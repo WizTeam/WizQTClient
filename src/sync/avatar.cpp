@@ -33,7 +33,8 @@ AvatarDownloader::AvatarDownloader(QObject* parent)
 void AvatarDownloader::download(const QString& strUserGUID)
 {
     m_strCurrentUser = strUserGUID;
-    QString strUrl = ApiEntry::avatarDownloadUrl(strUserGUID);
+    QString standGID = QUrl::toPercentEncoding(strUserGUID);
+    QString strUrl = ApiEntry::avatarDownloadUrl(standGID);
     if (strUrl.isEmpty()) {
         return;
     }
@@ -361,9 +362,8 @@ void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
         m_strUserCurrent.clear(); // Clear current otherwise download twice will be failed
         loadCache(strUserID);
         Q_EMIT q->loaded(strUserID);
+        return;
     }
-
-    download_impl();
 }
 
 /* --------------------- AvatarHost --------------------- */

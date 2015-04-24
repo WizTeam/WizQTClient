@@ -650,6 +650,9 @@
      </item>
      <item>
       <widget class="QPushButton" name="btn_snsLogin">
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
        <property name="text">
         <string>Thirdparty</string>
        </property>

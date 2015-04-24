@@ -211,164 +211,164 @@
         <translation>恢复笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2108"/>
+        <location filename="../src/wizCategoryView.cpp" line="2077"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2108"/>
+        <location filename="../src/wizCategoryView.cpp" line="2077"/>
         <source>Your enterprise services has expired, could not manage members. Please purchase services or apply for an extension.</source>
         <translation>您的企业服务已到期，将无法进行成员管理。请购买服务或申请延期。</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2180"/>
+        <location filename="../src/wizCategoryView.cpp" line="2149"/>
         <source>Create new group</source>
         <translation>创建群组</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2187"/>
-        <location filename="../src/wizCategoryView.cpp" line="2194"/>
+        <location filename="../src/wizCategoryView.cpp" line="2156"/>
+        <location filename="../src/wizCategoryView.cpp" line="2163"/>
         <source>View group info</source>
         <translation>群组信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2201"/>
-        <location filename="../src/wizCategoryView.cpp" line="2208"/>
+        <location filename="../src/wizCategoryView.cpp" line="2170"/>
+        <location filename="../src/wizCategoryView.cpp" line="2177"/>
         <source>Manage group</source>
         <translation>管理群组信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2217"/>
+        <location filename="../src/wizCategoryView.cpp" line="2186"/>
         <source>Storage Limit Info</source>
         <translation>容量限制信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2221"/>
+        <location filename="../src/wizCategoryView.cpp" line="2190"/>
         <source>Traffic Limit Info</source>
         <translation>流量限制信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2225"/>
+        <location filename="../src/wizCategoryView.cpp" line="2194"/>
         <source>Note Count Limit Info</source>
         <translation>笔记数目限制信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2225"/>
+        <location filename="../src/wizCategoryView.cpp" line="2194"/>
         <source>Group notes count limit exceeded!</source>
         <translation>群组笔记数目超出限制！</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2233"/>
+        <location filename="../src/wizCategoryView.cpp" line="2202"/>
         <source>View team info</source>
         <translation>团队信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2245"/>
+        <location filename="../src/wizCategoryView.cpp" line="2214"/>
         <source>Manage team</source>
         <translation>管理团队信息</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2543"/>
+        <location filename="../src/wizCategoryView.cpp" line="2512"/>
         <source>New note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3377"/>
+        <location filename="../src/wizCategoryView.cpp" line="3346"/>
         <source>Create new group...</source>
         <translation>创建群组...</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3451"/>
+        <location filename="../src/wizCategoryView.cpp" line="3420"/>
         <source>Search by Date Created</source>
         <translation>通过创建日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3452"/>
+        <location filename="../src/wizCategoryView.cpp" line="3421"/>
         <source>Search by Date Modified</source>
         <translation>通过修改日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3453"/>
+        <location filename="../src/wizCategoryView.cpp" line="3422"/>
         <source>Search by Date Accessed</source>
         <translation>通过访问日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3460"/>
+        <location filename="../src/wizCategoryView.cpp" line="3429"/>
         <source>Created since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3461"/>
+        <location filename="../src/wizCategoryView.cpp" line="3430"/>
         <source>Created since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3462"/>
+        <location filename="../src/wizCategoryView.cpp" line="3431"/>
         <source>Created since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3463"/>
+        <location filename="../src/wizCategoryView.cpp" line="3432"/>
         <source>Created since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3464"/>
+        <location filename="../src/wizCategoryView.cpp" line="3433"/>
         <source>Created since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3471"/>
+        <location filename="../src/wizCategoryView.cpp" line="3440"/>
         <source>Modified since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3472"/>
+        <location filename="../src/wizCategoryView.cpp" line="3441"/>
         <source>Modified since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3473"/>
+        <location filename="../src/wizCategoryView.cpp" line="3442"/>
         <source>Modified since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3474"/>
+        <location filename="../src/wizCategoryView.cpp" line="3443"/>
         <source>Modified since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3475"/>
+        <location filename="../src/wizCategoryView.cpp" line="3444"/>
         <source>Modified since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3482"/>
+        <location filename="../src/wizCategoryView.cpp" line="3451"/>
         <source>Accessed since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3483"/>
+        <location filename="../src/wizCategoryView.cpp" line="3452"/>
         <source>Accessed since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3484"/>
+        <location filename="../src/wizCategoryView.cpp" line="3453"/>
         <source>Accessed since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3485"/>
+        <location filename="../src/wizCategoryView.cpp" line="3454"/>
         <source>Accessed since one week</source>
         <translation>一周内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3486"/>
+        <location filename="../src/wizCategoryView.cpp" line="3455"/>
         <source>Accessed since one month</source>
         <translation>一月内</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2066"/>
+        <location filename="../src/wizCategoryView.cpp" line="2035"/>
         <source>Recent meesages</source>
         <translation>最近消息</translation>
     </message>
@@ -398,12 +398,12 @@
         <translation>选择文件</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2068"/>
+        <location filename="../src/wizCategoryView.cpp" line="2037"/>
         <source>Recent notes</source>
         <translation>近期笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2070"/>
+        <location filename="../src/wizCategoryView.cpp" line="2039"/>
         <source>No tag notes</source>
         <translation>无标签笔记</translation>
     </message>
@@ -682,27 +682,27 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1665"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1667"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1665"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1667"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1993"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1995"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2044"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2046"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2044"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2046"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -1413,6 +1413,11 @@
         <translation>搜索</translation>
     </message>
     <message>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="139"/>
+        <source>Sync</source>
+        <translation>同步</translation>
+    </message>
+    <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="316"/>
         <source>Download attachment:</source>
         <translation>下载附件:</translation>
@@ -1426,6 +1431,11 @@
         <location filename="../src/ui/wizpreferencedialog.ui" line="335"/>
         <source>Download all attachments</source>
         <translation>下载所有附件</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizpreferencedialog.ui" line="357"/>
+        <source>Read</source>
+        <translation>阅读</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="395"/>
@@ -1523,11 +1533,6 @@
         <translation>群组笔记：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="357"/>
-        <source>Reading</source>
-        <translation>阅读</translation>
-    </message>
-    <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="369"/>
         <source>Auto (Keep view state)</source>
         <translation>自动(保持视图状态)</translation>
@@ -1551,11 +1556,6 @@
         <location filename="../src/ui/wizpreferencedialog.ui" line="32"/>
         <source>WizPreferenceDialog</source>
         <translation>设置</translation>
-    </message>
-    <message>
-        <location filename="../src/ui/wizpreferencedialog.ui" line="139"/>
-        <source>Syncing</source>
-        <translation>同步</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="145"/>
@@ -1645,6 +1645,19 @@
         <translation>坐标信息
 x: %1  y: %2
 w: %3  h: %4</translation>
+    </message>
+</context>
+<context>
+    <name>CWizSearchEdit</name>
+    <message>
+        <location filename="../src/wizSearchWidget.cpp" line="107"/>
+        <source>Advanced search</source>
+        <translation>高级搜索</translation>
+    </message>
+    <message>
+        <location filename="../src/wizSearchWidget.cpp" line="108"/>
+        <source>Add custom search</source>
+        <translation>添加自定义搜索</translation>
     </message>
 </context>
 <context>
@@ -1928,12 +1941,11 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizUserInfoWidget.cpp" line="131"/>
-        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="145"/>
         <source>Account settings</source>
         <translation>账户设置</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="182"/>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="186"/>
         <source>Upload Avatar</source>
         <translation>上传头像</translation>
     </message>
@@ -2170,13 +2182,13 @@ w: %3  h: %4</translation>
         <translation>为知笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1656"/>
+        <location filename="../src/wizmainwindow.cpp" line="1658"/>
         <source>1 note</source>
         <translation>1 条笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1662"/>
-        <location filename="../src/wizmainwindow.cpp" line="1666"/>
+        <location filename="../src/wizmainwindow.cpp" line="1664"/>
+        <location filename="../src/wizmainwindow.cpp" line="1668"/>
         <source>%1 notes</source>
         <translation>%1 条笔记</translation>
     </message>
@@ -2188,7 +2200,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="473"/>
         <location filename="../src/wizmainwindow.cpp" line="1206"/>
-        <location filename="../src/wizmainwindow.cpp" line="1803"/>
+        <location filename="../src/wizmainwindow.cpp" line="1805"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -2228,67 +2240,67 @@ w: %3  h: %4</translation>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1613"/>
+        <location filename="../src/wizmainwindow.cpp" line="1615"/>
         <source>Unread Messages</source>
         <translation>未读消息</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1622"/>
+        <location filename="../src/wizmainwindow.cpp" line="1624"/>
         <source>Mark all messages read</source>
         <translation>全部标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3237"/>
+        <location filename="../src/wizmainwindow.cpp" line="3246"/>
         <source>downloading...</source>
         <translation>正在下载...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2293"/>
+        <location filename="../src/wizmainwindow.cpp" line="2301"/>
         <source>Open Directory</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2556"/>
+        <location filename="../src/wizmainwindow.cpp" line="2564"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3007"/>
+        <location filename="../src/wizmainwindow.cpp" line="3016"/>
         <source>Show/Hide MainWindow</source>
         <translation>显示/隐藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3010"/>
+        <location filename="../src/wizmainwindow.cpp" line="3019"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3015"/>
+        <location filename="../src/wizmainwindow.cpp" line="3024"/>
         <source>Hide TrayIcon</source>
         <translation>隐藏托盘图标</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3019"/>
+        <location filename="../src/wizmainwindow.cpp" line="3028"/>
         <source>Logout</source>
         <translation>注销</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3021"/>
+        <location filename="../src/wizmainwindow.cpp" line="3030"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3236"/>
+        <location filename="../src/wizmainwindow.cpp" line="3245"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下载附件  %1</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2238"/>
+        <location filename="../src/wizmainwindow.cpp" line="2240"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜索索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2241"/>
+        <location filename="../src/wizmainwindow.cpp" line="2243"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引会非常慢。只有在您的搜索出现异常的时候才需要用这个功能。</translation>
     </message>
@@ -2905,7 +2917,7 @@ w: %3  h: %4</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="330"/>
+        <location filename="../src/main.cpp" line="335"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -3684,7 +3696,7 @@ w: %3  h: %4</translation>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2051"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2053"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>
@@ -3873,12 +3885,12 @@ w: %3  h: %4</translation>
         <translation>代理设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="654"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="657"/>
         <source>Thirdparty</source>
         <translation>第三方登录</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="677"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="680"/>
         <source>Reset password</source>
         <translation>重置密码</translation>
     </message>

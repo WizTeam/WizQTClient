@@ -33,6 +33,9 @@ public:
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken);
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
 
+
+    static QString newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt);
+
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
     static QString appstoreParam(bool useAndSymbol = true);

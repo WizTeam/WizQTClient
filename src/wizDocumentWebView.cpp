@@ -681,7 +681,7 @@ bool CWizDocumentWebView::resetDefaultCss()
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
                    m_app.userSettings().editorBackgroundColor()));
 
-    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
+    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserGUID()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
 
     m_strDefaultCssFilePath = strPath + "default.css";

@@ -136,7 +136,7 @@
      </widget>
      <widget class="QWidget" name="tabSyncing">
       <attribute name="title">
-       <string>Syncing</string>
+       <string>Sync</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
@@ -354,7 +354,7 @@
      </widget>
      <widget class="QWidget" name="tabReading">
       <attribute name="title">
-       <string>Reading</string>
+       <string>Read</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>

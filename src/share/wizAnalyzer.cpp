@@ -1,9 +1,4 @@
 #include "wizAnalyzer.h"
-#include "wizmisc.h"
-#include "wizdef.h"
-#include "utils/pathresolve.h"
-#include "sync/apientry.h"
-#include "wizmainwindow.h"
 #include <QMutexLocker>
 #include <QRunnable>
 #include <QThreadPool>
@@ -17,6 +12,13 @@
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
+#include "wizdef.h"
+#include "wizmisc.h"
+#include "utils/pathresolve.h"
+#include "sync/apientry.h"
+#include "wizmainwindow.h"
+#include "wizDatabase.h"
+#include "wizDatabaseManager.h"
 
 CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
@@ -425,8 +427,9 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
 CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
 {
-    QSettings globalSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
-    QString strUserId = globalSettings.value("Users/DefaultUser").toString();
+//    QSettings globalSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
+//    QString strUserId = globalSettings.value("Users/DefaultUser").toString();
+    QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
     QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
 
     static CWizAnalyzer analyzer(strFile);

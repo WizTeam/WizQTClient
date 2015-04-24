@@ -135,14 +135,17 @@ void CWizUserInfoWidget::on_action_accountSettings_triggered()
     dlg->loadUserInfo();
     dlg->exec();
 #endif
+    // 用户可能会在设置页面中修改信息，此处清除token以便重新同步
+    Token::clearToken();
 }
 
 void CWizUserInfoWidget::on_action_upgradeVip_triggered()
 {
 #ifndef BUILD4APPSTORE
+    QString strToken = Token::token();
     QString extInfo = WizService::ApiEntry::appstoreParam(false);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken, extInfo);
+    QDesktopServices::openUrl(strUrl);
 #else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizIAPDialog* dlg = window->iapDialog();
@@ -190,14 +193,16 @@ void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
     QString strToken = WizService::Token::token();
     QString strUrl = WizService::ApiEntry::standardCommandUrl("service", strToken);
 
+    qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
 void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
 {
     QString strToken = WizService::Token::token();
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("my_share", strToken);
+    QString strUrl = WizService::ApiEntry::newStandardCommandUrl("my_share", strToken, "");
 
+    qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
