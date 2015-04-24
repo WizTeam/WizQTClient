@@ -682,27 +682,27 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1667"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1664"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1667"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1664"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1995"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1992"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2046"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2043"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2046"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2043"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -738,9 +738,19 @@
         <translation>插入链接</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizEditorInsertLinkForm.ui" line="42"/>
+        <location filename="../src/ui/wizEditorInsertLinkForm.ui" line="22"/>
         <source>URL:</source>
         <translation>网址：</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizEditorInsertLinkForm.ui" line="59"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizEditorInsertLinkForm.ui" line="66"/>
+        <source>OK</source>
+        <translation type="unfinished">确定</translation>
     </message>
 </context>
 <context>
@@ -751,22 +761,32 @@
         <translation>插入表格</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="42"/>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="22"/>
         <source>Rows:</source>
         <translation>行数：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="58"/>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="48"/>
         <source>Colums:</source>
         <translation>列数：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="77"/>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="91"/>
+        <source>Cancel</source>
+        <translation type="unfinished">取消</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="98"/>
+        <source>OK</source>
+        <translation type="unfinished">确定</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="41"/>
         <source>Accept rows between 1 to 30</source>
         <translation>请输入1到30之间的数字</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="93"/>
+        <location filename="../src/ui/wizEditorInsertTableForm.ui" line="67"/>
         <source>Accept cols between 1 to 30</source>
         <translation>请输入1到30之间的数字</translation>
     </message>
@@ -1650,12 +1670,12 @@ w: %3  h: %4</translation>
 <context>
     <name>CWizSearchEdit</name>
     <message>
-        <location filename="../src/wizSearchWidget.cpp" line="107"/>
+        <location filename="../src/wizSearchWidget.cpp" line="100"/>
         <source>Advanced search</source>
         <translation>高级搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizSearchWidget.cpp" line="108"/>
+        <location filename="../src/wizSearchWidget.cpp" line="101"/>
         <source>Add custom search</source>
         <translation>添加自定义搜索</translation>
     </message>
@@ -1945,7 +1965,7 @@ w: %3  h: %4</translation>
         <translation>账户设置</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="186"/>
+        <location filename="../src/widgets/wizUserInfoWidget.cpp" line="185"/>
         <source>Upload Avatar</source>
         <translation>上传头像</translation>
     </message>
@@ -2250,47 +2270,47 @@ w: %3  h: %4</translation>
         <translation>全部标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3246"/>
+        <location filename="../src/wizmainwindow.cpp" line="3244"/>
         <source>downloading...</source>
         <translation>正在下载...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2301"/>
+        <location filename="../src/wizmainwindow.cpp" line="2300"/>
         <source>Open Directory</source>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2564"/>
+        <location filename="../src/wizmainwindow.cpp" line="2563"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3016"/>
+        <location filename="../src/wizmainwindow.cpp" line="3014"/>
         <source>Show/Hide MainWindow</source>
         <translation>显示/隐藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3019"/>
+        <location filename="../src/wizmainwindow.cpp" line="3017"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3024"/>
+        <location filename="../src/wizmainwindow.cpp" line="3022"/>
         <source>Hide TrayIcon</source>
         <translation>隐藏托盘图标</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3028"/>
+        <location filename="../src/wizmainwindow.cpp" line="3026"/>
         <source>Logout</source>
         <translation>注销</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3030"/>
+        <location filename="../src/wizmainwindow.cpp" line="3028"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3245"/>
+        <location filename="../src/wizmainwindow.cpp" line="3243"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下载附件  %1</translation>
     </message>
@@ -3473,12 +3493,12 @@ w: %3  h: %4</translation>
         <translation>拖拽笔记到此栏目</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="1212"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="1215"/>
         <source>Your enterprise services has expired</source>
         <translation>您的企业服务已到期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryViewItem.cpp" line="1612"/>
+        <location filename="../src/wizCategoryViewItem.cpp" line="1615"/>
         <source>Your group is in the abnormal state</source>
         <translation>您的群组处于异常状态</translation>
     </message>
@@ -3696,7 +3716,7 @@ w: %3  h: %4</translation>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2053"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2050"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>

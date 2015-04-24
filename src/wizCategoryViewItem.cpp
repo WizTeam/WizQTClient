@@ -747,6 +747,9 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
     if (m_strName == data.strLocation && data.strKbGUID == kbGUID())
         return true;
 
+    if (kbGUID().isEmpty() && !db.IsGroup())
+        return true;
+
     return false;
 }
 

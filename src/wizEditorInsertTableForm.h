@@ -19,6 +19,11 @@ public:
     int getCols();
     void clear();
     
+private slots:
+    void on_pushButton_cancel_clicked();
+
+    void on_pushButton_ok_clicked();
+
 private:
     Ui::CWizEditorInsertTableForm *ui;
 };

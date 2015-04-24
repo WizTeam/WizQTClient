@@ -193,7 +193,8 @@ bool CWizKMSync::SyncCore()
     //
     if (m_bUploadOnly)
         return TRUE;
-    //
+    //    
+
     m_pEvents->OnStatus(_TR("Sync settings"));
     DownloadKeys();
     //
@@ -1787,8 +1788,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
-        WizService::AvatarHost::deleteAvatar(pDatabase->GetUserId());
-        WizService::AvatarHost::load(pDatabase->GetUserId(), true);
+        WizService::AvatarHost::reload(pDatabase->GetUserId());
         pDatabase->ClearLastSyncError();
         pEvents->ClearLastSyncError(pDatabase);
         CWizBizDataArray arrayBiz;

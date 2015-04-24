@@ -49,6 +49,7 @@ class AvatarHostPrivate: public QObject
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
     void load(const QString& strUserID, bool bForce);
+    void reload(const QString& strUserID);
     bool avatar(const QString& strUserID, QPixmap* pixmap);
     QPixmap orgAvatar(const QString& strUserID);
     bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath);
