@@ -414,18 +414,18 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
-//        QModelIndex droppedIndex = indexAt(event->pos());
+        QModelIndex droppedIndex = indexAt(event->pos());
 //        qDebug() << "drop index called " << droppedIndex;
-//        if( !droppedIndex.isValid() )
-//          return;
+        if( !droppedIndex.isValid() )
+          return;
 
 //        qDebug() << "get dropped item : " << m_dragItem;
         QTreeWidget::dropEvent(event);
-//        if (m_dragItem)
-//        {
-//            on_itemPosition_changed(m_dragItem);
-//        }
-//        viewport()->repaint();
+        if (m_dragItem)
+        {
+            on_itemPosition_changed(m_dragItem);
+        }
+        viewport()->repaint();
         return;
     }
 
