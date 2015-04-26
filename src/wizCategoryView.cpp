@@ -3784,8 +3784,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
         if (!create)
             return NULL;
 
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
-        parent->addChild(pFolderItem);
+        CWizCategoryViewFolderItem* pFolderItem = createFolderItem(parent, strCurrentLocation);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -4504,6 +4503,14 @@ void CWizCategoryView::loadCustomAdvancedSearchParamFromDB(QMap<QString, QString
 void CWizCategoryView::deleteCustomAdvancedSearchParamFromDB(const QString& strGuid)
 {
     m_dbMgr.db().deleteMetaByKey(QUICK_SEARCH_META, strGuid);
+}
+
+CWizCategoryViewFolderItem* CWizCategoryView::createFolderItem(QTreeWidgetItem* parent, const QString& strLocation)
+{
+    CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation, m_dbMgr.db().kbGUID());
+    parent->addChild(pFolderItem);
+    m_dbMgr.db().AddExtraFolder(strLocation);
+    return pFolderItem;
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)

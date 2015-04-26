@@ -472,6 +472,7 @@ private:
     void loadCustomAdvancedSearchParamFromDB(QMap<QString, QString>& paramMap);
     void deleteCustomAdvancedSearchParamFromDB(const QString& strGuid);
 
+    CWizCategoryViewFolderItem* createFolderItem(QTreeWidgetItem* parent, const QString& strLocation);
 private:
     QPointer<QMenu> m_menuShortcut;
     QPointer<QMenu> m_menuFolderRoot;

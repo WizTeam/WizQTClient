@@ -292,19 +292,32 @@ void CWizFolder::Delete()
     if (IsDeletedItems())
         return;
 
-    if (IsInDeletedItems()) {
-        // FIXME: should use CWizDocument to delete document data, attachments.
-        if (!m_db.DeleteDocumentsByLocation(Location())) {
-            TOLOG1("Failed to delete documents by location; %1", Location());
-            return;
-        }
+//    if (IsInDeletedItems()) {
+//        // FIXME: should use CWizDocument to delete document data, attachments.
+//        if (!m_db.DeleteDocumentsByLocation(Location())) {
+//            TOLOG1("Failed to delete documents by location; %1", Location());
+//            return;
+//        }
 
-        m_db.DeleteExtraFolder(Location());
-        m_db.SetLocalValueVersion("folders", -1);
-    } else {
-        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS + Location().right(Location().size() - 1));
-        MoveTo(&deletedItems);
+//        m_db.DeleteExtraFolder(Location());
+//        m_db.SetLocalValueVersion("folders", -1);
+//    } else {
+//        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS + Location().right(Location().size() - 1));
+//        MoveTo(&deletedItems);
+//    }
+    CWizDocumentDataArray arrayDocument;
+    m_db.GetDocumentsByLocation(Location(), arrayDocument, true);
+    CWizDocumentDataArray::iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
+    {
+        WIZDOCUMENTDATAEX doc = *it;
+        CWizDocument document(m_db, doc);
+        document.deleteToTrash();
     }
+
+    m_db.DeleteExtraFolder(Location());
+    m_db.SetLocalValueVersion("folders", -1);
+
 }
 
 void CWizFolder::MoveTo(QObject* dest)
