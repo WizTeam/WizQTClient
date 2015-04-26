@@ -1724,24 +1724,30 @@ void CWizCategoryView::on_action_user_deleteFolder()
     // setup warning messagebox
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete Folder"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete all notes inside folder: %1 ? (All notes will move to trash folder and remove from cloud server)").arg(p->location());
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteFolder_confirmed(int)));
     msgBox->exec();
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_user_deleteFolder_confirmed(result);
 }
 
 void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     if (!p)
         return;
 
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         CWizFolder folder(m_dbMgr.db(), p->location());
         folder.Delete();
     }
@@ -1757,24 +1763,30 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete tag"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete tag: %1 ? (include child tags if any)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteTag_confirmed(int)));
     msgBox->exec();
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_user_deleteTag_confirmed(result);
 }
 
 void CWizCategoryView::on_action_user_deleteTag_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>();
     if (!p)
         return;
 
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         WIZTAGDATA tag = p->tag();
         m_dbMgr.db().DeleteTagWithChildren(tag, TRUE);
     }
@@ -1790,24 +1802,30 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete group folder"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete folder: %1? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
-    msgBox->exec();
+    msgBox->exec();    
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_group_deleteFolder_confirmed(result);
 }
 
 void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>();
     if (!p)
         return;
 
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         WIZTAGDATA tag = p->tag();
         m_dbMgr.db(p->kbGUID()).DeleteTagWithChildren(tag, true);
     }
