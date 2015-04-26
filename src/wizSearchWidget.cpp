@@ -157,4 +157,38 @@ void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
     QLineEdit::mousePressEvent(event);
 }
 
+void CWizSearchEdit::mouseMoveEvent(QMouseEvent* event)
+{
+    QLineEdit::mouseMoveEvent(event);
+
+    QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
+    if (rcBtnSearch.contains(event->pos()))
+    {
+        if (cursor().shape() != Qt::ArrowCursor)
+        {
+            setCursor(QCursor(Qt::ArrowCursor));
+        }
+    }
+    else
+    {
+        if (!text().isEmpty())
+        {
+            QRect rect(QPoint(width() - m_deleteIcon.width() - 4, (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+            if (rect.contains(event->pos()))
+            {
+                if (cursor().shape() != Qt::ArrowCursor)
+                {
+                    setCursor(QCursor(Qt::ArrowCursor));
+                }
+                return;
+            }
+        }
+
+        if (cursor().shape() != Qt::IBeamCursor)
+        {
+            setCursor(QCursor(Qt::IBeamCursor));
+        }
+    }
+}
+
 #endif
