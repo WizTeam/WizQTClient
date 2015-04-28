@@ -60,7 +60,7 @@ QString CWizUpgrade::getWhatsNewUrl()
 
 void CWizUpgrade::check()
 {
-    QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server");
+    QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server", true);
 
     if (!m_net) {
         m_net = new QNetworkAccessManager(this);

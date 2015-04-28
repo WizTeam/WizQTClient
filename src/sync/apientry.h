@@ -8,6 +8,7 @@ namespace WizService {
 class ApiEntry
 {
 public:
+    static void setEnterpriseAPIUrl(const QString& strUrl);
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageVersionUrl();
@@ -29,12 +30,14 @@ public:
     static QString captchaUrl(const QString& strCaptchaID, int nWidth = 120, int nHeight = 40);
 
     //
-    static QString standardCommandUrl(const QString& strCommand);
-    static QString standardCommandUrl(const QString& strCommand, const QString& strToken);
-    static QString standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo);
+    static QString standardCommandUrl(const QString& strCommand, bool bUseWizServer = false);
+    static QString standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer = false);
+    static QString standardCommandUrl(const QString& strCommand, const QString& strToken,
+                                      const QString& strExtInfo, bool bUseWizServer = false);
 
 
-    static QString newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt);
+    static QString newStandardCommandUrl(const QString& strCommand, const QString& strToken,
+                                         const QString& strExt, bool bUseWizServer = false);
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 

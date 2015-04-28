@@ -448,7 +448,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = m_upgrade->getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::ApiEntry::standardCommandUrl("link");
+        QString url = WizService::ApiEntry::standardCommandUrl("link", true);
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -2218,7 +2218,7 @@ void MainWindow::on_actionSupport_triggered()
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
 
     if (strUrl.isEmpty())
         return;
@@ -2984,7 +2984,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
     strUrl += "&name=newfeature-mac";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
@@ -2993,7 +2993,7 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
     strUrl += "&name=guidemap_sendimage.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();

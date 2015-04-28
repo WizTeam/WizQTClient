@@ -28,7 +28,8 @@
  * %8: debug, true|false, optional
  */
 
-#define WIZNOTE_API_ENTRY "http://api.wiz.cn/?p=%1&l=%2&v=%3&c=%4&random=%5&cn=%6&plat=%7&debug=%8"
+#define WIZNOTE_API_SERVER      "http://api.wiz.cn/"
+#define WIZNOTE_API_ENTRY       "%1?p=%2&l=%3&v=%4&c=%5&random=%6&cn=%7&plat=%8&debug=%9"
 
 #define WIZNOTE_API_ARG_PRODUCT "wiz"
 
@@ -67,6 +68,7 @@ using namespace WizService;
 using namespace WizService::Internal;
 
 ApiEntryPrivate::ApiEntryPrivate()
+    : m_strEnterpriseAPIUrl(WIZNOTE_API_SERVER)
 {
 }
 
@@ -74,19 +76,25 @@ ApiEntryPrivate::~ApiEntryPrivate()
 {
 }
 
+void ApiEntryPrivate::setEnterpriseAPIUrl(const QString& strUrl)
+{
+
+}
+
 QString ApiEntryPrivate::asServerUrl()
 {
     QString strAsUrl;
-    return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl);
+    return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl, false);
 }
 
 
-QString ApiEntryPrivate::urlFromCommand(const QString& strCommand)
+QString ApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizServer)
 {
     // random seed
     qsrand((uint)QTime::currentTime().msec());
 
-    QString strUrl = QString(WIZNOTE_API_ENTRY)\
+    QString strUrl = QString(WIZNOTE_API_ENTRY)
+            .arg(bUseWizServer ? WIZNOTE_API_SERVER : m_strEnterpriseAPIUrl)\
             .arg(WIZNOTE_API_ARG_PRODUCT)\
             .arg(QLocale::system().name())\
             .arg(WIZ_CLIENT_VERSION)\
@@ -127,12 +135,12 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     return strRequestedUrl;
 }
 
-QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
+QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
 {
     if (!strUrl.isEmpty())
         return strUrl;
 
-    QString strRequestUrl= urlFromCommand(strCommand);
+    QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
     return strUrl;
@@ -140,17 +148,17 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl)
 
 QString ApiEntryPrivate::syncUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl);
+    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
 }
 
 QString ApiEntryPrivate::messageVersionUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl);
+    return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl, false);
 }
 
 QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
-    QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl));
+    QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl, false));
 
     strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
     strRawUrl += "?default=false"; // Do not download server default avatar
@@ -159,13 +167,13 @@ QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 
 QString ApiEntryPrivate::avatarUploadUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_UPLOAD_AVATAR, m_strAvatarUploadUrl);
+    return requestUrl(WIZNOTE_API_COMMAND_UPLOAD_AVATAR, m_strAvatarUploadUrl, false);
 }
 
 QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
     if (m_strCommentUrl.isEmpty()) {
-        requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl);
+        requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl, false);
     }
 
     QString strUrl(m_strCommentUrl);
@@ -180,7 +188,7 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
                                          const QString& strKbGUID, const QString& strGUID)
 {
     if (m_strCommentCountUrl.isEmpty()) {
-        requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl);
+        requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl, false);
     }
 
     QString strUrl(m_strCommentCountUrl);
@@ -200,28 +208,28 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString
 
 QString ApiEntryPrivate::feedbackUrl()
 {
-    return urlFromCommand(WIZNOTE_API_COMMAND_FEEDBACK);
+    return urlFromCommand(WIZNOTE_API_COMMAND_FEEDBACK, true);
 }
 
 QString ApiEntryPrivate::supportUrl()
 {
-    return urlFromCommand(WIZNOTE_API_COMMAND_SUPPORT);
+    return urlFromCommand(WIZNOTE_API_COMMAND_SUPPORT, true);
 }
 
 QString ApiEntryPrivate::changeLogUrl()
 {
-    return urlFromCommand(WIZNOTE_API_COMMAND_CHANGELOG);
+    return urlFromCommand(WIZNOTE_API_COMMAND_CHANGELOG, true);
 }
 
 QString ApiEntryPrivate::upgradeUrl()
 {
-    return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE);
+    return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE, true);
 }
 
 QString ApiEntryPrivate::analyzerUploadUrl()
 {
     QString analyzerUrl;
-    requestUrl("analyzer", analyzerUrl);
+    requestUrl("analyzer", analyzerUrl, true);
     return analyzerUrl;
 }
 
@@ -230,7 +238,7 @@ QString ApiEntryPrivate::mailShareUrl()
 //    QString strKsHost = syncUrl();
 
     QString strMailShare;
-    requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare);
+    requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare, false);
 //    strMailShare.replace("{ks_host}", strKsHost);
     return strMailShare;
 }
@@ -238,40 +246,40 @@ QString ApiEntryPrivate::mailShareUrl()
 QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_USER_INFO);
+    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_USER_INFO, false);
     return addExtendedInfo(strUrl, strExt);
 }
 
 QString ApiEntryPrivate::createGroupUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand("create_group");
+    QString strUrl = urlFromCommand("create_group", false);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand)
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
-    QString strUrl = urlFromCommand(strCommand);
+    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return strUrl;
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken)
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
     QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand(strCommand);
+    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
     QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
-    QString strUrl = urlFromCommand(strCommand);
+    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt)
+QString ApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
-    QString strUrl = urlFromCommand(strCommand);
+    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     QString strExtInfo = QString("&token=%1").arg(strToken);
     strExtInfo.append(strExt.isEmpty() ? "" : "&" + strExt);
     return strUrl + strExtInfo;
@@ -280,7 +288,7 @@ QString ApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const 
 QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
-    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_VIEW_GROUP);
+    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_VIEW_GROUP, false);
     return addExtendedInfo(strUrl, strExt);
 }
 
@@ -329,6 +337,13 @@ QString ApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& st
 
 
 static ApiEntryPrivate* d = 0;
+
+void ApiEntry::setEnterpriseAPIUrl(const QString& strUrl)
+{
+    if (!d)
+        d = new ApiEntryPrivate();
+    return d->setEnterpriseAPIUrl(strUrl);
+}
 
 QString ApiEntry::syncUrl()
 {
@@ -445,31 +460,31 @@ QString ApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeigh
     return strUrl;
 }
 
-QString ApiEntry::standardCommandUrl(const QString& strCommand)
+QString ApiEntry::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand);
+    return d->standardCommandUrl(strCommand, bUseWizServer);
 }
 
-QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken)
+QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand, strToken);
+    return d->standardCommandUrl(strCommand, strToken, bUseWizServer);
 }
-QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand, strToken, strExtInfo);
+    return d->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
 }
 
-QString ApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt)
+QString ApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
     if (!d)
         d = new ApiEntryPrivate();
-    return d->newStandardCommandUrl(strCommand, strToken, strExt);
+    return d->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
 }
 
 

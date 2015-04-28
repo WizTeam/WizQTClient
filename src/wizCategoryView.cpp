@@ -1837,7 +1837,7 @@ void CWizCategoryView::on_action_deleted_recovery()
     if (trashItem)
     {
         QString strToken = WizService::Token::token();
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID(), false);
         WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
     }
 }

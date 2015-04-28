@@ -312,6 +312,8 @@ int mainCore(int argc, char *argv[])
             PluginManager::setSettings(settings);
         }
         strPassword = loginDialog.password();
+
+
     }
 
     //
