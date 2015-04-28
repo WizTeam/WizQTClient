@@ -4,6 +4,8 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QTimer>
+#include "share/wizsettings.h"
 
 #ifndef Q_OS_MAC
 #include "share/wizshadowwindow.h"
@@ -12,7 +14,7 @@
 class QLabel;
 class CWizSkin9GridImage;
 class CWizImageButton;
-
+class CWizUdpClient;
 
 
 namespace Ui {
@@ -34,6 +36,7 @@ public:
 
     QString userId() const;
     QString password() const;
+    WizServerType serverType() const;
 
     void setUsers(const QString& strDefault);
     void setUser(const QString& strUserId);
@@ -47,6 +50,7 @@ public:
 
 signals:
     void snsLoginSuccess(const QString& strUrl);
+    void wizBoxSearchRequest(int port, QString message);
 
 #ifdef Q_OS_MAC
 private:
@@ -70,7 +74,9 @@ private slots:
     void onLoginInputChanged();
     void onSignUpInputDataChanged();
     void userListMenuClicked(QAction* action);
+    void serverListMenuClicked(QAction* action);
     void showUserListMenu();
+    void showServerListMenu();
 
     void onTokenAcquired(const QString& strToken);
     void onRegisterAccountFinished(bool bFinish);
@@ -83,19 +89,62 @@ private slots:
     void onSNSPageUrlChanged(const QUrl& url);
     void onSNSLoginSuccess(const QString& strUrl);
 
+    void onWizBoxResponse(const QString& boardAddress, const QString& serverAddress,
+                          const QString& responseMessage);
+    void onWizBoxSearchingTimeOut();
 
 private:
     void applyElementStyles(const QString& strLocal);
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
+    //
+    void findWizBoxServer();
+    void initSearchingDialog();
+    void showSearchingDialog();
+    void startWizBoxUdpClient();
+    void closeWizBoxUdpClient();
+    void checkServerLicence(const QString& strOldLicence);
+
+    class ControlWidgetsLocker
+    {
+    public:
+        ControlWidgetsLocker(){}
+        ~ControlWidgetsLocker() {
+            releaseWidgets();
+        }
+
+        void releaseWidgets() {
+            foreach (QWidget* wgt, m_widgetList) {
+                wgt->setEnabled(true);
+            }
+            m_widgetList.clear();
+        }
+
+        void lockWidget(QWidget* wgt) {
+            m_widgetList.append(wgt);
+            wgt->setEnabled(false);
+        }
+
+    private:
+        QList<QWidget*> m_widgetList;
+    };
 
 private:
     Ui::wizLoginWidget *ui;
-    QMenu* m_menu;
+    QMenu* m_menuUsers;
+    QMenu* m_menuServers;
+    QDialog* m_searchingDialog;
+    CWizUdpClient* m_udpClient;
+    QThread* m_udpThread;
+    WizServerType m_serverType;
+    WizServerType m_currentUserServerType;
+    QString m_serverLicence;
+    QTimer m_wizBoxSearchingTimer;
 
     QLineEdit* m_lineEditUserName;
     QLineEdit* m_lineEditPassword;
+    QLineEdit* m_lineEditServer;
     CWizImageButton* m_buttonLogin;
     QLineEdit* m_lineEditNewUserName;
     QLineEdit* m_lineEditNewPassword;

@@ -1,5 +1,21 @@
 #include "wizLoginDialog.h"
 #include "ui_wizLoginDialog.h"
+#include <QPainter>
+#include <QMouseEvent>
+#include <QMenu>
+#include <QBitmap>
+#include <QToolButton>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QLabel>
+#include <QWebView>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QMovie>
+#include <QDebug>
+#include <QDateTime>
+#include <QMessageBox>
+
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "sync/apientry.h"
@@ -12,25 +28,21 @@
 #include <extensionsystem/pluginmanager.h>
 #include "widgets/wizVerificationCodeDialog.h"
 #include "wizWebSettingsDialog.h"
-#include <QPainter>
-#include <QMouseEvent>
-#include <QMenu>
-#include <QBitmap>
-#include <QToolButton>
-#include <QDesktopServices>
-#include <QUrl>
-#include <QWebView>
-#include <QDebug>
-#include <QDateTime>
-
-
 #include "share/wizui.h"
 #include "wiznotestyle.h"
+#include "share/wizUDPClient.h"
+#include "rapidjson/document.h"
 
 using namespace WizService;
 
+#define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"
+#define WIZ_SERVERACTION_CONNECT_BIZSERVER        "CONNECT_TO_BIZSERVER"
+#define WIZ_SERVERACTION_HELP               "SERVERHELP"
+
 
 #define WIZ_ERROR_REGISTRATION_COUNT  366
+
+#define WIZBOX_PROT     9269
 
 CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent)
 #ifdef Q_OS_MAC
@@ -39,7 +51,10 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     : CWizShadowWindow<QDialog>(parent)
 #endif
     , ui(new Ui::wizLoginWidget)
-    , m_menu(new QMenu(this))
+    , m_menuUsers(new QMenu(this))
+    , m_menuServers(new QMenu(this))
+    , m_udpClient(0)
+    , m_serverType(WizServer)
 {
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
@@ -73,6 +88,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
+    m_lineEditServer = ui->wgt_serveroptioncontainer->edit();
     m_buttonLogin = ui->btn_login;
     m_lineEditNewUserName = ui->wgt_newUser->edit();
     m_lineEditNewPassword = ui->wgt_newPassword->edit();
@@ -86,7 +102,8 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     applyElementStyles(strLocale);
 
 
-    connect(m_menu, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
+    connect(m_menuUsers, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
+    connect(m_menuServers, SIGNAL(triggered(QAction*)), SLOT(serverListMenuClicked(QAction*)));
 
     connect(m_lineEditNewPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(m_lineEditNewUserName, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
@@ -95,9 +112,12 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->wgt_usercontainer, SIGNAL(rightIconClicked()), SLOT(showUserListMenu()));
+    connect(ui->wgt_serveroptioncontainer, SIGNAL(rightIconClicked()), SLOT(showServerListMenu()));
     connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
 
+    //
+    connect(&m_wizBoxSearchingTimer, SIGNAL(timeout()), SLOT(onWizBoxSearchingTimeOut()));
 #ifndef Q_OS_MAC
     connect(m_buttonLogin, SIGNAL(clicked()), SLOT(on_btn_login_clicked()));
     connect(ui->btn_changeToLogin, SIGNAL(clicked()), SLOT(on_btn_changeToLogin_clicked()));
@@ -110,11 +130,24 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 #endif
 
     setUsers(strDefaultUserId);
+    QAction* actionWizServer = m_menuServers->addAction(tr("Sign In  to WizNote"));
+    actionWizServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
+    m_menuServers->addAction(tr("Sign In to Enterprise Server"))->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    m_menuServers->addAction(tr("Help"))->setData(WIZ_SERVERACTION_HELP);
+    m_menuServers->setDefaultAction(actionWizServer);
 }
 
 CWizLoginDialog::~CWizLoginDialog()
 {
     delete ui;
+    if (m_searchingDialog)
+    {
+        m_searchingDialog->deleteLater();
+    }
+    if (m_udpClient)
+    {
+        m_udpClient->deleteLater();
+    }
 }
 
 QString CWizLoginDialog::userId() const
@@ -125,6 +158,11 @@ QString CWizLoginDialog::userId() const
 QString CWizLoginDialog::password() const
 {
     return m_lineEditPassword->text();
+}
+
+WizServerType CWizLoginDialog::serverType() const
+{
+    return m_serverType;
 }
 
 void CWizLoginDialog::setUsers(const QString &strDefault)
@@ -147,7 +185,7 @@ void CWizLoginDialog::setUsers(const QString &strDefault)
         if (!QFile::exists(strPath + "data/index.db"))
             continue;
 
-        m_menu->addAction(strUserId);
+        m_menuUsers->addAction(strUserId);
     }
 
     // set default user as default login entry.
@@ -155,7 +193,7 @@ void CWizLoginDialog::setUsers(const QString &strDefault)
     QAction* action = findActionInMenu(strDefault);
     if (action)
     {
-        m_menu->setDefaultAction(action);
+        m_menuUsers->setDefaultAction(action);
     }
 }
 
@@ -165,12 +203,27 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     QString strPassword = userSettings.password();
 
     m_lineEditUserName->setText(strUserId);
-    if (strPassword.isEmpty()) {
+    if (strPassword.isEmpty())
+    {
         m_lineEditPassword->clear();
         ui->cbx_remberPassword->setCheckState(Qt::Unchecked);
-    } else {
+    } else
+    {
         m_lineEditPassword->setText(strPassword);
         ui->cbx_remberPassword->setCheckState(Qt::Checked);
+    }
+
+    //
+    m_currentUserServerType = userSettings.serverType();
+    qDebug() << "set user , user type : " << m_currentUserServerType;
+    if (m_currentUserServerType == EnterpriseServer)
+    {
+        m_serverType = m_currentUserServerType;
+        m_lineEditServer->setText(userSettings.enterpriseServerUrl());
+    }
+    else if (m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty())
+    {
+        m_currentUserServerType = WizServer;
     }
 }
 
@@ -178,18 +231,58 @@ void CWizLoginDialog::doAccountVerify()
 {
     CWizUserSettings userSettings(userId());
 
+    ControlWidgetsLocker locker;
+    locker.lockWidget(m_lineEditUserName);
+    locker.lockWidget(m_lineEditPassword);
+    locker.lockWidget(ui->cbx_autologin);
+    locker.lockWidget(ui->cbx_remberPassword);
+    locker.lockWidget(m_buttonLogin);
+    locker.lockWidget(ui->btn_changeToSignin);
+
+    //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
+    //  如果登录过企业服务则需要登录到企业服务器
+    if (EnterpriseServer == m_serverType)
+    {
+        if (m_lineEditServer->text().isEmpty())
+        {
+            QMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+            return;
+        }
+        else
+        {
+            ApiEntry::setEnterpriseAPIUrl(m_lineEditServer->text());
+        }
+
+        if (userSettings.enterpriseServerUrl().isEmpty() && !userSettings.myWizMail().isEmpty())
+        {
+            QMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
+            return;
+        }
+
+        //
+        checkServerLicence(userSettings.serverLicence());
+    }
+    else if (WizServer == m_serverType && !userSettings.enterpriseServerUrl().isEmpty())
+    {
+        QMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
+        return;
+    }
+
+    qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
         Token::setPasswd(password());
+        locker.releaseWidgets();
+        enableLoginControls(false);
         doOnlineVerify();
         return;
     }
 
     if (updateUserProfile(false) && updateGlobalProfile()) {
+        locker.releaseWidgets();
         QDialog::accept();
     }
-    enableLoginControls(true);
 }
 
 void CWizLoginDialog::doOnlineVerify()
@@ -232,6 +325,13 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
 
         db.SetUserInfo(Token::info());
         db.Close();
+    }
+
+    userSettings.setServerType(m_serverType);
+    if (EnterpriseServer == m_serverType)
+    {
+        userSettings.setEnterpriseServerUrl(m_lineEditServer->text());
+        userSettings.setServerLicence(m_serverLicence);
     }
 
     return true;
@@ -347,10 +447,15 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
     m_lineEditUserName->setPlaceholderText("example@mail.com");
 
-    ui->wgt_passwordcontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
     ui->wgt_passwordcontainer->setLeftIcon(strIconKey);
     m_lineEditPassword->setEchoMode(QLineEdit::Password);
     m_lineEditPassword->setPlaceholderText(tr("Password"));
+
+    ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+    ui->wgt_serveroptioncontainer->setLeftIcon(strIconKey);
+    ui->wgt_serveroptioncontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
+    m_lineEditServer->setText(tr("Sign In  to WizNote"));
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_newUser->setLeftIcon(strIconPerson);
@@ -414,11 +519,17 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_passwordError->setStyleSheet(QString("QLabel {border: none; padding-left: 25px; color: red;}"));
     ui->label_passwordError->setText("");
 
-    m_menu->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menu->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
+    m_menuUsers->setFixedWidth(ui->wgt_usercontainer->width());
+    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
                           "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
+
+    m_menuServers->setFixedWidth(ui->wgt_serveroptioncontainer->width());
+    m_menuServers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
+                                 "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
+                                 "QMenu::item:selected {background-color: #E7F5FF; }"
+                                 "QMenu::item:default {background-color: #E7F5FF; }");
 }
 
 bool CWizLoginDialog::checkSingMessage()
@@ -453,7 +564,7 @@ bool CWizLoginDialog::checkSingMessage()
 
 QAction *CWizLoginDialog::findActionInMenu(const QString &strActName)
 {
-    QList<QAction*> actionList = m_menu->actions();
+    QList<QAction*> actionList = m_menuUsers->actions();
     for (int i = 0; i < actionList.count(); i++)
     {
         if (actionList.at(i)->text() == strActName)
@@ -475,6 +586,133 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
         return true;
     }
     return false;
+}
+
+void CWizLoginDialog::findWizBoxServer()
+{
+    qDebug() << "start findWizBoxServer ";
+    startWizBoxUdpClient();
+//    if (!QMetaObject::invokeMethod(m_udpClient, "Boardcast",
+//                                   Q_ARG(int, WIZBOX_PROT), Q_ARG(QString, "find wizbox"))) {
+//        qDebug() << "[UdpClient]failed: unable to invoke Boardcast!";
+//    }
+    emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
+    qDebug() << "call func form " << QThread::currentThread();
+    m_wizBoxSearchingTimer.start(10 * 1000);
+    showSearchingDialog();
+}
+
+void CWizLoginDialog::showSearchingDialog()
+{
+    if (!m_searchingDialog) {
+        initSearchingDialog();
+    }
+    if (m_searchingDialog->exec() == QDialog::Rejected)
+    {
+        m_wizBoxSearchingTimer.stop();
+        qDebug() << "searching cancel";
+        closeWizBoxUdpClient();
+
+        if (m_currentUserServerType != WizServer)
+        {
+            m_lineEditServer->clear();
+            m_lineEditServer->setPlaceholderText(tr("There is no server address, please input it."));
+            m_serverType = EnterpriseServer;
+        }
+    }
+}
+
+void CWizLoginDialog::initSearchingDialog()
+{
+    m_searchingDialog = new QDialog();
+    m_searchingDialog->setWindowFlags(Qt::FramelessWindowHint);
+    m_searchingDialog->setFixedSize(150, 100);
+    QPalette pl = m_searchingDialog->palette();
+    pl.setColor(QPalette::Window, QColor(0, 0, 0, 200));
+    m_searchingDialog->setPalette(pl);
+    m_searchingDialog->setAutoFillBackground(true);
+    m_searchingDialog->setWindowOpacity(0.7);
+
+    QHBoxLayout* closeLayout = new QHBoxLayout();
+    QToolButton* closeButton = new QToolButton(m_searchingDialog);
+    QString strBtnCloseNormal = Utils::StyleHelper::skinResourceFileName("linuxlogindialoclose_white");
+    QString strBtnCloseHover = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_on");
+    QString strBtnCloseDown = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_selected"); // ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_selected");
+    closeButton->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 16px; width: 16px;}"
+                                                     "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
+                                                     "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
+                                             .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
+    closeLayout->setContentsMargins(0, 0, 0, 0);
+    closeLayout->addStretch();
+    closeLayout->addWidget(closeButton);
+    connect(closeButton, SIGNAL(clicked()), m_searchingDialog, SLOT(reject()));
+    //
+    QLabel* labelSearching = new QLabel(m_searchingDialog);
+    labelSearching->setFixedSize(32, 32);
+    QMovie* movie =new QMovie(m_searchingDialog);
+    movie->setFileName(":/searching.gif");
+    labelSearching->setMovie(movie);
+    QHBoxLayout* labelLayout = new QHBoxLayout();
+    labelLayout->setContentsMargins(0, 0, 0, 0);
+    labelLayout->addStretch();
+    labelLayout->addWidget(labelSearching);
+    labelLayout->addStretch();
+    QHBoxLayout* textLayout = new QHBoxLayout();
+    textLayout->setContentsMargins(0, 5, 0, 0);
+    textLayout->addStretch();
+    QLabel* labelText = new QLabel(m_searchingDialog);
+    labelText->setText(tr("Finding Service...."));
+    QPalette plText = labelText->palette();
+    plText.setColor(QPalette::WindowText, QColor(255, 255, 255, 200));
+    labelText->setPalette(plText);
+    textLayout->addWidget(labelText);
+    textLayout->addStretch();
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 15);
+    layout->addLayout(closeLayout);
+    layout->addLayout(labelLayout);
+    layout->addLayout(textLayout);
+   m_searchingDialog->setLayout(layout);
+
+    movie->start();
+}
+
+void CWizLoginDialog::startWizBoxUdpClient()
+{
+    if (!m_udpClient)
+    {
+        m_udpClient = new CWizUdpClient();
+        connect(m_udpClient, SIGNAL(udpResponse(QString,QString,QString)),
+                SLOT(onWizBoxResponse(QString,QString,QString)));
+        connect(this, SIGNAL(wizBoxSearchRequest(int,QString)),
+                m_udpClient, SLOT(Boardcast(int,QString)), Qt::QueuedConnection);
+
+        m_udpThread = new QThread(this);
+        qDebug() << "create thread : " << m_udpThread;
+        m_udpClient->moveToThread(m_udpThread);
+    }
+
+    if (!m_udpThread->isRunning())
+    {
+        m_udpThread->start();
+
+    }
+}
+
+void CWizLoginDialog::closeWizBoxUdpClient()
+{
+    disconnect(m_udpClient, SIGNAL(udpResponse(QString,QString,QString)),
+               this, SLOT(onWizBoxResponse(QString,QString,QString)));
+    m_udpThread->quit();
+}
+
+void CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
+{
+    // get licence from server
+
+    // check wheather licence changed
+
+
 }
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
@@ -505,7 +743,7 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("forgot_password");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("forgot_password", false);
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
@@ -550,6 +788,7 @@ void CWizLoginDialog::onLoginInputChanged()
     ui->label_passwordError->clear();
     bool bInputFinished =  !m_lineEditUserName->text().isEmpty() && !m_lineEditPassword->text().isEmpty();
     ui->btn_login->setEnabled(bInputFinished);
+    m_currentUserServerType = NoServer;
 }
 
 void CWizLoginDialog::onTokenAcquired(const QString &strToken)
@@ -600,8 +839,52 @@ void CWizLoginDialog::userListMenuClicked(QAction *action)
 {
     if (action)
     {
-        m_menu->setDefaultAction(action);
+        m_menuUsers->setDefaultAction(action);
         setUser(action->text());
+    }
+}
+
+void CWizLoginDialog::serverListMenuClicked(QAction* action)
+{
+    if (action)
+    {
+        QString strActionData = action->data().toString();
+        if (strActionData == WIZ_SERVERACTION_CONNECT_WIZSERVER)
+        {
+            if (EnterpriseServer == m_currentUserServerType)
+            {
+                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote,"
+                                                       " it was signed in to enterprise server."));
+                return;
+            }
+            m_lineEditServer->setText(tr("Sign in to WizNote server"));
+            m_serverType = WizServer;
+        }
+        else if (strActionData == WIZ_SERVERACTION_CONNECT_BIZSERVER)
+        {
+            if (WizServer == m_currentUserServerType)
+            {
+                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
+                                                       " it was signed in to WizNote."));
+                return;
+            }
+            CWizUserSettings userSettings(userId());
+            qDebug() << "server type : " << userSettings.serverType();
+            qDebug() << "my wiz ; " << userSettings.myWizMail();
+            if (EnterpriseServer != userSettings.serverType() && !userSettings.myWizMail().isEmpty())
+            {
+                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
+                                                       " it was signed in to WizNote."));
+                return;
+            }
+            findWizBoxServer();
+        }
+        else if (strActionData == WIZ_SERVERACTION_HELP)
+        {
+            QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+            strUrl += "&name=wiz-box-search-help.html";
+            QDesktopServices::openUrl(strUrl);
+        }
     }
 }
 
@@ -609,7 +892,14 @@ void CWizLoginDialog::showUserListMenu()
 {
     QPoint point = ui->wgt_usercontainer->mapToGlobal(QPoint(0, ui->wgt_usercontainer->height()));
 
-    m_menu->popup(point);
+    m_menuUsers->popup(point);
+}
+
+void CWizLoginDialog::showServerListMenu()
+{
+    QPoint point = ui->wgt_serveroptioncontainer->mapToGlobal(QPoint(0, ui->wgt_serveroptioncontainer->height()));
+
+    m_menuServers->popup(point);
 }
 
 void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
@@ -617,7 +907,6 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     enableSignInControls(true);
     if (bFinish) {
-        enableSignInControls(false);
         m_lineEditUserName->setText(m_lineEditNewUserName->text());
         m_lineEditPassword->setText(m_lineEditNewPassword->text());
         ui->cbx_remberPassword->setChecked(false);
@@ -694,11 +983,52 @@ void CWizLoginDialog::onSNSLoginSuccess(const QString& strUrl)
     accept();
 }
 
+void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString& serverAddress,
+                                       const QString& responseMessage)
+{
+    m_wizBoxSearchingTimer.stop();
+    rapidjson::Document d;
+    d.Parse<0>(responseMessage.toUtf8().constData());
+
+    QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
+    QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());
+    if (ip.isEmpty())
+    {
+        TOLOG(CString(responseMessage));
+        TOLOG(_T("no ip field"));
+        return;
+    }
+
+    if (iptype.isEmpty())
+    {
+        TOLOG(CString(responseMessage));
+        TOLOG(_T("no iptype field"));
+        return;
+    }
+
+    closeWizBoxUdpClient();
+    if (iptype != "static")
+    {
+        QMessageBox::warning(0, tr("Info"), tr("Server ip should set to be static"));
+        return;
+    }
+    m_searchingDialog->accept();
+    m_lineEditServer->setText(ip);
+    m_serverType = EnterpriseServer;
+}
+
+void CWizLoginDialog::onWizBoxSearchingTimeOut()
+{
+    m_wizBoxSearchingTimer.stop();
+    m_searchingDialog->reject();
+    closeWizBoxUdpClient();
+    QMessageBox::information(0, tr("Info"), tr("There is no server address, please input it."));
+}
 
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("snspage");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("snspage", false);
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
     connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));

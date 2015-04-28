@@ -15,6 +15,14 @@ enum WizProxyType
     WizProxy_Socks5Proxy,
 };
 
+
+enum WizServerType
+{
+    NoServer = 0,
+    WizServer = 99,
+    EnterpriseServer = 199
+};
+
 class CWizSettings : public QSettings
 {
 public:
@@ -113,6 +121,15 @@ public:
 
     QString password() const;
     void setPassword(const QString& strPassword = "");
+
+    WizServerType serverType() const;
+    void setServerType(WizServerType server = NoServer);
+
+    QString enterpriseServerUrl ();
+    void setEnterpriseServerUrl(const QString& strEnterpriseServerd = "");
+
+    QString serverLicence();
+    void setServerLicence(const QString& strLicence = "");
 
     bool autoLogin() const;
     void setAutoLogin(bool bAutoLogin);
