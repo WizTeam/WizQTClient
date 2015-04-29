@@ -39,6 +39,7 @@ void AvatarDownloader::download(const QString& strUserGUID)
         return;
     }
 
+    qDebug() << "downloader start to download : " << m_strCurrentUser;
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     connect(reply, SIGNAL(finished()), SLOT(on_queryUserAvatar_finished()));
 }
@@ -329,8 +330,11 @@ void AvatarHostPrivate::load(const QString& strUserID, bool bForce)
         {
             qDebug() << "start to download avatar " << strUserID;
             m_listUser.append(strUserID);
-            m_thread->start(QThread::IdlePriority);
-//            download_impl();
+            if (!m_thread->isRunning())
+            {
+                m_thread->start(QThread::IdlePriority);
+            }
+            download_impl();
         }
 
         return;
@@ -358,7 +362,7 @@ void AvatarHostPrivate::download_impl()
 
     m_strUserCurrent = m_listUser.takeFirst();
 
-    if (!QMetaObject::invokeMethod(m_downloader, "download",
+    if (!QMetaObject::invokeMethod(m_downloader, "download", Qt::QueuedConnection,
                                    Q_ARG(QString, m_strUserCurrent))) {
         qDebug() << "[AvatarHost]failed: unable to invoke download!";
     }
@@ -378,6 +382,8 @@ void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
         Q_EMIT q->loaded(strUserID);
         return;
     }
+
+    download_impl();
 }
 
 /* --------------------- AvatarHost --------------------- */

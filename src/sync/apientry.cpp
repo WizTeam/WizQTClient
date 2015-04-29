@@ -76,9 +76,16 @@ ApiEntryPrivate::~ApiEntryPrivate()
 {
 }
 
-void ApiEntryPrivate::setEnterpriseAPIUrl(const QString& strUrl)
+void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
 {
-
+    if (!strIP.isEmpty())
+    {
+        m_strEnterpriseAPIUrl = QString("http://%1/").arg(strIP);
+    }
+    else
+    {
+        m_strEnterpriseAPIUrl = WIZNOTE_API_SERVER;
+    }
 }
 
 QString ApiEntryPrivate::asServerUrl()
@@ -143,6 +150,7 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, 
     QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
+    qDebug() << "request url for command : " << strCommand << " request url : " << strRequestUrl << "  return url : " << strUrl;
     return strUrl;
 }
 
@@ -336,177 +344,146 @@ QString ApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& st
 
 
 
-static ApiEntryPrivate* d = 0;
-
-void ApiEntry::setEnterpriseAPIUrl(const QString& strUrl)
+class CGarbo
 {
-    if (!d)
+public:
+    CGarbo()
+    {
         d = new ApiEntryPrivate();
-    return d->setEnterpriseAPIUrl(strUrl);
+    }
+
+    ~CGarbo()
+    {
+        delete d;
+    }
+
+    ApiEntryPrivate* d;
+
+};
+
+static CGarbo Garbo;
+
+void ApiEntry::setEnterpriseServerIP(const QString& strIP)
+{
+    return Garbo.d->setEnterpriseServerIP(strIP);
 }
 
 QString ApiEntry::syncUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->syncUrl();
+    return Garbo.d->syncUrl();
 }
 
 QString ApiEntry::asServerUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->asServerUrl();
+    return Garbo.d->asServerUrl();
 }
 
 QString ApiEntry::messageVersionUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->messageVersionUrl();
+    return Garbo.d->messageVersionUrl();
 }
 
 QString ApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->avatarDownloadUrl(strUserGUID);
+    return Garbo.d->avatarDownloadUrl(strUserGUID);
 }
 
 QString ApiEntry::avatarUploadUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->avatarUploadUrl();
+    return Garbo.d->avatarUploadUrl();
 }
 
 QString ApiEntry::mailShare()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->mailShareUrl();
+    return Garbo.d->mailShareUrl();
 }
 
 QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->commentUrl(strToken, strKbGUID, strGUID);
+    return Garbo.d->commentUrl(strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::commentCountUrl(const QString& strServer, const QString& strToken,
                                   const QString& strKbGUID, const QString& strGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->commentCountUrl(strServer, strToken, strKbGUID, strGUID);
+    return Garbo.d->commentCountUrl(strServer, strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::feedbackUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->feedbackUrl();
+    return Garbo.d->feedbackUrl();
 }
 
 QString ApiEntry::supportUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->supportUrl();
+    return Garbo.d->supportUrl();
 }
 
 QString ApiEntry::changeLogUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->changeLogUrl();
+    return Garbo.d->changeLogUrl();
 }
 
 QString ApiEntry::upgradeUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->upgradeUrl();
+    return Garbo.d->upgradeUrl();
 }
 
 QString ApiEntry::analyzerUploadUrl()
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->analyzerUploadUrl();
+    return Garbo.d->analyzerUploadUrl();
 }
 
 QString ApiEntry::accountInfoUrl(const QString& strToken)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->accountInfoUrl(strToken);
+    return Garbo.d->accountInfoUrl(strToken);
 }
 
 QString ApiEntry::createGroupUrl(const QString& strToken)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->createGroupUrl(strToken);
+    return Garbo.d->createGroupUrl(strToken);
 }
 
 QString ApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeight)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    QString strUrl = d->asServerUrl();
+    QString strUrl = Garbo.d->asServerUrl();
     strUrl += QString("/a/captcha/%1?width=%2&height=%3").arg(strCaptchaID).arg(nWidth).arg(nHeight);
     return strUrl;
 }
 
 QString ApiEntry::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand, bUseWizServer);
+    return Garbo.d->standardCommandUrl(strCommand, bUseWizServer);
 }
 
 QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand, strToken, bUseWizServer);
+    return Garbo.d->standardCommandUrl(strCommand, strToken, bUseWizServer);
 }
 QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
+    return Garbo.d->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
 }
 
 QString ApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
+    return Garbo.d->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
 }
 
 
 QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->groupAttributeUrl(strToken, strKbGUID);
+    return Garbo.d->groupAttributeUrl(strToken, strKbGUID);
 }
 
 QString ApiEntry::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->groupUsersUrl(strToken, strBizGUID, strkbGUID);
+    return Garbo.d->groupUsersUrl(strToken, strBizGUID, strkbGUID);
 }
 
 QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
-    if (!d)
-        d = new ApiEntryPrivate();
-    return d->kUrlFromGuid(strToken, strKbGUID);
+    return Garbo.d->kUrlFromGuid(strToken, strKbGUID);
 }
 
 QString ApiEntry::appstoreParam(bool useAndSymbol)

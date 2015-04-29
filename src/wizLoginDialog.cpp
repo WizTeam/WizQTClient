@@ -14,6 +14,7 @@
 #include <QMovie>
 #include <QDebug>
 #include <QDateTime>
+#include <QMetaObject>
 #include <QMessageBox>
 
 #include "utils/stylehelper.h"
@@ -32,6 +33,7 @@
 #include "wiznotestyle.h"
 #include "share/wizUDPClient.h"
 #include "rapidjson/document.h"
+#include "share/wizMessageBox.h"
 
 using namespace WizService;
 
@@ -219,11 +221,16 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_serverType = m_currentUserServerType;
-        m_lineEditServer->setText(userSettings.enterpriseServerUrl());
+        m_lineEditServer->setText(userSettings.enterpriseServerIP());
+        ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
     }
-    else if (m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty())
+    else if ((m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty()) ||
+             m_currentUserServerType == WizServer)
     {
         m_currentUserServerType = WizServer;
+        m_serverType = m_currentUserServerType;
+        m_lineEditServer->setText(tr("Sign In  to WizNote"));
+        ApiEntry::setEnterpriseServerIP("");
     }
 }
 
@@ -245,26 +252,22 @@ void CWizLoginDialog::doAccountVerify()
     {
         if (m_lineEditServer->text().isEmpty())
         {
-            QMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+            CWizMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+            return;
+        }        
+
+        if (userSettings.enterpriseServerIP().isEmpty() && !userSettings.myWizMail().isEmpty())
+        {
+            CWizMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
             return;
         }
-        else
-        {
-            ApiEntry::setEnterpriseAPIUrl(m_lineEditServer->text());
-        }
-
-        if (userSettings.enterpriseServerUrl().isEmpty() && !userSettings.myWizMail().isEmpty())
-        {
-            QMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
-            return;
-        }
-
         //
-        checkServerLicence(userSettings.serverLicence());
+        if (!checkServerLicence(userSettings.serverLicence()))
+            return;
     }
-    else if (WizServer == m_serverType && !userSettings.enterpriseServerUrl().isEmpty())
+    else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
     {
-        QMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
+        CWizMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
         return;
     }
 
@@ -330,7 +333,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     userSettings.setServerType(m_serverType);
     if (EnterpriseServer == m_serverType)
     {
-        userSettings.setEnterpriseServerUrl(m_lineEditServer->text());
+        userSettings.setEnterpriseServerIP(m_lineEditServer->text());
         userSettings.setServerLicence(m_serverLicence);
     }
 
@@ -591,11 +594,8 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
 void CWizLoginDialog::findWizBoxServer()
 {
     qDebug() << "start findWizBoxServer ";
-    startWizBoxUdpClient();
-//    if (!QMetaObject::invokeMethod(m_udpClient, "Boardcast",
-//                                   Q_ARG(int, WIZBOX_PROT), Q_ARG(QString, "find wizbox"))) {
-//        qDebug() << "[UdpClient]failed: unable to invoke Boardcast!";
-//    }
+    startWizBoxUdpClient();        
+
     emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
     qDebug() << "call func form " << QThread::currentThread();
     m_wizBoxSearchingTimer.start(10 * 1000);
@@ -681,21 +681,21 @@ void CWizLoginDialog::startWizBoxUdpClient()
 {
     if (!m_udpClient)
     {
-        m_udpClient = new CWizUdpClient();
-        connect(m_udpClient, SIGNAL(udpResponse(QString,QString,QString)),
-                SLOT(onWizBoxResponse(QString,QString,QString)));
+        m_udpClient = new CWizUdpClient();        
         connect(this, SIGNAL(wizBoxSearchRequest(int,QString)),
-                m_udpClient, SLOT(Boardcast(int,QString)), Qt::QueuedConnection);
+                m_udpClient, SLOT(boardcast(int,QString)), Qt::QueuedConnection);
 
         m_udpThread = new QThread(this);
         qDebug() << "create thread : " << m_udpThread;
         m_udpClient->moveToThread(m_udpThread);
     }
 
+    connect(m_udpClient, SIGNAL(udpResponse(QString,QString,QString)),
+            SLOT(onWizBoxResponse(QString,QString,QString)));
+
     if (!m_udpThread->isRunning())
     {
         m_udpThread->start();
-
     }
 }
 
@@ -703,16 +703,51 @@ void CWizLoginDialog::closeWizBoxUdpClient()
 {
     disconnect(m_udpClient, SIGNAL(udpResponse(QString,QString,QString)),
                this, SLOT(onWizBoxResponse(QString,QString,QString)));
+    QMetaObject::invokeMethod(m_udpClient, "closeUdpConnections", Qt::QueuedConnection);
     m_udpThread->quit();
 }
 
-void CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
+bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 {
-    // get licence from server
+    if (m_lineEditServer->text().isEmpty())
+    {
+        CWizMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+        return false;
+    }
+    ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
 
+    // get licence from server    
+    QNetworkAccessManager net;
+    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
+//    QNetworkRequest request;
+//    request.setUrl(strUrl);
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError) {
+        reply->deleteLater();
+        return false;
+    }
+
+    QString strResult = reply->readAll();
+    rapidjson::Document d;
+    d.Parse<0>(strResult.toUtf8().constData());
+
+    if (!d.FindMember("licence")) {
+        qDebug() << "Can not find licence from oem";
+        return false;
+    }
+    m_serverLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
     // check wheather licence changed
 
+    qDebug() << "compare licence : " << m_serverLicence << "  with old licence : " << strOldLicence;
+    if (m_serverLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != m_serverLicence))
+        return false;
 
+    return true;
 }
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
@@ -986,6 +1021,8 @@ void CWizLoginDialog::onSNSLoginSuccess(const QString& strUrl)
 void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString& serverAddress,
                                        const QString& responseMessage)
 {
+    qDebug() << "response from wizbox : " << responseMessage;
+
     m_wizBoxSearchingTimer.stop();
     rapidjson::Document d;
     d.Parse<0>(responseMessage.toUtf8().constData());

@@ -5,6 +5,7 @@
 #include <QFontDialog>
 #include <QColorDialog>
 
+#include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
@@ -347,14 +348,8 @@ void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
         userSettings().setLocale(strLocaleName);
     }
 
-    QMessageBox msgBox(this);
-    msgBox.setIcon(QMessageBox::Information);
-    msgBox.addButton(QMessageBox::Ok);
-    msgBox.setText(tr("Language will be changed after restart WizNote."));
-    msgBox.setWindowModality(Qt::ApplicationModal);
-    msgBox.exec();
 
-
+    CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
 }
 
 void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
@@ -405,7 +400,7 @@ void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
 {
     m_app.userSettings().setUseSystemBasedStyle(checked);
 
-    QMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."), QMessageBox::Ok);
+    CWizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."));
 }
 
 void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
@@ -418,15 +413,19 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
         ui->lineEditNotePassword->blockSignals(false);
         m_app.userSettings().setEncryptedNotePassword("");
 
-        QMessageBox msg;
-        msg.setIcon(QMessageBox::Information);
-        msg.setWindowTitle(tr("Cancel search encrypted note"));
-        msg.addButton(QMessageBox::Ok);
-        msg.addButton(QMessageBox::Cancel);
-        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
-                       "Do you want to rebuild full text search?"));
+//        QMessageBox msg;
+//        msg.setIcon(QMessageBox::Information);
+//        msg.setWindowTitle(tr("Cancel search encrypted note"));
+//        msg.addButton(QMessageBox::Ok);
+//        msg.addButton(QMessageBox::Cancel);
+//        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
+//                       "Do you want to rebuild full text search?"));
 
-        if (QMessageBox::Ok == msg.exec())
+        QMessageBox::StandardButton clickedButton = CWizMessageBox::warning(0, tr("Cancel search encrypted note"),
+                                                                                tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
+                                                                                 "Do you want to rebuild full text search?") ,QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
+
+        if (QMessageBox::Ok == clickedButton)
         {
             Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
             Q_ASSERT(mainWindow);

@@ -21,7 +21,8 @@ signals:
                        const QString& udpMessage);
 
 public slots:
-    void Boardcast(int port, const QString& message);
+    void boardcast(int port, const QString& message);
+    void closeUdpConnections();
 
 private slots:
     void readUdpPendingData();

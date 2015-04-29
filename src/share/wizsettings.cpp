@@ -304,15 +304,15 @@ void CWizUserSettings::setServerType(WizServerType server)
     set("ServerType", strServerType);
 }
 
-QString CWizUserSettings::enterpriseServerUrl()
+QString CWizUserSettings::enterpriseServerIP()
 {
-    QString strServerType = get("EnterpriseServerUrl");
+    QString strServerType = get("EnterpriseServerIP");
     return strServerType;
 }
 
-void CWizUserSettings::setEnterpriseServerUrl(const QString& strEnterpriseServerd)
+void CWizUserSettings::setEnterpriseServerIP(const QString& strEnterpriseServerd)
 {
-    set("EnterpriseServerUrl", strEnterpriseServerd);
+    set("EnterpriseServerIP", strEnterpriseServerd);
 }
 
 QString CWizUserSettings::serverLicence()

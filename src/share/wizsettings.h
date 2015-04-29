@@ -125,8 +125,8 @@ public:
     WizServerType serverType() const;
     void setServerType(WizServerType server = NoServer);
 
-    QString enterpriseServerUrl ();
-    void setEnterpriseServerUrl(const QString& strEnterpriseServerd = "");
+    QString enterpriseServerIP ();
+    void setEnterpriseServerIP(const QString& strEnterpriseServerd = "");
 
     QString serverLicence();
     void setServerLicence(const QString& strLicence = "");

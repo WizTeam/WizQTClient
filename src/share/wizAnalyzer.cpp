@@ -392,6 +392,8 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
     QNetworkReply* reply = net.post(request, buffer.GetString());
 
+    qDebug() << "send analyzer  to url : " << strURL << "  with message : " << buffer.GetString();
+
     QEventLoop loop;
     QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
@@ -417,7 +419,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     int returnCode = d.FindMember("return_code")->value.GetInt();
     if (returnCode != 200)
     {
-        qDebug() << "error code was not 200 " << returnCode;
+        qDebug() << "return code was not 200, error :  " << returnCode << strReply;
         return;
     }
 

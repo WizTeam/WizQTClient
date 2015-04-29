@@ -4,7 +4,6 @@
 #include <QMenuBar>
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QMessageBox>
 #include <QUndoStack>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -26,6 +25,7 @@
 #else
 #endif
 #include "wizSearchWidget.h"
+#include "share/wizMessageBox.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
@@ -1203,7 +1203,7 @@ void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const 
 
     if (doc.nProtected == 1)
     {
-        QMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
+        CWizMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
         return;
     }
 

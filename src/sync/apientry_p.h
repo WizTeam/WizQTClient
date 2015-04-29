@@ -15,7 +15,7 @@ public:
     ApiEntryPrivate();
     ~ApiEntryPrivate();
 
-    void setEnterpriseAPIUrl(const QString& strUrl);
+    void setEnterpriseServerIP(const QString& strIP);
     QString syncUrl();
     QString asServerUrl();
     QString messageVersionUrl();

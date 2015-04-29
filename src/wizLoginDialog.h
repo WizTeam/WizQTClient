@@ -104,7 +104,7 @@ private:
     void showSearchingDialog();
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
-    void checkServerLicence(const QString& strOldLicence);
+    bool checkServerLicence(const QString& strOldLicence);
 
     class ControlWidgetsLocker
     {

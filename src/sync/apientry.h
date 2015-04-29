@@ -8,7 +8,7 @@ namespace WizService {
 class ApiEntry
 {
 public:
-    static void setEnterpriseAPIUrl(const QString& strUrl);
+    static void setEnterpriseServerIP(const QString& strIP);
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageVersionUrl();

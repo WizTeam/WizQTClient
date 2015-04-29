@@ -47,7 +47,7 @@ bool CWizUdpClient::GetAllBoardcastAddresses(QMap<QString, QString>& addressMap)
     return true;
 }
 
-void CWizUdpClient::Boardcast(int port, const QString& message)
+void CWizUdpClient::boardcast(int port, const QString& message)
 {   
     QMap<QString, QString> addressMap;
     GetAllBoardcastAddresses(addressMap);
@@ -74,6 +74,15 @@ void CWizUdpClient::Boardcast(int port, const QString& message)
         //  broadcast message
         udpSocket->writeDatagram(message.toUtf8(), QHostAddress(broadcast), port);
         qDebug() << "send upd to " << broadcast << " with message ; " << message;
+    }
+}
+
+void CWizUdpClient::closeUdpConnections()
+{
+    QMap<QString, QUdpSocket*>::iterator it;
+    for (it = m_udpSocketMap.begin(); it != m_udpSocketMap.end(); it++)
+    {
+        it.value()->close();
     }
 }
 
