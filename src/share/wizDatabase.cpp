@@ -1880,8 +1880,7 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                     newVer = std::max<__int64>(v, newVer);
                     //
                     TOLOG1("[Sync] User avatar changed : %1", it->second);
-                    //DeleteFile(strAvatarPath + it->second + _T(".png"));
-                    WizService::AvatarHost::deleteAvatar(it->second);
+                    WizService::AvatarHost::reload(it->second);
                 }
             }
             //

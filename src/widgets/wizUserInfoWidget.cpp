@@ -181,7 +181,7 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());
 
     if (ok) {
-        AvatarHost::load(m_db.GetUserId(), true);
+        AvatarHost::reload(m_db.GetUserId());
     } else {
         QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
@@ -215,7 +215,7 @@ void CWizUserInfoWidget::on_action_logout_triggered()
 
 void CWizUserInfoWidget::on_userInfo_changed()
 {
-    AvatarHost::load(m_db.GetUserId(), true);
+    AvatarHost::reload(m_db.GetUserId());
     resetUserInfo();
 }
 QString CWizUserInfoWidget::userId()
