@@ -170,6 +170,7 @@ set(wiznote_SOURCES
     widgets/wizAdvancedSearchDialog.cpp
     share/wizUDPClient.cpp
     share/wizMessageBox.cpp
+    wizOEMSettings.cpp
 )
 
 set(wiznote_HEADERS
@@ -328,6 +329,8 @@ set(wiznote_HEADERS
     widgets/wizAdvancedSearchDialog.h
     share/wizUDPClient.h
     share/wizMessageBox.h
+    wizOEMSettings.h
+    wizOEMSettings_p.h
 )
 
 set(wiznote_FORMS

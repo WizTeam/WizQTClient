@@ -16,6 +16,7 @@
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "widgets/wizIAPDialog.h"
+#include "wizOEMSettings.h"
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -50,8 +51,6 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
     connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSettings_triggered()));
 
-    QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
-    connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
 
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
@@ -68,7 +67,12 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
-    m_menuMain->addAction(actionUpgradeVIP);
+    if (!CWizOEMSettings::isHideBuyVip())
+    {
+        QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
+        connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
+        m_menuMain->addAction(actionUpgradeVIP);
+    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
     m_menuMain->addAction(actionMyShare);

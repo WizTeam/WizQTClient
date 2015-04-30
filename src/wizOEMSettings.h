@@ -1,18 +1,16 @@
 #ifndef CWIZOEMSETTINGS_H
 #define CWIZOEMSETTINGS_H
 
-#include <QSettings>
+#include "wizOEMSettings_p.h"
 
 class CWizOEMSettings
 {
 public:
 
-
-private:
     CWizOEMSettings();
     ~CWizOEMSettings();
 
-    static void updateOEMSettings();
+    static void updateOEMSettings(const QString& strOEMJSONData);
 
     static bool isHideShareByEmail();
     static bool isHidePersonalGroup();
@@ -28,6 +26,8 @@ private:
     static bool isForbidCreateBiz();
 
 private:
+
+
     static CWizOEMSettingsPrivate* m_settings;
 
     class CGarbo
@@ -45,26 +45,5 @@ private:
 };
 
 
-class CWizOEMSettingsPrivate : public QSettings
-{
-public:
-    CWizOEMSettingsPrivate(const QString & fileName);
-    ~CWizOEMSettingsPrivate();
-
-    void updateOEMSettings();
-
-    bool isHideShareByEmail();
-    bool isHidePersonalGroup();
-    bool isHideFeedback();
-    bool isHideRegister();
-    bool isEncryptPassword();
-    bool isHideSocialLogin();
-    bool isHideForgotPassword();
-    bool isHideShare();                         //隐藏所有分享到外部方式
-    bool isAccountPlaceholder();            //登录框显示的域账号
-    bool isHideMyShare();
-    bool isHideBuyVip();
-    bool isForbidCreateBiz();
-};
 
 #endif // CWIZOEMSETTINGS_H

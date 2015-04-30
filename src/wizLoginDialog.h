@@ -106,30 +106,6 @@ private:
     void closeWizBoxUdpClient();
     bool checkServerLicence(const QString& strOldLicence);
 
-    class ControlWidgetsLocker
-    {
-    public:
-        ControlWidgetsLocker(){}
-        ~ControlWidgetsLocker() {
-            releaseWidgets();
-        }
-
-        void releaseWidgets() {
-            foreach (QWidget* wgt, m_widgetList) {
-                wgt->setEnabled(true);
-            }
-            m_widgetList.clear();
-        }
-
-        void lockWidget(QWidget* wgt) {
-            m_widgetList.append(wgt);
-            wgt->setEnabled(false);
-        }
-
-    private:
-        QList<QWidget*> m_widgetList;
-    };
-
 private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menuUsers;

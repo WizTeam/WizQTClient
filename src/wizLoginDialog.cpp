@@ -34,6 +34,7 @@
 #include "share/wizUDPClient.h"
 #include "rapidjson/document.h"
 #include "share/wizMessageBox.h"
+#include "wizOEMSettings.h"
 
 using namespace WizService;
 
@@ -45,6 +46,33 @@ using namespace WizService;
 #define WIZ_ERROR_REGISTRATION_COUNT  366
 
 #define WIZBOX_PROT     9269
+
+
+
+class ControlWidgetsLocker
+{
+public:
+    ControlWidgetsLocker(){}
+    ~ControlWidgetsLocker() {
+        releaseWidgets();
+    }
+
+    void releaseWidgets() {
+        foreach (QWidget* wgt, m_widgetList) {
+            wgt->setEnabled(true);
+        }
+        m_widgetList.clear();
+    }
+
+    void lockWidget(QWidget* wgt) {
+        m_widgetList.append(wgt);
+        wgt->setEnabled(false);
+    }
+
+private:
+    QList<QWidget*> m_widgetList;
+};
+
 
 CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString &strLocale, QWidget *parent)
 #ifdef Q_OS_MAC
@@ -260,10 +288,7 @@ void CWizLoginDialog::doAccountVerify()
         {
             CWizMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
             return;
-        }
-        //
-        if (!checkServerLicence(userSettings.serverLicence()))
-            return;
+        }     
     }
     else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
     {
@@ -278,6 +303,10 @@ void CWizLoginDialog::doAccountVerify()
         Token::setPasswd(password());
         locker.releaseWidgets();
         enableLoginControls(false);
+        // check server licence and update oem settings
+        if (EnterpriseServer == m_serverType && !checkServerLicence(userSettings.serverLicence()))
+            return;
+        //
         doOnlineVerify();
         return;
     }
@@ -718,37 +747,46 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 
     // get licence from server    
     QNetworkAccessManager net;
-    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
-//    QNetworkRequest request;
-//    request.setUrl(strUrl);
+    QString strUrl = ApiEntry::standardCommandUrl("oem", false);    
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
     QEventLoop loop;
     QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     loop.exec();
 
-    if (reply->error() != QNetworkReply::NoError) {
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qDebug() << "Download oem data failed!";
         reply->deleteLater();
         return false;
     }
 
     QString strResult = reply->readAll();
+    reply->deleteLater();
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
-    if (!d.FindMember("licence")) {
+    if (!d.FindMember("licence"))
+    {
         qDebug() << "Can not find licence from oem";
         return false;
     }
     m_serverLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
-    // check wheather licence changed
 
+    // check wheather licence changed
     qDebug() << "compare licence : " << m_serverLicence << "  with old licence : " << strOldLicence;
     if (m_serverLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != m_serverLicence))
+    {
+        CWizMessageBox::warning(0, tr("Ino"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
         return false;
+    }
+
+    // update oem setttings
+    CWizOEMSettings::updateOEMSettings(strResult);
 
     return true;
 }
+
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
 {
@@ -1052,6 +1090,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_searchingDialog->accept();
     m_lineEditServer->setText(ip);
     m_serverType = EnterpriseServer;
+    ApiEntry::setEnterpriseServerIP(ip);
 }
 
 void CWizLoginDialog::onWizBoxSearchingTimeOut()
@@ -1061,7 +1100,6 @@ void CWizLoginDialog::onWizBoxSearchingTimeOut()
     closeWizBoxUdpClient();
     QMessageBox::information(0, tr("Info"), tr("There is no server address, please input it."));
 }
-
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {

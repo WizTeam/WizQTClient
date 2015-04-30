@@ -36,6 +36,7 @@
 #include "sync/apientry.h"
 #include "sync/asyncapi.h"
 #include "messagecompleter.h"
+#include "wizOEMSettings.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -117,6 +118,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
+    m_emailBtn->setVisible(CWizOEMSettings::isHideShareByEmail());
+    m_emailBtn->setEnabled(CWizOEMSettings::isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
@@ -124,6 +127,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
+    m_shareBtn->setVisible(CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(CWizOEMSettings::isHideShare());
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
