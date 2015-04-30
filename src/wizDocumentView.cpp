@@ -296,11 +296,17 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     {
         m_status = m_status | DOCUMENT_GROUP | DOCUMENT_FIRSTTIMEVIEW;
     }
+    if (::WizIsDocumentContainsFrameset(data))
+    {
+        m_bEditingMode = false;
+        m_bLocked = true;
+    }
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (NotifyBar::LockForGruop == nLockReason)
     {
         startCheckDocumentEditStatus();
     }
+
 }
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)

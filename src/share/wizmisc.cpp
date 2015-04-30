@@ -2506,3 +2506,11 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
+
+
+bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
+{
+    QStringList fileTypes;
+    fileTypes << ".doc" << ".docx" << ".xls" << ".xlsx" << ".ppt" << ".pptx";
+    return fileTypes.contains(doc.strFileType);
+}

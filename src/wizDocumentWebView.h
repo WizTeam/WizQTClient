@@ -202,7 +202,9 @@ public:
 
 private:
     void initEditor();
+    void resetEditor();
     void viewDocumentInEditor(bool editing);
+    void viewDocumentWithoutEditor();
     void tryResetTitle();
 
     bool isInternalUrl(const QUrl& url);

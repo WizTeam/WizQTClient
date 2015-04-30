@@ -185,6 +185,9 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsOffline();
 bool WizIsHighPixel();
 
+
+bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
+
 enum WizKMUrlType
 {
     WizUrl_Invalid,

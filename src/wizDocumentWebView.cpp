@@ -596,11 +596,21 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
 {
     m_mapFile.insert(strGUID, strFileName);
 
-    if (m_bEditorInited) {
-        resetCheckListEnvironment();
-        viewDocumentInEditor(m_bEditingMode);
+    WIZDOCUMENTDATA doc;
+    if (!m_dbMgr.db(kbGUID).DocumentFromGUID(strGUID, doc))
+        return;
+
+    //
+    if (::WizIsDocumentContainsFrameset(doc)) {
+        viewDocumentWithoutEditor();
     } else {
-        initEditor();
+
+        if (m_bEditorInited) {
+            resetCheckListEnvironment();
+            viewDocumentInEditor(m_bEditingMode);
+        } else {
+            initEditor();
+        }
     }
 }
 
@@ -763,6 +773,30 @@ void CWizDocumentWebView::initEditor()
 
     page()->mainFrame()->setHtml(strHtml, url);
 
+}
+
+void CWizDocumentWebView::resetEditor()
+{
+    if (!m_bEditorInited)
+        return;
+
+    m_bEditorInited = false;
+    page()->setLinkDelegationPolicy(QWebPage::DontDelegateLinks);
+
+    disconnect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this,
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
+
+    disconnect(page()->mainFrame(), SIGNAL(loadFinished(bool)), this,
+            SLOT(onEditorLoadFinished(bool)));
+
+    disconnect(page(), SIGNAL(linkClicked(const QUrl&)), this,
+            SLOT(onEditorLinkClicked(const QUrl&)));
+
+    disconnect(page(), SIGNAL(selectionChanged()), this,
+            SLOT(onEditorSelectionChanged()));
+
+    disconnect(page(), SIGNAL(contentsChanged()), this,
+            SLOT(onEditorContentChanged()));
 }
 
 void CWizDocumentWebView::resetCheckListEnvironment()
@@ -1193,6 +1227,41 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
     emit viewDocumentFinished();
+}
+
+void CWizDocumentWebView::viewDocumentWithoutEditor()
+{
+    resetEditor();
+
+    //
+    QString strGUID = view()->note().strGUID;
+    QString strFileName = m_mapFile.value(strGUID);
+    if (strFileName.isEmpty()) {
+        return;
+    }
+
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
+
+    m_strCurrentNoteGUID = strGUID;
+    m_bCurrentEditing = false;
+    //
+    page()->mainFrame()->setHtml(strHtml);
+
+    // show client
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    window->showClient(true);
+    window->transitionView()->hide();
+
+    page()->undoStack()->clear();
+
+    //Waiting for the editor initialization complete if it's the first time to load a document.
+    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+//    emit viewDocumentFinished();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
