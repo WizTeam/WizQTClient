@@ -1652,25 +1652,6 @@ bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
     return lastSyncTime.daysTo(COleDateTime::currentDateTime()) > 0;
 }
 
-void WizDownloadBizUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
-{
-    pEvents->OnStatus("Downloading user image");
-    //
-    CWizStdStringArray arrayBizGroupUser;
-    pDatabase->GetAllBizUserIds(arrayBizGroupUser);
-    for (CWizStdStringArray::const_iterator it = arrayBizGroupUser.begin();
-        it != arrayBizGroupUser.end();
-        it++)
-    {
-        if (!WizService::AvatarHost::isFileExists(*it))
-        {
-            WizService::AvatarHost::load(*it, false);
-        }
-
-        if (pEvents->IsStop())
-            return;
-    }
-}
 //
 bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
 {
