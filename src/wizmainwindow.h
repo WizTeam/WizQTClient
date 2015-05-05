@@ -4,7 +4,7 @@
 #include <QtGlobal>
 #include <QMainWindow>
 #include <QPushButton>
-#include <functional>
+#include <QSystemTrayIcon>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
@@ -137,6 +137,7 @@ private:
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
     //
     QSystemTrayIcon* m_tray;
+    QMenu* m_trayMenu;
 
 #ifdef USECOCOATOOLBAR
     CWizMacToolBar* m_toolBar;
@@ -349,7 +350,7 @@ public Q_SLOTS:
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
-    void on_promptMessage_request(const QString& strMsg);
+    void on_promptMessage_request(int nType, const QString& strMsg);
 
     void on_TokenAcquired(const QString& strToken);
 
@@ -380,8 +381,12 @@ public Q_SLOTS:
     void on_upgradeThread_finished();
 #endif
 
+    //
     void on_trayIcon_newDocument_clicked();
     void on_hideTrayIcon_clicked();
+    void on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason);
+    void showTrayIconMessage(const QString& strTitle, const QString& strInfo);
+    void showTrayIconMenu();
     //
     void shiftVisableStatus();
 

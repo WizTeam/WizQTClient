@@ -136,6 +136,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
     , m_tray(NULL)
+    , m_trayMenu(NULL)
     , m_mobileFileReceiver(0)
 {
 #ifndef Q_OS_MAC
@@ -163,8 +164,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(promptMessageRequest(const QString&)),
-            SLOT(on_promptMessage_request(QString)));
+    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&)),
+            SLOT(on_promptMessage_request(int, QString)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
@@ -491,30 +492,50 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
 {
     //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
-    if (bVisible)
+//    if (bVisible)
+//    {
+//        //
+//        if (m_tray)
+//        {
+//            if (m_tray->isVisible())
+//                return;
+
+//            delete m_tray;
+//        }
+
+//        //
+    if (!m_tray)
     {
-        //
-        if (m_tray)
-        {
-            if (m_tray->isVisible())
-                return;
-
-            delete m_tray;
-        }
-
-        //
         m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
         initTrayIcon(m_tray);
         m_tray->show();
     }
-    else
+//    }
+//    else
+//    {
+//        if (m_tray)
+//        {
+//            m_tray->hide();
+//            delete m_tray;
+//            m_tray = 0;
+//        }
+//    }
+    m_tray->setVisible(bVisible);
+}
+
+void MainWindow::showTrayIconMessage(const QString& strTitle, const QString& strInfo)
+{
+    if (m_tray && m_tray->isVisible())
     {
-        if (m_tray)
-        {
-            m_tray->hide();
-            delete m_tray;
-            m_tray = 0;
-        }
+        m_tray->showMessage(strTitle, strInfo, QSystemTrayIcon::Information);
+    }
+}
+
+void MainWindow::showTrayIconMenu()
+{
+    if (m_trayMenu)
+    {
+        m_trayMenu->popup(QCursor::pos());
     }
 }
 
@@ -531,6 +552,30 @@ void MainWindow::on_hideTrayIcon_clicked()
 {
     setSystemTrayIconVisible(false);
     userSettings().setShowSystemTrayIcon(false);
+}
+
+void MainWindow::on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason)
+{
+    static QTimer trayTimer;
+    trayTimer.setSingleShot(true);
+    connect(&trayTimer, SIGNAL(timeout()), SLOT(showTrayIconMenu()), Qt::UniqueConnection);
+    switch (reason) {
+    case QSystemTrayIcon::DoubleClick:
+    {
+        trayTimer.stop();
+        qDebug() << "trayicon double clicked";        
+    }
+        break;
+    case QSystemTrayIcon::Trigger:
+    {
+        trayTimer.stop();
+        trayTimer.start(400);
+        qDebug() << "trayicon triggered";
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::shiftVisableStatus()
@@ -1800,9 +1845,21 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
     Q_UNUSED(strMsg);
 }
 
-void MainWindow::on_promptMessage_request(const QString& strMsg)
+void MainWindow::on_promptMessage_request(int nType, const QString& strMsg)
 {
-    QMessageBox::warning(0, tr("Info"), strMsg);
+    switch (nType) {
+    case wizSyncMessageNormal:
+        showTrayIconMessage(tr("New message"), strMsg);
+        break;
+    case wizSyncMessageWarning:
+        CWizMessageBox::warning(0, tr("Info"), strMsg);
+        break;
+    case wizSyncMeesageError:
+        CWizMessageBox::critical(0, tr("Info"), strMsg);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -1819,6 +1876,7 @@ void MainWindow::on_actionNewNote_triggered()
 
     setFocusForNewNote(data);
     m_doc->web()->setEditorEnable(true);
+    m_tray->showMessage(tr("Info"), tr("New note created"), QSystemTrayIcon::Critical);
 }
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()
@@ -3010,28 +3068,28 @@ void MainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
     Q_ASSERT(trayIcon);
-    QMenu* menu = new QMenu(this);
-    QAction* actionShow = menu->addAction(tr("Show/Hide MainWindow"));
+    m_trayMenu = new QMenu(this);
+    QAction* actionShow = m_trayMenu->addAction(tr("Show/Hide MainWindow"));
     connect(actionShow, SIGNAL(triggered()), SLOT(shiftVisableStatus()));
 
-    QAction* actionNewNote = menu->addAction(tr("New Note"));
-    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
+    QAction* actionNewNote = m_trayMenu->addAction(tr("New Note"));
+    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));    
 
     //
-    menu->addSeparator();
-    QAction* actionHideTrayIcon = menu->addAction(tr("Hide TrayIcon"));
+    m_trayMenu->addSeparator();
+    QAction* actionHideTrayIcon = m_trayMenu->addAction(tr("Hide TrayIcon"));
     connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
     //
-    menu->addSeparator();
-    QAction* actionLogout = menu->addAction(tr("Logout"));
+    m_trayMenu->addSeparator();
+    QAction* actionLogout = m_trayMenu->addAction(tr("Logout"));
     connect(actionLogout, SIGNAL(triggered()), SLOT(on_actionLogout_triggered()));
-    QAction* actionExit = menu->addAction(tr("Exit"));
+    QAction* actionExit = m_trayMenu->addAction(tr("Exit"));
     connect(actionExit, SIGNAL(triggered()), SLOT(on_actionExit_triggered()));
 
-    trayIcon->setContextMenu(menu);
 
-    //
 #ifdef Q_OS_MAC
+    trayIcon->setContextMenu(m_trayMenu);
+    //
     QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
     QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
     QIcon icon;
@@ -3042,12 +3100,14 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #else
-    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
-    QIcon icon(normal);
-    if (!icon.isNull())
-    {
-        trayIcon->setIcon(icon);
-    }
+    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+            SLOT(on_trayIcon_actived(QSystemTrayIcon::ActivationReason)));
+//    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
+//    QIcon icon(normal);
+//    if (!icon.isNull())
+//    {
+//        trayIcon->setIcon(icon);
+//    }
 #endif
 }
 
