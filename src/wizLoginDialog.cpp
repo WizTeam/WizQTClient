@@ -16,6 +16,10 @@
 #include <QDateTime>
 #include <QMetaObject>
 #include <QMessageBox>
+#include <QState>
+#include <QHistoryState>
+#include <QAbstractState>
+#include <QStateMachine>
 
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
@@ -160,11 +164,15 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 #endif
 
     setUsers(strDefaultUserId);
-    QAction* actionWizServer = m_menuServers->addAction(tr("Sign In  to WizNote"));
-    actionWizServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
-    m_menuServers->addAction(tr("Sign In to Enterprise Server"))->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    QAction* actionSelectServer = m_menuServers->addAction(tr("Search Enterprise Server"));
+    actionSelectServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
     m_menuServers->addAction(tr("Help"))->setData(WIZ_SERVERACTION_HELP);
-    m_menuServers->setDefaultAction(actionWizServer);
+    m_menuServers->setDefaultAction(actionSelectServer);
+
+
+    //
+    initSateMachine();
+
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -248,17 +256,15 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
-        m_serverType = m_currentUserServerType;
-        m_lineEditServer->setText(userSettings.enterpriseServerIP());
         ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
+        emit wizBoxUserSelected();
     }
     else if ((m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty()) ||
              m_currentUserServerType == WizServer)
     {
         m_currentUserServerType = WizServer;
-        m_serverType = m_currentUserServerType;
-        m_lineEditServer->setText(tr("Sign In  to WizNote"));
         ApiEntry::setEnterpriseServerIP("");
+        emit wizUserSelected();
     }
 }
 
@@ -266,13 +272,13 @@ void CWizLoginDialog::doAccountVerify()
 {
     CWizUserSettings userSettings(userId());
 
-    ControlWidgetsLocker locker;
-    locker.lockWidget(m_lineEditUserName);
-    locker.lockWidget(m_lineEditPassword);
-    locker.lockWidget(ui->cbx_autologin);
-    locker.lockWidget(ui->cbx_remberPassword);
-    locker.lockWidget(m_buttonLogin);
-    locker.lockWidget(ui->btn_changeToSignin);
+//    ControlWidgetsLocker locker;
+//    locker.lockWidget(m_lineEditUserName);
+//    locker.lockWidget(m_lineEditPassword);
+//    locker.lockWidget(ui->cbx_autologin);
+//    locker.lockWidget(ui->cbx_remberPassword);
+//    locker.lockWidget(m_buttonLogin);
+//    locker.lockWidget(ui->btn_changeToSignin);
 
     //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
     //  如果登录过企业服务则需要登录到企业服务器
@@ -301,18 +307,18 @@ void CWizLoginDialog::doAccountVerify()
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
         Token::setPasswd(password());
-        locker.releaseWidgets();
-        enableLoginControls(false);
+//        locker.releaseWidgets();
         // check server licence and update oem settings
         if (EnterpriseServer == m_serverType && !checkServerLicence(userSettings.serverLicence()))
             return;
         //
+        emit accountCheckStart();
         doOnlineVerify();
         return;
     }
 
     if (updateUserProfile(false) && updateGlobalProfile()) {
-        locker.releaseWidgets();
+//        locker.releaseWidgets();
         QDialog::accept();
     }
 }
@@ -377,9 +383,11 @@ void CWizLoginDialog::enableLoginControls(bool bEnable)
     ui->cbx_remberPassword->setEnabled(bEnable);
     m_buttonLogin->setEnabled(bEnable);
     ui->btn_changeToSignin->setEnabled(bEnable);
+    ui->btn_wizLogIn->setEnabled(bEnable);
+    ui->btn_wizBoxLogIn->setEnabled(bEnable);
 }
 
-void CWizLoginDialog::enableSignInControls(bool bEnable)
+void CWizLoginDialog::enableSignUpControls(bool bEnable)
 {
     m_lineEditNewUserName->setEnabled(bEnable);
     m_lineEditNewPassword->setEnabled(bEnable);
@@ -535,16 +543,24 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
                                                  "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
-    ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: rgba(255, 255, 255, 153); padding-right: 30px; padding-top: 5px}"));
-    ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; padding-left: 15px; padding-bottom: 5px}"));
-    ui->btn_snsLogin->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                            "color: #b1b1b1; padding-right: 15px; padding-bottom: 5px}"));
 
-    QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
-    ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
-                                                "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
+    ui->btn_wizLogIn->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                                     "color: rgba(255, 255, 255, 153); margin-right: 25px; margin-top: 5px}"));
+    QString strWizBoxLogIn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox");
+    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
+    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
+                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
+
+    ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                                "color: #b1b1b1; padding-bottom: 5px}"));
+    ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                                 "color: #b1b1b1; padding-left: 20px; padding-right:20px; padding-bottom: 5px}"));
+    ui->btn_snsLogin->setStyleSheet(QString("QPushButton { border: none; background: none; "
+                                            "color: #b1b1b1; padding-bottom: 5px}"));
+
+//    QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
+//    ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
+//                                                "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
 
     //
     ui->btn_changeToLogin->setVisible(false);
@@ -757,6 +773,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     if (reply->error() != QNetworkReply::NoError)
     {
         qDebug() << "Download oem data failed!";
+        ui->label_passwordError->setText(tr("Can not find server."));
         reply->deleteLater();
         return false;
     }
@@ -768,6 +785,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 
     if (!d.FindMember("licence"))
     {
+        ui->label_passwordError->setText(tr("Can not get licence from server."));
         qDebug() << "Can not find licence from oem";
         return false;
     }
@@ -790,12 +808,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
 {
-    ui->btn_changeToSignin->setVisible(false);
-    ui->btn_changeToLogin->setVisible(true);
-    ui->label_noaccount->setText(tr("Already got account,"));
-    ui->label_passwordError->clear();
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->wgt_newUser->setFocus();
+
 }
 
 void CWizLoginDialog::on_btn_changeToLogin_clicked()
@@ -832,7 +845,6 @@ void CWizLoginDialog::on_btn_login_clicked()
         return;
     }
 
-    enableLoginControls(false);
     doAccountVerify();
 }
 
@@ -852,7 +864,7 @@ void CWizLoginDialog::on_btn_singUp_clicked()
         AsyncApi* api = new AsyncApi(this);
         connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
         api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "");
-        enableSignInControls(false);
+        emit accountCheckStart();
     }
 }
 
@@ -868,7 +880,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
 
-    enableLoginControls(true);
+    emit accountCheckFinished();
     if (strToken.isEmpty())
     {
         int nErrorCode = Token::lastErrorCode();
@@ -978,7 +990,7 @@ void CWizLoginDialog::showServerListMenu()
 void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
 {
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
-    enableSignInControls(true);
+    emit accountCheckFinished();
     if (bFinish) {
         m_lineEditUserName->setText(m_lineEditNewUserName->text());
         m_lineEditPassword->setText(m_lineEditNewPassword->text());
@@ -993,7 +1005,7 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
                 AsyncApi* api = new AsyncApi(this);
                 connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
                 api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "", strCaptchaID, strCaptcha);
-                enableSignInControls(false);
+                emit accountCheckStart();
             }
         }
     }
@@ -1099,6 +1111,137 @@ void CWizLoginDialog::onWizBoxSearchingTimeOut()
     m_searchingDialog->reject();
     closeWizBoxUdpClient();
     QMessageBox::information(0, tr("Info"), tr("There is no server address, please input it."));
+}
+
+void CWizLoginDialog::onWizLogInStateEntered()
+{
+    qDebug() << "CWizLoginDialog::onWizLogInStateEntered()";
+    ui->stackedWidget->setCurrentIndex(0);
+    ui->label_noaccount->setVisible(true);
+    ui->btn_changeToLogin->setVisible(false);
+    ui->btn_changeToSignin->setVisible(true);
+    ui->btn_wizBoxLogIn->setVisible(true);
+    ui->wgt_serveroptioncontainer->setVisible(false);
+    //
+    ui->label_noaccount->setText(tr("No account yet,"));
+    ui->label_passwordError->clear();
+    ui->wgt_usercontainer->setFocus();
+    //
+    ui->btn_wizLogIn->setVisible(false);
+    ui->btn_snsLogin->setVisible(true);
+    ui->btn_fogetpass->setVisible(true);
+    ui->btn_proxysetting->setVisible(true);
+
+    //
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strLoginBottomLineEditor = WizGetSkinResourceFileName(strThemeName, "loginBottomLineEditor");
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
+
+    //
+    m_serverType = WizServer;
+}
+
+void CWizLoginDialog::onWizBoxLogInStateEntered()
+{
+    qDebug() << "CWizLoginDialog::onWizBoxLogInStateEntered()";
+    ui->stackedWidget->setCurrentIndex(0);
+    ui->label_noaccount->setVisible(false);
+    ui->btn_changeToSignin->setVisible(false);
+    ui->btn_wizBoxLogIn->setVisible(false);
+    ui->wgt_serveroptioncontainer->setVisible(true);
+    //
+    ui->label_passwordError->clear();
+    ui->wgt_usercontainer->setFocus();
+    //
+    ui->btn_wizLogIn->setVisible(true);
+    ui->btn_snsLogin->setVisible(false);
+    ui->btn_fogetpass->setVisible(false);
+    ui->btn_proxysetting->setVisible(false);
+    //
+    //
+    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strLoginMidLineEditor = WizGetSkinResourceFileName(strThemeName, "loginMidLineEditor");
+    ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
+
+    m_serverType = EnterpriseServer;
+}
+
+void CWizLoginDialog::onWizSignUpStateEntered()
+{
+    qDebug() << "CWizLoginDialog::onWizSignUpStateEntered()";
+    ui->btn_wizBoxLogIn->setVisible(false);
+    ui->btn_wizLogIn->setVisible(false);
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->btn_changeToLogin->setVisible(true);
+    ui->btn_changeToSignin->setVisible(false);
+    ui->label_noaccount->setVisible(true);
+    //
+    ui->label_noaccount->setText(tr("Already got account,"));
+    ui->label_passwordError->clear();
+    ui->wgt_newUser->setFocus();
+
+    m_serverType = WizServer;
+}
+
+void CWizLoginDialog::onLogInCheckStart()
+{
+    qDebug() << "CWizLoginDialog::onLogInCheckStart()";
+    enableLoginControls(false);
+}
+
+void CWizLoginDialog::onLogInCheckEnd()
+{
+    enableLoginControls(true);
+}
+
+void CWizLoginDialog::onSignUpCheckStart()
+{
+    enableSignUpControls(false);
+}
+
+void CWizLoginDialog::onSignUpCheckEnd()
+{
+    enableSignUpControls(true);
+}
+
+void CWizLoginDialog::initSateMachine()
+{
+    QState* st = new QState();
+    m_stateWizLogIn = new QState(st);
+    m_stateWizBoxLogIn = new QState(st);
+    m_stateWizSignUp = new QState(st);
+    m_stateLogInCheck = new QState(st);
+    m_stateSignUpCheck = new QState(st);
+    st->setInitialState(m_stateWizLogIn);
+    QHistoryState* stHistory = new QHistoryState(st);
+    stHistory->setDefaultState(m_stateWizLogIn);
+
+    connect(m_stateWizLogIn, SIGNAL(entered()), SLOT(onWizLogInStateEntered()));
+    connect(m_stateWizBoxLogIn, SIGNAL(entered()), SLOT(onWizBoxLogInStateEntered()));
+    connect(m_stateWizSignUp, SIGNAL(entered()), SLOT(onWizSignUpStateEntered()));
+    connect(m_stateLogInCheck, SIGNAL(entered()), SLOT(onLogInCheckStart()));
+    connect(m_stateLogInCheck, SIGNAL(exited()), SLOT(onLogInCheckEnd()));
+    connect(m_stateSignUpCheck, SIGNAL(entered()), SLOT(onSignUpCheckStart()));
+    connect(m_stateSignUpCheck, SIGNAL(exited()), SLOT(onSignUpCheckEnd()));
+
+    m_stateWizLogIn->addTransition(this, SIGNAL(wizBoxUserSelected()), m_stateWizBoxLogIn);
+    m_stateWizBoxLogIn->addTransition(this, SIGNAL(wizUserSelected()), m_stateWizLogIn);
+    m_stateWizLogIn->addTransition(ui->btn_wizBoxLogIn, SIGNAL(clicked()), m_stateWizBoxLogIn);
+    m_stateWizBoxLogIn->addTransition(ui->btn_wizLogIn, SIGNAL(clicked()), m_stateWizLogIn);
+    m_stateWizLogIn->addTransition(ui->btn_changeToSignin, SIGNAL(clicked()), m_stateWizSignUp);
+    m_stateWizSignUp->addTransition(ui->btn_changeToLogin, SIGNAL(clicked()), m_stateWizLogIn);
+
+    m_stateWizLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateLogInCheck);
+    m_stateWizBoxLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateLogInCheck);
+    m_stateWizSignUp->addTransition(this, SIGNAL(accountCheckStart()), m_stateSignUpCheck);
+    m_stateSignUpCheck->addTransition(this, SIGNAL(accountCheckFinished()), m_stateWizSignUp);
+    // history state
+    m_stateLogInCheck->addTransition(this, SIGNAL(accountCheckFinished()), stHistory);
+
+    QStateMachine* stMachine = new QStateMachine(this);
+    stMachine->addState(st);
+    stMachine->setInitialState(st);
+    stMachine->start();
 }
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()

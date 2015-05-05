@@ -110,18 +110,16 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_proxysetting">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="cursor">
-             <cursorShape>PointingHandCursor</cursorShape>
-            </property>
+           <widget class="QPushButton" name="btn_wizLogIn">
             <property name="text">
-             <string>Proxy settings</string>
+             <string>LogIn to Wiz</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_wizBoxLogIn">
+            <property name="text">
+             <string/>
             </property>
            </widget>
           </item>
@@ -164,7 +162,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -566,7 +564,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -627,7 +625,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -653,7 +651,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -665,13 +663,6 @@
        </property>
        <property name="text">
         <string>Thirdparty</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_separator3">
-       <property name="text">
-        <string/>
        </property>
       </widget>
      </item>
@@ -692,6 +683,22 @@
       </widget>
      </item>
      <item>
+      <widget class="QPushButton" name="btn_proxysetting">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>Proxy settings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -699,7 +706,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>

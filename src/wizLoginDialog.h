@@ -12,6 +12,8 @@
 #endif
 
 class QLabel;
+class QState;
+class QHistoryState;
 class CWizSkin9GridImage;
 class CWizImageButton;
 class CWizUdpClient;
@@ -46,11 +48,15 @@ public:
     bool updateGlobalProfile();
     bool updateUserProfile(bool bLogined);
     void enableLoginControls(bool bEnable);
-    void enableSignInControls(bool bEnable);
+    void enableSignUpControls(bool bEnable);
 
 signals:
     void snsLoginSuccess(const QString& strUrl);
     void wizBoxSearchRequest(int port, QString message);
+    void wizUserSelected();
+    void wizBoxUserSelected();
+    void accountCheckStart();
+    void accountCheckFinished();
 
 #ifdef Q_OS_MAC
 private:
@@ -93,7 +99,18 @@ private slots:
                           const QString& responseMessage);
     void onWizBoxSearchingTimeOut();
 
+    // state machine
+    void onWizLogInStateEntered();
+    void onWizBoxLogInStateEntered();
+    void onWizSignUpStateEntered();
+    void onLogInCheckStart();
+    void onLogInCheckEnd();
+    void onSignUpCheckStart();
+    void onSignUpCheckEnd();
+
+
 private:
+    void initSateMachine();
     void applyElementStyles(const QString& strLocal);
     bool checkSingMessage();
     QAction* findActionInMenu(const QString& strActName);
@@ -126,6 +143,14 @@ private:
     QLineEdit* m_lineEditNewPassword;
     QLineEdit* m_lineEditRepeatPassword;
     CWizImageButton* m_buttonSignUp;
+
+    //
+    QState* m_stateWizLogIn;
+    QState* m_stateWizBoxLogIn;
+    QState* m_stateWizSignUp;
+    QState* m_stateLogInCheck;
+    QState* m_stateSignUpCheck;
+
 };
 
 #endif // WIZLOGINWIDGET_H
