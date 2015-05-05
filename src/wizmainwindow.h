@@ -350,7 +350,7 @@ public Q_SLOTS:
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
-    void on_promptMessage_request(int nType, const QString& strMsg);
+    void on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg);
 
     void on_TokenAcquired(const QString& strToken);
 

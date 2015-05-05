@@ -18,7 +18,7 @@ void CWizKMSyncEvents::OnSyncProgress(int pos)
     Q_UNUSED(pos);
 }
 
-HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString& strStatus)
+HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressMessageType type, const QString& strStatus)
 {
     Q_UNUSED(type);
     qDebug() << "[Sync]" << strStatus;
@@ -27,9 +27,9 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressStatusType type, const QString
     return 0;
 }
 
-HRESULT CWizKMSyncEvents::OnPromptMessage(const QString& strMessage)
+HRESULT CWizKMSyncEvents::OnPromptMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage)
 {
-    emit promptMessageRequest(strMessage);
+    emit promptMessageRequest(type, strTitle, strMessage);
     return S_OK;
 }
 
@@ -109,7 +109,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     m_pEvents = new CWizKMSyncEvents();
     //
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
-    connect(m_pEvents, SIGNAL(promptMessageRequest(QString)), SIGNAL(promptMessageRequest(QString)));
+    connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
     //
     g_pSyncThread = this;
 }

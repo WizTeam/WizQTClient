@@ -164,8 +164,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&)),
-            SLOT(on_promptMessage_request(int, QString)));
+    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
+            SLOT(on_promptMessage_request(int, QString, QString)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
@@ -1845,17 +1845,17 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
     Q_UNUSED(strMsg);
 }
 
-void MainWindow::on_promptMessage_request(int nType, const QString& strMsg)
+void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg)
 {
     switch (nType) {
     case wizSyncMessageNormal:
-        showTrayIconMessage(tr("New message"), strMsg);
+        showTrayIconMessage(strTitle, strMsg);
         break;
     case wizSyncMessageWarning:
-        CWizMessageBox::warning(0, tr("Info"), strMsg);
+        CWizMessageBox::warning(0, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
         break;
     case wizSyncMeesageError:
-        CWizMessageBox::critical(0, tr("Info"), strMsg);
+        CWizMessageBox::critical(0, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
         break;
     default:
         break;

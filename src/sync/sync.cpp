@@ -1536,6 +1536,8 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         {
             CWizStdStringArray& documents = mapKbGUIDDocuments[it->strKbGUID];
             documents.push_back(it->strDocumentGUID);
+            pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
+                                     it->strMessageText);
         }
     }
     //
@@ -1817,12 +1819,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.Sync())
         {
-            pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
             QString strLastError = pDatabase->GetLastSyncErrorMessage();
             if (!strLastError.isEmpty() && !bBackground)
             {
-                pEvents->OnText(wizhttpstatustypeError, QString("Sync database error, for reason : %1").arg(strLastError));
-                pEvents->OnPromptMessage(strLastError);
+                pEvents->OnText(wizSyncMeesageError, QString("Sync database error, for reason : %1").arg(strLastError));
+                pEvents->OnPromptMessage(wizSyncMeesageError, "", strLastError);
             }
         }
         else
@@ -1895,7 +1897,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.DownloadObjectData())
         {
-            pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
         }
         else
         {
