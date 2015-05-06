@@ -256,6 +256,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
+        m_lineEditServer->setText(userSettings.enterpriseServerIP());
         ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
         emit wizBoxUserSelected();
     }
@@ -286,19 +287,19 @@ void CWizLoginDialog::doAccountVerify()
     {
         if (m_lineEditServer->text().isEmpty())
         {
-            CWizMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+            CWizMessageBox::warning(0, tr("Info"), tr("There is no server address, please input it."));
             return;
         }        
 
         if (userSettings.enterpriseServerIP().isEmpty() && !userSettings.myWizMail().isEmpty())
         {
-            CWizMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
+            CWizMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
             return;
         }     
     }
     else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
     {
-        CWizMessageBox::warning(0, tr("Ino"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
+        CWizMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
         return;
     }
 
@@ -495,7 +496,8 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
     ui->wgt_serveroptioncontainer->setLeftIcon(strIconKey);
     ui->wgt_serveroptioncontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
-    m_lineEditServer->setText(tr("Sign In  to WizNote"));
+    m_lineEditServer->setText(tr("Please search or input your server ip"));
+    m_lineEditServer->setPlaceholderText(tr("Please search or input your server ip"));
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_newUser->setLeftIcon(strIconPerson);
@@ -903,7 +905,14 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
         else
         {
             //QMessageBox::critical(0, tr("Verify account failed"), );
-            ui->label_passwordError->setText(Token::lastErrorMessage());
+            if (errorTokenInvalid == nErrorCode)
+            {
+                ui->label_passwordError->setText(tr("User name or password is not correct!"));
+            }
+            else
+            {
+                ui->label_passwordError->setText(Token::lastErrorMessage());
+            }
             return;
         }
     }
