@@ -19,6 +19,7 @@
 #include <QNetworkConfigurationManager>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
@@ -1848,10 +1849,10 @@ QString getImageHtmlLabelByFile(const QString& strImageFile)
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
 }
 
-QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref)
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgSize, const QString& linkHref)
 {
-    return QString("<div><a href=\"%1\"><img border=\"0\" src=\"file://%2\" /></a></div>")
-            .arg(linkHref).arg(imageFile);
+    return QString("<div><a href=\"%1\"><img border=\"0\" width=\"%2px\" height=\"%3px\" src=\"file://%4\" /></a></div>")
+            .arg(linkHref).arg(imgSize.width()).arg(imgSize.height()).arg(imageFile);
 }
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
@@ -2300,11 +2301,12 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     // get info text and calculate width of image
     const int nMb = 1024 * 1024;
     int nIconMargin = 4;
-    QString sz = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
+    QString fileSize = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
                                                          : QString(QString::number(qCeil(info.size() / (double)1024)) + " KB")) :
                                       QString(QString::number(info.size()) + " B");
-    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + sz;
+    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + fileSize;
 
+    bool isHighPix = WizIsHighPixel();
     QFont font;
     QFontMetrics fm(font);
     int nTextWidth = fm.width(infoText);
@@ -2313,11 +2315,19 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     int nHeight = imageBg.height();
 
     // draw icon and text on image
-    img = QImage(nWidth, nHeight, QImage::Format_RGB888);
-    imageBg.scaledToWidth(nWidth);
+    int nBgWidth = isHighPix ? 2 * nWidth : nWidth;
+    int nBgHeight = isHighPix ? 2 * nHeight : nHeight;
+    img = QImage(nBgWidth, nBgHeight, QImage::Format_RGB888);
+    imageBg.scaledToWidth(nBgWidth);
     QPainter p(&img);
-    p.drawImage(QRect(0, 0, nWidth, nHeight), imageBg);
+    p.drawImage(QRect(0, 0, nBgWidth, nBgHeight), imageBg);
 
+
+    if (isHighPix)
+    {
+        // 如果是高分辨率的屏幕，则放大将坐标放大二倍进行绘制，使用时进行缩放，否则会造成图片模糊。
+        Utils::StyleHelper::initPainterByDevice(&p);
+    }
     QFileIconProvider ip;
     QIcon icon = ip.icon(info);
     QPixmap pixIcon = icon.pixmap(iconSize);
@@ -2326,15 +2336,13 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     //
     QColor cText = QColor("#3c4d81");
     p.setPen(QPen(cText));
-    QRect titleRect(QPoint(nIconMargin * 2 + pixIcon.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
+    QRect titleRect(QPoint(nIconMargin * 2 + iconSize.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
     QString strTitle = fm.elidedText(info.fileName(), Qt::ElideMiddle, titleRect.width() - nIconMargin * 2);
     p.drawText(titleRect, strTitle);
-
     //
-    QRect infoRect(QPoint(nIconMargin * 2 + pixIcon.width(), nHeight / 2),
+    QRect infoRect(QPoint(nIconMargin * 2 + iconSize.width(), nHeight / 2),
                       QPoint(nWidth, nHeight));
     p.drawText(infoRect, infoText);
-
     return true;
 }
 

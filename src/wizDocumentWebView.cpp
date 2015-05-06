@@ -859,7 +859,12 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
     img.save(strDestFile, "PNG");
     QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);
-    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, strLink);
+    QSize szImg = img.size();
+    if (WizIsHighPixel())
+    {
+        szImg.scale(szImg.width() / 2, szImg.height() / 2, Qt::IgnoreAspectRatio);
+    }
+    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, szImg, strLink);
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
