@@ -23,6 +23,7 @@
 
 #include "wizmainwindow.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 
 using namespace Core::Internal;
 
@@ -622,7 +623,7 @@ QString CWizAttachmentListViewItem::detailText(const CWizAttachmentListView* vie
     {
         QString strKbGUID = m_attachment.strKbGUID;
         CString strFileName = view->m_dbMgr.db(strKbGUID).GetAttachmentFileName(m_attachment.strGUID);
-        qint64 size = ::WizGetFileSize(strFileName);
+        qint64 size = Utils::Misc::getFileSize(strFileName);
         CString strSize = 0 == size ? CString(QObject::tr("Un-downloaded")) : WizFormatInt(size);
         CString strType = view->m_iconProvider.type(m_attachment.strName);
         return strSize + "  " + strType;

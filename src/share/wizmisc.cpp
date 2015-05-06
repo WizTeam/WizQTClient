@@ -19,6 +19,7 @@
 #include <QNetworkConfigurationManager>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
 #include "share/wizAnalyzer.h"
@@ -44,12 +45,6 @@ QString WizGetFileSizeHumanReadalbe(const QString& strFileName)
         Q_ASSERT(0);
         return QString();
     }
-}
-
-qint64 WizGetFileSize(const CString& strFileName)
-{
-    QFileInfo info(strFileName);
-    return info.size();
 }
 
 void WizPathAddBackslash(QString& strPath)
@@ -122,62 +117,6 @@ BOOL WizDeleteAllFilesInFolder(const CString& strPath)
     return TRUE;
 }
 
-
-CString WizExtractFilePath(const CString& strFileName)
-{
-    CString str = strFileName;
-    str.Replace('\\', '/');
-    int index = str.lastIndexOf('/');
-    if (-1 == index)
-        return strFileName;
-    //
-    return str.left(index + 1); //include separator
-}
-
-
-CString WizExtractLastPathName(const CString& strFileName)
-{
-    CString strPath = ::WizPathRemoveBackslash2(strFileName);
-    return ::WizExtractFileName(strPath);
-}
-
-QString WizExtractFileName(const QString& strFileName)
-{
-    QString str = strFileName;
-    str.replace('\\', '/');
-    int index = str.lastIndexOf('/');
-    if (-1 == index)
-        return strFileName;
-
-    return strFileName.right(str.length() - index - 1);
-}
-
-QString WizExtractFileTitle(const QString &strFileName)
-{
-    QString strName = WizExtractFileName(strFileName);
-
-    int index = strName.lastIndexOf('.');
-    if (-1 == index)
-        return strName;
-
-    return strName.left(index);
-}
-
-CString WizExtractTitleTemplate(const CString& strFileName)
-{
-    return strFileName;
-}
-
-CString WizExtractFileExt(const CString& strFileName)
-{
-    CString strName = WizExtractFileName(strFileName);
-    //
-    int index = strName.lastIndexOf('.');
-    if (-1 == index)
-        return "";
-    //
-    return strName.right(strName.GetLength() - index);  //include .
-}
 
 void WizEnumFiles(const QString& path, const QString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags)
 {
@@ -272,9 +211,9 @@ void WizGetNextFileName(CString& strFileName)
     if (!PathFileExists(strFileName))
         return;
     //
-    CString strPath = WizExtractFilePath(strFileName);
-    CString strTitle = WizExtractFileTitle(strFileName);
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strPath = Utils::Misc::extractFilePath(strFileName);
+    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     //
     const UINT nMaxLength = MAX_PATH - 10;
@@ -1105,7 +1044,7 @@ bool WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, QString& strText,
         }
         else
         {
-            CString strExt = WizExtractFileExt(CString(strFileName));
+            CString strExt = Utils::Misc::extractFileExt(CString(strFileName));
             strExt.MakeLower();
             if (bForceHTML || strExt.startsWith(".htm"))
             {
@@ -1663,7 +1602,7 @@ void WizGetSkins(QStringList& skins)
         if (!PathFileExists(strSkinFileName))
             continue;
 
-        skins.append(WizExtractLastPathName(path));
+        skins.append(Utils::Misc::extractLastPathName(path));
     }
 }
 
@@ -1943,13 +1882,13 @@ void WizDeleteFolder(const CString& strPath)
     if (dir.isRoot())
         return;
 
-    dir.rmdir(::WizExtractLastPathName(strPath));
+    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
 }
 
 void WizDeleteFile(const CString& strFileName)
 {
-    QDir dir(::WizExtractFilePath(strFileName));
-    dir.remove(WizExtractFileName(strFileName));
+    QDir dir(::Utils::Misc::extractFilePath(strFileName));
+    dir.remove(Utils::Misc::extractFileName(strFileName));
 }
 
 
@@ -1997,8 +1936,8 @@ void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLe
 {
     WizMakeValidFileNameNoPath(strFileName);
     //
-    CString strTitle = WizExtractFileTitle(strFileName);
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     if (strTitle.GetLength() > nMaxTitleLength)
     {
@@ -2013,7 +1952,7 @@ void WizMakeValidFileNameNoPathLimitFullNameLength(CString& strFileName, int nMa
     if (strFileName.GetLength() <= nMaxFullNameLength)
         return;
     //
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     int nMaxTitleLength = nMaxFullNameLength - strExt.GetLength();
     //
@@ -2511,6 +2450,6 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
 {
     QStringList fileTypes;
-    fileTypes << ".doc" << ".docx" << ".xls" << ".xlsx" << ".ppt" << ".pptx";
+    fileTypes << ".xls" << ".xlsx" << ".ppt" << ".pptx";
     return fileTypes.contains(doc.strFileType);
 }

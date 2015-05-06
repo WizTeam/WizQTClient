@@ -20,6 +20,7 @@
 #include "rapidjson/document.h"
 
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "utils/logger.h"
 #include "sync/avatar.h"
 #include "wizObjectDataDownloader.h"
@@ -47,8 +48,8 @@ QString GetResoucePathFromFile(const QString& strHtmlFileName)
     if (!QFile::exists(strHtmlFileName))
         return NULL;
 
-    QString strTitle = WizExtractFileTitle(strHtmlFileName);
-    QString strPath = ::WizExtractFilePath(strHtmlFileName);
+    QString strTitle = Utils::Misc::extractFileTitle(strHtmlFileName);
+    QString strPath = Utils::Misc::extractFilePath(strHtmlFileName);
     QString strPath1 = strPath + strTitle + "_files/";
     QString strPath2 = strPath + strTitle + ".files/";
     if (QFile::exists(strPath1))
@@ -3241,7 +3242,7 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
     if (!LoadFileData(templateZiwFile, ba))
         return false;
 
-    QString strTitle = WizExtractFileTitle(templateZiwFile);
+    QString strTitle = Utils::Misc::extractFileTitle(templateZiwFile);
     newDoc.strTitle = strTitle;
 
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
@@ -3254,7 +3255,7 @@ bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString&
     dataRet.strDocumentGUID = document.strGUID;
 
     CString strMD5 = ::WizMd5FileString(strFileName);
-    if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
+    if (!CreateAttachment(document.strGUID, Utils::Misc::extractFileName(strFileName), strFileName, "", strMD5, dataRet))
         return false;
 
     if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), false))
@@ -3462,7 +3463,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     }
     CString strHtmlFileName = strTempFolder + "uindex.html";
 
-    CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
+    CString strHtmlTempPath = Utils::Misc::extractFilePath(strHtmlFileName);
 
     CString strHtml;
     CString strAbstractFileName = strHtmlTempPath + "wiz_full.html";
@@ -3479,7 +3480,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     htmlConverter.toText(strHtml, abstract.text);
     abstract.text = abstract.text.left(2000);
 
-    CString strResourcePath = WizExtractFilePath(strHtmlFileName) + "index_files/";
+    CString strResourcePath = Utils::Misc::extractFilePath(strHtmlFileName) + "index_files/";
     CWizStdStringArray arrayImageFileName;
     ::WizEnumFiles(strResourcePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
     if (!arrayImageFileName.empty())
@@ -3490,12 +3491,12 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         CWizStdStringArray::const_iterator it;
         for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++) {
             CString strFileName = *it;
-            qint64 size = ::WizGetFileSize(strFileName);
+            qint64 size = Utils::Misc::getFileSize(strFileName);
             if (size > m)
             {
                 //FIXME:此处是特殊处理，解析Html的CSS时候存在问题，目前暂不删除冗余图片。
                 //缩略图需要判断当前图片确实被使用
-                QString strName = WizExtractFileName(strFileName);
+                QString strName = Utils::Misc::extractFileName(strFileName);
                 if (!strHtml.contains(strName))
                     continue;
 

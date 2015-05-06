@@ -48,6 +48,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -2220,7 +2221,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     {
         if (QFile::exists(strResourceList.at(i)))
         {
-            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+            QFile::copy(strResourceList.at(i), strResourcePath + Utils::Misc::extractFileName(strResourceList.at(i)));
         }
     }
 }

@@ -75,7 +75,6 @@ bool WizIsPredefinedLocation(const QString& strLocation);
 QString WizGetAppFileName();
 QString WizLocation2Display(const QString& strLocation);
 
-qint64 WizGetFileSize(const CString& strFileName);
 QString WizGetFileSizeHumanReadalbe(const QString& strFileName);
 
 void WizPathAddBackslash(QString& strPath);
@@ -85,11 +84,6 @@ CString WizPathRemoveBackslash2(const CString& strPath);
 void WizEnsurePathExists(const CString& strPath);
 void WizEnsureFileExists(const QString& strFileName);
 
-CString WizExtractFilePath(const CString& strFileName);
-QString WizExtractFileName(const QString& strFileName);
-QString WizExtractFileTitle(const QString& strFileName);
-CString WizExtractTitleTemplate(const CString& strFileName);
-CString WizExtractFileExt(const CString& strFileName);
 
 #define EF_INCLUDEHIDDEN			0x01
 #define EF_INCLUDESUBDIR			0x02

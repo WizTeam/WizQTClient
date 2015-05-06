@@ -26,6 +26,7 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "wizFileReader.h"
 #include "widgets/wizAdvancedSearchDialog.h"
 #include "wizOEMSettings.h"
@@ -1235,7 +1236,7 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
     if (attachList.isEmpty())
         return false;
 
-    QString strTitle = WizExtractFileName(attachList.first());
+    QString strTitle =Utils::Misc::extractFileName(attachList.first());
     if (!createDocument(data, "<p><br/></p>", strTitle))
         return false;
 
