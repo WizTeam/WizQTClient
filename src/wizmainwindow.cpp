@@ -47,6 +47,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "widgets/wizFramelessWebDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizImageButton.h"
@@ -3021,7 +3022,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 {
     initVariableBeforCreateNote();
 
-    QString strTitle = WizExtractFileTitle(strImageFile);
+    QString strTitle = Utils::Misc::extractFileTitle(strImageFile);
     if (strTitle.isEmpty())
     {
         strTitle = "New note";

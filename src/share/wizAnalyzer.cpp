@@ -15,6 +15,7 @@
 #include "wizdef.h"
 #include "wizmisc.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "sync/apientry.h"
 #include "wizmainwindow.h"
 #include "wizDatabase.h"
@@ -24,7 +25,7 @@ CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
 {
 
-    m_strRecordFileNameNoDelete = ::WizExtractFilePath(strRecordFileName) + WizExtractFileTitle(strRecordFileName) + _T("Ex") + WizExtractFileExt(strRecordFileName);
+    m_strRecordFileNameNoDelete = Utils::Misc::extractFilePath(strRecordFileName) + Utils::Misc::extractFileTitle(strRecordFileName) + _T("Ex") + Utils::Misc::extractFileExt(strRecordFileName);
 	//
 	m_tLastLog = ::WizIniReadDateTimeDef(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), COleDateTime(2015, 1, 1, 0, 0, 0));
 }

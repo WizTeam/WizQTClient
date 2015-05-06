@@ -10,6 +10,7 @@
 #include "mac/wizmachelper.h"
 #include "html/wizhtmlcollector.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 
 CWizFileReader::CWizFileReader(QObject *parent) :
     QThread(parent)
@@ -104,7 +105,7 @@ void CWizFileReader::run()
         else if (htmlExtList.contains(docType, Qt::CaseInsensitive))
         {
             strHtml = loadHtmlFileToHtml(strFile);
-            QString strTitle = WizExtractFileName(strFile);
+            QString strTitle = Utils::Misc::extractFileName(strFile);
             emit htmlFileloaded(strFile, strHtml, strTitle);
 
             continue;
@@ -135,7 +136,7 @@ void CWizFileReader::run()
             emit fileLoadFailed(strFile);
         }
 #endif
-        QString strTitle = WizExtractFileName(strFile);
+        QString strTitle = Utils::Misc::extractFileName(strFile);
 
         if (addAttach)
         {

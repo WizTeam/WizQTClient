@@ -48,6 +48,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -858,7 +859,12 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
     img.save(strDestFile, "PNG");
     QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);
-    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, strLink);
+    QSize szImg = img.size();
+    if (WizIsHighPixel())
+    {
+        szImg.scale(szImg.width() / 2, szImg.height() / 2, Qt::IgnoreAspectRatio);
+    }
+    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, szImg, strLink);
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
@@ -2220,7 +2226,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     {
         if (QFile::exists(strResourceList.at(i)))
         {
-            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+            QFile::copy(strResourceList.at(i), strResourcePath + Utils::Misc::extractFileName(strResourceList.at(i)));
         }
     }
 }

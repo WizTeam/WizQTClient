@@ -1,7 +1,9 @@
 #include "misc.h"
 
 #include <QDateTime>
+#include <QDir>
 #include <QFile>
+#include <QFileInfo>
 #include <QTextStream>
 
 namespace Utils {
@@ -56,6 +58,123 @@ bool Misc::loadUnicodeTextFromFile(const QString& strFileName, QString& strText)
     file.close();
 
     return true;
+}
+
+void Misc::addBackslash(QString& strPath)
+{
+    strPath.replace('\\', '/');
+
+    if (strPath.endsWith('/'))
+        return;
+
+    strPath += '/';
+}
+
+void Misc::removeBackslash(CString& strPath)
+{
+    while (1)
+    {
+        if (!strPath.endsWith('/'))
+            return;
+
+        strPath.remove(strPath.length() - 1, 1);
+    }
+}
+
+CString Misc::addBackslash2(const CString& strPath)
+{
+    CString str(strPath);
+    addBackslash(str);
+    return str;
+}
+CString Misc::removeBackslash2(const CString& strPath)
+{
+    CString str(strPath);
+    removeBackslash(str);
+    return str;
+}
+
+void Misc::ensurePathExists(const CString& path)
+{
+    QDir dir;
+    dir.mkpath(path);
+}
+
+void Misc::ensureFileExists(const QString& strFileName)
+{
+    QFile file(strFileName);
+    if (!file.exists()) {
+        file.open(QIODevice::ReadWrite);
+        file.close();
+    }
+}
+
+CString Misc::extractFilePath(const CString& strFileName)
+{
+    CString str = strFileName;
+    str.Replace('\\', '/');
+    int index = str.lastIndexOf('/');
+    if (-1 == index)
+        return strFileName;
+    //
+    return str.left(index + 1); //include separator
+}
+
+
+CString Misc::extractLastPathName(const CString& strFileName)
+{
+    CString strPath = removeBackslash2(strFileName);
+    return extractFileName(strPath);
+}
+
+QString Misc::extractFileName(const QString& strFileName)
+{
+    QString str = strFileName;
+    str.replace('\\', '/');
+    int index = str.lastIndexOf('/');
+    if (-1 == index)
+        return strFileName;
+
+    return strFileName.right(str.length() - index - 1);
+}
+
+QString Misc::extractFileTitle(const QString &strFileName)
+{
+    QString strName = extractFileName(strFileName);
+
+    int index = strName.lastIndexOf('.');
+    if (-1 == index)
+        return strName;
+
+    return strName.left(index);
+}
+
+CString Misc::extractTitleTemplate(const CString& strFileName)
+{
+    return strFileName;
+}
+
+CString Misc::extractFileExt(const CString& strFileName)
+{
+    CString strName = extractFileName(strFileName);
+    //
+    int index = strName.lastIndexOf('.');
+    if (-1 == index)
+        return "";
+    //
+    return strName.right(strName.GetLength() - index);  //include .
+}
+
+qint64 Misc::getFileSize(const CString& strFileName)
+{
+    QFileInfo info(strFileName);
+    return info.size();
+}
+
+void Misc::deleteFile(const CString& strFileName)
+{
+    QDir dir(extractFilePath(strFileName));
+    dir.remove(extractFileName(strFileName));
 }
 
 

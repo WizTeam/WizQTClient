@@ -21,6 +21,7 @@
 #endif
 
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 
 
 CWizFileIconProvider::CWizFileIconProvider()
@@ -62,7 +63,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFileName) const
         }
     }
 #elif defined (Q_OS_MAC)
-    QString strTempFileName = Utils::PathResolve::tempPath() + "test" + WizExtractFileExt(strFileName);
+    QString strTempFileName = Utils::PathResolve::tempPath() + "test" + Utils::Misc::extractFileExt(strFileName);
     ::WizSaveDataToFile(strTempFileName, QByteArray());
     retIcon = QFileIconProvider::icon(QFileInfo(strTempFileName));
     ::WizDeleteFile(strTempFileName);

@@ -1,6 +1,7 @@
 #include "wizhtmlcollector.h"
 #include "../share/wizhtml2zip.h"
 #include "../share/wizObjectDataDownloader.h"
+#include "utils/misc.h"
 #include "wizmainwindow.h"
 #include <QEventLoop>
 #include <QFile>
@@ -168,10 +169,10 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
         if (strFileName.isEmpty())
             return;
         //
-        QString strName = WizExtractFileName(strFileName);
+        QString strName = Utils::Misc::extractFileName(strFileName);
         if (!IsRegFileName(strName))
         {
-            QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + WizExtractFileExt(strFileName);
+            QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strFileName);
             if (WizCopyFile(strFileName, strNewFileName, FALSE))
             {
                 strFileName = strNewFileName;
@@ -222,9 +223,9 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
 QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
 {
     if (m_bMainPage) {
-        return "index_files/" + WizExtractFileName(strFileName);
+        return "index_files/" + Utils::Misc::extractFileName(strFileName);
     } else {
-        return WizExtractFileName(strFileName);
+        return Utils::Misc::extractFileName(strFileName);
     }
 }
 

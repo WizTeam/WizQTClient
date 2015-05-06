@@ -1,6 +1,7 @@
 #include "wizDocTemplateDialog.h"
 #include "ui_wizDocTemplateDialog.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "share/wizmisc.h"
 #include "share/wizzip.h"
 #include "share/wizsettings.h"
@@ -141,7 +142,7 @@ void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
         if (ziwFile.right(3) == "ziw")
         {
             QString strTitle = ziwFile;
-            strTitle = WizExtractFileTitle(strTitle);
+            strTitle = Utils::Misc::extractFileTitle(strTitle);
             strTitle += languangeCode();
             QString strLocalTitle;
             if (getLocalization(settings, strTitle, strLocalTitle))
@@ -150,7 +151,7 @@ void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
             }
             else
             {
-                strTitle =WizExtractFileTitle(ziwFile);
+                strTitle = Utils::Misc::extractFileTitle(ziwFile);
             }
 
             ziwFile = strDir + ziwFile;
@@ -174,7 +175,7 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
 {
     if (QFile::exists(strFileName))
     {
-        QString strTempFolder = Utils::PathResolve::tempPath() + WizExtractFileTitle(strFileName);
+        QString strTempFolder = Utils::PathResolve::tempPath() + Utils::Misc::extractFileTitle(strFileName);
         if (CWizUnzipFile::extractZip(strFileName, strTempFolder))
         {
             QString strDestPath = Utils::PathResolve::downloadedTemplatesPath();
@@ -202,7 +203,7 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
             CWizSettings settings(strSettingFile);
             QString newSettingsFile = strTempFolder + "/" + "template.ini";
             CWizSettings newSettings(newSettingsFile);
-            QString strTitle = WizExtractFileTitle(strfileName);
+            QString strTitle = Utils::Misc::extractFileTitle(strfileName);
             QStringList suffixList;
             suffixList << "" <<  "_2052" << "_1028";
             foreach (QString strSuffix, suffixList)
@@ -251,7 +252,7 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
     if (pItem)
     {
         QString strZiwFile = pItem->filePath();
-        QString strTempFolder = Utils::PathResolve::tempPath() + WizExtractFileTitle(strZiwFile) + "/";
+        QString strTempFolder = Utils::PathResolve::tempPath() +Utils::Misc::extractFileTitle(strZiwFile) + "/";
         if (CWizUnzipFile::extractZip(strZiwFile, strTempFolder))
         {
             QString indexFile = "file://" + strTempFolder + previewFileName();
@@ -270,7 +271,7 @@ CWizTemplateFileItem::CWizTemplateFileItem(const QString& filePath, QTreeWidgetI
     : QTreeWidgetItem(parent)
     , m_filePath(filePath)
 {
-    setText(0, WizExtractFileTitle(filePath));
+    setText(0, Utils::Misc::extractFileTitle(filePath));
 }
 
 QString CWizTemplateFileItem::filePath() const

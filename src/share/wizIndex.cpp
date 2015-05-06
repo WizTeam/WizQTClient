@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "wizkmcore.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 #include "wizmisc.h"
 
 
@@ -439,7 +440,7 @@ bool CWizIndex::TitleExists(const CString& strLocation, CString strTitle)
 bool CWizIndex::GetNextTitle(const QString& strLocation, QString& strTitle)
 {
 	CString strTemplate(strTitle);
-	WizExtractTitleTemplate(strTemplate);
+    Utils::Misc::extractTitleTemplate(strTemplate);
 	strTitle = strTemplate;
 
     if (!TitleExists(strLocation, strTitle))
