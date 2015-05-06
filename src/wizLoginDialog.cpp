@@ -163,16 +163,15 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
 #endif
 
-    setUsers(strDefaultUserId);
     QAction* actionSelectServer = m_menuServers->addAction(tr("Search Enterprise Server"));
     actionSelectServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
     m_menuServers->addAction(tr("Help"))->setData(WIZ_SERVERACTION_HELP);
     m_menuServers->setDefaultAction(actionSelectServer);
 
-
+    //
+    setUsers(strDefaultUserId);
     //
     initSateMachine();
-
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -554,15 +553,17 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
 
     ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                "color: #b1b1b1; padding-bottom: 5px}"));
+                                                "color: #b1b1b1;margin-left:10px; margin-right:10px;  padding-bottom: 5px}"));
     ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; padding-left: 20px; padding-right:20px; padding-bottom: 5px}"));
+                                                 "color: #b1b1b1; margin-left: 10px; margin-right:10px; padding-bottom: 5px}"));
     ui->btn_snsLogin->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                            "color: #b1b1b1; padding-bottom: 5px}"));
+                                            "color: #b1b1b1; margin-left: 10px; margin-right:10px; padding-bottom: 5px}"));
 
-//    QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
-//    ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
-//                                                "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
+    QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
+    ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
+                                                "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
+    ui->label_separator4->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
+                                                "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
 
     //
     ui->btn_changeToLogin->setVisible(false);
@@ -1137,8 +1138,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
     ui->wgt_usercontainer->setFocus();
     //
     ui->btn_wizLogIn->setVisible(false);
-    ui->btn_snsLogin->setVisible(true);
-    ui->btn_fogetpass->setVisible(true);
+    ui->label_separator4->setVisible(true);
     ui->btn_proxysetting->setVisible(true);
 
     //
@@ -1148,6 +1148,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
 
     //
     m_serverType = WizServer;
+    ApiEntry::setEnterpriseServerIP("");
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1163,9 +1164,10 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     ui->wgt_usercontainer->setFocus();
     //
     ui->btn_wizLogIn->setVisible(true);
-    ui->btn_snsLogin->setVisible(false);
-    ui->btn_fogetpass->setVisible(false);
+//    ui->btn_snsLogin->setVisible(false);
+//    ui->btn_fogetpass->setVisible(false);
     ui->btn_proxysetting->setVisible(false);
+    ui->label_separator4->setVisible(false);
     //
     //
     QString strThemeName = Utils::StyleHelper::themeName();
@@ -1221,7 +1223,14 @@ void CWizLoginDialog::initSateMachine()
     m_stateWizSignUp = new QState(st);
     m_stateLogInCheck = new QState(st);
     m_stateSignUpCheck = new QState(st);
-    st->setInitialState(m_stateWizLogIn);
+    if (EnterpriseServer == m_currentUserServerType)
+    {
+        st->setInitialState(m_stateWizBoxLogIn);
+    }
+    else
+    {
+        st->setInitialState(m_stateWizLogIn);
+    }
     QHistoryState* stHistory = new QHistoryState(st);
     stHistory->setDefaultState(m_stateWizLogIn);
 

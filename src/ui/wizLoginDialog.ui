@@ -667,6 +667,13 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label_separator3">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="btn_fogetpass">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
@@ -679,6 +686,13 @@
        </property>
        <property name="text">
         <string>Reset password</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_separator4">
+       <property name="text">
+        <string/>
        </property>
       </widget>
      </item>
