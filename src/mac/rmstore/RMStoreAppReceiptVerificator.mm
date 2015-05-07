@@ -61,7 +61,7 @@
 {
     if (!_bundleVersion)
     {
-        return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
+        return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleShortVersionString"];
     }
     return _bundleVersion;
 }
@@ -70,10 +70,13 @@
 
 - (BOOL)verifyAppReceipt:(RMAppReceipt*)receipt
 {
+    NSLog(@"get receipt %@", receipt);
     if (!receipt) return NO;
 
+    NSLog(@"compare app bundleIdentifier : %@ and receipt bundleIdentifier : %@", self.bundleIdentifier, receipt.bundleIdentifier);
     if (![receipt.bundleIdentifier isEqualToString:self.bundleIdentifier]) return NO;
 
+    NSLog(@"compare app verion : %@ and receipt version : %@", self.bundleVersion, receipt.appVersion);
     if (![receipt.appVersion isEqualToString:self.bundleVersion]) return NO;
 
     if (![receipt verifyReceiptHash]) return NO;
