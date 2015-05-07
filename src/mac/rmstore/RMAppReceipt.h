@@ -22,7 +22,6 @@
 
 /** Represents the app receipt.
  */
-__attribute__((availability(ios,introduced=7.0)))
 @interface RMAppReceipt : NSObject
 
 /** The app’s bundle identifier. 

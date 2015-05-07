@@ -50,20 +50,20 @@
 
 - (NSString*)bundleIdentifier
 {
-    if (!_bundleIdentifier)
+    if (!self.bundleIdentifier)
     {
         return [[NSBundle mainBundle] bundleIdentifier];
     }
-    return _bundleIdentifier;
+    return self.bundleIdentifier;
 }
 
 - (NSString*)bundleVersion
 {
-    if (!_bundleVersion)
+    if (!self.bundleVersion)
     {
         return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
     }
-    return _bundleVersion;
+    return self.bundleVersion;
 }
 
 #pragma mark - Private

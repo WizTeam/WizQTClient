@@ -19,12 +19,16 @@
 //
 
 #import <Foundation/Foundation.h>
-#import "RMStore.h"
+//#import "RMStore.h"
+
+@protocol RMStoreReceiptVerificator;
+
+@protocol RMStoreReceiptVerificator <NSObject>
+@end
 
 /**
  Reference implementation of an app receipt verificator. If security is a concern you might want to avoid using a verificator whose code is open source.
  */
-__attribute__((availability(ios,introduced=7.0)))
 @interface RMStoreAppReceiptVerificator : NSObject<RMStoreReceiptVerificator>
 
 /**
