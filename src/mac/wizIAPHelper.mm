@@ -2,9 +2,9 @@
 #include "wizmachelper_mm.h"
 #include <QByteArray>
 
-
 #import <Foundation/Foundation.h>
 #import <StoreKit/StoreKit.h>
+#import "rmstore/RMStoreAppReceiptVerificator.h"
 
 #define kProductsLoadedNotification         @"ProductsLoaded"
 #define kProductPurchasedNotification       @"ProductPurchased"
@@ -32,6 +32,7 @@
 - (void)buyProduct:(SKProduct *)product;
 - (void)buyProductIdentifier:(NSString *)productIdentifier;
 - (NSData *)loadLocalReceipt;
+- (void)validteReceiptOnLauch;
 @end
 
 
@@ -46,11 +47,14 @@
         void onProductsLoaded(const QList<CWizIAPProduct>& productList);
         void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
         void purchaseProduct(const QString& strID);
+        void validteReceiptOnLauch();
 
     private:
         IAPHelper* m_helper;
         CWizIAPHelper* m_container;
     };
+
+
 
 
 
@@ -272,6 +276,17 @@
 }
 
 
+- (void)validteReceiptOnLauch
+{
+    RMStoreAppReceiptVerificator* verctor = [[[RMStoreAppReceiptVerificator alloc] init] autorelease];
+    if (![verctor verifyAppReceipt])
+    {
+        NSLog(@"Valide receipt failed");
+        exit(173);
+    }
+}
+
+
 - (void)dealloc
 {
     [_productIdentifiers release];
@@ -327,6 +342,18 @@ void CWizIAPHelperPrivate::purchaseProduct(const QString& strID)
     [m_helper buyProductIdentifier : productIdentifier];
 }
 
+void CWizIAPHelperPrivate::validteReceiptOnLauch()
+{
+    [m_helper validteReceiptOnLauch];
+}
+
+CWizIAPHelper::CWizIAPHelper()
+    : m_helper(new CWizIAPHelperPrivate(this))
+    , m_caller(0)
+{
+
+}
+
 CWizIAPHelper::CWizIAPHelper(CWizIAPCaller* caller)
     : m_helper(new CWizIAPHelperPrivate(this))
     , m_caller(caller)
@@ -361,4 +388,9 @@ void CWizIAPHelper::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 void CWizIAPHelper::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
 {
     m_caller->onPurchaseFinished(ok, receipt, strTransationID);
+}
+
+void CWizIAPHelper::validteReceiptOnLauch()
+{
+    m_helper->validteReceiptOnLauch();
 }

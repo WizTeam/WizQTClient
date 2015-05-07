@@ -24,6 +24,7 @@ public:
 class CWizIAPHelper
 {
 public:
+    CWizIAPHelper();
     CWizIAPHelper(CWizIAPCaller* caller);
     ~CWizIAPHelper();
 
@@ -32,6 +33,7 @@ public:
     void loadLocalReceipt(QByteArray& receipt);
     void onProductsLoaded(const QList<CWizIAPProduct>& productList);
     void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
+    void validteReceiptOnLauch();
 
 protected:
     CWizIAPHelperPrivate* m_helper;
