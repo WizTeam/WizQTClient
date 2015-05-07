@@ -13,8 +13,8 @@ set(wiznote_SOURCES_MAC
     utils/notify.mm
     mac/wizIAPHelper.mm
 #    mac/rmstore/RMStore.m
-    mac/rmstore/RMAppReceipt.m
-    mac/rmstore/RMStoreAppReceiptVerificator.m
+    mac/rmstore/RMAppReceipt.mm
+    mac/rmstore/RMStoreAppReceiptVerificator.mm
 )
 
 set(wiznote_HEADERS_MAC
@@ -382,7 +382,7 @@ if(UNIX)
         # refer to: https://bugreports.qt-project.org/browse/QTBUG-18662
         file(GLOB _qt5_QM ${qt_translations_dir}/qt_*.qm)
 
-        add_executable(WizNote MACOSX_BUNDLE ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
+        add_executable(WizNote MACOSX_BUNDLE  ${wiznote_HEADERS} ${wiznote_HEADERS_MAC} ${wiznote_FORM_HEADERS} ${wiznote_SOURCES_MAC} ${wiznote_SOURCES} ${wiznote_QM} ${_qt5_QM} ${wiznote_RC} ${wiznote_LOGO})
         set_target_properties(WizNote PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
