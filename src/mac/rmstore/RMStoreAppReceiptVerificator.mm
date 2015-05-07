@@ -50,20 +50,20 @@
 
 - (NSString*)bundleIdentifier
 {
-    if (!self.bundleIdentifier)
+    if (!_bundleIdentifier)
     {
         return [[NSBundle mainBundle] bundleIdentifier];
     }
-    return self.bundleIdentifier;
+    return _bundleIdentifier;
 }
 
 - (NSString*)bundleVersion
 {
-    if (!self.bundleVersion)
+    if (!_bundleVersion)
     {
         return [[NSBundle mainBundle] objectForInfoDictionaryKey:@"CFBundleVersion"];
     }
-    return self.bundleVersion;
+    return _bundleVersion;
 }
 
 #pragma mark - Private
@@ -71,13 +71,13 @@
 - (BOOL)verifyAppReceipt:(RMAppReceipt*)receipt
 {
     if (!receipt) return NO;
-    
+
     if (![receipt.bundleIdentifier isEqualToString:self.bundleIdentifier]) return NO;
-    
+
     if (![receipt.appVersion isEqualToString:self.bundleVersion]) return NO;
-    
+
     if (![receipt verifyReceiptHash]) return NO;
-    
+
     return YES;
 }
 
