@@ -8,6 +8,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QNetworkCacheMetaData>
+#include <QNetworkDiskCache>
 
 bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
 {

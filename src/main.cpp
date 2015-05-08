@@ -8,6 +8,8 @@
 #include <QProcess>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QSslConfiguration>
+#include <QNetworkProxy>
 
 #include <sys/stat.h>
 

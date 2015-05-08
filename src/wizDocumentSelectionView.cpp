@@ -62,8 +62,8 @@ CWizDocumentSelectionView::CWizDocumentSelectionView(CWizExplorerApp& app, QWidg
     , m_dbMgr(app.databaseManager())
     , QWidget(parent)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(app.mainWindow());
-    CWizDocumentListView* listView = qobject_cast<CWizDocumentListView*>(mainWindow->DocumentsCtrl());
+//    MainWindow* mainWindow = qobject_cast<MainWindow*>(app.mainWindow());
+//    CWizDocumentListView* listView = qobject_cast<CWizDocumentListView*>(mainWindow->DocumentsCtrl());
     //m_thumbCache = listView->thumbCache();
     //connect(m_thumbCache, SIGNAL(loaded(const WIZABSTRACT&)), SLOT(on_thumbCache_loaded(const WIZABSTRACT&)));
 

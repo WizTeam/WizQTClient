@@ -1,16 +1,5 @@
 #include "wizIAPDialog.h"
 #include "ui_wizIAPDialog.h"
-#if defined Q_OS_MAC
-#include "mac/wizIAPHelper.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
-#include "utils/stylehelper.h"
-#include "share/wizmisc.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "wizmainwindow.h"
-#include "coreplugin/icore.h"
-#include "rapidjson/document.h"
 #include <QMessageBox>
 #include <QWebView>
 #include <QTextBrowser>
@@ -21,6 +10,19 @@
 #include <QEventLoop>
 #include <QUrl>
 #include <QDebug>
+
+#if defined Q_OS_MAC
+#include "mac/wizIAPHelper.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "utils/stylehelper.h"
+#include "share/wizmisc.h"
+#include "share/wizMessageBox.h"
+#include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
+#include "wizmainwindow.h"
+#include "coreplugin/icore.h"
+#include "rapidjson/document.h"
 
 #define WIZ_PRODUCT_MONTH "cn.wiz.wiznote.mac.pro.monthly"
 #define WIZ_PRODUCT_YEAR "cn.wiz.wiznote.mac.pro.yearly"
@@ -369,6 +371,7 @@ void CWizIAPDialog::checkUnfinishedTransation()
     m_iAPhelper->loadLocalReceipt(receipt);
     if (receipt.isEmpty())
     {
+        CWizMessageBox::warning(0, tr("Info"), tr("Can not load receipt!"));
         qDebug() << "local receipt load failed";
         return;
     }

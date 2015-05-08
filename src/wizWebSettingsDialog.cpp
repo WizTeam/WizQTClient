@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QWebFrame>
 #include <QApplication>
+#include <QNetworkReply>
 
 using namespace WizService;
 

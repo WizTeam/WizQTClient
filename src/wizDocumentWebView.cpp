@@ -23,6 +23,7 @@
 #include <QWebElement>
 #include <QUndoStack>
 #include <QDesktopServices>
+#include <QNetworkDiskCache>
 
 #ifdef Q_OS_MAC
 #include <QMacPasteboardMime>

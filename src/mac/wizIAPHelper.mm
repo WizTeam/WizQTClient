@@ -146,6 +146,7 @@
         NSData *receipt = [NSData dataWithContentsOfURL:receiptURL];
         if (!receipt) {
             NSLog(@"can not load receipt!");
+//            exit(173);
             return NULL;
         }
 

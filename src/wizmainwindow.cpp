@@ -31,6 +31,14 @@
 #include <coreplugin/icore.h>
 #include <coreplugin/aboutdialog.h>
 
+#include "wizUpgrade.h"
+#include "wizconsoledialog.h"
+#include "wizCategoryView.h"
+#include "wizDocumentListView.h"
+#include "wizcertmanager.h"
+#include "wizusercipherform.h"
+#include "wizDocumentView.h"
+
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
 #include "wizactions.h"
@@ -316,9 +324,8 @@ void MainWindow::cleanOnQuit()
 }
 
 CWizSearcher*MainWindow::searcher()
-{
-    CWizSearcher* searcher = m_searcher.data();
-    return searcher;
+{    
+    return m_searcher;
 }
 
 void MainWindow::rebuildFTS()
@@ -1464,9 +1471,9 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_search = new CWizSearchWidget(this);
-    m_search->setWidthHint(280);
-    m_toolBar->addWidget(m_search);
+    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget->setWidthHint(280);
+    m_toolBar->addWidget(m_searchWidget);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     #endif
@@ -1519,9 +1526,9 @@ void MainWindow::initToolBar()
     //
 #endif
     //
-    connect(m_search, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-    connect(m_search, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
-    connect(m_search, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
+    connect(m_searchWidget, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    connect(m_searchWidget, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
+    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void MainWindow::initClient()
@@ -1549,8 +1556,8 @@ void MainWindow::initClient()
     layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
-    m_splitter = new CWizSplitter();
-    layout->addWidget(m_splitter);
+    m_splitter = std::make_shared<CWizSplitter>(new CWizSplitter());
+    layout->addWidget(m_splitter.get());
 
     QWidget* documentPanel = new QWidget();
     QHBoxLayout* layoutDocument = new QHBoxLayout();
@@ -1581,7 +1588,7 @@ void MainWindow::initClient()
 
     m_msgListWidget->hide();
     //
-    connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
+    connect(m_splitter.get(), SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
 }
 
 QWidget* MainWindow::createNoteListView()
@@ -1681,6 +1688,16 @@ QWidget*MainWindow::createMessageListView()
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     return m_msgListWidget;
+}
+
+QWidget*MainWindow::client() const
+{
+    return m_doc->client();
+}
+
+void MainWindow::showClient(bool visible) const
+{
+    return m_doc->showClient(visible);
 }
 
 CWizIAPDialog*MainWindow::iapDialog()
@@ -2311,7 +2328,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    m_search->focus();
+    m_searchWidget->focus();
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("search");
@@ -2320,8 +2337,8 @@ void MainWindow::on_actionSearch_triggered()
 void MainWindow::on_actionResetSearch_triggered()
 {
     cancelSearchStatus();
-    m_search->clear();
-    m_search->focus();
+    m_searchWidget->clear();
+    m_searchWidget->focus();
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
 
@@ -2758,6 +2775,31 @@ void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid
     {
         locateDocument(doc);
     }
+}
+
+QWidget*MainWindow::mainWindow()
+{
+    return this;
+}
+
+QObject*MainWindow::object()
+{
+    return this;
+}
+
+CWizCategoryBaseView&MainWindow::category()
+{
+    return *m_category;
+}
+
+CWizUserSettings&MainWindow::userSettings()
+{
+    return *m_settings;
+}
+
+QObject*MainWindow::CategoryCtrl()
+{
+    return m_category;
 }
 
 void MainWindow::on_application_messageAvailable(const QString& strMsg)

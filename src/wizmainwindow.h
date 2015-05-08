@@ -5,18 +5,11 @@
 #include <QMainWindow>
 #include <QPushButton>
 #include <QSystemTrayIcon>
+#include <memory>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
-#include "wizUpgrade.h"
-#include "wizconsoledialog.h"
-#include "wizCategoryView.h"
-#include "wizDocumentListView.h"
-#include "wizcertmanager.h"
-#include "wizusercipherform.h"
-//#include "wizdownloadobjectdatadialog.h"
-#include "wizDocumentView.h"
 #ifndef Q_OS_MAC
 #include "share/wizshadowwindow.h"
 #endif
@@ -52,6 +45,13 @@ class CWizKMSyncThread;
 class CWizUserVerifyDialog;
 
 class CWizMacToolBar;
+class QNetworkDiskCache;
+class CWizConsoleDialog;
+class CWizUpgrade;
+class CWizCategoryView;
+class QListWidgetItem;
+class CWizCategoryViewMessageItem;
+class CWizCategoryViewShortcutItem;
 
 class CWizDocumentWebView;
 
@@ -127,10 +127,10 @@ private:
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
-    QPointer<CWizKMSyncThread> m_sync;
-    QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
-    QPointer<CWizConsoleDialog> m_console;
-    QPointer<CWizUpgrade> m_upgrade;
+    CWizKMSyncThread* m_sync;
+    CWizUserVerifyDialog* m_userVerifyDialog;
+    CWizConsoleDialog* m_console;
+    CWizUpgrade* m_upgrade;
     CWizIAPDialog* m_iapDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
@@ -161,7 +161,7 @@ private:
 #endif
 
     CWizActions* m_actions;
-    QPointer<CWizCategoryView> m_category;
+    CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
     WizService::Internal::MessageListView* m_msgList;
     QWidget* m_noteListWidget;
@@ -170,21 +170,20 @@ private:
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
-    QPointer<CWizSplitter> m_splitter;
-    QPointer<QWidget> m_docListContainer;
-    QPointer<CWizOptionsWidget> m_options;
+    std::shared_ptr<CWizSplitter> m_splitter;
+    QWidget* m_docListContainer;
 
     QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
 
     CWizDocumentViewHistory* m_history;
-    QPointer<CWizAnimateAction> m_animateSync;
+    CWizAnimateAction* m_animateSync;
 
-    QPointer<CWizSearcher> m_searcher;
+    CWizSearcher* m_searcher;
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    QPointer<CWizSearchWidget> m_search;
+    CWizSearchWidget* m_searchWidget;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 
@@ -212,8 +211,8 @@ private:
 public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
-    QWidget* client() const { return m_doc->client(); }
-    void showClient(bool visible) const { return m_doc->showClient(visible); }
+    QWidget* client() const;
+    void showClient(bool visible) const;
 
     CWizActions* actions() const { return m_actions; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
@@ -401,17 +400,17 @@ public Q_SLOTS:
 
 public:
     // WizExplorerApp pointer
-    virtual QWidget* mainWindow() { return this; }
-    virtual QObject* object() { return this; }
+    virtual QWidget* mainWindow();
+    virtual QObject* object();
     virtual CWizDatabaseManager& databaseManager() { return m_dbMgr; }
-    virtual CWizCategoryBaseView& category() { return *m_category; }
-    virtual CWizUserSettings& userSettings() { return *m_settings; }
+    virtual CWizCategoryBaseView& category();
+    virtual CWizUserSettings& userSettings();
 
     //WizExplorerApp API:
     QObject* Window() { return this; }
     Q_PROPERTY(QObject* Window READ Window)
 
-    QObject* CategoryCtrl() { return m_category; }
+    QObject* CategoryCtrl();
     Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
 
     QObject* DocumentsCtrl();
