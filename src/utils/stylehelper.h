@@ -69,6 +69,8 @@ public:
     static void drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected);
     static void drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str);
 
+    static void drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOrign, const QPixmap& pix);
+
     static int listViewSortControlWidgetHeight();
 
     static int listViewItemHeight(int nType);
@@ -102,8 +104,8 @@ public:
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);
     static QRect drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
 
-    static int avatarHeight();
-    static QSize avatarSize();
+    static int avatarHeight(bool bNoScreenFactor = false);
+    static QSize avatarSize(bool bNoScreenFactor = false);
     static QRect drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm);
 
     static int fontHead(QFont& f);

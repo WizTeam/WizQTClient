@@ -8,6 +8,10 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QMouseEvent>
+#include "utils/stylehelper.h"
+#ifdef Q_OS_MAC
+#include "mac/wizmachelper.h"
+#endif
 
 CWizUserInfoWidgetBase::CWizUserInfoWidgetBase(QWidget *parent)
     : QToolButton(parent)
@@ -35,11 +39,15 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     rectIcon.setLeft(rectIcon.left());
     rectIcon.setRight(rectIcon.left() + nAvatarWidth);
 
+#ifdef Q_OS_MAC
+    float factor = qt_mac_get_scalefactor(0);
+    nAvatarWidth *= factor;
+#endif
+    //
     QPixmap pixmap = getAvatar(nAvatarWidth, nAvatarWidth);
-    if (!pixmap.isNull())
-    {
-        p.drawPixmap(rectIcon, pixmap);
-    }
+    Utils::StyleHelper::drawPixmapWithScreenScaleFactor(&p, rectIcon, pixmap);
+
+
     //if (!opt.icon.isNull()) {
     //    opt.icon.paint(&p, rectIcon);
     //}

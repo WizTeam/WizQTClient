@@ -107,7 +107,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setDragDropMode(QAbstractItemView::InternalMove);
 
     // scrollbar
-    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+//    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
 #else
