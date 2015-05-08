@@ -20,6 +20,8 @@
 
 #import <Foundation/Foundation.h>
 
+#ifdef BUILD4APPSTORE
+
 /** Represents the app receipt.
  */
 @interface RMAppReceipt : NSObject
@@ -173,3 +175,6 @@
 - (BOOL)isActiveAutoRenewableSubscriptionForDate:(NSDate*)date;
 
 @end
+
+
+#endif

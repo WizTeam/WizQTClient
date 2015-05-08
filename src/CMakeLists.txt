@@ -472,6 +472,9 @@ link_directories(
     ${CMAKE_BINARY_DIR}/bin
 )
 
+
+
+if(APPSTORE_BUILD)
 target_link_libraries(${PROJECT_NAME}
     quazip
     cryptlib
@@ -486,3 +489,17 @@ target_link_libraries(${PROJECT_NAME}
     ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
     ${CMAKE_DL_LIBS}
 )
+else(APPSTORE_BUILD)
+target_link_libraries(${PROJECT_NAME}
+    quazip
+    cryptlib
+    clucene-core-static
+    clucene-shared-static
+    extensionsystem
+    aggregation
+    coreplugin
+    helloworld
+    markdown
+    ${CMAKE_DL_LIBS}
+)
+endif(APPSTORE_BUILD)

@@ -18,6 +18,8 @@
 //  limitations under the License.
 //
 
+#ifdef BUILD4APPSTORE
+
 #import <Foundation/Foundation.h>
 //#import "RMStore.h"
 
@@ -51,3 +53,5 @@
 - (BOOL)verifyAppReceipt;
 
 @end
+
+#endif

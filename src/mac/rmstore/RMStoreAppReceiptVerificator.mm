@@ -20,9 +20,8 @@
 
 #import "RMStoreAppReceiptVerificator.h"
 #import "RMAppReceipt.h"
-#include <QFile>
-#include <QTextStream>
-#include "mac/wizmachelper_mm.h"
+
+#ifdef BUILD4APPSTORE
 
 @implementation RMStoreAppReceiptVerificator
 
@@ -73,22 +72,13 @@
 
 - (BOOL)verifyAppReceipt:(RMAppReceipt*)receipt
 {
-    NSLog(@"get receipt %@", receipt);
-    QFile file("out.txt");
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return NO;
-
-    QTextStream out(&file);
-    out << "get receipt" << endl;
-
+    NSLog(@"get receipt %@", receipt);    
     if (!receipt) return NO;
 
     NSLog(@"compare app bundleIdentifier : %@ and receipt bundleIdentifier : %@", self.bundleIdentifier, receipt.bundleIdentifier);
-    out << "compare bundleIdentifier receipt : " << WizToQString(receipt.bundleIdentifier) << " app bundleIdentifier : " << WizToQString(self.bundleIdentifier) << endl;
     if (![receipt.bundleIdentifier isEqualToString:self.bundleIdentifier]) return NO;
 
     NSLog(@"compare app verion : %@ and receipt version : %@", self.bundleVersion, receipt.appVersion);
-    out << "compare app verion : : " << WizToQString(self.bundleVersion) << " receipt version : " << WizToQString(receipt.appVersion) << endl;
     if (![receipt.appVersion isEqualToString:self.bundleVersion]) return NO;
 
     if (![receipt verifyReceiptHash]) return NO;
@@ -136,3 +126,5 @@
 //}
 
 @end
+
+#endif
