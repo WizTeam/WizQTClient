@@ -118,8 +118,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
-    m_emailBtn->setVisible(CWizOEMSettings::isHideShareByEmail());
-    m_emailBtn->setEnabled(CWizOEMSettings::isHideShareByEmail());
+    m_emailBtn->setVisible(!CWizOEMSettings::isHideShareByEmail());
+    m_emailBtn->setEnabled(!CWizOEMSettings::isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
@@ -127,8 +127,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
-    m_shareBtn->setVisible(CWizOEMSettings::isHideShare());
-    m_shareBtn->setVisible(CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
@@ -621,8 +621,8 @@ void TitleBar::onTokenAcquired(const QString& strToken)
         comments->load(m_commentsUrl);
     }
 
-    QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
-    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
+    QString kUrl = WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID);
+    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
 
     WizService::AsyncApi* api = new WizService::AsyncApi(this);
     connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
@@ -633,7 +633,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
 {
     WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
     api->disconnect(this);
-    api->deleteLater();
+    api->deleteLater();    
 
     if (nCount) {
         m_commentsBtn->setState(CellButton::Badge);

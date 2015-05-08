@@ -53,10 +53,10 @@
 #define WIZNOTE_API_COMMAND_FEEDBACK        "feedback"
 #define WIZNOTE_API_COMMAND_SUPPORT        "support"
 #define WIZNOTE_API_COMMAND_COMMENT         "comment"
-#define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count"
+#define WIZNOTE_API_COMMAND_COMMENT_COUNT   "comment_count2"
 #define WIZNOTE_API_COMMAND_CHANGELOG        "changelog"
 #define WIZNOTE_API_COMMAND_UPGRADE        "updatev2"
-#define WIZNOTE_API_COMMAND_MAIL_SHARE        "mail_share"
+#define WIZNOTE_API_COMMAND_MAIL_SHARE        "mail_share2"
 
 //#ifdef _M_X64
 //    QString strPlatform = "x64";
@@ -189,18 +189,22 @@ QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strK
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
+    qDebug() << "comment url : " << m_strCommentUrl;
     return strUrl;
 }
 
-QString ApiEntryPrivate::commentCountUrl(const QString& strServer, const QString& strToken,
+QString ApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& strToken,
                                          const QString& strKbGUID, const QString& strGUID)
 {
     if (m_strCommentCountUrl.isEmpty()) {
         requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl, false);
     }
 
+    QString strServer = strKUrl;
+    //NOTE: 新版服务器修改了评论数目获取方法，需要自行将KUrl中的/xmlrpc移除
+    strServer.remove("/xmlrpc");
     QString strUrl(m_strCommentCountUrl);
-    strUrl.replace("{server_host}", strServer);
+    strUrl.replace("{server_url}", strServer);
     strUrl.replace("{token}", strToken);
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
@@ -241,13 +245,17 @@ QString ApiEntryPrivate::analyzerUploadUrl()
     return analyzerUrl;
 }
 
-QString ApiEntryPrivate::mailShareUrl()
+QString ApiEntryPrivate::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
 //    QString strKsHost = syncUrl();
 
     QString strMailShare;
     requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare, false);
-//    strMailShare.replace("{ks_host}", strKsHost);
+    QString strServer = strKUrl;
+    //NOTE: 新版服务器修改了评论数目获取方法，需要自行将KUrl中的/xmlrpc移除
+    strServer.remove("/xmlrpc");
+    strMailShare.replace("{server_url}", strServer);
+    strMailShare.append(strMailInfo);
     return strMailShare;
 }
 
@@ -393,9 +401,9 @@ QString ApiEntry::avatarUploadUrl()
     return Garbo.d->avatarUploadUrl();
 }
 
-QString ApiEntry::mailShare()
+QString ApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
-    return Garbo.d->mailShareUrl();
+    return Garbo.d->mailShareUrl(strKUrl, strMailInfo);
 }
 
 QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
@@ -403,10 +411,10 @@ QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,c
     return Garbo.d->commentUrl(strToken, strKbGUID, strGUID);
 }
 
-QString ApiEntry::commentCountUrl(const QString& strServer, const QString& strToken,
+QString ApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToken,
                                   const QString& strKbGUID, const QString& strGUID)
 {
-    return Garbo.d->commentCountUrl(strServer, strToken, strKbGUID, strGUID);
+    return Garbo.d->commentCountUrl(strKUrl, strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::feedbackUrl()

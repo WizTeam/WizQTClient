@@ -69,15 +69,15 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
 {
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
-    QString strUrl = WizService::ApiEntry::mailShare();
-    QString strExInfo = getExInfo();
-    strUrl += strExInfo;
-
     QString strToken = WizService::Token::token();
     QString strKS = WizService::ApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
-    QUrl url(strKS);
-    strUrl.remove("http://{ks_host}");
-    strUrl = url.scheme() + "://" + url.host() + strUrl;
+    QString strExInfo = getExInfo();
+    QString strUrl = WizService::ApiEntry::mailShareUrl(strKS, strExInfo);
+//    strUrl += strExInfo;
+
+//    QUrl url(strKS);
+//    strUrl.remove("http://{ks_host}");
+//    strUrl = url.scheme() + "://" + url.host() + strUrl;
 
 
 

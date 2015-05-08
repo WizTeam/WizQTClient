@@ -14,9 +14,9 @@ public:
     static QString messageVersionUrl();
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
-    static QString mailShare();
+    static QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
     static QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
-    static QString commentCountUrl(const QString& strServer, const QString& strToken,
+    static QString commentCountUrl(const QString& strKUrl, const QString& strToken,
                                    const QString& strKbGUID, const QString& strGUID);
     static QString feedbackUrl();
     static QString supportUrl();

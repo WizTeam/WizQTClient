@@ -19,11 +19,11 @@ public:
     QString syncUrl();
     QString asServerUrl();
     QString messageVersionUrl();
-    QString mailShareUrl();
+    QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
     QString avatarDownloadUrl(const QString& strUserGUID);
     QString avatarUploadUrl();
     QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
-    QString commentCountUrl(const QString& strServer, const QString& strToken,
+    QString commentCountUrl(const QString& strKUrl, const QString& strToken,
                             const QString& strKbGUID, const QString& strGUID);
     QString feedbackUrl();
     QString supportUrl();
