@@ -112,7 +112,8 @@ public:
 
     static int titleEditorHeight();
     static int editToolBarHeight();
-
+    static int infoBarHeight();
+    static int tagBarHeight();
     //
     static int notifyBarHeight();
 

@@ -734,6 +734,16 @@ int StyleHelper::editToolBarHeight()
     return 30;
 }
 
+int StyleHelper::infoBarHeight()
+{
+    return 32;
+}
+
+int StyleHelper::tagBarHeight()
+{
+    return infoBarHeight();
+}
+
 int StyleHelper::notifyBarHeight()
 {
     return 32;
