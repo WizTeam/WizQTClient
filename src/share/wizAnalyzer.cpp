@@ -256,12 +256,8 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value locale(baLocal.constData(), baLocal.size());
     dd.AddMember("locale", locale, allocator);
 
-    //
-    QRect rec = QApplication::desktop()->screenGeometry();
-    QString strScreenSize = QString::number(rec.width()) + "x" + QString::number(rec.height());
-    QByteArray baScreenSize = strScreenSize.toUtf8();
-    rapidjson::Value screenSize(baScreenSize.constData(), baScreenSize.size());
-    dd.AddMember("screenSize", screenSize, allocator);
+    //  only used for phone
+    dd.AddMember("screenSize", 13, allocator);
 
 #ifdef Q_OS_MAC    
     dd.AddMember("deviceName", "MacOSX", allocator);
@@ -282,20 +278,16 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value isBiz(db->HasBiz());
     dd.AddMember("isBiz", isBiz, allocator);
 
-    QByteArray baUseDays = GetUseDays().toUtf8();
-    rapidjson::Value useDays(baUseDays.constData(), baUseDays.size());
-    dd.AddMember("useDays", useDays, allocator);
+    int nUseDays = GetUseDays().toInt();
+    dd.AddMember("useDays", nUseDays, allocator);
 
-    QByteArray baInstall = GetInstallDays().toUtf8();
-    rapidjson::Value installDays(baInstall.constData(), baInstall.size());
-    dd.AddMember("installDays", installDays, allocator);
+    int nInstallDays = GetInstallDays().toInt();
+    dd.AddMember("installDays", nInstallDays, allocator);
 
     QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
     int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
     dd.AddMember("signUpDays", signUpDays, allocator);
 
-//    root["installDays"] = CString("em"); //WizKMGetInstallDateTime();        //TODO:
-//    root["signUpDays"] = CString("dt"); //db.GetUserSignupDateTime();      //TOOD:
 	//
 
     QMap<QByteArray, QByteArray> firstActionMap;
@@ -393,7 +385,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
     QNetworkReply* reply = net.post(request, buffer.GetString());
 
-    qDebug() << "send analyzer  to url : " << strURL << "  with message : " << buffer.GetString();
+//    qDebug() << "send analyzer  to url : " << strURL << "  with message : " << buffer.GetString();
 
     QEventLoop loop;
     QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -420,8 +412,12 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     int returnCode = d.FindMember("return_code")->value.GetInt();
     if (returnCode != 200)
     {
-        qDebug() << "return code was not 200, error :  " << returnCode << strReply;
+        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << strReply;
         return;
+    }
+    else
+    {
+        qDebug() << "[Analyzer]Upload OK";
     }
 
 //	//
