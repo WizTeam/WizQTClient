@@ -148,7 +148,8 @@ private:
     QState* m_stateWizLogIn;
     QState* m_stateWizBoxLogIn;
     QState* m_stateWizSignUp;
-    QState* m_stateLogInCheck;
+    QState* m_stateWizLogInCheck;
+    QState* m_stateWizBoxLogInCheck;
     QState* m_stateSignUpCheck;
 
 };

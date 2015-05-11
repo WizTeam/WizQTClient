@@ -78,6 +78,9 @@ ApiEntryPrivate::~ApiEntryPrivate()
 
 void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
 {
+    if (strIP == m_strEnterpriseAPIUrl)
+        return;
+
     if (!strIP.isEmpty())
     {
         m_strEnterpriseAPIUrl = QString("http://%1/").arg(strIP);
@@ -86,6 +89,13 @@ void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
     {
         m_strEnterpriseAPIUrl = WIZNOTE_API_SERVER;
     }
+
+    m_strSyncUrl.clear();
+    m_strMessageVersionUrl.clear();
+    m_strAvatarDownloadUrl.clear();
+    m_strAvatarUploadUrl.clear();
+    m_strCommentUrl.clear();
+    m_strCommentCountUrl.clear();
 }
 
 QString ApiEntryPrivate::asServerUrl()

@@ -32,9 +32,13 @@ CWizOEMSettings::~CWizOEMSettings()
 {
 }
 
-void CWizOEMSettings::updateOEMSettings(const QString& strOEMJSONData)
+void CWizOEMSettings::updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData)
 {
-    helper()->updateOEMSettings(strOEMJSONData);
+//    helper()->updateOEMSettings(strOEMJSONData);
+    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
+//    m_settings = new CWizOEMSettingsPrivate(strFile);
+    CWizOEMSettingsPrivate _oemSettings(strFile);
+    _oemSettings.updateOEMSettings(strOEMJSONData);
 }
 
 bool CWizOEMSettings::isHideShareByEmail()

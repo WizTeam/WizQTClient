@@ -768,6 +768,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     QNetworkAccessManager net;
     QString strUrl = ApiEntry::standardCommandUrl("oem", false);    
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    qDebug() << "get oem from server : " << strUrl;
 
     QEventLoop loop;
     QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
@@ -786,6 +787,8 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
+    qDebug() << "oem settings : " << strResult;
+
     if (!d.FindMember("licence"))
     {
         ui->label_passwordError->setText(tr("Can not get licence from server."));
@@ -800,10 +803,11 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     {
         CWizMessageBox::warning(0, tr("Ino"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
         return false;
+    } else
+    {
+        // update oem setttings
+        CWizOEMSettings::updateOEMSettings(userId(), strResult);
     }
-
-    // update oem setttings
-    CWizOEMSettings::updateOEMSettings(strResult);
 
     return true;
 }
@@ -882,6 +886,8 @@ void CWizLoginDialog::onLoginInputChanged()
 void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
+
+    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
 
     emit accountCheckFinished();
     if (strToken.isEmpty())
@@ -1221,7 +1227,8 @@ void CWizLoginDialog::initSateMachine()
     m_stateWizLogIn = new QState(st);
     m_stateWizBoxLogIn = new QState(st);
     m_stateWizSignUp = new QState(st);
-    m_stateLogInCheck = new QState(st);
+    m_stateWizLogInCheck = new QState(st);
+    m_stateWizBoxLogInCheck = new QState(st);
     m_stateSignUpCheck = new QState(st);
     if (EnterpriseServer == m_currentUserServerType)
     {
@@ -1231,17 +1238,19 @@ void CWizLoginDialog::initSateMachine()
     {
         st->setInitialState(m_stateWizLogIn);
     }
-    QHistoryState* stHistory = new QHistoryState(st);
-    stHistory->setDefaultState(m_stateWizLogIn);
+//    QHistoryState* stHistory = new QHistoryState(st);
+//    stHistory->setDefaultState(m_stateWizLogIn);
 
     connect(m_stateWizLogIn, SIGNAL(entered()), SLOT(onWizLogInStateEntered()));
     connect(m_stateWizBoxLogIn, SIGNAL(entered()), SLOT(onWizBoxLogInStateEntered()));
     connect(m_stateWizSignUp, SIGNAL(entered()), SLOT(onWizSignUpStateEntered()));
-    connect(m_stateLogInCheck, SIGNAL(entered()), SLOT(onLogInCheckStart()));
-    connect(m_stateLogInCheck, SIGNAL(exited()), SLOT(onLogInCheckEnd()));
+    connect(m_stateWizLogInCheck, SIGNAL(entered()), SLOT(onLogInCheckStart()));
+    connect(m_stateWizLogInCheck, SIGNAL(exited()), SLOT(onLogInCheckEnd()));
+    connect(m_stateWizBoxLogInCheck, SIGNAL(entered()), SLOT(onLogInCheckStart()));
+    connect(m_stateWizBoxLogInCheck, SIGNAL(exited()), SLOT(onLogInCheckEnd()));
     connect(m_stateSignUpCheck, SIGNAL(entered()), SLOT(onSignUpCheckStart()));
     connect(m_stateSignUpCheck, SIGNAL(exited()), SLOT(onSignUpCheckEnd()));
-
+    // sign up / log in
     m_stateWizLogIn->addTransition(this, SIGNAL(wizBoxUserSelected()), m_stateWizBoxLogIn);
     m_stateWizBoxLogIn->addTransition(this, SIGNAL(wizUserSelected()), m_stateWizLogIn);
     m_stateWizLogIn->addTransition(ui->btn_wizBoxLogIn, SIGNAL(clicked()), m_stateWizBoxLogIn);
@@ -1249,12 +1258,14 @@ void CWizLoginDialog::initSateMachine()
     m_stateWizLogIn->addTransition(ui->btn_changeToSignin, SIGNAL(clicked()), m_stateWizSignUp);
     m_stateWizSignUp->addTransition(ui->btn_changeToLogin, SIGNAL(clicked()), m_stateWizLogIn);
 
-    m_stateWizLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateLogInCheck);
-    m_stateWizBoxLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateLogInCheck);
+    // start check
+    m_stateWizLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateWizLogInCheck);
+    m_stateWizBoxLogIn->addTransition(this, SIGNAL(accountCheckStart()), m_stateWizBoxLogInCheck);
     m_stateWizSignUp->addTransition(this, SIGNAL(accountCheckStart()), m_stateSignUpCheck);
+    // check finished
+    m_stateWizLogInCheck->addTransition(this, SIGNAL(accountCheckFinished()), m_stateWizLogIn);
+    m_stateWizBoxLogInCheck->addTransition(this, SIGNAL(accountCheckFinished()), m_stateWizBoxLogIn);
     m_stateSignUpCheck->addTransition(this, SIGNAL(accountCheckFinished()), m_stateWizSignUp);
-    // history state
-    m_stateLogInCheck->addTransition(this, SIGNAL(accountCheckFinished()), stHistory);
 
     QStateMachine* stMachine = new QStateMachine(this);
     stMachine->addState(st);

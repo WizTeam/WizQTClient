@@ -10,7 +10,7 @@ public:
     CWizOEMSettings();
     ~CWizOEMSettings();
 
-    static void updateOEMSettings(const QString& strOEMJSONData);
+    static void updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData);
 
     static bool isHideShareByEmail();
     static bool isHidePersonalGroup();

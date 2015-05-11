@@ -58,9 +58,6 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionWebService = new QAction(tr("Open web client..."), m_menuMain);
     connect(actionWebService, SIGNAL(triggered()), SLOT(on_action_viewNotesOnWeb_triggered()));
 
-    QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
-    connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
-
     QAction* actionLogout = new QAction(tr("Logout..."), m_menuMain);
     connect(actionLogout, SIGNAL(triggered()), SLOT(on_action_logout_triggered()));
 
@@ -75,7 +72,12 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
-    m_menuMain->addAction(actionMyShare);
+    if (!CWizOEMSettings::isHideMyShare())
+    {
+        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
+        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
+        m_menuMain->addAction(actionMyShare);
+    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //
