@@ -92,6 +92,10 @@ void CWizDocument::deleteToTrash()
 
 void CWizDocument::deleteFromTrash()
 {
+    //NOTE: 在普通文件夹中删除笔记的时候，会把数据存放在deletedguid中，此处需要判断是否已将删除数据同步到
+    //服务器上，如果没有同步，则不能删除deletedguid中的数据
+    bool bWaitUpload = m_db.IsObjectDeleted(m_data.strGUID);
+
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
 
@@ -101,15 +105,19 @@ void CWizDocument::deleteFromTrash()
         ::WizDeleteFile(strFileName);
 
         m_db.DeleteAttachment(*it, true, true);
-        m_db.DeleteDeletedGUID(it->strGUID);
+        if (!bWaitUpload) {
+            m_db.DeleteDeletedGUID(it->strGUID);
+        }
     }
 
     if (!m_db.DeleteDocument(m_data, true)) {
         TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
     }
-    //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
-    m_db.DeleteDeletedGUID(m_data.strGUID);
+    if (!bWaitUpload) {
+        //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
+        m_db.DeleteDeletedGUID(m_data.strGUID);
+    }
 
     CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
     if (PathFileExists(strZipFileName))

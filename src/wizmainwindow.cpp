@@ -1894,7 +1894,7 @@ void MainWindow::on_actionNewNote_triggered()
 
     setFocusForNewNote(data);
     m_doc->web()->setEditorEnable(true);
-    m_tray->showMessage(tr("Info"), tr("New note created"), QSystemTrayIcon::Critical);
+    m_history->addHistory(data);
 }
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()

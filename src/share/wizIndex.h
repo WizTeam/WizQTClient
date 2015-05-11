@@ -357,6 +357,7 @@ public:
     bool GetDeletedGUIDs(WizObjectType eType, CWizDeletedGUIDDataArray& arrayGUID);
 
     bool DeleteDeletedGUID(const CString& strGUID);
+    bool IsObjectDeleted(const CString& strGUID);
     bool GetDeletedGUIDsByTime(const COleDateTime& t, CWizDeletedGUIDDataArray& arrayData);
 
     CString GetDeletedItemsLocation() const { return m_strDeletedItemsLocation; }

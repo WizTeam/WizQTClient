@@ -646,6 +646,7 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
     if (!server.document_getData(strGUID, nPart, docOnServer))
         return false;
 
+    qDebug() << "[Status] Compare note version , local : " << doc.nVersion << " server : " << docOnServer.nVersion;
     return (docOnServer.strGUID == doc.strGUID) && (docOnServer.nVersion > doc.nVersion);
 }
 

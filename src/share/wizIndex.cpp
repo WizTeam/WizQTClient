@@ -1105,7 +1105,16 @@ bool CWizIndex::DeleteDeletedGUID(const CString& strGUID)
         STR2SQL(strGUID).utf16()
         );
 
-	return ExecSQL(strSQL);
+    return ExecSQL(strSQL);
+}
+
+bool CWizIndex::IsObjectDeleted(const CString& strGUID)
+{
+    CString strWhere = CString("DELETED_GUID = '%1'").arg(strGUID);
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DELETED_GUID, FIELD_LIST_WIZ_DELETED_GUID, strWhere);
+    CWizDeletedGUIDDataArray arrayGUID;
+    SQLToDeletedGUIDDataArray(strSQL, arrayGUID);
+    return arrayGUID.size() > 0;
 }
 
 bool CWizIndex::UpdateDocumentsInfoMD5(CWizDocumentDataArray& arrayDocument)
