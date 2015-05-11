@@ -2083,8 +2083,10 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
+        bool bUseCount = pItem->isUnreadButtonUseable() && pItem->isSelected();
+        if (bUseCount)
         {
+            emit itemSelectionChanged();
         }
         else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {

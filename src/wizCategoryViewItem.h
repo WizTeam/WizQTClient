@@ -364,7 +364,7 @@ public:
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
     //
-    bool isExtraButtonUseable();
+    bool isExtraButtonUseable() const;
     bool isUnreadButtonUseable() const;
     void updateUnreadCount();
     QString unreadString() const;
@@ -380,7 +380,6 @@ private:
     WIZBIZDATA m_biz;
     int m_unReadCount;
     QSize m_szUnreadSize;
-    bool m_extraButtonUseable;
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {

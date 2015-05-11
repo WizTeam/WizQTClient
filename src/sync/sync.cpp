@@ -1788,11 +1788,15 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
     // sync analyzer info one time a day
+#ifndef QT_DEBUG
     if (WizIsDayFirstSync(pDatabase))
     {
+#endif
         CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
         analyzer.Post(pDatabase);
+#ifndef QT_DEBUG
     }
+#endif
 
     //
     int groupCount = int(arrayGroup.size());

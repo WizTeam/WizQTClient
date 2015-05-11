@@ -150,7 +150,7 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, 
     QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
-    qDebug() << "request url for command : " << strCommand << " request url : " << strRequestUrl << "  return url : " << strUrl;
+//    qDebug() << "request url for command : " << strCommand << " request url : " << strRequestUrl << "  return url : " << strUrl;
     return strUrl;
 }
 

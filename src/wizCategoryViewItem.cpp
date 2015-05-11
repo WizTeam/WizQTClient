@@ -1105,7 +1105,6 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     : CWizCategoryViewGroupsRootItem(app, biz.bizName)
     , m_biz(biz)
     , m_unReadCount(0)
-    , m_extraButtonUseable(false)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
@@ -1152,7 +1151,6 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
             }
         }
         updateUnreadCount();
-        m_extraButtonUseable = false;
     }
     else
     {
@@ -1209,20 +1207,24 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
 
 QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
 {
-    if (m_extraButtonIcon.isNull())
+    if (m_unReadCount > 0 && isUnreadButtonUseable())
+        return QObject::tr("You have %1 unread notes").arg(m_unReadCount);
+
+    if (m_extraButtonIcon.isNull() || !isExtraButtonUseable())
         return "";
 
     return QObject::tr("Your enterprise services has expired");
 }
 
-bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable()
+bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable() const
 {
-    return m_extraButtonUseable;
+    return !isUnreadButtonUseable();
 }
 
 bool CWizCategoryViewBizGroupRootItem::isUnreadButtonUseable() const
 {
-    return (!isExpanded() && m_unReadCount > 0);
+     bool bUseable = (!isExpanded()) && (m_unReadCount > 0);
+     return bUseable;
 }
 
 void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
@@ -1271,7 +1273,6 @@ void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
     }
 
     view->updateItem(this);
-    m_extraButtonUseable = (m_unReadCount == 0);
 }
 
 QString CWizCategoryViewBizGroupRootItem::unreadString() const
@@ -1609,6 +1610,9 @@ bool CWizCategoryViewGroupRootItem::hitTestUnread()
 
 QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
 {
+    if (m_nUnread > 0)
+        return QObject::tr("You have %1 unread notes").arg(m_nUnread);
+
     if (m_extraButtonIcon.isNull())
         return "";
 
