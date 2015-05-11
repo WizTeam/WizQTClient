@@ -164,10 +164,11 @@ MessageListView::MessageListView(QWidget *parent)
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
                       SLOT(on_action_message_mark_read()));
-    m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
-                      SLOT(on_action_message_delete()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_LOCATE, this,
                       SLOT(on_action_message_locate()));
+    m_menu->addSeparator();
+    m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
+                      SLOT(on_action_message_delete()));
 
     connect(m_menu, SIGNAL(aboutToHide()), SLOT(clearRightMenuFocus()));
 
