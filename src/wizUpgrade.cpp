@@ -46,7 +46,7 @@ void CWizUpgrade::run()
 
 void CWizUpgrade::beginCheck()
 {
-    if (!QMetaObject::invokeMethod(this, "check")) {
+    if (!QMetaObject::invokeMethod(this, "checkUpgrade")) {
         TOLOG("Invoke check of upgrade failed");
     }
 
@@ -58,7 +58,7 @@ QString CWizUpgrade::getWhatsNewUrl()
     return WizService::ApiEntry::changeLogUrl();
 }
 
-void CWizUpgrade::check()
+void CWizUpgrade::checkUpgrade()
 {
     QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server", true);
 

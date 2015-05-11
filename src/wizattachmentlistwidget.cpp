@@ -178,8 +178,8 @@ void CWizAttachmentListView::resetAttachments()
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_dbMgr.db(m_document.strKbGUID).GetDocumentAttachments(m_document.strGUID, arrayAttachment);
 
-    CWizDocumentAttachmentDataArray::const_iterator it;
-    for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
+//    CWizDocumentAttachmentDataArray::const_iterator it;
+    for (auto it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         addItem(newAttachmentItem(*it));
     }
 }

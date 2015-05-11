@@ -302,33 +302,33 @@ signals:
 
 
 protected Q_SLOTS:
-    virtual void on_document_created(const WIZDOCUMENTDATA& doc);
+    virtual void on_document_created(const WIZDOCUMENTDATA& doc) override;
     virtual void on_document_modified(const WIZDOCUMENTDATA& docOld,
-                                      const WIZDOCUMENTDATA& docNew);
-    virtual void on_document_deleted(const WIZDOCUMENTDATA& doc);
-    virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc);
+                                      const WIZDOCUMENTDATA& docNew) override;
+    virtual void on_document_deleted(const WIZDOCUMENTDATA& doc) override;
+    virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc) override;
 
-    virtual void on_folder_created(const QString& strLocation);
-    virtual void on_folder_deleted(const QString& strLocation);
-    virtual void on_folder_positionChanged();
+    virtual void on_folder_created(const QString& strLocation) override;
+    virtual void on_folder_deleted(const QString& strLocation) override;
+    virtual void on_folder_positionChanged() override;
 
-    virtual void on_tag_created(const WIZTAGDATA& tag);
-    virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
-    virtual void on_tag_deleted(const WIZTAGDATA& tag);
-    virtual void on_tags_positionChanged(const QString& strKbGUID);
+    virtual void on_tag_created(const WIZTAGDATA& tag) override;
+    virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) override;
+    virtual void on_tag_deleted(const WIZTAGDATA& tag) override;
+    virtual void on_tags_positionChanged(const QString& strKbGUID) override;
 
-    virtual void on_group_opened(const QString& strKbGUID);
-    virtual void on_group_closed(const QString& strKbGUID);
-    virtual void on_group_renamed(const QString& strKbGUID);
-    virtual void on_group_permissionChanged(const QString& strKbGUID);
-    virtual void on_group_bizChanged(const QString& strKbGUID);
-    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
+    virtual void on_group_opened(const QString& strKbGUID) override;
+    virtual void on_group_closed(const QString& strKbGUID) override;
+    virtual void on_group_renamed(const QString& strKbGUID) override;
+    virtual void on_group_permissionChanged(const QString& strKbGUID) override;
+    virtual void on_group_bizChanged(const QString& strKbGUID) override;
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID) override;
 
-    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
+    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) override;
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) override;
     virtual void createDocumentByHtml(const QString &strFileName, const QString& strHtml,
-                                      const QString& strTitle);
+                                      const QString& strTitle) override;
 
 
 public Q_SLOTS:

@@ -188,10 +188,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_bEditorInited(false)
     , m_bNewNote(false)
     , m_bNewNoteTitleInited(false)
-    , m_noteFrame(0)
+    , m_noteFrame(nullptr)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
-    , m_searchReplaceWidget(0)
+    , m_searchReplaceWidget(nullptr)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);

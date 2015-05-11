@@ -146,7 +146,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bUpdatingSelection(false)
     , m_tray(NULL)
     , m_trayMenu(NULL)
-    , m_mobileFileReceiver(0)
+    , m_mobileFileReceiver(nullptr)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
