@@ -1654,6 +1654,7 @@ QWidget*MainWindow::createMessageListView()
     m_msgListWidget->setLayout(layoutList);
 
     m_msgListUnreadBar = new QWidget(this);
+    m_msgListUnreadBar->setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 0, 0);
     layoutActions->setSpacing(0);
