@@ -16,6 +16,7 @@
 #include "token.h"
 #include "wizkmxmlrpc.h"
 #include "wizdef.h"
+#include "share/wizEventLoop.h"
 
 /*
  * %1: product, use wiz
@@ -135,21 +136,19 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     QNetworkAccessManager* net = new QNetworkAccessManager();
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
 
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (reply->error()) {
-        reply->deleteLater();
-        return 0;
-    }
+    if (loop.timeOut())
+        return NULL;
 
-    QString strRequestedUrl = QString::fromUtf8(reply->readAll().constData());
+    if (loop.error() != QNetworkReply::NoError)
+        return NULL;
 
     reply->deleteLater();
     net->deleteLater();
 
-    return strRequestedUrl;
+    return loop.result();
 }
 
 QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
@@ -367,15 +366,15 @@ class CGarbo
 public:
     CGarbo()
     {
-        d = new ApiEntryPrivate();
+        apiHelper = new ApiEntryPrivate();
     }
 
     ~CGarbo()
     {
-        delete d;
+        delete apiHelper;
     }
 
-    ApiEntryPrivate* d;
+    ApiEntryPrivate* apiHelper;
 
 };
 
@@ -383,125 +382,125 @@ static CGarbo Garbo;
 
 void ApiEntry::setEnterpriseServerIP(const QString& strIP)
 {
-    return Garbo.d->setEnterpriseServerIP(strIP);
+    return Garbo.apiHelper->setEnterpriseServerIP(strIP);
 }
 
 QString ApiEntry::syncUrl()
 {
-    return Garbo.d->syncUrl();
+    return Garbo.apiHelper->syncUrl();
 }
 
 QString ApiEntry::asServerUrl()
 {
-    return Garbo.d->asServerUrl();
+    return Garbo.apiHelper->asServerUrl();
 }
 
 QString ApiEntry::messageVersionUrl()
 {
-    return Garbo.d->messageVersionUrl();
+    return Garbo.apiHelper->messageVersionUrl();
 }
 
 QString ApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
-    return Garbo.d->avatarDownloadUrl(strUserGUID);
+    return Garbo.apiHelper->avatarDownloadUrl(strUserGUID);
 }
 
 QString ApiEntry::avatarUploadUrl()
 {
-    return Garbo.d->avatarUploadUrl();
+    return Garbo.apiHelper->avatarUploadUrl();
 }
 
 QString ApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
-    return Garbo.d->mailShareUrl(strKUrl, strMailInfo);
+    return Garbo.apiHelper->mailShareUrl(strKUrl, strMailInfo);
 }
 
 QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
-    return Garbo.d->commentUrl(strToken, strKbGUID, strGUID);
+    return Garbo.apiHelper->commentUrl(strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToken,
                                   const QString& strKbGUID, const QString& strGUID)
 {
-    return Garbo.d->commentCountUrl(strKUrl, strToken, strKbGUID, strGUID);
+    return Garbo.apiHelper->commentCountUrl(strKUrl, strToken, strKbGUID, strGUID);
 }
 
 QString ApiEntry::feedbackUrl()
 {
-    return Garbo.d->feedbackUrl();
+    return Garbo.apiHelper->feedbackUrl();
 }
 
 QString ApiEntry::supportUrl()
 {
-    return Garbo.d->supportUrl();
+    return Garbo.apiHelper->supportUrl();
 }
 
 QString ApiEntry::changeLogUrl()
 {
-    return Garbo.d->changeLogUrl();
+    return Garbo.apiHelper->changeLogUrl();
 }
 
 QString ApiEntry::upgradeUrl()
 {
-    return Garbo.d->upgradeUrl();
+    return Garbo.apiHelper->upgradeUrl();
 }
 
 QString ApiEntry::analyzerUploadUrl()
 {
-    return Garbo.d->analyzerUploadUrl();
+    return Garbo.apiHelper->analyzerUploadUrl();
 }
 
 QString ApiEntry::accountInfoUrl(const QString& strToken)
 {
-    return Garbo.d->accountInfoUrl(strToken);
+    return Garbo.apiHelper->accountInfoUrl(strToken);
 }
 
 QString ApiEntry::createGroupUrl(const QString& strToken)
 {
-    return Garbo.d->createGroupUrl(strToken);
+    return Garbo.apiHelper->createGroupUrl(strToken);
 }
 
 QString ApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeight)
 {
-    QString strUrl = Garbo.d->asServerUrl();
+    QString strUrl = Garbo.apiHelper->asServerUrl();
     strUrl += QString("/a/captcha/%1?width=%2&height=%3").arg(strCaptchaID).arg(nWidth).arg(nHeight);
     return strUrl;
 }
 
 QString ApiEntry::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
-    return Garbo.d->standardCommandUrl(strCommand, bUseWizServer);
+    return Garbo.apiHelper->standardCommandUrl(strCommand, bUseWizServer);
 }
 
 QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
-    return Garbo.d->standardCommandUrl(strCommand, strToken, bUseWizServer);
+    return Garbo.apiHelper->standardCommandUrl(strCommand, strToken, bUseWizServer);
 }
 QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
-    return Garbo.d->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
+    return Garbo.apiHelper->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
 }
 
 QString ApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
-    return Garbo.d->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
+    return Garbo.apiHelper->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
 }
 
 
 QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
-    return Garbo.d->groupAttributeUrl(strToken, strKbGUID);
+    return Garbo.apiHelper->groupAttributeUrl(strToken, strKbGUID);
 }
 
 QString ApiEntry::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
 {
-    return Garbo.d->groupUsersUrl(strToken, strBizGUID, strkbGUID);
+    return Garbo.apiHelper->groupUsersUrl(strToken, strBizGUID, strkbGUID);
 }
 
 QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
-    return Garbo.d->kUrlFromGuid(strToken, strKbGUID);
+    return Garbo.apiHelper->kUrlFromGuid(strToken, strKbGUID);
 }
 
 QString ApiEntry::appstoreParam(bool useAndSymbol)

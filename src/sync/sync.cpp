@@ -9,6 +9,7 @@
 
 #include  "share/wizSyncableDatabase.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizEventLoop.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
@@ -1681,15 +1682,17 @@ QString downloadFromUrl(const QString& strUrl)
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
-    QEventLoop loop;
-    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
+
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (reply->error()) {
+    if (loop.timeOut())
         return NULL;
-    }
 
-    return QString::fromUtf8(reply->readAll().constData());
+    if (loop.error() != QNetworkReply::NoError)
+        return NULL;
+
+    return loop.result();
 }
 
 void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
@@ -1697,8 +1700,8 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 {
     QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
     if (!strt.isEmpty()) {
-        if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
-            if (background) {
+        if (background) {
+            if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
                 return;
             }
         }

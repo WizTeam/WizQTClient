@@ -102,7 +102,7 @@ bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
     QString strFileName = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
     if (QFile::exists(strFileName)) {
         ::WizDeleteFile(strFileName);
-        qDebug() << "AvatarHost]avatar file exists , remove it :" << !QFile::exists(strFileName);
+        qDebug() << "[AvatarHost]avatar file exists , remove it :" << !QFile::exists(strFileName);
     }
     QImage img = QImage::fromData(bytes);
 

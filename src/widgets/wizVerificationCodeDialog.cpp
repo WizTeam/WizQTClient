@@ -1,14 +1,14 @@
 #include "wizVerificationCodeDialog.h"
 #include "ui_wizVerificationCodeDialog.h"
-#include "share/wizmisc.h"
-#include "utils/pathresolve.h"
 #include <QIcon>
 #include <QPixmap>
 #include <QEventLoop>
-#include <QMessageBox>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
+#include "utils/pathresolve.h"
+#include "share/wizmisc.h"
+#include "share/wizMessageBox.h"
 
 CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent) :
     QDialog(parent),
@@ -59,7 +59,7 @@ bool CWizVerificationCodeDialog::downloadImage(QPixmap& pix)
     pix.loadFromData(byData);
     if (pix.isNull() && !byData.isEmpty())
     {
-        QMessageBox::information(this->parentWidget(), tr("Inof"), tr("Too many request, please wait for one minute."));
+        CWizMessageBox::warning(parentWidget(), tr("Info"), tr("Too many request, please wait for one minute."));
         return false;
     }
     return true;

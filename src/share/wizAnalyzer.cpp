@@ -20,6 +20,7 @@
 #include "wizmainwindow.h"
 #include "wizDatabase.h"
 #include "wizDatabaseManager.h"
+#include "share/wizEventLoop.h"
 
 CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
@@ -383,36 +384,31 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     QNetworkRequest request;
     request.setUrl(strURL);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
-    QNetworkReply* reply = net.post(request, buffer.GetString());
+    QNetworkReply* reply = net.post(request, buffer.GetString());    
 
-//    qDebug() << "send analyzer  to url : " << strURL << "  with message : " << buffer.GetString();
-
-    QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
+    reply->deleteLater();
 
-    if (reply->error() != QNetworkReply::NoError) {
-        qDebug() << "setdata error;" ;
-        reply->deleteLater();
+    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "[Analyzer]Upload failed!";
         return;
     }
 
-    QString strReply = QString::fromUtf8(reply->readAll());
-    reply->deleteLater();
-
     rapidjson::Document d;
-    d.Parse<0>(strReply.toUtf8().constData());
+    d.Parse<0>(loop.result().toUtf8().constData());
 
     if (!d.HasMember("return_code"))
     {
-        qDebug() << "can not get return code ";
+        qDebug() << "[Analyzer]Can not get return code ";
         return;
     }
 
     int returnCode = d.FindMember("return_code")->value.GetInt();
     if (returnCode != 200)
     {
-        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << strReply;
+        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
         return;
     }
     else
@@ -421,7 +417,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     }
 
 //	//
-//    ::DeleteFile(m_strRecordFileName);	//remove old file
+    ::DeleteFile(m_strRecordFileName);	//remove old file
 }
 
 CWizAnalyzer& CWizAnalyzer::GetAnalyzer()

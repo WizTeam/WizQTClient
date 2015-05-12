@@ -172,6 +172,7 @@ set(wiznote_SOURCES
     share/wizMessageBox.cpp
     wizOEMSettings.cpp
     core/wizTagBar.cpp
+    share/wizEventLoop.cpp
 )
 
 set(wiznote_HEADERS
@@ -333,6 +334,7 @@ set(wiznote_HEADERS
     wizOEMSettings.h
     wizOEMSettings_p.h
     core/wizTagBar.h
+    share/wizEventLoop.h
 )
 
 set(wiznote_FORMS

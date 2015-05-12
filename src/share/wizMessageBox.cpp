@@ -137,7 +137,6 @@ QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QS
     msg.setText(text);
     QList<QMessageBox::StandardButton> buttonList;
     buttonsFromStandardButtons(buttons, buttonList);
-    qDebug() << "button list from buttons : " << buttonList;
     foreach (QMessageBox::StandardButton button, buttonList) {
         QPushButton* pBtn = msg.addButton(button);
         pBtn->setText(buttonTextFromStandardButton(button));
