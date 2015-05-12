@@ -110,16 +110,9 @@
            </spacer>
           </item>
           <item>
-           <widget class="QPushButton" name="btn_wizLogIn">
+           <widget class="QPushButton" name="btn_selectServer">
             <property name="text">
-             <string>LogIn to Wiz</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="btn_wizBoxLogIn">
-            <property name="text">
-             <string/>
+             <string>Switch Server</string>
             </property>
            </widget>
           </item>

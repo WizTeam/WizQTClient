@@ -44,6 +44,7 @@ using namespace WizService;
 
 #define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"
 #define WIZ_SERVERACTION_CONNECT_BIZSERVER        "CONNECT_TO_BIZSERVER"
+#define WIZ_SERVERACTION_SEARCH_SERVER          "SEARCH_WIZBOXSERVER"
 #define WIZ_SERVERACTION_HELP               "SERVERHELP"
 
 
@@ -146,7 +147,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(m_lineEditPassword, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(m_lineEditUserName, SIGNAL(textChanged(QString)), SLOT(onLoginInputChanged()));
     connect(ui->wgt_usercontainer, SIGNAL(rightIconClicked()), SLOT(showUserListMenu()));
-    connect(ui->wgt_serveroptioncontainer, SIGNAL(rightIconClicked()), SLOT(showServerListMenu()));
+    connect(ui->btn_selectServer, SIGNAL(clicked()), SLOT(showServerListMenu()));
     connect(m_lineEditUserName, SIGNAL(textEdited(QString)), SLOT(onUserNameEdited(QString)));
     //
 
@@ -163,10 +164,19 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
 #endif
 
-    QAction* actionSelectServer = m_menuServers->addAction(tr("Search Enterprise Server"));
-    actionSelectServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
-    m_menuServers->addAction(tr("Help"))->setData(WIZ_SERVERACTION_HELP);
+    QAction* actionSelectServer = m_menuServers->addAction(tr("Sign in to WizNote Server"));
+    actionSelectServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
+    m_menuServers->addAction(tr("Sign in to Enterprise Private Server (WizBox)"))->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    m_menuServers->addSeparator();
+    m_menuServers->addAction(tr("Find WizBox..."))->setData(WIZ_SERVERACTION_SEARCH_SERVER);
+    m_menuServers->addSeparator();
+    m_menuServers->addAction(tr("About WizBox..."))->setData(WIZ_SERVERACTION_HELP);
     m_menuServers->setDefaultAction(actionSelectServer);
+
+    for (auto actionItem : m_menuServers->actions())
+    {
+        actionItem->setCheckable(true);
+    }
 
     //
     setUsers(strDefaultUserId);
@@ -257,14 +267,14 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
         ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
-        emit wizBoxUserSelected();
+        emit wizBoxServerSelected();
     }
     else if ((m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty()) ||
              m_currentUserServerType == WizServer)
     {
         m_currentUserServerType = WizServer;
         ApiEntry::setEnterpriseServerIP("");
-        emit wizUserSelected();
+        emit wizServerSelected();
     }
 }
 
@@ -383,8 +393,7 @@ void CWizLoginDialog::enableLoginControls(bool bEnable)
     ui->cbx_remberPassword->setEnabled(bEnable);
     m_buttonLogin->setEnabled(bEnable);
     ui->btn_changeToSignin->setEnabled(bEnable);
-    ui->btn_wizLogIn->setEnabled(bEnable);
-    ui->btn_wizBoxLogIn->setEnabled(bEnable);
+    ui->btn_selectServer->setEnabled(bEnable);
 }
 
 void CWizLoginDialog::enableSignUpControls(bool bEnable)
@@ -494,7 +503,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 
     ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
     ui->wgt_serveroptioncontainer->setLeftIcon(strIconKey);
-    ui->wgt_serveroptioncontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
+//    ui->wgt_serveroptioncontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
     m_lineEditServer->setText(tr("Please search or input your server ip"));
     m_lineEditServer->setPlaceholderText(tr("Please search or input your server ip"));
 
@@ -545,12 +554,12 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                  "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
 
-    ui->btn_wizLogIn->setStyleSheet(QString("QPushButton { border: none; background: none; "
+    ui->btn_selectServer->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                      "color: rgba(255, 255, 255, 153); margin-right: 25px; margin-top: 5px}"));
-    QString strWizBoxLogIn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox");
-    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
-    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
-                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
+//    QString strWizBoxLogIn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox");
+//    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
+//    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
+//                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
 
     ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
                                                 "color: #b1b1b1;margin-left:10px; margin-right:10px;  padding-bottom: 5px}"));
@@ -576,11 +585,11 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
 
-    m_menuServers->setFixedWidth(ui->wgt_serveroptioncontainer->width());
-    m_menuServers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
-                                 "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
-                                 "QMenu::item:selected {background-color: #E7F5FF; }"
-                                 "QMenu::item:default {background-color: #E7F5FF; }");
+//    m_menuServers->setFixedWidth(ui->wgt_serveroptioncontainer->width());
+//    m_menuServers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
+//                                 "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
+//                                 "QMenu::item:selected {background-color: #E7F5FF; }"
+//                                 "QMenu::item:default {background-color: #E7F5FF; }");
 }
 
 bool CWizLoginDialog::checkSingMessage()
@@ -639,7 +648,7 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
     return false;
 }
 
-void CWizLoginDialog::findWizBoxServer()
+void CWizLoginDialog::searchWizBoxServer()
 {
     qDebug() << "start findWizBoxServer ";
     startWizBoxUdpClient();        
@@ -949,36 +958,57 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 {
     if (action)
     {
+        QList<QAction*> actionsList = m_menuServers->actions();
+        std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
+            item->setChecked(false);
+        });
+
         QString strActionData = action->data().toString();
         if (strActionData == WIZ_SERVERACTION_CONNECT_WIZSERVER)
         {
-            if (EnterpriseServer == m_currentUserServerType)
-            {
-                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote,"
-                                                       " it was signed in to enterprise server."));
-                return;
-            }
-            m_lineEditServer->setText(tr("Sign in to WizNote server"));
+//            if (EnterpriseServer == m_currentUserServerType)
+//            {
+//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote,"
+//                                                       " it was signed in to enterprise server."));
+//                return;
+//            }
             m_serverType = WizServer;
+            emit wizServerSelected();
+            action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_CONNECT_BIZSERVER)
         {
-            if (WizServer == m_currentUserServerType)
-            {
-                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
-                                                       " it was signed in to WizNote."));
-                return;
-            }
-            CWizUserSettings userSettings(userId());
-            qDebug() << "server type : " << userSettings.serverType();
-            qDebug() << "my wiz ; " << userSettings.myWizMail();
-            if (EnterpriseServer != userSettings.serverType() && !userSettings.myWizMail().isEmpty())
-            {
-                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
-                                                       " it was signed in to WizNote."));
-                return;
-            }
-            findWizBoxServer();
+//            if (WizServer == m_currentUserServerType)
+//            {
+//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
+//                                                       " it was signed in to WizNote."));
+//                return;
+//            }
+//            CWizUserSettings userSettings(userId());
+//            qDebug() << "server type : " << userSettings.serverType();
+//            qDebug() << "my wiz ; " << userSettings.myWizMail();
+//            if (EnterpriseServer != userSettings.serverType() && !userSettings.myWizMail().isEmpty())
+//            {
+//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
+//                                                       " it was signed in to WizNote."));
+//                return;
+//            }
+            m_serverType = EnterpriseServer;
+            emit wizBoxServerSelected();
+            searchWizBoxServer();
+            action->setChecked(true);
+        }
+        else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
+        {
+            m_serverType = EnterpriseServer;
+            emit wizBoxServerSelected();
+            searchWizBoxServer();
+            std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
+                if (item->data().toString() == WIZ_SERVERACTION_CONNECT_BIZSERVER)
+                {
+                    item->setChecked(true);
+                }
+            });
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
@@ -998,7 +1028,7 @@ void CWizLoginDialog::showUserListMenu()
 
 void CWizLoginDialog::showServerListMenu()
 {
-    QPoint point = ui->wgt_serveroptioncontainer->mapToGlobal(QPoint(0, ui->wgt_serveroptioncontainer->height()));
+    QPoint point = ui->btn_selectServer->mapToGlobal(QPoint(0, ui->btn_selectServer->height()));
 
     m_menuServers->popup(point);
 }
@@ -1136,14 +1166,13 @@ void CWizLoginDialog::onWizLogInStateEntered()
     ui->label_noaccount->setVisible(true);
     ui->btn_changeToLogin->setVisible(false);
     ui->btn_changeToSignin->setVisible(true);
-    ui->btn_wizBoxLogIn->setVisible(true);
     ui->wgt_serveroptioncontainer->setVisible(false);
+    ui->btn_selectServer->setVisible(true);
     //
     ui->label_noaccount->setText(tr("No account yet,"));
     ui->label_passwordError->clear();
     ui->wgt_usercontainer->setFocus();
     //
-    ui->btn_wizLogIn->setVisible(false);
     ui->label_separator4->setVisible(true);
     ui->btn_proxysetting->setVisible(true);
 
@@ -1163,13 +1192,11 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     ui->stackedWidget->setCurrentIndex(0);
     ui->label_noaccount->setVisible(false);
     ui->btn_changeToSignin->setVisible(false);
-    ui->btn_wizBoxLogIn->setVisible(false);
     ui->wgt_serveroptioncontainer->setVisible(true);
     //
     ui->label_passwordError->clear();
     ui->wgt_usercontainer->setFocus();
     //
-    ui->btn_wizLogIn->setVisible(true);
 //    ui->btn_snsLogin->setVisible(false);
 //    ui->btn_fogetpass->setVisible(false);
     ui->btn_proxysetting->setVisible(false);
@@ -1186,8 +1213,7 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
 void CWizLoginDialog::onWizSignUpStateEntered()
 {
     qDebug() << "CWizLoginDialog::onWizSignUpStateEntered()";
-    ui->btn_wizBoxLogIn->setVisible(false);
-    ui->btn_wizLogIn->setVisible(false);
+    ui->btn_selectServer->setVisible(false);
     ui->stackedWidget->setCurrentIndex(1);
     ui->btn_changeToLogin->setVisible(true);
     ui->btn_changeToSignin->setVisible(false);
@@ -1251,10 +1277,10 @@ void CWizLoginDialog::initSateMachine()
     connect(m_stateSignUpCheck, SIGNAL(entered()), SLOT(onSignUpCheckStart()));
     connect(m_stateSignUpCheck, SIGNAL(exited()), SLOT(onSignUpCheckEnd()));
     // sign up / log in
-    m_stateWizLogIn->addTransition(this, SIGNAL(wizBoxUserSelected()), m_stateWizBoxLogIn);
-    m_stateWizBoxLogIn->addTransition(this, SIGNAL(wizUserSelected()), m_stateWizLogIn);
-    m_stateWizLogIn->addTransition(ui->btn_wizBoxLogIn, SIGNAL(clicked()), m_stateWizBoxLogIn);
-    m_stateWizBoxLogIn->addTransition(ui->btn_wizLogIn, SIGNAL(clicked()), m_stateWizLogIn);
+    m_stateWizLogIn->addTransition(this, SIGNAL(wizBoxServerSelected()), m_stateWizBoxLogIn);
+    m_stateWizBoxLogIn->addTransition(this, SIGNAL(wizServerSelected()), m_stateWizLogIn);
+//    m_stateWizLogIn->addTransition(ui->btn_wizBoxLogIn, SIGNAL(clicked()), m_stateWizBoxLogIn);
+//    m_stateWizBoxLogIn->addTransition(ui->btn_wizLogIn, SIGNAL(clicked()), m_stateWizLogIn);
     m_stateWizLogIn->addTransition(ui->btn_changeToSignin, SIGNAL(clicked()), m_stateWizSignUp);
     m_stateWizSignUp->addTransition(ui->btn_changeToLogin, SIGNAL(clicked()), m_stateWizLogIn);
 

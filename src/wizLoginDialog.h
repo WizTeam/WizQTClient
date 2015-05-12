@@ -53,8 +53,8 @@ public:
 signals:
     void snsLoginSuccess(const QString& strUrl);
     void wizBoxSearchRequest(int port, QString message);
-    void wizUserSelected();
-    void wizBoxUserSelected();
+    void wizServerSelected();
+    void wizBoxServerSelected();
     void accountCheckStart();
     void accountCheckFinished();
 
@@ -116,7 +116,7 @@ private:
     QAction* findActionInMenu(const QString& strActName);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
-    void findWizBoxServer();
+    void searchWizBoxServer();
     void initSearchingDialog();
     void showSearchingDialog();
     void startWizBoxUdpClient();
