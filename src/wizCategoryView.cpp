@@ -109,7 +109,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setDragDropMode(QAbstractItemView::InternalMove);
 
     // scrollbar        ScrollPerPixel could cause drag and drop problem
-    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+//    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
 #else
@@ -2978,7 +2978,7 @@ QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pIte
     if (!pItem)
         return QString();
 
-    QString str = pItem->location() + ": " + QString::number(nStartPos);
+    QString str ="\"" + pItem->location() + "\": " + QString::number(nStartPos);
     nStartPos ++;
 
     for (int i = 0; i < pItem->childCount(); i++)
