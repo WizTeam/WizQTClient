@@ -497,6 +497,11 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
 
 }
 
+void MainWindow::on_quickSync_request(const QString& strKbGUID)
+{
+    CWizKMSyncThread::quickSyncKb(strKbGUID);
+}
+
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
 {
     //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
@@ -1626,6 +1631,7 @@ QWidget* MainWindow::createNoteListView()
     m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
     connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
+    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
 
 
     //sortBtn->setStyleSheet("padding-top:10px;");
@@ -1761,6 +1767,7 @@ void MainWindow::init()
 {
     connect(m_category, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
     connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
+    connect(m_category, SIGNAL(categoryItemPositionChanged(QString)), SLOT(on_quickSync_request(QString)));
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));

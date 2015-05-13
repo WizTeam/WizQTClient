@@ -190,6 +190,7 @@ Q_SIGNALS:
     void lastDocumentDeleted();
     void documentsSelectionChanged();
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
+    void changeUploadRequest(const QString& strKbGUID);
 
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);

@@ -3,6 +3,7 @@
 #include <QPixmapCache>
 #include <QApplication>
 #include <QMenu>
+#include <QSet>
 
 #include "share/wizDatabaseManager.h"
 #include "wizCategoryView.h"
@@ -979,8 +980,10 @@ void CWizDocumentListView::on_action_deleteDocument()
     if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
+    //
     blockSignals(true);
     int index = -1;
+    QSet<QString> setKb;
     foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         if (item->type() == CWizDocumentListViewItem::TypeMessage) {
             continue;
@@ -988,9 +991,15 @@ void CWizDocumentListView::on_action_deleteDocument()
 
         index = indexFromItem(item).row();
         CWizDocument doc(m_dbMgr.db(item->document().strKbGUID), item->document());
+        setKb.insert(item->document().strKbGUID);
         doc.Delete();
     }
     blockSignals(false);
+
+    for (QString strKb : setKb)
+    {
+        emit changeUploadRequest(strKb);
+    }
 
     //change to next document
     int nItemCount = count();

@@ -3108,6 +3108,14 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
             int idx = str.lastIndexOf("/", -2);
             while (idx) {
                 str = str.left(idx + 1);
+                if (str.isEmpty()) {
+                    qDebug() << "[doLocationSanityCheck]Invalid folder name: " << strLocation;
+                    // remove from array
+//                    arrayLocation.erase(arrayLocation.begin() + i);
+                    break;
+                }
+
+                //
                 idx = str.lastIndexOf("/", -2);
 
                 if (-1 == ::WizFindInArray(arrayLocation, str)) {

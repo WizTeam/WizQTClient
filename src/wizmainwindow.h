@@ -353,6 +353,8 @@ public Q_SLOTS:
 
     void on_TokenAcquired(const QString& strToken);
 
+    void on_quickSync_request(const QString& strKbGUID);
+
     void on_options_restartForSettings();
 
     void on_editor_statusChanged();
