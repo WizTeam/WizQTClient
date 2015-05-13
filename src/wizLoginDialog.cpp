@@ -132,9 +132,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 
     ui->wgt_newUser->setAutoClearRightIcon(true);
     ui->wgt_newPassword->setAutoClearRightIcon(true);
-    ui->wgt_passwordRepeat->setAutoClearRightIcon(true);
-
-    applyElementStyles(strLocale);
+    ui->wgt_passwordRepeat->setAutoClearRightIcon(true);   
 
 
     connect(m_menuUsers, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
@@ -170,12 +168,12 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     QAction* actionWizBoxServer = m_menuServers->addAction(tr("Sign in to Enterprise Private Server (WizBox)"));
     actionWizBoxServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
     actionWizBoxServer->setCheckable(true);
-    m_menuServers->addSeparator();
     m_menuServers->addAction(tr("Find WizBox..."))->setData(WIZ_SERVERACTION_SEARCH_SERVER);
-    m_menuServers->addSeparator();
     m_menuServers->addAction(tr("About WizBox..."))->setData(WIZ_SERVERACTION_HELP);
     m_menuServers->setDefaultAction(actionWizServer);
 
+    //
+    applyElementStyles(strLocale);
     //
     setUsers(strDefaultUserId);
     //
@@ -552,9 +550,10 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                  "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
 #endif
 
-    ui->btn_selectServer->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                     "color: rgba(255, 255, 255, 153); margin-right: 25px; margin-top: 5px}"));
-//    QString strWizBoxLogIn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox");
+    QString bg_switchserver_menu = ::WizGetSkinResourceFileName(strThemeName, "bg_switchserver_menu");
+    ui->btn_selectServer->setStyleSheet(QString("QPushButton { border: none; background-image: url(%1);"
+                                                "background-position: right center; background-repeat: no-repeat;"
+                                                     "color: rgba(255, 255, 255, 153); padding-right:15px; margin-right: 20px; margin-top: 5px}").arg(bg_switchserver_menu));
 //    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
 //    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
 //                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
@@ -578,16 +577,19 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_passwordError->setText("");
 
     m_menuUsers->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
+    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}"
                           "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
                           "QMenu::item:selected {background-color: #E7F5FF; }"
                           "QMenu::item:default {background-color: #E7F5FF; }");
 
-//    m_menuServers->setFixedWidth(ui->wgt_serveroptioncontainer->width());
-//    m_menuServers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; menu-scrollable: 1;}"
-//                                 "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
-//                                 "QMenu::item:selected {background-color: #E7F5FF; }"
-//                                 "QMenu::item:default {background-color: #E7F5FF; }");
+    QString status_switchserver_selected = ::WizGetSkinResourceFileName(strThemeName, "status_switchserver_selected");
+    //  font-family:'黑体','Microsoft YaHei UI', 'Microsoft YaHei UI' ;
+    m_menuServers->setStyleSheet(QString("QMenu {background-color: #ffffff; border-style: solid; border-color: #3399ff; border-width: 1px; padding: 0px 0px 0px 0px;  menu-scrollable: 1;}"
+                                 "QMenu::item {padding: 4px 12px 4px 25px; color: #000000;  background-color: #ffffff;}"
+                                 "QMenu::item:selected {background-color: #E7F5FF; }"
+                                 "QMenu::item:disabled {color: #999999; }"
+                                 "QMenu::indicator { width: 16px; height: 16px; margin-left: 5px;} "
+                                 "QMenu::indicator:non-exclusive:checked { image: url(%1); }").arg(status_switchserver_selected));
 }
 
 bool CWizLoginDialog::checkSingMessage()
@@ -828,7 +830,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     return true;
 }
 
-void CWizLoginDialog::setSelectedAction(const QString& strActionData)
+void CWizLoginDialog::setSwicthServerSelectedAction(const QString& strActionData)
 {
     QList<QAction*> actionsList = m_menuServers->actions();
     std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
@@ -838,6 +840,18 @@ void CWizLoginDialog::setSelectedAction(const QString& strActionData)
             item->setChecked(true);
         }
     });
+}
+
+void CWizLoginDialog::setSwicthServerActionEnable(const QString& strActionData, bool bEnable)
+{
+    QList<QAction*> actionsList = m_menuServers->actions();
+    for (QAction* actionItem : actionsList)
+    {
+        if (actionItem && actionItem->data().toString() == strActionData)
+        {
+            actionItem->setEnabled(bEnable);
+        }
+    }
 }
 
 
@@ -1008,7 +1022,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 //            }
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
-//            searchWizBoxServer();
+            searchWizBoxServer();
         }
         else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
         {
@@ -1190,7 +1204,8 @@ void CWizLoginDialog::onWizLogInStateEntered()
     //
     m_serverType = WizServer;
     ApiEntry::setEnterpriseServerIP("");
-    setSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
+    setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
+//    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1215,7 +1230,8 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
 
     m_serverType = EnterpriseServer;
-    setSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+//    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, true);
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()
