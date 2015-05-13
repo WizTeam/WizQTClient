@@ -122,7 +122,8 @@ private:
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
     bool checkServerLicence(const QString& strOldLicence);
-    void setSelectedAction(const QString& strActionData);
+    void setSwicthServerSelectedAction(const QString& strActionData);
+    void setSwicthServerActionEnable(const QString &strActionData, bool bEnable);
 
 private:
     Ui::wizLoginWidget *ui;
