@@ -164,19 +164,17 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     connect(ui->cbx_remberPassword, SIGNAL(toggled(bool)), SLOT(on_cbx_remberPassword_toggled(bool)));
 #endif
 
-    QAction* actionSelectServer = m_menuServers->addAction(tr("Sign in to WizNote Server"));
-    actionSelectServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
-    m_menuServers->addAction(tr("Sign in to Enterprise Private Server (WizBox)"))->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    QAction* actionWizServer = m_menuServers->addAction(tr("Sign in to WizNote Server"));
+    actionWizServer->setData(WIZ_SERVERACTION_CONNECT_WIZSERVER);
+    actionWizServer->setCheckable(true);
+    QAction* actionWizBoxServer = m_menuServers->addAction(tr("Sign in to Enterprise Private Server (WizBox)"));
+    actionWizBoxServer->setData(WIZ_SERVERACTION_CONNECT_BIZSERVER);
+    actionWizBoxServer->setCheckable(true);
     m_menuServers->addSeparator();
     m_menuServers->addAction(tr("Find WizBox..."))->setData(WIZ_SERVERACTION_SEARCH_SERVER);
     m_menuServers->addSeparator();
     m_menuServers->addAction(tr("About WizBox..."))->setData(WIZ_SERVERACTION_HELP);
-    m_menuServers->setDefaultAction(actionSelectServer);
-
-    for (auto actionItem : m_menuServers->actions())
-    {
-        actionItem->setCheckable(true);
-    }
+    m_menuServers->setDefaultAction(actionWizServer);
 
     //
     setUsers(strDefaultUserId);
@@ -296,19 +294,19 @@ void CWizLoginDialog::doAccountVerify()
     {
         if (m_lineEditServer->text().isEmpty())
         {
-            CWizMessageBox::warning(0, tr("Info"), tr("There is no server address, please input it."));
+            CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
             return;
         }        
 
         if (userSettings.enterpriseServerIP().isEmpty() && !userSettings.myWizMail().isEmpty())
         {
-            CWizMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
+            CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
             return;
         }     
     }
     else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
     {
-        CWizMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
+        CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
         return;
     }
 
@@ -664,10 +662,19 @@ void CWizLoginDialog::showSearchingDialog()
     if (!m_searchingDialog) {
         initSearchingDialog();
     }
+
+    //
+#ifdef Q_OS_MAC
+    QPoint leftTop = geometry().topLeft();
+    leftTop.setX(leftTop.x() + (width() - m_searchingDialog->width()) / 2);
+    leftTop.setY(leftTop.y() + (height() - m_searchingDialog->height()) / 2);
+    m_searchingDialog->move(leftTop);
+#endif
+    //
     if (m_searchingDialog->exec() == QDialog::Rejected)
     {
         m_wizBoxSearchingTimer.stop();
-        qDebug() << "searching cancel";
+        qDebug() << "Searching cancel";
         closeWizBoxUdpClient();
 
         if (m_currentUserServerType != WizServer)
@@ -768,7 +775,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 {
     if (m_lineEditServer->text().isEmpty())
     {
-        CWizMessageBox::warning(0, tr("Ino"), tr("There is no server address, please input it."));
+        CWizMessageBox::warning(this, tr("Ino"), tr("There is no server address, please input it."));
         return false;
     }
     ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
@@ -810,7 +817,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     qDebug() << "compare licence : " << m_serverLicence << "  with old licence : " << strOldLicence;
     if (m_serverLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != m_serverLicence))
     {
-        CWizMessageBox::warning(0, tr("Ino"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
+        CWizMessageBox::warning(this, tr("Ino"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
         return false;
     } else
     {
@@ -819,6 +826,18 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     }
 
     return true;
+}
+
+void CWizLoginDialog::setSelectedAction(const QString& strActionData)
+{
+    QList<QAction*> actionsList = m_menuServers->actions();
+    std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
+        item->setChecked(false);
+        if (item->data().toString() == strActionData)
+        {
+            item->setChecked(true);
+        }
+    });
 }
 
 
@@ -958,11 +977,6 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 {
     if (action)
     {
-        QList<QAction*> actionsList = m_menuServers->actions();
-        std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
-            item->setChecked(false);
-        });
-
         QString strActionData = action->data().toString();
         if (strActionData == WIZ_SERVERACTION_CONNECT_WIZSERVER)
         {
@@ -974,7 +988,6 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 //            }
             m_serverType = WizServer;
             emit wizServerSelected();
-            action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_CONNECT_BIZSERVER)
         {
@@ -996,19 +1009,12 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
             searchWizBoxServer();
-            action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
         {
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
             searchWizBoxServer();
-            std::for_each(std::begin(actionsList), std::end(actionsList), [&](QAction* const item) {
-                if (item->data().toString() == WIZ_SERVERACTION_CONNECT_BIZSERVER)
-                {
-                    item->setChecked(true);
-                }
-            });
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
@@ -1142,7 +1148,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     closeWizBoxUdpClient();
     if (iptype != "static")
     {
-        QMessageBox::warning(0, tr("Info"), tr("Server ip should set to be static"));
+        CWizMessageBox::warning(this, tr("Info"), tr("Server ip should set to be static"));
         return;
     }
     m_searchingDialog->accept();
@@ -1156,7 +1162,7 @@ void CWizLoginDialog::onWizBoxSearchingTimeOut()
     m_wizBoxSearchingTimer.stop();
     m_searchingDialog->reject();
     closeWizBoxUdpClient();
-    QMessageBox::information(0, tr("Info"), tr("There is no server address, please input it."));
+    CWizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
 }
 
 void CWizLoginDialog::onWizLogInStateEntered()
@@ -1184,6 +1190,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
     //
     m_serverType = WizServer;
     ApiEntry::setEnterpriseServerIP("");
+    setSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1208,6 +1215,7 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
 
     m_serverType = EnterpriseServer;
+    setSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()

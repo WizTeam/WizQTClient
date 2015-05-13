@@ -1871,10 +1871,10 @@ void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, co
         showTrayIconMessage(strTitle, strMsg);
         break;
     case wizSyncMessageWarning:
-        CWizMessageBox::warning(0, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
+        CWizMessageBox::warning(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
         break;
     case wizSyncMeesageError:
-        CWizMessageBox::critical(0, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
+        CWizMessageBox::critical(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
         break;
     default:
         break;

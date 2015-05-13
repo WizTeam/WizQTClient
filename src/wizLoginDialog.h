@@ -122,6 +122,7 @@ private:
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
     bool checkServerLicence(const QString& strOldLicence);
+    void setSelectedAction(const QString& strActionData);
 
 private:
     Ui::wizLoginWidget *ui;

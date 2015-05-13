@@ -32,6 +32,21 @@ private:
     static QMessageBox::StandardButton messageBox(QWidget * parent, const QString & title, const QString & text,
                                          QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton,
                                                 QMessageBox::Icon icon);
+
+
+};
+
+class CMessageBox : public QMessageBox
+{
+    Q_OBJECT
+public:
+    explicit CMessageBox(QWidget *parent = 0) : QMessageBox(parent) { }
+
+signals:
+    void resized();
+
+protected:
+    void resizeEvent(QResizeEvent* event);
 };
 
 #endif // CWIZMESSAGEBOX_H

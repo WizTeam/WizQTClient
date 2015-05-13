@@ -421,7 +421,7 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 //        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
 //                       "Do you want to rebuild full text search?"));
 
-        QMessageBox::StandardButton clickedButton = CWizMessageBox::warning(0, tr("Cancel search encrypted note"),
+        QMessageBox::StandardButton clickedButton = CWizMessageBox::warning(this, tr("Cancel search encrypted note"),
                                                                                 tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
                                                                                  "Do you want to rebuild full text search?") ,QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 

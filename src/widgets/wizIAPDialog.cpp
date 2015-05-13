@@ -371,12 +371,12 @@ void CWizIAPDialog::checkUnfinishedTransation()
     m_iAPhelper->loadLocalReceipt(receipt);
     if (receipt.isEmpty())
     {
-        CWizMessageBox::warning(0, tr("Info"), tr("Can not load receipt!"));
+        CWizMessageBox::warning(this, tr("Info"), tr("Can not load receipt!"));
         qDebug() << "local receipt load failed";
         return;
     }
 
-    int result = QMessageBox::information(0, tr("Info"), tr("You have unfinished transation, continue to process it?"),
+    int result = CWizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
                              QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Ok);
     if (QMessageBox::Ok == result)
     {

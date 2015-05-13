@@ -131,7 +131,7 @@ void CWizMessageBox::buttonsFromStandardButtons(QMessageBox::StandardButtons but
 
 QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QString& title, const QString& text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon)
 {
-    QMessageBox msg(parent);
+    CMessageBox msg(parent);
     msg.setIcon(icon);
     msg.setWindowTitle(title);
     msg.setText(text);
@@ -143,8 +143,28 @@ QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QS
     }
     msg.setDefaultButton(defaultButton);
 
+    //FIXME: 在Mac系统下，dialog对话框不会在父窗口中居中显示，此处进行居中对齐处理
+#ifdef Q_OS_MAC
+    QObject::connect(&msg, &CMessageBox::resized, [&](){
+        if (parent)
+        {
+            QPoint leftTop = parent->geometry().topLeft();
+            leftTop.setX(leftTop.x() + (parent->width() - msg.width()) / 2);
+            leftTop.setY(leftTop.y() + (parent->height() - msg.height()) / 2);
+            msg.move(leftTop);
+        }
+    });
+#endif
+
     msg.exec();
 
     return msg.standardButton(msg.clickedButton());
 }
 
+
+
+void CMessageBox::resizeEvent(QResizeEvent* event)
+{
+    QMessageBox::resizeEvent(event);
+    emit resized();
+}
