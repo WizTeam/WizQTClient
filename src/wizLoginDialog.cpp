@@ -1008,7 +1008,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 //            }
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
-            searchWizBoxServer();
+//            searchWizBoxServer();
         }
         else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
         {

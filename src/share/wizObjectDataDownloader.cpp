@@ -139,7 +139,32 @@ bool CWizDownloadObjectRunnable::downloadDocument()
         return false;
     }
 
-    return m_dbMgr.db(m_data.strKbGUID).UpdateDocument(document);
+    // check update of attachment
+    WIZOBJECTVERSION versionServer;
+    ksServer.wiz_getVersion(versionServer);
+    __int64 nLocalVersion = db.GetObjectVersion("attachment");
+    if (document.nAttachmentCount > 0 && nLocalVersion < versionServer.nAttachmentVersion)
+    {
+        std::deque<WIZDOCUMENTATTACHMENTDATAEX> arrayRet;
+        ksServer.attachment_getList(50, nLocalVersion, arrayRet);
+        //
+        for(auto attach : arrayRet)
+        {
+            if (attach.strDocumentGUID != document.strGUID)
+                continue;
+
+            nPart = WIZKM_XMKRPC_ATTACHMENT_PART_INFO;
+            WIZDOCUMENTATTACHMENTDATAEX attachRet = attach;
+            attachRet.strKbGUID = db.kbGUID();
+            if (ksServer.attachment_getData(attach.strGUID, nPart, attachRet))
+            {
+//                qDebug() << "get attachment from server : " << attachRet.strName;
+                db.UpdateAttachment(attachRet);
+            }
+        }
+    }
+
+    return db.UpdateDocument(document);
 }
 
 bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
