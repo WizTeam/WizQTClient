@@ -443,11 +443,11 @@ void MainWindow::on_actionClose_triggered()
 #endif
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    Q_UNUSED(event);
-    updateHistoryButtonStatus();
-}
+//void MainWindow::resizeEvent(QResizeEvent *event)
+//{
+//    Q_UNUSED(event);
+//    updateHistoryButtonStatus();
+//}
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
@@ -1561,7 +1561,7 @@ void MainWindow::initClient()
     layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
-    m_splitter = std::make_shared<CWizSplitter>(new CWizSplitter());
+    m_splitter = std::make_shared<CWizSplitter>();
     layout->addWidget(m_splitter.get());
 
     QWidget* documentPanel = new QWidget();

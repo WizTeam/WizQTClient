@@ -13,6 +13,7 @@
 
 #include <coreplugin/icore.h>
 
+#include "core/wizTagBar.h"
 #include "titleedit.h"
 #include "cellbutton.h"
 #include "infobar.h"
@@ -45,6 +46,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
     , m_editTitle(new TitleEdit(this))
+    , m_tagBar(new CWizTagBar(app, this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
     , m_editorBar(new EditorToolBar(this))
@@ -145,6 +147,10 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line1->setFixedHeight(1);
     line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
+    QWidget* line2 = new QWidget(this);
+    line2->setFixedHeight(1);
+    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
+
 
     QWidget* line3 = new QWidget(this);
     line3->setFixedHeight(1);
@@ -169,6 +175,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
     layoutInfo1->addWidget(line1);
+    layoutInfo1->addWidget(m_tagBar);
+    layoutInfo1->addWidget(line2);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
     layoutInfo1->addWidget(line3);
@@ -356,6 +364,7 @@ void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
 {
     updateInfo(data);
     setEditingDocument(editing);
+    m_tagBar->setDocument(data);
 }
 
 void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)

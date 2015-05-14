@@ -35,6 +35,7 @@ namespace Core {
 namespace Internal {
 class TitleBar;
 class EditorToolBar;
+class CWizTagBar;
 } // namespace Internal
 
 class CWizDocumentView : public INoteView
@@ -74,7 +75,7 @@ protected:
 #endif
     QWebView* m_comments;
     CWizSplitter* m_splitter;
-    Core::Internal::TitleBar* m_title;
+    Core::Internal::TitleBar* m_title;  
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;

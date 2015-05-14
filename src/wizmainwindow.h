@@ -111,7 +111,7 @@ public:
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
-    virtual void resizeEvent(QResizeEvent* event);
+//    virtual void resizeEvent(QResizeEvent* event);
     virtual void closeEvent(QCloseEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);

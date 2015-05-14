@@ -27,6 +27,7 @@ class InfoBar;
 class NotifyBar;
 class EditorToolBar;
 class CellButton;
+class CWizTagBar;
 
 class TitleBar : public QWidget
 {
@@ -95,6 +96,7 @@ private:
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
+    CWizTagBar* m_tagBar;
     InfoBar* m_infoBar;
     NotifyBar* m_notifyBar;
     EditorToolBar* m_editorBar;
