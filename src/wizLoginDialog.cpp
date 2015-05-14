@@ -585,7 +585,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString status_switchserver_selected = ::WizGetSkinResourceFileName(strThemeName, "status_switchserver_selected");
     //  font-family:'黑体','Microsoft YaHei UI', 'Microsoft YaHei UI' ;
     m_menuServers->setStyleSheet(QString("QMenu {background-color: #ffffff; border-style: solid; border-color: #3399ff; border-width: 1px; padding: 0px 0px 0px 0px;  menu-scrollable: 1;}"
-                                 "QMenu::item {padding: 4px 12px 4px 25px; color: #000000;  background-color: #ffffff;}"
+                                 "QMenu::item {padding: 4px 10px 4px 25px; color: #000000;  background-color: #ffffff;}"
                                  "QMenu::item:selected {background-color: #E7F5FF; }"
                                  "QMenu::item:disabled {color: #999999; }"
                                  "QMenu::indicator { width: 16px; height: 16px; margin-left: 5px;} "
@@ -777,7 +777,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
 {
     if (m_lineEditServer->text().isEmpty())
     {
-        CWizMessageBox::warning(this, tr("Ino"), tr("There is no server address, please input it."));
+        CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
         return false;
     }
     ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
@@ -819,7 +819,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     qDebug() << "compare licence : " << m_serverLicence << "  with old licence : " << strOldLicence;
     if (m_serverLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != m_serverLicence))
     {
-        CWizMessageBox::warning(this, tr("Ino"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
+        CWizMessageBox::warning(this, tr("Info"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
         return false;
     } else
     {
@@ -1205,7 +1205,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
     m_serverType = WizServer;
     ApiEntry::setEnterpriseServerIP("");
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
-//    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
+    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1231,7 +1231,7 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
 
     m_serverType = EnterpriseServer;
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);
-//    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, true);
+    setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, true);
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()
