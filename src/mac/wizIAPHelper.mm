@@ -279,12 +279,14 @@
 
 - (void)validteReceiptOnLauch
 {
+#ifdef BUILD4APPSTORE
     RMStoreAppReceiptVerificator* verctor = [[[RMStoreAppReceiptVerificator alloc] init] autorelease];
     if (![verctor verifyAppReceipt])
     {
         NSLog(@"Valide receipt failed");
         exit(173);
     }
+#endif
 }
 
 

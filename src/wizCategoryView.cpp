@@ -108,7 +108,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::InternalMove);
 
-    // scrollbar        ScrollPerPixel could cause drag and drop problem
+    // scrollbar        ScrollPerPixel could cause drag and drop problem    
 //    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
