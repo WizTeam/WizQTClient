@@ -12,6 +12,9 @@ set(wiznote_SOURCES_MAC
     mac/wizUserInfoWidgetBaseMac_mm.cpp
     utils/notify.mm
     mac/wizIAPHelper.mm
+#    mac/rmstore/RMStore.m
+    mac/rmstore/RMAppReceipt.m
+    mac/rmstore/RMStoreAppReceiptVerificator.m
 )
 
 set(wiznote_HEADERS_MAC
@@ -23,6 +26,9 @@ set(wiznote_HEADERS_MAC
     mac/wizmacactionhelper.h
     mac/wizUserInfoWidgetBaseMac_mm.h
     mac/wizIAPHelper.h
+#    mac/rmstore/RMStore.h
+    mac/rmstore/RMAppReceipt.h
+    mac/rmstore/RMStoreAppReceiptVerificator.h
 )
 
 set(wiznote_SOURCES
@@ -403,10 +409,11 @@ if(UNIX)
         find_library(_COCOA_LIBRARY Cocoa)
         find_library(_WEBKIT_LIBRARY WebKit)
         find_library(_STORE_LIBRARY StoreKit)
+        find_library(_IO_LIBRARY IOKit)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")
@@ -469,6 +476,7 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/core
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
+    ${CMAKE_SOURCE_DIR}/libopenssl/include
 )
 
 link_directories(
@@ -485,5 +493,7 @@ target_link_libraries(${PROJECT_NAME}
     coreplugin
     helloworld
     markdown
+    ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
+    ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
     ${CMAKE_DL_LIBS}
 )

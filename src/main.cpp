@@ -24,6 +24,7 @@
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
+#include "mac/wizIAPHelper.h"
 #endif
 
 #include "utils/pathresolve.h"
@@ -179,6 +180,9 @@ int mainCore(int argc, char *argv[])
     }
 #else
     QApplication a(argc, argv);
+
+    CWizIAPHelper helper;
+    helper.validteReceiptOnLauch();
 #endif
 
 
