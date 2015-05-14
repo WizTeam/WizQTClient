@@ -300,7 +300,9 @@ void CWizLoginDialog::doAccountVerify()
         {
             CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
             return;
-        }     
+        }
+        // clear proxy for app
+//        QNetworkProxy::setApplicationProxy(QNetworkProxy::NoProxy);
     }
     else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
     {

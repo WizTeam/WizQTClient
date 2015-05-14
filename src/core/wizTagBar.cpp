@@ -1,4 +1,6 @@
 #include "wizTagBar.h"
+#include <QPalette>
+#include <QFontMetrics>
 #include "utils/stylehelper.h"
 
 using namespace Core::Internal;
@@ -11,6 +13,10 @@ CWizTagBar::CWizTagBar(QWidget *parent) : QWidget(parent)
     setStyleSheet("font-size: 11px; color: #646464;");
     setContentsMargins(5, 0, 0, 0);
     setFocusPolicy(Qt::StrongFocus);
+
+    QPalette pl = palette();
+    pl.setBrush(QPalette::Window, QBrush(QColor("#f7f8f9")));
+    setPalette(pl);
 }
 
 CWizTagBar::~CWizTagBar()
@@ -20,12 +26,19 @@ CWizTagBar::~CWizTagBar()
 
 
 
-CTagItem::CTagItem(QWidget* parent) : QWidget(parent)
+CTagItem::CTagItem(const QString text, QWidget* parent)
+    : QWidget(parent)
+    , m_text(text)
 {
 
 }
 
 CTagItem::~CTagItem()
+{
+
+}
+
+QSize CTagItem::sizeHint() const
 {
 
 }

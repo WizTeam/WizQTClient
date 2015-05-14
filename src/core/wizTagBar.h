@@ -10,8 +10,10 @@ class CTagItem : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CTagItem(QWidget *parent = 0);
+    explicit CTagItem(const QString text, QWidget *parent = 0);
     ~CTagItem();
+
+    QSize	sizeHint() const override;
 
 protected:
     void paintEvent(QPaintEvent* event);
@@ -20,6 +22,7 @@ protected:
     void mousePressEvent(QMouseEvent* event);
 
 private:
+    QString m_text;
     bool m_focused;
     QPixmap m_pixTag;
     QPixmap m_pixDelete;
