@@ -61,6 +61,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     applyStyleSheet();
 
     connect(m_lineEdit, SIGNAL(returnPressed()), SLOT(on_lineEditReturnPressed()));
+    connect(m_lineEdit, SIGNAL(textChanged(QString)), SLOT(on_lineEditTextChanged(QString)));
     connect(m_btnMore, SIGNAL(clicked()), SLOT(on_buttonMoreClicked()));
     connect(m_btnAdd, SIGNAL(clicked()), SLOT(on_buttonAddClicked()));
 
@@ -407,6 +408,20 @@ void CWizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
     }
 }
 
+void CWizTagBar::on_lineEditTextChanged(const QString& text)
+{
+    if (text.isEmpty())
+    {
+        m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
+                                  "background: #f7f8f9; color:#6c6c6c;}");
+    }
+    else
+    {
+        m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
+                                  "background: #f7f8f9; color:#000000;}");
+    }
+}
+
 void CWizTagBar::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
@@ -437,7 +452,7 @@ void CWizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
     m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                              "background: #f7f8f9; selection-background-color: darkgray;}");
+                              "background: #f7f8f9; color:#6c6c6c;}");
     m_lineEdit->setFixedWidth(150);
     m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 

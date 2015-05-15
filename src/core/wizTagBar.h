@@ -93,6 +93,9 @@ public slots:
     void on_tagDeleted(const WIZTAGDATA& tag);
     void on_documentTagModified(const WIZDOCUMENTDATA& document);
 
+    //
+    void on_lineEditTextChanged(const QString& text);
+
 protected:
     void resizeEvent(QResizeEvent* event);
     void focusOutEvent(QFocusEvent* event);
