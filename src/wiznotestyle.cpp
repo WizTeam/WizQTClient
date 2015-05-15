@@ -448,7 +448,9 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
     {
         if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
         {
-            Q_UNUSED(view);
+            if (!(view->dragItemFlags() & Qt::ItemIsDropEnabled))
+                return;
+
             p->setRenderHint(QPainter::Antialiasing, true);
 
             QPen pen;

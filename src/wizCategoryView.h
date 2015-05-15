@@ -57,6 +57,7 @@ public:
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
     bool validateDropDestination(const QPoint& p) const;
+    Qt::ItemFlags dragItemFlags() const;
 
     void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
     QPoint hitPoint() const { return m_hitPos; }

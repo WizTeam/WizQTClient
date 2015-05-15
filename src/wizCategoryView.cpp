@@ -103,10 +103,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setAutoFillBackground(true);
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(12);
-    setDragEnabled(true);
-    viewport()->setAcceptDrops(true);
-    setDropIndicatorShown(true);
-    setDragDropMode(QAbstractItemView::InternalMove);
 
     // scrollbar        ScrollPerPixel could cause drag and drop problem    
 //    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -354,9 +350,15 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         if (CWizCategoryViewItemBase* pItem = itemAt(event->pos()))
         {
             if (pItem->acceptDrop(m_dragItem))
+            {
                 pItem->setFlags(pItem->flags() | Qt::ItemIsDropEnabled);
+                m_dragItem->setFlags(m_dragItem->flags() | Qt::ItemIsDropEnabled);
+            }
             else
+            {
                 pItem->setFlags(pItem->flags() & ~Qt::ItemIsDropEnabled);
+                m_dragItem->setFlags(m_dragItem->flags() & ~Qt::ItemIsDropEnabled);
+            }
 
             event->acceptProposedAction();
             QTreeWidget::dragMoveEvent(event);
@@ -416,12 +418,16 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
+        if (m_dragItem && !(m_dragItem->flags() & Qt::ItemIsDropEnabled))
+        {
+            qDebug() << "[DragDrop]Can not drop item at invalid position";
+            return;
+        }
+
         QModelIndex droppedIndex = indexAt(event->pos());
-//        qDebug() << "drop index called " << droppedIndex;
         if( !droppedIndex.isValid() )
           return;
 
-//        qDebug() << "get dropped item : " << m_dragItem;
         QTreeWidget::dropEvent(event);
         if (m_dragItem)
         {
@@ -735,6 +741,14 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 
 }
 
+Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
+{
+    if (m_dragItem)
+        return m_dragItem->flags();
+
+    return Qt::NoItemFlags;
+}
+
 void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     CWizCategoryViewItemBase* pItem = categoryItemFromIndex(vopt->index);
@@ -772,8 +786,13 @@ bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*s
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
 {
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setDragEnabled(false);
+    viewport()->setAcceptDrops(false);
+    invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
+    setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::InternalMove);
-    setDragEnabled(true);
+
 
     initMenus();
 
@@ -2250,13 +2269,6 @@ void CWizCategoryView::init()
 
     loadExpandState();
 
-
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    setDragEnabled(true);
-    invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
-    viewport()->setAcceptDrops(true);
-    setDropIndicatorShown(true);
-    setDragDropMode(QAbstractItemView::InternalMove);
 }
 
 void CWizCategoryView::resetSections()
