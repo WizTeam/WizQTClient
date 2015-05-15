@@ -33,8 +33,10 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     setFocusPolicy(Qt::ClickFocus);
 
     QPalette pl = palette();
-    pl.setBrush(QPalette::Window, QBrush(QColor("#f7f8f9")));
+    pl.setColor(QPalette::Window, QColor("#f7f8f9"));
+//    pl.setBrush(QPalette::Window, QColor("#f7f8f9"));
     setPalette(pl);
+    setAutoFillBackground(true);
 
     //
     QHBoxLayout* hLayout = new QHBoxLayout(this);
@@ -435,8 +437,9 @@ void CWizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
     m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                              "background: yellow;selection-background-color: darkgray;}");
+                              "background: #f7f8f9; selection-background-color: darkgray;}");
     m_lineEdit->setFixedWidth(150);
+    m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     //
     QIcon icon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "action_addEditorBarItem");

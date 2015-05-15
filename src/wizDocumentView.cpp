@@ -38,7 +38,8 @@ using namespace Core::Internal;
 #define DOCUMENT_GROUP                 0x0001
 #define DOCUMENT_OFFLINE               0x0002
 #define DOCUMENT_FIRSTTIMEVIEW     0x0004
-#define DOCUMENT_EDITBYOTHERS   0x0010
+#define DOCUMENT_EDITBYOTHERS   0x0008
+#define DOCUMENT_NEWVERSIONFOUNDED      0x0016
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
@@ -637,7 +638,9 @@ bool CWizDocumentView::checkDocumentEditable()
     loop.exec();
     //
 
-    return !(m_status & DOCUMENT_EDITBYOTHERS);
+    bool editByOther = m_status & DOCUMENT_EDITBYOTHERS;
+    bool newVersion = m_status & DOCUMENT_NEWVERSIONFOUNDED;
+    return !(editByOther || newVersion);
 }
 
 void CWizDocumentView::stopCheckDocumentAnimations()
@@ -785,6 +788,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 {
     if (strGUID == m_note.strGUID)
     {
+        stopCheckDocumentAnimations();
         if (changed)
         {
 //            if (m_status & DOCUMENT_FIRSTTIMEVIEW)
@@ -796,6 +800,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 //            {
                 m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
 //            }
+                m_status |= DOCUMENT_NEWVERSIONFOUNDED;
         }
         else
         {
@@ -817,6 +822,8 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
                 bool bGroup = m_dbMgr.db(doc.strKbGUID).IsGroup();
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
+
+            m_status &= ~DOCUMENT_NEWVERSIONFOUNDED;
         }
         m_status = m_status & ~DOCUMENT_FIRSTTIMEVIEW;
     }

@@ -590,6 +590,7 @@ void CWizDocumentStatusChecker::startCheck()
 
     if (changed)
     {
+        emit checkEditStatusFinished(m_strCurGUID, false);
         m_timeOutTimer->stop();
         return;
     }
@@ -604,7 +605,7 @@ void CWizDocumentStatusChecker::startCheck()
 
     m_timeOutTimer->stop();
 
-    emit checkEditStatusFinished(m_strCurGUID, !changed && !editingByOthers);
+    emit checkEditStatusFinished(m_strCurGUID, !editingByOthers);
 }
 
 bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
