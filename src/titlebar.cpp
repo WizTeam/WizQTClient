@@ -388,6 +388,12 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
 
 void TitleBar::setEditingDocument(bool editing)
 {
+    //FIXME:此处强制刷新笔记标题，防止因多线程问题导致的标题覆盖
+    if (!editing)
+    {
+        m_editTitle->onTitleEditingFinished();
+    }
+    //
     m_editTitle->setReadOnly(!editing);
     m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
 }
