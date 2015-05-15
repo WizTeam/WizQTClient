@@ -147,9 +147,9 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line1->setFixedHeight(1);
     line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
-    QWidget* line2 = new QWidget(this);
-    line2->setFixedHeight(1);
-    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
+    m_tagBarSpacer = new QWidget(this);
+    m_tagBarSpacer->setFixedHeight(1);
+    m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
 
     QWidget* line3 = new QWidget(this);
@@ -176,7 +176,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo1->addLayout(layoutInfo2);
     layoutInfo1->addWidget(line1);
     layoutInfo1->addWidget(m_tagBar);
-    layoutInfo1->addWidget(line2);
+    layoutInfo1->addWidget(m_tagBarSpacer);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
     layoutInfo1->addWidget(line3);
@@ -303,6 +303,12 @@ void TitleBar::loadErrorPage()
     comments->setHtml(strHtml, url);
 }
 
+void TitleBar::setTagBarVisible(bool visible)
+{
+    m_tagBar->setVisible(visible);
+    m_tagBarSpacer->setVisible(visible);
+}
+
 #ifdef USEWEBENGINE
 void TitleBar::initWebChannel()
 {
@@ -364,7 +370,13 @@ void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
 {
     updateInfo(data);
     setEditingDocument(editing);
-    m_tagBar->setDocument(data);
+    bool isGroup = m_app.databaseManager().db(data.strKbGUID).IsGroup();
+    setTagBarVisible(!isGroup);
+    if (!isGroup)
+    {
+        m_tagBar->setDocument(data);
+
+    }
 }
 
 void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
@@ -438,15 +450,17 @@ void TitleBar::onEditButtonClicked()
 
 void TitleBar::onTagButtonClicked()
 {
-    if (!m_tags) {
-        m_tags = new CWizTagListWidget(topLevelWidget());
-    }
+//    if (!m_tags) {
+//        m_tags = new CWizTagListWidget(topLevelWidget());
+//    }
 
-    m_tags->setDocument(noteView()->note());
+//    m_tags->setDocument(noteView()->note());
 
-    QRect rc = m_tagBtn->rect();
-    QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
-    m_tags->showAtPoint(pt);
+//    QRect rc = m_tagBtn->rect();
+//    QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
+//    m_tags->showAtPoint(pt);
+
+    setTagBarVisible(!m_tagBar->isVisible());
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("showTags");
