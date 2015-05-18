@@ -787,8 +787,7 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
 {
     if (strGUID == m_note.strGUID)
-    {
-        stopCheckDocumentAnimations();
+    {       
         if (changed)
         {
 //            if (m_status & DOCUMENT_FIRSTTIMEVIEW)

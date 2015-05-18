@@ -13,6 +13,7 @@
 #include "wizdef.h"
 #include "wizLineInputDialog.h"
 #include "wiztaglistwidget.h"
+#include "share/wizAnalyzer.h"
 
 const int TAGITEM_MARGIN = 16;
 const int TAGITEM_HEIGHT  = 16;
@@ -91,7 +92,7 @@ void CWizTagBar::setDocument(const WIZDOCUMENTDATA& doc)
     for (WIZTAGDATA tag : arrayTag)
     {
         qDebug() << "add tag item : " << tag.strName;
-        addTag(tag.strGUID, tag.strName);
+        addTagToTagBar(tag.strGUID, tag.strName);
     }
 }
 
@@ -114,7 +115,7 @@ void CWizTagBar::on_removeTagRequest(const QString& guid)
     }
 }
 
-void CWizTagBar::addTag(const QString& guid, const QString text)
+void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
 {
     CTagItem* tagItem = new CTagItem(guid, text, this);            
 
@@ -196,7 +197,7 @@ void CWizTagBar::calculateTagWidgetWidth()
             {
                 wgtWidth += itemWidth;
                 //
-                addTag(it.first, it.second);
+                addTagToTagBar(it.first, it.second);
                 mapTemp.insert(std::make_pair(it.first, it.second));
             }
         });
@@ -263,6 +264,8 @@ void CWizTagBar::on_lineEditReturnPressed()
     if (strTagNames.isEmpty())
         return;
 
+    WizGetAnalyzer().LogAction("addTagByTagBarInput");
+
     QStringList sl = strTagNames.split(';');
     QStringList::const_iterator it;
     CWizDatabase& db = m_dbMgr.db();
@@ -309,6 +312,8 @@ void CWizTagBar::on_buttonMoreClicked()
     int buttonTopMargin  = 4;
     QPoint pos = m_btnMore->mapToGlobal(QPoint(0, height() - buttonTopMargin));
     menu->popup(pos);
+
+    WizGetAnalyzer().LogAction("buttonMoreOnTagBar");
 }
 
 void CWizTagBar::on_buttonAddClicked()
@@ -324,6 +329,8 @@ void CWizTagBar::on_buttonAddClicked()
     QRect rc = m_btnAdd->rect();
     QPoint pt = m_btnAdd->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_tagList->showAtPoint(pt);
+
+    WizGetAnalyzer().LogAction("buttonAddOnTagBar");
 }
 
 void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
@@ -335,14 +342,14 @@ void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
         db.GetDocumentTags(m_doc.strGUID, arrayTag);
         for (WIZTAGDATA tagItem : arrayTag)
         {
-            qDebug() << "add tag item : " << tag.strName;
             // add new tag
             if (tagItem.strGUID == tag.strGUID)
             {
                 return;
             }
         }
-        addTag(tag.strGUID, tag.strName);
+        qDebug() << "can not found tag in currrent tag list , add tag item : " << tag.strName;
+        db.InsertDocumentTag(m_doc, tag.strGUID);
     }
 }
 
@@ -355,7 +362,7 @@ void CWizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagN
             if (tagWgt.first == tagOld.strGUID)
             {
                 tagWgt.second->setName(tagNew.strName);
-                update();
+                on_documentTagModified(m_doc);
                 return;
             }
         }
@@ -621,7 +628,8 @@ void CTagItem::mouseReleaseEvent(QMouseEvent* event)
     {
         m_closeButtonPressed = false;
         update();
-        on_menuActionDelete();
+        on_menuActionRemove();
+        WizGetAnalyzer().LogAction("removeTagByCloseButton");
     }
     QWidget::mouseReleaseEvent(event);
 }

@@ -103,7 +103,7 @@ protected:
 private:
     void reset();
     void applyStyleSheet();
-    void addTag(const QString& guid, const QString text);
+    void addTagToTagBar(const QString& guid, const QString text);
     void calculateTagWidgetWidth();
     void clearTagSelection();
 

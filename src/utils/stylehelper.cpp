@@ -771,7 +771,7 @@ int StyleHelper::infoBarHeight()
 
 int StyleHelper::tagBarHeight()
 {
-    return infoBarHeight();
+    return editToolBarHeight();
 }
 
 int StyleHelper::notifyBarHeight()

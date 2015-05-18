@@ -1259,6 +1259,20 @@ bool CWizIndex::GetDocumentTagsNameStringArray(const CString& strDocumentGUID, C
     return true;
 }
 
+int CWizIndex::GetDocumentTagCount(const CString& strDocumentGUID)
+{
+    CString strSQL = CString("select count(TAG_GUID) from WIZ_DOCUMENT_TAG where DOCUMENT_GUID='%1'").arg(strDocumentGUID);
+
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+
+    if (!query.eof()) {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+
+    return 0;
+}
+
 CString CWizIndex::GetDocumentTagNameText(const CString& strDocumentGUID)
 {
 	CString strText;

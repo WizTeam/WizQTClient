@@ -68,6 +68,7 @@ public:
 
     // Query tags by document guid
     bool GetDocumentTagsNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagName);
+    int GetDocumentTagCount(const CString& strDocumentGUID);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizTagDataArray& arrayTag);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizStdStringArray& arrayTagGUID);
     CString GetDocumentTagsText(const CString& strDocumentGUID);

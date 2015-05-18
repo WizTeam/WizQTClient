@@ -370,8 +370,11 @@ void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
 {
     updateInfo(data);
     setEditingDocument(editing);
-    bool isGroup = m_app.databaseManager().db(data.strKbGUID).IsGroup();
-    setTagBarVisible(!isGroup);
+    //
+    CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
+    bool isGroup = db.IsGroup();
+    int nTagCount = db.GetDocumentTagCount(data.strGUID);
+    setTagBarVisible(!isGroup && nTagCount > 0);
     if (!isGroup)
     {
         m_tagBar->setDocument(data);
@@ -468,24 +471,21 @@ void TitleBar::onTagButtonClicked()
 
     setTagBarVisible(!m_tagBar->isVisible());
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showTags");
+    WizGetAnalyzer().LogAction("showTags");
 }
 
 void TitleBar::onEmailButtonClicked()
 {
     m_editor->shareNoteByEmail();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("shareByEmail");
+    WizGetAnalyzer().LogAction("shareByEmail");
 }
 
 void TitleBar::onShareButtonClicked()
 {
     m_editor->shareNoteByLink();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("shareByLink");
+    WizGetAnalyzer().LogAction("shareByLink");
 }
 
 void TitleBar::onAttachButtonClicked()
@@ -502,8 +502,7 @@ void TitleBar::onAttachButtonClicked()
         m_attachments->showAtPoint(pt);
     }
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showAttachments");
+    WizGetAnalyzer().LogAction("showAttachments");
 }
 
 void TitleBar::onHistoryButtonClicked()
@@ -512,8 +511,7 @@ void TitleBar::onHistoryButtonClicked()
 
     WizShowDocumentHistory(doc, noteView());
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showHistory");
+    WizGetAnalyzer().LogAction("showHistory");
 }
 
 
@@ -529,8 +527,7 @@ void TitleBar::onInfoButtonClicked()
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showNoteInfo");
+    WizGetAnalyzer().LogAction("showNoteInfo");
 }
 
 bool isNetworkAccessible()
@@ -552,14 +549,12 @@ void TitleBar::onCommentsButtonClicked()
     if (comments->isVisible()) {
         comments->hide();
 
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.LogAction("hideComments");
+        WizGetAnalyzer().LogAction("hideComments");
 
         return;
     }
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showComments");
+    WizGetAnalyzer().LogAction("showComments");
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
