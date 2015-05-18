@@ -198,7 +198,6 @@ QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strK
     strUrl.replace("{kbGuid}", strKbGUID);
     strUrl.replace("{documentGuid}", strGUID);
 
-    qDebug() << "comment url : " << m_strCommentUrl;
     return strUrl;
 }
 

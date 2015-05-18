@@ -947,6 +947,7 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
             }
             break;
         default:
+            qDebug() << QString("%1 is a wiz internal url , but we can not identify it");
             break;
         }
     }
@@ -955,13 +956,12 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
         QString strUrl = url.toString();
         if (strUrl.left(12) == "http://file/")
         {
-            strUrl.replace(0, 12, "file:/");
-            QDesktopServices::openUrl(strUrl);
-            return;
+            strUrl.replace(0, 12, "file:/");            
         }
-    }
 
-    QDesktopServices::openUrl(url);
+        qDebug() << "Open url " << strUrl;
+        QDesktopServices::openUrl(strUrl);
+    }
 }
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)
