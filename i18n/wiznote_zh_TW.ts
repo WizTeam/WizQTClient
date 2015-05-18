@@ -1044,9 +1044,14 @@
 <context>
     <name>CWizLoginDialog</name>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="500"/>
+        <location filename="../src/wizLoginDialog.cpp" line="502"/>
         <source>Password</source>
         <translation>密碼</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="506"/>
+        <source>Please search or input your server IP</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="510"/>
@@ -1060,7 +1065,7 @@
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="869"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1194"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1197"/>
         <source>No account yet,</source>
         <translation>還沒有帳號，</translation>
     </message>
@@ -1070,52 +1075,45 @@
         <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="368"/>
+        <location filename="../src/wizLoginDialog.cpp" line="369"/>
         <source>Can not open database while update user profile</source>
         <translation>更新使用者檔案時無法開啟資料庫</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="295"/>
-        <location filename="../src/wizLoginDialog.cpp" line="687"/>
+        <location filename="../src/wizLoginDialog.cpp" line="296"/>
         <location filename="../src/wizLoginDialog.cpp" line="782"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1181"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1184"/>
         <source>There is no server address, please input it.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="165"/>
+        <location filename="../src/wizLoginDialog.cpp" line="166"/>
         <source>Sign in to WizNote Server</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="168"/>
+        <location filename="../src/wizLoginDialog.cpp" line="169"/>
         <source>Sign in to Enterprise Private Server (WizBox)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="171"/>
+        <location filename="../src/wizLoginDialog.cpp" line="172"/>
         <source>Find WizBox...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="172"/>
+        <location filename="../src/wizLoginDialog.cpp" line="173"/>
         <source>About WizBox...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="301"/>
+        <location filename="../src/wizLoginDialog.cpp" line="302"/>
         <source>The user name can&apos;t switch to enterprise server, it was signed in to WizNote.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="309"/>
+        <location filename="../src/wizLoginDialog.cpp" line="310"/>
         <source>The user name can&apos;t switch to WizNote, it was signed in to enterprise server. </source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../src/wizLoginDialog.cpp" line="505"/>
-        <location filename="../src/wizLoginDialog.cpp" line="506"/>
-        <source>Please search or input your server ip</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1169,7 +1167,7 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="1248"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1251"/>
         <source>Already got account,</source>
         <translation>已有帳號，</translation>
     </message>
@@ -1189,20 +1187,14 @@
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="295"/>
-        <location filename="../src/wizLoginDialog.cpp" line="301"/>
-        <location filename="../src/wizLoginDialog.cpp" line="309"/>
+        <location filename="../src/wizLoginDialog.cpp" line="296"/>
+        <location filename="../src/wizLoginDialog.cpp" line="302"/>
+        <location filename="../src/wizLoginDialog.cpp" line="310"/>
         <location filename="../src/wizLoginDialog.cpp" line="782"/>
         <location filename="../src/wizLoginDialog.cpp" line="824"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1167"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1181"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1184"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
-    </message>
-    <message>
-        <location filename="../src/wizLoginDialog.cpp" line="1167"/>
-        <source>Server ip should set to be static</source>
-        <translation type="unfinished"></translation>
     </message>
 </context>
 <context>
@@ -1777,12 +1769,12 @@ w: %3  h: %4</translation>
 <context>
     <name>CWizSearchEdit</name>
     <message>
-        <location filename="../src/wizSearchWidget.cpp" line="100"/>
+        <location filename="../src/wizSearchWidget.cpp" line="101"/>
         <source>Advanced search</source>
         <translation>高級搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizSearchWidget.cpp" line="101"/>
+        <location filename="../src/wizSearchWidget.cpp" line="102"/>
         <source>Add custom search</source>
         <translation>添加自定義搜索</translation>
     </message>
@@ -2164,7 +2156,7 @@ w: %3  h: %4</translation>
         <translation>當前網絡狀況不佳，您正處於 &lt;b&gt; 離線編輯模式 &lt;/b&gt;。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="801"/>
+        <location filename="../src/wizDocumentView.cpp" line="800"/>
         <source>New version on server avalible. &lt;a href=&apos;%1&apos;&gt;Click to down load new version.&lt;a&gt;</source>
         <translation>檢測到當前筆記有更新，&lt;a href=&apos;%1&apos;&gt;下載更新&lt;a&gt;</translation>
     </message>
@@ -2190,47 +2182,47 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::Internal::CTagItem</name>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="644"/>
+        <location filename="../src/core/wizTagBar.cpp" line="652"/>
         <source>Rename...</source>
         <translation type="unfinished">重命名...</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="647"/>
+        <location filename="../src/core/wizTagBar.cpp" line="655"/>
         <source>Remove</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="649"/>
+        <location filename="../src/core/wizTagBar.cpp" line="657"/>
         <source>Delete</source>
         <translation type="unfinished">刪除</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="655"/>
+        <location filename="../src/core/wizTagBar.cpp" line="663"/>
         <source>Rename tag</source>
         <translation type="unfinished">重新命名標籤</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="656"/>
+        <location filename="../src/core/wizTagBar.cpp" line="664"/>
         <source>Please input tag name: </source>
         <translation type="unfinished">請輸入標簽名稱：</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="679"/>
+        <location filename="../src/core/wizTagBar.cpp" line="687"/>
         <source>Delete tag</source>
         <translation type="unfinished">刪除標籤</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="681"/>
+        <location filename="../src/core/wizTagBar.cpp" line="689"/>
         <source>Cancel</source>
         <translation type="unfinished">取消</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="682"/>
+        <location filename="../src/core/wizTagBar.cpp" line="690"/>
         <source>OK</source>
         <translation type="unfinished">確定</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="685"/>
+        <location filename="../src/core/wizTagBar.cpp" line="693"/>
         <source>Do you really want to delete tag: %1 ? (include child tags if any)</source>
         <translation type="unfinished">確定要刪除標籤 %1 嗎？（如果存在子標籤也將被刪除）</translation>
     </message>
@@ -2238,12 +2230,12 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::Internal::CWizTagBar</name>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="44"/>
+        <location filename="../src/core/wizTagBar.cpp" line="45"/>
         <source>Tag</source>
         <translation type="unfinished">標籤</translation>
     </message>
     <message>
-        <location filename="../src/core/wizTagBar.cpp" line="453"/>
+        <location filename="../src/core/wizTagBar.cpp" line="460"/>
         <source>Click here to add tags</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2356,26 +2348,26 @@ w: %3  h: %4</translation>
         <translation>插入代碼</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1236"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1240"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1235"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1239"/>
         <source>transparent</source>
         <translation>清除顏色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1245"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1248"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1244"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1247"/>
         <source>show more colors...</source>
         <translation>顯示更多顏色...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1355"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1448"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1354"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1447"/>
         <source>Save as...</source>
         <translation>另存爲...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1356"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1449"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1355"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1448"/>
         <source>Image Files (*.%1)</source>
         <translation>圖片檔案 (*.%1)</translation>
     </message>
@@ -2388,126 +2380,126 @@ w: %3  h: %4</translation>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1728"/>
+        <location filename="../src/wizmainwindow.cpp" line="1726"/>
         <source>1 note</source>
         <translation>1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1734"/>
-        <location filename="../src/wizmainwindow.cpp" line="1738"/>
+        <location filename="../src/wizmainwindow.cpp" line="1732"/>
+        <location filename="../src/wizmainwindow.cpp" line="1736"/>
         <source>%1 notes</source>
         <translation>%1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="490"/>
+        <location filename="../src/wizmainwindow.cpp" line="488"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="482"/>
-        <location filename="../src/wizmainwindow.cpp" line="1264"/>
+        <location filename="../src/wizmainwindow.cpp" line="480"/>
+        <location filename="../src/wizmainwindow.cpp" line="1262"/>
+        <location filename="../src/wizmainwindow.cpp" line="1878"/>
         <location filename="../src/wizmainwindow.cpp" line="1881"/>
-        <location filename="../src/wizmainwindow.cpp" line="1884"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="482"/>
+        <location filename="../src/wizmainwindow.cpp" line="480"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1264"/>
+        <location filename="../src/wizmainwindow.cpp" line="1262"/>
         <source>Can not share encrpyted notes.</source>
         <translation>加密筆記不能創建公開鏈接。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1276"/>
+        <location filename="../src/wizmainwindow.cpp" line="1274"/>
         <source>Upgrading to VIP</source>
         <translation>升級VIP</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1278"/>
+        <location filename="../src/wizmainwindow.cpp" line="1276"/>
         <source>Only VIP user can create link, please retry after upgrading to VIP and syncing to server.</source>
         <translation>僅 VIP 用戶能創建鏈接，請升級 VIP 並同步後重試！</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1279"/>
+        <location filename="../src/wizmainwindow.cpp" line="1277"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1280"/>
+        <location filename="../src/wizmainwindow.cpp" line="1278"/>
         <source>Upgrade now</source>
         <translation type="unfinished">立即升級</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1449"/>
+        <location filename="../src/wizmainwindow.cpp" line="1447"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1675"/>
+        <location filename="../src/wizmainwindow.cpp" line="1673"/>
         <source>Unread Messages</source>
         <translation>未讀消息</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1684"/>
+        <location filename="../src/wizmainwindow.cpp" line="1682"/>
         <source>Mark all messages read</source>
         <translation>全部標記為為已讀</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3355"/>
+        <location filename="../src/wizmainwindow.cpp" line="3326"/>
         <source>downloading...</source>
         <translation>正在下載...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2384"/>
+        <location filename="../src/wizmainwindow.cpp" line="2357"/>
         <source>Open Directory</source>
         <translation>選擇文件夾</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2647"/>
+        <location filename="../src/wizmainwindow.cpp" line="2618"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3123"/>
+        <location filename="../src/wizmainwindow.cpp" line="3094"/>
         <source>Show/Hide MainWindow</source>
         <translation>顯示/隱藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3126"/>
+        <location filename="../src/wizmainwindow.cpp" line="3097"/>
         <source>New Note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3131"/>
+        <location filename="../src/wizmainwindow.cpp" line="3102"/>
         <source>Hide TrayIcon</source>
         <translation>隱藏托盤圖標</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3135"/>
+        <location filename="../src/wizmainwindow.cpp" line="3106"/>
         <source>Logout</source>
         <translation>註銷</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3137"/>
+        <location filename="../src/wizmainwindow.cpp" line="3108"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3354"/>
+        <location filename="../src/wizmainwindow.cpp" line="3325"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下載附件  %1</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2324"/>
+        <location filename="../src/wizmainwindow.cpp" line="2299"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜尋索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2327"/>
+        <location filename="../src/wizmainwindow.cpp" line="2302"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引會非常慢。只有在您的搜索出現異常的時候才需要使用這個功能。</translation>
     </message>
