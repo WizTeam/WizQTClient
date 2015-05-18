@@ -404,16 +404,14 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("exit");
+    WizGetAnalyzer().LogAction("exit");
 
     qApp->exit();
 }
 
 void MainWindow::on_actionClose_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("close");
+    WizGetAnalyzer().LogAction("close");
 
 #ifdef Q_OS_MAC
     QWidget* wgt = qApp->activeWindow();
@@ -1788,8 +1786,7 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("syncAll");
+    WizGetAnalyzer().LogAction("syncAll");
 
 //    if (::WizIsOffline())
 //    {
@@ -1890,8 +1887,7 @@ void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, co
 
 void MainWindow::on_actionNewNote_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("newNote");
+    WizGetAnalyzer().LogAction("newNote");
 
     initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
@@ -1907,8 +1903,7 @@ void MainWindow::on_actionNewNote_triggered()
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("newNoteByTemplate");
+    WizGetAnalyzer().LogAction("newNoteByTemplate");
 
     //通过模板创建笔记
     CWizDocTemplateDialog dlg;
@@ -1918,16 +1913,14 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("undo");
+    WizGetAnalyzer().LogAction("undo");
 
     m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("redo");
+    WizGetAnalyzer().LogAction("redo");
 
     m_doc->web()->redo();
 }
@@ -1988,24 +1981,21 @@ void MainWindow::on_actionMoveToLineEnd_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cut");
+    WizGetAnalyzer().LogAction("cut");
 
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("copy");
+    WizGetAnalyzer().LogAction("copy");
 
     m_doc->web()->triggerPageAction(QWebPage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("paste");
+    WizGetAnalyzer().LogAction("paste");
 
     m_doc->web()->setPastePlainTextEnable(false);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -2013,8 +2003,7 @@ void MainWindow::on_actionEditingPaste_triggered()
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("pastePlain");
+    WizGetAnalyzer().LogAction("pastePlain");
 
     m_doc->web()->setPastePlainTextEnable(true);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -2022,8 +2011,7 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("selectAll");
+    WizGetAnalyzer().LogAction("selectAll");
 
     m_doc->web()->triggerPageAction(QWebPage::SelectAll);
 }
@@ -2037,8 +2025,7 @@ void MainWindow::on_actionEditingDelete_triggered()
 
 void MainWindow::on_actionViewToggleCategory_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("toggleCategory");
+    WizGetAnalyzer().LogAction("toggleCategory");
 
     QWidget* category = m_splitter->widget(0);
     if (category->isVisible()) {
@@ -2058,8 +2045,7 @@ void MainWindow::on_actionViewToggleCategory_triggered()
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("fullscreen");
+    WizGetAnalyzer().LogAction("fullscreen");
 
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
@@ -2075,8 +2061,7 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 
 void MainWindow::on_actionViewMinimize_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("minimize");
+    WizGetAnalyzer().LogAction("minimize");
 
     while (true) {
         QWidget* wgt = qApp->activeWindow();
@@ -2089,8 +2074,7 @@ void MainWindow::on_actionViewMinimize_triggered()
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("markAllMessagesRead");
+    WizGetAnalyzer().LogAction("markAllMessagesRead");
 
     m_msgList->markAllMessagesReaded();
 }
@@ -2223,14 +2207,12 @@ void MainWindow::on_actionConsole_triggered()
 
     m_console->show();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("console");
+    WizGetAnalyzer().LogAction("console");
 }
 
 void MainWindow::on_actionLogout_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("logout");
+    WizGetAnalyzer().LogAction("logout");
 
     // save state
     m_settings->setAutoLogin(false);
@@ -2240,8 +2222,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("aboutWiz");
+    WizGetAnalyzer().LogAction("aboutWiz");
 
     AboutDialog dialog(this);
     dialog.exec();
@@ -2251,15 +2232,13 @@ void MainWindow::on_actionDeveloper_triggered()
 {
     m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("developerMode");
+    WizGetAnalyzer().LogAction("developerMode");
 }
 
 
 void MainWindow::on_actionPreference_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("preference");
+    WizGetAnalyzer().LogAction("preference");
 
     CWizPreferenceWindow preference(*this, this);
 
@@ -2283,8 +2262,7 @@ void MainWindow::on_actionFeedback_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("feedback");
+    WizGetAnalyzer().LogAction("feedback");
 }
 
 void MainWindow::on_actionSupport_triggered()
@@ -2296,8 +2274,7 @@ void MainWindow::on_actionSupport_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("support");
+    WizGetAnalyzer().LogAction("support");
 }
 
 void MainWindow::on_actionManual_triggered()
@@ -2310,14 +2287,12 @@ void MainWindow::on_actionManual_triggered()
     strUrl += "&site=www&name=manual/mac/index.html";
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("manual");
+    WizGetAnalyzer().LogAction("manual");
 }
 
 void MainWindow::on_actionRebuildFTS_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("rebuildFTS");
+    WizGetAnalyzer().LogAction("rebuildFTS");
 
     QMessageBox msg;
     msg.setIcon(QMessageBox::Warning);
@@ -2328,7 +2303,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
     if (QMessageBox::Ok == msg.exec())
     {
-        analyzer.LogAction("rebuildFTSConfirm");
+        WizGetAnalyzer().LogAction("rebuildFTSConfirm");
 
         rebuildFTS();
     }
@@ -2338,8 +2313,7 @@ void MainWindow::on_actionSearch_triggered()
 {
     m_searchWidget->focus();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("search");
+    WizGetAnalyzer().LogAction("search");
 }
 
 void MainWindow::on_actionResetSearch_triggered()
@@ -2350,8 +2324,7 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("resetSearch");
+    WizGetAnalyzer().LogAction("resetSearch");
 }
 
 void MainWindow::on_actionAdvancedSearch_triggered()
@@ -2494,8 +2467,7 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
 void MainWindow::on_actionGoBack_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("goBack");
+    WizGetAnalyzer().LogAction("goBack");
 
     if (!m_history->canBack())
         return;
@@ -2517,8 +2489,7 @@ void MainWindow::on_actionGoBack_triggered()
 
 void MainWindow::on_actionGoForward_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("goForward");
+    WizGetAnalyzer().LogAction("goForward");
 
     if (!m_history->canForward())
         return;

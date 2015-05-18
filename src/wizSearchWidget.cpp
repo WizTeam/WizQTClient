@@ -4,6 +4,7 @@
 #include "mac/wizSearchWidget_mm.h"
 #else
 #include "share/wizsettings.h"
+#include "share/wizAnalyzer.h"
 #include "wizdef.h"
 #include "utils/stylehelper.h"
 
@@ -104,11 +105,13 @@ CWizSearchEdit::CWizSearchEdit(QWidget* parent)
 
 void CWizSearchEdit::on_actionAdvancedSearch()
 {
+    WizGetAnalyzer().LogAction("advancedSearchOnSearchWidget");
     emit advanceSearchRequest();
 }
 
 void CWizSearchEdit::on_addCustomSearch()
 {
+    WizGetAnalyzer().LogAction("customSearchOnSearchWidget");
     emit addCustomSearchRequest();
 }
 

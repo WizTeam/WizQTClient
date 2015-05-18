@@ -26,6 +26,7 @@
 #include "sync/apientry.h"
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
+#include "share/wizAnalyzer.h"
 #include "sync/wizkmxmlrpc.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
@@ -489,6 +490,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strLoginBottomLineEditor = WizGetSkinResourceFileName(strThemeName, "loginBottomLineEditor");
     QString strIconPerson = WizGetSkinResourceFileName(strThemeName, "loginIconPerson");
     QString strIconKey = WizGetSkinResourceFileName(strThemeName, "loginIconKey");
+    QString strIconServer = WizGetSkinResourceFileName(strThemeName, "loginIconServer");
     ui->wgt_usercontainer->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_usercontainer->setLeftIcon(strIconPerson);
     ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
@@ -500,10 +502,8 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     m_lineEditPassword->setPlaceholderText(tr("Password"));
 
     ui->wgt_serveroptioncontainer->setBackgroundImage(strLoginBottomLineEditor, QPoint(8, 8));
-    ui->wgt_serveroptioncontainer->setLeftIcon(strIconKey);
-//    ui->wgt_serveroptioncontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
-    m_lineEditServer->setText(tr("Please search or input your server ip"));
-    m_lineEditServer->setPlaceholderText(tr("Please search or input your server ip"));
+    ui->wgt_serveroptioncontainer->setLeftIcon(strIconServer);
+    m_lineEditServer->setPlaceholderText(tr("Please search or input your server IP"));
 
     ui->wgt_newUser->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_newUser->setLeftIcon(strIconPerson);
@@ -666,6 +666,7 @@ void CWizLoginDialog::showSearchingDialog()
     if (!m_searchingDialog) {
         initSearchingDialog();
     }
+    m_searchingDialog->clearFocus();
 
     //
 #ifdef Q_OS_MAC
@@ -684,7 +685,6 @@ void CWizLoginDialog::showSearchingDialog()
         if (m_currentUserServerType != WizServer)
         {
             m_lineEditServer->clear();
-            m_lineEditServer->setPlaceholderText(tr("There is no server address, please input it."));
             m_serverType = EnterpriseServer;
         }
     }
@@ -1002,6 +1002,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
 //                                                       " it was signed in to enterprise server."));
 //                return;
 //            }
+
             m_serverType = WizServer;
             emit wizServerSelected();
         }
@@ -1162,11 +1163,13 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     }
 
     closeWizBoxUdpClient();
-    if (iptype != "static")
-    {
-        CWizMessageBox::warning(this, tr("Info"), tr("Server ip should set to be static"));
-        return;
-    }
+    //
+//    if (iptype != "static")
+//    {
+//        CWizMessageBox::warning(this, tr("Info"), tr("Server ip should set to be static"));
+//        m_searchingDialog->reject();
+//        return;
+//    }
     m_searchingDialog->accept();
     m_lineEditServer->setText(ip);
     m_serverType = EnterpriseServer;

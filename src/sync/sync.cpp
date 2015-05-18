@@ -1795,8 +1795,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (WizIsDayFirstSync(pDatabase))
     {
 #endif
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.Post(pDatabase);
+        WizGetAnalyzer().Post(pDatabase);
 #ifndef QT_DEBUG
     }
 #endif

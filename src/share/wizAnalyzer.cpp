@@ -420,14 +420,17 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     ::DeleteFile(m_strRecordFileName);	//remove old file
 }
 
-CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
+QString analyzerFile()
 {
-//    QSettings globalSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
-//    QString strUserId = globalSettings.value("Users/DefaultUser").toString();
+    qDebug() << "analyzerFile  called";
     QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
     QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
+    return strFile;
+}
 
-    static CWizAnalyzer analyzer(strFile);
+CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
+{    
+    static CWizAnalyzer analyzer(analyzerFile());
 	//
     return analyzer;
 }
