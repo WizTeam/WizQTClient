@@ -510,6 +510,8 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return false; }
     virtual int getSortOrder() const { return 12; }
+    //
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 };
 
 #endif // WIZCATEGORYVIEWITEM_H

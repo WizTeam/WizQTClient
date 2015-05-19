@@ -1825,6 +1825,21 @@ bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem
     return false;
 }
 
+void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+{
+    if (!acceptDrop(data))
+        return;
+
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+
+    if (!forceCopy && kbGUID() == data.strKbGUID)
+    {
+//        CWizFolder folder(myDb, location());
+        CWizDocument doc(myDb, data);
+        doc.Delete();
+    }
+}
+
 
 /* ------------------------------ CWizCategoryViewSearchItem ------------------------------ */
 
