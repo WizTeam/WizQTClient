@@ -9,6 +9,7 @@ class ApiEntry
 {
 public:
     static void setEnterpriseServerIP(const QString& strIP);
+    static void setLanguage(const QString& strLocal);
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageVersionUrl();

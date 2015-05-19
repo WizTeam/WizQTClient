@@ -227,7 +227,7 @@ void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDAT
     if (view != this)
         return;
 
-    if (doc.tCreated.secsTo(QDateTime::currentDateTime()) == 0) {
+    if (doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1) {
         viewNote(doc, true);
     } else {
         viewNote(doc, false);

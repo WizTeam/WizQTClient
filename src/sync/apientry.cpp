@@ -70,6 +70,7 @@ using namespace WizService::Internal;
 
 ApiEntryPrivate::ApiEntryPrivate()
     : m_strEnterpriseAPIUrl(WIZNOTE_API_SERVER)
+    , m_strLocal(QLocale::system().name())
 {
 }
 
@@ -99,6 +100,11 @@ void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
     m_strCommentCountUrl.clear();
 }
 
+void ApiEntryPrivate::setLanguage(const QString& strLocal)
+{
+    m_strLocal = strLocal;
+}
+
 QString ApiEntryPrivate::asServerUrl()
 {
     QString strAsUrl;
@@ -114,7 +120,7 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizS
     QString strUrl = QString(WIZNOTE_API_ENTRY)
             .arg(bUseWizServer ? WIZNOTE_API_SERVER : m_strEnterpriseAPIUrl)\
             .arg(WIZNOTE_API_ARG_PRODUCT)\
-            .arg(QLocale::system().name())\
+            .arg(m_strLocal)\
             .arg(WIZ_CLIENT_VERSION)\
             .arg(strCommand)\
             .arg(qrand())\
@@ -384,6 +390,11 @@ static CGarbo Garbo;
 void ApiEntry::setEnterpriseServerIP(const QString& strIP)
 {
     return Garbo.apiHelper->setEnterpriseServerIP(strIP);
+}
+
+void ApiEntry::setLanguage(const QString& strLocal)
+{
+    return Garbo.apiHelper->setLanguage(strLocal);
 }
 
 QString ApiEntry::syncUrl()

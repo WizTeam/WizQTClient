@@ -16,6 +16,7 @@ public:
     ~ApiEntryPrivate();
 
     void setEnterpriseServerIP(const QString& strIP);
+    void setLanguage(const QString& strLocal);
     QString syncUrl();
     QString asServerUrl();
     QString messageVersionUrl();
@@ -54,6 +55,9 @@ private:
     QString m_strCommentUrl;
     QString m_strCommentCountUrl;
     QMap<QString, QString> m_mapkUrl;
+
+    //
+    QString m_strLocal;
 
     QString urlFromCommand(const QString& strCommand, bool bUseWizServer);
     QString addExtendedInfo(const QString& strUrl, const QString& strExt);

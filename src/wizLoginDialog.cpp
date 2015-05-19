@@ -663,10 +663,12 @@ void CWizLoginDialog::searchWizBoxServer()
 
 void CWizLoginDialog::showSearchingDialog()
 {
-    if (!m_searchingDialog) {
-        initSearchingDialog();
+    if (m_searchingDialog)
+    {
+        //NOTE:修复按钮样式问题，每次重新创建
+        delete m_searchingDialog;
     }
-    m_searchingDialog->clearFocus();
+    initSearchingDialog();
 
     //
 #ifdef Q_OS_MAC

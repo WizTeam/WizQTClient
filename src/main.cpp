@@ -340,6 +340,8 @@ int mainCore(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
+    WizService::ApiEntry::setLanguage(strLocale);
+
     CWizDatabaseManager dbMgr(strUserId);
     if (!dbMgr.openAll()) {
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
