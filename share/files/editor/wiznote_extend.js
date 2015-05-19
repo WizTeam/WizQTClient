@@ -50,6 +50,10 @@ try {
         WizEditor.onNoteLoadFinished();
     });
 
+    editor.addListener('contentchange', function() {
+        WizEditor.setContentsChanged(true);
+    });
+
 } catch (err) {
     alert(err);
 }
