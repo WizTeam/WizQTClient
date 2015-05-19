@@ -50,9 +50,10 @@ try {
         WizEditor.onNoteLoadFinished();
     });
 
-    editor.addListener('contentchange', function() {
-        WizEditor.setContentsChanged(true);
-    });
+    //NOTE: 不能监听contentchange事件，否则仅仅进入编辑状态就会修改笔记为已修改
+    // editor.addListener('contentchange', function() {
+    //     WizEditor.setContentsChanged(true);
+    // });
 
 } catch (err) {
     alert(err);
