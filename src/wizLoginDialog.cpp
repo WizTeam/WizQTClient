@@ -656,7 +656,7 @@ void CWizLoginDialog::searchWizBoxServer()
     startWizBoxUdpClient();        
 
     emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
-    qDebug() << "call func form " << QThread::currentThread();
+//    qDebug() << "call func form " << QThread::currentThread();
     m_wizBoxSearchingTimer.start(10 * 1000);
     showSearchingDialog();
 }
@@ -756,7 +756,7 @@ void CWizLoginDialog::startWizBoxUdpClient()
                 m_udpClient, SLOT(boardcast(int,QString)), Qt::QueuedConnection);
 
         m_udpThread = new QThread(this);
-        qDebug() << "create thread : " << m_udpThread;
+//        qDebug() << "create thread : " << m_udpThread;
         m_udpClient->moveToThread(m_udpThread);
     }
 
@@ -933,7 +933,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
 
-    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
+//    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
 
     emit accountCheckFinished();
     if (strToken.isEmpty())
@@ -1188,7 +1188,6 @@ void CWizLoginDialog::onWizBoxSearchingTimeOut()
 
 void CWizLoginDialog::onWizLogInStateEntered()
 {
-    qDebug() << "CWizLoginDialog::onWizLogInStateEntered()";
     ui->stackedWidget->setCurrentIndex(0);
     ui->label_noaccount->setVisible(true);
     ui->btn_changeToLogin->setVisible(false);
@@ -1217,7 +1216,6 @@ void CWizLoginDialog::onWizLogInStateEntered()
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
 {
-    qDebug() << "CWizLoginDialog::onWizBoxLogInStateEntered()";
     ui->stackedWidget->setCurrentIndex(0);
     ui->label_noaccount->setVisible(false);
     ui->btn_changeToSignin->setVisible(false);
@@ -1243,7 +1241,6 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
 
 void CWizLoginDialog::onWizSignUpStateEntered()
 {
-    qDebug() << "CWizLoginDialog::onWizSignUpStateEntered()";
     ui->btn_selectServer->setVisible(false);
     ui->stackedWidget->setCurrentIndex(1);
     ui->btn_changeToLogin->setVisible(true);
@@ -1259,7 +1256,6 @@ void CWizLoginDialog::onWizSignUpStateEntered()
 
 void CWizLoginDialog::onLogInCheckStart()
 {
-    qDebug() << "CWizLoginDialog::onLogInCheckStart()";
     enableLoginControls(false);
 }
 
