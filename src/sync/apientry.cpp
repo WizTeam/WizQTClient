@@ -137,7 +137,7 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
 
     CWizAutoTimeOutEventLoop loop(reply);
-    loop.exec();
+    loop.exec(QEventLoop::ExcludeUserInputEvents);    
 
     if (loop.timeOut())
         return NULL;
@@ -145,7 +145,9 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     if (loop.error() != QNetworkReply::NoError)
         return NULL;
 
-    reply->deleteLater();
+    //NOTE: reply has been delete in event loop, should not be deleted here
+//    reply->deleteLater();
+
     net->deleteLater();
 
     return loop.result();

@@ -388,7 +388,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
-    reply->deleteLater();
 
     if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
     {
@@ -422,7 +421,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
 QString analyzerFile()
 {
-    qDebug() << "analyzerFile  called";
     QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
     QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
     return strFile;
