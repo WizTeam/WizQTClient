@@ -55,9 +55,9 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
     {
         QNetworkReply* reply = m_network->post(request, data.toData());
         CWizXmlRpcEventLoop loop(reply);
-        qDebug() << "[Sync]Start a xml rpc event loop";
+//        qDebug() << "[Sync]Start a xml rpc event loop";
         loop.exec();
-        qDebug() << "[Sync]Xml rpc event loop finished";
+//        qDebug() << "[Sync]Xml rpc event loop finished";
         //
         if (loop.timeOut() && nCounter == 0)
         {

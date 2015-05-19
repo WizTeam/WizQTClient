@@ -34,12 +34,13 @@ using namespace Core;
 using namespace Core::Internal;
 
 
-#define DOCUMENT_PERSONAL           0x0000
-#define DOCUMENT_GROUP                 0x0001
-#define DOCUMENT_OFFLINE               0x0002
-#define DOCUMENT_FIRSTTIMEVIEW     0x0004
-#define DOCUMENT_EDITBYOTHERS   0x0008
-#define DOCUMENT_NEWVERSIONFOUNDED      0x0016
+#define DOCUMENT_STATUS_NOSTATUS            0x0000
+#define DOCUMENT_STATUS_GROUP                 0x0001
+#define DOCUMENT_STATUS_OFFLINE               0x0002
+#define DOCUMENT_STATUS_FIRSTTIMEVIEW     0x0004
+#define DOCUMENT_STATUS_EDITBYOTHERS   0x0008
+#define DOCUMENT_STATUS_NEWVERSIONFOUNDED      0x0010
+#define DOCUMENT_STATUS_PERSONAL           0x0020
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
@@ -61,7 +62,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_noteLoaded(false)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
     //, m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
-    , m_status(0)
+    , m_editStatus(0)
 {
     m_title->setEditor(m_web);
 
@@ -292,10 +293,10 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     }
 
     bool bGroup = m_dbMgr.db(data.strKbGUID).IsGroup();
-    m_status = m_status & DOCUMENT_PERSONAL;
+    m_editStatus = m_editStatus & DOCUMENT_STATUS_PERSONAL;
     if (bGroup)
     {
-        m_status = m_status | DOCUMENT_GROUP | DOCUMENT_FIRSTTIMEVIEW;
+        m_editStatus = m_editStatus | DOCUMENT_STATUS_GROUP | DOCUMENT_STATUS_FIRSTTIMEVIEW;
     }
     if (::WizIsDocumentContainsFrameset(data))
     {
@@ -566,6 +567,7 @@ void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool 
                 //            qDebug() << "document editable , hide message tips.";
                 m_title->hideMessageTips(true);
                 m_title->setEditButtonState(true, false);
+                m_bLocked = false;
             }
         }
         stopCheckDocumentAnimations();
@@ -622,6 +624,7 @@ void CWizDocumentView::stopDocumentEditingStatus()
 
 void CWizDocumentView::startCheckDocumentEditStatus()
 {
+    m_editStatus = DOCUMENT_STATUS_NOSTATUS;
     emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
@@ -634,13 +637,15 @@ bool CWizDocumentView::checkDocumentEditable()
 {
     QEventLoop loop;
     connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
+    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), &loop, SLOT(quit()));
     startCheckDocumentEditStatus();
     loop.exec();
     //
 
-    bool editByOther = m_status & DOCUMENT_EDITBYOTHERS;
-    bool newVersion = m_status & DOCUMENT_NEWVERSIONFOUNDED;
-    return !(editByOther || newVersion);
+    bool editByOther = m_editStatus & DOCUMENT_STATUS_EDITBYOTHERS;
+    bool newVersion = m_editStatus & DOCUMENT_STATUS_NEWVERSIONFOUNDED;
+    bool isOffLine = m_editStatus & DOCUMENT_STATUS_OFFLINE;
+    return !(editByOther || newVersion) || isOffLine;
 }
 
 void CWizDocumentView::stopCheckDocumentAnimations()
@@ -742,12 +747,12 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
                 qDebug() << "[EditStatus]:editing by myself.";
                 m_title->hideMessageTips(true);
                 m_title->setEditButtonState(true, false);
-                m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
+                m_editStatus = m_editStatus & ~DOCUMENT_STATUS_EDITBYOTHERS;
             }
             else
             {
                 m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
-                m_status = m_status | DOCUMENT_EDITBYOTHERS;
+                m_editStatus = m_editStatus | DOCUMENT_STATUS_EDITBYOTHERS;
                 if (m_note.nVersion == -1)
                 {
                     m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note.")).arg(strEditor));
@@ -765,7 +770,7 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
         if (strGUID == m_note.strGUID)
         {
             m_title->setEditButtonState(!m_bLocked, false);
-            m_status = m_status & ~DOCUMENT_EDITBYOTHERS;
+            m_editStatus = m_editStatus & ~DOCUMENT_STATUS_EDITBYOTHERS;
         }
     }
 }
@@ -774,14 +779,15 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
     if (strGUID == m_note.strGUID)
     {
-        if (!(m_status & DOCUMENT_OFFLINE))
+        if (!(m_editStatus & DOCUMENT_STATUS_OFFLINE))
         {
             m_title->setEditButtonState(true, false);
             m_title->showMessageTips(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
-            m_status = m_status | DOCUMENT_OFFLINE;
+            m_editStatus = m_editStatus | DOCUMENT_STATUS_OFFLINE;
         }
+        m_bLocked = false;
+        stopCheckDocumentAnimations();
     }
-    stopCheckDocumentAnimations();
 }
 
 void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
@@ -799,7 +805,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 //            {
                 m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
 //            }
-                m_status |= DOCUMENT_NEWVERSIONFOUNDED;
+                m_editStatus |= DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }
         else
         {
@@ -822,9 +828,9 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
 
-            m_status &= ~DOCUMENT_NEWVERSIONFOUNDED;
+            m_editStatus &= ~DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }
-        m_status = m_status & ~DOCUMENT_FIRSTTIMEVIEW;
+        m_editStatus = m_editStatus & ~DOCUMENT_STATUS_FIRSTTIMEVIEW;
     }
 }
 

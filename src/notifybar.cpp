@@ -8,10 +8,12 @@
 #include "widgets/wizImageButton.h"
 #include "utils/stylehelper.h"
 
+
 using namespace Core::Internal;
 
 NotifyBar::NotifyBar(QWidget *parent)
     : QWidget(parent)
+    , m_type(NoNotify)
 {
     //setStyleSheet("* {font-size:12px; color: #FFFFFF;} *:active {background: url(:/notify_bg.png);} *:!active {background: url(:/notify_bg_inactive.png);}");
 //    setFixedHeight(Utils::StyleHelper::notifyBarHeight());
@@ -46,8 +48,13 @@ NotifyBar::NotifyBar(QWidget *parent)
 
 void NotifyBar::showPermissionNotify(int type)
 {
+    if (m_type == type)
+        return;
+
+    hideNotify(false);
     setStyleForPermission();
 
+    m_type = (NotifyType)type;
     switch (type) {
     case Locked:
         m_labelNotify->setText(QObject::tr("The note is locked and read only, press unlock button if you need edit."));
@@ -80,6 +87,7 @@ void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
         m_labelNotify->setTextFormat(format);
         m_labelNotify->setText(info);
         showNotify();
+        m_type = CustomMessage;
     }
     else
     {
@@ -128,6 +136,7 @@ void NotifyBar::showNotify()
 void NotifyBar::hideNotify(bool bUseAnimation)
 {
     m_animation->stop();
+    m_type = NoNotify;
     if (maximumHeight() > 0)
     {
         if (bUseAnimation)

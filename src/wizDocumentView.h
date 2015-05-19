@@ -91,7 +91,7 @@ private:
     int m_viewMode; // user defined editing mode
     bool m_noteLoaded;
     //
-    int m_status;  // document edit or version status
+    int m_editStatus;  // document edit or version status
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }

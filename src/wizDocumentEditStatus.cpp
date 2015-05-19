@@ -545,6 +545,7 @@ void CWizDocumentStatusChecker::onTimeOut()
 {
     qDebug() << "CWizDocumentStatusChecker time out";
     m_timeOutTimer->stop();
+    m_stop = true;
     emit checkTimeOut(m_strCurGUID);
 }
 
@@ -578,6 +579,7 @@ void CWizDocumentStatusChecker::startRecheck()
 
 void CWizDocumentStatusChecker::startCheck()
 {
+//    qDebug() << "----------    CWizDocumentStatusChecker::startCheck start";
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
 
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
@@ -602,8 +604,10 @@ void CWizDocumentStatusChecker::startCheck()
         return;
     }
 
-
     m_timeOutTimer->stop();
+
+
+//    qDebug() << "------------   CWizDocumentStatusChecker::startCheck  finished";
 
     emit checkEditStatusFinished(m_strCurGUID, !editingByOthers);
 }
