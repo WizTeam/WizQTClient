@@ -696,27 +696,27 @@
 <context>
     <name>CWizDocumentWebView</name>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1740"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1744"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1740"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1744"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2068"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2072"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2119"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2123"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2119"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2123"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -1020,7 +1020,7 @@
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="374"/>
         <source>Can not load receipt!</source>
-        <translation>无法获取收据数据！</translation>
+        <translation>无法获取AppStore证书！</translation>
     </message>
     <message>
         <location filename="../src/widgets/wizIAPDialog.cpp" line="379"/>
@@ -1064,13 +1064,13 @@
         <translation>创建帐号</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="869"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1197"/>
+        <location filename="../src/wizLoginDialog.cpp" line="871"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1199"/>
         <source>No account yet,</source>
         <translation>还没有帐号，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="946"/>
+        <location filename="../src/wizLoginDialog.cpp" line="948"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>网络连接不可用,请检查网络连接.</translation>
     </message>
@@ -1081,8 +1081,8 @@
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="296"/>
-        <location filename="../src/wizLoginDialog.cpp" line="782"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1184"/>
+        <location filename="../src/wizLoginDialog.cpp" line="784"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1186"/>
         <source>There is no server address, please input it.</source>
         <translation>没找到服务器地址，请手动输入服务器地址。</translation>
     </message>
@@ -1147,42 +1147,42 @@
         <translation>两次输入的密码不一致</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="732"/>
+        <location filename="../src/wizLoginDialog.cpp" line="734"/>
         <source>Finding Service....</source>
         <translation>正在查找服务...</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="800"/>
+        <location filename="../src/wizLoginDialog.cpp" line="802"/>
         <source>Can not find server.</source>
         <translation>无法查找到服务器。</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="814"/>
+        <location filename="../src/wizLoginDialog.cpp" line="816"/>
         <source>Can not get licence from server.</source>
         <translation>从服务器获取校验信息失败。</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="824"/>
+        <location filename="../src/wizLoginDialog.cpp" line="826"/>
         <source>The user can&apos;t sigin in to the server, it had been signed in to other servers.</source>
         <translation>该用户在其他服务器上登录过，不能在此服务器上登录。</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="1251"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1253"/>
         <source>Already got account,</source>
         <translation>已有帐号，</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="890"/>
+        <location filename="../src/wizLoginDialog.cpp" line="892"/>
         <source>Please enter user id</source>
         <translation>请输入用户名</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="895"/>
+        <location filename="../src/wizLoginDialog.cpp" line="897"/>
         <source>Please enter user password</source>
         <translation>请输入用户密码</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="961"/>
+        <location filename="../src/wizLoginDialog.cpp" line="963"/>
         <source>User name or password is not correct!</source>
         <translation>用户名或密码错误!</translation>
     </message>
@@ -1190,9 +1190,9 @@
         <location filename="../src/wizLoginDialog.cpp" line="296"/>
         <location filename="../src/wizLoginDialog.cpp" line="302"/>
         <location filename="../src/wizLoginDialog.cpp" line="310"/>
-        <location filename="../src/wizLoginDialog.cpp" line="782"/>
-        <location filename="../src/wizLoginDialog.cpp" line="824"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1184"/>
+        <location filename="../src/wizLoginDialog.cpp" line="784"/>
+        <location filename="../src/wizLoginDialog.cpp" line="826"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1186"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -2136,27 +2136,27 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::CWizDocumentView</name>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="510"/>
+        <location filename="../src/wizDocumentView.cpp" line="511"/>
         <source>You have occupied this note by clicking checklist !  Switch to other notes to free this note.</source>
         <translation>您点击了阅读状态的清单项，当前笔记正被您占用！如需解除，请切换到其他笔记。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="749"/>
+        <location filename="../src/wizDocumentView.cpp" line="754"/>
         <source>%1 is currently editing this note. Note has been locked.</source>
         <translation>当前笔记正在被 %1 编辑，笔记已处于锁定状态。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="753"/>
+        <location filename="../src/wizDocumentView.cpp" line="758"/>
         <source>%1 is currently editing this note.</source>
         <translation>当前笔记正在被 %1 编辑。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="780"/>
+        <location filename="../src/wizDocumentView.cpp" line="785"/>
         <source>The current network in poor condition, you are &lt;b&gt; offline editing mode &lt;/b&gt;.</source>
         <translation>当前网络状况不佳，您正处于 &lt;b&gt; 离线编辑模式 &lt;/b&gt;。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentView.cpp" line="800"/>
+        <location filename="../src/wizDocumentView.cpp" line="806"/>
         <source>New version on server avalible. &lt;a href=&apos;%1&apos;&gt;Click to down load new version.&lt;a&gt;</source>
         <translation>检测到当前笔记有更新，&lt;a href=&apos;%1&apos;&gt;下载更新&lt;a&gt;</translation>
     </message>
@@ -2184,7 +2184,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="652"/>
         <source>Rename...</source>
-        <translation type="unfinished">重命名...</translation>
+        <translation>重命名...</translation>
     </message>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="655"/>
@@ -2219,12 +2219,12 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="690"/>
         <source>OK</source>
-        <translation type="unfinished">确定</translation>
+        <translation>确定</translation>
     </message>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="693"/>
         <source>Do you really want to delete tag: %1 ? (include child tags if any)</source>
-        <translation type="unfinished">确定要删除标签 %1 吗？（如果存在子标签也将被删除）</translation>
+        <translation>确定要删除标签 %1 吗？（如果存在子标签也将被删除）</translation>
     </message>
 </context>
 <context>
@@ -2232,12 +2232,12 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="45"/>
         <source>Tag</source>
-        <translation type="unfinished">标签</translation>
+        <translation>标签</translation>
     </message>
     <message>
         <location filename="../src/core/wizTagBar.cpp" line="460"/>
         <source>Click here to add tags</source>
-        <translation type="unfinished">点此添加标签</translation>
+        <translation>点此添加标签</translation>
     </message>
 </context>
 <context>
@@ -2449,7 +2449,7 @@ w: %3  h: %4</translation>
         <translation>全部标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3326"/>
+        <location filename="../src/wizmainwindow.cpp" line="3328"/>
         <source>downloading...</source>
         <translation>正在下载...</translation>
     </message>
@@ -2459,37 +2459,37 @@ w: %3  h: %4</translation>
         <translation>选择文件夹</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2618"/>
+        <location filename="../src/wizmainwindow.cpp" line="2620"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到笔记 %1 , 该篇笔记可能已被删除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3094"/>
+        <location filename="../src/wizmainwindow.cpp" line="3096"/>
         <source>Show/Hide MainWindow</source>
         <translation>显示/隐藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3097"/>
+        <location filename="../src/wizmainwindow.cpp" line="3099"/>
         <source>New Note</source>
         <translation>新建笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3102"/>
+        <location filename="../src/wizmainwindow.cpp" line="3104"/>
         <source>Hide TrayIcon</source>
         <translation>隐藏托盘图标</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3106"/>
+        <location filename="../src/wizmainwindow.cpp" line="3108"/>
         <source>Logout</source>
         <translation>注销</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3108"/>
+        <location filename="../src/wizmainwindow.cpp" line="3110"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3325"/>
+        <location filename="../src/wizmainwindow.cpp" line="3327"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下载附件  %1</translation>
     </message>
@@ -3118,7 +3118,7 @@ w: %3  h: %4</translation>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/main.cpp" line="345"/>
+        <location filename="../src/main.cpp" line="347"/>
         <source>Can not open database</source>
         <translation>无法打开数据库</translation>
     </message>
@@ -3692,17 +3692,17 @@ w: %3  h: %4</translation>
         <translation>您的群组处于异常状态</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="53"/>
+        <location filename="../src/notifybar.cpp" line="60"/>
         <source>The note is locked and read only, press unlock button if you need edit.</source>
         <translation>笔记已锁定为只读, 如需修改请点击解锁按钮。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="57"/>
+        <location filename="../src/notifybar.cpp" line="64"/>
         <source>This note is deleted, You can edit after move to other folders.</source>
         <translation>这个笔记已被删除, 请移动到其他文件夹之后再进行修改。</translation>
     </message>
     <message>
-        <location filename="../src/notifybar.cpp" line="61"/>
+        <location filename="../src/notifybar.cpp" line="68"/>
         <source>Your permission is not enough to edit this note.</source>
         <translation>您的权限不够, 无法修改这个笔记。</translation>
     </message>
@@ -3905,7 +3905,7 @@ w: %3  h: %4</translation>
         <translation>正在下载，请稍等...</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2126"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2130"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>
