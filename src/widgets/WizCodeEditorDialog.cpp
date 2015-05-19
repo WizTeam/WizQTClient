@@ -80,7 +80,8 @@ void WizCodeEditorDialog::registerJSObject()
 
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
-    QString strHtml = strResultDiv;    
+    QString strHtml = strResultDiv;
+    strHtml.replace("\\", "\\\\");
     strHtml.replace("'", "\\'");
     insertHtmlRequest(strHtml);
 }
