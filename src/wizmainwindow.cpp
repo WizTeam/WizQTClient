@@ -2485,6 +2485,7 @@ void MainWindow::on_actionGoBack_triggered()
     }
 
     updateHistoryButtonStatus();
+    m_doc->setFocus();
 }
 
 void MainWindow::on_actionGoForward_triggered()
@@ -2507,6 +2508,7 @@ void MainWindow::on_actionGoForward_triggered()
     }
 
     updateHistoryButtonStatus();
+    m_doc->setFocus();
 }
 
 void MainWindow::on_category_itemSelectionChanged()
