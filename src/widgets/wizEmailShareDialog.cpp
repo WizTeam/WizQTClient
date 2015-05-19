@@ -36,7 +36,7 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     ui->setupUi(this);
     ui->checkBox_saveNotes->setVisible(false);
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("send_email"));
-    QIcon icon(pix);
+    QIcon icon(Utils::StyleHelper::skinResourceFileName("send_email"));
     ui->toolButton_send->setIcon(icon);
     ui->toolButton_send->setIconSize(pix.size());
     ui->toolButton_contacts->setIcon(QIcon(Utils::StyleHelper::skinResourceFileName("document_badge")));
