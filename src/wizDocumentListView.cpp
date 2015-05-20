@@ -21,6 +21,7 @@
 #include "wizWebSettingsDialog.h"
 #include "wizPopupButton.h"
 #include "wizLineInputDialog.h"
+#include "share/wizAnalyzer.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -870,6 +871,7 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
 
 void CWizDocumentListView::on_action_documentHistory()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuHistory");
     if (m_rightButtonFocusedItems.count() != 1)
         return;
 
@@ -883,6 +885,7 @@ void CWizDocumentListView::on_action_documentHistory()
 
 void CWizDocumentListView::on_action_shareDocumentByLink()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuShareByLink");
     if (m_rightButtonFocusedItems.count() != 1)
         return;
 
@@ -958,6 +961,7 @@ void CWizDocumentListView::on_action_shareDocumentByLink()
 
 void CWizDocumentListView::on_action_selectTags()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuSelectTags");
     if (!m_tagList) {
         m_tagList = new CWizTagListWidget(this);
     }
@@ -977,6 +981,7 @@ void CWizDocumentListView::on_action_selectTags()
 
 void CWizDocumentListView::on_action_deleteDocument()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuDeleteDocument");
     if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
@@ -1021,6 +1026,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 
 void CWizDocumentListView::on_action_moveDocument()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuMoveDocument");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, this);
     selector->setAcceptRoot(false);
 
@@ -1085,6 +1091,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocument()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
     selector->setCopyStyle();
     selector->setAcceptRoot(false);
@@ -1110,6 +1117,7 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocumentLink()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuCopyLink");
     if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
@@ -1124,6 +1132,7 @@ void CWizDocumentListView::on_action_copyDocumentLink()
 
 void CWizDocumentListView::on_action_showDocumentInFloatWindow()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuOpenInFloatWindow");
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
@@ -1143,6 +1152,7 @@ void CWizDocumentListView::on_menu_aboutToHide()
 
 void CWizDocumentListView::on_action_encryptDocument()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuEncryptDocument");
     foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         WIZDOCUMENTDATA doc = item->document();
@@ -1153,6 +1163,7 @@ void CWizDocumentListView::on_action_encryptDocument()
 
 void CWizDocumentListView::on_action_cancelEncryption()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuCancelEncryptionn");
     QString strUserCipher;
     CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to cancel encrypt."),
                             "", 0, QLineEdit::Password);
@@ -1178,6 +1189,7 @@ void CWizDocumentListView::on_action_cancelEncryption()
 
 void CWizDocumentListView::on_action_alwaysOnTop()
 {
+    ::WizGetAnalyzer().LogAction("documentListMenuAlwaysOnTop");
     QAction *actionAlwaysOnTop = findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
     actionAlwaysOnTop->setChecked(actionAlwaysOnTop->isChecked());
     bool bAlwaysOnTop = actionAlwaysOnTop->isChecked();

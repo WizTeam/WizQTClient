@@ -19,6 +19,7 @@
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizSearchIndexer.h"
+#include "share/wizAnalyzer.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
@@ -267,6 +268,8 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         QTreeWidget::startDrag(supportedActions);
         setCurrentItem(m_dragItem);
         m_dragItem = 0;
+
+        ::WizGetAnalyzer().LogAction("categoryDragItem");
     }
 
 }
@@ -389,6 +392,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     m_dragDocArray.clear();
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        ::WizGetAnalyzer().LogAction("categoryDropDocument");
         CWizDocumentDataArray arrayDocument;
         mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
 
@@ -408,6 +412,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             pItem->drop(*it, forceCopy);
         }
     } else if (event->mimeData()->hasUrls()) {
+        ::WizGetAnalyzer().LogAction("categoryDropFiles");
         QList<QUrl> urls = event->mimeData()->urls();
         QStringList strFileList;
         foreach (QUrl url, urls) {
@@ -423,6 +428,8 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             qDebug() << "[DragDrop]Can not drop item at invalid position";
             return;
         }
+
+        ::WizGetAnalyzer().LogAction("categoryDropItem");
 
         QModelIndex droppedIndex = indexAt(event->pos());
         if( !droppedIndex.isValid() )
@@ -1309,6 +1316,7 @@ QString CWizCategoryView::WizGetHtmlBodyContent(QString strHtml)
 
 void CWizCategoryView::on_action_newDocument()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewDocument");
     if (currentCategoryItem<CWizCategoryViewFolderItem>()
             || currentCategoryItem<CWizCategoryViewGroupRootItem>()
             || currentCategoryItem<CWizCategoryViewGroupItem>())
@@ -1320,11 +1328,13 @@ void CWizCategoryView::on_action_newDocument()
 
 void CWizCategoryView::on_action_loadDocument()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuLoadDocument");
     //TODO:
 }
 
 void CWizCategoryView::on_action_importFile()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuImportFile");
     QStringList files = QFileDialog::getOpenFileNames(
     this,
     tr("Select one or more files to open"),
@@ -1338,7 +1348,7 @@ void CWizCategoryView::on_action_importFile()
 }
 
 void CWizCategoryView::on_action_newItem()
-{
+{    
     if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()
             || currentCategoryItem<CWizCategoryViewFolderItem>())
     {
@@ -1358,6 +1368,7 @@ void CWizCategoryView::on_action_newItem()
 
 void CWizCategoryView::on_action_user_newFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewFolder");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
                                                           tr("Please input folder name: "),
                                                           "", m_app.mainWindow());      //use mainWindow as parent
@@ -1400,6 +1411,7 @@ void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_user_newTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewTag");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"),
                                                           tr("Please input tag name: "),
                                                           "", window());
@@ -1446,6 +1458,7 @@ void CWizCategoryView::on_action_user_newTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_newFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewGroupFolder");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"),
                                                           tr("Please input folder name: "),
                                                           "", window());
@@ -1505,6 +1518,7 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuMoveFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, window());
     selector->setAcceptRoot(true);
 
@@ -1583,6 +1597,7 @@ void CWizCategoryView::on_action_renameItem()
 
 void CWizCategoryView::on_action_user_renameFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameFolder");
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     Q_ASSERT(p);
 
@@ -1648,6 +1663,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
 
 void CWizCategoryView::on_action_user_renameTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameTag");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
@@ -1681,6 +1697,7 @@ void CWizCategoryView::on_action_user_renameTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_renameFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameGroupFolder");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"),
@@ -1734,6 +1751,7 @@ void CWizCategoryView::on_action_deleteItem()
 
 void CWizCategoryView::on_action_user_deleteFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteFolder");
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     if (!p)
         return;
@@ -1776,6 +1794,7 @@ void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_user_deleteTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteTag");
     CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>();
     if (!p)
         return;
@@ -1815,6 +1834,7 @@ void CWizCategoryView::on_action_user_deleteTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_deleteFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteGroupFolder");
     CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>();
     if (!p)
         return;
@@ -1854,6 +1874,7 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_deleted_recovery()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRecovery");
     CWizCategoryViewTrashItem* trashItem = currentCategoryItem<CWizCategoryViewTrashItem>();
     if (trashItem)
     {
@@ -1877,7 +1898,7 @@ void CWizCategoryView::on_action_itemAttribute()
 
 void CWizCategoryView::on_action_groupAttribute()
 {
-
+    ::WizGetAnalyzer().LogAction("categoryMenuGroupAttribute");
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
@@ -1890,6 +1911,7 @@ void CWizCategoryView::on_action_groupAttribute()
 
 void CWizCategoryView::on_action_manageGroup()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuManageGroup");
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
@@ -1902,6 +1924,7 @@ void CWizCategoryView::on_action_manageGroup()
 
 void CWizCategoryView::on_action_bizgAttribute()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewBizAttribute");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
 
@@ -1923,6 +1946,7 @@ void CWizCategoryView::on_action_itemManage()
 
 void CWizCategoryView::on_action_manageBiz()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuManageBiz");
     CWizCategoryViewBizGroupRootItem* p = currentCategoryItem<CWizCategoryViewBizGroupRootItem>();
     if (p && !p->biz().bizGUID.isEmpty()) {
         manageBiz(p->biz().bizGUID, false);
@@ -1931,6 +1955,7 @@ void CWizCategoryView::on_action_manageBiz()
 
 void CWizCategoryView::on_action_removeShortcut()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRemoveShortcut");
     CWizCategoryViewShortcutItem* p = currentCategoryItem<CWizCategoryViewShortcutItem>();
     CWizCategoryViewShortcutRootItem *pRoot = dynamic_cast<CWizCategoryViewShortcutRootItem *>(p->parent());
     if (p && pRoot)
@@ -1946,6 +1971,7 @@ void CWizCategoryView::on_action_removeShortcut()
 
 void CWizCategoryView::on_action_advancedSearch()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuAdvancedSearch");
     bool bSearchOnly = true;
     CWizAdvancedSearchDialog dlg(bSearchOnly);
     if (dlg.exec() == QDialog::Accepted)
@@ -1957,6 +1983,7 @@ void CWizCategoryView::on_action_advancedSearch()
 
 void CWizCategoryView::on_action_addCustomSearch()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuAddCustomSearch");
     bool bSearchOnly = false;
     CWizAdvancedSearchDialog dlg(bSearchOnly);
     if (dlg.exec() == QDialog::Accepted)
@@ -2000,6 +2027,7 @@ void CWizCategoryView::on_action_addCustomSearch()
 
 void CWizCategoryView::on_action_editCustomSearch()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuEditCustomSearch");
     if (currentItem()->type() == ItemType_QuickSearchCustomItem)
     {
         CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
@@ -2027,6 +2055,7 @@ void CWizCategoryView::on_action_editCustomSearch()
 
 void CWizCategoryView::on_action_removeCustomSearch()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRemoveCustomSearch");
     if (currentItem()->type() == ItemType_QuickSearchCustomItem)
     {
         CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
@@ -2041,8 +2070,8 @@ void CWizCategoryView::on_action_removeCustomSearch()
 
 void CWizCategoryView::on_action_emptyTrash()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuEmptyTrash");
     // FIXME: show progress
-
     if (CWizCategoryViewTrashItem* pTrashItem = currentCategoryItem<CWizCategoryViewTrashItem>()) {
         QString strKbGUID = pTrashItem->kbGUID();
         Q_ASSERT(!strKbGUID.isEmpty());
