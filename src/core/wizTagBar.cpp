@@ -91,7 +91,7 @@ void CWizTagBar::setDocument(const WIZDOCUMENTDATA& doc)
     db.GetDocumentTags(m_doc.strGUID, arrayTag);
     for (WIZTAGDATA tag : arrayTag)
     {
-        qDebug() << "add tag item : " << tag.strName;
+        // qDebug() << "add tag item : " << tag.strName;
         addTagToTagBar(tag.strGUID, tag.strName);
     }
 }
@@ -123,9 +123,9 @@ void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
     int wgtWidth = 0;
 
     // calculate current tagWidgets
-    qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
+    // qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
     std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, CTagItem*>& it){
-        qDebug() << "item guid : " << it.first << " item : " << it.second;
+        // qDebug() << "item guid : " << it.first << " item : " << it.second;
         if (guid == it.first)
         {
             qDebug() << "[Tag]Try to add a same tag";
@@ -141,12 +141,12 @@ void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
         else
         {
             wgtWidth = maxWidth + 1;
-            qDebug() << "to much item return;";
+            // qDebug() << "to much item return;";
             return;
         }
     });
 
-    qDebug() << "current wgt width : " << wgtWidth;
+    // qDebug() << "current wgt width : " << wgtWidth;
     if (wgtWidth + tagItem->sizeHint().width() >= maxWidth)
     {
         tagItem->deleteLater();
@@ -172,9 +172,9 @@ void CWizTagBar::calculateTagWidgetWidth()
     int wgtWidth = 0;
     std::map<QString, QString> mapTemp;
     // calculate current tagWidgets
-    qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
+    // qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
     std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, CTagItem*>& it){
-        qDebug() << "item guid : " << it.first << " item : " << it.second;
+        // qDebug() << "item guid : " << it.first << " item : " << it.second;
         int itemWidth = it.second->sizeHint().width();
         if (wgtWidth < maxWidth && wgtWidth + itemWidth < maxWidth)
         {
@@ -244,7 +244,7 @@ void CWizTagBar::on_deleteTagRequest(const QString& guid)
 
 void CWizTagBar::on_renameTagRequest(const QString& guid, const QString& newName)
 {
-    qDebug() << "on rename tag request";
+    // qDebug() << "on rename tag request";
     WIZTAGDATA data;
     CWizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
     if (db.TagFromGUID(guid, data))
@@ -348,7 +348,7 @@ void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
                 return;
             }
         }
-        qDebug() << "can not found tag in currrent tag list , add tag item : " << tag.strName;
+        // qDebug() << "can not found tag in currrent tag list , add tag item : " << tag.strName;
         db.InsertDocumentTag(m_doc, tag.strGUID);
     }
 }
@@ -585,14 +585,12 @@ void CTagItem::paintEvent(QPaintEvent* event)
 
 void CTagItem::focusInEvent(QFocusEvent* event)
 {
-    qDebug() << "tag item focus in event";
     m_selected = true;
     QWidget::focusInEvent(event);
 }
 
 void CTagItem::focusOutEvent(QFocusEvent* event)
 {
-    qDebug() << "tag item focus out event";
     m_selected = false;
     QWidget::focusOutEvent(event);
 }
@@ -601,7 +599,6 @@ void CTagItem::mousePressEvent(QMouseEvent* event)
 {
     if (m_selected)
     {
-        qDebug() << "mouse press pos : " << event->pos();
         QRect rc(width() - TAGITEM_MARGIN, 0,
                  width(), height());
 
