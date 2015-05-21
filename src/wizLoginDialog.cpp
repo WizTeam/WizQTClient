@@ -259,7 +259,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
     //
     m_currentUserServerType = userSettings.serverType();
-    qDebug() << "set user , user type : " << m_currentUserServerType;
+//    qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());

@@ -76,6 +76,9 @@ public Q_SLOTS:
     void onEditorFocusIn();
     void onEditorFocusOut();
 
+    //
+    void onTitleEditFinished();
+
 signals:
     void notifyBar_link_clicked(const QString& link);
 
