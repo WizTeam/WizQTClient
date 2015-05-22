@@ -490,8 +490,12 @@ int StyleHelper::avatarHeight(bool bNoScreenFactor)
     if (bNoScreenFactor)
         return nHeight;
 
-    float factor = qt_mac_get_scalefactor(0);
+#ifdef Q_OS_LINUX
+    return nHeight;
+#else
+    float factor = qt_mac_get_scalefactor(0); 
     return nHeight * factor;
+#endif
 }
 
 QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)

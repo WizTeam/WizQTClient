@@ -91,6 +91,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     , m_menuServers(new QMenu(this))
     , m_udpClient(0)
     , m_serverType(WizServer)
+    , m_searchingDialog(nullptr)
 {
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
@@ -105,13 +106,21 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     ui->setupUi(uiWidget);
     QRect rcUI = uiWidget->geometry();
     setMinimumSize(rcUI.width() + 20, rcUI.height() + 20);
+    //    
+    //  init style for wizbox
+    ui->btn_selectServer->setMaximumHeight(20);
+    ui->layout_titleBar->setContentsMargins(0, 0, 0, 0);
+    ui->widget_titleBar->layout()->setContentsMargins(0, 0, 0, 0);
+    ui->widget_titleBar->layout()->setSpacing(0);
+    ui->label_logo->setMinimumHeight(80);
+    ui->btn_max->setVisible(false);
+    ui->btn_min->setVisible(false);
+    ui->btn_close->setVisible(false);
     //
-    ui->widget_titleBar->setVisible(false);
-    //
-    ui->layout_titleBar->removeWidget(ui->widget_titleBar);
-    //
-    QWidget* title = titleBar();
+    CWizTitleBar* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
+    title->setContentsMargins(QMargins(0, 2, 2 ,0));
+    rootWidget()->setContentsMargins(10, 0, 10, 10);
     //
 
 #endif
@@ -259,7 +268,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
     //
     m_currentUserServerType = userSettings.serverType();
-    qDebug() << "set user , user type : " << m_currentUserServerType;
+//    qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
@@ -423,6 +432,13 @@ void CWizLoginDialog::mouseReleaseEvent(QMouseEvent *)
 {
     m_mousePoint = QPoint(0, 0);
 }
+//#else
+//void layoutTitleBar()
+//{
+//    CWizShadowWindow<QDialog>::layoutTitleBar();
+
+//}
+
 #endif
 
 
@@ -671,12 +687,10 @@ void CWizLoginDialog::showSearchingDialog()
     initSearchingDialog();
 
     //
-#ifdef Q_OS_MAC
     QPoint leftTop = geometry().topLeft();
     leftTop.setX(leftTop.x() + (width() - m_searchingDialog->width()) / 2);
     leftTop.setY(leftTop.y() + (height() - m_searchingDialog->height()) / 2);
     m_searchingDialog->move(leftTop);
-#endif
     //
     if (m_searchingDialog->exec() == QDialog::Rejected)
     {

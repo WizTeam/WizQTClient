@@ -28,6 +28,8 @@ public:
     void setCanResize(bool b);
     bool canResize() const { return m_canResize; }
     //
+    void setContentsMargins(QMargins margins);
+    //
     void setText(QString title);
     QString text() const;
 protected:

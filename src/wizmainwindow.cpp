@@ -1503,11 +1503,11 @@ void MainWindow::initToolBar()
     m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
-    m_search = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchWidget(this);
 
-    m_toolBar->addWidget(m_search);
+    m_toolBar->addWidget(m_searchWidget);
 
-    m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
+    m_toolBar->layout()->setAlignment(m_searchWidget, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     CWizButton* buttonNew = new CWizButton(m_toolBar);
@@ -2824,7 +2824,7 @@ void MainWindow::adjustToolBarLayout()
     //
     if (searchWidth > 100)
     {
-        m_search->setFixedWidth(searchWidth);
+        m_searchWidget->setFixedWidth(searchWidth);
     }
 #else
 //#ifndef USECOCOATOOLBAR
@@ -3124,8 +3124,10 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #else
-    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-            SLOT(on_trayIcon_actived(QSystemTrayIcon::ActivationReason)));
+    trayIcon->setContextMenu(m_trayMenu);
+//    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+//            SLOT(on_trayIcon_actived(QSystemTrayIcon::ActivationReason)));
+
 //    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
 //    QIcon icon(normal);
 //    if (!icon.isNull())

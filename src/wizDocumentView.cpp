@@ -427,6 +427,11 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
     m_bEditingMode = bEdit;
 
+    if (!bEdit)
+    {
+        // 保存标题，防止因多线程保存引起覆盖
+        m_title->onTitleEditFinished();
+    }
     m_title->setEditingDocument(bEdit);
     m_web->setEditingDocument(bEdit);
 
@@ -735,39 +740,39 @@ void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QString
     //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
     //editors.removeAll(strCurrentUser);
 
-    if (strGUID == m_note.strGUID && !editors.isEmpty())
+    if (strGUID == m_note.strGUID)
     {
-        QString strEditor = editors.join(" , ");
-        if (!strEditor.isEmpty())
+        if (!editors.isEmpty())
         {
-            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-            QString strUserAlias = db.GetUserAlias();
-            if (editors.count() == 1 && editors.first() == strUserAlias)
+            QString strEditor = editors.join(" , ");
+            if (!strEditor.isEmpty())
             {
-                qDebug() << "[EditStatus]:editing by myself.";
-                m_title->hideMessageTips(true);
-                m_title->setEditButtonState(true, false);
-                m_editStatus = m_editStatus & ~DOCUMENT_STATUS_EDITBYOTHERS;
-            }
-            else
-            {
-                m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
-                m_editStatus = m_editStatus | DOCUMENT_STATUS_EDITBYOTHERS;
-                if (m_note.nVersion == -1)
+                CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+                QString strUserAlias = db.GetUserAlias();
+                if (editors.count() == 1 && editors.first() == strUserAlias)
                 {
-                    m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note.")).arg(strEditor));
+                    qDebug() << "[EditStatus]:editing by myself.";
+                    m_title->hideMessageTips(true);
                     m_title->setEditButtonState(true, false);
+                    m_editStatus = m_editStatus & ~DOCUMENT_STATUS_EDITBYOTHERS;
                 }
                 else
                 {
-                    m_title->setEditButtonState(false, false);
+                    m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note. Note has been locked.")).arg(strEditor));
+                    m_editStatus = m_editStatus | DOCUMENT_STATUS_EDITBYOTHERS;
+                    if (m_note.nVersion == -1)
+                    {
+                        m_title->showMessageTips(Qt::PlainText, QString(tr("%1 is currently editing this note.")).arg(strEditor));
+                        m_title->setEditButtonState(true, false);
+                    }
+                    else
+                    {
+                        m_title->setEditButtonState(false, false);
+                    }
                 }
             }
         }
-    }
-    else
-    {
-        if (strGUID == m_note.strGUID)
+        else
         {
             m_title->setEditButtonState(!m_bLocked, false);
             m_editStatus = m_editStatus & ~DOCUMENT_STATUS_EDITBYOTHERS;
