@@ -1700,11 +1700,11 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 {
     QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
     if (!strt.isEmpty()) {
-        if (background) {
+//        if (background) {
             if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
                 return;
             }
-        }
+//        }
     }
 
     pEvents->OnStatus("Sync group users");
