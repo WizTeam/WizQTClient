@@ -1722,8 +1722,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
     // before insert first checklist, should manual notify editor to save current sence for undo.
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
 
-    QString strExec = "WizTodo.insertOneTodo();";
-    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    QString strExec = "WizTodo.insertOneTodoForQt();";
+    page()->mainFrame()->evaluateJavaScript(strExec).toString();
 
     // after insert first checklist, should manual notify editor to save current sence for undo.
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
@@ -1732,7 +1732,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCheckList");
-    return ret;
+    return true;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertImage()
