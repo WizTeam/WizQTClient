@@ -28,6 +28,7 @@ public:
     /* Message related operations */
     bool createMessage(const WIZMESSAGEDATA& data);
     bool getAllMessages(CWizMessageDataArray& arrayMsg);
+    bool getAllMessageSenders(CWizStdStringArray& arraySender);
     bool getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax = 200);
     bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
     bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);

@@ -8,6 +8,7 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHostInfo>
@@ -1293,6 +1294,13 @@ void MainWindow::openVipPageInWebBrowser()
     }
 }
 
+void MainWindow::loadMessageByUserGuid(const QString& guid)
+{
+    CWizMessageDataArray arrayMsg;
+    m_dbMgr.db().messageFromUserGUID(guid, arrayMsg);
+    m_msgList->setMessages(arrayMsg);
+}
+
 bool MainWindow::checkListClickable()
 {
     if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
@@ -1667,15 +1675,52 @@ QWidget*MainWindow::createMessageListView()
 
     int nMargin = 15;
     QSize szMarkMessageBtn(16, 16);
-    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
+//    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
 
-    QLabel* labelHint = new QLabel(this);
+    QLabel* labelSender = new QLabel(m_msgListUnreadBar);
+    labelSender->setText(tr("Sender:"));
+    labelSender->setAlignment(Qt::AlignLeft);
+    labelSender->setStyleSheet("color: #787878;padding-bottom:1px;");
+    layoutActions->addWidget(labelSender);
+
+
+    m_messageSelector = new QComboBox(m_msgListUnreadBar);
+
+    CWizStdStringArray arraySender;
+    CWizDatabase& db = m_dbMgr.db();
+    db.getAllMessageSenders(arraySender);
+    for (auto sender : arraySender)
+    {
+        CWizBizUserDataArray arrayUser;
+        if (!db.userFromGUID(sender, arrayUser))
+            continue;
+
+        QSet<QString> userSet;
+        QString strUserId;
+        for (WIZBIZUSER user : arrayUser)
+        {
+            userSet.insert(user.alias);
+            strUserId = user.userId;
+        }
+        QStringList userList(userSet.toList());
+        QString strText = userList.join(';');
+        QPixmap pix;
+        WizService::AvatarHost::avatar(strUserId, &pix);
+        QIcon icon(pix);
+        m_messageSelector->addItem(icon, strText, sender);
+    }
+
+    layoutActions->addWidget(m_messageSelector);
+    connect(m_messageSelector, SIGNAL(currentIndexChanged(int)),
+            SLOT(on_messageSelector_indexChanged(int)));
+
+    QLabel* labelHint = new QLabel(m_msgListUnreadBar);
     labelHint->setText(tr("Unread Messages"));
     labelHint->setAlignment(Qt::AlignCenter);
     labelHint->setStyleSheet("color: #787878;padding-bottom:1px;");
     layoutActions->addWidget(labelHint);
 
-    wizImageButton* readBtn = new wizImageButton(this);
+    wizImageButton* readBtn = new wizImageButton(m_msgListUnreadBar);
     QIcon btnIcon = ::WizLoadSkinIcon(userSettings().skin(), "actionMarkMessagesRead");
     readBtn->setIcon(btnIcon);
     readBtn->setFixedSize(szMarkMessageBtn);
@@ -2077,6 +2122,12 @@ void MainWindow::on_actionMarkAllMessageRead_triggered()
     WizGetAnalyzer().LogAction("markAllMessagesRead");
 
     m_msgList->markAllMessagesReaded();
+}
+
+void MainWindow::on_messageSelector_indexChanged(int index)
+{
+    QString guid = m_messageSelector->itemData(index).toString();
+    loadMessageByUserGuid(guid);
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()

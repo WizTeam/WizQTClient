@@ -20,6 +20,7 @@
 class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
+class QComboBox;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -167,6 +168,7 @@ private:
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
     QWidget* m_msgListUnreadBar;
+    QComboBox* m_messageSelector;
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
@@ -296,6 +298,7 @@ public Q_SLOTS:
     void on_actionViewMinimize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
+    void on_messageSelector_indexChanged(int index);
 
     // menu format
     void on_actionFormatJustifyLeft_triggered();
@@ -470,6 +473,9 @@ private:
     void downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
     void openVipPageInWebBrowser();
+
+    //
+    void loadMessageByUserGuid(const QString& guid);
 };
 
 } // namespace Internal

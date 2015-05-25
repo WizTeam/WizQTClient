@@ -190,6 +190,13 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 
+bool CWizIndex::getAllMessageSenders(CWizStdStringArray& arraySender)
+{
+    QString strSQL = WizFormatString1("SELECT distinct SENDER_GUID from %1",
+                                      TABLE_NAME_WIZ_MESSAGE);
+    return SQLToStringArray(strSQL, 0, arraySender);
+}
+
 bool CWizIndex::getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax)
 {
     CString strExt;
