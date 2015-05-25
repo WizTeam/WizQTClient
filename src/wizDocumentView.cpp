@@ -229,7 +229,9 @@ void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDAT
 
     if (doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1) {
         viewNote(doc, true);
+        m_title->moveTitileTextToPlaceHolder();
     } else {
+        m_title->clearPlaceHolderText();
         viewNote(doc, false);
     }
 }

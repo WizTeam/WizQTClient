@@ -208,6 +208,9 @@ void TitleEdit::onTitleEditingFinished()
             return;
 
         QString strNewTitle = text().left(255);
+        if (strNewTitle.isEmpty() && !placeholderText().isEmpty()) {
+            strNewTitle = placeholderText().left(255);
+        }
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);

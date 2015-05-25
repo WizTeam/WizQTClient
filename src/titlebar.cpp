@@ -419,6 +419,18 @@ void TitleBar::updateEditButton(bool editing)
 void TitleBar::resetTitle(const QString& strTitle)
 {
     m_editTitle->resetTitle(strTitle);
+
+}
+
+void TitleBar::moveTitileTextToPlaceHolder()
+{
+    m_editTitle->setPlaceholderText(m_editTitle->text());
+    m_editTitle->clear();
+}
+
+void TitleBar::clearPlaceHolderText()
+{
+    m_editTitle->setPlaceholderText("");
 }
 
 void TitleBar::startEditButtonAnimation()
