@@ -32,7 +32,7 @@ public:
     void	setReadOnly(bool b);
 
     void setSelected(bool b);
-    QSize	sizeHint() const override;
+    QSize	sizeHint() const;
     static int textWidth(const QString text);
 
 signals:
@@ -43,12 +43,12 @@ signals:
 
 
 protected:
-    void paintEvent(QPaintEvent* event) override;
-    void focusInEvent(QFocusEvent* event) override;
-    void focusOutEvent(QFocusEvent* event) override;
-    void mousePressEvent(QMouseEvent* event) override;
-    void mouseReleaseEvent(QMouseEvent* event) override;
-    void contextMenuEvent(QContextMenuEvent* event) override;
+    void paintEvent(QPaintEvent* event);
+    void focusInEvent(QFocusEvent* event);
+    void focusOutEvent(QFocusEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void contextMenuEvent(QContextMenuEvent* event);
 
 private:
     void createContextMenu();

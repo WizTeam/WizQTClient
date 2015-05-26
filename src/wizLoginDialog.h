@@ -66,7 +66,7 @@ protected:
     void mouseMoveEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
 //#else
-//    void layoutTitleBar() override;
+//    void layoutTitleBar();
 #endif
 private slots:
     void on_btn_close_clicked();
