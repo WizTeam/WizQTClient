@@ -141,11 +141,15 @@ bool CWizIndexBase::Repair(const QString& strDestFileName)
 
 bool CWizIndexBase::updateTableStructure(int oldVersion)
 {
-    if (oldVersion < 1)
-    {
-        qDebug() << "table structure version : " << oldVersion << "  update to version 1";
+    qDebug() << "table structure version : " << oldVersion << "  update to version " << WIZ_TABLE_STRUCTURE_VERSION;
+    if (oldVersion < 1) {
         Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
     }
+    //
+    if (oldVersion < 2) {
+
+    }
+    //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
@@ -1526,6 +1530,26 @@ bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
         return false;
 
     data = arrayMessage[0];
+    return true;
+}
+
+bool CWizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+{
+    CString strWhere;
+    strWhere.Format("SENDER_GUID=%s", STR2SQL(userGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG("[messageFromId] failed to get message by document guid");
+        return false;
+    }
+
+    if (arrayMessage.empty())
+        return false;
+
     return true;
 }
 
