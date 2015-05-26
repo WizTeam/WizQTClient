@@ -1,4 +1,4 @@
-lupdate ./src/*.cpp ./src/*.h ./src/widgets/*.h ./src/widgets/*.cpp ./src/sync/*.h ./src/sync/*.cpp ./src/utils/*.h ./src/utils/*.cpp ./src/share/*.h ./src/share/*.cpp  ./src/ui/*.ui -ts ./i18n/wiznote_zh_CN.ts -no-obsolete -recursive
-lupdate ./src/*.cpp ./src/*.h ./src/widgets/*.h ./src/widgets/*.cpp ./src/sync/*.h ./src/sync/*.cpp ./src/utils/*.h ./src/utils/*.cpp ./src/share/*.h ./src/share/*.cpp ./src/ui/*.ui -ts ./i18n/wiznote_zh_TW.ts -no-obsolete -recursive
+lupdate ./src/*.cpp ./src/*.h ./src/core/*.h ./src/core/*.cpp ./src/widgets/*.h ./src/widgets/*.cpp ./src/sync/*.h ./src/sync/*.cpp ./src/utils/*.h ./src/utils/*.cpp ./src/share/*.h ./src/share/*.cpp ./src/ui/*.ui ./src/plugins/coreplugin/*.cpp ./src/plugins/coreplugin/*.h ./src/plugins/markdown/*.cpp ./src/plugins/coreplugin/*.h -ts ./i18n/wiznote_zh_CN.ts -no-obsolete -recursive
+lupdate ./src/*.cpp ./src/*.h ./src/core/*.h ./src/core/*.cpp ./src/widgets/*.h ./src/widgets/*.cpp ./src/sync/*.h ./src/sync/*.cpp ./src/utils/*.h ./src/utils/*.cpp ./src/share/*.h ./src/share/*.cpp ./src/ui/*.ui ./src/plugins/coreplugin/*.cpp ./src/plugins/coreplugin/*.h ./src/plugins/markdown/*.cpp ./src/plugins/coreplugin/*.h -ts ./i18n/wiznote_zh_TW.ts -no-obsolete -recursive
 
 

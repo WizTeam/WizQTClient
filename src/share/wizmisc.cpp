@@ -19,6 +19,8 @@
 #include <QNetworkConfigurationManager>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
 #include "share/wizAnalyzer.h"
@@ -44,12 +46,6 @@ QString WizGetFileSizeHumanReadalbe(const QString& strFileName)
         Q_ASSERT(0);
         return QString();
     }
-}
-
-qint64 WizGetFileSize(const CString& strFileName)
-{
-    QFileInfo info(strFileName);
-    return info.size();
 }
 
 void WizPathAddBackslash(QString& strPath)
@@ -122,62 +118,6 @@ BOOL WizDeleteAllFilesInFolder(const CString& strPath)
     return TRUE;
 }
 
-
-CString WizExtractFilePath(const CString& strFileName)
-{
-    CString str = strFileName;
-    str.Replace('\\', '/');
-    int index = str.lastIndexOf('/');
-    if (-1 == index)
-        return strFileName;
-    //
-    return str.left(index + 1); //include separator
-}
-
-
-CString WizExtractLastPathName(const CString& strFileName)
-{
-    CString strPath = ::WizPathRemoveBackslash2(strFileName);
-    return ::WizExtractFileName(strPath);
-}
-
-QString WizExtractFileName(const QString& strFileName)
-{
-    QString str = strFileName;
-    str.replace('\\', '/');
-    int index = str.lastIndexOf('/');
-    if (-1 == index)
-        return strFileName;
-
-    return strFileName.right(str.length() - index - 1);
-}
-
-QString WizExtractFileTitle(const QString &strFileName)
-{
-    QString strName = WizExtractFileName(strFileName);
-
-    int index = strName.lastIndexOf('.');
-    if (-1 == index)
-        return strName;
-
-    return strName.left(index);
-}
-
-CString WizExtractTitleTemplate(const CString& strFileName)
-{
-    return strFileName;
-}
-
-CString WizExtractFileExt(const CString& strFileName)
-{
-    CString strName = WizExtractFileName(strFileName);
-    //
-    int index = strName.lastIndexOf('.');
-    if (-1 == index)
-        return "";
-    //
-    return strName.right(strName.GetLength() - index);  //include .
-}
 
 void WizEnumFiles(const QString& path, const QString& strExts, CWizStdStringArray& arrayFiles, UINT uFlags)
 {
@@ -272,9 +212,9 @@ void WizGetNextFileName(CString& strFileName)
     if (!PathFileExists(strFileName))
         return;
     //
-    CString strPath = WizExtractFilePath(strFileName);
-    CString strTitle = WizExtractFileTitle(strFileName);
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strPath = Utils::Misc::extractFilePath(strFileName);
+    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     //
     const UINT nMaxLength = MAX_PATH - 10;
@@ -1105,7 +1045,7 @@ bool WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, QString& strText,
         }
         else
         {
-            CString strExt = WizExtractFileExt(CString(strFileName));
+            CString strExt = Utils::Misc::extractFileExt(CString(strFileName));
             strExt.MakeLower();
             if (bForceHTML || strExt.startsWith(".htm"))
             {
@@ -1663,7 +1603,7 @@ void WizGetSkins(QStringList& skins)
         if (!PathFileExists(strSkinFileName))
             continue;
 
-        skins.append(WizExtractLastPathName(path));
+        skins.append(Utils::Misc::extractLastPathName(path));
     }
 }
 
@@ -1909,10 +1849,10 @@ QString getImageHtmlLabelByFile(const QString& strImageFile)
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
 }
 
-QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref)
+QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgSize, const QString& linkHref)
 {
-    return QString("<div><a href=\"%1\"><img border=\"0\" src=\"file://%2\" /></a></div>")
-            .arg(linkHref).arg(imageFile);
+    return QString("<div><a href=\"%1\"><img border=\"0\" width=\"%2px\" height=\"%3px\" src=\"file://%4\" /></a></div>")
+            .arg(linkHref).arg(imgSize.width()).arg(imgSize.height()).arg(imageFile);
 }
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
@@ -1943,13 +1883,13 @@ void WizDeleteFolder(const CString& strPath)
     if (dir.isRoot())
         return;
 
-    dir.rmdir(::WizExtractLastPathName(strPath));
+    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
 }
 
 void WizDeleteFile(const CString& strFileName)
 {
-    QDir dir(::WizExtractFilePath(strFileName));
-    dir.remove(WizExtractFileName(strFileName));
+    QDir dir(::Utils::Misc::extractFilePath(strFileName));
+    dir.remove(Utils::Misc::extractFileName(strFileName));
 }
 
 
@@ -1997,8 +1937,8 @@ void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLe
 {
     WizMakeValidFileNameNoPath(strFileName);
     //
-    CString strTitle = WizExtractFileTitle(strFileName);
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     if (strTitle.GetLength() > nMaxTitleLength)
     {
@@ -2013,7 +1953,7 @@ void WizMakeValidFileNameNoPathLimitFullNameLength(CString& strFileName, int nMa
     if (strFileName.GetLength() <= nMaxFullNameLength)
         return;
     //
-    CString strExt = WizExtractFileExt(strFileName);
+    CString strExt = Utils::Misc::extractFileExt(strFileName);
     //
     int nMaxTitleLength = nMaxFullNameLength - strExt.GetLength();
     //
@@ -2117,13 +2057,13 @@ CWaitCursor::~CWaitCursor()
 
 
 
-void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, bool dialogResizable)
+void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)
 {
     QString strFuncName = windowTitle;
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
     CWizFunctionDurationLogger logger(strFuncName);
 
-    CWizWebSettingsWithTokenDialog pDlg(url, QSize(800, 480), parent);
+    CWizWebSettingsWithTokenDialog pDlg(url, sz, parent);
     if (dialogResizable)
     {
         pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
@@ -2272,7 +2212,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
 
@@ -2361,11 +2301,12 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     // get info text and calculate width of image
     const int nMb = 1024 * 1024;
     int nIconMargin = 4;
-    QString sz = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
+    QString fileSize = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
                                                          : QString(QString::number(qCeil(info.size() / (double)1024)) + " KB")) :
                                       QString(QString::number(info.size()) + " B");
-    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + sz;
+    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + fileSize;
 
+    bool isHighPix = WizIsHighPixel();
     QFont font;
     QFontMetrics fm(font);
     int nTextWidth = fm.width(infoText);
@@ -2374,11 +2315,19 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     int nHeight = imageBg.height();
 
     // draw icon and text on image
-    img = QImage(nWidth, nHeight, QImage::Format_RGB888);
-    imageBg.scaledToWidth(nWidth);
+    int nBgWidth = isHighPix ? 2 * nWidth : nWidth;
+    int nBgHeight = isHighPix ? 2 * nHeight : nHeight;
+    img = QImage(nBgWidth, nBgHeight, QImage::Format_RGB888);
+    imageBg.scaledToWidth(nBgWidth);
     QPainter p(&img);
-    p.drawImage(QRect(0, 0, nWidth, nHeight), imageBg);
+    p.drawImage(QRect(0, 0, nBgWidth, nBgHeight), imageBg);
 
+
+    if (isHighPix)
+    {
+        // 如果是高分辨率的屏幕，则放大将坐标放大二倍进行绘制，使用时进行缩放，否则会造成图片模糊。
+        Utils::StyleHelper::initPainterByDevice(&p);
+    }
     QFileIconProvider ip;
     QIcon icon = ip.icon(info);
     QPixmap pixIcon = icon.pixmap(iconSize);
@@ -2387,15 +2336,13 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     //
     QColor cText = QColor("#3c4d81");
     p.setPen(QPen(cText));
-    QRect titleRect(QPoint(nIconMargin * 2 + pixIcon.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
+    QRect titleRect(QPoint(nIconMargin * 2 + iconSize.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
     QString strTitle = fm.elidedText(info.fileName(), Qt::ElideMiddle, titleRect.width() - nIconMargin * 2);
     p.drawText(titleRect, strTitle);
-
     //
-    QRect infoRect(QPoint(nIconMargin * 2 + pixIcon.width(), nHeight / 2),
+    QRect infoRect(QPoint(nIconMargin * 2 + iconSize.width(), nHeight / 2),
                       QPoint(nWidth, nHeight));
     p.drawText(infoRect, infoText);
-
     return true;
 }
 
@@ -2504,5 +2451,13 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
     QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
-    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, true);
+    WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
+}
+
+
+bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
+{
+    QStringList fileTypes;
+    fileTypes << ".xls" << ".xlsx" << ".ppt" << ".pptx";
+    return fileTypes.contains(doc.strFileType);
 }

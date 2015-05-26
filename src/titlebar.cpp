@@ -13,6 +13,7 @@
 
 #include <coreplugin/icore.h>
 
+#include "core/wizTagBar.h"
 #include "titleedit.h"
 #include "cellbutton.h"
 #include "infobar.h"
@@ -36,6 +37,7 @@
 #include "sync/apientry.h"
 #include "sync/asyncapi.h"
 #include "messagecompleter.h"
+#include "wizOEMSettings.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -44,6 +46,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
     , m_editTitle(new TitleEdit(this))
+    , m_tagBar(new CWizTagBar(app, this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
     , m_editorBar(new EditorToolBar(this))
@@ -117,6 +120,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
+    m_emailBtn->setVisible(!CWizOEMSettings::isHideShareByEmail());
+    m_emailBtn->setEnabled(!CWizOEMSettings::isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
@@ -124,6 +129,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
+    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
@@ -139,6 +146,10 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QWidget* line1 = new QWidget(this);
     line1->setFixedHeight(1);
     line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
+
+    m_tagBarSpacer = new QWidget(this);
+    m_tagBarSpacer->setFixedHeight(1);
+    m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
 
     QWidget* line3 = new QWidget(this);
@@ -164,6 +175,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
     layoutInfo1->addWidget(line1);
+    layoutInfo1->addWidget(m_tagBar);
+    layoutInfo1->addWidget(m_tagBarSpacer);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
     layoutInfo1->addWidget(line3);
@@ -264,6 +277,11 @@ void TitleBar::onEditorFocusOut()
         showInfoBar();
 }
 
+void TitleBar::onTitleEditFinished()
+{
+    m_editTitle->onTitleEditingFinished();
+}
+
 void TitleBar::showInfoBar()
 {
     m_editorBar->hide();
@@ -288,6 +306,12 @@ void TitleBar::loadErrorPage()
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
     comments->setHtml(strHtml, url);
+}
+
+void TitleBar::setTagBarVisible(bool visible)
+{
+    m_tagBar->setVisible(visible);
+    m_tagBarSpacer->setVisible(visible);
 }
 
 #ifdef USEWEBENGINE
@@ -351,6 +375,16 @@ void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
 {
     updateInfo(data);
     setEditingDocument(editing);
+    //
+    CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
+    bool isGroup = db.IsGroup();
+    int nTagCount = db.GetDocumentTagCount(data.strGUID);
+    setTagBarVisible(!isGroup && nTagCount > 0);
+    if (!isGroup)
+    {
+        m_tagBar->setDocument(data);
+
+    }
 }
 
 void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
@@ -362,6 +396,7 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
 
 void TitleBar::setEditingDocument(bool editing)
 {
+    //
     m_editTitle->setReadOnly(!editing);
     m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
 }
@@ -424,34 +459,33 @@ void TitleBar::onEditButtonClicked()
 
 void TitleBar::onTagButtonClicked()
 {
-    if (!m_tags) {
-        m_tags = new CWizTagListWidget(topLevelWidget());
-    }
+//    if (!m_tags) {
+//        m_tags = new CWizTagListWidget(topLevelWidget());
+//    }
 
-    m_tags->setDocument(noteView()->note());
+//    m_tags->setDocument(noteView()->note());
 
-    QRect rc = m_tagBtn->rect();
-    QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
-    m_tags->showAtPoint(pt);
+//    QRect rc = m_tagBtn->rect();
+//    QPoint pt = m_tagBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
+//    m_tags->showAtPoint(pt);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showTags");
+    setTagBarVisible(!m_tagBar->isVisible());
+
+    WizGetAnalyzer().LogAction("showTags");
 }
 
 void TitleBar::onEmailButtonClicked()
 {
     m_editor->shareNoteByEmail();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("shareByEmail");
+    WizGetAnalyzer().LogAction("shareByEmail");
 }
 
 void TitleBar::onShareButtonClicked()
 {
     m_editor->shareNoteByLink();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("shareByLink");
+    WizGetAnalyzer().LogAction("shareByLink");
 }
 
 void TitleBar::onAttachButtonClicked()
@@ -468,8 +502,7 @@ void TitleBar::onAttachButtonClicked()
         m_attachments->showAtPoint(pt);
     }
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showAttachments");
+    WizGetAnalyzer().LogAction("showAttachments");
 }
 
 void TitleBar::onHistoryButtonClicked()
@@ -478,8 +511,7 @@ void TitleBar::onHistoryButtonClicked()
 
     WizShowDocumentHistory(doc, noteView());
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showHistory");
+    WizGetAnalyzer().LogAction("showHistory");
 }
 
 
@@ -495,8 +527,7 @@ void TitleBar::onInfoButtonClicked()
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showNoteInfo");
+    WizGetAnalyzer().LogAction("showNoteInfo");
 }
 
 bool isNetworkAccessible()
@@ -518,14 +549,12 @@ void TitleBar::onCommentsButtonClicked()
     if (comments->isVisible()) {
         comments->hide();
 
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.LogAction("hideComments");
+        WizGetAnalyzer().LogAction("hideComments");
 
         return;
     }
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("showComments");
+    WizGetAnalyzer().LogAction("showComments");
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
@@ -616,8 +645,8 @@ void TitleBar::onTokenAcquired(const QString& strToken)
         comments->load(m_commentsUrl);
     }
 
-    QUrl kUrl(WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID));
-    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl.host(), strToken, strKbGUID, strGUID);
+    QString kUrl = WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID);
+    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
 
     WizService::AsyncApi* api = new WizService::AsyncApi(this);
     connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
@@ -628,7 +657,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
 {
     WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
     api->disconnect(this);
-    api->deleteLater();
+    api->deleteLater();    
 
     if (nCount) {
         m_commentsBtn->setState(CellButton::Badge);

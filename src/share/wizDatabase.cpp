@@ -20,6 +20,7 @@
 #include "rapidjson/document.h"
 
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "utils/logger.h"
 #include "sync/avatar.h"
 #include "wizObjectDataDownloader.h"
@@ -47,8 +48,8 @@ QString GetResoucePathFromFile(const QString& strHtmlFileName)
     if (!QFile::exists(strHtmlFileName))
         return NULL;
 
-    QString strTitle = WizExtractFileTitle(strHtmlFileName);
-    QString strPath = ::WizExtractFilePath(strHtmlFileName);
+    QString strTitle = Utils::Misc::extractFileTitle(strHtmlFileName);
+    QString strPath = Utils::Misc::extractFilePath(strHtmlFileName);
     QString strPath1 = strPath + strTitle + "_files/";
     QString strPath2 = strPath + strTitle + ".files/";
     if (QFile::exists(strPath1))
@@ -91,6 +92,10 @@ void CWizDocument::deleteToTrash()
 
 void CWizDocument::deleteFromTrash()
 {
+    //NOTE: 在普通文件夹中删除笔记的时候，会把数据存放在deletedguid中，此处需要判断是否已将删除数据同步到
+    //服务器上，如果没有同步，则不能删除deletedguid中的数据
+    bool bWaitUpload = m_db.IsObjectDeleted(m_data.strGUID);
+
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
 
@@ -100,15 +105,19 @@ void CWizDocument::deleteFromTrash()
         ::WizDeleteFile(strFileName);
 
         m_db.DeleteAttachment(*it, true, true);
-        m_db.DeleteDeletedGUID(it->strGUID);
+        if (!bWaitUpload) {
+            m_db.DeleteDeletedGUID(it->strGUID);
+        }
     }
 
     if (!m_db.DeleteDocument(m_data, true)) {
         TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
     }
-    //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
-    m_db.DeleteDeletedGUID(m_data.strGUID);
+    if (!bWaitUpload) {
+        //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
+        m_db.DeleteDeletedGUID(m_data.strGUID);
+    }
 
     CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
     if (PathFileExists(strZipFileName))
@@ -292,19 +301,32 @@ void CWizFolder::Delete()
     if (IsDeletedItems())
         return;
 
-    if (IsInDeletedItems()) {
-        // FIXME: should use CWizDocument to delete document data, attachments.
-        if (!m_db.DeleteDocumentsByLocation(Location())) {
-            TOLOG1("Failed to delete documents by location; %1", Location());
-            return;
-        }
+//    if (IsInDeletedItems()) {
+//        // FIXME: should use CWizDocument to delete document data, attachments.
+//        if (!m_db.DeleteDocumentsByLocation(Location())) {
+//            TOLOG1("Failed to delete documents by location; %1", Location());
+//            return;
+//        }
 
-        m_db.DeleteExtraFolder(Location());
-        m_db.SetLocalValueVersion("folders", -1);
-    } else {
-        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS + Location().right(Location().size() - 1));
-        MoveTo(&deletedItems);
+//        m_db.DeleteExtraFolder(Location());
+//        m_db.SetLocalValueVersion("folders", -1);
+//    } else {
+//        CWizFolder deletedItems(m_db, LOCATION_DELETED_ITEMS + Location().right(Location().size() - 1));
+//        MoveTo(&deletedItems);
+//    }
+    CWizDocumentDataArray arrayDocument;
+    m_db.GetDocumentsByLocation(Location(), arrayDocument, true);
+    CWizDocumentDataArray::iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
+    {
+        WIZDOCUMENTDATAEX doc = *it;
+        CWizDocument document(m_db, doc);
+        document.deleteToTrash();
     }
+
+    m_db.DeleteExtraFolder(Location());
+    m_db.SetLocalValueVersion("folders", -1);
+
 }
 
 void CWizFolder::MoveTo(QObject* dest)
@@ -1711,6 +1733,17 @@ int CWizDatabase::GetObjectSyncTimeline()
     return nDays;
 }
 
+void CWizDatabase::setDownloadAttachmentsAtSync(bool download)
+{
+    CString strD = download ? "1" : "0";
+    SetMeta("QT_WIZNOTE", "SyncDownloadAttachment", strD);
+}
+
+bool CWizDatabase::getDownloadAttachmentsAtSync()
+{
+    return GetMetaDef("QT_WIZNOTE", "SyncDownloadAttachment", "0").toInt() != 0;
+}
+
 void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJsonUsers)
 {
     CWizBizUserDataArray arrayUser;
@@ -1856,8 +1889,7 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                     newVer = std::max<__int64>(v, newVer);
                     //
                     TOLOG1("[Sync] User avatar changed : %1", it->second);
-                    //DeleteFile(strAvatarPath + it->second + _T(".png"));
-                    WizService::AvatarHost::deleteAvatar(it->second);
+                    WizService::AvatarHost::reload(it->second);
                 }
             }
             //
@@ -2138,7 +2170,11 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
     }
 
     if (!CWizIndex::Open(GetIndexFileName())) {
-        return false;
+        // If can not open db, try again. If db still can not be opened, delete the db file and download data from server.
+        if (!CWizIndex::Open(GetIndexFileName())) {
+            QFile::remove(GetIndexFileName());
+            return false;
+        }
     }
 
     // user private database opened, try to load kb guid
@@ -2151,7 +2187,11 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
     // FIXME
     if (!CThumbIndex::OpenThumb(GetThumbFileName(), getThumIndexVersion())) {
-        return false;
+        // If can not open db, try again. If db still can not be opened, delete the db file and download data from server.
+        if (!CThumbIndex::OpenThumb(GetThumbFileName(), getThumIndexVersion())) {
+            QFile::remove(GetThumbFileName());
+            return false;
+        }
     }
 
     setThumbIndexVersion(WIZNOTE_THUMB_VERSION);
@@ -3010,9 +3050,13 @@ bool CWizDatabase::GetAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayDat
                 continue;
             }
 
-            if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
-                arrayData.erase(arrayData.begin() + i);
-                continue;
+            CWizDatabase* privateDB = getPersonalDatabase();
+            if (!privateDB->getDownloadAttachmentsAtSync())
+            {
+                if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
+                    arrayData.erase(arrayData.begin() + i);
+                    continue;
+                }
             }
         }
     }
@@ -3206,7 +3250,7 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
     if (!LoadFileData(templateZiwFile, ba))
         return false;
 
-    QString strTitle = WizExtractFileTitle(templateZiwFile);
+    QString strTitle = Utils::Misc::extractFileTitle(templateZiwFile);
     newDoc.strTitle = strTitle;
 
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
@@ -3219,7 +3263,7 @@ bool CWizDatabase::AddAttachment(const WIZDOCUMENTDATA& document, const CString&
     dataRet.strDocumentGUID = document.strGUID;
 
     CString strMD5 = ::WizMd5FileString(strFileName);
-    if (!CreateAttachment(document.strGUID, WizExtractFileName(strFileName), strFileName, "", strMD5, dataRet))
+    if (!CreateAttachment(document.strGUID, Utils::Misc::extractFileName(strFileName), strFileName, "", strMD5, dataRet))
         return false;
 
     if (!::WizCopyFile(strFileName, GetAttachmentFileName(dataRet.strGUID), false))
@@ -3427,7 +3471,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     }
     CString strHtmlFileName = strTempFolder + "uindex.html";
 
-    CString strHtmlTempPath = WizExtractFilePath(strHtmlFileName);
+    CString strHtmlTempPath = Utils::Misc::extractFilePath(strHtmlFileName);
 
     CString strHtml;
     CString strAbstractFileName = strHtmlTempPath + "wiz_full.html";
@@ -3444,7 +3488,7 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
     htmlConverter.toText(strHtml, abstract.text);
     abstract.text = abstract.text.left(2000);
 
-    CString strResourcePath = WizExtractFilePath(strHtmlFileName) + "index_files/";
+    CString strResourcePath = Utils::Misc::extractFilePath(strHtmlFileName) + "index_files/";
     CWizStdStringArray arrayImageFileName;
     ::WizEnumFiles(strResourcePath, "*.jpg;*.png;*.bmp;*.gif", arrayImageFileName, 0);
     if (!arrayImageFileName.empty())
@@ -3455,12 +3499,12 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         CWizStdStringArray::const_iterator it;
         for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++) {
             CString strFileName = *it;
-            qint64 size = ::WizGetFileSize(strFileName);
+            qint64 size = Utils::Misc::getFileSize(strFileName);
             if (size > m)
             {
                 //FIXME:此处是特殊处理，解析Html的CSS时候存在问题，目前暂不删除冗余图片。
                 //缩略图需要判断当前图片确实被使用
-                QString strName = WizExtractFileName(strFileName);
+                QString strName = Utils::Misc::extractFileName(strFileName);
                 if (!strHtml.contains(strName))
                     continue;
 

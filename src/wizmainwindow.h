@@ -4,18 +4,12 @@
 #include <QtGlobal>
 #include <QMainWindow>
 #include <QPushButton>
+#include <QSystemTrayIcon>
+#include <memory>
 
 #include "wizdef.h"
 #include "share/wizuihelper.h"
 #include "share/wizsettings.h"
-#include "wizUpgrade.h"
-#include "wizconsoledialog.h"
-#include "wizCategoryView.h"
-#include "wizDocumentListView.h"
-#include "wizcertmanager.h"
-#include "wizusercipherform.h"
-//#include "wizdownloadobjectdatadialog.h"
-#include "wizDocumentView.h"
 #ifndef Q_OS_MAC
 #include "share/wizshadowwindow.h"
 #endif
@@ -38,6 +32,7 @@ class CWizMacFixedSpacer;
 class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
+class CWizIAPDialog;
 
 class CWizSearchWidget;
 class CWizSearcher;
@@ -50,6 +45,13 @@ class CWizKMSyncThread;
 class CWizUserVerifyDialog;
 
 class CWizMacToolBar;
+class QNetworkDiskCache;
+class CWizConsoleDialog;
+class CWizUpgrade;
+class CWizCategoryView;
+class QListWidgetItem;
+class CWizCategoryViewMessageItem;
+class CWizCategoryViewShortcutItem;
 
 class CWizDocumentWebView;
 
@@ -99,6 +101,7 @@ public:
 
     bool isLogout() const { return m_bLogoutRestart; }
 
+    CWizSearcher* searcher();
     QString searchKeywords() const { return m_strSearchKeywords; }
     void rebuildFTS();
 
@@ -108,7 +111,7 @@ public:
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
-    virtual void resizeEvent(QResizeEvent* event);
+//    virtual void resizeEvent(QResizeEvent* event);
     virtual void closeEvent(QCloseEvent* event);
     virtual void mousePressEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
@@ -124,15 +127,17 @@ private:
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
-    QPointer<CWizKMSyncThread> m_sync;
-    QPointer<CWizUserVerifyDialog> m_userVerifyDialog;
-    QPointer<CWizConsoleDialog> m_console;
-    QPointer<CWizUpgrade> m_upgrade;
+    CWizKMSyncThread* m_sync;
+    CWizUserVerifyDialog* m_userVerifyDialog;
+    CWizConsoleDialog* m_console;
+    CWizUpgrade* m_upgrade;
+    CWizIAPDialog* m_iapDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
     //
     QSystemTrayIcon* m_tray;
+    QMenu* m_trayMenu;
 
 #ifdef USECOCOATOOLBAR
     CWizMacToolBar* m_toolBar;
@@ -156,7 +161,7 @@ private:
 #endif
 
     CWizActions* m_actions;
-    QPointer<CWizCategoryView> m_category;
+    CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
     WizService::Internal::MessageListView* m_msgList;
     QWidget* m_noteListWidget;
@@ -165,21 +170,20 @@ private:
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
-    QPointer<CWizSplitter> m_splitter;
-    QPointer<QWidget> m_docListContainer;
-    QPointer<CWizOptionsWidget> m_options;
+    std::shared_ptr<CWizSplitter> m_splitter;
+    QWidget* m_docListContainer;
 
     QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
 
     CWizDocumentViewHistory* m_history;
-    QPointer<CWizAnimateAction> m_animateSync;
+    CWizAnimateAction* m_animateSync;
 
-    QPointer<CWizSearcher> m_searcher;
+    CWizSearcher* m_searcher;
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    QPointer<CWizSearchWidget> m_search;
+    CWizSearchWidget* m_searchWidget;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;
 
@@ -207,8 +211,8 @@ private:
 public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
-    QWidget* client() const { return m_doc->client(); }
-    void showClient(bool visible) const { return m_doc->showClient(visible); }
+    QWidget* client() const;
+    void showClient(bool visible) const;
 
     CWizActions* actions() const { return m_actions; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
@@ -216,6 +220,7 @@ public:
     //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
+    CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
@@ -258,6 +263,8 @@ public Q_SLOTS:
     void on_actionManual_triggered();
     void on_actionSearch_triggered();
     void on_actionResetSearch_triggered();
+    void on_actionAdvancedSearch_triggered();
+    void on_actionAddCustomSearch_triggered();
     void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
@@ -316,7 +323,8 @@ public Q_SLOTS:
     void on_actionFormatInsertImage_triggered();
     void on_actionFormatScreenShot_triggered();
 
-    void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
+    void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
+                          bool bStart, bool bEnd);
 
     void on_actionGoBack_triggered();
     void on_actionGoForward_triggered();
@@ -341,9 +349,11 @@ public Q_SLOTS:
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
-    void on_promptMessage_request(const QString& strMsg);
+    void on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg);
 
     void on_TokenAcquired(const QString& strToken);
+
+    void on_quickSync_request(const QString& strKbGUID);
 
     void on_options_restartForSettings();
 
@@ -372,8 +382,12 @@ public Q_SLOTS:
     void on_upgradeThread_finished();
 #endif
 
+    //
     void on_trayIcon_newDocument_clicked();
     void on_hideTrayIcon_clicked();
+    void on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason);
+    void showTrayIconMessage(const QString& strTitle, const QString& strInfo);
+    void showTrayIconMenu();
     //
     void shiftVisableStatus();
 
@@ -388,17 +402,17 @@ public Q_SLOTS:
 
 public:
     // WizExplorerApp pointer
-    virtual QWidget* mainWindow() { return this; }
-    virtual QObject* object() { return this; }
+    virtual QWidget* mainWindow();
+    virtual QObject* object();
     virtual CWizDatabaseManager& databaseManager() { return m_dbMgr; }
-    virtual CWizCategoryBaseView& category() { return *m_category; }
-    virtual CWizUserSettings& userSettings() { return *m_settings; }
+    virtual CWizCategoryBaseView& category();
+    virtual CWizUserSettings& userSettings();
 
     //WizExplorerApp API:
     QObject* Window() { return this; }
     Q_PROPERTY(QObject* Window READ Window)
 
-    QObject* CategoryCtrl() { return m_category; }
+    QObject* CategoryCtrl();
     Q_PROPERTY(QObject* CategoryCtrl READ CategoryCtrl)
 
     QObject* DocumentsCtrl();
@@ -418,6 +432,7 @@ public:
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
+    Q_INVOKABLE void AppStoreIAP();
 
 private:
     void syncAllData();
@@ -446,7 +461,8 @@ private:
     void showDocmentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
-
+    void searchNotesBySQL(const QString& strSQLWhere);
+    void searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword, int searchScope);
     //
     void updateHistoryButtonStatus();
     //

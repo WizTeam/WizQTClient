@@ -48,7 +48,8 @@ class AvatarHostPrivate: public QObject
 
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
-    void load(const QString& strUserID, bool bForce);
+    void load(const QString& strUserID);
+    void reload(const QString& strUserID);
     bool avatar(const QString& strUserID, QPixmap* pixmap);
     QPixmap orgAvatar(const QString& strUserID);
     bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath);
@@ -66,16 +67,16 @@ private:
     AvatarDownloader* m_downloader;
 
     QStringList m_listUser; // download pool
-    QString m_strUserCurrent;
+    QString m_strCurrentDownloadingUser;    // current user's id
 
-    bool isNeedUpdate(const QString& strUserID);
     bool loadCache(const QString& strUserID);
     void loadCacheDefault();
     bool loadCacheFromFile(const QString &key, const QString& strFilePath);
     //
-    QPixmap loadOrg(const QString& strUserID, bool bForce);
+//    QPixmap loadOrg(const QString& strUserID, bool bForce);
     QPixmap loadOrg(const QString& strUserID);
 
+    void addToDownloadList(const QString& strUserID);
     void download_impl();
 
     AvatarHost* q;

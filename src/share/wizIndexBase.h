@@ -130,6 +130,9 @@ protected:
     static CString FormatDeleteSQLFormat(const CString& strTableName,
                                          const CString& strKey);
 
+    static CString FormatDeleteSQLByWhere(const CString& strTableName,
+                                         const CString& strWhere);
+
     static CString FormatQuerySQLByTime(const CString& strTableName,
                                         const CString& strFieldList,
                                         const CString& strFieldName,

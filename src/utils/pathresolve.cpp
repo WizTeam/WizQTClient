@@ -4,7 +4,6 @@
 #include <QApplication>
 #include <QDir>
 #include <QDebug>
-#include "mac/wizmachelper.h"
 
 namespace Utils {
 

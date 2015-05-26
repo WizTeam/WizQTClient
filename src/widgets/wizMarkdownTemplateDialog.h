@@ -9,13 +9,6 @@ namespace Ui {
 class CWizMarkdownTemplateDialog;
 }
 
-class CWizListStyle : public QProxyStyle
-{
-public:
-    CWizListStyle(QStyle *style = 0);
-    virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
-};
-
 class CWizTemplateItem : public QListWidgetItem
 {
 public:

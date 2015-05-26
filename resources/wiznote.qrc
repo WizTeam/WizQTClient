@@ -15,5 +15,6 @@
         <file>logo_512.png</file>
         <file>logo_96.png</file>
         <file>wiznote.png</file>
+        <file>searching.gif</file>
     </qresource>
 </RCC>

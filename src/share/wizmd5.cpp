@@ -5,6 +5,7 @@
 
 #include "wizmisc.h"
 #include "../utils/logger.h"
+#include "utils/misc.h"
 
 
 namespace wizmd5
@@ -635,7 +636,7 @@ CString WizMd5FileStringNoSpaceJava(const CString& strFileName)
 
 BOOL WizMd5File(const CString& strFileName, BYTE* pResult)
 {
-    qint64 len = ::WizGetFileSize(strFileName);
+    qint64 len = Utils::Misc::getFileSize(strFileName);
     if (len <= 0)
         return FALSE;
     //

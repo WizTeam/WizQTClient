@@ -38,3 +38,13 @@ void CWizEditorInsertTableForm::clear()
     ui->editRows->clear();
     ui->editCols->clear();
 }
+
+void CWizEditorInsertTableForm::on_pushButton_cancel_clicked()
+{
+    reject();
+}
+
+void CWizEditorInsertTableForm::on_pushButton_ok_clicked()
+{
+    accept();
+}

@@ -18,10 +18,12 @@ class NotifyBar : public QWidget
 public:
     enum NotifyType
     {
+        NoNotify,
         Locked,
         Deleted,
         PermissionLack,
-        LockForGruop
+        LockForGruop,
+        CustomMessage
     };
 
     explicit NotifyBar(QWidget *parent);
@@ -39,6 +41,7 @@ private:
     QLabel* m_labelNotify;
     wizImageButton* m_buttonClose;
     QPropertyAnimation* m_animation;
+    NotifyType m_type;
 
     void setStyleForPermission();
     void setStyleForEditing();

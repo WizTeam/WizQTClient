@@ -153,6 +153,13 @@ void CWizTitleBar::setCanResize(bool b)
     m_maximize->setEnabled(b);
     m_minimize->setEnabled(b);
 }
+
+void CWizTitleBar::setContentsMargins(QMargins margins)
+{
+    m_oldContentsMargin = margins;
+    QWidget::setContentsMargins(margins);
+    layout()->setContentsMargins(margins);
+}
 void CWizTitleBar::setText(QString title)
 {
     m_titleLabel->setText(title);

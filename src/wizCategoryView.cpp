@@ -18,6 +18,8 @@
 #include "share/wizdrawtexthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizSearchIndexer.h"
+#include "share/wizAnalyzer.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
@@ -25,7 +27,10 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "wizFileReader.h"
+#include "widgets/wizAdvancedSearchDialog.h"
+#include "wizOEMSettings.h"
 
 using namespace WizService;
 
@@ -43,6 +48,7 @@ using namespace Core::Internal;
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
 
+#define CATEGORY_SEARCH_BYCUSTOM  QObject::tr("Search by custom param")
 
 // for context menu text
 #define CATEGORY_ACTION_DOCUMENT_NEW    QObject::tr("New note")
@@ -74,6 +80,8 @@ using namespace Core::Internal;
 #define CATEGORY_SHORTCUT   "CategoryShortcut"
 #define CATEGORY_META   "CategoryMeta"
 
+#define QUICK_SEARCH_META   "CUSTOM_QUICK_SEARCH"
+
 
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
@@ -96,13 +104,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setAutoFillBackground(true);
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(12);
-    setDragEnabled(true);
-    viewport()->setAcceptDrops(true);
-    setDropIndicatorShown(true);
-    setDragDropMode(QAbstractItemView::InternalMove);
 
-    // scrollbar
-    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
+    // scrollbar        ScrollPerPixel could cause drag and drop problem    
+//    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
 #ifdef Q_OS_MAC
     verticalScrollBar()->setSingleStep(10);
 #else
@@ -264,6 +268,8 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         QTreeWidget::startDrag(supportedActions);
         setCurrentItem(m_dragItem);
         m_dragItem = 0;
+
+        ::WizGetAnalyzer().LogAction("categoryDragItem");
     }
 
 }
@@ -347,9 +353,15 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         if (CWizCategoryViewItemBase* pItem = itemAt(event->pos()))
         {
             if (pItem->acceptDrop(m_dragItem))
+            {
                 pItem->setFlags(pItem->flags() | Qt::ItemIsDropEnabled);
+                m_dragItem->setFlags(m_dragItem->flags() | Qt::ItemIsDropEnabled);
+            }
             else
+            {
                 pItem->setFlags(pItem->flags() & ~Qt::ItemIsDropEnabled);
+                m_dragItem->setFlags(m_dragItem->flags() & ~Qt::ItemIsDropEnabled);
+            }
 
             event->acceptProposedAction();
             QTreeWidget::dragMoveEvent(event);
@@ -379,8 +391,8 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 
     m_dragDocArray.clear();
 
-
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+        ::WizGetAnalyzer().LogAction("categoryDropDocument");
         CWizDocumentDataArray arrayDocument;
         mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
 
@@ -400,6 +412,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
             pItem->drop(*it, forceCopy);
         }
     } else if (event->mimeData()->hasUrls()) {
+        ::WizGetAnalyzer().LogAction("categoryDropFiles");
         QList<QUrl> urls = event->mimeData()->urls();
         QStringList strFileList;
         foreach (QUrl url, urls) {
@@ -410,6 +423,14 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
+        if (m_dragItem && !(m_dragItem->flags() & Qt::ItemIsDropEnabled))
+        {
+            qDebug() << "[DragDrop]Can not drop item at invalid position";
+            return;
+        }
+
+        ::WizGetAnalyzer().LogAction("categoryDropItem");
+
         QModelIndex droppedIndex = indexAt(event->pos());
         if( !droppedIndex.isValid() )
           return;
@@ -692,7 +713,6 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
 
 void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
-    qDebug() << "reset folder location : " << strNewLocation;
     item->setLocation(strNewLocation);
     for (int i = 0; i < item->childCount(); i++)
     {
@@ -726,6 +746,14 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
     return (itemBase && itemBase->acceptDrop(data));
 
+}
+
+Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
+{
+    if (m_dragItem)
+        return m_dragItem->flags();
+
+    return Qt::NoItemFlags;
 }
 
 void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
@@ -765,8 +793,13 @@ bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*s
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
 {
-    setDragDropMode(QAbstractItemView::DragDrop);
-    setDragEnabled(true);
+    setSelectionMode(QAbstractItemView::SingleSelection);
+    setDragEnabled(false);
+    viewport()->setAcceptDrops(false);
+    invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
+    setDropIndicatorShown(true);
+    setDragDropMode(QAbstractItemView::InternalMove);
+
 
     initMenus();
 
@@ -877,10 +910,38 @@ void CWizCategoryView::initMenus()
     addAction(actionRemoveShortcut);
     connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
 
+    QAction* actionAdvancedSearch = new QAction(tr("Advanced search"), this);
+    actionAdvancedSearch->setData(ActionAdvancedSearch);
+    addAction(actionAdvancedSearch);
+    connect(actionAdvancedSearch, SIGNAL(triggered()), SLOT(on_action_advancedSearch()));
+
+    QAction* actionAddCustomSearch = new QAction(tr("Add custom search"), this);
+    actionAddCustomSearch->setData(ActionAddCustomSearch);
+    addAction(actionAddCustomSearch);
+    connect(actionAddCustomSearch, SIGNAL(triggered()), SLOT(on_action_addCustomSearch()));
+
+    QAction* actionEditCustomSearch = new QAction(tr("Edit custom search"), this);
+    actionEditCustomSearch->setData(ActionEditCustomSearch);
+    addAction(actionEditCustomSearch);
+    connect(actionEditCustomSearch, SIGNAL(triggered()), SLOT(on_action_editCustomSearch()));
+
+    QAction* actionRemoveCustomSearch = new QAction(tr("Remove custom search"), this);
+    actionRemoveCustomSearch->setData(ActionRemoveCustomSearch);
+    addAction(actionRemoveCustomSearch);
+    connect(actionRemoveCustomSearch, SIGNAL(triggered()), SLOT(on_action_removeCustomSearch()));
+
+
     // shortcut menu
     m_menuShortcut = new QMenu(this);
     m_menuShortcut->addAction(actionRemoveShortcut);
 
+    // custom search menu
+    m_menuCustomSearch = new QMenu(this);
+    m_menuCustomSearch->addAction(actionAdvancedSearch);
+    m_menuCustomSearch->addSeparator();
+    m_menuCustomSearch->addAction(actionAddCustomSearch);
+    m_menuCustomSearch->addAction(actionEditCustomSearch);
+    m_menuCustomSearch->addAction(actionRemoveCustomSearch);
 
     // trash menu
     m_menuTrash = new QMenu(this);
@@ -1036,6 +1097,14 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
                 act->setText(CATEGORY_ACTION_MANAGE_BIZ);
             }
             break;
+        case ActionRemoveCustomSearch:
+        case ActionEditCustomSearch:
+            if (type == AddCustomSearchItem) {
+                act->setVisible(false);
+            } else if (type == EditCustomSearchItem) {
+                act->setVisible(true);
+            }
+            break;
         default:
             continue;
         }
@@ -1052,6 +1121,19 @@ void CWizCategoryView::showShortcutContextMenu(QPoint pos)
 {
     resetMenu(ShortcutItem);
     m_menuShortcut->popup(pos);
+}
+
+void CWizCategoryView::showCustomSearchContextMenu(QPoint pos, bool removable)
+{
+    if (removable)
+    {
+        resetMenu(EditCustomSearchItem);
+    }
+    else
+    {
+        resetMenu(AddCustomSearchItem);
+    }
+    m_menuCustomSearch->popup(pos);
 }
 
 void CWizCategoryView::showFolderRootContextMenu(QPoint pos)
@@ -1180,7 +1262,7 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
     if (attachList.isEmpty())
         return false;
 
-    QString strTitle = WizExtractFileName(attachList.first());
+    QString strTitle =Utils::Misc::extractFileName(attachList.first());
     if (!createDocument(data, "<p><br/></p>", strTitle))
         return false;
 
@@ -1234,6 +1316,7 @@ QString CWizCategoryView::WizGetHtmlBodyContent(QString strHtml)
 
 void CWizCategoryView::on_action_newDocument()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewDocument");
     if (currentCategoryItem<CWizCategoryViewFolderItem>()
             || currentCategoryItem<CWizCategoryViewGroupRootItem>()
             || currentCategoryItem<CWizCategoryViewGroupItem>())
@@ -1245,11 +1328,13 @@ void CWizCategoryView::on_action_newDocument()
 
 void CWizCategoryView::on_action_loadDocument()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuLoadDocument");
     //TODO:
 }
 
 void CWizCategoryView::on_action_importFile()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuImportFile");
     QStringList files = QFileDialog::getOpenFileNames(
     this,
     tr("Select one or more files to open"),
@@ -1263,7 +1348,7 @@ void CWizCategoryView::on_action_importFile()
 }
 
 void CWizCategoryView::on_action_newItem()
-{
+{    
     if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()
             || currentCategoryItem<CWizCategoryViewFolderItem>())
     {
@@ -1283,6 +1368,7 @@ void CWizCategoryView::on_action_newItem()
 
 void CWizCategoryView::on_action_user_newFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewFolder");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New folder"),
                                                           tr("Please input folder name: "),
                                                           "", m_app.mainWindow());      //use mainWindow as parent
@@ -1325,6 +1411,7 @@ void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_user_newTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewTag");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New tag"),
                                                           tr("Please input tag name: "),
                                                           "", window());
@@ -1371,6 +1458,7 @@ void CWizCategoryView::on_action_user_newTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_newFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewGroupFolder");
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("New group folder"),
                                                           tr("Please input folder name: "),
                                                           "", window());
@@ -1430,6 +1518,7 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuMoveFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, window());
     selector->setAcceptRoot(true);
 
@@ -1508,6 +1597,7 @@ void CWizCategoryView::on_action_renameItem()
 
 void CWizCategoryView::on_action_user_renameFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameFolder");
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     Q_ASSERT(p);
 
@@ -1573,6 +1663,7 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed_progress(int nMax, 
 
 void CWizCategoryView::on_action_user_renameTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameTag");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
@@ -1606,6 +1697,7 @@ void CWizCategoryView::on_action_user_renameTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_renameFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRenameGroupFolder");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
 
     CWizLineInputDialog* dialog = new CWizLineInputDialog(tr("Rename group folder"),
@@ -1659,6 +1751,7 @@ void CWizCategoryView::on_action_deleteItem()
 
 void CWizCategoryView::on_action_user_deleteFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteFolder");
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     if (!p)
         return;
@@ -1670,26 +1763,30 @@ void CWizCategoryView::on_action_user_deleteFolder()
     // setup warning messagebox
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete Folder"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete all notes inside folder: %1 ? (All notes will move to trash folder and remove from cloud server)").arg(p->location());
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteFolder_confirmed(int)));
     msgBox->exec();
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_user_deleteFolder_confirmed(result);
 }
 
 void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>();
     if (!p)
         return;
 
-    qDebug() << "try to delete folder : " << p->location();
-
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         CWizFolder folder(m_dbMgr.db(), p->location());
         folder.Delete();
     }
@@ -1697,6 +1794,7 @@ void CWizCategoryView::on_action_user_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_user_deleteTag()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteTag");
     CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>();
     if (!p)
         return;
@@ -1705,24 +1803,30 @@ void CWizCategoryView::on_action_user_deleteTag()
 
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete tag"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete tag: %1 ? (include child tags if any)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_user_deleteTag_confirmed(int)));
     msgBox->exec();
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_user_deleteTag_confirmed(result);
 }
 
 void CWizCategoryView::on_action_user_deleteTag_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewTagItem* p = currentCategoryItem<CWizCategoryViewTagItem>();
     if (!p)
         return;
 
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         WIZTAGDATA tag = p->tag();
         m_dbMgr.db().DeleteTagWithChildren(tag, TRUE);
     }
@@ -1730,6 +1834,7 @@ void CWizCategoryView::on_action_user_deleteTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_deleteFolder()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuDeleteGroupFolder");
     CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>();
     if (!p)
         return;
@@ -1738,24 +1843,30 @@ void CWizCategoryView::on_action_group_deleteFolder()
 
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete group folder"));
-    msgBox->addButton(QMessageBox::Ok);
-    msgBox->addButton(QMessageBox::Cancel);
+    msgBox->setIcon(QMessageBox::Information);
+    msgBox->addButton(tr("Cancel"), QMessageBox::NoRole);
+    QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
+    msgBox->setDefaultButton(btnOK);
 
     QString strWarning = tr("Do you really want to delete folder: %1? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
     msgBox->setText(strWarning);
-    connect(msgBox,SIGNAL(finished(int)),this,SLOT(on_action_group_deleteFolder_confirmed(int)));
-    msgBox->exec();
+    msgBox->exec();    
+
+    int result = QDialog::Rejected;
+    if (msgBox->clickedButton() == btnOK)
+    {
+        result = QDialog::Accepted;
+    }
+    on_action_group_deleteFolder_confirmed(result);
 }
 
 void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
-{
-    sender()->deleteLater();
-
+{    
     CWizCategoryViewGroupItem* p = currentCategoryItem<CWizCategoryViewGroupItem>();
     if (!p)
         return;
 
-    if (result == QMessageBox::Ok) {
+    if (result == QMessageBox::Accepted) {
         WIZTAGDATA tag = p->tag();
         m_dbMgr.db(p->kbGUID()).DeleteTagWithChildren(tag, true);
     }
@@ -1763,12 +1874,13 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_deleted_recovery()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRecovery");
     CWizCategoryViewTrashItem* trashItem = currentCategoryItem<CWizCategoryViewTrashItem>();
     if (trashItem)
     {
         QString strToken = WizService::Token::token();
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, true);
+        QString strUrl = WizService::ApiEntry::standardCommandUrl("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID(), false);
+        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
     }
 }
 
@@ -1786,7 +1898,7 @@ void CWizCategoryView::on_action_itemAttribute()
 
 void CWizCategoryView::on_action_groupAttribute()
 {
-
+    ::WizGetAnalyzer().LogAction("categoryMenuGroupAttribute");
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
@@ -1799,6 +1911,7 @@ void CWizCategoryView::on_action_groupAttribute()
 
 void CWizCategoryView::on_action_manageGroup()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuManageGroup");
     CWizCategoryViewGroupRootItem* p = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     if (p && !p->kbGUID().isEmpty()) {
         if (p->isBizGroup()) {
@@ -1811,6 +1924,7 @@ void CWizCategoryView::on_action_manageGroup()
 
 void CWizCategoryView::on_action_bizgAttribute()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuNewBizAttribute");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
     if (p && !p->kbGUID().isEmpty()) {
 
@@ -1832,6 +1946,7 @@ void CWizCategoryView::on_action_itemManage()
 
 void CWizCategoryView::on_action_manageBiz()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuManageBiz");
     CWizCategoryViewBizGroupRootItem* p = currentCategoryItem<CWizCategoryViewBizGroupRootItem>();
     if (p && !p->biz().bizGUID.isEmpty()) {
         manageBiz(p->biz().bizGUID, false);
@@ -1840,6 +1955,7 @@ void CWizCategoryView::on_action_manageBiz()
 
 void CWizCategoryView::on_action_removeShortcut()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuRemoveShortcut");
     CWizCategoryViewShortcutItem* p = currentCategoryItem<CWizCategoryViewShortcutItem>();
     CWizCategoryViewShortcutRootItem *pRoot = dynamic_cast<CWizCategoryViewShortcutRootItem *>(p->parent());
     if (p && pRoot)
@@ -1853,10 +1969,109 @@ void CWizCategoryView::on_action_removeShortcut()
     saveShortcutState();
 }
 
+void CWizCategoryView::on_action_advancedSearch()
+{
+    ::WizGetAnalyzer().LogAction("categoryMenuAdvancedSearch");
+    bool bSearchOnly = true;
+    CWizAdvancedSearchDialog dlg(bSearchOnly);
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strParam = dlg.getParams();
+        advancedSearchByCustomParam(strParam);
+    }
+}
+
+void CWizCategoryView::on_action_addCustomSearch()
+{
+    ::WizGetAnalyzer().LogAction("categoryMenuAddCustomSearch");
+    bool bSearchOnly = false;
+    CWizAdvancedSearchDialog dlg(bSearchOnly);
+    if (dlg.exec() == QDialog::Accepted)
+    {
+        QString strParam = dlg.getParams();
+        advancedSearchByCustomParam(strParam);
+
+        // create item by param
+        QString strSQLWhere, name , keyword;
+        int scope;
+        CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name, scope);
+
+        CWizCategoryViewItemBase* rootItem = findAllSearchItem();
+        if (!rootItem)
+            return;
+
+        QTreeWidgetItem* parentItem = 0;
+        for (int i = 0; i < rootItem->childCount(); i++)
+        {
+            if (rootItem->child(i)->text(0) == CATEGORY_SEARCH_BYCUSTOM)
+            {
+                parentItem = dynamic_cast<CWizCategoryViewSearchItem*>(rootItem->child(i));
+                break;
+            }
+        }
+        if (parentItem == 0)
+        {
+            parentItem = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
+        }
+        rootItem->addChild(parentItem);
+
+
+        QString strGuid = ::WizGenGUIDLowerCaseLetterOnly();
+        CWizCategoryViewCustomSearchItem* item = new CWizCategoryViewCustomSearchItem(
+                    m_app, name, strParam, strSQLWhere, strGuid, keyword, scope);
+        parentItem->addChild(item);
+        sortItems(0, Qt::AscendingOrder);
+        saveCustomAdvancedSearchParamToDB(strGuid, strParam);
+    }
+}
+
+void CWizCategoryView::on_action_editCustomSearch()
+{
+    ::WizGetAnalyzer().LogAction("categoryMenuEditCustomSearch");
+    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    {
+        CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
+        if (item)
+        {
+            CWizAdvancedSearchDialog dlg(false);
+            dlg.setParams(item->getSelectParam());
+            if (dlg.exec() == QDialog::Accepted)
+            {
+                QString strParam = dlg.getParams();
+                QString strSQLWhere, name, keyword;
+                int scope;
+                CWizAdvancedSearchDialog::paramToSQL(strParam, strSQLWhere, keyword, name, scope);
+                item->setText(0, name);
+                item->setKeyword(keyword);
+                item->setSelectParam(strParam);
+                item->setSQLWhere(strSQLWhere);
+                item->setSearchScope(scope);
+                saveCustomAdvancedSearchParamToDB(item->kbGUID(), strParam);
+                update();
+            }
+        }
+    }
+}
+
+void CWizCategoryView::on_action_removeCustomSearch()
+{
+    ::WizGetAnalyzer().LogAction("categoryMenuRemoveCustomSearch");
+    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    {
+        CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
+        if (item)
+        {
+            QString strGuid = item->kbGUID();
+            deleteCustomAdvancedSearchParamFromDB(strGuid);
+            item->parent()->removeChild(item);
+        }
+    }
+}
+
 void CWizCategoryView::on_action_emptyTrash()
 {
+    ::WizGetAnalyzer().LogAction("categoryMenuEmptyTrash");
     // FIXME: show progress
-
     if (CWizCategoryViewTrashItem* pTrashItem = currentCategoryItem<CWizCategoryViewTrashItem>()) {
         QString strKbGUID = pTrashItem->kbGUID();
         Q_ASSERT(!strKbGUID.isEmpty());
@@ -1916,8 +2131,10 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item))
     {
-        if (pItem->isUnreadButtonUseable() && pItem->isSelected())
+        bool bUseCount = pItem->isUnreadButtonUseable() && pItem->isSelected();
+        if (bUseCount)
         {
+            emit itemSelectionChanged();
         }
         else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {
@@ -2081,13 +2298,6 @@ void CWizCategoryView::init()
 
     loadExpandState();
 
-
-    setSelectionMode(QAbstractItemView::SingleSelection);
-    setDragEnabled(true);
-    invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
-    viewport()->setAcceptDrops(true);
-    setDropIndicatorShown(true);
-    setDragDropMode(QAbstractItemView::InternalMove);
 }
 
 void CWizCategoryView::resetSections()
@@ -2160,7 +2370,7 @@ void CWizCategoryView::resetSections()
                 else
                 {
                     pExistingSection = new CWizCategoryViewSectionItem(m_app, sectionName, pItem->getSortOrder() - 1);
-                    if(CATEGORY_TEAM_GROUPS == sectionName)
+                    if(CATEGORY_TEAM_GROUPS == sectionName && !CWizOEMSettings::isForbidCreateBiz())
                     {
                         QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "plus.png";
                         pExistingSection->setExtraButtonIcon(strIconPath);
@@ -2667,9 +2877,7 @@ void CWizCategoryView::initGeneral()
 
     loadShortcutState();
 
-    //CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
-    //addTopLevelItem(pSearchRoot);
-    //pSearchRoot->setHidden(true);
+    initQuickSearches();
 }
 
 void CWizCategoryView::sortFolders()
@@ -2811,7 +3019,7 @@ QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pIte
     if (!pItem)
         return QString();
 
-    QString str = pItem->location() + ": " + QString::number(nStartPos);
+    QString str ="\"" + pItem->location() + "\": " + QString::number(nStartPos);
     nStartPos ++;
 
     for (int i = 0; i < pItem->childCount(); i++)
@@ -2941,6 +3149,14 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
             int idx = str.lastIndexOf("/", -2);
             while (idx) {
                 str = str.left(idx + 1);
+                if (str.isEmpty()) {
+                    qDebug() << "[doLocationSanityCheck]Invalid folder name: " << strLocation;
+                    // remove from array
+//                    arrayLocation.erase(arrayLocation.begin() + i);
+                    break;
+                }
+
+                //
                 idx = str.lastIndexOf("/", -2);
 
                 if (-1 == ::WizFindInArray(arrayLocation, str)) {
@@ -3266,6 +3482,73 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
     pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
+void CWizCategoryView::initQuickSearches()
+{
+    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
+    addTopLevelItem(pSearchRoot);
+
+//    CWizCategoryViewSearchItem* pSearchByAttributes = new CWizCategoryViewSearchItem(m_app, tr("Search by Attributes(Personal Notes)"));
+    CWizCategoryViewSearchItem* pSearchByDTCreated = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Created"));
+    CWizCategoryViewSearchItem* pSearchByDTModified = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Modified"));
+    CWizCategoryViewSearchItem* pSearchByDTAccessed = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Accessed"));
+
+//    pSearchRoot->addChild(pSearchByAttributes);
+    pSearchRoot->addChild(pSearchByDTCreated);
+    pSearchRoot->addChild(pSearchByDTModified);
+    pSearchRoot->addChild(pSearchByDTAccessed);
+
+    CWizCategoryViewTimeSearchItem* pCreatedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since Today"), "DT_CREATED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pCreatedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since Yestoday"), "DT_CREATED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pCreatedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since the day before yestoday"), "DT_CREATED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pCreatedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since one week"), "DT_CREATED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pCreatedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Created since one month"), "DT_CREATED > %1", DateInterval_LastMonth);
+    pSearchByDTCreated->addChild(pCreatedToday);
+    pSearchByDTCreated->addChild(pCreatedYestoday);
+    pSearchByDTCreated->addChild(pCreatedDayBeforeYestoday);
+    pSearchByDTCreated->addChild(pCreatedOneWeek);
+    pSearchByDTCreated->addChild(pCreatedOneMonth);
+
+    CWizCategoryViewTimeSearchItem* pModifiedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since Today"), "DT_MODIFIED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pModifiedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since Yestoday"), "DT_MODIFIED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pModifiedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since the day before yestoday"), "DT_MODIFIED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pModifiedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since one week"), "DT_MODIFIED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pModifiedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Modified since one month"), "DT_MODIFIED > %1", DateInterval_LastMonth);
+    pSearchByDTModified->addChild(pModifiedToday);
+    pSearchByDTModified->addChild(pModifiedYestoday);
+    pSearchByDTModified->addChild(pModifiedDayBeforeYestoday);
+    pSearchByDTModified->addChild(pModifiedOneWeek);
+    pSearchByDTModified->addChild(pModifiedOneMonth);
+
+    CWizCategoryViewTimeSearchItem* pAccessedToday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since Today"), "DT_ACCESSED > %1", DateInterval_Today);
+    CWizCategoryViewTimeSearchItem* pAccessedYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since Yestoday"), "DT_ACCESSED > %1", DateInterval_Yestoday);
+    CWizCategoryViewTimeSearchItem* pAccessedDayBeforeYestoday = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since the day before yestoday"), "DT_ACCESSED > %1", DateInterval_TheDayBeforeYestoday);
+    CWizCategoryViewTimeSearchItem* pAccessedOneWeek = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since one week"), "DT_ACCESSED > %1", DateInterval_LastWeek);
+    CWizCategoryViewTimeSearchItem* pAccessedOneMonth = new CWizCategoryViewTimeSearchItem(m_app, tr("Accessed since one month"), "DT_ACCESSED > %1", DateInterval_LastMonth);
+    pSearchByDTAccessed->addChild(pAccessedToday);
+    pSearchByDTAccessed->addChild(pAccessedYestoday);
+    pSearchByDTAccessed->addChild(pAccessedDayBeforeYestoday);
+    pSearchByDTAccessed->addChild(pAccessedOneWeek);
+    pSearchByDTAccessed->addChild(pAccessedOneMonth);
+
+    QMap<QString, QString> customMap;
+    loadCustomAdvancedSearchParamFromDB(customMap);
+    if (customMap.count() > 0)
+    {
+        CWizCategoryViewSearchItem* pSearchByCustomSQL = new CWizCategoryViewSearchItem(m_app, CATEGORY_SEARCH_BYCUSTOM);
+        pSearchRoot->addChild(pSearchByCustomSQL);
+        QMap<QString, QString>::Iterator it;
+        for (it = customMap.begin(); it != customMap.end(); it++)
+        {
+            QString where, name, keyword;
+            int scope;
+            CWizAdvancedSearchDialog::paramToSQL(it.value(), where, keyword, name, scope);
+            CWizCategoryViewCustomSearchItem* pCustomSearch = new CWizCategoryViewCustomSearchItem(m_app,
+                                                                                                   name, it.value(), where, it.key(), keyword, scope);
+            pSearchByCustomSQL->addChild(pCustomSearch);
+        }
+    }
+}
+
 CWizCategoryViewItemBase* CWizCategoryView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate /* = true*/)
 {
     if (group.IsBiz())
@@ -3368,6 +3651,22 @@ CWizCategoryViewItemBase* CWizCategoryView::findAllTagsItem()
     //
     return NULL;
 }
+
+CWizCategoryViewItemBase*CWizCategoryView::findAllSearchItem()
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->type() != ItemType_QuickSearchRootItem)
+            continue;
+
+        CWizCategoryViewSearchRootItem* pItem = dynamic_cast<CWizCategoryViewSearchRootItem*>(topLevelItem(i));
+        if (pItem) {
+            return pItem;
+        }
+    }
+    //
+    return NULL;
+}
+
 CWizCategoryViewItemBase* CWizCategoryView::findAllMessagesItem()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
@@ -3556,8 +3855,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
         if (!create)
             return NULL;
 
-        CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strCurrentLocation, m_dbMgr.db().kbGUID());
-        parent->addChild(pFolderItem);
+        CWizCategoryViewFolderItem* pFolderItem = createFolderItem(parent, strCurrentLocation);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -4080,11 +4378,18 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
         {
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
-            if (!parentItem)
-                return;
+            if (parentItem == 0)
+            {
+//                parentItem = folderRoot;
+                //拖拽存在bug，会导致普通元素变成顶级元素，此处进行特殊处理。
+//                int index = indexOfTopLevelItem(item);
+//                takeTopLevelItem(index);
+//                folderRoot->insertChild(0, item);
+                parentItem = folderRoot;
+            }
 
             QString strName = getUseableItemName(parentItem, item);
-            qDebug() << "get useable item name : " << strName;
+//            qDebug() << "get useable item name : " << strName;
             QString strNewLocation = "/" + strName + "/";
             item->setText(0, strName);
 
@@ -4095,17 +4400,19 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
                 if (!parentBase)
                     return;
 
-                qDebug() << "parent is not root , parent name : " << parentBase->name();
+//                qDebug() << "parent is not root , parent name : " << parentBase->name();
                 strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
                 parentItem = parentBase->parent();
             }
 
             QString strOldLocation = item->location();
 
-            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
+//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
         }
+
+        sortFolders();
     }
 }
 
@@ -4221,6 +4528,60 @@ void CWizCategoryView::saveItemState(QTreeWidgetItem* pi, QSettings *settings)
    bool bExpand = pItem->isExpanded() ? true : false;
 
    settings->setValue(strId, bExpand);
+}
+
+void CWizCategoryView::advancedSearchByCustomParam(const QString& strParam)
+{
+    QString strSql, strName, strKeyword;
+    int scope;
+    CWizAdvancedSearchDialog::paramToSQL(strParam, strSql, strKeyword, strName, scope);
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    CWizSearcher* searcher = mainWindow->searcher();
+    if (searcher)
+    {
+        if (strSql.isEmpty())
+        {
+            searcher->search(strKeyword, 500, (SearchScope)scope);
+        }
+        else if (strKeyword.isEmpty())
+        {
+            searcher->searchBySQLWhere(strSql, 500, (SearchScope)scope);
+        }
+        else
+        {
+            searcher->searchByKeywordAndWhere(strKeyword, strSql, 500, (SearchScope)scope);
+        }
+    }
+}
+
+void CWizCategoryView::saveCustomAdvancedSearchParamToDB(const QString& strGuid, const QString& strParam)
+{
+    m_dbMgr.db().SetMeta(QUICK_SEARCH_META, strGuid, strParam);
+}
+
+void CWizCategoryView::loadCustomAdvancedSearchParamFromDB(QMap<QString, QString>& paramMap)
+{
+    CWizMetaDataArray arrayMeta;
+     m_dbMgr.db().GetMetasByName(QUICK_SEARCH_META, arrayMeta);
+     CWizMetaDataArray::iterator it;
+     for (it = arrayMeta.begin(); it != arrayMeta.end(); it++)
+     {
+         paramMap.insert(it->strKey, it->strValue);
+     }
+}
+
+void CWizCategoryView::deleteCustomAdvancedSearchParamFromDB(const QString& strGuid)
+{
+    m_dbMgr.db().deleteMetaByKey(QUICK_SEARCH_META, strGuid);
+}
+
+CWizCategoryViewFolderItem* CWizCategoryView::createFolderItem(QTreeWidgetItem* parent, const QString& strLocation)
+{
+    CWizCategoryViewFolderItem* pFolderItem = new CWizCategoryViewFolderItem(m_app, strLocation, m_dbMgr.db().kbGUID());
+    parent->addChild(pFolderItem);
+    m_dbMgr.db().AddExtraFolder(strLocation);
+    return pFolderItem;
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)

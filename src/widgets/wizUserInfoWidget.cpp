@@ -15,6 +15,8 @@
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
+#include "widgets/wizIAPDialog.h"
+#include "wizOEMSettings.h"
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -47,7 +49,8 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     actionAccountInfo->setVisible(false);
 
     QAction* actionAccountSetup = new QAction(tr("Account settings..."), m_menuMain);
-    connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSetup_triggered()));
+    connect(actionAccountSetup, SIGNAL(triggered()), SLOT(on_action_accountSettings_triggered()));
+
 
     QAction* actionChangeAvatar = new QAction(tr("Change avatar..."), m_menuMain);
     connect(actionChangeAvatar, SIGNAL(triggered()), SLOT(on_action_changeAvatar_triggered()));
@@ -55,18 +58,26 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     QAction* actionWebService = new QAction(tr("Open web client..."), m_menuMain);
     connect(actionWebService, SIGNAL(triggered()), SLOT(on_action_viewNotesOnWeb_triggered()));
 
-    QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
-    connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
-
     QAction* actionLogout = new QAction(tr("Logout..."), m_menuMain);
     connect(actionLogout, SIGNAL(triggered()), SLOT(on_action_logout_triggered()));
 
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
+    if (!CWizOEMSettings::isHideBuyVip())
+    {
+        QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
+        connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
+        m_menuMain->addAction(actionUpgradeVIP);
+    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
-    m_menuMain->addAction(actionMyShare);
+    if (!CWizOEMSettings::isHideMyShare())
+    {
+        QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
+        connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
+        m_menuMain->addAction(actionMyShare);
+    }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionLogout);
     //
@@ -118,12 +129,36 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 }
 
-void CWizUserInfoWidget::on_action_accountSetup_triggered()
-{
+void CWizUserInfoWidget::on_action_accountSettings_triggered()
+{    
+#ifndef BUILD4APPSTORE
     QString extInfo = WizService::ApiEntry::appstoreParam(false);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-//    QString strUrl = WizService::ApiEntry::accountInfoUrl(WIZ_TOKEN_IN_URL_REPLACE_PART);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info",
+                                                              WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo, false);
     WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+#else
+    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    CWizIAPDialog* dlg = window->iapDialog();
+    dlg->loadUserInfo();
+    dlg->exec();
+#endif
+    // 用户可能会在设置页面中修改信息，此处清除token以便重新同步
+    Token::clearToken();
+}
+
+void CWizUserInfoWidget::on_action_upgradeVip_triggered()
+{
+#ifndef BUILD4APPSTORE
+    QString strToken = Token::token();
+    QString extInfo = WizService::ApiEntry::appstoreParam(false);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken, extInfo, true);
+    QDesktopServices::openUrl(strUrl);
+#else
+    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    CWizIAPDialog* dlg = window->iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
+#endif
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_triggered()
@@ -152,7 +187,7 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());
 
     if (ok) {
-        AvatarHost::load(m_db.GetUserId(), true);
+        AvatarHost::reload(m_db.GetUserId());
     } else {
         QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
@@ -163,16 +198,18 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 {
     QString strToken = WizService::Token::token();
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("service", strToken);
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("service", strToken, false);
 
+    qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
 void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
 {
     QString strToken = WizService::Token::token();
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("my_share", strToken);
+    QString strUrl = WizService::ApiEntry::newStandardCommandUrl("my_share", strToken, "", false);
 
+    qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
@@ -184,7 +221,7 @@ void CWizUserInfoWidget::on_action_logout_triggered()
 
 void CWizUserInfoWidget::on_userInfo_changed()
 {
-    AvatarHost::load(m_db.GetUserId(), true);
+    AvatarHost::reload(m_db.GetUserId());
     resetUserInfo();
 }
 QString CWizUserInfoWidget::userId()

@@ -144,11 +144,11 @@ struct IWizSyncableDatabase
 
 
 
-enum WizKMSyncProgressStatusType
+enum WizKMSyncProgressMessageType
 {
-    wizhttpstatustypeNormal,
-    wizhttpstatustypeWarning,
-    wizhttpstatustypeError
+    wizSyncMessageNormal,
+    wizSyncMessageWarning,
+    wizSyncMeesageError
 };
 
 
@@ -163,8 +163,8 @@ public:
     }
 
     virtual void OnSyncProgress(int pos) {}
-    virtual HRESULT OnText(WizKMSyncProgressStatusType type, const QString& strStatus) = 0;
-    virtual HRESULT OnPromptMessage(const QString& strMessage) = 0;
+    virtual HRESULT OnText(WizKMSyncProgressMessageType type, const QString& strStatus) = 0;
+    virtual HRESULT OnPromptMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage) = 0;
     virtual void SetStop(bool b) { m_bStop = b; }
     virtual bool IsStop() const { return m_bStop; }
     virtual void SetLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }
@@ -181,9 +181,9 @@ public:
     virtual void OnEndKb(const QString& strKbGUID) {}
 
 public:
-    void OnStatus(const QString& strText) { OnText(wizhttpstatustypeNormal, strText); }
-    void OnWarning(const QString& strText) { OnText(wizhttpstatustypeWarning, strText); }
-    void OnError(const QString& strText) { OnText(wizhttpstatustypeError, strText); }
+    void OnStatus(const QString& strText) { OnText(wizSyncMessageNormal, strText); }
+    void OnWarning(const QString& strText) { OnText(wizSyncMessageWarning, strText); }
+    void OnError(const QString& strText) { OnText(wizSyncMeesageError, strText); }
 
 private:
     bool m_bStop;

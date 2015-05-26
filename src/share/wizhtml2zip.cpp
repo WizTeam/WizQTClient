@@ -6,6 +6,7 @@
 
 #include "wizmisc.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include <QDir>
 
 
@@ -64,7 +65,7 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
         it++)
     {
         CString strFileName = *it;
-        CString strNameInZip = "index_files/" + WizExtractFileName(strFileName);
+        CString strNameInZip = "index_files/" + Utils::Misc::extractFileName(strFileName);
         if (!zip.compressFile(strFileName, strNameInZip))
         {
             failed++;
@@ -102,7 +103,7 @@ bool WizFolder2Zip(const QString &strFolder, const QString &strMetaText,    \
     for (QStringList::const_iterator it = strResourceList.begin(); it != strResourceList.end(); it++)
     {
         QString strFileName =dir.path() +"/" + *it;
-        QString strNameInZip = "index_files/" + WizExtractFileName(strFileName);
+        QString strNameInZip = "index_files/" + Utils::Misc::extractFileName(strFileName);
         if (!zip.compressFile(strFileName, strNameInZip))
         {
             failed++;

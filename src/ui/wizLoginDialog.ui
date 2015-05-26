@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>354</width>
-    <height>503</height>
+    <height>535</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -108,6 +108,13 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="btn_selectServer">
+            <property name="text">
+             <string>Switch Server</string>
+            </property>
+           </widget>
           </item>
          </layout>
         </item>
@@ -219,6 +226,16 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>15</height>
+                </size>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="CWizIconLineEditContainer" name="wgt_serveroptioncontainer" native="true">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -540,7 +557,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -601,7 +618,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -627,24 +644,18 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="btn_proxysetting">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
+      <widget class="QPushButton" name="btn_snsLogin">
        <property name="cursor">
         <cursorShape>PointingHandCursor</cursorShape>
        </property>
        <property name="text">
-        <string>Proxy settings</string>
+        <string>Thirdparty</string>
        </property>
       </widget>
      </item>
@@ -672,6 +683,29 @@
       </widget>
      </item>
      <item>
+      <widget class="QLabel" name="label_separator4">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="btn_proxysetting">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Maximum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="cursor">
+        <cursorShape>PointingHandCursor</cursorShape>
+       </property>
+       <property name="text">
+        <string>Proxy settings</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <spacer name="horizontalSpacer_8">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
@@ -679,7 +713,7 @@
        <property name="sizeHint" stdset="0">
         <size>
          <width>10</width>
-         <height>5</height>
+         <height>0</height>
         </size>
        </property>
       </spacer>
@@ -709,7 +743,6 @@
   <tabstop>btn_singUp</tabstop>
   <tabstop>btn_changeToSignin</tabstop>
   <tabstop>btn_changeToLogin</tabstop>
-  <tabstop>btn_proxysetting</tabstop>
   <tabstop>btn_fogetpass</tabstop>
   <tabstop>btn_max</tabstop>
   <tabstop>btn_min</tabstop>

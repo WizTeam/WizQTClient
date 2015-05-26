@@ -3,6 +3,7 @@
 #include <QLabel>
 #include <QHBoxLayout>
 
+#include "utils/stylehelper.h"
 #include "share/wizobject.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
@@ -16,8 +17,8 @@ InfoBar::InfoBar(QWidget *parent)
     setStyleSheet("font-size: 11px; color: #646464;");
     setContentsMargins(5, 0, 0, 0);
 
-    // FIXME: should be the same as editor toolbar
-    setFixedHeight(32);
+    int nHeight = Utils::StyleHelper::infoBarHeight();
+    setFixedHeight(nHeight);
 
     QHBoxLayout* layout = new QHBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);

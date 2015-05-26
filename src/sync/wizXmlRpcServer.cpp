@@ -1,63 +1,10 @@
 #include "wizXmlRpcServer.h"
-
-//#include "wizdef.h"
-#include "../share/wizmisc.h"
-
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QNetworkProxy>
+#include <QTimer>
 
-CWizXmlRpcEventLoop::CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
-    : QEventLoop(parent)
-    , m_error(QNetworkReply::NoError)
-{
-    connect(pReply, SIGNAL(finished()), SLOT(on_replyFinished()));
-    connect(pReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
-}
-
-
-void CWizXmlRpcEventLoop::doFinished(QNetworkReply* reply)
-{
-    m_error = reply->error();
-    if (m_error) {
-        m_errorString = reply->errorString();
-        return;
-    }
-
-    //TODO: modify content type checker
-    QString strContentType = reply->header(QNetworkRequest::ContentTypeHeader).toString();
-    if (strContentType != "text/xml;charset=UTF-8") {
-        m_error = QNetworkReply::ProtocolFailure;
-        m_errorString = "Invalid content type of response";
-        return;
-    }
-
-    m_result = QString::fromUtf8(reply->readAll().constData());
-
-}
-
-void CWizXmlRpcEventLoop::doError(QNetworkReply::NetworkError error)
-{
-    m_error = error;
-}
-
-void CWizXmlRpcEventLoop::on_replyFinished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-    //
-    doFinished(reply);
-
-    reply->deleteLater();
-    //
-    quit();
-}
-
-void CWizXmlRpcEventLoop::on_replyError(QNetworkReply::NetworkError error)
-{
-    doError(error);
-    //
-    quit();
-}
+#include "share/wizEventLoop.h"
 
 
 CWizXmlRpcServerBase::CWizXmlRpcServerBase(const QString& strUrl, QObject* parent)
@@ -103,44 +50,57 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
     //
 
-    QNetworkReply* reply = m_network->post(request, data.toData());
-    CWizXmlRpcEventLoop loop(reply);
-    loop.exec();
-    //
-    if (loop.error())
+    int nCounter = 0;
+    while (true)
     {
-        m_nLastErrorCode = loop.error();
-        m_strLastErrorMessage = loop.errorString();
-        return false;
-    }
-    //
-    QString strXml = loop.result();
-    //
-    CWizXMLDocument doc;
-    if (!doc.LoadXML(strXml)) {
-        m_nLastErrorCode = -1;
-        m_strLastErrorMessage = "Invalid xml";
-        return false;
-    }
+        QNetworkReply* reply = m_network->post(request, data.toData());
+        CWizXmlRpcEventLoop loop(reply);
+//        qDebug() << "[Sync]Start a xml rpc event loop";
+        loop.exec();
+//        qDebug() << "[Sync]Xml rpc event loop finished";
+        //
+        if (loop.timeOut() && nCounter == 0)
+        {
+            nCounter ++;
+            continue;
+        }
+        //
+        if (loop.error())
+        {
+            m_nLastErrorCode = loop.error();
+            m_strLastErrorMessage = loop.errorString();
+            return false;
+        }
+        //
+        QString strXml = loop.result();
+        //
+        CWizXMLDocument doc;
+        if (!doc.LoadXML(strXml)) {
+            m_nLastErrorCode = -1;
+            m_strLastErrorMessage = "Invalid xml";
+            return false;
+        }
 
-    CWizXmlRpcValue* pRet = NULL;
+        CWizXmlRpcValue* pRet = NULL;
 
-    if (!WizXmlRpcResultFromXml(doc, &pRet)) {
-        m_nLastErrorCode = -1;
-        m_strLastErrorMessage = "Can not parse xmlrpc";
-        return false;
+        if (!WizXmlRpcResultFromXml(doc, &pRet)) {
+            m_nLastErrorCode = -1;
+            m_strLastErrorMessage = "Can not parse xmlrpc";
+            return false;
+        }
+
+        Q_ASSERT(pRet);
+
+        if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
+            m_nLastErrorCode = pFault->GetFaultCode();
+            m_strLastErrorMessage = pFault->GetFaultString();
+            TOLOG2(_T("XmlRpcCall failed : %1, %2"), QString::number(m_nLastErrorCode), m_strLastErrorMessage);
+            return false;
+        }
+        //
+        result.SetResult(strMethodName, pRet);
+        break;
     }
-
-    Q_ASSERT(pRet);
-
-    if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
-        m_nLastErrorCode = pFault->GetFaultCode();
-        m_strLastErrorMessage = pFault->GetFaultString();
-        TOLOG2(_T("XmlRpcCall failed : %1, %2"), QString::number(m_nLastErrorCode), m_strLastErrorMessage);
-        return false;
-    }
-    //
-    result.SetResult(strMethodName, pRet);
     //
     return true;
 }

@@ -9,6 +9,7 @@
 
 #include  "share/wizSyncableDatabase.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizEventLoop.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")
@@ -193,7 +194,8 @@ bool CWizKMSync::SyncCore()
     //
     if (m_bUploadOnly)
         return TRUE;
-    //
+    //    
+
     m_pEvents->OnStatus(_TR("Sync settings"));
     DownloadKeys();
     //
@@ -1535,6 +1537,8 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         {
             CWizStdStringArray& documents = mapKbGUIDDocuments[it->strKbGUID];
             documents.push_back(it->strDocumentGUID);
+            pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
+                                     it->strMessageText);
         }
     }
     //
@@ -1651,25 +1655,6 @@ bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
     return lastSyncTime.daysTo(COleDateTime::currentDateTime()) > 0;
 }
 
-void WizDownloadBizUserAvatars(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, bool bBackground)
-{
-    pEvents->OnStatus("Downloading user image");
-    //
-    CWizStdStringArray arrayBizGroupUser;
-    pDatabase->GetAllBizUserIds(arrayBizGroupUser);
-    for (CWizStdStringArray::const_iterator it = arrayBizGroupUser.begin();
-        it != arrayBizGroupUser.end();
-        it++)
-    {
-        if (!WizService::AvatarHost::isFileExists(*it))
-        {
-            WizService::AvatarHost::load(*it, false);
-        }
-
-        if (pEvents->IsStop())
-            return;
-    }
-}
 //
 bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
 {
@@ -1697,15 +1682,17 @@ QString downloadFromUrl(const QString& strUrl)
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
-    QEventLoop loop;
-    loop.connect(reply, SIGNAL(finished()), SLOT(quit()));
+
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (reply->error()) {
+    if (loop.timeOut())
         return NULL;
-    }
 
-    return QString::fromUtf8(reply->readAll().constData());
+    if (loop.error() != QNetworkReply::NoError)
+        return NULL;
+
+    return loop.result();
 }
 
 void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
@@ -1713,11 +1700,11 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 {
     QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
     if (!strt.isEmpty()) {
-        if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
-            if (background) {
+//        if (background) {
+            if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
                 return;
             }
-        }
+//        }
     }
 
     pEvents->OnStatus("Sync group users");
@@ -1787,6 +1774,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
+        WizService::AvatarHost::reload(pDatabase->GetUserId());
         pDatabase->ClearLastSyncError();
         pEvents->ClearLastSyncError(pDatabase);
         CWizBizDataArray arrayBiz;
@@ -1803,11 +1791,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
     // sync analyzer info one time a day
+#ifndef QT_DEBUG
     if (WizIsDayFirstSync(pDatabase))
     {
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.Post(pDatabase);
+#endif
+        WizGetAnalyzer().Post(pDatabase);
+#ifndef QT_DEBUG
     }
+#endif
 
     //
     int groupCount = int(arrayGroup.size());
@@ -1834,12 +1825,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.Sync())
         {
-            pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
             QString strLastError = pDatabase->GetLastSyncErrorMessage();
             if (!strLastError.isEmpty() && !bBackground)
             {
-                pEvents->OnText(wizhttpstatustypeError, QString("Sync database error, for reason : %1").arg(strLastError));
-                pEvents->OnPromptMessage(strLastError);
+                pEvents->OnText(wizSyncMeesageError, QString("Sync database error, for reason : %1").arg(strLastError));
+                pEvents->OnPromptMessage(wizSyncMeesageError, "", strLastError);
             }
         }
         else
@@ -1912,7 +1903,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.DownloadObjectData())
         {
-            pEvents->OnText(wizhttpstatustypeError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
         }
         else
         {

@@ -68,6 +68,7 @@ public:
 
     // Query tags by document guid
     bool GetDocumentTagsNameStringArray(const CString& strDocumentGUID, CWizStdStringArray& arrayTagName);
+    int GetDocumentTagCount(const CString& strDocumentGUID);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizTagDataArray& arrayTag);
     bool GetDocumentTags(const CString& strDocumentGUID, CWizStdStringArray& arrayTagGUID);
     CString GetDocumentTagsText(const CString& strDocumentGUID);
@@ -285,6 +286,8 @@ public:
     bool GetRecentDocumentsCreated(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsModified(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument);
     bool GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
+    bool GetRecentDocumentsByModifiedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
+    bool GetRecentDocumentsByAccessedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument);
 
     // Extend
     bool GetModifiedDocuments(CWizDocumentDataArray& arrayData);
@@ -348,12 +351,14 @@ public:
     qint64 GetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 nDef);
     bool SetMetaInt64(const CString& strMetaName, const CString& strKey, qint64 n);
     bool deleteMetasByName(const QString& strMetaName);
+    bool deleteMetaByKey(const QString& strMetaName, const QString& strMetaKey);
 
     /* Deleted related operations */
     bool GetDeletedGUIDs(CWizDeletedGUIDDataArray& arrayGUID);
     bool GetDeletedGUIDs(WizObjectType eType, CWizDeletedGUIDDataArray& arrayGUID);
 
     bool DeleteDeletedGUID(const CString& strGUID);
+    bool IsObjectDeleted(const CString& strGUID);
     bool GetDeletedGUIDsByTime(const COleDateTime& t, CWizDeletedGUIDDataArray& arrayData);
 
     CString GetDeletedItemsLocation() const { return m_strDeletedItemsLocation; }
@@ -405,6 +410,10 @@ public:
     bool setAllDocumentsSearchIndexed(bool b);
     bool getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument);
     bool setDocumentSearchIndexed(const QString& strDocumentGUID, bool b);
+
+    bool SearchDocumentByWhere(const QString& strWhere,
+                               int nMaxCount,
+                               CWizDocumentDataArray& arrayDocument);
 
     bool SearchDocumentByTitle(const QString& strTitle,
                                const QString& strLocation,

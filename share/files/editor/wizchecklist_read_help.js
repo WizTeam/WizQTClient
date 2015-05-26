@@ -225,6 +225,7 @@ function WizDoc(wizDoc) {
 	this.setHtml = setHtml;
 	this.canEdit = canEdit;
 	this.getTitle = getTitle;
+    	this.isGroupObject = isGroupObject;
 
 	function getHtml() {
 		if (!this.doc)
@@ -248,6 +249,9 @@ function WizDoc(wizDoc) {
 
 	function getTitle() {
 		return this.doc.Title;
+	}
+    function isGroupObject() {
+        return this.doc.Database.KbGUID !== "";
 	}
 }
 
@@ -407,6 +411,10 @@ function WizTodoReadCheckedWindows (wizApp) {
 	}
 
 	function onClickingTodo(callback) {
+        if (!this.doc.isGroupObject()) {
+            WizTodoReadChecked[callback](false, false);
+            return;
+        }
         this.app.ExecuteCommand("OnClickingChecklist",
          "WizTodoReadChecked." + callback + "({cancel}, {needCallAgain});", "readingnote");
 	}

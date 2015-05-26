@@ -8,8 +8,7 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QTextStream>
-#include "share/wizmisc.h"
-
+#include "misc.h"
 #include "pathresolve.h"
 
 #define LOG_LINES_MAX 30000
@@ -81,9 +80,9 @@ QString Logger::logFileName()
 {
     QString strFileName = PathResolve::logFile();
 
-    if (::WizGetFileSize(strFileName) > 10 * 1024 * 1024)
+    if (Misc::getFileSize(strFileName) > 10 * 1024 * 1024)
     {
-        ::WizDeleteFile(strFileName);
+        Misc::deleteFile(strFileName);
     }
     //
     return strFileName;

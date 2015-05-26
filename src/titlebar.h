@@ -27,6 +27,7 @@ class InfoBar;
 class NotifyBar;
 class EditorToolBar;
 class CellButton;
+class CWizTagBar;
 
 class TitleBar : public QWidget
 {
@@ -75,6 +76,9 @@ public Q_SLOTS:
     void onEditorFocusIn();
     void onEditorFocusOut();
 
+    //
+    void onTitleEditFinished();
+
 signals:
     void notifyBar_link_clicked(const QString& link);
 
@@ -82,6 +86,7 @@ private:
     void showInfoBar();
     void showEditorBar();
     void loadErrorPage();
+    void setTagBarVisible(bool visible);
 #ifdef USEWEBENGINE
     //
     void initWebChannel();
@@ -95,6 +100,8 @@ private:
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
+    CWizTagBar* m_tagBar;
+    QWidget* m_tagBarSpacer;
     InfoBar* m_infoBar;
     NotifyBar* m_notifyBar;
     EditorToolBar* m_editorBar;

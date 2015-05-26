@@ -36,7 +36,7 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     ui->setupUi(this);
     ui->checkBox_saveNotes->setVisible(false);
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("send_email"));
-    QIcon icon(pix);
+    QIcon icon(Utils::StyleHelper::skinResourceFileName("send_email"));
     ui->toolButton_send->setIcon(icon);
     ui->toolButton_send->setIconSize(pix.size());
     ui->toolButton_contacts->setIcon(QIcon(Utils::StyleHelper::skinResourceFileName("document_badge")));
@@ -69,15 +69,15 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
 {
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
-    QString strUrl = WizService::ApiEntry::mailShare();
-    QString strExInfo = getExInfo();
-    strUrl += strExInfo;
-
     QString strToken = WizService::Token::token();
     QString strKS = WizService::ApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
-    QUrl url(strKS);
-    strUrl.remove("http://{ks_host}");
-    strUrl = url.scheme() + "://" + url.host() + strUrl;
+    QString strExInfo = getExInfo();
+    QString strUrl = WizService::ApiEntry::mailShareUrl(strKS, strExInfo);
+//    strUrl += strExInfo;
+
+//    QUrl url(strKS);
+//    strUrl.remove("http://{ks_host}");
+//    strUrl = url.scheme() + "://" + url.host() + strUrl;
 
 
 

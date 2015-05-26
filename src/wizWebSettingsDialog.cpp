@@ -11,6 +11,7 @@
 #include <QPushButton>
 #include <QWebFrame>
 #include <QApplication>
+#include <QNetworkReply>
 
 using namespace WizService;
 
@@ -51,6 +52,11 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     layout->addWidget(m_web);
     m_web->setVisible(true);
     m_labelProgress->setVisible(false);
+}
+
+QWebView*CWizWebSettingsDialog::webVew()
+{
+    return m_web;
 }
 
 void CWizWebSettingsDialog::load()
@@ -94,7 +100,9 @@ void CWizWebSettingsDialog::loadErrorPage()
 void CWizWebSettingsDialog::onEditorPopulateJavaScriptWindowObject()
 {
     Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
-    m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    if (mainWindow) {
+        m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    }
 }
 
 void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)

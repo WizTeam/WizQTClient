@@ -8,6 +8,8 @@
 #include <QProcess>
 #include <QSettings>
 #include <QDesktopServices>
+#include <QSslConfiguration>
+#include <QNetworkProxy>
 
 #include <sys/stat.h>
 
@@ -22,6 +24,7 @@
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
+#include "mac/wizIAPHelper.h"
 #endif
 
 #include "utils/pathresolve.h"
@@ -177,6 +180,11 @@ int mainCore(int argc, char *argv[])
     }
 #else
     QApplication a(argc, argv);
+
+#ifdef BUILD4APPSTORE
+    CWizIAPHelper helper;
+    helper.validteReceiptOnLauch();
+#endif
 #endif
 
 
@@ -280,11 +288,11 @@ int mainCore(int argc, char *argv[])
 
     if (bAutoLogin && !strPassword.isEmpty()) {
         bFallback = false;
-    }
+    }    
 
+    //
     QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
     PluginManager::setSettings(settings);
-
     //set network proxy
     CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
     if (wizSettings.GetProxyStatus())
@@ -305,8 +313,15 @@ int mainCore(int argc, char *argv[])
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
-        strUserId = loginDialog.userId();
+        if (loginDialog.userId() != strUserId)
+        {
+            strUserId = loginDialog.userId();
+            settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
+            PluginManager::setSettings(settings);
+        }
         strPassword = loginDialog.password();
+
+
     }
 
     //
@@ -324,6 +339,8 @@ int mainCore(int argc, char *argv[])
     strLocaleFile = Utils::PathResolve::qtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
+
+    WizService::ApiEntry::setLanguage(strLocale);
 
     CWizDatabaseManager dbMgr(strUserId);
     if (!dbMgr.openAll()) {

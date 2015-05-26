@@ -545,6 +545,7 @@ void CWizDocumentStatusChecker::onTimeOut()
 {
     qDebug() << "CWizDocumentStatusChecker time out";
     m_timeOutTimer->stop();
+    m_stop = true;
     emit checkTimeOut(m_strCurGUID);
 }
 
@@ -578,6 +579,7 @@ void CWizDocumentStatusChecker::startRecheck()
 
 void CWizDocumentStatusChecker::startCheck()
 {
+//    qDebug() << "----------    CWizDocumentStatusChecker::startCheck start";
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
 
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
@@ -590,6 +592,7 @@ void CWizDocumentStatusChecker::startCheck()
 
     if (changed)
     {
+        emit checkEditStatusFinished(m_strCurGUID, false);
         m_timeOutTimer->stop();
         return;
     }
@@ -601,10 +604,12 @@ void CWizDocumentStatusChecker::startCheck()
         return;
     }
 
-
     m_timeOutTimer->stop();
 
-    emit checkEditStatusFinished(m_strCurGUID, !changed && !editingByOthers);
+
+//    qDebug() << "------------   CWizDocumentStatusChecker::startCheck  finished";
+
+    emit checkEditStatusFinished(m_strCurGUID, !editingByOthers);
 }
 
 bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
@@ -646,7 +651,12 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
     if (!server.document_getData(strGUID, nPart, docOnServer))
         return false;
 
-    return (docOnServer.strGUID == doc.strGUID) && (docOnServer.nVersion > doc.nVersion);
+    if ((docOnServer.strGUID == doc.strGUID) && (docOnServer.nVersion > doc.nVersion))
+    {
+        qDebug() << "[Status]New version of note detected , note : " << docOnServer.strTitle << "  local version : " << doc.nVersion << " server version : " << docOnServer.nVersion;
+        return true;
+    }
+    return false;
 }
 
 bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)

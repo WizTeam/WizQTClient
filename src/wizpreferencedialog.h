@@ -40,6 +40,7 @@ public Q_SLOTS:
     void on_comboSyncInterval_activated(int index);
     void on_comboSyncMethod_activated(int index);
     void on_comboSyncGroupMethod_activated(int index);
+    void on_comboDownloadAttachments_activated(int index);
 
     void labelProxy_linkActivated(const QString& link);
 
@@ -63,6 +64,8 @@ private slots:
     void on_checkBoxManuallySort_toggled(bool checked);
 
     void on_pushButtonChoseMarkdwonTemplate_clicked();
+
+
 
 private:
     Ui::CWizPreferenceWindow *ui;

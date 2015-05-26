@@ -3,38 +3,12 @@
 
 #include <QString>
 #include <QNetworkAccessManager>
-#include <QEventLoop>
 #include <QNetworkReply>
 
-#include "../share/wizxmlrpc.h"
-#include "../share/wizmisc.h"
-#include "../utils/logger.h"
+#include "share/wizxmlrpc.h"
+#include "utils/logger.h"
+#include "share/wizmisc.h"
 
-
-
-class CWizXmlRpcEventLoop : public QEventLoop
-{
-    Q_OBJECT
-public:
-    explicit CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent = 0);
-private:
-    QString m_result;
-    QNetworkReply::NetworkError m_error;
-    QString m_errorString;
-
-private:
-    void doFinished(QNetworkReply* pReply);
-    void doError(QNetworkReply::NetworkError error);
-
-public:
-    QNetworkReply::NetworkError error() { return m_error; }
-    QString errorString() { return m_errorString; }
-    QString result() { return m_result; }
-
-public Q_SLOTS:
-    void on_replyFinished();
-    void on_replyError(QNetworkReply::NetworkError);
-};
 
 
 class CWizXmlRpcServerBase : public QObject

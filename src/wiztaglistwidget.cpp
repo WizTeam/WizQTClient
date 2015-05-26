@@ -96,7 +96,8 @@ void CWizTagListWidget::reloadTags()
 
 void CWizTagListWidget::setDocument(const WIZDOCUMENTDATAEX& doc)
 {
-    Q_ASSERT(doc.strKbGUID == m_dbMgr.db().kbGUID());
+    QString dbKbGuid = m_dbMgr.db().kbGUID();
+    Q_ASSERT(doc.strKbGUID == dbKbGuid);
 
     m_bUpdating = true;
 

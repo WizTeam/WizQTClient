@@ -1,9 +1,4 @@
 #include "wizAnalyzer.h"
-#include "wizmisc.h"
-#include "wizdef.h"
-#include "utils/pathresolve.h"
-#include "sync/apientry.h"
-#include "wizmainwindow.h"
 #include <QMutexLocker>
 #include <QRunnable>
 #include <QThreadPool>
@@ -17,12 +12,21 @@
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
+#include "wizdef.h"
+#include "wizmisc.h"
+#include "utils/pathresolve.h"
+#include "utils/misc.h"
+#include "sync/apientry.h"
+#include "wizmainwindow.h"
+#include "wizDatabase.h"
+#include "wizDatabaseManager.h"
+#include "share/wizEventLoop.h"
 
 CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
 {
 
-    m_strRecordFileNameNoDelete = ::WizExtractFilePath(strRecordFileName) + WizExtractFileTitle(strRecordFileName) + _T("Ex") + WizExtractFileExt(strRecordFileName);
+    m_strRecordFileNameNoDelete = Utils::Misc::extractFilePath(strRecordFileName) + Utils::Misc::extractFileTitle(strRecordFileName) + _T("Ex") + Utils::Misc::extractFileExt(strRecordFileName);
 	//
 	m_tLastLog = ::WizIniReadDateTimeDef(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), COleDateTime(2015, 1, 1, 0, 0, 0));
 }
@@ -253,12 +257,8 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value locale(baLocal.constData(), baLocal.size());
     dd.AddMember("locale", locale, allocator);
 
-    //
-    QRect rec = QApplication::desktop()->screenGeometry();
-    QString strScreenSize = QString::number(rec.width()) + "x" + QString::number(rec.height());
-    QByteArray baScreenSize = strScreenSize.toUtf8();
-    rapidjson::Value screenSize(baScreenSize.constData(), baScreenSize.size());
-    dd.AddMember("screenSize", screenSize, allocator);
+    //  only used for phone
+    dd.AddMember("screenSize", 13, allocator);
 
 #ifdef Q_OS_MAC    
     dd.AddMember("deviceName", "MacOSX", allocator);
@@ -279,22 +279,16 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value isBiz(db->HasBiz());
     dd.AddMember("isBiz", isBiz, allocator);
 
-    QByteArray baUseDays = GetUseDays().toUtf8();
-    rapidjson::Value useDays(baUseDays.constData(), baUseDays.size());
-    dd.AddMember("useDays", useDays, allocator);
+    int nUseDays = GetUseDays().toInt();
+    dd.AddMember("useDays", nUseDays, allocator);
 
-    QByteArray baInstall = GetInstallDays().toUtf8();
-    rapidjson::Value installDays(baInstall.constData(), baInstall.size());
-    qDebug() << "install days : " << baInstall;
-    dd.AddMember("installDays", installDays, allocator);
+    int nInstallDays = GetInstallDays().toInt();
+    dd.AddMember("installDays", nInstallDays, allocator);
 
     QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
     int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
-    qDebug() << "sign up days : " << signUpDays;
     dd.AddMember("signUpDays", signUpDays, allocator);
 
-//    root["installDays"] = CString("em"); //WizKMGetInstallDateTime();        //TODO:
-//    root["signUpDays"] = CString("dt"); //db.GetUserSignupDateTime();      //TOOD:
 	//
 
     QMap<QByteArray, QByteArray> firstActionMap;
@@ -358,7 +352,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 	{
         QString strKey = it.key();
         int sec = seconds.value(strKey).toInt();
-        qDebug() << "item : " << strKey << " duration : " << sec;
         if (sec == 0)
             continue;
 
@@ -379,7 +372,6 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
 
     dd.Accept(writer);
-    qDebug() << buffer.GetString();
 
 
     CString strURL = WizService::ApiEntry::analyzerUploadUrl();
@@ -392,48 +384,51 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     QNetworkRequest request;
     request.setUrl(strURL);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
-    QNetworkReply* reply = net.post(request, buffer.GetString());
+    QNetworkReply* reply = net.post(request, buffer.GetString());    
 
-    QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (reply->error() != QNetworkReply::NoError) {
-        qDebug() << "setdata error;" ;
-        reply->deleteLater();
+    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "[Analyzer]Upload failed!";
         return;
     }
 
-    QString strReply = QString::fromUtf8(reply->readAll());
-    reply->deleteLater();
-
     rapidjson::Document d;
-    d.Parse<0>(strReply.toUtf8().constData());
+    d.Parse<0>(loop.result().toUtf8().constData());
 
     if (!d.HasMember("return_code"))
     {
-        qDebug() << "can not get return code ";
+        qDebug() << "[Analyzer]Can not get return code ";
         return;
     }
 
     int returnCode = d.FindMember("return_code")->value.GetInt();
     if (returnCode != 200)
     {
-        qDebug() << "error code was not 200 " << returnCode;
+        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
         return;
+    }
+    else
+    {
+        qDebug() << "[Analyzer]Upload OK";
     }
 
 //	//
-//    ::DeleteFile(m_strRecordFileName);	//remove old file
+    ::DeleteFile(m_strRecordFileName);	//remove old file
+}
+
+QString analyzerFile()
+{
+    QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
+    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
+    return strFile;
 }
 
 CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
-{
-    QSettings globalSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
-    QString strUserId = globalSettings.value("Users/DefaultUser").toString();
-    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
-
-    static CWizAnalyzer analyzer(strFile);
+{    
+    static CWizAnalyzer analyzer(analyzerFile());
 	//
     return analyzer;
 }

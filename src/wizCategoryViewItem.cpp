@@ -45,8 +45,8 @@ using namespace Core;
 
 CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
                                                    const QString& strName,
-                                                   const QString& strKbGUID)
-    : QTreeWidgetItem()
+                                                   const QString& strKbGUID, int type)
+    : QTreeWidgetItem(type)
     , m_app(app)
     , m_strName(strName)
     , m_strKbGUID(strKbGUID)
@@ -360,7 +360,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", ItemType_MessageItem)
     , m_nUnread(0)
 {
     QIcon icon;
@@ -617,7 +617,7 @@ void CWizCategoryViewShortcutRootItem::removePlaceHoldItem()
 /* -------------------- CWizCategoryViewSearchRootItem -------------------- */
 CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
                                                                const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", ItemType_QuickSearchRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_normal"),
@@ -626,6 +626,18 @@ CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& 
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
+}
+
+void CWizCategoryViewSearchRootItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showCustomSearchContextMenu(pos, false);
+    }
+}
+
+QString CWizCategoryViewSearchRootItem::getSectionName()
+{
+    return WIZ_CATEGORY_SECTION_GENERAL;
 }
 
 
@@ -733,6 +745,9 @@ bool CWizCategoryViewFolderItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA&
     Q_UNUSED(db);
 
     if (m_strName == data.strLocation && data.strKbGUID == kbGUID())
+        return true;
+
+    if (kbGUID().isEmpty() && !db.IsGroup())
         return true;
 
     return false;
@@ -1073,11 +1088,11 @@ bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTD
     return false;
 }
 
-bool CWizCategoryViewGroupsRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
-{
-    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
-    return NULL != item;
-}
+//bool CWizCategoryViewGroupsRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+//{
+//    const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+//    return NULL != item;
+//}
 QString CWizCategoryViewGroupsRootItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_GROUPS;
@@ -1090,7 +1105,6 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     : CWizCategoryViewGroupsRootItem(app, biz.bizName)
     , m_biz(biz)
     , m_unReadCount(0)
-    , m_extraButtonUseable(false)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
@@ -1137,7 +1151,6 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
             }
         }
         updateUnreadCount();
-        m_extraButtonUseable = false;
     }
     else
     {
@@ -1194,20 +1207,24 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
 
 QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
 {
-    if (m_extraButtonIcon.isNull())
+    if (m_unReadCount > 0 && isUnreadButtonUseable())
+        return QObject::tr("You have %1 unread notes").arg(m_unReadCount);
+
+    if (m_extraButtonIcon.isNull() || !isExtraButtonUseable())
         return "";
 
     return QObject::tr("Your enterprise services has expired");
 }
 
-bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable()
+bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable() const
 {
-    return m_extraButtonUseable;
+    return !isUnreadButtonUseable();
 }
 
 bool CWizCategoryViewBizGroupRootItem::isUnreadButtonUseable() const
 {
-    return (!isExpanded() && m_unReadCount > 0);
+     bool bUseable = (!isExpanded()) && (m_unReadCount > 0);
+     return bUseable;
 }
 
 void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
@@ -1256,7 +1273,6 @@ void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
     }
 
     view->updateItem(this);
-    m_extraButtonUseable = (m_unReadCount == 0);
 }
 
 QString CWizCategoryViewBizGroupRootItem::unreadString() const
@@ -1407,7 +1423,7 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
 bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
     const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
-    return NULL != item;
+    return item->kbGUID() == kbGUID();
 }
 
 void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
@@ -1594,6 +1610,9 @@ bool CWizCategoryViewGroupRootItem::hitTestUnread()
 
 QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
 {
+    if (m_nUnread > 0)
+        return QObject::tr("You have %1 unread notes").arg(m_nUnread);
+
     if (m_extraButtonIcon.isNull())
         return "";
 
@@ -1806,6 +1825,21 @@ bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem
     return false;
 }
 
+void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+{
+    if (!acceptDrop(data))
+        return;
+
+    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+
+    if (!forceCopy && kbGUID() == data.strKbGUID)
+    {
+//        CWizFolder folder(myDb, location());
+        CWizDocument doc(myDb, data);
+        doc.Delete();
+    }
+}
+
 
 /* ------------------------------ CWizCategoryViewSearchItem ------------------------------ */
 
@@ -1839,7 +1873,7 @@ bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
                                                            const QString& strName, const QString& strKbGuid,
                                                            const QString& strGuid, bool bEncrypted)
-    : CWizCategoryViewItemBase(app, strName, strKbGuid)
+    : CWizCategoryViewItemBase(app, strName, strKbGuid, ItemType_ShortcutItem)
     , m_strGuid(strGuid)
 {
     QIcon icon;
@@ -1875,3 +1909,134 @@ CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
 {
 
 }
+
+
+CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app,
+                                                       const QString& strName, int type)
+    : CWizCategoryViewItemBase(app, strName, "", type)
+{
+    QIcon icon;
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_normal"),
+                 QSize(16, 16), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_selected"),
+                 QSize(16, 16), QIcon::Selected);
+    setIcon(0, icon);
+    setText(0, strName);
+}
+
+void CWizCategoryViewSearchItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showCustomSearchContextMenu(pos, false);
+    }
+}
+
+bool CWizCategoryViewTimeSearchItem::operator<(const QTreeWidgetItem& other) const
+{
+    const CWizCategoryViewTimeSearchItem* pOther = dynamic_cast<const CWizCategoryViewTimeSearchItem*>(&other);
+    if (!pOther) {
+        return false;
+    }
+
+    return m_dateInterval < pOther->m_dateInterval;
+}
+
+
+CWizCategoryViewTimeSearchItem::CWizCategoryViewTimeSearchItem(CWizExplorerApp& app,
+                                                               const QString& strName, const QString strSelectParam, DateInterval interval)
+    : CWizCategoryViewSearchItem(app, strName)
+    , m_dateInterval(interval)
+    , m_strSelectParam(strSelectParam)
+{
+}
+
+QString CWizCategoryViewTimeSearchItem::getSQLWhere()
+{
+    COleDateTime dt;
+    switch (m_dateInterval) {
+    case DateInterval_Today:
+        dt = dt.addDays(-1);
+        break;
+    case DateInterval_Yestoday:
+        dt = dt.addDays(-2);
+        break;
+    case DateInterval_TheDayBeforeYestoday:
+        dt = dt.addDays(-3);
+        break;
+    case DateInterval_LastWeek:
+        dt = dt.addDays(-8);
+        break;
+    case DateInterval_LastMonth:
+        dt = dt.addMonths(-1);
+        break;
+    case DateInterval_LastYear:
+        dt = dt.addYears(-1);
+        break;
+    default:
+        break;
+    }
+    QString str = m_strSelectParam;
+    str.replace("%1", TIME2SQL(dt));
+    return str;
+}
+
+
+CWizCategoryViewCustomSearchItem::CWizCategoryViewCustomSearchItem(CWizExplorerApp& app,
+                                                                   const QString& strName, const QString strSelectParam,
+                                                                   const QString strSqlWhere, const QString& strGuid,
+                                                                   const QString& keyword, int searchScope)
+    : CWizCategoryViewSearchItem(app, strName, ItemType_QuickSearchCustomItem)
+    , m_strSelectParam(strSelectParam)
+    , m_strSQLWhere(strSqlWhere)
+    , m_strKeywrod(keyword)
+    , m_nSearchScope(searchScope)
+{
+    m_strKbGUID = strGuid;
+}
+
+void CWizCategoryViewCustomSearchItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
+{
+    if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
+        view->showCustomSearchContextMenu(pos, true);
+    }
+}
+
+QString CWizCategoryViewCustomSearchItem::getSQLWhere()
+{
+    return m_strSQLWhere;
+}
+
+void CWizCategoryViewCustomSearchItem::setSQLWhere(const QString& strSql)
+{
+    m_strSQLWhere = strSql;
+}
+
+QString CWizCategoryViewCustomSearchItem::getSelectParam()
+{
+    return m_strSelectParam;
+}
+
+void CWizCategoryViewCustomSearchItem::setSelectParam(const QString& strParam)
+{
+    m_strSelectParam = strParam;
+}
+
+void CWizCategoryViewCustomSearchItem::setKeyword(const QString& strKeyword)
+{
+    m_strKeywrod = strKeyword;
+}
+
+QString CWizCategoryViewCustomSearchItem::getKeyword()
+{
+    return m_strKeywrod;
+}
+int CWizCategoryViewCustomSearchItem::searchScope() const
+{
+    return m_nSearchScope;
+}
+
+void CWizCategoryViewCustomSearchItem::setSearchScope(int nSearchScope)
+{
+    m_nSearchScope = nSearchScope;
+}
+

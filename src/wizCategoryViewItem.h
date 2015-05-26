@@ -5,6 +5,23 @@
 
 #include "share/wizobject.h"
 
+enum ItemType
+{
+    ItemType_MessageItem = 1001,
+    ItemType_ShortcutItem,
+    ItemType_QuickSearchRootItem,
+    ItemType_QuickSearchItem,
+    ItemType_QuickSearchCustomItem
+};
+
+enum DateInterval{
+    DateInterval_Today,
+    DateInterval_Yestoday,
+    DateInterval_TheDayBeforeYestoday,
+    DateInterval_LastWeek,
+    DateInterval_LastMonth,
+    DateInterval_LastYear
+};
 
 class CWizDatabase;
 class CWizExplorerApp;
@@ -13,7 +30,7 @@ class CWizCategoryBaseView;
 class CWizCategoryViewItemBase : public QTreeWidgetItem
 {
 public:
-    CWizCategoryViewItemBase(CWizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "");
+    CWizCategoryViewItemBase(CWizExplorerApp& app, const QString& strName = "", const QString& strKbGUID = "", int type = Type);
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos) = 0;
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument) = 0;
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
@@ -105,7 +122,6 @@ public:
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 10; }
 
-
 private:
     int m_nFilter;
     int m_nUnread;
@@ -168,12 +184,70 @@ class CWizCategoryViewSearchRootItem : public CWizCategoryViewItemBase
 public:
     CWizCategoryViewSearchRootItem(CWizExplorerApp& app, const QString& strName);
 
-    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
-    { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
 
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    virtual QString getSectionName();
+    virtual int getSortOrder() const { return 12; }
+};
+
+class CWizCategoryViewSearchItem : public CWizCategoryViewItemBase
+{
+public:
+    CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& strName,
+                               int type = ItemType_QuickSearchItem);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+
+    virtual void getDocuments(CWizDatabase& db,
+                              CWizDocumentDataArray& arrayDocument)
+    { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    virtual QString getSQLWhere() { return ""; }
+    virtual QString getSelectParam() { return ""; }
+};
+
+class CWizCategoryViewTimeSearchItem : public CWizCategoryViewSearchItem
+{
+public:
+    CWizCategoryViewTimeSearchItem(CWizExplorerApp& app, const QString& strName,
+                               const QString strSelectParam, DateInterval interval);        
+
+    virtual bool operator<(const QTreeWidgetItem &other) const;
+
+    virtual QString getSQLWhere();
+
+protected:
+    QString m_strSelectParam;
+    DateInterval m_dateInterval;
+};
+
+class CWizCategoryViewCustomSearchItem : public CWizCategoryViewSearchItem
+{
+public:
+    CWizCategoryViewCustomSearchItem(CWizExplorerApp& app, const QString& strName,
+                               const QString strSelectParam, const QString strSqlWhere,
+                                     const QString& strGuid, const QString& keyword, int searchScope);
+
+    virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
+
+    virtual QString getSQLWhere();
+    virtual void setSQLWhere(const QString& strSql);
+    virtual QString getSelectParam();
+    virtual void setSelectParam(const QString& strParam);
+    void setKeyword(const QString& strKeyword);
+    QString getKeyword();
+    int searchScope() const;
+    void setSearchScope(int searchScope);
+
+protected:
+    QString m_strSelectParam;
+    QString m_strSQLWhere;
+    QString m_strKeywrod;
+    int m_nSearchScope;
 };
 
 class CWizCategoryViewAllFoldersItem : public CWizCategoryViewItemBase
@@ -270,7 +344,7 @@ public:
 
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
-    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+//    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual QString getSectionName();
 
 };
@@ -290,7 +364,7 @@ public:
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
     //
-    bool isExtraButtonUseable();
+    bool isExtraButtonUseable() const;
     bool isUnreadButtonUseable() const;
     void updateUnreadCount();
     QString unreadString() const;
@@ -306,7 +380,6 @@ private:
     WIZBIZDATA m_biz;
     int m_unReadCount;
     QSize m_szUnreadSize;
-    bool m_extraButtonUseable;
 };
 class CWizCategoryViewOwnGroupRootItem : public CWizCategoryViewGroupsRootItem
 {
@@ -437,6 +510,8 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return false; }
     virtual int getSortOrder() const { return 12; }
+    //
+    virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 };
 
 #endif // WIZCATEGORYVIEWITEM_H

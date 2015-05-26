@@ -73,7 +73,7 @@ void CWizAnimateAction::setTogetherIcon(const QString& strIconBaseName)
         m_icons.push_back(icon);
 
         startX += pixHeight;
-        if (startX > pix.width())
+        if (startX >= pix.width())
             return;
     }
 }

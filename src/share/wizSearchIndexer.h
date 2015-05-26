@@ -9,9 +9,25 @@
 
 #include "wizClucene.h"
 #include "wizDatabaseManager.h"
+#include "share/wizqthelper.h"
 
 struct WIZDOCUMENTDATAEX;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
+
+
+enum SearchDateInterval {
+    today = 0,
+    yesterday,
+    dayBeforeYesterday,
+    oneWeek,
+    oneMonth
+};
+
+enum SearchScope {
+    Scope_AllNotes = 0,
+    Scope_PersonalNotes,
+    Scope_GroupNotes
+};
 
 
 /* --------------------------- CWizSearchIndexer --------------------------- */
@@ -66,8 +82,15 @@ class CWizSearcher
 
 public:
     explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
-    void search(const QString& strKeywords, int nMaxSize = -1);
     void waitForDone();
+
+    void search(const QString& strKeywords, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
+    void searchByDateCreate(SearchDateInterval dateInterval, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
+    void searchByDateModified(SearchDateInterval dateInterval, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
+    void searchByDateAccessed(SearchDateInterval dateInterval, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
+    void searchBySQLWhere(const QString& strWhere, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
+    void searchByKeywordAndWhere(const QString& strKeywords, const QString& strWhere, int nMaxSize = -1
+            , SearchScope scope = Scope_AllNotes);
 
 protected:
     virtual bool onSearchProcess(const std::string& lpszKbGUID, const std::string& lpszDocumentID, const std::string& lpszURL);
@@ -80,6 +103,7 @@ private:
     QString m_strIndexPath; // working path
     QString m_strkeywords;
     int m_nMaxResult;
+    SearchScope m_scope;
 
     bool m_stop;
     QMutex m_mutexWait;
@@ -93,12 +117,15 @@ private:
     void doSearch();
 
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
-    void searchDatabase(const QString& strKeywords);
+    void searchDatabaseByKeyword(const QString& strKeywords);
+    COleDateTime getDateByInterval(SearchDateInterval dateInterval);
+
+    void emitSearchProcess(const QString& strKeywords);
 
     void stop();
 
 Q_SIGNALS:
-    void searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd);
+    void searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart,  bool bEnd);
 };
 
 #endif // WIZSEARCHINDEXER_H

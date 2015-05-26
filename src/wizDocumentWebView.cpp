@@ -23,6 +23,7 @@
 #include <QWebElement>
 #include <QUndoStack>
 #include <QDesktopServices>
+#include <QNetworkDiskCache>
 
 #ifdef Q_OS_MAC
 #include <QMacPasteboardMime>
@@ -48,6 +49,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -186,10 +188,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_bEditorInited(false)
     , m_bNewNote(false)
     , m_bNewNoteTitleInited(false)
-    , m_noteFrame(0)
+    , m_noteFrame(nullptr)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
-    , m_searchReplaceWidget(0)
+    , m_searchReplaceWidget(nullptr)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -596,11 +598,21 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
 {
     m_mapFile.insert(strGUID, strFileName);
 
-    if (m_bEditorInited) {
-        resetCheckListEnvironment();
-        viewDocumentInEditor(m_bEditingMode);
+    WIZDOCUMENTDATA doc;
+    if (!m_dbMgr.db(kbGUID).DocumentFromGUID(strGUID, doc))
+        return;
+
+    //
+    if (::WizIsDocumentContainsFrameset(doc)) {
+        viewDocumentWithoutEditor();
     } else {
-        initEditor();
+
+        if (m_bEditorInited) {
+            resetCheckListEnvironment();
+            viewDocumentInEditor(m_bEditingMode);
+        } else {
+            initEditor();
+        }
     }
 }
 
@@ -681,7 +693,7 @@ bool CWizDocumentWebView::resetDefaultCss()
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
                    m_app.userSettings().editorBackgroundColor()));
 
-    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
+    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserGUID()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
 
     m_strDefaultCssFilePath = strPath + "default.css";
@@ -765,6 +777,30 @@ void CWizDocumentWebView::initEditor()
 
 }
 
+void CWizDocumentWebView::resetEditor()
+{
+    if (!m_bEditorInited)
+        return;
+
+    m_bEditorInited = false;
+    page()->setLinkDelegationPolicy(QWebPage::DontDelegateLinks);
+
+    disconnect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), this,
+            SLOT(onEditorPopulateJavaScriptWindowObject()));
+
+    disconnect(page()->mainFrame(), SIGNAL(loadFinished(bool)), this,
+            SLOT(onEditorLoadFinished(bool)));
+
+    disconnect(page(), SIGNAL(linkClicked(const QUrl&)), this,
+            SLOT(onEditorLinkClicked(const QUrl&)));
+
+    disconnect(page(), SIGNAL(selectionChanged()), this,
+            SLOT(onEditorSelectionChanged()));
+
+    disconnect(page(), SIGNAL(contentsChanged()), this,
+            SLOT(onEditorContentChanged()));
+}
+
 void CWizDocumentWebView::resetCheckListEnvironment()
 {
     if (!m_bEditingMode)
@@ -824,7 +860,12 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
     img.save(strDestFile, "PNG");
     QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);
-    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, strLink);
+    QSize szImg = img.size();
+    if (WizIsHighPixel())
+    {
+        szImg.scale(szImg.width() / 2, szImg.height() / 2, Qt::IgnoreAspectRatio);
+    }
+    QString strHtml = WizGetImageHtmlLabelWithLink(strDestFile, szImg, strLink);
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
@@ -906,6 +947,7 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
             }
             break;
         default:
+            qDebug() << QString("%1 is a wiz internal url , but we can not identify it");
             break;
         }
     }
@@ -914,13 +956,12 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
         QString strUrl = url.toString();
         if (strUrl.left(12) == "http://file/")
         {
-            strUrl.replace(0, 12, "file:/");
-            QDesktopServices::openUrl(strUrl);
-            return;
+            strUrl.replace(0, 12, "file:/");            
         }
-    }
 
-    QDesktopServices::openUrl(url);
+        qDebug() << "Open url " << strUrl;
+        QDesktopServices::openUrl(strUrl);
+    }
 }
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)
@@ -1193,6 +1234,41 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
     emit viewDocumentFinished();
+}
+
+void CWizDocumentWebView::viewDocumentWithoutEditor()
+{
+    resetEditor();
+
+    //
+    QString strGUID = view()->note().strGUID;
+    QString strFileName = m_mapFile.value(strGUID);
+    if (strFileName.isEmpty()) {
+        return;
+    }
+
+    QString strHtml;
+    bool ret = WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    if (!ret) {
+        // hide client and show error
+        return;
+    }
+
+    m_strCurrentNoteGUID = strGUID;
+    m_bCurrentEditing = false;
+    //
+    page()->mainFrame()->setHtml(strHtml);
+
+    // show client
+    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    window->showClient(true);
+    window->transitionView()->hide();
+
+    page()->undoStack()->clear();
+
+    //Waiting for the editor initialization complete if it's the first time to load a document.
+    QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+//    emit viewDocumentFinished();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -2151,7 +2227,7 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     {
         if (QFile::exists(strResourceList.at(i)))
         {
-            QFile::copy(strResourceList.at(i), strResourcePath + WizExtractFileName(strResourceList.at(i)));
+            QFile::copy(strResourceList.at(i), strResourcePath + Utils::Misc::extractFileName(strResourceList.at(i)));
         }
     }
 }
@@ -2246,7 +2322,7 @@ void CWizDocumentWebViewLoaderThread::run()
         if (m_stop)
             return;
         //
-        if (kbGuid.isEmpty())
+        if (docGuid.isEmpty())
             continue;
         //
         CWizDatabase& db = m_dbMgr.db(kbGuid);
@@ -2280,7 +2356,7 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    if (m_strCurrentKbGUID.isEmpty())
+    if (m_strCurrentDocGUID.isEmpty())
         m_waitForData.wait(&m_mutex);
     //
     kbGUID = m_strCurrentKbGUID;

@@ -35,6 +35,7 @@ namespace Core {
 namespace Internal {
 class TitleBar;
 class EditorToolBar;
+class CWizTagBar;
 } // namespace Internal
 
 class CWizDocumentView : public INoteView
@@ -74,7 +75,7 @@ protected:
 #endif
     QWebView* m_comments;
     CWizSplitter* m_splitter;
-    Core::Internal::TitleBar* m_title;
+    Core::Internal::TitleBar* m_title;  
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
@@ -90,7 +91,7 @@ private:
     int m_viewMode; // user defined editing mode
     bool m_noteLoaded;
     //
-    int m_status;  // document edit or version status
+    int m_editStatus;  // document edit or version status
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>430</width>
-    <height>280</height>
+    <height>291</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>430</width>
-    <height>280</height>
+    <height>290</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>430</width>
-    <height>280</height>
+    <height>291</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -136,7 +136,7 @@
      </widget>
      <widget class="QWidget" name="tabSyncing">
       <attribute name="title">
-       <string>Syncing</string>
+       <string>Sync</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
@@ -148,7 +148,7 @@
           <item row="0" column="0">
            <widget class="QLabel" name="labelSyncInterval">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -164,6 +164,12 @@
              <size>
               <width>170</width>
               <height>0</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
              </size>
             </property>
             <property name="modelColumn">
@@ -199,7 +205,7 @@
           <item row="1" column="0">
            <widget class="QLabel" name="labelSyncMethod">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -253,7 +259,7 @@
           <item row="2" column="0">
            <widget class="QLabel" name="labelSyncGroupMethod">
             <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
@@ -304,6 +310,33 @@
             </item>
            </widget>
           </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Download attachment:</string>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="comboDownloadAttachments">
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Not download attachments</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download all attachments</string>
+             </property>
+            </item>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -321,7 +354,7 @@
      </widget>
      <widget class="QWidget" name="tabReading">
       <attribute name="title">
-       <string>Reading</string>
+       <string>Read</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout_5">
        <item>

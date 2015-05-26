@@ -288,6 +288,44 @@ void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
     }
 }
 
+WizServerType CWizUserSettings::serverType() const
+{
+    QString strServerType = get("ServerType");
+    if (strServerType.isEmpty()) {
+        return NoServer;
+    }
+
+    return WizServerType(strServerType.toInt());
+}
+
+void CWizUserSettings::setServerType(WizServerType server)
+{
+    QString strServerType = QString::number(server);
+    set("ServerType", strServerType);
+}
+
+QString CWizUserSettings::enterpriseServerIP()
+{
+    QString strServerType = get("EnterpriseServerIP");
+    return strServerType;
+}
+
+void CWizUserSettings::setEnterpriseServerIP(const QString& strEnterpriseServerd)
+{
+    set("EnterpriseServerIP", strEnterpriseServerd);
+}
+
+QString CWizUserSettings::serverLicence()
+{
+    QString strServerType = get("ServerLicence");
+    return strServerType;
+}
+
+void CWizUserSettings::setServerLicence(const QString& strLicence)
+{
+    set("ServerLicence", strLicence);
+}
+
 bool CWizUserSettings::autoLogin() const
 {
     QString strAutoLogin = get("AutoLogin");

@@ -3,7 +3,7 @@
 
 #include <QtGlobal>
 
-#define WIZ_CLIENT_VERSION  "2.1.17"
+#define WIZ_CLIENT_VERSION  "2.1.19"
 #define WIZNOTE_FTS_VERSION "5"
 #define WIZNOTE_THUMB_VERSION "3"
 #define WIZ_NEW_FEATURE_GUIDE_VERSION "2"

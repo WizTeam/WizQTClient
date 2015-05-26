@@ -4,13 +4,16 @@
 #include "mac/wizSearchWidget_mm.h"
 #else
 #include "share/wizsettings.h"
+#include "share/wizAnalyzer.h"
 #include "wizdef.h"
 #include "utils/stylehelper.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QPainter>
 #include <QPixmap>
+#include <QMenu>
 #include <QMouseEvent>
+#include <QDebug>
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QWidget(parent)
@@ -21,14 +24,14 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     setContentsMargins(1, 0, 1, 1);
 
     m_editSearch = new CWizSearchEdit(this);
-    m_editSearch->setTextMargins(20, 1, 0, 1);
+    m_editSearch->setTextMargins(25, 1, 0, 1);
 
     m_editSearch->setStyleSheet("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:10px;}"
                                 "QLineEdit::focus{background-color:#ffffff;border:1px solid #6699cb; border-radius:10px;}");
 
 
     // avoid focus rect on OSX, this should be a bug of qt style sheet
-    m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);
+    m_editSearch->setAttribute(Qt::WA_MacShowFocusRect, 0);    
 
     QHBoxLayout* layout = new QHBoxLayout(this);
     setLayout(layout);
@@ -42,6 +45,10 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
             SLOT(on_search_returnPressed()));
     connect(m_editSearch, SIGNAL(textChanged(QString)), \
             SLOT(on_searchTextChanged(QString)), Qt::QueuedConnection);
+    connect(m_editSearch, SIGNAL(advanceSearchRequest()), this,
+            SIGNAL(advancedSearchRequest()));
+    connect(m_editSearch, SIGNAL(addCustomSearchRequest()),
+            SIGNAL(addCustomSearchRequest()));
 }
 
 void CWizSearchWidget::clear()
@@ -75,10 +82,13 @@ void CWizSearchWidget::on_searchTextChanged(QString str)
 //    if (str.isEmpty())
 //    {
 //        Q_EMIT doSearch("");
-//    }
+    //    }
 }
 
-CWizSearchEdit::CWizSearchEdit(QWidget* parent) : QLineEdit(parent)
+
+CWizSearchEdit::CWizSearchEdit(QWidget* parent)
+    : QLineEdit(parent)
+    , m_menu(new QMenu(this))
 {
     bool bHighPixel = WizIsHighPixel();
     QString strSearch = bHighPixel ? "mactoolbarsearch@2x" : "mactoolbarsearch";
@@ -87,6 +97,22 @@ CWizSearchEdit::CWizSearchEdit(QWidget* parent) : QLineEdit(parent)
     QString strDelete = bHighPixel ? "mactoolbardelete@2x" : "mactoolbardelete";
     QString strDeleteIcon = Utils::StyleHelper::skinResourceFileName(strDelete);
     m_deleteIcon = QPixmap(strDeleteIcon);
+
+    m_menu->addAction(tr("Advanced search"), this, SLOT(on_actionAdvancedSearch()));
+    m_menu->addAction(tr("Add custom search"), this, SLOT(on_addCustomSearch()));
+
+}
+
+void CWizSearchEdit::on_actionAdvancedSearch()
+{
+    WizGetAnalyzer().LogAction("advancedSearchOnSearchWidget");
+    emit advanceSearchRequest();
+}
+
+void CWizSearchEdit::on_addCustomSearch()
+{
+    WizGetAnalyzer().LogAction("customSearchOnSearchWidget");
+    emit addCustomSearchRequest();
 }
 
 void CWizSearchEdit::paintEvent(QPaintEvent* event)
@@ -112,6 +138,15 @@ void CWizSearchEdit::paintEvent(QPaintEvent* event)
 
 void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
 {
+    QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
+    if (rcBtnSearch.contains(event->pos()))
+    {
+        event->accept();
+        m_menu->popup(mapToGlobal(event->pos()));
+        clearFocus();
+        return;
+    }
+
     if (!text().isEmpty())
     {
         QRect rect(QPoint(width() - m_deleteIcon.width() - 4, (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
@@ -123,6 +158,40 @@ void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
         }
     }
     QLineEdit::mousePressEvent(event);
+}
+
+void CWizSearchEdit::mouseMoveEvent(QMouseEvent* event)
+{
+    QLineEdit::mouseMoveEvent(event);
+
+    QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
+    if (rcBtnSearch.contains(event->pos()))
+    {
+        if (cursor().shape() != Qt::ArrowCursor)
+        {
+            setCursor(QCursor(Qt::ArrowCursor));
+        }
+    }
+    else
+    {
+        if (!text().isEmpty())
+        {
+            QRect rect(QPoint(width() - m_deleteIcon.width() - 4, (height() - m_deleteIcon.height()) / 2), m_deleteIcon.size());
+            if (rect.contains(event->pos()))
+            {
+                if (cursor().shape() != Qt::ArrowCursor)
+                {
+                    setCursor(QCursor(Qt::ArrowCursor));
+                }
+                return;
+            }
+        }
+
+        if (cursor().shape() != Qt::IBeamCursor)
+        {
+            setCursor(QCursor(Qt::IBeamCursor));
+        }
+    }
 }
 
 #endif

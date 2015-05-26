@@ -593,7 +593,8 @@ var WizTodo = (function () {
 				if (child.nodeValue === "") {
 					ele.removeChild(child);
 				}
-				if (8203 == child.nodeValue.charCodeAt(0))
+				var v = child.nodeValue.replace(/\u200B/g, '');
+				if (0 == v.length)
 					ele.removeChild(child);
 			}
 		}
@@ -806,6 +807,11 @@ var WizTodo = (function () {
 		todoEle.src = imgSrc;
 		todoEle.setAttribute('state', state);
 		label.setAttribute('class', classValue);
+		//update _src for ueditor
+		var backupSrc = todoEle.getAttribute('_src');
+		if (backupSrc) {
+			todoEle.setAttribute('_src', imgSrc);
+		}
 		//
 		if (!todoHelper.isPersonalDocument()) {
 

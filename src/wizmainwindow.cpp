@@ -4,7 +4,6 @@
 #include <QMenuBar>
 #include <QApplication>
 #include <QDesktopWidget>
-#include <QMessageBox>
 #include <QUndoStack>
 #include <QEvent>
 #include <QHBoxLayout>
@@ -26,10 +25,19 @@
 #else
 #endif
 #include "wizSearchWidget.h"
+#include "share/wizMessageBox.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
 #include <coreplugin/aboutdialog.h>
+
+#include "wizUpgrade.h"
+#include "wizconsoledialog.h"
+#include "wizCategoryView.h"
+#include "wizDocumentListView.h"
+#include "wizcertmanager.h"
+#include "wizusercipherform.h"
+#include "wizDocumentView.h"
 
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
@@ -47,9 +55,11 @@
 #include "share/wizObjectDataDownloader.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "widgets/wizFramelessWebDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizImageButton.h"
+#include "widgets/wizIAPDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -103,6 +113,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
+    , m_iapDialog(0)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -134,7 +145,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
     , m_tray(NULL)
-    , m_mobileFileReceiver(0)
+    , m_trayMenu(NULL)
+    , m_mobileFileReceiver(nullptr)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -161,13 +173,13 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(promptMessageRequest(const QString&)),
-            SLOT(on_promptMessage_request(QString)));
+    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
+            SLOT(on_promptMessage_request(int, QString, QString)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool)),
-        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool)));
+    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
+        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
 //    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
@@ -311,6 +323,11 @@ void MainWindow::cleanOnQuit()
     }
 }
 
+CWizSearcher*MainWindow::searcher()
+{    
+    return m_searcher;
+}
+
 void MainWindow::rebuildFTS()
 {
     m_searchIndexer->rebuild();
@@ -387,16 +404,14 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("exit");
+    WizGetAnalyzer().LogAction("exit");
 
     qApp->exit();
 }
 
 void MainWindow::on_actionClose_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("close");
+    WizGetAnalyzer().LogAction("close");
 
 #ifdef Q_OS_MAC
     QWidget* wgt = qApp->activeWindow();
@@ -426,11 +441,11 @@ void MainWindow::on_actionClose_triggered()
 #endif
 }
 
-void MainWindow::resizeEvent(QResizeEvent *event)
-{
-    Q_UNUSED(event);
-    updateHistoryButtonStatus();
-}
+//void MainWindow::resizeEvent(QResizeEvent *event)
+//{
+//    Q_UNUSED(event);
+//    updateHistoryButtonStatus();
+//}
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
@@ -440,7 +455,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = m_upgrade->getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::ApiEntry::standardCommandUrl("link");
+        QString url = WizService::ApiEntry::standardCommandUrl("link", true);
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -480,33 +495,58 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
 
 }
 
+void MainWindow::on_quickSync_request(const QString& strKbGUID)
+{
+    CWizKMSyncThread::quickSyncKb(strKbGUID);
+}
+
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
 {
     //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
-    if (bVisible)
+//    if (bVisible)
+//    {
+//        //
+//        if (m_tray)
+//        {
+//            if (m_tray->isVisible())
+//                return;
+
+//            delete m_tray;
+//        }
+
+//        //
+    if (!m_tray)
     {
-        //
-        if (m_tray)
-        {
-            if (m_tray->isVisible())
-                return;
-
-            delete m_tray;
-        }
-
-        //
         m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
         initTrayIcon(m_tray);
         m_tray->show();
     }
-    else
+//    }
+//    else
+//    {
+//        if (m_tray)
+//        {
+//            m_tray->hide();
+//            delete m_tray;
+//            m_tray = 0;
+//        }
+//    }
+    m_tray->setVisible(bVisible);
+}
+
+void MainWindow::showTrayIconMessage(const QString& strTitle, const QString& strInfo)
+{
+    if (m_tray && m_tray->isVisible())
     {
-        if (m_tray)
-        {
-            m_tray->hide();
-            delete m_tray;
-            m_tray = 0;
-        }
+        m_tray->showMessage(strTitle, strInfo, QSystemTrayIcon::Information);
+    }
+}
+
+void MainWindow::showTrayIconMenu()
+{
+    if (m_trayMenu)
+    {
+        m_trayMenu->popup(QCursor::pos());
     }
 }
 
@@ -523,6 +563,30 @@ void MainWindow::on_hideTrayIcon_clicked()
 {
     setSystemTrayIconVisible(false);
     userSettings().setShowSystemTrayIcon(false);
+}
+
+void MainWindow::on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason)
+{
+    static QTimer trayTimer;
+    trayTimer.setSingleShot(true);
+    connect(&trayTimer, SIGNAL(timeout()), SLOT(showTrayIconMenu()), Qt::UniqueConnection);
+    switch (reason) {
+    case QSystemTrayIcon::DoubleClick:
+    {
+        trayTimer.stop();
+        qDebug() << "trayicon double clicked";        
+    }
+        break;
+    case QSystemTrayIcon::Trigger:
+    {
+        trayTimer.stop();
+        trayTimer.start(400);
+        qDebug() << "trayicon triggered";
+    }
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::shiftVisableStatus()
@@ -1195,7 +1259,7 @@ void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const 
 
     if (doc.nProtected == 1)
     {
-        QMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
+        CWizMessageBox::information(this, tr("Info"), tr("Can not share encrpyted notes."));
         return;
     }
 
@@ -1210,7 +1274,6 @@ void MainWindow::openVipPageInWebBrowser()
     msg.setWindowTitle(tr("Upgrading to VIP"));
     msg.setIcon(QMessageBox::Information);
     msg.setText(tr("Only VIP user can create link, please retry after upgrading to VIP and syncing to server."));
-#ifndef BUILD4APPSTORE
     msg.addButton(tr("Cancel"), QMessageBox::NoRole);
     QPushButton *actionBuy = msg.addButton(tr("Upgrade now"), QMessageBox::YesRole);
     msg.setDefaultButton(actionBuy);
@@ -1218,14 +1281,16 @@ void MainWindow::openVipPageInWebBrowser()
 
     if (msg.clickedButton() == actionBuy)
     {
+#ifndef BUILD4APPSTORE
         QString strToken = WizService::Token::token();
         QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
         QDesktopServices::openUrl(QUrl(strUrl));
-    }
 #else
-    msg.addButton(tr("OK"), QMessageBox::YesRole);
-    msg.exec();
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
 #endif
+    }
 }
 
 bool MainWindow::checkListClickable()
@@ -1283,6 +1348,18 @@ void MainWindow::SetDialogResult(int nResult)
         m_dbMgr.db(doc.strKbGUID).SetObjectDataDownloaded(doc.strGUID, _T("document"), false);
         m_doc->viewNote(doc, false);
     }
+}
+
+void MainWindow::AppStoreIAP()
+{
+#ifdef BUILD4APPSTORE
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    if (!dlg->isActiveWindow())
+    {
+        dlg->exec();
+    }
+#endif
 }
 
 #ifndef Q_OS_MAC
@@ -1397,9 +1474,9 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_search = new CWizSearchWidget(this);
-    m_search->setWidthHint(280);
-    m_toolBar->addWidget(m_search);
+    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget->setWidthHint(280);
+    m_toolBar->addWidget(m_searchWidget);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     #endif
@@ -1426,11 +1503,11 @@ void MainWindow::initToolBar()
     m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
-    m_search = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchWidget(this);
 
-    m_toolBar->addWidget(m_search);
+    m_toolBar->addWidget(m_searchWidget);
 
-    m_toolBar->layout()->setAlignment(m_search, Qt::AlignBottom);
+    m_toolBar->layout()->setAlignment(m_searchWidget, Qt::AlignBottom);
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
     CWizButton* buttonNew = new CWizButton(m_toolBar);
@@ -1452,7 +1529,9 @@ void MainWindow::initToolBar()
     //
 #endif
     //
-    connect(m_search, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    connect(m_searchWidget, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
+    connect(m_searchWidget, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
+    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void MainWindow::initClient()
@@ -1480,8 +1559,8 @@ void MainWindow::initClient()
     layout->setContentsMargins(0, 0, 0, 0);
     client->setLayout(layout);
 
-    m_splitter = new CWizSplitter();
-    layout->addWidget(m_splitter);
+    m_splitter = std::make_shared<CWizSplitter>();
+    layout->addWidget(m_splitter.get());
 
     QWidget* documentPanel = new QWidget();
     QHBoxLayout* layoutDocument = new QHBoxLayout();
@@ -1512,7 +1591,7 @@ void MainWindow::initClient()
 
     m_msgListWidget->hide();
     //
-    connect(m_splitter, SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
+    connect(m_splitter.get(), SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));
 }
 
 QWidget* MainWindow::createNoteListView()
@@ -1550,6 +1629,7 @@ QWidget* MainWindow::createNoteListView()
     m_labelDocumentsCount->setMargin(5);
     layoutActions->addWidget(m_labelDocumentsCount);
     connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
+    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
 
 
     //sortBtn->setStyleSheet("padding-top:10px;");
@@ -1578,6 +1658,7 @@ QWidget*MainWindow::createMessageListView()
     m_msgListWidget->setLayout(layoutList);
 
     m_msgListUnreadBar = new QWidget(this);
+    m_msgListUnreadBar->setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 0, 0);
     layoutActions->setSpacing(0);
@@ -1612,6 +1693,28 @@ QWidget*MainWindow::createMessageListView()
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
     return m_msgListWidget;
+}
+
+QWidget*MainWindow::client() const
+{
+    return m_doc->client();
+}
+
+void MainWindow::showClient(bool visible) const
+{
+    return m_doc->showClient(visible);
+}
+
+CWizIAPDialog*MainWindow::iapDialog()
+{
+#ifdef Q_OS_MAC
+    if (m_iapDialog == 0) {
+        m_iapDialog = new CWizIAPDialog(this);
+    }
+    return m_iapDialog;
+#else
+    return 0;
+#endif
 }
 
 void MainWindow::on_documents_documentCountChanged()
@@ -1662,6 +1765,7 @@ void MainWindow::init()
 {
     connect(m_category, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
     connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
+    connect(m_category, SIGNAL(categoryItemPositionChanged(QString)), SLOT(on_quickSync_request(QString)));
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
@@ -1682,8 +1786,7 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("syncAll");
+    WizGetAnalyzer().LogAction("syncAll");
 
 //    if (::WizIsOffline())
 //    {
@@ -1765,15 +1868,26 @@ void MainWindow::on_syncProcessLog(const QString& strMsg)
     Q_UNUSED(strMsg);
 }
 
-void MainWindow::on_promptMessage_request(const QString& strMsg)
+void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg)
 {
-    QMessageBox::warning(0, tr("Info"), strMsg);
+    switch (nType) {
+    case wizSyncMessageNormal:
+        showTrayIconMessage(strTitle, strMsg);
+        break;
+    case wizSyncMessageWarning:
+        CWizMessageBox::warning(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
+        break;
+    case wizSyncMeesageError:
+        CWizMessageBox::critical(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
+        break;
+    default:
+        break;
+    }
 }
 
 void MainWindow::on_actionNewNote_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("newNote");
+    WizGetAnalyzer().LogAction("newNote");
 
     initVariableBeforCreateNote();
     WIZDOCUMENTDATA data;
@@ -1784,12 +1898,12 @@ void MainWindow::on_actionNewNote_triggered()
 
     setFocusForNewNote(data);
     m_doc->web()->setEditorEnable(true);
+    m_history->addHistory(data);
 }
 
 void MainWindow::on_actionNewNoteByTemplate_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("newNoteByTemplate");
+    WizGetAnalyzer().LogAction("newNoteByTemplate");
 
     //通过模板创建笔记
     CWizDocTemplateDialog dlg;
@@ -1799,16 +1913,14 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("undo");
+    WizGetAnalyzer().LogAction("undo");
 
     m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("redo");
+    WizGetAnalyzer().LogAction("redo");
 
     m_doc->web()->redo();
 }
@@ -1869,24 +1981,21 @@ void MainWindow::on_actionMoveToLineEnd_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cut");
+    WizGetAnalyzer().LogAction("cut");
 
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("copy");
+    WizGetAnalyzer().LogAction("copy");
 
     m_doc->web()->triggerPageAction(QWebPage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("paste");
+    WizGetAnalyzer().LogAction("paste");
 
     m_doc->web()->setPastePlainTextEnable(false);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -1894,8 +2003,7 @@ void MainWindow::on_actionEditingPaste_triggered()
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("pastePlain");
+    WizGetAnalyzer().LogAction("pastePlain");
 
     m_doc->web()->setPastePlainTextEnable(true);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -1903,8 +2011,7 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("selectAll");
+    WizGetAnalyzer().LogAction("selectAll");
 
     m_doc->web()->triggerPageAction(QWebPage::SelectAll);
 }
@@ -1918,8 +2025,7 @@ void MainWindow::on_actionEditingDelete_triggered()
 
 void MainWindow::on_actionViewToggleCategory_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("toggleCategory");
+    WizGetAnalyzer().LogAction("toggleCategory");
 
     QWidget* category = m_splitter->widget(0);
     if (category->isVisible()) {
@@ -1939,8 +2045,7 @@ void MainWindow::on_actionViewToggleCategory_triggered()
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("fullscreen");
+    WizGetAnalyzer().LogAction("fullscreen");
 
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
@@ -1956,8 +2061,7 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 
 void MainWindow::on_actionViewMinimize_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("minimize");
+    WizGetAnalyzer().LogAction("minimize");
 
     while (true) {
         QWidget* wgt = qApp->activeWindow();
@@ -1970,8 +2074,7 @@ void MainWindow::on_actionViewMinimize_triggered()
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("markAllMessagesRead");
+    WizGetAnalyzer().LogAction("markAllMessagesRead");
 
     m_msgList->markAllMessagesReaded();
 }
@@ -2104,14 +2207,12 @@ void MainWindow::on_actionConsole_triggered()
 
     m_console->show();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("console");
+    WizGetAnalyzer().LogAction("console");
 }
 
 void MainWindow::on_actionLogout_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("logout");
+    WizGetAnalyzer().LogAction("logout");
 
     // save state
     m_settings->setAutoLogin(false);
@@ -2121,8 +2222,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("aboutWiz");
+    WizGetAnalyzer().LogAction("aboutWiz");
 
     AboutDialog dialog(this);
     dialog.exec();
@@ -2132,15 +2232,13 @@ void MainWindow::on_actionDeveloper_triggered()
 {
     m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("developerMode");
+    WizGetAnalyzer().LogAction("developerMode");
 }
 
 
 void MainWindow::on_actionPreference_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("preference");
+    WizGetAnalyzer().LogAction("preference");
 
     CWizPreferenceWindow preference(*this, this);
 
@@ -2164,8 +2262,7 @@ void MainWindow::on_actionFeedback_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("feedback");
+    WizGetAnalyzer().LogAction("feedback");
 }
 
 void MainWindow::on_actionSupport_triggered()
@@ -2177,13 +2274,12 @@ void MainWindow::on_actionSupport_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("support");
+    WizGetAnalyzer().LogAction("support");
 }
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
 
     if (strUrl.isEmpty())
         return;
@@ -2191,14 +2287,12 @@ void MainWindow::on_actionManual_triggered()
     strUrl += "&site=www&name=manual/mac/index.html";
     QDesktopServices::openUrl(strUrl);
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("manual");
+    WizGetAnalyzer().LogAction("manual");
 }
 
 void MainWindow::on_actionRebuildFTS_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("rebuildFTS");
+    WizGetAnalyzer().LogAction("rebuildFTS");
 
     QMessageBox msg;
     msg.setIcon(QMessageBox::Warning);
@@ -2209,7 +2303,7 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
     if (QMessageBox::Ok == msg.exec())
     {
-        analyzer.LogAction("rebuildFTSConfirm");
+        WizGetAnalyzer().LogAction("rebuildFTSConfirm");
 
         rebuildFTS();
     }
@@ -2217,22 +2311,30 @@ void MainWindow::on_actionRebuildFTS_triggered()
 
 void MainWindow::on_actionSearch_triggered()
 {
-    m_search->focus();
+    m_searchWidget->focus();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("search");
+    WizGetAnalyzer().LogAction("search");
 }
 
 void MainWindow::on_actionResetSearch_triggered()
 {
     cancelSearchStatus();
-    m_search->clear();
-    m_search->focus();
+    m_searchWidget->clear();
+    m_searchWidget->focus();
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("resetSearch");
+    WizGetAnalyzer().LogAction("resetSearch");
+}
+
+void MainWindow::on_actionAdvancedSearch_triggered()
+{
+    m_category->on_action_advancedSearch();
+}
+
+void MainWindow::on_actionAddCustomSearch_triggered()
+{
+    m_category->on_action_addCustomSearch();
 }
 
 void MainWindow::on_actionFindReplace_triggered()
@@ -2309,18 +2411,23 @@ void MainWindow::on_search_doSearch(const QString& keywords)
 }
 
 
-void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bEnd)
+void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
     if (bEnd) {
         m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
         m_doc->web()->applySearchKeywordHighlight();
     }
 
-    if (strKeywords != m_strSearchKeywords) {
-        return;
-    }
+//    if (strKeywords != m_strSearchKeywords) {
+//        return;
+//    }
 
-    m_documents->setDocuments(arrayDocument);
+    if (bStart) {
+        m_documents->setDocuments(arrayDocument);
+    } else {
+//        m_documents->setDocuments(arrayDocument);
+        m_documents->appendDocuments(arrayDocument);
+    }
     on_documents_itemSelectionChanged();
 }
 
@@ -2360,8 +2467,7 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
 void MainWindow::on_actionGoBack_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("goBack");
+    WizGetAnalyzer().LogAction("goBack");
 
     if (!m_history->canBack())
         return;
@@ -2379,12 +2485,12 @@ void MainWindow::on_actionGoBack_triggered()
     }
 
     updateHistoryButtonStatus();
+    m_doc->setFocus();
 }
 
 void MainWindow::on_actionGoForward_triggered()
 {
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("goForward");
+    WizGetAnalyzer().LogAction("goForward");
 
     if (!m_history->canForward())
         return;
@@ -2402,6 +2508,7 @@ void MainWindow::on_actionGoForward_triggered()
     }
 
     updateHistoryButtonStatus();
+    m_doc->setFocus();
 }
 
 void MainWindow::on_category_itemSelectionChanged()
@@ -2426,22 +2533,47 @@ void MainWindow::on_category_itemSelectionChanged()
         oldItem = currentItem;
     }
 
-    CWizCategoryViewMessageItem* pItem = category->currentCategoryItem<CWizCategoryViewMessageItem>();
-    if (pItem)
+    QTreeWidgetItem* categoryItem = category->currentItem();
+    switch (categoryItem->type()) {
+    case ItemType_MessageItem:
     {
-        showMessageList(pItem);
+        CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(categoryItem);
+        if (pItem)
+        {
+            showMessageList(pItem);
+        }
     }
-    else
+        break;
+    case ItemType_ShortcutItem:
     {
-        CWizCategoryViewShortcutItem *pShortcut = category->currentCategoryItem<CWizCategoryViewShortcutItem>();
+        CWizCategoryViewShortcutItem* pShortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(categoryItem);
         if (pShortcut)
         {
             viewDocumentByShortcut(pShortcut);
         }
-        else
+    }
+        break;
+    case ItemType_QuickSearchItem:
+    {
+        CWizCategoryViewSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewSearchItem*>(categoryItem);
+        if (pSearchItem)
         {
-            showDocmentList(category);
+            searchNotesBySQL(pSearchItem->getSQLWhere());
         }
+    }
+        break;
+    case ItemType_QuickSearchCustomItem:
+    {
+        CWizCategoryViewCustomSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewCustomSearchItem*>(categoryItem);
+        if (pSearchItem)
+        {
+            searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword(), pSearchItem->searchScope());
+        }
+    }
+        break;
+    default:
+        showDocmentList(category);
+        break;
     }
 }
 
@@ -2523,8 +2655,6 @@ void MainWindow::on_options_restartForSettings()
 
 void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwner)
 {
-    Q_ASSERT(!strKbGUID.isEmpty());
-
     int nPerm = m_dbMgr.db(strKbGUID).permission();
     bool isGroup = m_dbMgr.db().kbGUID() != strKbGUID;
 
@@ -2584,7 +2714,7 @@ void MainWindow::resetPermission(const QString& strKbGUID, const QString& strOwn
 
 void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
 {
-    Q_ASSERT(!data.strKbGUID.isEmpty());
+    Q_ASSERT(!data.strGUID.isEmpty());
 
     if (data.strGUID == m_doc->note().strGUID)
     {
@@ -2628,6 +2758,31 @@ void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid
     }
 }
 
+QWidget*MainWindow::mainWindow()
+{
+    return this;
+}
+
+QObject*MainWindow::object()
+{
+    return this;
+}
+
+CWizCategoryBaseView&MainWindow::category()
+{
+    return *m_category;
+}
+
+CWizUserSettings&MainWindow::userSettings()
+{
+    return *m_settings;
+}
+
+QObject*MainWindow::CategoryCtrl()
+{
+    return m_category;
+}
+
 void MainWindow::on_application_messageAvailable(const QString& strMsg)
 {
     qDebug() << "application message received : " << strMsg;
@@ -2669,7 +2824,7 @@ void MainWindow::adjustToolBarLayout()
     //
     if (searchWidth > 100)
     {
-        m_search->setFixedWidth(searchWidth);
+        m_searchWidget->setFixedWidth(searchWidth);
     }
 #else
 //#ifndef USECOCOATOOLBAR
@@ -2890,7 +3045,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 {
     initVariableBeforCreateNote();
 
-    QString strTitle = WizExtractFileTitle(strImageFile);
+    QString strTitle = Utils::Misc::extractFileTitle(strImageFile);
     if (strTitle.isEmpty())
     {
         strTitle = "New note";
@@ -2911,7 +3066,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
     strUrl += "&name=newfeature-mac";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
@@ -2920,7 +3075,7 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link");
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
     strUrl += "&name=guidemap_sendimage.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
@@ -2937,28 +3092,28 @@ void MainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)
 void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 {
     Q_ASSERT(trayIcon);
-    QMenu* menu = new QMenu(this);
-    QAction* actionShow = menu->addAction(tr("Show/Hide MainWindow"));
+    m_trayMenu = new QMenu(this);
+    QAction* actionShow = m_trayMenu->addAction(tr("Show/Hide MainWindow"));
     connect(actionShow, SIGNAL(triggered()), SLOT(shiftVisableStatus()));
 
-    QAction* actionNewNote = menu->addAction(tr("New Note"));
-    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
+    QAction* actionNewNote = m_trayMenu->addAction(tr("New Note"));
+    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));    
 
     //
-    menu->addSeparator();
-    QAction* actionHideTrayIcon = menu->addAction(tr("Hide TrayIcon"));
+    m_trayMenu->addSeparator();
+    QAction* actionHideTrayIcon = m_trayMenu->addAction(tr("Hide TrayIcon"));
     connect(actionHideTrayIcon, SIGNAL(triggered()), SLOT(on_hideTrayIcon_clicked()));
     //
-    menu->addSeparator();
-    QAction* actionLogout = menu->addAction(tr("Logout"));
+    m_trayMenu->addSeparator();
+    QAction* actionLogout = m_trayMenu->addAction(tr("Logout"));
     connect(actionLogout, SIGNAL(triggered()), SLOT(on_actionLogout_triggered()));
-    QAction* actionExit = menu->addAction(tr("Exit"));
+    QAction* actionExit = m_trayMenu->addAction(tr("Exit"));
     connect(actionExit, SIGNAL(triggered()), SLOT(on_actionExit_triggered()));
 
-    trayIcon->setContextMenu(menu);
 
-    //
 #ifdef Q_OS_MAC
+    trayIcon->setContextMenu(m_trayMenu);
+    //
     QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
     QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
     QIcon icon;
@@ -2969,12 +3124,16 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
         trayIcon->setIcon(icon);
     }
 #else
-    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
-    QIcon icon(normal);
-    if (!icon.isNull())
-    {
-        trayIcon->setIcon(icon);
-    }
+    trayIcon->setContextMenu(m_trayMenu);
+//    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
+//            SLOT(on_trayIcon_actived(QSystemTrayIcon::ActivationReason)));
+
+//    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
+//    QIcon icon(normal);
+//    if (!icon.isNull())
+//    {
+//        trayIcon->setIcon(icon);
+//    }
 #endif
 }
 
@@ -3113,6 +3272,30 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
     }
 }
 
+void MainWindow::searchNotesBySQL(const QString& strSQLWhere)
+{
+    if (strSQLWhere.isEmpty())
+        return;
+    m_searcher->searchBySQLWhere(strSQLWhere, 500);
+}
+
+void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword, int searchScope)
+{
+    qDebug() << "search by sql and keyword : " << strSQLWhere << strKeyword;
+    if (strSQLWhere.isEmpty())
+    {
+        m_searcher->search(strKeyword, 500, (SearchScope)searchScope);
+    }
+    else if (strKeyword.isEmpty())
+    {
+        m_searcher->searchBySQLWhere(strSQLWhere, 500, (SearchScope)searchScope);
+    }
+    else
+    {
+        m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500, (SearchScope)searchScope);
+    }
+}
+
 void MainWindow::updateHistoryButtonStatus()
 {
     bool canGoBack = m_history->canBack();
@@ -3174,3 +3357,5 @@ void MainWindow::quickSyncKb(const QString& kbGuid)
 {
     CWizKMSyncThread::quickSyncKb(kbGuid);
 }
+
+

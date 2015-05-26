@@ -246,6 +246,34 @@ void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString&
     p->restore();
 }
 
+void StyleHelper::drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOrign, const QPixmap& pix)
+{
+    if (pix.isNull())
+        return;
+
+#ifdef Q_OS_MAC
+    float factor = qt_mac_get_scalefactor(0);
+    QRect rcTarget(rcOrign);
+    rcTarget.setWidth(rcTarget.width() * factor);
+    rcTarget.setHeight(rcTarget.height() * factor);
+    QTransform transRect;
+    transRect.scale(factor, factor);
+    QPoint leftTop = transRect.map(rcOrign.topLeft());
+    rcTarget.moveTopLeft(leftTop);
+    //
+    float rFactor = 1 / factor;
+    QTransform transPainter;
+    transPainter.scale(rFactor, rFactor);    
+    //
+    p->save();
+    p->setWorldTransform(transPainter);
+    p->drawPixmap(rcTarget, pix);
+    p->restore();
+#else
+    p->drawPixmap(rcOrign, pix);
+#endif
+}
+
 int StyleHelper::listViewSortControlWidgetHeight()
 {
     if (!m_settings) {
@@ -449,26 +477,32 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListVi
     p->restore();
 }
 
-QSize StyleHelper::avatarSize()
+QSize StyleHelper::avatarSize(bool bNoScreenFactor)
 {
-    return QSize(avatarHeight(), avatarHeight());
+    int nHeight = avatarHeight(bNoScreenFactor);
+    return QSize(nHeight, nHeight);
 }
 
-int StyleHelper::avatarHeight()
+int StyleHelper::avatarHeight(bool bNoScreenFactor)
 {
     QFont f;
-    return fontHead(f) + fontNormal(f) + margin() * 3;
+    int nHeight = fontHead(f) + fontNormal(f) + margin() * 3 ;
+    if (bNoScreenFactor)
+        return nHeight;
+
+#ifdef Q_OS_LINUX
+    return nHeight;
+#else
+    float factor = qt_mac_get_scalefactor(0); 
+    return nHeight * factor;
+#endif
 }
 
 QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 {
     QRect rectAvatar = rc;
-    rectAvatar.setSize(avatarSize());
-
-    p->save();
-    p->setRenderHint(QPainter::Antialiasing);
-    p->drawPixmap(rectAvatar, pm);
-    p->restore();
+    rectAvatar.setSize(avatarSize(true));
+    drawPixmapWithScreenScaleFactor(p, rectAvatar, pm);    
 
     return rectAvatar;
 }
@@ -732,6 +766,16 @@ int StyleHelper::titleEditorHeight()
 int StyleHelper::editToolBarHeight()
 {
     return 30;
+}
+
+int StyleHelper::infoBarHeight()
+{
+    return 32;
+}
+
+int StyleHelper::tagBarHeight()
+{
+    return editToolBarHeight();
 }
 
 int StyleHelper::notifyBarHeight()

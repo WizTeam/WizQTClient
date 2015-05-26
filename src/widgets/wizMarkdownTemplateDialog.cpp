@@ -3,6 +3,7 @@
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "extensionsystem/pluginmanager.h"
+#include "wiznotestyle.h"
 #include <QSettings>
 #include <QFileDialog>
 #include <QFontMetrics>
@@ -19,7 +20,7 @@ CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent) :
     ui->setupUi(this);
     ui->listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
     ui->listWidget->setTextElideMode(Qt::ElideMiddle);
-    CWizListStyle* listStyle = new CWizListStyle();
+    CWizListItemStyle<CWizTemplateItem>* listStyle = new CWizListItemStyle<CWizTemplateItem>();
     ui->listWidget->setStyle(listStyle);
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     QTimer::singleShot(100, this, SLOT(initListWidget()));
@@ -181,41 +182,6 @@ void CWizMarkdownTemplateDialog::selectItemByLocation(const QString& strFileName
             ui->listWidget->setItemSelected(item, true);
             return;
         }
-    }
-}
-
-
-CWizListStyle::CWizListStyle(QStyle* style)
-    : QProxyStyle(style)
-{
-
-}
-
-void CWizListStyle::drawControl(QStyle::ControlElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget) const
-{
-    switch (element)
-    {
-    case CE_ItemViewItem:
-        {
-            const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
-            Q_ASSERT(vopt);
-
-            if (const QListWidget* view = dynamic_cast<const QListWidget*>(widget))
-            {
-                QListWidgetItem *item = view->item(vopt->index.row());
-                if (item)
-                {
-                    if (CWizTemplateItem* templateItem = dynamic_cast<CWizTemplateItem*>(item))
-                    {
-                        templateItem->draw(painter, vopt);
-                    }
-                }
-            }
-            break;
-        }
-    default:
-        QProxyStyle::drawControl(element, option, painter, widget);
-        break;
     }
 }
 

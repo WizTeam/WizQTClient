@@ -17,7 +17,7 @@ public:
     QString getWhatsNewUrl();
 
 public Q_SLOTS:
-    void check();
+    void checkUpgrade();
     void on_getCheckUrl_finished();
     void on_checkUpgrade_finished();
     void on_timerCheck_timeout();

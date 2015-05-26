@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "wizkmcore.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 #include "wizmisc.h"
 
 
@@ -439,7 +440,7 @@ bool CWizIndex::TitleExists(const CString& strLocation, CString strTitle)
 bool CWizIndex::GetNextTitle(const QString& strLocation, QString& strTitle)
 {
 	CString strTemplate(strTitle);
-	WizExtractTitleTemplate(strTemplate);
+    Utils::Misc::extractTitleTemplate(strTemplate);
 	strTitle = strTemplate;
 
     if (!TitleExists(strLocation, strTitle))
@@ -1104,7 +1105,16 @@ bool CWizIndex::DeleteDeletedGUID(const CString& strGUID)
         STR2SQL(strGUID).utf16()
         );
 
-	return ExecSQL(strSQL);
+    return ExecSQL(strSQL);
+}
+
+bool CWizIndex::IsObjectDeleted(const CString& strGUID)
+{
+    CString strWhere = CString("DELETED_GUID = '%1'").arg(strGUID);
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DELETED_GUID, FIELD_LIST_WIZ_DELETED_GUID, strWhere);
+    CWizDeletedGUIDDataArray arrayGUID;
+    SQLToDeletedGUIDDataArray(strSQL, arrayGUID);
+    return arrayGUID.size() > 0;
 }
 
 bool CWizIndex::UpdateDocumentsInfoMD5(CWizDocumentDataArray& arrayDocument)
@@ -1247,6 +1257,20 @@ bool CWizIndex::GetDocumentTagsNameStringArray(const CString& strDocumentGUID, C
 	}
 
     return true;
+}
+
+int CWizIndex::GetDocumentTagCount(const CString& strDocumentGUID)
+{
+    CString strSQL = CString("select count(TAG_GUID) from WIZ_DOCUMENT_TAG where DOCUMENT_GUID='%1'").arg(strDocumentGUID);
+
+    CppSQLite3Query query = m_db.execQuery(strSQL);
+
+    if (!query.eof()) {
+        int nCount = query.getIntField(0);
+        return nCount;
+    }
+
+    return 0;
 }
 
 CString CWizIndex::GetDocumentTagNameText(const CString& strDocumentGUID)
@@ -3078,6 +3102,34 @@ bool CWizIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocum
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
+bool CWizIndex::GetRecentDocumentsByModifiedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
+{
+    CString strTime = TIME2SQL(t);
+
+    CString strSQL;
+    strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_MODIFIED>=%s order by DT_MODIFIED desc"),
+        QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
+        strTime.utf16()
+        );
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
+bool CWizIndex::GetRecentDocumentsByAccessedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
+{
+    CString strTime = TIME2SQL(t);
+
+    CString strSQL;
+    strSQL.Format(_T("select %s from %s where DOCUMENT_LOCATION not like '/Deleted Items/%%' and DT_ACCESSED>=%s order by DT_ACCESSED desc"),
+        QString(FIELD_LIST_WIZ_DOCUMENT).utf16(),
+        QString(TABLE_NAME_WIZ_DOCUMENT).utf16(),
+        strTime.utf16()
+        );
+
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
+}
+
 #ifndef WIZ_NO_OBSOLETE
 bool CWizIndex::GetCalendarEvents(const COleDateTime& tStart, const COleDateTime& tEnd, CWizDocumentDataArray& arrayDocument)
 {
@@ -3234,6 +3286,17 @@ bool CWizIndex::deleteMetasByName(const QString& strMetaName)
     strSQL.Format(strFormat,
         STR2SQL(strMetaName).utf16()
         );
+
+    if (!ExecSQL(strSQL))
+        return false;
+
+    return true;
+}
+
+bool CWizIndex::deleteMetaByKey(const QString& strMetaName, const QString& strMetaKey)
+{
+    CString strWhere = QString("META_NAME='%1' AND META_KEY='%2'").arg(strMetaName).arg(strMetaKey);
+    CString strSQL = FormatDeleteSQLByWhere(TABLE_NAME_WIZ_META, strWhere);
 
     if (!ExecSQL(strSQL))
         return false;
@@ -3489,6 +3552,20 @@ bool CWizIndex::setDocumentSearchIndexed(const QString& strDocumentGUID, bool b)
 
 	if (!ExecSQL(strSQL))
         return false;
+
+    return true;
+}
+
+bool CWizIndex::SearchDocumentByWhere(const QString& strWhere, int nMaxCount, CWizDocumentDataArray& arrayDocument)
+{
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
+
+    if (!SQLToDocumentDataArray(strSQL, arrayDocument))
+        return false;
+
+    if (arrayDocument.size() > nMaxCount) {
+        arrayDocument.resize(nMaxCount);
+    }
 
     return true;
 }
