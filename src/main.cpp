@@ -204,7 +204,7 @@ int mainCore(int argc, char *argv[])
     icon.addPixmap(QPixmap(":/logo_16.png"));
     icon.addPixmap(QPixmap(":/logo_32.png"));
     icon.addPixmap(QPixmap(":/logo_48.png"));
-    icon.addPixmap(QPixmap(":/logo_96.png"));
+    icon.addPixmap(QPixmap(":/logo_64.png"));
     icon.addPixmap(QPixmap(":/logo_128.png"));
     icon.addPixmap(QPixmap(":/logo_256.png"));
     QApplication::setWindowIcon(icon);

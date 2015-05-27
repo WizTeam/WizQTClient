@@ -408,42 +408,34 @@
 			callback.shareCallback = callback;
 
 			_share(function(status, resp) {
-				toLog("share function callled");
 				if (resp === requestError
 					|| resp === requestTimeout) {
 					callback.shareCallback(resp);
 				}
 				else if (200 == status) {
-					toLog("share resp status :" + status + " return code : " + resp.return_code);
 					var retCode = resp.return_code;
 					switch (retCode) {
 						case 200:
 							if (resp.password){
 								info.password = resp.password;
-								toLog("[shareLInk] password : " + info.password);
 							}
 							if (resp.shareId) {
 								info.shareId = resp.shareId;
-								toLog("[shareLInk] shareId : " + info.shareId);
 							}
 							if (resp.readCountLimit) {
 								info.readCountLimit = resp.readCountLimit;
-								toLog("[shareLInk] readCountLimit : " + info.readCountLimit);
 							}
 							if (resp.readCount) {
 								info.readCount = resp.readCount;
 							}
 							if (resp.expiredAt) {
 								info.expiredAt = resp.expiredAt;
-								toLog("[shareLInk] expire at : " + info.expiredAt);
 							}
 							if (resp.expiredDaysSet) {
 								info.expiredDaysSet = resp.expiredDaysSet;
-								toLog("[shareLInk] expired days set : " + info.expiredDaysSet);
 							}
 							if (resp.readCountSet) {
 								info.readCountSet = resp.readCountSet;
-								toLog("[shareLInk] read count set : " + info.readCountSet);
 							}
 							//
 							callback.shareCallback(requestSucceeded);
@@ -475,23 +467,18 @@
 							info.shareId = resp.shareId;
 							if (resp.readCountLimit) {
 								info.readCountLimit = resp.readCountLimit;
-								toLog("[share link] readCountLimit : " + info.readCountLimit);
 							}
 							if (resp.readCount) {
 								info.readCount = resp.readCount;
-								toLog("[share link] readCount : " + info.readCount);
 							}
 							if (resp.expiredAt) {
 								info.expiredAt = resp.expiredAt;
-								toLog("[share link] expiredAt : " + info.expiredAt);
 							}
 							if (resp.expiredDaysSet){
 								info.expiredDaysSet = resp.expiredDaysSet;
-								toLog("[share link] expiredDaysSet : " + info.expiredDaysSet);
 							}
 							if (resp.readCountSet) {
 								info.readCountSet = resp.readCountSet;
-								toLog("[share link] readCountSet : " + info.readCountSet);
 							}
 							//
 							callback.shareCallback(requestSucceeded);
@@ -528,7 +515,6 @@
 		}
 		//
 		function getExpiredAt() {
-			toLog("getExpiredAt called : " + info.expiredAt);
 			return info.expiredAt;
 		}
 		//
@@ -1172,9 +1158,7 @@
 				if (!expiredDate.getTime()) {
 					expiredDate = new Date(external.formateISO8601String(expiredAt));
 				}				
-				toLog("expiredAt : " + expiredAt + " create data from expiredAt : " + expiredDate);
 				var days = Math.round((expiredDate.getTime() - Date.now()) / (1000*60*60*24.0));
-				toLog("updateUI , expireDate : " + expiredDate + " get time : " + expiredDate.getTime() + " date now : " + Date.now() + " days : " + days);
 				dayTips.innerText = sharelocale_remain_days.replace("%1", days);
 			}
 		}
