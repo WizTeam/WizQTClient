@@ -46,6 +46,7 @@
 #define WIZNOTE_API_COMMAND_AS_SERVER       "as"
 #define WIZNOTE_API_COMMAND_SYNC_HTTP       "sync_http"
 #define WIZNOTE_API_COMMAND_SYNC_HTTPS      "sync_https"
+#define WIZNOTE_API_COMMAND_MESSAGE_SERVER       "message_server"
 #define WIZNOTE_API_COMMAND_MESSAGE_VERSION "message_version"
 #define WIZNOTE_API_COMMAND_AVATAR          "avatar"
 #define WIZNOTE_API_COMMAND_UPLOAD_AVATAR   "upload_avatar"
@@ -93,6 +94,7 @@ void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
     }
 
     m_strSyncUrl.clear();
+    m_strMessageServerUrl.clear();
     m_strMessageVersionUrl.clear();
     m_strAvatarDownloadUrl.clear();
     m_strAvatarUploadUrl.clear();
@@ -109,6 +111,11 @@ QString ApiEntryPrivate::asServerUrl()
 {
     QString strAsUrl;
     return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl, false);
+}
+
+QString ApiEntryPrivate::messageServerUrl()
+{
+    return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_SERVER, m_strMessageServerUrl, false);
 }
 
 
@@ -167,7 +174,6 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, 
     QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
-//    qDebug() << "request url for command : " << strCommand << " request url : " << strRequestUrl << "  return url : " << strUrl;
     return strUrl;
 }
 
@@ -232,26 +238,6 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& 
 //    return url.toString();
 
     return strUrl;
-}
-
-QString ApiEntryPrivate::feedbackUrl()
-{
-    return urlFromCommand(WIZNOTE_API_COMMAND_FEEDBACK, true);
-}
-
-QString ApiEntryPrivate::supportUrl()
-{
-    return urlFromCommand(WIZNOTE_API_COMMAND_SUPPORT, true);
-}
-
-QString ApiEntryPrivate::changeLogUrl()
-{
-    return urlFromCommand(WIZNOTE_API_COMMAND_CHANGELOG, true);
-}
-
-QString ApiEntryPrivate::upgradeUrl()
-{
-    return urlFromCommand(WIZNOTE_API_COMMAND_UPGRADE, true);
 }
 
 QString ApiEntryPrivate::analyzerUploadUrl()
@@ -407,6 +393,11 @@ QString ApiEntry::asServerUrl()
     return Garbo.apiHelper->asServerUrl();
 }
 
+QString ApiEntry::messageServerUrl()
+{
+    return Garbo.apiHelper->messageServerUrl();
+}
+
 QString ApiEntry::messageVersionUrl()
 {
     return Garbo.apiHelper->messageVersionUrl();
@@ -436,26 +427,6 @@ QString ApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToke
                                   const QString& strKbGUID, const QString& strGUID)
 {
     return Garbo.apiHelper->commentCountUrl(strKUrl, strToken, strKbGUID, strGUID);
-}
-
-QString ApiEntry::feedbackUrl()
-{
-    return Garbo.apiHelper->feedbackUrl();
-}
-
-QString ApiEntry::supportUrl()
-{
-    return Garbo.apiHelper->supportUrl();
-}
-
-QString ApiEntry::changeLogUrl()
-{
-    return Garbo.apiHelper->changeLogUrl();
-}
-
-QString ApiEntry::upgradeUrl()
-{
-    return Garbo.apiHelper->upgradeUrl();
 }
 
 QString ApiEntry::analyzerUploadUrl()

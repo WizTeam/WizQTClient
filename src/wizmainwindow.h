@@ -476,6 +476,9 @@ private:
 
     //
     void loadMessageByUserGuid(const QString& guid);
+
+    //
+    void windowActived();
 };
 
 } // namespace Internal

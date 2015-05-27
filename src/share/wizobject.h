@@ -653,6 +653,7 @@ struct WIZUSERMESSAGEDATA
     QString strReceiverID;
     int nMessageType;
     int nReadStatus;	//阅读状态, 0:未读，1:已读
+    int nDeletedStatus;  // 删除状态， 0：为删除， 1：已删除
     COleDateTime tCreated;
     QString strMessageText;
     qint64 nVersion;
@@ -664,6 +665,7 @@ struct WIZUSERMESSAGEDATA
         : nMessageID(0)
         , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
         , nReadStatus(0)
+        , nDeletedStatus(0)
         , nVersion(0)
     {
 
@@ -723,6 +725,11 @@ struct WIZMESSAGEDATA
     // 0: not read
     // 1: read
     qint32 nReadStatus;
+
+    //Field:DELETE_STATUS
+    //0: not deleted
+    //1:deleted
+    qint32 nDeleteStatus;
 
     // Field: receiver_alias
     QString receiverAlias;

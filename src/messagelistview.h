@@ -64,7 +64,8 @@ private:
     MessageListViewItem* m_pCurrentItem;
     QList<MessageListViewItem*> m_rightButtonFocusedItems;
     QTimer m_timerRead;
-    QList<qint64> m_lsIds;
+    QList<qint64> m_readList;
+    QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
     WizService::AsyncApi* m_api;
 

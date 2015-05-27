@@ -147,7 +147,7 @@ bool CWizIndexBase::updateTableStructure(int oldVersion)
     }
     //
     if (oldVersion < 2) {
-
+        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int; ");
     }
     //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
@@ -574,6 +574,7 @@ bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
             data.title = query.getStringField(msgMESSAGE_TITLE);
             data.messageBody = query.getStringField(msgMESSAGE_TEXT);
             data.nVersion = query.getInt64Field(msgWIZ_VERSION);
+            data.nDeleteStatus = query.getIntField(msgDELETE_STATUS);
 
             arrayMessage.push_back(data);
             query.nextRow();
@@ -667,6 +668,7 @@ bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
     CString strSQL;
     strSQL.Format(strFormat,
                   data.nReadStatus,
+                  data.nDeleteStatus,
                   WizInt64ToStr(data.nVersion).utf16(),
                   WizInt64ToStr(data.nId).utf16()
         );

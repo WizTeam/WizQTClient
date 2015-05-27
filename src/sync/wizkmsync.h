@@ -45,6 +45,9 @@ public:
     void setFullSyncInterval(int nMinutes);
     //
     void addQuickSyncKb(const QString& kbGuid);
+    //
+    void quickDownloadMesages();
+
     bool clearCurrentToken();
     //
     void waitForDone();    
@@ -65,6 +68,7 @@ private:
     WIZUSERINFO m_info;
     CWizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
+    bool m_bNeedDownloadMessages;
     QDateTime m_tLastSyncAll;
     int m_nfullSyncInterval;
 
@@ -78,8 +82,10 @@ private:
     bool prepareToken();
     bool needSyncAll();
     bool needQuickSync();
+    bool needDownloadMessage();
     bool syncAll();
     bool quickSync();
+    bool downloadMesages();
 
     void syncUserCert();
     //

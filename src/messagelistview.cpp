@@ -231,6 +231,11 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
+    if (msg.nDeleteStatus == 1) {
+        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
+        return;
+    }
+
     MessageListViewItem* pItem = new MessageListViewItem(msg);
 
     int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 2;
@@ -317,7 +322,7 @@ void MessageListView::markAllMessagesReaded()
         MessageListViewItem* pItem = messageItem(i);
         if (!pItem->data().nReadStatus) {
             CWizDatabaseManager::instance()->db().setMessageReadStatus(pItem->data(), 1);
-            m_lsIds.push_back(pItem->data().nId);
+            m_readList.push_back(pItem->data().nId);
         }
     }
     m_timerTriggerSync.start();
@@ -350,7 +355,7 @@ void MessageListView::onReadTimeout()
 {
     if (m_pCurrentItem && !m_pCurrentItem->data().nReadStatus) {
         CWizDatabaseManager::instance()->db().setMessageReadStatus(m_pCurrentItem->data(), 1);
-        m_lsIds.push_back(m_pCurrentItem->data().nId);
+        m_readList.push_back(m_pCurrentItem->data().nId);
         m_timerTriggerSync.start();
     }
 }
@@ -361,23 +366,45 @@ void MessageListView::onSyncTimeout()
         m_api = new WizService::AsyncApi(this);
     }
 
-    QString ids;
-    for (int i = 0; i < m_lsIds.size(); i++) {
-        ids += QString::number(m_lsIds.at(i));
+    if (m_readList.count() > 0)
+    {
+        QString ids;
+        for (int i = 0; i < m_readList.size(); i++) {
+            ids += QString::number(m_readList.at(i));
 
-        if (i != m_lsIds.size() - 1) {
-            ids += ",";
+            if (i != m_readList.size() - 1) {
+                ids += ",";
+            }
         }
+
+        if (ids.isEmpty())
+            return;
+
+        qDebug() << "upload messages read status:" << ids;
+        m_api->setMessageReadStatus(ids, 1);
+
+        m_readList.clear();
     }
 
-    if (ids.isEmpty())
-        return;
+    if (m_deleteList.count() > 0)
+    {
+        QString ids;
+        for (int i = 0; i < m_deleteList.size(); i++) {
+            ids += QString::number(m_deleteList.at(i));
 
-    qDebug() << "upload messages read status:" << ids;
+            if (i != m_deleteList.size() - 1) {
+                ids += ",";
+            }
+        }
 
-    m_api->setMessageStatus(ids, 1);
+        if (ids.isEmpty())
+            return;
 
-    m_lsIds.clear();
+        qDebug() << "upload messages delete status:" << ids;
+        m_api->setMessageDeleteStatus(ids, 1);
+
+        m_deleteList.clear();
+    }
 }
 
 void MessageListView::updateTreeItem()
@@ -404,11 +431,13 @@ void MessageListView::on_action_message_mark_read()
     CWizMessageDataArray arrayMessage;
     for (int i = 0; i < arrayMsg.size(); i++) {
         arrayMessage.push_back(arrayMsg.at(i));
+        m_readList.append(arrayMsg.at(i).nId);
     }
 
     CWizDatabaseManager::instance()->db().setMessageReadStatus(arrayMessage, 1);
 
     updateTreeItem();
+    m_timerTriggerSync.start();
 }
 
 void MessageListView::on_action_message_delete()
@@ -417,10 +446,13 @@ void MessageListView::on_action_message_delete()
     specialFocusedMessages(arrayMsg);
 
     for (int i = 0; i < arrayMsg.size(); i++) {
-        CWizDatabaseManager::instance()->db().deleteMessageEx(arrayMsg.at(i));
+        arrayMsg[i].nDeleteStatus = 1;
+        CWizDatabaseManager::instance()->db().modifyMessageEx(arrayMsg.at(i));
+        m_deleteList.append(arrayMsg.at(i).nId);
     }
 
     updateTreeItem();
+    m_timerTriggerSync.start();
 }
 
 void MessageListView::on_action_message_locate()
@@ -448,12 +480,18 @@ void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
                                           const WIZMESSAGEDATA& newMsg)
 {
     Q_UNUSED(oldMsg);
+    qDebug() << "on_message_modified : " << newMsg.nId << " message deleted ; " << newMsg.nDeleteStatus;
 
     int i = rowFromId(newMsg.nId);
     if (i != -1) {
         if (MessageListViewItem* pItem = messageItem(i)) {
             pItem->setData(newMsg);
             update(indexFromItem(pItem));
+            //
+            if (newMsg.nDeleteStatus == 1) {
+                takeItem(i);
+                delete pItem;
+            }
         }
     }
 
@@ -464,7 +502,9 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
 {
     int i = rowFromId(msg.nId);
     if (i != -1) {
-        takeItem(i);
+        QListWidgetItem* item = takeItem(i);
+        if (item)
+            delete item;
     }
 
     updateTreeItem();

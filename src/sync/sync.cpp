@@ -1980,3 +1980,21 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
     //
     return bRet;
 }
+
+
+bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
+{
+    pEvents->OnStatus(_TR("[Sync]Quick download messages"));
+    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    server.SetUserInfo(info);
+    /*
+    ////获得群组信息////
+    */
+    //
+    CWizGroupDataArray arrayGroup;
+    server.GetGroupList(arrayGroup);
+    /*
+    ////下载消息////
+    */
+    return WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
+}

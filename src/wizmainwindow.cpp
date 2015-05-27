@@ -389,6 +389,12 @@ void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 
 void MainWindow::changeEvent(QEvent* event)
 {
+    if (event->type() == QEvent::ActivationChange
+            && isActiveWindow())
+    {
+        windowActived();
+    }
+    //
     if (m_useSystemBasedStyle)
         QMainWindow::changeEvent(event);
     else
@@ -1299,6 +1305,15 @@ void MainWindow::loadMessageByUserGuid(const QString& guid)
     CWizMessageDataArray arrayMsg;
     m_dbMgr.db().messageFromUserGUID(guid, arrayMsg);
     m_msgList->setMessages(arrayMsg);
+}
+
+void MainWindow::windowActived()
+{
+    static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
+    if (!isBizUser)
+        return;
+
+    m_sync->quickDownloadMesages();
 }
 
 bool MainWindow::checkListClickable()
@@ -2300,7 +2315,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::ApiEntry::feedbackUrl();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("feedback", true);
 
     if (strUrl.isEmpty())
         return;
@@ -2318,7 +2333,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::ApiEntry::supportUrl();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("support", true);
 
     if (strUrl.isEmpty())
         return;

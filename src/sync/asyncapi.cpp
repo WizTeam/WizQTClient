@@ -11,7 +11,7 @@
 #include <QEventLoop>
 
 #include <rapidjson/document.h>
-
+#include "share/wizEventLoop.h"
 #include "apientry.h"
 #include "wizkmxmlrpc.h"
 #include "token.h"
@@ -172,15 +172,20 @@ void AsyncApi::on_comments_finished()
 }
 
 
-void AsyncApi::setMessageStatus(const QString& ids, bool bRead)
+void AsyncApi::setMessageReadStatus(const QString& ids, bool bRead)
 {
-    QtConcurrent::run(this, &AsyncApi::setMessageStatus_impl, ids, bRead);
+    QtConcurrent::run(this, &AsyncApi::setMessageReadStatus_impl, ids, bRead);
 }
 
-void AsyncApi::setMessageStatus_impl(const QString& ids, bool bRead)
+void AsyncApi::setMessageDeleteStatus(const QString& ids, bool bDelete)
+{
+    QtConcurrent::run(this, &AsyncApi::setMessageDeleteStatus_impl, ids, bDelete);
+}
+
+void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
 {
     QString strToken = Token::token();
-    qDebug() << "set message status, strken:" << strToken;
+    qDebug() << "set message read status, strken:" << strToken;
 
     if (strToken.isEmpty()) {
         return;
@@ -196,5 +201,50 @@ void AsyncApi::setMessageStatus_impl(const QString& ids, bool bRead)
     if (!ret) {
         m_nErrorCode = aServer.GetLastErrorCode();
         m_strErrorMessage = aServer.GetLastErrorMessage();
+    }
+}
+
+void AsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
+{
+    QString strToken = Token::token();
+    if (strToken.isEmpty()) {
+        return;
+    }
+    //
+    QString strUrl = WizService::ApiEntry::messageServerUrl();
+    strUrl += QString("/messages?m=delete&token=%1&ids=%2").arg(strToken).arg(ids);
+    qDebug() << "set message delete status, strken:" << strToken << "   ids : " << ids << " url : " << strUrl;
+    //
+    QNetworkRequest request;
+    request.setUrl(QUrl(strUrl));
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(request);
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
+    //
+    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "[MessageStatus]Send message delete status failed.";
+        return;
+    }
+
+    rapidjson::Document d;
+    d.Parse<0>(loop.result().toUtf8().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "[MessageStatus]Send message delete status can not get return code ";
+        return;
+    }
+
+    int returnCode = d.FindMember("return_code")->value.GetInt();
+    if (returnCode != 200)
+    {
+        qDebug() << "[MessageStatus]Send message delete status error :  " << returnCode << loop.result();
+        return;
+    }
+    else
+    {
+        qDebug() << "[MessageStatus]Send message delete status OK";
     }
 }

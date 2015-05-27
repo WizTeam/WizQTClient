@@ -19,6 +19,7 @@ public:
     void setLanguage(const QString& strLocal);
     QString syncUrl();
     QString asServerUrl();
+    QString messageServerUrl();
     QString messageVersionUrl();
     QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
     QString avatarDownloadUrl(const QString& strUserGUID);
@@ -26,7 +27,6 @@ public:
     QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
     QString commentCountUrl(const QString& strKUrl, const QString& strToken,
                             const QString& strKbGUID, const QString& strGUID);
-    QString feedbackUrl();
     QString supportUrl();
     QString changeLogUrl();
     QString upgradeUrl();
@@ -49,6 +49,7 @@ public:
 private:
     QString m_strEnterpriseAPIUrl;
     QString m_strSyncUrl;
+    QString m_strMessageServerUrl;
     QString m_strMessageVersionUrl;
     QString m_strAvatarDownloadUrl;
     QString m_strAvatarUploadUrl;

@@ -55,7 +55,7 @@ void CWizUpgrade::beginCheck()
 
 QString CWizUpgrade::getWhatsNewUrl()
 {
-    return WizService::ApiEntry::changeLogUrl();
+    return WizService::ApiEntry::standardCommandUrl("changelog", true);
 }
 
 void CWizUpgrade::checkUpgrade()

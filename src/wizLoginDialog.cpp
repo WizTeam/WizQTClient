@@ -320,7 +320,7 @@ void CWizLoginDialog::doAccountVerify()
         return;
     }
 
-    qDebug() << "do account verify , server type : " << m_serverType;
+//    qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
