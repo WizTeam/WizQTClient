@@ -9,6 +9,7 @@
 	<script type="text/javascript">
 
 	var DEBUG = false;
+	var MAX_INT = 100000000;
 
 	function DEBUG_ALERT (msg) {
 		if (DEBUG) {
@@ -130,7 +131,9 @@
 			"readCountLimit": null,
 			"shareId": null,
 			"readCount": null,
-			"expiredAt": null
+			"expiredAt": null,
+			"expiredDaysSet": null,
+			"readCountSet": null
 		};
 
 		var tempInfo = {
@@ -138,7 +141,9 @@
 			"readCountLimit": null,
 			"shareId": null,
 			"readCount": null,
-			"expiredAt": null
+			"expiredAt": null,
+			"expiredDaysSet": null,
+			"readCountSet": null
 		};
 
 		var callback = {
@@ -155,6 +160,8 @@
 			tempInfo.shareId = info.shareId;
 			tempInfo.readCount = info.readCount;
 			tempInfo.expiredAt = info.expiredAt;
+			tempInfo.expiredDaysSet = info.expiredDaysSet;
+			tempInfo.readCountSet = info.readCountSet;
 		}
 
 		function _updateInfo() {
@@ -163,6 +170,8 @@
 			info.shareId = tempInfo.shareId;
 			info.readCount = tempInfo.readCount;
 			info.expiredAt = tempInfo.expiredAt;
+			info.expiredDaysSet = tempInfo.expiredDaysSet;
+			info.readCountSet = tempInfo.readCountSet;
 		}
 
 		function _share(callback) {
@@ -193,7 +202,16 @@
 				var d = new Date(tempInfo.expiredAt);
 				params['expiredAt'] = d.toISOString();
 			}
+			params['expiredDaysSet'] = MAX_INT;
+			params['readCountSet'] = MAX_INT;
+			if (null !== tempInfo.expiredDaysSet) {
+				params['expiredDaysSet'] = tempInfo.expiredDaysSet;
+			}
+			if (null !== tempInfo.readCountSet) {
+				params['readCountSet'] = tempInfo.readCountSet;
+			}
 			//
+			console.log("put request : " + tempInfo.shareId);
 			request('PUT', url + '/' + tempInfo.shareId, params, function(status, resp) {
 				callback(status, resp);
 			});
@@ -314,14 +332,20 @@
 				now.setDate(now.getDate() + day);
 				tempInfo.expiredAt = now.getTime();
 				tempInfo.readCountLimit = null;
+				tempInfo.expiredDaysSet = day;
+				tempInfo.readCountSet = null;
 			}
 			else if (null != time) {
 				tempInfo.expiredAt = null;
 				tempInfo.readCountLimit = time;
+				tempInfo.expiredDaysSet = null;
+				tempInfo.readCountSet = time;
 			}
 			else {
 				tempInfo.expiredAt = null;
 				tempInfo.readCountLimit = null;
+				tempInfo.expiredDaysSet = null;
+				tempInfo.readCountSet = null;
 			}
 			//
 			_updateShare(callback);
@@ -384,24 +408,43 @@
 			callback.shareCallback = callback;
 
 			_share(function(status, resp) {
+				toLog("share function callled");
 				if (resp === requestError
 					|| resp === requestTimeout) {
 					callback.shareCallback(resp);
 				}
 				else if (200 == status) {
+					toLog("share resp status :" + status + " return code : " + resp.return_code);
 					var retCode = resp.return_code;
 					switch (retCode) {
 						case 200:
-							if (resp.password)
+							if (resp.password){
 								info.password = resp.password;
-							if (resp.shareId)
+								toLog("[shareLInk] password : " + info.password);
+							}
+							if (resp.shareId) {
 								info.shareId = resp.shareId;
-							if (resp.readCountLimit)
+								toLog("[shareLInk] shareId : " + info.shareId);
+							}
+							if (resp.readCountLimit) {
 								info.readCountLimit = resp.readCountLimit;
-							if (resp.readCount)
+								toLog("[shareLInk] readCountLimit : " + info.readCountLimit);
+							}
+							if (resp.readCount) {
 								info.readCount = resp.readCount;
-							if (resp.expiredAt)
+							}
+							if (resp.expiredAt) {
 								info.expiredAt = resp.expiredAt;
+								toLog("[shareLInk] expire at : " + info.expiredAt);
+							}
+							if (resp.expiredDaysSet) {
+								info.expiredDaysSet = resp.expiredDaysSet;
+								toLog("[shareLInk] expired days set : " + info.expiredDaysSet);
+							}
+							if (resp.readCountSet) {
+								info.readCountSet = resp.readCountSet;
+								toLog("[shareLInk] read count set : " + info.readCountSet);
+							}
 							//
 							callback.shareCallback(requestSucceeded);
 							break;
@@ -430,12 +473,26 @@
 							if (resp.password)
 								info.password = resp.password;
 							info.shareId = resp.shareId;
-							if (resp.readCountLimit)
+							if (resp.readCountLimit) {
 								info.readCountLimit = resp.readCountLimit;
-							if (resp.readCount)
+								toLog("[share link] readCountLimit : " + info.readCountLimit);
+							}
+							if (resp.readCount) {
 								info.readCount = resp.readCount;
-							if (resp.expiredAt)
+								toLog("[share link] readCount : " + info.readCount);
+							}
+							if (resp.expiredAt) {
 								info.expiredAt = resp.expiredAt;
+								toLog("[share link] expiredAt : " + info.expiredAt);
+							}
+							if (resp.expiredDaysSet){
+								info.expiredDaysSet = resp.expiredDaysSet;
+								toLog("[share link] expiredDaysSet : " + info.expiredDaysSet);
+							}
+							if (resp.readCountSet) {
+								info.readCountSet = resp.readCountSet;
+								toLog("[share link] readCountSet : " + info.readCountSet);
+							}
 							//
 							callback.shareCallback(requestSucceeded);
 							break;
@@ -471,6 +528,7 @@
 		}
 		//
 		function getExpiredAt() {
+			toLog("getExpiredAt called : " + info.expiredAt);
 			return info.expiredAt;
 		}
 		//
@@ -480,6 +538,13 @@
 		//
 		function getReadCount() {
 			return info.readCount;
+		}
+		//
+		function getOptionsDays() {
+			return info.expiredDaysSet;
+		}
+		function getOptionsTimes() {
+			return info.readCountSet;
 		}
 		//
 		return {
@@ -493,7 +558,9 @@
 			getPassword: getPassword,
 			getExpiredAt: getExpiredAt,
 			getReadCountLimit: getReadCountLimit,
-			getReadCount: getReadCount
+			getReadCount: getReadCount,
+			getOptionsDays: getOptionsDays,
+			getOptionsTimes: getOptionsTimes
 		};
 	})();
 
@@ -533,6 +600,16 @@
 		if (external && external.logAction) {
 			external.logAction(text);
 		}
+	}
+	function isDisableButton(node) {
+		if (node && node.className) {
+			if (-1 != node.className.indexOf("disable"))
+				return true;
+			else 
+				return false;
+		}
+		//
+		return true;
 	}
 
 	function onCreateLinkError(errorText) {
@@ -744,6 +821,8 @@
 	}
 	//
 	function onModifyOptions() {
+		if (isDisableButton(this))
+			return;
 		if (WizShare.busy)
 			return;
 		if (!WizShare.getLink())
@@ -1088,9 +1167,86 @@
 		else if (null !== expiredAt) {
 			var dayTips = document.querySelector('.lmt-tips-day');
 			if (dayTips) {
-				dayTips.style.display = "";
-				var days = Math.round((expiredAt - Date.now()) / (1000*60*60*24.0));
+				dayTips.style.display = "";				
+				var expiredDate = new Date(expiredAt);
+				if (!expiredDate.getTime()) {
+					expiredDate = new Date(external.formateISO8601String(expiredAt));
+				}				
+				toLog("expiredAt : " + expiredAt + " create data from expiredAt : " + expiredDate);
+				var days = Math.round((expiredDate.getTime() - Date.now()) / (1000*60*60*24.0));
+				toLog("updateUI , expireDate : " + expiredDate + " get time : " + expiredDate.getTime() + " date now : " + Date.now() + " days : " + days);
 				dayTips.innerText = sharelocale_remain_days.replace("%1", days);
+			}
+		}
+		//
+		var optionsDays = WizShare.getOptionsDays();
+		var optionsTimes = WizShare.getOptionsTimes();
+		var options = document.querySelectorAll(".btnLimitDay");
+		for (var i = 0; i < options.length; i++) {
+			options[i].classList.remove("option-select");
+			options[i].classList.add("option-unselect");
+		}
+		//
+		var options = document.querySelectorAll(".btnLimitTime");
+		for (var i = 0; i < options.length; i++) {
+			options[i].classList.remove("option-select");
+			options[i].classList.add("option-unselect");
+		}		
+		//
+		var daysUnlimit = document.querySelector(".lmt-day-unlmt");
+		if (daysUnlimit) {
+			daysUnlimit.classList.remove("option-unselect");
+			daysUnlimit.classList.add("option-select");
+		}
+		var timesUnlimit = document.querySelector(".lmt-time-unlmt");
+		if (timesUnlimit) {
+			timesUnlimit.classList.remove("option-unselect");
+			timesUnlimit.classList.add("option-select");
+		}
+		if (null !== optionsDays && MAX_INT !== optionsDays) {
+			if ("number" === typeof(optionsDays)) {
+				var dayNodes = document.querySelectorAll(".btnLimitDay");
+				for (var i = 0; i < dayNodes.length; i++) {
+					var node = dayNodes[i];
+					var v = node.className.match(/\d+/g);
+					if (v && v.length > 0) {
+						if (optionsDays === Number(v[0])) {
+							node.classList.remove("option-unselect");
+							node.classList.add("option-select");
+							//
+							var daysUnlimit = document.querySelector(".lmt-day-unlmt");
+							if (daysUnlimit) {
+								daysUnlimit.classList.remove("option-select");
+								daysUnlimit.classList.add("option-unselect");
+							}
+							//
+							break;
+						}
+					}
+				}
+			}
+		}
+		else if (null !== optionsTimes && MAX_INT !== optionsTimes) {
+			if ("number" === typeof(optionsTimes)) {
+				var timeNodes = document.querySelectorAll(".btnLimitTime");
+				for (var i = 0; i < timeNodes.length; i++) {
+					var node = timeNodes[i];
+					var v = node.className.match(/\d+/g);
+					if (v && v.length > 0) {
+						if (optionsTimes === Number(v[0])) {
+							node.classList.remove("option-unselect");
+							node.classList.add("option-select");
+							//
+							var timesUnlimit = document.querySelector(".lmt-time-unlmt");
+							if (timesUnlimit) {
+								timesUnlimit.classList.remove("option-select");
+								timesUnlimit.classList.add("option-unselect");
+							}
+							//
+							break;
+						}
+					}
+				}
 			}
 		}
 		// disable all buttons
@@ -1225,10 +1381,9 @@
 	}
 
 	function initButtons() {
-		console.log("initButtons called");
 
 		document.addEventListener("mouseup", onDocumentMouseUp);
-		
+		//
 		var head = document.querySelector("#head");
 		if (head) {
 			head.addEventListener("mousedown", onHeadMouseDown);
