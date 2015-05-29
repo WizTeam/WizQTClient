@@ -412,10 +412,12 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         if (strFolder.startsWith(strOldLocation)) {
             strFolder.remove(0, strOldLocation.length());
             strFolder.insert(0, strDestLocation);
+            qDebug() << "Add new folder ; " << strFolder;
             m_db.AddExtraFolder(strFolder);
         }
     }
 
+    qDebug() << "Delete old location ; " << strOldLocation;
     m_db.DeleteExtraFolder(strOldLocation);
     m_db.SetLocalValueVersion("folders", -1);
 }
@@ -508,6 +510,11 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
 bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
 {
     return GetModifiedAttachments(arrayData);
+}
+
+bool CWizDatabase::GetModifiedMessageList(CWizMessageDataArray& arrayData)
+{
+    return getModifiedMessages(arrayData);
 }
 
 bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
@@ -770,6 +777,16 @@ bool CWizDatabase::ModifyDocumentsVersion(CWizDocumentDataArray& arrayData)
     for (it = arrayData.begin(); it != arrayData.end(); it++) {
         WIZDOCUMENTDATA data(*it);
         SetDocumentVersion(data.strGUID, data.nVersion);
+    }
+
+    return true;
+}
+
+bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
+{
+    for (WIZMESSAGEDATA msg : arrayData)
+    {
+        modifyMessageLocalChanged(msg);
     }
 
     return true;

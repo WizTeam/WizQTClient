@@ -331,6 +331,7 @@ bool CWizKMSyncThread::downloadMesages()
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     m_bNeedDownloadMessages = false;
+    return true;
 }
 
 

@@ -30,10 +30,11 @@ public:
     bool getAllMessages(CWizMessageDataArray& arrayMsg);
     bool getAllMessageSenders(CWizStdStringArray& arraySender);
     bool getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax = 200);
-    bool setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead);
-    bool setMessageReadStatus(const CWizMessageDataArray& arrayMsg, qint32 nRead);
+    bool setMessageReadStatus(const WIZMESSAGEDATA& msg);
+    bool setMessageDeleteStatus(const WIZMESSAGEDATA& msg);
     bool getModifiedMessages(CWizMessageDataArray&  arrayMsg);
     bool getUnreadMessages(CWizMessageDataArray& arrayMsg);
+    bool modifyMessageLocalChanged(const WIZMESSAGEDATA& msg);
     int getUnreadMessageCount();
 
     /* Tags related operations */

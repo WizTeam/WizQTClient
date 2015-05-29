@@ -660,6 +660,7 @@ struct WIZUSERMESSAGEDATA
     QString strSender;
     QString strReceiver;
     QString strTitle;
+    int nLocalChanged;
 
     WIZUSERMESSAGEDATA()
         : nMessageID(0)
@@ -667,6 +668,7 @@ struct WIZUSERMESSAGEDATA
         , nReadStatus(0)
         , nDeletedStatus(0)
         , nVersion(0)
+        , nLocalChanged(0)
     {
 
     }
@@ -676,6 +678,8 @@ struct WIZUSERMESSAGEDATA
 
 typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
 
+
+
 struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
@@ -683,6 +687,12 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "messages"; }
+
+    enum LocalChanged{
+        localChanged_None = 0x0000,
+        localChanged_Read = 0x0001,
+        localChanged_Delete = 0x0002
+    };
 
     // Field: biz_guid, char(36)
     // wiz bussiness groups guid
@@ -764,6 +774,9 @@ struct WIZMESSAGEDATA
 
     // Field: version
     qint64 nVersion;
+
+    // Field: localchanged  should not upload. use value of  WIZMESSAGEDATA::LocalChanged
+    int nLocalChanged;
 };
 
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;

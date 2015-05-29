@@ -179,6 +179,7 @@ set(wiznote_SOURCES
     wizOEMSettings.cpp
     core/wizTagBar.cpp
     share/wizEventLoop.cpp
+    sync/wizJSONServerBase.cpp
 )
 
 set(wiznote_HEADERS
@@ -341,6 +342,7 @@ set(wiznote_HEADERS
     wizOEMSettings_p.h
     core/wizTagBar.h
     share/wizEventLoop.h
+    sync/wizJSONServerBase.h
 )
 
 set(wiznote_FORMS

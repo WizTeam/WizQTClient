@@ -198,9 +198,15 @@ void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
     aServer.SetUserInfo(info);
 
     bool ret = aServer.SetMessageReadStatus(ids, bRead);
-    if (!ret) {
+    qDebug() << "set message read status : " << ret;
+    if (!ret)
+    {
         m_nErrorCode = aServer.GetLastErrorCode();
         m_strErrorMessage = aServer.GetLastErrorMessage();
+    }
+    else
+    {
+        emit uploadMessageReadStatusFinished(ids);
     }
 }
 
@@ -210,41 +216,25 @@ void AsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
     if (strToken.isEmpty()) {
         return;
     }
-    //
-    QString strUrl = WizService::ApiEntry::messageServerUrl();
-    strUrl += QString("/messages?m=delete&token=%1&ids=%2").arg(strToken).arg(ids);
-    qDebug() << "set message delete status, strken:" << strToken << "   ids : " << ids << " url : " << strUrl;
-    //
-    QNetworkRequest request;
-    request.setUrl(QUrl(strUrl));
-    QNetworkAccessManager net;
-    QNetworkReply* reply = net.get(request);
-    CWizAutoTimeOutEventLoop loop(reply);
-    loop.exec();
-    //
-    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
-    {
-        qDebug() << "[MessageStatus]Send message delete status failed.";
-        return;
-    }
 
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().toUtf8().constData());
+    CWizKMAccountsServer aServer(ApiEntry::syncUrl());
 
-    if (!d.HasMember("return_code"))
-    {
-        qDebug() << "[MessageStatus]Send message delete status can not get return code ";
-        return;
-    }
+    WIZUSERINFO info = Token::info();
+    info.strToken = strToken;
+    aServer.SetUserInfo(info);
 
-    int returnCode = d.FindMember("return_code")->value.GetInt();
-    if (returnCode != 200)
+    bool ret = aServer.SetMessageDeleteStatus(ids, bDelete);
+    if (ret)
     {
-        qDebug() << "[MessageStatus]Send message delete status error :  " << returnCode << loop.result();
-        return;
+        qDebug() << "[MessageStatus]Upload message delete status OK";
+        emit uploadMessageDeleteStatusFinished(ids);
     }
     else
     {
-        qDebug() << "[MessageStatus]Send message delete status OK";
+        m_nErrorCode = aServer.GetLastErrorCode();
+        m_strErrorMessage = aServer.GetLastErrorMessage();
+        qDebug() << "[MessageStatus]Upload message delete status error :  " << m_nErrorCode << m_strErrorMessage;
     }
+    //
+
 }

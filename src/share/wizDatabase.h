@@ -139,6 +139,7 @@ public:
     virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData);
     virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData);
     virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool GetModifiedMessageList(CWizMessageDataArray& arrayData);
     virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject);
 
     virtual bool DocumentFromGUID(const QString& strGUID,
@@ -178,10 +179,12 @@ public:
                                     UINT part);
 
     virtual bool OnUploadObject(const QString& strGUID,
-                                const QString& strObjectType);
+                                const QString& strObjectType);    
 
     // modify
     virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
+    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
+
 
     //copy Document
     //create new doc and copy data, set the new doc time as the source doc.
@@ -479,7 +482,7 @@ public:
 
 public slots:
     void onAttachmentModified(const QString strKbGUID, const QString& strGUID, const QString& strFileName,
-                              const QString& strMD5, const QDateTime& dtLastModified);
+                              const QString& strMD5, const QDateTime& dtLastModified);    
 
 Q_SIGNALS:
     void userInfoChanged();

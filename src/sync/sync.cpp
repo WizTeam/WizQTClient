@@ -1649,6 +1649,75 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     return TRUE;
 }
 
+bool WizUploadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server, IWizSyncableDatabase* pDatabase)
+{
+    CWizMessageDataArray arrayMessage;
+    pDatabase->GetModifiedMessageList(arrayMessage);
+
+    qDebug() << "get modified messages , size ; " << arrayMessage.size();
+    if (arrayMessage.size() == 0)
+        return true;
+
+    QString strReadIds;
+    QString strDeleteIds;
+    for (WIZMESSAGEDATA msg : arrayMessage)
+    {
+        if (msg.nReadStatus == 1 && (msg.nLocalChanged & WIZMESSAGEDATA::localChanged_Read))
+        {
+            strReadIds.append(QString::number(msg.nId) + ",");
+        }
+        if (msg.nDeleteStatus == 1 && (msg.nLocalChanged & WIZMESSAGEDATA::localChanged_Delete))
+        {
+            strDeleteIds.append(QString::number(msg.nId) + ",");
+        }
+    }
+
+    CWizMessageDataArray::iterator it;
+    if (!strReadIds.isEmpty())
+    {
+        strReadIds.remove(strReadIds.length() - 1, 1);      // remove the last ','
+        qDebug() << "upload read message : " << strReadIds;
+        if (server.SetMessageReadStatus(strReadIds, 1))
+        {
+            QStringList readIds = strReadIds.split(',', QString::SkipEmptyParts);
+            CWizMessageDataArray readMsgArray;
+            for (it = arrayMessage.begin(); it != arrayMessage.end(); it++)
+            {
+                if (readIds.contains(QString::number(it->nId)))
+                {
+                    qDebug() << "upload message read status ok, update: " << it->nId;
+                    it->nLocalChanged = it->nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
+                    readMsgArray.push_back(it.operator *());
+                }
+            }
+            pDatabase->ModifyMessagesLocalChanged(readMsgArray);
+        }
+    }
+
+    if (!strDeleteIds.isEmpty())
+    {
+        strDeleteIds.remove(strDeleteIds.length() - 1, 1);      // remove the last ','
+        qDebug() << "upload read message : " << strReadIds;
+        if (server.SetMessageDeleteStatus(strDeleteIds, 1))
+        {
+            QStringList deleteIds = strDeleteIds.split(',', QString::SkipEmptyParts);
+            CWizMessageDataArray deleteMsgArray;
+            for (it = arrayMessage.begin(); it != arrayMessage.end(); it++)
+            {
+                qDebug() << "current item ; " << QString::number(it->nId) << " string list ; " << deleteIds;
+                if (deleteIds.contains(QString::number(it->nId)))
+                {
+                    it->nLocalChanged = it->nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
+                    qDebug() << "upload message read status ok, update: " << it->nId << " local changed ; " << it->nLocalChanged;
+                    deleteMsgArray.push_back(it.operator *());
+                }
+            }
+            pDatabase->ModifyMessagesLocalChanged(deleteMsgArray);
+        }
+    }
+    return true;
+}
+
 bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
 {
     COleDateTime lastSyncTime = pDatabase->GetLastSyncTime();
@@ -1816,6 +1885,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->OnStatus(_TR("Downloading messages"));
     WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
     //
+    pEvents->OnStatus(_T("Upload modified messages"));
+    WizUploadMessages(pEvents, server, pDatabase);
     //
     pEvents->OnStatus(_TR("-------sync private notes--------------"));
     //
@@ -1984,7 +2055,7 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
-    pEvents->OnStatus(_TR("[Sync]Quick download messages"));
+    pEvents->OnStatus(_TR("Quick download messages"));
     CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
     server.SetUserInfo(info);
     /*

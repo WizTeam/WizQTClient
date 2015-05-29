@@ -50,6 +50,8 @@ Q_SIGNALS:
     void keepAliveFinished(bool bOk);
     void registerAccountFinished(bool bOk);
     void getCommentsCountFinished(int i);
+    void uploadMessageReadStatusFinished(const QString& ids);
+    void uploadMessageDeleteStatusFinished(const QString& ids);
 };
 
 } // namespace WizService

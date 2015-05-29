@@ -2,6 +2,7 @@
 #define WIZKMXMLRPC_H
 
 #include "wizXmlRpcServer.h"
+#include "wizJSONServerBase.h"
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
@@ -18,7 +19,7 @@ public:
 };
 
 
-class CWizKMAccountsServer : public CWizKMXmlRpcServerBase
+class CWizKMAccountsServer : public CWizKMXmlRpcServerBase, public CWizJSONServerBase
 {
 public:
     CWizKMAccountsServer(const QString& strUrl, QObject* parent = 0);
@@ -50,6 +51,7 @@ public:
     bool KeepAlive(const QString& strToken);
     bool GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
     bool SetMessageReadStatus(const QString& strMessageIDs, int nStatus);
+    bool SetMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
 
     bool GetValueVersion(const QString& strKey, __int64& nVersion);
     bool GetValue(const QString& strKey, QString& strValue, __int64& nVersion);

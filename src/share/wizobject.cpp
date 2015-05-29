@@ -771,6 +771,7 @@ WIZMESSAGEDATA::WIZMESSAGEDATA()
     : nId(0)
     , nDeleteStatus(0)
     , nVersion(-1)
+    , nLocalChanged(0)
 {
 }
 
@@ -795,6 +796,7 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZMESSAGEDATA& data)
     , messageBody(data.messageBody)
     , note(data.note)
     , nVersion(data.nVersion)
+    , nLocalChanged(data.nLocalChanged)
 {
 }
 
@@ -816,6 +818,7 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
     , title(data.strTitle)
     , messageBody(data.strMessageText)
     , nVersion(data.nVersion)
+    , nLocalChanged(data.nLocalChanged)
 {
 
 }

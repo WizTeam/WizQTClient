@@ -120,8 +120,9 @@ private:
 #define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 #define WIZACTION_LIST_MESSAGE_LOCATE       QObject::tr("Locate Message")
 
-MessageListView::MessageListView(QWidget *parent)
+MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     : QListWidget(parent)
+    , m_dbMgr(dbMgr)
     , m_pCurrentItem(NULL)
     , m_api(NULL)
 {
@@ -175,19 +176,19 @@ MessageListView::MessageListView(QWidget *parent)
     connect(this, SIGNAL(currentItemChanged(QListWidgetItem*,QListWidgetItem*)),
             SLOT(onCurrentItemChanged(QListWidgetItem*,QListWidgetItem*)));
 
-    connect(&CWizDatabaseManager::instance()->db(),
+    connect(&m_dbMgr.db(),
             SIGNAL(messageCreated(const WIZMESSAGEDATA&)),
             SLOT(on_message_created(const WIZMESSAGEDATA&)));
 
-    connect(&CWizDatabaseManager::instance()->db(),
+    connect(&m_dbMgr.db(),
             SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
             SLOT(on_message_modified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)));
 
-    connect(&CWizDatabaseManager::instance()->db(),
+    connect(&m_dbMgr.db(),
             SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
             SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
 
-    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
+    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));    
 }
 
 void MessageListView::resizeEvent(QResizeEvent* event)
@@ -321,11 +322,40 @@ void MessageListView::markAllMessagesReaded()
     for (int i = 0; i < count(); i++) {
         MessageListViewItem* pItem = messageItem(i);
         if (!pItem->data().nReadStatus) {
-            CWizDatabaseManager::instance()->db().setMessageReadStatus(pItem->data(), 1);
+            m_dbMgr.db().setMessageReadStatus(pItem->data());
             m_readList.push_back(pItem->data().nId);
         }
     }
     m_timerTriggerSync.start();
+}
+
+void MessageListView::on_uploadReadStatus_finished(const QString& ids)
+{
+    qDebug() << "upload read status finished : " << ids;
+    QStringList idList = ids.split(',');
+    CWizDatabase& db = m_dbMgr.db();
+    for (QString id : idList)
+    {
+        WIZMESSAGEDATA msg;
+        db.messageFromId(id.toLong(), msg);
+        msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
+        qDebug() << "upload read status finished : " <<id << " update db : " << msg.nLocalChanged;
+        db.updateMessage(msg);
+    }
+}
+
+void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
+{
+    QStringList idList = ids.split(',');
+    CWizDatabase& db = m_dbMgr.db();
+    for (QString id : idList)
+    {
+        WIZMESSAGEDATA msg;
+        db.messageFromId(id.toLong(), msg);
+        msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
+        qDebug() << "upload delete status finished : " <<id << " update db : " << msg.nLocalChanged;
+        db.updateMessage(msg);
+    }
 }
 
 void MessageListView::onAvatarLoaded(const QString& strUserId)
@@ -354,7 +384,7 @@ void MessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetI
 void MessageListView::onReadTimeout()
 {
     if (m_pCurrentItem && !m_pCurrentItem->data().nReadStatus) {
-        CWizDatabaseManager::instance()->db().setMessageReadStatus(m_pCurrentItem->data(), 1);
+        m_dbMgr.db().setMessageReadStatus(m_pCurrentItem->data());
         m_readList.push_back(m_pCurrentItem->data().nId);
         m_timerTriggerSync.start();
     }
@@ -364,6 +394,11 @@ void MessageListView::onSyncTimeout()
 {
     if (!m_api) {
         m_api = new WizService::AsyncApi(this);
+
+        connect(m_api, SIGNAL(uploadMessageReadStatusFinished(QString)),
+                SLOT(on_uploadReadStatus_finished(QString)));
+        connect(m_api, SIGNAL(uploadMessageDeleteStatusFinished(QString)),
+                SLOT(on_uploadDeleteStatus_finished(QString)));
     }
 
     if (m_readList.count() > 0)
@@ -418,7 +453,7 @@ void MessageListView::updateTreeItem()
         CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
         Q_ASSERT(pItem);
 
-        int nUnread = CWizDatabaseManager::instance()->db().getUnreadMessageCount();
+        int nUnread = m_dbMgr.db().getUnreadMessageCount();
         pItem->setUnreadCount(nUnread);
     }
 }
@@ -428,13 +463,11 @@ void MessageListView::on_action_message_mark_read()
     QList<WIZMESSAGEDATA> arrayMsg;
     specialFocusedMessages(arrayMsg);
 
-    CWizMessageDataArray arrayMessage;
     for (int i = 0; i < arrayMsg.size(); i++) {
-        arrayMessage.push_back(arrayMsg.at(i));
         m_readList.append(arrayMsg.at(i).nId);
+        m_dbMgr.db().setMessageReadStatus(arrayMsg.at(i));
     }
 
-    CWizDatabaseManager::instance()->db().setMessageReadStatus(arrayMessage, 1);
 
     updateTreeItem();
     m_timerTriggerSync.start();
@@ -446,8 +479,10 @@ void MessageListView::on_action_message_delete()
     specialFocusedMessages(arrayMsg);
 
     for (int i = 0; i < arrayMsg.size(); i++) {
-        arrayMsg[i].nDeleteStatus = 1;
-        CWizDatabaseManager::instance()->db().modifyMessageEx(arrayMsg.at(i));
+//        arrayMsg[i].nDeleteStatus = 1;
+//        arrayMsg[i].nLocalChanged = arrayMsg.at(i).nLocalChanged | WIZMESSAGEDATA::localChanged_Delete;
+//        m_dbMgr.db().modifyMessageEx(arrayMsg.at(i));
+        m_dbMgr.db().setMessageDeleteStatus(arrayMsg.at(i));
         m_deleteList.append(arrayMsg.at(i).nId);
     }
 

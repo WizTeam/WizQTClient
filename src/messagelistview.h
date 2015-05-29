@@ -6,6 +6,7 @@
 #include <deque>
 
 class CWizScrollBar;
+class CWizDatabaseManager;
 
 struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
@@ -30,7 +31,7 @@ class MessageListView : public QListWidget
     Q_OBJECT
 
 public:
-    explicit MessageListView(QWidget *parent = 0);
+    explicit MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     void setMessages(const CWizMessageDataArray& arrayMsg);
@@ -48,6 +49,8 @@ public:
 
 public slots:
     void markAllMessagesReaded();
+    void on_uploadReadStatus_finished(const QString& ids);
+    void on_uploadDeleteStatus_finished(const QString& ids);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -68,6 +71,7 @@ private:
     QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
     WizService::AsyncApi* m_api;
+    CWizDatabaseManager& m_dbMgr;
 
     void updateTreeItem();
 

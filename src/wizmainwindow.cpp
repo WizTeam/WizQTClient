@@ -137,7 +137,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
     , m_noteListWidget(NULL)
-    , m_msgList(new MessageListView(this))
+    , m_msgList(new MessageListView(dbMgr, this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
@@ -1314,6 +1314,7 @@ void MainWindow::windowActived()
         return;
 
     m_sync->quickDownloadMesages();
+    WizGetAnalyzer().LogAction("bizUserQuickDownloadMessage");
 }
 
 bool MainWindow::checkListClickable()
@@ -1848,6 +1849,12 @@ void MainWindow::on_actionSync_triggered()
 {
     WizGetAnalyzer().LogAction("syncAll");
 
+    if (m_animateSync->isPlaying())
+    {
+        on_actionConsole_triggered();
+        return;
+    }
+
 //    if (::WizIsOffline())
 //    {
 //        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
@@ -1855,7 +1862,7 @@ void MainWindow::on_actionSync_triggered()
 //    else
 //    {
         syncAllData();
-//    }
+//    }    
 }
 
 void MainWindow::on_syncLogined()
@@ -2272,6 +2279,7 @@ void MainWindow::on_actionConsole_triggered()
     }
 
     m_console->show();
+    m_console->raise();
 
     WizGetAnalyzer().LogAction("console");
 }
