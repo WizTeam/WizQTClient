@@ -387,6 +387,24 @@ EditorToolBar::EditorToolBar(QWidget *parent)
 {
     QString skin = "default";
 
+    m_mapParagraphType.insert("h1", tr("H1"));
+    m_mapParagraphType.insert("h2", tr("H2"));
+    m_mapParagraphType.insert("h3", tr("H3"));
+    m_mapParagraphType.insert("h4", tr("H4"));
+    m_mapParagraphType.insert("h5", tr("H5"));
+    m_mapParagraphType.insert("h6", tr("H6"));
+    m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
+
+    m_comboParagraph = new CWizToolComboBox(this);
+    m_comboParagraph->setMinimumWidth(90);
+    QMap<QString, QString>::Iterator it;
+    for (it = m_mapParagraphType.begin(); it != m_mapParagraphType.end(); it++) {
+        m_comboParagraph->addItem(it.value(), it.key());
+    }
+    connect(m_comboParagraph, SIGNAL(activated(int)),
+            SLOT(on_comboParagraph_indexChanged(int)));
+
+
     m_comboFontFamily = new CWizToolComboBoxFont(this);
     connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
@@ -533,11 +551,12 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnMobileImage);
     layout->addWidget(m_btnCheckList);
     layout->addWidget(m_btnInsertCode);
-    layout->addSpacing(6);
+    layout->addWidget(m_comboParagraph);
+    layout->addSpacing(4);
     layout->addWidget(m_comboFontFamily);
-    layout->addSpacing(6);
+    layout->addSpacing(4);
     layout->addWidget(m_comboFontSize);
-    layout->addSpacing(12);
+    layout->addSpacing(8);
     layout->addWidget(m_btnFormatMatch);
     layout->addWidget(m_btnForeColor);
     layout->addWidget(m_btnBackColor);
@@ -798,6 +817,10 @@ void EditorToolBar::resetToolbar()
     m_btnSearchReplace->setEnabled(!isSourceMode);
     m_btnInsertImage->setEnabled(!isSourceMode);
     m_btnInsertCode->setEnabled(!isSourceMode);
+
+    value = m_editor->editorCommandQueryCommandValue("Paragraph");
+    m_comboParagraph->setText(m_mapParagraphType.value(value));
+    m_comboParagraph->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
@@ -1464,7 +1487,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
 
 bool EditorToolBar::hasFocus()
 {
-    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping();
+    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping() || m_comboParagraph->isPopuping();
 }
 
 void EditorToolBar::buildMenu()
@@ -1612,6 +1635,20 @@ void EditorToolBar::on_editor_paste_triggered()
     m_editor->triggerPageAction(QWebPage::Paste);
 }
 #endif
+
+void EditorToolBar::on_comboParagraph_indexChanged(int index)
+{
+    QString type = m_comboParagraph->itemData(index).toString();
+    QString text = m_mapParagraphType.value(type);
+    if (text == m_comboParagraph->text())
+        return;
+
+    if (m_editor) {
+
+        m_editor->editorCommandExecuteParagraph(type);
+        m_comboParagraph->setText(text);
+    }
+}
 
 void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {

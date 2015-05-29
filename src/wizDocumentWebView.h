@@ -166,6 +166,7 @@ public:
 
     bool editorCommandQueryMobileFileReceiverState();
 
+    bool editorCommandExecuteParagraph(const QString& strType);
     bool editorCommandExecuteFontFamily(const QString& strFamily);
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);

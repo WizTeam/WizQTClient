@@ -1399,6 +1399,12 @@ bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
     return m_app.userSettings().receiveMobileFile();
 }
 
+bool CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
+{
+    WizGetAnalyzer().LogAction("editorParagraph");
+    return editorCommandExecuteCommand("Paragraph", "'" + strType + "'");
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
@@ -1551,11 +1557,13 @@ void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool 
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
+    WizGetAnalyzer().LogAction("editorFontFamily");
     return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
+    WizGetAnalyzer().LogAction("editorFontSize");
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 

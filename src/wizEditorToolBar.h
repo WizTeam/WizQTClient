@@ -46,6 +46,7 @@ private:
 #endif
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
+    CWizToolComboBox* m_comboParagraph;
     CWizToolComboBoxFont* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
     CWizToolButtonColor* m_btnForeColor;
@@ -76,6 +77,8 @@ private:
     bool m_resetLocked;
     QTimer m_resetLockTimer;
 
+    QMap<QString, QString> m_mapParagraphType;
+
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
     int buildMenu(QMenu* pMenu, int indx);
@@ -97,6 +100,7 @@ protected Q_SLOTS:
     void on_editor_copy_triggered();
     void on_editor_paste_triggered();
 
+    void on_comboParagraph_indexChanged(int index);
     void on_comboFontFamily_indexChanged(const QString& strFamily);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
