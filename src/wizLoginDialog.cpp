@@ -126,7 +126,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 #endif
     QPainterPath path;
     QRectF rect = geometry();
-    path.addRoundRect(rect, 5, 2);
+    path.addRoundRect(rect, 6, 4);
     QPolygon polygon= path.toFillPolygon().toPolygon();
     QRegion region(polygon);
     setMask(region);
@@ -456,11 +456,17 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strlogo;
     // setup locale for welcome dialog
     if (strLocal != WizGetDefaultTranslatedLocal()) {
-        strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+//        if (WizIsHighPixel()) {
+//            strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+//        } else {
+            strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
+//        }
     } else {
         strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
     }
-    ui->label_logo->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
+    QPixmap pix(strlogo);
+    ui->label_logo->setMinimumWidth(pix.width());
+    ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
                                         "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
     ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
 
