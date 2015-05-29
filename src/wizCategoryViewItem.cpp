@@ -1696,6 +1696,12 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
     return false;
 }
 
+bool CWizCategoryViewGroupItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    qDebug() << "accept drop called : " << pItem->kbGUID() << " item kb ; " << kbGUID();
+    return pItem->kbGUID() == kbGUID();
+}
+
 bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
     Q_UNUSED(data);

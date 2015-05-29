@@ -270,6 +270,8 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         m_dragItem = 0;
 
         ::WizGetAnalyzer().LogAction("categoryDragItem");
+        //
+        viewport()->repaint();
     }
 
 }
@@ -298,12 +300,16 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+        event->accept();
     } else if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
-    } else{
+        event->accept();
+    } else if (m_dragItem){
+        event->acceptProposedAction();
+        event->accept();
+    }else {
         QTreeWidget::dragEnterEvent(event);
-    }
-
+    }    
 }
 
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
@@ -367,21 +373,20 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
             QTreeWidget::dragMoveEvent(event);
         }
     }
-
-    viewport()->repaint();
+    repaint();
+    viewport()->repaint();    
 }
 
 void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
-{
-    Q_UNUSED(event);
-
+{       
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
     m_dragHoveredTimer->stop();
     m_dragHoveredItem = 0;
 
     m_dragDocArray.clear();
-    viewport()->repaint();
+    QTreeWidget::dragLeaveEvent(event);
+    viewport()->repaint();    
 }
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
@@ -1631,6 +1636,8 @@ void CWizCategoryView::on_action_user_renameFolder_confirmed(int result)
         QString strOldLocation = p->location();
         int n = strOldLocation.lastIndexOf("/", -2);
         strLocation = strOldLocation.left(n + 1) + strFolderName + "/";
+
+        qDebug() << "[Category]Rename folder from : " << strOldLocation << "  to : " << strLocation;
 
         if (strLocation == strOldLocation)
             return;
@@ -4178,12 +4185,20 @@ void CWizCategoryView::on_folder_deleted(const QString& strLocation)
 {
     Q_ASSERT(!strLocation.isEmpty());
 
+    bool bDeleted = false;
+
     if (CWizCategoryViewFolderItem* pFolder = findFolder(strLocation, false, false))
     {
         if (QTreeWidgetItem* parent = pFolder->parent())
         {
             parent->removeChild(pFolder);
+            bDeleted = true;
         }
+    }
+
+    if (!bDeleted)
+    {
+        qDebug() << "[Category]------------***-------------------Folder deleted in db, but can not deleted in category------------***-------------------" << strLocation;
     }
 }
 
