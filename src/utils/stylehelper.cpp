@@ -580,7 +580,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
             nWidth = qMax<int>(p->fontMetrics().width(lineText), nWidth);
         } else {
             lineText = str.left(line.textLength());
-            nWidth = qMax<int>(line.width(), nWidth);
+            nWidth = qMax<int>(p->fontMetrics().width(lineText), nWidth);
         }
 
         str.remove(0, line.textLength());
@@ -825,14 +825,14 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     QFont fontThumb;
     nFontHeight = Utils::StyleHelper::fontNormal(fontThumb);
 
-    QRect rcLead;
+    QRect rcLead;   //排序类型或标签等
     if (!lead.isEmpty()) {
         QString strInfo(lead);
         QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
         rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
     }
 
-    if (!abs.isEmpty()) {
+    if (!abs.isEmpty()) {          //  笔记内容
         QString strText(abs);
         QRect rcLine1(rcd.adjusted(rcLead.width(), 0, 0, 0));
         QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);

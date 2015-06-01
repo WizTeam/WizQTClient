@@ -45,6 +45,80 @@ public:
         return pOther->m_data.tCreated < m_data.tCreated;
     }
 
+    void drawColorMessageBody(QPainter* p, const QRect& rcMsg, const QFont& f) const
+    {
+        QString strMsg;
+        if (m_data.messageBody.isEmpty())
+        {
+            strMsg = m_data.title;
+            Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
+        }
+        else
+        {
+            strMsg = m_data.messageBody;
+            strMsg.remove(0, m_data.senderAlias.length() + 1);
+            QString strBeforeTitle = strMsg.left(strMsg.indexOf(m_data.title));
+            QString strAfterTitle = strMsg.right(strMsg.length() - strMsg.lastIndexOf(m_data.title) - m_data.title.length());
+            //
+            QColor colorSummary = Qt::black;
+            QColor colorTitle(Qt::red);
+
+            QRect rcBeforeTitle = Utils::StyleHelper::drawText(p, rcMsg, strBeforeTitle, 1, Qt::AlignVCenter, p->pen().color(), f, false);
+            if (strBeforeTitle.isEmpty() && rcBeforeTitle.height() < rcMsg.height())   //  第一行有剩余空间
+            {
+                QString strTitle(m_data.title);
+                QRect rcTitle1(rcMsg.adjusted(rcBeforeTitle.width() - Utils::StyleHelper::margin(), 0, 0, 0));
+                rcTitle1 = Utils::StyleHelper::drawText(p, rcTitle1, strTitle, 1, Qt::AlignVCenter, colorTitle, f, false);
+
+                if (!strTitle.isEmpty())        //继续绘制标题
+                {
+                    QRect rcTitle2(rcMsg.adjusted(0, rcBeforeTitle.height(), 0, 0));
+                    rcTitle2 = Utils::StyleHelper::drawText(p, rcTitle2, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
+                    if (strTitle.isEmpty() && rcTitle2.width() < rcMsg.width())
+                    {
+                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle2.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                        Utils::StyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                    }
+                }
+                else if (rcTitle1.right() < rcMsg.right())   //在第一行绘制标题后内容
+                {
+                    QRect rcAfterTitle1(rcMsg.adjusted(rcBeforeTitle.width() + rcTitle1.width()  - Utils::StyleHelper::margin() * 2, 0, 0, 0));
+                    rcAfterTitle1 = Utils::StyleHelper::drawText(p, rcAfterTitle1, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f, false);
+
+                    if (!strAfterTitle.isEmpty()) {
+                        QRect rcLine2(rcMsg.adjusted(0, rcAfterTitle1.height(), 0, 0));
+                        rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                    }
+                }
+                else        //第一行没剩余空间，在第二行绘制标题后内容
+                {
+                    QRect rcLine2(rcMsg.adjusted(0, rcTitle1.height(), 0, 0));
+                    Utils::StyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                }
+            }
+            else                // 第一行没有剩余空间
+            {
+                QRect rcBeforeTitle2(rcMsg.adjusted(0, rcBeforeTitle.height(), 0, 0));
+                rcBeforeTitle2 = Utils::StyleHelper::drawText(p, rcBeforeTitle2, strBeforeTitle, 1, Qt::AlignVCenter, colorSummary, f);
+
+                if (strBeforeTitle.isEmpty() && rcBeforeTitle2.width() < rcMsg.width())
+                {
+                    QString strTitle(m_data.title);
+                    QRect rcTitle(rcMsg.adjusted(rcBeforeTitle2.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                    rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
+
+                    //
+                    if (strTitle.isEmpty())
+                    {
+                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                        rcAfterTitle = Utils::StyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorTitle, f);
+                    }
+                }
+
+            }
+        }
+    }
+
     void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {
         int nMargin = Utils::StyleHelper::margin();
@@ -101,9 +175,9 @@ public:
             p->restore();
         }
 
-        QRect rcMsg(rcd.x() + nMargin, rcd.y() + 4 + nMargin, sz.width(), sz.height());
-        QString strMsg = m_data.title.isEmpty() ? " " : m_data.title;
-        rcMsg = Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
+        QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin, sz.width(), sz.height());
+        drawColorMessageBody(p, rcMsg, f);
+
         p->restore();
     }
 
@@ -126,6 +200,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_pCurrentItem(NULL)
     , m_api(NULL)
 {
+    setMinimumWidth(100);
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
