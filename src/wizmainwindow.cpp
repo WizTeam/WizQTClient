@@ -3257,12 +3257,12 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
 
 void MainWindow::startSearchStatus()
 {
-    m_documents->setAcceptAllItems(true);
+    m_documents->setAcceptAllSearchItems(true);
 }
 
 void MainWindow::quitSearchStatus()
 {
-    m_documents->setAcceptAllItems(false);
+    m_documents->setAcceptAllSearchItems(false);
     if (m_category->selectedItems().count() > 0)
     {
         m_category->setFocus();

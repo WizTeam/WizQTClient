@@ -51,7 +51,7 @@ public:
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
     void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
-    void setAcceptAllItems(bool bAccept);
+    void setAcceptAllSearchItems(bool bAccept);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -92,7 +92,7 @@ private:
 //#endif // Q_OS_MAC
 
     bool m_itemSelectionChanged;
-    bool m_accpetAllItems;
+    bool m_accpetAllSearchItems;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
@@ -198,6 +198,8 @@ private:
     //    
     int addDocument(const WIZDOCUMENTDATA& data, bool sort);
     void addDocument(const WIZDOCUMENTDATA &doc);
+
+    bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 };
 
 

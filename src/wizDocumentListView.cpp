@@ -50,7 +50,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
     , m_itemSelectionChanged(false)
-    , m_accpetAllItems(false)
+    , m_accpetAllSearchItems(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -270,6 +270,18 @@ void CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
     addItem(pItem);
 }
 
+bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
+{
+    //  搜索模式下屏蔽因同步带来的笔记新增和修改
+    if (m_accpetAllSearchItems)
+    {
+        if (documentIndexFromGUID(document.strGUID) == -1)
+            return false;
+    }
+
+    return true;
+}
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     /*
@@ -280,7 +292,7 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 
     // there is no need to check if kbguid is same. especially when category item is  biz root.
 
-    if (m_accpetAllItems)
+    if (m_accpetAllSearchItems)
         return true;
 
     return m_app.category().acceptDocument(document);
@@ -766,6 +778,9 @@ void CWizDocumentListView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTA
 
 void CWizDocumentListView::on_document_created(const WIZDOCUMENTDATA& document)
 {
+    if (!acceptDocumentChange(document))
+        return;
+
     if (acceptDocument(document))
     {
         if (-1 == documentIndexFromGUID(document.strGUID))
@@ -779,6 +794,9 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
                                                 const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
+
+    if (!acceptDocumentChange(documentNew))
+        return;
 
     // FIXME: if user search on-going, acceptDocument will remove this document from the list.
     if (acceptDocument(documentNew))
@@ -803,7 +821,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
 }
 
 void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
-{
+{    
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 != index) {
         takeItem(index);
@@ -1425,9 +1443,9 @@ void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& s
     }
 }
 
-void CWizDocumentListView::setAcceptAllItems(bool bAccept)
+void CWizDocumentListView::setAcceptAllSearchItems(bool bAccept)
 {
-    m_accpetAllItems = bAccept;
+    m_accpetAllSearchItems = bAccept;
 }
 
 void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)
