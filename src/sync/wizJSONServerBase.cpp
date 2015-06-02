@@ -28,13 +28,55 @@ QString CWizJSONServerBase::jsonResult()
     return m_strJSONResult;
 }
 
-void CWizJSONServerBase::request(const QString& strUrl)
+void CWizJSONServerBase::getRequest(const QString& strUrl)
 {
     m_nReturnCode = 0;
     m_strReturnMessage.clear();
     m_strJSONResult.clear();
 
+    qDebug() << "request url : " << strUrl;
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
+    qDebug() << "before create event loop";
+    CWizAutoTimeOutEventLoop loop(reply);
+    qDebug() << "after create event loop";
+    loop.exec();
+    //
+    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "[JSONRequest]Upload message delete status failed.";
+        return;
+    }
+
+    m_strJSONResult = loop.result();
+    rapidjson::Document d;
+    d.Parse<0>(loop.result().toUtf8().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "[JSONRequest]Upload message delete status can not get return code ";
+        return;
+    }
+
+    m_nReturnCode = d.FindMember("return_code")->value.GetInt();
+    m_strReturnMessage = d.FindMember("return_message")->value.GetString();
+    if (m_nReturnCode != JSON_RETURNCODE_OK )
+    {
+        qDebug() << "[JSONRequest]Upload message delete status error :  " << m_nReturnCode << loop.result();
+    }
+    else
+    {
+        qDebug() << "[JSONRequest]Upload message delete status OK";
+    }
+}
+
+void CWizJSONServerBase::deleteRequest(const QString& strUrl)
+{
+    m_nReturnCode = 0;
+    m_strReturnMessage.clear();
+    m_strJSONResult.clear();
+
+    qDebug() << "request url : " << strUrl;
+    QNetworkReply* reply = m_net->deleteResource(QNetworkRequest(strUrl));
     qDebug() << "before create event loop";
     CWizAutoTimeOutEventLoop loop(reply);
     qDebug() << "after create event loop";

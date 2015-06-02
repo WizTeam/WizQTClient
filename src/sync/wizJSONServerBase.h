@@ -16,7 +16,8 @@ public:
     QString returnMessage();
     QString jsonResult();
 
-    void request(const QString& strUrl);
+    void getRequest(const QString& strUrl);
+    void deleteRequest(const QString& strUrl);
 
 protected:
     std::shared_ptr<QNetworkAccessManager> m_net;
