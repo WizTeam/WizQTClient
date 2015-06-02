@@ -450,7 +450,7 @@ private:
 #endif
     //
     void startSearchStatus();
-    void cancelSearchStatus();
+    void quitSearchStatus();
 
     //
     void initVariableBeforCreateNote();

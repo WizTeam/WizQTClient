@@ -397,6 +397,8 @@ private:
     void closeSourceMode();
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();
+
+    QString getMailSender();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

@@ -869,10 +869,30 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
+QString CWizDocumentWebView::getMailSender()
+{
+    QString mailSender = page()->mainFrame()->evaluateJavaScript("WizGetMailSender()").toString();
+
+    if (mailSender.isEmpty())
+    {
+        QRegExp rxlen("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
+        rxlen.setCaseSensitivity(Qt::CaseInsensitive);
+        rxlen.setPatternSyntax(QRegExp::RegExp);
+        QString strTitle = view()->note().strTitle;
+        int pos = rxlen.indexIn(strTitle);
+        if (pos > -1) {
+            mailSender = rxlen.cap(0); //
+        }
+    }
+
+    return mailSender;
+}
+
 void CWizDocumentWebView::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
-    dlg.setNote(view()->note());
+    QString sendTo = getMailSender();
+    dlg.setNote(view()->note(), sendTo);
 
     dlg.exec();
 }
