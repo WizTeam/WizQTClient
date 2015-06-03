@@ -795,6 +795,7 @@ bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
                                   const WIZTAGDATA &targetTag, QString &strResultGUID, CWizObjectDataDownloaderHost *downloaderHost)
 {
+    TOLOG("Copy document");
     WIZDOCUMENTDATA sourceDoc;
     if (!DocumentFromGUID(strGUID, sourceDoc))
         return false;
@@ -3227,7 +3228,8 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
         BeginUpdate();
 
         newDoc.strKbGUID = kbGUID();
-        newDoc.strOwner = GetUserId();
+        newDoc.strOwner = GetUserId();        
+
         bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
                               sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
                               sourceDoc.strStyleGUID, 0, 0, 0, newDoc);

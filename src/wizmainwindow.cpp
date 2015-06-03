@@ -424,7 +424,14 @@ void MainWindow::on_actionClose_triggered()
     QWidget* wgt = qApp->activeWindow();
     if (wgt && wgt != this)
     {
-       wgt->close();
+        //FIXME:  窗口全屏时直接关闭会造成黑屏，此处改为先取消全屏然后关闭。
+
+        if (wgt->windowState() & Qt::WindowFullScreen)
+        {
+            wgt->setWindowState(wgt->windowState() & ~Qt::WindowFullScreen);
+        }
+       wgt->close();       
+       wgt->deleteLater();
     }
     else
     {
@@ -1303,7 +1310,29 @@ void MainWindow::openVipPageInWebBrowser()
 void MainWindow::loadMessageByUserGuid(const QString& guid)
 {
     CWizMessageDataArray arrayMsg;
-    m_dbMgr.db().messageFromUserGUID(guid, arrayMsg);
+    if(guid.isEmpty())
+    {
+        if (m_msgListTitleBar->isUnreadMode())
+        {
+            m_dbMgr.db().getUnreadMessages(arrayMsg);
+        }
+        else
+        {
+            m_dbMgr.db().getAllMessages(arrayMsg);
+        }
+    }
+    else
+    {
+        if (m_msgListTitleBar->isUnreadMode())
+        {
+            m_dbMgr.db().unreadMessageFromUserGUID(guid, arrayMsg);
+        }
+        else
+        {
+            m_dbMgr.db().messageFromUserGUID(guid, arrayMsg);
+        }
+    }
+    //
     m_msgList->setMessages(arrayMsg);
 }
 
@@ -1681,74 +1710,18 @@ QWidget*MainWindow::createMessageListView()
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
 
-    m_msgListUnreadBar = new QWidget(this);
-    m_msgListUnreadBar->setFixedHeight(Utils::StyleHelper::titleEditorHeight());
-    QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 0, 0);
-    layoutActions->setSpacing(0);
-    m_msgListUnreadBar->setLayout(layoutActions);
-
-
-    int nMargin = 15;
-    QSize szMarkMessageBtn(16, 16);
-//    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
-
-    QLabel* labelSender = new QLabel(m_msgListUnreadBar);
-    labelSender->setText(tr("Sender:"));
-    labelSender->setAlignment(Qt::AlignLeft);
-    labelSender->setStyleSheet("color: #787878;padding-bottom:1px;");
-    layoutActions->addWidget(labelSender);
-
-
-    m_messageSelector = new QComboBox(m_msgListUnreadBar);
-
-    CWizStdStringArray arraySender;
-    CWizDatabase& db = m_dbMgr.db();
-    db.getAllMessageSenders(arraySender);
-    for (auto sender : arraySender)
-    {
-        CWizBizUserDataArray arrayUser;
-        if (!db.userFromGUID(sender, arrayUser))
-            continue;
-
-        QSet<QString> userSet;
-        QString strUserId;
-        for (WIZBIZUSER user : arrayUser)
-        {
-            userSet.insert(user.alias);
-            strUserId = user.userId;
-        }
-        QStringList userList(userSet.toList());
-        QString strText = userList.join(';');
-        QPixmap pix;
-        WizService::AvatarHost::avatar(strUserId, &pix);
-        QIcon icon(pix);
-        m_messageSelector->addItem(icon, strText, sender);
-    }
-
-    layoutActions->addWidget(m_messageSelector);
-    connect(m_messageSelector, SIGNAL(currentIndexChanged(int)),
+    m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
+    connect(m_msgListTitleBar, SIGNAL(messageSelector_indexChanged(int)),
             SLOT(on_messageSelector_indexChanged(int)));
+    connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request()),
+            SLOT(on_actionMarkAllMessageRead_triggered()));
 
-    QLabel* labelHint = new QLabel(m_msgListUnreadBar);
-    labelHint->setText(tr("Unread Messages"));
-    labelHint->setAlignment(Qt::AlignCenter);
-    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;");
-    layoutActions->addWidget(labelHint);
-
-    wizImageButton* readBtn = new wizImageButton(m_msgListUnreadBar);
-    QIcon btnIcon = ::WizLoadSkinIcon(userSettings().skin(), "actionMarkMessagesRead");
-    readBtn->setIcon(btnIcon);
-    readBtn->setFixedSize(szMarkMessageBtn);
-    readBtn->setToolTip(tr("Mark all messages read"));
-    connect(readBtn, SIGNAL(clicked()), SLOT(on_actionMarkAllMessageRead_triggered()));
-    layoutActions->addWidget(readBtn);
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
-    layoutList->addWidget(m_msgListUnreadBar);
+    layoutList->addWidget(m_msgListTitleBar);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_msgList);
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -2148,7 +2121,7 @@ void MainWindow::on_actionMarkAllMessageRead_triggered()
 
 void MainWindow::on_messageSelector_indexChanged(int index)
 {
-    QString guid = m_messageSelector->itemData(index).toString();
+    QString guid = m_msgListTitleBar->selectorItemData(index);
     loadMessageByUserGuid(guid);
 }
 
@@ -3334,8 +3307,10 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
     pItem->getMessages(m_dbMgr.db(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
 
+    // msg title bar
+    m_msgListTitleBar->setSelectorIndex(0);
     bool showUnreadBar = pItem->hitTestUnread();
-    m_msgListUnreadBar->setVisible(showUnreadBar);
+    m_msgListTitleBar->setUnreadMode(showUnreadBar);
 }
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)

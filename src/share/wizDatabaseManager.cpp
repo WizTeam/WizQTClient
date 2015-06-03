@@ -306,6 +306,13 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(tagsPositionChanged(const QString&)));
     connect(db, SIGNAL(folderPositionChanged()),
             SIGNAL(folderPositionChanged()));
+
+    connect(db, SIGNAL(messageCreated(WIZMESSAGEDATA)),
+            SIGNAL(messageCreated(WIZMESSAGEDATA)));
+    connect(db, SIGNAL(messageModified(WIZMESSAGEDATA,WIZMESSAGEDATA)),
+            SIGNAL(messageModified(WIZMESSAGEDATA,WIZMESSAGEDATA)));
+    connect(db, SIGNAL(messageDeleted(WIZMESSAGEDATA)),
+            SIGNAL(messageDeleted(WIZMESSAGEDATA)));
 }
 
 void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QString& strKbGUID)

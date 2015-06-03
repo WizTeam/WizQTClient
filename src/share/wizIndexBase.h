@@ -76,6 +76,7 @@ public:
     // messages
     bool messageFromId(qint64 id, WIZMESSAGEDATA& data);
     bool messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage);
+    bool unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage);
     bool messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data);
 
     // biz users, one user may in different biz group

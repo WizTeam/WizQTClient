@@ -4,9 +4,14 @@
 #include <QListWidget>
 #include <QTimer>
 #include <deque>
+#include <QComboBox>
+#include <QLabel>
+#include <QStyledItemDelegate>
+//#include <memory>
 
 class CWizScrollBar;
 class CWizDatabaseManager;
+class wizImageButton;
 
 struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
@@ -25,6 +30,55 @@ class AsyncApi;
 namespace Internal {
 
 class MessageListViewItem;
+
+class WizMessageSelector : public QComboBox
+{
+    Q_OBJECT
+public:
+    WizMessageSelector(QWidget *parent = 0);
+
+    virtual void showPopup() override;
+    virtual void hidePopup() override;
+
+public slots:
+    void resetIconSize();
+    void checkFocus();
+
+protected:
+    void focusOutEvent(QFocusEvent* event) override;
+
+};
+
+
+class WizMessageListTitleBar : public QWidget
+{
+    Q_OBJECT
+public:
+    WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+
+    void setUnreadMode(bool unread);
+    bool isUnreadMode() const;
+
+    void setSelectorIndex(int index);
+
+    QString selectorItemData(int index) const;
+
+signals:
+    void messageSelector_indexChanged(int index);
+    void markAllMessageRead_request();
+
+public slots:
+    void on_message_created(const WIZMESSAGEDATA& msg);
+
+private:
+    void addUserToSelector(const QString& userGUID);
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    WizMessageSelector* m_msgSelector;
+    QLabel* m_msgListHintLabel;
+    wizImageButton* m_msgListMarkAllBtn;
+};
 
 class MessageListView : public QListWidget
 {

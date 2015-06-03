@@ -53,7 +53,6 @@ class CWizCategoryView;
 class QListWidgetItem;
 class CWizCategoryViewMessageItem;
 class CWizCategoryViewShortcutItem;
-
 class CWizDocumentWebView;
 
 class CWizMobileFileReceiver;
@@ -61,6 +60,8 @@ class CWizMobileFileReceiver;
 namespace WizService {
 namespace Internal {
 class MessageListView;
+class WizMessageSelector;
+class WizMessageListTitleBar;
 }
 }
 
@@ -167,8 +168,8 @@ private:
     WizService::Internal::MessageListView* m_msgList;
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
-    QWidget* m_msgListUnreadBar;
-    QComboBox* m_messageSelector;
+    WizService::Internal::WizMessageListTitleBar* m_msgListTitleBar;
+
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;

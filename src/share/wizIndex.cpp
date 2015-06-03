@@ -698,6 +698,8 @@ bool CWizIndex::ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 {
+    Q_ASSERT(data.strKbGUID == kbGUID());
+
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DT_ACCESSED=%s where DOCUMENT_GUID=%s"),
         TIME2SQL(data.tAccessed).utf16(),

@@ -1550,14 +1550,28 @@ bool CWizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageData
                                     strWhere);
 
     if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
-        TOLOG("[messageFromId] failed to get message by document guid");
+        TOLOG1("[messageFromId] failed to get message by user guid : %1", userGUID);
         return false;
     }
 
-    if (arrayMessage.empty())
-        return false;
+    return !arrayMessage.empty();
+}
 
-    return true;
+bool CWizIndexBase::unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+{
+    CString strWhere;
+    strWhere.Format("SENDER_GUID=%s and READ_STATUS=0", STR2SQL(userGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG1("[messageFromId] failed to get unread message by user guid : %1", userGUID);
+        return false;
+    }
+
+    return !arrayMessage.empty();
 }
 
 bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data)
@@ -1571,7 +1585,7 @@ bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDA
 
     CWizMessageDataArray arrayMessage;
     if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
-        TOLOG("[messageFromId] failed to get message by document guid");
+        TOLOG1("[messageFromId] failed to get message by document guid : %1", strGUID);
         return false;
     }
 

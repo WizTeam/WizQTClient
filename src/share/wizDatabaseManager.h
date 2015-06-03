@@ -14,6 +14,7 @@ struct WIZSTYLEDATA;
 struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 struct WIZGROUPDATA;
+struct WIZMESSAGEDATA;
 class CWizDatabase;
 struct WIZDATABASEINFO;
 
@@ -93,6 +94,11 @@ Q_SIGNALS:
     void folderDeleted(const QString& strLocation);
     void folderPositionChanged();
     void tagsPositionChanged(const QString& strKbGUID);
+
+    void messageCreated(const WIZMESSAGEDATA& msg);
+    void messageModified(const WIZMESSAGEDATA& msgOld,
+                         const WIZMESSAGEDATA& msgNew);
+    void messageDeleted(const WIZMESSAGEDATA& msg);
 
 };
 

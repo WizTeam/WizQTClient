@@ -3,6 +3,8 @@
 #include <QListWidgetItem>
 #include <QScrollBar>
 #include <QResizeEvent>
+#include <QHBoxLayout>
+#include <QStyledItemDelegate>
 #include <QPainter>
 #include <QMenu>
 #include <QList>
@@ -14,6 +16,7 @@
 #include "utils/misc.h"
 #include "sync/avatar.h"
 #include "sync/asyncapi.h"
+#include "widgets/wizImageButton.h"
 
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
@@ -678,6 +681,161 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
     }
 }
 
+WizMessageSelector::WizMessageSelector(QWidget* parent)
+    : QComboBox(parent)
+{
+    connect(this, SIGNAL(activated(int)), SLOT(resetIconSize()));
+}
+
+void WizMessageSelector::showPopup()
+{
+    setIconSize(QSize(30, 30));
+    QComboBox::showPopup();
+}
+
+void WizMessageSelector::hidePopup()
+{
+    QComboBox::hidePopup();
+    resetIconSize();
+}
+
+void WizMessageSelector::resetIconSize()
+{
+    setIconSize(QSize(20, 20));
+    update();
+}
+
+void WizMessageSelector::checkFocus()
+{
+}
+
+void WizMessageSelector::focusOutEvent(QFocusEvent* event)
+{
+    QComboBox::focusOutEvent(event);
+    resetIconSize();
+    qDebug() << "focus out icon size " << iconSize();
+}
+
+WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
+    : QWidget(parent)
+    , m_dbMgr(dbMgr)
+{
+    setFixedHeight(Utils::StyleHelper::titleEditorHeight());
+    QHBoxLayout* layoutActions = new QHBoxLayout();
+    layoutActions->setContentsMargins(16, 0, 16, 0);
+    layoutActions->setSpacing(0);
+    setLayout(layoutActions);
+
+    m_msgSelector = new WizMessageSelector(this);
+    m_msgSelector->setMinimumHeight(22);
+    m_msgSelector->setFixedWidth(156);
+
+    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
+    int minHeight = m_msgSelector->count() * 40 + 200;
+    minHeight = qMin(minHeight, height());
+    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
+                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
+                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
+                                             "QComboBox::down-arrow {image:url(%1);}"
+                                             "QComboBox QListView{background-color:white;border:0px;}"
+                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:60px; max-width:160px; margin-left:8px}"
+                                             "QComboBox::item:selected {background:#3397db;color:#ffffff;}").arg(strDropArrow));
+
+
+    QStyledItemDelegate* itemDelegate = new QStyledItemDelegate();
+    m_msgSelector->setItemDelegate(itemDelegate);
+
+    CWizStdStringArray arraySender;
+    CWizDatabase& db = m_dbMgr.db();
+    db.getAllMessageSenders(arraySender);
+    for (auto sender : arraySender)
+    {
+        addUserToSelector(sender);
+    }
+    m_msgSelector->model()->sort(0);
+    //
+    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+    QIcon icon(pix);
+    m_msgSelector->insertItem(0, icon, tr("All members"));
+
+    layoutActions->addWidget(m_msgSelector);
+    connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
+            SIGNAL(messageSelector_indexChanged(int)));
+
+    layoutActions->addStretch();
+    m_msgListHintLabel = new QLabel(this);
+    m_msgListHintLabel->setText(tr("Unread messages"));
+    m_msgListHintLabel->setAlignment(Qt::AlignCenter);
+    m_msgListHintLabel->setStyleSheet("color: #787878;padding-top:4px;margin-right:10px;");
+    layoutActions->addWidget(m_msgListHintLabel);
+
+    m_msgListMarkAllBtn = new wizImageButton(this);
+    QIcon btnIcon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "actionMarkMessagesRead");
+    m_msgListMarkAllBtn->setIcon(btnIcon);
+    m_msgListMarkAllBtn->setFixedSize(QSize(16, 16));
+    m_msgListMarkAllBtn->setToolTip(tr("Mark all messages read"));
+    connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SIGNAL(markAllMessageRead_request()));
+    layoutActions->addWidget(m_msgListMarkAllBtn);
+
+    connect(&m_dbMgr, SIGNAL(messageCreated(WIZMESSAGEDATA)),
+            SLOT(on_message_created(WIZMESSAGEDATA)));
+}
+
+void WizMessageListTitleBar::setUnreadMode(bool unread)
+{
+    m_msgListMarkAllBtn->setVisible(unread);
+    m_msgListHintLabel->setText(unread ? tr("Unread messages") : tr("All messages"));
+}
+
+bool WizMessageListTitleBar::isUnreadMode() const
+{
+    return m_msgListMarkAllBtn->isVisible();
+}
+
+void WizMessageListTitleBar::setSelectorIndex(int index)
+{
+    m_msgSelector->blockSignals(true);
+    m_msgSelector->setCurrentIndex(index);
+    m_msgSelector->blockSignals(false);
+}
+
+QString WizMessageListTitleBar::selectorItemData(int index) const
+{
+    return m_msgSelector->itemData(index).toString();
+}
+
+void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
+{
+    if (msg.senderGUID.isEmpty())
+        return;
+
+    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
+    {
+        addUserToSelector(msg.senderGUID);
+    }
+}
+
+void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
+{
+    CWizBizUserDataArray arrayUser;
+    if (!m_dbMgr.db().userFromGUID(userGUID, arrayUser))
+        return;
+
+    QSet<QString> userSet;
+    QString strUserId;
+    for (WIZBIZUSER user : arrayUser)
+    {
+        userSet.insert(user.alias);
+        strUserId = user.userId;
+    }
+    QStringList userList(userSet.toList());
+    QString strText = userList.join(';');
+    QPixmap pix;
+    WizService::AvatarHost::load(strUserId);
+    WizService::AvatarHost::avatar(strUserId, &pix);
+    QIcon icon(pix);
+    m_msgSelector->addItem(icon, strText, userGUID);
+}
 
 
 } // namespace Internal
