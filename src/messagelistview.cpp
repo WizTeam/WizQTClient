@@ -683,6 +683,7 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
 
 WizMessageSelector::WizMessageSelector(QWidget* parent)
     : QComboBox(parent)
+    , m_isPopup(false)
 {
     connect(this, SIGNAL(activated(int)), SLOT(resetIconSize()));
 }
@@ -691,6 +692,8 @@ void WizMessageSelector::showPopup()
 {
     setIconSize(QSize(30, 30));
     QComboBox::showPopup();
+    qDebug() << "shwo popup callled";
+    m_isPopup = true;
 }
 
 void WizMessageSelector::hidePopup()
@@ -699,21 +702,33 @@ void WizMessageSelector::hidePopup()
     resetIconSize();
 }
 
+bool WizMessageSelector::event(QEvent* event)
+{
+    qDebug() << "combox event ; " << event->type();
+    if (event->type() == QEvent::Paint)
+    {
+        //FIXME: foucus事件不会被触发，无法再次处理图标大小。此处根据是否需要重绘来刷新图标
+        if (m_isPopup)
+        {
+            m_isPopup = false;
+        }
+        else
+        {
+            resetIconSize();
+        }
+    }
+    return QComboBox::event(event);
+}
+
 void WizMessageSelector::resetIconSize()
 {
     setIconSize(QSize(20, 20));
-    update();
-}
-
-void WizMessageSelector::checkFocus()
-{
 }
 
 void WizMessageSelector::focusOutEvent(QFocusEvent* event)
 {
     QComboBox::focusOutEvent(event);
     resetIconSize();
-    qDebug() << "focus out icon size " << iconSize();
 }
 
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)

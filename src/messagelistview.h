@@ -37,16 +37,19 @@ class WizMessageSelector : public QComboBox
 public:
     WizMessageSelector(QWidget *parent = 0);
 
-    virtual void showPopup() override;
-    virtual void hidePopup() override;
+    virtual void showPopup();
+    virtual void hidePopup();
+
+    bool event(QEvent *event);
 
 public slots:
     void resetIconSize();
-    void checkFocus();
 
 protected:
-    void focusOutEvent(QFocusEvent* event) override;
+    void focusOutEvent(QFocusEvent* event);
 
+private:
+    bool m_isPopup;
 };
 
 
