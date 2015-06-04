@@ -126,7 +126,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
 #endif
     QPainterPath path;
     QRectF rect = geometry();
-    path.addRoundRect(rect, 6, 4);
+    path.addRoundRect(rect, 4, 1);
     QPolygon polygon= path.toFillPolygon().toPolygon();
     QRegion region(polygon);
     setMask(region);
@@ -474,13 +474,13 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 #ifdef Q_OS_MAC
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
-    ui->btn_close->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}"
-                                         "QToolButton:hover{ border-image:url(%2);}"
-                                           "QToolButton:pressed { border-image:url(%3);}")
+    ui->btn_close->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}"
+                                         "QToolButton:hover{ image:url(%2);}"
+                                           "QToolButton:pressed { image:url(%3);}")
                                  .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
     QString strGrayButton = ::WizGetSkinResourceFileName(strThemeName, "loginGrayButton");
-    ui->btn_min->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
-    ui->btn_max->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
+    ui->btn_min->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
+    ui->btn_max->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
 #else
     CWizTitleBar* m_titleBar = qobject_cast<CWizTitleBar*>(titleBar());
     if (m_titleBar)
@@ -510,12 +510,13 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strLoginTopLineEditor = WizGetSkinResourceFileName(strThemeName, "loginTopLineEditor");
     QString strLoginMidLineEditor = WizGetSkinResourceFileName(strThemeName, "loginMidLineEditor");
     QString strLoginBottomLineEditor = WizGetSkinResourceFileName(strThemeName, "loginBottomLineEditor");
-    QString strIconPerson = WizGetSkinResourceFileName(strThemeName, "loginIconPerson");
-    QString strIconKey = WizGetSkinResourceFileName(strThemeName, "loginIconKey");
-    QString strIconServer = WizGetSkinResourceFileName(strThemeName, "loginIconServer");
+    bool isHighPix = ::WizIsHighPixel();
+    QString strIconPerson = WizGetSkinResourceFileName(strThemeName, "loginIconPerson" + (isHighPix ? "@2x" : QString()));
+    QString strIconKey = WizGetSkinResourceFileName(strThemeName, "loginIconKey" + (isHighPix ? "@2x" : QString()));
+    QString strIconServer = WizGetSkinResourceFileName(strThemeName, "loginIconServer" + (isHighPix ? "@2x" : QString()));
     ui->wgt_usercontainer->setBackgroundImage(strLoginTopLineEditor, QPoint(8, 8));
     ui->wgt_usercontainer->setLeftIcon(strIconPerson);
-    ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow"));
+    ui->wgt_usercontainer->setRightIcon(WizGetSkinResourceFileName(strThemeName, "loginLineEditorDownArrow" + (isHighPix ? "@2x" : QString())));
     m_lineEditUserName->setPlaceholderText("example@mail.com");
 
     ui->wgt_passwordcontainer->setBackgroundImage(strLoginMidLineEditor, QPoint(8, 8));
