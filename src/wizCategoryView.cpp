@@ -2035,7 +2035,7 @@ void CWizCategoryView::on_action_addCustomSearch()
 void CWizCategoryView::on_action_editCustomSearch()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuEditCustomSearch");
-    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    if (currentItem()->type() == Category_QuickSearchCustomItem)
     {
         CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
         if (item)
@@ -2063,7 +2063,7 @@ void CWizCategoryView::on_action_editCustomSearch()
 void CWizCategoryView::on_action_removeCustomSearch()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuRemoveCustomSearch");
-    if (currentItem()->type() == ItemType_QuickSearchCustomItem)
+    if (currentItem()->type() == Category_QuickSearchCustomItem)
     {
         CWizCategoryViewCustomSearchItem* item = dynamic_cast<CWizCategoryViewCustomSearchItem*>(currentItem());
         if (item)
@@ -3662,7 +3662,7 @@ CWizCategoryViewItemBase* CWizCategoryView::findAllTagsItem()
 CWizCategoryViewItemBase*CWizCategoryView::findAllSearchItem()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
-        if (topLevelItem(i)->type() != ItemType_QuickSearchRootItem)
+        if (topLevelItem(i)->type() != Category_QuickSearchRootItem)
             continue;
 
         CWizCategoryViewSearchRootItem* pItem = dynamic_cast<CWizCategoryViewSearchRootItem*>(topLevelItem(i));

@@ -174,7 +174,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     QAction* actionCopyDoc = m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT,
                                                        this, SLOT(on_action_copyDocument()), QKeySequence("Ctrl+Shift+C"));
     // not implement, hide currently.
-    actionCopyDoc->setVisible(false);
+//    actionCopyDoc->setVisible(false);
 
     // Add to widget's actions list
     addAction(actionDeleteDoc);
@@ -187,7 +187,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
 
 
@@ -1083,7 +1083,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
     if (arrayDocument.size() <= 3) {
         foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
             CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
         }
     } else {
         MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
@@ -1093,7 +1093,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
         int i = 0;
         foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
             CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
 
             progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
             progress->setNotifyString(data.strTitle);

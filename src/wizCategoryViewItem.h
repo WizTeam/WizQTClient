@@ -7,11 +7,22 @@
 
 enum ItemType
 {
-    ItemType_MessageItem = 1001,
-    ItemType_ShortcutItem,
-    ItemType_QuickSearchRootItem,
-    ItemType_QuickSearchItem,
-    ItemType_QuickSearchCustomItem
+    Category_WizNoneItem = 1001,
+    Category_MessageItem,
+    Category_ShortcutItem,
+    Category_QuickSearchRootItem,
+    Category_QuickSearchItem,
+    Category_QuickSearchCustomItem,
+    Category_AllFoldersItem,
+    Category_FolderItem,
+    Category_AllTagsItem,
+    Category_TagItem,
+    Category_BizGroupRootItem,
+    Category_OwnGroupRootItem,
+    Category_JoinedGroupRootItem,
+    Category_GroupRootItem,
+    Category_GroupItem,
+    Category_GroupNoTagItem
 };
 
 enum DateInterval{
@@ -198,7 +209,7 @@ class CWizCategoryViewSearchItem : public CWizCategoryViewItemBase
 {
 public:
     CWizCategoryViewSearchItem(CWizExplorerApp& app, const QString& strName,
-                               int type = ItemType_QuickSearchItem);
+                               int type = Category_QuickSearchItem);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
 

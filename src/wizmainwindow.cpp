@@ -2582,7 +2582,7 @@ void MainWindow::on_category_itemSelectionChanged()
 
     QTreeWidgetItem* categoryItem = category->currentItem();
     switch (categoryItem->type()) {
-    case ItemType_MessageItem:
+    case Category_MessageItem:
     {
         CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(categoryItem);
         if (pItem)
@@ -2594,7 +2594,7 @@ void MainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
-    case ItemType_ShortcutItem:
+    case Category_ShortcutItem:
     {
         CWizCategoryViewShortcutItem* pShortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(categoryItem);
         if (pShortcut)
@@ -2603,7 +2603,7 @@ void MainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
-    case ItemType_QuickSearchItem:
+    case Category_QuickSearchItem:
     {
         CWizCategoryViewSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewSearchItem*>(categoryItem);
         if (pSearchItem)
@@ -2612,7 +2612,7 @@ void MainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
-    case ItemType_QuickSearchCustomItem:
+    case Category_QuickSearchCustomItem:
     {
         CWizCategoryViewCustomSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewCustomSearchItem*>(categoryItem);
         if (pSearchItem)

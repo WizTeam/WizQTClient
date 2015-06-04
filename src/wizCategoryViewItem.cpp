@@ -360,7 +360,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
-    : CWizCategoryViewItemBase(app, strName, "", ItemType_MessageItem)
+    : CWizCategoryViewItemBase(app, strName, "", Category_MessageItem)
     , m_nUnread(0)
 {
     QIcon icon;
@@ -617,7 +617,7 @@ void CWizCategoryViewShortcutRootItem::removePlaceHoldItem()
 /* -------------------- CWizCategoryViewSearchRootItem -------------------- */
 CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
                                                                const QString& strName)
-    : CWizCategoryViewItemBase(app, strName, "", ItemType_QuickSearchRootItem)
+    : CWizCategoryViewItemBase(app, strName, "", Category_QuickSearchRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_normal"),
@@ -646,7 +646,7 @@ QString CWizCategoryViewSearchRootItem::getSectionName()
 CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& app,
                                                                const QString& strName,
                                                                const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID, Category_AllFoldersItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folders_normal"),
@@ -702,7 +702,7 @@ void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl
 CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
                                                        const QString& strLocation,
                                                        const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strLocation, strKbGUID)
+    : CWizCategoryViewItemBase(app, strLocation, strKbGUID, Category_FolderItem)
 {
     QIcon icon;
     if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
@@ -777,7 +777,7 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
    {
        CWizFolder folder(myDb, location());
        CWizDocument doc(myDb, data);
-       doc.MoveDocument(&folder);
+       doc.MoveTo(&folder);
    }
    else
    {
@@ -876,7 +876,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
                                                          const QString& strName,
                                                          const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID, Category_AllTagsItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_normal"),
@@ -928,7 +928,7 @@ QString CWizCategoryViewAllTagsItem::getSectionName()
 CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
                                                  const WIZTAGDATA& tag,
                                                  const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_TagItem)
     , m_tag(tag)
 {
     QIcon icon;
@@ -1353,7 +1353,7 @@ QString CWizCategoryViewCreateGroupLinkItem::getSectionName()
 
 CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
                                                              const WIZGROUPDATA& group)
-    : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID)
+    : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID, Category_GroupRootItem)
     , m_group(group)
     , m_nUnread(0)
 {
@@ -1439,7 +1439,7 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
             CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
@@ -1622,7 +1622,7 @@ QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */
 CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app,
                                                                const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID)
+    : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID, Category_GroupNoTagItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
@@ -1660,7 +1660,7 @@ bool CWizCategoryViewGroupNoTagItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
                                                      const WIZTAGDATA& tag,
                                                      const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_GroupItem)
     , m_tag(tag)
 {
     QIcon icon;
@@ -1727,7 +1727,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
             CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
@@ -1879,7 +1879,7 @@ void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
                                                            const QString& strName, const QString& strKbGuid,
                                                            const QString& strGuid, bool bEncrypted)
-    : CWizCategoryViewItemBase(app, strName, strKbGuid, ItemType_ShortcutItem)
+    : CWizCategoryViewItemBase(app, strName, strKbGuid, Category_ShortcutItem)
     , m_strGuid(strGuid)
 {
     QIcon icon;
@@ -1991,7 +1991,7 @@ CWizCategoryViewCustomSearchItem::CWizCategoryViewCustomSearchItem(CWizExplorerA
                                                                    const QString& strName, const QString strSelectParam,
                                                                    const QString strSqlWhere, const QString& strGuid,
                                                                    const QString& keyword, int searchScope)
-    : CWizCategoryViewSearchItem(app, strName, ItemType_QuickSearchCustomItem)
+    : CWizCategoryViewSearchItem(app, strName, Category_QuickSearchCustomItem)
     , m_strSelectParam(strSelectParam)
     , m_strSQLWhere(strSqlWhere)
     , m_strKeywrod(keyword)
