@@ -297,6 +297,19 @@ public:
         QComboBox::hidePopup();
     }
 
+    bool event(QEvent* event)
+    {
+        if (event->type() == QEvent::Paint)
+        {
+            //FIXME: QT5.4.1 通过点击combobox外区域来隐藏列表不会触发  hidePopup() 事件
+            if (m_isPopup)
+            {
+                m_isPopup = false;
+            }
+        }
+        return QComboBox::event(event);
+    }
+
 protected:
     virtual void paintEvent(QPaintEvent *event)
     {
@@ -358,6 +371,19 @@ public:
         QFontComboBox::hidePopup();
     }
 
+    bool event(QEvent* event)
+    {
+        if (event->type() == QEvent::Paint)
+        {
+            //FIXME: QT5.4.1 通过点击combobox外区域来隐藏列表不会触发  hidePopup() 事件
+            if (m_isPopup)
+            {
+                m_isPopup = false;
+            }
+        }
+        return QComboBox::event(event);
+    }
+
 protected:
     virtual void paintEvent(QPaintEvent *event)
     {
@@ -393,7 +419,6 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     m_mapParagraphType.insert("h4", tr("H4"));
     m_mapParagraphType.insert("h5", tr("H5"));
     m_mapParagraphType.insert("h6", tr("H6"));
-    m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
 
     m_comboParagraph = new CWizToolComboBox(this);
     m_comboParagraph->setMinimumWidth(90);
@@ -401,6 +426,8 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     for (it = m_mapParagraphType.begin(); it != m_mapParagraphType.end(); it++) {
         m_comboParagraph->addItem(it.value(), it.key());
     }
+    m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
+    m_comboParagraph->insertItem(0, "p", tr("Paragraph"));
     connect(m_comboParagraph, SIGNAL(activated(int)),
             SLOT(on_comboParagraph_indexChanged(int)));
 
