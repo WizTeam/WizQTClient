@@ -1764,6 +1764,9 @@ bool CWizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
         const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
         if (pOther)
         {
+            if (m_tag.nPostion == pOther->m_tag.nPostion || m_tag.nPostion == 0 || pOther->m_tag.nPostion == 0)
+                return CWizCategoryViewItemBase::operator <(other);
+
             return m_tag.nPostion < pOther->m_tag.nPostion;
         }
     }

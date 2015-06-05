@@ -2976,7 +2976,7 @@ void CWizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
         CWizCategoryViewGroupItem* childItem = dynamic_cast<CWizCategoryViewGroupItem* >(rootItem->child(i));
         if (childItem)
         {
-            childItem->setTagPosition(rootItem->indexOfChild(childItem));
+            childItem->setTagPosition(rootItem->indexOfChild(childItem) + 1);
             saveGroupTagsPosition(db, childItem);
         }
     }
@@ -2997,7 +2997,7 @@ void CWizCategoryView::saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewG
         CWizCategoryViewGroupItem* childItem = dynamic_cast<CWizCategoryViewGroupItem* >(pItem->child(i));
         if (childItem)
         {
-            childItem->setTagPosition(i);
+            childItem->setTagPosition(i + 1);
             saveGroupTagsPosition(db, childItem);
         }
     }
