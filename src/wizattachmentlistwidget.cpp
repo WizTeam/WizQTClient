@@ -29,7 +29,7 @@ using namespace Core::Internal;
 
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
-#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
+//#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
 #define WIZACTION_ATTACHMENT_SAVEAS QObject::tr("Save as...")
 #define WIZACTION_ATTACHMENT_OPEN   QObject::tr("Open...")
 #define WIZACTION_ATTACHMENT_DELETE QObject::tr("Delete")
@@ -346,7 +346,7 @@ void CWizAttachmentListView::resetPermission()
 
         findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(bOpenOrSaveEnable);
         findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(bOpenOrSaveEnable);
-        findAction(WIZACTION_ATTACHMENT_DOWNLOAD)->setEnabled(bDownloadEnable);
+//        findAction(WIZACTION_ATTACHMENT_DOWNLOAD)->setEnabled(bDownloadEnable);
         findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(bDeleteEnable);
     }
 
