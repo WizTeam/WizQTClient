@@ -33,8 +33,8 @@ using namespace Core::Internal;
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
-#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note...")
-#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note To...")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note To...")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version history...")
 #define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy document link")
 #define WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK QObject::tr("Share Link...")
@@ -167,23 +167,25 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_menuDocument->addSeparator();
 
-    QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
-                                                         this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
     QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
                                                        this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     QAction* actionCopyDoc = m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT,
                                                        this, SLOT(on_action_copyDocument()), QKeySequence("Ctrl+Shift+C"));
-    // not implement, hide currently.
-//    actionCopyDoc->setVisible(false);
-
-    // Add to widget's actions list
-    addAction(actionDeleteDoc);
-    addAction(actionMoveDoc);
-    addAction(actionCopyDoc);
     m_menuDocument->addAction(WIZACTION_LIST_ENCRYPT_DOCUMENT, this,
                               SLOT(on_action_encryptDocument()));
     m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ENCRYPTION, this,
                               SLOT(on_action_cancelEncryption()));
+
+    m_menuDocument->addSeparator();
+    QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
+                                                         this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
+    // not implement, hide currently.
+//    actionCopyDoc->setVisible(false);
+
+    // Add to widget's actions list
+    addAction(actionMoveDoc);
+    addAction(actionDeleteDoc);
+    addAction(actionCopyDoc);
 
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -282,6 +284,133 @@ bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
     return true;
 }
 
+void CWizDocumentListView::moveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
+{
+    // only move user private documents
+//    if (isDocumentsWithGroupDocument(arrayDocument)) {
+//        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
+//        return;
+//    }
+
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    // move, show progress if size > 3
+    CWizFolder folder(m_dbMgr.db(), targetFolder);
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(m_dbMgr.db(), &folder, mainWindow->downloaderHost());
+        }
+    } else {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(m_dbMgr.db(), &folder, mainWindow->downloaderHost());
+
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        mainWindow->progressDialog()->hide();
+    }
+
+}
+
+void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, mainWindow->downloaderHost());
+        }
+    } else {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, mainWindow->downloaderHost());
+
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        mainWindow->progressDialog()->hide();
+    }
+}
+
+void CWizDocumentListView::copyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument,
+                                                        const QString& targetFolder, bool keepDocTime, bool keepTag)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    // move, show progress if size > 3
+    CWizFolder folder(m_dbMgr.db(), targetFolder);
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(m_dbMgr.db(), &folder, keepDocTime, keepTag, mainWindow->downloaderHost());
+        }
+    } else {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(m_dbMgr.db(), &folder, keepDocTime, keepTag, mainWindow->downloaderHost());
+
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        mainWindow->progressDialog()->hide();
+    }
+}
+
+void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
+                                                      const WIZTAGDATA& targetTag, bool keepDocTime)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, mainWindow->downloaderHost());
+        }
+    } else {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, mainWindow->downloaderHost());
+
+            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        mainWindow->progressDialog()->hide();
+    }
+}
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     /*
@@ -368,18 +497,16 @@ void CWizDocumentListView::resetPermission()
     bool bShareEnable = true;
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
-        findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
-        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(false);
-        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(false);
+        findAction(WIZACTION_LIST_TAGS)->setVisible(false);
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
         bShareEnable = false;
     } else {
-        findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
-        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(true);
-        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(true);
+        findAction(WIZACTION_LIST_TAGS)->setVisible(true);
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(bShareEnable);
     }
 
     // deleted user private documents
-    findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(!bGroup);
+    findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(bCanEdit);
 
     // disable delete if permission is not enough
     findAction(WIZACTION_LIST_DELETE)->setEnabled(bCanEdit);
@@ -415,6 +542,13 @@ void CWizDocumentListView::resetPermission()
     }
 
     findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setEnabled(bShareEnable);
+
+    if (bGroup)
+    {
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setVisible(false);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setVisible(false);
+    }
 }
 
 QAction* CWizDocumentListView::findAction(const QString& strName)
@@ -1054,64 +1188,59 @@ void CWizDocumentListView::on_action_moveDocument()
 
 void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 {
+    qDebug() << "move document confirmed : " << result;
     CWizFolderSelector* selector = qobject_cast<CWizFolderSelector*>(sender());
-    QString strSelectedFolder = selector->selectedFolder();
-    sender()->deleteLater();
+    WizScopeGuard guard([&]{
+       selector->deleteLater();
+    });
 
     if (result != QDialog::Accepted) {
         return;
     }
 
-    if (strSelectedFolder.isEmpty()) {
-        return;
-    }
-
+    QSet<QString> dbSet;
     // collect documents
     CWizDocumentDataArray arrayDocument;
     foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
+        dbSet.insert(item->document().strKbGUID);
     }
 
-    // only move user private documents
-    if (isDocumentsWithGroupDocument(arrayDocument)) {
-        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
-        return;
+    if (selector->isSelectPrivateFolder())
+    {
+        QString strSelectedFolder = selector->selectedFolder();
+        if (strSelectedFolder.isEmpty())
+            return;
+        qDebug() << "move docuemnt to private folder " << strSelectedFolder;
+        moveDocumentsToPrivateFolder(arrayDocument, strSelectedFolder);
+        dbSet.insert(m_dbMgr.db().kbGUID());
+    }
+    else if (selector->isSelectGroupFolder())
+    {
+        WIZTAGDATA tag = selector->selectedGroupFolder();
+        if (tag.strKbGUID.isEmpty())
+            return;
+        qDebug() << "move docuemnt to group folder " << tag.strName;
+        //
+        moveDocumentsToGroupFolder(arrayDocument, tag);
+        dbSet.insert(tag.strKbGUID);
     }
 
-    // move, show progress if size > 3
-    CWizFolder folder(m_dbMgr.db(), strSelectedFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveTo(&folder);
-        }
-    } else {
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveTo(&folder);
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-
-            i++;
-        }
-
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    for (QString kbGuid : dbSet)
+    {
+        mainWindow->quickSyncKb(kbGuid);
     }
 }
 
 void CWizDocumentListView::on_action_copyDocument()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
+    Q_ASSERT(!m_rightButtonFocusedItems.isEmpty());
+    //
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
-    selector->setCopyStyle();
+    bool isGroup = m_dbMgr.db(m_rightButtonFocusedItems.first()->document().strKbGUID).IsGroup();
+    selector->setCopyStyle(!isGroup);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_copyDocument_confirmed(int)));
@@ -1120,16 +1249,49 @@ void CWizDocumentListView::on_action_copyDocument()
 
 void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 {
+    qDebug() << "copy document confirmed : " << result;
     CWizFolderSelector* selector = qobject_cast<CWizFolderSelector*>(sender());
-    QString strSelectedFolder = selector->selectedFolder();
-    sender()->deleteLater();
+    WizScopeGuard guard([&]{
+       selector->deleteLater();
+    });
 
-    if (strSelectedFolder.isEmpty()) {
+    if (result != QDialog::Accepted) {
         return;
     }
 
-    if (result == QDialog::Accepted) {
-        qDebug() << "user select: " << strSelectedFolder;
+    QSet<QString> dbSet;
+    // collect documents
+    CWizDocumentDataArray arrayDocument;
+    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
+        arrayDocument.push_back(item->document());
+        dbSet.insert(item->document().strKbGUID);
+    }
+
+    if (selector->isSelectPrivateFolder())
+    {
+        QString strSelectedFolder = selector->selectedFolder();
+        if (strSelectedFolder.isEmpty()) {
+            return;
+        }
+        qDebug() << "copy docuemnt to private folder " << strSelectedFolder;
+        copyDocumentsToPrivateFolder(arrayDocument, strSelectedFolder, selector->isKeepTime(), selector->isKeepTag());
+        dbSet.insert(m_dbMgr.db().kbGUID());
+    }
+    else if (selector->isSelectGroupFolder())
+    {
+        WIZTAGDATA tag = selector->selectedGroupFolder();
+        if (tag.strKbGUID.isEmpty())
+            return;
+        qDebug() << "copy docuemnt to group folder " << tag.strName;
+        //
+        copyDocumentsToGroupFolder(arrayDocument, tag, selector->isKeepTime());
+        dbSet.insert(tag.strKbGUID);
+    }
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    for (QString kbGuid : dbSet)
+    {
+        mainWindow->quickSyncKb(kbGuid);
     }
 }
 

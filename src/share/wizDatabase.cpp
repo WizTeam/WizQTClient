@@ -189,30 +189,95 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
     return true;
 }
 
-bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader)
 {
-    if (!CopyTo(targetDB, targetTag, downloader))
+    qDebug() << "wizdocmove  to : " << pFolder->Location();
+    if (targetDB.kbGUID() == m_db.kbGUID())
+        return MoveTo(pFolder);
+
+    if (!CopyTo(targetDB, pFolder, true, true,downloader))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
     }
 
     Delete();
+    return true;
 }
 
-bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader)
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
 {
+    qDebug() << "wizdoc move to : " << targetTag.strName;
+    if (targetDB.kbGUID() == m_db.kbGUID())
+    {
+        if (m_data.strLocation == LOCATION_DELETED_ITEMS)
+        {
+            CWizFolder folder(m_db, m_db.GetDefaultNoteLocation());
+            MoveTo(&folder);
+        }
+
+        CWizTagDataArray arrayTag;
+        m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
+            {
+                RemoveTag(*it);
+            }
+        }
+        return AddTag(targetTag);
+    }
+
+    //
+    if (!CopyTo(targetDB, targetTag, true, downloader))
+    {
+        TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
+        return false;
+    }
+
+    qDebug() << " after copy doc delete this doc";
+    Delete();
+    return true;
+}
+
+bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
+                          bool keepDocTag, CWizObjectDataDownloaderHost* downloader)
+{
+    qDebug() << "wizdocu copy to : " << pFolder->Location();
     QString strLocation = pFolder->Location();
     QString strNewDocGUID;
     WIZTAGDATA tagEmpty;
-    return m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, strNewDocGUID, downloader);
+    if (!m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, strNewDocGUID, downloader, keepDocTime))
+    {
+        TOLOG1(_T("Failed to copy document %1."), m_data.strTitle);
+        return false;
+    }
+
+    if (keepDocTag && !m_db.IsGroup() && m_db.kbGUID() == targetDB.kbGUID())
+    {
+        WIZDOCUMENTDATA newDoc;
+        if (!targetDB.DocumentFromGUID(strNewDocGUID, newDoc))
+            return false;
+
+        CWizStdStringArray arrayTag;
+        if (m_db.GetDocumentTags(m_data.strGUID, arrayTag))
+        {
+            for (CString tagGUID : arrayTag)
+            {
+                targetDB.InsertDocumentTag(newDoc, tagGUID);
+            }
+        }
+    }
+    return true;
 }
 
-bool CWizDocument::CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
+bool CWizDocument::CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag,
+                          bool keepDocTime, CWizObjectDataDownloaderHost* downloader)
 {
+    qDebug() << "wizdocu copy to : " << targetTag.strName;
     QString strLocation = targetDB.GetDefaultNoteLocation();
     QString strNewDocGUID;
-    return m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, downloader);
+    return m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, downloader, keepDocTime);
 }
 
 bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
@@ -819,7 +884,7 @@ bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 }
 
 bool CWizDatabase::CopyDocumentTo(const QString &sourceGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
-                                  const WIZTAGDATA &targetTag, QString &resultGUID, CWizObjectDataDownloaderHost *downloaderHost)
+                                  const WIZTAGDATA &targetTag, QString &resultGUID, CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime)
 {
     TOLOG("Copy document");
     WIZDOCUMENTDATA sourceDoc;
@@ -848,12 +913,15 @@ bool CWizDatabase::CopyDocumentTo(const QString &sourceGUID, CWizDatabase &targe
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
 
-    newDoc.tCreated = sourceDoc.tCreated;
-    newDoc.tAccessed = sourceDoc.tAccessed;
-    newDoc.tDataModified = sourceDoc.tDataModified;
-    newDoc.tModified = sourceDoc.tModified;
-    newDoc.tInfoModified = sourceDoc.tInfoModified;
-    newDoc.tParamModified = sourceDoc.tParamModified;
+    if (keepDocTime)
+    {
+        newDoc.tCreated = sourceDoc.tCreated;
+        newDoc.tAccessed = sourceDoc.tAccessed;
+        newDoc.tDataModified = sourceDoc.tDataModified;
+        newDoc.tModified = sourceDoc.tModified;
+        newDoc.tInfoModified = sourceDoc.tInfoModified;
+        newDoc.tParamModified = sourceDoc.tParamModified;
+    }
     newDoc.nAttachmentCount = targetDB.GetDocumentAttachmentCount(newDoc.strGUID);
     targetDB.ModifyDocumentInfoEx(newDoc);
 

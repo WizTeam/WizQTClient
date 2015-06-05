@@ -6,6 +6,7 @@
 
 class CWizExplorerApp;
 class CWizFolderView;
+struct WIZTAGDATA;
 
 class CWizFolderSelector : public QDialog
 {
@@ -14,9 +15,16 @@ class CWizFolderSelector : public QDialog
 public:
     explicit CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app, QWidget *parent = 0);
 
-    void setCopyStyle();
+    void setCopyStyle(bool showKeepTagsOption);
     void setAcceptRoot(bool b) { m_bAcceptRoot = b; }
+    //
+    bool isKeepTime() const;
+    bool isKeepTag() const;
+    //
+    bool isSelectPrivateFolder();
     QString selectedFolder();
+    bool isSelectGroupFolder();
+    WIZTAGDATA selectedGroupFolder();
 
 protected:
     CWizExplorerApp& m_app;

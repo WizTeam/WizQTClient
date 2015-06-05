@@ -31,7 +31,7 @@ CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp&
     layout->addWidget(buttonBox);
 }
 
-void CWizFolderSelector::setCopyStyle()
+void CWizFolderSelector::setCopyStyle(bool showKeepTagsOption)
 {
     QVBoxLayout* lay = qobject_cast<QVBoxLayout*>(layout());
 
@@ -39,39 +39,99 @@ void CWizFolderSelector::setCopyStyle()
     checkKeepTime->setCheckState(m_bKeepTime ? Qt::Checked : Qt::Unchecked);
     connect(checkKeepTime, SIGNAL(stateChanged(int)), SLOT(on_checkKeepTime_stateChanged(int)));
 
-    QCheckBox* checkKeepTags = new QCheckBox(tr("Keep tags"), this);
-    checkKeepTags->setCheckState(m_bKeepTags ? Qt::Checked : Qt::Unchecked);
-    connect(checkKeepTags, SIGNAL(stateChanged(int)), SLOT(on_checkKeepTags_stateChanged(int)));
-
     lay->insertWidget(1, checkKeepTime);
-    lay->insertWidget(2, checkKeepTags);
+
+    if (showKeepTagsOption)
+    {
+        QCheckBox* checkKeepTags = new QCheckBox(tr("Keep tags"), this);
+        checkKeepTags->setCheckState(m_bKeepTags ? Qt::Checked : Qt::Unchecked);
+        connect(checkKeepTags, SIGNAL(stateChanged(int)), SLOT(on_checkKeepTags_stateChanged(int)));
+
+        lay->insertWidget(2, checkKeepTags);
+    }
+}
+
+bool CWizFolderSelector::isKeepTime() const
+{
+    return m_bKeepTime;
+}
+
+bool CWizFolderSelector::isKeepTag() const
+{
+    return m_bKeepTags;
+}
+
+bool CWizFolderSelector::isSelectGroupFolder()
+{
+    QTreeWidgetItem* item = m_folderView->currentItem();
+
+    if (!m_bAcceptRoot)
+        return item->type() == Category_GroupNoTagItem || item->type() == Category_GroupItem;
+
+    return item->type() == Category_GroupRootItem || item->type() == Category_GroupNoTagItem
+            || item->type() == Category_GroupItem;
 }
 
 QString CWizFolderSelector::selectedFolder()
 {
-    CWizCategoryViewAllFoldersItem* pRoot = dynamic_cast<CWizCategoryViewAllFoldersItem*>(m_folderView->currentItem());
-    if (pRoot) {
+    QTreeWidgetItem* item = m_folderView->currentItem();
+    if (item->type() == Category_AllFoldersItem)
+    {
         return "/";
     }
+    else if (item->type() == Category_FolderItem)
+    {
+        CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(item);
+        Q_ASSERT(p);
 
-    CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(m_folderView->currentItem());
-    if (p) {
         return p->location();
     }
 
     return NULL;
 }
 
+bool CWizFolderSelector::isSelectPrivateFolder()
+{
+    QTreeWidgetItem* item = m_folderView->currentItem();
+    if (!m_bAcceptRoot)
+        return item->type() == Category_FolderItem;
+
+    return item->type() == Category_AllFoldersItem || item->type() == Category_FolderItem;
+}
+
+WIZTAGDATA CWizFolderSelector::selectedGroupFolder()
+{
+    QTreeWidgetItem* item = m_folderView->currentItem();
+    if (item->type() == Category_GroupItem)
+    {
+        CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(item);
+        if (p)
+        {
+            return p->tag();
+        }
+    }
+    else if (item->type() == Category_GroupNoTagItem || item->type() == Category_GroupRootItem)
+    {
+        CWizCategoryViewItemBase* p = dynamic_cast<CWizCategoryViewItemBase*>(item);
+        if (p)
+        {
+            WIZTAGDATA tag;
+            tag.strKbGUID = p->kbGUID();
+            return tag;
+        }
+    }
+
+    WIZTAGDATA tag;
+    return tag;
+}
+
 void CWizFolderSelector::on_accept()
 {
     // accept only if user select folder item.
-    if (!m_bAcceptRoot) {
-        CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(m_folderView->currentItem());
-        if (!p)
-            return;
+    if (isSelectPrivateFolder() || isSelectGroupFolder())
+    {
+        accept();
     }
-
-    accept();
 }
 
 void CWizFolderSelector::on_checkKeepTime_stateChanged(int state)

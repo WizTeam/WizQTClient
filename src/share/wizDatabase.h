@@ -30,9 +30,10 @@ public:
     QString GetAttachmentsPath(bool create);
     bool IsInDeletedItemsFolder();
     bool MoveTo(CWizFolder* pFolder);
+    bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
     bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
-    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
-    bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime, bool keepDocTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
     bool AddTag(const WIZTAGDATA& dataTag);
     bool RemoveTag(const WIZTAGDATA& dataTag);
     QString GetMetaText();
@@ -193,7 +194,7 @@ public:
     //create new doc and copy data, set the new doc time as the source doc.
     virtual bool CopyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
                                   const QString& strTargetLocation, const WIZTAGDATA &targetTag,
-                                QString& resultGUID, CWizObjectDataDownloaderHost *downloaderHost);
+                                QString& resultGUID, CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime = true);
     //if file doesn't exist, download it.
     bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
     bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
