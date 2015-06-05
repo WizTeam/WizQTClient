@@ -443,7 +443,7 @@ void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
-        qDebug() << "upload delete status finished : " <<id << " update db : " << msg.nLocalChanged;
+        qDebug() << "upload delete status finished : " <<id << " localchanged : " << msg.nLocalChanged;
         db.updateMessage(msg);
     }
 }
@@ -704,7 +704,6 @@ void WizMessageSelector::showPopup()
 {
     setIconSize(QSize(30, 30));
     QComboBox::showPopup();
-    qDebug() << "shwo popup callled";
     m_isPopup = true;
 }
 
@@ -716,10 +715,9 @@ void WizMessageSelector::hidePopup()
 
 bool WizMessageSelector::event(QEvent* event)
 {
-    qDebug() << "combox event ; " << event->type();
     if (event->type() == QEvent::Paint)
     {
-        //FIXME: foucus事件不会被触发，无法再次处理图标大小。此处根据是否需要重绘来刷新图标
+        //FIXME: QT5.4.1 foucus事件不会被触发，无法再次处理图标大小。此处根据是否需要重绘来刷新图标
         if (m_isPopup)
         {
             m_isPopup = false;
@@ -764,12 +762,12 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
                                              "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
                                              "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
                                              "QComboBox::down-arrow {image:url(%1);}"
-                                             "QComboBox QListView{background-color:white;border:0px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:60px; max-width:160px; margin-left:8px}"
-                                             "QComboBox::item:selected {background:#3397db;color:#ffffff;}").arg(strDropArrow));
+                                             "QComboBox QListView{background-color:white;border:0px; min-width:140px;}"
+                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:140px; max-width:180px; margin-left:8px;background:transparent;}"
+                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
 
 
-    QStyledItemDelegate* itemDelegate = new QStyledItemDelegate();
+    WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
     m_msgSelector->setItemDelegate(itemDelegate);
 
     CWizStdStringArray arraySender;
@@ -862,6 +860,22 @@ void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
     WizService::AvatarHost::avatar(strUserId, &pix);
     QIcon icon(pix);
     m_msgSelector->addItem(icon, strText, userGUID);
+}
+
+WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
+    : QStyledItemDelegate(parent)
+{
+}
+
+void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+    //NOTE:QCombobox 的项目的背景css颜色样式无效，需要通过绘制实现。
+    if (option.state & QStyle::State_Selected)
+        painter->fillRect(option.rect, QBrush(QColor("#3397db")));
+    else if (option.state & QStyle::State_MouseOver)
+        painter->fillRect(option.rect, QBrush(QColor("#3397db")));
+
+    QStyledItemDelegate::paint(painter, option, index);
 }
 
 

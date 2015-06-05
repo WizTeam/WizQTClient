@@ -31,6 +31,17 @@ namespace Internal {
 
 class MessageListViewItem;
 
+class WizMessageSelectorItemDelegate : public QStyledItemDelegate
+{
+public:
+    WizMessageSelectorItemDelegate(QObject *parent = 0);
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+
+};
+
 class WizMessageSelector : public QComboBox
 {
     Q_OBJECT
