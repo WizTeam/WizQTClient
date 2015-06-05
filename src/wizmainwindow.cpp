@@ -2670,6 +2670,22 @@ void MainWindow::on_message_itemSelectionChanged()
             m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
             return;
         }
+        //  show comments
+//#if QT_VERSION >  0x050400
+        WIZMESSAGEDATA msgData;
+        m_dbMgr.db().messageFromId(msg.nId, msgData);
+        if (msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
+                msgData.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
+                msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
+        {
+//            QTimer::singleShot(0, [&](){
+                qDebug() << "show comments page();";
+               m_doc->commentView()->setVisible(true);
+//            });
+        }
+//#endif
+
+
         viewDocument(doc, true);
     }
 }

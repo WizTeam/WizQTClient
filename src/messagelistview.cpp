@@ -414,6 +414,12 @@ void MessageListView::on_uploadReadStatus_finished(const QString& ids)
     CWizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
     {
+#ifdef QT_DEBUG
+        Q_ASSERT(!id.isEmpty() && id != "0");
+#endif
+        if (id.isEmpty() || id == "0")
+            continue;
+
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
@@ -428,6 +434,12 @@ void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
     CWizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
     {
+#ifdef QT_DEBUG
+        Q_ASSERT(!id.isEmpty() && id != "0");
+#endif
+        if (id.isEmpty() || id == "0")
+            continue;
+
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;

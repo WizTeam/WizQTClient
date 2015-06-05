@@ -638,8 +638,11 @@ struct WIZBIZDATA
 };
 
 
-const int WIZ_USER_MSG_TYPE_CALLED = 0;
+const int WIZ_USER_MSG_TYPE_CALLED_IN_TITLE = 0;
 const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
+const int WIZ_USER_MSG_TYPE_COMMENT = 10;
+const int WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT = 20;
+const int WIZ_USER_MSG_TYPE_COMMENT_REPLY = 30;
 
 struct WIZUSERMESSAGEDATA
 {
@@ -664,7 +667,7 @@ struct WIZUSERMESSAGEDATA
 
     WIZUSERMESSAGEDATA()
         : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
+        , nMessageType(WIZ_USER_MSG_TYPE_CALLED_IN_TITLE)
         , nReadStatus(0)
         , nDeletedStatus(0)
         , nVersion(0)
@@ -723,8 +726,10 @@ struct WIZMESSAGEDATA
     QString messageBody;
 
     // Field: message_type
-    // 0: @ message
+    // 0: @ message in title
     // 1: document edited meesage
+    // 10: comment
+    // 30: @ message in comment
     qint32 nMessageType;
 
     // Filed: note
