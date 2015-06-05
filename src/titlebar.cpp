@@ -222,8 +222,8 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
-        m_tagBtn->setEnabled(bIsGroup ? false : true);
-        m_shareBtn->setEnabled(bIsGroup ? false : true);
+        m_tagBtn->setVisible(bIsGroup ? false : true);
+        m_shareBtn->setVisible(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
         m_emailBtn->setEnabled(true);

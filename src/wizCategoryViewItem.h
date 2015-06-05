@@ -17,6 +17,7 @@ enum ItemType
     Category_FolderItem,
     Category_AllTagsItem,
     Category_TagItem,
+    Category_GroupsRootItem,
     Category_BizGroupRootItem,
     Category_OwnGroupRootItem,
     Category_JoinedGroupRootItem,

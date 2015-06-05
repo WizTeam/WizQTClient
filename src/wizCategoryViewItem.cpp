@@ -1031,7 +1031,7 @@ QString CWizCategoryViewStyleRootItem::getSectionName()
 /* ---------------------------- CWizCategoryViewGroupsRootItem ---------------------------- */
 
 CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName)
-    : CWizCategoryViewItemBase(app, strName, "")
+    : CWizCategoryViewItemBase(app, strName, "", Category_GroupsRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
