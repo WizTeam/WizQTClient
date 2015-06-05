@@ -762,6 +762,7 @@ bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 
     CString strSQL;
     strSQL.Format(strFormat,
+                  STR2SQL(user.userId).utf16(),
                   STR2SQL(user.alias).utf16(),
                   STR2SQL(user.pinyin).utf16()
         );
