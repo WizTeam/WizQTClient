@@ -1528,17 +1528,19 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     ////按照群组分组笔记////
     */
     std::map<QString, CWizStdStringArray> mapKbGUIDDocuments;
-    for (std::deque<WIZUSERMESSAGEDATA>::const_iterator it = arrayMessage.begin();
-        it != arrayMessage.end();
-        it++)
+    for (WIZUSERMESSAGEDATA it : arrayMessage)
     {
-        if (!it->strKbGUID.isEmpty()
-            && !it->strDocumentGUID.isEmpty())
+        if (!it.strKbGUID.isEmpty()
+            && !it.strDocumentGUID.isEmpty())
         {
-            CWizStdStringArray& documents = mapKbGUIDDocuments[it->strKbGUID];
-            documents.push_back(it->strDocumentGUID);
-            pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
-                                     it->strMessageText);
+            CWizStdStringArray& documents = mapKbGUIDDocuments[it.strKbGUID];
+            documents.push_back(it.strDocumentGUID);
+
+            if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
+            {
+                pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
+                                         it.strMessageText);
+            }
         }
     }
     //
@@ -1769,11 +1771,11 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 {
     QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
     if (!strt.isEmpty()) {
-//        if (background) {
             if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
+#ifndef QT_DEBUG
                 return;
-            }
-//        }
+#endif
+        }
     }
 
     pEvents->OnStatus("Sync group users");
@@ -1786,8 +1788,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         if (!g.bizGUID.isEmpty())
         {
             QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
-            QString strJsonRaw = downloadFromUrl(strUrl);
-
+            QString strJsonRaw = downloadFromUrl(strUrl);            
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
         }
