@@ -875,7 +875,7 @@ bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
 int CWizIndex::getGroupUnreadDocumentCount()
 {
     CString strSQL;
-    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0");
+    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
 
     CppSQLite3Query query = m_db.execQuery(strSQL);
 
@@ -883,6 +883,7 @@ int CWizIndex::getGroupUnreadDocumentCount()
         int nCount = query.getIntField(0);
         return nCount;
     }
+
 
     return 0;
 }

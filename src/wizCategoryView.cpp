@@ -2162,6 +2162,10 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         {
             promptGroupLimitMessage(pItem->kbGUID(), pItem->bizGUID());
         }
+        else if (pItem->hitTestUnread())
+        {
+            emit itemSelectionChanged();
+        }
 
     }
 }
