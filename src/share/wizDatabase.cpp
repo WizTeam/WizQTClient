@@ -2527,6 +2527,11 @@ QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
     QString strUserID = doc.strOwner;
     WIZBIZUSER bizUser;
     personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
+    if (bizUser.alias.isEmpty())
+    {
+        int index = doc.strOwner.indexOf('@');
+        return index == -1 ? doc.strOwner :  doc.strOwner.left(index);
+    }
     return bizUser.alias;
 }
 
