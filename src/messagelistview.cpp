@@ -8,7 +8,9 @@
 #include <QPainter>
 #include <QMenu>
 #include <QList>
+#include <QSortFilterProxyModel>
 #include <QDebug>
+#include <QTextCodec>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -27,6 +29,7 @@
 #include "wizCategoryView.h"
 #include "wizCategoryViewItem.h"
 #include "coreplugin/itreeview.h"
+#include "utils/misc.h"
 
 namespace WizService {
 namespace Internal {
@@ -64,7 +67,7 @@ public:
             QString strAfterTitle = strMsg.right(strMsg.length() - strMsg.lastIndexOf(m_data.title) - m_data.title.length());
             //
             QColor colorSummary = Qt::black;
-            QColor colorTitle(Qt::red);
+            QColor colorTitle("#3998d6");
 
             QRect rcBeforeTitle = Utils::StyleHelper::drawText(p, rcMsg, strBeforeTitle, 1, Qt::AlignVCenter, p->pen().color(), f, false);
             if (strBeforeTitle.isEmpty() && rcBeforeTitle.height() < rcMsg.height())   //  第一行有剩余空间
@@ -151,7 +154,7 @@ public:
         QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-        QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+        QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
         po.translate(rcd.left() + nMargin, rcd.top());
 
         if (vopt->state.testFlag(QStyle::State_Selected)) {
@@ -777,6 +780,11 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     {
         addUserToSelector(sender);
     }
+
+    WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
+    proxy->setSourceModel(m_msgSelector->model());                            // <--
+    m_msgSelector->model()->setParent(proxy);                                 // <--
+    m_msgSelector->setModel(proxy);
     m_msgSelector->model()->sort(0);
     //
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
@@ -876,6 +884,42 @@ void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOption
         painter->fillRect(option.rect, QBrush(QColor("#3397db")));
 
     QStyledItemDelegate::paint(painter, option, index);
+}
+
+WizSortFilterProxyModel::WizSortFilterProxyModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{
+
+}
+
+bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
+    QVariant leftData = sourceModel()->data(left);
+    QVariant rightData = sourceModel()->data(right);
+
+    QString leftString  = leftData.toString();
+    QString rightString = rightData.toString();
+
+//    return QString::localeAwareCompare(leftString, rightString) < 0;
+
+
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(leftString);
+            QByteArray arrOther = pCodec->fromUnicode(rightString);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return leftString.compare(rightString) < 0;
+
 }
 
 

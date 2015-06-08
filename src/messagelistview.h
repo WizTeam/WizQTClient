@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QStyledItemDelegate>
+#include <QSortFilterProxyModel>
 //#include <memory>
 
 class CWizScrollBar;
@@ -30,6 +31,14 @@ class AsyncApi;
 namespace Internal {
 
 class MessageListViewItem;
+
+class WizSortFilterProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    WizSortFilterProxyModel(QObject *parent = 0);
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+};
 
 class WizMessageSelectorItemDelegate : public QStyledItemDelegate
 {

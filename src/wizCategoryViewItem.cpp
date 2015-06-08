@@ -12,6 +12,7 @@
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 
 #include "wizCategoryView.h"
 #include "wizmainwindow.h"
@@ -53,17 +54,6 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
-bool IsSimpChinese()
-{
-    QLocale local;
-    QString name = local.name().toLower();
-    if (name == "zh_cn"
-        || name == "zh-cn")
-    {
-        return true;
-    }
-    return false;
-}
 bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewItemBase* pOther = dynamic_cast<const CWizCategoryViewItemBase*>(&other);
@@ -81,7 +71,7 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
     //
-    static bool isSimpChinese = IsSimpChinese();
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
     if (isSimpChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
@@ -844,29 +834,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     }
 
     //
-    QString strThis = text(0).toLower();
-    QString strOther = pOther->text(0).toLower();
-    //
-    static bool isSimpChinese = IsSimpChinese();
-    if (isSimpChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(strThis);
-            QByteArray arrOther = pCodec->fromUnicode(strOther);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            bool result = strThisA.compare(strOtherA.c_str()) < 0;
-//            qDebug() << "compare by chinese text : " << result;
-            return result;
-        }
-    }
-    //
-    bool result =  strThis.compare(strOther) < 0;
-//    qDebug() << "compare by english text : " << result;
-    return result;
+    return CWizCategoryViewItemBase::operator <(other);
 }
 
 
