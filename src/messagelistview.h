@@ -99,6 +99,7 @@ private:
 private:
     CWizDatabaseManager& m_dbMgr;
     WizMessageSelector* m_msgSelector;
+    QListWidget* m_listWidget;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;
 };

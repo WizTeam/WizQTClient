@@ -140,18 +140,24 @@ public:
         int nHeight = Utils::StyleHelper::fontNormal(f);
 
         p->save();
-        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+        bool bItemActive = vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus);
+        if (bItemActive)
         {
             p->setPen("#FFFFFF");
         }
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
+
+        QString strType = QObject::tr("Comment in your note.");
+        QRect rectType = rcd;
+        rectType.setLeft(rectSender.right() + 6);
+        Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
         rcd.setTop(rectSender.bottom());
 
         QRect rcBottom(rcd);
         rcBottom.setTop(rcd.bottom() - nHeight);
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
-        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
+        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
         QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
@@ -181,8 +187,15 @@ public:
             p->restore();
         }
 
-        QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin, sz.width(), sz.height());
-        drawColorMessageBody(p, rcMsg, f);
+        QRect rcTitle(rcd.x() + 10, rcd.y() + 15, sz.width() - 5, sz.height() - 15);
+//        drawColorMessageBody(p, rcMsg, f);
+        QString strTitle(m_data.title);
+        QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
+        if (!strTitle.isEmpty())
+        {
+            rcTitle.setTop(rcFirstLine.bottom() + 4);
+            Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
+        }
 
         p->restore();
     }
@@ -320,7 +333,7 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 
     MessageListViewItem* pItem = new MessageListViewItem(msg);
 
-    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 2;
+    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 5;
     pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
 
     addItem(pItem);
@@ -758,17 +771,29 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgSelector->setMinimumHeight(22);
     m_msgSelector->setFixedWidth(156);
 
-    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
-    int minHeight = m_msgSelector->count() * 40 + 200;
-    minHeight = qMin(minHeight, height());
-    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
-                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
-                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
-                                             "QComboBox::down-arrow {image:url(%1);}"
-                                             "QComboBox QListView{background-color:white;border:0px; min-width:140px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:140px; max-width:180px; margin-left:8px;background:transparent;}"
-                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
-
+//    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
+//    int minHeight = m_msgSelector->count() * 40 + 200;
+//    minHeight = qMin(minHeight, height());
+//    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
+//                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
+//                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
+//                                             "QComboBox::down-arrow {image:url(%1);}"
+//                                             "QComboBox QListView{background-color:white;border:0px; min-width:140px;}"
+//                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:140px; max-width:180px; margin-left:8px;background:transparent;}"
+//                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
+//    m_listWidget = new QListWidget();
+//    account_combo_box->setModel(m_listWidget->model());
+//    account_combo_box->setView(m_listWidget);
+//    account_combo_box->setEditable(true);
+//    for(int i=0; i<3; i++)
+//    {
+////        AccountItem *account_item = new AccountItem();
+////        account_item->setAccountNumber(QString("safe_") + QString::number(i, 10) + QString("@sina.com"));
+////        connect(account_item, SIGNAL(showAccount(QString)), this, SLOT(showAccount(QString)));
+////        connect(account_item, SIGNAL(removeAccount(QString)), this, SLOT(removeAccount(QString)));
+//        QListWidgetItem *list_item = new QListWidgetItem(list_widget);
+//        m_listWidget->setItemWidget(list_item, account_item);
+//    }
 
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
     m_msgSelector->setItemDelegate(itemDelegate);
