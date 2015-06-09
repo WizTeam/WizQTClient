@@ -11,6 +11,7 @@
 #include "share/wizkmcore.h"
 #include "share/wizobject.h"
 #include "share/wizDatabase.h"
+#include "widgets/wizScrollBar.h"
 
 
 class CWizTagListWidgetItem: public QListWidgetItem
@@ -43,7 +44,7 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
 //    m_tagsEdit->setPlaceholderText(tr("Use semicolon to seperate tags..."));
 //    connect(m_tagsEdit, SIGNAL(returnPressed()), SLOT(on_tagsEdit_returnPressed()));
 
-    m_list = new QListWidget(this);
+    m_list = new CWizListWidgetWithCustomScorllBar(this);
     m_list->setAttribute(Qt::WA_MacShowFocusRect, false);
     connect(m_list, SIGNAL(itemChanged(QListWidgetItem*)),
             SLOT(on_list_itemChanged(QListWidgetItem*)));
