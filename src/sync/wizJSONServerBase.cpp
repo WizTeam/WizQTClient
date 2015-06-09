@@ -34,16 +34,13 @@ void CWizJSONServerBase::getRequest(const QString& strUrl)
     m_strReturnMessage.clear();
     m_strJSONResult.clear();
 
-    qDebug() << "request url : " << strUrl;
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    qDebug() << "before create event loop";
     CWizAutoTimeOutEventLoop loop(reply);
-    qDebug() << "after create event loop";
     loop.exec();
     //
     if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
     {
-        qDebug() << "[JSONRequest]Upload message delete status failed.";
+        qDebug() << "[JSONRequest]Send get request failed.";
         return;
     }
 
@@ -53,7 +50,7 @@ void CWizJSONServerBase::getRequest(const QString& strUrl)
 
     if (!d.HasMember("return_code"))
     {
-        qDebug() << "[JSONRequest]Upload message delete status can not get return code ";
+        qDebug() << "[JSONRequest]Send get request do not get return code ";
         return;
     }
 
@@ -61,11 +58,11 @@ void CWizJSONServerBase::getRequest(const QString& strUrl)
     m_strReturnMessage = d.FindMember("return_message")->value.GetString();
     if (m_nReturnCode != JSON_RETURNCODE_OK )
     {
-        qDebug() << "[JSONRequest]Upload message delete status error :  " << m_nReturnCode << loop.result();
+        qDebug() << "[JSONRequest]Send get request error :  " << m_nReturnCode << loop.result();
     }
     else
     {
-        qDebug() << "[JSONRequest]Upload message delete status OK";
+        qDebug() << "[JSONRequest]Send get request OK";
     }
 }
 
@@ -75,16 +72,13 @@ void CWizJSONServerBase::deleteRequest(const QString& strUrl)
     m_strReturnMessage.clear();
     m_strJSONResult.clear();
 
-    qDebug() << "request url : " << strUrl;
     QNetworkReply* reply = m_net->deleteResource(QNetworkRequest(strUrl));
-    qDebug() << "before create event loop";
     CWizAutoTimeOutEventLoop loop(reply);
-    qDebug() << "after create event loop";
     loop.exec();
     //
     if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
     {
-        qDebug() << "[JSONRequest]Upload message delete status failed.";
+        qDebug() << "[JSONDelete]Send delete request failed. result : " << loop.result();
         return;
     }
 
@@ -94,7 +88,7 @@ void CWizJSONServerBase::deleteRequest(const QString& strUrl)
 
     if (!d.HasMember("return_code"))
     {
-        qDebug() << "[JSONRequest]Upload message delete status can not get return code ";
+        qDebug() << "[JSONDelete]Send delete request do not get return code ";
         return;
     }
 
@@ -102,11 +96,11 @@ void CWizJSONServerBase::deleteRequest(const QString& strUrl)
     m_strReturnMessage = d.FindMember("return_message")->value.GetString();
     if (m_nReturnCode != JSON_RETURNCODE_OK )
     {
-        qDebug() << "[JSONRequest]Upload message delete status error :  " << m_nReturnCode << loop.result();
+        qDebug() << "[JSONDelete]Send delete request status error :  " << m_nReturnCode << loop.result();
     }
     else
     {
-        qDebug() << "[JSONRequest]Upload message delete status OK";
+        qDebug() << "[JSONDelete]Send delete request OK";
     }
 }
 

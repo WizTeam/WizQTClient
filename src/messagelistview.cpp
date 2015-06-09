@@ -125,6 +125,28 @@ public:
         }
     }
 
+    QString descriptionOfMessageType(int type) const
+    {
+        switch (type) {
+        case WIZ_USER_MSG_TYPE_CALLED_IN_TITLE:
+            return QObject::tr("@ you in note title");
+            break;
+        case WIZ_USER_MSG_TYPE_MODIFIED:
+            return QObject::tr("Modified your note");
+            break;
+        case WIZ_USER_MSG_TYPE_COMMENT:
+            return QObject::tr("Comment your note");
+            break;
+        case WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT:
+            return QObject::tr("@ you in note comment");
+            break;
+        case WIZ_USER_MSG_TYPE_COMMENT_REPLY:
+            return QObject::tr("Reply your comment");
+            break;
+        }
+        return QObject::tr("Unknown meesage type");
+    }
+
     void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {
         int nMargin = Utils::StyleHelper::margin();
@@ -148,9 +170,9 @@ public:
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
 
-        QString strType = QObject::tr("Comment in your note.");
+        QString strType = descriptionOfMessageType(m_data.nMessageType);
         QRect rectType = rcd;
-        rectType.setLeft(rectSender.right() + 6);
+        rectType.setLeft(rectSender.right() + 2);
         Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
         rcd.setTop(rectSender.bottom());
 
@@ -327,7 +349,7 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     if (msg.nDeleteStatus == 1) {
-        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
+//        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
         return;
     }
 
@@ -425,7 +447,6 @@ void MessageListView::markAllMessagesReaded()
 
 void MessageListView::on_uploadReadStatus_finished(const QString& ids)
 {
-    qDebug() << "upload read status finished : " << ids;
     QStringList idList = ids.split(',');
     CWizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
@@ -439,7 +460,6 @@ void MessageListView::on_uploadReadStatus_finished(const QString& ids)
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
-        qDebug() << "upload read status finished : " <<id << " update db : " << msg.nLocalChanged;
         db.updateMessage(msg);
     }
 }
@@ -459,7 +479,6 @@ void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
-        qDebug() << "upload delete status finished : " <<id << " localchanged : " << msg.nLocalChanged;
         db.updateMessage(msg);
     }
 }
@@ -564,6 +583,8 @@ void MessageListView::updateTreeItem()
     }
 }
 
+
+
 void MessageListView::on_action_message_mark_read()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
@@ -621,8 +642,6 @@ void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
                                           const WIZMESSAGEDATA& newMsg)
 {
     Q_UNUSED(oldMsg);
-    qDebug() << "on_message_modified : " << newMsg.nId << " message deleted ; " << newMsg.nDeleteStatus;
-
     int i = rowFromId(newMsg.nId);
     if (i != -1) {
         if (MessageListViewItem* pItem = messageItem(i)) {
@@ -721,6 +740,7 @@ void WizMessageSelector::showPopup()
 //    setIconSize(QSize(30, 30));
     setEditable(true);
     QComboBox::showPopup();
+//    setEditable(false);
     m_isPopup = true;
 
     QWidget* popup = findChild<QFrame*>();
@@ -775,8 +795,9 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     setLayout(layoutActions);
 
     m_msgSelector = new WizMessageSelector(this);
-    m_msgSelector->setMinimumHeight(22);
-    m_msgSelector->setFixedWidth(120);
+//    m_msgSelector->setMinimumHeight(22);
+    m_msgSelector->setFixedHeight(22);
+    m_msgSelector->setFixedWidth(122);
     m_msgSelector->setIconSize(QSize(20, 20));
 
     QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
@@ -784,6 +805,9 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     minHeight = qMin(minHeight, height());
     m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
                                              "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"
+//                                         "QComboBox:editable { \
+//                                             padding-top:3px \
+//                                         }"
                                              "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
                                              "QComboBox::down-arrow {image:url(%1);}"
                                          "QComboBox QListView QScrollBar {\
