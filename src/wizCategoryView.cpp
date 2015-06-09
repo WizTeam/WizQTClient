@@ -2381,7 +2381,8 @@ void CWizCategoryView::resetSections()
                 else
                 {
                     pExistingSection = new CWizCategoryViewSectionItem(m_app, sectionName, pItem->getSortOrder() - 1);
-                    if(CATEGORY_TEAM_GROUPS == sectionName && !CWizOEMSettings::isForbidCreateBiz())
+                    CWizOEMSettings oemSettings(m_dbMgr.db().GetUserId());
+                    if(CATEGORY_TEAM_GROUPS == sectionName && !oemSettings.isForbidCreateBiz())
                     {
                         QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "plus.png";
                         pExistingSection->setExtraButtonIcon(strIconPath);

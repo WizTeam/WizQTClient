@@ -120,8 +120,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
-    m_emailBtn->setVisible(!CWizOEMSettings::isHideShareByEmail());
-    m_emailBtn->setEnabled(!CWizOEMSettings::isHideShareByEmail());
+    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+    m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
@@ -129,8 +129,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
-    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
-    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(!oemSettings.isHideShare());
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);

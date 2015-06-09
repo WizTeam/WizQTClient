@@ -1,5 +1,6 @@
 #include "wizOEMSettings.h"
 #include <QVariant>
+#include <QFile>
 #include <QDebug>
 #include "utils/pathresolve.h"
 #include "share/wizDatabase.h"
@@ -19,109 +20,8 @@
 #define HideMyShare                "HideMyShare"
 #define HideBuyVip                 "HideBuyVip"
 #define ForbidCreateBiz              "ForbidCreateBiz"
+#define LoginLogoPath              "LoginLogoPath"
 
-
-CWizOEMSettingsPrivate* CWizOEMSettings::m_settings = 0;
-
-
-CWizOEMSettings::CWizOEMSettings()
-{
-}
-
-CWizOEMSettings::~CWizOEMSettings()
-{
-}
-
-void CWizOEMSettings::updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData)
-{
-//    helper()->updateOEMSettings(strOEMJSONData);
-    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
-//    m_settings = new CWizOEMSettingsPrivate(strFile);
-    CWizOEMSettingsPrivate _oemSettings(strFile);
-    _oemSettings.updateOEMSettings(strOEMJSONData);
-}
-
-bool CWizOEMSettings::isHideShareByEmail()
-{
-    return helper()->isHideShareByEmail();
-}
-
-bool CWizOEMSettings::isHidePersonalGroup()
-{
-    return helper()->isHidePersonalGroup();
-}
-
-bool CWizOEMSettings::isHideFeedback()
-{
-    return helper()->isHideFeedback();
-}
-
-bool CWizOEMSettings::isHideRegister()
-{
-    return helper()->isHideRegister();
-}
-
-bool CWizOEMSettings::isEncryptPassword()
-{
-    return helper()->isEncryptPassword();
-}
-
-bool CWizOEMSettings::isHideSocialLogin()
-{
-    return helper()->isHideSocialLogin();
-}
-
-bool CWizOEMSettings::isHideForgotPassword()
-{
-    return helper()->isHideForgotPassword();
-}
-
-bool CWizOEMSettings::isHideShare()
-{
-    return helper()->isHideShare();
-}
-
-bool CWizOEMSettings::isAccountPlaceholder()
-{
-    return helper()->isAccountPlaceholder();
-}
-
-bool CWizOEMSettings::isHideMyShare()
-{
-    return helper()->isHideMyShare();
-}
-
-bool CWizOEMSettings::isHideBuyVip()
-{
-    return helper()->isHideBuyVip();
-}
-
-bool CWizOEMSettings::isForbidCreateBiz()
-{
-    return helper()->isForbidCreateBiz();
-}
-
-CWizOEMSettingsPrivate*CWizOEMSettings::helper()
-{
-    if (!m_settings)
-    {
-        QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
-        QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
-        m_settings = new CWizOEMSettingsPrivate(strFile);
-    }
-    return m_settings;
-}
-
-
-CWizOEMSettingsPrivate::CWizOEMSettingsPrivate(const QString& fileName)
-    : QSettings(fileName, QSettings::IniFormat)
-{
-
-}
-
-CWizOEMSettingsPrivate::~CWizOEMSettingsPrivate()
-{
-}
 
 void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, QSettings* settings)
 {
@@ -132,84 +32,105 @@ void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, Q
     }
 }
 
-void CWizOEMSettingsPrivate::updateOEMSettings(const QString& strOEMData)
+CWizOEMSettings::CWizOEMSettings(const QString& strUserId)
+    : QSettings(Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini", QSettings::IniFormat)
 {
-    rapidjson::Document d;
-    d.Parse<0>(strOEMData.toUtf8().constData());
-
-
-    getBoolValueFromJSON(d, HidePersonalGroup, this);
-    getBoolValueFromJSON(d, HideShareByEmail, this);
-    getBoolValueFromJSON(d, HideFeedback, this);
-    getBoolValueFromJSON(d, HideRegister, this);
-    getBoolValueFromJSON(d, EncryptPassword, this);
-    getBoolValueFromJSON(d, HideSocialLogin, this);
-    getBoolValueFromJSON(d, HideForgotPassword, this);
-    getBoolValueFromJSON(d, HideShare, this);
-    getBoolValueFromJSON(d, AccountPlaceholder, this);
-    getBoolValueFromJSON(d, HideMyShare, this);
-    getBoolValueFromJSON(d, HideBuyVip, this);
-    getBoolValueFromJSON(d, ForbidCreateBiz, this);
-
-
 }
 
-bool CWizOEMSettingsPrivate::isHideShareByEmail()
+
+bool CWizOEMSettings::settingFileExists(const QString& strUserId)
+{
+    return QFile::exists(Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini");
+}
+
+void CWizOEMSettings::updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData)
+{
+    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
+    QSettings settings(strFile);
+
+    rapidjson::Document d;
+    d.Parse<0>(strOEMJSONData.toUtf8().constData());
+
+    getBoolValueFromJSON(d, HidePersonalGroup, &settings);
+    getBoolValueFromJSON(d, HideShareByEmail, &settings);
+    getBoolValueFromJSON(d, HideFeedback, &settings);
+    getBoolValueFromJSON(d, HideRegister, &settings);
+    getBoolValueFromJSON(d, EncryptPassword, &settings);
+    getBoolValueFromJSON(d, HideSocialLogin, &settings);
+    getBoolValueFromJSON(d, HideForgotPassword, &settings);
+    getBoolValueFromJSON(d, HideShare, &settings);
+    getBoolValueFromJSON(d, AccountPlaceholder, &settings);
+    getBoolValueFromJSON(d, HideMyShare, &settings);
+    getBoolValueFromJSON(d, HideBuyVip, &settings);
+    getBoolValueFromJSON(d, ForbidCreateBiz, &settings);
+}
+
+bool CWizOEMSettings::isHideShareByEmail()
 {
     return value(HideShareByEmail, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHidePersonalGroup()
+bool CWizOEMSettings::isHidePersonalGroup()
 {
     return value(HidePersonalGroup, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideFeedback()
+bool CWizOEMSettings::isHideFeedback()
 {
     return value(HideFeedback, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideRegister()
+bool CWizOEMSettings::isHideRegister()
 {
     return value(HideRegister, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isEncryptPassword()
+bool CWizOEMSettings::isEncryptPassword()
 {
     return value(EncryptPassword, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideSocialLogin()
+bool CWizOEMSettings::isHideSocialLogin()
 {
     return value(HideSocialLogin, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideForgotPassword()
+bool CWizOEMSettings::isHideForgotPassword()
 {
     return value(HideForgotPassword, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideShare()
+bool CWizOEMSettings::isHideShare()
 {
     return value(HideShare, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isAccountPlaceholder()
+bool CWizOEMSettings::isAccountPlaceholder()
 {
     return value(AccountPlaceholder, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideMyShare()
+bool CWizOEMSettings::isHideMyShare()
 {
     return value(HideMyShare, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isHideBuyVip()
+bool CWizOEMSettings::isHideBuyVip()
 {
     return value(HideBuyVip, false).toBool();
 }
 
-bool CWizOEMSettingsPrivate::isForbidCreateBiz()
+bool CWizOEMSettings::isForbidCreateBiz()
 {
     return value(ForbidCreateBiz, false).toBool();
+}
+
+void CWizOEMSettings::setLogoPath(const QString& path)
+{
+    setValue(LoginLogoPath, path);
+}
+
+QString CWizOEMSettings::logoPath()
+{
+    return value(LoginLogoPath, "").toString();
 }
