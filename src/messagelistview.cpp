@@ -718,15 +718,21 @@ WizMessageSelector::WizMessageSelector(QWidget* parent)
 
 void WizMessageSelector::showPopup()
 {
-    setIconSize(QSize(30, 30));
+//    setIconSize(QSize(30, 30));
+    setEditable(true);
     QComboBox::showPopup();
     m_isPopup = true;
+
+    QWidget* popup = findChild<QFrame*>();
+    QPoint pos(0, parentWidget()->height());
+    pos = parentWidget()->mapToGlobal(pos);
+    popup->move(pos);
 }
 
 void WizMessageSelector::hidePopup()
 {
     QComboBox::hidePopup();
-    resetIconSize();
+    resetIconSize();    
 }
 
 bool WizMessageSelector::event(QEvent* event)
@@ -748,7 +754,8 @@ bool WizMessageSelector::event(QEvent* event)
 
 void WizMessageSelector::resetIconSize()
 {
-    setIconSize(QSize(20, 20));
+//    setIconSize(QSize(20, 20));
+    setEditable(false);
 }
 
 void WizMessageSelector::focusOutEvent(QFocusEvent* event)
@@ -763,38 +770,52 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(16, 0, 16, 0);
+    layoutActions->setContentsMargins(10, 0, 16, 0);
     layoutActions->setSpacing(0);
     setLayout(layoutActions);
 
     m_msgSelector = new WizMessageSelector(this);
     m_msgSelector->setMinimumHeight(22);
-    m_msgSelector->setFixedWidth(156);
+    m_msgSelector->setFixedWidth(120);
+    m_msgSelector->setIconSize(QSize(20, 20));
 
-//    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
-//    int minHeight = m_msgSelector->count() * 40 + 200;
-//    minHeight = qMin(minHeight, height());
-//    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
-//                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
-//                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
-//                                             "QComboBox::down-arrow {image:url(%1);}"
-//                                             "QComboBox QListView{background-color:white;border:0px; min-width:140px;}"
-//                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:140px; max-width:180px; margin-left:8px;background:transparent;}"
-//                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
-//    m_listWidget = new QListWidget();
-//    account_combo_box->setModel(m_listWidget->model());
-//    account_combo_box->setView(m_listWidget);
-//    account_combo_box->setEditable(true);
-//    for(int i=0; i<3; i++)
-//    {
-////        AccountItem *account_item = new AccountItem();
-////        account_item->setAccountNumber(QString("safe_") + QString::number(i, 10) + QString("@sina.com"));
-////        connect(account_item, SIGNAL(showAccount(QString)), this, SLOT(showAccount(QString)));
-////        connect(account_item, SIGNAL(removeAccount(QString)), this, SLOT(removeAccount(QString)));
-//        QListWidgetItem *list_item = new QListWidgetItem(list_widget);
-//        m_listWidget->setItemWidget(list_item, account_item);
-//    }
+    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
+    int minHeight = m_msgSelector->count() * 40 + 200;
+    minHeight = qMin(minHeight, height());
+    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
+                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"
+                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
+                                             "QComboBox::down-arrow {image:url(%1);}"
+                                         "QComboBox QListView QScrollBar {\
+                                             background: transparent;\
+                                             width: 10px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle {\
+                                             background: rgba(85, 85, 85, 200);\
+                                             border-radius: 4px;\
+                                             min-height: 30px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle:vertical {\
+                                             margin: 0px 2px 0px 0px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle:horizontal {\
+                                             margin: 0px 0px 2px 0px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::add-page, QScrollBar::sub-page {\
+                                             background: transparent;\
+                                         }\
+                                         QComboBox QListView QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+                                             background: transparent;\
+                                         }\
+                                         QComboBox QListView QScrollBar::add-line, QScrollBar::sub-line {\
+                                             height: 0px;\
+                                             width: 0px;\
+                                         }"\
+                                             "QComboBox QListView{background-color:white;border:0px; min-width:160px;}"
+                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:160px; max-width:180px; margin-left:8px;background:transparent;}"
+                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
 
+    m_msgSelector->setMaxVisibleItems(15);\
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
     m_msgSelector->setItemDelegate(itemDelegate);
 
