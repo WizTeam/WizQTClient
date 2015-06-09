@@ -186,9 +186,10 @@ void CWizDownloadObjectRunnable::on_downloadProgress(int totalSize, int loadedSi
 }
 
 
-CWizFileDownloader::CWizFileDownloader(const QString& strUrl, const QString& strFileName, const QString& strPath)
+CWizFileDownloader::CWizFileDownloader(const QString& strUrl, const QString& strFileName, const QString& strPath, bool isImage)
     : m_strUrl(strUrl)
     , m_strFileName(strFileName)
+    , m_isImage(isImage)
 {
     if (m_strFileName.isEmpty())
     {
@@ -235,6 +236,13 @@ bool CWizFileDownloader::download()
 
 
      QByteArray byData = reply->readAll();
+     if (m_isImage)
+     {
+         QPixmap pix;
+         pix.loadFromData(byData);
+         return pix.save(m_strFileName);
+     }
+
      QFile file(m_strFileName);
      if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
          return false;
