@@ -134,7 +134,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //    }
 
 #ifdef Q_OS_MAC
-    QString strText = wizSystemClipboardData();
+    QString strOrignUrl;
+    QString strText = wizSystemClipboardData(strOrignUrl);
     if (!strText.isEmpty())
     {
         QMimeData* data = new QMimeData();
@@ -145,6 +146,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     }
     else if (mime->hasHtml())   // special process for xcode
     {
+        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
         QString strHtml = mime->html();
         if (WizGetBodyContentFromHtml(strHtml, true))
         {
@@ -2173,6 +2175,15 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
 
     strSrc = strImgSrc;
     return true;
+}
+
+void CWizDocumentWebView::setContentsChanged(bool b)
+{
+    m_bContentsChanged = b;
+    if (b)
+    {
+        emit contentsChanged();
+    }
 }
 
 void CWizDocumentWebView::undo()

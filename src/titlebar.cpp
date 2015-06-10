@@ -254,6 +254,7 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
+    connect(editor, SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
 //    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
@@ -363,7 +364,7 @@ void TitleBar::registerWebChannel()
 
 void TitleBar::onEditorChanged()
 {
-    if (m_editor->isModified()) {
+    if (m_editor->isModified() || m_editor->isContentsChanged()) {
         m_editBtn->setState(CellButton::Badge);
     } else {
         m_editBtn->setState(noteView()->isEditing() ? CellButton::Checked : CellButton::Normal);
