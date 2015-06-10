@@ -5,6 +5,7 @@
 #include <QResizeEvent>
 #include <QHBoxLayout>
 #include <QStyledItemDelegate>
+#include <QLineEdit>
 #include <QPainter>
 #include <QMenu>
 #include <QList>
@@ -730,18 +731,13 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
 
 WizMessageSelector::WizMessageSelector(QWidget* parent)
     : QComboBox(parent)
-    , m_isPopup(false)
-{
-    connect(this, SIGNAL(activated(int)), SLOT(resetIconSize()));
+{   
 }
 
 void WizMessageSelector::showPopup()
 {
-//    setIconSize(QSize(30, 30));
     setEditable(true);
     QComboBox::showPopup();
-//    setEditable(false);
-    m_isPopup = true;
 
     QWidget* popup = findChild<QFrame*>();
     QPoint pos(0, parentWidget()->height());
@@ -749,40 +745,39 @@ void WizMessageSelector::showPopup()
     popup->move(pos);
 }
 
-void WizMessageSelector::hidePopup()
-{
-    QComboBox::hidePopup();
-    resetIconSize();    
-}
+//bool WizMessageSelector::event(QEvent* event)
+//{
+//    qDebug() << "event type  : " << event << "  cursor shape ; " << cursor().shape();
+//    return QComboBox::event(event);
+//}
 
-bool WizMessageSelector::event(QEvent* event)
-{
-    if (event->type() == QEvent::Paint)
-    {
-        //FIXME: QT5.4.1 foucus事件不会被触发，无法再次处理图标大小。此处根据是否需要重绘来刷新图标
-        if (m_isPopup)
-        {
-            m_isPopup = false;
-        }
-        else
-        {
-            resetIconSize();
-        }
-    }
-    return QComboBox::event(event);
-}
-
-void WizMessageSelector::resetIconSize()
-{
-//    setIconSize(QSize(20, 20));
-    setEditable(false);
-}
 
 void WizMessageSelector::focusOutEvent(QFocusEvent* event)
 {
     QComboBox::focusOutEvent(event);
-    resetIconSize();
 }
+
+void WizMessageSelector::focusInEvent(QFocusEvent* event)
+{
+    //NOTE:为了使用弹出列表的滚动条，将combobox设置为可编辑。此处移除focusin来取消可编辑
+//    QComboBox::focusInEvent(event);
+    event->accept();
+    setCursor(QCursor(Qt::ArrowCursor));
+    clearFocus();
+}
+
+//void WizMessageSelector::mouseMoveEvent(QMouseEvent* event)
+//{
+//    QComboBox::mouseMoveEvent(event);
+//    qDebug() << "mousr move event ; " << cursor().shape();
+//    setCursor(QCursor(Qt::ArrowCursor));
+//}
+
+//void WizMessageSelector::enterEvent(QEvent* event)
+//{
+//    QComboBox::enterEvent(event);
+//    setCursor(QCursor(Qt::ArrowCursor));
+//}
 
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
     : QWidget(parent)
@@ -799,15 +794,13 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgSelector->setFixedHeight(22);
     m_msgSelector->setFixedWidth(122);
     m_msgSelector->setIconSize(QSize(20, 20));
+    m_msgSelector->setEditable(true);
 
     QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
     int minHeight = m_msgSelector->count() * 40 + 200;
     minHeight = qMin(minHeight, height());
-    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
-                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"
-//                                         "QComboBox:editable { \
-//                                             padding-top:3px \
-//                                         }"
+    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
+                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"                                         
                                              "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
                                              "QComboBox::down-arrow {image:url(%1);}"
                                          "QComboBox QListView QScrollBar {\
@@ -843,23 +836,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
     m_msgSelector->setItemDelegate(itemDelegate);
 
-    CWizStdStringArray arraySender;
-    CWizDatabase& db = m_dbMgr.db();
-    db.getAllMessageSenders(arraySender);
-    for (auto sender : arraySender)
-    {
-        addUserToSelector(sender);
-    }
-
-    WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
-    proxy->setSourceModel(m_msgSelector->model());                            // <--
-    m_msgSelector->model()->setParent(proxy);                                 // <--
-    m_msgSelector->setModel(proxy);
-    m_msgSelector->model()->sort(0);
-    //
-    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
-    QIcon icon(pix);
-    m_msgSelector->insertItem(0, icon, tr("All members"));
+    initUserList();
 
     layoutActions->addWidget(m_msgSelector);
     connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
@@ -909,13 +886,20 @@ QString WizMessageListTitleBar::selectorItemData(int index) const
 
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
 {
-    if (msg.senderGUID.isEmpty())
-        return;
 
-    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
-    {
-        addUserToSelector(msg.senderGUID);
-    }
+    //FIXME:在添加新的项目到列表中时存在icon丢失的问题，暂不提供根据新消息添加用户的功能
+//    if (msg.senderGUID.isEmpty())
+//        return;
+
+//    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
+//    {
+//        addUserToSelector(msg.senderGUID);
+//        m_msgSelector->model()->sort(0);
+//    }
+
+
+    // update message list
+    messageSelector_indexChanged(m_msgSelector->currentIndex());
 }
 
 void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
@@ -933,11 +917,41 @@ void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
     }
     QStringList userList(userSet.toList());
     QString strText = userList.join(';');
+//    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
     QPixmap pix;
     WizService::AvatarHost::load(strUserId);
     WizService::AvatarHost::avatar(strUserId, &pix);
     QIcon icon(pix);
     m_msgSelector->addItem(icon, strText, userGUID);
+}
+
+void WizMessageListTitleBar::initUserList()
+{
+    CWizStdStringArray arraySender;
+    CWizDatabase& db = m_dbMgr.db();
+    db.getAllMessageSenders(arraySender);
+    for (auto sender : arraySender)
+    {
+        addUserToSelector(sender);
+    }
+
+    static bool once = true;
+    if (once)
+    {
+        WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
+        proxy->setSourceModel(m_msgSelector->model());                            // <--
+        m_msgSelector->model()->setParent(proxy);                                 // <--
+        m_msgSelector->setModel(proxy);
+        once = false;
+    }
+    //
+    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+    QIcon icon(pix);
+//    m_msgSelector->insertItem(0, icon, tr("All members"));
+    m_msgSelector->addItem(icon, tr("All members"), "");
+
+    m_msgSelector->model()->sort(0);
+    m_msgSelector->setCurrentIndex(0);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
@@ -964,6 +978,13 @@ WizSortFilterProxyModel::WizSortFilterProxyModel(QObject* parent)
 
 bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
 {
+    QString leftGuid = sourceModel()->data(left, Qt::UserRole).toString();
+    QString rightGuid = sourceModel()->data(right, Qt::UserRole).toString();
+    if (leftGuid.isEmpty())
+        return true;
+    if (rightGuid.isEmpty())
+        return false;
+
     QVariant leftData = sourceModel()->data(left);
     QVariant rightData = sourceModel()->data(right);
 
