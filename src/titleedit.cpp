@@ -32,6 +32,7 @@ TitleEdit::TitleEdit(QWidget *parent)
     connect(this, SIGNAL(returnPressed()), SLOT(onTitleReturnPressed()));
     connect(this, SIGNAL(editingFinished()), SLOT(onTitleEditingFinished()));
     connect(this, SIGNAL(textEdited(QString)), SLOT(onTextEdit(QString)));
+    connect(this, SIGNAL(textChanged(QString)), SLOT(onTextChanged(QString)));
 }
 
 QSize TitleEdit::sizeHint() const
@@ -257,4 +258,13 @@ void TitleEdit::onTextEdit(const QString& text)
     cr.setWidth(c->popup()->sizeHintForColumn(0)
                 + c->popup()->verticalScrollBar()->sizeHint().width() + 20); // bigger
     c->complete(cr); // popup it up!
+}
+
+void TitleEdit::onTextChanged(const QString& text)
+{
+    if (text.isEmpty()) {
+        setStyleSheet("QLineEdit{color:#666666;}");
+    } else {
+        setStyleSheet("QLineEdit{color:black;}");
+    }
 }

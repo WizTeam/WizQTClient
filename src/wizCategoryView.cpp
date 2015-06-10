@@ -2584,7 +2584,7 @@ void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    return createDocument(data, "<p><br/></p>", tr("New note"));
+    return createDocument(data, "<p><br/></p>", tr("Untitled"));
 }
 
 void CWizCategoryView::on_updatePrivateTagDocumentCount_timeout()
