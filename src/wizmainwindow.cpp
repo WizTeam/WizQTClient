@@ -189,6 +189,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
+#if QT_VERSION > 0x050400
+    connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
+        WizService::AvatarHost::deleteAvatar(oldId);
+        WizService::AvatarHost::load(oldId);
+        WizService::AvatarHost::load(newId);
+    });
+#endif
+
     // GUI
     initActions();
 #ifdef Q_OS_MAC

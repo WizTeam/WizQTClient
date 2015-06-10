@@ -253,6 +253,9 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
     connect(db, SIGNAL(databaseBizChanged(const QString&)),
             SIGNAL(databaseBizchanged(const QString&)));
 
+    connect(db, SIGNAL(userIdChanged(QString,QString)),
+            SIGNAL(userIdChanged(QString,QString)));
+
     connect(db, SIGNAL(tagCreated(const WIZTAGDATA&)),
             SIGNAL(tagCreated(const WIZTAGDATA&)));
     connect(db, SIGNAL(tagModified(const WIZTAGDATA&, const WIZTAGDATA&)),

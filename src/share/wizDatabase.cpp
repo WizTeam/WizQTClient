@@ -2677,8 +2677,12 @@ bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
     WIZBIZUSER userTemp;
     if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
         // only modify user when alias changed
-        //if (userTemp.alias != user.alias) {
+//        if (userTemp.alias != user.alias) {
         bRet = modifyUserEx(user);
+        if (bRet && userTemp.userId != user.userId) {
+            qDebug() << "User id changed " << userTemp.userId << user.userId;
+            emit userIdChanged(userTemp.userId, user.userId);
+        }
         //} else {
         //    bRet = true;
         //}
