@@ -50,6 +50,7 @@ void CWizFolderView::showEvent(QShowEvent *event)
     clear();
     initFolders();
     initGroups();
+    sortItems(0, Qt::AscendingOrder);
 }
 
 void CWizFolderView::initFolders()
@@ -150,7 +151,7 @@ void CWizFolderView::initGroups()
 
     int nTotal = m_dbMgr.count();
     for (int i = 0; i < nTotal; i++) {
-        if (m_showReadOnlyGroup && !m_dbMgr.at(i).IsGroupAuthor())
+        if (!m_showReadOnlyGroup && !m_dbMgr.at(i).IsGroupAuthor())
             continue;
 
         initGroup(m_dbMgr.at(i));

@@ -10,6 +10,8 @@ class CWizScrollBar;
 class CWizDatabaseManager;
 class CWizExplorerApp;
 class QSettings;
+class CWizProgressDialog;
+class CWizObjectDataDownloaderHost;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
 #define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
@@ -355,6 +357,9 @@ public Q_SLOTS:
                                                       const WIZDOCUMENTDATA& data);
 
     void on_action_copyItem();
+    void on_action_user_copyFolder();
+    void on_action_user_copyFolder_confirmed(int result);
+
 
     void on_action_renameItem();
     void on_action_user_renameFolder();
@@ -477,6 +482,36 @@ private:
     void deleteCustomAdvancedSearchParamFromDB(const QString& strGuid);
 
     CWizCategoryViewFolderItem* createFolderItem(QTreeWidgetItem* parent, const QString& strLocation);
+
+
+    //
+    void moveGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
+                                         const QString& targetParentFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
+    void moveGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizDatabase& targetDB,
+                                         const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    //
+    void movePersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder);
+
+    void movePersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
+                                         const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
+    //
+    void copyGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
+                                         const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
+                                         CWizObjectDataDownloaderHost* downloader);
+
+    void copyGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizDatabase& targetDB,
+                                         const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
+                                      CWizObjectDataDownloaderHost* downloader);
+    //
+    void copyPersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder,
+                                            bool keepDocTime, bool keepTag, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
+    void copyPersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
+                                         const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
+                                         CWizObjectDataDownloaderHost* downloader);
+
 private:
     QPointer<QMenu> m_menuShortcut;
     QPointer<QMenu> m_menuFolderRoot;

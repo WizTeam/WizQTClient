@@ -427,7 +427,7 @@ EditorToolBar::EditorToolBar(QWidget *parent)
         m_comboParagraph->addItem(it.value(), it.key());
     }
     m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
-    m_comboParagraph->insertItem(0, "p", tr("Paragraph"));
+    m_comboParagraph->insertItem(0, tr("Paragraph"), "p");
     connect(m_comboParagraph, SIGNAL(activated(int)),
             SLOT(on_comboParagraph_indexChanged(int)));
 
