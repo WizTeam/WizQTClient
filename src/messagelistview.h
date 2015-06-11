@@ -59,13 +59,13 @@ public:
 
     virtual void showPopup();   
 
-    bool event(QEvent *event);
+//    bool event(QEvent *event);
 
 protected:
     void focusOutEvent(QFocusEvent* event);
     void focusInEvent(QFocusEvent* event);
-    void	mouseMoveEvent(QMouseEvent * event);
-    void	enterEvent(QEvent * event);
+//    void	mouseMoveEvent(QMouseEvent * event);
+//    void	enterEvent(QEvent * event);
 };
 
 

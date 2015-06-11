@@ -55,6 +55,7 @@ using namespace Core::Internal;
 #define CATEGORY_ACTION_DOCUMENT_LOAD   QObject::tr("Load note")
 #define CATEGORY_ACTION_IMPORT_FILE   QObject::tr("Import file...")
 #define CATEGORY_ACTION_FOLDER_NEW      QObject::tr("New folder...")
+#define CATEGORY_ACTION_FOLDER_COPY     QObject::tr("Copy to...")
 #define CATEGORY_ACTION_FOLDER_MOVE     QObject::tr("Move to...")
 #define CATEGORY_ACTION_FOLDER_RENAME   QObject::tr("Rename...")
 #define CATEGORY_ACTION_FOLDER_DELETE   QObject::tr("Delete")
@@ -269,6 +270,19 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         setCurrentItem(m_dragItem);
         m_dragItem = 0;
 
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+//        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
+        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
+        qDebug() << "drag start key mode ctrl : " << isCTRL;
+        if (isCTRL)
+        {
+            setCursor(QCursor(Qt::DragCopyCursor));
+        }
+        else
+        {
+            setCursor(QCursor(Qt::DragMoveCursor));
+        }
+
         ::WizGetAnalyzer().LogAction("categoryDragItem");
         //
         viewport()->repaint();
@@ -350,7 +364,8 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         else
             event->ignore();
 
-    }else if(event->mimeData()->hasUrls())
+    }
+    else if(event->mimeData()->hasUrls())
     {
         event->acceptProposedAction();
     }
@@ -856,6 +871,13 @@ void CWizCategoryView::initMenus()
     addAction(actionMoveItem);
     connect(actionMoveItem, SIGNAL(triggered()), SLOT(on_action_moveItem()));
 
+    QAction* actionCopyItem = new QAction("ActionCopyItem", this);
+    actionCopyItem->setShortcutContext(Qt::WidgetShortcut);
+    actionCopyItem->setShortcut(QKeySequence("Ctrl+Shift+C"));
+    actionCopyItem->setData(ActionCopyItem);
+    addAction(actionCopyItem);
+    connect(actionCopyItem, SIGNAL(triggered()), SLOT(on_action_copyItem()));
+
     QAction* actionRenameItem = new QAction("ActionRenameItem", this);
     actionRenameItem->setShortcutContext(Qt::WidgetShortcut);
     actionRenameItem->setShortcut(QKeySequence::SaveAs);
@@ -962,9 +984,10 @@ void CWizCategoryView::initMenus()
     m_menuFolder->addAction(actionNewDoc);
     m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
-    m_menuFolder->addSeparator();
-    m_menuFolder->addAction(actionMoveItem);
     m_menuFolder->addAction(actionRenameItem);
+    m_menuFolder->addAction(actionCopyItem);
+    m_menuFolder->addAction(actionMoveItem);
+    m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionDeleteItem);
 
     // tag root menu
@@ -1015,6 +1038,8 @@ void CWizCategoryView::initMenus()
     m_menuGroup->addAction(actionNewDoc);
     m_menuGroup->addAction(actionNewItem);
     m_menuGroup->addAction(actionRenameItem);
+    m_menuGroup->addAction(actionCopyItem);
+    m_menuGroup->addAction(actionMoveItem);
     m_menuGroup->addSeparator();
     m_menuGroup->addAction(actionDeleteItem);
 }
@@ -1059,8 +1084,13 @@ void CWizCategoryView::resetMenu(CategoryMenuType type)
                     act->setText(CATEGORY_ACTION_TAG_NEW);
             }
             break;
+        case ActionCopyItem:
+            if (type == FolderItem|| type == GroupItem) {
+                act->setText(CATEGORY_ACTION_FOLDER_COPY);
+            }
+            break;
         case ActionMoveItem:
-            if (type == FolderItem) {
+            if (type == FolderItem|| type == GroupItem) {
                 act->setText(CATEGORY_ACTION_FOLDER_MOVE);
             }
             break;
@@ -1516,7 +1546,9 @@ void CWizCategoryView::on_action_group_newFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_moveItem()
 {
-    if (currentCategoryItem<CWizCategoryViewFolderItem>()) {
+//    if (currentCategoryItem<CWizCategoryViewFolderItem>()) {
+    if (currentItem()->type() == Category_FolderItem || currentItem()->type() == Category_GroupItem)
+    {
         on_action_user_moveFolder();
     }
 }
@@ -1579,6 +1611,11 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed_progress(int nMax, in
     if (nMax == nValue + 1) {
         progress->setVisible(false);
     }
+}
+
+void CWizCategoryView::on_action_copyItem()
+{
+
 }
 
 void CWizCategoryView::on_action_renameItem()
@@ -4351,6 +4388,9 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionRenameItem)->setEnabled(false);
         findAction(ActionDeleteItem)->setEnabled(false);
         findAction(ActionRecovery)->setEnabled(false);
+
+        findAction(ActionCopyItem)->setEnabled(false);
+        findAction(ActionMoveItem)->setEnabled(false);
     } else {
         CWizCategoryViewTrashItem* pItem = findTrash(strKbGUID);
         if (pItem) pItem->setHidden(false);
@@ -4359,6 +4399,9 @@ void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)
         findAction(ActionRenameItem)->setEnabled(true);
         findAction(ActionDeleteItem)->setEnabled(true);
         findAction(ActionRecovery)->setEnabled(true);
+
+        findAction(ActionCopyItem)->setEnabled(true);
+        findAction(ActionMoveItem)->setEnabled(true);
     }
 
     // permission greater than author can create new document

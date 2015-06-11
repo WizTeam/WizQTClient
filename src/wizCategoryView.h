@@ -161,6 +161,7 @@ public:
         ActionImportFile,
         ActionNewItem,
         ActionMoveItem,
+        ActionCopyItem,
         ActionRenameItem,
         ActionDeleteItem,
         ActionRecovery,
@@ -352,6 +353,8 @@ public Q_SLOTS:
                                                       const QString& strOldLocation,
                                                       const QString& strNewLocation,
                                                       const WIZDOCUMENTDATA& data);
+
+    void on_action_copyItem();
 
     void on_action_renameItem();
     void on_action_user_renameFolder();

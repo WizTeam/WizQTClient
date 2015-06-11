@@ -11,6 +11,10 @@
 #include "wizobject.h"
 #include "wizmd5.h"
 
+class CWizDatabaseManager;
+class CWizProgressDialog;
+class CWizObjectDataDownloaderHost;
+
 #define WIZNOTE_OBSOLETE
 
 QString WizGetEmailPrefix(const QString& strMail);
@@ -179,6 +183,21 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 
 bool WizIsOffline();
 bool WizIsHighPixel();
+
+
+///
+void WizMoveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+                                     CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
+void WizMoveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
+                                CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
+void WizCopyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+                                  bool keepDocTime, bool keepTag, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress,
+                                  CWizObjectDataDownloaderHost* downloader);
+
+void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
+                                bool keepDocTime, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
 
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
