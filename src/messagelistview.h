@@ -88,6 +88,7 @@ signals:
 
 public slots:
     void on_message_created(const WIZMESSAGEDATA& msg);
+    void on_selector_indexChanged(int index);
 
 private:
     void addUserToSelector(const QString& userGUID);

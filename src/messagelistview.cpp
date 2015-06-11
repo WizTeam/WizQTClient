@@ -210,13 +210,13 @@ public:
             p->restore();
         }
 
-        QRect rcTitle(rcd.x() + 10, rcd.y() + 15, sz.width() - 5, sz.height() - 15);
+        QRect rcTitle(rcd.x() + 10, rcd.y() + 15, sz.width() - 6, sz.height() - 15);
 //        drawColorMessageBody(p, rcMsg, f);
         QString strTitle(m_data.title);
         QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
         if (!strTitle.isEmpty())
         {
-            rcTitle.setTop(rcFirstLine.bottom() + 4);
+            rcTitle.setTop(rcFirstLine.bottom());
             Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
         }
 
@@ -740,7 +740,8 @@ void WizMessageSelector::showPopup()
     QComboBox::showPopup();
 
     QWidget* popup = findChild<QFrame*>();
-    QPoint pos(0, parentWidget()->height());
+    int topMargin = 4;
+    QPoint pos(-6, height() + topMargin);
     pos = parentWidget()->mapToGlobal(pos);
     popup->move(pos);
 }
@@ -785,7 +786,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(10, 0, 16, 0);
+    layoutActions->setContentsMargins(2, 0, 16, 0);
     layoutActions->setSpacing(0);
     setLayout(layoutActions);
 
@@ -829,8 +830,8 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
                                              width: 0px;\
                                          }"\
                                              "QComboBox QListView{background-color:white;border:0px; min-width:160px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:160px; max-width:180px; margin-left:8px;background:transparent;}"
-                                             "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
+                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:160px; max-width:180px; margin-left:6px;background:transparent;}"
+                                             /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
 
     m_msgSelector->setMaxVisibleItems(15);\
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
@@ -840,7 +841,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 
     layoutActions->addWidget(m_msgSelector);
     connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
-            SIGNAL(messageSelector_indexChanged(int)));
+            SLOT(on_selector_indexChanged(int)));
 
     layoutActions->addStretch();
     m_msgListHintLabel = new QLabel(this);
@@ -902,6 +903,17 @@ void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
     messageSelector_indexChanged(m_msgSelector->currentIndex());
 }
 
+void WizMessageListTitleBar::on_selector_indexChanged(int index)
+{
+    QString text = m_msgSelector->currentText();
+    QFont f;
+    QFontMetrics fm(f);
+    const int elidedTextWidth = 80;
+    QString elidedText = fm.elidedText(text, Qt::ElideRight, elidedTextWidth);
+    m_msgSelector->setEditText(elidedText);
+    emit messageSelector_indexChanged(index);
+}
+
 void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
 {
     CWizBizUserDataArray arrayUser;
@@ -961,13 +973,24 @@ WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
 
 void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
+    QStyleOptionViewItem opt(option);
     //NOTE:QCombobox 的项目的背景css颜色样式无效，需要通过绘制实现。
     if (option.state & QStyle::State_Selected)
+    {
+        opt.palette.setColor(QPalette::Text, QColor(Qt::black));
+        opt.palette.setColor(QPalette::WindowText, QColor(Qt::black));
+        opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::black));
+    }
+    if (option.state & QStyle::State_MouseOver)
+    {
         painter->fillRect(option.rect, QBrush(QColor("#3397db")));
-    else if (option.state & QStyle::State_MouseOver)
-        painter->fillRect(option.rect, QBrush(QColor("#3397db")));
+        opt.palette.setColor(QPalette::Text, QColor(Qt::white));
+        opt.palette.setColor(QPalette::WindowText, QColor(Qt::white));
+        opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::white));
+    }
 
-    QStyledItemDelegate::paint(painter, option, index);
+
+    QStyledItemDelegate::paint(painter, opt, index);
 }
 
 WizSortFilterProxyModel::WizSortFilterProxyModel(QObject* parent)
