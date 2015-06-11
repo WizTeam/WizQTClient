@@ -502,6 +502,7 @@ Q_SIGNALS:
     void folderPositionChanged();
     void tagsPositionChanged(const QString& strKbGUID);
     void documentUploaded(const QString& strKbGUID, const QString& strGUID);
+    void userIdChanged(const QString& oldId, const QString& newId);
 
 private:
     //should make sure sourceDoc already exist before use this.

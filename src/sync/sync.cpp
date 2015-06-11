@@ -1699,14 +1699,14 @@ bool WizUploadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server, 
     if (!strDeleteIds.isEmpty())
     {
         strDeleteIds.remove(strDeleteIds.length() - 1, 1);      // remove the last ','
-        qDebug() << "upload read message : " << strReadIds;
+        qDebug() << "upload delete message : " << strReadIds;
         if (server.SetMessageDeleteStatus(strDeleteIds, 1))
         {
             QStringList deleteIds = strDeleteIds.split(',', QString::SkipEmptyParts);
             CWizMessageDataArray deleteMsgArray;
             for (it = arrayMessage.begin(); it != arrayMessage.end(); it++)
             {
-                qDebug() << "current item ; " << QString::number(it->nId) << " string list ; " << deleteIds;
+                qDebug() << "current item ; " << QString::number(it->nId);
                 if (deleteIds.contains(QString::number(it->nId)))
                 {
                     it->nLocalChanged = it->nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;

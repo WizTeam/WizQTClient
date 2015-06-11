@@ -71,6 +71,9 @@ Q_SIGNALS:
     void databasePermissionChanged(const QString& strKbGUID);
     void databaseBizchanged(const QString&);
 
+    //
+    void userIdChanged(const QString& oldId, const QString& newId);
+
     // CWizDatabase passthrough signals
     void tagCreated(const WIZTAGDATA& tag);
     void tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);

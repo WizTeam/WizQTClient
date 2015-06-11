@@ -47,11 +47,11 @@ void AvatarDownloader::download(const QString& strUserGUID)
 void AvatarDownloader::on_queryUserAvatar_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-    reply->deleteLater();
 
     if (reply->error()) {
         qDebug() << "[AvatarHost]Error occured: " << reply->errorString();
         fetchUserAvatarEnd(false);
+        reply->deleteLater();
         return;
     }
 
@@ -70,6 +70,7 @@ void AvatarDownloader::on_queryUserAvatar_finished()
 
         // read and save avatar
         QByteArray bReply = reply->readAll();
+        reply->deleteLater();
 
         if (!save(m_strCurrentUser, bReply)) {
             qDebug() << "[AvatarHost]failed: unable to save user avatar, guid: " << m_strCurrentUser;

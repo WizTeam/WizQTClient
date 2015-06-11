@@ -102,3 +102,21 @@ void CWizScrollBar::on_scrollTimeout()
 {
     hide();
 }
+
+
+CWizListWidgetWithCustomScorllBar::CWizListWidgetWithCustomScorllBar(QWidget* parent)
+    : QListWidget(parent)
+{
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    m_vScroll = new CWizScrollBar(this);
+    m_vScroll->syncWith(verticalScrollBar());
+}
+
+void CWizListWidgetWithCustomScorllBar::resizeEvent(QResizeEvent* event)
+{
+    // reset scrollbar
+    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+    QListWidget::resizeEvent(event);
+}

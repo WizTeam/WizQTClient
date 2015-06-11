@@ -40,7 +40,7 @@ void wizMacRegisterSystemService();
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
-QString wizSystemClipboardData();
+QString wizSystemClipboardData(QString& orignUrl);
 
 bool documentToHtml(const QString& strFile, documentType type, QString& strHtml);
 

@@ -27,6 +27,7 @@
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizObjectDataDownloader.h"
 #include "sync/wizkmxmlrpc.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
@@ -53,7 +54,8 @@ using namespace WizService;
 
 #define WIZBOX_PROT     9269
 
-
+#define WIZLOGO_WIDTH_IMAGE    180
+#define WIZLOGO_WIDTH_AREA      190
 
 class ControlWidgetsLocker
 {
@@ -388,6 +390,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     {
         userSettings.setEnterpriseServerIP(m_lineEditServer->text());
         userSettings.setServerLicence(m_serverLicence);
+        downloadLogoFromWizBox(true);
     }
 
     return true;
@@ -453,21 +456,15 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
-    QString strlogo;
     // setup locale for welcome dialog
-    if (strLocal != WizGetDefaultTranslatedLocal()) {
-//        if (WizIsHighPixel()) {
-//            strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
-//        } else {
-            strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
-//        }
+    if (strLocal != WizGetDefaultTranslatedLocal()) {        
+        m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoCn");
     } else {
-        strlogo= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
+        m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
     }
-    QPixmap pix(strlogo);
-    ui->label_logo->setMinimumWidth(pix.width());
+    ui->label_logo->setMinimumWidth(180);   // use fixed logo size for oem
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(strlogo));
+                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(m_wizLogoPath));
     ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
 
     //
@@ -805,28 +802,12 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
         CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
         return false;
     }
-    ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
 
-    // get licence from server    
-    QNetworkAccessManager net;
-    QString strUrl = ApiEntry::standardCommandUrl("oem", false);    
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-    qDebug() << "get oem from server : " << strUrl;
-
-    QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
-
-    if (reply->error() != QNetworkReply::NoError)
-    {
-        qDebug() << "Download oem data failed!";
-        ui->label_passwordError->setText(tr("Can not find server."));
-        reply->deleteLater();
+    QString strResult = downloadOEMSettingsFromWizBox();
+    if (strResult.isEmpty())
         return false;
-    }
 
-    QString strResult = reply->readAll();
-    reply->deleteLater();
+    //
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
@@ -846,7 +827,8 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     {
         CWizMessageBox::warning(this, tr("Info"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
         return false;
-    } else
+    }
+    else
     {
         // update oem setttings
         CWizOEMSettings::updateOEMSettings(userId(), strResult);
@@ -877,6 +859,123 @@ void CWizLoginDialog::setSwicthServerActionEnable(const QString& strActionData, 
             actionItem->setEnabled(bEnable);
         }
     }
+}
+
+void CWizLoginDialog::downloadLogoFromWizBox(bool saveToUserSettings)
+{
+    QString oemSettings = downloadOEMSettingsFromWizBox();
+    if (oemSettings.isEmpty())
+        return;
+
+    rapidjson::Document d;
+    d.Parse<0>(oemSettings.toUtf8().constData());
+
+    qDebug() << "oem settings : " << oemSettings;
+
+    if (!d.FindMember("LogoConfig"))
+    {
+        qDebug() << "Can not find LogoConfig in oem settings";
+        return;
+    }
+
+    if (!d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
+    {
+        qDebug() << "LogoConfig was set to disable in oem settings";
+        return;
+    }
+
+    QString strLogoPath = d.FindMember("LogoConfig")->value.FindMember("login_logo")->value.GetString();
+    if (strLogoPath.isEmpty())
+    {
+        qDebug() << "Can not found logo path in oem settings";
+        return;
+    }
+
+    if (!strLogoPath.startsWith("http"))
+    {
+        strLogoPath = "http://" + m_lineEditServer->text() + strLogoPath;
+    }
+
+    QString strFileName = WizGenGUIDLowerCaseLetterOnly() + ".png";
+    CWizFileDownloader* downloader = new CWizFileDownloader(strLogoPath, strFileName, "", true);
+    QEventLoop loop;
+    loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
+    //  just wait for 15 seconds
+    QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
+    downloader->startDownload();
+    loop.exec();
+
+    strFileName = Utils::PathResolve::tempPath() + strFileName;
+    if (!QFile::exists(strFileName))
+    {
+        qDebug() << "Download logo image failed";
+        return;
+    }
+
+    setLogo(strFileName);
+
+    if (saveToUserSettings)
+    {
+        //
+        if (!CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
+            return;
+
+        //
+        CWizOEMSettings settings(m_lineEditUserName->text());
+        QString strOldPath = settings.logoPath();
+        if (!strOldPath.isEmpty())
+        {
+            QDir dir;
+            dir.remove(strOldPath);
+            QFile::copy(strFileName, strOldPath);
+        }
+        else
+        {
+            QString strNewPath = Utils::PathResolve::cachePath() + "logo/";
+            Utils::PathResolve::ensurePathExists(strNewPath);
+            strNewPath = strNewPath + WizGenGUIDLowerCaseLetterOnly() + ".png";
+            QFile::copy(strFileName, strNewPath);
+            settings.setLogoPath(strNewPath);
+        }
+    }
+}
+
+QString CWizLoginDialog::downloadOEMSettingsFromWizBox()
+{
+    if (m_lineEditServer->text().isEmpty())
+        return "";
+
+    ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
+
+    // get oem settings from server
+    QNetworkAccessManager net;
+    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    qDebug() << "get oem from server : " << strUrl;
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qDebug() << "Download oem data failed!";
+        ui->label_passwordError->setText(tr("Can not find server."));
+        reply->deleteLater();
+        return "";
+    }
+
+    QString strResult = reply->readAll();
+    reply->deleteLater();
+
+    return strResult;
+}
+
+void CWizLoginDialog::setLogo(const QString& logoPath)
+{
+    ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
+                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").
+                                  arg(logoPath.isEmpty() ? m_wizLogoPath : logoPath));
 }
 
 
@@ -1197,6 +1296,8 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_lineEditServer->setText(ip);
     m_serverType = EnterpriseServer;
     ApiEntry::setEnterpriseServerIP(ip);
+
+    downloadLogoFromWizBox(false);
 }
 
 void CWizLoginDialog::onWizBoxSearchingTimeOut()
@@ -1233,6 +1334,8 @@ void CWizLoginDialog::onWizLogInStateEntered()
     ApiEntry::setEnterpriseServerIP("");
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
     setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
+
+    setLogo(m_wizLogoPath);
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1258,6 +1361,17 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     m_serverType = EnterpriseServer;
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_BIZSERVER);
     setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, true);
+
+    // update logo if user server is oem server
+    if (m_currentUserServerType == EnterpriseServer)
+    {
+        if (CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
+        {
+            CWizOEMSettings settings(m_lineEditUserName->text());
+            QString strLogoPath = settings.logoPath();
+            setLogo(strLogoPath);
+        }
+    }
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()

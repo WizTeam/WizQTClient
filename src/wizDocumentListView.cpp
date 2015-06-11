@@ -292,62 +292,17 @@ void CWizDocumentListView::moveDocumentsToPrivateFolder(const CWizDocumentDataAr
 //        return;
 //    }
 
-
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    // move, show progress if size > 3
-    CWizFolder folder(m_dbMgr.db(), targetFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(m_dbMgr.db(), &folder, mainWindow->downloaderHost());
-        }
-    } else {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(m_dbMgr.db(), &folder, mainWindow->downloaderHost());
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
-    }
-
+    ::WizMoveDocumentsToPrivateFolder(arrayDocument, targetFolder, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    // move, show progress if size > 3
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, mainWindow->downloaderHost());
-        }
-    } else {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, mainWindow->downloaderHost());
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
-    }
+    ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
 }
 
 void CWizDocumentListView::copyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument,
@@ -355,30 +310,8 @@ void CWizDocumentListView::copyDocumentsToPrivateFolder(const CWizDocumentDataAr
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    // move, show progress if size > 3
-    CWizFolder folder(m_dbMgr.db(), targetFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(m_dbMgr.db(), &folder, keepDocTime, keepTag, mainWindow->downloaderHost());
-        }
-    } else {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(m_dbMgr.db(), &folder, keepDocTime, keepTag, mainWindow->downloaderHost());
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
-    }
+    ::WizCopyDocumentsToPrivateFolder(arrayDocument, targetFolder, keepDocTime, keepTag,
+                                      m_dbMgr, mainWindow->progressDialog(), mainWindow->downloaderHost());
 }
 
 void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
@@ -386,29 +319,8 @@ void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArra
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    // move, show progress if size > 3
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, mainWindow->downloaderHost());
-        }
-    } else {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(m_dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, mainWindow->downloaderHost());
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
-    }
+    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
 }
 
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)

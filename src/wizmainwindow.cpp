@@ -189,6 +189,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
 
+#if QT_VERSION > 0x050400
+    connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
+        WizService::AvatarHost::deleteAvatar(oldId);
+        WizService::AvatarHost::load(oldId);
+        WizService::AvatarHost::load(newId);
+    });
+#endif
+
     // GUI
     initActions();
 #ifdef Q_OS_MAC
@@ -1669,6 +1677,7 @@ QWidget* MainWindow::createNoteListView()
     line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
+    sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
@@ -3133,7 +3142,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 void MainWindow::showNewFeatureGuide()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
-    strUrl += "&name=newfeature-mac";
+    strUrl += "&name=newfeature-mac.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     dlg->loadAndShow(strUrl);

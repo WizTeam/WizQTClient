@@ -5,10 +5,13 @@
 #include <QResizeEvent>
 #include <QHBoxLayout>
 #include <QStyledItemDelegate>
+#include <QLineEdit>
 #include <QPainter>
 #include <QMenu>
 #include <QList>
+#include <QSortFilterProxyModel>
 #include <QDebug>
+#include <QTextCodec>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -27,6 +30,7 @@
 #include "wizCategoryView.h"
 #include "wizCategoryViewItem.h"
 #include "coreplugin/itreeview.h"
+#include "utils/misc.h"
 
 namespace WizService {
 namespace Internal {
@@ -64,7 +68,7 @@ public:
             QString strAfterTitle = strMsg.right(strMsg.length() - strMsg.lastIndexOf(m_data.title) - m_data.title.length());
             //
             QColor colorSummary = Qt::black;
-            QColor colorTitle(Qt::red);
+            QColor colorTitle("#3998d6");
 
             QRect rcBeforeTitle = Utils::StyleHelper::drawText(p, rcMsg, strBeforeTitle, 1, Qt::AlignVCenter, p->pen().color(), f, false);
             if (strBeforeTitle.isEmpty() && rcBeforeTitle.height() < rcMsg.height())   //  第一行有剩余空间
@@ -122,6 +126,28 @@ public:
         }
     }
 
+    QString descriptionOfMessageType(int type) const
+    {
+        switch (type) {
+        case WIZ_USER_MSG_TYPE_CALLED_IN_TITLE:
+            return QObject::tr("@ you in note title");
+            break;
+        case WIZ_USER_MSG_TYPE_MODIFIED:
+            return QObject::tr("Modified your note");
+            break;
+        case WIZ_USER_MSG_TYPE_COMMENT:
+            return QObject::tr("Comment your note");
+            break;
+        case WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT:
+            return QObject::tr("@ you in note comment");
+            break;
+        case WIZ_USER_MSG_TYPE_COMMENT_REPLY:
+            return QObject::tr("Reply your comment");
+            break;
+        }
+        return QObject::tr("Unknown meesage type");
+    }
+
     void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {
         int nMargin = Utils::StyleHelper::margin();
@@ -137,21 +163,27 @@ public:
         int nHeight = Utils::StyleHelper::fontNormal(f);
 
         p->save();
-        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+        bool bItemActive = vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus);
+        if (bItemActive)
         {
             p->setPen("#FFFFFF");
         }
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
+
+        QString strType = descriptionOfMessageType(m_data.nMessageType);
+        QRect rectType = rcd;
+        rectType.setLeft(rectSender.right() + 2);
+        Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
         rcd.setTop(rectSender.bottom());
 
         QRect rcBottom(rcd);
         rcBottom.setTop(rcd.bottom() - nHeight);
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
-        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, p->pen().color(), f);
+        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
 
         QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-        QPolygon po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+        QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
         po.translate(rcd.left() + nMargin, rcd.top());
 
         if (vopt->state.testFlag(QStyle::State_Selected)) {
@@ -178,8 +210,15 @@ public:
             p->restore();
         }
 
-        QRect rcMsg(rcd.x() + nMargin, rcd.y() + nMargin, sz.width(), sz.height());
-        drawColorMessageBody(p, rcMsg, f);
+        QRect rcTitle(rcd.x() + 10, rcd.y() + 15, sz.width() - 5, sz.height() - 15);
+//        drawColorMessageBody(p, rcMsg, f);
+        QString strTitle(m_data.title);
+        QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
+        if (!strTitle.isEmpty())
+        {
+            rcTitle.setTop(rcFirstLine.bottom() + 4);
+            Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
+        }
 
         p->restore();
     }
@@ -311,13 +350,13 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     if (msg.nDeleteStatus == 1) {
-        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
+//        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
         return;
     }
 
     MessageListViewItem* pItem = new MessageListViewItem(msg);
 
-    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 2;
+    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 5;
     pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
 
     addItem(pItem);
@@ -409,7 +448,6 @@ void MessageListView::markAllMessagesReaded()
 
 void MessageListView::on_uploadReadStatus_finished(const QString& ids)
 {
-    qDebug() << "upload read status finished : " << ids;
     QStringList idList = ids.split(',');
     CWizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
@@ -423,7 +461,6 @@ void MessageListView::on_uploadReadStatus_finished(const QString& ids)
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
-        qDebug() << "upload read status finished : " <<id << " update db : " << msg.nLocalChanged;
         db.updateMessage(msg);
     }
 }
@@ -443,7 +480,6 @@ void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
         WIZMESSAGEDATA msg;
         db.messageFromId(id.toLong(), msg);
         msg.nLocalChanged = msg.nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
-        qDebug() << "upload delete status finished : " <<id << " localchanged : " << msg.nLocalChanged;
         db.updateMessage(msg);
     }
 }
@@ -548,6 +584,8 @@ void MessageListView::updateTreeItem()
     }
 }
 
+
+
 void MessageListView::on_action_message_mark_read()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
@@ -605,8 +643,6 @@ void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
                                           const WIZMESSAGEDATA& newMsg)
 {
     Q_UNUSED(oldMsg);
-    qDebug() << "on_message_modified : " << newMsg.nId << " message deleted ; " << newMsg.nDeleteStatus;
-
     int i = rowFromId(newMsg.nId);
     if (i != -1) {
         if (MessageListViewItem* pItem = messageItem(i)) {
@@ -695,51 +731,53 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
 
 WizMessageSelector::WizMessageSelector(QWidget* parent)
     : QComboBox(parent)
-    , m_isPopup(false)
-{
-    connect(this, SIGNAL(activated(int)), SLOT(resetIconSize()));
+{   
 }
 
 void WizMessageSelector::showPopup()
 {
-    setIconSize(QSize(30, 30));
+    setEditable(true);
     QComboBox::showPopup();
-    m_isPopup = true;
+
+    QWidget* popup = findChild<QFrame*>();
+    QPoint pos(0, parentWidget()->height());
+    pos = parentWidget()->mapToGlobal(pos);
+    popup->move(pos);
 }
 
-void WizMessageSelector::hidePopup()
-{
-    QComboBox::hidePopup();
-    resetIconSize();
-}
+//bool WizMessageSelector::event(QEvent* event)
+//{
+//    qDebug() << "event type  : " << event << "  cursor shape ; " << cursor().shape();
+//    return QComboBox::event(event);
+//}
 
-bool WizMessageSelector::event(QEvent* event)
-{
-    if (event->type() == QEvent::Paint)
-    {
-        //FIXME: QT5.4.1 foucus事件不会被触发，无法再次处理图标大小。此处根据是否需要重绘来刷新图标
-        if (m_isPopup)
-        {
-            m_isPopup = false;
-        }
-        else
-        {
-            resetIconSize();
-        }
-    }
-    return QComboBox::event(event);
-}
-
-void WizMessageSelector::resetIconSize()
-{
-    setIconSize(QSize(20, 20));
-}
 
 void WizMessageSelector::focusOutEvent(QFocusEvent* event)
 {
     QComboBox::focusOutEvent(event);
-    resetIconSize();
 }
+
+void WizMessageSelector::focusInEvent(QFocusEvent* event)
+{
+    //NOTE:为了使用弹出列表的滚动条，将combobox设置为可编辑。此处移除focusin来取消可编辑
+//    QComboBox::focusInEvent(event);
+    event->accept();
+    setCursor(QCursor(Qt::ArrowCursor));
+    clearFocus();
+}
+
+//void WizMessageSelector::mouseMoveEvent(QMouseEvent* event)
+//{
+//    QComboBox::mouseMoveEvent(event);
+//    qDebug() << "mousr move event ; " << cursor().shape();
+//    setCursor(QCursor(Qt::ArrowCursor));
+//}
+
+//void WizMessageSelector::enterEvent(QEvent* event)
+//{
+//    QComboBox::enterEvent(event);
+//    setCursor(QCursor(Qt::ArrowCursor));
+//}
 
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
     : QWidget(parent)
@@ -747,41 +785,58 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(16, 0, 16, 0);
+    layoutActions->setContentsMargins(10, 0, 16, 0);
     layoutActions->setSpacing(0);
     setLayout(layoutActions);
 
     m_msgSelector = new WizMessageSelector(this);
-    m_msgSelector->setMinimumHeight(22);
-    m_msgSelector->setFixedWidth(156);
+//    m_msgSelector->setMinimumHeight(22);
+    m_msgSelector->setFixedHeight(22);
+    m_msgSelector->setFixedWidth(122);
+    m_msgSelector->setIconSize(QSize(20, 20));
+    m_msgSelector->setEditable(true);
 
     QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
     int minHeight = m_msgSelector->count() * 40 + 200;
     minHeight = qMin(minHeight, height());
-    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #0a214c; selection-background-color: #C19A6B;}"
-                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;min-width: 6em;}"
+    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
+                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"                                         
                                              "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
                                              "QComboBox::down-arrow {image:url(%1);}"
-                                             "QComboBox QListView{background-color:white;border:0px; min-width:140px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:40px; min-width:140px; max-width:180px; margin-left:8px;background:transparent;}"
+                                         "QComboBox QListView QScrollBar {\
+                                             background: transparent;\
+                                             width: 10px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle {\
+                                             background: rgba(85, 85, 85, 200);\
+                                             border-radius: 4px;\
+                                             min-height: 30px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle:vertical {\
+                                             margin: 0px 2px 0px 0px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::handle:horizontal {\
+                                             margin: 0px 0px 2px 0px;\
+                                         }\
+                                         QComboBox QListView QScrollBar::add-page, QScrollBar::sub-page {\
+                                             background: transparent;\
+                                         }\
+                                         QComboBox QListView QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+                                             background: transparent;\
+                                         }\
+                                         QComboBox QListView QScrollBar::add-line, QScrollBar::sub-line {\
+                                             height: 0px;\
+                                             width: 0px;\
+                                         }"\
+                                             "QComboBox QListView{background-color:white;border:0px; min-width:160px;}"
+                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:160px; max-width:180px; margin-left:8px;background:transparent;}"
                                              "QComboBox::item:selected {background:transparent;color:#ffffff;}").arg(strDropArrow));
 
-
+    m_msgSelector->setMaxVisibleItems(15);\
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
     m_msgSelector->setItemDelegate(itemDelegate);
 
-    CWizStdStringArray arraySender;
-    CWizDatabase& db = m_dbMgr.db();
-    db.getAllMessageSenders(arraySender);
-    for (auto sender : arraySender)
-    {
-        addUserToSelector(sender);
-    }
-    m_msgSelector->model()->sort(0);
-    //
-    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
-    QIcon icon(pix);
-    m_msgSelector->insertItem(0, icon, tr("All members"));
+    initUserList();
 
     layoutActions->addWidget(m_msgSelector);
     connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
@@ -831,13 +886,20 @@ QString WizMessageListTitleBar::selectorItemData(int index) const
 
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
 {
-    if (msg.senderGUID.isEmpty())
-        return;
 
-    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
-    {
-        addUserToSelector(msg.senderGUID);
-    }
+    //FIXME:在添加新的项目到列表中时存在icon丢失的问题，暂不提供根据新消息添加用户的功能
+//    if (msg.senderGUID.isEmpty())
+//        return;
+
+//    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
+//    {
+//        addUserToSelector(msg.senderGUID);
+//        m_msgSelector->model()->sort(0);
+//    }
+
+
+    // update message list
+    messageSelector_indexChanged(m_msgSelector->currentIndex());
 }
 
 void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
@@ -855,11 +917,41 @@ void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
     }
     QStringList userList(userSet.toList());
     QString strText = userList.join(';');
+//    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
     QPixmap pix;
     WizService::AvatarHost::load(strUserId);
     WizService::AvatarHost::avatar(strUserId, &pix);
     QIcon icon(pix);
     m_msgSelector->addItem(icon, strText, userGUID);
+}
+
+void WizMessageListTitleBar::initUserList()
+{
+    CWizStdStringArray arraySender;
+    CWizDatabase& db = m_dbMgr.db();
+    db.getAllMessageSenders(arraySender);
+    for (auto sender : arraySender)
+    {
+        addUserToSelector(sender);
+    }
+
+    static bool once = true;
+    if (once)
+    {
+        WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
+        proxy->setSourceModel(m_msgSelector->model());                            // <--
+        m_msgSelector->model()->setParent(proxy);                                 // <--
+        m_msgSelector->setModel(proxy);
+        once = false;
+    }
+    //
+    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+    QIcon icon(pix);
+//    m_msgSelector->insertItem(0, icon, tr("All members"));
+    m_msgSelector->addItem(icon, tr("All members"), "");
+
+    m_msgSelector->model()->sort(0);
+    m_msgSelector->setCurrentIndex(0);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
@@ -876,6 +968,49 @@ void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOption
         painter->fillRect(option.rect, QBrush(QColor("#3397db")));
 
     QStyledItemDelegate::paint(painter, option, index);
+}
+
+WizSortFilterProxyModel::WizSortFilterProxyModel(QObject* parent)
+    : QSortFilterProxyModel(parent)
+{
+
+}
+
+bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelIndex& right) const
+{
+    QString leftGuid = sourceModel()->data(left, Qt::UserRole).toString();
+    QString rightGuid = sourceModel()->data(right, Qt::UserRole).toString();
+    if (leftGuid.isEmpty())
+        return true;
+    if (rightGuid.isEmpty())
+        return false;
+
+    QVariant leftData = sourceModel()->data(left);
+    QVariant rightData = sourceModel()->data(right);
+
+    QString leftString  = leftData.toString();
+    QString rightString = rightData.toString();
+
+//    return QString::localeAwareCompare(leftString, rightString) < 0;
+
+
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(leftString);
+            QByteArray arrOther = pCodec->fromUnicode(rightString);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return leftString.compare(rightString) < 0;
+
 }
 
 

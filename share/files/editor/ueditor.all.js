@@ -15901,6 +15901,7 @@ UE.plugins['fiximgclick'] = (function () {
                         }
                         domUtils.un(me.doc,'mousemove', me.proxy(me._eventHandler, me));
                         me.editor.fireEvent('contentchange');
+                        me.editor.fireEvent('wizcontentchange');
                         break;
                     default:
                         break;

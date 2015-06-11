@@ -34,6 +34,9 @@ public:
     // file operations
     static qint64 getFileSize(const CString& strFileName);
     static void deleteFile(const CString& strFileName);
+
+    //
+    static bool isSimpChinese();
 };
 
 } // namespace Utils

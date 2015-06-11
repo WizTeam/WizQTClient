@@ -246,7 +246,6 @@ bool CWizIndex::getModifiedMessages(CWizMessageDataArray& arrayMsg)
                                       FIELD_LIST_WIZ_MESSAGE,
                                       strExt);
 
-    qDebug() << "get modified messages , sql : " << strSQL;
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 

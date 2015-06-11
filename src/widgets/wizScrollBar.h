@@ -4,6 +4,7 @@
 #include <QScrollBar>
 #include <QPointer>
 #include <QTimer>
+#include <QListWidget>
 
 
 class CWizScrollBar : public QScrollBar
@@ -29,5 +30,17 @@ private:
     QTimer m_timerScrollTimeout;
 };
 
+class CWizListWidgetWithCustomScorllBar : public  QListWidget
+{
+    Q_OBJECT
+public:
+    CWizListWidgetWithCustomScorllBar(QWidget* parent = 0);
+
+protected:
+    void resizeEvent(QResizeEvent* event);
+
+protected:
+    CWizScrollBar* m_vScroll;
+};
 
 #endif // WIZSCROLLBAR_H

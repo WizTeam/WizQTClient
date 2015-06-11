@@ -55,6 +55,10 @@ try {
     //     WizEditor.setContentsChanged(true);
     // });
 
+    editor.addListener('wizcontentchange', function() {
+        WizEditor.setContentsChanged(true);
+    });
+
 } catch (err) {
     alert(err);
 }

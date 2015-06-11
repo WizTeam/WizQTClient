@@ -49,6 +49,7 @@ private Q_SLOTS:
     void onInsertCompletion(const QModelIndex &index);    
     void onTitleReturnPressed();
     void onTextEdit(const QString & text);
+    void onTextChanged(const QString & text);
 };
 
 } // namespace Internal

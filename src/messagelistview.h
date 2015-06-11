@@ -7,6 +7,7 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QStyledItemDelegate>
+#include <QSortFilterProxyModel>
 //#include <memory>
 
 class CWizScrollBar;
@@ -31,6 +32,14 @@ namespace Internal {
 
 class MessageListViewItem;
 
+class WizSortFilterProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    WizSortFilterProxyModel(QObject *parent = 0);
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+};
+
 class WizMessageSelectorItemDelegate : public QStyledItemDelegate
 {
 public:
@@ -48,19 +57,15 @@ class WizMessageSelector : public QComboBox
 public:
     WizMessageSelector(QWidget *parent = 0);
 
-    virtual void showPopup();
-    virtual void hidePopup();
+    virtual void showPopup();   
 
-    bool event(QEvent *event);
-
-public slots:
-    void resetIconSize();
+//    bool event(QEvent *event);
 
 protected:
     void focusOutEvent(QFocusEvent* event);
-
-private:
-    bool m_isPopup;
+    void focusInEvent(QFocusEvent* event);
+//    void	mouseMoveEvent(QMouseEvent * event);
+//    void	enterEvent(QEvent * event);
 };
 
 
@@ -86,10 +91,12 @@ public slots:
 
 private:
     void addUserToSelector(const QString& userGUID);
+    void initUserList();
 
 private:
     CWizDatabaseManager& m_dbMgr;
     WizMessageSelector* m_msgSelector;
+    QListWidget* m_listWidget;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;
 };

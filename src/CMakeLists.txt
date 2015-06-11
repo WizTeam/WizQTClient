@@ -339,7 +339,6 @@ set(wiznote_HEADERS
     share/wizUDPClient.h
     share/wizMessageBox.h
     wizOEMSettings.h
-    wizOEMSettings_p.h
     core/wizTagBar.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h

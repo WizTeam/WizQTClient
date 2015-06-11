@@ -126,6 +126,9 @@ private:
     bool checkServerLicence(const QString& strOldLicence);
     void setSwicthServerSelectedAction(const QString& strActionData);
     void setSwicthServerActionEnable(const QString &strActionData, bool bEnable);
+    void downloadLogoFromWizBox(bool saveToUserSettings);
+    QString downloadOEMSettingsFromWizBox();
+    void setLogo(const QString& logoPath);
 
 private:
     Ui::wizLoginWidget *ui;
@@ -138,6 +141,7 @@ private:
     WizServerType m_currentUserServerType;
     QString m_serverLicence;
     QTimer m_wizBoxSearchingTimer;
+    QString m_wizLogoPath;
 
     QLineEdit* m_lineEditUserName;
     QLineEdit* m_lineEditPassword;
