@@ -2530,7 +2530,7 @@ void MainWindow::on_actionGoBack_triggered()
 
     WIZDOCUMENTDATA data = m_history->back();
     CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
-    if (db.DocumentFromGUID(data.strGUID, data))
+    if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
         locateDocument(data);
@@ -2553,7 +2553,7 @@ void MainWindow::on_actionGoForward_triggered()
 
     WIZDOCUMENTDATA data = m_history->forward();
     CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
-    if (db.DocumentFromGUID(data.strGUID, data))
+    if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
         locateDocument(data);
