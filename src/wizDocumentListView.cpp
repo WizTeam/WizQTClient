@@ -323,6 +323,40 @@ void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArra
                                     mainWindow->progressDialog(), mainWindow->downloaderHost());
 }
 
+void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& arrayDocument)
+{
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+        if (db.IsGroup())
+        {
+            CWizStdStringArray arrayTagGUID;
+            db.GetDocumentTags(doc.strGUID, arrayTagGUID);
+            WIZTAGDATA targetTag;
+            if (arrayTagGUID.size() > 1)
+            {
+                qDebug() << "Too may tags found by document : " << doc.strTitle;
+                continue;
+            }
+            else if (arrayTagGUID.size() == 1)
+            {
+                db.TagFromGUID(*arrayTagGUID.begin(), targetTag);
+            }
+            targetTag.strKbGUID = doc.strKbGUID;
+            //
+            CWizDocumentDataArray arrayCopyDoc;
+            arrayCopyDoc.push_back(doc);
+            copyDocumentsToGroupFolder(arrayCopyDoc, targetTag, true);
+        }
+        else
+        {
+            CWizDocumentDataArray arrayCopyDoc;
+            arrayCopyDoc.push_back(doc);
+            copyDocumentsToPrivateFolder(arrayCopyDoc, doc.strLocation, true, true);
+        }
+    }
+}
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     /*
@@ -636,7 +670,7 @@ QPixmap WizGetDocumentDragBadget(int nCount)
     p.setBrush(brush);
 
     p.drawEllipse(rectBadget);
-    p.drawText(rectBadget,  Qt::AlignVCenter, QString::number(nCount));
+    p.drawText(rectBadget,  Qt::AlignCenter, QString::number(nCount));
 
     // draw badget on icon
     QPixmap pixmapDragIcon(szPixmap.width() + rectBadget.width() / 2, szPixmap.height());
@@ -691,9 +725,13 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
-
     drag->setPixmap(WizGetDocumentDragBadget(items.size()));
-    drag->exec();
+
+//    Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+//    bool forceCopy = keyMod.testFlag(Qt::AltModifier);
+//    Qt::DropAction deafult = forceCopy ? Qt::CopyAction : Qt::MoveAction;
+
+    drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
 
     //delete drag would cause crash
 //    drag->deleteLater();
@@ -701,20 +739,28 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 
 void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS) ||
+            event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+        event->accept();
     }
-
-    //QListWidget::dragEnterEvent(event);
+    else
+    {
+        QListWidget::dragEnterEvent(event);
+    }
 }
 
 void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
-{
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
+{   
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)||
+            event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+        event->accept();
     }
-
-    //QListWidget::dragMoveEvent(event);
+    else
+    {
+        QListWidget::dragMoveEvent(event);
+    }
 }
 
 void CWizDocumentListView::dropEvent(QDropEvent * event)
@@ -737,9 +783,26 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
                 }
             }
         }
-
-        event->acceptProposedAction();
     }
+    else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        ::WizGetAnalyzer().LogAction("documentListDuplicateDocument");
+        CWizDocumentDataArray arrayDocument;
+        ::WizMime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dbMgr, arrayDocument);
+
+        if (!arrayDocument.size())
+            return;
+
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+        bool forceCopy = keyMod.testFlag(Qt::AltModifier);
+
+        if (!forceCopy)
+            return;
+
+        duplicateDocuments(arrayDocument);
+    }
+
+    event->acceptProposedAction();
 }
 
 void CWizDocumentListView::resetItemsViewType(int type)

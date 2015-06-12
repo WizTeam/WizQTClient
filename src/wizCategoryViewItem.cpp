@@ -669,6 +669,8 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 
 bool CWizCategoryViewAllFoldersItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
     return NULL != item;
 }
@@ -752,6 +754,8 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 
 bool CWizCategoryViewFolderItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
     return NULL != item;
 }
@@ -778,6 +782,18 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+
+       // copy document tag for personal db
+       if (!sourceDb.IsGroup())
+       {
+           CWizStdStringArray arrayTagGUID;
+           sourceDb.GetDocumentTags(data.strGUID, arrayTagGUID);
+           WIZDOCUMENTDATA newDoc;
+           if (myDb.DocumentFromGUID(strNewDocGUID, newDoc))
+           {
+               myDb.SetDocumentTags(newDoc, arrayTagGUID);
+           }
+       }
    }
 }
 
@@ -1390,8 +1406,10 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
 
 bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
-    return item->kbGUID() == kbGUID();
+    return item && item->kbGUID() == kbGUID();
 }
 
 void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
@@ -1666,7 +1684,8 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
 
 bool CWizCategoryViewGroupItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
-    qDebug() << "accept drop called : " << pItem->kbGUID() << " item kb ; " << kbGUID();
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     return pItem->kbGUID() == kbGUID();
 }
 

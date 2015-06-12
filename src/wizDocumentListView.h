@@ -208,6 +208,9 @@ private:
                                       bool keepDocTime, bool keepTag);
     void copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                     bool keepDocTime);
+
+    //
+    void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);
 };
 
 

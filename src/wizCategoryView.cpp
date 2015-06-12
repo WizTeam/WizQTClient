@@ -253,34 +253,22 @@ void CWizCategoryBaseView::contextMenuEvent(QContextMenuEvent * e)
 
 void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
 {
-    Q_UNUSED(supportedActions);
-
     if (m_app.userSettings().isManualSortingEnabled())
     {
         m_dragItem = currentCategoryItem<CWizCategoryViewItemBase>();
         Q_ASSERT(m_dragItem);
         if (!m_dragItem->dragAble() || !m_dbMgr.db(m_dragItem->kbGUID()).IsGroupSuper())
         {
-            m_dragItem = 0;
+            m_dragItem = nullptr;
             return;
         }
 
         resetRootItemsDropEnabled(m_dragItem);
         QTreeWidget::startDrag(supportedActions);
-        setCurrentItem(m_dragItem);
-        m_dragItem = 0;
-
-        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
-//        bool isSHIFT = keyMod.testFlag(Qt::ShiftModifier);
-        bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
-        qDebug() << "drag start key mode ctrl : " << isCTRL;
-        if (isCTRL)
+        if (m_dragItem != nullptr)
         {
-            setCursor(QCursor(Qt::DragCopyCursor));
-        }
-        else
-        {
-            setCursor(QCursor(Qt::DragMoveCursor));
+            setCurrentItem(m_dragItem);
+            m_dragItem = nullptr;
         }
 
         ::WizGetAnalyzer().LogAction("categoryDragItem");
@@ -288,23 +276,6 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         viewport()->repaint();
     }
 
-}
-
-void mime2Note(const QByteArray& bMime, CWizDocumentDataArray& arrayDocument)
-{
-    QString strMime(QString::fromUtf8(bMime));
-    QStringList lsNotes = strMime.split(";");
-    for (int i = 0; i < lsNotes.size(); i++) {
-        QStringList lsMeta = lsNotes[i].split(":");
-        //qDebug()<<lsMeta;
-        Q_ASSERT(lsMeta.size() == 2);
-
-        CWizDatabase& db = CWizDatabaseManager::instance()->db(lsMeta[0]);
-
-        WIZDOCUMENTDATA data;
-        if (db.DocumentFromGUID(lsMeta[1], data))
-            arrayDocument.push_back(data);
-    }
 }
 
 void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
@@ -343,7 +314,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
         }
 
         m_dragDocArray.clear();
-        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dragDocArray);
+        WizMime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dbMgr, m_dragDocArray);
 
         if (!m_dragDocArray.size())
             return;
@@ -376,7 +347,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
             if (pItem->acceptDrop(m_dragItem))
             {
                 pItem->setFlags(pItem->flags() | Qt::ItemIsDropEnabled);
-                m_dragItem->setFlags(m_dragItem->flags() | Qt::ItemIsDropEnabled);
+                m_dragItem->setFlags(m_dragItem->flags() | Qt::ItemIsDropEnabled);                
             }
             else
             {
@@ -414,7 +385,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         ::WizGetAnalyzer().LogAction("categoryDropDocument");
         CWizDocumentDataArray arrayDocument;
-        mime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), arrayDocument);
+        WizMime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dbMgr, arrayDocument);
 
         if (!arrayDocument.size())
             return;
@@ -423,7 +394,8 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if (!pItem)
             return;
 
-        bool forceCopy = (QApplication::keyboardModifiers() == Qt::ControlModifier);
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+        bool forceCopy = keyMod.testFlag(Qt::AltModifier);
 
         for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
              it != arrayDocument.end();
@@ -462,6 +434,41 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         }
         viewport()->repaint();
         return;
+
+//        CWizCategoryViewItemBase* hoveredItem = itemAt(event->pos());
+//        Q_ASSERT(hoveredItem != nullptr);
+
+//        if (hoveredItem->kbGUID() == m_dragItem->kbGUID())
+//        {
+//            QTreeWidget::dropEvent(event);
+//            if (m_dragItem)
+//            {
+//                on_itemPosition_changed(m_dragItem);
+//            }
+//            viewport()->repaint();
+//            return;
+//        }
+//        else
+//        {
+//            Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+//            bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
+//            QRect rcItem = visualItemRect(hoveredItem);
+//            qDebug() << "hover item rect : " << rcItem << "  event pos : " << event->pos();
+//            if (event->pos().y() < rcItem.top() + 2)
+//            {
+//                dropItemAsBrother(hoveredItem, m_dragItem, true, !isCTRL);
+//            }
+//            else if (event->pos().y() > rcItem.bottom() - 2)
+//            {
+//                dropItemAsBrother(hoveredItem, m_dragItem, false, !isCTRL);
+//            }
+//            else
+//            {
+//                dropItemAsChild(hoveredItem, m_dragItem, !isCTRL);
+//            }
+////                setCurrentItem(hoveredItem);
+//                m_dragItem = nullptr;
+//         }
     }
 
     viewport()->repaint();
@@ -743,6 +750,14 @@ void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item,
             resetFolderLocation(child, strChildLocation);
         }
     }
+}
+
+void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
+{
+}
+
+void CWizCategoryBaseView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
+{
 }
 
 void CWizCategoryBaseView::on_dragHovered_timeOut()
@@ -4589,12 +4604,7 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
             if (parentItem == 0)
-            {
-//                parentItem = folderRoot;
-                //拖拽存在bug，会导致普通元素变成顶级元素，此处进行特殊处理。
-//                int index = indexOfTopLevelItem(item);
-//                takeTopLevelItem(index);
-//                folderRoot->insertChild(0, item);
+            {                
                 parentItem = folderRoot;
             }
 
@@ -5004,6 +5014,89 @@ void CWizCategoryView::copyPersonalFolderToGroupFolder(CWizDatabase& db, const Q
         {
             copyPersonalFolderToGroupFolder(db, childFolder, targetDB, targetTag, keepDocTime,
                                             progress, downloader);
+        }
+    }
+}
+
+void CWizCategoryView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
+                                         CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
+{
+//    if (targetItem->type() == Category_FolderItem)
+//    {
+//        CWizCategoryViewFolderItem* folderItem = dynamic_cast<CWizCategoryViewFolderItem*>(targetItem);
+//        folderItem->location();
+//    }
+//    else if (targetItem->type() == Category_GroupItem)
+//    {
+
+//    }
+}
+
+void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
+{
+    if (targetItem->kbGUID() == dragedItem->kbGUID())
+    {
+        qDebug() << "Try to dropItemAsChild, but the targetItem and dragedItem are in same db, it should be processed in drop event, not here";
+        return;
+    }
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    if (targetItem->type() == Category_AllFoldersItem || targetItem->type() == Category_FolderItem)
+    {
+        QString targetParentFolder = "/";
+        if (targetItem->type() == Category_FolderItem)
+        {
+            CWizCategoryViewFolderItem* targetFolder = dynamic_cast<CWizCategoryViewFolderItem*>(targetItem);
+            targetParentFolder = targetFolder->location();
+        }
+        if (dragedItem->type() == Category_GroupItem)
+        {
+            CWizDatabase& sourceDB = m_dbMgr.db(dragedItem->kbGUID());
+            CWizCategoryViewGroupItem* groupItem = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
+            if (deleteDragSource)
+            {
+                moveGroupFolderToPersonalFolder(sourceDB, groupItem->tag(), targetParentFolder,
+                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
+            else
+            {
+                copyGroupFolderToPersonalFolder(sourceDB, groupItem->tag(), targetParentFolder, true,
+                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
+        }
+    }
+    else if (targetItem->type() == Category_GroupItem)
+    {
+        CWizCategoryViewGroupItem* targetFolder = dynamic_cast<CWizCategoryViewGroupItem*>(targetItem);
+        CWizDatabase& targetDB = m_dbMgr.db(targetItem->kbGUID());
+        if (dragedItem->type() == Category_FolderItem)
+        {
+            CWizCategoryViewFolderItem* sourceFolder = dynamic_cast<CWizCategoryViewFolderItem*>(dragedItem);
+            if (deleteDragSource)
+            {
+                movePersonalFolderToGroupFolder(m_dbMgr.db(), sourceFolder->location(), targetDB, targetFolder->tag(),
+                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
+            else
+            {
+                copyPersonalFolderToGroupFolder(m_dbMgr.db(), sourceFolder->location(), targetDB, targetFolder->tag(),
+                                                true, mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
+        }
+        else if (dragedItem->type() == Category_GroupItem)
+        {
+            CWizCategoryViewGroupItem* dragedFolder = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
+            CWizDatabase& sourceDB = m_dbMgr.db(dragedFolder->kbGUID());
+            if (deleteDragSource)
+            {
+                moveGroupFolderToGroupFolder(sourceDB, dragedFolder->tag(), targetDB, targetFolder->tag(),
+                                             mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
+            else
+            {
+                copyGroupFolderToGroupFolder(sourceDB, dragedFolder->tag(), targetDB, targetFolder->tag(),
+                                             true, mainWindow->progressDialog(), mainWindow->downloaderHost());
+            }
         }
     }
 }

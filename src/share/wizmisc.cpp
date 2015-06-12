@@ -2580,3 +2580,21 @@ void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
         progress->hide();
     }
 }
+
+
+void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
+{
+    QString strMime(QString::fromUtf8(bMime));
+    QStringList lsNotes = strMime.split(";");
+    for (int i = 0; i < lsNotes.size(); i++) {
+        QStringList lsMeta = lsNotes[i].split(":");
+        //qDebug()<<lsMeta;
+        Q_ASSERT(lsMeta.size() == 2);
+
+        CWizDatabase& db = dbMgr.db(lsMeta[0]);
+
+        WIZDOCUMENTDATA data;
+        if (db.DocumentFromGUID(lsMeta[1], data))
+            arrayDocument.push_back(data);
+    }
+}

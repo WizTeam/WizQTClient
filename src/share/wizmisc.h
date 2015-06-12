@@ -200,6 +200,10 @@ void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, c
                                 bool keepDocTime, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
 
+//
+void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
+
+
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
 
 enum WizKMUrlType

@@ -84,6 +84,12 @@ protected:
                                 QTreeWidgetItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
 
+    //
+    virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+                                   bool dropAtTop, bool deleteDragSource);
+    virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+                                 bool deleteDragSource);
+
 protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
@@ -510,7 +516,13 @@ private:
 
     void copyPersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
                                          const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
-                                         CWizObjectDataDownloaderHost* downloader);
+                                         CWizObjectDataDownloaderHost* downloader);    
+
+    //
+    virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+                                   bool dropAtTop, bool deleteDragSource);
+    virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+                                 bool deleteDragSource);
 
 private:
     QPointer<QMenu> m_menuShortcut;
