@@ -11888,7 +11888,7 @@ UE.plugins['paragraph'] = function() {
             }
             return range.moveToBookmark( bookmark2 ).moveToBookmark( bookmark );
         };
-    me.setOpt('paragraph',{'p':'', 'h1':'', 'h2':'', 'h3':'', 'h4':'', 'h5':'', 'h6':''});
+    me.setOpt('paragraph',{'p':'', 'div':'', 'h1':'', 'h2':'', 'h3':'', 'h4':'', 'h5':'', 'h6':''});
     me.commands['paragraph'] = {
         execCommand : function( cmdName, style,attrs,sourceCmdName ) {
             var range = this.selection.getRange();
@@ -11935,7 +11935,7 @@ UE.plugins['paragraph'] = function() {
             return true;
         },
         queryCommandValue : function() {
-            var node = domUtils.filterNodeList(this.selection.getStartElementPath(),'p h1 h2 h3 h4 h5 h6');
+            var node = domUtils.filterNodeList(this.selection.getStartElementPath(),'p div h1 h2 h3 h4 h5 h6');
             return node ? node.tagName.toLowerCase() : '';
         }
     };

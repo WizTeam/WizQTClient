@@ -426,8 +426,13 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     for (it = m_mapParagraphType.begin(); it != m_mapParagraphType.end(); it++) {
         m_comboParagraph->addItem(it.value(), it.key());
     }
+
+    m_mapParagraphType.insert(m_mapParagraphType.begin(), "div", tr("Text"));
+    m_comboParagraph->insertItem(m_comboParagraph->count(), tr("Text"), "div");
+
     m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
-    m_comboParagraph->insertItem(0, tr("Paragraph"), "p");
+    m_comboParagraph->insertItem(m_comboParagraph->count(), tr("Paragraph"), "p");
+    //
     connect(m_comboParagraph, SIGNAL(activated(int)),
             SLOT(on_comboParagraph_indexChanged(int)));
 

@@ -328,7 +328,9 @@ void CWizTagBar::on_buttonAddClicked()
         m_tagList = new CWizTagListWidget(this);
     }
 
-    m_tagList->setDocument(m_doc);
+    WIZDOCUMENTDATA doc;
+    m_dbMgr.db(m_doc.strKbGUID).DocumentFromGUID(m_doc.strGUID, doc);
+    m_tagList->setDocument(doc);
 
     QRect rc = m_btnAdd->rect();
     QPoint pt = m_btnAdd->mapToGlobal(QPoint(rc.width()/2, rc.height()));
