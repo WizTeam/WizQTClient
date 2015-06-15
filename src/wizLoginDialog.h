@@ -59,12 +59,12 @@ signals:
     void accountCheckFinished();
 
 #ifdef Q_OS_MAC
-private:
-    QPoint m_mousePoint;
 protected:
     void mousePressEvent(QMouseEvent* event);
     void mouseMoveEvent(QMouseEvent* event);
     void mouseReleaseEvent(QMouseEvent* event);
+private:
+    QPoint m_mousePoint;
 //#else
 //    void layoutTitleBar();
 #endif

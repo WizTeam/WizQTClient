@@ -95,6 +95,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     , m_serverType(WizServer)
     , m_searchingDialog(nullptr)
 {
+
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
@@ -190,6 +191,10 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     setUsers(strDefaultUserId);
     //
     initSateMachine();
+
+    QTimer::singleShot(500, [&](){
+        setFixedWidth(width());
+    });
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -398,6 +403,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
 
 void CWizLoginDialog::enableLoginControls(bool bEnable)
 {
+    ui->wgt_usercontainer->setEnabled(bEnable);
     m_lineEditUserName->setEnabled(bEnable);
     m_lineEditPassword->setEnabled(bEnable);
     ui->cbx_autologin->setEnabled(bEnable);
@@ -872,6 +878,14 @@ void CWizLoginDialog::downloadLogoFromWizBox(bool saveToUserSettings)
 
     qDebug() << "oem settings : " << oemSettings;
 
+#ifdef QT_DEBUG
+    if (!d.FindMember("LogoCustom") || !d.FindMember("LogoCustom")->value.GetBool())
+    {
+        qDebug() << "Logo custom is not enable";
+        return;
+    }
+#endif
+
     if (!d.FindMember("LogoConfig"))
     {
         qDebug() << "Can not find LogoConfig in oem settings";
@@ -1065,7 +1079,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
             CWizUserSettings userSettings(userId());
             if (password() != userSettings.password())
             {
-                ui->label_passwordError->setText(tr("Connection is not available, please check your network connection."));
+                ui->label_passwordError->setText(tr("Network connection is unavailable."));
                 return;
             }
             else
