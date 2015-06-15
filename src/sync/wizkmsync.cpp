@@ -192,6 +192,7 @@ bool CWizKMSyncThread::doSync()
         qDebug() <<  "[Sync] quick download messages started, thread:" << QThread::currentThreadId();
         //
         downloadMesages();
+        return true;
     }
     //
     return false;
@@ -369,7 +370,12 @@ bool CWizKMSyncThread::needDownloadMessage()
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    return m_bNeedDownloadMessages;
+    if (m_bNeedDownloadMessages)
+    {
+        m_bNeedDownloadMessages = false;
+        return true;
+    }
+    return false;
 }
 
 

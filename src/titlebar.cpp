@@ -49,7 +49,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_tagBar(new CWizTagBar(app, this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
-    , m_editorBar(new EditorToolBar(this))
+    , m_editorBar(new EditorToolBar(app, this))
     , m_editor(NULL)
     , m_tags(NULL)
     , m_info(NULL)
@@ -628,6 +628,12 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     if (view != noteView()) {
         return;
     }
+
+    static QString docGUID = "";
+    if (docGUID == note.strGUID)
+        return;
+    docGUID = note.strGUID;
+
 
     m_commentsUrl.clear();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),

@@ -12,6 +12,7 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QMimeData>
+#include <QStyledItemDelegate>
 #include <QDebug>
 
 #include "share/wizmisc.h"
@@ -23,6 +24,143 @@
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizAnalyzer.h"
+#include "wizdef.h"
+
+struct WizComboboxStyledItem
+{    
+    QString strText;
+    QString strUserData;
+    int nFontSize;
+    bool bBold;
+};
+
+
+const int nParagraphItemCount = 8;
+WizComboboxStyledItem* ParagraphItems()
+{
+    static WizComboboxStyledItem paragraphItems[] =
+    {
+        {QObject::tr("Paragraph"), "p", 14},
+        {QObject::tr("Text"), "div", 14},
+        {QObject::tr("H6"), "h6", 14, true},
+        {QObject::tr("H5"), "h5", 15, true},
+        {QObject::tr("H4"), "h4", 17, true},
+        {QObject::tr("H3"), "h3", 18, true},
+        {QObject::tr("H2"), "h2", 20, true},
+        {QObject::tr("H1"), "h1", 21, true }
+    };
+
+    return paragraphItems;
+}
+
+const int nFontSizeCount = 15;
+WizComboboxStyledItem* FontSizes()
+{
+    static WizComboboxStyledItem fontItems[] =
+    {
+        {"9px", "9px", 9},
+        {"10px", "10px", 10},
+        {"11px", "11px", 11},
+        {"12px", "12px", 12},
+        {"13px", "13px", 13},
+        {"14px", "14px", 14},
+        {"15px", "15px", 15},
+        {"16px", "16px", 16},
+        {"17px", "17px", 17},
+        {"18px", "18px", 18},
+        {"24px", "24px", 24},
+        {"36px", "36px", 36},
+        {"48px", "48px", 48},
+        {"64px", "64px", 64},
+        {"72px", "72px", 72}
+    };
+    return fontItems;
+};
+
+
+WizComboboxStyledItem itemFromArrayByKey(const QString& key, const WizComboboxStyledItem array[], const int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (array[i].strUserData == key)
+        {
+            return array[i];
+        }
+    }
+    WizComboboxStyledItem defaultItem;
+    return defaultItem;
+}
+
+WizComboboxStyledItem itemFromArrayByText(const QString& text, const WizComboboxStyledItem array[], const int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (array[i].strText == text)
+        {
+            return array[i];
+        }
+    }
+    WizComboboxStyledItem defaultItem;
+    return defaultItem;
+}
+
+class WizToolComboboxItemDelegate : public QStyledItemDelegate
+{
+public:
+    WizToolComboboxItemDelegate(QObject *parent, const WizComboboxStyledItem* items, int count)
+        : QStyledItemDelegate(parent), m_itemArray(items), m_arrayCount(count)
+    {}
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+        //
+        WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
+        opt.text = styledItem.strText;
+        opt.font.setPointSize(styledItem.nFontSize);
+        opt.font.setBold(styledItem.bBold);
+        qDebug() << "item check state ; " << opt.checkState << index.model()->data(index, Qt::CheckStateRole).toInt() << (opt.state & QStyle::State_Selected);
+        QStyledItemDelegate::paint(painter, opt, index);
+
+        //
+        QStyleOptionButton BtnStyle;
+        BtnStyle.state = QStyle::State_Enabled;
+
+        if(index.model()->data(index, Qt::CheckStateRole).toInt() == Qt::Checked)
+        {
+            BtnStyle.state |= QStyle::State_On;
+        }else{
+            BtnStyle.state |= QStyle::State_Off;
+        }
+
+
+        BtnStyle.direction = QApplication::layoutDirection();
+        BtnStyle.rect = option.rect;
+        QApplication::style()->drawControl(QStyle::CE_CheckBox,&BtnStyle,painter );
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItemV4 opt = option;
+        initStyleOption(&opt, index);
+
+        WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
+        QFont font = opt.font;
+        font.setPointSize(styledItem.nFontSize);
+        QFontMetrics fm(font);
+        QRect rc = fm.boundingRect(opt.text);
+//        qDebug()
+        //
+        QSize size(rc.width() + 4, rc.height() + 4);
+        return size;
+    }
+
+private:
+    const WizComboboxStyledItem* m_itemArray;
+    int m_arrayCount;
+};
 
 
 const QColor colors[6][8] =
@@ -407,31 +545,31 @@ private:
 };
 
 
-EditorToolBar::EditorToolBar(QWidget *parent)
+EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
     , m_resetLocked(false)
 {
-    QString skin = "default";
-
-    m_mapParagraphType.insert("h1", tr("H1"));
-    m_mapParagraphType.insert("h2", tr("H2"));
-    m_mapParagraphType.insert("h3", tr("H3"));
-    m_mapParagraphType.insert("h4", tr("H4"));
-    m_mapParagraphType.insert("h5", tr("H5"));
-    m_mapParagraphType.insert("h6", tr("H6"));
+    QString skin = "default";   
 
     m_comboParagraph = new CWizToolComboBox(this);
-    m_comboParagraph->setMinimumWidth(90);
-    QMap<QString, QString>::Iterator it;
-    for (it = m_mapParagraphType.begin(); it != m_mapParagraphType.end(); it++) {
-        m_comboParagraph->addItem(it.value(), it.key());
+    if (m_app.userSettings().locale() == ::WizGetDefaultTranslatedLocal())
+    {
+        m_comboParagraph->setMinimumWidth(90);
+    }
+    else
+    {
+        m_comboParagraph->setMinimumWidth(70);
     }
 
-    m_mapParagraphType.insert(m_mapParagraphType.begin(), "div", tr("Text"));
-    m_comboParagraph->insertItem(m_comboParagraph->count(), tr("Text"), "div");
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, paraItems, nParagraphItemCount);
+    m_comboParagraph->setItemDelegate(paragraphDelegate);
 
-    m_mapParagraphType.insert(m_mapParagraphType.begin(), "p", tr("Paragraph"));
-    m_comboParagraph->insertItem(m_comboParagraph->count(), tr("Paragraph"), "p");
+    for (int i = 0; i < nParagraphItemCount; i ++)
+    {
+        m_comboParagraph->addItem(paraItems[i].strText, paraItems[i].strUserData);
+    }
     //
     connect(m_comboParagraph, SIGNAL(activated(int)),
             SLOT(on_comboParagraph_indexChanged(int)));
@@ -441,11 +579,16 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
-    QStringList listSize;
-    listSize << "9px" << "10px" << "11px" << "12px" << "13px"<< "14px"
-             << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->addItems(listSize);
+    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:180px;}");
+    WizComboboxStyledItem* fontItems = FontSizes();
+    WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, fontItems, nFontSizeCount);
+    m_comboFontSize->setItemDelegate(fontDelegate);
+
+    for (int i = 0; i < nFontSizeCount; i++)
+    {
+        m_comboFontSize->addItem(fontItems[i].strText, fontItems[i].strUserData);
+    }
     connect(m_comboFontSize, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontSize_indexChanged(const QString&)));
 
@@ -851,7 +994,9 @@ void EditorToolBar::resetToolbar()
     m_btnInsertCode->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("Paragraph");
-    m_comboParagraph->setText(m_mapParagraphType.value(value));
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    WizComboboxStyledItem styledItem = itemFromArrayByKey(value, paraItems, nParagraphItemCount);
+    m_comboParagraph->setText(styledItem.strText);
     m_comboParagraph->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
@@ -1671,7 +1816,10 @@ void EditorToolBar::on_editor_paste_triggered()
 void EditorToolBar::on_comboParagraph_indexChanged(int index)
 {
     QString type = m_comboParagraph->itemData(index).toString();
-    QString text = m_mapParagraphType.value(type);
+    Q_ASSERT (index >=0 && index < nParagraphItemCount);
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    WizComboboxStyledItem item = itemFromArrayByKey(type, paraItems, nParagraphItemCount);
+    QString text = item.strText;
     if (text == m_comboParagraph->text())
         return;
 

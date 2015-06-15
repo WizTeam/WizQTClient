@@ -14,6 +14,7 @@ class CWizToolButton;
 class CWizToolButtonColor;
 class CWizToolComboBox;
 class CWizToolComboBoxFont;
+class CWizExplorerApp;
 
 struct WizEditorContextMenuItem;
 
@@ -26,7 +27,7 @@ class EditorToolBar : public QWidget
     Q_OBJECT
 
 public:
-    explicit EditorToolBar(QWidget *parent);
+    explicit EditorToolBar(CWizExplorerApp& app, QWidget *parent);
 #ifdef USEWEBENGINE
     void setDelegate(CWizDocumentWebEngine* editor);
 #else
@@ -39,6 +40,8 @@ protected:
     QSize sizeHint() const;
 
 private:
+    CWizExplorerApp& m_app;
+
 #ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_editor;
 #else
@@ -75,9 +78,7 @@ private:
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
-    QTimer m_resetLockTimer;
-
-    QMap<QString, QString> m_mapParagraphType;
+    QTimer m_resetLockTimer;    
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();

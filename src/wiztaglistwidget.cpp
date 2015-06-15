@@ -55,7 +55,12 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
 #elif defined(Q_OS_MAC)
     pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
 #endif
+    setStyleSheet("QWidget{background:#F7F7F7;}");
+
     m_list->setPalette(pal);
+//    m_list->setContentsMargins(10, 6, 0, 6);
+    m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px;}" \
+                          "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px;}");
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
@@ -66,7 +71,7 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
     layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
 //    layoutTitle->addWidget(m_tagsEdit);
     layoutTitle->setSpacing(0);
-    layoutTitle->setContentsMargins(4, 2, 0, 2);
+    layoutTitle->setContentsMargins(8, 2, 0, 2);
 
     layout->addLayout(layoutTitle);
     layout->addWidget(m_list);

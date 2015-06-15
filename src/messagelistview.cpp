@@ -11,6 +11,7 @@
 #include <QList>
 #include <QSortFilterProxyModel>
 #include <QDebug>
+#include <QApplication>
 #include <QTextCodec>
 
 #include <extensionsystem/pluginmanager.h>
@@ -741,7 +742,7 @@ void WizMessageSelector::showPopup()
 
     QWidget* popup = findChild<QFrame*>();
     int topMargin = 4;
-    QPoint pos(-6, height() + topMargin);
+    QPoint pos(0, height() + topMargin * 2);
     pos = parentWidget()->mapToGlobal(pos);
     popup->move(pos);
 }
@@ -797,9 +798,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgSelector->setIconSize(QSize(20, 20));
     m_msgSelector->setEditable(true);
 
-    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
-    int minHeight = m_msgSelector->count() * 40 + 200;
-    minHeight = qMin(minHeight, height());
+    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");    
     m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
                                              "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"                                         
                                              "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
@@ -829,13 +828,13 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
                                              height: 0px;\
                                              width: 0px;\
                                          }"\
-                                             "QComboBox QListView{background-color:white;border:0px; min-width:160px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:160px; max-width:180px; margin-left:6px;background:transparent;}"
+                                             "QComboBox QListView{background-color:white;border:0px; min-width:180px;}"
+                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:180px; max-width:180px; margin:2px 0px 2px 0px;background:transparent;}"
                                              /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
 
-    m_msgSelector->setMaxVisibleItems(15);\
+    m_msgSelector->setMaxVisibleItems(15);
     WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
-    m_msgSelector->setItemDelegate(itemDelegate);
+    m_msgSelector->setItemDelegate(itemDelegate);    
 
     initUserList();
 
@@ -973,7 +972,9 @@ WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
 
 void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
-    QStyleOptionViewItem opt(option);
+//    QStyleOptionViewItem opt(option);
+    QStyleOptionViewItemV4 opt = option;
+    initStyleOption(&opt, index);
     //NOTE:QCombobox 的项目的背景css颜色样式无效，需要通过绘制实现。
     if (option.state & QStyle::State_Selected)
     {
@@ -987,10 +988,22 @@ void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOption
         opt.palette.setColor(QPalette::Text, QColor(Qt::white));
         opt.palette.setColor(QPalette::WindowText, QColor(Qt::white));
         opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::white));
-    }
+    }    
 
+    painter->save();
 
-    QStyledItemDelegate::paint(painter, opt, index);
+    painter->setPen(QPen(opt.palette.color(QPalette::Text)));
+    painter->setFont(opt.font);
+
+    const int nMargin = 5;
+    const int nIconSize = 20;
+    QRect rcItem = opt.rect;
+    QRect rcIcon(rcItem.left() + nMargin, rcItem.top() + (rcItem.height() - nIconSize) / 2, nIconSize , nIconSize);
+    painter->drawPixmap(rcIcon, opt.icon.pixmap(nIconSize, nIconSize));
+    QRect rcText(rcIcon.right() + nMargin + 1, rcItem.top(), rcItem.width() - rcIcon.width() - nMargin * 2, rcItem.height());
+    painter->drawText(rcText, Qt::AlignLeft |Qt::AlignVCenter, opt.text);
+
+    painter->restore();
 }
 
 WizSortFilterProxyModel::WizSortFilterProxyModel(QObject* parent)

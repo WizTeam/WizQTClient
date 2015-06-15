@@ -33,14 +33,14 @@ using namespace Core::Internal;
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
-#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note To...")
-#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note To...")
-#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version history...")
-#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy document link")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move to...")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy to...")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version History...")
+#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Note Link")
 #define WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK QObject::tr("Share Link...")
-#define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt document")
-#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel document encryption")
-#define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always on top")
+#define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt Note")
+#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel Note Encryption")
+#define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always On Top")
 //#define WIZACTION_LIST_CANCEL_ON_TOP  QObject::tr("Cancel always on top")
 
 
@@ -167,10 +167,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_menuDocument->addSeparator();
 
-    QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
-                                                       this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     QAction* actionCopyDoc = m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT,
                                                        this, SLOT(on_action_copyDocument()), QKeySequence("Ctrl+Shift+C"));
+    QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
+                                                       this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     m_menuDocument->addAction(WIZACTION_LIST_ENCRYPT_DOCUMENT, this,
                               SLOT(on_action_encryptDocument()));
     m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ENCRYPTION, this,
