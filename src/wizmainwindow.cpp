@@ -148,6 +148,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_tray(NULL)
     , m_trayMenu(NULL)
     , m_mobileFileReceiver(nullptr)
+    , m_bQuickDownloadMessageEnable(true)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -491,7 +492,9 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 
 void MainWindow::on_TokenAcquired(const QString& strToken)
 {
-    WizService::Token::instance()->disconnect(this);
+    //WizService::Token::instance()->disconnect(this);
+    disconnect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), this,
+            SLOT(on_TokenAcquired(QString)));
 
     if (strToken.isEmpty())
     {
@@ -503,6 +506,9 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
         }
         else if (errorTokenInvalid == nErrorCode)
         {
+            // disable quick download message to stop request token again
+            m_bQuickDownloadMessageEnable = false;
+
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
             if (!m_userVerifyDialog)
@@ -512,9 +518,10 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
             }
 
             m_userVerifyDialog->exec();
+            m_userVerifyDialog->deleteLater();
+            m_userVerifyDialog = nullptr;
         }
     }
-
 }
 
 void MainWindow::on_quickSync_request(const QString& strKbGUID)
@@ -1347,7 +1354,7 @@ void MainWindow::loadMessageByUserGuid(const QString& guid)
 void MainWindow::windowActived()
 {
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
-    if (!isBizUser)
+    if (!isBizUser || !m_bQuickDownloadMessageEnable)
         return;
 
     m_sync->quickDownloadMesages();
@@ -1844,7 +1851,7 @@ void MainWindow::on_actionSync_triggered()
 //    else
 //    {
         syncAllData();
-//    }    
+//    }
 }
 
 void MainWindow::on_syncLogined()
@@ -1878,6 +1885,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     //
     if (errorTokenInvalid == nErrorCode)
     {
+        qDebug() << "sync done reconnectServer";
         reconnectServer();
         return;
     }
@@ -1896,6 +1904,11 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 //            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
 //        }
     }
+    else if (0 == nErrorCode)
+    {
+        // set quick download message enable
+        m_bQuickDownloadMessageEnable = true;
+    }
 
     m_documents->viewport()->update();
     m_category->updateGroupsData();
@@ -1904,7 +1917,6 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
 void MainWindow::on_syncDone_userVerified()
 {
-    m_userVerifyDialog->deleteLater();
 
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
         m_sync->clearCurrentToken();

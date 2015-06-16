@@ -194,6 +194,8 @@ private:
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
+    bool m_bQuickDownloadMessageEnable;
+
     WIZDOCUMENTDATA m_documentForEditing;
 
 private:
