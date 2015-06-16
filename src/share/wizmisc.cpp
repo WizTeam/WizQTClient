@@ -2542,7 +2542,7 @@ void WizCopyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument,
             CWizDocument doc(dbMgr.db(data.strKbGUID), data);
             doc.CopyTo(dbMgr.db(), &folder, keepDocTime, keepTag, downloader);
 
-            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
+            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
             i++;
@@ -2571,7 +2571,7 @@ void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
             CWizDocument doc(dbMgr.db(data.strKbGUID), data);
             doc.CopyTo(dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, downloader);
 
-            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
+            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
             progress->setNotifyString(data.strTitle);
             progress->setProgress(arrayDocument.size(), i);
             i++;

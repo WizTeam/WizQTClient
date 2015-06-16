@@ -4,12 +4,18 @@
 #include <QDialogButtonBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QDebug>
 
+#include "wizdef.h"
+#include "share/wizDatabase.h"
+#include "share/wizMessageBox.h"
 #include "wizFolderView.h"
 
-CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app, QWidget *parent)
+CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app,
+                                       unsigned int nPermission, QWidget *parent)
     : QDialog(parent)
     , m_app(app)
+    , m_nMinPermission(nPermission)
     , m_bAcceptRoot(true)
     , m_bKeepTime(true)
     , m_bKeepTags(true)
@@ -64,6 +70,28 @@ bool CWizFolderSelector::isKeepTag() const
 bool CWizFolderSelector::isSelectGroupFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
+
+    qDebug() << "selected item type " << item->type();
+    if (item->type() > QTreeWidgetItem::UserType)
+    {
+        CWizCategoryViewItemBase* baseItem = dynamic_cast<CWizCategoryViewItemBase*>(item);
+        if (!baseItem)
+            return false;
+
+        qDebug() << "item kbguid : " << baseItem->kbGUID();
+        if (m_app.databaseManager().db(baseItem->kbGUID()).permission() > m_nMinPermission)
+        {
+            if (m_nMinPermission >= WIZ_USERGROUP_READER)
+            {
+                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
+            }
+            else if (m_nMinPermission == WIZ_USERGROUP_SUPER)
+            {
+                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create note in this group!"));
+            }
+            return false;
+        }
+    }
 
     if (!m_bAcceptRoot)
         return item->type() == Category_GroupNoTagItem || item->type() == Category_GroupItem;

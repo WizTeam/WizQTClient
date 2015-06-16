@@ -1571,7 +1571,7 @@ void CWizCategoryView::on_action_moveItem()
 void CWizCategoryView::on_action_user_moveFolder()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuMoveFolder");
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, window());
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_user_moveFolder_confirmed(int)));
@@ -1685,7 +1685,7 @@ void CWizCategoryView::on_action_copyItem()
 void CWizCategoryView::on_action_user_copyFolder()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuCopyFolder");
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy folder"), m_app, window());
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
     bool isGroup = currentItem()->type() == Category_GroupItem;
     selector->setCopyStyle(!isGroup);

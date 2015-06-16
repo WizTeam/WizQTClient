@@ -1154,7 +1154,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 void CWizDocumentListView::on_action_moveDocument()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuMoveDocument");
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, WIZ_USERGROUP_AUTHOR, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -1213,7 +1213,7 @@ void CWizDocumentListView::on_action_copyDocument()
     ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
     Q_ASSERT(!m_rightButtonFocusedItems.isEmpty());
     //
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, WIZ_USERGROUP_AUTHOR, this);
     bool isGroup = m_dbMgr.db(m_rightButtonFocusedItems.first()->document().strKbGUID).IsGroup();
     selector->setCopyStyle(!isGroup);
     selector->setAcceptRoot(false);

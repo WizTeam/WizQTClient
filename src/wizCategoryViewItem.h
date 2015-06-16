@@ -7,7 +7,7 @@
 
 enum ItemType
 {
-    Category_WizNoneItem = 1001,
+    Category_WizNoneItem = QTreeWidgetItem::UserType + 1,
     Category_MessageItem,
     Category_ShortcutItem,
     Category_QuickSearchRootItem,
