@@ -3,10 +3,10 @@
 
 #include <QtGlobal>
 
-#define WIZ_CLIENT_VERSION  "2.1.19"
+#define WIZ_CLIENT_VERSION  "2.2.1"
 #define WIZNOTE_FTS_VERSION "5"
 #define WIZNOTE_THUMB_VERSION "3"
-#define WIZ_NEW_FEATURE_GUIDE_VERSION "2"
+#define WIZ_NEW_FEATURE_GUIDE_VERSION "3"
 #define WIZ_TABLE_STRUCTURE_VERSION "2"
 
 #if defined Q_OS_MAC
