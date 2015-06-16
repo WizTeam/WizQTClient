@@ -611,7 +611,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:195px;}"
+    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:200px;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizComboboxStyledItem* fontItems = FontSizes();
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
