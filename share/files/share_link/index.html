@@ -211,7 +211,6 @@
 				params['readCountSet'] = tempInfo.readCountSet;
 			}
 			//
-			console.log("put request : " + tempInfo.shareId);
 			request('PUT', url + '/' + tempInfo.shareId, params, function(status, resp) {
 				callback(status, resp);
 			});
@@ -337,7 +336,7 @@
 			}
 			else if (null != time) {
 				tempInfo.expiredAt = null;
-				tempInfo.readCountLimit = time;
+				tempInfo.readCountLimit = time + info.readCount;
 				tempInfo.expiredDaysSet = null;
 				tempInfo.readCountSet = time;
 			}

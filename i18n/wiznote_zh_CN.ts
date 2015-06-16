@@ -3242,7 +3242,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="47"/>
         <source>Note Folders</source>
-        <translation>笔记文件夹</translation>
+        <translation>文件夹</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="51"/>
