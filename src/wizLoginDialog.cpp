@@ -468,7 +468,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     } else {
         m_wizLogoPath= ::WizGetSkinResourceFileName(strThemeName, "loginLogoUS");
     }
-    ui->label_logo->setMinimumWidth(180);   // use fixed logo size for oem
+    ui->label_logo->setMinimumWidth(190);   // use fixed logo size for oem
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
                                         "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(m_wizLogoPath));
     ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
@@ -1194,6 +1194,7 @@ void CWizLoginDialog::showServerListMenu()
 
 void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
 {
+
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     emit accountCheckFinished();
     if (bFinish) {
@@ -1202,11 +1203,24 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
         ui->cbx_remberPassword->setChecked(false);
         doAccountVerify();
     } else {
+        static bool readVerificationCodeError = false;
         ui->label_passwordError->setText(api->lastErrorMessage());
         if (WIZ_ERROR_REGISTRATION_COUNT == api->lastErrorCode()) {
+
+            if (readVerificationCodeError)
+            {
+                ui->label_passwordError->setText(tr("Verification code error"));
+            }
+            else
+            {
+                ui->label_passwordError->clear();
+            }
+            readVerificationCodeError = false;
+
             QString strCaptchaID, strCaptcha;
             if (doVerificationCodeCheck(strCaptchaID, strCaptcha))
             {
+                readVerificationCodeError = true;
                 AsyncApi* api = new AsyncApi(this);
                 connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
                 api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "", strCaptchaID, strCaptcha);
