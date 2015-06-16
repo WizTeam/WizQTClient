@@ -1065,7 +1065,7 @@
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="1005"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1334"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1348"/>
         <source>No account yet,</source>
         <translation>还没有帐号，</translation>
     </message>
@@ -1077,7 +1077,7 @@
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="312"/>
         <location filename="../src/wizLoginDialog.cpp" line="808"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1322"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1336"/>
         <source>There is no server address, please input it.</source>
         <translation>没找到服务器地址，请手动输入服务器地址。</translation>
     </message>
@@ -1167,7 +1167,12 @@
         <translation>网络连接不可用.</translation>
     </message>
     <message>
-        <location filename="../src/wizLoginDialog.cpp" line="1399"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1212"/>
+        <source>Verification code error</source>
+        <translation>验证码错误</translation>
+    </message>
+    <message>
+        <location filename="../src/wizLoginDialog.cpp" line="1413"/>
         <source>Already got account,</source>
         <translation>已有帐号，</translation>
     </message>
@@ -1192,7 +1197,7 @@
         <location filename="../src/wizLoginDialog.cpp" line="326"/>
         <location filename="../src/wizLoginDialog.cpp" line="808"/>
         <location filename="../src/wizLoginDialog.cpp" line="834"/>
-        <location filename="../src/wizLoginDialog.cpp" line="1322"/>
+        <location filename="../src/wizLoginDialog.cpp" line="1336"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -2238,161 +2243,131 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::Internal::EditorToolBar</name>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="524"/>
-        <source>H1</source>
-        <translation>标题 1</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="525"/>
-        <source>H2</source>
-        <translation>标题 2</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="526"/>
-        <source>H3</source>
-        <translation>标题 3</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="527"/>
-        <source>H4</source>
-        <translation>标题 4</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="528"/>
-        <source>H5</source>
-        <translation>标题 5</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="529"/>
-        <source>H6</source>
-        <translation>标题 6</translation>
-    </message>
-    <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="578"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="629"/>
         <source>FormatMatch</source>
         <translation>格式刷</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="583"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="634"/>
         <source>ForeColor</source>
         <translation>字体颜色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="591"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="642"/>
         <source>BackColor</source>
         <translation>背景色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="599"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="650"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="604"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="655"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="609"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="660"/>
         <source>UnderLine</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="614"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="665"/>
         <source>StrikeThrough</source>
         <translation>删除线</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="619"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="670"/>
         <source>JustifyLeft</source>
         <translation>左对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="624"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="675"/>
         <source>JustifyCenter</source>
         <translation>居中对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="629"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="680"/>
         <source>JustifyRight</source>
         <translation>右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="634"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="685"/>
         <source>UnorderedList</source>
         <translation>无序列表</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="639"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="690"/>
         <source>OrderedList</source>
         <translation>有序列表</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="645"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="696"/>
         <source>InsertTable</source>
         <translation>插入表格</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="651"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="702"/>
         <source>InsertHorizontal</source>
         <translation>插入水平标尺</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="657"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="708"/>
         <source>InsertCheckList</source>
         <translation>插入清单</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="663"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="714"/>
         <source>InsertImage</source>
         <translation>插入图片</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="668"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="719"/>
         <source>Receive mobile image</source>
         <translation>手机传图</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="674"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="725"/>
         <source>Find &amp; Replace</source>
         <translation>查找 &amp; 替换</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="681"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="732"/>
         <source>Screen shot</source>
         <translation>屏幕截图</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="690"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="741"/>
         <source>View source</source>
         <translation>查看源码</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="696"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="747"/>
         <source>Insert code</source>
         <translation>插入代码</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1415"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1419"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1480"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1484"/>
         <source>transparent</source>
         <translation>清除颜色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1424"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1427"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1489"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1492"/>
         <source>show more colors...</source>
         <translation>显示更多颜色...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1534"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1627"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1599"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1692"/>
         <source>Save as...</source>
         <translation>另存为...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1535"/>
-        <location filename="../src/wizEditorToolBar.cpp" line="1628"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1600"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1693"/>
         <source>Image Files (*.%1)</source>
         <translation>图片文件 (*.%1)</translation>
     </message>
@@ -2734,7 +2709,7 @@ w: %3  h: %4</translation>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="51"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="48"/>
         <location filename="../src/wizactions.cpp" line="47"/>
         <source>Text</source>
         <translation>文本</translation>
@@ -2745,13 +2720,13 @@ w: %3  h: %4</translation>
         <translation>列表</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1248"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1313"/>
         <location filename="../src/wizactions.cpp" line="49"/>
         <source>Table</source>
         <translation>表格</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1226"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1291"/>
         <location filename="../src/wizactions.cpp" line="50"/>
         <source>Link</source>
         <translation>链接</translation>
@@ -2929,19 +2904,19 @@ w: %3  h: %4</translation>
         <translation>开发者模式</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1176"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1241"/>
         <location filename="../src/wizactions.cpp" line="114"/>
         <source>Justify left</source>
         <translation>左对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1178"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1243"/>
         <location filename="../src/wizactions.cpp" line="115"/>
         <source>Justify right</source>
         <translation>右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1177"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1242"/>
         <location filename="../src/wizactions.cpp" line="116"/>
         <source>Justify center</source>
         <translation>居中</translation>
@@ -3048,7 +3023,7 @@ w: %3  h: %4</translation>
         <translation>全选</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1180"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1245"/>
         <location filename="../src/wizactions.cpp" line="122"/>
         <source>Insert table</source>
         <translation>插入表格</translation>
@@ -3059,25 +3034,25 @@ w: %3  h: %4</translation>
         <translation>插入链接</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1169"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1234"/>
         <location filename="../src/wizactions.cpp" line="124"/>
         <source>Bold</source>
         <translation>粗体</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1170"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1235"/>
         <location filename="../src/wizactions.cpp" line="125"/>
         <source>Italic</source>
         <translation>斜体</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1171"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1236"/>
         <location filename="../src/wizactions.cpp" line="126"/>
         <source>Underline</source>
         <translation>下划线</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1172"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1237"/>
         <location filename="../src/wizactions.cpp" line="127"/>
         <source>Strike through</source>
         <translation>删除线</translation>
@@ -3444,260 +3419,260 @@ w: %3  h: %4</translation>
         <translation>转到笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1157"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1222"/>
         <location filename="../src/wizactions.cpp" line="87"/>
         <source>Cut</source>
         <translation>剪切</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1158"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1223"/>
         <location filename="../src/wizactions.cpp" line="88"/>
         <source>Copy</source>
         <translation>拷贝</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1159"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1224"/>
         <location filename="../src/wizactions.cpp" line="89"/>
         <source>Paste</source>
         <translation>粘贴</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1154"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1219"/>
         <source>Use &quot;Google&quot; search</source>
         <translation>使用 “Google&quot; 搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="45"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="54"/>
         <source>H1</source>
         <translation>标题 1</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="46"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="53"/>
         <source>H2</source>
         <translation>标题 2</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="47"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="52"/>
         <source>H3</source>
         <translation>标题 3</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="48"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="51"/>
         <source>H4</source>
         <translation>标题 4</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="49"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="50"/>
         <source>H5</source>
         <translation>标题 5</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="50"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="49"/>
         <source>H6</source>
         <translation>标题 6</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="52"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="47"/>
         <source>Paragraph</source>
         <translation>段落</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1155"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1220"/>
         <source>Use &quot;Baidu&quot; search</source>
         <translation>使用 &quot;百度&quot; 搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1161"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1226"/>
         <source>Save Image as...</source>
         <translation>图片另存为...</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1162"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1227"/>
         <source>Copy Image</source>
         <translation>复制图片</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1163"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1228"/>
         <source>Copy Image Link</source>
         <translation>复制图片链接</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1165"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1230"/>
         <source>Insert Link</source>
         <translation>插入链接</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1166"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1231"/>
         <source>Edit Link</source>
         <translation>编辑链接</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1167"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1232"/>
         <source>Remove Link</source>
         <translation>删除链接</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1173"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1238"/>
         <source>font color</source>
         <translation>字体颜色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1174"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1239"/>
         <source>background color</source>
         <translation>背景颜色</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1181"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1246"/>
         <source>Delete table</source>
         <translation>删除表格</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1183"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1248"/>
         <source>Delete row</source>
         <translation>删除行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1184"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1249"/>
         <source>Delete colum</source>
         <translation>删除列</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1186"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1251"/>
         <source>Insert row</source>
         <translation>插入上行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1187"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1252"/>
         <source>Insert row next</source>
         <translation>插入下行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1188"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1253"/>
         <source>Insert colum</source>
         <translation>插入左列</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1189"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1254"/>
         <source>Insert colum next</source>
         <translation>插入右列</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1191"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1256"/>
         <source>Insert caption</source>
         <translation>插入表格名称</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1192"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1257"/>
         <source>Delete caption</source>
         <translation>删除表格名称</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1193"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1258"/>
         <source>Insert title</source>
         <translation>插入标题行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1194"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1259"/>
         <source>Delete title</source>
         <translation>删除标题行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1196"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1261"/>
         <source>Merge cells</source>
         <translation>合并单元格</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1197"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1262"/>
         <source>Merge right</source>
         <translation>向右合并</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1198"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1263"/>
         <source>Merge down</source>
         <translation>向下合并</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1200"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1265"/>
         <source>Split cells</source>
         <translation>拆分单元格</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1201"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1266"/>
         <source>Split rows</source>
         <translation>拆分成行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1202"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1267"/>
         <source>Split colums</source>
         <translation>拆分成列</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1204"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1269"/>
         <source>Averaged distribute rows</source>
         <translation>平均分布各行</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1205"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1270"/>
         <source>Averaged distribute colums</source>
         <translation>平均分布各列</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1232"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1297"/>
         <source>Font</source>
         <translation>字体</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1242"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1307"/>
         <source>Justify</source>
         <translation>段落方向</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1252"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1317"/>
         <source>Cell Alignment</source>
         <translation>单元格对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1253"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1318"/>
         <source>Align leftTop</source>
         <translation>靠上两端对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1254"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1319"/>
         <source>Align top</source>
         <translation>靠上居中</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1255"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1320"/>
         <source>Align rightTop</source>
         <translation>靠上右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1256"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1321"/>
         <source>Align left</source>
         <translation>中部两端对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1257"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1322"/>
         <source>Align center</source>
         <translation>居中</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1258"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1323"/>
         <source>Align right</source>
         <translation>中部右对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1259"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1324"/>
         <source>Align leftBottom</source>
         <translation>靠下两端对齐</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1260"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1325"/>
         <source>Align bottom</source>
         <translation>靠下居中</translation>
     </message>
     <message>
-        <location filename="../src/wizEditorToolBar.cpp" line="1261"/>
+        <location filename="../src/wizEditorToolBar.cpp" line="1326"/>
         <source>Align rightBottom</source>
         <translation>靠下右对齐</translation>
     </message>
@@ -4202,22 +4177,22 @@ w: %3  h: %4</translation>
         <location filename="../src/messagelistview.cpp" line="847"/>
         <location filename="../src/messagelistview.cpp" line="867"/>
         <source>Unread messages</source>
-        <translation type="unfinished">未读消息</translation>
+        <translation>未读消息</translation>
     </message>
     <message>
         <location filename="../src/messagelistview.cpp" line="856"/>
         <source>Mark all messages read</source>
-        <translation type="unfinished">全部标记为已读</translation>
+        <translation>全部标记为已读</translation>
     </message>
     <message>
         <location filename="../src/messagelistview.cpp" line="867"/>
         <source>All messages</source>
-        <translation type="unfinished">全部消息</translation>
+        <translation>全部消息</translation>
     </message>
     <message>
         <location filename="../src/messagelistview.cpp" line="962"/>
         <source>All members</source>
-        <translation type="unfinished">全部成员</translation>
+        <translation>全部成员</translation>
     </message>
 </context>
 <context>

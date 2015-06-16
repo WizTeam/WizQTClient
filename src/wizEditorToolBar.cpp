@@ -154,7 +154,11 @@ public:
         {
             static QIcon icon = Utils::StyleHelper::loadIcon("listViewItemSelected");
             opt.icon = icon;
-            painter->drawPixmap(opt.rect.x() + 4, opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off));
+            QPixmap pix = icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off);
+            if (!pix.isNull())
+            {
+                painter->drawPixmap(opt.rect.x() + 4, opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
+            }
         }
         opt.rect.setX(opt.rect.x() + nIconSize + 4);
 
@@ -582,7 +586,8 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     {
         m_comboParagraph->setMinimumWidth(70);
     }
-    m_comboParagraph->setStyleSheet("QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
+                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
 
     WizComboboxStyledItem* paraItems = ParagraphItems();
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
