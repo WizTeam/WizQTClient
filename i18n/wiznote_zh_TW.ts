@@ -884,22 +884,38 @@
 <context>
     <name>CWizFolderSelector</name>
     <message>
-        <location filename="../src/wizFolderSelector.cpp" line="27"/>
+        <location filename="../src/wizFolderSelector.cpp" line="33"/>
         <source>OK</source>
         <translation>確定</translation>
     </message>
     <message>
-        <location filename="../src/wizFolderSelector.cpp" line="28"/>
+        <location filename="../src/wizFolderSelector.cpp" line="34"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/wizFolderSelector.cpp" line="46"/>
+        <location filename="../src/wizFolderSelector.cpp" line="52"/>
         <source>Keep tags</source>
         <translation>保持標籤</translation>
     </message>
     <message>
-        <location filename="../src/wizFolderSelector.cpp" line="38"/>
+        <location filename="../src/wizFolderSelector.cpp" line="86"/>
+        <location filename="../src/wizFolderSelector.cpp" line="90"/>
+        <source>Info</source>
+        <translation type="unfinished">提示</translation>
+    </message>
+    <message>
+        <location filename="../src/wizFolderSelector.cpp" line="86"/>
+        <source>You have no permission to create folder in this group!</source>
+        <translation type="unfinished">您的權限不夠, 無法在該羣組中創建資料夾！</translation>
+    </message>
+    <message>
+        <location filename="../src/wizFolderSelector.cpp" line="90"/>
+        <source>You have no permission to create note in this group!</source>
+        <translation type="unfinished">您的權限不夠, 無法在該羣組中新建筆記！</translation>
+    </message>
+    <message>
+        <location filename="../src/wizFolderSelector.cpp" line="44"/>
         <source>Keep create/update time</source>
         <translation>保持創建/更新時間</translation>
     </message>
@@ -2375,121 +2391,121 @@ w: %3  h: %4</translation>
 <context>
     <name>Core::Internal::MainWindow</name>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="214"/>
+        <location filename="../src/wizmainwindow.cpp" line="215"/>
         <source>WizNote</source>
         <translation>爲知筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1769"/>
+        <location filename="../src/wizmainwindow.cpp" line="1776"/>
         <source>1 note</source>
         <translation>1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1775"/>
-        <location filename="../src/wizmainwindow.cpp" line="1779"/>
+        <location filename="../src/wizmainwindow.cpp" line="1782"/>
+        <location filename="../src/wizmainwindow.cpp" line="1786"/>
         <source>%1 notes</source>
         <translation>%1 條筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="510"/>
+        <location filename="../src/wizmainwindow.cpp" line="516"/>
         <source>sorry, sync failed. please input your password and try again.</source>
         <translation>抱歉，同步失敗了。請輸入您的密碼再試一次。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="502"/>
-        <location filename="../src/wizmainwindow.cpp" line="1284"/>
-        <location filename="../src/wizmainwindow.cpp" line="1927"/>
-        <location filename="../src/wizmainwindow.cpp" line="1930"/>
+        <location filename="../src/wizmainwindow.cpp" line="505"/>
+        <location filename="../src/wizmainwindow.cpp" line="1291"/>
+        <location filename="../src/wizmainwindow.cpp" line="1939"/>
+        <location filename="../src/wizmainwindow.cpp" line="1942"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="502"/>
+        <location filename="../src/wizmainwindow.cpp" line="505"/>
         <source>Connection is not available, please check your network connection.</source>
         <translation>網絡連接不可用,請檢查網絡連接.</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1284"/>
+        <location filename="../src/wizmainwindow.cpp" line="1291"/>
         <source>Can not share encrpyted notes.</source>
         <translation>加密筆記不能創建公開鏈接。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1296"/>
+        <location filename="../src/wizmainwindow.cpp" line="1303"/>
         <source>Upgrading to VIP</source>
         <translation>升級VIP</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1298"/>
+        <location filename="../src/wizmainwindow.cpp" line="1305"/>
         <source>Only VIP user can create link, please retry after upgrading to VIP and syncing to server.</source>
         <translation>僅 VIP 用戶能創建鏈接，請升級 VIP 並同步後重試！</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1299"/>
+        <location filename="../src/wizmainwindow.cpp" line="1306"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1300"/>
+        <location filename="../src/wizmainwindow.cpp" line="1307"/>
         <source>Upgrade now</source>
         <translation type="unfinished">立即升級</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="1508"/>
+        <location filename="../src/wizmainwindow.cpp" line="1515"/>
         <source>Search</source>
         <translation>搜索</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3407"/>
+        <location filename="../src/wizmainwindow.cpp" line="3420"/>
         <source>downloading...</source>
         <translation>正在下載...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2413"/>
+        <location filename="../src/wizmainwindow.cpp" line="2425"/>
         <source>Open Directory</source>
         <translation>選擇文件夾</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2679"/>
+        <location filename="../src/wizmainwindow.cpp" line="2691"/>
         <source>Can&apos;t find note %1 , may be it has been deleted.</source>
         <translation>找不到筆記 %1 , 該篇筆記可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3171"/>
+        <location filename="../src/wizmainwindow.cpp" line="3184"/>
         <source>Show/Hide MainWindow</source>
         <translation>顯示/隱藏主窗口</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3174"/>
+        <location filename="../src/wizmainwindow.cpp" line="3187"/>
         <source>New Note</source>
         <translation>新建筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3179"/>
+        <location filename="../src/wizmainwindow.cpp" line="3192"/>
         <source>Hide TrayIcon</source>
         <translation>隱藏托盤圖標</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3183"/>
+        <location filename="../src/wizmainwindow.cpp" line="3196"/>
         <source>Logout</source>
         <translation>註銷</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3185"/>
+        <location filename="../src/wizmainwindow.cpp" line="3198"/>
         <source>Exit</source>
         <translation>退出</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="3406"/>
+        <location filename="../src/wizmainwindow.cpp" line="3419"/>
         <source>Downloading attachment file  %1 </source>
         <translation>正在下載附件  %1</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2355"/>
+        <location filename="../src/wizmainwindow.cpp" line="2367"/>
         <source>Rebuild full text search index</source>
         <translation>重建搜尋索引</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="2358"/>
+        <location filename="../src/wizmainwindow.cpp" line="2370"/>
         <source>Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected.</source>
         <translation>重建全文搜索索引會非常慢。只有在您的搜索出現異常的時候才需要使用這個功能。</translation>
     </message>
@@ -3917,10 +3933,14 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/share/wizmisc.cpp" line="2487"/>
         <location filename="../src/share/wizmisc.cpp" line="2515"/>
-        <location filename="../src/share/wizmisc.cpp" line="2545"/>
-        <location filename="../src/share/wizmisc.cpp" line="2574"/>
         <source>Move Note: %1 to %2</source>
         <translation>移動筆記: %1 到 %2</translation>
+    </message>
+    <message>
+        <location filename="../src/share/wizmisc.cpp" line="2545"/>
+        <location filename="../src/share/wizmisc.cpp" line="2574"/>
+        <source>Copy Note: %1 to %2</source>
+        <translation>複製筆記: %1 到 %2</translation>
     </message>
     <message>
         <location filename="../src/share/wizobject.h" line="920"/>
