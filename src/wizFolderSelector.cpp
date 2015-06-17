@@ -71,23 +71,22 @@ bool CWizFolderSelector::isSelectGroupFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
 
-    qDebug() << "selected item type " << item->type();
     if (item->type() > QTreeWidgetItem::UserType)
     {
         CWizCategoryViewItemBase* baseItem = dynamic_cast<CWizCategoryViewItemBase*>(item);
         if (!baseItem)
             return false;
 
-        qDebug() << "item kbguid : " << baseItem->kbGUID();
-        if (m_app.databaseManager().db(baseItem->kbGUID()).permission() > m_nMinPermission)
+        int nPermission = m_app.databaseManager().db(baseItem->kbGUID()).permission();
+        if (nPermission > m_nMinPermission)
         {
-            if (m_nMinPermission >= WIZ_USERGROUP_READER)
-            {
-                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
-            }
-            else if (m_nMinPermission == WIZ_USERGROUP_SUPER)
+            if (nPermission >= WIZ_USERGROUP_READER)
             {
                 CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create note in this group!"));
+            }
+            else if (nPermission >= WIZ_USERGROUP_EDITOR)
+            {
+                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
             }
             return false;
         }
