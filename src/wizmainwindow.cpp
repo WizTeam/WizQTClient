@@ -3154,6 +3154,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 void MainWindow::showNewFeatureGuide()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
