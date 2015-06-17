@@ -192,9 +192,11 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
     initSateMachine();
 
+#if QT_VERSION > 0x050400
     QTimer::singleShot(500, [&](){
         setFixedWidth(width());
     });
+#endif
 }
 
 CWizLoginDialog::~CWizLoginDialog()

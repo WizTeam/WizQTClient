@@ -927,7 +927,7 @@ void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
         strUserId = user.userId;
     }
     QStringList userList(userSet.toList());
-    QString strText = userList.join(';');
+    QString strText = userList.join(";");
 //    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
     QPixmap pix;
     WizService::AvatarHost::load(strUserId);

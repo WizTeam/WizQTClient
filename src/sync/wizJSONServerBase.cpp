@@ -1,6 +1,7 @@
 #include "wizJSONServerBase.h"
 #include "share/wizEventLoop.h"
 #include "rapidjson/document.h"
+#include <QDebug>
 
 CWizJSONServerBase::CWizJSONServerBase()
     : m_net(std::make_shared<QNetworkAccessManager>())

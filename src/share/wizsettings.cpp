@@ -378,7 +378,7 @@ bool CWizUserSettings::useSystemBasedStyle() const
         return strUseSystemStyle.toInt() ? true : false;
     }
 
-    return false;
+    return true;
 }
 
 void CWizUserSettings::setUseSystemBasedStyle(bool bSystemStyle)

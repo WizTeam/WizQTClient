@@ -144,8 +144,8 @@ public:
             opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::black));
         }
         //
-        WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
-        opt.text = styledItem.strText;
+        QString text = index.model()->data(index, Qt::DisplayRole).toString();
+        WizComboboxStyledItem styledItem = itemFromArrayByText(text, m_itemArray, m_arrayCount);
         opt.font.setPointSize(styledItem.nFontSize);
         opt.font.setBold(styledItem.bBold);
 
@@ -153,7 +153,6 @@ public:
         if (index.model()->data(index, WizCheckStateRole).toInt() == Qt::Checked)
         {
             static QIcon icon = Utils::StyleHelper::loadIcon("listViewItemSelected");
-            opt.icon = icon;
             QPixmap pix = icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off);
             if (!pix.isNull())
             {
@@ -586,13 +585,15 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     {
         m_comboParagraph->setMinimumWidth(70);
     }
+
+#ifdef Q_OS_MAC
     m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
                                     "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
-
-    WizComboboxStyledItem* paraItems = ParagraphItems();
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
     m_comboParagraph->setItemDelegate(paragraphDelegate);
+#endif
 
+    WizComboboxStyledItem* paraItems = ParagraphItems();
     for (int i = 0; i < nParagraphItemCount; i ++)
     {
         m_comboParagraph->addItem(paraItems[i].strText, paraItems[i].strUserData);
@@ -611,12 +612,14 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     m_comboFontSize = new CWizToolComboBox(this);
+#ifdef Q_OS_MAC
     m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
-    WizComboboxStyledItem* fontItems = FontSizes();
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
+#endif
 
+    WizComboboxStyledItem* fontItems = FontSizes();
     for (int i = 0; i < nFontSizeCount; i++)
     {
         m_comboFontSize->addItem(fontItems[i].strText, fontItems[i].strUserData);
