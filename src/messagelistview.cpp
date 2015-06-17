@@ -907,7 +907,7 @@ void WizMessageListTitleBar::on_selector_indexChanged(int index)
     QString text = m_msgSelector->currentText();
     QFont f;
     QFontMetrics fm(f);
-    const int elidedTextWidth = 80;
+    const int elidedTextWidth = 78;
     QString elidedText = fm.elidedText(text, Qt::ElideRight, elidedTextWidth);
     m_msgSelector->setEditText(elidedText);
     emit messageSelector_indexChanged(index);

@@ -586,6 +586,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
         m_comboParagraph->setMinimumWidth(70);
     }
 
+    WizComboboxStyledItem* paraItems = ParagraphItems();
 #ifdef Q_OS_MAC
     m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
                                     "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
@@ -593,7 +594,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboParagraph->setItemDelegate(paragraphDelegate);
 #endif
 
-    WizComboboxStyledItem* paraItems = ParagraphItems();
     for (int i = 0; i < nParagraphItemCount; i ++)
     {
         m_comboParagraph->addItem(paraItems[i].strText, paraItems[i].strUserData);
@@ -612,6 +612,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     m_comboFontSize = new CWizToolComboBox(this);
+    WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
     m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
@@ -619,7 +620,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboFontSize->setItemDelegate(fontDelegate);
 #endif
 
-    WizComboboxStyledItem* fontItems = FontSizes();
     for (int i = 0; i < nFontSizeCount; i++)
     {
         m_comboFontSize->addItem(fontItems[i].strText, fontItems[i].strUserData);
