@@ -178,6 +178,7 @@ set(wiznote_SOURCES
     share/wizMessageBox.cpp
     wizOEMSettings.cpp
     core/wizTagBar.cpp
+    core/wizTrayIcon.cpp
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
 )
@@ -340,6 +341,7 @@ set(wiznote_HEADERS
     share/wizMessageBox.h
     wizOEMSettings.h
     core/wizTagBar.h
+    core/wizTrayIcon.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
 )

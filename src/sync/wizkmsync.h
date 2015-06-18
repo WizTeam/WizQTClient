@@ -14,7 +14,8 @@ class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
 
     virtual void OnSyncProgress(int pos);
     virtual HRESULT OnText(WizKMSyncProgressMessageType type, const QString& strStatus);
-    virtual HRESULT OnPromptMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage);
+    virtual HRESULT OnMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage);
+    virtual HRESULT OnBubbleNotification(const QVariant& param);
     virtual void SetDatabaseCount(int count);
     virtual void SetCurrentDatabase(int index);
     virtual void ClearLastSyncError(IWizSyncableDatabase* pDatabase);
@@ -29,6 +30,7 @@ class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
 Q_SIGNALS:
     void messageReady(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
+    void bubbleNotificationRequest(const QVariant& param);
 };
 
 
@@ -98,6 +100,7 @@ Q_SIGNALS:
     void syncFinished(int nErrorCode, const QString& strErrorMesssage);
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
+    void bubbleNotificationRequest(const QVariant& param);
 };
 
 #endif // WIZKMSYNC_H

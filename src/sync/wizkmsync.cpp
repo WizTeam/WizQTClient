@@ -27,9 +27,15 @@ HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressMessageType type, const QStrin
     return 0;
 }
 
-HRESULT CWizKMSyncEvents::OnPromptMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage)
+HRESULT CWizKMSyncEvents::OnMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage)
 {
     emit promptMessageRequest(type, strTitle, strMessage);
+    return S_OK;
+}
+
+HRESULT CWizKMSyncEvents::OnBubbleNotification(const QVariant& param)
+{
+    emit bubbleNotificationRequest(param);
     return S_OK;
 }
 
@@ -111,6 +117,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     //
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
+    connect(m_pEvents, SIGNAL(bubbleNotificationRequest(const QVariant&)), SIGNAL(bubbleNotificationRequest(const QVariant&)));
     //
     g_pSyncThread = this;
 }

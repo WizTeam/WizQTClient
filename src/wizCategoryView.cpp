@@ -3881,6 +3881,9 @@ CWizCategoryViewItemBase*CWizCategoryView::findAllSearchItem()
 CWizCategoryViewItemBase* CWizCategoryView::findAllMessagesItem()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->type() != Category_MessageItem)
+            continue;
+
         CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(topLevelItem(i));
         if (pItem) {
             return pItem;

@@ -389,6 +389,17 @@ void MessageListView::specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
     }
 }
 
+void MessageListView::selectMessage(qint64 nId)
+{
+    for (int i = 0; i < count(); i++) {
+        if (MessageListViewItem* pItem = messageItem(i)) {
+            if (pItem->data().nId == nId) {
+                setCurrentItem(pItem, QItemSelectionModel::ClearAndSelect);
+            }
+        }
+    }
+}
+
 void MessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
 {
     QList<QListWidgetItem*> items = selectedItems();

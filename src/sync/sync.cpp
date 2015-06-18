@@ -1538,8 +1538,12 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
 
             if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
             {
-                pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
-                                         it.strMessageText);
+                QList<QVariant> paramList;
+                paramList.append(wizBubbleMessageCenter);
+                paramList.append(it.nMessageID);
+                paramList.append(QObject::tr("New Message"));
+                paramList.append(it.strMessageText);
+                pEvents->OnBubbleNotification(paramList);
             }
         }
     }
@@ -1902,7 +1906,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             if (!strLastError.isEmpty() && !bBackground)
             {
                 pEvents->OnText(wizSyncMeesageError, QString("Sync database error, for reason : %1").arg(strLastError));
-                pEvents->OnPromptMessage(wizSyncMeesageError, "", strLastError);
+                pEvents->OnMessage(wizSyncMeesageError, "", strLastError);
             }
         }
         else
