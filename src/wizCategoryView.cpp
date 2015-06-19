@@ -84,6 +84,15 @@ using namespace Core::Internal;
 #define QUICK_SEARCH_META   "CUSTOM_QUICK_SEARCH"
 
 
+#define SHORTCUT_TYPE_FOLDER            "/Type=folder"
+#define SHORTCUT_TYPE_DOCUMENT      "/Type=document"
+#define SHORTCUT_TYPE_TAG                   "/Type=tag"
+#define SHORTCUT_PARAM_LOCATION     "/Location="
+#define SHORTCUT_PARAM_KBGUID          "/KbGUID="
+#define SHORTCUT_PARAM_TAGGUID        "/TagGUID="
+#define SHORTCUT_PARAM_DOCUMENTGUID     "/DocumentGUID="
+
+
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
 CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent)
@@ -2419,7 +2428,23 @@ void CWizCategoryView::updateGroupsData()
 //            CWizCategoryViewGroupRootItem* pOwnGroupItem = findGroup(group.strGroupGUID);
 //            setGroupRootItemExtraButton(pOwnGroupItem, group);
 //        }
-//    }
+    //    }
+}
+
+void CWizCategoryView::on_shortcutDataChanged(const QString& shortcut)
+{
+    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    if (shortcutRoot)
+    {
+        QList<QTreeWidgetItem *> itemList = shortcutRoot->takeChildren();
+        for (QTreeWidgetItem* child : itemList)
+        {
+            delete child;
+        }
+    }
+
+    //
+    initShortcut(shortcut);
 }
 
 void CWizCategoryView::createGroup()
@@ -3388,46 +3413,36 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
 
 
 void CWizCategoryView::loadShortcutState()
-{
-    CWizCategoryViewShortcutRootItem* pShortcutRoot = 0;
-    for (int i = 0 ; i < topLevelItemCount(); i++)
-    {
-        pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(topLevelItem(i));
-        if (pShortcutRoot)
-            break;
-    }
-
-    if (!pShortcutRoot)
-    {
-        pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
-        addTopLevelItem(pShortcutRoot);
-    }
-
+{   
     //
-    QString strData = m_dbMgr.db().meta(CATEGORY_META, CATEGORY_SHORTCUT);
-    if (!strData.isEmpty())
-    {
-        QStringList shortCutList = strData.split(';');
-        foreach (QString shortCut, shortCutList) {
-            QStringList shortDataList = shortCut.split(',');
-            if (shortDataList.count() != 2)
-                continue;
+//    QString strData = m_dbMgr.db().meta(CATEGORY_META, CATEGORY_SHORTCUT);
+//    if (!strData.isEmpty())
+//    {
+//        QStringList shortCutList = strData.split(';');
+//        foreach (QString shortCut, shortCutList) {
+//            QStringList shortDataList = shortCut.split(',');
+//            if (shortDataList.count() != 2)
+//                continue;
 
-            QString strKbGuid = shortDataList.first();
-            QString strGuid = shortDataList.last();
-            CWizDatabase &db = m_dbMgr.db(strKbGuid);
-            WIZDOCUMENTDATA doc;
-            if (db.DocumentFromGUID(strGuid, doc))
-            {
-                bool isEncrypted = doc.nProtected == 1;
-                CWizCategoryViewShortcutItem *pShortcutItem =
-                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
-                pShortcutRoot->addChild(pShortcutItem);
-            }
+//            QString strKbGuid = shortDataList.first();
+//            QString strGuid = shortDataList.last();
+//            CWizDatabase &db = m_dbMgr.db(strKbGuid);
+//            WIZDOCUMENTDATA doc;
+//            if (db.DocumentFromGUID(strGuid, doc))
+//            {
+//                bool isEncrypted = doc.nProtected == 1;
+//                CWizCategoryViewShortcutItem *pShortcutItem =
+//                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
+//                pShortcutRoot->addChild(pShortcutItem);
+//            }
 
-        }
-    }
+//        }
+//    }
 
+    QString strData = m_dbMgr.db().GetFavorites();
+    initShortcut(strData);
+
+    CWizCategoryViewShortcutRootItem* pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
     if (pShortcutRoot->childCount() == 0)
     {
         pShortcutRoot->addPlaceHoldItem();
@@ -3438,15 +3453,7 @@ void CWizCategoryView::loadShortcutState()
 
 void CWizCategoryView::saveShortcutState()
 {
-
-    CWizCategoryViewShortcutRootItem *pShortcutRoot = 0;
-    for (int i = 0 ; i < topLevelItemCount(); i++)
-    {
-        pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(topLevelItem(i));
-        if (pShortcutRoot)
-            break;
-    }
-
+    CWizCategoryViewItemBase *pShortcutRoot = findShortcutRootItem();
     QString strShortcutData = "";
 
     if (pShortcutRoot && pShortcutRoot->childCount() > 0)
@@ -3454,13 +3461,40 @@ void CWizCategoryView::saveShortcutState()
         for (int i = 0; i < pShortcutRoot->childCount(); i++)
         {
             CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(pShortcutRoot->child(i));
-            if (pItem)
+            if (!pItem)
+                return;
+            //
+            switch (pItem->shortcutType())
             {
-                strShortcutData += pItem->kbGUID() + "," + pItem->guid() + ";";
+            case CWizCategoryViewShortcutItem::Document:
+            {
+                ///Type=document /KbGUID= /DocumentGUID=10813667-7c9e-46cc-9896-a278462793cc
+                strShortcutData = strShortcutData +  "*" + SHORTCUT_TYPE_DOCUMENT + " " + SHORTCUT_PARAM_KBGUID + pItem->kbGUID() + " "
+                        + SHORTCUT_PARAM_DOCUMENTGUID + pItem->guid();
+            }
+                break;
+            case CWizCategoryViewShortcutItem::PersonalTag:
+            case CWizCategoryViewShortcutItem::GroupTag:
+            {
+                // */Type=tag /KbGUID= /TagGUID=8188524c-767f-4d79-8a06-806e5787f49a
+                 strShortcutData = strShortcutData + "*" + SHORTCUT_TYPE_TAG + " " + SHORTCUT_PARAM_KBGUID + pItem->kbGUID() + " "
+                         + SHORTCUT_PARAM_TAGGUID + pItem->guid();
+            }
+                break;
+            case CWizCategoryViewShortcutItem::PersonalFolder:
+            {
+                //  /Type=folder /Location=/abcd/gerger/
+                strShortcutData = strShortcutData + "*" + SHORTCUT_TYPE_FOLDER + " " + SHORTCUT_PARAM_LOCATION + pItem->location();
+            }
+                break;
             }
         }
+        //
+        if (strShortcutData.length() > 0)
+            strShortcutData.remove(0, 1);
     }
-    m_dbMgr.db().setMeta(CATEGORY_META, CATEGORY_SHORTCUT, strShortcutData);
+    qDebug() << "short cut data : " << strShortcutData;
+    m_dbMgr.db().SetFavorites(strShortcutData, -1);
 }
 
 void CWizCategoryView::loadExpandState()
@@ -3756,6 +3790,78 @@ void CWizCategoryView::initQuickSearches()
             CWizCategoryViewCustomSearchItem* pCustomSearch = new CWizCategoryViewCustomSearchItem(m_app,
                                                                                                    name, it.value(), where, it.key(), keyword, scope);
             pSearchByCustomSQL->addChild(pCustomSearch);
+        }
+    }
+}
+
+void CWizCategoryView::initShortcut(const QString& shortcut)
+{
+    CWizCategoryViewItemBase* pShortcutRoot = findShortcutRootItem();
+    if (!pShortcutRoot)
+    {
+        pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
+        addTopLevelItem(pShortcutRoot);
+    }
+
+    //
+    QStringList shortcutList = shortcut.split("*", QString::SkipEmptyParts);
+    for (QString param : shortcutList)
+    {
+        QStringList paramList = param.split(" ", QString::SkipEmptyParts);
+        if (paramList.count() < 2)
+        {
+            qDebug() << "Invalid shortcut data : " << paramList;
+            continue;
+        }
+
+        //
+        QString type = paramList.first();
+        if (type == SHORTCUT_TYPE_FOLDER)
+        {
+            QString location = paramList.last();
+            Q_ASSERT(location.startsWith(SHORTCUT_PARAM_LOCATION));
+            location = location.remove(SHORTCUT_PARAM_LOCATION);
+            QString name = CWizDatabase::GetLocationName(location);
+            CWizCategoryViewShortcutItem* item = new CWizCategoryViewShortcutItem(m_app,
+                                                                                  name, CWizCategoryViewShortcutItem::PersonalFolder,
+                                                                                  "", "", location);
+            pShortcutRoot->addChild(item);
+        }
+        else if (type == SHORTCUT_TYPE_TAG)
+        {
+            QString kbGuid = paramList.at(1);
+            QString guid = paramList.last();
+            Q_ASSERT(kbGuid.startsWith(SHORTCUT_PARAM_KBGUID) && guid.startsWith(SHORTCUT_PARAM_TAGGUID));
+            kbGuid = kbGuid.remove(SHORTCUT_PARAM_KBGUID);
+            guid = guid.remove(SHORTCUT_PARAM_TAGGUID);
+            WIZTAGDATA tag;
+            if (m_dbMgr.db(kbGuid).TagFromGUID(guid, tag))
+            {
+                CWizCategoryViewShortcutItem* item = new CWizCategoryViewShortcutItem(m_app,
+                                                                                      tag.strName, m_dbMgr.db(kbGuid).IsGroup() ? CWizCategoryViewShortcutItem::GroupTag : CWizCategoryViewShortcutItem::PersonalTag,
+                                                                                      kbGuid, guid, "");
+                pShortcutRoot->addChild(item);
+            }
+        }
+        else if (type == SHORTCUT_TYPE_DOCUMENT)
+        {
+            QString kbGuid = paramList.at(1);
+            QString guid = paramList.last();
+            Q_ASSERT(kbGuid.startsWith(SHORTCUT_PARAM_KBGUID) && guid.startsWith(SHORTCUT_PARAM_DOCUMENTGUID));
+            kbGuid = kbGuid.remove(SHORTCUT_PARAM_KBGUID);
+            guid = guid.remove(SHORTCUT_PARAM_DOCUMENTGUID);
+            WIZDOCUMENTDATA doc;
+            if (m_dbMgr.db(kbGuid).DocumentFromGUID(guid, doc))
+            {
+                CWizCategoryViewShortcutItem* item = new CWizCategoryViewShortcutItem(m_app,
+                                                                                      doc.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                                                      kbGuid, guid, doc.strLocation);
+                pShortcutRoot->addChild(item);
+            }
+        }
+        else
+        {
+            qDebug() << "Invalid shortcut type : " << type;
         }
     }
 }
@@ -4530,6 +4636,21 @@ QAction* CWizCategoryView::findAction(CategoryActions type)
 
     Q_ASSERT(0);
     return NULL;
+}
+
+CWizCategoryViewItemBase*CWizCategoryView::findShortcutRootItem()
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->type() != Category_ShortcutRootItem)
+            continue;
+
+        CWizCategoryViewShortcutRootItem* pItem = dynamic_cast<CWizCategoryViewShortcutRootItem*>(topLevelItem(i));
+        if (pItem) {
+            return pItem;
+        }
+    }
+    //
+    return nullptr;
 }
 
 void CWizCategoryView::on_group_permissionChanged(const QString& strKbGUID)

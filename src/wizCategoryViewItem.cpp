@@ -498,7 +498,7 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
 CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,
                                                                    const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", Category_ShortcutRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "shortcut_normal"),
@@ -540,14 +540,14 @@ bool CWizCategoryViewShortcutRootItem::accept(CWizDatabase& /*db*/, const WIZDOC
     return false;
 }
 
-void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*forceCopy*/)
+void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& doc, bool /*forceCopy*/)
 {
     for (int i = 0; i < childCount(); i++)
     {
         CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
         if (pItem)
         {
-            if (pItem->guid() == data.strGUID)
+            if (pItem->guid() == doc.strGUID)
                 return;
         }
     }
@@ -555,9 +555,10 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
     if (isContainsPlaceHoldItem())
         removePlaceHoldItem();
 
-    bool isEncrypted = data.nProtected == 1;
+    bool isEncrypted = doc.nProtected == 1;
     CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
-                                                                           data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
+                                                                           doc.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                                           doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
 
@@ -1867,26 +1868,53 @@ void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
 
 
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
-                                                           const QString& strName, const QString& strKbGuid,
-                                                           const QString& strGuid, bool bEncrypted)
+                                                           const QString& strName, ShortcutType type, const QString& strKbGuid,
+                                                           const QString& strGuid, const QString& location, bool bEncrypted)
     : CWizCategoryViewItemBase(app, strName, strKbGuid, Category_ShortcutItem)
     , m_strGuid(strGuid)
+    , m_type(type)
+    , m_location(location)
 {
     QIcon icon;
-    if (bEncrypted)
+    switch (type) {
+    case Document:
     {
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+        if (bEncrypted)
+        {
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+                         QSize(16, 16), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+                         QSize(16, 16), QIcon::Selected);
+        }
+        else
+        {
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+                         QSize(16, 16), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                         QSize(16, 16), QIcon::Selected);
+        }
+    }
+        break;
+    case PersonalFolder:
+    case GroupTag:
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
                      QSize(16, 16), QIcon::Normal);
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
                      QSize(16, 16), QIcon::Selected);
     }
-    else
+        break;
+    case PersonalTag:
     {
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal"),
                      QSize(16, 16), QIcon::Normal);
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
                      QSize(16, 16), QIcon::Selected);
     }
+        break;
+    }
+
+    //
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -1901,7 +1929,7 @@ void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, 
 
 CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
         CWizExplorerApp& app, const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", Category_ShortcutPlaceHoldItem)
 {
 
 }

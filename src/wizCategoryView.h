@@ -263,6 +263,7 @@ public:
     // helper
     QAction* findAction(CategoryActions type);
 
+    CWizCategoryViewItemBase* findShortcutRootItem();
     CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
     CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
     CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
@@ -411,6 +412,8 @@ public Q_SLOTS:
 
     void updateGroupsData();
 
+    void on_shortcutDataChanged(const QString& shortcut);
+
 public:
     // Public API:
     Q_INVOKABLE CWizFolder* SelectedFolder();
@@ -463,6 +466,7 @@ private:
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
     void initQuickSearches();
+    void initShortcut(const QString& shortcut);
     //
     void resetCreateGroupLink();
 

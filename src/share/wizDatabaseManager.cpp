@@ -316,6 +316,9 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(messageModified(WIZMESSAGEDATA,WIZMESSAGEDATA)));
     connect(db, SIGNAL(messageDeleted(WIZMESSAGEDATA)),
             SIGNAL(messageDeleted(WIZMESSAGEDATA)));
+
+    connect(db, SIGNAL(favoritesChanged(QString)),
+            SIGNAL(favoritesChanged(QString)));
 }
 
 void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QString& strKbGUID)

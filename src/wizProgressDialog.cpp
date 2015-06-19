@@ -21,8 +21,8 @@ void CWizProgressDialog::setActionString(const QString& strAction)
 
 void CWizProgressDialog::setNotifyString(const QString& strNotify)
 {
-    QString elideText = fontMetrics().elidedText(strNotify, Qt::ElideRight, ui->labelNotify->width());
-    ui->labelNotify->setText(elideText);
+    QString elideText = fontMetrics().elidedText(strNotify, Qt::ElideRight, ui->labelDetails->width());
+    ui->labelDetails->setText(elideText);
 }
 
 void CWizProgressDialog::setProgress(int nMax, int nCurrent)

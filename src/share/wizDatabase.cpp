@@ -1345,6 +1345,7 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
     {
         arrayKey.push_back("folders");
         arrayKey.push_back("folders_pos");
+        arrayKey.push_back("favorites");
     }
 }
 
@@ -1401,6 +1402,10 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     {
         return GetGroupTagsPos();
     }
+    else if (strKey == "favorites")
+    {
+        return GetFavorites();
+    }
     else if (strKey == "group_tag_oem")
     {
         Q_ASSERT(false);
@@ -1442,6 +1447,10 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     else if (strKey == "group_tag_pos")
     {
         SetGroupTagsPos(value, nServerVersion);
+    }
+    else if (strKey == "favorites")
+    {
+        SetFavorites(value, nServerVersion);
     }
     else if (strKey == "group_tag_oem")
     {
@@ -1825,6 +1834,22 @@ void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
 
     if (bPositionChanged) {
         Q_EMIT tagsPositionChanged(kbGUID());
+    }
+}
+
+QString CWizDatabase::GetFavorites()
+{
+    return meta("SYNC_INFO", "FAVORITES");
+}
+
+void CWizDatabase::SetFavorites(const QString& favorites, qint64 nVersion)
+{
+    SetLocalValueVersion("favorites", nVersion);
+    SetMeta("SYNC_INFO", "FAVORITES", favorites);
+
+    if (nVersion != -1)
+    {
+        emit favoritesChanged(favorites);
     }
 }
 
@@ -2742,7 +2767,7 @@ bool CWizDatabase::UpdateDeletedGUID(const WIZDELETEDGUIDDATA& data)
     bool bExists = false;
     ObjectExists(data.strGUID, strType, bExists);
     if (!bExists)
-        return true;
+        return true;    
 
     qDebug() << "delete object: " << strType << " guid: " << data.strGUID;
 

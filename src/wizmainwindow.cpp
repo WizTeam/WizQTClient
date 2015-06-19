@@ -192,6 +192,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+    connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
+            SLOT(on_shortcutDataChanged(QString)));
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
@@ -3106,6 +3108,10 @@ void MainWindow::viewAttachmentByWizKMURL(const QString& strKbGUID, const QStrin
 
         openAttachment(attachment, strFileName);
     }
+    else
+    {
+        CWizMessageBox::information(this, tr("Info"), tr("Can't find the specified attachment, may be it has been deleted."));
+    }
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
@@ -3374,12 +3380,43 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
 {
     CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
-    WIZDOCUMENTDATA doc;
-    if (db.DocumentFromGUID(pShortcut->guid(), doc))
+    switch (pShortcut->shortcutType()) {
+    case CWizCategoryViewShortcutItem::Document:
     {
-        viewDocument(doc, true);
-        m_docListContainer->hide();
+        WIZDOCUMENTDATA doc;
+        if (db.DocumentFromGUID(pShortcut->guid(), doc))
+        {
+            viewDocument(doc, true);
+            CWizDocumentDataArray array;
+            db.GetDocumentsByLocation(doc.strLocation, array);
+            m_documents->setDocuments(array);
+            m_documents->setCurrentRow(m_documents->documentIndexFromGUID(doc.strGUID));
+        }
     }
+        break;
+    case CWizCategoryViewShortcutItem::PersonalFolder:
+    {
+        CWizDocumentDataArray array;
+        if (db.GetDocumentsByLocation(pShortcut->location(), array))
+        {
+            m_documents->setDocuments(array);
+        }
+    }
+        break;
+    case CWizCategoryViewShortcutItem::PersonalTag:
+    case CWizCategoryViewShortcutItem::GroupTag:
+    {
+        CWizDocumentDataArray array;
+        WIZTAGDATA tag;
+        db.TagFromGUID(pShortcut->guid(), tag);
+        if (db.GetDocumentsByTag(tag, array))
+        {
+            m_documents->setDocuments(array);
+        }
+    }
+        break;
+    }
+
 }
 
 void MainWindow::searchNotesBySQL(const QString& strSQLWhere)

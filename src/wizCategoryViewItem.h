@@ -8,7 +8,10 @@
 enum ItemType
 {
     Category_WizNoneItem = QTreeWidgetItem::UserType + 1,
+    Category_MessageRootItem,
     Category_MessageItem,
+    Category_ShortcutRootItem,
+    Category_ShortcutPlaceHoldItem,
     Category_ShortcutItem,
     Category_QuickSearchRootItem,
     Category_QuickSearchItem,
@@ -177,18 +180,30 @@ public:
 class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName,
-                                 const QString& strKbGuid, const QString& strGuid, bool bEncrypted = false);
+    enum ShortcutType
+    {
+        Document,
+        PersonalFolder,
+        PersonalTag,
+        GroupTag
+    };
+    //
+    CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName, ShortcutType type,
+                                 const QString& strKbGuid, const QString& strGuid, const QString& location, bool bEncrypted = false);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
-    QString guid() {return m_strGuid;}
+    QString guid() const {return m_strGuid;}
+    QString location() const { return m_location; }
+    ShortcutType shortcutType() const { return m_type; }
 
 private:
     QString m_strGuid;
+    QString m_location;
+    ShortcutType m_type;
 };
 
 class CWizCategoryViewSearchRootItem : public CWizCategoryViewItemBase
