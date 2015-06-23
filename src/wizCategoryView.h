@@ -78,11 +78,7 @@ protected:
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
-    virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);
-
-    QString getUseableItemName(QTreeWidgetItem* parent, \
-                                QTreeWidgetItem* item);
-    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
+    virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);    
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
@@ -234,6 +230,9 @@ public:
 
     void sortGroupTags(const QString& strKbGUID, bool bReloadData = false);
     void sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bReloadData);
+
+    void savePersonalTagsPosition();
+    void savePersonalTagsPosition(CWizDatabase& db, CWizCategoryViewTagItem* pItem);
 
     void saveGroupTagsPosition(const QString& strKbGUID);
     void saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem);
@@ -443,9 +442,9 @@ private:
 
     void quickSyncNewDocument(const QString& strKbGUID);
 
-    void updatePrivateFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
+    void updatePersonalFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
                                       const QString& strNewLocation);
-    void updatePrivateTagPosition(CWizDatabase& db);
+    void updatePersonalTagPosition();
     void updateGroupFolderPosition(CWizDatabase& db);
 
     //
@@ -527,6 +526,12 @@ private:
                                    bool dropAtTop, bool deleteDragSource);
     virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
                                  bool deleteDragSource);
+
+    //
+    QString getUseableItemName(QTreeWidgetItem* parent, \
+                                QTreeWidgetItem* item);
+    void resetFolderLocation(CWizCategoryViewFolderItem* item);
+    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
 
 private:
     QPointer<QMenu> m_menuShortcut;

@@ -733,7 +733,7 @@ void CWizCategoryBaseView::resetRootItemsDropEnabled(CWizCategoryViewItemBase* p
     update();
 }
 
-QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
+QString CWizCategoryView::getUseableItemName(QTreeWidgetItem* parent, \
                                                   QTreeWidgetItem* item)
 {
     QString name = item->text(0);
@@ -761,7 +761,7 @@ QString CWizCategoryBaseView::getUseableItemName(QTreeWidgetItem* parent, \
     return name;
 }
 
-void CWizCategoryBaseView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
+void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
 {
     item->setLocation(strNewLocation);
     for (int i = 0; i < item->childCount(); i++)
@@ -3076,7 +3076,7 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
     emit categoryItemPositionChanged(db.kbGUID());
 }
 
-void CWizCategoryView::updatePrivateFolderLocation(CWizDatabase& db, \
+void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
                                                     const QString& strOldLocation, const QString& strNewLocation)
 {
     CWizCategoryViewAllFoldersItem* pItem = dynamic_cast<CWizCategoryViewAllFoldersItem* >(findAllFolderItem());
@@ -3104,9 +3104,13 @@ void CWizCategoryView::updatePrivateFolderLocation(CWizDatabase& db, \
     emit categoryItemPositionChanged(db.kbGUID());
 }
 
-void CWizCategoryView::updatePrivateTagPosition(CWizDatabase& db)
+void CWizCategoryView::updatePersonalTagPosition()
 {
-    Q_UNUSED(db);
+    CWizDatabase& db = m_dbMgr.db();
+    savePersonalTagsPosition();
+    db.SetGroupTagsPosModified();
+
+    emit categoryItemPositionChanged(db.kbGUID());
 }
 
 void CWizCategoryView::initGeneral()
@@ -3200,6 +3204,47 @@ void CWizCategoryView::sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bRel
     }
 
     pItem->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::savePersonalTagsPosition()
+{
+    CWizCategoryViewAllTagsItem* rootItem =
+            dynamic_cast<CWizCategoryViewAllTagsItem*>(findAllTagsItem());
+    if (!rootItem)
+        return;
+
+    CWizDatabase& db = m_dbMgr.db();
+    db.blockSignals(true);
+    for (int i = 0; i < rootItem->childCount(); i++)
+    {
+        CWizCategoryViewTagItem* childItem = dynamic_cast<CWizCategoryViewTagItem* >(rootItem->child(i));
+        if (childItem)
+        {
+            childItem->setTagPosition(rootItem->indexOfChild(childItem) + 1);
+            savePersonalTagsPosition(db, childItem);
+        }
+    }
+
+    db.blockSignals(false);
+}
+
+void CWizCategoryView::savePersonalTagsPosition(CWizDatabase& db, CWizCategoryViewTagItem* pItem)
+{
+    if (!pItem)
+        return;
+
+    WIZTAGDATA tag = pItem->tag();
+    db.ModifyTag(tag);
+
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
+        CWizCategoryViewTagItem* childItem = dynamic_cast<CWizCategoryViewTagItem* >(pItem->child(i));
+        if (childItem)
+        {
+            childItem->setTagPosition(i + 1);
+            savePersonalTagsPosition(db, childItem);
+        }
+    }
 }
 
 void CWizCategoryView::saveGroupTagsPosition(const QString& strKbGUID)
@@ -4748,42 +4793,19 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
             CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem);
             Q_ASSERT(item);
             //
-            CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
-            QTreeWidgetItem* parentItem = item->parent();
-            if (parentItem == 0)
-            {                
-                parentItem = folderRoot;
-            }
-
-            QString strName = getUseableItemName(parentItem, item);
-//            qDebug() << "get useable item name : " << strName;
-            QString strNewLocation = "/" + strName + "/";
-            item->setText(0, strName);
-
-
-            if (parentItem != folderRoot)
-            {
-                CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
-                if (!parentBase)
-                    return;
-
-//                qDebug() << "parent is not root , parent name : " << parentBase->name();
-                strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
-                parentItem = parentBase->parent();
-            }
-
-            QString strOldLocation = item->location();
-
-//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
-            resetFolderLocation(item, strNewLocation);
-            updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
+            resetFolderLocation(item);
+            sortFolders();
         }
         else if (pItem->type() == Category_TagItem)
         {
-
+            updatePersonalTagPosition();
+            CWizCategoryViewItemBase* allTags = findAllTagsItem();
+            if (allTags)
+            {
+                allTags->sortChildren(0, Qt::AscendingOrder);
+            }
         }
 
-        sortFolders();
     }
 }
 
@@ -5250,6 +5272,40 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
             }
         }
     }
+}
+
+void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
+{
+    CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
+    QTreeWidgetItem* parentItem = item->parent();
+    if (parentItem == 0)
+    {
+        parentItem = folderRoot;
+    }
+
+    QString strName = getUseableItemName(parentItem, item);
+//            qDebug() << "get useable item name : " << strName;
+    QString strNewLocation = "/" + strName + "/";
+    item->setText(0, strName);
+
+
+    if (parentItem != folderRoot)
+    {
+        CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
+        if (!parentBase)
+            return;
+
+//                qDebug() << "parent is not root , parent name : " << parentBase->name();
+        strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
+        parentItem = parentBase->parent();
+    }
+
+    QString strOldLocation = item->location();
+
+//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
+    resetFolderLocation(item, strNewLocation);
+    CWizDatabase& db = m_dbMgr.db();
+    updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)
