@@ -53,6 +53,7 @@ public:
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
     virtual bool dragAble() const { return false; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false) { Q_UNUSED(data); Q_UNUSED(forceCopy);}
+    virtual void drop(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
@@ -156,7 +157,9 @@ public:
 
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+    virtual void drop(const CWizCategoryViewItemBase* pItem);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& /*data*/) const {return true;}
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 11; }
@@ -335,6 +338,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool dragAble() const { return true; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QTreeWidgetItem *clone() const;

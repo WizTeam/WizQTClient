@@ -574,6 +574,74 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& doc, bool /*f
 #endif
 }
 
+void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pItem)
+{
+    CWizCategoryViewShortcutItem* newItem = nullptr;
+    if (pItem->type() == Category_FolderItem)
+    {
+        const CWizCategoryViewFolderItem* folderItem = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, CWizDatabase::GetLocationName(folderItem->location()),
+                                                                                 CWizCategoryViewShortcutItem::PersonalFolder, "", "", folderItem->location());
+    }
+    else if (pItem->type() == Category_TagItem)
+    {
+        const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, tagItem->tag().strName, CWizCategoryViewShortcutItem::PersonalTag,
+                                                    tagItem->tag().strKbGUID, tagItem->tag().strGUID, "");
+    }
+    else if (pItem->type() == Category_GroupItem)
+    {
+        const CWizCategoryViewGroupItem* groupItem = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, groupItem->tag().strName, CWizCategoryViewShortcutItem::GroupTag,
+                                                    groupItem->tag().strKbGUID, groupItem->tag().strGUID, "");
+    }
+    //
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *shortcutItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (shortcutItem)
+        {
+            switch (shortcutItem->type()) {
+            case CWizCategoryViewShortcutItem::PersonalTag:
+            case CWizCategoryViewShortcutItem::GroupTag:
+            {
+                if (shortcutItem->guid() == newItem->guid())
+                    return;
+            }
+                break;
+            case CWizCategoryViewShortcutItem::PersonalFolder:
+            {
+                if (shortcutItem->location() == newItem->location())
+                    return;
+            }
+                break;
+            default:
+                break;
+            }
+        }
+    }
+    //
+    addChild(newItem);
+    treeWidget()->blockSignals(true);
+    treeWidget()->setCurrentItem(newItem);
+    treeWidget()->blockSignals(false);
+    sortChildren(0, Qt::AscendingOrder);
+
+    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+}
+
+bool CWizCategoryViewShortcutRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    if (!pItem)
+        return false;
+
+    if (pItem->type() == Category_FolderItem || pItem->type() == Category_TagItem || pItem->type() == Category_GroupItem)
+        return true;
+
+    return false;
+}
+
 QString CWizCategoryViewShortcutRootItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_GENERAL;
@@ -954,6 +1022,11 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     }
 
     return false;
+}
+
+bool CWizCategoryViewTagItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    return pItem && pItem->type() == Category_TagItem;
 }
 
 void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)

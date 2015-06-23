@@ -78,7 +78,6 @@ using namespace Core::Internal;
 #define TREEVIEW_SELECTED_ITEM "SelectedItemID"
 #define SHORTCUT_STATE "ShortcutState"
 
-#define CATEGORY_SHORTCUT   "CategoryShortcut"
 #define CATEGORY_META   "CategoryMeta"
 
 #define QUICK_SEARCH_META   "CUSTOM_QUICK_SEARCH"
@@ -276,7 +275,9 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         QTreeWidget::startDrag(supportedActions);
         if (m_dragItem != nullptr)
         {
+            blockSignals(true);
             setCurrentItem(m_dragItem);
+            blockSignals(false);
             m_dragItem = nullptr;
         }
 
@@ -436,10 +437,23 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if( !droppedIndex.isValid() )
           return;
 
-        QTreeWidget::dropEvent(event);
-        if (m_dragItem)
+
+        QTreeWidgetItem* pItem = itemAt(event->pos());
+        if (pItem->type() == Category_ShortcutRootItem)
         {
-            on_itemPosition_changed(m_dragItem);
+            CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(pItem);
+            shortcutRoot->drop(m_dragItem);
+            setCurrentItem(m_dragItem);
+            event->setDropAction(Qt::CopyAction);
+            event->accept();
+        }
+        else
+        {
+            QTreeWidget::dropEvent(event);
+            if (m_dragItem)
+            {
+                on_itemPosition_changed(m_dragItem);
+            }
         }
         viewport()->repaint();
         return;
@@ -2324,6 +2338,7 @@ void CWizCategoryView::on_itemSelectionChanged()
         Q_EMIT documentsHint(currentItem()->text(0));
     }
 }
+
 void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
 {
     if (CWizCategoryViewLinkItem* pLink = dynamic_cast<CWizCategoryViewLinkItem*>(item))
@@ -3469,11 +3484,17 @@ void CWizCategoryView::saveShortcutState()
             case CWizCategoryViewShortcutItem::Document:
             {
                 ///Type=document /KbGUID= /DocumentGUID=10813667-7c9e-46cc-9896-a278462793cc
-                strShortcutData = strShortcutData +  "*" + SHORTCUT_TYPE_DOCUMENT + " " + SHORTCUT_PARAM_KBGUID + pItem->kbGUID() + " "
+                strShortcutData = strShortcutData +  "*" + SHORTCUT_TYPE_DOCUMENT + " " + SHORTCUT_PARAM_KBGUID + " "
                         + SHORTCUT_PARAM_DOCUMENTGUID + pItem->guid();
             }
                 break;
             case CWizCategoryViewShortcutItem::PersonalTag:
+            {
+                // */Type=tag /KbGUID= /TagGUID=8188524c-767f-4d79-8a06-806e5787f49a
+                 strShortcutData = strShortcutData + "*" + SHORTCUT_TYPE_TAG + " " + SHORTCUT_PARAM_KBGUID + " "
+                         + SHORTCUT_PARAM_TAGGUID + pItem->guid();
+            }
+                break;
             case CWizCategoryViewShortcutItem::GroupTag:
             {
                 // */Type=tag /KbGUID= /TagGUID=8188524c-767f-4d79-8a06-806e5787f49a
@@ -3818,9 +3839,8 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
         QString type = paramList.first();
         if (type == SHORTCUT_TYPE_FOLDER)
         {
-            QString location = paramList.last();
-            Q_ASSERT(location.startsWith(SHORTCUT_PARAM_LOCATION));
-            location = location.remove(SHORTCUT_PARAM_LOCATION);
+            QString location = param;
+            location = location.remove(SHORTCUT_TYPE_FOLDER + QString(" ") + SHORTCUT_PARAM_LOCATION);
             QString name = CWizDatabase::GetLocationName(location);
             CWizCategoryViewShortcutItem* item = new CWizCategoryViewShortcutItem(m_app,
                                                                                   name, CWizCategoryViewShortcutItem::PersonalFolder,
@@ -4723,8 +4743,11 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
     else
     {
-        if (CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem))
+        if (pItem->type() == Category_FolderItem)
         {
+            CWizCategoryViewFolderItem* item = dynamic_cast<CWizCategoryViewFolderItem*>(pItem);
+            Q_ASSERT(item);
+            //
             CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
             QTreeWidgetItem* parentItem = item->parent();
             if (parentItem == 0)
@@ -4754,6 +4777,10 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
 //            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
             resetFolderLocation(item, strNewLocation);
             updatePrivateFolderLocation(db, strOldLocation, strNewLocation);
+        }
+        else if (pItem->type() == Category_TagItem)
+        {
+
         }
 
         sortFolders();
