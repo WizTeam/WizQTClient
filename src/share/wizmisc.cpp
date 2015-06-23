@@ -2283,7 +2283,7 @@ QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
 QString WizStr2Title(const QString& str)
 {
     int idx = str.size() - 1;
-    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r\t"); // end of line
     foreach(QChar c, eol) {
         int i = str.indexOf(c, 0, Qt::CaseInsensitive);
         if (i != -1 && i < idx) {
