@@ -323,7 +323,7 @@ public:
     QString GetAttachmentFileName(const QString& strGUID);
     QString GetAvatarPath() const;
     QString GetDefaultNoteLocation() const;
-    QString GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc);
+    QString GetDocumentAuthorAlias(const WIZDOCUMENTDATA& doc);
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);

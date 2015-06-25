@@ -2543,8 +2543,11 @@ QString CWizDatabase::GetDefaultNoteLocation() const
         return "/"+m_strUserId+"/";
 }
 
-QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
+QString CWizDatabase::GetDocumentAuthorAlias(const WIZDOCUMENTDATA& doc)
 {
+    if (!doc.strAuthor.isEmpty())
+        return doc.strAuthor;
+
     CWizDatabase* personDb = getPersonalDatabase();
     if (!personDb)
         return QString();
