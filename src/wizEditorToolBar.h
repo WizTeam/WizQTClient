@@ -8,6 +8,7 @@
 
 class QString;
 class QMenu;
+class QToolButton;
 class CWizDocumentWebEngine;
 class CWizDocumentWebView;
 class CWizToolButton;
@@ -59,9 +60,7 @@ private:
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
     CWizToolButton* m_btnStrikeThrough;
-    CWizToolButton* m_btnJustifyLeft;
-    CWizToolButton* m_btnJustifyCenter;
-    CWizToolButton* m_btnJustifyRight;
+    QToolButton* m_btnJustify;
     CWizToolButton* m_btnUnorderedList;
     CWizToolButton* m_btnOrderedList;
     CWizToolButton* m_btnTable;
@@ -73,6 +72,10 @@ private:
     CWizToolButton* m_btnScreenShot;
     CWizToolButton* m_btnViewSource;
     CWizToolButton* m_btnInsertCode;
+    QMenu* m_menuJustify;
+    QAction* m_actionJustifyLeft;
+    QAction* m_actionJustifyCenter;
+    QAction* m_actionJustifyRight;
 
     QString m_strImageSrc;
 
@@ -109,6 +112,7 @@ protected Q_SLOTS:
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
     void on_btnStrikeThrough_clicked();
+    void on_btnJustify_clicked();
     void on_btnJustifyLeft_clicked();
     void on_btnJustifyCenter_clicked();
     void on_btnJustifyRight_clicked();
