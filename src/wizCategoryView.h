@@ -533,6 +533,11 @@ private:
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
 
+    //
+    void updateShortcut(int type, const QString& keyValue, const QString& name);
+    void removeShortcut(int type, const QString& keyValue);
+    void removeShortcut(CWizCategoryViewItemBase* shortcut);
+
 private:
     QPointer<QMenu> m_menuShortcut;
     QPointer<QMenu> m_menuFolderRoot;

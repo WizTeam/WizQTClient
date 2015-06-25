@@ -775,11 +775,91 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, con
     }
 }
 
-void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
+void CWizCategoryView::updateShortcut(int type, const QString& keyValue, const QString& name)
+{
+    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    if (shortcutRoot)
+    {
+        CWizCategoryViewShortcutItem::ShortcutType shortcutType = (CWizCategoryViewShortcutItem::ShortcutType)type;
+        for (int i = 0; i < shortcutRoot->childCount(); i++)
+        {
+            CWizCategoryViewShortcutItem* item = dynamic_cast<CWizCategoryViewShortcutItem*>(shortcutRoot->child(i));
+            if (item && item->shortcutType() == shortcutType)
+            {
+                if (shortcutType == CWizCategoryViewShortcutItem::PersonalFolder)
+                {
+                    if (item->location() == keyValue)
+                    {
+                        item->setText(0, name);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (item->guid() == keyValue)
+                    {
+                        item->setText(0, name);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CWizCategoryView::removeShortcut(int type, const QString& keyValue)
+{
+    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    if (shortcutRoot)
+    {
+        CWizCategoryViewShortcutItem::ShortcutType shortcutType = (CWizCategoryViewShortcutItem::ShortcutType)type;
+        for (int i = 0; i < shortcutRoot->childCount(); i++)
+        {
+            CWizCategoryViewShortcutItem* item = dynamic_cast<CWizCategoryViewShortcutItem*>(shortcutRoot->child(i));
+            if (item && item->shortcutType() == shortcutType)
+            {
+                if (shortcutType == CWizCategoryViewShortcutItem::PersonalFolder)
+                {
+                    if (item->location() == keyValue)
+                    {
+                        removeShortcut(item);
+                        break;
+                    }
+                }
+                else
+                {
+                    if (item->guid() == keyValue)
+                    {
+                        removeShortcut(item);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void CWizCategoryView::removeShortcut(CWizCategoryViewItemBase* shortcut)
+{
+    CWizCategoryViewShortcutRootItem *pRoot = dynamic_cast<CWizCategoryViewShortcutRootItem *>(shortcut->parent());
+    if (shortcut && pRoot)
+    {
+        pRoot->removeChild(shortcut);
+        if (pRoot->childCount() == 0)
+        {
+            pRoot->addPlaceHoldItem();
+        }
+    }
+    saveShortcutState();
+}
+
+void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
+                                             CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
 {
 }
 
-void CWizCategoryBaseView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
+void CWizCategoryBaseView::dropItemAsChild(CWizCategoryViewItemBase* targetItem,
+                                           CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
 {
 }
 
@@ -2186,16 +2266,7 @@ void CWizCategoryView::on_action_removeShortcut()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuRemoveShortcut");
     CWizCategoryViewShortcutItem* p = currentCategoryItem<CWizCategoryViewShortcutItem>();
-    CWizCategoryViewShortcutRootItem *pRoot = dynamic_cast<CWizCategoryViewShortcutRootItem *>(p->parent());
-    if (p && pRoot)
-    {
-        pRoot->removeChild(p);
-        if (pRoot->childCount() == 0)
-        {
-            pRoot->addPlaceHoldItem();
-        }
-    }
-    saveShortcutState();
+    removeShortcut(p);
 }
 
 void CWizCategoryView::on_action_advancedSearch()
@@ -4550,6 +4621,9 @@ void CWizCategoryView::on_document_modified(const WIZDOCUMENTDATA& docOld, const
     } else {
         updateGroupFolderDocumentCount(docNew.strKbGUID);
     }
+
+    //
+    updateShortcut(CWizCategoryViewShortcutItem::Document, docNew.strGUID, docNew.strTitle);
 }
 
 void CWizCategoryView::on_document_deleted(const WIZDOCUMENTDATA& doc)
@@ -4562,6 +4636,9 @@ void CWizCategoryView::on_document_deleted(const WIZDOCUMENTDATA& doc)
     } else {
         updateGroupFolderDocumentCount(doc.strKbGUID);
     }
+
+    //
+    removeShortcut(CWizCategoryViewShortcutItem::Document, doc.strGUID);
 }
 
 void CWizCategoryView::on_document_tag_modified(const WIZDOCUMENTDATA& doc)
@@ -4597,6 +4674,9 @@ void CWizCategoryView::on_folder_deleted(const QString& strLocation)
     {
         qDebug() << "[Category]------------***-------------------Folder deleted in db, but can not deleted in category------------***-------------------" << strLocation;
     }
+
+    //
+    removeShortcut(CWizCategoryViewShortcutItem::PersonalFolder, strLocation);
 }
 
 void CWizCategoryView::on_folder_positionChanged()
@@ -4631,6 +4711,8 @@ void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDAT
         }
 
         updatePrivateTagDocumentCount();
+        //
+        updateShortcut(CWizCategoryViewShortcutItem::PersonalTag, tagNew.strGUID, tagNew.strName);
     } else {
         if (tagOld.strParentGUID != tagNew.strParentGUID) {
             removeGroupFolder(tagOld);
@@ -4642,6 +4724,8 @@ void CWizCategoryView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDAT
             pTagItem->parent()->sortChildren(0, Qt::AscendingOrder);
         }
         updateGroupFolderDocumentCount(tagNew.strKbGUID);
+        //
+        updateShortcut(CWizCategoryViewShortcutItem::GroupTag, tagNew.strGUID, tagNew.strName);
     }
 }
 
@@ -4650,9 +4734,13 @@ void CWizCategoryView::on_tag_deleted(const WIZTAGDATA& tag)
     if (tag.strKbGUID == m_dbMgr.db().kbGUID()) {
         removeTag(tag);
         updatePrivateTagDocumentCount();
+        //
+        removeShortcut(CWizCategoryViewShortcutItem::PersonalTag, tag.strGUID);
     } else {
         removeGroupFolder(tag);
         updateGroupFolderDocumentCount(tag.strKbGUID);
+        //
+        removeShortcut(CWizCategoryViewShortcutItem::GroupTag, tag.strGUID);
     }
 }
 
