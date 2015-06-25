@@ -8,7 +8,6 @@
 
 class QString;
 class QMenu;
-class QToolButton;
 class CWizDocumentWebEngine;
 class CWizDocumentWebView;
 class CWizToolButton;
@@ -60,7 +59,7 @@ private:
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
     CWizToolButton* m_btnStrikeThrough;
-    QToolButton* m_btnJustify;
+    CWizToolButton* m_btnJustify;
     CWizToolButton* m_btnUnorderedList;
     CWizToolButton* m_btnOrderedList;
     CWizToolButton* m_btnTable;

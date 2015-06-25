@@ -342,7 +342,17 @@ protected:
 
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        if (opt.arrowType == Qt::RightArrow)
+            rcIcon.setX((opt.rect.width() - size.width()) / 2 - 16);
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+
+        if (opt.arrowType == Qt::RightArrow)
+        {
+            QRect rcArrow = opt.rect;
+            rcArrow.setX(opt.rect.right() - 16);
+            QPixmap arrow(Utils::StyleHelper::skinResourceFileName("actionPopupMainMenu"));
+            p.drawPixmap(rcArrow, arrow);
+        }
     }
 
     virtual void leaveEvent(QEvent* event) {
@@ -359,6 +369,8 @@ protected:
 
     virtual QSize sizeHint() const
     {
+        if (arrowType() == Qt::RightArrow)
+            return QSize(36, 20);
         return QSize(20, 20);
     }
 
@@ -668,13 +680,13 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnStrikeThrough->setToolTip(tr("StrikeThrough"));
     connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
 
-    m_btnJustify = new QToolButton(this);
+    m_btnJustify = new CWizToolButton(this);
     m_btnJustify->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
     m_btnJustify->setCheckable(false);
     m_btnJustify->setArrowType(Qt::RightArrow);
     m_btnJustify->setPopupMode(QToolButton::MenuButtonPopup);
     m_btnJustify->setToolTip(tr("Justify"));
-//    connect(m_btnJustify, SIGNAL(clicked()), SLOT(on_btnJustify_clicked()));
+    connect(m_btnJustify, SIGNAL(clicked()), SLOT(on_btnJustify_clicked()));
     m_menuJustify = new QMenu(m_btnJustify);
     m_actionJustifyLeft = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"),
                              tr("JustifyLeft"), this, SLOT(on_btnJustifyLeft_clicked()));
