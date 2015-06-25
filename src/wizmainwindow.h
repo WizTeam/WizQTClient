@@ -483,6 +483,7 @@ private:
     void loadMessageByUserGuid(const QString& guid);
 
     //
+private slots:
     void windowActived();
 };
 

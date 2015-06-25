@@ -149,7 +149,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_tray(NULL)
     , m_trayMenu(NULL)
     , m_mobileFileReceiver(nullptr)
-    , m_bQuickDownloadMessageEnable(true)
+    , m_bQuickDownloadMessageEnable(false)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -406,7 +406,7 @@ void MainWindow::changeEvent(QEvent* event)
     if (event->type() == QEvent::ActivationChange
             && isActiveWindow())
     {
-        windowActived();
+        QTimer::singleShot(0, this, SLOT(windowActived()));
     }
     //
     if (m_useSystemBasedStyle)
@@ -1920,7 +1920,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 //            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
 //        }
     }
-    else if (0 == nErrorCode)
+    else if (S_OK == nErrorCode)
     {
         // set quick download message enable
         m_bQuickDownloadMessageEnable = true;
