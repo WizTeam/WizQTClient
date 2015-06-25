@@ -445,7 +445,7 @@ private:
     void updatePersonalFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
                                       const QString& strNewLocation);
     void updatePersonalTagPosition();
-    void updateGroupFolderPosition(CWizDatabase& db);
+    void updateGroupFolderPosition(CWizDatabase& db, CWizCategoryViewItemBase* pItem);
 
     //
     void promptGroupLimitMessage(const QString& groupGUID, const QString& bizGUID);

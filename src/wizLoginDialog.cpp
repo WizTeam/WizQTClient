@@ -878,15 +878,7 @@ void CWizLoginDialog::downloadLogoFromWizBox(bool saveToUserSettings)
     rapidjson::Document d;
     d.Parse<0>(oemSettings.toUtf8().constData());
 
-    qDebug() << "oem settings : " << oemSettings;
-
-#ifdef QT_DEBUG
-    if (!d.FindMember("LogoCustom") || !d.FindMember("LogoCustom")->value.GetBool())
-    {
-        qDebug() << "Logo custom is not enable";
-        return;
-    }
-#endif
+    qDebug() << "oem settings : " << oemSettings;    
 
     if (!d.FindMember("LogoConfig"))
     {

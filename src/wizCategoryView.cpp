@@ -3068,8 +3068,24 @@ void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
     mainWindow->quickSyncKb(strKbGUID);
 }
 
-void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db)
+void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db, CWizCategoryViewItemBase* pItem)
 {
+    // modify tag parent info
+    if (pItem->type() == Category_GroupItem)
+    {
+        CWizCategoryViewGroupItem* groupItem = dynamic_cast<CWizCategoryViewGroupItem*>(pItem);
+        WIZTAGDATA tag = groupItem->tag();
+        tag.strParentGUID = "";
+        if (pItem->parent()->type() == Category_GroupItem)
+        {
+            CWizCategoryViewGroupItem* parentItem = dynamic_cast<CWizCategoryViewGroupItem*>(groupItem->parent());
+            Q_ASSERT(parentItem);
+            tag.strParentGUID = parentItem->tag().strGUID;
+        }
+        tag.nVersion = -1;
+        db.UpdateTag(tag);
+    }
+    //
     saveGroupTagsPosition(db.kbGUID());
     db.SetGroupTagsPosModified();
 
@@ -3106,6 +3122,9 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
 
 void CWizCategoryView::updatePersonalTagPosition()
 {
+    // not support for customing personal tag position
+    return;
+
     CWizDatabase& db = m_dbMgr.db();
     savePersonalTagsPosition();
     db.SetGroupTagsPosModified();
@@ -3275,7 +3294,7 @@ void CWizCategoryView::saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewG
         return;
 
     WIZTAGDATA tag = pItem->tag();
-    db.ModifyTag(tag);
+    db.ModifyTagPosition(tag);
 
     for (int i = 0; i < pItem->childCount(); i++)
     {
@@ -4784,7 +4803,7 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
     if (db.IsGroup())
     {
-        updateGroupFolderPosition(db);
+        updateGroupFolderPosition(db, pItem);
     }
     else
     {

@@ -579,6 +579,19 @@ bool CWizIndex::DeleteTag(const WIZTAGDATA& data, bool bLog, bool bReset /* = tr
     return DeleteTagEx(data);
 }
 
+bool CWizIndex::ModifyTagPosition(const WIZTAGDATA& data)
+{
+    CString strSQL = WizFormatString2(_T("update WIZ_TAG set TAG_POS=%1 where TAG_GUID=%2"),
+        WizInt64ToStr(data.nPostion),
+        STR2SQL(data.strGUID));
+
+    //
+    if (!ExecSQL(strSQL))
+        return false;
+
+    return true;
+}
+
 QString CWizIndex::getTagTreeText(const QString& strTagGUID)
 {
     WIZTAGDATA tag;
