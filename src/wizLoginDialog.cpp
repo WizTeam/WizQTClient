@@ -397,7 +397,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     {
         userSettings.setEnterpriseServerIP(m_lineEditServer->text());
         userSettings.setServerLicence(m_serverLicence);
-        downloadLogoFromWizBox(true);
+//        downloadLogoFromWizBox(true);
     }
 
     return true;
@@ -1327,7 +1327,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_serverType = EnterpriseServer;
     ApiEntry::setEnterpriseServerIP(ip);
 
-    downloadLogoFromWizBox(false);
+//    downloadLogoFromWizBox(false);
 }
 
 void CWizLoginDialog::onWizBoxSearchingTimeOut()
