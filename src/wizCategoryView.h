@@ -12,6 +12,7 @@ class CWizExplorerApp;
 class QSettings;
 class CWizProgressDialog;
 class CWizObjectDataDownloaderHost;
+class CWizFolderSelector;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
 #define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
@@ -494,18 +495,27 @@ private:
 
 
     //
+    void moveGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
     void moveGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
                                          const QString& targetParentFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     void moveGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizDatabase& targetDB,
                                          const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
+    void movePersonalFolder(CWizDatabase& db, const QString& sourceFolder, CWizFolderSelector* selector,
+                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
     void movePersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder);
 
     void movePersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
                                          const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     //
+    void copyGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
     void copyGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
                                          const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
                                          CWizObjectDataDownloaderHost* downloader);
@@ -514,6 +524,9 @@ private:
                                          const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
                                       CWizObjectDataDownloaderHost* downloader);
     //
+    void copyPersonalFolder(CWizDatabase& sourceDB, const QString& sourceFolder, CWizFolderSelector* selector,
+                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+
     void copyPersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder,
                                             bool keepDocTime, bool keepTag, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
