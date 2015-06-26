@@ -104,6 +104,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     , m_searcher(new CWizSearcher(m_dbMgr, this))
+    , m_userVerifyDialog(nullptr)
 #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade(this))
 #else
@@ -490,9 +491,10 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
             }
 
             m_userVerifyDialog->exec();
+            m_userVerifyDialog->deleteLater();
+            m_userVerifyDialog = nullptr;
         }
     }
-
 }
 
 void MainWindow::on_quickSync_request(const QString& strKbGUID)
