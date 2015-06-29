@@ -291,6 +291,8 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
     p->restore();
 }
 
+const int TOOLBUTTON_ARRWO_WIDTH = 8;
+
 class CWizToolButton : public QToolButton
 {
 public:
@@ -343,15 +345,27 @@ protected:
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         if (opt.arrowType == Qt::RightArrow)
-            rcIcon.setX((opt.rect.width() - size.width()) / 2 - 16);
+            rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_ARRWO_WIDTH);
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
         if (opt.arrowType == Qt::RightArrow)
         {
-            QRect rcArrow = opt.rect;
-            rcArrow.setX(opt.rect.right() - 16);
-            QPixmap arrow(Utils::StyleHelper::skinResourceFileName("actionPopupMainMenu"));
-            p.drawPixmap(rcArrow, arrow);
+//            QRect rcArrow = opt.rect;
+//            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
+//            QPixmap arrow(Utils::StyleHelper::skinResourceFileName("actionPopupMainMenu"));
+//            p.drawPixmap(rcArrow, arrow);
+
+            QMatrix matrix;
+            matrix.translate(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH / 2 -1, opt.rect.center().y() + 2);
+            QPainterPath path;
+            path.moveTo(0, 2.3);
+            path.lineTo(-2.3, -2.3);
+            path.lineTo(2.3, -2.3);
+            p.setMatrix(matrix);
+            p.setPen(Qt::NoPen);
+            p.setBrush(QColor(0, 0, 0, 255));
+            p.setRenderHint(QPainter::Antialiasing);
+            p.drawPath(path);
         }
     }
 
@@ -370,7 +384,7 @@ protected:
     virtual QSize sizeHint() const
     {
         if (arrowType() == Qt::RightArrow)
-            return QSize(36, 20);
+            return QSize(20 + TOOLBUTTON_ARRWO_WIDTH, 20);
         return QSize(20, 20);
     }
 
