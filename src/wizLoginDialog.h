@@ -18,6 +18,29 @@ class CWizSkin9GridImage;
 class CWizImageButton;
 class CWizUdpClient;
 
+class CWizOEMDownloader : public QObject
+{
+    Q_OBJECT
+public:
+    CWizOEMDownloader(QObject* parent, const QString& serverIp);
+
+public slots:
+    void downloadOEMLogo(const QString& strUrl);
+    void downloadOEMSettings();
+    void onCheckServerLicenceRequest(const QString& licence);
+
+signals:
+    void oemSettingsDownloaded(const QString& setting);
+    void logoDownloaded(const QString& logoFile);
+    void errorMessage(const QString& error);
+    void checkLicenceFinished(bool result, const QString& settings);
+
+private:
+    QString _downloadOEMSettings();
+
+    QString m_server;
+};
+
 
 namespace Ui {
 class wizLoginWidget;
@@ -57,6 +80,8 @@ signals:
     void wizBoxServerSelected();
     void accountCheckStart();
     void accountCheckFinished();
+    void logoDownloadRequest(const QString& strUrl);
+    void checkServerLicenceRequest(const QString& licence);
 
 #ifdef Q_OS_MAC
 protected:
@@ -101,6 +126,12 @@ private slots:
                           const QString& responseMessage);
     void onWizBoxSearchingTimeOut();
 
+    // download oem
+    bool onOEMSettingsDownloaded(const QString& settings);
+    void onOEMLogoDownloaded(const QString& logoFile);
+    void showErrorMessage(const QString& stterror);
+    void onCheckServerLicenceFinished(bool result, const QString& settings);
+
     // state machine
     void onWizLogInStateEntered();
     void onWizBoxLogInStateEntered();
@@ -113,8 +144,10 @@ private slots:
 
 private:
     void initSateMachine();
+    void initOEMDownloader();
+    //
     void applyElementStyles(const QString& strLocal);
-    bool checkSingMessage();
+    bool checkSignMessage();
     QAction* findActionInMenu(const QString& strActName);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
@@ -123,12 +156,13 @@ private:
     void showSearchingDialog();
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
-    bool checkServerLicence(const QString& strOldLicence);
+    void checkServerLicence();
     void setSwicthServerSelectedAction(const QString& strActionData);
     void setSwicthServerActionEnable(const QString &strActionData, bool bEnable);
-    void downloadLogoFromWizBox(bool saveToUserSettings);
-    QString downloadOEMSettingsFromWizBox();
+    void downloadLogoFromWizBox(const QString& strUrl);
+    void downloadOEMSettingsFromWizBox();
     void setLogo(const QString& logoPath);
+
 
 private:
     Ui::wizLoginWidget *ui;
@@ -160,6 +194,10 @@ private:
     QState* m_stateWizBoxLogInCheck;
     QState* m_stateSignUpCheck;
 
+    //
+    QMap<QString, QString> m_oemLogoMap;
+    QThread* m_oemThread;
+    CWizOEMDownloader* m_oemDownloader;
 };
 
 #endif // WIZLOGINWIDGET_H
