@@ -277,7 +277,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
     //
     m_currentUserServerType = userSettings.serverType();
-    qDebug() << "set user , user type : " << m_currentUserServerType;
+//    qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
@@ -329,7 +329,7 @@ void CWizLoginDialog::doAccountVerify()
         return;
     }
 
-    qDebug() << "do account verify , server type : " << m_serverType;
+//    qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
@@ -397,7 +397,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     {
         userSettings.setEnterpriseServerIP(m_lineEditServer->text());
         userSettings.setServerLicence(m_serverLicence);
-//        downloadLogoFromWizBox(true);
+        downloadLogoFromWizBox(true);
     }
 
     return true;
@@ -819,7 +819,7 @@ bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
-    qDebug() << "checkServerLicence,  download  oem settings : " << strResult;
+    qDebug() << "oem settings : " << strResult;
 
     if (!d.FindMember("licence"))
     {
@@ -1327,7 +1327,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_serverType = EnterpriseServer;
     ApiEntry::setEnterpriseServerIP(ip);
 
-//    downloadLogoFromWizBox(false);
+    downloadLogoFromWizBox(false);
 }
 
 void CWizLoginDialog::onWizBoxSearchingTimeOut()

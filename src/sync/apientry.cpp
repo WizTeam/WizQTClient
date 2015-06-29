@@ -163,10 +163,7 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
 
     net->deleteLater();
 
-    QString result = loop.result();
-    qDebug() << "request url from " << strUrl << "   get result ; " << result;
-
-    return result;
+    return loop.result();
 }
 
 QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
