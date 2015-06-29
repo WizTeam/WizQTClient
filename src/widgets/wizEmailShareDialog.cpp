@@ -1,11 +1,5 @@
 #include "wizEmailShareDialog.h"
 #include "ui_wizEmailShareDialog.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
-#include "share/wizsettings.h"
-#include "share/wizDatabaseManager.h"
-#include "rapidjson/document.h"
-#include "utils/stylehelper.h"
 #include <QListWidget>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -15,6 +9,13 @@
 #include <QPixmap>
 #include <QVBoxLayout>
 #include <QDebug>
+
+#include "sync/apientry.h"
+#include "sync/token.h"
+#include "share/wizsettings.h"
+#include "share/wizDatabaseManager.h"
+#include "rapidjson/document.h"
+#include "utils/stylehelper.h"
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
 
@@ -57,10 +58,11 @@ CWizEmailShareDialog::~CWizEmailShareDialog()
     delete ui;
 }
 
-void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note)
+void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& sendTo)
 {
     m_note = note;
     ui->lineEdit_subject->setText(m_note.strTitle);
+    ui->lineEdit_to->setText(sendTo);
     ui->comboBox_replyTo->insertItem(0, m_app.userSettings().user());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
 }

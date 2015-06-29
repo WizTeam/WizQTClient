@@ -7,7 +7,7 @@ class QPainter;
 class QPixmap;
 class QColor;
 class QString;
-class QPolygon;
+class QPolygonF;
 class QFont;
 class QIcon;
 class CWizSettings;
@@ -91,7 +91,7 @@ public:
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
     static QIcon listViewBadge(int type);
-    static QPolygon bubbleFromSize(const QSize& sz, int nAngle = 10, bool bAlignLeft = true);
+    static QPolygonF bubbleFromSize(const QSize& sz, int nAngle = 10, bool bAlignLeft = true);
     static QRect drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
                         int nFlags, const QColor& color, const QFont& font, bool bElided = true);
     static int drawSingleLineText(QPainter* p, const QRect& rc, QString& str, int nFlags, const QColor& color, const QFont& font);

@@ -190,6 +190,13 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 
+bool CWizIndex::getAllMessageSenders(CWizStdStringArray& arraySender)
+{
+    QString strSQL = WizFormatString1("SELECT distinct SENDER_GUID from %1",
+                                      TABLE_NAME_WIZ_MESSAGE);
+    return SQLToStringArray(strSQL, 0, arraySender);
+}
+
 bool CWizIndex::getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax)
 {
     CString strExt;
@@ -202,37 +209,42 @@ bool CWizIndex::getLastestMessages(CWizMessageDataArray& arrayMsg, int nMax)
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
 
-bool CWizIndex::setMessageReadStatus(const WIZMESSAGEDATA& msg, qint32 nRead)
+bool CWizIndex::setMessageReadStatus(const WIZMESSAGEDATA& msg)
 {
-    CWizMessageDataArray arrayMsg;
-    arrayMsg.push_back(msg);
+    WIZMESSAGEDATA readMsg;
+    if (!messageFromId(msg.nId, readMsg))
+        return false;
 
-    return setMessageReadStatus(arrayMsg, nRead);
-}
-
-bool CWizIndex::setMessageReadStatus(const CWizMessageDataArray& arrayMsg,
-                                      qint32 nRead)
-{
-    bool ret = true;
-
-    CWizMessageDataArray::const_iterator it;
-    for (it = arrayMsg.begin(); it != arrayMsg.end(); it++) {
-        WIZMESSAGEDATA msg(*it);
-
-        if (msg.nReadStatus != nRead) {
-            msg.nReadStatus = nRead;
-            msg.nVersion = -1;
-            ret = modifyMessageEx(msg);
-        }
+    if (readMsg.nReadStatus != 1) {
+        readMsg.nReadStatus = 1;
+        readMsg.nLocalChanged = readMsg.nLocalChanged | WIZMESSAGEDATA::localChanged_Read;
+        return modifyMessageEx(readMsg);
     }
-
-    return ret;
+    return true;
 }
+
+bool CWizIndex::setMessageDeleteStatus(const WIZMESSAGEDATA& msg)
+{
+    WIZMESSAGEDATA delMsg;
+    if (!messageFromId(msg.nId, delMsg))
+        return false;
+
+    if (delMsg.nDeleteStatus != 1) {
+        delMsg.nDeleteStatus = 1;
+        delMsg.nLocalChanged = delMsg.nLocalChanged | WIZMESSAGEDATA::localChanged_Delete;
+        return modifyMessageEx(delMsg);
+    }
+    return true;
+}
+
 
 bool CWizIndex::getModifiedMessages(CWizMessageDataArray& arrayMsg)
 {
-    CString strSQL = FormatModifiedQuerySQL(TABLE_NAME_WIZ_MESSAGE,
-                                            FIELD_LIST_WIZ_MESSAGE);
+    CString strExt;
+    strExt.Format("where LOCAL_CHANGED>0");
+    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_MESSAGE,
+                                      FIELD_LIST_WIZ_MESSAGE,
+                                      strExt);
 
     return SQLToMessageDataArray(strSQL, arrayMsg);
 }
@@ -246,6 +258,17 @@ bool CWizIndex::getUnreadMessages(CWizMessageDataArray& arrayMsg)
                                       strExt);
 
     return SQLToMessageDataArray(strSQL, arrayMsg);
+}
+
+bool CWizIndex::modifyMessageLocalChanged(const WIZMESSAGEDATA& msg)
+{
+    CString strSQL = WizFormatString4("update %1 set LOCAL_CHANGED=%2 where %3=%4",
+        TABLE_NAME_WIZ_MESSAGE,
+        WizIntToStr(msg.nLocalChanged),
+        TABLE_KEY_WIZ_MESSAGE,
+        WizInt64ToStr(msg.nId));
+
+    return ExecSQL(strSQL);
 }
 
 int CWizIndex::getUnreadMessageCount()
@@ -674,6 +697,8 @@ bool CWizIndex::ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 {
+    Q_ASSERT(data.strKbGUID == kbGUID());
+
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DT_ACCESSED=%s where DOCUMENT_GUID=%s"),
         TIME2SQL(data.tAccessed).utf16(),
@@ -849,7 +874,7 @@ bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
 int CWizIndex::getGroupUnreadDocumentCount()
 {
     CString strSQL;
-    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0");
+    strSQL.Format("select count(*) from WIZ_DOCUMENT where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
 
     CppSQLite3Query query = m_db.execQuery(strSQL);
 
@@ -857,6 +882,7 @@ int CWizIndex::getGroupUnreadDocumentCount()
         int nCount = query.getIntField(0);
         return nCount;
     }
+
 
     return 0;
 }

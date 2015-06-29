@@ -29,7 +29,7 @@ using namespace Core::Internal;
 
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
-#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
+//#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
 #define WIZACTION_ATTACHMENT_SAVEAS QObject::tr("Save as...")
 #define WIZACTION_ATTACHMENT_OPEN   QObject::tr("Open...")
 #define WIZACTION_ATTACHMENT_DELETE QObject::tr("Delete")
@@ -71,7 +71,7 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     m_menu->addSeparator();
     m_menu->addAction(WIZACTION_ATTACHMENT_OPEN, this, SLOT(on_action_openAttachment()));
     m_menu->addAction(WIZACTION_ATTACHMENT_SAVEAS, this, SLOT(on_action_saveAttachmentAs()));
-    m_menu->addAction(WIZACTION_ATTACHMENT_DOWNLOAD, this, SLOT(on_action_downloadAttachment()));
+//    m_menu->addAction(WIZACTION_ATTACHMENT_DOWNLOAD, this, SLOT(on_action_downloadAttachment()));
     m_menu->addSeparator();
     m_menu->addAction(WIZACTION_ATTACHMENT_DELETE, this, SLOT(on_action_deleteAttachment()));
     m_menu->addSeparator();
@@ -346,7 +346,7 @@ void CWizAttachmentListView::resetPermission()
 
         findAction(WIZACTION_ATTACHMENT_OPEN)->setEnabled(bOpenOrSaveEnable);
         findAction(WIZACTION_ATTACHMENT_SAVEAS)->setEnabled(bOpenOrSaveEnable);
-        findAction(WIZACTION_ATTACHMENT_DOWNLOAD)->setEnabled(bDownloadEnable);
+//        findAction(WIZACTION_ATTACHMENT_DOWNLOAD)->setEnabled(bDownloadEnable);
         findAction(WIZACTION_ATTACHMENT_DELETE)->setEnabled(bDeleteEnable);
     }
 
@@ -386,16 +386,16 @@ void CWizAttachmentListView::on_action_addAttachment()
     addAttachments();
 }
 
-void CWizAttachmentListView::on_action_downloadAttachment()
-{
-    foreach (QListWidgetItem* it, selectedItems())
-    {
-        if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
-        {
-            downloadAttachment(item);
-        }
-    }
-}
+//void CWizAttachmentListView::on_action_downloadAttachment()
+//{
+//    foreach (QListWidgetItem* it, selectedItems())
+//    {
+//        if (CWizAttachmentListViewItem* item = dynamic_cast<CWizAttachmentListViewItem*>(it))
+//        {
+//            downloadAttachment(item);
+//        }
+//    }
+//}
 
 void CWizAttachmentListView::on_action_saveAttachmentAs()
 {

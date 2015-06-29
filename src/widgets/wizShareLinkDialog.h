@@ -33,6 +33,7 @@ public:
     Q_INVOKABLE QString getShareLinkFirstTips();
     Q_INVOKABLE void setShareLinkFirstTips(const QString& value);
     Q_INVOKABLE QString getLocalLanguage();
+    Q_INVOKABLE QString formateISO8601String(const QString& value);
 
 public slots:
     void loadHtml();

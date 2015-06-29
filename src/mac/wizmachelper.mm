@@ -444,11 +444,25 @@ bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
 
 
 
-QString wizSystemClipboardData()
+QString wizSystemClipboardData(QString& orignUrl)
 {
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
 
     NSArray *typeArray = [pasteboard types];
+//    NSLog(@"clipboard types : %@", typeArray);
+//    NSString* htmlType = @"public.html";
+//    if ([typeArray containsObject:htmlType])
+//    {
+//        NSData* data = [pasteboard dataForType:htmlType];
+
+//        WebArchive *archive = [[WebArchive alloc] initWithData:data];
+//        WebResource *resource = archive.mainResource;
+//        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
+//        [archive release];
+
+//        NSString* url = [[resource URL] absoluteString];
+//        orignUrl = WizToQString(url);
+//    }
     NSString *type = @"com.apple.webarchive";
     if ([typeArray containsObject:type])
     {
@@ -463,8 +477,8 @@ QString wizSystemClipboardData()
 
         QString strHtml = WizToQString(string);
         NSString* url = [[resource URL] absoluteString];
-        QString strUrl = WizToQString(url);
-        processWebImageUrl(strHtml, strUrl);
+        orignUrl = WizToQString(url);
+        processWebImageUrl(strHtml, orignUrl);
         return strHtml;
     }
 

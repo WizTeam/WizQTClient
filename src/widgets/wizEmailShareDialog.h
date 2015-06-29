@@ -19,7 +19,7 @@ public:
     explicit CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent = 0);
     ~CWizEmailShareDialog();
 
-    void setNote(const WIZDOCUMENTDATA& note);
+    void setNote(const WIZDOCUMENTDATA& note, const QString& sendTo = "");
 
 private slots:
     void on_toolButton_send_clicked();

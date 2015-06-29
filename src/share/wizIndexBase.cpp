@@ -141,11 +141,16 @@ bool CWizIndexBase::Repair(const QString& strDestFileName)
 
 bool CWizIndexBase::updateTableStructure(int oldVersion)
 {
-    if (oldVersion < 1)
-    {
-        qDebug() << "table structure version : " << oldVersion << "  update to version 1";
+    qDebug() << "table structure version : " << oldVersion << "  update to version " << WIZ_TABLE_STRUCTURE_VERSION;
+    if (oldVersion < 1) {
         Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
     }
+    //
+    if (oldVersion < 2) {
+        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
+        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+    }
+    //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
@@ -570,6 +575,8 @@ bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
             data.title = query.getStringField(msgMESSAGE_TITLE);
             data.messageBody = query.getStringField(msgMESSAGE_TEXT);
             data.nVersion = query.getInt64Field(msgWIZ_VERSION);
+            data.nDeleteStatus = query.getIntField(msgDELETE_STATUS);
+            data.nLocalChanged = query.getIntField(msgLOCAL_CHANGED);
 
             arrayMessage.push_back(data);
             query.nextRow();
@@ -635,7 +642,9 @@ bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
                   TIME2SQL(data.tCreated).utf16(),
                   STR2SQL(data.title).utf16(),
                   STR2SQL(data.messageBody).utf16(),
-                  WizInt64ToStr(data.nVersion).utf16()
+                  WizInt64ToStr(data.nVersion).utf16(),
+                  data.nDeleteStatus,
+                  data.nLocalChanged
         );
 
 
@@ -663,7 +672,9 @@ bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
     CString strSQL;
     strSQL.Format(strFormat,
                   data.nReadStatus,
+                  data.nDeleteStatus,
                   WizInt64ToStr(data.nVersion).utf16(),
+                  data.nLocalChanged,
                   WizInt64ToStr(data.nId).utf16()
         );
 
@@ -751,6 +762,7 @@ bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 
     CString strSQL;
     strSQL.Format(strFormat,
+                  STR2SQL(user.userId).utf16(),
                   STR2SQL(user.alias).utf16(),
                   STR2SQL(user.pinyin).utf16()
         );
@@ -1529,6 +1541,40 @@ bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
     return true;
 }
 
+bool CWizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+{
+    CString strWhere;
+    strWhere.Format("SENDER_GUID=%s", STR2SQL(userGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG1("[messageFromId] failed to get message by user guid : %1", userGUID);
+        return false;
+    }
+
+    return !arrayMessage.empty();
+}
+
+bool CWizIndexBase::unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+{
+    CString strWhere;
+    strWhere.Format("SENDER_GUID=%s and READ_STATUS=0", STR2SQL(userGUID).utf16());
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+                                    FIELD_LIST_WIZ_MESSAGE,
+                                    strWhere);
+
+    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+        TOLOG1("[messageFromId] failed to get unread message by user guid : %1", userGUID);
+        return false;
+    }
+
+    return !arrayMessage.empty();
+}
+
 bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data)
 {
     CString strWhere;
@@ -1540,7 +1586,7 @@ bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDA
 
     CWizMessageDataArray arrayMessage;
     if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
-        TOLOG("[messageFromId] failed to get message by document guid");
+        TOLOG1("[messageFromId] failed to get message by document guid : %1", strGUID);
         return false;
     }
 

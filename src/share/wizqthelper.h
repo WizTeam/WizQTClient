@@ -6,6 +6,7 @@
 #include <map>
 #include <deque>
 #include <set>
+#include <functional>
 
 #include <assert.h>
 
@@ -187,6 +188,22 @@ bool WizMapLookup(const T& m, const typename T::key_type& key, typename T::mappe
     return true;
 }
 
+class WizScopeGuard
+{
+public:
+    explicit WizScopeGuard(std::function<void()> onExitScope)
+        : onExitScope_(onExitScope)
+    { }
+    ~WizScopeGuard()
+    {
+            onExitScope_();
+    }
+private:
+    std::function<void()> onExitScope_;
+private: // noncopyable
+    WizScopeGuard(WizScopeGuard const&);
+    WizScopeGuard& operator=(WizScopeGuard const&);
+};
 
 typedef std::deque<CString> CWizStdStringArray;
 

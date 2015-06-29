@@ -75,6 +75,8 @@ public:
 
     // messages
     bool messageFromId(qint64 id, WIZMESSAGEDATA& data);
+    bool messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage);
+    bool unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage);
     bool messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data);
 
     // biz users, one user may in different biz group
@@ -492,13 +494,13 @@ META_NAME=%s, META_KEY=%s, META_VALUE=%s, DT_MODIFIED=%s"
 
 #define FIELD_LIST_WIZ_MESSAGE "\
 MESSAGE_ID, BIZ_GUID, KB_GUID, DOCUMENT_GUID, SENDER, SENDER_ID, SENDER_GUID, \
-RECEIVER, RECEIVER_ID, RECEIVER_GUID, MESSAGE_TYPE, READ_STATUS, DT_CREATED, \
-MESSAGE_TITLE, MESSAGE_TEXT, WIZ_VERSION"
+RECEIVER, RECEIVER_ID, RECEIVER_GUID, MESSAGE_TYPE, READ_STATUS,\
+DT_CREATED, MESSAGE_TITLE, MESSAGE_TEXT, WIZ_VERSION, DELETE_STATUS, LOCAL_CHANGED"
 
 #define PARAM_LIST_WIZ_MESSAGE "\
-%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %s, %s, %s, %s"
+%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d,%s, %s, %s, %s, %d, %d"
 
-#define FIELD_LIST_WIZ_MESSAGE_MODIFY "READ_STATUS=%d, WIZ_VERSION=%s"
+#define FIELD_LIST_WIZ_MESSAGE_MODIFY "READ_STATUS=%d, DELETE_STATUS=%d, WIZ_VERSION=%s, LOCAL_CHANGED=%d"
 #define TABLE_KEY_WIZ_MESSAGE   "MESSAGE_ID"
 
 enum FieldIndex_WizMessage
@@ -518,9 +520,10 @@ enum FieldIndex_WizMessage
     msgDT_CREATED,
     msgMESSAGE_TITLE,
     msgMESSAGE_TEXT,
-    msgWIZ_VERSION
+    msgWIZ_VERSION,
+    msgDELETE_STATUS,
+    msgLOCAL_CHANGED
 };
-
 
 /* ------------------------------ WIZ_USER ------------------------------ */
 #define TABLE_NAME_WIZ_USER "WIZ_USER"
@@ -530,7 +533,7 @@ BIZ_GUID, USER_ID, USER_GUID, USER_ALIAS, USER_PINYIN"
 
 #define PARAM_LIST_WIZ_USER "%s, %s, %s, %s, %s"
 
-#define FIELD_LIST_WIZ_USER_MODIFY "USER_ALIAS=%s, USER_PINYIN=%s"
+#define FIELD_LIST_WIZ_USER_MODIFY "USER_ID=%s, USER_ALIAS=%s, USER_PINYIN=%s"
 
 enum FieldIndex_WizUser
 {

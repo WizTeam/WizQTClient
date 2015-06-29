@@ -20,6 +20,7 @@
 class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
+class QComboBox;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -52,7 +53,6 @@ class CWizCategoryView;
 class QListWidgetItem;
 class CWizCategoryViewMessageItem;
 class CWizCategoryViewShortcutItem;
-
 class CWizDocumentWebView;
 
 class CWizMobileFileReceiver;
@@ -60,6 +60,8 @@ class CWizMobileFileReceiver;
 namespace WizService {
 namespace Internal {
 class MessageListView;
+class WizMessageSelector;
+class WizMessageListTitleBar;
 }
 }
 
@@ -166,7 +168,8 @@ private:
     WizService::Internal::MessageListView* m_msgList;
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
-    QWidget* m_msgListUnreadBar;
+    WizService::Internal::WizMessageListTitleBar* m_msgListTitleBar;
+
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
     CWizDocumentTransitionView* m_transitionView;
@@ -190,6 +193,8 @@ private:
     bool m_bRestart;
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
+
+    bool m_bQuickDownloadMessageEnable;
 
     WIZDOCUMENTDATA m_documentForEditing;
 
@@ -296,6 +301,7 @@ public Q_SLOTS:
     void on_actionViewMinimize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
+    void on_messageSelector_indexChanged(int index);
 
     // menu format
     void on_actionFormatJustifyLeft_triggered();
@@ -447,7 +453,7 @@ private:
 #endif
     //
     void startSearchStatus();
-    void cancelSearchStatus();
+    void quitSearchStatus();
 
     //
     void initVariableBeforCreateNote();
@@ -470,6 +476,12 @@ private:
     void downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment);
 
     void openVipPageInWebBrowser();
+
+    //
+    void loadMessageByUserGuid(const QString& guid);
+
+    //
+    void windowActived();
 };
 
 } // namespace Internal

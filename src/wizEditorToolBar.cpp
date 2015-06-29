@@ -12,6 +12,8 @@
 #include <QClipboard>
 #include <QApplication>
 #include <QMimeData>
+#include <QStyledItemDelegate>
+#include <QListWidget>
 #include <QDebug>
 
 #include "share/wizmisc.h"
@@ -23,6 +25,166 @@
 #include "utils/logger.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizAnalyzer.h"
+#include "wizdef.h"
+#include "utils/stylehelper.h"
+
+const int WizCheckStateRole = (int)Qt::UserRole + 5;
+
+struct WizComboboxStyledItem
+{    
+    QString strText;
+    QString strUserData;
+    int nFontSize;
+    bool bBold;
+};
+
+
+const int nParagraphItemCount = 8;
+WizComboboxStyledItem* ParagraphItems()
+{
+    static WizComboboxStyledItem paragraphItems[] =
+    {
+        {QObject::tr("Paragraph"), "p", 14},
+        {QObject::tr("Text"), "div", 14},
+        {QObject::tr("H6"), "h6", 14, true},
+        {QObject::tr("H5"), "h5", 15, true},
+        {QObject::tr("H4"), "h4", 17, true},
+        {QObject::tr("H3"), "h3", 18, true},
+        {QObject::tr("H2"), "h2", 20, true},
+        {QObject::tr("H1"), "h1", 21, true }
+    };
+
+    return paragraphItems;
+}
+
+const int nFontSizeCount = 15;
+WizComboboxStyledItem* FontSizes()
+{
+    static WizComboboxStyledItem fontItems[] =
+    {
+        {"9px", "9px", 9},
+        {"10px", "10px", 10},
+        {"11px", "11px", 11},
+        {"12px", "12px", 12},
+        {"13px", "13px", 13},
+        {"14px", "14px", 14},
+        {"15px", "15px", 15},
+        {"16px", "16px", 16},
+        {"17px", "17px", 17},
+        {"18px", "18px", 18},
+        {"24px", "24px", 24},
+        {"36px", "36px", 36},
+        {"48px", "48px", 48},
+        {"64px", "64px", 64},
+        {"72px", "72px", 72}
+    };
+    return fontItems;
+};
+
+
+WizComboboxStyledItem itemFromArrayByKey(const QString& key, const WizComboboxStyledItem array[], const int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (array[i].strUserData == key)
+        {
+            return array[i];
+        }
+    }
+    WizComboboxStyledItem defaultItem;
+    return defaultItem;
+}
+
+WizComboboxStyledItem itemFromArrayByText(const QString& text, const WizComboboxStyledItem array[], const int count)
+{
+    for (int i = 0; i < count; i++)
+    {
+        if (array[i].strText == text)
+        {
+            return array[i];
+        }
+    }
+    WizComboboxStyledItem defaultItem;
+    return defaultItem;
+}
+
+void clearWizCheckState(QComboBox* combobox)
+{
+    for (int i = 0; i < combobox->count(); i++)
+    {
+        QModelIndex index = combobox->model()->index(i, 0);
+        combobox->model()->setData(index, Qt::Unchecked, WizCheckStateRole);
+    }
+}
+
+class WizToolComboboxItemDelegate : public QStyledItemDelegate
+{
+public:
+    WizToolComboboxItemDelegate(QObject *parent, QComboBox* widget, const WizComboboxStyledItem* items, int count)
+        : QStyledItemDelegate(parent), m_itemArray(items), m_arrayCount(count), m_widget(widget)
+    {}
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+        //
+        if (option.state & QStyle::State_Selected)
+        {
+            painter->fillRect(option.rect, QBrush(QColor("#448aff")));
+            opt.palette.setColor(QPalette::Text, QColor(Qt::white));
+            opt.palette.setColor(QPalette::WindowText, QColor(Qt::white));
+            opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::white));
+        }
+        else if (option.state & QStyle::State_MouseOver)
+        {
+            opt.palette.setColor(QPalette::Text, QColor(Qt::black));
+            opt.palette.setColor(QPalette::WindowText, QColor(Qt::black));
+            opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::black));
+        }
+        //
+        QString text = index.model()->data(index, Qt::DisplayRole).toString();
+        WizComboboxStyledItem styledItem = itemFromArrayByText(text, m_itemArray, m_arrayCount);
+        opt.font.setPointSize(styledItem.nFontSize);
+        opt.font.setBold(styledItem.bBold);
+
+        const int nIconSize = 16;
+        if (index.model()->data(index, WizCheckStateRole).toInt() == Qt::Checked)
+        {
+            static QIcon icon = Utils::StyleHelper::loadIcon("listViewItemSelected");
+            QPixmap pix = icon.pixmap(QSize(nIconSize, nIconSize), QIcon::Normal, (opt.state & QStyle::State_MouseOver) ? QIcon::On : QIcon::Off);
+            if (!pix.isNull())
+            {
+                painter->drawPixmap(opt.rect.x() + 4, opt.rect.y() + (opt.rect.height() - nIconSize) / 2, nIconSize, nIconSize , pix);
+            }
+        }
+        opt.rect.setX(opt.rect.x() + nIconSize + 4);
+
+        QStyledItemDelegate::paint(painter, opt, index);
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItemV4 opt = option;
+        initStyleOption(&opt, index);
+
+        WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
+        QFont font = opt.font;
+        font.setPointSize(styledItem.nFontSize);
+        QFontMetrics fm(font);
+        QRect rc = fm.boundingRect(opt.text);
+//        qDebug()
+        //
+        QSize size(rc.width() + 4, rc.height() + 4);
+        return size;
+    }
+
+private:
+    const WizComboboxStyledItem* m_itemArray;
+    int m_arrayCount;
+    QComboBox* m_widget;
+};
 
 
 const QColor colors[6][8] =
@@ -288,13 +450,26 @@ public:
     void	showPopup()
     {
         m_isPopup = true;
-        QComboBox::showPopup();
+        QComboBox::showPopup();        
     }
 
     void hidePopup()
     {
         m_isPopup = false;
         QComboBox::hidePopup();
+    }
+
+    bool event(QEvent* event)
+    {
+        if (event->type() == QEvent::Paint)
+        {
+            //FIXME: QT5.4.1 通过点击combobox外区域来隐藏列表不会触发  hidePopup() 事件
+            if (m_isPopup)
+            {
+                m_isPopup = false;
+            }
+        }
+        return QComboBox::event(event);
     }
 
 protected:
@@ -358,6 +533,19 @@ public:
         QFontComboBox::hidePopup();
     }
 
+    bool event(QEvent* event)
+    {
+        if (event->type() == QEvent::Paint)
+        {
+            //FIXME: QT5.4.1 通过点击combobox外区域来隐藏列表不会触发  hidePopup() 事件
+            if (m_isPopup)
+            {
+                m_isPopup = false;
+            }
+        }
+        return QComboBox::event(event);
+    }
+
 protected:
     virtual void paintEvent(QPaintEvent *event)
     {
@@ -381,21 +569,61 @@ private:
 };
 
 
-EditorToolBar::EditorToolBar(QWidget *parent)
+EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
     , m_resetLocked(false)
 {
-    QString skin = "default";
+    QString skin = "default";   
+
+    m_comboParagraph = new CWizToolComboBox(this);
+    if (m_app.userSettings().locale() == ::WizGetDefaultTranslatedLocal())
+    {
+        m_comboParagraph->setMinimumWidth(90);
+    }
+    else
+    {
+        m_comboParagraph->setMinimumWidth(70);
+    }
+
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+#ifdef Q_OS_MAC
+    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
+                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
+    m_comboParagraph->setItemDelegate(paragraphDelegate);
+#endif
+
+    for (int i = 0; i < nParagraphItemCount; i ++)
+    {
+        m_comboParagraph->addItem(paraItems[i].strText, paraItems[i].strUserData);
+    }
+    //
+    connect(m_comboParagraph, SIGNAL(activated(int)),
+            SLOT(on_comboParagraph_indexChanged(int)));
+
 
     m_comboFontFamily = new CWizToolComboBoxFont(this);
+//    QListView* fontWidget = new QListView(m_comboFontFamily);
+//    m_comboFontFamily->setView(fontWidget);
+    m_comboFontFamily->setStyleSheet("QComboBox QListView::item:hover {background-color: #448aff;}"
+                                     "QComboBox QListView::item:selected {background-color: #448aff;}");
     connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
-    QStringList listSize;
-    listSize << "9px" << "10px" << "11px" << "12px" << "13px"<< "14px"
-             << "18px" << "24px" << "36px" << "48px" << "64px" << "72px";
     m_comboFontSize = new CWizToolComboBox(this);
-    m_comboFontSize->addItems(listSize);
+    WizComboboxStyledItem* fontItems = FontSizes();
+#ifdef Q_OS_MAC
+    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;}"
+                                   "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
+    m_comboFontSize->setItemDelegate(fontDelegate);
+#endif
+
+    for (int i = 0; i < nFontSizeCount; i++)
+    {
+        m_comboFontSize->addItem(fontItems[i].strText, fontItems[i].strUserData);
+    }
     connect(m_comboFontSize, SIGNAL(activated(const QString&)),
             SLOT(on_comboFontSize_indexChanged(const QString&)));
 
@@ -533,11 +761,12 @@ EditorToolBar::EditorToolBar(QWidget *parent)
     layout->addWidget(m_btnMobileImage);
     layout->addWidget(m_btnCheckList);
     layout->addWidget(m_btnInsertCode);
-    layout->addSpacing(6);
+    layout->addWidget(m_comboParagraph);
+    layout->addSpacing(4);
     layout->addWidget(m_comboFontFamily);
-    layout->addSpacing(6);
+    layout->addSpacing(4);
     layout->addWidget(m_comboFontSize);
-    layout->addSpacing(12);
+    layout->addSpacing(8);
     layout->addWidget(m_btnFormatMatch);
     layout->addWidget(m_btnForeColor);
     layout->addWidget(m_btnBackColor);
@@ -799,6 +1028,12 @@ void EditorToolBar::resetToolbar()
     m_btnInsertImage->setEnabled(!isSourceMode);
     m_btnInsertCode->setEnabled(!isSourceMode);
 
+    value = m_editor->editorCommandQueryCommandValue("Paragraph");
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    WizComboboxStyledItem styledItem = itemFromArrayByKey(value, paraItems, nParagraphItemCount);
+    m_comboParagraph->setText(styledItem.strText);
+    m_comboParagraph->setEnabled(!isSourceMode);
+
     value = m_editor->editorCommandQueryCommandValue("fontFamily");
     m_comboFontFamily->setText(value);
     m_comboFontFamily->setEnabled(!isSourceMode);
@@ -806,6 +1041,19 @@ void EditorToolBar::resetToolbar()
     value = m_editor->editorCommandQueryCommandValue("fontSize");
     m_comboFontSize->setText(value);
     m_comboFontSize->setEnabled(!isSourceMode);
+
+    //
+    if (!isSourceMode)
+    {
+        clearWizCheckState(m_comboParagraph);
+        QModelIndex modelIndex = m_comboParagraph->model()->index(m_comboParagraph->currentIndex(), 0);
+        m_comboParagraph->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+
+        //
+        clearWizCheckState(m_comboFontSize);
+        modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
+        m_comboFontSize->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+    }
 
     state = m_editor->editorCommandQueryCommandState("formatMatch");
     if (state == -1) {
@@ -1464,7 +1712,7 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
 
 bool EditorToolBar::hasFocus()
 {
-    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping();
+    return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping() || m_comboParagraph->isPopuping();
 }
 
 void EditorToolBar::buildMenu()
@@ -1613,6 +1861,26 @@ void EditorToolBar::on_editor_paste_triggered()
 }
 #endif
 
+void EditorToolBar::on_comboParagraph_indexChanged(int index)
+{
+    QString type = m_comboParagraph->itemData(index).toString();
+    Q_ASSERT (index >=0 && index < nParagraphItemCount);
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    WizComboboxStyledItem item = itemFromArrayByKey(type, paraItems, nParagraphItemCount);
+    QString text = item.strText;
+    if (text == m_comboParagraph->text())
+        return;
+
+    if (m_editor) {
+
+        m_editor->editorCommandExecuteParagraph(type);
+        m_comboParagraph->setText(text);
+        clearWizCheckState(m_comboParagraph);
+        QModelIndex modelIndex = m_comboParagraph->model()->index(index, 0);
+        m_comboParagraph->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+    }
+}
+
 void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {
     if (strFamily == m_comboFontFamily->text())
@@ -1632,6 +1900,10 @@ void EditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
     if (m_editor) {
         m_editor->editorCommandExecuteFontSize(strSize);
         m_comboFontSize->setText(strSize);
+        //
+        clearWizCheckState(m_comboFontSize);
+        QModelIndex modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
+        m_comboFontSize->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
     }
 }
 

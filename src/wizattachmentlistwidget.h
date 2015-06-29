@@ -61,7 +61,7 @@ public:
 
 public Q_SLOTS:
     void on_action_addAttachment();
-    void on_action_downloadAttachment();
+//    void on_action_downloadAttachment();
     void on_action_saveAttachmentAs();
     void on_action_openAttachment();
     void on_action_deleteAttachment();

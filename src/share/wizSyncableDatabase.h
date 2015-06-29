@@ -54,6 +54,7 @@ struct IWizSyncableDatabase
     virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData) = 0;
     virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData) = 0;
     virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData) = 0;
+    virtual bool GetModifiedMessageList(CWizMessageDataArray& arrayData) = 0;
 
     virtual bool InitDocumentData(const QString& strGUID, WIZDOCUMENTDATAEX& data, UINT part) = 0;
     virtual bool InitAttachmentData(const QString& strGUID, WIZDOCUMENTATTACHMENTDATAEX& data, UINT part) = 0;
@@ -61,6 +62,8 @@ struct IWizSyncableDatabase
     virtual bool OnUploadObject(const QString& strGUID, const QString& strObjectType) = 0;
 
     virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData) = 0;
+
+    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData) = 0;
 
     virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup) = 0;
     virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz) = 0;

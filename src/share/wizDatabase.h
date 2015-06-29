@@ -29,7 +29,11 @@ public:
 
     QString GetAttachmentsPath(bool create);
     bool IsInDeletedItemsFolder();
-    bool MoveDocument(CWizFolder* pFolder);
+    bool MoveTo(CWizFolder* pFolder);
+    bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
+    bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime, bool keepDocTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
     bool AddTag(const WIZTAGDATA& dataTag);
     bool RemoveTag(const WIZTAGDATA& dataTag);
     QString GetMetaText();
@@ -139,6 +143,7 @@ public:
     virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData);
     virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData);
     virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool GetModifiedMessageList(CWizMessageDataArray& arrayData);
     virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject);
 
     virtual bool DocumentFromGUID(const QString& strGUID,
@@ -178,16 +183,18 @@ public:
                                     UINT part);
 
     virtual bool OnUploadObject(const QString& strGUID,
-                                const QString& strObjectType);
+                                const QString& strObjectType);    
 
     // modify
     virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
+    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
+
 
     //copy Document
     //create new doc and copy data, set the new doc time as the source doc.
-    virtual bool CopyDocumentTo(const QString& strGUID, CWizDatabase& targetDB,
+    virtual bool CopyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
                                   const QString& strTargetLocation, const WIZTAGDATA &targetTag,
-                                QString& strResultGUID, CWizObjectDataDownloaderHost *downloaderHost);
+                                QString& resultGUID, CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime = true);
     //if file doesn't exist, download it.
     bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
     bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
@@ -479,7 +486,7 @@ public:
 
 public slots:
     void onAttachmentModified(const QString strKbGUID, const QString& strGUID, const QString& strFileName,
-                              const QString& strMD5, const QDateTime& dtLastModified);
+                              const QString& strMD5, const QDateTime& dtLastModified);    
 
 Q_SIGNALS:
     void userInfoChanged();
@@ -495,6 +502,7 @@ Q_SIGNALS:
     void folderPositionChanged();
     void tagsPositionChanged(const QString& strKbGUID);
     void documentUploaded(const QString& strKbGUID, const QString& strGUID);
+    void userIdChanged(const QString& oldId, const QString& newId);
 
 private:
     //should make sure sourceDoc already exist before use this.

@@ -144,6 +144,15 @@ QString CWizShareLinkDialog::getLocalLanguage()
     return m_settings.locale();
 }
 
+QString CWizShareLinkDialog::formateISO8601String(const QString& value)
+{
+    QDateTime date = QDateTime::fromString(value, Qt::ISODate);
+    if (!date.isValid() || date.isNull())
+        return value;
+
+    return date.toString(Qt::ISODate);
+}
+
 void CWizShareLinkDialog::loadHtml()
 {
     QString strFile = Utils::PathResolve::resourcesPath() + "files/share_link/index.html";

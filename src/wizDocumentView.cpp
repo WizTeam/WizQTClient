@@ -41,6 +41,7 @@ using namespace Core::Internal;
 #define DOCUMENT_STATUS_EDITBYOTHERS   0x0008
 #define DOCUMENT_STATUS_NEWVERSIONFOUNDED      0x0010
 #define DOCUMENT_STATUS_PERSONAL           0x0020
+#define DOCUMENT_STATUS_ON_EDITREQUEST       0x0040
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
@@ -229,7 +230,9 @@ void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDAT
 
     if (doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1) {
         viewNote(doc, true);
+        m_title->moveTitileTextToPlaceHolder();
     } else {
+        m_title->clearPlaceHolderText();
         viewNote(doc, false);
     }
 }
@@ -429,6 +432,8 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
     if (!bEdit)
     {
+        m_editStatus = DOCUMENT_STATUS_NOSTATUS;
+
         // 保存标题，防止因多线程保存引起覆盖
         m_title->onTitleEditFinished();
     }
@@ -644,6 +649,7 @@ bool CWizDocumentView::checkDocumentEditable()
     connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
     connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), &loop, SLOT(quit()));
     startCheckDocumentEditStatus();
+    m_editStatus = m_editStatus | DOCUMENT_STATUS_ON_EDITREQUEST;
     loop.exec();
     //
 
@@ -712,7 +718,9 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     mainWindow->transitionView()->setVisible(false);
 
-    viewNote(m_note,m_bEditingMode);
+    bool onEditRequest = m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST;
+
+    viewNote(m_note, onEditRequest ? true : m_bEditingMode);
 }
 
 void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
@@ -784,12 +792,12 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
     if (strGUID == m_note.strGUID)
     {
-        if (!(m_editStatus & DOCUMENT_STATUS_OFFLINE))
+        if (m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST)
         {
-            m_title->setEditButtonState(true, false);
             m_title->showMessageTips(Qt::RichText, tr("The current network in poor condition, you are <b> offline editing mode </b>."));
-            m_editStatus = m_editStatus | DOCUMENT_STATUS_OFFLINE;
         }
+        m_title->setEditButtonState(true, false);
+        m_editStatus = m_editStatus | DOCUMENT_STATUS_OFFLINE;
         m_bLocked = false;
         stopCheckDocumentAnimations();
     }

@@ -177,6 +177,18 @@ void Misc::deleteFile(const CString& strFileName)
     dir.remove(extractFileName(strFileName));
 }
 
+bool Misc::isSimpChinese()
+{
+    QLocale local;
+    QString name = local.name().toLower();
+    if (name == "zh_cn"
+        || name == "zh-cn")
+    {
+        return true;
+    }
+    return false;
+}
+
 
 
 } // namespace Utils

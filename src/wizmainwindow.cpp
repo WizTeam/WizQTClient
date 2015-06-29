@@ -8,6 +8,7 @@
 #include <QEvent>
 #include <QHBoxLayout>
 #include <QLabel>
+#include <QComboBox>
 #include <QFileDialog>
 #include <QPushButton>
 #include <QHostInfo>
@@ -104,6 +105,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
     , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
     , m_searcher(new CWizSearcher(m_dbMgr, this))
+    , m_console(nullptr)
+    , m_userVerifyDialog(nullptr)
 #ifndef BUILD4APPSTORE
     , m_upgrade(new CWizUpgrade(this))
 #else
@@ -113,12 +116,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
-    , m_iapDialog(0)
+    , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
 #endif
-    , m_menuBar(0)
+    , m_menuBar(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
@@ -129,14 +132,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #else
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
-    , m_spacerForToolButtonAdjust(NULL)
+    , m_spacerForToolButtonAdjust(nullptr)
     , m_useSystemBasedStyle(m_settings->useSystemBasedStyle())
 #endif
     , m_actions(new CWizActions(*this, this))
     , m_category(new CWizCategoryView(*this, this))
     , m_documents(new CWizDocumentListView(*this, this))
-    , m_noteListWidget(NULL)
-    , m_msgList(new MessageListView(this))
+    , m_noteListWidget(nullptr)
+    , m_msgList(new MessageListView(dbMgr, this))
     , m_documentSelection(new CWizDocumentSelectionView(*this, this))
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
@@ -144,9 +147,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
-    , m_tray(NULL)
-    , m_trayMenu(NULL)
+    , m_tray(nullptr)
+    , m_trayMenu(nullptr)
     , m_mobileFileReceiver(nullptr)
+    , m_bQuickDownloadMessageEnable(true)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -187,6 +191,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+
+#if QT_VERSION > 0x050400
+    connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
+        WizService::AvatarHost::deleteAvatar(oldId);
+        WizService::AvatarHost::load(oldId);
+        WizService::AvatarHost::load(newId);
+    });
+#endif
 
     // GUI
     initActions();
@@ -388,6 +400,12 @@ void MainWindow::mouseReleaseEvent(QMouseEvent* event)
 
 void MainWindow::changeEvent(QEvent* event)
 {
+    if (event->type() == QEvent::ActivationChange
+            && isActiveWindow())
+    {
+        windowActived();
+    }
+    //
     if (m_useSystemBasedStyle)
         QMainWindow::changeEvent(event);
     else
@@ -417,7 +435,14 @@ void MainWindow::on_actionClose_triggered()
     QWidget* wgt = qApp->activeWindow();
     if (wgt && wgt != this)
     {
-       wgt->close();
+        //FIXME:  窗口全屏时直接关闭会造成黑屏，此处改为先取消全屏然后关闭。
+
+        if (wgt->windowState() & Qt::WindowFullScreen)
+        {
+            wgt->setWindowState(wgt->windowState() & ~Qt::WindowFullScreen);
+        }
+       wgt->close();       
+       wgt->deleteLater();
     }
     else
     {
@@ -469,7 +494,9 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 
 void MainWindow::on_TokenAcquired(const QString& strToken)
 {
-    WizService::Token::instance()->disconnect(this);
+    //WizService::Token::instance()->disconnect(this);
+    disconnect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), this,
+            SLOT(on_TokenAcquired(QString)));
 
     if (strToken.isEmpty())
     {
@@ -481,6 +508,9 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
         }
         else if (errorTokenInvalid == nErrorCode)
         {
+            // disable quick download message to stop request token again
+            m_bQuickDownloadMessageEnable = false;
+
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
             if (!m_userVerifyDialog)
@@ -490,9 +520,10 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
             }
 
             m_userVerifyDialog->exec();
+            m_userVerifyDialog->deleteLater();
+            m_userVerifyDialog = nullptr;
         }
     }
-
 }
 
 void MainWindow::on_quickSync_request(const QString& strKbGUID)
@@ -1293,6 +1324,45 @@ void MainWindow::openVipPageInWebBrowser()
     }
 }
 
+void MainWindow::loadMessageByUserGuid(const QString& guid)
+{
+    CWizMessageDataArray arrayMsg;
+    if(guid.isEmpty())
+    {
+        if (m_msgListTitleBar->isUnreadMode())
+        {
+            m_dbMgr.db().getUnreadMessages(arrayMsg);
+        }
+        else
+        {
+            m_dbMgr.db().getAllMessages(arrayMsg);
+        }
+    }
+    else
+    {
+        if (m_msgListTitleBar->isUnreadMode())
+        {
+            m_dbMgr.db().unreadMessageFromUserGUID(guid, arrayMsg);
+        }
+        else
+        {
+            m_dbMgr.db().messageFromUserGUID(guid, arrayMsg);
+        }
+    }
+    //
+    m_msgList->setMessages(arrayMsg);
+}
+
+void MainWindow::windowActived()
+{
+    static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
+    if (!isBizUser || !m_bQuickDownloadMessageEnable)
+        return;
+
+    m_sync->quickDownloadMesages();
+    WizGetAnalyzer().LogAction("bizUserQuickDownloadMessage");
+}
+
 bool MainWindow::checkListClickable()
 {
     if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
@@ -1616,6 +1686,7 @@ QWidget* MainWindow::createNoteListView()
     line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
     layoutActions->addWidget(line);
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
+    sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
@@ -1657,37 +1728,18 @@ QWidget*MainWindow::createMessageListView()
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
 
-    m_msgListUnreadBar = new QWidget(this);
-    m_msgListUnreadBar->setFixedHeight(Utils::StyleHelper::titleEditorHeight());
-    QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 0, 0);
-    layoutActions->setSpacing(0);
-    m_msgListUnreadBar->setLayout(layoutActions);
+    m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
+    connect(m_msgListTitleBar, SIGNAL(messageSelector_indexChanged(int)),
+            SLOT(on_messageSelector_indexChanged(int)));
+    connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request()),
+            SLOT(on_actionMarkAllMessageRead_triggered()));
 
-
-    int nMargin = 15;
-    QSize szMarkMessageBtn(16, 16);
-    layoutActions->setContentsMargins(szMarkMessageBtn.width() + nMargin, 0, nMargin, 0);
-
-    QLabel* labelHint = new QLabel(this);
-    labelHint->setText(tr("Unread Messages"));
-    labelHint->setAlignment(Qt::AlignCenter);
-    labelHint->setStyleSheet("color: #787878;padding-bottom:1px;");
-    layoutActions->addWidget(labelHint);
-
-    wizImageButton* readBtn = new wizImageButton(this);
-    QIcon btnIcon = ::WizLoadSkinIcon(userSettings().skin(), "actionMarkMessagesRead");
-    readBtn->setIcon(btnIcon);
-    readBtn->setFixedSize(szMarkMessageBtn);
-    readBtn->setToolTip(tr("Mark all messages read"));
-    connect(readBtn, SIGNAL(clicked()), SLOT(on_actionMarkAllMessageRead_triggered()));
-    layoutActions->addWidget(readBtn);
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
     line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
-    layoutList->addWidget(m_msgListUnreadBar);
+    layoutList->addWidget(m_msgListTitleBar);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_msgList);
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
@@ -1788,6 +1840,12 @@ void MainWindow::on_actionSync_triggered()
 {
     WizGetAnalyzer().LogAction("syncAll");
 
+    if (m_animateSync->isPlaying())
+    {
+        on_actionConsole_triggered();
+        return;
+    }
+
 //    if (::WizIsOffline())
 //    {
 //        QMessageBox::information(this, tr("Info"), tr("Connection is not available, please check your network connection."));
@@ -1829,6 +1887,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     //
     if (errorTokenInvalid == nErrorCode)
     {
+        qDebug() << "sync done reconnectServer";
         reconnectServer();
         return;
     }
@@ -1847,6 +1906,11 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 //            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
 //        }
     }
+    else if (0 == nErrorCode)
+    {
+        // set quick download message enable
+        m_bQuickDownloadMessageEnable = true;
+    }
 
     m_documents->viewport()->update();
     m_category->updateGroupsData();
@@ -1855,7 +1919,6 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
 void MainWindow::on_syncDone_userVerified()
 {
-    m_userVerifyDialog->deleteLater();
 
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
         m_sync->clearCurrentToken();
@@ -2079,6 +2142,12 @@ void MainWindow::on_actionMarkAllMessageRead_triggered()
     m_msgList->markAllMessagesReaded();
 }
 
+void MainWindow::on_messageSelector_indexChanged(int index)
+{
+    QString guid = m_msgListTitleBar->selectorItemData(index);
+    loadMessageByUserGuid(guid);
+}
+
 void MainWindow::on_actionFormatJustifyLeft_triggered()
 {
     m_doc->web()->editorCommandExecuteJustifyLeft();
@@ -2206,6 +2275,7 @@ void MainWindow::on_actionConsole_triggered()
     }
 
     m_console->show();
+    m_console->raise();
 
     WizGetAnalyzer().LogAction("console");
 }
@@ -2249,7 +2319,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::ApiEntry::feedbackUrl();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("feedback", true);
 
     if (strUrl.isEmpty())
         return;
@@ -2267,7 +2337,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::ApiEntry::supportUrl();
+    QString strUrl = WizService::ApiEntry::standardCommandUrl("support", true);
 
     if (strUrl.isEmpty())
         return;
@@ -2318,7 +2388,7 @@ void MainWindow::on_actionSearch_triggered()
 
 void MainWindow::on_actionResetSearch_triggered()
 {
-    cancelSearchStatus();
+    quitSearchStatus();
     m_searchWidget->clear();
     m_searchWidget->focus();
     m_category->restoreSelection();
@@ -2474,7 +2544,7 @@ void MainWindow::on_actionGoBack_triggered()
 
     WIZDOCUMENTDATA data = m_history->back();
     CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
-    if (db.DocumentFromGUID(data.strGUID, data))
+    if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
         locateDocument(data);
@@ -2497,7 +2567,7 @@ void MainWindow::on_actionGoForward_triggered()
 
     WIZDOCUMENTDATA data = m_history->forward();
     CWizDatabase &db = m_dbMgr.db(data.strKbGUID);
-    if (db.DocumentFromGUID(data.strGUID, data))
+    if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
         locateDocument(data);
@@ -2516,7 +2586,7 @@ void MainWindow::on_category_itemSelectionChanged()
     CWizCategoryBaseView* category = qobject_cast<CWizCategoryBaseView *>(sender());
     if (!category)
         return;
-    cancelSearchStatus();
+    quitSearchStatus();
     /*
      * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
      * 因此需要在这个地方避免重复刷新两次消息列表
@@ -2535,16 +2605,19 @@ void MainWindow::on_category_itemSelectionChanged()
 
     QTreeWidgetItem* categoryItem = category->currentItem();
     switch (categoryItem->type()) {
-    case ItemType_MessageItem:
+    case Category_MessageItem:
     {
         CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(categoryItem);
         if (pItem)
         {
             showMessageList(pItem);
+            //
+            m_sync->quickDownloadMesages();
+            WizGetAnalyzer().LogAction("categoryMessageRootSelected");
         }
     }
         break;
-    case ItemType_ShortcutItem:
+    case Category_ShortcutItem:
     {
         CWizCategoryViewShortcutItem* pShortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(categoryItem);
         if (pShortcut)
@@ -2553,7 +2626,7 @@ void MainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
-    case ItemType_QuickSearchItem:
+    case Category_QuickSearchItem:
     {
         CWizCategoryViewSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewSearchItem*>(categoryItem);
         if (pSearchItem)
@@ -2562,7 +2635,7 @@ void MainWindow::on_category_itemSelectionChanged()
         }
     }
         break;
-    case ItemType_QuickSearchCustomItem:
+    case Category_QuickSearchCustomItem:
     {
         CWizCategoryViewCustomSearchItem* pSearchItem = dynamic_cast<CWizCategoryViewCustomSearchItem*>(categoryItem);
         if (pSearchItem)
@@ -2620,6 +2693,22 @@ void MainWindow::on_message_itemSelectionChanged()
             m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
             return;
         }
+        //  show comments
+//#if QT_VERSION >  0x050400
+        WIZMESSAGEDATA msgData;
+        m_dbMgr.db().messageFromId(msg.nId, msgData);
+        if (msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
+                msgData.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
+                msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
+        {
+//            QTimer::singleShot(0, [&](){
+                qDebug() << "show comments page();";
+               m_doc->commentView()->setVisible(true);
+//            });
+        }
+//#endif
+
+
         viewDocument(doc, true);
     }
 }
@@ -3067,7 +3156,8 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 void MainWindow::showNewFeatureGuide()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
-    strUrl += "&name=newfeature-mac";
+    strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
+    strUrl += "&name=newfeature-mac.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     dlg->loadAndShow(strUrl);
@@ -3180,12 +3270,12 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
 
 void MainWindow::startSearchStatus()
 {
-    m_documents->setAcceptAllItems(true);
+    m_documents->setAcceptAllSearchItems(true);
 }
 
-void MainWindow::cancelSearchStatus()
+void MainWindow::quitSearchStatus()
 {
-    m_documents->setAcceptAllItems(false);
+    m_documents->setAcceptAllSearchItems(false);
     if (m_category->selectedItems().count() > 0)
     {
         m_category->setFocus();
@@ -3195,7 +3285,7 @@ void MainWindow::cancelSearchStatus()
 
 void MainWindow::initVariableBeforCreateNote()
 {
-    cancelSearchStatus();
+    quitSearchStatus();
 }
 
 bool MainWindow::needShowNewFeatureGuide()
@@ -3257,8 +3347,10 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
     pItem->getMessages(m_dbMgr.db(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
 
+    // msg title bar
+    m_msgListTitleBar->setSelectorIndex(0);
     bool showUnreadBar = pItem->hitTestUnread();
-    m_msgListUnreadBar->setVisible(showUnreadBar);
+    m_msgListTitleBar->setUnreadMode(showUnreadBar);
 }
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)

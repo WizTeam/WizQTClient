@@ -12,6 +12,7 @@
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
 #include "utils/logger.h"
+#include "utils/misc.h"
 
 #include "wizCategoryView.h"
 #include "wizmainwindow.h"
@@ -53,17 +54,6 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
-bool IsSimpChinese()
-{
-    QLocale local;
-    QString name = local.name().toLower();
-    if (name == "zh_cn"
-        || name == "zh-cn")
-    {
-        return true;
-    }
-    return false;
-}
 bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewItemBase* pOther = dynamic_cast<const CWizCategoryViewItemBase*>(&other);
@@ -81,7 +71,7 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
     //
-    static bool isSimpChinese = IsSimpChinese();
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
     if (isSimpChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
@@ -360,7 +350,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 /* -------------------- CWizCategoryViewMessageRootItem -------------------- */
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
-    : CWizCategoryViewItemBase(app, strName, "", ItemType_MessageItem)
+    : CWizCategoryViewItemBase(app, strName, "", Category_MessageItem)
     , m_nUnread(0)
 {
     QIcon icon;
@@ -617,7 +607,7 @@ void CWizCategoryViewShortcutRootItem::removePlaceHoldItem()
 /* -------------------- CWizCategoryViewSearchRootItem -------------------- */
 CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& app,
                                                                const QString& strName)
-    : CWizCategoryViewItemBase(app, strName, "", ItemType_QuickSearchRootItem)
+    : CWizCategoryViewItemBase(app, strName, "", Category_QuickSearchRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_normal"),
@@ -646,7 +636,7 @@ QString CWizCategoryViewSearchRootItem::getSectionName()
 CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& app,
                                                                const QString& strName,
                                                                const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID, Category_AllFoldersItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folders_normal"),
@@ -679,6 +669,8 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 
 bool CWizCategoryViewAllFoldersItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
     return NULL != item;
 }
@@ -702,7 +694,7 @@ void CWizCategoryViewAllFoldersItem::showContextMenu(CWizCategoryBaseView* pCtrl
 CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
                                                        const QString& strLocation,
                                                        const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strLocation, strKbGUID)
+    : CWizCategoryViewItemBase(app, strLocation, strKbGUID, Category_FolderItem)
 {
     QIcon icon;
     if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
@@ -762,6 +754,8 @@ bool CWizCategoryViewFolderItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 
 bool CWizCategoryViewFolderItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewFolderItem* item = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
     return NULL != item;
 }
@@ -777,7 +771,7 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
    {
        CWizFolder folder(myDb, location());
        CWizDocument doc(myDb, data);
-       doc.MoveDocument(&folder);
+       doc.MoveTo(&folder);
    }
    else
    {
@@ -788,6 +782,18 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+
+       // copy document tag for personal db
+       if (!sourceDb.IsGroup())
+       {
+           CWizStdStringArray arrayTagGUID;
+           sourceDb.GetDocumentTags(data.strGUID, arrayTagGUID);
+           WIZDOCUMENTDATA newDoc;
+           if (myDb.DocumentFromGUID(strNewDocGUID, newDoc))
+           {
+               myDb.SetDocumentTags(newDoc, arrayTagGUID);
+           }
+       }
    }
 }
 
@@ -844,29 +850,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     }
 
     //
-    QString strThis = text(0).toLower();
-    QString strOther = pOther->text(0).toLower();
-    //
-    static bool isSimpChinese = IsSimpChinese();
-    if (isSimpChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(strThis);
-            QByteArray arrOther = pCodec->fromUnicode(strOther);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            bool result = strThisA.compare(strOtherA.c_str()) < 0;
-//            qDebug() << "compare by chinese text : " << result;
-            return result;
-        }
-    }
-    //
-    bool result =  strThis.compare(strOther) < 0;
-//    qDebug() << "compare by english text : " << result;
-    return result;
+    return CWizCategoryViewItemBase::operator <(other);
 }
 
 
@@ -876,7 +860,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
 CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
                                                          const QString& strName,
                                                          const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, strName, strKbGUID, Category_AllTagsItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_normal"),
@@ -928,7 +912,7 @@ QString CWizCategoryViewAllTagsItem::getSectionName()
 CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
                                                  const WIZTAGDATA& tag,
                                                  const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_TagItem)
     , m_tag(tag)
 {
     QIcon icon;
@@ -1031,7 +1015,7 @@ QString CWizCategoryViewStyleRootItem::getSectionName()
 /* ---------------------------- CWizCategoryViewGroupsRootItem ---------------------------- */
 
 CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& app, const QString& strName)
-    : CWizCategoryViewItemBase(app, strName, "")
+    : CWizCategoryViewItemBase(app, strName, "", Category_GroupsRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
@@ -1353,7 +1337,7 @@ QString CWizCategoryViewCreateGroupLinkItem::getSectionName()
 
 CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& app,
                                                              const WIZGROUPDATA& group)
-    : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID)
+    : CWizCategoryViewItemBase(app, group.strGroupName, group.strGroupGUID, Category_GroupRootItem)
     , m_group(group)
     , m_nUnread(0)
 {
@@ -1422,8 +1406,10 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const WIZDOCUMENTDATA &data) cons
 
 bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
 {
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
     const CWizCategoryViewGroupItem* item = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
-    return item->kbGUID() == kbGUID();
+    return item && item->kbGUID() == kbGUID();
 }
 
 void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
@@ -1439,7 +1425,7 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
             CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
@@ -1622,7 +1608,7 @@ QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */
 CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& app,
                                                                const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID)
+    : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID, Category_GroupNoTagItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
@@ -1660,7 +1646,7 @@ bool CWizCategoryViewGroupNoTagItem::accept(CWizDatabase& db, const WIZDOCUMENTD
 CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
                                                      const WIZTAGDATA& tag,
                                                      const QString& strKbGUID)
-    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID)
+    : CWizCategoryViewItemBase(app, tag.strName, strKbGUID, Category_GroupItem)
     , m_tag(tag)
 {
     QIcon icon;
@@ -1696,6 +1682,13 @@ bool CWizCategoryViewGroupItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& 
     return false;
 }
 
+bool CWizCategoryViewGroupItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+//    return pItem->type() == Category_FolderItem | pItem->type() == Category_GroupItem;
+
+    return pItem->kbGUID() == kbGUID();
+}
+
 bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
 {
     Q_UNUSED(data);
@@ -1721,7 +1714,7 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
             CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
-            doc.MoveDocument(&folder);
+            doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
@@ -1758,6 +1751,9 @@ bool CWizCategoryViewGroupItem::operator<(const QTreeWidgetItem& other) const
         const CWizCategoryViewGroupItem* pOther = dynamic_cast<const CWizCategoryViewGroupItem*>(&other);
         if (pOther)
         {
+            if (m_tag.nPostion == pOther->m_tag.nPostion || m_tag.nPostion == 0 || pOther->m_tag.nPostion == 0)
+                return CWizCategoryViewItemBase::operator <(other);
+
             return m_tag.nPostion < pOther->m_tag.nPostion;
         }
     }
@@ -1873,7 +1869,7 @@ void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
                                                            const QString& strName, const QString& strKbGuid,
                                                            const QString& strGuid, bool bEncrypted)
-    : CWizCategoryViewItemBase(app, strName, strKbGuid, ItemType_ShortcutItem)
+    : CWizCategoryViewItemBase(app, strName, strKbGuid, Category_ShortcutItem)
     , m_strGuid(strGuid)
 {
     QIcon icon;
@@ -1985,7 +1981,7 @@ CWizCategoryViewCustomSearchItem::CWizCategoryViewCustomSearchItem(CWizExplorerA
                                                                    const QString& strName, const QString strSelectParam,
                                                                    const QString strSqlWhere, const QString& strGuid,
                                                                    const QString& keyword, int searchScope)
-    : CWizCategoryViewSearchItem(app, strName, ItemType_QuickSearchCustomItem)
+    : CWizCategoryViewSearchItem(app, strName, Category_QuickSearchCustomItem)
     , m_strSelectParam(strSelectParam)
     , m_strSQLWhere(strSqlWhere)
     , m_strKeywrod(keyword)

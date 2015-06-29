@@ -769,7 +769,9 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */
 WIZMESSAGEDATA::WIZMESSAGEDATA()
     : nId(0)
+    , nDeleteStatus(0)
     , nVersion(-1)
+    , nLocalChanged(0)
 {
 }
 
@@ -787,12 +789,14 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZMESSAGEDATA& data)
     , tCreated(data.tCreated)
     , nMessageType(data.nMessageType)
     , nReadStatus(data.nReadStatus)
+    , nDeleteStatus(data.nDeleteStatus)
     , nEmailStatus(data.nEmailStatus)
     , nSMSStatus(data.nSMSStatus)
     , title(data.title)
     , messageBody(data.messageBody)
     , note(data.note)
     , nVersion(data.nVersion)
+    , nLocalChanged(data.nLocalChanged)
 {
 }
 
@@ -810,9 +814,11 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
     , tCreated(data.tCreated)
     , nMessageType(data.nMessageType)
     , nReadStatus(data.nReadStatus)
+    , nDeleteStatus(data.nDeletedStatus)
     , title(data.strTitle)
     , messageBody(data.strMessageText)
     , nVersion(data.nVersion)
+    , nLocalChanged(data.nLocalChanged)
 {
 
 }
@@ -827,6 +833,7 @@ bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetTime("dt_created", tCreated);
     data.GetInt("message_type", nMessageType);
     data.GetInt("read_status", nReadStatus);
+    data.GetInt("delete_status", nDeleteStatus);
     data.GetInt("email_status", nEmailStatus);
     data.GetInt("sms_status", nSMSStatus);
 
@@ -870,6 +877,7 @@ BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
     data.GetStr(_T("receiver_id"), strReceiverID);
     data.GetInt(_T("message_type"), nMessageType);
     data.GetInt(_T("read_status"), nReadStatus);
+    data.GetInt(_T("delete_status"), nDeletedStatus);
     data.GetTime(_T("dt_created"), tCreated);
     data.GetStr(_T("message_body"), strMessageText);
     data.GetInt64(_T("version"), nVersion);

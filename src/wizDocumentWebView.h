@@ -166,6 +166,7 @@ public:
 
     bool editorCommandQueryMobileFileReceiverState();
 
+    bool editorCommandExecuteParagraph(const QString& strType);
     bool editorCommandExecuteFontFamily(const QString& strFamily);
     bool editorCommandExecuteFontSize(const QString& strSize);
     bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
@@ -180,7 +181,7 @@ public:
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
-    Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
+    Q_INVOKABLE void setContentsChanged(bool b);
 
     //use undo func provied by editor
     void undo();
@@ -382,6 +383,8 @@ Q_SIGNALS:
     void focusIn();
     void focusOut();
     //
+    void contentsChanged();
+
 
     void showContextMenuRequest(const QPoint& pos);
     void updateEditorToolBarRequest();
@@ -396,6 +399,8 @@ private:
     void closeSourceMode();
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();
+
+    QString getMailSender();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

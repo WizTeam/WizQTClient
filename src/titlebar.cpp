@@ -49,7 +49,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_tagBar(new CWizTagBar(app, this))
     , m_infoBar(new InfoBar(this))
     , m_notifyBar(new NotifyBar(this))
-    , m_editorBar(new EditorToolBar(this))
+    , m_editorBar(new EditorToolBar(app, this))
     , m_editor(NULL)
     , m_tags(NULL)
     , m_info(NULL)
@@ -120,8 +120,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
-    m_emailBtn->setVisible(!CWizOEMSettings::isHideShareByEmail());
-    m_emailBtn->setEnabled(!CWizOEMSettings::isHideShareByEmail());
+    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+    m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
@@ -129,8 +129,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document (Alt + 7)"));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
-    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
-    m_shareBtn->setVisible(!CWizOEMSettings::isHideShare());
+    m_shareBtn->setVisible(!oemSettings.isHideShare());
 
     // comments
     m_commentsBtn = new CellButton(CellButton::Right, this);
@@ -222,7 +221,9 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
+        m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
+        m_shareBtn->setVisible(bIsGroup ? false : true);
         m_shareBtn->setEnabled(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
@@ -255,6 +256,7 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
+    connect(editor, SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
 //    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
     connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
@@ -364,7 +366,7 @@ void TitleBar::registerWebChannel()
 
 void TitleBar::onEditorChanged()
 {
-    if (m_editor->isModified()) {
+    if (m_editor->isModified() || m_editor->isContentsChanged()) {
         m_editBtn->setState(CellButton::Badge);
     } else {
         m_editBtn->setState(noteView()->isEditing() ? CellButton::Checked : CellButton::Normal);
@@ -419,6 +421,18 @@ void TitleBar::updateEditButton(bool editing)
 void TitleBar::resetTitle(const QString& strTitle)
 {
     m_editTitle->resetTitle(strTitle);
+
+}
+
+void TitleBar::moveTitileTextToPlaceHolder()
+{
+    m_editTitle->setPlaceholderText(m_editTitle->text());
+    m_editTitle->clear();
+}
+
+void TitleBar::clearPlaceHolderText()
+{
+    m_editTitle->setPlaceholderText("");
 }
 
 void TitleBar::startEditButtonAnimation()
@@ -614,6 +628,12 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     if (view != noteView()) {
         return;
     }
+
+    static QString docGUID = "";
+    if (docGUID == note.strGUID)
+        return;
+    docGUID = note.strGUID;
+
 
     m_commentsUrl.clear();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),

@@ -52,6 +52,8 @@ public:
     void setEditButtonState(bool enable, bool editing);
     void updateEditButton(bool bEditing);
     void resetTitle(const QString& strTitle);
+    void moveTitileTextToPlaceHolder();
+    void clearPlaceHolderText();
 
     void startEditButtonAnimation();
     void stopEditButtonAnimation();

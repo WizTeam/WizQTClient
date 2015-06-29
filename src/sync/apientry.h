@@ -12,17 +12,14 @@ public:
     static void setLanguage(const QString& strLocal);
     static QString syncUrl();
     static QString asServerUrl();
+    static QString messageServerUrl();
     static QString messageVersionUrl();
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
     static QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
     static QString commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID);
     static QString commentCountUrl(const QString& strKUrl, const QString& strToken,
-                                   const QString& strKbGUID, const QString& strGUID);
-    static QString feedbackUrl();
-    static QString supportUrl();
-    static QString changeLogUrl();
-    static QString upgradeUrl();
+                                   const QString& strKbGUID, const QString& strGUID);    
     static QString analyzerUploadUrl();
     static QString accountInfoUrl(const QString& strToken);
     static QString groupAttributeUrl(const QString& strToken, const QString& strKbGUID);

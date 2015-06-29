@@ -1814,9 +1814,14 @@ var WizTodo = (function () {
 		return caninsert;
 	}
 
+	function insertOneTodoForQt() {
+		insertOneTodo();
+	}
+
 	return {
 		init: init,
 		insertOneTodo: insertOneTodo,
+		insertOneTodoForQt: insertOneTodoForQt,
 		canInsert: canInsert,
 		setUserAlias: setUserAlias,
 		setUserAvatarFileName: setUserAvatarFileName,

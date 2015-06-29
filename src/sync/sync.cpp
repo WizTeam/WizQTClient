@@ -1528,17 +1528,19 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     ////按照群组分组笔记////
     */
     std::map<QString, CWizStdStringArray> mapKbGUIDDocuments;
-    for (std::deque<WIZUSERMESSAGEDATA>::const_iterator it = arrayMessage.begin();
-        it != arrayMessage.end();
-        it++)
+    for (WIZUSERMESSAGEDATA it : arrayMessage)
     {
-        if (!it->strKbGUID.isEmpty()
-            && !it->strDocumentGUID.isEmpty())
+        if (!it.strKbGUID.isEmpty()
+            && !it.strDocumentGUID.isEmpty())
         {
-            CWizStdStringArray& documents = mapKbGUIDDocuments[it->strKbGUID];
-            documents.push_back(it->strDocumentGUID);
-            pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
-                                     it->strMessageText);
+            CWizStdStringArray& documents = mapKbGUIDDocuments[it.strKbGUID];
+            documents.push_back(it.strDocumentGUID);
+
+            if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
+            {
+                pEvents->OnPromptMessage(wizSyncMessageNormal, QString(QObject::tr("New Message")),
+                                         it.strMessageText);
+            }
         }
     }
     //
@@ -1649,6 +1651,75 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     return TRUE;
 }
 
+bool WizUploadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server, IWizSyncableDatabase* pDatabase)
+{
+    CWizMessageDataArray arrayMessage;
+    pDatabase->GetModifiedMessageList(arrayMessage);
+
+    qDebug() << "get modified messages , size ; " << arrayMessage.size();
+    if (arrayMessage.size() == 0)
+        return true;
+
+    QString strReadIds;
+    QString strDeleteIds;
+    for (WIZMESSAGEDATA msg : arrayMessage)
+    {
+        if (msg.nReadStatus == 1 && (msg.nLocalChanged & WIZMESSAGEDATA::localChanged_Read))
+        {
+            strReadIds.append(QString::number(msg.nId) + ",");
+        }
+        if (msg.nDeleteStatus == 1 && (msg.nLocalChanged & WIZMESSAGEDATA::localChanged_Delete))
+        {
+            strDeleteIds.append(QString::number(msg.nId) + ",");
+        }
+    }
+
+    CWizMessageDataArray::iterator it;
+    if (!strReadIds.isEmpty())
+    {
+        strReadIds.remove(strReadIds.length() - 1, 1);      // remove the last ','
+        qDebug() << "upload read message : " << strReadIds;
+        if (server.SetMessageReadStatus(strReadIds, 1))
+        {
+            QStringList readIds = strReadIds.split(',', QString::SkipEmptyParts);
+            CWizMessageDataArray readMsgArray;
+            for (it = arrayMessage.begin(); it != arrayMessage.end(); it++)
+            {
+                if (readIds.contains(QString::number(it->nId)))
+                {
+                    qDebug() << "upload message read status ok, update: " << it->nId;
+                    it->nLocalChanged = it->nLocalChanged & ~WIZMESSAGEDATA::localChanged_Read;
+                    readMsgArray.push_back(it.operator *());
+                }
+            }
+            pDatabase->ModifyMessagesLocalChanged(readMsgArray);
+        }
+    }
+
+    if (!strDeleteIds.isEmpty())
+    {
+        strDeleteIds.remove(strDeleteIds.length() - 1, 1);      // remove the last ','
+        qDebug() << "upload delete message : " << strReadIds;
+        if (server.SetMessageDeleteStatus(strDeleteIds, 1))
+        {
+            QStringList deleteIds = strDeleteIds.split(',', QString::SkipEmptyParts);
+            CWizMessageDataArray deleteMsgArray;
+            for (it = arrayMessage.begin(); it != arrayMessage.end(); it++)
+            {
+                qDebug() << "current item ; " << QString::number(it->nId);
+                if (deleteIds.contains(QString::number(it->nId)))
+                {
+                    it->nLocalChanged = it->nLocalChanged & ~WIZMESSAGEDATA::localChanged_Delete;
+                    qDebug() << "upload message read status ok, update: " << it->nId << " local changed ; " << it->nLocalChanged;
+                    deleteMsgArray.push_back(it.operator *());
+                }
+            }
+            pDatabase->ModifyMessagesLocalChanged(deleteMsgArray);
+        }
+    }
+    return true;
+}
+
 bool WizIsDayFirstSync(IWizSyncableDatabase* pDatabase)
 {
     COleDateTime lastSyncTime = pDatabase->GetLastSyncTime();
@@ -1700,11 +1771,11 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 {
     QString strt = pDatabase->meta("SYNC_INFO", "DownloadGroupUsers");
     if (!strt.isEmpty()) {
-//        if (background) {
             if (QDateTime::fromString(strt).addDays(1) > QDateTime::currentDateTime()) {
+#ifndef QT_DEBUG
                 return;
-            }
-//        }
+#endif
+        }
     }
 
     pEvents->OnStatus("Sync group users");
@@ -1717,8 +1788,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         if (!g.bizGUID.isEmpty())
         {
             QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
-            QString strJsonRaw = downloadFromUrl(strUrl);
-
+            QString strJsonRaw = downloadFromUrl(strUrl);            
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
         }
@@ -1816,6 +1886,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->OnStatus(_TR("Downloading messages"));
     WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
     //
+    pEvents->OnStatus(_T("Upload modified messages"));
+    WizUploadMessages(pEvents, server, pDatabase);
     //
     pEvents->OnStatus(_TR("-------sync private notes--------------"));
     //
@@ -1979,4 +2051,22 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
     }
     //
     return bRet;
+}
+
+
+bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
+{
+    pEvents->OnStatus(_TR("Quick download messages"));
+    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    server.SetUserInfo(info);
+    /*
+    ////获得群组信息////
+    */
+    //
+    CWizGroupDataArray arrayGroup;
+    server.GetGroupList(arrayGroup);
+    /*
+    ////下载消息////
+    */
+    return WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
 }

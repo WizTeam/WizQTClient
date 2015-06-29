@@ -266,26 +266,30 @@ void CWizTagBar::on_lineEditReturnPressed()
 
     WizGetAnalyzer().LogAction("addTagByTagBarInput");
 
+    WIZDOCUMENTDATA docData;
+    CWizDatabase& db = m_dbMgr.db();
+    db.DocumentFromGUID(m_doc.strGUID, docData);
+    CWizDocument doc(db, docData);
+
+    //
     QStringList sl = strTagNames.split(';');
     QStringList::const_iterator it;
-    CWizDatabase& db = m_dbMgr.db();
     for (it = sl.begin(); it != sl.end(); it++) {
         CString strTagName = *it;
 
-        WIZTAGDATA tagNew;
+        WIZTAGDATA tag;
 
         // only create tag for unique name
-        if (db.TagByName(strTagName, tagNew)) {
+        if (db.TagByName(strTagName, tag)) {
             qDebug() << QString("Tag name already exist: %1").arg(strTagName);
             //
-             WIZDOCUMENTDATA docData;
-             db.DocumentFromGUID(m_doc.strGUID, docData);
-             CWizDocument doc(db, docData);
-             doc.AddTag(tagNew);
-             continue;
+             doc.AddTag(tag);
         }
-
-        db.CreateTag("", strTagName, "", tagNew);
+        else
+        {
+            db.CreateTag("", strTagName, "", tag);
+            doc.AddTag(tag);
+        }
     }
     m_lineEdit->clear();
 }
@@ -324,7 +328,9 @@ void CWizTagBar::on_buttonAddClicked()
         m_tagList = new CWizTagListWidget(this);
     }
 
-    m_tagList->setDocument(m_doc);
+    WIZDOCUMENTDATA doc;
+    m_dbMgr.db(m_doc.strKbGUID).DocumentFromGUID(m_doc.strGUID, doc);
+    m_tagList->setDocument(doc);
 
     QRect rc = m_btnAdd->rect();
     QPoint pt = m_btnAdd->mapToGlobal(QPoint(rc.width()/2, rc.height()));
@@ -335,22 +341,8 @@ void CWizTagBar::on_buttonAddClicked()
 
 void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
 {
-    if (tag.strKbGUID == m_dbMgr.db().kbGUID())
-    {
-        CWizDatabase& db = m_dbMgr.db(m_doc.strKbGUID);
-        CWizTagDataArray arrayTag;
-        db.GetDocumentTags(m_doc.strGUID, arrayTag);
-        for (WIZTAGDATA tagItem : arrayTag)
-        {
-            // add new tag
-            if (tagItem.strGUID == tag.strGUID)
-            {
-                return;
-            }
-        }
-        // qDebug() << "can not found tag in currrent tag list , add tag item : " << tag.strName;
-        db.InsertDocumentTag(m_doc, tag.strGUID);
-    }
+    //NOTE: do not process tag created signal. new tag could be created in other place
+    Q_UNUSED(tag);
 }
 
 void CWizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)

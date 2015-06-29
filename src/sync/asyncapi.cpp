@@ -11,7 +11,7 @@
 #include <QEventLoop>
 
 #include <rapidjson/document.h>
-
+#include "share/wizEventLoop.h"
 #include "apientry.h"
 #include "wizkmxmlrpc.h"
 #include "token.h"
@@ -172,15 +172,20 @@ void AsyncApi::on_comments_finished()
 }
 
 
-void AsyncApi::setMessageStatus(const QString& ids, bool bRead)
+void AsyncApi::setMessageReadStatus(const QString& ids, bool bRead)
 {
-    QtConcurrent::run(this, &AsyncApi::setMessageStatus_impl, ids, bRead);
+    QtConcurrent::run(this, &AsyncApi::setMessageReadStatus_impl, ids, bRead);
 }
 
-void AsyncApi::setMessageStatus_impl(const QString& ids, bool bRead)
+void AsyncApi::setMessageDeleteStatus(const QString& ids, bool bDelete)
+{
+    QtConcurrent::run(this, &AsyncApi::setMessageDeleteStatus_impl, ids, bDelete);
+}
+
+void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
 {
     QString strToken = Token::token();
-    qDebug() << "set message status, strken:" << strToken;
+    qDebug() << "set message read status, strken:" << strToken;
 
     if (strToken.isEmpty()) {
         return;
@@ -193,8 +198,43 @@ void AsyncApi::setMessageStatus_impl(const QString& ids, bool bRead)
     aServer.SetUserInfo(info);
 
     bool ret = aServer.SetMessageReadStatus(ids, bRead);
-    if (!ret) {
+    qDebug() << "set message read status : " << ret;
+    if (!ret)
+    {
         m_nErrorCode = aServer.GetLastErrorCode();
         m_strErrorMessage = aServer.GetLastErrorMessage();
     }
+    else
+    {
+        emit uploadMessageReadStatusFinished(ids);
+    }
+}
+
+void AsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
+{
+    QString strToken = Token::token();
+    if (strToken.isEmpty()) {
+        return;
+    }
+
+    CWizKMAccountsServer aServer(ApiEntry::syncUrl());
+
+    WIZUSERINFO info = Token::info();
+    info.strToken = strToken;
+    aServer.SetUserInfo(info);
+
+    bool ret = aServer.SetMessageDeleteStatus(ids, bDelete);
+    if (ret)
+    {
+        qDebug() << "[MessageStatus]Upload message delete status OK";
+        emit uploadMessageDeleteStatusFinished(ids);
+    }
+    else
+    {
+        m_nErrorCode = aServer.GetLastErrorCode();
+        m_strErrorMessage = aServer.GetLastErrorMessage();
+        qDebug() << "[MessageStatus]Upload message delete status error :  " << m_nErrorCode << m_strErrorMessage;
+    }
+    //
+
 }

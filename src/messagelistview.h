@@ -4,8 +4,15 @@
 #include <QListWidget>
 #include <QTimer>
 #include <deque>
+#include <QComboBox>
+#include <QLabel>
+#include <QStyledItemDelegate>
+#include <QSortFilterProxyModel>
+//#include <memory>
 
 class CWizScrollBar;
+class CWizDatabaseManager;
+class wizImageButton;
 
 struct WIZMESSAGEDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
@@ -25,12 +32,81 @@ namespace Internal {
 
 class MessageListViewItem;
 
+class WizSortFilterProxyModel : public QSortFilterProxyModel
+{
+    Q_OBJECT
+public:
+    WizSortFilterProxyModel(QObject *parent = 0);
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+};
+
+class WizMessageSelectorItemDelegate : public QStyledItemDelegate
+{
+public:
+    WizMessageSelectorItemDelegate(QObject *parent = 0);
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option, const QModelIndex &index) const;
+
+};
+
+class WizMessageSelector : public QComboBox
+{
+    Q_OBJECT
+public:
+    WizMessageSelector(QWidget *parent = 0);
+
+    virtual void showPopup();   
+
+//    bool event(QEvent *event);
+
+protected:
+    void focusOutEvent(QFocusEvent* event);
+    void focusInEvent(QFocusEvent* event);
+//    void	mouseMoveEvent(QMouseEvent * event);
+//    void	enterEvent(QEvent * event);
+};
+
+
+class WizMessageListTitleBar : public QWidget
+{
+    Q_OBJECT
+public:
+    WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+
+    void setUnreadMode(bool unread);
+    bool isUnreadMode() const;
+
+    void setSelectorIndex(int index);
+
+    QString selectorItemData(int index) const;
+
+signals:
+    void messageSelector_indexChanged(int index);
+    void markAllMessageRead_request();
+
+public slots:
+    void on_message_created(const WIZMESSAGEDATA& msg);
+    void on_selector_indexChanged(int index);
+
+private:
+    void addUserToSelector(const QString& userGUID);
+    void initUserList();
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    WizMessageSelector* m_msgSelector;
+    QListWidget* m_listWidget;
+    QLabel* m_msgListHintLabel;
+    wizImageButton* m_msgListMarkAllBtn;
+};
+
 class MessageListView : public QListWidget
 {
     Q_OBJECT
 
 public:
-    explicit MessageListView(QWidget *parent = 0);
+    explicit MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     void setMessages(const CWizMessageDataArray& arrayMsg);
@@ -48,6 +124,8 @@ public:
 
 public slots:
     void markAllMessagesReaded();
+    void on_uploadReadStatus_finished(const QString& ids);
+    void on_uploadDeleteStatus_finished(const QString& ids);
 
 protected:
     virtual void resizeEvent(QResizeEvent* event);
@@ -64,9 +142,11 @@ private:
     MessageListViewItem* m_pCurrentItem;
     QList<MessageListViewItem*> m_rightButtonFocusedItems;
     QTimer m_timerRead;
-    QList<qint64> m_lsIds;
+    QList<qint64> m_readList;
+    QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
     WizService::AsyncApi* m_api;
+    CWizDatabaseManager& m_dbMgr;
 
     void updateTreeItem();
 

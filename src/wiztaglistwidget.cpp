@@ -11,6 +11,7 @@
 #include "share/wizkmcore.h"
 #include "share/wizobject.h"
 #include "share/wizDatabase.h"
+#include "widgets/wizScrollBar.h"
 
 
 class CWizTagListWidgetItem: public QListWidgetItem
@@ -39,11 +40,11 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
 {
     setContentsMargins(0, 20, 0, 0);
 
-    m_tagsEdit = new QLineEdit(this);
-    m_tagsEdit->setPlaceholderText(tr("Use semicolon to seperate tags..."));
-    connect(m_tagsEdit, SIGNAL(returnPressed()), SLOT(on_tagsEdit_returnPressed()));
+//    m_tagsEdit = new QLineEdit(this);
+//    m_tagsEdit->setPlaceholderText(tr("Use semicolon to seperate tags..."));
+//    connect(m_tagsEdit, SIGNAL(returnPressed()), SLOT(on_tagsEdit_returnPressed()));
 
-    m_list = new QListWidget(this);
+    m_list = new CWizListWidgetWithCustomScorllBar(this);
     m_list->setAttribute(Qt::WA_MacShowFocusRect, false);
     connect(m_list, SIGNAL(itemChanged(QListWidgetItem*)),
             SLOT(on_list_itemChanged(QListWidgetItem*)));
@@ -54,7 +55,12 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
 #elif defined(Q_OS_MAC)
     pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
 #endif
+    setStyleSheet("QWidget{background:#F7F7F7;}");
+
     m_list->setPalette(pal);
+//    m_list->setContentsMargins(10, 6, 0, 6);
+    m_list->setStyleSheet("QListView{padding:0px 0px 0px 0px;}" \
+                          "QListView::item{margin:2px 0px 0px 0px; padding-left:-6px; spacing:2px;}");
 
     QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);
@@ -63,9 +69,9 @@ CWizTagListWidget::CWizTagListWidget(QWidget* parent)
     QHBoxLayout* layoutTitle = new QHBoxLayout();
 
     layoutTitle->addWidget(new QLabel(tr("Tags:"), this));
-    layoutTitle->addWidget(m_tagsEdit);
-    layoutTitle->setSpacing(8);
-    layoutTitle->setMargin(4);
+//    layoutTitle->addWidget(m_tagsEdit);
+    layoutTitle->setSpacing(0);
+    layoutTitle->setContentsMargins(8, 2, 0, 2);
 
     layout->addLayout(layoutTitle);
     layout->addWidget(m_list);
@@ -77,8 +83,9 @@ void CWizTagListWidget::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
-    m_tagsEdit->clear();
-    m_tagsEdit->clearFocus();
+//    m_tagsEdit->clear();
+//    m_tagsEdit->clearFocus();
+    m_list->setFocus();
 }
 
 void CWizTagListWidget::reloadTags()
@@ -112,6 +119,8 @@ void CWizTagListWidget::setDocument(const WIZDOCUMENTDATAEX& doc)
 
         if (-1 != strGUIDs.indexOf(pItem->tag().strGUID)) {
             pItem->setCheckState(Qt::Checked);
+            m_list->takeItem(i);
+            m_list->insertItem(0, pItem);
         }
     }
 
@@ -145,9 +154,12 @@ void CWizTagListWidget::setDocuments(const CWizDocumentDataArray& arrayDocument)
         CWizTagListWidgetItem* pItem = dynamic_cast<CWizTagListWidgetItem*>(m_list->item(i));
 
         int n  = listGUIDs.count(pItem->tag().strGUID);
+        m_list->takeItem(i);
         if (n  && n < arrayDocument.size()) {
             pItem->setCheckState(Qt::PartiallyChecked);
+            m_list->insertItem(0, pItem);
         } else if (n == arrayDocument.size()) {
+            m_list->insertItem(0, pItem);
             pItem->setCheckState(Qt::Checked);
         }
     }
@@ -168,9 +180,12 @@ void CWizTagListWidget::on_list_itemChanged(QListWidgetItem* pItem)
          it != m_arrayDocuments.end(); it++) {
         CWizDocument doc(m_dbMgr.db(), *it);
 
+        m_list->takeItem(m_list->row(pItemTag));
         if (pItemTag->checkState() == Qt::Checked) {
+            m_list->insertItem(0, pItemTag);
             doc.AddTag(pItemTag->tag());
         } else if (pItemTag->checkState() == Qt::Unchecked) {
+            m_list->insertItem(m_list->count(), pItemTag);
             doc.RemoveTag(pItemTag->tag());
         } else {
             Q_ASSERT(0);
@@ -180,7 +195,7 @@ void CWizTagListWidget::on_list_itemChanged(QListWidgetItem* pItem)
 
 void CWizTagListWidget::on_tagsEdit_returnPressed()
 {
-    QString tagsText = m_tagsEdit->text();
+    QString tagsText ;//= m_tagsEdit->text();
 
     CWizTagDataArray arrayTagNew;
     m_dbMgr.db().TagsTextToTagArray(tagsText, arrayTagNew);
@@ -200,5 +215,5 @@ void CWizTagListWidget::on_tagsEdit_returnPressed()
     setDocuments(arrayDocument);    //refresh tags
 
     //
-    m_tagsEdit->clear();
+//    m_tagsEdit->clear();
 }

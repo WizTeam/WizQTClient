@@ -24,6 +24,9 @@
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
 #include "share/wizAnalyzer.h"
+#include "wizDatabaseManager.h"
+#include "wizObjectDataDownloader.h"
+#include "wizProgressDialog.h"
 
 
 #ifndef MAX_PATH
@@ -2460,4 +2463,138 @@ bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
     QStringList fileTypes;
     fileTypes << ".xls" << ".xlsx" << ".ppt" << ".pptx";
     return fileTypes.contains(doc.strFileType);
+}
+
+
+void WizMoveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+                                     CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+{
+    // move, show progress if size > 3
+    CWizFolder folder(dbMgr.db(), targetFolder);
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(dbMgr.db(), &folder, downloader);
+        }
+    } else {
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(dbMgr.db(), &folder, downloader);
+
+            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        progress->hide();
+    }
+}
+
+
+void WizMoveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
+                                   CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+{
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(dbMgr.db(targetTag.strKbGUID), targetTag, downloader);
+        }
+    } else {
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.MoveTo(dbMgr.db(targetTag.strKbGUID), targetTag, downloader);
+
+            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+       progress->hide();
+    }
+}
+
+
+void WizCopyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+                                     bool keepDocTime, bool keepTag, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress,
+                                     CWizObjectDataDownloaderHost* downloader)
+{
+    //  show progress if size > 3
+    CWizFolder folder(dbMgr.db(), targetFolder);
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(dbMgr.db(), &folder, keepDocTime, keepTag, downloader);
+        }
+    } else {
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(dbMgr.db(), &folder, keepDocTime, keepTag, downloader);
+
+            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        progress->hide();
+    }
+}
+
+
+void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
+                                   const WIZTAGDATA& targetTag, bool keepDocTime, CWizDatabaseManager& dbMgr,
+                                   CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+{
+    // show progress if size > 3
+    if (arrayDocument.size() <= 3) {
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, downloader);
+        }
+    } else {
+        progress->show();
+
+        int i = 0;
+        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
+            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
+            doc.CopyTo(dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, downloader);
+
+            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
+            progress->setNotifyString(data.strTitle);
+            progress->setProgress(arrayDocument.size(), i);
+            i++;
+        }
+        // hide progress dialog
+        progress->hide();
+    }
+}
+
+
+void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
+{
+    QString strMime(QString::fromUtf8(bMime));
+    QStringList lsNotes = strMime.split(";");
+    for (int i = 0; i < lsNotes.size(); i++) {
+        QStringList lsMeta = lsNotes[i].split(":");
+        //qDebug()<<lsMeta;
+        Q_ASSERT(lsMeta.size() == 2);
+
+        CWizDatabase& db = dbMgr.db(lsMeta[0]);
+
+        WIZDOCUMENTDATA data;
+        if (db.DocumentFromGUID(lsMeta[1], data))
+            arrayDocument.push_back(data);
+    }
 }

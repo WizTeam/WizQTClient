@@ -164,10 +164,10 @@ void CWizDocument::MoveTo(QObject* p)
     if (!folder)
         return;
 
-    MoveDocument(folder);
+    MoveTo(folder);
 }
 
-bool CWizDocument::MoveDocument(CWizFolder* pFolder)
+bool CWizDocument::MoveTo(CWizFolder* pFolder)
 {
     if (!pFolder)
         return false;
@@ -187,6 +187,97 @@ bool CWizDocument::MoveDocument(CWizFolder* pFolder)
     }
 
     return true;
+}
+
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader)
+{
+    qDebug() << "wizdocmove  to : " << pFolder->Location();
+    if (targetDB.kbGUID() == m_db.kbGUID())
+        return MoveTo(pFolder);
+
+    if (!CopyTo(targetDB, pFolder, true, true,downloader))
+    {
+        TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
+        return false;
+    }
+
+    Delete();
+    return true;
+}
+
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
+{
+    qDebug() << "wizdoc move to : " << targetTag.strName;
+    if (targetDB.kbGUID() == m_db.kbGUID())
+    {
+        if (m_data.strLocation == LOCATION_DELETED_ITEMS)
+        {
+            CWizFolder folder(m_db, m_db.GetDefaultNoteLocation());
+            MoveTo(&folder);
+        }
+
+        CWizTagDataArray arrayTag;
+        m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+        if (arrayTag.size() > 0)
+        {
+            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
+            {
+                RemoveTag(*it);
+            }
+        }
+        return AddTag(targetTag);
+    }
+
+    //
+    if (!CopyTo(targetDB, targetTag, true, downloader))
+    {
+        TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
+        return false;
+    }
+
+    qDebug() << " after copy doc delete this doc";
+    Delete();
+    return true;
+}
+
+bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
+                          bool keepDocTag, CWizObjectDataDownloaderHost* downloader)
+{
+    qDebug() << "wizdocu copy to : " << pFolder->Location();
+    QString strLocation = pFolder->Location();
+    QString strNewDocGUID;
+    WIZTAGDATA tagEmpty;
+    if (!m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, strNewDocGUID, downloader, keepDocTime))
+    {
+        TOLOG1(_T("Failed to copy document %1."), m_data.strTitle);
+        return false;
+    }
+
+    if (keepDocTag && !m_db.IsGroup() && m_db.kbGUID() == targetDB.kbGUID())
+    {
+        WIZDOCUMENTDATA newDoc;
+        if (!targetDB.DocumentFromGUID(strNewDocGUID, newDoc))
+            return false;
+
+        CWizStdStringArray arrayTag;
+        if (m_db.GetDocumentTags(m_data.strGUID, arrayTag))
+        {
+            for (CString tagGUID : arrayTag)
+            {
+                targetDB.InsertDocumentTag(newDoc, tagGUID);
+            }
+        }
+    }
+    return true;
+}
+
+bool CWizDocument::CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag,
+                          bool keepDocTime, CWizObjectDataDownloaderHost* downloader)
+{
+    qDebug() << "wizdocu copy to : " << targetTag.strName;
+    QString strLocation = targetDB.GetDefaultNoteLocation();
+    QString strNewDocGUID;
+    return m_db.CopyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, downloader, keepDocTime);
 }
 
 bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
@@ -412,10 +503,12 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         if (strFolder.startsWith(strOldLocation)) {
             strFolder.remove(0, strOldLocation.length());
             strFolder.insert(0, strDestLocation);
+            qDebug() << "Add new folder ; " << strFolder;
             m_db.AddExtraFolder(strFolder);
         }
     }
 
+    qDebug() << "Delete old location ; " << strOldLocation;
     m_db.DeleteExtraFolder(strOldLocation);
     m_db.SetLocalValueVersion("folders", -1);
 }
@@ -508,6 +601,11 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
 bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
 {
     return GetModifiedAttachments(arrayData);
+}
+
+bool CWizDatabase::GetModifiedMessageList(CWizMessageDataArray& arrayData)
+{
+    return getModifiedMessages(arrayData);
 }
 
 bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
@@ -775,11 +873,22 @@ bool CWizDatabase::ModifyDocumentsVersion(CWizDocumentDataArray& arrayData)
     return true;
 }
 
-bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
-                                  const WIZTAGDATA &targetTag, QString &strResultGUID, CWizObjectDataDownloaderHost *downloaderHost)
+bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 {
+    for (WIZMESSAGEDATA msg : arrayData)
+    {
+        modifyMessageLocalChanged(msg);
+    }
+
+    return true;
+}
+
+bool CWizDatabase::CopyDocumentTo(const QString &sourceGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
+                                  const WIZTAGDATA &targetTag, QString &resultGUID, CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime)
+{
+    TOLOG("Copy document");
     WIZDOCUMENTDATA sourceDoc;
-    if (!DocumentFromGUID(strGUID, sourceDoc))
+    if (!DocumentFromGUID(sourceGUID, sourceDoc))
         return false;
 
     if (!makeSureDocumentExist(sourceDoc, downloaderHost))
@@ -799,17 +908,20 @@ bool CWizDatabase::CopyDocumentTo(const QString &strGUID, CWizDatabase &targetDB
         return false;
     }
 
-    strResultGUID = newDoc.strGUID;
+    resultGUID = newDoc.strGUID;
 
     if (!CopyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
         return false;
 
-    newDoc.tCreated = sourceDoc.tCreated;
-    newDoc.tAccessed = sourceDoc.tAccessed;
-    newDoc.tDataModified = sourceDoc.tDataModified;
-    newDoc.tModified = sourceDoc.tModified;
-    newDoc.tInfoModified = sourceDoc.tInfoModified;
-    newDoc.tParamModified = sourceDoc.tParamModified;
+    if (keepDocTime)
+    {
+        newDoc.tCreated = sourceDoc.tCreated;
+        newDoc.tAccessed = sourceDoc.tAccessed;
+        newDoc.tDataModified = sourceDoc.tDataModified;
+        newDoc.tModified = sourceDoc.tModified;
+        newDoc.tInfoModified = sourceDoc.tInfoModified;
+        newDoc.tParamModified = sourceDoc.tParamModified;
+    }
     newDoc.nAttachmentCount = targetDB.GetDocumentAttachmentCount(newDoc.strGUID);
     targetDB.ModifyDocumentInfoEx(newDoc);
 
@@ -2415,6 +2527,11 @@ QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
     QString strUserID = doc.strOwner;
     WIZBIZUSER bizUser;
     personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
+    if (bizUser.alias.isEmpty())
+    {
+        int index = doc.strOwner.indexOf('@');
+        return index == -1 ? doc.strOwner :  doc.strOwner.left(index);
+    }
     return bizUser.alias;
 }
 
@@ -2560,8 +2677,12 @@ bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
     WIZBIZUSER userTemp;
     if (userFromGUID(user.bizGUID, user.userGUID, userTemp)) {
         // only modify user when alias changed
-        //if (userTemp.alias != user.alias) {
+//        if (userTemp.alias != user.alias) {
         bRet = modifyUserEx(user);
+        if (bRet && userTemp.userId != user.userId) {
+            qDebug() << "User id changed " << userTemp.userId << user.userId;
+            emit userIdChanged(userTemp.userId, user.userId);
+        }
         //} else {
         //    bRet = true;
         //}
@@ -3210,7 +3331,8 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
         BeginUpdate();
 
         newDoc.strKbGUID = kbGUID();
-        newDoc.strOwner = GetUserId();
+        newDoc.strOwner = GetUserId();        
+
         bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
                               sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
                               sourceDoc.strStyleGUID, 0, 0, 0, newDoc);

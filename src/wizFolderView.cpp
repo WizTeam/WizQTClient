@@ -10,10 +10,11 @@
 #include "share/wizuihelper.h"
 #include "wiznotestyle.h"
 
-CWizFolderView::CWizFolderView(CWizExplorerApp& app, QWidget *parent)
+CWizFolderView::CWizFolderView(CWizExplorerApp& app, QWidget *parent, bool showReadOnlyGroup)
     : QTreeWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
+    , m_showReadOnlyGroup(showReadOnlyGroup)
 {
     header()->hide();
     setAnimated(true);
@@ -48,6 +49,8 @@ void CWizFolderView::showEvent(QShowEvent *event)
     QTreeWidget::showEvent(event);
     clear();
     initFolders();
+    initGroups();
+    sortItems(0, Qt::AscendingOrder);
 }
 
 void CWizFolderView::initFolders()
@@ -101,6 +104,110 @@ void CWizFolderView::initFolders(QTreeWidgetItem* pParent,
 
         initFolders(pFolderItem, strLocation, arrayAllLocation);
     }
+}
+
+void CWizFolderView::initGroups()
+{
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+
+    //
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    //
+    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
+         it != arrayBiz.end();
+         it++)
+    {
+        const WIZBIZDATA& biz = *it;
+        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+
+        addTopLevelItem(pBizGroupItem);
+        pBizGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pBizGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayOwnGroup;
+    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+    if (!arrayOwnGroup.empty())
+    {
+        CWizCategoryViewOwnGroupRootItem* pOwnGroupItem = new CWizCategoryViewOwnGroupRootItem(m_app);
+        addTopLevelItem(pOwnGroupItem);
+        pOwnGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pOwnGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayJionedGroup;
+    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+    if (!arrayJionedGroup.empty())
+    {
+        CWizCategoryViewJionedGroupRootItem* pJionedGroupItem = new CWizCategoryViewJionedGroupRootItem(m_app);
+        addTopLevelItem(pJionedGroupItem);
+        pJionedGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pJionedGroupItem);
+    }
+
+    int nTotal = m_dbMgr.count();
+    for (int i = 0; i < nTotal; i++) {
+//        if (!m_showReadOnlyGroup && !m_dbMgr.at(i).IsGroupAuthor())
+//            continue;
+
+        initGroup(m_dbMgr.at(i));
+    }
+    //
+    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
+         it != arrayGroupsItem.end();
+         it++)
+    {
+        CWizCategoryViewItemBase* pItem = *it;
+        pItem->sortChildren(0, Qt::AscendingOrder);
+    }
+}
+
+void CWizFolderView::initGroup(CWizDatabase& db)
+{
+    bool itemCreeated = false;
+    if (findGroup(db.kbGUID()))
+        return;
+    //
+    WIZGROUPDATA group;
+    m_dbMgr.db().GetGroupData(db.kbGUID(), group);
+    //
+    //
+    QTreeWidgetItem* pRoot = findGroupsRootItem(group);
+    if (!pRoot) {
+        return;
+    }
+
+    itemCreeated = true;
+    //
+    CWizCategoryViewGroupRootItem* pGroupItem = new CWizCategoryViewGroupRootItem(m_app, group);
+    pRoot->addChild(pGroupItem);
+
+    //
+    initGroup(db, pGroupItem, "");
+
+    CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, db.kbGUID());
+    pGroupItem->addChild(pGroupNoTagItem);
+    pGroupItem->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizFolderView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID)
+{
+    CWizTagDataArray arrayTag;
+    db.GetChildTags(strParentTagGUID, arrayTag);
+
+    CWizTagDataArray::const_iterator it;
+    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
+        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
+        pParent->addChild(pTagItem);
+
+        initGroup(db, pTagItem, it->strGUID);
+    }
+    //
+    pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 CWizCategoryViewFolderItem* CWizFolderView::addFolder(const QString& strLocation, bool sort)
@@ -192,4 +299,109 @@ CWizCategoryViewTrashItem* CWizFolderView::findTrash(const QString& strKbGUID)
     }
 
     return NULL;
+}
+
+CWizCategoryViewGroupRootItem*CWizFolderView::findGroup(const QString& strKbGUID)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        if (topLevelItem(i)->type() < Category_GroupsRootItem || topLevelItem(i)->type() > Category_JoinedGroupRootItem)
+            return nullptr;
+
+        CWizCategoryViewGroupsRootItem* p = dynamic_cast<CWizCategoryViewGroupsRootItem *>(topLevelItem(i));
+
+        // only search under all groups root and biz group root
+        if (!p)
+            continue;
+
+        for (int j = 0; j < p->childCount(); j++) {
+            CWizCategoryViewGroupRootItem* pGroup = dynamic_cast<CWizCategoryViewGroupRootItem *>(p->child(j));
+            if (pGroup && (pGroup->kbGUID() == strKbGUID)) {
+                return pGroup;
+            }
+        }
+    }
+
+    return NULL;
+}
+
+CWizCategoryViewItemBase*CWizFolderView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate)
+{
+    if (group.IsBiz())
+    {
+        WIZBIZDATA biz;
+        if (!m_dbMgr.db().GetBizData(group.bizGUID, biz))
+            return NULL;
+        //
+        return findBizGroupsRootItem(biz);
+    }
+    else
+    {
+        if (group.IsOwn())
+            return findOwnGroupsRootItem(bCreate);
+        else
+            return findJionedGroupsRootItem(bCreate);
+    }
+}
+
+CWizCategoryViewItemBase* CWizFolderView::findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate /*= true*/)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        CWizCategoryViewBizGroupRootItem* pItem = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(topLevelItem(i));
+        if (!pItem)
+            continue;
+        if (pItem->biz().bizGUID == biz.bizGUID)
+            return pItem;
+    }
+
+    if (!bCreate)
+        return NULL;
+    //
+    CWizCategoryViewBizGroupRootItem* pItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+    addTopLevelItem(pItem);
+    //
+    sortItems(0, Qt::AscendingOrder);
+    //
+    return pItem;
+}
+
+CWizCategoryViewItemBase* CWizFolderView::findOwnGroupsRootItem(bool bCreate /*= true*/)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        CWizCategoryViewOwnGroupRootItem* pItem = dynamic_cast<CWizCategoryViewOwnGroupRootItem*>(topLevelItem(i));
+        if (!pItem)
+            continue;
+        //
+        return pItem;
+    }
+    //
+    if (!bCreate)
+        return NULL;
+    //
+    CWizCategoryViewOwnGroupRootItem* pItem = new CWizCategoryViewOwnGroupRootItem(m_app);;
+    addTopLevelItem(pItem);
+    //
+    sortItems(0, Qt::AscendingOrder);
+    //
+    return pItem;
+}
+
+CWizCategoryViewItemBase* CWizFolderView::findJionedGroupsRootItem(bool bCreate /*= true*/)
+{
+    for (int i = 0; i < topLevelItemCount(); i++) {
+        CWizCategoryViewJionedGroupRootItem* pItem = dynamic_cast<CWizCategoryViewJionedGroupRootItem*>(topLevelItem(i));
+        if (!pItem)
+            continue;
+        //
+        return pItem;
+    }
+    //
+    if (!bCreate)
+        return NULL;
+    //
+    CWizCategoryViewJionedGroupRootItem* pItem = new CWizCategoryViewJionedGroupRootItem(m_app);;
+    addTopLevelItem(pItem);
+    //
+    sortItems(0, Qt::AscendingOrder);
+    //
+    return pItem;
 }

@@ -98,6 +98,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     : QThread(parent)
     , m_db(db)
     , m_bNeedSyncAll(false)
+    , m_bNeedDownloadMessages(false)
     , m_pEvents(NULL)
     , m_bBackground(true)
     , m_mutex(QMutex::Recursive)
@@ -184,6 +185,13 @@ bool CWizKMSyncThread::doSync()
         qDebug() << "[Sync] quick syncing started, thread:" << QThread::currentThreadId();
         //
         quickSync();
+        return true;
+    }
+    else if (needDownloadMessage())
+    {
+        qDebug() <<  "[Sync] quick download messages started, thread:" << QThread::currentThreadId();
+        //
+        downloadMesages();
         return true;
     }
     //
@@ -314,6 +322,19 @@ bool CWizKMSyncThread::quickSync()
     return true;
 }
 
+bool CWizKMSyncThread::downloadMesages()
+{
+    if (!prepareToken())
+        return false;
+
+    ::WizQuickDownloadMessage(m_info, m_pEvents, &m_db);
+
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    m_bNeedDownloadMessages = false;
+    return true;
+}
+
 
 
 // FIXME: remove this to syncing flow
@@ -344,6 +365,19 @@ bool CWizKMSyncThread::needQuickSync()
     return false;
 }
 
+bool CWizKMSyncThread::needDownloadMessage()
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    if (m_bNeedDownloadMessages)
+    {
+        m_bNeedDownloadMessages = false;
+        return true;
+    }
+    return false;
+}
+
 
 void CWizKMSyncThread::stopSync()
 {
@@ -364,6 +398,13 @@ void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
     m_setQuickSyncKb.insert(kbGuid);
     //
     m_tLastKbModified = QDateTime::currentDateTime();
+}
+
+void CWizKMSyncThread::quickDownloadMesages()
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    m_bNeedDownloadMessages = true;
 }
 
 bool CWizKMSyncThread::peekQuickSyncKb(QString& kbGuid)

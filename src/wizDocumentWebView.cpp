@@ -134,7 +134,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //    }
 
 #ifdef Q_OS_MAC
-    QString strText = wizSystemClipboardData();
+    QString strOrignUrl;
+    QString strText = wizSystemClipboardData(strOrignUrl);
     if (!strText.isEmpty())
     {
         QMimeData* data = new QMimeData();
@@ -145,6 +146,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     }
     else if (mime->hasHtml())   // special process for xcode
     {
+        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
         QString strHtml = mime->html();
         if (WizGetBodyContentFromHtml(strHtml, true))
         {
@@ -869,10 +871,30 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
+QString CWizDocumentWebView::getMailSender()
+{
+    QString mailSender = page()->mainFrame()->evaluateJavaScript("WizGetMailSender()").toString();
+
+    if (mailSender.isEmpty())
+    {
+        QRegExp rxlen("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
+        rxlen.setCaseSensitivity(Qt::CaseInsensitive);
+        rxlen.setPatternSyntax(QRegExp::RegExp);
+        QString strTitle = view()->note().strTitle;
+        int pos = rxlen.indexIn(strTitle);
+        if (pos > -1) {
+            mailSender = rxlen.cap(0); //
+        }
+    }
+
+    return mailSender;
+}
+
 void CWizDocumentWebView::shareNoteByEmail()
 {
     CWizEmailShareDialog dlg(m_app);
-    dlg.setNote(view()->note());
+    QString sendTo = getMailSender();
+    dlg.setNote(view()->note(), sendTo);
 
     dlg.exec();
 }
@@ -1399,6 +1421,12 @@ bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
     return m_app.userSettings().receiveMobileFile();
 }
 
+bool CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
+{
+    WizGetAnalyzer().LogAction("editorParagraph");
+    return editorCommandExecuteCommand("Paragraph", "'" + strType + "'");
+}
+
 bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
@@ -1551,11 +1579,13 @@ void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool 
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
+    WizGetAnalyzer().LogAction("editorFontFamily");
     return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
+    WizGetAnalyzer().LogAction("editorFontSize");
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 
@@ -1722,8 +1752,8 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
     // before insert first checklist, should manual notify editor to save current sence for undo.
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
 
-    QString strExec = "WizTodo.insertOneTodo();";
-    bool ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    QString strExec = "WizTodo.insertOneTodoForQt();";
+    page()->mainFrame()->evaluateJavaScript(strExec).toString();
 
     // after insert first checklist, should manual notify editor to save current sence for undo.
     page()->mainFrame()->evaluateJavaScript("editor.execCommand('saveScene');");
@@ -1732,7 +1762,7 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCheckList");
-    return ret;
+    return true;
 }
 
 bool CWizDocumentWebView::editorCommandExecuteInsertImage()
@@ -2145,6 +2175,15 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
 
     strSrc = strImgSrc;
     return true;
+}
+
+void CWizDocumentWebView::setContentsChanged(bool b)
+{
+    m_bContentsChanged = b;
+    if (b)
+    {
+        emit contentsChanged();
+    }
 }
 
 void CWizDocumentWebView::undo()

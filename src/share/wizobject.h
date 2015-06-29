@@ -638,8 +638,11 @@ struct WIZBIZDATA
 };
 
 
-const int WIZ_USER_MSG_TYPE_CALLED = 0;
+const int WIZ_USER_MSG_TYPE_CALLED_IN_TITLE = 0;
 const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
+const int WIZ_USER_MSG_TYPE_COMMENT = 10;
+const int WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT = 20;
+const int WIZ_USER_MSG_TYPE_COMMENT_REPLY = 30;
 
 struct WIZUSERMESSAGEDATA
 {
@@ -653,18 +656,22 @@ struct WIZUSERMESSAGEDATA
     QString strReceiverID;
     int nMessageType;
     int nReadStatus;	//阅读状态, 0:未读，1:已读
+    int nDeletedStatus;  // 删除状态， 0：为删除， 1：已删除
     COleDateTime tCreated;
     QString strMessageText;
     qint64 nVersion;
     QString strSender;
     QString strReceiver;
     QString strTitle;
+    int nLocalChanged;
 
     WIZUSERMESSAGEDATA()
         : nMessageID(0)
-        , nMessageType(WIZ_USER_MSG_TYPE_CALLED)
+        , nMessageType(WIZ_USER_MSG_TYPE_CALLED_IN_TITLE)
         , nReadStatus(0)
+        , nDeletedStatus(0)
         , nVersion(0)
+        , nLocalChanged(0)
     {
 
     }
@@ -674,6 +681,8 @@ struct WIZUSERMESSAGEDATA
 
 typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
 
+
+
 struct WIZMESSAGEDATA
 {
     WIZMESSAGEDATA();
@@ -681,6 +690,12 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "messages"; }
+
+    enum LocalChanged{
+        localChanged_None = 0x0000,
+        localChanged_Read = 0x0001,
+        localChanged_Delete = 0x0002
+    };
 
     // Field: biz_guid, char(36)
     // wiz bussiness groups guid
@@ -711,8 +726,10 @@ struct WIZMESSAGEDATA
     QString messageBody;
 
     // Field: message_type
-    // 0: @ message
+    // 0: @ message in title
     // 1: document edited meesage
+    // 10: comment
+    // 30: @ message in comment
     qint32 nMessageType;
 
     // Filed: note
@@ -723,6 +740,11 @@ struct WIZMESSAGEDATA
     // 0: not read
     // 1: read
     qint32 nReadStatus;
+
+    //Field:DELETE_STATUS
+    //0: not deleted
+    //1:deleted
+    qint32 nDeleteStatus;
 
     // Field: receiver_alias
     QString receiverAlias;
@@ -757,6 +779,9 @@ struct WIZMESSAGEDATA
 
     // Field: version
     qint64 nVersion;
+
+    // Field: localchanged  should not upload. use value of  WIZMESSAGEDATA::LocalChanged
+    int nLocalChanged;
 };
 
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;

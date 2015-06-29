@@ -31,7 +31,7 @@ private:
     CWizDocumentDataArray m_arrayDocuments;
     bool m_bUpdating; // avoid itemChanged signal emit programmatically
 
-    QPointer<QLineEdit> m_tagsEdit;
+//    QPointer<QLineEdit> m_tagsEdit;
     QPointer<QListWidget> m_list;
 
     void reloadTags();

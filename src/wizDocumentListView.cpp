@@ -33,14 +33,14 @@ using namespace Core::Internal;
 // Document actions
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
-#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move Note...")
-#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy Note")
-#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version history...")
-#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy document link")
+#define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move to...")
+#define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy to...")
+#define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version History...")
+#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Note Link")
 #define WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK QObject::tr("Share Link...")
-#define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt document")
-#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel document encryption")
-#define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always on top")
+#define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt Note")
+#define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel Note Encryption")
+#define WIZACTION_LIST_ALWAYS_ON_TOP  QObject::tr("Always On Top")
 //#define WIZACTION_LIST_CANCEL_ON_TOP  QObject::tr("Cancel always on top")
 
 
@@ -50,7 +50,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_dbMgr(app.databaseManager())
     , m_tagList(NULL)
     , m_itemSelectionChanged(false)
-    , m_accpetAllItems(false)
+    , m_accpetAllSearchItems(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -167,27 +167,29 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_menuDocument->addSeparator();
 
-    QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
-                                                         this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
-    QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
-                                                       this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     QAction* actionCopyDoc = m_menuDocument->addAction(WIZACTION_LIST_COPY_DOCUMENT,
                                                        this, SLOT(on_action_copyDocument()), QKeySequence("Ctrl+Shift+C"));
-    // not implement, hide currently.
-    actionCopyDoc->setVisible(false);
-
-    // Add to widget's actions list
-    addAction(actionDeleteDoc);
-    addAction(actionMoveDoc);
-    addAction(actionCopyDoc);
+    QAction* actionMoveDoc = m_menuDocument->addAction(WIZACTION_LIST_MOVE_DOCUMENT,
+                                                       this, SLOT(on_action_moveDocument()), QKeySequence("Ctrl+Shift+M"));
     m_menuDocument->addAction(WIZACTION_LIST_ENCRYPT_DOCUMENT, this,
                               SLOT(on_action_encryptDocument()));
     m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ENCRYPTION, this,
                               SLOT(on_action_cancelEncryption()));
 
+    m_menuDocument->addSeparator();
+    QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
+                                                         this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
+    // not implement, hide currently.
+//    actionCopyDoc->setVisible(false);
+
+    // Add to widget's actions list
+    addAction(actionMoveDoc);
+    addAction(actionDeleteDoc);
+    addAction(actionCopyDoc);
+
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    //actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
 
 
 
@@ -270,6 +272,91 @@ void CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
     addItem(pItem);
 }
 
+bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
+{
+    //  搜索模式下屏蔽因同步带来的笔记新增和修改
+    if (m_accpetAllSearchItems)
+    {
+        if (documentIndexFromGUID(document.strGUID) == -1)
+            return false;
+    }
+
+    return true;
+}
+
+void CWizDocumentListView::moveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
+{
+    // only move user private documents
+//    if (isDocumentsWithGroupDocument(arrayDocument)) {
+//        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
+//        return;
+//    }
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    ::WizMoveDocumentsToPrivateFolder(arrayDocument, targetFolder, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+}
+
+void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+}
+
+void CWizDocumentListView::copyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument,
+                                                        const QString& targetFolder, bool keepDocTime, bool keepTag)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    ::WizCopyDocumentsToPrivateFolder(arrayDocument, targetFolder, keepDocTime, keepTag,
+                                      m_dbMgr, mainWindow->progressDialog(), mainWindow->downloaderHost());
+}
+
+void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
+                                                      const WIZTAGDATA& targetTag, bool keepDocTime)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
+                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+}
+
+void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& arrayDocument)
+{
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+        if (db.IsGroup())
+        {
+            CWizStdStringArray arrayTagGUID;
+            db.GetDocumentTags(doc.strGUID, arrayTagGUID);
+            WIZTAGDATA targetTag;
+            if (arrayTagGUID.size() > 1)
+            {
+                qDebug() << "Too may tags found by document : " << doc.strTitle;
+                continue;
+            }
+            else if (arrayTagGUID.size() == 1)
+            {
+                db.TagFromGUID(*arrayTagGUID.begin(), targetTag);
+            }
+            targetTag.strKbGUID = doc.strKbGUID;
+            //
+            CWizDocumentDataArray arrayCopyDoc;
+            arrayCopyDoc.push_back(doc);
+            copyDocumentsToGroupFolder(arrayCopyDoc, targetTag, true);
+        }
+        else
+        {
+            CWizDocumentDataArray arrayCopyDoc;
+            arrayCopyDoc.push_back(doc);
+            copyDocumentsToPrivateFolder(arrayCopyDoc, doc.strLocation, true, true);
+        }
+    }
+}
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     /*
@@ -280,7 +367,7 @@ bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 
     // there is no need to check if kbguid is same. especially when category item is  biz root.
 
-    if (m_accpetAllItems)
+    if (m_accpetAllSearchItems)
         return true;
 
     return m_app.category().acceptDocument(document);
@@ -356,18 +443,16 @@ void CWizDocumentListView::resetPermission()
     bool bShareEnable = true;
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
-        findAction(WIZACTION_LIST_TAGS)->setEnabled(false);
-        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(false);
-        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(false);
+        findAction(WIZACTION_LIST_TAGS)->setVisible(false);
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
         bShareEnable = false;
     } else {
-        findAction(WIZACTION_LIST_TAGS)->setEnabled(true);
-        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setEnabled(true);
-        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setEnabled(true);
+        findAction(WIZACTION_LIST_TAGS)->setVisible(true);
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(bShareEnable);
     }
 
     // deleted user private documents
-    findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(!bGroup);
+    findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(bCanEdit);
 
     // disable delete if permission is not enough
     findAction(WIZACTION_LIST_DELETE)->setEnabled(bCanEdit);
@@ -403,6 +488,13 @@ void CWizDocumentListView::resetPermission()
     }
 
     findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setEnabled(bShareEnable);
+
+    if (bGroup)
+    {
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
+        findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setVisible(false);
+        findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setVisible(false);
+    }
 }
 
 QAction* CWizDocumentListView::findAction(const QString& strName)
@@ -578,7 +670,7 @@ QPixmap WizGetDocumentDragBadget(int nCount)
     p.setBrush(brush);
 
     p.drawEllipse(rectBadget);
-    p.drawText(rectBadget,  Qt::AlignVCenter, QString::number(nCount));
+    p.drawText(rectBadget,  Qt::AlignCenter, QString::number(nCount));
 
     // draw badget on icon
     QPixmap pixmapDragIcon(szPixmap.width() + rectBadget.width() / 2, szPixmap.height());
@@ -633,9 +725,13 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
-
     drag->setPixmap(WizGetDocumentDragBadget(items.size()));
-    drag->exec();
+
+//    Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+//    bool forceCopy = keyMod.testFlag(Qt::AltModifier);
+//    Qt::DropAction deafult = forceCopy ? Qt::CopyAction : Qt::MoveAction;
+
+    drag->exec(Qt::CopyAction | Qt::MoveAction, Qt::MoveAction);
 
     //delete drag would cause crash
 //    drag->deleteLater();
@@ -643,20 +739,28 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 
 void CWizDocumentListView::dragEnterEvent(QDragEnterEvent *event)
 {
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS) ||
+            event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+        event->accept();
     }
-
-    //QListWidget::dragEnterEvent(event);
+    else
+    {
+        QListWidget::dragEnterEvent(event);
+    }
 }
 
 void CWizDocumentListView::dragMoveEvent(QDragMoveEvent *event)
-{
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)) {
+{   
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS)||
+            event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         event->acceptProposedAction();
+        event->accept();
     }
-
-    //QListWidget::dragMoveEvent(event);
+    else
+    {
+        QListWidget::dragMoveEvent(event);
+    }
 }
 
 void CWizDocumentListView::dropEvent(QDropEvent * event)
@@ -679,9 +783,26 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
                 }
             }
         }
-
-        event->acceptProposedAction();
     }
+    else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
+    {
+        ::WizGetAnalyzer().LogAction("documentListDuplicateDocument");
+        CWizDocumentDataArray arrayDocument;
+        ::WizMime2Note(event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS), m_dbMgr, arrayDocument);
+
+        if (!arrayDocument.size())
+            return;
+
+        Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
+        bool forceCopy = keyMod.testFlag(Qt::AltModifier);
+
+        if (!forceCopy)
+            return;
+
+        duplicateDocuments(arrayDocument);
+    }
+
+    event->acceptProposedAction();
 }
 
 void CWizDocumentListView::resetItemsViewType(int type)
@@ -766,6 +887,9 @@ void CWizDocumentListView::on_tag_modified(const WIZTAGDATA& tagOld, const WIZTA
 
 void CWizDocumentListView::on_document_created(const WIZDOCUMENTDATA& document)
 {
+    if (!acceptDocumentChange(document))
+        return;
+
     if (acceptDocument(document))
     {
         if (-1 == documentIndexFromGUID(document.strGUID))
@@ -779,6 +903,9 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
                                                 const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
+
+    if (!acceptDocumentChange(documentNew))
+        return;
 
     // FIXME: if user search on-going, acceptDocument will remove this document from the list.
     if (acceptDocument(documentNew))
@@ -803,7 +930,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
 }
 
 void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
-{
+{    
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 != index) {
         takeItem(index);
@@ -1027,7 +1154,7 @@ void CWizDocumentListView::on_action_deleteDocument()
 void CWizDocumentListView::on_action_moveDocument()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuMoveDocument");
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, this);
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, WIZ_USERGROUP_AUTHOR, this);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_moveDocument_confirmed(int)));
@@ -1036,64 +1163,59 @@ void CWizDocumentListView::on_action_moveDocument()
 
 void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 {
+    qDebug() << "move document confirmed : " << result;
     CWizFolderSelector* selector = qobject_cast<CWizFolderSelector*>(sender());
-    QString strSelectedFolder = selector->selectedFolder();
-    sender()->deleteLater();
+    WizScopeGuard guard([&]{
+       selector->deleteLater();
+    });
 
     if (result != QDialog::Accepted) {
         return;
     }
 
-    if (strSelectedFolder.isEmpty()) {
-        return;
-    }
-
+    QSet<QString> dbSet;
     // collect documents
     CWizDocumentDataArray arrayDocument;
     foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
+        dbSet.insert(item->document().strKbGUID);
     }
 
-    // only move user private documents
-    if (isDocumentsWithGroupDocument(arrayDocument)) {
-        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
-        return;
+    if (selector->isSelectPrivateFolder())
+    {
+        QString strSelectedFolder = selector->selectedFolder();
+        if (strSelectedFolder.isEmpty())
+            return;
+        qDebug() << "move docuemnt to private folder " << strSelectedFolder;
+        moveDocumentsToPrivateFolder(arrayDocument, strSelectedFolder);
+        dbSet.insert(m_dbMgr.db().kbGUID());
+    }
+    else if (selector->isSelectGroupFolder())
+    {
+        WIZTAGDATA tag = selector->selectedGroupFolder();
+        if (tag.strKbGUID.isEmpty())
+            return;
+        qDebug() << "move docuemnt to group folder " << tag.strName;
+        //
+        moveDocumentsToGroupFolder(arrayDocument, tag);
+        dbSet.insert(tag.strKbGUID);
     }
 
-    // move, show progress if size > 3
-    CWizFolder folder(m_dbMgr.db(), strSelectedFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveDocument(&folder);
-        }
-    } else {
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(m_dbMgr.db(), data);
-            doc.MoveDocument(&folder);
-
-            progress->setActionString(tr("Move Note: %1 to %2").arg(data.strLocation).arg(strSelectedFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-
-            i++;
-        }
-
-        // hide progress dialog
-        mainWindow->progressDialog()->hide();
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    for (QString kbGuid : dbSet)
+    {
+        mainWindow->quickSyncKb(kbGuid);
     }
 }
 
 void CWizDocumentListView::on_action_copyDocument()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
-    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, this);
-    selector->setCopyStyle();
+    Q_ASSERT(!m_rightButtonFocusedItems.isEmpty());
+    //
+    CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, WIZ_USERGROUP_AUTHOR, this);
+    bool isGroup = m_dbMgr.db(m_rightButtonFocusedItems.first()->document().strKbGUID).IsGroup();
+    selector->setCopyStyle(!isGroup);
     selector->setAcceptRoot(false);
 
     connect(selector, SIGNAL(finished(int)), SLOT(on_action_copyDocument_confirmed(int)));
@@ -1102,16 +1224,49 @@ void CWizDocumentListView::on_action_copyDocument()
 
 void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
 {
+    qDebug() << "copy document confirmed : " << result;
     CWizFolderSelector* selector = qobject_cast<CWizFolderSelector*>(sender());
-    QString strSelectedFolder = selector->selectedFolder();
-    sender()->deleteLater();
+    WizScopeGuard guard([&]{
+       selector->deleteLater();
+    });
 
-    if (strSelectedFolder.isEmpty()) {
+    if (result != QDialog::Accepted) {
         return;
     }
 
-    if (result == QDialog::Accepted) {
-        qDebug() << "user select: " << strSelectedFolder;
+    QSet<QString> dbSet;
+    // collect documents
+    CWizDocumentDataArray arrayDocument;
+    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
+        arrayDocument.push_back(item->document());
+        dbSet.insert(item->document().strKbGUID);
+    }
+
+    if (selector->isSelectPrivateFolder())
+    {
+        QString strSelectedFolder = selector->selectedFolder();
+        if (strSelectedFolder.isEmpty()) {
+            return;
+        }
+        qDebug() << "copy docuemnt to private folder " << strSelectedFolder;
+        copyDocumentsToPrivateFolder(arrayDocument, strSelectedFolder, selector->isKeepTime(), selector->isKeepTag());
+        dbSet.insert(m_dbMgr.db().kbGUID());
+    }
+    else if (selector->isSelectGroupFolder())
+    {
+        WIZTAGDATA tag = selector->selectedGroupFolder();
+        if (tag.strKbGUID.isEmpty())
+            return;
+        qDebug() << "copy docuemnt to group folder " << tag.strName;
+        //
+        copyDocumentsToGroupFolder(arrayDocument, tag, selector->isKeepTime());
+        dbSet.insert(tag.strKbGUID);
+    }
+
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    for (QString kbGuid : dbSet)
+    {
+        mainWindow->quickSyncKb(kbGuid);
     }
 }
 
@@ -1425,9 +1580,9 @@ void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& s
     }
 }
 
-void CWizDocumentListView::setAcceptAllItems(bool bAccept)
+void CWizDocumentListView::setAcceptAllSearchItems(bool bAccept)
 {
-    m_accpetAllItems = bAccept;
+    m_accpetAllSearchItems = bAccept;
 }
 
 void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)

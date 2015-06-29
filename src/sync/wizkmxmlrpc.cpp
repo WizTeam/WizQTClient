@@ -1,4 +1,6 @@
 #include "wizkmxmlrpc.h"
+#include "apientry.h"
+#include "token.h"
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
@@ -243,6 +245,17 @@ BOOL CWizKMAccountsServer::SetMessageReadStatus(const QString& strMessageIDs, in
     }
     //
     return TRUE;
+}
+
+bool CWizKMAccountsServer::SetMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
+{
+    QString strUrl = WizService::ApiEntry::messageServerUrl();
+    strUrl += QString("/messages?token=%1&ids=%2").arg(m_retLogin.strToken).arg(strMessageIDs);
+    qDebug() << "set message delete status, strken:" << m_retLogin.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
+    //
+    deleteRequest(strUrl);
+
+    return returnCode() == JSON_RETURNCODE_OK;
 }
 
 BOOL CWizKMAccountsServer::GetValueVersion(const QString& strKey, __int64& nVersion)

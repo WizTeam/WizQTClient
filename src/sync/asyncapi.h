@@ -23,7 +23,8 @@ public:
     void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode,
                          const QString& strCaptchaID = "", const QString& strCaptcha = "");
     void getCommentsCount(const QString& strUrl);
-    void setMessageStatus(const QString& ids, bool bRead);
+    void setMessageReadStatus(const QString& ids, bool bRead);
+    void setMessageDeleteStatus(const QString& ids, bool bDelete);
 
     int lastErrorCode() { return m_nErrorCode; }
     QString lastErrorMessage() { return m_strErrorMessage; }
@@ -37,7 +38,8 @@ private:
     bool getToken_impl(const QString& strUserId, const QString& strPasswd);
     bool keepAlive_impl(const QString& strToken, const QString &strKbGUID);
     bool registerAccount_impl(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha);
-    void setMessageStatus_impl(const QString& ids, bool bRead);
+    void setMessageReadStatus_impl(const QString& ids, bool bRead);
+    void setMessageDeleteStatus_impl(const QString& ids, bool bDelete);
 
 public slots:
     void on_comments_finished();
@@ -48,6 +50,8 @@ Q_SIGNALS:
     void keepAliveFinished(bool bOk);
     void registerAccountFinished(bool bOk);
     void getCommentsCountFinished(int i);
+    void uploadMessageReadStatusFinished(const QString& ids);
+    void uploadMessageDeleteStatusFinished(const QString& ids);
 };
 
 } // namespace WizService

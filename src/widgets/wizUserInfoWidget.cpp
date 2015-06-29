@@ -64,7 +64,8 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
-    if (!CWizOEMSettings::isHideBuyVip())
+    CWizOEMSettings oemSettings(m_db.GetUserId());
+    if (!oemSettings.isHideBuyVip())
     {
         QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
         connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
@@ -72,7 +73,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     }
     m_menuMain->addSeparator();
     m_menuMain->addAction(actionWebService);
-    if (!CWizOEMSettings::isHideMyShare())
+    if (!oemSettings.isHideMyShare())
     {
         QAction* actionMyShare = new QAction(tr("My shared links..."), m_menuMain);
         connect(actionMyShare, SIGNAL(triggered()), SLOT(on_action_mySharedNotes_triggered()));
