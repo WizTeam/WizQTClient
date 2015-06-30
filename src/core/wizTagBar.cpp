@@ -479,12 +479,9 @@ CTagItem::CTagItem(const QString guid, const QString text, QWidget* parent)
     , m_closeButtonPressed(false)
 {
     if (!m_pixDeleteNormal)
-    {
-        bool bHighPix = ::WizIsHighPixel();
-        QString deleteNormal = bHighPix ? "action_deleteEditorBarItem@2x"  : "action_deleteEditorBarItem";
-        QString deletePressed = bHighPix ? "action_deleteEditorBarItem_on@2x" : "action_deleteEditorBarItem_on";
-        deleteNormal = Utils::StyleHelper::skinResourceFileName(deleteNormal);
-        deletePressed = Utils::StyleHelper::skinResourceFileName(deletePressed);
+    {        
+        QString deleteNormal = Utils::StyleHelper::skinResourceFileName("action_deleteEditorBarItem", true);
+        QString deletePressed = Utils::StyleHelper::skinResourceFileName("action_deleteEditorBarItem_on", true);
         m_pixDeleteNormal = std::make_shared<QPixmap>(deleteNormal);
         m_pixDeletePressed = std::make_shared<QPixmap>(deletePressed);
     }

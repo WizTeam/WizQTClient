@@ -218,6 +218,8 @@ QIcon createColorIcon(QColor color)
     return QIcon(pixmap);
 }
 
+const int TOOLBUTTON_MARGIN_WIDTH = 12;
+const int TOOLBUTTON_ARRWO_WIDTH = 16;
 
 using namespace Core::Internal;
 
@@ -242,7 +244,13 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 //        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
 
         subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
-        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
+//        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
+        QRect rcArrow = opt.rect;
+        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 8);
+        rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
+        rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
+        static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarComboboxArrow", true));
+        painter.drawPixmap(rcArrow, arrow);
     }
 
     // draw text
@@ -290,8 +298,6 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
     p->drawPath(path);
     p->restore();
 }
-
-const int TOOLBUTTON_ARRWO_WIDTH = 8;
 
 class CWizToolButton : public QToolButton
 {
@@ -345,27 +351,29 @@ protected:
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         if (opt.arrowType == Qt::RightArrow)
-            rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_ARRWO_WIDTH);
+            rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_MARGIN_WIDTH);
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
         if (opt.arrowType == Qt::RightArrow)
         {
-//            QRect rcArrow = opt.rect;
-//            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
-//            QPixmap arrow(Utils::StyleHelper::skinResourceFileName("actionPopupMainMenu"));
-//            p.drawPixmap(rcArrow, arrow);
+            QRect rcArrow = opt.rect;
+            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
+            rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
+            rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
+            static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+            p.drawPixmap(rcArrow, arrow);
 
-            QMatrix matrix;
-            matrix.translate(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH / 2 -1, opt.rect.center().y() + 2);
-            QPainterPath path;
-            path.moveTo(0, 2.3);
-            path.lineTo(-2.3, -2.3);
-            path.lineTo(2.3, -2.3);
-            p.setMatrix(matrix);
-            p.setPen(Qt::NoPen);
-            p.setBrush(QColor(0, 0, 0, 255));
-            p.setRenderHint(QPainter::Antialiasing);
-            p.drawPath(path);
+//            QMatrix matrix;
+//            matrix.translate(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH / 2 -1, opt.rect.center().y() + 2);
+//            QPainterPath path;
+//            path.moveTo(0, 2.3);
+//            path.lineTo(-2.3, -2.3);
+//            path.lineTo(2.3, -2.3);
+//            p.setMatrix(matrix);
+//            p.setPen(Qt::NoPen);
+//            p.setBrush(QColor(0, 0, 0, 255));
+//            p.setRenderHint(QPainter::Antialiasing);
+//            p.drawPath(path);
         }
     }
 
@@ -384,7 +392,7 @@ protected:
     virtual QSize sizeHint() const
     {
         if (arrowType() == Qt::RightArrow)
-            return QSize(20 + TOOLBUTTON_ARRWO_WIDTH, 20);
+            return QSize(20 + TOOLBUTTON_MARGIN_WIDTH, 20);
         return QSize(20, 20);
     }
 

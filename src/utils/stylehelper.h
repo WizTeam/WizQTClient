@@ -50,7 +50,7 @@ public:
 
 
     static QString themeName();
-    static QString skinResourceFileName(const QString& strName);
+    static QString skinResourceFileName(const QString& strName, bool need2x = false);
     static QIcon loadIcon(const QString& strName);
 
     static int treeViewItemHeight();

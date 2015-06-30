@@ -59,9 +59,11 @@ QString StyleHelper::themeName()
     return strTheme;
 }
 
-QString StyleHelper::skinResourceFileName(const QString& strName)
+QString StyleHelper::skinResourceFileName(const QString& strName, bool need2x)
 {
-    return ::WizGetSkinResourceFileName(themeName(), strName);
+    bool use2x = need2x && ::WizIsHighPixel();
+    return ::WizGetSkinResourceFileName(themeName(),
+                                        (use2x ? strName + "@2x" : strName));
 }
 
 QIcon StyleHelper::loadIcon(const QString& strName)
