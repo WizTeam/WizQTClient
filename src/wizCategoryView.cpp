@@ -3937,9 +3937,10 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
             WIZDOCUMENTDATA doc;
             if (m_dbMgr.db(kbGuid).DocumentFromGUID(guid, doc))
             {
+                bool isEncrypted = doc.nProtected == 1;
                 CWizCategoryViewShortcutItem* item = new CWizCategoryViewShortcutItem(m_app,
                                                                                       doc.strTitle, CWizCategoryViewShortcutItem::Document,
-                                                                                      kbGuid, guid, doc.strLocation);
+                                                                                      kbGuid, guid, doc.strLocation, isEncrypted);
                 pShortcutRoot->addChild(item);
             }
         }
@@ -3947,6 +3948,39 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
         {
             qDebug() << "Invalid shortcut type : " << type;
         }
+    }
+
+    ////FIXME:兼容旧版本的快捷方式
+    ////REMOVEME: 2015-10-1日之后可以删除
+    QString strData = m_dbMgr.db().meta(CATEGORY_META, "CategoryShortcut");
+    if (!strData.isEmpty())
+    {
+        QStringList shortCutList = strData.split(';');
+        foreach (QString str, shortCutList) {
+            QStringList shortDataList = str.split(',');
+            if (shortDataList.count() != 2)
+                continue;
+
+            QString strKbGuid = shortDataList.first();
+            QString strGuid = shortDataList.last();
+            if (shortcut.contains(strGuid))
+                continue;
+            //
+            CWizDatabase &db = m_dbMgr.db(strKbGuid);
+            WIZDOCUMENTDATA doc;
+            if (db.DocumentFromGUID(strGuid, doc))
+            {
+                bool isEncrypted = doc.nProtected == 1;
+                CWizCategoryViewShortcutItem *pShortcutItem =
+                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                         doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
+                pShortcutRoot->addChild(pShortcutItem);
+            }
+        }
+        // clear old value
+        m_dbMgr.db().setMeta(CATEGORY_META, "CategoryShortcut", "");
+        m_dbMgr.db().deleteMetaByKey(CATEGORY_META, "CategoryShortcut");
+        saveShortcutState();
     }
 }
 

@@ -3387,10 +3387,10 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         if (db.DocumentFromGUID(pShortcut->guid(), doc))
         {
             viewDocument(doc, true);
-            CWizDocumentDataArray array;
-            db.GetDocumentsByLocation(doc.strLocation, array);
-            m_documents->setDocuments(array);
-            m_documents->setCurrentRow(m_documents->documentIndexFromGUID(doc.strGUID));
+            locateDocument(doc);
+            m_category->blockSignals(true);
+            m_category->setCurrentItem(pShortcut);
+            m_category->blockSignals(false);
         }
     }
         break;
