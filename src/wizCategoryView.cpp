@@ -3546,8 +3546,9 @@ void CWizCategoryView::saveShortcutState()
             {
             case CWizCategoryViewShortcutItem::Document:
             {
+                CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
                 ///Type=document /KbGUID= /DocumentGUID=10813667-7c9e-46cc-9896-a278462793cc
-                strShortcutData = strShortcutData +  "*" + SHORTCUT_TYPE_DOCUMENT + " " + SHORTCUT_PARAM_KBGUID + " "
+                strShortcutData = strShortcutData +  "*" + SHORTCUT_TYPE_DOCUMENT + " " + SHORTCUT_PARAM_KBGUID + (db.IsGroup() ? pItem->kbGUID() : QString())  + " "
                         + SHORTCUT_PARAM_DOCUMENTGUID + pItem->guid();
             }
                 break;
