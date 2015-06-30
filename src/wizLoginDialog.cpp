@@ -285,7 +285,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
     //
     m_currentUserServerType = userSettings.serverType();
-//    qDebug() << "set user , user type : " << m_currentUserServerType;
+    qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
@@ -331,7 +331,7 @@ void CWizLoginDialog::doAccountVerify()
         return;
     }
 
-//    qDebug() << "do account verify , server type : " << m_serverType;
+    qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
@@ -978,7 +978,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
 
-//    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
+    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
 
     emit accountCheckFinished();
     if (strToken.isEmpty())
@@ -1002,7 +1002,6 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
         }
         else
         {
-            //QMessageBox::critical(0, tr("Verify account failed"), );
             if (errorTokenInvalid == nErrorCode)
             {
                 ui->label_passwordError->setText(tr("User name or password is not correct!"));
@@ -1256,9 +1255,6 @@ bool CWizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
     rapidjson::Document d;
     d.Parse<0>(settings.toUtf8().constData());
 
-    if (d.FindMember("TestOEM"))
-        qDebug() << "find member test oem";
-
     if (d.FindMember("LogoConfig") && d.FindMember("LogoConfig")->value.FindMember("enable")
             && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
     {
@@ -1472,12 +1468,12 @@ void CWizLoginDialog::initOEMDownloader()
             SLOT(onOEMLogoDownloaded(QString)));
     connect(m_oemDownloader, SIGNAL(errorMessage(QString)),
             SLOT(showErrorMessage(QString)));
+    connect(m_oemDownloader, SIGNAL(checkLicenceFinished(bool, QString)),
+            SLOT(onCheckServerLicenceFinished(bool, QString)));
     connect(this, SIGNAL(logoDownloadRequest(QString)),
             m_oemDownloader, SLOT(downloadOEMLogo(QString)));
     connect(this, SIGNAL(checkServerLicenceRequest(QString)),
             m_oemDownloader, SLOT(onCheckServerLicenceRequest(QString)));
-    connect(m_oemDownloader, SIGNAL(checkLicenceFinished(bool, QString)),
-            SLOT(onCheckServerLicenceFinished(bool, QString)));
 
     m_oemThread = new QThread();
     m_oemThread->start();
@@ -1563,7 +1559,6 @@ void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
     QString settings = _downloadOEMSettings();
     if (settings.isEmpty())
     {
-        emit errorMessage(tr("Download oem settings failed!"));
         return;
     }
 
