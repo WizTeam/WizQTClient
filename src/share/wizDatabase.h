@@ -324,6 +324,7 @@ public:
     QString GetAvatarPath() const;
     QString GetDefaultNoteLocation() const;
     QString GetDocumentAuthorAlias(const WIZDOCUMENTDATA& doc);
+    QString GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc);
 
     bool GetUserName(QString& strUserName);
     bool SetUserName(const QString& strUserName);

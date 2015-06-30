@@ -2552,6 +2552,30 @@ QString CWizDatabase::GetDocumentAuthorAlias(const WIZDOCUMENTDATA& doc)
     if (!personDb)
         return QString();
 
+    if (doc.strKbGUID.isEmpty() || doc.strKbGUID == personDb->kbGUID())
+    {
+        QString displayName;
+        if (personDb->GetUserDisplayName(displayName))
+            return displayName;
+    }
+
+    QString strUserID = doc.strOwner;
+    WIZBIZUSER bizUser;
+    personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
+    if (bizUser.alias.isEmpty())
+    {
+        int index = doc.strOwner.indexOf('@');
+        return index == -1 ? doc.strOwner :  doc.strOwner.left(index);
+    }
+    return bizUser.alias;
+}
+
+QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
+{
+    CWizDatabase* personDb = getPersonalDatabase();
+    if (!personDb)
+        return QString();
+
     QString strUserID = doc.strOwner;
     WIZBIZUSER bizUser;
     personDb->userFromID(doc.strKbGUID, strUserID, bizUser);

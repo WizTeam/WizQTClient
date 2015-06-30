@@ -151,7 +151,7 @@ void CWizDocumentListViewItem::setSortingType(int type)
 
 
     if (m_data.nType == TypeGroupDocument) {
-        QString strAuthor = db.GetDocumentAuthorAlias(m_data.doc);
+        QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
         strAuthor += strAuthor.isEmpty() ? "" : " ";
 
         switch (m_nSortingType) {
