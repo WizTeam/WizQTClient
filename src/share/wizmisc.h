@@ -11,6 +11,7 @@
 #include "wizobject.h"
 #include "wizmd5.h"
 
+class CWizDatabase;
 class CWizDatabaseManager;
 class CWizProgressDialog;
 class CWizObjectDataDownloaderHost;
@@ -185,14 +186,23 @@ bool WizIsOffline();
 bool WizIsHighPixel();
 
 
+///  make sure document exist, if not try to download document, show download dialog by default.
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
+                              CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
+                              CWizObjectDataDownloaderHost* downloaderHost);
+
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                                      CWizObjectDataDownloaderHost* downloaderHost);
+
 ///
-void WizMoveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+void WizMoveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
                                      CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
 void WizMoveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                 CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-void WizCopyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+void WizCopyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
                                   bool keepDocTime, bool keepTag, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress,
                                   CWizObjectDataDownloaderHost* downloader);
 

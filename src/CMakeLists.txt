@@ -181,6 +181,7 @@ set(wiznote_SOURCES
     core/wizTrayIcon.cpp
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
+    share/wizObjectOperator.cpp
 )
 
 set(wiznote_HEADERS
@@ -344,6 +345,7 @@ set(wiznote_HEADERS
     core/wizTrayIcon.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
+    share/wizObjectOperator.h
 )
 
 set(wiznote_FORMS

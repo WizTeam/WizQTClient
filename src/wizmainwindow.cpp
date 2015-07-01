@@ -3473,8 +3473,8 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     CWizProgressDialog *dlg = progressDialog();
     dlg->setProgress(100,0);
-    dlg->setActionString(tr("Downloading attachment file  %1 ").arg(attachment.strName));
-    dlg->setNotifyString(tr("downloading..."));
+    dlg->setActionString(tr("Downloading attachment file  %1 ...").arg(attachment.strName));
+    dlg->setWindowTitle(tr("Downloading"));
     connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
     connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),

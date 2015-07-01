@@ -275,14 +275,14 @@ public:
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
-    void updatePrivateFolderDocumentCount();
-    void updatePrivateFolderDocumentCount_impl();
+    void updatePersonalFolderDocumentCount();
+    void updatePersonalFolderDocumentCount_impl();
 
     void updateGroupFolderDocumentCount(const QString& strKbGUID);
     void updateGroupFolderDocumentCount_impl(const QString& strKbGUID);
 
-    void updatePrivateTagDocumentCount();
-    void updatePrivateTagDocumentCount_impl(const QString& strKbGUID = NULL);
+    void updatePersonalTagDocumentCount();
+    void updatePersonalTagDocumentCount_impl(const QString& strKbGUID = NULL);
 
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
@@ -419,8 +419,8 @@ public:
     Q_INVOKABLE CWizFolder* SelectedFolder();
 
 private Q_SLOTS:
-    void on_updatePrivateFolderDocumentCount_timeout();
-    void on_updatePrivateTagDocumentCount_timeout();
+    void on_updatePersonalFolderDocumentCount_timeout();
+    void on_updatePersonalTagDocumentCount_timeout();
     void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
 
 

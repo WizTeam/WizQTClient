@@ -202,9 +202,9 @@ private:
     bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 
     //
-    void moveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder);
+    void moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder);
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
-    void copyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
+    void copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
                                       bool keepDocTime, bool keepTag);
     void copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                     bool keepDocTime);

@@ -38,10 +38,7 @@ public:
     bool RemoveTag(const WIZTAGDATA& dataTag);
     QString GetMetaText();
 
-private:
-    CWizDatabase& m_db;
-    WIZDOCUMENTDATA m_data;
-
+    //
 public:
     Q_INVOKABLE void Delete();
     Q_INVOKABLE void PermanentlyDelete(void);
@@ -49,6 +46,20 @@ public:
     Q_INVOKABLE bool UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags);
     Q_INVOKABLE void deleteToTrash();   // would delete from server
     Q_INVOKABLE void deleteFromTrash();   // delete local file
+
+
+
+private:
+    bool copyDocumentTo(const QString &sourceGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
+                        const WIZTAGDATA &targetTag, QString &resultGUID,
+                        CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime);
+    bool copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
+                                WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+
+private:
+    CWizDatabase& m_db;
+    WIZDOCUMENTDATA m_data;
+
 };
 
 
@@ -187,19 +198,7 @@ public:
 
     // modify
     virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
-    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
-
-
-    //copy Document
-    //create new doc and copy data, set the new doc time as the source doc.
-    virtual bool CopyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
-                                  const QString& strTargetLocation, const WIZTAGDATA &targetTag,
-                                QString& resultGUID, CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime = true);
-    //if file doesn't exist, download it.
-    bool makeSureDocumentExist(const WIZDOCUMENTDATA& doc, CWizObjectDataDownloaderHost* downloaderHost);
-    bool makeSureAttachmentExist(const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                 CWizObjectDataDownloaderHost* downloaderHost);
-    bool tryAccessDocument(const WIZDOCUMENTDATA& doc);
+    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);    
 
     // info and groups
     virtual void SetUserInfo(const WIZUSERINFO& info);
@@ -474,6 +473,9 @@ public:
     void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
 
     //
+    bool tryAccessDocument(const WIZDOCUMENTDATA &doc);
+
+    //
     void CopyDocumentLink(const WIZDOCUMENTDATA& document);
     void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
     QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
@@ -511,12 +513,7 @@ Q_SIGNALS:
 private:
     //should make sure sourceDoc already exist before use this.
     bool CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
-                                WIZDOCUMENTDATA& targetDoc);
-    bool CopyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, \
-                                        WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
-    bool CopyDocumentAttachment(const WIZDOCUMENTATTACHMENTDATAEX& sourceData, \
-                                const CWizDatabase& targetDB, WIZDOCUMENTATTACHMENTDATAEX& targetData, \
-                                QString& strFileName);
+                                WIZDOCUMENTDATA& targetDoc);    
 
     bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 

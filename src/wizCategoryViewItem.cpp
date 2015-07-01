@@ -620,8 +620,12 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pIte
             }
         }
     }
+
     //
     addChild(newItem);
+    if (isContainsPlaceHoldItem())
+        removePlaceHoldItem();
+    //
     treeWidget()->blockSignals(true);
     treeWidget()->setCurrentItem(newItem);
     treeWidget()->blockSignals(false);
@@ -836,9 +840,9 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
 
    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
+   CWizFolder folder(myDb, location());
    if (!forceCopy && kbGUID() == data.strKbGUID)
    {
-       CWizFolder folder(myDb, location());
        CWizDocument doc(myDb, data);
        doc.MoveTo(&folder);
    }
@@ -850,6 +854,10 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
        QString strLocation = location();
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
+       CWizDocument doc(sourceDb, data);
+       doc.CopyTo(myDb, &folder, true, true, window->downloaderHost());
+
+       /*
        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
 
        // copy document tag for personal db
@@ -863,6 +871,7 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
                myDb.SetDocumentTags(newDoc, arrayTagGUID);
            }
        }
+       */
    }
 }
 
@@ -1491,19 +1500,19 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
 
     if (!forceCopy && data.strKbGUID == m_strKbGUID)
     {
-        CWizDocument doc(myDb, data);
+        CWizDocument doc(targetDb, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
             doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
-        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        targetDb.GetDocumentTags(data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
@@ -1515,11 +1524,14 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = myDb.GetDefaultNoteLocation();
+        QString strLocation = targetDb.GetDefaultNoteLocation();
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
         WIZTAGDATA tagEmpty;
-        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+
+        CWizDocument doc(sourceDb, data);
+        doc.CopyTo(targetDb, tagEmpty, true, window->downloaderHost());
     }
 }
 
@@ -1780,19 +1792,19 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
 
     if (!forceCopy && data.strKbGUID == m_strKbGUID)
     {
-        CWizDocument doc(myDb, data);
+        CWizDocument doc(targetDb, data);
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
             doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
-        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        targetDb.GetDocumentTags(data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
@@ -1806,10 +1818,13 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = myDb.GetDefaultNoteLocation();
+        QString strLocation = targetDb.GetDefaultNoteLocation();
         Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
         QString strNewDocGUID;
-        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+
+        CWizDocument doc(sourceDb, data);
+        doc.CopyTo(targetDb, m_tag, true, window->downloaderHost());
     }
 }
 

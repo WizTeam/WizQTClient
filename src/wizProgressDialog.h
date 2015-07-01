@@ -15,14 +15,20 @@ public:
     explicit CWizProgressDialog(QWidget *parent = 0);
     ~CWizProgressDialog();
 
-    void setActionString(const QString& strAction);
-    void setNotifyString(const QString& strNotify);
+signals:
+    void stopRequest();
 
 public slots:
     void setProgress(QString strObjGUID, int nMax, int nCurrent);
     void setProgress(int nMax, int nCurrent);
+    void setActionString(const QString& strAction);
 
     
+private slots:
+    void on_btn_stop_clicked();
+
+    void on_btn_hide_clicked();
+
 private:
     Ui::CWizProgressDialog *ui;
 };

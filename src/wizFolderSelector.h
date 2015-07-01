@@ -21,7 +21,7 @@ public:
     bool isKeepTime() const;
     bool isKeepTag() const;
     //
-    bool isSelectPrivateFolder();
+    bool isSelectPersonalFolder();
     QString selectedFolder();
     bool isSelectGroupFolder();
     WIZTAGDATA selectedGroupFolder();
