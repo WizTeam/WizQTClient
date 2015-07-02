@@ -3611,7 +3611,8 @@ bool CWizIndex::SearchDocumentByWhere(const QString& strWhere, int nMaxCount, CW
 
 bool CWizIndex::getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument)
 {
-    CString strWhere = _T("DOCUMENT_INDEXED=0");
+    CString strWhere = QString("DOCUMENT_INDEXED=0 and DOCUMENT_GUID in \
+                               (select DISTINCT OBJECT_GUID from WIZ_OBJECT_EX where %1=1)").arg(GetReservedIntFieldName(DATA_DOWNLOADED_FIELD));
 
     if (!GetDocumentsBySQLWhere(strWhere, arrayDocument)) {
 		TOLOG(_T("Failed to get documents by DOCUMENT_INDEXED=0"));
