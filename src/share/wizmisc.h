@@ -195,21 +195,6 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
 bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
                                                       CWizObjectDataDownloaderHost* downloaderHost);
 
-///
-void WizMoveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
-                                     CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
-
-void WizMoveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
-                                CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
-
-void WizCopyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
-                                  bool keepDocTime, bool keepTag, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress,
-                                  CWizObjectDataDownloaderHost* downloader);
-
-void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
-                                bool keepDocTime, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
-
-
 //
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
 

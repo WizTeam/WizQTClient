@@ -20,6 +20,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizSearchIndexer.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizObjectOperator.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
@@ -1702,7 +1703,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         CWizCategoryViewGroupItem* groupItem = currentCategoryItem<CWizCategoryViewGroupItem>();
         Q_ASSERT(groupItem != nullptr);
 
-        moveGroupFolder(currentDB, groupItem->tag(), selector, mainWindow->progressDialog(),
+        moveGroupFolder(groupItem->tag(), selector, mainWindow->progressDialog(),
                         mainWindow->downloaderHost());
         //
         mainWindow->quickSyncKb(groupItem->kbGUID());
@@ -1712,7 +1713,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         CWizCategoryViewFolderItem* folderItem = currentCategoryItem<CWizCategoryViewFolderItem>();
         Q_ASSERT(folderItem != nullptr);
 
-        movePersonalFolder(currentDB, folderItem->location(), selector, mainWindow->progressDialog(),
+        movePersonalFolder(folderItem->location(), selector, mainWindow->progressDialog(),
                            mainWindow->downloaderHost());
         //
         mainWindow->quickSyncKb("");
@@ -1787,7 +1788,7 @@ void CWizCategoryView::on_action_user_copyFolder_confirmed(int result)
         CWizCategoryViewGroupItem* groupItem = currentCategoryItem<CWizCategoryViewGroupItem>();
         Q_ASSERT(groupItem != nullptr);
 
-        copyGroupFolder(currentDB, groupItem->tag(), selector, mainWindow->progressDialog(),
+        copyGroupFolder(groupItem->tag(), selector, mainWindow->progressDialog(),
                         mainWindow->downloaderHost());
     }
     else            //copy  private folder to ...
@@ -1795,7 +1796,7 @@ void CWizCategoryView::on_action_user_copyFolder_confirmed(int result)
         CWizCategoryViewFolderItem* folderItem = currentCategoryItem<CWizCategoryViewFolderItem>();
         Q_ASSERT(folderItem != nullptr);
 
-        copyPersonalFolder(currentDB, folderItem->location(), selector, mainWindow->progressDialog(),
+        copyPersonalFolder(folderItem->location(), selector, mainWindow->progressDialog(),
                            mainWindow->downloaderHost());
     }
 
@@ -5055,8 +5056,8 @@ CWizCategoryViewFolderItem* CWizCategoryView::createFolderItem(QTreeWidgetItem* 
     return pFolderItem;
 }
 
-void CWizCategoryView::moveGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder,
-                                       CWizFolderSelector* selector, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     // move group folder to private folder
     if (selector->isSelectPersonalFolder())
@@ -5066,8 +5067,7 @@ void CWizCategoryView::moveGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA&
             return;
 
         qDebug() << "move group folder to private folder " << strSelectedFolder;
-        moveGroupFolderToPersonalFolder(sourceDB, sourceFolder, strSelectedFolder,
-                                        progress, downloader);
+        moveGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, progress, downloader);
     }
     else if (selector->isSelectGroupFolder())
     {
@@ -5076,88 +5076,36 @@ void CWizCategoryView::moveGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA&
             return;
         qDebug() << "move group folder to group folder " << tag.strName;
         //
-        CWizDatabase& targetDB = m_dbMgr.db(tag.strKbGUID);
-        moveGroupFolderToGroupFolder(sourceDB, sourceFolder, targetDB, tag,
-                                     progress, downloader);
+        moveGroupFolderToGroupFolder(sourceFolder, tag, progress, downloader);
     }
 }
 
-void CWizCategoryView::moveGroupFolderToPersonalFolder(CWizDatabase& groupDB,
-                                                       const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+void CWizCategoryView::moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
                                                        CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     qDebug() << "move group folder to personal folder, group folder : " << groupFolder.strName << " private folder ; " << targetParentFolder;
-    CWizDocumentDataArray arrayDocument;
-    groupDB.GetDocumentsByTag(groupFolder, arrayDocument);
-    QString targetFolder = targetParentFolder + groupFolder.strName + "/";
-    ::WizMoveDocumentsToPersonalFolder(arrayDocument, targetFolder, m_dbMgr,
-                                      progress, downloader);
-
-    //
-    CWizTagDataArray arrayTag;
-    groupDB.GetChildTags(groupFolder.strGUID, arrayTag);
-    for (WIZTAGDATA childTag : arrayTag)
-    {
-        moveGroupFolderToPersonalFolder(groupDB, childTag, targetFolder, progress, downloader);
-    }
-
-    // remove tag at last  if tag is empty
-    arrayDocument.clear();
-    groupDB.GetDocumentsByTag(groupFolder, arrayDocument);
-    arrayTag.clear();
-    groupDB.GetChildTags(groupFolder.strGUID, arrayTag);
-    if (arrayDocument.size() == 0 && arrayTag.size() == 0)
-    {
-        groupDB.DeleteTag(groupFolder, true);
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetParentFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->moveGroupFolderToPersonalDB(groupFolder, targetParentFolder, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::moveGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder,
-                                                    CWizDatabase& targetDB, const WIZTAGDATA& targetFolder, CWizProgressDialog* progress,
-                                                    CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                                    CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     qDebug() << "move group folder to group folder , source : " << sourceFolder.strName << "  kb : " << sourceFolder.strKbGUID
              << "target : " << targetFolder.strName << " kb ; " << targetFolder.strKbGUID;
 
-    if (sourceDB.kbGUID() == targetDB.kbGUID())
-    {
-        qDebug() << "folder in same db, just modify parent tag guid";
-        WIZTAGDATA sourceTag = sourceFolder;
-        sourceTag.strParentGUID = targetFolder.strGUID;
-        sourceDB.ModifyTag(sourceTag);
-    }
-    else
-    {
-        WIZTAGDATA targetTag;
-        targetDB.CreateTag(targetFolder.strGUID, sourceFolder.strName, sourceFolder.strDescription, targetTag);
-
-        //
-        CWizDocumentDataArray arrayDocument;
-        sourceDB.GetDocumentsByTag(sourceFolder, arrayDocument);
-        ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr, progress, downloader);
-
-        //
-        CWizTagDataArray arrayTag;
-        sourceDB.GetChildTags(sourceFolder.strGUID, arrayTag);
-        for (WIZTAGDATA childTag : arrayTag)
-        {
-            moveGroupFolderToGroupFolder(sourceDB, childTag, targetDB, targetTag, progress, downloader);
-        }
-
-        // remove tag at last  if tag is empty
-        arrayDocument.clear();
-        sourceDB.GetDocumentsByTag(sourceFolder, arrayDocument);
-        arrayTag.clear();
-        sourceDB.GetChildTags(sourceFolder.strGUID, arrayTag);
-        if (arrayDocument.size() == 0 && arrayTag.size() == 0)
-        {
-            sourceDB.DeleteTag(sourceFolder, true);
-        }
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetFolder.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->moveGroupFolderToGroupDB(sourceFolder, targetFolder, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::movePersonalFolder(CWizDatabase& db, const QString& sourceFolder,
-                                          CWizFolderSelector* selector, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
+                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     // mvoe  personal folder to personal folder
     if (selector->isSelectPersonalFolder())
@@ -5167,7 +5115,7 @@ void CWizCategoryView::movePersonalFolder(CWizDatabase& db, const QString& sourc
             return;
         qDebug() << "move personal folder to personal folder  ; " << strSelectedFolder;
         //
-        movePersonalFolderToPersonalFolder(db, sourceFolder, strSelectedFolder);
+        movePersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, progress);
     }
     else if (selector->isSelectGroupFolder())
     {
@@ -5176,81 +5124,35 @@ void CWizCategoryView::movePersonalFolder(CWizDatabase& db, const QString& sourc
             return;
         qDebug() << "move personal folder to group folder " << tag.strName;
         //
-        CWizDatabase& targetDB = m_dbMgr.db(tag.strKbGUID);
-        movePersonalFolderToGroupFolder(db, sourceFolder, targetDB, tag,
+        movePersonalFolderToGroupFolder(sourceFolder, tag,
                                         progress, downloader);
     }
 }
 
-void CWizCategoryView::movePersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder)
+void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
+                                                          CWizProgressDialog* progress)
 {
     qDebug() << "move personal folder to personal folder , source : " << sourceFolder << "  target folder : " << targetParentFolder;
-    CWizDocumentDataArray arrayDocument;
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, false);
-    //
-    QString folderName = db.GetLocationName(sourceFolder);
-    QString targetFolder = targetParentFolder + folderName + "/";
-    for (WIZDOCUMENTDATAEX doc : arrayDocument)
-    {
-        doc.strLocation = targetFolder;
-        db.ModifyDocumentInfo(doc);
-    }
-
-    CWizStdStringArray arrayFolder;
-    db.GetAllLocations(arrayFolder);
-    CWizStdStringArray arrayChild;
-    if (db.GetChildLocations(arrayFolder, sourceFolder, arrayChild))
-    {
-        for (QString childFolder : arrayChild)
-        {
-            movePersonalFolderToPersonalFolder(db, childFolder, targetFolder);
-        }
-    }
-
-    //
-    arrayDocument.clear();
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, true);
-    if (arrayDocument.size() == 0)
-    {
-        db.DeleteExtraFolder(sourceFolder);
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetParentFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->movePersonalFolderToPersonalDB(sourceFolder, targetParentFolder);
+    progress->exec();
 }
 
-void CWizCategoryView::movePersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder,
-                                                       CWizDatabase& targetDB, const WIZTAGDATA& targetFolder,
+void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
                                                        CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     qDebug() << "move personal folder : " << sourceFolder << "  to gorup folder ; " << targetFolder.strName;
-    WIZTAGDATA targetTag;
-    targetDB.CreateTag(targetFolder.strGUID, db.GetLocationName(sourceFolder), "", targetTag);
-    //
-    CWizDocumentDataArray arrayDocument;
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, false);
-    ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr, progress, downloader);
-    //
-    CWizStdStringArray arrayFolder;
-    db.GetAllLocations(arrayFolder);
-    CWizStdStringArray arrayChild;
-    if (db.GetChildLocations(arrayFolder, sourceFolder, arrayChild))
-    {
-        for (QString childFolder : arrayChild)
-        {
-            movePersonalFolderToGroupFolder(db, childFolder, targetDB, targetTag,
-                                            progress, downloader);
-        }
-    }
-
-    //  check if move sucessfull
-    arrayDocument.clear();
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, true);
-    if (arrayDocument.size() == 0)
-    {
-        db.DeleteExtraFolder(sourceFolder);
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetFolder.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->movePersonalFolderToGroupDB(sourceFolder, targetFolder, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::copyGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder,
-                                       CWizFolderSelector* selector, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     // copy group folder to private folder
     if (selector->isSelectPersonalFolder())
@@ -5260,7 +5162,7 @@ void CWizCategoryView::copyGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA&
             return;
 
         qDebug() << "copy group folder to private folder " << strSelectedFolder;
-        copyGroupFolderToPersonalFolder(sourceDB, sourceFolder, strSelectedFolder, selector->isKeepTime(),
+        copyGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
                                         progress, downloader);
     }
     else if (selector->isSelectGroupFolder())
@@ -5270,59 +5172,34 @@ void CWizCategoryView::copyGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA&
             return;
         qDebug() << "copy group folder to group folder " << tag.strName;
         //
-        CWizDatabase& targetDB = m_dbMgr.db(tag.strKbGUID);
-        copyGroupFolderToGroupFolder(sourceDB, sourceFolder, targetDB, tag, selector->isKeepTime(),
+        copyGroupFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
                                      progress, downloader);
     }
 }
 
-void CWizCategoryView::copyGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
+void CWizCategoryView::copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder,
                                                        const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
                                                        CWizObjectDataDownloaderHost* downloader)
 {
-    qDebug() << "copy group folder to personal folder, group folder : " << groupFolder.strName << " private folder ; " << targetParentFolder;
-    CWizDocumentDataArray arrayDocument;
-    groupDB.GetDocumentsByTag(groupFolder, arrayDocument);
-    QString targetFolder = targetParentFolder + groupFolder.strName + "/";
-    ::WizCopyDocumentsToPersonalFolder(arrayDocument, targetFolder,keepDocTime, false, m_dbMgr,
-                                      progress, downloader);
-
-    //
-    CWizTagDataArray arrayTag;
-    groupDB.GetChildTags(groupFolder.strGUID, arrayTag);
-    for (WIZTAGDATA childTag : arrayTag)
-    {
-        copyGroupFolderToPersonalFolder(groupDB, childTag, targetFolder, keepDocTime,progress, downloader);
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetParentFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyGroupFolderToPersonalDB(groupFolder, targetParentFolder, keepDocTime, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::copyGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder,
-                                                    CWizDatabase& targetDB, const WIZTAGDATA& targetFolder,
+void CWizCategoryView::copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
                                                     bool keepDocTime, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    qDebug() << "copy group folder to group folder , source : " << sourceFolder.strName << "  kb : " << sourceFolder.strKbGUID
-             << "target : " << targetFolder.strName << " kb ; " << targetFolder.strKbGUID;
-
-    WIZTAGDATA targetTag;
-    targetDB.CreateTag(targetFolder.strGUID, sourceFolder.strName, sourceFolder.strDescription, targetTag);
-
-    //
-    CWizDocumentDataArray arrayDocument;
-    sourceDB.GetDocumentsByTag(sourceFolder, arrayDocument);
-    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
-                                    progress, downloader);
-    //
-    CWizTagDataArray arrayTag;
-    sourceDB.GetChildTags(sourceFolder.strGUID, arrayTag);
-    for (WIZTAGDATA childTag : arrayTag)
-    {
-        copyGroupFolderToGroupFolder(sourceDB, childTag, targetDB, targetTag, keepDocTime,
-                                     progress, downloader);
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetFolder.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyGroupFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::copyPersonalFolder(CWizDatabase& sourceDB, const QString& sourceFolder,
-                                          CWizFolderSelector* selector, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolderSelector* selector,
+                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
     // copy  personal folder to personal folder
     if (selector->isSelectPersonalFolder())
@@ -5332,7 +5209,7 @@ void CWizCategoryView::copyPersonalFolder(CWizDatabase& sourceDB, const QString&
             return;
         qDebug() << "copy personal folder to personal folder  ; " << strSelectedFolder;
         //
-        copyPersonalFolderToPersonalFolder(sourceDB, sourceFolder, strSelectedFolder, selector->isKeepTime(),
+        copyPersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
                                            selector->isKeepTag(), progress, downloader);
     }
     else if (selector->isSelectGroupFolder())
@@ -5342,62 +5219,30 @@ void CWizCategoryView::copyPersonalFolder(CWizDatabase& sourceDB, const QString&
             return;
         qDebug() << "copy personal folder to group folder " << tag.strName;
         //
-        CWizDatabase& targetDB = m_dbMgr.db(tag.strKbGUID);
-        copyPersonalFolderToGroupFolder(sourceDB, sourceFolder, targetDB, tag, selector->isKeepTime(),
+        copyPersonalFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
                                         progress, downloader);
     }
 }
 
-void CWizCategoryView::copyPersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder,
+void CWizCategoryView::copyPersonalFolderToPersonalFolder(const QString& sourceFolder,
                                                           const QString& targetParentFolder, bool keepDocTime, bool keepTag,
                                                           CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    qDebug() << "copy personal folder to personal folder , source : " << sourceFolder << "  target folder : " << targetParentFolder;
-    CWizDocumentDataArray arrayDocument;
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, false);
-    //
-    QString folderName = db.GetLocationName(sourceFolder);
-    QString targetFolder = targetParentFolder + folderName + "/";
-    ::WizCopyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime, keepTag,
-                                      m_dbMgr, progress, downloader);
-
-    CWizStdStringArray arrayFolder;
-    db.GetAllLocations(arrayFolder);
-    CWizStdStringArray arrayChild;
-    if (db.GetChildLocations(arrayFolder, sourceFolder, arrayChild))
-    {
-        for (QString childFolder : arrayChild)
-        {
-            copyPersonalFolderToPersonalFolder(db, childFolder, targetFolder, keepDocTime, keepTag,
-                                               progress, downloader);
-        }
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetParentFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyPersonalFolderToPersonalDB(sourceFolder, targetParentFolder, keepDocTime, keepTag, downloader);
+    progress->exec();
 }
 
-void CWizCategoryView::copyPersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder,
-                                                       CWizDatabase& targetDB, const WIZTAGDATA& targetFolder, bool keepDocTime,
+void CWizCategoryView::copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool keepDocTime,
                                                        CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    qDebug() << "copy personal folder : " << sourceFolder << "  to gorup folder ; " << targetFolder.strName;
-    WIZTAGDATA targetTag;
-    targetDB.CreateTag(targetFolder.strGUID, db.GetLocationName(sourceFolder), "", targetTag);
-    //
-    CWizDocumentDataArray arrayDocument;
-    db.GetDocumentsByLocation(sourceFolder, arrayDocument, false);
-    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
-                                    progress, downloader);
-    //
-    CWizStdStringArray arrayFolder;
-    db.GetAllLocations(arrayFolder);
-    CWizStdStringArray arrayChild;
-    if (db.GetChildLocations(arrayFolder, sourceFolder, arrayChild))
-    {
-        for (QString childFolder : arrayChild)
-        {
-            copyPersonalFolderToGroupFolder(db, childFolder, targetDB, targetTag, keepDocTime,
-                                            progress, downloader);
-        }
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetFolder.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyPersonalFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, downloader);
+    progress->exec();
 }
 
 void CWizCategoryView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
@@ -5433,16 +5278,15 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
         }
         if (dragedItem->type() == Category_GroupItem)
         {
-            CWizDatabase& sourceDB = m_dbMgr.db(dragedItem->kbGUID());
             CWizCategoryViewGroupItem* groupItem = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
             if (deleteDragSource)
             {
-                moveGroupFolderToPersonalFolder(sourceDB, groupItem->tag(), targetParentFolder,
+                moveGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder,
                                                 mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
             else
             {
-                copyGroupFolderToPersonalFolder(sourceDB, groupItem->tag(), targetParentFolder, true,
+                copyGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder, true,
                                                 mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
         }
@@ -5450,33 +5294,31 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
     else if (targetItem->type() == Category_GroupItem)
     {
         CWizCategoryViewGroupItem* targetFolder = dynamic_cast<CWizCategoryViewGroupItem*>(targetItem);
-        CWizDatabase& targetDB = m_dbMgr.db(targetItem->kbGUID());
         if (dragedItem->type() == Category_FolderItem)
         {
             CWizCategoryViewFolderItem* sourceFolder = dynamic_cast<CWizCategoryViewFolderItem*>(dragedItem);
             if (deleteDragSource)
             {
-                movePersonalFolderToGroupFolder(m_dbMgr.db(), sourceFolder->location(), targetDB, targetFolder->tag(),
+                movePersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(),
                                                 mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
             else
             {
-                copyPersonalFolderToGroupFolder(m_dbMgr.db(), sourceFolder->location(), targetDB, targetFolder->tag(),
+                copyPersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(),
                                                 true, mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
         }
         else if (dragedItem->type() == Category_GroupItem)
         {
             CWizCategoryViewGroupItem* dragedFolder = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
-            CWizDatabase& sourceDB = m_dbMgr.db(dragedFolder->kbGUID());
             if (deleteDragSource)
             {
-                moveGroupFolderToGroupFolder(sourceDB, dragedFolder->tag(), targetDB, targetFolder->tag(),
+                moveGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(),
                                              mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
             else
             {
-                copyGroupFolderToGroupFolder(sourceDB, dragedFolder->tag(), targetDB, targetFolder->tag(),
+                copyGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(),
                                              true, mainWindow->progressDialog(), mainWindow->downloaderHost());
             }
         }

@@ -495,44 +495,44 @@ private:
 
 
     //
-    void moveGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+    void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
-                                         const QString& targetParentFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+                                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizDatabase& targetDB,
-                                         const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                      CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
-    void movePersonalFolder(CWizDatabase& db, const QString& sourceFolder, CWizFolderSelector* selector,
+    void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void movePersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder);
+    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
+                                            CWizProgressDialog* progress);
 
-    void movePersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
-                                         const WIZTAGDATA& targetFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+                                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     //
-    void copyGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
+    void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToPersonalFolder(CWizDatabase& groupDB, const WIZTAGDATA& groupFolder,
+    void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder,
                                          const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
                                          CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToGroupFolder(CWizDatabase& sourceDB, const WIZTAGDATA& sourceFolder, CWizDatabase& targetDB,
+    void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder,
                                          const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
                                       CWizObjectDataDownloaderHost* downloader);
     //
-    void copyPersonalFolder(CWizDatabase& sourceDB, const QString& sourceFolder, CWizFolderSelector* selector,
+    void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void copyPersonalFolderToPersonalFolder(CWizDatabase& db, const QString& sourceFolder, const QString& targetParentFolder,
+    void copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
                                             bool keepDocTime, bool keepTag, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void copyPersonalFolderToGroupFolder(CWizDatabase& db, const QString& sourceFolder, CWizDatabase& targetDB,
-                                         const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
-                                         CWizObjectDataDownloaderHost* downloader);    
+    void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+                                         bool keepDocTime, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,

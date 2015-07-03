@@ -22,6 +22,7 @@
 #include "wizPopupButton.h"
 #include "wizLineInputDialog.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizObjectOperator.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -285,24 +286,43 @@ bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
 }
 
 void CWizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
-{
-    // only move user private documents
-//    if (isDocumentsWithGroupDocument(arrayDocument)) {
-//        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
-//        return;
-//    }
+{    
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());       
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    ::WizMoveDocumentsToPersonalFolder(arrayDocument, targetFolder, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
-    ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
@@ -310,17 +330,44 @@ void CWizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataA
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    ::WizCopyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime, keepTag,
-                                      m_dbMgr, mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    //  show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                       keepTag, mainWindow->downloaderHost());
+    }
+    else
+    {
+        qDebug() << " main thread : " << QThread::currentThreadId();
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                       keepTag, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
                                                       const WIZTAGDATA& targetTag, bool keepDocTime)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
-    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& arrayDocument)
