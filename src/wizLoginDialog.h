@@ -22,9 +22,10 @@ class CWizOEMDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizOEMDownloader(QObject* parent, const QString& serverIp);
+    CWizOEMDownloader(QObject* parent);
 
 public slots:
+    void setServerIp(const QString& ip);
     void downloadOEMLogo(const QString& strUrl);
     void downloadOEMSettings();
     void onCheckServerLicenceRequest(const QString& licence);

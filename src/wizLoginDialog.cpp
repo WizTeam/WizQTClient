@@ -192,13 +192,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
     setUsers(strDefaultUserId);
     //
-    initSateMachine();
-
-#if QT_VERSION > 0x050400
-    QTimer::singleShot(500, [&](){
-        setFixedWidth(width());
-    });
-#endif
+    initSateMachine();    
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -215,8 +209,8 @@ CWizLoginDialog::~CWizLoginDialog()
     if (m_oemDownloader)
     {
         m_oemDownloader->deleteLater();
-        m_oemThread->quit();
-        m_oemThread->deleteLater();
+        connect(m_oemThread, SIGNAL(finished()), m_oemThread, SLOT(deleteLater()));
+        m_oemThread->quit();        
     }
 }
 
@@ -487,6 +481,7 @@ void CWizLoginDialog::on_btn_close_clicked()
 void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
+    setFixedWidth(354);
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
@@ -706,13 +701,12 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
 
 void CWizLoginDialog::searchWizBoxServer()
 {
-    qDebug() << "start findWizBoxServer ";
-    startWizBoxUdpClient();        
+//    qDebug() << "start findWizBoxServer ";
+//    startWizBoxUdpClient();
 
-    emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
-//    qDebug() << "call func form " << QThread::currentThread();
-    m_wizBoxSearchingTimer.start(10 * 1000);
-    showSearchingDialog();
+//    emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
+//    m_wizBoxSearchingTimer.start(10 * 1000);
+//    showSearchingDialog();
 }
 
 void CWizLoginDialog::showSearchingDialog()
@@ -841,6 +835,7 @@ void CWizLoginDialog::checkServerLicence()
     {
         initOEMDownloader();
     }
+    m_oemDownloader->setServerIp(m_lineEditServer->text());
 
 //    downloadOEMSettingsFromWizBox();
     CWizUserSettings userSettings(userId());
@@ -892,6 +887,7 @@ void CWizLoginDialog::downloadOEMSettingsFromWizBox()
     {
         initOEMDownloader();
     }
+    m_oemDownloader->setServerIp(m_lineEditServer->text());
     qDebug() << "main thread : " << QThread::currentThreadId();
     QTimer::singleShot(0, m_oemDownloader, SLOT(downloadOEMSettings()));
 }
@@ -1461,7 +1457,7 @@ void CWizLoginDialog::initSateMachine()
 
 void CWizLoginDialog::initOEMDownloader()
 {
-    m_oemDownloader = new CWizOEMDownloader(0, m_lineEditServer->text());
+    m_oemDownloader = new CWizOEMDownloader(nullptr);
     connect(m_oemDownloader, SIGNAL(oemSettingsDownloaded(QString)),
             SLOT(onOEMSettingsDownloaded(QString)));
     connect(m_oemDownloader, SIGNAL(logoDownloaded(QString)),
@@ -1494,6 +1490,7 @@ QString CWizOEMDownloader::_downloadOEMSettings()
 {
     // get oem settings from server
     QNetworkAccessManager net;
+    ApiEntry::setEnterpriseServerIP(m_server);
     QString strUrl = ApiEntry::standardCommandUrl("oem", false);
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
     qDebug() << "get oem from server : " << strUrl;
@@ -1505,25 +1502,29 @@ QString CWizOEMDownloader::_downloadOEMSettings()
     if (reply->error() != QNetworkReply::NoError)
     {
         qDebug() << "Download oem data failed!";
-        emit errorMessage(tr("Can not find server."));
+        emit errorMessage(tr("Can not find server %1").arg(m_server));
         reply->deleteLater();
         return "";
     }
 
     QString strResult = reply->readAll();
-    reply->deleteLater();
+    reply->deleteLater();    
     return strResult;
 }
 
-CWizOEMDownloader::CWizOEMDownloader(QObject* parent, const QString& serverIp)
+CWizOEMDownloader::CWizOEMDownloader(QObject* parent)
     : QObject(parent)
-    , m_server(serverIp)
+    , m_server(QString())
 {
+}
+
+void CWizOEMDownloader::setServerIp(const QString& ip)
+{
+    m_server = ip;
 }
 
 void CWizOEMDownloader::downloadOEMLogo(const QString& strUrl)
 {
-    qDebug() << "download oem logo in thread : " << QThread::currentThreadId();
     if (strUrl.isEmpty())
         return; 
 
@@ -1548,7 +1549,6 @@ void CWizOEMDownloader::downloadOEMLogo(const QString& strUrl)
 
 void CWizOEMDownloader::downloadOEMSettings()
 {
-    qDebug() << "download oem settings in thread : " << QThread::currentThreadId();
     QString settings = _downloadOEMSettings();
     qDebug() << "oem settings downloaded : " << settings;
     emit oemSettingsDownloaded(settings);
@@ -1586,7 +1586,7 @@ void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
     }
     else
     {
-        emit errorMessage(tr("Can not found licence info in oem settings!"));
+        emit errorMessage(tr("Licence not found : %1").arg(settings.left(100)));
         qDebug() << "Can not find licence from oem settings";
     }
 }
