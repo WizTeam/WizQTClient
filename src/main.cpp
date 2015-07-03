@@ -215,15 +215,10 @@ int mainCore(int argc, char *argv[])
     wizMacInitUncaughtExceptionHandler();
     wizMacRegisterSystemService();
 
-    //FIXME: 在Mac osx10.10.3上存在ssl握手问题，此处进行特殊处理
-    QString strKernelVersion = QSysInfo::kernelVersion();
-    qDebug() << "system kernel version : " << strKernelVersion;
-    if (strKernelVersion.compare("13.3.0") > 0)
-    {
-        QSslConfiguration conf = QSslConfiguration::defaultConfiguration();
-        conf.setPeerVerifyMode(QSslSocket::VerifyNone);
-        QSslConfiguration::setDefaultConfiguration(conf);
-    }
+    //FIXME: 在Mac osx安全更新之后存在ssl握手问题，此处进行特殊处理
+    QSslConfiguration conf = QSslConfiguration::defaultConfiguration();
+    conf.setPeerVerifyMode(QSslSocket::VerifyNone);
+    QSslConfiguration::setDefaultConfiguration(conf);
 #endif
 
     // setup settings

@@ -701,12 +701,12 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
 
 void CWizLoginDialog::searchWizBoxServer()
 {
-//    qDebug() << "start findWizBoxServer ";
-//    startWizBoxUdpClient();
+    qDebug() << "start findWizBoxServer ";
+    startWizBoxUdpClient();
 
-//    emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
-//    m_wizBoxSearchingTimer.start(10 * 1000);
-//    showSearchingDialog();
+    emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
+    m_wizBoxSearchingTimer.start(10 * 1000);
+    showSearchingDialog();
 }
 
 void CWizLoginDialog::showSearchingDialog()
