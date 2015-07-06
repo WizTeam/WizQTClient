@@ -960,7 +960,7 @@
     <message>
         <location filename="../src/wizFolderView.cpp" line="58"/>
         <source>Note Folders</source>
-        <translation>笔记文件夹</translation>
+        <translation>文件夹</translation>
     </message>
 </context>
 <context>

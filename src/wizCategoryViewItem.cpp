@@ -601,22 +601,28 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pIte
         CWizCategoryViewShortcutItem *shortcutItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
         if (shortcutItem)
         {
-            switch (shortcutItem->type()) {
+            switch (shortcutItem->shortcutType()) {
             case CWizCategoryViewShortcutItem::PersonalTag:
             case CWizCategoryViewShortcutItem::GroupTag:
             {
                 if (shortcutItem->guid() == newItem->guid())
+                {
+                    delete newItem;
                     return;
+                }
             }
                 break;
             case CWizCategoryViewShortcutItem::PersonalFolder:
             {
                 if (shortcutItem->location() == newItem->location())
+                {
+                    delete newItem;
                     return;
+                }
             }
                 break;
             default:
-                break;
+                continue;
             }
         }
     }
