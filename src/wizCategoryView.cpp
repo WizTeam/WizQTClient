@@ -1052,6 +1052,7 @@ void CWizCategoryView::initMenus()
 
     QAction* actionRemoveShortcut = new QAction("RemoveShortcut", this);
     actionRemoveShortcut->setText(CATEGORY_ACTION_REMOVE_SHORTCUT);
+    actionRemoveShortcut->setData(ActionRemoveShortcutItem);
     actionRemoveShortcut->setShortcutContext(Qt::WidgetShortcut);
     addAction(actionRemoveShortcut);
     connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
@@ -1288,6 +1289,31 @@ void CWizCategoryView::showCustomSearchContextMenu(QPoint pos, bool removable)
         resetMenu(AddCustomSearchItem);
     }
     m_menuCustomSearch->popup(pos);
+}
+
+CWizCategoryViewItemBase*CWizCategoryView::findFolder(const WIZDOCUMENTDATA& doc)
+{
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    if (db.IsGroup())
+    {
+        CWizTagDataArray arrayTag;
+        db.GetDocumentTags(doc.strGUID,arrayTag);
+
+        if (arrayTag.size() == 0)
+        {
+            return findGroup(db.kbGUID());
+        }
+        else
+        {
+            WIZTAGDATA tag = *arrayTag.begin();
+            return findGroupFolder(tag, false, false);
+        }
+    }
+    else
+    {
+        return findFolder(doc.strLocation, false, false);
+    }
+    return nullptr;
 }
 
 void CWizCategoryView::showFolderRootContextMenu(QPoint pos)

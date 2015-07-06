@@ -174,6 +174,7 @@ public:
         ActionEmptyTrash,
         ActionQuitGroup,
         ActionItemManage,
+        ActionRemoveShortcutItem,
         ActionAdvancedSearch,
         ActionAddCustomSearch,
         ActionEditCustomSearch,
@@ -220,6 +221,8 @@ public:
 
 
 public:
+    CWizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
+
     // folders
     CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
     CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
