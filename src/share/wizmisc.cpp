@@ -2555,3 +2555,29 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
 
     return PathFileExists(strAttachmentFileName);
 }
+
+
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData, CWizObjectDataDownloaderHost* downloaderHost)
+{
+    if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
+        return false;
+
+    QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
+    if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        CWizProgressDialog dlg;
+        dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
+        dlg.setWindowTitle(QObject::tr("Downloading"));
+        dlg.setProgress(100,0);
+        QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
+        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+
+        downloaderHost->downloadData(attachData);
+        dlg.exec();
+    }
+
+    return PathFileExists(strAttachmentFileName);
+}

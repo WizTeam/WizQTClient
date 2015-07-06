@@ -3104,6 +3104,9 @@ void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
 
 void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db, CWizCategoryViewItemBase* pItem)
 {
+    saveGroupTagsPosition(db.kbGUID());
+    db.SetGroupTagsPosModified();
+
     // modify tag parent info
     if (pItem->type() == Category_GroupItem)
     {
@@ -3120,8 +3123,6 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db, CWizCategoryV
         db.UpdateTag(tag);
     }
     //
-    saveGroupTagsPosition(db.kbGUID());
-    db.SetGroupTagsPosModified();
 
     emit categoryItemPositionChanged(db.kbGUID());
 }

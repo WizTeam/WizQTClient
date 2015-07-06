@@ -66,6 +66,20 @@ CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
 }
 
+void CWizDocument::makeSureObjectDataExists(CWizObjectDataDownloaderHost* downloader)
+{
+    ::WizMakeSureDocumentExistAndBlockWidthDialog(m_db, m_data, downloader);
+
+    CWizDocumentAttachmentDataArray arrayAttach;
+    if (m_db.GetDocumentAttachments(m_data.strGUID, arrayAttach))
+    {
+        for (WIZDOCUMENTATTACHMENTDATAEX attach : arrayAttach)
+        {
+            ::WizMakeSureAttachmentExistAndBlockWidthDialog(m_db, attach, downloader);
+        }
+    }
+}
+
 bool CWizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
 {
     return m_db.UpdateDocumentData(m_data, strHtml, strURL, nFlags);

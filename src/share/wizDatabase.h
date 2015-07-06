@@ -27,6 +27,8 @@ public:
     bool isProtected() const { return m_data.nProtected; }
     bool encryptDocument() { return false; }
 
+    void makeSureObjectDataExists(CWizObjectDataDownloaderHost* downloader);
+
     QString GetAttachmentsPath(bool create);
     bool IsInDeletedItemsFolder();
     bool MoveTo(CWizFolder* pFolder);

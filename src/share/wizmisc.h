@@ -194,6 +194,8 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
 
 bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
                                                       CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                                      CWizObjectDataDownloaderHost* downloaderHost);
 
 //
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
