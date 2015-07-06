@@ -44,6 +44,10 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
 
     m_movie = localProgressWebView->movie();
     m_labelProgress = localProgressWebView->labelProgress();
+
+    //
+    m_labelProgress->setVisible(false);
+    m_web->setVisible(true);
 }
 
 QWebView*CWizWebSettingsDialog::webVew()
