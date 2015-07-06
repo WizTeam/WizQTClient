@@ -2496,7 +2496,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
         if (!downloaderHost)
             return false;
 
-        CWizProgressDialog dlg;
+        CWizProgressDialog dlg(0, false);
         dlg.setActionString(QObject::tr("Download Note %1 ...").arg(doc.strTitle));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
@@ -2568,7 +2568,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
         if (!downloaderHost)
             return false;
 
-        CWizProgressDialog dlg;
+        CWizProgressDialog dlg(0, false);
         dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);

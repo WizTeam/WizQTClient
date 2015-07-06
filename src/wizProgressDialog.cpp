@@ -2,12 +2,15 @@
 #include "ui_wizProgressDialog.h"
 #include<QDebug>
 
-CWizProgressDialog::CWizProgressDialog(QWidget *parent) :
+CWizProgressDialog::CWizProgressDialog(QWidget *parent, bool showStop) :
     QDialog(parent),
     ui(new Ui::CWizProgressDialog)
 {
     ui->setupUi(this);
     setFixedSize(size());
+
+    ui->btn_stop->setVisible(showStop);
+    ui->btn_hide->setVisible(showStop);
 }
 
 CWizProgressDialog::~CWizProgressDialog()
@@ -18,8 +21,8 @@ CWizProgressDialog::~CWizProgressDialog()
 void CWizProgressDialog::setActionString(const QString& strAction)
 {
     qDebug() << "dialog set action ; " << strAction;
-    QString elideText = fontMetrics().elidedText(strAction, Qt::ElideRight, ui->labelAction->width());
-    ui->labelAction->setText(elideText);
+//    QString elideText = fontMetrics().elidedText(strAction, Qt::ElideRight, ui->progressBar->width());
+    ui->labelAction->setText(strAction);
     update();
 }
 

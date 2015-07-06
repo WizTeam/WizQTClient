@@ -12,7 +12,7 @@ class CWizProgressDialog : public QDialog
     Q_OBJECT
     
 public:
-    explicit CWizProgressDialog(QWidget *parent = 0);
+    explicit CWizProgressDialog(QWidget *parent = 0, bool showStop = true);
     ~CWizProgressDialog();
 
 signals:
