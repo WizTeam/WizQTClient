@@ -651,7 +651,8 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     QWebView* comments = noteView()->commentView();
 #endif
 
-    if (strToken.isEmpty()) {
+    if (strToken.isEmpty())
+    {
         comments->hide();
         return;
     }
@@ -660,8 +661,14 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     QString strGUID = noteView()->note().strGUID;
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
-    if (comments->isVisible()) {
-//        comments->load(QUrl());
+    if (m_commentsUrl.isEmpty())
+    {
+        loadErrorPage();
+        return;
+    }
+
+    if (comments->isVisible())
+    {
         comments->load(m_commentsUrl);
     }
 

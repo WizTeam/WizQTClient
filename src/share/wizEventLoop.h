@@ -10,6 +10,7 @@ class CWizAutoTimeOutEventLoop : public QEventLoop
     Q_OBJECT
 public:
     explicit CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent = 0);
+    void setTimeoutWaitSeconds(int seconds);
 
 public:
     QNetworkReply::NetworkError error() { return m_error; }
@@ -33,6 +34,7 @@ protected:
     QNetworkReply::NetworkError m_error;
     QString m_errorString;
     bool m_timeOut;
+    int m_timeOutWaitSeconds;
 };
 
 
