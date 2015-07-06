@@ -2524,8 +2524,10 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
             return false;
 
         QEventLoop loop;
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
-
+        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
+            QObject::disconnect(downloaderHost, 0, 0, 0);
+            loop.quit();
+        });
         downloaderHost->downloadData(doc);
         loop.exec();
     }
@@ -2547,7 +2549,10 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
             return false;
 
         QEventLoop loop;
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA, bool)), &loop, SLOT(quit()));
+        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
+            QObject::disconnect(downloaderHost, 0, 0, 0);
+            loop.quit();
+        });
 
         downloaderHost->downloadData(attachData);
         loop.exec();
