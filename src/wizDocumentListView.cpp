@@ -830,6 +830,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
                 }
             }
         }
+        event->acceptProposedAction();
     }
     else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
@@ -847,9 +848,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
             return;
 
         duplicateDocuments(arrayDocument);
-    }
-
-    event->acceptProposedAction();
+    }    
 }
 
 void CWizDocumentListView::resetItemsViewType(int type)
