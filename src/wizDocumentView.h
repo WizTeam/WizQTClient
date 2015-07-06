@@ -30,6 +30,7 @@ class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
 class CWizDocumentWebEngine;
+class CWizLocalProgressWebView;
 
 namespace Core {
 namespace Internal {
@@ -53,7 +54,8 @@ public:
 #else
     CWizDocumentWebView* web() const { return m_web; }
 #endif
-    QWebView* commentView() const { return m_comments; }
+    QWebView* commentView() const;
+    CWizLocalProgressWebView* commentWidget() const;
     //
     void waitForDone();
 
@@ -74,6 +76,7 @@ protected:
     CWizDocumentWebView* m_web;
 #endif
     QWebView* m_comments;
+    CWizLocalProgressWebView* m_commentWidget;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;  
 

@@ -32,6 +32,7 @@
 #include "share/wizAnalyzer.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
+#include "widgets/wizLocalProgressWebView.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -301,7 +302,9 @@ void TitleBar::loadErrorPage()
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
+    noteView()->commentWidget()->hideLocalProgress();
     QWebView* comments = noteView()->commentView();
+    comments->setVisible(true);
 #endif
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
@@ -558,10 +561,10 @@ void TitleBar::onCommentsButtonClicked()
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
-    if (comments->isVisible()) {
-        comments->hide();
+    if (commentWidget->isVisible()) {
+        commentWidget->hide();
 
         WizGetAnalyzer().LogAction("hideComments");
 
@@ -572,8 +575,9 @@ void TitleBar::onCommentsButtonClicked()
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
-            comments->load(m_commentsUrl);
-            QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
+            commentWidget->showLocalProgress();
+            commentWidget->web()->load(m_commentsUrl);
+            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
             Q_ASSERT(splitter);
             QList<int> li = splitter->sizes();
             Q_ASSERT(li.size() == 2);
@@ -581,10 +585,10 @@ void TitleBar::onCommentsButtonClicked()
             lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
             lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
             splitter->setSizes(lin);
-            comments->show();
+            commentWidget->show();
         } else {
             loadErrorPage();
-            comments->show();
+            commentWidget->show();
         }
 
     } else {
@@ -597,12 +601,16 @@ void TitleBar::onCommentPageLoaded(bool ok)
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
     if (!ok)
     {
         loadErrorPage();
-        comments->show();
+        commentWidget->show();
+    }
+    else
+    {
+        commentWidget->hideLocalProgress();
     }
 #ifdef USEWEBENGINE
     else
@@ -648,18 +656,20 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
 
     if (strToken.isEmpty())
     {
-        comments->hide();
+        commentWidget->hide();
         return;
     }
 
+    commentWidget->showLocalProgress();
     QString strKbGUID = noteView()->note().strKbGUID;
     QString strGUID = noteView()->note().strGUID;
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+
 
     if (m_commentsUrl.isEmpty())
     {
@@ -667,9 +677,9 @@ void TitleBar::onTokenAcquired(const QString& strToken)
         return;
     }
 
-    if (comments->isVisible())
+    if (commentWidget->isVisible())
     {
-        comments->load(m_commentsUrl);
+        commentWidget->web()->load(m_commentsUrl);
     }
 
     QString kUrl = WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID);

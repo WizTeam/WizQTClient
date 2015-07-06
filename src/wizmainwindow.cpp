@@ -62,6 +62,7 @@
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizImageButton.h"
 #include "widgets/wizIAPDialog.h"
+#include "widgets/wizLocalProgressWebView.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -2664,7 +2665,7 @@ void MainWindow::on_category_itemSelectionChanged()
     }
         break;
     default:
-        showDocmentList(category);
+        showDocumentList(category);
         break;
     }
 }
@@ -2721,7 +2722,7 @@ void MainWindow::on_message_itemSelectionChanged()
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
 //            QTimer::singleShot(0, [&](){
-               m_doc->commentView()->setVisible(true);
+               m_doc->commentWidget()->setVisible(true);
 //            });
         }
 //#endif
@@ -3334,7 +3335,7 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void MainWindow::showDocmentList(CWizCategoryBaseView* category)
+void MainWindow::showDocumentList(CWizCategoryBaseView* category)
 {
     if (!m_noteListWidget->isVisible())
     {
@@ -3387,10 +3388,17 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         if (db.DocumentFromGUID(pShortcut->guid(), doc))
         {
             viewDocument(doc, true);
-            locateDocument(doc);
-            m_category->blockSignals(true);
-            m_category->setCurrentItem(pShortcut);
-            m_category->blockSignals(false);
+            CWizCategoryViewItemBase* baseItem = m_category->findFolder(doc);
+            if (baseItem)
+            {
+                CWizDocumentDataArray arrayDocument;
+                baseItem->getDocuments(db, arrayDocument);
+                m_documents->setDocuments(arrayDocument);
+                on_documents_hintChanged(baseItem->text(0));
+                m_documents->setAcceptAllSearchItems(true);
+                m_documents->addAndSelectDocument(doc);
+                m_documents->setAcceptAllSearchItems(false);
+            }
         }
     }
         break;

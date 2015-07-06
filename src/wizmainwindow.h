@@ -466,7 +466,7 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
-    void showDocmentList(CWizCategoryBaseView* category);
+    void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
     void searchNotesBySQL(const QString& strSQLWhere);

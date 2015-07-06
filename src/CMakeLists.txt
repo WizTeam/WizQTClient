@@ -182,6 +182,7 @@ set(wiznote_SOURCES
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
     share/wizObjectOperator.cpp
+    widgets/wizLocalProgressWebView.cpp
 )
 
 set(wiznote_HEADERS
@@ -346,6 +347,7 @@ set(wiznote_HEADERS
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
     share/wizObjectOperator.h
+    widgets/wizLocalProgressWebView.h
 )
 
 set(wiznote_FORMS
