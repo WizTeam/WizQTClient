@@ -1254,8 +1254,8 @@ bool CWizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
     if (d.FindMember("LogoConfig") && d.FindMember("LogoConfig")->value.FindMember("enable")
             && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
     {
-        QString strUrl = d.FindMember("LogoConfig")->value.FindMember("login_logo") ?
-                    d.FindMember("LogoConfig")->value.FindMember("login_logo")->value.GetString() : "";
+        QString strUrl = d.FindMember("LogoConfig")->value.FindMember("common") ?
+                    d.FindMember("LogoConfig")->value.FindMember("common")->value.GetString() : "";
         if (strUrl.isEmpty())
         {
             qDebug() << "Can not found logo path in oem settings";
