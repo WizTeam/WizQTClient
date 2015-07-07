@@ -208,6 +208,7 @@ CWizLoginDialog::~CWizLoginDialog()
     }    
     if (m_oemDownloader)
     {
+        QObject::disconnect(m_oemDownloader, 0, 0, 0);
         m_oemDownloader->deleteLater();
         connect(m_oemThread, SIGNAL(finished()), m_oemThread, SLOT(deleteLater()));
         m_oemThread->quit();        

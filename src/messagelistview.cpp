@@ -243,7 +243,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_pCurrentItem(NULL)
     , m_api(NULL)
 {
-    setMinimumWidth(100);
+    setMinimumWidth(150);
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
@@ -856,7 +856,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     layoutActions->addStretch();
     m_msgListHintLabel = new QLabel(this);
     m_msgListHintLabel->setText(tr("Unread messages"));
-    m_msgListHintLabel->setAlignment(Qt::AlignCenter);
+    m_msgListHintLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
     m_msgListHintLabel->setStyleSheet("color: #787878;padding-top:4px;margin-right:10px;");
     layoutActions->addWidget(m_msgListHintLabel);
 
@@ -874,8 +874,18 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 
 void WizMessageListTitleBar::setUnreadMode(bool unread)
 {
-    m_msgListMarkAllBtn->setVisible(unread);
     m_msgListHintLabel->setText(unread ? tr("Unread messages") : tr("All messages"));
+    m_msgListMarkAllBtn->setVisible(unread);
+    if (unread)
+    {
+        layout()->setContentsMargins(2, 0, 16, 0);
+        m_msgListHintLabel->setStyleSheet("color: #787878;padding-top:4px;margin-right:10px;");
+    }
+    else
+    {
+        layout()->setContentsMargins(2, 0, 0, 0);
+        m_msgListHintLabel->setStyleSheet("color: #787878;padding-top:4px;margin-right:0px;");
+    }
 }
 
 bool WizMessageListTitleBar::isUnreadMode() const
