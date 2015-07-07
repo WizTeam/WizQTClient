@@ -222,13 +222,15 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
+        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
         m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
-        m_shareBtn->setVisible(bIsGroup ? false : true);
+        m_shareBtn->setVisible(bIsGroup ? false : !oemSettings.isHideShare());
         m_shareBtn->setEnabled(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
-        m_emailBtn->setEnabled(true);
+        m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
+        m_emailBtn->setEnabled(!oemSettings.isHideShareByEmail());
     }
 }
 
