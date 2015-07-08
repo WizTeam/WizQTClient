@@ -33,8 +33,12 @@ AvatarDownloader::AvatarDownloader(QObject* parent)
 void AvatarDownloader::download(const QString& strUserGUID)
 {
     m_strCurrentUser = strUserGUID;
+#ifdef Q_OS_LINUX
+    QString strUrl = ApiEntry::avatarDownloadUrl(strUserGUID);
+#else
     QString standGID = QUrl::toPercentEncoding(strUserGUID);
     QString strUrl = ApiEntry::avatarDownloadUrl(standGID);
+#endif
     if (strUrl.isEmpty()) {
         return;
     }
@@ -58,6 +62,7 @@ void AvatarDownloader::on_queryUserAvatar_finished()
     // cause we use "default", redirection may occur
     QVariant possibleRedirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute);
     m_urlRedirectedTo = redirectUrl(possibleRedirectUrl.toUrl(), m_urlRedirectedTo);
+
 
     if(!m_urlRedirectedTo.isEmpty()) {
         qDebug() << "[AvatarHost]fetching redirected, url: "
