@@ -1759,10 +1759,7 @@ QString downloadFromUrl(const QString& strUrl)
 
 
     CWizAutoTimeOutEventLoop loop(reply);
-    loop.exec();
-
-    if (loop.timeOut())
-        return NULL;
+    loop.exec();    
 
     if (loop.error() != QNetworkReply::NoError)
         return NULL;
