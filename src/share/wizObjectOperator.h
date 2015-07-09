@@ -28,6 +28,8 @@ public:
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                       CWizObjectDataDownloaderHost* downloader);
     //
+    void deleteDocuments(const CWizDocumentDataArray& arrayDocument);
+    //
     void copyPersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder,
                                         bool keepDocTime, bool keepTag, CWizObjectDataDownloaderHost* downloader);
     void copyPersonalFolderToGroupDB(const QString &sourceFolder, const WIZTAGDATA& targetParentTag,
@@ -61,7 +63,8 @@ private slots:
     void copyDocumentToGroupFolder();
     void moveDocumentToPersonalFolder();
     void moveDocumentToGroupFolder();
-
+    //
+    void deleteDocuments();
     //
     void copyPersonalFolderToPersonalDB();
     void copyPersonalFolderToGroupDB();
@@ -78,8 +81,7 @@ private:
     void copyDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc);
     void copyDocumentToGroupFolder(const WIZDOCUMENTDATA& doc);
     void moveDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc);
-    void moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc);
-
+    void moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc);    
     //
     void copyPersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder);
     void copyPersonalFolderToGroupDB(const QString& childFolder, const WIZTAGDATA& targetParentTag);

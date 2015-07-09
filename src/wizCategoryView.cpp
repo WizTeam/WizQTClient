@@ -408,12 +408,8 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
         bool forceCopy = keyMod.testFlag(Qt::AltModifier);
 
-        for (CWizDocumentDataArray::const_iterator it = arrayDocument.begin();
-             it != arrayDocument.end();
-             it++)
-        {
-            pItem->drop(*it, forceCopy);
-        }
+        pItem->drop(arrayDocument, forceCopy);
+
     } else if (event->mimeData()->hasUrls()) {
         ::WizGetAnalyzer().LogAction("categoryDropFiles");
         QList<QUrl> urls = event->mimeData()->urls();

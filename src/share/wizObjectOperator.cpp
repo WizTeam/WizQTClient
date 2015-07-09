@@ -92,6 +92,16 @@ void CWizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArra
     m_thread->start();
 }
 
+void CWizDocumentOperator::deleteDocuments(const CWizDocumentDataArray& arrayDocument)
+{
+    m_arrayDocument = arrayDocument;
+    //
+    m_thread = new QThread();
+    moveToThread(m_thread);
+    connect(m_thread, SIGNAL(started()), SLOT(deleteDocuments()));
+    m_thread->start();
+}
+
 void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& sourceFolder,
                                                           const QString& targetParentFolder, bool keepDocTime,
                                                           bool keepTag, CWizObjectDataDownloaderHost* downloader)
@@ -293,6 +303,27 @@ void CWizDocumentOperator::moveDocumentToGroupFolder()
     deleteLater();
 }
 
+void CWizDocumentOperator::deleteDocuments()
+{
+    m_totoalCount = m_arrayDocument.size();
+    m_counter = 0;
+    for (WIZDOCUMENTDATA doc : m_arrayDocument)
+    {
+        emit newAction(tr("Delete note %1").arg(doc.strTitle));
+        CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+        CWizDocument document(db, doc);
+        document.Delete();
+        emit progress(m_totoalCount, m_counter);
+
+        if (m_stop)
+            break;
+    }
+
+    emit finished();
+    //
+    deleteLater();
+}
+
 void CWizDocumentOperator::copyPersonalFolderToPersonalDB()
 {
     m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
@@ -398,6 +429,7 @@ void CWizDocumentOperator::moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)
     CWizDocument wizDoc(m_dbMgr.db(doc.strKbGUID), doc);
     wizDoc.MoveTo(m_dbMgr.db(m_targetTag.strKbGUID), m_targetTag, m_downloader);
 }
+
 
 void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& childFolder,
                                                           const QString& targetParentFolder)

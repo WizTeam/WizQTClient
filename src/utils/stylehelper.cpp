@@ -74,7 +74,7 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     QString strIconActive2 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_selected");
 
     if (!QFile::exists(strIconNormal)) {
-        qDebug() << "load icon failed, filePath:" << strIconNormal;
+        qWarning() << "load icon failed, filePath:" << strIconNormal;
         return QIcon();
     }
 
