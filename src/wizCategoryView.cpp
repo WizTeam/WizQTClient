@@ -1835,30 +1835,29 @@ void CWizCategoryView::on_action_user_copyFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_renameItem()
 {
-    QTreeWidgetItem* p = currentItem();
-    if (p)
+//    QTreeWidgetItem* p = currentItem();
+//    if (p)
+//    {
+//        p->setFlags(p->flags() | Qt::ItemIsEditable);
+//        editItem(p, 0);
+//    }
+
+
+    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
     {
-        p->setFlags(p->flags() | Qt::ItemIsEditable);
-        editItem(p, 0);
-//        p->setData(0, Qt::EditRole, p->text(0));
+        // user can not rename predefined folders name
+        if (!::WizIsPredefinedLocation(p->location())) {
+            on_action_user_renameFolder();
+        }
     }
-
-
-//    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
-//    {
-//        // user can not rename predefined folders name
-//        if (!::WizIsPredefinedLocation(p->location())) {
-//            on_action_user_renameFolder();
-//        }
-//    }
-//    else if (currentCategoryItem<CWizCategoryViewTagItem>())
-//    {
-//        on_action_user_renameTag();
-//    }
-//    else if (currentCategoryItem<CWizCategoryViewGroupItem>())
-//    {
-//        on_action_group_renameFolder();
-//    }
+    else if (currentCategoryItem<CWizCategoryViewTagItem>())
+    {
+        on_action_user_renameTag();
+    }
+    else if (currentCategoryItem<CWizCategoryViewGroupItem>())
+    {
+        on_action_group_renameFolder();
+    }
 }
 
 void CWizCategoryView::on_action_user_renameFolder()
