@@ -2462,7 +2462,6 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
 {
     QStringList fileTypes;
-//    fileTypes << ".xls" << ".xlsx" << ".ppt" << ".pptx";
     fileTypes << ".xls" << ".xlsx";
     return fileTypes.contains(doc.strFileType);
 }
