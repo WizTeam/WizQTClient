@@ -1290,7 +1290,9 @@ void CWizDocumentWebView::viewDocumentWithoutEditor()
 
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+
 //    emit viewDocumentFinished();
+    onNoteLoadFinished();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()

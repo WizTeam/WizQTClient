@@ -317,14 +317,12 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     if (::WizIsDocumentContainsFrameset(data))
     {
         m_bEditingMode = false;
-        m_bLocked = true;
     }
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
     if (NotifyBar::LockForGruop == nLockReason)
     {
         startCheckDocumentEditStatus();
     }
-
 }
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
@@ -426,6 +424,12 @@ void CWizDocumentView::setEditNote(bool bEdit)
 {
     if (m_bLocked)
         return;
+
+    if (::WizIsDocumentContainsFrameset(m_note))
+    {
+        m_title->showMessageTips(Qt::PlainText, tr("Note type is %1, do not support edit mode.").arg(m_note.strFileType));
+        return;
+    }
 
     bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).IsGroup();
     if (bEdit && isGroupNote)
