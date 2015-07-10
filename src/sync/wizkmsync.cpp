@@ -21,7 +21,7 @@ void CWizKMSyncEvents::OnSyncProgress(int pos)
 HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressMessageType type, const QString& strStatus)
 {
     Q_UNUSED(type);
-    qDebug() << "[Sync]" << strStatus;
+    qInfo() << "[Sync]" << strStatus;
 
     Q_EMIT messageReady(strStatus);
     return 0;

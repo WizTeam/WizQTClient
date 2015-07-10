@@ -23,6 +23,7 @@
 
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
+#include "utils/logger.h"
 #include "sync/apientry.h"
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
@@ -192,7 +193,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
     setUsers(strDefaultUserId);
     //
-    initSateMachine();    
+    initSateMachine();        
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -1502,7 +1503,7 @@ QString CWizOEMDownloader::_downloadOEMSettings()
 
     if (reply->error() != QNetworkReply::NoError)
     {
-        qDebug() << "Download oem data failed!";
+        qWarning() << "Download oem data failed!";
         emit errorMessage(tr("Can not find server %1").arg(m_server));
         reply->deleteLater();
         return "";

@@ -56,21 +56,34 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 {
     Q_UNUSED(context);
 
-    logger()->saveToLogFile(msg);
-    logger()->addToBuffer(msg);
+//    bool saveLog = true;
+//#ifndef QT_DEBUG
+//    if (type == QtDebugMsg)
+//        saveLog = false;
+//#endif
+//    if (saveLog)
+//    {
+        logger()->saveToLogFile(msg);
+        logger()->addToBuffer(msg);
+//    }
 
     switch (type) {
     case QtDebugMsg:
         fprintf(stderr, "[DEBUG] %s\n", msg.toUtf8().constData());
         break;
+#if QT_VERSION > 0x050500
+    case QtInfoMsg:
+        fprintf(stderr, "[INFO] %s\n", msg.toUtf8().constData());
+        break;
+#endif
     case QtWarningMsg:
-        fprintf(stderr, "[WARNING]: %s\n", msg.toUtf8().constData());
+        fprintf(stderr, "[WARNING]: %s (%s:%u, %s)\n", msg.toUtf8().constData(), context.file, context.line, context.function);
         break;
     case QtCriticalMsg:
-        fprintf(stderr, "[CRITICAL]: %s\n", msg.toUtf8().constData());
+        fprintf(stderr, "[CRITICAL]: %s (%s:%u, %s)\n", msg.toUtf8().constData(), context.file, context.line, context.function);
         break;
     case QtFatalMsg:
-        fprintf(stderr, "[FATAL]: %s\n", msg.toUtf8().constData());
+        fprintf(stderr, "[FATAL]: %s (%s:%u, %s)\n", msg.toUtf8().constData(), context.file, context.line, context.function);
         abort();
     }
 }
@@ -132,7 +145,11 @@ Logger* Logger::logger()
 
 void Logger::writeLog(const QString& strMsg)
 {
-    qDebug() << strMsg;
+//    qDebug() << strMsg;
+    logger()->saveToLogFile(strMsg);
+    logger()->addToBuffer(strMsg);
+
+    fprintf(stderr, "[INFO] %s\n", strMsg.toUtf8().constData());
 }
 void Logger::getAllLogs(QString& text)
 {
@@ -140,3 +157,20 @@ void Logger::getAllLogs(QString& text)
 }
 
 } // namespace Utils
+
+#if QT_VERSION < 0x050500
+CWizInfo::~CWizInfo()
+{
+    if (!--stream->ref) {
+        if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
+            stream->buffer.chop(1);
+        if (stream->message_output) {
+//            qt_message_output(stream->type,
+//                              stream->context,
+//                              stream->buffer);
+            Utils::Logger::logger()->writeLog(stream->buffer);
+        }
+        delete stream;
+    }
+}
+#endif
