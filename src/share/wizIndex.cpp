@@ -579,6 +579,19 @@ bool CWizIndex::DeleteTag(const WIZTAGDATA& data, bool bLog, bool bReset /* = tr
     return DeleteTagEx(data);
 }
 
+bool CWizIndex::ModifyTagPosition(const WIZTAGDATA& data)
+{
+    CString strSQL = WizFormatString2(_T("update WIZ_TAG set TAG_POS=%1 where TAG_GUID=%2"),
+        WizInt64ToStr(data.nPostion),
+        STR2SQL(data.strGUID));
+
+    //
+    if (!ExecSQL(strSQL))
+        return false;
+
+    return true;
+}
+
 QString CWizIndex::getTagTreeText(const QString& strTagGUID)
 {
     WIZTAGDATA tag;
@@ -3598,7 +3611,8 @@ bool CWizIndex::SearchDocumentByWhere(const QString& strWhere, int nMaxCount, CW
 
 bool CWizIndex::getAllDocumentsNeedToBeSearchIndexed(CWizDocumentDataArray& arrayDocument)
 {
-    CString strWhere = _T("DOCUMENT_INDEXED=0");
+    CString strWhere = QString("DOCUMENT_INDEXED=0 and DOCUMENT_GUID in \
+                               (select DISTINCT OBJECT_GUID from WIZ_OBJECT_EX where %1=1)").arg(GetReservedIntFieldName(DATA_DOWNLOADED_FIELD));
 
     if (!GetDocumentsBySQLWhere(strWhere, arrayDocument)) {
 		TOLOG(_T("Failed to get documents by DOCUMENT_INDEXED=0"));

@@ -22,6 +22,7 @@
 #include "wizPopupButton.h"
 #include "wizLineInputDialog.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizObjectOperator.h"
 
 #include "sync/avatar.h"
 #include "thumbcache.h"
@@ -284,43 +285,89 @@ bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
     return true;
 }
 
-void CWizDocumentListView::moveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
-{
-    // only move user private documents
-//    if (isDocumentsWithGroupDocument(arrayDocument)) {
-//        TOLOG("on_action_moveDocument_confirmed: selected documents with group document!");
-//        return;
-//    }
+void CWizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
+{    
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());       
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    ::WizMoveDocumentsToPrivateFolder(arrayDocument, targetFolder, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
-    ::WizMoveDocumentsToGroupFolder(arrayDocument, targetTag, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
-void CWizDocumentListView::copyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument,
+void CWizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
                                                         const QString& targetFolder, bool keepDocTime, bool keepTag)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    ::WizCopyDocumentsToPrivateFolder(arrayDocument, targetFolder, keepDocTime, keepTag,
-                                      m_dbMgr, mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    //  show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                       keepTag, mainWindow->downloaderHost());
+    }
+    else
+    {
+        qDebug() << " main thread : " << QThread::currentThreadId();
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                       keepTag, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
                                                       const WIZTAGDATA& targetTag, bool keepDocTime)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
-    ::WizCopyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, m_dbMgr,
-                                    mainWindow->progressDialog(), mainWindow->downloaderHost());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -352,7 +399,7 @@ void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& array
         {
             CWizDocumentDataArray arrayCopyDoc;
             arrayCopyDoc.push_back(doc);
-            copyDocumentsToPrivateFolder(arrayCopyDoc, doc.strLocation, true, true);
+            copyDocumentsToPersonalFolder(arrayCopyDoc, doc.strLocation, true, true);
         }
     }
 }
@@ -783,6 +830,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
                 }
             }
         }
+        event->acceptProposedAction();
     }
     else if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
@@ -800,9 +848,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
             return;
 
         duplicateDocuments(arrayDocument);
-    }
-
-    event->acceptProposedAction();
+    }    
 }
 
 void CWizDocumentListView::resetItemsViewType(int type)
@@ -1181,13 +1227,13 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
         dbSet.insert(item->document().strKbGUID);
     }
 
-    if (selector->isSelectPrivateFolder())
+    if (selector->isSelectPersonalFolder())
     {
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty())
             return;
         qDebug() << "move docuemnt to private folder " << strSelectedFolder;
-        moveDocumentsToPrivateFolder(arrayDocument, strSelectedFolder);
+        moveDocumentsToPersonalFolder(arrayDocument, strSelectedFolder);
         dbSet.insert(m_dbMgr.db().kbGUID());
     }
     else if (selector->isSelectGroupFolder())
@@ -1242,14 +1288,14 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
         dbSet.insert(item->document().strKbGUID);
     }
 
-    if (selector->isSelectPrivateFolder())
+    if (selector->isSelectPersonalFolder())
     {
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty()) {
             return;
         }
         qDebug() << "copy docuemnt to private folder " << strSelectedFolder;
-        copyDocumentsToPrivateFolder(arrayDocument, strSelectedFolder, selector->isKeepTime(), selector->isKeepTag());
+        copyDocumentsToPersonalFolder(arrayDocument, strSelectedFolder, selector->isKeepTime(), selector->isKeepTag());
         dbSet.insert(m_dbMgr.db().kbGUID());
     }
     else if (selector->isSelectGroupFolder())

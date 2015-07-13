@@ -15,6 +15,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
+#include "widgets/wizLocalProgressWebView.h"
 #include "wizDocumentWebView.h"
 #include "wiznotestyle.h"
 #include "widgets/wizSegmentedButton.h"
@@ -53,7 +54,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_comments(new QWebEngineView(this))
     #else
     , m_web(new CWizDocumentWebView(app, this))
-    , m_comments(new QWebView(app.mainWindow()))
+    , m_commentWidget(new CWizLocalProgressWebView(app.mainWindow()))
     #endif
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
@@ -94,7 +95,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
-    m_splitter->addWidget(m_comments);
+    m_splitter->addWidget(m_commentWidget);
+    m_comments = m_commentWidget->web();
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->setPage(commentPage);
@@ -103,11 +105,12 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
     m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
-    m_comments->hide();
     connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
     connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
     connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(on_comment_populateJavaScriptWindowObject()));
+
+    m_commentWidget->hide();
 
     layoutDoc->addWidget(m_title);
     layoutDoc->addWidget(m_splitter);
@@ -212,6 +215,16 @@ void CWizDocumentView::waitForDone()
 QWidget* CWizDocumentView::client() const
 {
     return m_tab;
+}
+
+QWebView*CWizDocumentView::commentView() const
+{
+    return m_commentWidget->web();
+}
+
+CWizLocalProgressWebView*CWizDocumentView::commentWidget() const
+{
+    return m_commentWidget;
 }
 void CWizDocumentView::showEvent(QShowEvent *event)
 {

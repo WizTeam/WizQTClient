@@ -493,11 +493,22 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     bool isRetina = WizIsHighPixel();
     strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin());
-    if (db.IsDocumentModified(m_data.doc.strGUID))
+    CWizDocumentAttachmentDataArray arrayAttachment;
+    db.GetDocumentAttachments(m_data.doc.strGUID, arrayAttachment);
+    bool attachModified = false;
+    bool attachUndownload = false;
+    for (WIZDOCUMENTATTACHMENTDATAEX attachment : arrayAttachment)
+    {
+        if (db.IsAttachmentModified(attachment.strGUID))
+            attachModified = true;
+        if (!db.IsAttachmentDownloaded(attachment.strGUID))
+            attachUndownload = true;
+    }
+    if (db.IsDocumentModified(m_data.doc.strGUID) || attachModified)
     {
         strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
     }
-    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
+    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID) || attachUndownload)
     {
         strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
     }

@@ -389,7 +389,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    if (loop.error() != QNetworkReply::NoError)
     {
         qDebug() << "[Analyzer]Upload failed!";
         return;

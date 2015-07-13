@@ -27,6 +27,7 @@
 #endif
 #include "wizSearchWidget.h"
 #include "share/wizMessageBox.h"
+#include "core/wizTrayIcon.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
@@ -61,6 +62,7 @@
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizImageButton.h"
 #include "widgets/wizIAPDialog.h"
+#include "widgets/wizLocalProgressWebView.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -150,7 +152,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_tray(nullptr)
     , m_trayMenu(nullptr)
     , m_mobileFileReceiver(nullptr)
-    , m_bQuickDownloadMessageEnable(true)
+    , m_bQuickDownloadMessageEnable(false)
 {
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -179,6 +181,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
+    connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
+            SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
@@ -191,6 +195,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+    connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
+            SLOT(on_shortcutDataChanged(QString)));
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
@@ -403,7 +409,7 @@ void MainWindow::changeEvent(QEvent* event)
     if (event->type() == QEvent::ActivationChange
             && isActiveWindow())
     {
-        windowActived();
+        QTimer::singleShot(0, this, SLOT(windowActived()));
     }
     //
     if (m_useSystemBasedStyle)
@@ -548,7 +554,7 @@ void MainWindow::setSystemTrayIconVisible(bool bVisible)
 //        //
     if (!m_tray)
     {
-        m_tray = new QSystemTrayIcon(QApplication::windowIcon(), this);
+        m_tray = new CWizTrayIcon(*this, QApplication::windowIcon(), this);
         initTrayIcon(m_tray);
         m_tray->show();
     }
@@ -565,7 +571,7 @@ void MainWindow::setSystemTrayIconVisible(bool bVisible)
     m_tray->setVisible(bVisible);
 }
 
-void MainWindow::showTrayIconMessage(const QString& strTitle, const QString& strInfo)
+void MainWindow::showBubbleNotification(const QString& strTitle, const QString& strInfo)
 {
     if (m_tray && m_tray->isVisible())
     {
@@ -579,6 +585,17 @@ void MainWindow::showTrayIconMenu()
     {
         m_trayMenu->popup(QCursor::pos());
     }
+}
+
+void MainWindow::on_viewMessage_request(qint64 messageID)
+{
+    CWizCategoryViewItemBase* pBase = m_category->findAllMessagesItem();
+    if (!pBase)
+        return;
+
+    CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
+    showMessageList(pItem);
+    m_msgList->selectMessage(messageID);
 }
 
 void MainWindow::on_trayIcon_newDocument_clicked()
@@ -1906,7 +1923,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 //            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
 //        }
     }
-    else if (0 == nErrorCode)
+    else if (S_OK == nErrorCode)
     {
         // set quick download message enable
         m_bQuickDownloadMessageEnable = true;
@@ -1935,7 +1952,7 @@ void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, co
 {
     switch (nType) {
     case wizSyncMessageNormal:
-        showTrayIconMessage(strTitle, strMsg);
+        CWizMessageBox::information(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
         break;
     case wizSyncMessageWarning:
         CWizMessageBox::warning(this, strTitle.isEmpty() ? tr("Info") : strTitle, strMsg);
@@ -1946,6 +1963,11 @@ void MainWindow::on_promptMessage_request(int nType, const QString& strTitle, co
     default:
         break;
     }
+}
+
+void MainWindow::on_bubbleNotification_request(const QVariant& param)
+{
+    m_tray->showMessage(param);
 }
 
 void MainWindow::on_actionNewNote_triggered()
@@ -2645,7 +2667,7 @@ void MainWindow::on_category_itemSelectionChanged()
     }
         break;
     default:
-        showDocmentList(category);
+        showDocumentList(category);
         break;
     }
 }
@@ -2702,8 +2724,7 @@ void MainWindow::on_message_itemSelectionChanged()
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
 //            QTimer::singleShot(0, [&](){
-                qDebug() << "show comments page();";
-               m_doc->commentView()->setVisible(true);
+               m_doc->commentWidget()->setVisible(true);
 //            });
         }
 //#endif
@@ -3090,6 +3111,10 @@ void MainWindow::viewAttachmentByWizKMURL(const QString& strKbGUID, const QStrin
 
         openAttachment(attachment, strFileName);
     }
+    else
+    {
+        CWizMessageBox::information(this, tr("Info"), tr("Can't find the specified attachment, may be it has been deleted."));
+    }
 }
 
 void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
@@ -3200,6 +3225,8 @@ void MainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     QAction* actionExit = m_trayMenu->addAction(tr("Exit"));
     connect(actionExit, SIGNAL(triggered()), SLOT(on_actionExit_triggered()));
 
+    connect(m_tray, SIGNAL(viewMessageRequest(qint64)),
+            SLOT(on_viewMessage_request(qint64)));
 
 #ifdef Q_OS_MAC
     trayIcon->setContextMenu(m_trayMenu);
@@ -3310,7 +3337,7 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void MainWindow::showDocmentList(CWizCategoryBaseView* category)
+void MainWindow::showDocumentList(CWizCategoryBaseView* category)
 {
     if (!m_noteListWidget->isVisible())
     {
@@ -3356,12 +3383,50 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
 {
     CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
-    WIZDOCUMENTDATA doc;
-    if (db.DocumentFromGUID(pShortcut->guid(), doc))
+    switch (pShortcut->shortcutType()) {
+    case CWizCategoryViewShortcutItem::Document:
     {
-        viewDocument(doc, true);
-        m_docListContainer->hide();
+        WIZDOCUMENTDATA doc;
+        if (db.DocumentFromGUID(pShortcut->guid(), doc))
+        {
+            viewDocument(doc, true);
+            CWizCategoryViewItemBase* baseItem = m_category->findFolder(doc);
+            if (baseItem)
+            {
+                CWizDocumentDataArray arrayDocument;
+                baseItem->getDocuments(db, arrayDocument);
+                m_documents->setDocuments(arrayDocument);
+                on_documents_hintChanged(baseItem->text(0));
+                m_documents->setAcceptAllSearchItems(true);
+                m_documents->addAndSelectDocument(doc);
+                m_documents->setAcceptAllSearchItems(false);
+            }
+        }
     }
+        break;
+    case CWizCategoryViewShortcutItem::PersonalFolder:
+    {
+        CWizDocumentDataArray array;
+        if (db.GetDocumentsByLocation(pShortcut->location(), array))
+        {
+            m_documents->setDocuments(array);
+        }
+    }
+        break;
+    case CWizCategoryViewShortcutItem::PersonalTag:
+    case CWizCategoryViewShortcutItem::GroupTag:
+    {
+        CWizDocumentDataArray array;
+        WIZTAGDATA tag;
+        db.TagFromGUID(pShortcut->guid(), tag);
+        if (db.GetDocumentsByTag(tag, array))
+        {
+            m_documents->setDocuments(array);
+        }
+    }
+        break;
+    }
+
 }
 
 void MainWindow::searchNotesBySQL(const QString& strSQLWhere)
@@ -3418,8 +3483,8 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     CWizProgressDialog *dlg = progressDialog();
     dlg->setProgress(100,0);
-    dlg->setActionString(tr("Downloading attachment file  %1 ").arg(attachment.strName));
-    dlg->setNotifyString(tr("downloading..."));
+    dlg->setActionString(tr("Downloading attachment file  %1 ...").arg(attachment.strName));
+    dlg->setWindowTitle(tr("Downloading"));
     connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
     connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),

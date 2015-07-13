@@ -185,7 +185,10 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
 
         QString strFileName = db.GetDocumentFileName(doc.strGUID);
         if (!QFile::exists(strFileName))
+        {
+            db.SetDocumentDataDownloaded(doc.strGUID, false);
             bFilter = true;
+        }
 
         if (bFilter) {
             arrayDocument.erase(arrayDocument.begin() + i);

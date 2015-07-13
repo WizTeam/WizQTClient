@@ -39,7 +39,7 @@ void CWizJSONServerBase::getRequest(const QString& strUrl)
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
     //
-    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    if (loop.error() != QNetworkReply::NoError)
     {
         qDebug() << "[JSONRequest]Send get request failed.";
         return;
@@ -77,7 +77,7 @@ void CWizJSONServerBase::deleteRequest(const QString& strUrl)
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
     //
-    if (loop.timeOut() || loop.error() != QNetworkReply::NoError)
+    if (loop.error() != QNetworkReply::NoError)
     {
         qDebug() << "[JSONDelete]Send delete request failed. result : " << loop.result();
         return;

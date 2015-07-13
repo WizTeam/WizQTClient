@@ -24,6 +24,7 @@
 #include "mac/wizmachelper.h"
 #include "sync/apientry.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizObjectOperator.h"
 #include "wizDatabaseManager.h"
 #include "wizObjectDataDownloader.h"
 #include "wizProgressDialog.h"
@@ -2283,7 +2284,7 @@ QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName)
 QString WizStr2Title(const QString& str)
 {
     int idx = str.size() - 1;
-    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r"); // end of line
+    static QString eol("，。？~!#$%^&*()_+{}|:\"<>?,./;'[]\\-=\n\r\t"); // end of line
     foreach(QChar c, eol) {
         int i = str.indexOf(c, 0, Qt::CaseInsensitive);
         if (i != -1 && i < idx) {
@@ -2465,123 +2466,6 @@ bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
     return fileTypes.contains(doc.strFileType);
 }
 
-
-void WizMoveDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
-                                     CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
-{
-    // move, show progress if size > 3
-    CWizFolder folder(dbMgr.db(), targetFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(dbMgr.db(), &folder, downloader);
-        }
-    } else {
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(dbMgr.db(), &folder, downloader);
-
-            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        progress->hide();
-    }
-}
-
-
-void WizMoveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
-                                   CWizDatabaseManager& dbMgr, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
-{
-    // move, show progress if size > 3
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(dbMgr.db(targetTag.strKbGUID), targetTag, downloader);
-        }
-    } else {
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.MoveTo(dbMgr.db(targetTag.strKbGUID), targetTag, downloader);
-
-            progress->setActionString(QObject::tr("Move Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-       progress->hide();
-    }
-}
-
-
-void WizCopyDocumentsToPrivateFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
-                                     bool keepDocTime, bool keepTag, CWizDatabaseManager& dbMgr, CWizProgressDialog* progress,
-                                     CWizObjectDataDownloaderHost* downloader)
-{
-    //  show progress if size > 3
-    CWizFolder folder(dbMgr.db(), targetFolder);
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(dbMgr.db(), &folder, keepDocTime, keepTag, downloader);
-        }
-    } else {
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(dbMgr.db(), &folder, keepDocTime, keepTag, downloader);
-
-            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetFolder));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        progress->hide();
-    }
-}
-
-
-void WizCopyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
-                                   const WIZTAGDATA& targetTag, bool keepDocTime, CWizDatabaseManager& dbMgr,
-                                   CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
-{
-    // show progress if size > 3
-    if (arrayDocument.size() <= 3) {
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, downloader);
-        }
-    } else {
-        progress->show();
-
-        int i = 0;
-        foreach (const WIZDOCUMENTDATAEX& data, arrayDocument) {
-            CWizDocument doc(dbMgr.db(data.strKbGUID), data);
-            doc.CopyTo(dbMgr.db(targetTag.strKbGUID), targetTag, keepDocTime, downloader);
-
-            progress->setActionString(QObject::tr("Copy Note: %1 to %2").arg(data.strLocation).arg(targetTag.strName));
-            progress->setNotifyString(data.strTitle);
-            progress->setProgress(arrayDocument.size(), i);
-            i++;
-        }
-        // hide progress dialog
-        progress->hide();
-    }
-}
-
-
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
 {
     QString strMime(QString::fromUtf8(bMime));
@@ -2597,4 +2481,108 @@ void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocum
         if (db.DocumentFromGUID(lsMeta[1], data))
             arrayDocument.push_back(data);
     }
+}
+
+
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
+                              CWizObjectDataDownloaderHost* downloaderHost)
+{
+    if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
+        return false;
+
+    QString strFileName = db.GetDocumentFileName(doc.strGUID);
+    if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        CWizProgressDialog dlg(0, false);
+        dlg.setActionString(QObject::tr("Download Note %1 ...").arg(doc.strTitle));
+        dlg.setWindowTitle(QObject::tr("Downloading"));
+        dlg.setProgress(100,0);
+        QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
+        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+
+        downloaderHost->downloadData(doc);
+        dlg.exec();
+    }
+
+    return PathFileExists(strFileName);
+}
+
+
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
+                                                    CWizObjectDataDownloaderHost* downloaderHost)
+{
+    if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
+        return false;
+
+    QString strFileName = db.GetDocumentFileName(doc.strGUID);
+    if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        QEventLoop loop;
+        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
+            QObject::disconnect(downloaderHost, 0, 0, 0);
+            loop.quit();
+        });
+        downloaderHost->downloadData(doc);
+        loop.exec();
+    }
+
+    return PathFileExists(strFileName);
+}
+
+
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
+                                                      CWizObjectDataDownloaderHost* downloaderHost)
+{
+    if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
+        return false;
+
+    QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
+    if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        QEventLoop loop;
+        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
+            QObject::disconnect(downloaderHost, 0, 0, 0);
+            loop.quit();
+        });
+
+        downloaderHost->downloadData(attachData);
+        loop.exec();
+    }
+
+    return PathFileExists(strAttachmentFileName);
+}
+
+
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData, CWizObjectDataDownloaderHost* downloaderHost)
+{
+    if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
+        return false;
+
+    QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
+    if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    {
+        if (!downloaderHost)
+            return false;
+
+        CWizProgressDialog dlg(0, false);
+        dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
+        dlg.setWindowTitle(QObject::tr("Downloading"));
+        dlg.setProgress(100,0);
+        QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
+        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+
+        downloaderHost->downloadData(attachData);
+        dlg.exec();
+    }
+
+    return PathFileExists(strAttachmentFileName);
 }

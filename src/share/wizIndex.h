@@ -42,6 +42,7 @@ public:
                    const CString& strDescription, WIZTAGDATA& data);
     bool ModifyTag(WIZTAGDATA& data);
     bool DeleteTag(const WIZTAGDATA& data, bool bLog, bool bReset = true);
+    bool ModifyTagPosition(const WIZTAGDATA& data);
 
 
     bool SetDocumentTags(WIZDOCUMENTDATA& data, const CWizTagDataArray& arrayTag);

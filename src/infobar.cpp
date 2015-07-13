@@ -8,11 +8,13 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizmisc.h"
+#include "wizdef.h"
 
 using namespace Core::Internal;
 
-InfoBar::InfoBar(QWidget *parent)
+InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
+    , m_app(app)
 {
     setStyleSheet("font-size: 11px; color: #646464;");
     setContentsMargins(5, 0, 0, 0);
@@ -45,7 +47,9 @@ void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
     QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy-MM-dd");
     m_labelModifiedTime->setText(strModifiedTime);
 
-    QString strAuthor = QObject::tr("Author: ") + data.strOwner;
+
+    QString strAuthor = m_app.databaseManager().db(data.strKbGUID).GetDocumentAuthorAlias(data);
+    strAuthor = QObject::tr("Author: ") + (strAuthor.isEmpty() ? data.strOwner : strAuthor);
     strAuthor = fontMetrics().elidedText(strAuthor, Qt::ElideRight, 150);
     m_labelAuthor->setText(strAuthor);
 

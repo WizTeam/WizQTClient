@@ -8,7 +8,10 @@
 enum ItemType
 {
     Category_WizNoneItem = QTreeWidgetItem::UserType + 1,
+    Category_MessageRootItem,
     Category_MessageItem,
+    Category_ShortcutRootItem,
+    Category_ShortcutPlaceHoldItem,
     Category_ShortcutItem,
     Category_QuickSearchRootItem,
     Category_QuickSearchItem,
@@ -50,6 +53,7 @@ public:
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
     virtual bool dragAble() const { return false; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false) { Q_UNUSED(data); Q_UNUSED(forceCopy);}
+    virtual void drop(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
@@ -153,7 +157,9 @@ public:
 
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
+    virtual void drop(const CWizCategoryViewItemBase* pItem);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& /*data*/) const {return true;}
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 11; }
@@ -177,18 +183,30 @@ public:
 class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase
 {
 public:
-    CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName,
-                                 const QString& strKbGuid, const QString& strGuid, bool bEncrypted = false);
+    enum ShortcutType
+    {
+        Document,
+        PersonalFolder,
+        PersonalTag,
+        GroupTag
+    };
+    //
+    CWizCategoryViewShortcutItem(CWizExplorerApp& app, const QString& strName, ShortcutType type,
+                                 const QString& strKbGuid, const QString& strGuid, const QString& location, bool bEncrypted = false);
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos);
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
-    QString guid() {return m_strGuid;}
+    QString guid() const {return m_strGuid;}
+    QString location() const { return m_location; }
+    ShortcutType shortcutType() const { return m_type; }
 
 private:
     QString m_strGuid;
+    QString m_location;
+    ShortcutType m_type;
 };
 
 class CWizCategoryViewSearchRootItem : public CWizCategoryViewItemBase
@@ -320,6 +338,8 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool dragAble() const { return true; }
     virtual void drop(const WIZDOCUMENTDATA& data, bool forceCopy = false);
 
     virtual QTreeWidgetItem *clone() const;

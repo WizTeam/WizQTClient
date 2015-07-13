@@ -94,6 +94,8 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     , m_udpClient(0)
     , m_serverType(WizServer)
     , m_searchingDialog(nullptr)
+    , m_oemDownloader(nullptr)
+    , m_oemThread(nullptr)
 {
 
 #ifdef Q_OS_MAC
@@ -190,13 +192,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strDefaultUserId, const QString 
     //
     setUsers(strDefaultUserId);
     //
-    initSateMachine();
-
-#if QT_VERSION > 0x050400
-    QTimer::singleShot(500, [&](){
-        setFixedWidth(width());
-    });
-#endif
+    initSateMachine();    
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -209,6 +205,13 @@ CWizLoginDialog::~CWizLoginDialog()
     if (m_udpClient)
     {
         m_udpClient->deleteLater();
+    }    
+    if (m_oemDownloader)
+    {
+        QObject::disconnect(m_oemDownloader, 0, 0, 0);
+        m_oemDownloader->deleteLater();
+        connect(m_oemThread, SIGNAL(finished()), m_oemThread, SLOT(deleteLater()));
+        m_oemThread->quit();        
     }
 }
 
@@ -277,12 +280,14 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
     //
     m_currentUserServerType = userSettings.serverType();
-//    qDebug() << "set user , user type : " << m_currentUserServerType;
+    qDebug() << "set user , user type : " << m_currentUserServerType;
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
         ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
         emit wizBoxServerSelected();
+        // update oem settings
+        downloadOEMSettingsFromWizBox();
     }
     else if ((m_currentUserServerType == NoServer && !userSettings.myWizMail().isEmpty()) ||
              m_currentUserServerType == WizServer)
@@ -295,15 +300,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
 void CWizLoginDialog::doAccountVerify()
 {
-    CWizUserSettings userSettings(userId());
-
-//    ControlWidgetsLocker locker;
-//    locker.lockWidget(m_lineEditUserName);
-//    locker.lockWidget(m_lineEditPassword);
-//    locker.lockWidget(ui->cbx_autologin);
-//    locker.lockWidget(ui->cbx_remberPassword);
-//    locker.lockWidget(m_buttonLogin);
-//    locker.lockWidget(ui->btn_changeToSignin);
+    CWizUserSettings userSettings(userId());    
 
     //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
     //  如果登录过企业服务则需要登录到企业服务器
@@ -329,15 +326,17 @@ void CWizLoginDialog::doAccountVerify()
         return;
     }
 
-//    qDebug() << "do account verify , server type : " << m_serverType;
+    qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
         Token::setUserId(userId());
         Token::setPasswd(password());
-//        locker.releaseWidgets();
         // check server licence and update oem settings
-        if (EnterpriseServer == m_serverType && !checkServerLicence(userSettings.serverLicence()))
+        if (EnterpriseServer == m_serverType)
+        {
+            checkServerLicence();
             return;
+        }
         //
         emit accountCheckStart();
         doOnlineVerify();
@@ -345,7 +344,6 @@ void CWizLoginDialog::doAccountVerify()
     }
 
     if (updateUserProfile(false) && updateGlobalProfile()) {
-//        locker.releaseWidgets();
         QDialog::accept();
     }
 }
@@ -397,7 +395,30 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     {
         userSettings.setEnterpriseServerIP(m_lineEditServer->text());
         userSettings.setServerLicence(m_serverLicence);
-        downloadLogoFromWizBox(true);
+
+        //
+        QString logoFile = m_oemLogoMap.value(m_lineEditServer->text());
+        qDebug() << "update oem logo path : " << logoFile;
+        if (logoFile.isEmpty() || !CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
+            return true;
+
+        //
+        CWizOEMSettings settings(m_lineEditUserName->text());
+        QString strOldPath = settings.logoPath();
+        if (!strOldPath.isEmpty())
+        {
+            QDir dir;
+            dir.remove(strOldPath);
+            QFile::copy(logoFile, strOldPath);
+        }
+        else
+        {
+            QString strNewPath = Utils::PathResolve::cachePath() + "logo/";
+            Utils::PathResolve::ensurePathExists(strNewPath);
+            strNewPath = strNewPath + WizGenGUIDLowerCaseLetterOnly() + ".png";
+            QFile::copy(logoFile, strNewPath);
+            settings.setLogoPath(strNewPath);
+        }
     }
 
     return true;
@@ -461,6 +482,7 @@ void CWizLoginDialog::on_btn_close_clicked()
 void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
+    setFixedWidth(354);
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
@@ -622,7 +644,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                  "QMenu::indicator:non-exclusive:checked { image: url(%1); }").arg(status_switchserver_selected));
 }
 
-bool CWizLoginDialog::checkSingMessage()
+bool CWizLoginDialog::checkSignMessage()
 {
     QRegExp mailRex("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
     mailRex.setCaseSensitivity(Qt::CaseInsensitive);
@@ -681,10 +703,9 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
 void CWizLoginDialog::searchWizBoxServer()
 {
     qDebug() << "start findWizBoxServer ";
-    startWizBoxUdpClient();        
+    startWizBoxUdpClient();
 
     emit wizBoxSearchRequest(WIZBOX_PROT, "find wizbox");
-//    qDebug() << "call func form " << QThread::currentThread();
     m_wizBoxSearchingTimer.start(10 * 1000);
     showSearchingDialog();
 }
@@ -803,46 +824,24 @@ void CWizLoginDialog::closeWizBoxUdpClient()
     m_udpThread->quit();
 }
 
-bool CWizLoginDialog::checkServerLicence(const QString& strOldLicence)
+void CWizLoginDialog::checkServerLicence()
 {
     if (m_lineEditServer->text().isEmpty())
     {
         CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
-        return false;
+        return;
     }
 
-    QString strResult = downloadOEMSettingsFromWizBox();
-    if (strResult.isEmpty())
-        return false;
-
-    //
-    rapidjson::Document d;
-    d.Parse<0>(strResult.toUtf8().constData());
-
-    qDebug() << "oem settings : " << strResult;
-
-    if (!d.FindMember("licence"))
+    if (!m_oemDownloader)
     {
-        ui->label_passwordError->setText(tr("Can not get licence from server."));
-        qDebug() << "Can not find licence from oem";
-        return false;
+        initOEMDownloader();
     }
-    m_serverLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
+    m_oemDownloader->setServerIp(m_lineEditServer->text());
 
-    // check wheather licence changed
-    qDebug() << "compare licence : " << m_serverLicence << "  with old licence : " << strOldLicence;
-    if (m_serverLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != m_serverLicence))
-    {
-        CWizMessageBox::warning(this, tr("Info"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
-        return false;
-    }
-    else
-    {
-        // update oem setttings
-        CWizOEMSettings::updateOEMSettings(userId(), strResult);
-    }
-
-    return true;
+//    downloadOEMSettingsFromWizBox();
+    CWizUserSettings userSettings(userId());
+    QString strOldLicence = userSettings.serverLicence();
+    emit checkServerLicenceRequest(strOldLicence);
 }
 
 void CWizLoginDialog::setSwicthServerSelectedAction(const QString& strActionData)
@@ -869,122 +868,29 @@ void CWizLoginDialog::setSwicthServerActionEnable(const QString& strActionData, 
     }
 }
 
-void CWizLoginDialog::downloadLogoFromWizBox(bool saveToUserSettings)
+void CWizLoginDialog::downloadLogoFromWizBox(const QString& strUrl)
 {
-    QString oemSettings = downloadOEMSettingsFromWizBox();
-    if (oemSettings.isEmpty())
-        return;
-
-    rapidjson::Document d;
-    d.Parse<0>(oemSettings.toUtf8().constData());
-
-    qDebug() << "oem settings : " << oemSettings;
-
-#ifdef QT_DEBUG
-    if (!d.FindMember("LogoCustom") || !d.FindMember("LogoCustom")->value.GetBool())
+    if (!m_oemDownloader)
     {
-        qDebug() << "Logo custom is not enable";
-        return;
+        initOEMDownloader();
     }
-#endif
-
-    if (!d.FindMember("LogoConfig"))
-    {
-        qDebug() << "Can not find LogoConfig in oem settings";
-        return;
-    }
-
-    if (!d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
-    {
-        qDebug() << "LogoConfig was set to disable in oem settings";
-        return;
-    }
-
-    QString strLogoPath = d.FindMember("LogoConfig")->value.FindMember("login_logo")->value.GetString();
-    if (strLogoPath.isEmpty())
-    {
-        qDebug() << "Can not found logo path in oem settings";
-        return;
-    }
-
-    if (!strLogoPath.startsWith("http"))
-    {
-        strLogoPath = "http://" + m_lineEditServer->text() + strLogoPath;
-    }
-
-    QString strFileName = WizGenGUIDLowerCaseLetterOnly() + ".png";
-    CWizFileDownloader* downloader = new CWizFileDownloader(strLogoPath, strFileName, "", true);
-    QEventLoop loop;
-    loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
-    //  just wait for 15 seconds
-    QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
-    downloader->startDownload();
-    loop.exec();
-
-    strFileName = Utils::PathResolve::tempPath() + strFileName;
-    if (!QFile::exists(strFileName))
-    {
-        qDebug() << "Download logo image failed";
-        return;
-    }
-
-    setLogo(strFileName);
-
-    if (saveToUserSettings)
-    {
-        //
-        if (!CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
-            return;
-
-        //
-        CWizOEMSettings settings(m_lineEditUserName->text());
-        QString strOldPath = settings.logoPath();
-        if (!strOldPath.isEmpty())
-        {
-            QDir dir;
-            dir.remove(strOldPath);
-            QFile::copy(strFileName, strOldPath);
-        }
-        else
-        {
-            QString strNewPath = Utils::PathResolve::cachePath() + "logo/";
-            Utils::PathResolve::ensurePathExists(strNewPath);
-            strNewPath = strNewPath + WizGenGUIDLowerCaseLetterOnly() + ".png";
-            QFile::copy(strFileName, strNewPath);
-            settings.setLogoPath(strNewPath);
-        }
-    }
+    qDebug() << "download logo request in main thread : " << QThread::currentThreadId();
+//    QTimer::singleShot(0, m_oemDownloader, SLOT(downloadOEMLogo()));
+    emit logoDownloadRequest(strUrl);
 }
 
-QString CWizLoginDialog::downloadOEMSettingsFromWizBox()
+void CWizLoginDialog::downloadOEMSettingsFromWizBox()
 {
     if (m_lineEditServer->text().isEmpty())
-        return "";
-
-    ApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
-
-    // get oem settings from server
-    QNetworkAccessManager net;
-    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-    qDebug() << "get oem from server : " << strUrl;
-
-    QEventLoop loop;
-    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    loop.exec();
-
-    if (reply->error() != QNetworkReply::NoError)
+        return;
+    //
+    if (!m_oemDownloader)
     {
-        qDebug() << "Download oem data failed!";
-        ui->label_passwordError->setText(tr("Can not find server."));
-        reply->deleteLater();
-        return "";
+        initOEMDownloader();
     }
-
-    QString strResult = reply->readAll();
-    reply->deleteLater();
-
-    return strResult;
+    m_oemDownloader->setServerIp(m_lineEditServer->text());
+    qDebug() << "main thread : " << QThread::currentThreadId();
+    QTimer::singleShot(0, m_oemDownloader, SLOT(downloadOEMSettings()));
 }
 
 void CWizLoginDialog::setLogo(const QString& logoPath)
@@ -1039,7 +945,7 @@ void CWizLoginDialog::on_btn_login_clicked()
 
 void CWizLoginDialog::on_btn_singUp_clicked()
 {
-    if (checkSingMessage())
+    if (checkSignMessage())
     {
 
 //    #if defined Q_OS_MAC
@@ -1069,7 +975,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
 
-//    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
+    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
 
     emit accountCheckFinished();
     if (strToken.isEmpty())
@@ -1093,7 +999,6 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
         }
         else
         {
-            //QMessageBox::critical(0, tr("Verify account failed"), );
             if (errorTokenInvalid == nErrorCode)
             {
                 ui->label_passwordError->setText(tr("User name or password is not correct!"));
@@ -1327,7 +1232,8 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_serverType = EnterpriseServer;
     ApiEntry::setEnterpriseServerIP(ip);
 
-    downloadLogoFromWizBox(false);
+//    downloadLogoFromWizBox();
+    downloadOEMSettingsFromWizBox();
 }
 
 void CWizLoginDialog::onWizBoxSearchingTimeOut()
@@ -1336,6 +1242,67 @@ void CWizLoginDialog::onWizBoxSearchingTimeOut()
     m_searchingDialog->reject();
     closeWizBoxUdpClient();
     CWizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
+}
+
+bool CWizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
+{
+    if (settings.isEmpty())
+        return false;
+    //
+    rapidjson::Document d;
+    d.Parse<0>(settings.toUtf8().constData());
+
+    if (d.FindMember("LogoConfig") && d.FindMember("LogoConfig")->value.FindMember("enable")
+            && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
+    {
+        QString strUrl = d.FindMember("LogoConfig")->value.FindMember("common") ?
+                    d.FindMember("LogoConfig")->value.FindMember("common")->value.GetString() : "";
+        if (strUrl.isEmpty())
+        {
+            qDebug() << "Can not found logo path in oem settings";
+            return false;
+        }
+
+        if (!strUrl.startsWith("http"))
+        {
+            strUrl = "http://" + m_lineEditServer->text() + strUrl;
+        }
+
+        downloadLogoFromWizBox(strUrl);
+    }
+
+    return true;
+}
+
+void CWizLoginDialog::onOEMLogoDownloaded(const QString& logoFile)
+{
+    if (!QFile::exists(logoFile))
+        return;
+    //
+    setLogo(logoFile);
+    m_oemLogoMap.insert(m_lineEditServer->text(), logoFile);
+}
+
+void CWizLoginDialog::showErrorMessage(const QString& stterror)
+{
+    ui->label_passwordError->setText(stterror);
+}
+
+void CWizLoginDialog::onCheckServerLicenceFinished(bool result, const QString& settings)
+{
+    if (result)
+    {
+        // update oem setttings
+        onOEMSettingsDownloaded(settings);
+        CWizOEMSettings::updateOEMSettings(userId(), settings);
+        //
+        emit accountCheckStart();
+        doOnlineVerify();
+    }
+    else
+    {
+        CWizMessageBox::warning(this, tr("Info"), tr("The user can't sigin in to the server, it had been signed in to other servers."));
+    }
 }
 
 void CWizLoginDialog::onWizLogInStateEntered()
@@ -1455,9 +1422,7 @@ void CWizLoginDialog::initSateMachine()
     else
     {
         st->setInitialState(m_stateWizLogIn);
-    }
-//    QHistoryState* stHistory = new QHistoryState(st);
-//    stHistory->setDefaultState(m_stateWizLogIn);
+    }    
 
     connect(m_stateWizLogIn, SIGNAL(entered()), SLOT(onWizLogInStateEntered()));
     connect(m_stateWizBoxLogIn, SIGNAL(entered()), SLOT(onWizBoxLogInStateEntered()));
@@ -1491,6 +1456,27 @@ void CWizLoginDialog::initSateMachine()
     stMachine->start();
 }
 
+void CWizLoginDialog::initOEMDownloader()
+{
+    m_oemDownloader = new CWizOEMDownloader(nullptr);
+    connect(m_oemDownloader, SIGNAL(oemSettingsDownloaded(QString)),
+            SLOT(onOEMSettingsDownloaded(QString)));
+    connect(m_oemDownloader, SIGNAL(logoDownloaded(QString)),
+            SLOT(onOEMLogoDownloaded(QString)));
+    connect(m_oemDownloader, SIGNAL(errorMessage(QString)),
+            SLOT(showErrorMessage(QString)));
+    connect(m_oemDownloader, SIGNAL(checkLicenceFinished(bool, QString)),
+            SLOT(onCheckServerLicenceFinished(bool, QString)));
+    connect(this, SIGNAL(logoDownloadRequest(QString)),
+            m_oemDownloader, SLOT(downloadOEMLogo(QString)));
+    connect(this, SIGNAL(checkServerLicenceRequest(QString)),
+            m_oemDownloader, SLOT(onCheckServerLicenceRequest(QString)));
+
+    m_oemThread = new QThread();
+    m_oemThread->start();
+    m_oemDownloader->moveToThread(m_oemThread);
+}
+
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
     QString strUrl = WizService::ApiEntry::standardCommandUrl("snspage", false);
@@ -1498,4 +1484,110 @@ void CWizLoginDialog::on_btn_snsLogin_clicked()
     connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
     dlg.exec();
+}
+
+
+QString CWizOEMDownloader::_downloadOEMSettings()
+{
+    // get oem settings from server
+    QNetworkAccessManager net;
+    ApiEntry::setEnterpriseServerIP(m_server);
+    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+    qDebug() << "get oem from server : " << strUrl;
+
+    QEventLoop loop;
+    QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
+
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        qDebug() << "Download oem data failed!";
+        emit errorMessage(tr("Can not find server %1").arg(m_server));
+        reply->deleteLater();
+        return "";
+    }
+
+    QString strResult = reply->readAll();
+    reply->deleteLater();    
+    return strResult;
+}
+
+CWizOEMDownloader::CWizOEMDownloader(QObject* parent)
+    : QObject(parent)
+    , m_server(QString())
+{
+}
+
+void CWizOEMDownloader::setServerIp(const QString& ip)
+{
+    m_server = ip;
+}
+
+void CWizOEMDownloader::downloadOEMLogo(const QString& strUrl)
+{
+    if (strUrl.isEmpty())
+        return; 
+
+    QString strFileName = WizGenGUIDLowerCaseLetterOnly() + ".png";
+    CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, strFileName, "", true);
+    QEventLoop loop;
+    loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
+    //  just wait for 15 seconds
+    QTimer::singleShot(15 * 1000, &loop, SLOT(quit()));
+    downloader->startDownload();
+    loop.exec();
+
+    strFileName = Utils::PathResolve::tempPath() + strFileName;
+    if (!QFile::exists(strFileName))
+    {
+        qDebug() << "Download logo image failed";
+        return;
+    }
+
+    emit logoDownloaded(strFileName);
+}
+
+void CWizOEMDownloader::downloadOEMSettings()
+{
+    QString settings = _downloadOEMSettings();
+    qDebug() << "oem settings downloaded : " << settings;
+    emit oemSettingsDownloaded(settings);
+}
+
+void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
+{
+    QString settings = _downloadOEMSettings();
+    if (settings.isEmpty())
+    {
+        return;
+    }
+
+    qDebug() << "oem settings : " << settings;
+    //
+    rapidjson::Document d;
+    d.Parse<0>(settings.toUtf8().constData());
+
+    if (d.FindMember("licence"))
+    {
+        QString newLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
+
+        QString strOldLicence = licence;
+        // check wheather licence changed
+        qDebug() << "compare licence : " << newLicence << "  with old licence : " << strOldLicence;
+        if (newLicence.isEmpty() || (!strOldLicence.isEmpty() && strOldLicence != newLicence))
+        {
+            qDebug() << "compare licence failed";
+            emit checkLicenceFinished(false, settings);
+        }
+        else
+        {
+            emit checkLicenceFinished(true, settings);
+        }
+    }
+    else
+    {
+        emit errorMessage(tr("Licence not found : %1").arg(settings.left(100)));
+        qDebug() << "Can not find licence from oem settings";
+    }
 }

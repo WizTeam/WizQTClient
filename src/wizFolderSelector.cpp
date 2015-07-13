@@ -117,7 +117,7 @@ QString CWizFolderSelector::selectedFolder()
     return NULL;
 }
 
-bool CWizFolderSelector::isSelectPrivateFolder()
+bool CWizFolderSelector::isSelectPersonalFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
     if (!m_bAcceptRoot)
@@ -155,7 +155,7 @@ WIZTAGDATA CWizFolderSelector::selectedGroupFolder()
 void CWizFolderSelector::on_accept()
 {
     // accept only if user select folder item.
-    if (isSelectPrivateFolder() || isSelectGroupFolder())
+    if (isSelectPersonalFolder() || isSelectGroupFolder())
     {
         accept();
     }

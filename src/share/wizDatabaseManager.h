@@ -103,6 +103,7 @@ Q_SIGNALS:
                          const WIZMESSAGEDATA& msgNew);
     void messageDeleted(const WIZMESSAGEDATA& msg);
 
+    void favoritesChanged(const QString& favorites);
 };
 
 #endif // WIZDATABASEMANAGER_H

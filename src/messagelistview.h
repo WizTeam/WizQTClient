@@ -114,6 +114,7 @@ public:
     void addMessage(const WIZMESSAGEDATA& msg, bool sort);
     void selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg);
     void specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg);
+    void selectMessage(qint64 nId);
 
     int rowFromId(qint64 nId) const;
     MessageListViewItem* messageItem(int row) const;

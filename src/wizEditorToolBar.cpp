@@ -218,6 +218,8 @@ QIcon createColorIcon(QColor color)
     return QIcon(pixmap);
 }
 
+const int TOOLBUTTON_MARGIN_WIDTH = 12;
+const int TOOLBUTTON_ARRWO_WIDTH = 16;
 
 using namespace Core::Internal;
 
@@ -242,7 +244,13 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
 //        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowUp, subOpt);
 
         subOpt.rect = rectSub.adjusted(0, rectSub.height()/2 - 3, 0, -rectSub.height()/2 + 3);
-        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
+//        drawComboPrimitive(&painter, QStyle::PE_IndicatorArrowDown, subOpt);
+        QRect rcArrow = opt.rect;
+        rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 8);
+        rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
+        rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
+        static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarComboboxArrow", true));
+        painter.drawPixmap(rcArrow, arrow);
     }
 
     // draw text
@@ -342,7 +350,31 @@ protected:
 
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        if (opt.arrowType == Qt::RightArrow)
+            rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_MARGIN_WIDTH);
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+
+        if (opt.arrowType == Qt::RightArrow)
+        {
+            QRect rcArrow = opt.rect;
+            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
+            rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
+            rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
+            static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+            p.drawPixmap(rcArrow, arrow);
+
+//            QMatrix matrix;
+//            matrix.translate(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH / 2 -1, opt.rect.center().y() + 2);
+//            QPainterPath path;
+//            path.moveTo(0, 2.3);
+//            path.lineTo(-2.3, -2.3);
+//            path.lineTo(2.3, -2.3);
+//            p.setMatrix(matrix);
+//            p.setPen(Qt::NoPen);
+//            p.setBrush(QColor(0, 0, 0, 255));
+//            p.setRenderHint(QPainter::Antialiasing);
+//            p.drawPath(path);
+        }
     }
 
     virtual void leaveEvent(QEvent* event) {
@@ -359,6 +391,8 @@ protected:
 
     virtual QSize sizeHint() const
     {
+        if (arrowType() == Qt::RightArrow)
+            return QSize(20 + TOOLBUTTON_MARGIN_WIDTH, 20);
         return QSize(20, 20);
     }
 
@@ -668,20 +702,25 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnStrikeThrough->setToolTip(tr("StrikeThrough"));
     connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
 
-    m_btnJustifyLeft = new CWizToolButton(this);
-    m_btnJustifyLeft->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
-    m_btnJustifyLeft->setToolTip(tr("JustifyLeft"));
-    connect(m_btnJustifyLeft, SIGNAL(clicked()), SLOT(on_btnJustifyLeft_clicked()));
+    m_btnJustify = new CWizToolButton(this);
+    m_btnJustify->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
+    m_btnJustify->setCheckable(false);
+    m_btnJustify->setArrowType(Qt::RightArrow);
+    m_btnJustify->setPopupMode(QToolButton::MenuButtonPopup);
+    m_btnJustify->setToolTip(tr("Justify"));
+    connect(m_btnJustify, SIGNAL(clicked()), SLOT(on_btnJustify_clicked()));
+    m_menuJustify = new QMenu(m_btnJustify);
+    m_actionJustifyLeft = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"),
+                             tr("JustifyLeft"), this, SLOT(on_btnJustifyLeft_clicked()));
+    m_actionJustifyLeft->setCheckable(true);
+    m_actionJustifyCenter = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"),
+                             tr("JustifyCenter"), this, SLOT(on_btnJustifyCenter_clicked()));
+    m_actionJustifyCenter->setCheckable(true);
+    m_actionJustifyRight = m_menuJustify->addAction(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"),
+                             tr("JustifyRight"), this, SLOT(on_btnJustifyRight_clicked()));
+    m_actionJustifyRight->setCheckable(true);
+    m_btnJustify->setMenu(m_menuJustify);
 
-    m_btnJustifyCenter = new CWizToolButton(this);
-    m_btnJustifyCenter->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyCenter"));
-    m_btnJustifyCenter->setToolTip(tr("JustifyCenter"));
-    connect(m_btnJustifyCenter, SIGNAL(clicked()), SLOT(on_btnJustifyCenter_clicked()));
-
-    m_btnJustifyRight = new CWizToolButton(this);
-    m_btnJustifyRight->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyRight"));
-    m_btnJustifyRight->setToolTip(tr("JustifyRight"));
-    connect(m_btnJustifyRight, SIGNAL(clicked()), SLOT(on_btnJustifyRight_clicked()));
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
@@ -775,9 +814,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->addWidget(m_btnUnderLine);
     layout->addWidget(m_btnStrikeThrough);
     layout->addSpacing(12);
-    layout->addWidget(m_btnJustifyLeft);
-    layout->addWidget(m_btnJustifyCenter);
-    layout->addWidget(m_btnJustifyRight);
+    layout->addWidget(m_btnJustify);
     layout->addSpacing(12);
     layout->addWidget(m_btnUnorderedList);
     layout->addWidget(m_btnOrderedList);
@@ -1131,26 +1168,25 @@ void EditorToolBar::resetToolbar()
     state = m_editor->editorCommandQueryCommandState("justify");
     value = m_editor->editorCommandQueryCommandValue("justify");
     if (state == -1) {
-        m_btnJustifyLeft->setEnabled(false);
-        m_btnJustifyCenter->setEnabled(false);
-        m_btnJustifyRight->setEnabled(false);
+        m_btnJustify->setEnabled(false);
     } else {
-        m_btnJustifyLeft->setEnabled(true);
-        m_btnJustifyCenter->setEnabled(true);
-        m_btnJustifyRight->setEnabled(true);
+        m_btnJustify->setEnabled(true);
 
         if (value == "left") {
-            m_btnJustifyLeft->setChecked(true);
-            m_btnJustifyCenter->setChecked(false);
-            m_btnJustifyRight->setChecked(false);
+            m_actionJustifyLeft->setChecked(true);
+            m_actionJustifyCenter->setChecked(false);
+            m_actionJustifyRight->setChecked(false);
+            m_btnJustify->setIcon(m_actionJustifyLeft->icon());
         } else if (value == "center") {
-            m_btnJustifyLeft->setChecked(false);
-            m_btnJustifyCenter->setChecked(true);
-            m_btnJustifyRight->setChecked(false);
+            m_actionJustifyLeft->setChecked(false);
+            m_actionJustifyCenter->setChecked(true);
+            m_actionJustifyRight->setChecked(false);
+            m_btnJustify->setIcon(m_actionJustifyCenter->icon());
         } else if (value == "right") {
-            m_btnJustifyLeft->setChecked(false);
-            m_btnJustifyCenter->setChecked(false);
-            m_btnJustifyRight->setChecked(true);
+            m_actionJustifyLeft->setChecked(false);
+            m_actionJustifyCenter->setChecked(false);
+            m_actionJustifyRight->setChecked(true);
+            m_btnJustify->setIcon(m_actionJustifyRight->icon());
         }
     }
 
@@ -1939,6 +1975,20 @@ void EditorToolBar::on_btnStrikeThrough_clicked()
 {
     if (m_editor) {
         m_editor->editorCommandExecuteStrikeThrough();
+    }
+}
+
+void EditorToolBar::on_btnJustify_clicked()
+{
+    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    analyzer.LogAction("justifyInEditorToolBar");
+    //
+    QPoint pos = m_btnJustify->mapToGlobal(QPoint(0, m_btnJustify->height()));
+    m_menuJustify->move(pos);
+    QAction*action = m_menuJustify->exec();
+    if (action)
+    {
+        m_btnJustify->setIcon(action->icon());
     }
 }
 

@@ -32,6 +32,7 @@
 #include "share/wizAnalyzer.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
+#include "widgets/wizLocalProgressWebView.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -47,7 +48,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_app(app)
     , m_editTitle(new TitleEdit(this))
     , m_tagBar(new CWizTagBar(app, this))
-    , m_infoBar(new InfoBar(this))
+    , m_infoBar(new InfoBar(app, this))
     , m_notifyBar(new NotifyBar(this))
     , m_editorBar(new EditorToolBar(app, this))
     , m_editor(NULL)
@@ -221,13 +222,15 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
+        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
         m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
-        m_shareBtn->setVisible(bIsGroup ? false : true);
+        m_shareBtn->setVisible(bIsGroup ? false : !oemSettings.isHideShare());
         m_shareBtn->setEnabled(bIsGroup ? false : true);
         m_historyBtn->setEnabled(true);
         m_commentsBtn->setEnabled(true);
-        m_emailBtn->setEnabled(true);
+        m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
+        m_emailBtn->setEnabled(!oemSettings.isHideShareByEmail());
     }
 }
 
@@ -301,7 +304,9 @@ void TitleBar::loadErrorPage()
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
+    noteView()->commentWidget()->hideLocalProgress();
     QWebView* comments = noteView()->commentView();
+    comments->setVisible(true);
 #endif
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
@@ -551,17 +556,17 @@ bool isNetworkAccessible()
     //return man.isOnline();
 }
 
-#define COMMENT_FRAME_WIDTH 300
+#define COMMENT_FRAME_WIDTH 310
 
 void TitleBar::onCommentsButtonClicked()
 {
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
-    if (comments->isVisible()) {
-        comments->hide();
+    if (commentWidget->isVisible()) {
+        commentWidget->hide();
 
         WizGetAnalyzer().LogAction("hideComments");
 
@@ -572,8 +577,9 @@ void TitleBar::onCommentsButtonClicked()
 
     if (isNetworkAccessible()) {
         if (!m_commentsUrl.isEmpty()) {
-            comments->load(m_commentsUrl);
-            QSplitter* splitter = qobject_cast<QSplitter*>(comments->parentWidget());
+            commentWidget->showLocalProgress();
+            commentWidget->web()->load(m_commentsUrl);
+            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
             Q_ASSERT(splitter);
             QList<int> li = splitter->sizes();
             Q_ASSERT(li.size() == 2);
@@ -581,10 +587,10 @@ void TitleBar::onCommentsButtonClicked()
             lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
             lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
             splitter->setSizes(lin);
-            comments->show();
+            commentWidget->show();
         } else {
             loadErrorPage();
-            comments->show();
+            commentWidget->show();
         }
 
     } else {
@@ -597,12 +603,16 @@ void TitleBar::onCommentPageLoaded(bool ok)
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
     if (!ok)
     {
         loadErrorPage();
-        comments->show();
+        commentWidget->show();
+    }
+    else
+    {
+        commentWidget->hideLocalProgress();
     }
 #ifdef USEWEBENGINE
     else
@@ -648,21 +658,30 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    QWebView* comments = noteView()->commentView();
+    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
 
-    if (strToken.isEmpty()) {
-        comments->hide();
+    if (strToken.isEmpty())
+    {
+        commentWidget->hide();
         return;
     }
 
+    commentWidget->showLocalProgress();
     QString strKbGUID = noteView()->note().strKbGUID;
     QString strGUID = noteView()->note().strGUID;
     m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
-    if (comments->isVisible()) {
-//        comments->load(QUrl());
-        comments->load(m_commentsUrl);
+
+    if (m_commentsUrl.isEmpty())
+    {
+        loadErrorPage();
+        return;
+    }
+
+    if (commentWidget->isVisible())
+    {
+        commentWidget->web()->load(m_commentsUrl);
     }
 
     QString kUrl = WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID);

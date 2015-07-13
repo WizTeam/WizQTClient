@@ -3,6 +3,7 @@
 #include "wizmainwindow.h"
 #include "coreplugin/icore.h"
 #include "utils/pathresolve.h"
+#include "widgets/wizLocalProgressWebView.h"
 
 #include <QWebView>
 #include <QMovie>
@@ -26,32 +27,27 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    m_web = new QWebView(this);
-    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
+    CWizLocalProgressWebView* localProgressWebView = new CWizLocalProgressWebView(this);
+
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
+    layout->addWidget(localProgressWebView);
+    setLayout(layout);
+
+    m_web = localProgressWebView->web();
 //    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
 //            SLOT(on_networkRequest_finished(QNetworkReply*)));
     connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
     connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
 
-    m_movie = new QMovie(this);
-    m_movie->setFileName(":/loading.gif");
+    m_movie = localProgressWebView->movie();
+    m_labelProgress = localProgressWebView->labelProgress();
 
-    m_labelProgress = new QLabel(this);
-    m_labelProgress->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_labelProgress->setAlignment(Qt::AlignCenter);
-    m_labelProgress->setMovie(m_movie);
-
-    QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
-    layout->setSpacing(0);
-    setLayout(layout);
-
-    layout->addWidget(m_labelProgress);
-    layout->addWidget(m_web);
-    m_web->setVisible(true);
+    //
     m_labelProgress->setVisible(false);
+    m_web->setVisible(true);
 }
 
 QWebView*CWizWebSettingsDialog::webVew()

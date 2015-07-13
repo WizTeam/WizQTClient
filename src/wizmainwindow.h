@@ -54,7 +54,7 @@ class QListWidgetItem;
 class CWizCategoryViewMessageItem;
 class CWizCategoryViewShortcutItem;
 class CWizDocumentWebView;
-
+class CWizTrayIcon;
 class CWizMobileFileReceiver;
 
 namespace WizService {
@@ -138,7 +138,7 @@ private:
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
     //
-    QSystemTrayIcon* m_tray;
+    CWizTrayIcon* m_tray;
     QMenu* m_trayMenu;
 
 #ifdef USECOCOATOOLBAR
@@ -356,6 +356,7 @@ public Q_SLOTS:
 
     void on_syncProcessLog(const QString& strMsg);
     void on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg);
+    void on_bubbleNotification_request(const QVariant& param);
 
     void on_TokenAcquired(const QString& strToken);
 
@@ -392,8 +393,9 @@ public Q_SLOTS:
     void on_trayIcon_newDocument_clicked();
     void on_hideTrayIcon_clicked();
     void on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason);
-    void showTrayIconMessage(const QString& strTitle, const QString& strInfo);
+    void showBubbleNotification(const QString& strTitle, const QString& strInfo);
     void showTrayIconMenu();
+    void on_viewMessage_request(qint64 messageID);
     //
     void shiftVisableStatus();
 
@@ -464,7 +466,7 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
-    void showDocmentList(CWizCategoryBaseView* category);
+    void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
     void searchNotesBySQL(const QString& strSQLWhere);
@@ -481,6 +483,7 @@ private:
     void loadMessageByUserGuid(const QString& guid);
 
     //
+private slots:
     void windowActived();
 };
 

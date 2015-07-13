@@ -45,8 +45,11 @@ bool CWizOEMSettings::settingFileExists(const QString& strUserId)
 
 void CWizOEMSettings::updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData)
 {
+    if (strUserId.isEmpty() || strOEMJSONData.isEmpty())
+        return;
+
     QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
-    QSettings settings(strFile);
+    QSettings settings(strFile, QSettings::IniFormat);
 
     rapidjson::Document d;
     d.Parse<0>(strOEMJSONData.toUtf8().constData());

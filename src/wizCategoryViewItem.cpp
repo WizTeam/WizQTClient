@@ -498,7 +498,7 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
 CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerApp& app,
                                                                    const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", Category_ShortcutRootItem)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "shortcut_normal"),
@@ -540,14 +540,14 @@ bool CWizCategoryViewShortcutRootItem::accept(CWizDatabase& /*db*/, const WIZDOC
     return false;
 }
 
-void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*forceCopy*/)
+void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& doc, bool /*forceCopy*/)
 {
     for (int i = 0; i < childCount(); i++)
     {
         CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
         if (pItem)
         {
-            if (pItem->guid() == data.strGUID)
+            if (pItem->guid() == doc.strGUID)
                 return;
         }
     }
@@ -555,9 +555,10 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
     if (isContainsPlaceHoldItem())
         removePlaceHoldItem();
 
-    bool isEncrypted = data.nProtected == 1;
+    bool isEncrypted = doc.nProtected == 1;
     CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
-                                                                           data.strTitle, data.strKbGUID, data.strGUID, isEncrypted);
+                                                                           doc.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                                           doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
     addChild(pItem);
     sortChildren(0, Qt::AscendingOrder);
 
@@ -571,6 +572,84 @@ void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& data, bool /*
         categoryView->saveShortcutState();
     });
 #endif
+}
+
+void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pItem)
+{
+    CWizCategoryViewShortcutItem* newItem = nullptr;
+    if (pItem->type() == Category_FolderItem)
+    {
+        const CWizCategoryViewFolderItem* folderItem = dynamic_cast<const CWizCategoryViewFolderItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, CWizDatabase::GetLocationName(folderItem->location()),
+                                                                                 CWizCategoryViewShortcutItem::PersonalFolder, "", "", folderItem->location());
+    }
+    else if (pItem->type() == Category_TagItem)
+    {
+        const CWizCategoryViewTagItem* tagItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, tagItem->tag().strName, CWizCategoryViewShortcutItem::PersonalTag,
+                                                    tagItem->tag().strKbGUID, tagItem->tag().strGUID, "");
+    }
+    else if (pItem->type() == Category_GroupItem)
+    {
+        const CWizCategoryViewGroupItem* groupItem = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
+        newItem = new CWizCategoryViewShortcutItem(m_app, groupItem->tag().strName, CWizCategoryViewShortcutItem::GroupTag,
+                                                    groupItem->tag().strKbGUID, groupItem->tag().strGUID, "");
+    }
+    //
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *shortcutItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (shortcutItem)
+        {
+            switch (shortcutItem->shortcutType()) {
+            case CWizCategoryViewShortcutItem::PersonalTag:
+            case CWizCategoryViewShortcutItem::GroupTag:
+            {
+                if (shortcutItem->guid() == newItem->guid())
+                {
+                    delete newItem;
+                    return;
+                }
+            }
+                break;
+            case CWizCategoryViewShortcutItem::PersonalFolder:
+            {
+                if (shortcutItem->location() == newItem->location())
+                {
+                    delete newItem;
+                    return;
+                }
+            }
+                break;
+            default:
+                continue;
+            }
+        }
+    }
+
+    //
+    addChild(newItem);
+    if (isContainsPlaceHoldItem())
+        removePlaceHoldItem();
+    //
+    treeWidget()->blockSignals(true);
+    treeWidget()->setCurrentItem(newItem);
+    treeWidget()->blockSignals(false);
+    sortChildren(0, Qt::AscendingOrder);
+
+    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+}
+
+bool CWizCategoryViewShortcutRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    if (!pItem)
+        return false;
+
+    if (pItem->type() == Category_FolderItem || pItem->type() == Category_TagItem || pItem->type() == Category_GroupItem)
+        return true;
+
+    return false;
 }
 
 QString CWizCategoryViewShortcutRootItem::getSectionName()
@@ -767,20 +846,26 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
 
    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
 
+   Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+   CWizFolder folder(myDb, location());
    if (!forceCopy && kbGUID() == data.strKbGUID)
    {
-       CWizFolder folder(myDb, location());
        CWizDocument doc(myDb, data);
+       doc.makeSureObjectDataExists(window->downloaderHost());
        doc.MoveTo(&folder);
    }
    else
    {
        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-       Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
        //QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
        QString strLocation = location();
        WIZTAGDATA tagEmpty;
        QString strNewDocGUID;
+       CWizDocument doc(sourceDb, data);
+       doc.makeSureObjectDataExists(window->downloaderHost());
+       doc.CopyTo(myDb, &folder, true, true, window->downloaderHost());
+
+       /*
        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
 
        // copy document tag for personal db
@@ -794,6 +879,7 @@ void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCop
                myDb.SetDocumentTags(newDoc, arrayTagGUID);
            }
        }
+       */
    }
 }
 
@@ -953,6 +1039,11 @@ bool CWizCategoryViewTagItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     }
 
     return false;
+}
+
+bool CWizCategoryViewTagItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    return pItem && pItem->type() == Category_TagItem;
 }
 
 void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
@@ -1417,19 +1508,21 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
 
+    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
     if (!forceCopy && data.strKbGUID == m_strKbGUID)
     {
-        CWizDocument doc(myDb, data);
+        CWizDocument doc(targetDb, data);
+        doc.makeSureObjectDataExists(window->downloaderHost());
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
             doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
-        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        targetDb.GetDocumentTags(data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
@@ -1441,11 +1534,14 @@ void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool force
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = myDb.GetDefaultNoteLocation();
-        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strLocation = targetDb.GetDefaultNoteLocation();
         QString strNewDocGUID;
         WIZTAGDATA tagEmpty;
-        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
+
+        CWizDocument doc(sourceDb, data);
+        doc.makeSureObjectDataExists(window->downloaderHost());
+        doc.CopyTo(targetDb, tagEmpty, true, window->downloaderHost());
     }
 }
 
@@ -1706,19 +1802,21 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     if (!acceptDrop(data))
         return;
 
-    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
 
+    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
     if (!forceCopy && data.strKbGUID == m_strKbGUID)
     {
-        CWizDocument doc(myDb, data);
+        CWizDocument doc(targetDb, data);
+        doc.makeSureObjectDataExists(window->downloaderHost());
         if (data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(myDb, myDb.GetDefaultNoteLocation());
+            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
             doc.MoveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
-        myDb.GetDocumentTags(data.strGUID, arrayTag);
+        targetDb.GetDocumentTags(data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
@@ -1732,10 +1830,13 @@ void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
     else
     {
         CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = myDb.GetDefaultNoteLocation();
-        Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+        QString strLocation = targetDb.GetDefaultNoteLocation();
         QString strNewDocGUID;
-        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+//        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
+
+        CWizDocument doc(sourceDb, data);
+        doc.makeSureObjectDataExists(window->downloaderHost());
+        doc.CopyTo(targetDb, m_tag, true, window->downloaderHost());
     }
 }
 
@@ -1867,26 +1968,53 @@ void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy
 
 
 CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
-                                                           const QString& strName, const QString& strKbGuid,
-                                                           const QString& strGuid, bool bEncrypted)
+                                                           const QString& strName, ShortcutType type, const QString& strKbGuid,
+                                                           const QString& strGuid, const QString& location, bool bEncrypted)
     : CWizCategoryViewItemBase(app, strName, strKbGuid, Category_ShortcutItem)
     , m_strGuid(strGuid)
+    , m_type(type)
+    , m_location(location)
 {
     QIcon icon;
-    if (bEncrypted)
+    switch (type) {
+    case Document:
     {
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+        if (bEncrypted)
+        {
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
+                         QSize(16, 16), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+                         QSize(16, 16), QIcon::Selected);
+        }
+        else
+        {
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+                         QSize(16, 16), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                         QSize(16, 16), QIcon::Selected);
+        }
+    }
+        break;
+    case PersonalFolder:
+    case GroupTag:
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_normal"),
                      QSize(16, 16), QIcon::Normal);
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
                      QSize(16, 16), QIcon::Selected);
     }
-    else
+        break;
+    case PersonalTag:
     {
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_normal"),
                      QSize(16, 16), QIcon::Normal);
-        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
                      QSize(16, 16), QIcon::Selected);
     }
+        break;
+    }
+
+    //
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -1901,7 +2029,7 @@ void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, 
 
 CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
         CWizExplorerApp& app, const QString& strName)
-    : CWizCategoryViewItemBase(app, strName)
+    : CWizCategoryViewItemBase(app, strName, "", Category_ShortcutPlaceHoldItem)
 {
 
 }

@@ -59,7 +59,7 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
         loop.exec();
 //        qDebug() << "[Sync]Xml rpc event loop finished";
         //
-        if (loop.timeOut() && nCounter == 0)
+        if (loop.error() && nCounter == 0)
         {
             nCounter ++;
             continue;

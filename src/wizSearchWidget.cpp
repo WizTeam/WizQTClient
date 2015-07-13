@@ -89,13 +89,10 @@ void CWizSearchWidget::on_searchTextChanged(QString str)
 CWizSearchEdit::CWizSearchEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_menu(new QMenu(this))
-{
-    bool bHighPixel = WizIsHighPixel();
-    QString strSearch = bHighPixel ? "mactoolbarsearch@2x" : "mactoolbarsearch";
-    QString strSearchIcon = Utils::StyleHelper::skinResourceFileName(strSearch);
+{    
+    QString strSearchIcon = Utils::StyleHelper::skinResourceFileName("mactoolbarsearch", true);
     m_searchIcon = QPixmap(strSearchIcon);
-    QString strDelete = bHighPixel ? "mactoolbardelete@2x" : "mactoolbardelete";
-    QString strDeleteIcon = Utils::StyleHelper::skinResourceFileName(strDelete);
+    QString strDeleteIcon = Utils::StyleHelper::skinResourceFileName("mactoolbardelete", true);
     m_deleteIcon = QPixmap(strDeleteIcon);
 
     m_menu->addAction(tr("Advanced search"), this, SLOT(on_actionAdvancedSearch()));

@@ -630,7 +630,7 @@ WizDocumentViewMode CWizUserSettings::noteViewMode() const
         return WizDocumentViewMode(mode.toInt());
     }
 
-    return viewmodeAlwaysEditing;
+    return viewmodeAlwaysReading;
 }
 
 int CWizUserSettings::syncInterval() const

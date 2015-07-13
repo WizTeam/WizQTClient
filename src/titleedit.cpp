@@ -212,6 +212,8 @@ void TitleEdit::onTitleEditingFinished()
         if (strNewTitle.isEmpty() && !placeholderText().isEmpty()) {
             strNewTitle = placeholderText().left(255);
         }
+        strNewTitle.replace("\n", " ");
+        strNewTitle.replace("\r", " ");
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);

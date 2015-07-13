@@ -154,11 +154,12 @@ void CWizTagListWidget::setDocuments(const CWizDocumentDataArray& arrayDocument)
         CWizTagListWidgetItem* pItem = dynamic_cast<CWizTagListWidgetItem*>(m_list->item(i));
 
         int n  = listGUIDs.count(pItem->tag().strGUID);
-        m_list->takeItem(i);
         if (n  && n < arrayDocument.size()) {
-            pItem->setCheckState(Qt::PartiallyChecked);
+            m_list->takeItem(i);
             m_list->insertItem(0, pItem);
+            pItem->setCheckState(Qt::PartiallyChecked);
         } else if (n == arrayDocument.size()) {
+            m_list->takeItem(i);
             m_list->insertItem(0, pItem);
             pItem->setCheckState(Qt::Checked);
         }

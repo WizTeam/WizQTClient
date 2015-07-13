@@ -5,6 +5,7 @@
 
 struct WIZDOCUMENTDATA;
 class QLabel;
+class CWizExplorerApp;
 
 namespace Core {
 namespace Internal {
@@ -14,7 +15,7 @@ class InfoBar : public QWidget
     Q_OBJECT
 
 public:
-    explicit InfoBar(QWidget *parent);
+    explicit InfoBar(CWizExplorerApp& app, QWidget *parent);
     void setDocument(const WIZDOCUMENTDATA& data);
 
 private:
@@ -22,6 +23,7 @@ private:
     QLabel* m_labelModifiedTime;
     QLabel* m_labelAuthor;
     QLabel* m_labelSize;
+    CWizExplorerApp& m_app;
 };
 
 } // namespace Internal

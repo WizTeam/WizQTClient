@@ -155,6 +155,13 @@ enum WizKMSyncProgressMessageType
 };
 
 
+enum WizBubbleMessageType {
+    wizBubbleNoMessage,
+    wizBubbleNormal,
+    wizBubbleMessageCenter,
+    wizBubbleUnknowMessage
+};
+
 
 struct IWizKMSyncEvents
 {
@@ -167,7 +174,9 @@ public:
 
     virtual void OnSyncProgress(int pos) {}
     virtual HRESULT OnText(WizKMSyncProgressMessageType type, const QString& strStatus) = 0;
-    virtual HRESULT OnPromptMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage) = 0;
+    virtual HRESULT OnMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage) = 0;
+    virtual HRESULT OnBubbleNotification(const QVariant& param) = 0;
+
     virtual void SetStop(bool b) { m_bStop = b; }
     virtual bool IsStop() const { return m_bStop; }
     virtual void SetLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }
