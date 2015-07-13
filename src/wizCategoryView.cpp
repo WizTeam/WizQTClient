@@ -2449,6 +2449,8 @@ void CWizCategoryView::updateGroupsData()
         setGroupRootItemExtraButton(pGroupItem, group);
     }
 
+    resetSections();
+
     //
 //    CWizGroupDataArray arrayOwnGroup;
 //    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
@@ -2617,6 +2619,8 @@ void CWizCategoryView::resetSections()
         }
     }
 
+    sortItems(0, Qt::AscendingOrder);
+
     QString lastSectionName;
     //
     for (int i = 0; i < topLevelItemCount(); i++)
@@ -2644,7 +2648,7 @@ void CWizCategoryView::resetSections()
                 //
                 if (pExistingSection)
                 {
-                    pExistingSection->reset(sectionName, pItem->getSortOrder());
+                    pExistingSection->reset(sectionName, pItem->getSortOrder() - 1);
                 }
                 else
                 {

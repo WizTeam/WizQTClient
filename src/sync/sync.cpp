@@ -1836,12 +1836,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     ////获得群组信息////
     */
     //
-    CWizGroupDataArray arrayGroup;
-    if (server.GetGroupList(arrayGroup))
-    {
-        pDatabase->OnDownloadGroups(arrayGroup);
-    }
-
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
@@ -1858,7 +1852,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             pEvents->SetLastErrorCode(server.GetLastErrorCode());
             return false;
         }
+    }
 
+    CWizGroupDataArray arrayGroup;
+    if (server.GetGroupList(arrayGroup))
+    {
+        pDatabase->OnDownloadGroups(arrayGroup);
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
     }
     // sync analyzer info one time a day

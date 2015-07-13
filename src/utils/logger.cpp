@@ -71,7 +71,7 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
     case QtDebugMsg:
         fprintf(stderr, "[DEBUG] %s\n", msg.toUtf8().constData());
         break;
-#if QT_VERSION > 0x050500
+#if QT_VERSION >= 0x050500
     case QtInfoMsg:
         fprintf(stderr, "[INFO] %s\n", msg.toUtf8().constData());
         break;

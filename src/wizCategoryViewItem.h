@@ -457,7 +457,7 @@ public:
         : CWizCategoryViewLinkItem(app, strName, commandId) {}
     //
     virtual QString getSectionName();
-    virtual int getSortOrder() const { return 33; }
+    virtual int getSortOrder() const { return 29; }
 
 
 };
