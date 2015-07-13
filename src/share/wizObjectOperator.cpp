@@ -24,11 +24,6 @@ CWizDocumentOperator::~CWizDocumentOperator()
 {
     if (m_thread)
     {
-        qDebug() << "copy destractor in thread : " << QThread::currentThreadId();
-        connect(m_thread, &QThread::destroyed, [](){
-           qDebug() << "document opreator destroyed";
-        });
-
         connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
         m_thread->quit();
     }

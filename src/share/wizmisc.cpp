@@ -2524,17 +2524,20 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
             return false;
 
         QEventLoop loop;
+#if QT_VERSION >= 0x050000
         QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
             QObject::disconnect(downloaderHost, 0, 0, 0);
             loop.quit();
         });
+#else
+        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
+#endif
         downloaderHost->downloadData(doc);
         loop.exec();
     }
 
     return PathFileExists(strFileName);
 }
-
 
 bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
                                                       CWizObjectDataDownloaderHost* downloaderHost)
@@ -2549,10 +2552,14 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
             return false;
 
         QEventLoop loop;
+#if QT_VERSION >= 0x050000
         QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
             QObject::disconnect(downloaderHost, 0, 0, 0);
             loop.quit();
         });
+#else
+        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
+#endif
 
         downloaderHost->downloadData(attachData);
         loop.exec();
