@@ -2457,6 +2457,14 @@ void MainWindow::on_actionSaveAsHtml_triggered()
     }
 }
 
+void MainWindow::on_actionImportFile_triggered()
+{
+    if (m_category)
+    {
+        m_category->on_action_importFile();
+    }
+}
+
 void MainWindow::on_actionPrint_triggered()
 {
     m_doc->web()->printDocument();
