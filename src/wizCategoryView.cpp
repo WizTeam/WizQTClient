@@ -104,6 +104,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dragHoveredTimer(new QTimer())
     , m_dragHoveredItem(0)
     , m_dragItem(NULL)
+    , m_dragUrls(false)
 {
     // basic features
     header()->hide();
@@ -294,18 +295,21 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
     m_bDragHovered = true;
     repaint();
 
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) || m_dragItem)
+    {
         event->acceptProposedAction();
         event->accept();
-    } else if (event->mimeData()->hasUrls()) {
+    }
+    else if (event->mimeData()->hasUrls())
+    {
+        m_dragUrls = true;
         event->acceptProposedAction();
         event->accept();
-    } else if (m_dragItem){
-        event->acceptProposedAction();
-        event->accept();
-    }else {
+    }
+    else
+    {
         QTreeWidget::dragEnterEvent(event);
-    }    
+    }
 }
 
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
@@ -349,6 +353,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     }
     else if(event->mimeData()->hasUrls())
     {
+        m_dragUrls = true;
         event->acceptProposedAction();
     }
     else if (m_dragItem)
@@ -380,6 +385,7 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
     m_dragHoveredPos = QPoint();
     m_dragHoveredTimer->stop();
     m_dragHoveredItem = 0;
+    m_dragUrls = false;
 
     m_dragDocArray.clear();
     QTreeWidget::dragLeaveEvent(event);
@@ -390,6 +396,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
+    m_dragUrls = false;
 
     m_dragDocArray.clear();
 
@@ -878,13 +885,19 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     if (p.isNull())
         return false;
 
+    if (m_dragUrls)
+    {
+        CWizCategoryViewItemBase* itemBase = itemAt(p);
+        itemBase->acceptDrop("");
+        return true;
+    }
+
     if (m_dragDocArray.empty())
         return false;
 
     CWizCategoryViewItemBase* itemBase = itemAt(p);
     WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
     return (itemBase && itemBase->acceptDrop(data));
-
 }
 
 Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
