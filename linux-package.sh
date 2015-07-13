@@ -14,7 +14,7 @@ cd WizNote
 mkdir bin
 cd bin
 
-cp ../../WizQTClient-Release-Linux/bin/wiznote ./
+cp ../../WizQTClient-Release-Linux/bin/WizNote ./
 cp /usr/lib/x86_64-linux-gnu/libQtWebKit.so.4 ./
 cp /usr/lib/x86_64-linux-gnu/libQtGui.so.4 ./
 cp /usr/lib/x86_64-linux-gnu//libQtXml.so.4 ./
@@ -39,7 +39,7 @@ cd ..
 
 cp -R ../WizQTClient-Release-Linux/share ./
 #cp ../WizQTClient/start-WizNote.sh ./
-ln -s bin/wiznote WizNote
+ln -s bin/WizNote WizNote
 cd ..
-rm ./WizNote.tar.gz
+rm -f ./WizNote.tar.gz
 tar -zcvf ./WizNote.tar.gz WizNote

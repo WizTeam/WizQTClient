@@ -1507,6 +1507,14 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* p
     return item && item->kbGUID() == kbGUID();
 }
 
+bool CWizCategoryViewGroupRootItem::acceptDrop(const QString& urls) const
+{
+    Q_UNUSED(urls);
+    CWizDatabase& db = m_app.databaseManager().db(kbGUID());
+
+    return WIZ_USERGROUP_AUTHOR >= db.permission();
+}
+
 void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
     CWizDocumentDataArray arrayOp;
@@ -1796,6 +1804,14 @@ bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     }
 
     return false;
+}
+
+bool CWizCategoryViewGroupItem::acceptDrop(const QString& urls) const
+{
+    Q_UNUSED(urls);
+    CWizDatabase& db = m_app.databaseManager().db(kbGUID());
+
+    return WIZ_USERGROUP_AUTHOR >= db.permission();
 }
 
 void CWizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)

@@ -51,6 +51,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data) { Q_UNUSED(db); Q_UNUSED(data); return false; }
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const { Q_UNUSED(pItem); return false;}
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const { Q_UNUSED(data); return false; }
+    virtual bool acceptDrop(const QString& urls) const { Q_UNUSED(urls); return false; }
     virtual bool dragAble() const { return false; }
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false) { Q_UNUSED(arrayDocument); Q_UNUSED(forceCopy);}
     virtual void drop(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
@@ -288,6 +289,7 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool acceptDrop(const QString& urls) const { Q_UNUSED(urls); return true; }
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 20; }
 };
@@ -301,6 +303,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool acceptDrop(const QString& urls) const { Q_UNUSED(urls); return true; }
     virtual bool dragAble() const { return true; }
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
 
@@ -474,6 +477,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+    virtual bool acceptDrop(const QString& urls) const;
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void reload(CWizDatabase& db);
@@ -515,6 +519,7 @@ public:
     virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool acceptDrop(const WIZDOCUMENTDATA& data) const;
+    virtual bool acceptDrop(const QString& urls) const;
     virtual bool dragAble() const { return true; }
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
 

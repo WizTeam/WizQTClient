@@ -44,11 +44,13 @@ Bugfixes:
 
 - Fixed shortcuts scope problem of editor, no longer affect the operation of other widgets.
 - Normal token failure no longer ask for password.
+- [Mac]When the program at full-screen model, insert code widget no longer show in full-screen model.
 
 Features:
 
-- Add option to use system window style.
-- Add function of screenshot.
+- [Mac]Adaptation for Retina screen.
+- [Linux]Add option to use system window style.
+- [Linux]Add function of screenshot.
 - Notes browsing history.
 - Increase the common notes list, you can set notes shortcuts now.
 - Notes List sorted by access time.

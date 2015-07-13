@@ -104,6 +104,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dragHoveredTimer(new QTimer())
     , m_dragHoveredItem(0)
     , m_dragItem(NULL)
+    , m_dragUrls(false)
 {
     // basic features
     header()->hide();
@@ -294,18 +295,21 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
     m_bDragHovered = true;
     repaint();
 
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) || m_dragItem)
+    {
         event->acceptProposedAction();
         event->accept();
-    } else if (event->mimeData()->hasUrls()) {
+    }
+    else if (event->mimeData()->hasUrls())
+    {
+        m_dragUrls = true;
         event->acceptProposedAction();
         event->accept();
-    } else if (m_dragItem){
-        event->acceptProposedAction();
-        event->accept();
-    }else {
+    }
+    else
+    {
         QTreeWidget::dragEnterEvent(event);
-    }    
+    }
 }
 
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
@@ -349,6 +353,7 @@ void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
     }
     else if(event->mimeData()->hasUrls())
     {
+        m_dragUrls = true;
         event->acceptProposedAction();
     }
     else if (m_dragItem)
@@ -380,6 +385,7 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
     m_dragHoveredPos = QPoint();
     m_dragHoveredTimer->stop();
     m_dragHoveredItem = 0;
+    m_dragUrls = false;
 
     m_dragDocArray.clear();
     QTreeWidget::dragLeaveEvent(event);
@@ -390,8 +396,12 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
-
+    m_dragUrls = false;
     m_dragDocArray.clear();
+
+    CWizCategoryViewItemBase* pItem = itemAt(event->pos());
+    if (!pItem)
+        return;
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
         ::WizGetAnalyzer().LogAction("categoryDropDocument");
@@ -401,9 +411,6 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if (!arrayDocument.size())
             return;
 
-        CWizCategoryViewItemBase* pItem = itemAt(event->pos());
-        if (!pItem)
-            return;
 
         Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
         bool forceCopy = keyMod.testFlag(Qt::AltModifier);
@@ -412,6 +419,10 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 
     } else if (event->mimeData()->hasUrls()) {
         ::WizGetAnalyzer().LogAction("categoryDropFiles");
+        if (!pItem->acceptDrop(""))
+            return;
+
+        setCurrentItem(pItem);
         QList<QUrl> urls = event->mimeData()->urls();
         QStringList strFileList;
         foreach (QUrl url, urls) {
@@ -434,8 +445,6 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if( !droppedIndex.isValid() )
           return;
 
-
-        QTreeWidgetItem* pItem = itemAt(event->pos());
         if (pItem->type() == Category_ShortcutRootItem)
         {
             CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(pItem);
@@ -874,13 +883,18 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
     if (p.isNull())
         return false;
 
+    if (m_dragUrls)
+    {
+        CWizCategoryViewItemBase* itemBase = itemAt(p);
+        return itemBase->acceptDrop("");
+    }
+
     if (m_dragDocArray.empty())
         return false;
 
     CWizCategoryViewItemBase* itemBase = itemAt(p);
     WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
     return (itemBase && itemBase->acceptDrop(data));
-
 }
 
 Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
@@ -1427,7 +1441,7 @@ bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml
     WIZDOCUMENTATTACHMENTDATA attach;
     if (!db.AddAttachment(data, strAttachFile, attach))
     {
-        TOLOG1("[Service] add attch failed :  1%", strAttachFile);
+        qWarning() << "add attachment failed , " << strAttachFile;
         return false;
     }
     return true;
@@ -1443,11 +1457,12 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
         return false;
 
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    foreach (QString strFileName, attachList) {
+    foreach (QString strFileName, attachList)
+    {
         WIZDOCUMENTATTACHMENTDATA attach;
         if (!db.AddAttachment(data, strFileName, attach))
         {
-            TOLOG1("[Service] add attch failed :  1%", strFileName);
+            qWarning() << "add attachment failed , " << strFileName;
         }
     }
 

@@ -132,6 +132,7 @@ private:
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
     CWizDocumentDataArray m_dragDocArray;
+    bool m_dragUrls;
     QTimer* m_dragHoveredTimer;
     CWizCategoryViewItemBase* m_dragHoveredItem;
 
