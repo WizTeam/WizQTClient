@@ -1823,8 +1823,7 @@ bool CWizDocumentWebView::editorCommandExecutePlainText()
 
     setContentsChanged(true);
     m_strCurrentNoteHtml = strText;
-    QString strExec = QString("viewCurrentNote();");
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return page()->mainFrame()->evaluateJavaScript("updateEditorHtml(true);").toBool();
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()

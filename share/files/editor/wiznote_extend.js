@@ -145,6 +145,24 @@ function updateCurrentNoteHtml()
     }
 }
 
+function updateEditorHtml(bEditing)
+{
+    editor.reset();
+    editor.document.head.innerHTML = WizEditor.currentNoteHead();
+    editor.document.body.innerHTML = WizEditor.currentNoteHtml();
+    editor.fireEvent('aftersetcontent');
+    editor.fireEvent('contentchange');
+
+    bEditing ? editor.setEnabled() : editor.setDisabled();
+
+    window.UE.utils.domReady(function() {
+        //special process to remove css style added by phone
+        WizSpecialProcessForPhoneCss();
+        WizEditor.initCheckListEnvironment();
+        editor.window.scrollTo(0, 0);
+    });
+}
+
 function updateCss()
 {
     var css= editor.document.getElementsByTagName('link');
