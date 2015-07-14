@@ -1542,6 +1542,7 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     {
         progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
         WIZTAGDATA tag;
+        tag.strKbGUID = m_strKbGUID;
         documentOperator->copyDocumentsToGroupFolder(arrayOp, tag, false, window->downloaderHost());
         progress->exec();
     }
@@ -1549,6 +1550,7 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     {
         progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
         WIZTAGDATA tag;
+        tag.strKbGUID = m_strKbGUID;
         documentOperator->moveDocumentsToGroupFolder(arrayOp, tag, window->downloaderHost());
         progress->exec();
     }
@@ -1840,15 +1842,13 @@ void CWizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument,
     if (needCopy)
     {
         progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
-        WIZTAGDATA tag;
-        documentOperator->copyDocumentsToGroupFolder(arrayOp, tag, false, window->downloaderHost());
+        documentOperator->copyDocumentsToGroupFolder(arrayOp, m_tag, false, window->downloaderHost());
         progress->exec();
     }
     else
     {
         progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
-        WIZTAGDATA tag;
-        documentOperator->moveDocumentsToGroupFolder(arrayOp, tag, window->downloaderHost());
+        documentOperator->moveDocumentsToGroupFolder(arrayOp, m_tag, window->downloaderHost());
         progress->exec();
     }
 }

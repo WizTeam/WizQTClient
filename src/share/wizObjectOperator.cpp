@@ -23,12 +23,7 @@ CWizDocumentOperator::CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* 
 CWizDocumentOperator::~CWizDocumentOperator()
 {
     if (m_thread)
-    {
-        qDebug() << "copy destractor in thread : " << QThread::currentThreadId();
-        connect(m_thread, &QThread::destroyed, [](){
-           qDebug() << "document opreator destroyed";
-        });
-
+    {       
         connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
         m_thread->quit();
     }
@@ -38,7 +33,6 @@ void CWizDocumentOperator::copyDocumentsToPersonalFolder(const CWizDocumentDataA
                                                      const QString& targetFolder, bool keepDocTime, bool keepTag,
                                                      CWizObjectDataDownloaderHost* downloader)
 {
-    qDebug() << "prepare to copy in thread : " << QThread::currentThreadId();
     m_arrayDocument = arrayDocument;
     m_targetFolder = targetFolder;
     m_keepDocTime = keepDocTime;
@@ -224,7 +218,6 @@ void CWizDocumentOperator::bindSignalsToProgressDialog(CWizProgressDialog* progr
 void CWizDocumentOperator::stop()
 {
     m_stop = true;
-    qDebug() << "stop document operator in thread : " << QThread::currentThreadId();
 }
 
 void CWizDocumentOperator::copyDocumentToPersonalFolder()
@@ -237,7 +230,6 @@ void CWizDocumentOperator::copyDocumentToPersonalFolder()
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToPersonalFolder(doc);
         nCounter ++;
-        qDebug() << "copy finished : " << nCounter << "  need stop : " << m_stop;
         emit progress(m_arrayDocument.size(), nCounter);
     }
 
@@ -256,7 +248,6 @@ void CWizDocumentOperator::copyDocumentToGroupFolder()
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToGroupFolder(doc);
         nCounter ++;
-        qDebug() << "copy finished : " << nCounter << "  need stop : " << m_stop;
         emit progress(m_arrayDocument.size(), nCounter);
     }
 
@@ -275,7 +266,6 @@ void CWizDocumentOperator::moveDocumentToPersonalFolder()
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         moveDocumentToPersonalFolder(doc);
         nCounter ++;
-        qDebug() << "copy finished : " << nCounter << "  need stop : " << m_stop;
         emit progress(m_arrayDocument.size(), nCounter);
     }
 
@@ -294,7 +284,6 @@ void CWizDocumentOperator::moveDocumentToGroupFolder()
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         moveDocumentToGroupFolder(doc);
         nCounter ++;
-        qDebug() << "copy finished : " << nCounter << "  need stop : " << m_stop;
         emit progress(m_arrayDocument.size(), nCounter);
     }
 
@@ -449,7 +438,6 @@ void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& childFo
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToPersonalFolder(doc);
         m_counter ++;
-        qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
         emit progress(m_totoalCount, m_counter);
     }
 
@@ -488,7 +476,6 @@ void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& childFolde
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToGroupFolder(doc);
         m_counter ++;
-        qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
         emit progress(m_totoalCount, m_counter);
     }
 
@@ -525,7 +512,6 @@ void CWizDocumentOperator::copyGroupFolderToPersonalDB(const WIZTAGDATA& childFo
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToPersonalFolder(doc);
         m_counter ++;
-        qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
         emit progress(m_totoalCount, m_counter);
     }
 
@@ -560,7 +546,6 @@ void CWizDocumentOperator::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFold
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToGroupFolder(doc);
         m_counter ++;
-        qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
         emit progress(m_totoalCount, m_counter);
     }
 
@@ -583,7 +568,6 @@ void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& childFo
     groupDB.GetDocumentsByTag(childFolder, arrayDocument);
     QString targetFolder = targetParentFolder + childFolder.strName + "/";
     m_targetFolder = targetFolder;
-    qDebug() << "moveGroupFolderToPersonalDB, group ;  " << childFolder.strName << "  target : " << m_targetFolder << " documents ; " << arrayDocument.size();
     //
     CWizDocumentDataArray::iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end() && !m_stop; it++)
@@ -592,7 +576,6 @@ void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& childFo
         emit newAction(tr("Move note %1").arg(doc.strTitle));
         moveDocumentToPersonalFolder(doc);
         m_counter ++;
-        qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
         emit progress(m_totoalCount, m_counter);
     }
 
@@ -646,7 +629,6 @@ void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFold
             emit newAction(tr("Move note %1").arg(doc.strTitle));
             moveDocumentToGroupFolder(doc);
             m_counter ++;
-            qDebug() << "copy finished : " << m_counter << "  need stop : " << m_stop;
             emit progress(m_totoalCount, m_counter);
         }
 
@@ -765,7 +747,6 @@ int CWizDocumentOperator::documentCount(CWizDatabase& db, const QString& persona
 {
     int count;
     db.GetDocumentsCountByLocation(personalFolder, count, true);
-    qDebug() << "get coument count : " << count;
     return count;
 }
 
@@ -775,7 +756,6 @@ int CWizDocumentOperator::documentCount(CWizDatabase& db, const WIZTAGDATA& grou
     CWizTagDataArray arrayTag;
     db.GetAllChildTags(groupFolder.strGUID, arrayTag);
     arrayTag.push_back(groupFolder);
-    qDebug() << "get all child tag count : " << arrayTag.size();
     std::map<CString, int> mapTagDocumentCount;
     db.GetAllTagsDocumentCount(mapTagDocumentCount);
     for (WIZTAGDATA tag : arrayTag)
@@ -783,7 +763,6 @@ int CWizDocumentOperator::documentCount(CWizDatabase& db, const WIZTAGDATA& grou
        std::map<CString, int>::const_iterator pos =  mapTagDocumentCount.find(tag.strGUID);
        if (pos != mapTagDocumentCount.end())
        {
-           qDebug() << "get tag document count : tag " << tag.strName << "  count : " << pos->second;
            count += pos->second;
        }
     }
