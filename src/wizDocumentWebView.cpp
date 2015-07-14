@@ -146,7 +146,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     }
     else if (mime->hasHtml())   // special process for xcode
     {
-        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
+//        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
         QString strHtml = mime->html();
         if (WizGetBodyContentFromHtml(strHtml, true))
         {

@@ -522,6 +522,12 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     WizScaleIconSizeForRetina(szPix);
     QRect rcSync(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height() - nMargin,
                  szPix.width(), szPix.height());
+    if (vopt->state & QStyle::State_Selected)
+    {
+        QRect rcClip(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height(),
+                     szPix.width(), szPix.height());
+        p->setClipRect(rcClip);
+    }
     p->drawPixmap(rcSync, pix);
     p->restore();
 
