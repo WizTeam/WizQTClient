@@ -150,7 +150,6 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
 
     CWizAutoTimeOutEventLoop loop(reply);
-//    loop.setTimeoutWaitSeconds(5);
     loop.exec(QEventLoop::ExcludeUserInputEvents);        
 
     if (loop.error() != QNetworkReply::NoError)

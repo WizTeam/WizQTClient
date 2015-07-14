@@ -3,22 +3,25 @@
 #include <QTimer>
 #include <QDebug>
 
-const int TIMEOUT_WAIT_SECONDS = 30;
+const int TIMEOUT_WAIT_SECONDS = 60;
 
 CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
     : QEventLoop(parent)
     , m_error(QNetworkReply::NoError)
-//    , m_timeOut(false)
-//    , m_timeOutWaitSeconds(TIMEOUT_WAIT_SECONDS * 1000)
+    , m_timeOut(false)
+    , m_timeOutSeconds(TIMEOUT_WAIT_SECONDS)
+    , m_downloadBytes(0)
 {
     connect(pReply, SIGNAL(finished()), SLOT(on_replyFinished()));
     connect(pReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
+    connect(pReply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(on_downloadProgress(qint64,qint64)));
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timeOut()));
 }
 
-//void CWizAutoTimeOutEventLoop::setTimeoutWaitSeconds(int seconds)
-//{
-//    m_timeOutWaitSeconds = seconds * 1000;
-//}
+void CWizAutoTimeOutEventLoop::setTimeoutWaitSeconds(int seconds)
+{
+    m_timeOutSeconds = seconds;
+}
 
 
 void CWizAutoTimeOutEventLoop::doFinished(QNetworkReply* reply)
@@ -38,12 +41,13 @@ void CWizAutoTimeOutEventLoop::doError(QNetworkReply::NetworkError error)
 
 int CWizAutoTimeOutEventLoop::exec(QEventLoop::ProcessEventsFlags flags)
 {
-//    QTimer::singleShot(m_timeOutWaitSeconds, this, SLOT(on_timeOut()));
+    m_timer.start(m_timeOutSeconds * 1000);
     return QEventLoop::exec(flags);
 }
 
 void CWizAutoTimeOutEventLoop::on_replyFinished()
 {
+    m_timer.stop();
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
     //
     doFinished(reply);
@@ -55,21 +59,35 @@ void CWizAutoTimeOutEventLoop::on_replyFinished()
 
 void CWizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
 {
+    m_timer.stop();
     doError(error);
     //
     quit();
 }
 
-//void CWizAutoTimeOutEventLoop::on_timeOut()
-//{
-//    m_timeOut = true;
-//    m_error = QNetworkReply::TimeoutError;
-//    m_errorString = "Event loop time out, can not get response from network reply";
-//    qDebug() << "[sync]Xml rpc event loop time out";
-//    //
-//    quit();
-//}
+void CWizAutoTimeOutEventLoop::on_timeOut()
+{
+    qDebug() << "download bytes : " << m_downloadBytes << "  last bytes : " << m_lastBytes;
+    if (m_downloadBytes != m_lastBytes)
+    {
+        m_lastBytes = m_downloadBytes;
+    }
+    else
+    {
+        m_timeOut = true;
+        m_error = QNetworkReply::TimeoutError;
+        m_errorString = "Event loop time out, can not get response from network reply";
+        qWarning() << "[sync]Xml rpc event loop time out";
+        //
+        quit();
+    }
+}
 
+void CWizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+{
+    m_downloadBytes = bytesReceived;
+    qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
+}
 
 
 CWizXmlRpcEventLoop::CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject* parent)
