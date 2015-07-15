@@ -105,6 +105,10 @@ CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(par
 {
     action(QWebPage::Undo)->setShortcut(QKeySequence());
     action(QWebPage::Redo)->setShortcut(QKeySequence());
+    action(QWebPage::Copy)->setShortcut(QKeySequence());
+    action(QWebPage::Cut)->setShortcut(QKeySequence());
+    action(QWebPage::Paste)->setShortcut(QKeySequence());
+    action(QWebPage::SelectAll)->setShortcut(QKeySequence());
 }
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
@@ -306,12 +310,17 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
-    else if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier && !isEditing())
+#if QT_VERSION >= 0x050402
+    //FIXME: QT5.4.2之后无法触发全局的保存按钮
+    else if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier)
     {
-        //阅读模式下selectall无法触发，强制触发阅读模式下的selectall。
-        emit selectAllKeyPressed();
+        WizGetAnalyzer().LogAction("paste");
+
+        setPastePlainTextEnable(false);
+        triggerPageAction(QWebPage::Paste);
         return;
     }
+#endif
     else if (event->key() == Qt::Key_Tab)
     {
         //set contentchanged
@@ -360,7 +369,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         }
     }
 
-    //special handled for qt4,case capslock doesn't work
     QWebView::keyPressEvent(event);
 #endif
 
