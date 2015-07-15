@@ -32,6 +32,7 @@
 #include "wizFileReader.h"
 #include "widgets/wizAdvancedSearchDialog.h"
 #include "wizOEMSettings.h"
+#include "share/wizMessageBox.h"
 
 using namespace WizService;
 
@@ -799,12 +800,77 @@ bool CWizCategoryView::renameFolder(CWizCategoryViewFolderItem* item, const QStr
     if (strLocation == strOldLocation)
         return true;
 
+    CWizStdStringArray arrayLocation;
+    m_dbMgr.db().GetAllLocationsWithExtra(arrayLocation);
+    if (std::find(arrayLocation.begin(), arrayLocation.end(), strLocation) != arrayLocation.end())
+    {
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder %1 alread exists, combine these folders?").arg(validName)) == QMessageBox::No)
+        {
+            validName = getUseableItemName(item->parent(), item);
+            item->setText(0, validName);
+            strLocation = strOldLocation.left(n + 1) + validName + "/";
+            if (strLocation == strOldLocation)
+                return true;
+        }
+    }
+
     // move all documents to new folder
     CWizFolder folder(m_dbMgr.db(), strOldLocation);
     connect(&folder, SIGNAL(moveDocument(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)),
             SLOT(on_action_user_renameFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
 
     folder.MoveToLocation(strLocation);
+    return true;
+}
+
+bool CWizCategoryView::renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName)
+{
+    WIZTAGDATA tag = pGroup->tag();
+
+    QTreeWidgetItem* sameNameBrother = nullptr;
+    for (int i = 0; i < pGroup->parent()->childCount(); i++)
+    {
+        QTreeWidgetItem* brother = pGroup->parent()->child(i);
+        if (brother->type() == Category_GroupItem && brother != pGroup && brother->text(0) == strFolderName)
+        {
+            sameNameBrother = brother;
+        }
+    }
+
+    CWizDatabase& db = m_dbMgr.db(tag.strKbGUID);
+    tag.strName = strFolderName;
+    if (sameNameBrother != nullptr)
+    {
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' alread exists, combine these folders?").arg(strFolderName)) == QMessageBox::Yes)
+        {
+            // move documents to brother folder  and move child folders to brother folder
+            CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);
+            CWizDocumentDataArray arrayDocument;
+            if (db.GetDocumentsByTag(pGroup->tag(), arrayDocument))
+            {
+                moveDocumentsToGroupFolder(arrayDocument, targetItem->tag());
+            }
+            CWizTagDataArray arrayTag;
+            if (db.GetChildTags(pGroup->tag().strGUID, arrayTag))
+            {
+                for (WIZTAGDATA tag : arrayTag)
+                {
+                   tag.strParentGUID = targetItem->tag().strGUID;
+                   db.ModifyTag(tag);
+                }
+            }
+            db.DeleteTag(pGroup->tag(), true);
+
+            return true;
+        }
+        else
+        {
+            QString useableName = getUseableItemName(pGroup->parent(), pGroup);
+            tag.strName = useableName;
+        }
+    }
+    db.ModifyTag(tag);
+    pGroup->reload(db);
     return true;
 }
 
@@ -2434,10 +2500,7 @@ void CWizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
             return;
 
 //        qDebug() << "group changed text " << pGroup->text(0) << "  name : " << pGroup->tag().strName;
-        WIZTAGDATA tag = pGroup->tag();
-        tag.strName = pGroup->text(0);
-        m_dbMgr.db(tag.strKbGUID).ModifyTag(tag);
-        pGroup->reload(m_dbMgr.db(tag.strKbGUID));
+        renameGroupFolder(pGroup, pGroup->text(0));
     }
 }
 
@@ -5342,6 +5405,26 @@ void CWizCategoryView::copyPersonalFolderToGroupFolder(const QString& sourceFold
     documentOperator->bindSignalsToProgressDialog(progress);
     documentOperator->copyPersonalFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, downloader);
     progress->exec();
+}
+
+void CWizCategoryView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
+{
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    // move, show progress if size > 3
+    if (arrayDocument.size() <= 3)
+    {
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+    }
+    else
+    {
+        CWizProgressDialog* progress = mainWindow->progressDialog();
+        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
+        documentOperator->bindSignalsToProgressDialog(progress);
+        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+        progress->exec();
+    }
 }
 
 void CWizCategoryView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,

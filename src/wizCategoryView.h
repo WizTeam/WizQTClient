@@ -538,6 +538,8 @@ private:
 
     void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
                                          bool keepDocTime, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    //
+    void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
@@ -551,6 +553,7 @@ private:
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
+    bool renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);
