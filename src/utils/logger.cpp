@@ -158,7 +158,7 @@ void Logger::getAllLogs(QString& text)
 
 } // namespace Utils
 
-#if QT_VERSION < 0x050500
+#if QT_VERSION < 0x050500 && QT_VERSION > 0x050000
 CWizInfo::~CWizInfo()
 {
     if (!--stream->ref) {
