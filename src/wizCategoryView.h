@@ -412,6 +412,7 @@ public Q_SLOTS:
     void on_action_emptyTrash();
 
     void on_itemSelectionChanged();
+    void on_itemChanged(QTreeWidgetItem * item, int column);
     void on_itemClicked(QTreeWidgetItem *item, int column);
 
     void updateGroupsData();
@@ -549,11 +550,13 @@ private:
                                 QTreeWidgetItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
-
+    bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);
     void removeShortcut(CWizCategoryViewItemBase* shortcut);
+
+
 
 private:
     QPointer<QMenu> m_menuShortcut;

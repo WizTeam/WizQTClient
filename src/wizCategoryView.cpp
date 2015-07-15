@@ -781,6 +781,33 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, con
     }
 }
 
+bool CWizCategoryView::renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName)
+{
+    if (strFolderName.isEmpty() || item == nullptr)
+        return false;
+
+    CString validName = strFolderName;
+    WizMakeValidFileNameNoPath(validName);
+
+    QString strLocation;
+    QString strOldLocation = item->location();
+    int n = strOldLocation.lastIndexOf("/", -2);
+    strLocation = strOldLocation.left(n + 1) + validName + "/";
+
+    qDebug() << "[Category]Rename folder from : " << strOldLocation << "  to : " << strLocation;
+
+    if (strLocation == strOldLocation)
+        return true;
+
+    // move all documents to new folder
+    CWizFolder folder(m_dbMgr.db(), strOldLocation);
+    connect(&folder, SIGNAL(moveDocument(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)),
+            SLOT(on_action_user_renameFolder_confirmed_progress(int, int, const QString&, const QString&, const WIZDOCUMENTDATA&)));
+
+    folder.MoveToLocation(strLocation);
+    return true;
+}
+
 void CWizCategoryView::updateShortcut(int type, const QString& keyValue, const QString& name)
 {
     CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
@@ -953,6 +980,7 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     initMenus();
 
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));
+    connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), SLOT(on_itemChanged(QTreeWidgetItem*,int)));
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
 
     ExtensionSystem::PluginManager::addObject(this);
@@ -1850,28 +1878,20 @@ void CWizCategoryView::on_action_user_copyFolder_confirmed(int result)
 
 void CWizCategoryView::on_action_renameItem()
 {
-//    QTreeWidgetItem* p = currentItem();
-//    if (p)
-//    {
-//        p->setFlags(p->flags() | Qt::ItemIsEditable);
-//        editItem(p, 0);
-//    }
-
-
-    if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
+    QTreeWidgetItem* p = currentItem();
+    if (p)
     {
-        // user can not rename predefined folders name
-        if (!::WizIsPredefinedLocation(p->location())) {
-            on_action_user_renameFolder();
+        if (p->type() == Category_FolderItem)
+        {
+            if (CWizCategoryViewFolderItem* pFolder = currentCategoryItem<CWizCategoryViewFolderItem>())
+            {
+                //user can not rename predefined folders name
+                if (WizIsPredefinedLocation(pFolder->location()))
+                    return;
+            }
         }
-    }
-    else if (currentCategoryItem<CWizCategoryViewTagItem>())
-    {
-        on_action_user_renameTag();
-    }
-    else if (currentCategoryItem<CWizCategoryViewGroupItem>())
-    {
-        on_action_group_renameFolder();
+        p->setFlags(p->flags() | Qt::ItemIsEditable);
+        editItem(p, 0);
     }
 }
 
@@ -2380,6 +2400,44 @@ void CWizCategoryView::on_itemSelectionChanged()
         Q_EMIT documentsHint(tr("No tag notes"));
     } else {
         Q_EMIT documentsHint(currentItem()->text(0));
+    }
+}
+
+void CWizCategoryView::on_itemChanged(QTreeWidgetItem* item, int column)
+{
+//    qDebug() << "item changed : " << item->text(0) << item->type();
+    if (item->type() == Category_FolderItem)
+    {
+        CWizCategoryViewFolderItem* pFolder = dynamic_cast<CWizCategoryViewFolderItem*>(item);
+        if (pFolder == nullptr || pFolder->text(0) == pFolder->name())
+            return;
+//        qDebug() << "folder changed text " << pFolder->text(0) << "  name : " << pFolder->name();
+
+       renameFolder(pFolder, pFolder->text(0));
+    }
+    else if (item->type() == Category_TagItem)
+    {
+        CWizCategoryViewTagItem* pTag = dynamic_cast<CWizCategoryViewTagItem*>(item);
+        if (pTag == nullptr || pTag->text(0).isEmpty() || pTag->text(0) == pTag->tag().strName)
+            return;
+
+//        qDebug() << "tag changed text " << pTag->text(0) << "  name : " << pTag->tag().strName;
+        WIZTAGDATA tag = pTag->tag();
+        tag.strName = pTag->text(0);
+        m_dbMgr.db().ModifyTag(tag);
+        pTag->reload(m_dbMgr.db());
+    }
+    else if (item->type() == Category_GroupItem)
+    {
+        CWizCategoryViewGroupItem* pGroup = dynamic_cast<CWizCategoryViewGroupItem*>(item);
+        if (pGroup == nullptr || pGroup->text(0).isEmpty() || pGroup->text(0) == pGroup->tag().strName)
+            return;
+
+//        qDebug() << "group changed text " << pGroup->text(0) << "  name : " << pGroup->tag().strName;
+        WIZTAGDATA tag = pGroup->tag();
+        tag.strName = pGroup->text(0);
+        m_dbMgr.db(tag.strKbGUID).ModifyTag(tag);
+        pGroup->reload(m_dbMgr.db(tag.strKbGUID));
     }
 }
 

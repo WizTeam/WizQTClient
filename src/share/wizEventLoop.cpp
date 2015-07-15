@@ -80,6 +80,7 @@ void CWizAutoTimeOutEventLoop::on_timeOut()
         m_errorString = "Event loop time out, can not get response from network reply";
         qWarning() << "[sync]Xml rpc event loop time out";
         //
+        m_timer.stop();
         quit();
     }
 }
