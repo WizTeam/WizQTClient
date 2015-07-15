@@ -11,6 +11,7 @@ CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObjec
     , m_timeOut(false)
     , m_timeOutSeconds(TIMEOUT_WAIT_SECONDS)
     , m_downloadBytes(0)
+    , m_lastBytes(-1)
 {
     connect(pReply, SIGNAL(finished()), SLOT(on_replyFinished()));
     connect(pReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));

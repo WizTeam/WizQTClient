@@ -21,7 +21,7 @@ public:
 private:
     QLabel* m_labelCreatedTime;
     QLabel* m_labelModifiedTime;
-    QLabel* m_labelAuthor;
+    QLabel* m_labelOwner;
     QLabel* m_labelSize;
     CWizExplorerApp& m_app;
 };
