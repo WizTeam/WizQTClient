@@ -58,8 +58,8 @@ private:
 } // namespace Utils
 
 
-#if QT_VERSION <0x050500
-
+#if QT_VERSION < 0x050500
+    #if QT_VERSION > 0x050000
 class CWizInfo
 {
     struct Stream {
@@ -138,7 +138,10 @@ public:
 
 
 
-    #define qInfo CWizInfo
+        #define qInfo CWizInfo
+    #else
+        #define qInfo   qDebug
+    #endif
 #endif
 
 // obsolete, should remove
