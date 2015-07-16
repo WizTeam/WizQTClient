@@ -11,11 +11,14 @@ CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObjec
     , m_timeOut(false)
     , m_timeOutSeconds(TIMEOUT_WAIT_SECONDS)
     , m_downloadBytes(0)
-    , m_lastBytes(-1)
+    , m_lastDownloadBytes(-1)
+    , m_uploadBytes(0)
+    , m_lastUploadBytes(-1)
 {
     connect(pReply, SIGNAL(finished()), SLOT(on_replyFinished()));
     connect(pReply, SIGNAL(error(QNetworkReply::NetworkError)), SLOT(on_replyError(QNetworkReply::NetworkError)));
     connect(pReply, SIGNAL(downloadProgress(qint64,qint64)), SLOT(on_downloadProgress(qint64,qint64)));
+    connect(pReply, SIGNAL(uploadProgress(qint64,qint64)), SLOT(on_uploadProgress(qint64,qint64)));
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timeOut()));
 }
 
@@ -68,10 +71,14 @@ void CWizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
 
 void CWizAutoTimeOutEventLoop::on_timeOut()
 {
-    qDebug() << "download bytes : " << m_downloadBytes << "  last bytes : " << m_lastBytes;
-    if (m_downloadBytes != m_lastBytes)
+    qDebug() << "download bytes : " << m_downloadBytes << "  last bytes : " << m_lastDownloadBytes;
+    if (m_downloadBytes != m_lastDownloadBytes)
     {
-        m_lastBytes = m_downloadBytes;
+        m_lastDownloadBytes = m_downloadBytes;
+    }
+    else if (m_uploadBytes != m_lastUploadBytes)
+    {
+        m_lastUploadBytes = m_uploadBytes;
     }
     else
     {
@@ -89,6 +96,12 @@ void CWizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 
 {
     m_downloadBytes = bytesReceived;
     qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
+}
+
+void CWizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)
+{
+    m_uploadBytes = bytesSent;
+    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
 }
 
 

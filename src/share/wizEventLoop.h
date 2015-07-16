@@ -25,6 +25,7 @@ public Q_SLOTS:
     void on_replyError(QNetworkReply::NetworkError);
     void on_timeOut();
     void on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void on_uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 
 protected:
@@ -37,7 +38,9 @@ protected:
     bool m_timeOut;
     int m_timeOutSeconds;
     qint64 m_downloadBytes;
-    qint64 m_lastBytes;
+    qint64 m_lastDownloadBytes;
+    qint64 m_uploadBytes;
+    qint64 m_lastUploadBytes;
     QTimer m_timer;
 };
 
