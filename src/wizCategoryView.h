@@ -503,41 +503,42 @@ private:
     void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder,
                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
     void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
+    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder,
                                             CWizProgressDialog* progress);
 
-    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     //
     void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder,
-                                         const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
+    void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
                                          CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder,
-                                         const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
+    void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                      bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
                                       CWizObjectDataDownloaderHost* downloader);
     //
     void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     void copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
-                                            bool keepDocTime, bool keepTag, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                            bool keepDocTime, bool keepTag, bool combineFolder,
+                                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
-                                         bool keepDocTime, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
 
@@ -559,6 +560,8 @@ private:
     void removeShortcut(int type, const QString& keyValue);
     void removeShortcut(CWizCategoryViewItemBase* shortcut);
 
+    //
+    QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* item, const QString& name);
 
 
 private:

@@ -31,20 +31,20 @@ public:
     void deleteDocuments(const CWizDocumentDataArray& arrayDocument);
     //
     void copyPersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder,
-                                        bool keepDocTime, bool keepTag, CWizObjectDataDownloaderHost* downloader);
+                                        bool keepDocTime, bool keepTag, bool combineFolders, CWizObjectDataDownloaderHost* downloader);
     void copyPersonalFolderToGroupDB(const QString &sourceFolder, const WIZTAGDATA& targetParentTag,
-                                     bool keepDocTime, CWizObjectDataDownloaderHost *downloader);
+                                     bool keepDocTime, bool combineFolders, CWizObjectDataDownloaderHost *downloader);
     void copyGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
-                                     bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
+                                     bool keepDocTime, bool combineFolders, CWizObjectDataDownloaderHost* downloader);
     void copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
-                                  bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
+                                  bool keepDocTime, bool combineFolders, CWizObjectDataDownloaderHost* downloader);
     //
-    void moveGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+    void moveGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolders,
                                          CWizObjectDataDownloaderHost* downloader);
-    void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+    void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                       CWizObjectDataDownloaderHost* downloader);
-    void movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder);
-    void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+    void movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
+    void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                          CWizObjectDataDownloaderHost* downloader);
 
 
@@ -83,20 +83,28 @@ private:
     void moveDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc);
     void moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc);    
     //
-    void copyPersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder);
-    void copyPersonalFolderToGroupDB(const QString& childFolder, const WIZTAGDATA& targetParentTag);
+    void copyPersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder,
+                                        const QString& targetFolderName);
+    void copyPersonalFolderToGroupDB(const QString& childFolder, const WIZTAGDATA& targetParentTag,
+                                     const QString& targetTagName);
     void copyGroupFolderToPersonalDB(const WIZTAGDATA& childFolder, const QString& targetParentFolder);
     void copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder);
     //
     void moveGroupFolderToPersonalDB(const WIZTAGDATA &childFolder, const QString &targetParentFolder);
-    void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder);
-    void _movePersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder);
-    void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder);
+    void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetParentTag);
+    void _movePersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder,
+                                         const QString& targetFolderName);
+    void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetParentTag,
+                                     const QString& targetTagName);
 
     //
     int documentCount(CWizDatabase& db, const QString& personalFolder);
     int documentCount(CWizDatabase &db, const WIZTAGDATA &groupFolder);
 
+    //
+    void combineSameNameGroupFolder(const WIZTAGDATA& parentTag, const WIZTAGDATA& childTag);
+    QString getUniqueTagName(const WIZTAGDATA& parentTag, const WIZTAGDATA& tag);
+    QString getUniqueFolderName(const QString& parentLocation, const QString& locationName);
 
 protected:
     CWizDocumentDataArray m_arrayDocument;
@@ -108,7 +116,7 @@ protected:
     bool m_keepTag;
     CWizDatabaseManager& m_dbMgr;
     CWizObjectDataDownloaderHost* m_downloader;
-
+    bool m_combineFolders;
     //
     QThread* m_thread;
     bool m_stop;
