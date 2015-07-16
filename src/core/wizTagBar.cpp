@@ -278,12 +278,21 @@ void CWizTagBar::on_lineEditReturnPressed()
     for (it = sl.begin(); it != sl.end(); it++) {
         CString strTagName = *it;
 
-        WIZTAGDATA tag;
-
         // only create tag for unique name
-        if (db.TagByName(strTagName, tag)) {
+        WIZTAGDATA tag;
+        CWizTagDataArray arrayTag;
+        db.TagByName(strTagName, arrayTag);
+        for (WIZTAGDATA tagItem : arrayTag)
+        {
+            if (tagItem.strParentGUID.IsEmpty())
+            {
+                tag = tagItem;
+                break;
+            }
+        }
+        if (!tag.strGUID.IsEmpty())
+        {
             qInfo() << QString("Tag name already exist: %1").arg(strTagName);
-            //
              doc.AddTag(tag);
         }
         else

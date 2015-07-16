@@ -2036,7 +2036,7 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                     newVer = std::max<__int64>(v, newVer);
                     //
                     TOLOG1("[Sync] User avatar changed : %1", it->second);
-                    WizService::AvatarHost::reload(it->second);
+                    WizService::AvatarHost::deleteAvatar(it->second);
                 }
             }
             //
