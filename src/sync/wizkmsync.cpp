@@ -182,7 +182,7 @@ bool CWizKMSyncThread::doSync()
     {
         qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
         qDebug() << "as server : " << WizService::ApiEntry::asServerUrl() << "\nsync url : " <<
-                    WizService::ApiEntry::syncUrl();
+                    WizService::ApiEntry::syncUrl() << "  local ip " << localIP();
         syncAll();
         m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
