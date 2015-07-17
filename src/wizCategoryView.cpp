@@ -952,19 +952,51 @@ void CWizCategoryView::removeShortcut(CWizCategoryViewItemBase* shortcut)
     saveShortcutState();
 }
 
-QTreeWidgetItem*CWizCategoryView::findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* item, const QString& name)
+QTreeWidgetItem*CWizCategoryView::findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name)
 {
     if (parent)
     {
         for (int i = 0; i < parent->childCount(); i++)
         {
-            if (parent->child(i) != item && parent->child(i)->text(0) == name)
+            if (parent->child(i) != exceptItem && parent->child(i)->text(0) == name)
             {
                 return parent->child(i);
             }
         }
     }
     return nullptr;
+}
+
+bool CWizCategoryView::isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName, QTreeWidgetItem* exceptBrother)
+{
+    CWizCategoryViewItemBase* targetItem = nullptr;
+    parentTag.strGUID.IsEmpty() ? (targetItem = findGroup(parentTag.strKbGUID)) :  (targetItem = findGroupFolder(parentTag, false, false));
+    QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, exceptBrother, folderName);
+    bool combineSameNameFolders = false;
+    if (sameNameBrother)
+    {
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(folderName)) == QMessageBox::Yes)
+        {
+            combineSameNameFolders = true;
+        }
+    }
+
+    return combineSameNameFolders;
+}
+
+bool CWizCategoryView::isCombineSameNameFolder(const QString& parentFolder, const QString& folderName, QTreeWidgetItem* exceptBrother)
+{
+    CWizCategoryViewItemBase* targetItem = findFolder(parentFolder, false, false);
+    QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, exceptBrother, folderName);
+    bool combineSameNameFolder = false;
+    if (sameNameBrother)
+    {
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(folderName)) == QMessageBox::Yes)
+        {
+            combineSameNameFolder = true;
+        }
+    }
+    return combineSameNameFolder;
 }
 
 void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
@@ -2484,7 +2516,7 @@ void CWizCategoryView::on_itemSelectionChanged()
     if (currentCategoryItem<CWizCategoryViewMessageItem>()) {
         Q_EMIT documentsHint(tr("Recent meesages"));
     } else if (currentCategoryItem<CWizCategoryViewAllFoldersItem>()) {
-        Q_EMIT documentsHint(tr("Recent notes"));
+        Q_EMIT documentsHint(tr("All Notes"));
     } else if (currentCategoryItem<CWizCategoryViewAllTagsItem>()) {
         Q_EMIT documentsHint(tr("No tag notes"));
     } else {
@@ -5250,18 +5282,8 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty())
             return;
-        //
-        CWizCategoryViewItemBase* folder = findFolder(strSelectedFolder, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(folder, nullptr, sourceFolder.strName);
-
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
+        //        
+        bool combineSameNameFolder = isCombineSameNameFolder(strSelectedFolder, sourceFolder.strName);
 
         qDebug() << "move group folder to private folder " << strSelectedFolder;
         moveGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder, progress, downloader);
@@ -5272,17 +5294,9 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
         if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strParentGUID)
             return;
 
-        //
-        CWizCategoryViewItemBase* folder = findGroupFolder(tag, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(folder, nullptr, sourceFolder.strName);
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sourceFolder.strName)) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
+        //        
+        bool combineSameNameFolder = isCombineSameNameFolder(tag, sourceFolder.strName);
+
 
         qDebug() << "move group folder to group folder " << tag.strName;
         //
@@ -5323,18 +5337,10 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty())
             return;
+
         //combine same name folder
-        CWizCategoryViewItemBase* targetItem = findFolder(strSelectedFolder, false, false);
         CWizCategoryViewItemBase* sourceItem = findFolder(sourceFolder, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, sourceItem, CWizDatabase::GetLocationName(sourceFolder));
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
+        bool combineSameNameFolder = isCombineSameNameFolder(strSelectedFolder, CWizDatabase::GetLocationName(sourceFolder), sourceItem);
 
         qDebug() << "move personal folder to personal folder  ; " << strSelectedFolder;
         //
@@ -5345,17 +5351,8 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
         WIZTAGDATA tag = selector->selectedGroupFolder();
         if (tag.strKbGUID.isEmpty())
             return;
-        //
-        CWizCategoryViewItemBase* targetItem = findGroupFolder(tag, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, nullptr, CWizDatabase::GetLocationName(sourceFolder));
-        bool combineSameNameFolders = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolders = true;
-            }
-        }
+        //        
+        bool combineSameNameFolders = isCombineSameNameFolder(tag, CWizDatabase::GetLocationName(sourceFolder));
         qDebug() << "move personal folder to group folder " << tag.strName;
         //
         movePersonalFolderToGroupFolder(sourceFolder, tag, combineSameNameFolders, progress, downloader);
@@ -5394,18 +5391,8 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
         if (strSelectedFolder.isEmpty())
             return;
 
-        //
-        CWizCategoryViewItemBase* folder = findFolder(strSelectedFolder, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(folder, nullptr, sourceFolder.strName);
-
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
+        //        
+        bool combineSameNameFolder =  isCombineSameNameFolder(strSelectedFolder, sourceFolder.strName);
 
         qDebug() << "copy group folder to private folder " << strSelectedFolder;
         copyGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
@@ -5417,18 +5404,8 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
         if (tag.strKbGUID.isEmpty())
             return;
         qDebug() << "copy group folder to group folder " << tag.strName;
-        //
-        CWizCategoryViewItemBase* folder = findGroupFolder(tag, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(folder, nullptr, sourceFolder.strName);
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sourceFolder.strName)) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
-        //
+        //        
+        bool combineSameNameFolder = isCombineSameNameFolder(tag, sourceFolder.strName);
         copyGroupFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
                                      combineSameNameFolder, progress, downloader);
     }
@@ -5441,7 +5418,7 @@ void CWizCategoryView::copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFo
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
     progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetParentFolder));
     documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyGroupFolderToPersonalDB(groupFolder, targetParentFolder, combineFolder, keepDocTime, downloader);
+    documentOperator->copyGroupFolderToPersonalDB(groupFolder, targetParentFolder, keepDocTime, combineFolder, downloader);
     progress->exec();
 }
 
@@ -5451,7 +5428,7 @@ void CWizCategoryView::copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFold
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
     progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetFolder.strName));
     documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyGroupFolderToGroupDB(sourceFolder, targetFolder, combineFolder, keepDocTime, downloader);
+    documentOperator->copyGroupFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder, downloader);
     progress->exec();
 }
 
@@ -5465,21 +5442,11 @@ void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolder
         if (strSelectedFolder.isEmpty())
             return;
 
-        //combine same name folder
-        CWizCategoryViewItemBase* targetItem = findFolder(strSelectedFolder, false, false);
-        CWizCategoryViewItemBase* sourceItem = findFolder(sourceFolder, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, sourceItem, CWizDatabase::GetLocationName(sourceFolder));
-        bool combineSameNameFolder = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolder = true;
-            }
-        }
-
         qDebug() << "copy personal folder to personal folder  ; " << strSelectedFolder;
-        //
+        //combine same name folder
+        CWizCategoryViewItemBase* sourceItem = findFolder(sourceFolder, false, false);
+        bool combineSameNameFolder = isCombineSameNameFolder(strSelectedFolder, CWizDatabase::GetLocationName(sourceFolder), sourceItem);
+
         copyPersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
                                             selector->isKeepTag(), combineSameNameFolder, progress, downloader);
     }
@@ -5488,18 +5455,8 @@ void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolder
         WIZTAGDATA tag = selector->selectedGroupFolder();
         if (tag.strKbGUID.isEmpty())
             return;
-        qDebug() << "copy personal folder to group folder " << tag.strName;
-
-        CWizCategoryViewItemBase* targetItem = findGroupFolder(tag, false, false);
-        QTreeWidgetItem* sameNameBrother = findSameNameBrother(targetItem, nullptr, CWizDatabase::GetLocationName(sourceFolder));
-        bool combineSameNameFolders = false;
-        if (sameNameBrother)
-        {
-            if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(sameNameBrother->text(0))) == QMessageBox::Yes)
-            {
-                combineSameNameFolders = true;
-            }
-        }
+        qDebug() << "copy personal folder to group folder " << tag.strName;        
+        bool combineSameNameFolders = isCombineSameNameFolder(tag, CWizDatabase::GetLocationName(sourceFolder));
         //
         copyPersonalFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
                                         combineSameNameFolders, progress, downloader);

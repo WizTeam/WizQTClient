@@ -346,34 +346,8 @@ void CWizDocumentOperator::copyPersonalFolderToGroupDB()
 {
     m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
 
-    //
-    CWizDatabase& targetDB = m_dbMgr.db(m_targetTag.strKbGUID);
-    CWizTagDataArray arrayTag;
-    WIZTAGDATA sameNameBrother;
-    if (targetDB.GetChildTags(m_targetTag.strGUID, arrayTag))
-    {
-        QString locationName = CWizDatabase::GetLocationName(m_sourceFolder);
-        for (WIZTAGDATA tag : arrayTag)
-        {
-            if (tag.strName == locationName)
-            {
-                sameNameBrother = tag;
-                break;
-            }
-        }
-    }
-    // combine same name folders
-    QString targetTagName;
-    if (!sameNameBrother.strGUID.IsEmpty())
-    {
-        if (!m_combineFolders)
-        {
-            WIZTAGDATA uniqueTag = sameNameBrother;
-            uniqueTag.strGUID.clear();
-            targetTagName = getUniqueTagName(m_targetTag, uniqueTag);
-        }
-    }
-
+    //    
+    QString targetTagName = getUniqueFolderName(m_targetTag, m_sourceFolder, m_combineFolders);
     copyPersonalFolderToGroupDB(m_sourceFolder, m_targetTag, targetTagName);
 
     emit finished();
@@ -400,33 +374,9 @@ void CWizDocumentOperator::copyGroupFolderToPersonalDB()
 
 void CWizDocumentOperator::copyGroupFolderToGroupDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);
+    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);    
 
-    CWizDatabase& targetDB = m_dbMgr.db(m_targetTag.strKbGUID);
-    CWizTagDataArray arrayTag;
-    WIZTAGDATA sameNameBrother;
-    if (targetDB.GetChildTags(m_targetTag.strGUID, arrayTag))
-    {
-        for (WIZTAGDATA tag : arrayTag)
-        {
-            if (tag.strGUID != m_sourceTag.strGUID && tag.strName == m_sourceTag.strName)
-            {
-                sameNameBrother = tag;
-                break;
-            }
-        }
-    }
-    // combine same name folders
-    if (!sameNameBrother.strGUID.IsEmpty())
-    {
-        if (!m_combineFolders)
-        {
-            WIZTAGDATA uniqueTag = sameNameBrother;
-            uniqueTag.strGUID.clear();
-            m_sourceTag.strName = getUniqueTagName(m_targetTag, uniqueTag);
-        }
-    }
-
+    m_sourceTag.strName = getUniqueFolderName(m_targetTag, m_sourceTag, m_combineFolders);
     copyGroupFolderToGroupDB(m_sourceTag, m_targetTag);
 
     emit finished();
@@ -456,31 +406,7 @@ void CWizDocumentOperator::moveGroupFolderToGroupDB()
 {
     m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);
 
-    CWizDatabase& targetDB = m_dbMgr.db(m_targetTag.strKbGUID);
-    CWizTagDataArray arrayTag;
-    WIZTAGDATA sameNameBrother;
-    if (targetDB.GetChildTags(m_targetTag.strGUID, arrayTag))
-    {
-        for (WIZTAGDATA tag : arrayTag)
-        {
-            if (tag.strGUID != m_sourceTag.strGUID && tag.strName == m_sourceTag.strName)
-            {
-                sameNameBrother = tag;
-                break;
-            }
-        }
-    }
-    // combine same name folders
-    if (!sameNameBrother.strGUID.IsEmpty())
-    {
-        if (!m_combineFolders)
-        {
-            WIZTAGDATA uniqueTag = sameNameBrother;
-            uniqueTag.strGUID.clear();
-            m_sourceTag.strName = getUniqueTagName(m_targetTag, uniqueTag);
-        }
-    }
-
+    m_sourceTag.strName = getUniqueFolderName(m_targetTag, m_sourceTag, m_combineFolders, m_sourceTag.strGUID);
     moveGroupFolderToGroupDB(m_sourceTag, m_targetTag);
 
     emit finished();
@@ -511,33 +437,8 @@ void CWizDocumentOperator::movePersonalFolderToGroupDB()
 {
     m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
 
-    //
-    CWizDatabase& targetDB = m_dbMgr.db(m_targetTag.strKbGUID);
-    CWizTagDataArray arrayTag;
-    WIZTAGDATA sameNameBrother;
-    if (targetDB.GetChildTags(m_targetTag.strGUID, arrayTag))
-    {
-        QString locationName = CWizDatabase::GetLocationName(m_sourceFolder);
-        for (WIZTAGDATA tag : arrayTag)
-        {
-            if (tag.strName == locationName)
-            {
-                sameNameBrother = tag;
-                break;
-            }
-        }
-    }
-    // combine same name folders
-    QString targetTagName;
-    if (!sameNameBrother.strGUID.IsEmpty())
-    {
-        if (!m_combineFolders)
-        {
-            WIZTAGDATA uniqueTag = sameNameBrother;
-            uniqueTag.strGUID.clear();
-            targetTagName = getUniqueTagName(m_targetTag, uniqueTag);
-        }
-    }
+    //    
+    QString targetTagName = getUniqueFolderName(m_targetTag, m_sourceFolder, m_combineFolders);
     movePersonalFolderToGroupDB(m_sourceFolder, m_targetTag, targetTagName);
 
     emit finished();
@@ -1044,5 +945,66 @@ QString CWizDocumentOperator::getUniqueFolderName(const QString& parentLocation,
             break;
     }
     return name;
+}
+
+QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, const WIZTAGDATA& sourceTag, bool combineFolder, const QString& exceptGUID)
+{
+    CWizDatabase& targetDB = m_dbMgr.db(parentTag.strKbGUID);
+    CWizTagDataArray arrayTag;
+    WIZTAGDATA sameNameBrother;
+    if (targetDB.GetChildTags(parentTag.strGUID, arrayTag))
+    {
+        for (WIZTAGDATA tag : arrayTag)
+        {
+            if (tag.strGUID != exceptGUID && tag.strName == sourceTag.strName)
+            {
+                sameNameBrother = tag;
+                break;
+            }
+        }
+    }
+    // combine same name folders
+    if (!sameNameBrother.strGUID.IsEmpty())
+    {
+        if (!combineFolder)
+        {
+            WIZTAGDATA uniqueTag = sameNameBrother;
+            uniqueTag.strGUID.clear();
+            return getUniqueTagName(parentTag, uniqueTag);
+        }
+    }
+
+    return m_sourceTag.strName;
+}
+
+QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, const QString& sourceFolder, bool combineFolder)
+{
+    CWizDatabase& targetDB = m_dbMgr.db(parentTag.strKbGUID);
+    CWizTagDataArray arrayTag;
+    WIZTAGDATA sameNameBrother;
+    QString locationName = CWizDatabase::GetLocationName(sourceFolder);
+    if (targetDB.GetChildTags(parentTag.strGUID, arrayTag))
+    {
+        for (WIZTAGDATA tag : arrayTag)
+        {
+            if (tag.strName == locationName)
+            {
+                sameNameBrother = tag;
+                break;
+            }
+        }
+    }
+    // combine same name folders
+    if (!sameNameBrother.strGUID.IsEmpty())
+    {
+        if (!combineFolder)
+        {
+            WIZTAGDATA uniqueTag = sameNameBrother;
+            uniqueTag.strGUID.clear();
+            return getUniqueTagName(parentTag, uniqueTag);
+        }
+    }
+
+    return locationName;
 }
 

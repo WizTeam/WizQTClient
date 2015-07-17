@@ -105,6 +105,8 @@ private:
     void combineSameNameGroupFolder(const WIZTAGDATA& parentTag, const WIZTAGDATA& childTag);
     QString getUniqueTagName(const WIZTAGDATA& parentTag, const WIZTAGDATA& tag);
     QString getUniqueFolderName(const QString& parentLocation, const QString& locationName);
+    QString getUniqueFolderName(const WIZTAGDATA& parentTag, const WIZTAGDATA& sourceTag, bool combineFolder, const QString& exceptGUID = "");
+    QString getUniqueFolderName(const WIZTAGDATA& parentTag, const QString& sourceFolder, bool combineFolder);
 
 protected:
     CWizDocumentDataArray m_arrayDocument;
