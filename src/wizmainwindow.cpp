@@ -517,6 +517,8 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
             // disable quick download message to stop request token again
             m_bQuickDownloadMessageEnable = false;
 
+            qDebug() << "try to relogin wiz server, but failed. may be password error.  " << "\n current as server : " << WizService::ApiEntry::asServerUrl()
+                     << "\ncurrent sync url  : " << WizService::ApiEntry::syncUrl() << "\nlocal ip :  " << localIP();
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
             if (!m_userVerifyDialog)
@@ -1900,11 +1902,11 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     Q_UNUSED(strErrorMsg);
 
     m_animateSync->stopPlay();
-
     //
     if (errorTokenInvalid == nErrorCode)
     {
-        qDebug() << "sync done reconnectServer";
+        qDebug() << "sync done token invalid, try to reconnect server  " << WizService::ApiEntry::asServerUrl()
+                 <<" sync url : "<< WizService::ApiEntry::syncUrl() << "  local ip " << localIP();
         reconnectServer();
         return;
     }
@@ -1936,7 +1938,9 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 
 void MainWindow::on_syncDone_userVerified()
 {
-
+    qDebug() <<"reSync user verify, try to resync data , key value length " << m_userVerifyDialog->password()
+            << "\n as server : " << WizService::ApiEntry::asServerUrl() << "\n sync url : " << WizService::ApiEntry::syncUrl()
+                << "\n local ip " << localIP();
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
         m_sync->clearCurrentToken();
         syncAllData();
@@ -3039,6 +3043,7 @@ void MainWindow::reconnectServer()
     WizService::Token::setUserId(db.GetUserId());
     WizService::Token::setPasswd(m_settings->password());
 
+    qDebug() << "reconnect server , clear current token.  key value length :  " << m_settings->password();
     m_sync->clearCurrentToken();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);

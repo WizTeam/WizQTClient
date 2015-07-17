@@ -93,6 +93,8 @@ void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
         m_strEnterpriseAPIUrl = WIZNOTE_API_SERVER;
     }
 
+    qDebug() << "set server ip : " << m_strEnterpriseAPIUrl;
+
     m_strSyncUrl.clear();
     m_strMessageServerUrl.clear();
     m_strMessageVersionUrl.clear();
@@ -167,17 +169,24 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
 QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
 {
     if (!strUrl.isEmpty())
+    {
+        qDebug() << "request url by command : " << strCommand << "  use cache url : "  << strUrl;
         return strUrl;
+    }
 
     QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
+
+    qDebug() << "request url by command : " << strCommand << "  request result : "  << strUrl;
     return strUrl;
 }
 
 QString ApiEntryPrivate::syncUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
+    QString strSyncUrl = requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
+    qDebug() << "get sync url , cache url :  " << m_strSyncUrl  << "   result :  " << strSyncUrl;
+    return strSyncUrl;
 }
 
 QString ApiEntryPrivate::messageVersionUrl()

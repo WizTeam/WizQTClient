@@ -35,16 +35,20 @@ QString TokenPrivate::token()
 //    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
     CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+    qDebug() << "request token, current token :  " << m_info.strToken;
     if (m_info.strToken.isEmpty())
     {
+        qDebug() << "current token is empty try to get a new token with user id : " << m_strUserId << " length : " << m_strPasswd.length();
         if (asServer.Login(m_strUserId, m_strPasswd))
         {
             m_info = asServer.GetUserInfo();
+            qDebug() << "get token succces : " << m_info.strToken;
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
         }
         else
         {
+            qDebug() << "get token failed : " << m_lastErrorCode << m_lastErrorMessage;
             m_lastErrorCode = asServer.GetLastErrorCode();
             m_lastErrorMessage = asServer.GetLastErrorMessage();
             return QString();
@@ -62,6 +66,7 @@ QString TokenPrivate::token()
         info.strKbGUID = m_info.strKbGUID;
         asServer.SetUserInfo(info);
 
+        qDebug() << "current token expried try to keep alive";
         if (asServer.KeepAlive(m_info.strToken))
         {
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
@@ -69,15 +74,18 @@ QString TokenPrivate::token()
         }
         else
         {
+            qDebug() << "token keep alive failed , try to request a new token";
             QString strToken;
             if (asServer.GetToken(m_strUserId, m_strPasswd, strToken))
             {
                 m_info.strToken = strToken;
+                qDebug() << "request new token success : " << m_info.strToken;
                 m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
                 return m_info.strToken;
             }
             else
             {
+                qDebug() << "request new token failed : " << m_lastErrorCode << m_lastErrorMessage;
                 m_lastErrorCode = asServer.GetLastErrorCode();
                 m_lastErrorMessage = asServer.GetLastErrorMessage();
                 return QString();

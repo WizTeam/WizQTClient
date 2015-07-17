@@ -203,6 +203,8 @@ void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocum
 
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
 
+QString localIP();
+
 enum WizKMUrlType
 {
     WizUrl_Invalid,

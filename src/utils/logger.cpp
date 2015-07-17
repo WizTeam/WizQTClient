@@ -56,6 +56,10 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 {
     Q_UNUSED(context);
 
+    //QTBug: ignore these
+    if (msg.startsWith("libpng warning: iCCP"))
+        return;
+
     logger()->saveToLogFile(msg);
     logger()->addToBuffer(msg);
 

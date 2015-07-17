@@ -2586,3 +2586,28 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
 
     return PathFileExists(strAttachmentFileName);
 }
+
+
+#include <QNetworkInterface>
+QString localIP()
+{
+    QString localIP;
+    QList<QNetworkInterface> interface = QNetworkInterface::allInterfaces();
+    for (int i = 0; i < interface.size(); i++)
+    {
+        QNetworkInterface item = interface.at(i);
+        if (item.isValid() &&  !(item.flags() & QNetworkInterface::CanBroadcast))
+            continue;
+
+        QList<QNetworkAddressEntry> entryList = item.addressEntries();
+        for (int j = 0; j < entryList.size(); j++)
+        {
+            QString strIP = entryList.at(j).ip().toString();
+            if (strIP.isEmpty() || strIP.startsWith("127"))
+                continue;
+
+            localIP.append(entryList.at(j).ip().toString());
+        }
+    }
+    return localIP;
+}

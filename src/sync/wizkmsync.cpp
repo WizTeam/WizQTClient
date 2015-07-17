@@ -181,7 +181,8 @@ bool CWizKMSyncThread::doSync()
     if (needSyncAll())
     {
         qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
-
+        qDebug() << "as server : " << WizService::ApiEntry::asServerUrl() << "\nsync url : " <<
+                    WizService::ApiEntry::syncUrl();
         syncAll();
         m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
