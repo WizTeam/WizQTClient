@@ -96,13 +96,13 @@ void CWizAutoTimeOutEventLoop::on_timeOut()
 void CWizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     m_downloadBytes = bytesReceived;
-    qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
+//    qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
 }
 
 void CWizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
     m_uploadBytes = bytesSent;
-    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
+//    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
 }
 
 

@@ -56,6 +56,10 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 {
     Q_UNUSED(context);
 
+    //FIXME: useless waning message from qt, ignore it
+    if (msg.startsWith("libpng warning: iCCP:"))
+        return;
+
 //    bool saveLog = true;
 //#ifndef QT_DEBUG
 //    if (type == QtDebugMsg)

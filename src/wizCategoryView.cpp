@@ -804,7 +804,7 @@ bool CWizCategoryView::renameFolder(CWizCategoryViewFolderItem* item, const QStr
     m_dbMgr.db().GetAllLocationsWithExtra(arrayLocation);
     if (std::find(arrayLocation.begin(), arrayLocation.end(), strLocation) != arrayLocation.end())
     {
-        if (CWizMessageBox::question(0, tr("Info"), tr("Folder %1 alread exists, combine these folders?").arg(validName)) == QMessageBox::No)
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(validName)) == QMessageBox::No)
         {
             validName = getUseableItemName(item->parent(), item);
             item->setText(0, validName);
@@ -841,7 +841,7 @@ bool CWizCategoryView::renameGroupFolder(CWizCategoryViewGroupItem* pGroup, cons
     tag.strName = strFolderName;
     if (sameNameBrother != nullptr)
     {
-        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' alread exists, combine these folders?").arg(strFolderName)) == QMessageBox::Yes)
+        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(strFolderName)) == QMessageBox::Yes)
         {
             // move documents to brother folder  and move child folders to brother folder
             CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);

@@ -21,7 +21,7 @@ void CWizKMSyncEvents::OnSyncProgress(int pos)
 HRESULT CWizKMSyncEvents::OnText(WizKMSyncProgressMessageType type, const QString& strStatus)
 {
     Q_UNUSED(type);
-    qInfo() << "[Sync]" << strStatus;
+    qInfo() << "[Sync]"  << strStatus;
 
     Q_EMIT messageReady(strStatus);
     return 0;
@@ -41,12 +41,12 @@ HRESULT CWizKMSyncEvents::OnBubbleNotification(const QVariant& param)
 
 void CWizKMSyncEvents::SetDatabaseCount(int count)
 {
-    qDebug() << "[Sync]SetDatabaseCount count = " << count;
+    OnStatus(QObject::tr("Set database count: %1").arg(count));
 }
 
 void CWizKMSyncEvents::SetCurrentDatabase(int index)
 {
-    qDebug() << "[Sync]SetCurrentDatabase index = " << index;
+    OnStatus(QObject::tr("Set current database index: %1").arg(index));
 }
 
 void CWizKMSyncEvents::ClearLastSyncError(IWizSyncableDatabase* pDatabase)
@@ -81,19 +81,18 @@ void CWizKMSyncEvents::OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
 
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
-    qDebug() << "[Sync]SetCurrentDatabase guid: " << strDocumentGUID;
+    OnStatus(QObject::tr("Upload document: %1").arg(strDocumentGUID));
 }
 
 void CWizKMSyncEvents::OnBeginKb(const QString& strKbGUID)
 {
-    qDebug() << "[Sync]OnBeginKb kb_guid: " << strKbGUID;
+    OnStatus(QObject::tr("OnBeginKb kb_guid: %1").arg(strKbGUID));
 }
 
 void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 {
-    qDebug() << "[Sync]OnEndKb kb_guid: " << strKbGUID;
+    OnStatus(QObject::tr("OnEndKb kb_guid: %1").arg(strKbGUID));
 }
-
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 

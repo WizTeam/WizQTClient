@@ -78,7 +78,7 @@ private:
         __int64 nVersion = m_pDatabase->GetObjectVersion(strObjectType);
         if (nServerVersion == nVersion)
         {
-            m_pEvents->OnStatus(_TR("No change, skip"));
+            m_pEvents->OnStatus(QObject::tr("No change, skip"));
             return TRUE;
         }
         //
