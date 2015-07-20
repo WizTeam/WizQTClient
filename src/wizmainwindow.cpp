@@ -190,7 +190,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
-//    connect(m_doc->web(), SIGNAL(selectAllKeyPressed()), SLOT(on_actionEditingSelectAll_triggered()));
     connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
@@ -428,14 +427,14 @@ void MainWindow::showEvent(QShowEvent* event)
 
 void MainWindow::on_actionExit_triggered()
 {
-    WizGetAnalyzer().LogAction("exit");
+    WizGetAnalyzer().LogAction("MenuBarExit");
 
     qApp->exit();
 }
 
 void MainWindow::on_actionClose_triggered()
 {
-    WizGetAnalyzer().LogAction("close");
+    WizGetAnalyzer().LogAction("MenuBarClose");
 
 #ifdef Q_OS_MAC
     QWidget* wgt = qApp->activeWindow();
@@ -1822,11 +1821,13 @@ void MainWindow::on_documents_hintChanged(const QString& strHint)
 
 void MainWindow::on_documents_viewTypeChanged(int type)
 {
+    WizGetAnalyzer().LogAction("DocumentsViewTypeChanged");
     m_documents->resetItemsViewType(type);
 }
 
 void MainWindow::on_documents_sortingTypeChanged(int type)
 {
+    WizGetAnalyzer().LogAction("DocumentsSortTypeChanged");
     m_documents->resetItemsSortingType(type);
 }
 
@@ -1855,7 +1856,7 @@ void MainWindow::on_actionAutoSync_triggered()
 
 void MainWindow::on_actionSync_triggered()
 {
-    WizGetAnalyzer().LogAction("syncAll");
+    WizGetAnalyzer().LogAction("ToolBarSyncAll");
 
     if (m_animateSync->isPlaying())
     {
@@ -1997,15 +1998,15 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
-{
-    WizGetAnalyzer().LogAction("undo");
+{    
+    WizGetAnalyzer().LogAction("MenuBarUndo");
 
     m_doc->web()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    WizGetAnalyzer().LogAction("redo");
+    WizGetAnalyzer().LogAction("MenuBarRedo");
 
     m_doc->web()->redo();
 }
@@ -2066,21 +2067,21 @@ void MainWindow::on_actionMoveToLineEnd_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    WizGetAnalyzer().LogAction("cut");
+    WizGetAnalyzer().LogAction("MenuBarCut");
 
     m_doc->web()->triggerPageAction(QWebPage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    WizGetAnalyzer().LogAction("copy");
+    WizGetAnalyzer().LogAction("MenuBarCopy");
 
     m_doc->web()->triggerPageAction(QWebPage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
-    WizGetAnalyzer().LogAction("paste");
+    WizGetAnalyzer().LogAction("MenuBarPaste");
 
     m_doc->web()->setPastePlainTextEnable(false);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -2088,7 +2089,7 @@ void MainWindow::on_actionEditingPaste_triggered()
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    WizGetAnalyzer().LogAction("pastePlain");
+    WizGetAnalyzer().LogAction("MenuBarPastePlain");
 
     m_doc->web()->setPastePlainTextEnable(true);
     m_doc->web()->triggerPageAction(QWebPage::Paste);
@@ -2096,7 +2097,7 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    WizGetAnalyzer().LogAction("selectAll");
+    WizGetAnalyzer().LogAction("MenuBarSelectAll");
 
     m_doc->web()->triggerPageAction(QWebPage::SelectAll);
 }
@@ -2110,7 +2111,7 @@ void MainWindow::on_actionEditingDelete_triggered()
 
 void MainWindow::on_actionViewToggleCategory_triggered()
 {
-    WizGetAnalyzer().LogAction("toggleCategory");
+    WizGetAnalyzer().LogAction("MenuBarToggleCategory");
 
     QWidget* category = m_splitter->widget(0);
     if (category->isVisible()) {
@@ -2130,7 +2131,8 @@ void MainWindow::on_actionViewToggleCategory_triggered()
 
 void MainWindow::on_actionViewToggleFullscreen_triggered()
 {
-    WizGetAnalyzer().LogAction("fullscreen");
+    WizGetAnalyzer().LogAction("MenuBarFullscreen");
+
 
 #ifdef Q_OS_MAC
     //toggleFullScreenMode(this);
@@ -2146,7 +2148,7 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 
 void MainWindow::on_actionViewMinimize_triggered()
 {
-    WizGetAnalyzer().LogAction("minimize");
+    WizGetAnalyzer().LogAction("MenuBarMinimize");
 
     while (true) {
         QWidget* wgt = qApp->activeWindow();
@@ -2166,127 +2168,152 @@ void MainWindow::on_actionMarkAllMessageRead_triggered()
 
 void MainWindow::on_messageSelector_indexChanged(int index)
 {
+    WizGetAnalyzer().LogAction("messageSelector");
     QString guid = m_msgListTitleBar->selectorItemData(index);
     loadMessageByUserGuid(guid);
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarJustifyLeft");
     m_doc->web()->editorCommandExecuteJustifyLeft();
 }
 
 void MainWindow::on_actionFormatJustifyRight_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarJustifyRight");
     m_doc->web()->editorCommandExecuteJustifyRight();
 }
 
 void MainWindow::on_actionFormatJustifyCenter_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarJustifyCenter");
     m_doc->web()->editorCommandExecuteJustifyCenter();
 }
 
 void MainWindow::on_actionFormatJustifyJustify_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarJustifyJustify");
     m_doc->web()->editorCommandExecuteJustifyJustify();
 }
 
 void MainWindow::on_actionFormatInsertOrderedList_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarOrderedList");
     m_doc->web()->editorCommandExecuteInsertOrderedList();
 }
 
 void MainWindow::on_actionFormatInsertUnorderedList_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarUnorderedList");
     m_doc->web()->editorCommandExecuteInsertUnorderedList();
 }
 
 void MainWindow::on_actionFormatInsertTable_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarUnorderedList");
     m_doc->web()->editorCommandExecuteTableInsert();
 }
 
 void MainWindow::on_actionFormatInsertLink_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertLink");
     m_doc->web()->editorCommandExecuteLinkInsert();
 }
 
 void MainWindow::on_actionFormatBold_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarBold");
     m_doc->web()->editorCommandExecuteBold();
 }
 
 void MainWindow::on_actionFormatItalic_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarItalic");
     m_doc->web()->editorCommandExecuteItalic();
 }
 
 void MainWindow::on_actionFormatUnderLine_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarUnderLine");
     m_doc->web()->editorCommandExecuteUnderLine();
 }
 
 void MainWindow::on_actionFormatStrikeThrough_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarStrikeThrough");
     m_doc->web()->editorCommandExecuteStrikeThrough();
 }
 
 void MainWindow::on_actionFormatInsertHorizontal_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertHorizontal");
     m_doc->web()->editorCommandExecuteInsertHorizontal();
 }
 
 void MainWindow::on_actionFormatInsertDate_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertDate");
     m_doc->web()->editorCommandExecuteInsertDate();
 }
 
 void MainWindow::on_actionFormatInsertTime_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertTime");
     m_doc->web()->editorCommandExecuteInsertTime();
 }
 
 void MainWindow::on_actionFormatIndent_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarIndent");
     m_doc->web()->editorCommandExecuteIndent();
 }
 
 void MainWindow::on_actionFormatOutdent_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarOutdent");
     m_doc->web()->editorCommandExecuteOutdent();
 }
 
 void MainWindow::on_actionFormatRemoveFormat_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarRemoveFormat");
     m_doc->web()->editorCommandExecuteRemoveFormat();
 }
 
 void MainWindow::on_actionFormatPlainText_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarPlainText");
     m_doc->web()->editorCommandExecutePlainText();
 }
 
 void MainWindow::on_actionEditorViewSource_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarViewSource");
     m_doc->web()->editorCommandExecuteViewSource();
 }
 
 void MainWindow::on_actionFormatInsertCheckList_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertCheckList");
     m_doc->web()->editorCommandExecuteInsertCheckList();
 }
 
 void MainWindow::on_actionFormatInsertCode_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertCode");
     m_doc->web()->editorCommandExecuteInsertCode();
 }
 
 void MainWindow::on_actionFormatInsertImage_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarInsertImage");
     m_doc->web()->editorCommandExecuteInsertImage();
 }
 
 void MainWindow::on_actionFormatScreenShot_triggered()
 {
+    WizGetAnalyzer().LogAction("MenuBarScreenShot");
     m_doc->web()->editorCommandExecuteScreenShot();
 }
 
@@ -2299,12 +2326,12 @@ void MainWindow::on_actionConsole_triggered()
     m_console->show();
     m_console->raise();
 
-    WizGetAnalyzer().LogAction("console");
+    WizGetAnalyzer().LogAction("MenuBarConsole");
 }
 
 void MainWindow::on_actionLogout_triggered()
 {
-    WizGetAnalyzer().LogAction("logout");
+    WizGetAnalyzer().LogAction("MenuBarLogout");
 
     // save state
     m_settings->setAutoLogin(false);
@@ -2314,7 +2341,7 @@ void MainWindow::on_actionLogout_triggered()
 
 void MainWindow::on_actionAbout_triggered()
 {
-    WizGetAnalyzer().LogAction("aboutWiz");
+    WizGetAnalyzer().LogAction("MenuBarAboutWiz");
 
     AboutDialog dialog(this);
     dialog.exec();
@@ -2324,13 +2351,13 @@ void MainWindow::on_actionDeveloper_triggered()
 {
     m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
-    WizGetAnalyzer().LogAction("developerMode");
+    WizGetAnalyzer().LogAction("MenuBarDeveloperMode");
 }
 
 
 void MainWindow::on_actionPreference_triggered()
 {
-    WizGetAnalyzer().LogAction("preference");
+    WizGetAnalyzer().LogAction("MenuBarPreference");
 
     CWizPreferenceWindow preference(*this, this);
 
@@ -2354,7 +2381,7 @@ void MainWindow::on_actionFeedback_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    WizGetAnalyzer().LogAction("feedback");
+    WizGetAnalyzer().LogAction("MenuBarFeedback");
 }
 
 void MainWindow::on_actionSupport_triggered()
@@ -2366,7 +2393,7 @@ void MainWindow::on_actionSupport_triggered()
 
     QDesktopServices::openUrl(strUrl);
 
-    WizGetAnalyzer().LogAction("support");
+    WizGetAnalyzer().LogAction("MenuBarSupport");
 }
 
 void MainWindow::on_actionManual_triggered()
@@ -2379,7 +2406,7 @@ void MainWindow::on_actionManual_triggered()
     strUrl += "&site=www&name=manual/mac/index.html";
     QDesktopServices::openUrl(strUrl);
 
-    WizGetAnalyzer().LogAction("manual");
+    WizGetAnalyzer().LogAction("MenuBarManual");
 }
 
 void MainWindow::on_actionRebuildFTS_triggered()
@@ -2405,7 +2432,7 @@ void MainWindow::on_actionSearch_triggered()
 {
     m_searchWidget->focus();
 
-    WizGetAnalyzer().LogAction("search");
+    WizGetAnalyzer().LogAction("MenuBarSearch");
 }
 
 void MainWindow::on_actionResetSearch_triggered()
@@ -2416,22 +2443,25 @@ void MainWindow::on_actionResetSearch_triggered()
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
 
-    WizGetAnalyzer().LogAction("resetSearch");
+    WizGetAnalyzer().LogAction("MenuBarResetSearch");
 }
 
 void MainWindow::on_actionAdvancedSearch_triggered()
 {
     m_category->on_action_advancedSearch();
+    WizGetAnalyzer().LogAction("MenuBarAdvancedSearch");
 }
 
 void MainWindow::on_actionAddCustomSearch_triggered()
 {
     m_category->on_action_addCustomSearch();
+    WizGetAnalyzer().LogAction("MenuBarAddCustomSearch");
 }
 
 void MainWindow::on_actionFindReplace_triggered()
 {    
     m_doc->web()->editorCommandExecuteFindReplace();
+    WizGetAnalyzer().LogAction("MenuBarFindReplace");
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()
@@ -2440,6 +2470,7 @@ void MainWindow::on_actionSaveAsPDF_triggered()
     {
         m_doc->web()->saveAsPDF();
     }
+    WizGetAnalyzer().LogAction("MenuBarSaveAsPDF");
 }
 
 void MainWindow::on_actionSaveAsHtml_triggered()
@@ -2455,6 +2486,7 @@ void MainWindow::on_actionSaveAsHtml_triggered()
             m_doc->web()->saveAsHtml(strPath + "/");
         }
     }
+    WizGetAnalyzer().LogAction("MenuBarSaveAsHtml");
 }
 
 void MainWindow::on_actionImportFile_triggered()
@@ -2463,11 +2495,13 @@ void MainWindow::on_actionImportFile_triggered()
     {
         m_category->on_action_importFile();
     }
+    WizGetAnalyzer().LogAction("MenuBarImportFile");
 }
 
 void MainWindow::on_actionPrint_triggered()
 {
     m_doc->web()->printDocument();
+    WizGetAnalyzer().LogAction("MenuBarPrint");
 }
 
 void MainWindow::on_actionPrintMargin_triggered()
@@ -2477,6 +2511,7 @@ void MainWindow::on_actionPrintMargin_triggered()
     connect(&preference, SIGNAL(settingsChanged(WizOptionsType)), SLOT(on_options_settingsChanged(WizOptionsType)));
     connect(&preference, SIGNAL(restartForSettings()), SLOT(on_options_restartForSettings()));
     preference.exec();
+    WizGetAnalyzer().LogAction("MenuBarPrintMargin");
 }
 
 //void MainWindow::on_searchDocumentFind(const WIZDOCUMENTDATAEX& doc)
@@ -2567,7 +2602,7 @@ void MainWindow::on_client_splitterMoved(int pos, int index)
 
 void MainWindow::on_actionGoBack_triggered()
 {
-    WizGetAnalyzer().LogAction("goBack");
+    WizGetAnalyzer().LogAction("ToolBarGoBack");
 
     if (!m_history->canBack())
         return;
@@ -2590,7 +2625,7 @@ void MainWindow::on_actionGoBack_triggered()
 
 void MainWindow::on_actionGoForward_triggered()
 {
-    WizGetAnalyzer().LogAction("goForward");
+    WizGetAnalyzer().LogAction("ToolBarGoForward");
 
     if (!m_history->canForward())
         return;
@@ -2723,19 +2758,31 @@ void MainWindow::on_message_itemSelectionChanged()
             m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
             return;
         }
+
         //  show comments
-//#if QT_VERSION >  0x050400
         WIZMESSAGEDATA msgData;
         m_dbMgr.db().messageFromId(msg.nId, msgData);
         if (msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
-//            QTimer::singleShot(0, [&](){
-               m_doc->commentWidget()->setVisible(true);
-//            });
+            QWidget* commentWidget = m_doc->commentWidget();
+            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
+            if (splitter)
+            {
+                QList<int> li = splitter->sizes();
+                Q_ASSERT(li.size() == 2);
+                if (li.size() == 2)
+                {
+                    QList<int> lin;
+                    const int COMMENT_FRAME_WIDTH = 310;
+                    lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
+                    lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+                    splitter->setSizes(lin);
+                    commentWidget->show();
+                }
+            }
         }
-//#endif
 
 
         viewDocument(doc, true);

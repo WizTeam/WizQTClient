@@ -1253,6 +1253,7 @@ struct WizEditorContextMenuItem
     QString label;
     QString command;
     QString execute;
+    bool localSlot;
 };
 
 #define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
@@ -1313,80 +1314,80 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
 {
     static WizEditorContextMenuItem arrayData[] =
     {
-        {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered"},
-        {WIZEDITOR_ACTION_BAIDU,                   "",                 "on_editor_baidu_triggered"},
+        {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered", true},
+        {WIZEDITOR_ACTION_BAIDU,                   "",                 "on_editor_baidu_triggered", true},
         {"-", "-", "-"},
 
-        {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered"},
-        {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered"},
-        {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered"},
+        {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered", true},
+        {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered", true},
+        {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered", true},
         {"-", "-", "-"},
 
-        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered"},
-        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered"},
-        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered"},
+        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered", true},
+        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered", true},
+        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered", true},
         {"-", "-", "-"},
 
         {QObject::tr("Link"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_LINK_INSERT,              "link",             "editorCommandExecuteLinkInsert"},
-        {WIZEDITOR_ACTION_LINK_EDIT,                "link",             "editorCommandExecuteLinkInsert"},
-        {WIZEDITOR_ACTION_LINK_REMOVE,              "unlink",           "editorCommandExecuteLinkRemove"},
+        {WIZEDITOR_ACTION_LINK_INSERT,              "link",             "on_editor_insertLink_triggered", true},
+        {WIZEDITOR_ACTION_LINK_EDIT,                "link",             "on_editor_editLink_triggered", true},
+        {WIZEDITOR_ACTION_LINK_REMOVE,              "unlink",           "on_editor_removeLink_triggered", true},
         {"+", "+", "+"},
 
         {QObject::tr("Font"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_FONT_BOLD,                "bold",             "editorCommandExecuteBold"},
-        {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "editorCommandExecuteItalic"},
-        {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "editorCommandExecuteUnderLine"},
-        {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "editorCommandExecuteStrikeThrough"},
+        {WIZEDITOR_ACTION_FONT_BOLD,                "bold",             "on_editor_bold_triggered", true},
+        {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "on_editor_italic_triggered", true},
+        {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "on_editor_underline_triggered", true},
+        {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "on_editor_strikethrough_triggered", true},
 //        {"-", "-", "-"},
 //        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
 //        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
         {"+", "+", "+"},
 
         {QObject::tr("Justify"),                    "+",          "+"},
-        {WIZEDITOR_ACTION_JUSTIFY_LEFT,             "justify",          "editorCommandExecuteJustifyLeft"},
-        {WIZEDITOR_ACTION_JUSTIFY_CENTER,           "justify",          "editorCommandExecuteJustifyCenter"},
-        {WIZEDITOR_ACTION_JUSTIFY_RIGHT,            "justify",          "editorCommandExecuteJustifyRight"},
+        {WIZEDITOR_ACTION_JUSTIFY_LEFT,             "justify",          "on_editor_justifyLeft_triggered", true},
+        {WIZEDITOR_ACTION_JUSTIFY_CENTER,           "justify",          "on_editor_justifyCenter_triggered", true},
+        {WIZEDITOR_ACTION_JUSTIFY_RIGHT,            "justify",          "on_editor_justifyRight_triggered", true},
         {"+", "+", "+"},
 
         {QObject::tr("Table"),                      "+",                "+"},
-        {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "editorCommandExecuteTableInsert"},
-        {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",      "editorCommandExecuteTableDelete"},
+        {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "on_editor_insertTable_triggered", true},
+        {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",     "on_editor_deleteTable_triggered", true},
         {"-", "-", "-"},
         {QObject::tr("Cell Alignment"),                      "+",                "+"},
-        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop"},
-        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop"},
-        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop"},
-        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft"},
-        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter"},
-        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight"},
-        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom"},
-        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom"},
-        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom"},
+        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop", false},
+        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop", false},
+        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop", false},
+        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft", false},
+        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter", false},
+        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight", false},
+        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom", false},
+        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom", false},
+        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom", false},
         {"+", "+", "+"},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW,         "insertrow",        "editorCommandExecuteTableInsertRow"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT,    "insertrownext",    "editorCommandExecuteTableInsertRowNext"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM,       "insertcol",        "editorCommandExecuteTableInsertCol"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT,  "insertcolnext",    "editorCommandExecuteTableInsertColNext"},
+        {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow", false},
+        {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol", false},
+        {WIZEDITOR_ACTION_TABLE_INSERT_ROW,         "insertrow",        "editorCommandExecuteTableInsertRow", false},
+        {WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT,    "insertrownext",    "editorCommandExecuteTableInsertRowNext", false},
+        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM,       "insertcol",        "editorCommandExecuteTableInsertCol", false},
+        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT,  "insertcolnext",    "editorCommandExecuteTableInsertColNext", false},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_CAPTION,     "insertcaption",    "editorCommandExecuteTableInsertCaption"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_CAPTION,     "deletecaption",    "editorCommandExecuteTableDeleteCaption"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_TITLE,       "inserttitle",      "editorCommandExecuteTableInsertTitle"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_TITLE,       "deletetitle",      "editorCommandExecuteTableDeleteTitle"},
+        {WIZEDITOR_ACTION_TABLE_INSERT_CAPTION,     "insertcaption",    "editorCommandExecuteTableInsertCaption", false},
+        {WIZEDITOR_ACTION_TABLE_DELETE_CAPTION,     "deletecaption",    "editorCommandExecuteTableDeleteCaption", false},
+        {WIZEDITOR_ACTION_TABLE_INSERT_TITLE,       "inserttitle",      "editorCommandExecuteTableInsertTitle", false},
+        {WIZEDITOR_ACTION_TABLE_DELETE_TITLE,       "deletetitle",      "editorCommandExecuteTableDeleteTitle", false},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_MERGE_CELLS,        "mergecells",       "editorCommandExecuteTableMergeCells"},
-        {WIZEDITOR_ACTION_TABLE_MERGE_RIGHT,        "mergeright",       "editorCommandExecuteTalbeMergeRight"},
-        {WIZEDITOR_ACTION_TABLE_MERGE_DOWN,         "mergedown",        "editorCommandExecuteTableMergeDown"},
+        {WIZEDITOR_ACTION_TABLE_MERGE_CELLS,        "mergecells",       "editorCommandExecuteTableMergeCells", false},
+        {WIZEDITOR_ACTION_TABLE_MERGE_RIGHT,        "mergeright",       "editorCommandExecuteTalbeMergeRight", false},
+        {WIZEDITOR_ACTION_TABLE_MERGE_DOWN,         "mergedown",        "editorCommandExecuteTableMergeDown", false},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_CELLS,        "splittocells",     "editorCommandExecuteTableSplitCells"},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_ROWS,         "splittorows",      "editorCommandExecuteTableSplitRows"},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS,       "splittocols",      "editorCommandExecuteTableSplitCols"},
+        {WIZEDITOR_ACTION_TABLE_SPLIT_CELLS,        "splittocells",     "editorCommandExecuteTableSplitCells", false},
+        {WIZEDITOR_ACTION_TABLE_SPLIT_ROWS,         "splittorows",      "editorCommandExecuteTableSplitRows", false},
+        {WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS,       "splittocols",      "editorCommandExecuteTableSplitCols", false},
         {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS,       "averagedistributerow", "editorCommandExecuteTableAverageRows"},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS,     "averagedistributecol", "editorCommandExecuteTableAverageCols"},
+        {WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS,       "averagedistributerow", "editorCommandExecuteTableAverageRows", false},
+        {WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS,     "averagedistributecol", "editorCommandExecuteTableAverageCols", false},
         {"+", "+", "+"},
 
         {"", "", ""}
@@ -1463,7 +1464,7 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     } else {
         actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
-    }
+    }    
 
     if (m_editor->page()->settings()->globalSettings()->testAttribute(QWebSettings::DeveloperExtrasEnabled)) {
         m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
@@ -1573,6 +1574,7 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
 
 void EditorToolBar::on_foreColor_changed()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarForeColor");
     QAction *pColorAction = qobject_cast<QAction *>(sender());
     if (!pColorAction)
         return;
@@ -1600,6 +1602,7 @@ void EditorToolBar::on_showForeColorBoard()
 
 void EditorToolBar::on_backColor_changed()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarBackColor");
     QAction *pColorAction = qobject_cast<QAction *>(sender());
     if (!pColorAction)
         return;
@@ -1783,10 +1786,10 @@ void EditorToolBar::buildMenu()
             }
 
             QString strSlot = "1" + item.execute + "()";
-            if (!item.command.isEmpty()) {
-                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
-            } else {
+            if (item.localSlot) {
                 m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8());
+            } else {
+                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
             }
         } else {
             Q_ASSERT(0);
@@ -1835,7 +1838,11 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 
             bSkip = false;
             QString strSlot = "1" + item.execute + "()";
-            m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
+            if (item.localSlot) {
+                m_actions[item.label] = pSubMenu->addAction(item.label, this, strSlot.toUtf8());
+            } else {
+                m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
+            }
 
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             continue;
@@ -1855,12 +1862,14 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 
 void EditorToolBar::on_editor_google_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuSearchByGoogle");
     QUrl url("http://google.com/search?q=" + m_editor->page()->selectedText());
     QDesktopServices::openUrl(url);
 }
 
 void EditorToolBar::on_editor_baidu_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuSearchByBaidu");
     QUrl url("http://www.baidu.com/s?wd=" + m_editor->page()->selectedText());
     QDesktopServices::openUrl(url);
 }
@@ -1883,22 +1892,98 @@ void EditorToolBar::on_editor_paste_triggered()
 #else
 void EditorToolBar::on_editor_cut_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCut");
     m_editor->triggerPageAction(QWebPage::Cut);
 }
 
 void EditorToolBar::on_editor_copy_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopy");
     m_editor->triggerPageAction(QWebPage::Copy);
 }
 
 void EditorToolBar::on_editor_paste_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
     m_editor->triggerPageAction(QWebPage::Paste);
+}
+
+void EditorToolBar::on_editor_bold_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuBold");
+    m_editor->editorCommandExecuteBold();
+}
+
+void EditorToolBar::on_editor_italic_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuItalic");
+    m_editor->editorCommandExecuteItalic();
+}
+
+void EditorToolBar::on_editor_underline_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuUnderline");
+    m_editor->editorCommandExecuteUnderLine();
+}
+
+void EditorToolBar::on_editor_strikethrough_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuStrikeThrough");
+    m_editor->editorCommandExecuteStrikeThrough();
+}
+
+void EditorToolBar::on_editor_insertLink_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuInsertLink");
+    m_editor->editorCommandExecuteLinkInsert();
+}
+
+void EditorToolBar::on_editor_editLink_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuEditLink");
+    m_editor->editorCommandExecuteLinkInsert();
+}
+
+void EditorToolBar::on_editor_removeLink_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuRemoveLink");
+    m_editor->editorCommandExecuteLinkRemove();
+}
+
+void EditorToolBar::on_editor_insertTable_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuInsertTable");
+    m_editor->editorCommandExecuteTableInsert();
+}
+
+void EditorToolBar::on_editor_deleteTable_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuDeleteTable");
+    m_editor->editorCommandExecuteTableDelete();
+}
+
+void EditorToolBar::on_editor_justifyLeft_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyLeft");
+    m_editor->editorCommandExecuteJustifyLeft();
+}
+
+void EditorToolBar::on_editor_justifyCenter_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyCenter");
+    m_editor->editorCommandExecuteJustifyCenter();
+}
+
+void EditorToolBar::on_editor_justifyRight_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyRight");
+    m_editor->editorCommandExecuteJustifyRight();
 }
 #endif
 
 void EditorToolBar::on_comboParagraph_indexChanged(int index)
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarParagraph");
     QString type = m_comboParagraph->itemData(index).toString();
     Q_ASSERT (index >=0 && index < nParagraphItemCount);
     WizComboboxStyledItem* paraItems = ParagraphItems();
@@ -1919,6 +2004,7 @@ void EditorToolBar::on_comboParagraph_indexChanged(int index)
 
 void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarFontFamily");
     if (strFamily == m_comboFontFamily->text())
         return;
 
@@ -1930,6 +2016,7 @@ void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
 
 void EditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarFontSize");
     if (strSize == m_comboFontSize->text())
         return;
 
@@ -1945,6 +2032,7 @@ void EditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
 
 void EditorToolBar::on_btnFormatMatch_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarFormatMatch");
     if (m_editor) {
         m_editor->editorCommandExecuteFormatMatch();
     }
@@ -1952,6 +2040,7 @@ void EditorToolBar::on_btnFormatMatch_clicked()
 
 void EditorToolBar::on_btnBold_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarBold");
     if (m_editor) {
         m_editor->editorCommandExecuteBold();
     }
@@ -1959,6 +2048,7 @@ void EditorToolBar::on_btnBold_clicked()
 
 void EditorToolBar::on_btnItalic_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarItalic");
     if (m_editor) {
         m_editor->editorCommandExecuteItalic();
     }
@@ -1966,6 +2056,7 @@ void EditorToolBar::on_btnItalic_clicked()
 
 void EditorToolBar::on_btnUnderLine_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarUnderLine");
     if (m_editor) {
         m_editor->editorCommandExecuteUnderLine();
     }
@@ -1973,15 +2064,15 @@ void EditorToolBar::on_btnUnderLine_clicked()
 
 void EditorToolBar::on_btnStrikeThrough_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarStrikeThrough");
     if (m_editor) {
         m_editor->editorCommandExecuteStrikeThrough();
     }
 }
 
 void EditorToolBar::on_btnJustify_clicked()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("justifyInEditorToolBar");
+{    
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustify");
     //
     QPoint pos = m_btnJustify->mapToGlobal(QPoint(0, m_btnJustify->height()));
     m_menuJustify->move(pos);
@@ -1994,6 +2085,7 @@ void EditorToolBar::on_btnJustify_clicked()
 
 void EditorToolBar::on_btnJustifyLeft_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyLeft");
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyLeft();
     }
@@ -2001,6 +2093,7 @@ void EditorToolBar::on_btnJustifyLeft_clicked()
 
 void EditorToolBar::on_btnJustifyCenter_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyCenter");
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyCenter();
     }
@@ -2008,6 +2101,7 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 
 void EditorToolBar::on_btnJustifyRight_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyLeft");
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyRight();
     }
@@ -2015,6 +2109,7 @@ void EditorToolBar::on_btnJustifyRight_clicked()
 
 void EditorToolBar::on_btnSearchReplace_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarSearchReplace");
     if (m_editor) {
         m_editor->editorCommandExecuteFindReplace();
     }
@@ -2022,6 +2117,7 @@ void EditorToolBar::on_btnSearchReplace_clicked()
 
 void EditorToolBar::on_btnUnorderedList_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarUnorderedList");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertUnorderedList();
     }
@@ -2029,6 +2125,7 @@ void EditorToolBar::on_btnUnorderedList_clicked()
 
 void EditorToolBar::on_btnOrderedList_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarOrderedList");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertOrderedList();
     }
@@ -2036,6 +2133,7 @@ void EditorToolBar::on_btnOrderedList_clicked()
 
 void EditorToolBar::on_btnTable_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarTable");
     if (m_editor) {
         m_editor->editorCommandExecuteTableInsert();
     }
@@ -2043,6 +2141,7 @@ void EditorToolBar::on_btnTable_clicked()
 
 void EditorToolBar::on_btnHorizontal_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarHorizontal");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertHorizontal();
     }
@@ -2050,6 +2149,7 @@ void EditorToolBar::on_btnHorizontal_clicked()
 
 void EditorToolBar::on_btnCheckList_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarCheckList");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertCheckList();
     }
@@ -2057,6 +2157,7 @@ void EditorToolBar::on_btnCheckList_clicked()
 
 void EditorToolBar::on_btnImage_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarImage");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
     }
@@ -2064,6 +2165,7 @@ void EditorToolBar::on_btnImage_clicked()
 
 void EditorToolBar::on_btnMobileImage_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarMobileImage");
     bool bReceiveImage = m_btnMobileImage->isChecked();
     if (m_editor)
     {
@@ -2076,6 +2178,7 @@ void EditorToolBar::on_btnMobileImage_clicked()
 
 void EditorToolBar::on_btnScreenShot_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarScreenShot");
     if (m_editor) {
         m_editor->editorCommandExecuteScreenShot();
     }
@@ -2083,6 +2186,7 @@ void EditorToolBar::on_btnScreenShot_clicked()
 
 void EditorToolBar::on_btnViewSource_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarViewSource");
     if (m_editor) {
         m_editor->editorCommandExecuteViewSource();
     }
@@ -2090,6 +2194,7 @@ void EditorToolBar::on_btnViewSource_clicked()
 
 void EditorToolBar::on_btnInsertCode_clicked()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarInsertCode");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertCode();
     }
@@ -2097,6 +2202,7 @@ void EditorToolBar::on_btnInsertCode_clicked()
 
 void EditorToolBar::on_editor_saveImageAs_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuSaveImageAs");
     bool bNeedSubsequent = false;
     if (processImageSrc(false, bNeedSubsequent) && bNeedSubsequent)
     {
@@ -2106,6 +2212,7 @@ void EditorToolBar::on_editor_saveImageAs_triggered()
 
 void EditorToolBar::on_editor_copyImage_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopyImage");
     bool bNeedSubsequent = false;
     if (processImageSrc(true, bNeedSubsequent) && bNeedSubsequent)
     {
@@ -2115,6 +2222,7 @@ void EditorToolBar::on_editor_copyImage_triggered()
 
 void EditorToolBar::on_editor_copyImageLink_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopyImageLink");
     if (m_strImageSrc.isEmpty())
         return;
 

@@ -2121,10 +2121,7 @@ void CWizDocumentWebView::saveAsPDF()
         printer.setColorMode(QPrinter::Color);
         printer.setOutputFileName(strFileName);
         //
-        frame->print(&printer);
-
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.LogAction("saveAsPDF");
+        frame->print(&printer);        
     }
 }
 
@@ -2132,10 +2129,7 @@ void CWizDocumentWebView::saveAsHtml(const QString& strDirPath)
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.ExportToHtmlFile(doc, strDirPath);
-
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("saveAsHtml");
+    db.ExportToHtmlFile(doc, strDirPath);    
 }
 
 void CWizDocumentWebView::printDocument()
@@ -2165,10 +2159,7 @@ void CWizDocumentWebView::printDocument()
         dlg.setWindowTitle(QObject::tr("Print Document"));
         if(dlg.exec() == QDialog::Accepted)
         {
-            frame->print(&printer);
-
-            CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-            analyzer.LogAction("print");
+            frame->print(&printer);            
         }
     }
 }
