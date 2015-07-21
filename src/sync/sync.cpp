@@ -843,7 +843,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         WizStringArrayToText(arrayPart, strParts, _T(", "));
         //
         QString strInfo;
-        strInfo = ::WizFormatString2(_TR("Updating note [%2] %1"), local.strTitle, strParts);
+        strInfo = ::WizFormatString2(QObject::tr("Upload note [%2] %1"), local.strTitle, strParts);
         //
         for (int i = 0; i < 2; i++)	//try twice
         {
@@ -895,7 +895,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //
     if (!succeeded)
     {
-        pEvents->OnWarning(WizFormatString1(_T("Cannot upload note data: %1"), local.strTitle));
+        pEvents->OnWarning(QObject::tr("Cannot upload note data: %1").arg(local.strTitle));
         return FALSE;
     }
     //
@@ -1811,7 +1811,11 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(QObject::tr("Connecting to server"));
 
-    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    QString syncUrl = WizService::ApiEntry::syncUrl();
+    if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
+        return false;
+
+    CWizKMAccountsServer server(syncUrl);
     server.SetUserInfo(info);
 
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));

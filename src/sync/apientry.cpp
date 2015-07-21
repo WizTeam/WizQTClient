@@ -176,7 +176,12 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, 
 
 QString ApiEntryPrivate::syncUrl()
 {
-    return requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
+     requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
+     if (m_strSyncUrl.isEmpty() || !m_strSyncUrl.startsWith("http"))
+     {
+        qWarning() << QObject::tr("Can not get sync url from server : %1, please check you network.").arg(m_strEnterpriseAPIUrl);
+     }
+     return m_strSyncUrl;
 }
 
 QString ApiEntryPrivate::messageVersionUrl()

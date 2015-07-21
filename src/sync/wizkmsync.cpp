@@ -81,7 +81,14 @@ void CWizKMSyncEvents::OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
 
 void CWizKMSyncEvents::OnUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
-    OnStatus(QObject::tr("Upload document: %1").arg(strDocumentGUID));
+    if (bDone)
+    {
+        OnStatus(QObject::tr("Upload document: %1 finished").arg(strDocumentGUID));
+    }
+    else
+    {
+        OnStatus(QObject::tr("Upload document: %1 start").arg(strDocumentGUID));
+    }
 }
 
 void CWizKMSyncEvents::OnBeginKb(const QString& strKbGUID)
