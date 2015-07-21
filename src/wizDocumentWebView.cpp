@@ -556,7 +556,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                     {
                         QString strHtml, strLink;
                         db.DocumentToHtmlLink(document, strHtml, strLink);
-                        strLinkHtml += "<p>" + strHtml + "</p>";
+                        strLinkHtml += "<span>&nbsp;" + strHtml + "&nbsp;</span>";
                     }
                 }
             }
