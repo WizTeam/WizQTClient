@@ -2099,7 +2099,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/ui/wizusercipherform.ui" line="177"/>
         <source>Remember for this session</source>
-        <translation>記住密碼 (目前工作階段)</translation>
+        <translation type="unfinished">記住密碼</translation>
     </message>
 </context>
 <context>

@@ -127,16 +127,15 @@ protected Q_SLOTS:
                                                     const QString& strAttachFile);
     void on_dragHovered_timeOut();
 
-private:
+protected:
     QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
     CWizDocumentDataArray m_dragDocArray;
     bool m_dragUrls;
     QTimer* m_dragHoveredTimer;
-    CWizCategoryViewItemBase* m_dragHoveredItem;
-
     CWizCategoryViewItemBase* m_dragItem;
+    CWizCategoryViewItemBase* m_dragHoveredItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
@@ -564,6 +563,8 @@ private:
     QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name);
     bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
     bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
+
+    bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
 
 private:
     QPointer<QMenu> m_menuShortcut;
