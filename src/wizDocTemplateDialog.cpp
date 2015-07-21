@@ -178,42 +178,35 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
         QString strTempFolder = Utils::PathResolve::tempPath() + Utils::Misc::extractFileTitle(strFileName);
         if (CWizUnzipFile::extractZip(strFileName, strTempFolder))
         {
-            QString strDestPath = Utils::PathResolve::downloadedTemplatesPath();
             QDir dir(strTempFolder);
-            QStringList folderList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
-            if (folderList.count() != 1)
+            QString strfileName = "template.ziw";
+            QString strZiwFile = dir.path() + "/" + strfileName;
+            if (QFile::exists(strZiwFile))
             {
-                return false;
-            }
-            strDestPath = strDestPath + folderList.first();
-            WizEnsurePathExists(strDestPath);
-            dir = QDir(strTempFolder + "/" + folderList.first());
-            QString strfileName = dir.entryList(QDir::Files | QDir::NoDotAndDotDot).first();
-            if (!QFile::copy(dir.path() + "/" + strfileName, strDestPath + "/" + strfileName))
-            {
-                return false;
-            }
-
-            //
-            QString strSettingFile = Utils::PathResolve::downloadedTemplatesPath() + "template.ini";
-            if (!QFile::exists(strSettingFile))
-            {
-                createSettingsFile(strSettingFile);
-            }
-            CWizSettings settings(strSettingFile);
-            QString newSettingsFile = strTempFolder + "/" + "template.ini";
-            CWizSettings newSettings(newSettingsFile);
-            QString strTitle = Utils::Misc::extractFileTitle(strfileName);
-            QStringList suffixList;
-            suffixList << "" <<  "_2052" << "_1028";
-            foreach (QString strSuffix, suffixList)
-            {
-                QString strVaule = newSettings.GetString("common", strTitle + strSuffix);
-                if (!strVaule.isEmpty())
+                QString strNewFile = dir.dirName();
+                QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + strNewFile + "/";
+                WizEnsurePathExists(strDestPath);
+                if (!QFile::copy(strZiwFile, strDestPath + strNewFile + ".ziw"))
                 {
-                    settings.SetString("Strings", strTitle + strSuffix, strVaule);
+                    return false;
                 }
             }
+            else
+            {
+                QStringList folderList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
+                if (folderList.count() == 1)
+                {
+                    QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + folderList.first();
+                    WizEnsurePathExists(strDestPath);
+                    dir = QDir(strTempFolder + "/" + folderList.first());
+                    QString strfileName = dir.entryList(QDir::Files | QDir::NoDotAndDotDot).first();
+                    if (!QFile::copy(dir.path() + "/" + strfileName, strDestPath + "/" + strfileName))
+                    {
+                        return false;
+                    }
+                }
+            }
+
             resetTempalteTree();
         }
     }
@@ -255,9 +248,17 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
         QString strTempFolder = Utils::PathResolve::tempPath() +Utils::Misc::extractFileTitle(strZiwFile) + "/";
         if (CWizUnzipFile::extractZip(strZiwFile, strTempFolder))
         {
-            QString indexFile = "file://" + strTempFolder + previewFileName();
+            QString previewFile = strTempFolder + previewFileName();
+            if (!QFile::exists(previewFile))
+            {
+                previewFile = "file://" + strTempFolder + "index.html";
+            }
+            else
+            {
+                previewFile = "file://" + previewFile;
+            }
             m_selectedTemplate = strZiwFile;
-            ui->webView_preview->load(QUrl(indexFile));
+            ui->webView_preview->load(QUrl(previewFile));
         }
         else
         {
