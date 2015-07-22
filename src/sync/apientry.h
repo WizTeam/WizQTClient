@@ -5,7 +5,7 @@ class QString;
 
 namespace WizService {
 
-class ApiEntry
+class CommonApiEntry
 {
 public:
     static void setEnterpriseServerIP(const QString& strIP);
@@ -41,6 +41,12 @@ public:
 
     static QString appstoreParam(bool useAndSymbol = true);
 
+private:
+    QString requestUrl(const QString& strCommand);
+
+private:
+    static QString m_server;
+    static QString m_strLocal;
 };
 
 } // namespace WizService

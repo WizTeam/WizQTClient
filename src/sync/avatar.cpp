@@ -37,7 +37,7 @@ void AvatarDownloader::download(const QString& strUserGUID)
     QString strUrl = ApiEntry::avatarDownloadUrl(strUserGUID);
 #else
     QString standGID = QUrl::toPercentEncoding(strUserGUID);
-    QString strUrl = ApiEntry::avatarDownloadUrl(standGID);
+    QString strUrl = CommonApiEntry::avatarDownloadUrl(standGID);
 #endif
     if (strUrl.isEmpty()) {
         return;

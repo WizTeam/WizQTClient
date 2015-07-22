@@ -69,17 +69,42 @@
 using namespace WizService;
 using namespace WizService::Internal;
 
-ApiEntryPrivate::ApiEntryPrivate()
+
+
+
+QString _requestUrl(const QString& strUrl)
+{
+    QNetworkAccessManager* net = new QNetworkAccessManager();
+    QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
+
+    CWizAutoTimeOutEventLoop loop(reply);
+//    loop.setTimeoutWaitSeconds(5);
+    loop.exec(QEventLoop::ExcludeUserInputEvents);
+
+    if (loop.error() != QNetworkReply::NoError)
+        return NULL;
+
+    //NOTE: reply has been delete in event loop, should not be deleted here
+//    reply->deleteLater();
+
+    net->deleteLater();
+
+    return loop.result();
+}
+
+
+
+CommonApiEntryPrivate::CommonApiEntryPrivate()
     : m_strEnterpriseAPIUrl(WIZNOTE_API_SERVER)
     , m_strLocal(QLocale::system().name())
 {
 }
 
-ApiEntryPrivate::~ApiEntryPrivate()
+CommonApiEntryPrivate::~CommonApiEntryPrivate()
 {
 }
 
-void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
+void CommonApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
 {
     if (strIP == m_strEnterpriseAPIUrl)
         return;
@@ -104,24 +129,23 @@ void ApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
     m_strCommentCountUrl.clear();
 }
 
-void ApiEntryPrivate::setLanguage(const QString& strLocal)
+void CommonApiEntryPrivate::setLanguage(const QString& strLocal)
 {
     m_strLocal = strLocal;
 }
 
-QString ApiEntryPrivate::asServerUrl()
+QString CommonApiEntryPrivate::asServerUrl()
 {
     QString strAsUrl;
     return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl, false);
 }
 
-QString ApiEntryPrivate::messageServerUrl()
+QString CommonApiEntryPrivate::messageServerUrl()
 {
     return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_SERVER, m_strMessageServerUrl, false);
 }
 
-
-QString ApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizServer)
+QString CommonApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizServer)
 {
     // random seed
     qsrand((uint)QTime::currentTime().msec());
@@ -137,16 +161,18 @@ QString ApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizS
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
+    qDebug() << "url from command : " << strCommand << " use wiz server : " << bUseWizServer
+             << "  enterprise url : " << m_strEnterpriseAPIUrl << "  result : " << strUrl;
     return strUrl;
 }
 
-QString ApiEntryPrivate::addExtendedInfo(const QString& strUrl, const QString& strExt)
+QString CommonApiEntryPrivate::addExtendedInfo(const QString& strUrl, const QString& strExt)
 {
     QString strExtInfo = QString("&a=%1").arg(QUrl::toPercentEncoding(strExt).constData());
     return strUrl + strExtInfo;
 }
 
-QString ApiEntryPrivate::requestUrl(const QString& strUrl)
+QString CommonApiEntryPrivate::requestUrl(const QString& strUrl)
 {
     QNetworkAccessManager* net = new QNetworkAccessManager();
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
@@ -166,14 +192,8 @@ QString ApiEntryPrivate::requestUrl(const QString& strUrl)
     return loop.result();
 }
 
-QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
-{
-    if (!strUrl.isEmpty())
-    {
-        qDebug() << "request url by command : " << strCommand << "  use cache url : "  << strUrl;
-        return strUrl;
-    }
-
+QString CommonApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
+{    
     QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
 
     strUrl = requestUrl(strRequestUrl);
@@ -182,19 +202,19 @@ QString ApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, 
     return strUrl;
 }
 
-QString ApiEntryPrivate::syncUrl()
+QString CommonApiEntryPrivate::syncUrl()
 {
     QString strSyncUrl = requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
     qDebug() << "get sync url , cache url :  " << m_strSyncUrl  << "   result :  " << strSyncUrl;
     return strSyncUrl;
 }
 
-QString ApiEntryPrivate::messageVersionUrl()
+QString CommonApiEntryPrivate::messageVersionUrl()
 {
     return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl, false);
 }
 
-QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
+QString CommonApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl, false));
 
@@ -203,12 +223,12 @@ QString ApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
     return strRawUrl;
 }
 
-QString ApiEntryPrivate::avatarUploadUrl()
+QString CommonApiEntryPrivate::avatarUploadUrl()
 {
     return requestUrl(WIZNOTE_API_COMMAND_UPLOAD_AVATAR, m_strAvatarUploadUrl, false);
 }
 
-QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
+QString CommonApiEntryPrivate::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
     if (m_strCommentUrl.isEmpty()) {
         requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl, false);
@@ -222,7 +242,7 @@ QString ApiEntryPrivate::commentUrl(const QString& strToken, const QString& strK
     return strUrl;
 }
 
-QString ApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& strToken,
+QString CommonApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& strToken,
                                          const QString& strKbGUID, const QString& strGUID)
 {
     if (m_strCommentCountUrl.isEmpty()) {
@@ -247,14 +267,14 @@ QString ApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& 
     return strUrl;
 }
 
-QString ApiEntryPrivate::analyzerUploadUrl()
+QString CommonApiEntryPrivate::analyzerUploadUrl()
 {
     QString analyzerUrl;
     requestUrl("analyzer", analyzerUrl, true);
     return analyzerUrl;
 }
 
-QString ApiEntryPrivate::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
+QString CommonApiEntryPrivate::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
 //    QString strKsHost = syncUrl();
 
@@ -268,41 +288,41 @@ QString ApiEntryPrivate::mailShareUrl(const QString& strKUrl, const QString& str
     return strMailShare;
 }
 
-QString ApiEntryPrivate::accountInfoUrl(const QString& strToken)
+QString CommonApiEntryPrivate::accountInfoUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
     QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_USER_INFO, false);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::createGroupUrl(const QString& strToken)
+QString CommonApiEntryPrivate::createGroupUrl(const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
     QString strUrl = urlFromCommand("create_group", false);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
+QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
     QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return strUrl;
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
+QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
     QString strExt = QString("token=%1").arg(strToken);
     QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
+QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
     QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
     QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
+QString CommonApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
     QString strUrl = urlFromCommand(strCommand, bUseWizServer);
     QString strExtInfo = QString("&token=%1").arg(strToken);
@@ -310,14 +330,14 @@ QString ApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const 
     return strUrl + strExtInfo;
 }
 
-QString ApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
+QString CommonApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
     QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_VIEW_GROUP, false);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString ApiEntryPrivate::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
+QString CommonApiEntryPrivate::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
 {
     QUrl url(syncUrl());
     QString strExt = QString("?token=%1&biz_guid=%2&kb_guid=%3&t=%4")
@@ -329,7 +349,7 @@ QString ApiEntryPrivate::groupUsersUrl(const QString& strToken, const QString& s
     return url.scheme() + "://" + url.host() + "/wizas/a/biz/user_aliases" + strExt;
 }
 
-QString ApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+QString CommonApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
     Q_ASSERT(!strToken.isEmpty());
 
@@ -366,7 +386,7 @@ class CGarbo
 public:
     CGarbo()
     {
-        apiHelper = new ApiEntryPrivate();
+        apiHelper = new CommonApiEntryPrivate();
     }
 
     ~CGarbo()
@@ -374,126 +394,138 @@ public:
         delete apiHelper;
     }
 
-    ApiEntryPrivate* apiHelper;
+    CommonApiEntryPrivate* apiHelper;
 
 };
 
 static CGarbo Garbo;
 
-void ApiEntry::setEnterpriseServerIP(const QString& strIP)
+void CommonApiEntry::setEnterpriseServerIP(const QString& strIP)
 {
-    return Garbo.apiHelper->setEnterpriseServerIP(strIP);
+    if (strIP == m_server)
+        return;
+
+    if (!strIP.isEmpty())
+    {
+        m_server = QString("http://%1/").arg(strIP);
+    }
+    else
+    {
+        m_server = WIZNOTE_API_SERVER;
+    }
+
+    qDebug() << "set server ip : " << m_server;
 }
 
-void ApiEntry::setLanguage(const QString& strLocal)
+void CommonApiEntry::setLanguage(const QString& strLocal)
 {
-    return Garbo.apiHelper->setLanguage(strLocal);
+    m_strLocal = strLocal;
 }
 
-QString ApiEntry::syncUrl()
+QString CommonApiEntry::syncUrl()
 {
     return Garbo.apiHelper->syncUrl();
 }
 
-QString ApiEntry::asServerUrl()
+QString CommonApiEntry::asServerUrl()
 {
     return Garbo.apiHelper->asServerUrl();
 }
 
-QString ApiEntry::messageServerUrl()
+QString CommonApiEntry::messageServerUrl()
 {
     return Garbo.apiHelper->messageServerUrl();
 }
 
-QString ApiEntry::messageVersionUrl()
+QString CommonApiEntry::messageVersionUrl()
 {
     return Garbo.apiHelper->messageVersionUrl();
 }
 
-QString ApiEntry::avatarDownloadUrl(const QString& strUserGUID)
+QString CommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     return Garbo.apiHelper->avatarDownloadUrl(strUserGUID);
 }
 
-QString ApiEntry::avatarUploadUrl()
+QString CommonApiEntry::avatarUploadUrl()
 {
     return Garbo.apiHelper->avatarUploadUrl();
 }
 
-QString ApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
+QString CommonApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
     return Garbo.apiHelper->mailShareUrl(strKUrl, strMailInfo);
 }
 
-QString ApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
+QString CommonApiEntry::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
 {
     return Garbo.apiHelper->commentUrl(strToken, strKbGUID, strGUID);
 }
 
-QString ApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToken,
+QString CommonApiEntry::commentCountUrl(const QString& strKUrl, const QString& strToken,
                                   const QString& strKbGUID, const QString& strGUID)
 {
     return Garbo.apiHelper->commentCountUrl(strKUrl, strToken, strKbGUID, strGUID);
 }
 
-QString ApiEntry::analyzerUploadUrl()
+QString CommonApiEntry::analyzerUploadUrl()
 {
     return Garbo.apiHelper->analyzerUploadUrl();
 }
 
-QString ApiEntry::accountInfoUrl(const QString& strToken)
+QString CommonApiEntry::accountInfoUrl(const QString& strToken)
 {
     return Garbo.apiHelper->accountInfoUrl(strToken);
 }
 
-QString ApiEntry::createGroupUrl(const QString& strToken)
+QString CommonApiEntry::createGroupUrl(const QString& strToken)
 {
     return Garbo.apiHelper->createGroupUrl(strToken);
 }
 
-QString ApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeight)
+QString CommonApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int nHeight)
 {
     QString strUrl = Garbo.apiHelper->asServerUrl();
     strUrl += QString("/a/captcha/%1?width=%2&height=%3").arg(strCaptchaID).arg(nWidth).arg(nHeight);
     return strUrl;
 }
 
-QString ApiEntry::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
+QString CommonApiEntry::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
 {
     return Garbo.apiHelper->standardCommandUrl(strCommand, bUseWizServer);
 }
 
-QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
+QString CommonApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
 {
     return Garbo.apiHelper->standardCommandUrl(strCommand, strToken, bUseWizServer);
 }
-QString ApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
+QString CommonApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
 {
     return Garbo.apiHelper->standardCommandUrl(strCommand, strToken, strExtInfo, bUseWizServer);
 }
 
-QString ApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
+QString CommonApiEntry::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
 {
     return Garbo.apiHelper->newStandardCommandUrl(strCommand, strToken, strExt, bUseWizServer);
 }
 
 
-QString ApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
+QString CommonApiEntry::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
 {
     return Garbo.apiHelper->groupAttributeUrl(strToken, strKbGUID);
 }
 
-QString ApiEntry::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
+QString CommonApiEntry::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
 {
     return Garbo.apiHelper->groupUsersUrl(strToken, strBizGUID, strkbGUID);
 }
 
-QString ApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
+QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
     return Garbo.apiHelper->kUrlFromGuid(strToken, strKbGUID);
 }
 
-QString ApiEntry::appstoreParam(bool useAndSymbol)
+QString CommonApiEntry::appstoreParam(bool useAndSymbol)
 {
     QString strParam = "";
 #ifdef BUILD4APPSTORE
@@ -507,3 +539,57 @@ QString ApiEntry::appstoreParam(bool useAndSymbol)
     return strParam;
 }
 
+QString CommonApiEntry::requestUrl(const QString& strCommand)
+{
+    QString strRequestUrl= urlFromCommand(strCommand);
+    QString strUrl = _requestUrl(strRequestUrl);
+    if (!strUrl.startsWith("http"))
+    {
+        qCritical() << "request url by command error. command : " << strCommand << " return : " << strUrl;
+        strUrl.clear();
+    }
+    return strUrl;
+}
+
+QString CommonApiEntry::urlFromCommand(const QString& strCommand)
+{
+    // random seed
+    qsrand((uint)QTime::currentTime().msec());
+    QString strUrl = QString(WIZNOTE_API_ENTRY)
+            .arg(m_server)
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(m_strLocal)\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(strCommand)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false");
+
+    qDebug() << "url from command : " << strCommand << "  server url : " << m_server << "  result : " << strUrl;
+    return strUrl;
+}
+
+QString WizApiEntryPrivate::standardCommandUrl(const QString& strCommand)
+{
+    return urlFromCommand(strCommand);
+}
+
+QString WizApiEntryPrivate::urlFromCommand(const QString& strCommand)
+{
+    // random seed
+    qsrand((uint)QTime::currentTime().msec());
+
+    QString strUrl = QString(WIZNOTE_API_ENTRY)
+            .arg(WIZNOTE_API_SERVER)\
+            .arg(WIZNOTE_API_ARG_PRODUCT)\
+            .arg(m_strLocal)\
+            .arg(WIZ_CLIENT_VERSION)\
+            .arg(strCommand)\
+            .arg(qrand())\
+            .arg(QHostInfo::localHostName())\
+            .arg(WIZNOTE_API_ARG_PLATFORM)\
+            .arg("false");
+
+    return strUrl;
+}

@@ -336,7 +336,7 @@ int mainCore(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
-    WizService::ApiEntry::setLanguage(strLocale);
+    WizService::CommonApiEntry::setLanguage(strLocale);
 
     CWizDatabaseManager dbMgr(strUserId);
     if (!dbMgr.openAll()) {

@@ -34,7 +34,7 @@ QString TokenPrivate::token()
     //
 //    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
-    CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
     qDebug() << "request token, current token :  " << m_info.strToken;
     if (m_info.strToken.isEmpty())
     {

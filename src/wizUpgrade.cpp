@@ -55,12 +55,12 @@ void CWizUpgrade::beginCheck()
 
 QString CWizUpgrade::getWhatsNewUrl()
 {
-    return WizService::ApiEntry::standardCommandUrl("changelog", true);
+    return WizService::CommonApiEntry::standardCommandUrl("changelog", true);
 }
 
 void CWizUpgrade::checkUpgrade()
 {
-    QString strApiUrl = WizService::ApiEntry::standardCommandUrl("download_server", true);
+    QString strApiUrl = WizService::CommonApiEntry::standardCommandUrl("download_server", true);
 
     if (!m_net) {
         m_net = new QNetworkAccessManager(this);

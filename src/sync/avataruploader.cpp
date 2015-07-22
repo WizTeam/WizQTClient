@@ -47,7 +47,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    m_strUrl = WizService::ApiEntry::avatarUploadUrl();
+    m_strUrl = WizService::CommonApiEntry::avatarUploadUrl();
     if (m_strUrl.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get url for uploading avatar!";
         m_strError = "failed to get url for uploading avatar!";

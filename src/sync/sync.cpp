@@ -1788,7 +1788,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         const WIZGROUPDATA& g = *it;
         if (!g.bizGUID.isEmpty())
         {
-            QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
+            QString strUrl = WizService::CommonApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);            
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
@@ -1811,7 +1811,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(_TR("Connecting to server"));
 
-    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    CWizKMAccountsServer server(WizService::CommonApiEntry::syncUrl());
     server.SetUserInfo(info);
 
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
@@ -2058,7 +2058,7 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
     pEvents->OnStatus(_TR("Quick download messages"));
-    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    CWizKMAccountsServer server(WizService::CommonApiEntry::syncUrl());
     server.SetUserInfo(info);
     /*
     ////获得群组信息////

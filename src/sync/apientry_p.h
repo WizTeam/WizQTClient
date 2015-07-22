@@ -9,11 +9,11 @@ class QString;
 namespace WizService {
 namespace Internal {
 
-class ApiEntryPrivate: QObject
+class CommonApiEntryPrivate: QObject
 {
 public:
-    ApiEntryPrivate();
-    ~ApiEntryPrivate();
+    CommonApiEntryPrivate();
+    ~CommonApiEntryPrivate();
 
     void setEnterpriseServerIP(const QString& strIP);
     void setLanguage(const QString& strLocal);
@@ -64,6 +64,17 @@ private:
     QString addExtendedInfo(const QString& strUrl, const QString& strExt);
     QString requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer);
     QString requestUrl(const QString& strUrl);
+};
+
+class WizApiEntryPrivate : public QObject
+{
+public:
+    WizApiEntryPrivate();
+    ~WizApiEntryPrivate();
+
+public:
+    QString standardCommandUrl(const QString& strCommand);
+    QString urlFromCommand(const QString& strCommand);
 };
 
 } // namespace Internal

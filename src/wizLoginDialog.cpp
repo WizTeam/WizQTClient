@@ -940,6 +940,8 @@ void CWizLoginDialog::on_btn_login_clicked()
         return;
     }
 
+
+
     doAccountVerify();
 }
 
