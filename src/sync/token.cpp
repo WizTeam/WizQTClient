@@ -38,7 +38,7 @@ QString TokenPrivate::token()
     qDebug() << "request token, current token :  " << m_info.strToken;
     if (m_info.strToken.isEmpty())
     {
-        qDebug() << "current token is empty try to get a new token with user id : " << m_strUserId << " length : " << m_strPasswd.length();
+        qDebug() << "current token is empty try to get a new token.";
         if (asServer.Login(m_strUserId, m_strPasswd))
         {
             m_info = asServer.GetUserInfo();

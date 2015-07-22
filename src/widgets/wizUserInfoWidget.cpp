@@ -135,7 +135,7 @@ void CWizUserInfoWidget::on_action_accountSettings_triggered()
 #ifndef BUILD4APPSTORE
     QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
     QString strUrl = WizService::CommonApiEntry::standardCommandUrl("user_info",
-                                                              WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo, false);
+                                                              WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
 #else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
@@ -152,7 +152,7 @@ void CWizUserInfoWidget::on_action_upgradeVip_triggered()
 #ifndef BUILD4APPSTORE
     QString strToken = Token::token();
     QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("vip", strToken, extInfo, true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken, extInfo);
     QDesktopServices::openUrl(strUrl);
 #else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
@@ -199,7 +199,7 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 {
     QString strToken = WizService::Token::token();
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("service", strToken, false);
+    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("service", strToken);
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
@@ -208,7 +208,7 @@ void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
 {
     QString strToken = WizService::Token::token();
-    QString strUrl = WizService::CommonApiEntry::newStandardCommandUrl("my_share", strToken, "", false);
+    QString strUrl = WizService::CommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);

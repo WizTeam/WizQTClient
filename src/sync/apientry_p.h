@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QMap>
 
+/*
 class QString;
 
 namespace WizService {
@@ -66,19 +67,8 @@ private:
     QString requestUrl(const QString& strUrl);
 };
 
-class WizApiEntryPrivate : public QObject
-{
-public:
-    WizApiEntryPrivate();
-    ~WizApiEntryPrivate();
-
-public:
-    QString standardCommandUrl(const QString& strCommand);
-    QString urlFromCommand(const QString& strCommand);
-};
-
 } // namespace Internal
 } // namespace WizService
-
+*/
 
 #endif // WIZSERVICE_APIENTRY_P_H

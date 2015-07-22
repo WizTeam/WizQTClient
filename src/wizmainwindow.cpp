@@ -486,7 +486,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = m_upgrade->getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::ApiEntry::standardCommandUrl("link", true);
+        QString url = WizService::WizApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -517,8 +517,8 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
             // disable quick download message to stop request token again
             m_bQuickDownloadMessageEnable = false;
 
-            qDebug() << "try to relogin wiz server, but failed. may be password error.  " << "\n current as server : " << WizService::ApiEntry::asServerUrl()
-                     << "\ncurrent sync url  : " << WizService::ApiEntry::syncUrl() << "\nlocal ip :  " << localIP();
+            qDebug() << "try to relogin wiz server, but failed. may be password error.  " << "\n current as server : " << WizService::CommonApiEntry::asServerUrl()
+                     << "\ncurrent sync url  : " << WizService::CommonApiEntry::syncUrl() << "\nlocal ip :  " << localIP();
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
             if (!m_userVerifyDialog)
@@ -1333,7 +1333,7 @@ void MainWindow::openVipPageInWebBrowser()
     {
 #ifndef BUILD4APPSTORE
         QString strToken = WizService::Token::token();
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+        QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
         QDesktopServices::openUrl(QUrl(strUrl));
 #else
     CWizIAPDialog* dlg = iapDialog();
@@ -1905,8 +1905,8 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     //
     if (errorTokenInvalid == nErrorCode)
     {
-        qDebug() << "sync done token invalid, try to reconnect server  " << WizService::ApiEntry::asServerUrl()
-                 <<" sync url : "<< WizService::ApiEntry::syncUrl() << "  local ip " << localIP();
+        qDebug() << "sync done token invalid, try to reconnect server  " << WizService::CommonApiEntry::asServerUrl()
+                 <<" sync url : "<< WizService::CommonApiEntry::syncUrl() << "  local ip " << localIP();
         reconnectServer();
         return;
     }
@@ -1939,7 +1939,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 void MainWindow::on_syncDone_userVerified()
 {
     qDebug() <<"reSync user verify, try to resync data , key value length " << m_userVerifyDialog->password()
-            << "\n as server : " << WizService::ApiEntry::asServerUrl() << "\n sync url : " << WizService::ApiEntry::syncUrl()
+            << "\n as server : " << WizService::CommonApiEntry::asServerUrl() << "\n sync url : " << WizService::CommonApiEntry::syncUrl()
                 << "\n local ip " << localIP();
     if (m_dbMgr.db().SetPassword(m_userVerifyDialog->password())) {
         m_sync->clearCurrentToken();
@@ -2345,7 +2345,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("feedback", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("feedback");
 
     if (strUrl.isEmpty())
         return;
@@ -2363,7 +2363,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("support", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("support");
 
     if (strUrl.isEmpty())
         return;
@@ -2375,7 +2375,7 @@ void MainWindow::on_actionSupport_triggered()
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
 
     if (strUrl.isEmpty())
         return;
@@ -3043,7 +3043,7 @@ void MainWindow::reconnectServer()
     WizService::Token::setUserId(db.GetUserId());
     WizService::Token::setPasswd(m_settings->password());
 
-    qDebug() << "reconnect server , clear current token.  key value length :  " << m_settings->password();
+    qDebug() << "reconnect server , clear current token.";
     m_sync->clearCurrentToken();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
@@ -3185,7 +3185,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
@@ -3195,7 +3195,7 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
     strUrl += "&name=guidemap_sendimage.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
