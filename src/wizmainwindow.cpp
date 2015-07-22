@@ -2122,15 +2122,11 @@ void MainWindow::on_actionViewToggleCategory_triggered()
     QWidget* category = m_splitter->widget(0);
     if (category->isVisible()) {
         category->hide();
-    } else {
-        category->show();
-    }
-
-    if (m_docListContainer->isVisible()) {
         m_docListContainer->hide();
     } else {
+        category->show();
         m_docListContainer->show();
-    }
+    }    
 
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
