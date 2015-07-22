@@ -588,6 +588,12 @@ void MainWindow::showTrayIconMenu()
 
 void MainWindow::on_viewMessage_request(qint64 messageID)
 {
+    if (windowState() & Qt::WindowMinimized)
+    {
+        setWindowState(windowState() & ~Qt::WindowMinimized);
+        show();
+    }
+
     CWizCategoryViewItemBase* pBase = m_category->findAllMessagesItem();
     if (!pBase)
         return;
