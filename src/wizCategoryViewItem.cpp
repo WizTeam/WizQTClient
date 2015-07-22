@@ -434,6 +434,9 @@ QString CWizCategoryViewMessageItem::unreadString() const
 
 bool CWizCategoryViewMessageItem::hitTestUnread()
 {
+    if (m_nUnread == 0)
+        return false;
+
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
     Q_ASSERT(view);
 
