@@ -34,10 +34,10 @@ void AvatarDownloader::download(const QString& strUserGUID)
 {
     m_strCurrentUser = strUserGUID;
 #ifdef Q_OS_LINUX
-    QString strUrl = ApiEntry::avatarDownloadUrl(strUserGUID);
+    QString strUrl = CommonApiEntry::avatarDownloadUrl(strUserGUID);
 #else
     QString standGID = QUrl::toPercentEncoding(strUserGUID);
-    QString strUrl = ApiEntry::avatarDownloadUrl(standGID);
+    QString strUrl = CommonApiEntry::avatarDownloadUrl(standGID);
 #endif
     if (strUrl.isEmpty()) {
         return;

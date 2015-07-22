@@ -40,7 +40,7 @@ CWizDocTemplateDialog::~CWizDocTemplateDialog()
 
 void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("gettemplate", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("gettemplate");
     QDesktopServices::openUrl(strUrl);
 }
 

@@ -374,7 +374,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     dd.Accept(writer);
 
 
-    CString strURL = WizService::ApiEntry::analyzerUploadUrl();
+    CString strURL = WizService::WizApiEntry::analyzerUploadUrl();
 
     if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
         && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))

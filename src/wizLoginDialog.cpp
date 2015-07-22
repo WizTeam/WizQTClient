@@ -285,7 +285,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     if (m_currentUserServerType == EnterpriseServer)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
-        ApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
+        CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
         emit wizBoxServerSelected();
         // update oem settings
         downloadOEMSettingsFromWizBox();
@@ -294,7 +294,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
              m_currentUserServerType == WizServer)
     {
         m_currentUserServerType = WizServer;
-        ApiEntry::setEnterpriseServerIP("");
+        CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
         emit wizServerSelected();
     }
 }
@@ -690,7 +690,7 @@ bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& st
 {
     strCaptchaID = QString::number(QDateTime::currentMSecsSinceEpoch()).right(8);
     strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);
-    QString strUrl = WizService::ApiEntry::captchaUrl(strCaptchaID);
+    QString strUrl = WizService::CommonApiEntry::captchaUrl(strCaptchaID);
 
     CWizVerificationCodeDialog dlg(this);
     if (dlg.verificationRequest(strUrl) == QDialog::Accepted)
@@ -925,7 +925,7 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("forgot_password", false);
+    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("forgot_password");
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
@@ -976,7 +976,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
     Token::instance()->disconnect(this);
 
-    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << ApiEntry::syncUrl();
+    qDebug() << " check user online : " << m_currentUserServerType << m_serverType << " api " << CommonApiEntry::syncUrl();
 
     emit accountCheckFinished();
     if (strToken.isEmpty())
@@ -1079,7 +1079,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
-            QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+            QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
             strUrl += "&name=wiz-box-search-help.html";
             QDesktopServices::openUrl(strUrl);
         }
@@ -1231,7 +1231,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
     m_searchingDialog->accept();
     m_lineEditServer->setText(ip);
     m_serverType = EnterpriseServer;
-    ApiEntry::setEnterpriseServerIP(ip);
+    CommonApiEntry::setEnterpriseServerIP(ip);
 
 //    downloadLogoFromWizBox();
     downloadOEMSettingsFromWizBox();
@@ -1329,7 +1329,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
 
     //
     m_serverType = WizServer;
-    ApiEntry::setEnterpriseServerIP("");
+    CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
     setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
 
@@ -1480,7 +1480,7 @@ void CWizLoginDialog::initOEMDownloader()
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("snspage", false);
+    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("snspage");
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
     connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
@@ -1492,8 +1492,8 @@ QString CWizOEMDownloader::_downloadOEMSettings()
 {
     // get oem settings from server
     QNetworkAccessManager net;
-    ApiEntry::setEnterpriseServerIP(m_server);
-    QString strUrl = ApiEntry::standardCommandUrl("oem", false);
+    CommonApiEntry::setEnterpriseServerIP(m_server);
+    QString strUrl = CommonApiEntry::standardCommandUrl("oem");
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
     qDebug() << "get oem from server : " << strUrl;
 

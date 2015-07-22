@@ -485,7 +485,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = m_upgrade->getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::ApiEntry::standardCommandUrl("link", true);
+        QString url = WizService::WizApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -1336,7 +1336,7 @@ void MainWindow::openVipPageInWebBrowser()
     {
 #ifndef BUILD4APPSTORE
         QString strToken = WizService::Token::token();
-        QString strUrl = WizService::ApiEntry::standardCommandUrl("vip", strToken);
+        QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
         QDesktopServices::openUrl(QUrl(strUrl));
 #else
     CWizIAPDialog* dlg = iapDialog();
@@ -2374,7 +2374,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("feedback", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("feedback");
 
     if (strUrl.isEmpty())
         return;
@@ -2392,7 +2392,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("support", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("support");
 
     if (strUrl.isEmpty())
         return;
@@ -2404,7 +2404,7 @@ void MainWindow::on_actionSupport_triggered()
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
 
     if (strUrl.isEmpty())
         return;
@@ -3241,7 +3241,7 @@ void MainWindow::createNoteWithImage(const QString& strImageFile)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
@@ -3251,7 +3251,7 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("link", true);
+    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
     strUrl += "&name=guidemap_sendimage.html";
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();

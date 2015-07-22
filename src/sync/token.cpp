@@ -34,7 +34,7 @@ QString TokenPrivate::token()
     //
 //    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
-    CWizKMAccountsServer asServer(ApiEntry::syncUrl());
+    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
     if (m_info.strToken.isEmpty())
     {
         if (asServer.Login(m_strUserId, m_strPasswd))

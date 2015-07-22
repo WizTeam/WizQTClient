@@ -315,7 +315,7 @@ bool CWizKMSyncThread::quickSync()
                 userInfo.strDatabaseServer = group.strDatabaseServer;
                 if (userInfo.strDatabaseServer.isEmpty())
                 {
-                    userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+                    userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
                 }
                 //
                 CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
@@ -355,7 +355,7 @@ void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    CWizKMAccountsServer serser(WizService::ApiEntry::syncUrl());
+    CWizKMAccountsServer serser(WizService::CommonApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
     }

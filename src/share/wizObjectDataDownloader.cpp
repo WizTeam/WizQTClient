@@ -175,7 +175,7 @@ bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
 
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
+    info.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

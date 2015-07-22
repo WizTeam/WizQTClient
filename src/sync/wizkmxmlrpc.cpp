@@ -249,7 +249,7 @@ BOOL CWizKMAccountsServer::SetMessageReadStatus(const QString& strMessageIDs, in
 
 bool CWizKMAccountsServer::SetMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
-    QString strUrl = WizService::ApiEntry::messageServerUrl();
+    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&ids=%2").arg(m_retLogin.strToken).arg(strMessageIDs);
     qDebug() << "set message delete status, strken:" << m_retLogin.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //

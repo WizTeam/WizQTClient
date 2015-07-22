@@ -72,9 +72,9 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
     QString strToken = WizService::Token::token();
-    QString strKS = WizService::ApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+    QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
     QString strExInfo = getExInfo();
-    QString strUrl = WizService::ApiEntry::mailShareUrl(strKS, strExInfo);
+    QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
 //    strUrl += strExInfo;
 
 //    QUrl url(strKS);
