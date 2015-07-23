@@ -2658,6 +2658,9 @@ void MainWindow::on_category_itemSelectionChanged()
      * 在点击MessageItem的时候,为了重新刷新当前消息,强制发送了itemSelectionChanged消息
      * 因此需要在这个地方避免重复刷新两次消息列表
      */
+    if (!category->currentItem())
+        return;
+
     static QTime lastTime(0, 0, 0);
     QTreeWidgetItem *currentItem = category->currentItem();
     static QTreeWidgetItem *oldItem = currentItem;

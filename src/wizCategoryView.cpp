@@ -836,18 +836,28 @@ bool CWizCategoryView::renameGroupFolder(CWizCategoryViewGroupItem* pGroup, cons
         if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(strFolderName)) == QMessageBox::Yes)
         {
             // move documents to brother folder  and move child folders to brother folder
-            CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);
+            WIZTAGDATA targetTag;
+            if (sameNameBrother->type() == Category_GroupNoTagItem)
+            {
+                targetTag.strKbGUID = pGroup->kbGUID();
+            }
+            else
+            {
+                CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);
+                targetTag = targetItem->tag();
+            }
+            //
             CWizDocumentDataArray arrayDocument;
             if (db.GetDocumentsByTag(pGroup->tag(), arrayDocument))
             {
-                moveDocumentsToGroupFolder(arrayDocument, targetItem->tag());
+                moveDocumentsToGroupFolder(arrayDocument, targetTag);
             }
             CWizTagDataArray arrayTag;
             if (db.GetChildTags(pGroup->tag().strGUID, arrayTag))
             {
                 for (WIZTAGDATA tag : arrayTag)
                 {
-                   tag.strParentGUID = targetItem->tag().strGUID;
+                   tag.strParentGUID = targetTag.strGUID;
                    db.ModifyTag(tag);
                 }
             }
@@ -2515,6 +2525,9 @@ void CWizCategoryView::on_action_emptyTrash()
 
 void CWizCategoryView::on_itemSelectionChanged()
 {
+    if (currentItem() == nullptr)
+        return;
+
     CWizCategoryViewGroupRootItem* pRoot = currentCategoryItem<CWizCategoryViewGroupRootItem>();
     CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>();
     if (pRoot || pItem) {
@@ -3376,7 +3389,12 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
     if (strOldLocation != strNewLocation)
     {
         db.UpdateLocation(strOldLocation, strNewLocation);
-
+        CWizStdStringArray childLocations;
+        db.GetAllChildLocations(strNewLocation, childLocations);
+        for (CString childLocation : childLocations)
+        {
+            findFolder(childLocation, true, true);
+        }
     }
 
     QString str = getAllFoldersPosition();
@@ -5640,18 +5658,35 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
 //            qDebug() << "get useable item name : " << strName;
 
     bool combineFolder = false;
+    QString strNewLocation = "/" + strName + "/";
     if (strName != item->text(0))
     {
         if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(item->text(0))) == QMessageBox::Yes)
         {
-            strName = item->text(0);
             combineFolder = true;
-        }
+            // 处理默认文件夹的合并，默认文件夹的显示名称和实际数据不相同
+            QTreeWidgetItem* brother = findSameNameBrother(parentItem, item, item->text(0));
+            if (brother && brother->type() == Category_FolderItem)
+            {
+                CWizCategoryViewFolderItem* brotherFolder = dynamic_cast<CWizCategoryViewFolderItem*>(brother);
+                if (brotherFolder)
+                {
+                    strName = item->text(0);
+                    strNewLocation = "/" + strName + "/";
+                    if (!brotherFolder->location().contains(brotherFolder->text(0)))
+                    {
+                        strNewLocation = brotherFolder->location();
+                    }
+                }
+            }
+        }        
     }
 
-    QString strNewLocation = "/" + strName + "/";
-    item->setText(0, strName);
-
+    item->setText(0,  strName);
+    if (combineFolder)
+    {
+        item->parent()->removeChild(item);
+    }
 
     if (parentItem != folderRoot)
     {
@@ -5673,15 +5708,15 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
 
     //
     if (combineFolder)
-    {
-        item->parent()->removeChild(item);
+    {        
         if (m_dragItem == item)
         {
             m_dragItem = nullptr;
         }
+        qDebug() << "delete current item : " << item;
         delete item;
-        QTreeWidgetItem* item = findFolder(strNewLocation, false, false);
-        setCurrentItem(item);
+        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
+        setCurrentItem(currentItem);
     }
 }
 
