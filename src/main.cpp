@@ -304,7 +304,8 @@ int mainCore(int argc, char *argv[])
 
 
     // manually login
-    if (bFallback) {
+    if (bFallback)
+    {
         CWizLoginDialog loginDialog(strUserId, strLocale);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
@@ -316,8 +317,18 @@ int mainCore(int argc, char *argv[])
             PluginManager::setSettings(settings);
         }
         strPassword = loginDialog.password();
-
-
+    }
+    else
+    {
+        if (userSettings.serverType() == EnterpriseServer)
+        {
+            WizService::CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
+        }
+        else if (userSettings.serverType() == WizServer ||
+                 (userSettings.serverType() == NoServer && !userSettings.myWizMail().isEmpty()))
+        {
+            WizService::CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
+        }
     }
 
     //

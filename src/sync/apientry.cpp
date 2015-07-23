@@ -631,7 +631,6 @@ QString CommonApiEntry::urlFromCommand(const QString& strCommand)
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
-    qDebug() << "url from command : " << strCommand << "  server url : " << m_server << "  result : " << strUrl;
     return strUrl;
 }
 
@@ -687,6 +686,5 @@ QString WizApiEntry::urlFromCommand(const QString& strCommand)
             .arg(WIZNOTE_API_ARG_PLATFORM)\
             .arg("false");
 
-    qDebug() << "wiz url from command : " << strCommand << "  result : " << strUrl;
     return strUrl;
 }
