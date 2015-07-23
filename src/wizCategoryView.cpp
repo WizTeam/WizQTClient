@@ -278,9 +278,9 @@ void CWizCategoryBaseView::startDrag(Qt::DropActions supportedActions)
         QTreeWidget::startDrag(supportedActions);
         if (m_dragItem != nullptr)
         {
-            blockSignals(true);
+//            blockSignals(true);
             setCurrentItem(m_dragItem);
-            blockSignals(false);
+//            blockSignals(false);
             m_dragItem = nullptr;
         }
 
@@ -5655,7 +5655,6 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
     }
 
     QString strName = getUseableItemName(parentItem, item);
-//            qDebug() << "get useable item name : " << strName;
 
     bool combineFolder = false;
     QString strNewLocation = "/" + strName + "/";
