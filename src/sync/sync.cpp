@@ -1587,7 +1587,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         if (!serverDB.document_downloadFullList(arrayDocumentGUID, arrayDocumentServer))
         {
             pEvents->OnError(_T("Can download notes of messages"));
-            return FALSE;
         }
         //
         for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocumentServer.begin();
@@ -1622,7 +1621,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             if (!pGroupDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
             {
                 pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-                return FALSE;
             }
         }
         //
@@ -1630,22 +1628,22 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     }
     //
     ////
-    int count = int(arrayMessage.size());
-    for (int i = count - 1; i >= 0; i--)
-    {
-        const WIZUSERMESSAGEDATA& data = arrayMessage[i];
-        if (data.strKbGUID.isEmpty())
-            continue;
-        if (data.strDocumentGUID.isEmpty())
-            continue;
-        /*
-        ////判断对应的笔记是否被下载了（如果没有，说明服务器已经没有这个笔记了，无法显示这个消息）////
-        */
-        if (setDownloadedDocumentGUID.find(data.strDocumentGUID) != setDownloadedDocumentGUID.end())
-            continue;
-        //
-        arrayMessage.erase(arrayMessage.begin() + i);
-    }
+//    int count = int(arrayMessage.size());
+//    for (int i = count - 1; i >= 0; i--)
+//    {
+//        const WIZUSERMESSAGEDATA& data = arrayMessage[i];
+//        if (data.strKbGUID.isEmpty())
+//            continue;
+//        if (data.strDocumentGUID.isEmpty())
+//            continue;
+//        /*
+//        ////判断对应的笔记是否被下载了（如果没有，说明服务器已经没有这个笔记了，无法显示这个消息）////
+//        */
+//        if (setDownloadedDocumentGUID.find(data.strDocumentGUID) != setDownloadedDocumentGUID.end())
+//            continue;
+//        //
+//        arrayMessage.erase(arrayMessage.begin() + i);
+//    }
     //
     __int64 nNewVersion = CWizKMSync::GetObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
     //
