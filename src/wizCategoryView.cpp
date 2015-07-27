@@ -3343,6 +3343,7 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db, CWizCategoryV
                 CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);
                 combineGroupFolder(pGroup, targetItem);
 
+                setCurrentItem(targetItem);
                 if (m_dragItem == pItem)
                 {
                     m_dragItem = nullptr;
@@ -5708,14 +5709,14 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
     //
     if (combineFolder)
     {        
+        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
+        setCurrentItem(currentItem);
         if (m_dragItem == item)
         {
             m_dragItem = nullptr;
         }
         qDebug() << "delete current item : " << item;
         delete item;
-        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
-        setCurrentItem(currentItem);
     }
 }
 
