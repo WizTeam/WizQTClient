@@ -140,7 +140,7 @@ public Q_SLOTS:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_data_modified(const WIZDOCUMENTDATA& data);
-    void on_document_data_saved(const QString& strGUID, CWizDocumentView* viewer);
+    void on_document_data_changed(const QString& strGUID, CWizDocumentView* viewer);
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
@@ -170,31 +170,6 @@ private:
     bool checkDocumentEditable();
     //
     void stopCheckDocumentAnimations();
-};
-
-class WizFloatDocumentViewer : public QWidget
-{
-    Q_OBJECT
-public:
-    WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
-
-    CWizDocumentView* docView()
-    {
-        return m_docView;
-    }
-
-    ~WizFloatDocumentViewer();
-
-public slots:
-    void on_textInputFinished();
-
-private:
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_webEngine;
-#else
-    CWizDocumentView* m_docView;
-#endif
-    QLineEdit* m_edit;
 };
 
 } // namespace Core

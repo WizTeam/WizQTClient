@@ -68,6 +68,7 @@ class WizMessageListTitleBar;
 namespace Core {
 class ICore;
 class CWizDocumentView;
+class CWizSingleDocumentViewDelegate;
 
 namespace Internal {
 
@@ -109,7 +110,7 @@ public:
 
     static MainWindow* instance();
 
-    QNetworkDiskCache* webViewNetworkCache();
+    QNetworkDiskCache* webViewNetworkCache();   
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
@@ -175,6 +176,7 @@ private:
     CWizDocumentTransitionView* m_transitionView;
     std::shared_ptr<CWizSplitter> m_splitter;
     QWidget* m_docListContainer;
+    CWizSingleDocumentViewDelegate* m_singleViewDelegate;
 
     QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
@@ -218,6 +220,7 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     void showClient(bool visible) const;
+    CWizDocumentView* documentView() const;
 
     CWizActions* actions() const { return m_actions; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
@@ -230,7 +233,7 @@ public:
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
     //
-    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
+    void viewDocumentInSeparateWidget(const WIZDOCUMENTDATA& data);
     //
     static void quickSyncKb(const QString& kbGuid);
 

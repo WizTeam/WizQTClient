@@ -750,10 +750,10 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
     reloadNote();
 }
 
-void CWizDocumentView::on_document_data_saved(const QString& strGUID,
+void CWizDocumentView::on_document_data_changed(const QString& strGUID,
                                               CWizDocumentView* viewer)
 {
-    if (viewer != this && strGUID == note().strGUID)
+    if (viewer != this && strGUID == note().strGUID && !m_bEditingMode)
     {
         reloadNote();
     }
@@ -906,33 +906,4 @@ void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
 }
 
 
-WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent) : QWidget(parent)
-{
-        setAttribute(Qt::WA_DeleteOnClose);
-        setContentsMargins(0, 0, 0, 0);
-        setPalette(QPalette(Qt::white));
-        QVBoxLayout* layout = new QVBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-//        m_webEngine = new CWizDocumentWebEngine(app, this);
-//        layout->addWidget(m_webEngine);
-//        m_edit = new QLineEdit(this);
-//        layout->addWidget(m_edit);
-//        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-//        WIZDOCUMENTDATA doc;
-//        m_webEngine->viewDocument(doc, true);
-        m_docView = new CWizDocumentView(app, this);
-        layout->addWidget(m_docView);
-        setLayout(layout);
-}
-
-WizFloatDocumentViewer::~WizFloatDocumentViewer()
-{
-        m_docView->waitForDone();
-}
-
-void WizFloatDocumentViewer::on_textInputFinished()
-{
-//    qDebug() << "run js : " << m_edit->text();
-//    m_webEngine->page()->runJavaScript(m_edit->text());
-}
 

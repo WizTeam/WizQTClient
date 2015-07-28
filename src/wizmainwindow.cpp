@@ -91,6 +91,7 @@
 #include "share/wizAnalyzer.h"
 #include "share/wizTranslater.h"
 #include "widgets/wizShareLinkDialog.h"
+#include "core/wizSingleDocumentView.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -146,6 +147,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
     , m_animateSync(new CWizAnimateAction(*this, this))
+    , m_singleViewDelegate(new CWizSingleDocumentViewDelegate(*this, this))
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
@@ -193,7 +195,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
-            m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+            m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
     connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
             SLOT(on_shortcutDataChanged(QString)));
 
@@ -1779,6 +1781,11 @@ void MainWindow::showClient(bool visible) const
     return m_doc->showClient(visible);
 }
 
+CWizDocumentView* MainWindow::documentView() const
+{
+    return m_doc;
+}
+
 CWizIAPDialog*MainWindow::iapDialog()
 {
 #ifdef Q_OS_MAC
@@ -2379,10 +2386,9 @@ void MainWindow::on_actionFeedback_triggered()
     CWizDatabase& personDb = m_dbMgr.db();
     QString strUserName = "Unkown";
     personDb.GetUserDisplayName(strUserName);
-    strUrl.replace(QHostInfo::localHostName(), strUserName);
+    strUrl.replace(QHostInfo::localHostName(), QUrl::toPercentEncoding(strUserName));
 
     QDesktopServices::openUrl(strUrl);
-
     WizGetAnalyzer().LogAction("MenuBarFeedback");
 }
 
@@ -2751,7 +2757,7 @@ void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
         WIZDOCUMENTDATA doc = pItem->document();
         if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
         {
-            viewDocumentInFloatWidget(doc);
+            viewDocumentInSeparateWidget(doc);
             resortDocListAfterViewDocument(doc);
         }
     }
@@ -3559,21 +3565,9 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->exec();
 }
 
-void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
+void MainWindow::viewDocumentInSeparateWidget(const WIZDOCUMENTDATA& data)
 {
-    WizFloatDocumentViewer* wgt = new WizFloatDocumentViewer(*this);
-    CWizDocumentView* docView = wgt->docView();
-    connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
-    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
-    connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
-            SLOT(on_shareDocumentByLink_request(QString,QString)));
-
-    wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
-                     m_doc->width(), wgt->height());
-    wgt->setWindowTitle(data.strTitle);
-    wgt->show();
-    //
-    docView->viewNote(data, false);
+    m_singleViewDelegate->viewDocument(data);
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
