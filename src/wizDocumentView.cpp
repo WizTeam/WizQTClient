@@ -96,6 +96,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(m_web);
     m_splitter->addWidget(m_commentWidget);
+    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_comments = m_commentWidget->web();
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);

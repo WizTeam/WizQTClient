@@ -2614,7 +2614,10 @@ void MainWindow::on_actionGoBack_triggered()
     if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
-        locateDocument(data);
+        if (m_documents->isVisible())
+        {
+            locateDocument(data);
+        }
     }
     else
     {
@@ -2637,7 +2640,10 @@ void MainWindow::on_actionGoForward_triggered()
     if (db.DocumentFromGUID(data.strGUID, data) && !db.IsInDeletedItems(data.strLocation))
     {
         viewDocument(data, false);
-        locateDocument(data);
+        if (m_documents->isVisible())
+        {
+            locateDocument(data);
+        }
     }
     else
     {

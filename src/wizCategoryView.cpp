@@ -3343,6 +3343,7 @@ void CWizCategoryView::updateGroupFolderPosition(CWizDatabase& db, CWizCategoryV
                 CWizCategoryViewGroupItem* targetItem = dynamic_cast<CWizCategoryViewGroupItem*>(sameNameBrother);
                 combineGroupFolder(pGroup, targetItem);
 
+                setCurrentItem(targetItem);
                 if (m_dragItem == pItem)
                 {
                     m_dragItem = nullptr;
@@ -5350,7 +5351,7 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
-        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strParentGUID)
+        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strParentGUID || tag.strGUID == sourceFolder.strGUID)
             return;
 
         //        
@@ -5394,7 +5395,8 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
     if (selector->isSelectPersonalFolder())
     {
         QString strSelectedFolder = selector->selectedFolder();
-        if (strSelectedFolder.isEmpty())
+        if (strSelectedFolder.isEmpty() || strSelectedFolder == sourceFolder ||
+                (sourceFolder.startsWith(strSelectedFolder) && sourceFolder.indexOf('/', strSelectedFolder.length()) == sourceFolder.length() -1))
             return;
 
         //combine same name folder
@@ -5460,7 +5462,7 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
-        if (tag.strKbGUID.isEmpty())
+        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strGUID || tag.strGUID == sourceFolder.strParentGUID)
             return;
         qDebug() << "copy group folder to group folder " << tag.strName;
         //        
@@ -5498,7 +5500,7 @@ void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolder
     if (selector->isSelectPersonalFolder())
     {
         QString strSelectedFolder = selector->selectedFolder();
-        if (strSelectedFolder.isEmpty())
+        if (strSelectedFolder.isEmpty() || strSelectedFolder == sourceFolder)
             return;
 
         qDebug() << "copy personal folder to personal folder  ; " << strSelectedFolder;
@@ -5708,14 +5710,14 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
     //
     if (combineFolder)
     {        
+        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
+        setCurrentItem(currentItem);
         if (m_dragItem == item)
         {
             m_dragItem = nullptr;
         }
         qDebug() << "delete current item : " << item;
         delete item;
-        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
-        setCurrentItem(currentItem);
     }
 }
 

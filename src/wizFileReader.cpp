@@ -97,6 +97,7 @@ void CWizFileReader::run()
         if (textExtList.contains(docType,Qt::CaseInsensitive))
         {
             strHtml = loadTextFileToHtml(strFile);
+            addAttach = true;
         }
         else if (imageExtList.contains(docType,Qt::CaseInsensitive))
         {
@@ -105,10 +106,7 @@ void CWizFileReader::run()
         else if (htmlExtList.contains(docType, Qt::CaseInsensitive))
         {
             strHtml = loadHtmlFileToHtml(strFile);
-            QString strTitle = Utils::Misc::extractFileName(strFile);
-            emit htmlFileloaded(strFile, strHtml, strTitle);
-
-            continue;
+            addAttach = true;
         }
 #ifdef Q_OS_MAC
         else if (rtfExtList.contains(docType, Qt::CaseInsensitive))
@@ -130,6 +128,7 @@ void CWizFileReader::run()
             if (!documentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
                 continue;
             WizGetBodyContentFromHtml(strHtml, true);
+            addAttach = true;
         }
         else
         {
