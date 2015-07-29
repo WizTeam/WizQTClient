@@ -730,7 +730,7 @@ var utils = UE.utils = {
      * ```
      */
     unhtml:function (str, reg) {
-        return str ? str.replace(reg || /[&<">'](?:(amp|lt|quot|gt|#39|nbsp);)?/g, function (a, b) {
+        return str ? str.replace(reg || /[&<">'](?:(amp|lt|quot|gt|#39|nbsp|#\d+);)?/g, function (a, b) {
             if (b) {
                 return a;
             } else {
@@ -8285,7 +8285,7 @@ var filterWord = UE.filterWord = function () {
             (dtd.$empty[node.tagName] ? '\/' : '' ) + '>'
         );
         //插入新行
-        if (formatter  &&  !dtd.$inlineWithA[node.tagName]) {
+        if (formatter  &&  !dtd.$inlineWithA[node.tagName] && node.tagName != 'pre') {
             if(node.children && node.children.length){
                 current = insertLine(arr, current, true);
                 insertIndent(arr, current)
@@ -8302,7 +8302,7 @@ var filterWord = UE.filterWord = function () {
             }
         }
         if (!dtd.$empty[node.tagName]) {
-            if (formatter && !dtd.$inlineWithA[node.tagName]) {
+            if (formatter && !dtd.$inlineWithA[node.tagName]  && node.tagName != 'pre') {
 
                 if(node.children && node.children.length){
                     current = insertLine(arr, current);
@@ -8930,15 +8930,15 @@ var htmlparser = UE.htmlparser = function (htmlstr,ignoreBlank) {
         sub:1,img:1,sup:1,font:1,big:1,small:1,iframe:1,a:1,br:1,pre:1
     };
     htmlstr = htmlstr.replace(new RegExp(domUtils.fillChar, 'g'), '');
-    if(!ignoreBlank){
-        htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(ignoreBlank?'':' ')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(ignoreBlank?'':' ')+']*','g'), function(a,b){
-            //br暂时单独处理
-            if(b && allowEmptyTags[b.toLowerCase()]){
-                return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
-            }
-            return a.replace(new RegExp('^[\\r\\n'+(ignoreBlank?'':' ')+']+'),'').replace(new RegExp('[\\r\\n'+(ignoreBlank?'':' ')+']+$'),'');
-        });
-    }
+    // if(!ignoreBlank){
+    //     htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(ignoreBlank?'':' ')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(ignoreBlank?'':' ')+']*','g'), function(a,b){
+    //         //br暂时单独处理
+    //         if(b && allowEmptyTags[b.toLowerCase()]){
+    //             return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
+    //         }
+    //         return a.replace(new RegExp('^[\\r\\n'+(ignoreBlank?'':' ')+']+'),'').replace(new RegExp('[\\r\\n'+(ignoreBlank?'':' ')+']+$'),'');
+    //     });
+    // }
 
     var notTransAttrs = {
         'href':1,
@@ -13708,7 +13708,7 @@ UE.plugins['paste'] = function () {
             html = div.innerHTML;//.replace(/>(?:(\s|&nbsp;)*?)</g,'><');
 
             //过滤word粘贴过来的冗余属性
-            html = UE.filterWord(html);
+            //html = UE.filterWord(html);
             //取消了忽略空白的第二个参数，粘贴过来的有些是有空白的，会被套上相关的标签
             var root = UE.htmlparser(html);
             //如果给了过滤规则就先进行过滤
