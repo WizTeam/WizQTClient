@@ -45,6 +45,16 @@ CWizSingleDocumentViewDelegate::CWizSingleDocumentViewDelegate(CWizExplorerApp& 
 {
 }
 
+CWizSingleDocumentViewer*CWizSingleDocumentViewDelegate::getDocumentViewer(const QString& guid)
+{
+    return m_viewerMap.value(guid, nullptr);
+}
+
+QMap<QString, CWizSingleDocumentViewer*>& CWizSingleDocumentViewDelegate::getDocumentViewerMap()
+{
+    return m_viewerMap;
+}
+
 void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
 {
     if (m_viewerMap.find(doc.strGUID) != m_viewerMap.end())

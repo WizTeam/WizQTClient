@@ -35,6 +35,8 @@ class CWizSingleDocumentViewDelegate : public QObject
 public:
     CWizSingleDocumentViewDelegate(CWizExplorerApp& app, QObject* parent = 0);
 
+    CWizSingleDocumentViewer* getDocumentViewer(const QString& guid);
+    QMap<QString, CWizSingleDocumentViewer*>& getDocumentViewerMap();
 
 public slots:
     void viewDocument(const WIZDOCUMENTDATA& doc);
