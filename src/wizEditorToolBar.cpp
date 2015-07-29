@@ -34,6 +34,7 @@ struct WizComboboxStyledItem
 {    
     QString strText;
     QString strUserData;
+    QString strFontFamily;
     int nFontSize;
     bool bBold;
 };
@@ -44,14 +45,14 @@ WizComboboxStyledItem* ParagraphItems()
 {
     static WizComboboxStyledItem paragraphItems[] =
     {
-        {QObject::tr("Paragraph"), "p", 14},
-        {QObject::tr("Text"), "div", 14},
-        {QObject::tr("H6"), "h6", 14, true},
-        {QObject::tr("H5"), "h5", 15, true},
-        {QObject::tr("H4"), "h4", 17, true},
-        {QObject::tr("H3"), "h3", 18, true},
-        {QObject::tr("H2"), "h2", 20, true},
-        {QObject::tr("H1"), "h1", 21, true }
+        {QObject::tr("Paragraph"), "p", "", 14, false},
+        {QObject::tr("Text"), "div", "", 14, false},
+        {QObject::tr("H6"), "h6", "", 14, true},
+        {QObject::tr("H5"), "h5", "", 15, true},
+        {QObject::tr("H4"), "h4", "", 17, true},
+        {QObject::tr("H3"), "h3", "", 18, true},
+        {QObject::tr("H2"), "h2", "", 20, true},
+        {QObject::tr("H1"), "h1", "", 21, true }
     };
 
     return paragraphItems;
@@ -62,25 +63,50 @@ WizComboboxStyledItem* FontSizes()
 {
     static WizComboboxStyledItem fontItems[] =
     {
-        {"9px", "9px", 9},
-        {"10px", "10px", 10},
-        {"11px", "11px", 11},
-        {"12px", "12px", 12},
-        {"13px", "13px", 13},
-        {"14px", "14px", 14},
-        {"15px", "15px", 15},
-        {"16px", "16px", 16},
-        {"17px", "17px", 17},
-        {"18px", "18px", 18},
-        {"24px", "24px", 24},
-        {"36px", "36px", 36},
-        {"48px", "48px", 48},
-        {"64px", "64px", 64},
-        {"72px", "72px", 72}
+        {"9px", "9px", "", 9, false},
+        {"10px", "10px", "", 10, false},
+        {"11px", "11px", "", 11, false},
+        {"12px", "12px", "", 12, false},
+        {"13px", "13px", "", 13, false},
+        {"14px", "14px", "", 14, false},
+        {"15px", "15px", "", 15, false},
+        {"16px", "16px", "", 16, false},
+        {"17px", "17px", "", 17, false},
+        {"18px", "18px", "", 18, false},
+        {"24px", "24px", "", 24, false},
+        {"36px", "36px", "", 36, false},
+        {"48px", "48px", "", 48, false},
+        {"64px", "64px", "", 64, false},
+        {"72px", "72px", "", 72, false}
     };
     return fontItems;
 };
 
+const int nFontFamilyCount =  14;
+
+WizComboboxStyledItem* FontFamilies()
+{
+    static WizComboboxStyledItem fontItems[] =
+    {
+        {QObject::tr("Adobe Fangsong Std"), "Adobe Fangsong Std", "Adobe Fangsong Std", 14, false},
+        {QObject::tr("Adobe Heiti Std"), "Adobe Heiti Std", "Adobe Heiti Std", 14, false},
+        {QObject::tr("Adobe Kaiti Std"), "Adobe Kaiti Std", "Adobe Kaiti Std", 14, false},
+        {QObject::tr("Adobe Song Std"), "Adobe Song Std", "Adobe Song Std", 14, false},
+        {QObject::tr("Baoli SC"), "Baoli SC", "Baoli SC", 14, false},
+        {QObject::tr("Hannotate SC"), "Hannotate SC", "Hannotate SC", 14, false},
+        {QObject::tr("Hannotate TC"), "Hannotate TC", "Hannotate TC", 14, false},
+        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+        {QObject::tr("HanziPen TC"), "HanziPen TC", "HanziPen TC", 14, false},
+        {QObject::tr("Heiti SC"), "Heiti SC", "Heiti SC", 14, false},
+        {QObject::tr("Heiti TC"), "Heiti TC", "Heiti TC", 14, false},
+        {QObject::tr("Kaiti TC"), "Kaiti TC", "Kaiti TC", 14, false},
+        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+    };
+    return fontItems;
+};
 
 WizComboboxStyledItem itemFromArrayByKey(const QString& key, const WizComboboxStyledItem array[], const int count)
 {
