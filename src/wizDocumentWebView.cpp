@@ -362,7 +362,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             editorCommandExecuteRemoveStartOfLine();
             return;
         }
-        else
+        else if(m_bEditingMode)
         {
             //FIXME: would not trigger content change event, when delete row and image by backspace
             setContentsChanged(true);
