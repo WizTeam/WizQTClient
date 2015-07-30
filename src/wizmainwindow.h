@@ -137,7 +137,6 @@ private:
     CWizIAPDialog* m_iapDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
-    //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
     //
     CWizTrayIcon* m_tray;
     QMenu* m_trayMenu;
@@ -152,7 +151,7 @@ private:
 
     QMenuBar* m_menuBar;
     QMenu* m_dockMenu;
-    QMenu* m_windowsMenu;
+    QMenu* m_windowListMenu;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
     QToolButton* m_menuButton;    
@@ -228,7 +227,6 @@ public:
     CWizActions* actions() const { return m_actions; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
-    //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
     CWizIAPDialog* iapDialog();

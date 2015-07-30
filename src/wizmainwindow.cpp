@@ -93,6 +93,8 @@
 #include "widgets/wizShareLinkDialog.h"
 #include "core/wizSingleDocumentView.h"
 
+#define MAINWINDOW  "MainWindow"
+
 using namespace Core;
 using namespace Core::Internal;
 using namespace WizService::Internal;
@@ -117,7 +119,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
-    //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
     , m_transitionView(new CWizDocumentTransitionView(this))
     , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
@@ -126,7 +127,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif
     , m_menuBar(nullptr)
     , m_dockMenu(nullptr)
-    , m_windowsMenu(nullptr)
+    , m_windowListMenu(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
@@ -312,15 +313,6 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
             }
         }
     }
-    else if (event->type() == QEvent::WindowActivate || event->type() == QEvent::WindowDeactivate)
-    {
-        static QTime lastUpdate = QTime::currentTime();
-        if (lastUpdate.secsTo(QTime::currentTime()) > 1)
-        {
-            lastUpdate = QTime::currentTime();
-//            QTimer::singleShot(2, this, SLOT(resetDockMenu()));
-        }
-    }
 #endif
 
     //
@@ -380,7 +372,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #ifdef Q_OS_MAC
     if (event->spontaneous())
     {
-        wizMacHideCurrentApplication();
+//        wizMacHideCurrentApplication();
+        setVisible(false);
         event->ignore();
         return;
     }
@@ -623,8 +616,9 @@ void MainWindow::on_dockMenuAction_triggered()
     if (action)
     {
         QString guid = action->data().toString();
-        if (guid.isEmpty())
+        if (guid == MAINWINDOW)
         {
+            setVisible(true);
             raise();
             activateWindow();
         }
@@ -633,6 +627,7 @@ void MainWindow::on_dockMenuAction_triggered()
             CWizSingleDocumentViewer* viewer = m_singleViewDelegate->getDocumentViewer(guid);
             if (viewer)
             {
+                viewer->setVisible(true);
                 viewer->raise();
                 viewer->activateWindow();
             }
@@ -809,9 +804,9 @@ void MainWindow::initMenuBar()
 {
     m_menuBar = new QMenuBar(this);
     setMenuBar(m_menuBar);
-    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini", m_windowsMenu);
+    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini", m_windowListMenu);
 
-    connect(m_windowsMenu, SIGNAL(aboutToShow()), SLOT(resetWindowsMenu()));
+    connect(m_windowListMenu, SIGNAL(aboutToShow()), SLOT(resetWindowsMenu()));
     connect(m_singleViewDelegate, SIGNAL(documentViewerClosed(QString)),
             SLOT(removeWindowsMenuItem(QString)));
 }
@@ -1436,75 +1431,78 @@ QAction* actionByGuid(const QList<QAction*>& actionList, const QString guid)
     return nullptr;
 }
 
+bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
+    //
+    const QString k1 = action1->text().toLower();
+    const QString k2 = action2->text().toLower();
+
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(k1);
+            QByteArray arrOther = pCodec->fromUnicode(k2);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return  k1.compare(k2) < 0;
+}
+
 void MainWindow::resetDockMenu()
 {
     m_dockMenu->clear();
     QWidget * activeWidget = QApplication::activeWindow();
 
+    QList<QAction*> actions;
     QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
     m_dockMenu->setIcon(icon);
-    QMap<QString, QAction*> actionMap;
     QAction* action = new QAction(icon, tr("WizNote"), m_dockMenu);
-    action->setData("MainWindow");
-    actionMap.insert(tr("WizNote"), action);
-
+    action->setData(MAINWINDOW);
+    action->setCheckable(true);
+    action->setChecked(activeWidget == this);
+    actions.append(action);
 
     QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
     QList<QString> keys = viewerMap.keys();
     for (int i = 0; i < keys.count(); i++)
     {
         CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
-        action = m_dockMenu->addAction(icon, viewer->windowTitle(), this, SLOT(on_dockMenuAction_triggered()));
+        action = new QAction(icon, viewer->windowTitle(), m_dockMenu);
         action->setData(keys.at(i));
-        actionMap.insert(viewer->windowTitle(), action);
+        action->setCheckable(true);
+        action->setChecked(viewer == activeWidget);
+        actions.append(action);
     }
 
-    QList<QAction*> actions = actionMap.values();
-    m_dockMenu->addActions(actions);
+    qSort(actions.begin(), actions.end(), caseInsensitiveLessThan);
     for (QAction* action : actions)
     {
         connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
-        action->setCheckable(true);
     }
-
-    action = nullptr;
-    if (activeWidget == this)
-    {
-        action = actionByGuid(actions, "MainWindow");
-    }
-    else
-    {
-        CWizSingleDocumentViewer* viewer = qobject_cast<CWizSingleDocumentViewer*>(activeWidget);
-        if (viewer)
-        {
-            action = actionByGuid(actions, viewer->guid());
-        }
-    }
-    if (action)
-    {
-        action->setChecked(true);
-    }
-
+    m_dockMenu->addActions(actions);
 }
 
 void MainWindow::resetWindowsMenu()
 {
-    QList<QAction*> actionList = m_windowsMenu->actions();
+    QList<QAction*> actionList = m_windowListMenu->actions();
     QWidget * activeWidget = QApplication::activeWindow();
     QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
 
-    QAction* mainWindow = actionByGuid(actionList, "MainWindow");
-    if (mainWindow)
-    {
-        mainWindow->setChecked(activeWidget == this);
-    }
-    else
-    {
-        mainWindow = m_windowsMenu->addAction(icon, tr("WizNote"), this, SLOT(on_dockMenuAction_triggered()));
-        mainWindow->setData("MainWindow");
-        mainWindow->setCheckable(true);
-        mainWindow->setChecked(activeWidget == this);
-    }
+    QList<QAction*> newActions;
+    QAction* action = actionByGuid(actionList, MAINWINDOW);
+    m_windowListMenu->removeAction(action);
+
+    action = new QAction(icon, tr("WizNote"), m_windowListMenu);
+    action->setData(MAINWINDOW);
+    action->setCheckable(true);
+    action->setChecked(activeWidget == this);
+    newActions.append(action);
     //
     QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
     QList<QString> keys = viewerMap.keys();
@@ -1512,27 +1510,29 @@ void MainWindow::resetWindowsMenu()
     {
         CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
         QAction* action = actionByGuid(actionList, keys.at(i));
-        if (action)
-        {
-            action->setChecked(viewer == activeWidget);
-        }
-        else
-        {
-            action = m_windowsMenu->addAction(icon, viewer->windowTitle(), this, SLOT(on_dockMenuAction_triggered()));
-            action->setData(keys.at(i));
-            action->setCheckable(true);
-            action->setChecked(viewer == activeWidget);
-        }
+        m_windowListMenu->removeAction(action);
+        action = new QAction(icon, viewer->windowTitle(), m_windowListMenu);
+        action->setData(keys.at(i));
+        action->setCheckable(true);
+        action->setChecked(viewer == activeWidget);
+        newActions.append(action);
     }
+
+    qSort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
+    for (QAction* action : newActions)
+    {
+        connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
+    }
+    m_windowListMenu->addActions(newActions);
 }
 
 void MainWindow::removeWindowsMenuItem(QString guid)
 {
-    QList<QAction*> actionList = m_windowsMenu->actions();
+    QList<QAction*> actionList = m_windowListMenu->actions();
     QAction* action = actionByGuid(actionList, guid);
     if (action)
     {
-        m_windowsMenu->removeAction(action);
+        m_windowListMenu->removeAction(action);
     }
 }
 
