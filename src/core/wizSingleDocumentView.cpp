@@ -7,9 +7,9 @@
 
 using namespace Core;
 
-CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, QWidget* parent) :
+CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const QString& guid, QWidget* parent) :
     QWidget(parent)
-  , m_guid(WizGenGUIDLowerCaseLetterOnly())
+  , m_guid(guid)
 {
         setAttribute(Qt::WA_DeleteOnClose);
         setContentsMargins(0, 0, 0, 0);
@@ -35,7 +35,9 @@ CWizDocumentView*CWizSingleDocumentViewer::docView()
 
 CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
 {
-        m_docView->waitForDone();
+    emit documentViewerDeleted(m_guid);
+
+    m_docView->waitForDone();
 }
 
 
@@ -65,12 +67,13 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
     else
     {
         Core::Internal::MainWindow* mainWindow = dynamic_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
-        CWizSingleDocumentViewer* wgt = new CWizSingleDocumentViewer(m_app, mainWindow);
+        CWizSingleDocumentViewer* wgt = new CWizSingleDocumentViewer(m_app, doc.strGUID);
         CWizDocumentView* docView = wgt->docView();
         connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentChanged(QString,CWizDocumentView*)));
         connect(this, SIGNAL(documentChanged(QString,CWizDocumentView*)), docView, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
         connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
                 mainWindow, SLOT(on_shareDocumentByLink_request(QString,QString)));
+        connect(wgt, SIGNAL(documentViewerDeleted(QString)), SLOT(onDocumentViewerDeleted(QString)));
 
         wgt->setGeometry((mainWindow->width() - mainWindow->documentView()->width())  / 2,
                          (mainWindow->height() - wgt->height()) / 2,
@@ -80,6 +83,15 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
         //
         docView->viewNote(doc, false);
         docView->raise();
+        docView->activateWindow();
+        docView->setFocus();
         m_viewerMap.insert(doc.strGUID, wgt);
     }
+}
+
+void CWizSingleDocumentViewDelegate::onDocumentViewerDeleted(QString guid)
+{
+    m_viewerMap.remove(guid);
+
+    emit documentViewerClosed(guid);
 }

@@ -151,6 +151,8 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
+    QMenu* m_dockMenu;
+    QMenu* m_windowsMenu;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
     QToolButton* m_menuButton;    
@@ -211,6 +213,7 @@ private:
     void initMenuList();
 #endif
     void initMenuBar();
+    void initDockMenu();
 
     QWidget* createNoteListView();
     QWidget* createMessageListView();
@@ -302,7 +305,7 @@ public Q_SLOTS:
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
-    void on_actionViewMinimize_triggered();
+    void on_actionMinimize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
     void on_messageSelector_indexChanged(int index);
@@ -401,6 +404,8 @@ public Q_SLOTS:
     void showTrayIconMenu();
     void on_viewMessage_request(qint64 messageID);
     //
+    void on_dockMenuAction_triggered();
+    //
     void shiftVisableStatus();
 
     //
@@ -486,9 +491,12 @@ private:
     //
     void loadMessageByUserGuid(const QString& guid);
 
-    //
 private slots:
     void windowActived();
+    //
+    void resetDockMenu();
+    void resetWindowsMenu();
+    void removeWindowsMenuItem(QString guid);
 };
 
 } // namespace Internal

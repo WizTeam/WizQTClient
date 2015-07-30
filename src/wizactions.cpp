@@ -32,6 +32,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionView", QObject::tr("&View")},
         {"actionFormat", QObject::tr("For&mat")},
         {"actionTools", QObject::tr("&Tools")},
+        {"actionWindow", QObject::tr("&Window")},
         {"actionHelp", QObject::tr("&Help")},
     #else
         // root
@@ -40,6 +41,7 @@ WIZACTION* CWizActions::actionsData()
         {"actionView", QObject::tr("View")},
         {"actionFormat", QObject::tr("Format")},
         {"actionTools", QObject::tr("Tools")},
+        {"actionWindow", QObject::tr("Window")},
         {"actionHelp", QObject::tr("Help")},
     #endif
 
@@ -107,9 +109,13 @@ WIZACTION* CWizActions::actionsData()
 #endif
 
         // view
-        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide category view"),   QObject::tr("Show category view"),    QKeySequence("Alt+Ctrl+S")},
-        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter fullscreen"),       QObject::tr("Leave fullscreen"),         QKeySequence("Ctrl+Meta+f")},
+        {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide Sidebar"),   QObject::tr("Show Sidebar"),    QKeySequence("Alt+Ctrl+S")},
+        {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"),       QObject::tr("Leave Fullscreen"),         QKeySequence("Ctrl+Meta+f")},
+
+
         {"actionViewMinimize",                                               QObject::tr("Minimize"),       QObject::tr(""),         QKeySequence("Ctrl+M")},
+        {"actionZoom",                                                             QObject::tr("Zoom"),          QObject::tr(""),         QKeySequence()},
+        {"actionBringFront",                                                     QObject::tr("Bring All to Front"),          QObject::tr(""),         QKeySequence()},
 
         // format
         {WIZACTION_FORMAT_JUSTIFYLEFT,               QObject::tr("Justify left"),                "",           QKeySequence("Ctrl+[")},
@@ -302,7 +308,7 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
     }
 }
 
-void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
+void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu)
 {
     CWizSettings settings(strFileName);
 
@@ -333,6 +339,11 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName)
 
             QMenu* pMenu = menuBar->addMenu(strLocalText);
             buildMenu(pMenu, settings, strAction, true);
+
+            if (strAction.remove('&') == "Window")
+            {
+                windowsMenu = pMenu;
+            }
         }
         else
         {

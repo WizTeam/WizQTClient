@@ -101,7 +101,7 @@ public:
 
     QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar);
-    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName);
+    void buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu);
     void buildMenu(QMenu* menu, const QString& strFileName);
 };
 

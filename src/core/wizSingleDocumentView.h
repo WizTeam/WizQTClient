@@ -13,11 +13,14 @@ class CWizSingleDocumentViewer : public QWidget
 {
     Q_OBJECT
 public:
-    CWizSingleDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
+    CWizSingleDocumentViewer(CWizExplorerApp& app, const QString& guid, QWidget* parent = 0);
     ~CWizSingleDocumentViewer();
 
     CWizDocumentView* docView();
     QString guid() const { return m_guid; }
+
+signals:
+    void documentViewerDeleted(QString guid);
 
 private:
 #ifdef USEWEBENGINE
@@ -40,9 +43,11 @@ public:
 
 public slots:
     void viewDocument(const WIZDOCUMENTDATA& doc);
+    void onDocumentViewerDeleted(QString guid);
 
 signals:
     void documentChanged(const QString& strGUID, CWizDocumentView* viewer);
+    void documentViewerClosed(QString guid);
 
 private:
     QMap<QString, CWizSingleDocumentViewer*> m_viewerMap;

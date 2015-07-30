@@ -125,6 +125,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_optionsAction(NULL)
 #endif
     , m_menuBar(nullptr)
+    , m_dockMenu(nullptr)
+    , m_windowsMenu(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
@@ -211,6 +213,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initActions();
 #ifdef Q_OS_MAC
     initMenuBar();
+    initDockMenu();
 #else
     if (m_useSystemBasedStyle) {
         initMenuBar();
@@ -307,6 +310,15 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
             }
+        }
+    }
+    else if (event->type() == QEvent::WindowActivate || event->type() == QEvent::WindowDeactivate)
+    {
+        static QTime lastUpdate = QTime::currentTime();
+        if (lastUpdate.secsTo(QTime::currentTime()) > 1)
+        {
+            lastUpdate = QTime::currentTime();
+//            QTimer::singleShot(2, this, SLOT(resetDockMenu()));
         }
     }
 #endif
@@ -605,6 +617,29 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
     m_msgList->selectMessage(messageID);
 }
 
+void MainWindow::on_dockMenuAction_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        QString guid = action->data().toString();
+        if (guid.isEmpty())
+        {
+            raise();
+            activateWindow();
+        }
+        else
+        {
+            CWizSingleDocumentViewer* viewer = m_singleViewDelegate->getDocumentViewer(guid);
+            if (viewer)
+            {
+                viewer->raise();
+                viewer->activateWindow();
+            }
+        }
+    }
+}
+
 void MainWindow::on_trayIcon_newDocument_clicked()
 {
     setVisible(true);
@@ -774,7 +809,20 @@ void MainWindow::initMenuBar()
 {
     m_menuBar = new QMenuBar(this);
     setMenuBar(m_menuBar);
-    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
+    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini", m_windowsMenu);
+
+    connect(m_windowsMenu, SIGNAL(aboutToShow()), SLOT(resetWindowsMenu()));
+    connect(m_singleViewDelegate, SIGNAL(documentViewerClosed(QString)),
+            SLOT(removeWindowsMenuItem(QString)));
+}
+
+void MainWindow::initDockMenu()
+{
+    m_dockMenu = new QMenu(this);
+    qt_mac_set_dock_menu(m_dockMenu);
+
+    connect(m_dockMenu, SIGNAL(aboutToShow()),
+            SLOT(resetDockMenu()));
 }
 
 void MainWindow::on_editor_statusChanged()
@@ -1375,6 +1423,117 @@ void MainWindow::loadMessageByUserGuid(const QString& guid)
     }
     //
     m_msgList->setMessages(arrayMsg);
+}
+
+QAction* actionByGuid(const QList<QAction*>& actionList, const QString guid)
+{
+    for (QAction* action : actionList)
+    {
+        if (action->data().toString() == guid)
+            return action;
+    }
+
+    return nullptr;
+}
+
+void MainWindow::resetDockMenu()
+{
+    m_dockMenu->clear();
+    QWidget * activeWidget = QApplication::activeWindow();
+
+    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
+    m_dockMenu->setIcon(icon);
+    QMap<QString, QAction*> actionMap;
+    QAction* action = new QAction(icon, tr("WizNote"), m_dockMenu);
+    action->setData("MainWindow");
+    actionMap.insert(tr("WizNote"), action);
+
+
+    QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
+    QList<QString> keys = viewerMap.keys();
+    for (int i = 0; i < keys.count(); i++)
+    {
+        CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
+        action = m_dockMenu->addAction(icon, viewer->windowTitle(), this, SLOT(on_dockMenuAction_triggered()));
+        action->setData(keys.at(i));
+        actionMap.insert(viewer->windowTitle(), action);
+    }
+
+    QList<QAction*> actions = actionMap.values();
+    m_dockMenu->addActions(actions);
+    for (QAction* action : actions)
+    {
+        connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
+        action->setCheckable(true);
+    }
+
+    action = nullptr;
+    if (activeWidget == this)
+    {
+        action = actionByGuid(actions, "MainWindow");
+    }
+    else
+    {
+        CWizSingleDocumentViewer* viewer = qobject_cast<CWizSingleDocumentViewer*>(activeWidget);
+        if (viewer)
+        {
+            action = actionByGuid(actions, viewer->guid());
+        }
+    }
+    if (action)
+    {
+        action->setChecked(true);
+    }
+
+}
+
+void MainWindow::resetWindowsMenu()
+{
+    QList<QAction*> actionList = m_windowsMenu->actions();
+    QWidget * activeWidget = QApplication::activeWindow();
+    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
+
+    QAction* mainWindow = actionByGuid(actionList, "MainWindow");
+    if (mainWindow)
+    {
+        mainWindow->setChecked(activeWidget == this);
+    }
+    else
+    {
+        mainWindow = m_windowsMenu->addAction(icon, tr("WizNote"), this, SLOT(on_dockMenuAction_triggered()));
+        mainWindow->setData("MainWindow");
+        mainWindow->setCheckable(true);
+        mainWindow->setChecked(activeWidget == this);
+    }
+    //
+    QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
+    QList<QString> keys = viewerMap.keys();
+    for (int i = 0; i < keys.count(); i++)
+    {
+        CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
+        QAction* action = actionByGuid(actionList, keys.at(i));
+        if (action)
+        {
+            action->setChecked(viewer == activeWidget);
+        }
+        else
+        {
+            action = m_windowsMenu->addAction(icon, viewer->windowTitle(), this, SLOT(on_dockMenuAction_triggered()));
+            action->setData(keys.at(i));
+            action->setCheckable(true);
+            action->setChecked(viewer == activeWidget);
+        }
+    }
+}
+
+void MainWindow::removeWindowsMenuItem(QString guid)
+{
+    QList<QAction*> actionList = m_windowsMenu->actions();
+    QAction* action = actionByGuid(actionList, guid);
+    if (action)
+    {
+        m_windowsMenu->removeAction(action);
+    }
 }
 
 void MainWindow::windowActived()
@@ -2155,7 +2314,7 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 #endif // Q_OS_MAC
 }
 
-void MainWindow::on_actionViewMinimize_triggered()
+void MainWindow::on_actionMinimize_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarMinimize");
 
@@ -3567,7 +3726,7 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 
 void MainWindow::viewDocumentInSeparateWidget(const WIZDOCUMENTDATA& data)
 {
-    m_singleViewDelegate->viewDocument(data);
+    m_singleViewDelegate->viewDocument(data);    
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
