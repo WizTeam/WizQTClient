@@ -200,6 +200,8 @@ public:
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
+
     QString guid() const {return m_strGuid;}
     QString location() const { return m_location; }
     ShortcutType shortcutType() const { return m_type; }

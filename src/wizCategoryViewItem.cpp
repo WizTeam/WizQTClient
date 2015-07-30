@@ -2050,6 +2050,46 @@ void CWizCategoryViewShortcutItem::showContextMenu(CWizCategoryBaseView* pCtrl, 
     }
 }
 
+bool CWizCategoryViewShortcutItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+{
+    switch (m_type) {
+    case Document:
+        return data.strGUID == m_strGuid;
+        break;
+    case PersonalFolder:
+        return data.strLocation == m_location;
+        break;
+    case PersonalTag:
+    {
+        CWizStdStringArray arrayTag;
+        m_app.databaseManager().db().GetDocumentTags(data.strGUID, arrayTag);
+        for (CString tag : arrayTag)
+        {
+            if (tag == m_strGuid)
+                return true;
+        }
+    }
+        break;
+    case GroupTag:
+    {
+        if (data.strKbGUID != m_strKbGUID)
+            return false;
+
+        CWizStdStringArray arrayTag;
+        m_app.databaseManager().db(data.strKbGUID).GetDocumentTags(data.strGUID, arrayTag);
+        for (CString tag : arrayTag)
+        {
+            if (tag == m_strGuid)
+                return true;
+        }
+    }
+        break;
+    default:
+        break;
+    }
+    return false;
+}
+
 
 CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
         CWizExplorerApp& app, const QString& strName)
