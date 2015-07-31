@@ -548,27 +548,12 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizDocumentDataArray& arrayDo
 {
     bool changed = false;
     for (WIZDOCUMENTDATA document : arrayDocument)
-    {
-        for (int i = 0; i < childCount(); i++)
+    {        
+        CWizCategoryViewShortcutItem *pItem = addDocumentToShortcuts(document);
+        if (pItem)
         {
-            CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
-            if (pItem)
-            {
-                if (pItem->guid() == document.strGUID)
-                    return;
-            }
+            changed = true;
         }
-
-        if (isContainsPlaceHoldItem())
-            removePlaceHoldItem();
-
-        bool isEncrypted = document.nProtected == 1;
-        CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
-                                                                               document.strTitle, CWizCategoryViewShortcutItem::Document,
-                                                                               document.strKbGUID, document.strGUID, document.strLocation, isEncrypted);
-        addChild(pItem);
-        sortChildren(0, Qt::AscendingOrder);
-        changed = true;
     }
 
     if (changed)
@@ -587,6 +572,32 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizDocumentDataArray& arrayDo
 }
 
 void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pItem)
+{
+    CWizCategoryViewShortcutItem* newItem = addItemToShortcuts(pItem);
+    if (!newItem)
+        return;
+    //
+    treeWidget()->blockSignals(true);
+    treeWidget()->setCurrentItem(newItem);
+    treeWidget()->blockSignals(false);
+    sortChildren(0, Qt::AscendingOrder);
+
+    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+}
+
+bool CWizCategoryViewShortcutRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+{
+    if (!pItem)
+        return false;
+
+    if (pItem->type() == Category_FolderItem || pItem->type() == Category_TagItem || pItem->type() == Category_GroupItem)
+        return true;
+
+    return false;
+}
+
+CWizCategoryViewShortcutItem* CWizCategoryViewShortcutRootItem::addItemToShortcuts(const CWizCategoryViewItemBase* pItem)
 {
     CWizCategoryViewShortcutItem* newItem = nullptr;
     if (pItem->type() == Category_FolderItem)
@@ -620,7 +631,7 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pIte
                 if (shortcutItem->guid() == newItem->guid())
                 {
                     delete newItem;
-                    return;
+                    return nullptr;
                 }
             }
                 break;
@@ -629,7 +640,7 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pIte
                 if (shortcutItem->location() == newItem->location())
                 {
                     delete newItem;
-                    return;
+                    return nullptr;
                 }
             }
                 break;
@@ -643,25 +654,33 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pIte
     addChild(newItem);
     if (isContainsPlaceHoldItem())
         removePlaceHoldItem();
-    //
-    treeWidget()->blockSignals(true);
-    treeWidget()->setCurrentItem(newItem);
-    treeWidget()->blockSignals(false);
-    sortChildren(0, Qt::AscendingOrder);
 
-    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
-    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+    return newItem;
 }
 
-bool CWizCategoryViewShortcutRootItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
+CWizCategoryViewShortcutItem*CWizCategoryViewShortcutRootItem::addDocumentToShortcuts(const WIZDOCUMENTDATA& document)
 {
-    if (!pItem)
-        return false;
+    for (int i = 0; i < childCount(); i++)
+    {
+        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+        if (pItem)
+        {
+            if (pItem->guid() == document.strGUID)
+                return nullptr;
+        }
+    }
 
-    if (pItem->type() == Category_FolderItem || pItem->type() == Category_TagItem || pItem->type() == Category_GroupItem)
-        return true;
+    if (isContainsPlaceHoldItem())
+        removePlaceHoldItem();
 
-    return false;
+    bool isEncrypted = document.nProtected == 1;
+    CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
+                                                                           document.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                                           document.strKbGUID, document.strGUID, document.strLocation, isEncrypted);
+
+    addChild(pItem);
+    sortChildren(0, Qt::AscendingOrder);
+    return pItem;
 }
 
 QString CWizCategoryViewShortcutRootItem::getSectionName()

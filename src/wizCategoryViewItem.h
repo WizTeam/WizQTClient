@@ -145,6 +145,7 @@ private:
     QSize m_szUnreadSize;
 };
 
+class CWizCategoryViewShortcutItem;
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
 {
 public:
@@ -161,6 +162,9 @@ public:
     virtual void drop(const CWizCategoryViewItemBase* pItem);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& /*data*/) const {return true;}
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+
+    CWizCategoryViewShortcutItem* addItemToShortcuts(const CWizCategoryViewItemBase* pItem);
+    CWizCategoryViewShortcutItem* addDocumentToShortcuts(const WIZDOCUMENTDATA& document);
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 11; }

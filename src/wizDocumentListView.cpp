@@ -165,6 +165,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionOnTop->setCheckable(true);
     addAction(actionOnTop);
 
+    QAction* actionAddToShortcuts = m_menuDocument->addAction(QObject::tr("Add to Shortcuts"),
+                                                              this, SLOT(on_action_addToShortcuts()));
+    addAction(actionAddToShortcuts);
 
     m_menuDocument->addSeparator();
 
@@ -507,8 +510,6 @@ void CWizDocumentListView::resetPermission()
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setCheckable(true);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
-
-
 
     // disable note history if selection is not only one
     if (m_rightButtonFocusedItems.count() != 1)
@@ -1413,6 +1414,20 @@ void CWizDocumentListView::on_action_alwaysOnTop()
     }
 
     sortItems();
+}
+
+void CWizDocumentListView::on_action_addToShortcuts()
+{
+    ::WizGetAnalyzer().LogAction("documentListMenuAddToShortcuts");
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    {
+        CWizDatabase& db = m_dbMgr.db(item->document().strKbGUID);
+        WIZDOCUMENTDATA doc;
+        if (db.DocumentFromGUID(item->document().strGUID, doc))
+        {
+            emit addDocumentToShortcutsRequest(doc);
+        }
+    }
 }
 
 

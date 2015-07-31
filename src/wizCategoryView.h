@@ -175,6 +175,7 @@ public:
         ActionQuitGroup,
         ActionItemManage,
         ActionRemoveShortcutItem,
+        ActionAddToShortcuts,
         ActionAdvancedSearch,
         ActionAddCustomSearch,
         ActionEditCustomSearch,
@@ -402,6 +403,7 @@ public Q_SLOTS:
     void on_action_manageBiz();
 
     void on_action_removeShortcut();
+    void on_action_addToShortcuts();
 
     void on_action_advancedSearch();
     void on_action_addCustomSearch();
@@ -417,6 +419,9 @@ public Q_SLOTS:
     void updateGroupsData();
 
     void on_shortcutDataChanged(const QString& shortcut);
+
+    //
+    void addDocumentToShortcuts(const WIZDOCUMENTDATA& doc);
 
 public:
     // Public API:

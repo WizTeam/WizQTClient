@@ -1223,6 +1223,11 @@ void CWizCategoryView::initMenus()
     addAction(actionManageBiz);
     connect(actionManageBiz, SIGNAL(triggered()), SLOT(on_action_manageBiz()));
 
+    QAction* actionAddToShortcuts = new QAction(tr("Add to Shortcuts"), this);
+    actionAddToShortcuts->setData(ActionAddToShortcuts);
+    addAction(actionAddToShortcuts);
+    connect(actionAddToShortcuts, SIGNAL(triggered()), SLOT(on_action_addToShortcuts()));
+
     QAction* actionRemoveShortcut = new QAction("RemoveShortcut", this);
     actionRemoveShortcut->setText(CATEGORY_ACTION_REMOVE_SHORTCUT);
     actionRemoveShortcut->setData(ActionRemoveShortcutItem);
@@ -1277,9 +1282,11 @@ void CWizCategoryView::initMenus()
     m_menuFolder->addAction(actionNewDoc);
     m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
+    m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionRenameItem);
     m_menuFolder->addAction(actionCopyItem);
     m_menuFolder->addAction(actionMoveItem);
+    m_menuFolder->addAction(actionAddToShortcuts);
     m_menuFolder->addSeparator();
     m_menuFolder->addAction(actionDeleteItem);
 
@@ -1291,6 +1298,7 @@ void CWizCategoryView::initMenus()
     m_menuTag = new QMenu(this);
     m_menuTag->addAction(actionNewItem);
     m_menuTag->addAction(actionRenameItem);
+    m_menuTag->addAction(actionAddToShortcuts);
     m_menuTag->addSeparator();
     m_menuTag->addAction(actionDeleteItem);
 
@@ -1333,6 +1341,7 @@ void CWizCategoryView::initMenus()
     m_menuGroup->addAction(actionRenameItem);
     m_menuGroup->addAction(actionCopyItem);
     m_menuGroup->addAction(actionMoveItem);
+    m_menuGroup->addAction(actionAddToShortcuts);
     m_menuGroup->addSeparator();
     m_menuGroup->addAction(actionDeleteItem);
 }
@@ -2405,6 +2414,18 @@ void CWizCategoryView::on_action_removeShortcut()
     removeShortcut(p);
 }
 
+void CWizCategoryView::on_action_addToShortcuts()
+{
+    ::WizGetAnalyzer().LogAction("categoryMenuAddToShortcut");
+    CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
+    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
+    if (p && shortcutRoot)
+    {
+        shortcutRoot->addItemToShortcuts(p);
+        QTimer::singleShot(200, this, SLOT(saveShortcutState()));
+    }
+}
+
 void CWizCategoryView::on_action_advancedSearch()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuAdvancedSearch");
@@ -2711,6 +2732,16 @@ void CWizCategoryView::on_shortcutDataChanged(const QString& shortcut)
 
     //
     initShortcut(shortcut);
+}
+
+void CWizCategoryView::addDocumentToShortcuts(const WIZDOCUMENTDATA& doc)
+{
+    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
+    if (shortcutRoot)
+    {
+        shortcutRoot->addDocumentToShortcuts(doc);
+        QTimer::singleShot(200, this, SLOT(saveShortcutState()));
+    }
 }
 
 void CWizCategoryView::createGroup()

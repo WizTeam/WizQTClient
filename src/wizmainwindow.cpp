@@ -194,6 +194,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
+    connect(m_documents, SIGNAL(addDocumentToShortcutsRequest(WIZDOCUMENTDATA)),
+            m_category, SLOT(addDocumentToShortcuts(WIZDOCUMENTDATA)));
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
