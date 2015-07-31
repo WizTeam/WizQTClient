@@ -416,7 +416,7 @@ void CommonApiEntry::setLanguage(const QString& strLocal)
 QString CommonApiEntry::syncUrl()
 {
     QString strSyncUrl = requestUrl("sync_https");
-    qDebug() << "get sync url, result :  " << strSyncUrl;
+//    qDebug() << "get sync url, result :  " << strSyncUrl;
     if (!strSyncUrl.startsWith("http"))
     {
         qCritical() << "request url by command error. command : sync_https,  return : " << strSyncUrl;
@@ -572,7 +572,7 @@ QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& str
     Q_ASSERT(!strToken.isEmpty());
 
     WIZUSERINFO info = Token::info();
-    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
+//    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
     if (info.strKbGUID == strKbGUID)
         return info.strDatabaseServer;
 
@@ -584,13 +584,15 @@ QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& str
         CWizGroupDataArray::const_iterator it = arrayGroup.begin();
         for (; it != arrayGroup.end(); it++) {
             const WIZGROUPDATA& group = *it;
-            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
+//            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
             if (group.strGroupGUID == strKbGUID)
                 return group.strDatabaseServer;
         }
     } else {
         qDebug() << asServer.GetLastErrorMessage();
     }
+
+    qWarning() << "can not get kurl by kbguid : " << strKbGUID << "  current token : " << strToken;
 
     return NULL;
 }

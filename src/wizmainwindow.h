@@ -490,11 +490,13 @@ private:
     //
     void loadMessageByUserGuid(const QString& guid);
 
+    void resetWindowListMenu(QMenu* menu, bool removeExists);
+
 private slots:
     void windowActived();
     //
     void resetDockMenu();
-    void resetWindowsMenu();
+    void resetWindowMenu();
     void removeWindowsMenuItem(QString guid);
 };
 

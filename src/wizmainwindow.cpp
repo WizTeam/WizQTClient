@@ -806,7 +806,7 @@ void MainWindow::initMenuBar()
     setMenuBar(m_menuBar);
     m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini", m_windowListMenu);
 
-    connect(m_windowListMenu, SIGNAL(aboutToShow()), SLOT(resetWindowsMenu()));
+    connect(m_windowListMenu, SIGNAL(aboutToShow()), SLOT(resetWindowMenu()));
     connect(m_singleViewDelegate, SIGNAL(documentViewerClosed(QString)),
             SLOT(removeWindowsMenuItem(QString)));
 }
@@ -1420,6 +1420,7 @@ void MainWindow::loadMessageByUserGuid(const QString& guid)
     m_msgList->setMessages(arrayMsg);
 }
 
+
 QAction* actionByGuid(const QList<QAction*>& actionList, const QString guid)
 {
     for (QAction* action : actionList)
@@ -1454,54 +1455,28 @@ bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
     return  k1.compare(k2) < 0;
 }
 
-void MainWindow::resetDockMenu()
+
+void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
 {
-    m_dockMenu->clear();
+    QList<QAction*> actionList = menu->actions();
     QWidget * activeWidget = QApplication::activeWindow();
-
-    QList<QAction*> actions;
-    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
-    m_dockMenu->setIcon(icon);
-    QAction* action = new QAction(icon, tr("WizNote"), m_dockMenu);
-    action->setData(MAINWINDOW);
-    action->setCheckable(true);
-    action->setChecked(activeWidget == this);
-    actions.append(action);
-
-    QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
-    QList<QString> keys = viewerMap.keys();
-    for (int i = 0; i < keys.count(); i++)
-    {
-        CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
-        action = new QAction(icon, viewer->windowTitle(), m_dockMenu);
-        action->setData(keys.at(i));
-        action->setCheckable(true);
-        action->setChecked(viewer == activeWidget);
-        actions.append(action);
-    }
-
-    qSort(actions.begin(), actions.end(), caseInsensitiveLessThan);
-    for (QAction* action : actions)
-    {
-        connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
-    }
-    m_dockMenu->addActions(actions);
-}
-
-void MainWindow::resetWindowsMenu()
-{
-    QList<QAction*> actionList = m_windowListMenu->actions();
-    QWidget * activeWidget = QApplication::activeWindow();
+    // if current app is not active, there will no activewindow. remenber last active window to set menu item checkstate
+    static QWidget * lastActiveWidget = activeWidget;
+    activeWidget == nullptr ? (activeWidget = lastActiveWidget) : (lastActiveWidget = activeWidget);
     QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
 
     QList<QAction*> newActions;
-    QAction* action = actionByGuid(actionList, MAINWINDOW);
-    m_windowListMenu->removeAction(action);
+    QAction* action = nullptr;
+    if (removeExists)
+    {
+        action = actionByGuid(actionList, MAINWINDOW);
+        menu->removeAction(action);
+    }
 
-    action = new QAction(icon, tr("WizNote"), m_windowListMenu);
+    action = new QAction(icon, tr("WizNote"), menu);
     action->setData(MAINWINDOW);
     action->setCheckable(true);
-    action->setChecked(activeWidget == this);
+    action->setChecked((activeWidget == nullptr || activeWidget == this));
     newActions.append(action);
     //
     QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
@@ -1509,9 +1484,12 @@ void MainWindow::resetWindowsMenu()
     for (int i = 0; i < keys.count(); i++)
     {
         CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
-        QAction* action = actionByGuid(actionList, keys.at(i));
-        m_windowListMenu->removeAction(action);
-        action = new QAction(icon, viewer->windowTitle(), m_windowListMenu);
+        if (removeExists)
+        {
+            action = actionByGuid(actionList, keys.at(i));
+            menu->removeAction(action);
+        }
+        action = new QAction(icon, viewer->windowTitle(), menu);
         action->setData(keys.at(i));
         action->setCheckable(true);
         action->setChecked(viewer == activeWidget);
@@ -1523,7 +1501,18 @@ void MainWindow::resetWindowsMenu()
     {
         connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
     }
-    m_windowListMenu->addActions(newActions);
+    menu->addActions(newActions);
+}
+
+void MainWindow::resetDockMenu()
+{
+    m_dockMenu->clear();
+    resetWindowListMenu(m_dockMenu, false);
+}
+
+void MainWindow::resetWindowMenu()
+{
+    resetWindowListMenu(m_windowListMenu, true);
 }
 
 void MainWindow::removeWindowsMenuItem(QString guid)
@@ -1534,6 +1523,9 @@ void MainWindow::removeWindowsMenuItem(QString guid)
     {
         m_windowListMenu->removeAction(action);
     }
+
+    //
+    resetDockMenu();
 }
 
 void MainWindow::windowActived()
@@ -3728,7 +3720,9 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 
 void MainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
 {
-    m_singleViewDelegate->viewDocument(data);    
+    m_singleViewDelegate->viewDocument(data);
+    // update dock menu
+    resetDockMenu();
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
