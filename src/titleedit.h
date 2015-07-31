@@ -26,6 +26,7 @@ public:
 
 public slots:
     void onTitleEditingFinished();
+    void setText(const QString &text);
 
 signals:
     void titleEdited(QString strTitle);

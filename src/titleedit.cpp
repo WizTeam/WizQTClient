@@ -202,6 +202,8 @@ void TitleEdit::onInsertCompletion(const QModelIndex& index)
 
 void TitleEdit::onTitleEditingFinished()
 {
+    setCursorPosition(0);
+    //
     WIZDOCUMENTDATA data;
     CWizDatabase& db = CWizDatabaseManager::instance()->db(noteView()->note().strKbGUID);
     if (db.DocumentFromGUID(noteView()->note().strGUID, data)) {
@@ -221,6 +223,12 @@ void TitleEdit::onTitleEditingFinished()
             emit titleEdited(strNewTitle);
         }
     }
+}
+
+void TitleEdit::setText(const QString& text)
+{
+    QLineEdit::setText(text);
+    setCursorPosition(0);
 }
 
 void TitleEdit::onTitleReturnPressed()
