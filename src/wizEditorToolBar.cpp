@@ -80,9 +80,9 @@ WizComboboxStyledItem* FontSizes()
         {"72px", "72px", "", 72, false}
     };
     return fontItems;
-};
+}
 
-const int nFontFamilyCount =  14;
+const int nFontFamilyCount =  30;
 
 WizComboboxStyledItem* FontFamilies()
 {
@@ -100,10 +100,24 @@ WizComboboxStyledItem* FontFamilies()
         {QObject::tr("Heiti SC"), "Heiti SC", "Heiti SC", 14, false},
         {QObject::tr("Heiti TC"), "Heiti TC", "Heiti TC", 14, false},
         {QObject::tr("Kaiti TC"), "Kaiti TC", "Kaiti TC", 14, false},
-        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
-        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
-        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
-        {QObject::tr("HanziPen SC"), "HanziPen SC", "HanziPen SC", 14, false},
+        {QObject::tr("Lantinghei SC"), "Lantinghei SC", "Lantinghei SC", 14, false},
+        {QObject::tr("Lantinghei TC"), "Lantinghei TC", "Lantinghei TC", 14, false},
+        {QObject::tr("Libian SC"), "Libian SC", "Libian SC", 14, false},
+        {QObject::tr("Microsoft YaHei"), "Microsoft YaHei", "Microsoft YaHei", 14, false},
+        {QObject::tr("Songti SC"), "Songti SC", "Songti SC", 14, false},
+        {QObject::tr("Songti TC"), "Songti TC", "Songti TC", 14, false},
+        {QObject::tr("STFangsong"), "STFangsong", "STFangsong", 14, false},
+        {QObject::tr("STHeiti"), "STHeiti", "STHeiti", 14, false},
+        {QObject::tr("STKaiti"), "STKaiti", "STKaiti", 14, false},
+        {QObject::tr("STSong"), "STSong", "STSong", 14, false},
+        {QObject::tr("Wawati SC"), "Wawati SC", "Wawati SC", 14, false},
+        {QObject::tr("Wawati TC"), "Wawati TC", "Wawati TC", 14, false},
+        {QObject::tr("Weibei SC"), "Weibei SC", "Weibei SC", 14, false},
+        {QObject::tr("Weibei TC"), "Weibei TC", "Weibei TC", 14, false},
+        {QObject::tr("Xingkai SC"), "Xingkai SC", "Xingkai SC", 14, false},
+        {QObject::tr("Yuanti SC"), "Yuanti SC", "Yuanti SC", 14, false},
+        {QObject::tr("Yuppy TC"), "Yuppy TC", "Yuppy TC", 14, false},
+        {QObject::tr("Yuppy SC"), "Yuppy SC", "Yuppy SC", 14, false}
     };
     return fontItems;
 };
@@ -172,8 +186,19 @@ public:
         //
         QString text = index.model()->data(index, Qt::DisplayRole).toString();
         WizComboboxStyledItem styledItem = itemFromArrayByText(text, m_itemArray, m_arrayCount);
+        if (styledItem.strText.isEmpty())
+        {
+            //set default data
+            styledItem.bBold = false;
+            styledItem.nFontSize = 14;
+            styledItem.strFontFamily = text;
+        }
         opt.font.setPointSize(styledItem.nFontSize);
         opt.font.setBold(styledItem.bBold);
+        if (!styledItem.strFontFamily.isEmpty())
+        {
+            opt.font.setFamily(styledItem.strFontFamily);
+        }
 
         const int nIconSize = 16;
         if (index.model()->data(index, WizCheckStateRole).toInt() == Qt::Checked)
@@ -196,6 +221,10 @@ public:
         initStyleOption(&opt, index);
 
         WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
+        if (styledItem.strText.isEmpty())
+        {
+            styledItem.nFontSize = 14;
+        }
         QFont font = opt.font;
         font.setPointSize(styledItem.nFontSize);
         QFontMetrics fm(font);
@@ -646,14 +675,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
         m_comboParagraph->setMinimumWidth(70);
     }
 
-    WizComboboxStyledItem* paraItems = ParagraphItems();
-#ifdef Q_OS_MAC
-    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
-                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
-    WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
-    m_comboParagraph->setItemDelegate(paragraphDelegate);
-#endif
-
+    WizComboboxStyledItem* paraItems = ParagraphItems();    
     for (int i = 0; i < nParagraphItemCount; i ++)
     {
         m_comboParagraph->addItem(paraItems[i].strText, paraItems[i].strUserData);
@@ -662,23 +684,40 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_comboParagraph, SIGNAL(activated(int)),
             SLOT(on_comboParagraph_indexChanged(int)));
 
-
-    m_comboFontFamily = new CWizToolComboBoxFont(this);
-//    QListView* fontWidget = new QListView(m_comboFontFamily);
-//    m_comboFontFamily->setView(fontWidget);
-    m_comboFontFamily->setStyleSheet("QComboBox QListView::item:hover {background-color: #448aff;}"
-                                     "QComboBox QListView::item:selected {background-color: #448aff;}");
-    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
-            SLOT(on_comboFontFamily_indexChanged(const QString&)));
+    //
+    m_comboFontFamily = new CWizToolComboBox(this);
+//    m_comboFontFamily->setStyleSheet("QComboBox QListView::item:hover {background-color: #448aff;}"
+//                                     "QComboBox QListView::item:selected {background-color: #448aff;}");
 
     m_comboFontSize = new CWizToolComboBox(this);
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
+    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
+                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
+    WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
+    m_comboParagraph->setItemDelegate(paragraphDelegate);
+    //
+    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:95px;}"
+                                     "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
+    WizToolComboboxItemDelegate* fontFamilyDelegate = new WizToolComboboxItemDelegate(m_comboFontFamily, m_comboFontFamily, paraItems, nParagraphItemCount);
+    m_comboFontFamily->setItemDelegate(fontFamilyDelegate);
+    //
     m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
 #endif
+
+    QFontDatabase fontDB;
+    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
+    QStringList fontFamilies = fontDB.families();
+    for (QString font : fontFamilies)
+    {
+       WizComboboxStyledItem familyItem = itemFromArrayByKey(font, fontFamilyItems, nFontFamilyCount);
+        m_comboFontFamily->addItem(familyItem.strText.isEmpty() ? font : familyItem.strText, font);
+    }
+    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
+            SLOT(on_comboFontFamily_indexChanged(const QString&)));
 
     for (int i = 0; i < nFontSizeCount; i++)
     {
@@ -1110,8 +1149,11 @@ void EditorToolBar::resetToolbar()
     {
         clearWizCheckState(m_comboParagraph);
         QModelIndex modelIndex = m_comboParagraph->model()->index(m_comboParagraph->currentIndex(), 0);
-        m_comboParagraph->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
-
+        m_comboParagraph->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);        
+        //
+        clearWizCheckState(m_comboFontFamily);
+        modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
+        m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
         //
         clearWizCheckState(m_comboFontSize);
         modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
@@ -2037,6 +2079,10 @@ void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
     if (m_editor) {
         m_editor->editorCommandExecuteFontFamily(strFamily);
         m_comboFontFamily->setText(strFamily);
+        //
+        clearWizCheckState(m_comboFontFamily);
+        QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
+        m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
     }
 }
 

@@ -50,7 +50,7 @@ private:
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
     CWizToolComboBox* m_comboParagraph;
-    CWizToolComboBoxFont* m_comboFontFamily;
+    CWizToolComboBox* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
     CWizToolButtonColor* m_btnForeColor;
     CWizToolButtonColor* m_btnBackColor;
