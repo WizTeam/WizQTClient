@@ -232,9 +232,7 @@ public:
     CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
-    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
-    //
-    void viewDocumentInSeparateWidget(const WIZDOCUMENTDATA& data);
+    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
     //
     static void quickSyncKb(const QString& kbGuid);
 
@@ -414,6 +412,9 @@ public Q_SLOTS:
     //
     void locateDocument(const WIZDOCUMENTDATA& data);
     void locateDocument(const QString& strKbGuid, const QString& strGuid);
+
+    //
+    void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
 
 public:
     // WizExplorerApp pointer

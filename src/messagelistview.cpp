@@ -283,6 +283,8 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
                       SLOT(on_action_message_mark_read()));
+    m_menu->addAction(tr("View in Separate Window"), this,
+                      SLOT(on_action_message_viewInSeparateWindow()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_LOCATE, this,
                       SLOT(on_action_message_locate()));
     m_menu->addSeparator();
@@ -642,6 +644,27 @@ void MessageListView::on_action_message_locate()
     }
 }
 
+void MessageListView::on_action_message_viewInSeparateWindow()
+{
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
+
+    MessageListViewItem* pItem = m_rightButtonFocusedItems.first();
+    if (pItem)
+    {
+        WIZMESSAGEDATA message = pItem->data();
+        WIZDOCUMENTDATA doc;
+        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.DocumentFromGUID(message.documentGUID, doc))
+            return;
+
+        if (db.IsDocumentDownloaded(doc.strGUID))
+        {
+            emit viewNoteInSparateWindowRequest(doc);
+        }
+    }
+}
+
 void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
 {
     if (rowFromId(msg.nId) == -1) {
@@ -681,6 +704,24 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     }
 
     updateTreeItem();
+}
+
+void MessageListView::on_itemDoubleClicked(QListWidgetItem* item)
+{
+    MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item);
+    if (pItem)
+    {
+        WIZMESSAGEDATA message = pItem->data();
+        WIZDOCUMENTDATA doc;
+        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.DocumentFromGUID(message.documentGUID, doc))
+            return;
+
+        if (db.IsDocumentDownloaded(doc.strGUID))
+        {
+            emit viewNoteInSparateWindowRequest(doc);
+        }
+    }
 }
 
 void MessageListView::clearRightMenuFocus()

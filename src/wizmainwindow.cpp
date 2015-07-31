@@ -2012,6 +2012,8 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_msgList, SIGNAL(loacteDocumetRequest(QString,QString)), SLOT(locateDocument(QString,QString)));
+    connect(m_msgList, SIGNAL(viewNoteInSparateWindowRequest(WIZDOCUMENTDATA)),
+            SLOT(viewNoteInSeparateWindow(WIZDOCUMENTDATA)));
     connect(m_documents, SIGNAL(documentsSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
@@ -2916,7 +2918,7 @@ void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
         WIZDOCUMENTDATA doc = pItem->document();
         if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
         {
-            viewDocumentInSeparateWidget(doc);
+            viewNoteInSeparateWindow(doc);
             resortDocListAfterViewDocument(doc);
         }
     }
@@ -3724,7 +3726,7 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->exec();
 }
 
-void MainWindow::viewDocumentInSeparateWidget(const WIZDOCUMENTDATA& data)
+void MainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
 {
     m_singleViewDelegate->viewDocument(data);    
 }

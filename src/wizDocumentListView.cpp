@@ -1338,7 +1338,7 @@ void CWizDocumentListView::on_action_showDocumentInFloatWindow()
     foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
-        mainWindow->viewDocumentInSeparateWidget(document);
+        mainWindow->viewNoteInSeparateWindow(document);
     }
 }
 

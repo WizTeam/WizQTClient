@@ -15,6 +15,7 @@ class CWizDatabaseManager;
 class wizImageButton;
 
 struct WIZMESSAGEDATA;
+struct WIZDOCUMENTDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 
 #ifdef Q_OS_LINUX
@@ -154,6 +155,7 @@ private:
 Q_SIGNALS:
     void sizeChanged(int nCount);
     void loacteDocumetRequest(const QString strKbGuid, const QString strGuid);
+    void viewNoteInSparateWindowRequest(const WIZDOCUMENTDATA& doc);
 
 private Q_SLOTS:
     void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
@@ -165,11 +167,14 @@ private Q_SLOTS:
     void on_action_message_mark_read();
     void on_action_message_delete();
     void on_action_message_locate();
+    void on_action_message_viewInSeparateWindow();
 
     void on_message_created(const WIZMESSAGEDATA& msg);
     void on_message_modified(const WIZMESSAGEDATA& oldMsg,
                              const WIZMESSAGEDATA& newMsg);
     void on_message_deleted(const WIZMESSAGEDATA& msg);
+
+    void	on_itemDoubleClicked(QListWidgetItem * item);
 
     void clearRightMenuFocus();
 };
