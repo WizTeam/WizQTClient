@@ -303,6 +303,24 @@ public Q_SLOTS:
     void on_actionViewToggleFullscreen_triggered();
     void on_actionMinimize_triggered();
 
+    void on_actionCategoryMessageCenter_triggered();
+    void on_actionCategoryShortcuts_triggered();
+    void on_actionCategoryQuickSearch_triggered();
+    void on_actionCategoryFolders_triggered();
+    void on_actionCategoryTags_triggered();
+    void on_actionCategoryBizGroups_triggered();
+    void on_actionCategoryPersonalGroups_triggered();
+    void on_actionThumbnailView_triggered();
+    void on_actionTwoLineView_triggered();
+    void on_actionOneLineView_triggered();
+    void on_actionSortByCreatedTime_triggered();
+    void on_actionSortByUpdatedTime_triggered();
+    void on_actionSortByAccessTime_triggered();
+    void on_actionSortByTitle_triggered();
+    void on_actionSortByFolder_triggered();
+    void on_actionSortByTag_triggered();
+    void on_actionSortBySize_triggered();
+
     void on_actionMarkAllMessageRead_triggered();
     void on_messageSelector_indexChanged(int index);
 

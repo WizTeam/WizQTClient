@@ -878,7 +878,7 @@ bool CWizCategoryView::renameGroupFolder(CWizCategoryViewGroupItem* pGroup, cons
 
 void CWizCategoryView::updateShortcut(int type, const QString& keyValue, const QString& name)
 {
-    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    CWizCategoryViewItemBase* shortcutRoot = findAllShortcutItem();
     if (shortcutRoot)
     {
         CWizCategoryViewShortcutItem::ShortcutType shortcutType = (CWizCategoryViewShortcutItem::ShortcutType)type;
@@ -910,7 +910,7 @@ void CWizCategoryView::updateShortcut(int type, const QString& keyValue, const Q
 
 void CWizCategoryView::removeShortcut(int type, const QString& keyValue)
 {
-    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    CWizCategoryViewItemBase* shortcutRoot = findAllShortcutItem();
     if (shortcutRoot)
     {
         CWizCategoryViewShortcutItem::ShortcutType shortcutType = (CWizCategoryViewShortcutItem::ShortcutType)type;
@@ -1471,6 +1471,166 @@ void CWizCategoryView::showCustomSearchContextMenu(QPoint pos, bool removable)
         resetMenu(AddCustomSearchItem);
     }
     m_menuCustomSearch->popup(pos);
+}
+
+QString sectionToText(CategorySection section)
+{
+    QString strKey = "";
+    switch (section) {
+    case Section_MessageCenter:
+        strKey = "MessageCenter";
+        break;
+    case Section_Shortcuts:
+        strKey = "Shortcuts";
+        break;
+    case Section_QuickSearch:
+        strKey = "QuickSearch";
+        break;
+    case Section_Folders:
+        strKey = "Folders";
+        break;
+    case Section_Tags:
+        strKey = "Tags";
+        break;
+    case Section_BizGroups:
+        strKey = "BizGroups";
+        break;
+    case Section_PersonalGroups:
+        strKey = "PersonalGroup";
+        break;
+    }
+
+    return strKey;
+}
+
+bool CWizCategoryView::setSectionVisible(CategorySection section, bool visible)
+{
+    QString strKey = sectionToText(section);
+    if (strKey.isEmpty())
+        return false;
+
+    QString optionXML = m_dbMgr.db().meta("CategoryViewOption", "SectionVisible");
+    QDomDocument doc;
+    doc.setContent(optionXML);
+
+    QDomNodeList nodeList = doc.elementsByTagName(strKey);
+    qDebug() << "set section visible ; " << section << " visible : " << visible << " old text : " << optionXML <<
+                " item count : "  << nodeList.count();
+    if (nodeList.count() > 0)
+    {
+        nodeList.at(0).toElement().firstChild().setNodeValue(visible ? "true" : "false");
+    }
+    else
+    {
+        QDomElement elem = doc.createElement(strKey);
+        doc.appendChild(elem);
+        QDomText t = doc.createTextNode(visible ? "true" : "false");
+        elem.appendChild(t);
+    }
+
+    optionXML = doc.toString();
+    qDebug() << "new string : " << optionXML;
+    m_dbMgr.db().setMeta("CategoryViewOption", "SectionVisible", optionXML);
+
+    loadSectionStatus();
+    return true;
+}
+
+bool CWizCategoryView::isSectionVisible(CategorySection section) const
+{
+    QString strKey = sectionToText(section);
+    if (strKey.isEmpty())
+        return false;
+
+    QString optionXML = m_dbMgr.db().meta("CategoryViewOption", "SectionVisible");
+    QDomDocument doc;
+    doc.setContent(optionXML);
+
+    QString nodeValue;
+    QDomNodeList nodeList = doc.elementsByTagName(strKey);
+    if (nodeList.count() > 0)
+    {
+        nodeValue = nodeList.at(0).toElement().nodeValue();
+    }
+    else
+    {
+        return true;
+    }
+
+    qDebug() << "is section visible ; " << section << " xml : " << optionXML << " visible ; " << (nodeValue == "true");
+    return nodeValue == "true";
+}
+
+void setItemVisible(const QString& strXML, CategorySection section, QTreeWidget* treeWidget,
+                    QTreeWidgetItem* item)
+{
+    QDomDocument doc;
+    doc.setContent(strXML);
+    bool sectionVisible;
+    QString strKey = sectionToText(section);
+    QDomNodeList nodeList = doc.elementsByTagName(strKey);
+    qDebug() << "get node value by key : " << strKey << " count : " << nodeList.count();
+
+    if (nodeList.count() > 0)
+    {
+        qDebug() << "node value : " << nodeList.at(0).toElement().firstChild().nodeValue();
+        sectionVisible = nodeList.at(0).toElement().firstChild().nodeValue() == "true";
+    }
+    else
+    {
+        sectionVisible = true;
+    }
+    qDebug() << "set item visible ; " << item->text(0) << " visible ; " << sectionVisible;
+    treeWidget->setItemHidden(item, !sectionVisible);
+}
+
+void CWizCategoryView::loadSectionStatus()
+{
+    QString optionXML = m_dbMgr.db().meta("CategoryViewOption", "SectionVisible");
+//    QDomDocument doc;
+//    doc.setContent(optionXML);
+
+    qDebug() << "load section status : " << optionXML;
+
+    QTreeWidgetItem* item = findAllMessagesItem();
+    setItemVisible(optionXML, Section_MessageCenter, this, item);
+
+    //
+    item = findAllShortcutItem();
+    setItemVisible(optionXML, Section_Shortcuts, this, item);
+
+    //
+    item = findAllSearchItem();
+    setItemVisible(optionXML, Section_QuickSearch, this, item);
+
+    //
+    item = findAllFolderItem();
+    setItemVisible(optionXML, Section_Folders, this, item);
+
+    //
+    item = findAllTagsItem();
+    setItemVisible(optionXML, Section_Tags, this, item);
+
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+
+    for (WIZBIZDATA biz : arrayBiz)
+    {
+        item = findBizGroupsRootItem(biz, false);
+        setItemVisible(optionXML, Section_BizGroups, this, item);
+    }
+
+    for (WIZGROUPDATA group : arrayGroup)
+    {
+        if (!group.IsBiz())
+        {
+            item = findGroupsRootItem(group, false);
+            setItemVisible(optionXML, Section_PersonalGroups, this, item);
+        }
+    }
 }
 
 CWizCategoryViewItemBase*CWizCategoryView::findFolder(const WIZDOCUMENTDATA& doc)
@@ -2418,7 +2578,7 @@ void CWizCategoryView::on_action_addToShortcuts()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuAddToShortcut");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
-    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
+    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findAllShortcutItem());
     if (p && shortcutRoot)
     {
         shortcutRoot->addItemToShortcuts(p);
@@ -2720,7 +2880,7 @@ void CWizCategoryView::updateGroupsData()
 
 void CWizCategoryView::on_shortcutDataChanged(const QString& shortcut)
 {
-    CWizCategoryViewItemBase* shortcutRoot = findShortcutRootItem();
+    CWizCategoryViewItemBase* shortcutRoot = findAllShortcutItem();
     if (shortcutRoot)
     {
         QList<QTreeWidgetItem *> itemList = shortcutRoot->takeChildren();
@@ -2736,7 +2896,7 @@ void CWizCategoryView::on_shortcutDataChanged(const QString& shortcut)
 
 void CWizCategoryView::addDocumentToShortcuts(const WIZDOCUMENTDATA& doc)
 {
-    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
+    CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findAllShortcutItem());
     if (shortcutRoot)
     {
         shortcutRoot->addDocumentToShortcuts(doc);
@@ -3837,7 +3997,7 @@ void CWizCategoryView::loadShortcutState()
     QString strData = m_dbMgr.db().GetFavorites();
     initShortcut(strData);
 
-    CWizCategoryViewShortcutRootItem* pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findShortcutRootItem());
+    CWizCategoryViewShortcutRootItem* pShortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(findAllShortcutItem());
     if (pShortcutRoot->childCount() == 0)
     {
         pShortcutRoot->addPlaceHoldItem();
@@ -3848,7 +4008,7 @@ void CWizCategoryView::loadShortcutState()
 
 void CWizCategoryView::saveShortcutState()
 {
-    CWizCategoryViewItemBase *pShortcutRoot = findShortcutRootItem();
+    CWizCategoryViewItemBase *pShortcutRoot = findAllShortcutItem();
     QString strShortcutData = "";
 
     if (pShortcutRoot && pShortcutRoot->childCount() > 0)
@@ -4198,7 +4358,7 @@ void CWizCategoryView::initQuickSearches()
 
 void CWizCategoryView::initShortcut(const QString& shortcut)
 {
-    CWizCategoryViewItemBase* pShortcutRoot = findShortcutRootItem();
+    CWizCategoryViewItemBase* pShortcutRoot = findAllShortcutItem();
     if (!pShortcutRoot)
     {
         pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
@@ -5090,7 +5250,7 @@ QAction* CWizCategoryView::findAction(CategoryActions type)
     return NULL;
 }
 
-CWizCategoryViewItemBase*CWizCategoryView::findShortcutRootItem()
+CWizCategoryViewItemBase*CWizCategoryView::findAllShortcutItem()
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
         if (topLevelItem(i)->type() != Category_ShortcutRootItem)

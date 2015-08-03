@@ -142,6 +142,16 @@ protected:
 #endif
 };
 
+enum CategorySection
+{
+    Section_MessageCenter,
+    Section_Shortcuts,
+    Section_QuickSearch,
+    Section_Folders,
+    Section_Tags,
+    Section_BizGroups,
+    Section_PersonalGroups
+};
 
 class CWizCategoryView : public CWizCategoryBaseView
 {
@@ -221,6 +231,10 @@ public:
     void showCustomSearchContextMenu(QPoint pos, bool removable = false);
 
 
+    bool setSectionVisible(CategorySection section, bool visible);
+    bool isSectionVisible(CategorySection section) const;
+    void loadSectionStatus();
+
 public:
     CWizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
 
@@ -267,7 +281,6 @@ public:
     // helper
     QAction* findAction(CategoryActions type);
 
-    CWizCategoryViewItemBase* findShortcutRootItem();
     CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
     CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
     CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
@@ -276,6 +289,7 @@ public:
     CWizCategoryViewItemBase* findAllTagsItem();
     CWizCategoryViewItemBase* findAllSearchItem();
     CWizCategoryViewItemBase* findAllMessagesItem();
+    CWizCategoryViewItemBase* findAllShortcutItem();
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update

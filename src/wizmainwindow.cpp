@@ -6,6 +6,7 @@
 #include <QDesktopWidget>
 #include <QUndoStack>
 #include <QEvent>
+#include <QAction>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QComboBox>
@@ -811,6 +812,66 @@ void MainWindow::initMenuBar()
     connect(m_windowListMenu, SIGNAL(aboutToShow()), SLOT(resetWindowMenu()));
     connect(m_singleViewDelegate, SIGNAL(documentViewerClosed(QString)),
             SLOT(removeWindowsMenuItem(QString)));
+
+    //
+    m_actions->actionFromName(WIZCATEGORY_OPTION_MESSAGECENTER)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_SHORTCUTS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_QUICKSEARCH)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setCheckable(true);
+
+    bool checked = m_category->isSectionVisible(Section_MessageCenter);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_MESSAGECENTER)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_Shortcuts);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_SHORTCUTS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_QuickSearch);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_QUICKSEARCH)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_Folders);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_Tags);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_BizGroups);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_PersonalGroups);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setChecked(checked);
+
+    //
+    m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW)->setCheckable(true);
+    QActionGroup* actionGroup = new QActionGroup(m_menuBar);
+    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW));
+    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW));
+    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW));
+    int viewType = userSettings().get("VIEW_TYPE").toInt();
+    if (viewType >= 0)
+    {
+        actionGroup->actions().at(viewType)->setChecked(true);
+    }
+
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG)->setCheckable(true);
+    m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE)->setCheckable(true);
+    actionGroup = new QActionGroup(m_menuBar);
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG));
+    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE));
+    int sortType = qAbs(userSettings().get("SORT_TYPE").toInt());
+    if (sortType > 0)
+    {
+        actionGroup->actions().at(sortType - 1)->setChecked(true);
+    }
+
 }
 
 void MainWindow::initDockMenu()
@@ -2321,6 +2382,119 @@ void MainWindow::on_actionMinimize_triggered()
 
         wgt->setWindowState(Qt::WindowMinimized);
     }
+}
+
+void MainWindow::on_actionCategoryMessageCenter_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_MessageCenter, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryShortcuts_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Shortcuts, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryQuickSearch_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_QuickSearch, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryFolders_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Folders, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryTags_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Tags, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryBizGroups_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_BizGroups, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryPersonalGroups_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_PersonalGroups, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionThumbnailView_triggered()
+{
+
+}
+
+void MainWindow::on_actionTwoLineView_triggered()
+{
+
+}
+
+void MainWindow::on_actionOneLineView_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByCreatedTime_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByUpdatedTime_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByAccessTime_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByTitle_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByFolder_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortByTag_triggered()
+{
+
+}
+
+void MainWindow::on_actionSortBySize_triggered()
+{
+
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
