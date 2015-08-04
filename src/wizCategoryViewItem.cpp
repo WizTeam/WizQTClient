@@ -299,7 +299,7 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
 /* ------------------------------ CWizCategoryViewSectionItem ------------------------------ */
 
 CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, const QString& strName, int sortOrder)
-    : CWizCategoryViewItemBase(app, strName, "")
+    : CWizCategoryViewItemBase(app, strName, "", Category_SectionItem)
     , m_sortOrder(sortOrder)
 {
     setFlags(Qt::NoItemFlags); // user can not interact with it.

@@ -26,7 +26,8 @@ enum ItemType
     Category_JoinedGroupRootItem,
     Category_GroupRootItem,
     Category_GroupItem,
-    Category_GroupNoTagItem
+    Category_GroupNoTagItem,
+    Category_SectionItem
 };
 
 enum DateInterval{

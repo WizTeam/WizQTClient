@@ -1513,23 +1513,26 @@ bool CWizCategoryView::setSectionVisible(CategorySection section, bool visible)
     QDomDocument doc;
     doc.setContent(optionXML);
 
-    QDomNodeList nodeList = doc.elementsByTagName(strKey);
-    qDebug() << "set section visible ; " << section << " visible : " << visible << " old text : " << optionXML <<
-                " item count : "  << nodeList.count();
+    QDomNodeList nodeList = doc.elementsByTagName(strKey);    
     if (nodeList.count() > 0)
     {
         nodeList.at(0).toElement().firstChild().setNodeValue(visible ? "true" : "false");
     }
     else
     {
+        QDomElement root = doc.firstChild().toElement();
+        if (!root.isElement() || root.tagName() != "root")
+        {
+            root = doc.createElement("root");
+            doc.appendChild(root);
+        }
         QDomElement elem = doc.createElement(strKey);
-        doc.appendChild(elem);
+        root.appendChild(elem);
         QDomText t = doc.createTextNode(visible ? "true" : "false");
         elem.appendChild(t);
     }
 
     optionXML = doc.toString();
-    qDebug() << "new string : " << optionXML;
     m_dbMgr.db().setMeta("CategoryViewOption", "SectionVisible", optionXML);
 
     loadSectionStatus();
@@ -1550,14 +1553,13 @@ bool CWizCategoryView::isSectionVisible(CategorySection section) const
     QDomNodeList nodeList = doc.elementsByTagName(strKey);
     if (nodeList.count() > 0)
     {
-        nodeValue = nodeList.at(0).toElement().nodeValue();
+        nodeValue = nodeList.at(0).toElement().text();
     }
     else
     {
         return true;
     }
 
-    qDebug() << "is section visible ; " << section << " xml : " << optionXML << " visible ; " << (nodeValue == "true");
     return nodeValue == "true";
 }
 
@@ -1569,28 +1571,56 @@ void setItemVisible(const QString& strXML, CategorySection section, QTreeWidget*
     bool sectionVisible;
     QString strKey = sectionToText(section);
     QDomNodeList nodeList = doc.elementsByTagName(strKey);
-    qDebug() << "get node value by key : " << strKey << " count : " << nodeList.count();
 
     if (nodeList.count() > 0)
     {
-        qDebug() << "node value : " << nodeList.at(0).toElement().firstChild().nodeValue();
         sectionVisible = nodeList.at(0).toElement().firstChild().nodeValue() == "true";
     }
     else
     {
         sectionVisible = true;
     }
-    qDebug() << "set item visible ; " << item->text(0) << " visible ; " << sectionVisible;
     treeWidget->setItemHidden(item, !sectionVisible);
+}
+
+void hideSectionItem(QTreeWidget* treewidget)
+{
+    if (!treewidget)
+        return;
+
+    QTreeWidgetItem* lastSectionItem = nullptr;
+    bool sectionAreaHiden = true;
+    for (int i = 0; i < treewidget->topLevelItemCount(); i++)
+    {
+        if (treewidget->topLevelItem(i)->type() == Category_SectionItem)
+        {
+            if (lastSectionItem != nullptr)
+            {
+                lastSectionItem->setHidden(sectionAreaHiden);
+            }
+            sectionAreaHiden = true;
+            lastSectionItem = treewidget->topLevelItem(i);
+        }
+        else
+        {
+            if (!treewidget->topLevelItem(i)->isHidden())
+            {
+                sectionAreaHiden = false;
+            }
+        }
+    }
+
+    if (lastSectionItem != nullptr)
+    {
+        lastSectionItem->setHidden(sectionAreaHiden);
+    }
 }
 
 void CWizCategoryView::loadSectionStatus()
 {
     QString optionXML = m_dbMgr.db().meta("CategoryViewOption", "SectionVisible");
-//    QDomDocument doc;
-//    doc.setContent(optionXML);
-
-    qDebug() << "load section status : " << optionXML;
+    if (optionXML.isEmpty())
+        return;
 
     QTreeWidgetItem* item = findAllMessagesItem();
     setItemVisible(optionXML, Section_MessageCenter, this, item);
@@ -1601,7 +1631,7 @@ void CWizCategoryView::loadSectionStatus()
 
     //
     item = findAllSearchItem();
-    setItemVisible(optionXML, Section_QuickSearch, this, item);
+    setItemVisible(optionXML, Section_QuickSearch, this, item);    
 
     //
     item = findAllFolderItem();
@@ -1631,6 +1661,8 @@ void CWizCategoryView::loadSectionStatus()
             setItemVisible(optionXML, Section_PersonalGroups, this, item);
         }
     }
+
+    hideSectionItem(this);
 }
 
 CWizCategoryViewItemBase*CWizCategoryView::findFolder(const WIZDOCUMENTDATA& doc)
@@ -2989,7 +3021,7 @@ void CWizCategoryView::init()
     resetSections();
 
     loadExpandState();
-
+    loadSectionStatus();
 }
 
 void CWizCategoryView::resetSections()
