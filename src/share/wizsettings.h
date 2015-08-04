@@ -164,6 +164,9 @@ public:
     QString encryptedNotePassword();
     void setEncryptedNotePassword(const QString& strPassword);
 
+    bool isRememberNotePasswordForSession();
+    void setRememberNotePasswordForSession(bool remember);
+
     QString editorBackgroundColor();
     void setEditorBackgroundColor(const QString& strColor);
 

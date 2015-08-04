@@ -484,6 +484,17 @@ void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
     set("EncryptedNotePassword", strEncryptPass);
 }
 
+static bool rememberPasswordForSession = false;
+bool CWizUserSettings::isRememberNotePasswordForSession()
+{
+    return rememberPasswordForSession;
+}
+
+void CWizUserSettings::setRememberNotePasswordForSession(bool remember)
+{
+    rememberPasswordForSession = remember;
+}
+
 QString CWizUserSettings::editorBackgroundColor()
 {
     QString strColor = get("EditorBackgroundColor");

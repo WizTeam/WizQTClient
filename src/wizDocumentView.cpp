@@ -710,6 +710,7 @@ void CWizDocumentView::onCipherCheckRequest()
 
     db.setUserCipher(m_passwordView->userCipher());
     db.setSaveUserCipher(m_passwordView->isSaveForSession());
+    m_app.userSettings().setRememberNotePasswordForSession(m_passwordView->isSaveForSession());
 
     if (!db.IsFileAccessible(noteData))
     {

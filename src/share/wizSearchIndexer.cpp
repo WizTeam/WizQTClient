@@ -101,8 +101,15 @@ bool CWizSearchIndexer::buildFTSIndex()
 
 void clearDatabaseCipher(CWizDatabase& db)
 {
-    db.setSaveUserCipher(false);
-    db.setUserCipher("");
+    if (!db.IsGroup())
+    {
+        CWizUserSettings settings(db);
+        if (!settings.isRememberNotePasswordForSession())
+        {
+            db.setSaveUserCipher(false);
+            db.setUserCipher("");
+        }
+    }
 }
 
 bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
