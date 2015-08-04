@@ -802,6 +802,18 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
+void setActionCheckState(const QList<QAction*>& actionList, int type)
+{
+    for (int i = 0; i < actionList.count(); i++)
+    {
+        QAction* action = actionList.at(i);
+        if (action->data().toInt() == type)
+        {
+            action->setChecked(true);
+            break;
+        }
+    }
+}
 
 void MainWindow::initMenuBar()
 {
@@ -838,40 +850,50 @@ void MainWindow::initMenuBar()
     m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setChecked(checked);
 
     //
-    m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW)->setCheckable(true);
-    m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW)->setCheckable(true);
-    m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW)->setCheckable(true);
-    QActionGroup* actionGroup = new QActionGroup(m_menuBar);
-    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW));
-    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW));
-    actionGroup->addAction(m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW));
+    m_viewTypeActions = new QActionGroup(m_menuBar);
+    QAction* action = m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeThumbnail);
+    m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeTwoLine);
+    m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeOneLine);
+    m_viewTypeActions->addAction(action);
     int viewType = userSettings().get("VIEW_TYPE").toInt();
-    if (viewType >= 0)
-    {
-        actionGroup->actions().at(viewType)->setChecked(true);
-    }
+    setActionCheckState(m_viewTypeActions->actions(), viewType);
 
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG)->setCheckable(true);
-    m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE)->setCheckable(true);
-    actionGroup = new QActionGroup(m_menuBar);
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG));
-    actionGroup->addAction(m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE));
+    m_sortTypeActions = new QActionGroup(m_menuBar);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME);
+    action->setData(CWizSortingPopupButton::SortingCreateTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME);
+    action->setData(CWizSortingPopupButton::SortingUpdateTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME);
+    action->setData(CWizSortingPopupButton::SortingAccessTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE);
+    action->setData(CWizSortingPopupButton::SortingTitle);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
+    action->setData(CWizSortingPopupButton::SortingLocation);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
+    action->setData(CWizSortingPopupButton::SortingTag);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
+    action->setData(CWizSortingPopupButton::SortingSize);
+    m_sortTypeActions->addAction(action);
+    for (QAction* actionItem : m_sortTypeActions->actions())
+    {
+        actionItem->setCheckable(true);
+    }
     int sortType = qAbs(userSettings().get("SORT_TYPE").toInt());
-    if (sortType > 0)
-    {
-        actionGroup->actions().at(sortType - 1)->setChecked(true);
-    }
-
+    setActionCheckState(m_sortTypeActions->actions(), sortType);
 }
 
 void MainWindow::initDockMenu()
@@ -1567,6 +1589,16 @@ void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
     menu->addActions(newActions);
 }
 
+void MainWindow::changeDocumentsSortTypeByAction(QAction* action)
+{
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsSortingType(type);
+        emit documentsSortTypeChanged(type);
+    }
+}
+
 void MainWindow::resetDockMenu()
 {
     m_dockMenu->clear();
@@ -1918,6 +1950,7 @@ QWidget* MainWindow::createNoteListView()
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
+    connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
     line->setFixedWidth(1);
@@ -1926,6 +1959,7 @@ QWidget* MainWindow::createNoteListView()
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
+    connect(this, SIGNAL(documentsSortTypeChanged(int)), sortBtn, SLOT(on_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
@@ -2050,12 +2084,16 @@ void MainWindow::on_documents_viewTypeChanged(int type)
 {
     WizGetAnalyzer().LogAction("DocumentsViewTypeChanged");
     m_documents->resetItemsViewType(type);
+
+    setActionCheckState(m_viewTypeActions->actions(), type);
 }
 
 void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     WizGetAnalyzer().LogAction("DocumentsSortTypeChanged");
     m_documents->resetItemsSortingType(type);
+
+    setActionCheckState(m_sortTypeActions->actions(), type);
 }
 
 void MainWindow::init()
@@ -2449,52 +2487,77 @@ void MainWindow::on_actionCategoryPersonalGroups_triggered()
 
 void MainWindow::on_actionThumbnailView_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
 }
 
 void MainWindow::on_actionTwoLineView_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
 }
 
 void MainWindow::on_actionOneLineView_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
 }
 
 void MainWindow::on_actionSortByCreatedTime_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortByUpdatedTime_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortByAccessTime_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortByTitle_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortByFolder_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortByTag_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionSortBySize_triggered()
 {
-
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()

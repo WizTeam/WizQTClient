@@ -21,6 +21,7 @@ class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
 class QComboBox;
+class QActionGroup;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -152,6 +153,8 @@ private:
     QMenuBar* m_menuBar;
     QMenu* m_dockMenu;
     QMenu* m_windowListMenu;
+    QActionGroup* m_viewTypeActions;
+    QActionGroup* m_sortTypeActions;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
     QToolButton* m_menuButton;    
@@ -251,6 +254,9 @@ signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
+
+    void documentsViewTypeChanged(int);
+    void documentsSortTypeChanged(int);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -509,6 +515,8 @@ private:
     void loadMessageByUserGuid(const QString& guid);
 
     void resetWindowListMenu(QMenu* menu, bool removeExists);
+
+    void changeDocumentsSortTypeByAction(QAction* action);
 
 private slots:
     void windowActived();
