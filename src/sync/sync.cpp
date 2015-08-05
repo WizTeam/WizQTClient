@@ -92,12 +92,12 @@ bool CWizKMSync::SyncCore()
 {
     m_mapOldKeyValues.clear();
     m_pEvents->OnSyncProgress(::GetSyncStartProgress(syncDatabaseLogin));
-    m_pEvents->OnStatus(_TR("Connect to server"));
+    m_pEvents->OnStatus(QObject::tr("Connect to server"));
 
     if (m_pEvents->IsStop())
         return FALSE;
 
-    m_pEvents->OnStatus(_TR("Query server infomation"));
+    m_pEvents->OnStatus(QObject::tr("Query server infomation"));
     if (!m_bGroup)
     {
         WIZKBINFO info;
@@ -120,40 +120,40 @@ bool CWizKMSync::SyncCore()
     WIZOBJECTVERSION versionServer;
     if (!m_server.wiz_getVersion(versionServer))
     {
-        m_pEvents->OnError(_T("Cannot get version information!"));
+        m_pEvents->OnError(QObject::tr("Cannot get version information!"));
         return FALSE;
     }
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Query deleted objects list"));
+    m_pEvents->OnStatus(QObject::tr("Query deleted objects list"));
     if (!DownloadDeletedList(versionServer.nDeletedGUIDVersion))
     {
-        m_pEvents->OnError(_T("Cannot download deleted objects list!"));
+        m_pEvents->OnError(QObject::tr("Cannot download deleted objects list!"));
         return FALSE;
     }
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Upload deleted objects list"));
+    m_pEvents->OnStatus(QObject::tr("Upload deleted objects list"));
     if (!UploadDeletedList())
     {
-        m_pEvents->OnError(_T("Cannot upload deleted objects list!"));
+        m_pEvents->OnError(QObject::tr("Cannot upload deleted objects list!"));
         //return FALSE;
     }
     //
-    m_pEvents->OnStatus(_TR("Sync settings"));
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
     UploadKeys();
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Upload tags"));
+    m_pEvents->OnStatus(QObject::tr("Upload tags"));
     if (!UploadTagList())
     {
-        m_pEvents->OnError(_T("Cannot upload tags!"));
+        m_pEvents->OnError(QObject::tr("Cannot upload tags!"));
         return FALSE;
     }
     //
@@ -161,10 +161,10 @@ bool CWizKMSync::SyncCore()
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Upload styles"));
+    m_pEvents->OnStatus(QObject::tr("Upload styles"));
     if (!UploadStyleList())
     {
-        m_pEvents->OnError(_T("Cannot upload styles!"));
+        m_pEvents->OnError(QObject::tr("Cannot upload styles!"));
         return FALSE;
     }
     //
@@ -172,20 +172,20 @@ bool CWizKMSync::SyncCore()
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Upload notes"));
+    m_pEvents->OnStatus(QObject::tr("Upload notes"));
     if (!UploadDocumentList())
     {
-        m_pEvents->OnError(_T("Cannot upload notes!"));
+        m_pEvents->OnError(QObject::tr("Cannot upload notes!"));
         return FALSE;
     }
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Upload attachments"));
+    m_pEvents->OnStatus(QObject::tr("Upload attachments"));
     if (!UploadAttachmentList())
     {
-        m_pEvents->OnError(_T("Cannot upload attachments!"));
+        m_pEvents->OnError(QObject::tr("Cannot upload attachments!"));
         return FALSE;
     }
     //
@@ -196,36 +196,36 @@ bool CWizKMSync::SyncCore()
         return TRUE;
     //    
 
-    m_pEvents->OnStatus(_TR("Sync settings"));
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
     DownloadKeys();
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Download tags"));
+    m_pEvents->OnStatus(QObject::tr("Download tags"));
     if (!DownloadTagList(versionServer.nTagVersion))
     {
-        m_pEvents->OnError(_T("Cannot download tags!"));
+        m_pEvents->OnError(QObject::tr("Cannot download tags!"));
         return FALSE;
     }
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Download styles"));
+    m_pEvents->OnStatus(QObject::tr("Download styles"));
     if (!DownloadStyleList(versionServer.nStyleVersion))
     {
-        m_pEvents->OnError(_T("Cannot download styles!"));
+        m_pEvents->OnError(QObject::tr("Cannot download styles!"));
         return FALSE;
     }
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Download notes list"));
+    m_pEvents->OnStatus(QObject::tr("Download notes list"));
     if (!DownloadSimpleDocumentList(versionServer.nDocumentVersion))
     {
-        m_pEvents->OnError(_T("Cannot download notes list!"));
+        m_pEvents->OnError(QObject::tr("Cannot download notes list!"));
         return FALSE;
     }
     //
@@ -239,16 +239,16 @@ bool CWizKMSync::SyncCore()
     // 因此不会被删除，导致手机上还有空的文件夹
     // 因此在这里需要重新更新一下
     */
-    m_pEvents->OnStatus(_TR("Sync settings"));
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
     ProcessOldKeyValues();
     //
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    m_pEvents->OnStatus(_TR("Download attachments list"));
+    m_pEvents->OnStatus(QObject::tr("Download attachments list"));
     if (!DownloadAttachmentList(versionServer.nAttachmentVersion))
     {
-        m_pEvents->OnError(_T("Cannot download attachments list!"));
+        m_pEvents->OnError(QObject::tr("Cannot download attachments list!"));
         return FALSE;
     }
     //
@@ -467,14 +467,14 @@ bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, I
     GetModifiedObjectList<TData>(pDatabase, arrayData);
     if (arrayData.empty())
     {
-        pEvents->OnStatus(_TR("No change, skip"));
+        pEvents->OnStatus(QObject::tr("No change, skip"));
         return TRUE;
     }
     //
     //
     if (!server.postList<TData>(arrayData))
     {
-        TOLOG(_T("Can't upload list!"));
+        TOLOG(QObject::tr("Can't upload list!"));
         return FALSE;
     }
     //
@@ -843,7 +843,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         WizStringArrayToText(arrayPart, strParts, _T(", "));
         //
         QString strInfo;
-        strInfo = ::WizFormatString2(_TR("Updating note [%2] %1"), local.strTitle, strParts);
+        strInfo = ::WizFormatString2(QObject::tr("Upload note [%2] %1"), local.strTitle, strParts);
         //
         for (int i = 0; i < 2; i++)	//try twice
         {
@@ -895,7 +895,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //
     if (!succeeded)
     {
-        pEvents->OnWarning(WizFormatString1(_T("Cannot upload note data: %1"), local.strTitle));
+        pEvents->OnWarning(QObject::tr("Cannot upload note data: %1").arg(local.strTitle));
         return FALSE;
     }
     //
@@ -1132,7 +1132,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     GetModifiedObjectList<TData>(pDatabase, arrayData);
     if (arrayData.empty())
     {
-        pEvents->OnStatus(_TR("No change, skip"));
+        pEvents->OnStatus(QObject::tr("No change, skip"));
         return TRUE;
     }
     //
@@ -1160,7 +1160,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     TArray arrayDataOnServer;
     if (!server.downloadSimpleList<TData>(arrayGUID, arrayDataOnServer))
     {
-        pEvents->OnError(_TR("Cannot download object list!"));
+        pEvents->OnError(QObject::tr("Cannot download object list!"));
         return FALSE;
     }
 
@@ -1194,7 +1194,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
         {
             bUploaded = FALSE;
             //
-            pEvents->OnStatus("Can't upload object, ErrorCode: " + WizIntToStr(server.GetLastErrorCode()));
+            pEvents->OnStatus(QObject::tr("Can't upload object, error code : %1").arg(WizIntToStr(server.GetLastErrorCode())));
             pEvents->OnStatus(server.GetLastErrorMessage());
             //
             switch (server.GetLastErrorCode())
@@ -1587,7 +1587,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         if (!serverDB.document_downloadFullList(arrayDocumentGUID, arrayDocumentServer))
         {
             pEvents->OnError(_T("Can download notes of messages"));
-            return FALSE;
         }
         //
         for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocumentServer.begin();
@@ -1622,7 +1621,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             if (!pGroupDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
             {
                 pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-                return FALSE;
             }
         }
         //
@@ -1630,22 +1628,22 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
     }
     //
     ////
-    int count = int(arrayMessage.size());
-    for (int i = count - 1; i >= 0; i--)
-    {
-        const WIZUSERMESSAGEDATA& data = arrayMessage[i];
-        if (data.strKbGUID.isEmpty())
-            continue;
-        if (data.strDocumentGUID.isEmpty())
-            continue;
-        /*
-        ////判断对应的笔记是否被下载了（如果没有，说明服务器已经没有这个笔记了，无法显示这个消息）////
-        */
-        if (setDownloadedDocumentGUID.find(data.strDocumentGUID) != setDownloadedDocumentGUID.end())
-            continue;
-        //
-        arrayMessage.erase(arrayMessage.begin() + i);
-    }
+//    int count = int(arrayMessage.size());
+//    for (int i = count - 1; i >= 0; i--)
+//    {
+//        const WIZUSERMESSAGEDATA& data = arrayMessage[i];
+//        if (data.strKbGUID.isEmpty())
+//            continue;
+//        if (data.strDocumentGUID.isEmpty())
+//            continue;
+//        /*
+//        ////判断对应的笔记是否被下载了（如果没有，说明服务器已经没有这个笔记了，无法显示这个消息）////
+//        */
+//        if (setDownloadedDocumentGUID.find(data.strDocumentGUID) != setDownloadedDocumentGUID.end())
+//            continue;
+//        //
+//        arrayMessage.erase(arrayMessage.begin() + i);
+//    }
     //
     __int64 nNewVersion = CWizKMSync::GetObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
     //
@@ -1779,7 +1777,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         }
     }
 
-    pEvents->OnStatus("Sync group users");
+    pEvents->OnStatus(QObject::tr("Sync group users"));
 
     for (CWizGroupDataArray::const_iterator it = arrayGroup.begin();
          it != arrayGroup.end();
@@ -1788,7 +1786,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         const WIZGROUPDATA& g = *it;
         if (!g.bizGUID.isEmpty())
         {
-            QString strUrl = WizService::ApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
+            QString strUrl = WizService::CommonApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);            
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
@@ -1807,15 +1805,19 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
 {
     Q_UNUSED(bUseWizServer);
 
-    pEvents->OnStatus(_TR("-------Sync start--------------"));
+    pEvents->OnStatus(QObject::tr("----------Sync start----------"));
     pEvents->OnSyncProgress(0);
-    pEvents->OnStatus(_TR("Connecting to server"));
+    pEvents->OnStatus(QObject::tr("Connecting to server"));
 
-    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    QString syncUrl = WizService::CommonApiEntry::syncUrl();
+    if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
+        return false;
+
+    CWizKMAccountsServer server(syncUrl);
     server.SetUserInfo(info);
 
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
-    pEvents->OnStatus(_TR("Signing in"));
+    pEvents->OnStatus(QObject::tr("Signing in"));
 
     //QString strPassword = pDatabase->GetPassword();
     //while (1)
@@ -1836,18 +1838,13 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     ////获得群组信息////
     */
     //
-    CWizGroupDataArray arrayGroup;
-    if (server.GetGroupList(arrayGroup))
-    {
-        pDatabase->OnDownloadGroups(arrayGroup);
-    }
-
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
         WizService::AvatarHost::reload(pDatabase->GetUserId());
         pDatabase->ClearLastSyncError();
         pEvents->ClearLastSyncError(pDatabase);
+        pEvents->OnStatus(QObject::tr("Get Biz info"));
         CWizBizDataArray arrayBiz;
         if (server.GetBizList(arrayBiz))
         {
@@ -1858,8 +1855,21 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             pEvents->SetLastErrorCode(server.GetLastErrorCode());
             return false;
         }
+    }
 
+
+    pEvents->OnStatus(QObject::tr("Get groups info"));
+    CWizGroupDataArray arrayGroup;
+    if (server.GetGroupList(arrayGroup))
+    {
+        pDatabase->OnDownloadGroups(arrayGroup);
         syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+    }
+    else
+    {
+        pEvents->SetLastErrorCode(server.GetLastErrorCode());
+        pEvents->OnError(QObject::tr("Can not get groups"));
+        return false;
     }
     // sync analyzer info one time a day
 #ifndef QT_DEBUG
@@ -1878,19 +1888,19 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     /*
     ////下载设置////
     */
-    pEvents->OnStatus(_TR("Downloading settings"));
+    pEvents->OnStatus(QObject::tr("Downloading settings"));
     DownloadAccountKeys(server, pDatabase);
 
     /*
     ////下载消息////
     */
-    pEvents->OnStatus(_TR("Downloading messages"));
+    pEvents->OnStatus(QObject::tr("Downloading messages"));
     WizDownloadMessages(pEvents, server, pDatabase, arrayGroup);
     //
-    pEvents->OnStatus(_T("Upload modified messages"));
+    pEvents->OnStatus(QObject::tr("Upload modified messages"));
     WizUploadMessages(pEvents, server, pDatabase);
     //
-    pEvents->OnStatus(_TR("-------sync private notes--------------"));
+    pEvents->OnStatus(QObject::tr("----------sync private notes----------"));
     //
     {
         pEvents->SetCurrentDatabase(0);
@@ -1898,7 +1908,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.Sync())
         {
-            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, QObject::tr("Cannot sync!"));
             QString strLastError = pDatabase->GetLastSyncErrorMessage();
             if (!strLastError.isEmpty() && !bBackground)
             {
@@ -1916,7 +1926,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (pEvents->IsStop())
         return FALSE;
 
-    pEvents->OnStatus(_TR("-------sync groups--------------"));
+    pEvents->OnStatus(QObject::tr("----------sync groups----------"));
     //
     for (CWizGroupDataArray::const_iterator itGroup = arrayGroup.begin();
         itGroup != arrayGroup.end();
@@ -1930,12 +1940,12 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         WIZGROUPDATA group = *itGroup;
         //
         pEvents->OnSyncProgress(0);
-        pEvents->OnStatus(WizFormatString1(_TR("-------Sync group: %1--------------"), group.strGroupName));
+        pEvents->OnStatus(WizFormatString1(QObject::tr("----------Sync group: %1----------"), group.strGroupName));
         //
         IWizSyncableDatabase* pGroupDatabase = pDatabase->GetGroupDatabase(group);
         if (!pGroupDatabase)
         {
-            pEvents->OnError(WizFormatString1(_T("Cannot open group: %1"), group.strGroupName));
+            pEvents->OnError(WizFormatString1(QObject::tr("Cannot open group: %1"), group.strGroupName));
             continue;
         }
         //
@@ -1950,7 +1960,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         {
             pGroupDatabase->ClearLastSyncError();
             pGroupDatabase->SaveLastSyncTime();
-            pEvents->OnStatus(WizFormatString1(_TR("Sync group %1 done"), group.strGroupName));
+            pEvents->OnStatus(WizFormatString1(QObject::tr("Sync group %1 done"), group.strGroupName));
 
             // sync personal group avatar.  biz group avatar has been processed when get biz info
             if (!group.IsBiz())
@@ -1960,7 +1970,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         else
         {
-            pEvents->OnError(WizFormatString1(_TR("Cannot sync group %1"), group.strGroupName));
+            pEvents->OnError(WizFormatString1(QObject::tr("Cannot sync group %1"), group.strGroupName));
             pEvents->OnSyncProgress(100);
         }
         //
@@ -1968,7 +1978,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     }
     //
     //
-    pEvents->OnStatus(_TR("-------Downloading notes--------------"));
+    pEvents->OnStatus(QObject::tr("----------Downloading notes----------"));
     //
     {
         //pEvents->SetCurrentDatabase(0);
@@ -1976,7 +1986,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         //
         if (!syncPrivate.DownloadObjectData())
         {
-            pEvents->OnText(wizSyncMeesageError, _T("Cannot sync!"));
+            pEvents->OnText(wizSyncMeesageError, QObject::tr("Cannot sync!"));
         }
         else
         {
@@ -2003,7 +2013,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         IWizSyncableDatabase* pGroupDatabase = pDatabase->GetGroupDatabase(group);
         if (!pGroupDatabase)
         {
-            pEvents->OnError(WizFormatString1(_T("Cannot open group: %1"), group.strGroupName));
+            pEvents->OnError(WizFormatString1(QObject::tr("Cannot open group: %1"), group.strGroupName));
             continue;
         }
         //
@@ -2021,14 +2031,14 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         }
         else
         {
-            pEvents->OnError(WizFormatString1(_TR("Cannot sync group %1"), group.strGroupName));
+            pEvents->OnError(WizFormatString1(QObject::tr("Cannot sync group %1"), group.strGroupName));
             //pEvents->OnSyncProgress(100);
         }
         //
         pDatabase->CloseGroupDatabase(pGroupDatabase);
     }
     //
-    pEvents->OnStatus(_TR("-------Sync done--------------"));
+    pEvents->OnStatus(QObject::tr("----------Sync done----------"));
     //
     return TRUE;
 }
@@ -2058,7 +2068,7 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
     pEvents->OnStatus(_TR("Quick download messages"));
-    CWizKMAccountsServer server(WizService::ApiEntry::syncUrl());
+    CWizKMAccountsServer server(WizService::CommonApiEntry::syncUrl());
     server.SetUserInfo(info);
     /*
     ////获得群组信息////

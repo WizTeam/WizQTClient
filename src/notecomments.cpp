@@ -52,7 +52,7 @@ void NoteCommentsPrivate::loadComments(const QString& strToken)
 {
     QMap<CWizDocumentView*, WIZDOCUMENTDATA>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++) {
-        qDebug() << ApiEntry::commentUrl(strToken, it.value().strKbGUID, it.value().strGUID);
+        qDebug() << CommonApiEntry::commentUrl(strToken, it.value().strKbGUID, it.value().strGUID);
     }
 }
 

@@ -3,27 +3,29 @@
 
 #include <QEventLoop>
 #include <QNetworkReply>
-
+#include <QTimer>
 
 class CWizAutoTimeOutEventLoop : public QEventLoop
 {
     Q_OBJECT
 public:
     explicit CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent = 0);
-//    void setTimeoutWaitSeconds(int seconds);
+    void setTimeoutWaitSeconds(int seconds);
 
 public:
     QNetworkReply::NetworkError error() { return m_error; }
     QString errorString() { return m_errorString; }
     QString result() { return m_result; }
-//    bool timeOut() { return m_timeOut; }
+    bool timeOut() { return m_timeOut; }
 
     int exec(ProcessEventsFlags flags = AllEvents);
 
 public Q_SLOTS:
     void on_replyFinished();
     void on_replyError(QNetworkReply::NetworkError);
-//    void on_timeOut();
+    void on_timeOut();
+    void on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal);
+    void on_uploadProgress(qint64 bytesSent, qint64 bytesTotal);
 
 
 protected:
@@ -33,8 +35,13 @@ protected:
     QString m_result;
     QNetworkReply::NetworkError m_error;
     QString m_errorString;
-//    bool m_timeOut;
-//    int m_timeOutWaitSeconds;
+    bool m_timeOut;
+    int m_timeOutSeconds;
+    qint64 m_downloadBytes;
+    qint64 m_lastDownloadBytes;
+    qint64 m_uploadBytes;
+    qint64 m_lastUploadBytes;
+    QTimer m_timer;
 };
 
 

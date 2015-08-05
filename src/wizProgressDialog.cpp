@@ -20,7 +20,6 @@ CWizProgressDialog::~CWizProgressDialog()
 
 void CWizProgressDialog::setActionString(const QString& strAction)
 {
-    qDebug() << "dialog set action ; " << strAction;
 //    QString elideText = fontMetrics().elidedText(strAction, Qt::ElideRight, ui->progressBar->width());
     ui->labelAction->setText(strAction);
     update();
@@ -28,7 +27,6 @@ void CWizProgressDialog::setActionString(const QString& strAction)
 
 void CWizProgressDialog::setProgress(int nMax, int nCurrent)
 {
-    qDebug() << "dialog set progress : " << nMax << "  current ; " << nCurrent;
     ui->progressBar->setMaximum(nMax);
     ui->progressBar->setValue(nCurrent);
     update();
@@ -36,7 +34,6 @@ void CWizProgressDialog::setProgress(int nMax, int nCurrent)
 
 void CWizProgressDialog::setProgress(QString strObjGUID, int nMax, int nCurrent)
 {
-    qDebug() << "dialog set progress : " << nMax << "  current ; " << nCurrent;
     ui->progressBar->setMaximum(nMax);
     ui->progressBar->setValue(nCurrent);
     update();

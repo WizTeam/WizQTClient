@@ -496,19 +496,16 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     CWizDocumentAttachmentDataArray arrayAttachment;
     db.GetDocumentAttachments(m_data.doc.strGUID, arrayAttachment);
     bool attachModified = false;
-    bool attachUndownload = false;
     for (WIZDOCUMENTATTACHMENTDATAEX attachment : arrayAttachment)
     {
         if (db.IsAttachmentModified(attachment.strGUID))
-            attachModified = true;
-        if (!db.IsAttachmentDownloaded(attachment.strGUID))
-            attachUndownload = true;
+            attachModified = true;        
     }
     if (db.IsDocumentModified(m_data.doc.strGUID) || attachModified)
     {
         strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
     }
-    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID) || attachUndownload)
+    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
     {
         strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
     }
@@ -522,6 +519,12 @@ void CWizDocumentListViewItem::drawSyncStatus(QPainter* p, const QStyleOptionVie
     WizScaleIconSizeForRetina(szPix);
     QRect rcSync(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height() - nMargin,
                  szPix.width(), szPix.height());
+    if (vopt->state & QStyle::State_Selected)
+    {
+        QRect rcClip(vopt->rect.right() - szPix.width() - nMargin, vopt->rect.bottom() - szPix.height(),
+                     szPix.width(), szPix.height());
+        p->setClipRect(rcClip);
+    }
     p->drawPixmap(rcSync, pix);
     p->restore();
 

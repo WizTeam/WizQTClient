@@ -79,10 +79,10 @@ bool CWizIndex::LogDeletedGUIDs(const CWizStdStringArray& arrayGUID, WizObjectTy
     return true;
 }
 
-bool CWizIndex::TagByName(const CString& strName, WIZTAGDATA& data, const CString& strExceptGUID /*= ""*/)
+bool CWizIndex::TagByName(const CString& strName, CWizTagDataArray& arrayTag, const CString& strExceptGUID /*= ""*/)
 {
-	CWizTagDataArray arrayTag;
-    if (!GetAllTags(arrayTag)) {
+    CWizTagDataArray arrayAllTag;
+    if (!GetAllTags(arrayAllTag)) {
 		TOLOG(_T("Failed to get tags!"));
         return false;
 	}
@@ -90,23 +90,29 @@ bool CWizIndex::TagByName(const CString& strName, WIZTAGDATA& data, const CStrin
     CString strFindName = TagDisplayNameToName(strName);
 
     CWizTagDataArray::const_iterator it;
-    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
+    for (it = arrayAllTag.begin(); it != arrayAllTag.end(); it++) {
         if (0 == it->strName.CompareNoCase(strFindName)) {
 			if (0 == strExceptGUID.CompareNoCase(it->strGUID))
 				continue;
 
-			data = *it;
-            return true;
+            arrayTag.push_back(*it);
 		}
 	}
 
-    return false;
+    return !arrayTag.empty();
 }
 
 bool CWizIndex::TagByNameEx(const CString& strName, WIZTAGDATA& data)
 {
-    if (TagByName(strName, data, ""))
-        return true;
+    CWizTagDataArray arrayTag;
+    if (!TagByName(strName, arrayTag, ""))
+        return false;
+
+    for (WIZTAGDATA tag : arrayTag)
+    {
+        if (tag.strParentGUID.IsEmpty())
+            return true;
+    }
 
     return CreateTag(_T(""), strName, _T(""), data);
 }
@@ -297,10 +303,16 @@ bool CWizIndex::CreateTag(const CString& strParentTagGUID,
         return false;
     }
 
-    if (TagByName(strName, data) && data.strParentGUID == strParentTagGUID) {
-        TOLOG1("[WARNING]Tag already exists: %1", data.strName);
-        return false;
-	}
+    CWizTagDataArray arrayTag;
+    if (TagByName(strName, arrayTag)) {
+        for (WIZTAGDATA tag : arrayTag) {
+            if (tag.strParentGUID == strParentTagGUID) {
+                TOLOG1("[WARNING]Tag already exists: %1", tag.strName);
+                data = tag;
+                return false;
+            }
+        }
+    }
 
     data.strKbGUID = kbGUID();
 	data.strGUID = WizGenGUIDLowerCaseLetterOnly();
@@ -547,13 +559,15 @@ bool CWizIndex::ModifyTag(WIZTAGDATA& data)
     if (data.strName.IsEmpty()) {
         TOLOG("ModifyTag: Failed to modify tag: name is empty");
         return false;
-	}
+    }
 
-    WIZTAGDATA dataTemp;
-    if (TagByName(data.strName, dataTemp, data.strGUID)) {
-        if (dataTemp.strParentGUID == data.strParentGUID) {
-            TOLOG1("ModifyTag: Tag already exists with the same parent: %1", data.strName);
-            return false;
+    CWizTagDataArray arrayTag;
+    if (TagByName(data.strName, arrayTag, data.strGUID)) {
+        for (WIZTAGDATA tagItem : arrayTag) {
+            if (tagItem.strParentGUID == data.strParentGUID) {
+                TOLOG1("ModifyTag: Tag already exists with the same parent: %1", data.strName);
+                return false;
+            }
         }
     }
 
@@ -826,14 +840,14 @@ void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
                                            const std::map<CString, int>& mapDocumentIndex,
                                            const CString& strTagName,
                                            int nShareFlags)
-{
-    WIZTAGDATA dataShare;
-    if (!TagByName(strTagName, dataShare))
-        return;
-
+{        
     CWizTagDataArray arrayTag;
-    GetAllChildTags(dataShare.strGUID, arrayTag);
-    arrayTag.push_back(dataShare);
+    TagByName(strTagName, arrayTag);
+
+    for (WIZTAGDATA dataShare : arrayTag) {
+        GetAllChildTags(dataShare.strGUID, arrayTag);
+    }
+
 
     CWizStdStringArray arrayTagGUID;
     CWizTagDataArray::const_iterator it;

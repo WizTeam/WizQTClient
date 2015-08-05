@@ -19,6 +19,7 @@ class QShortcut;
 #define WIZACTION_GLOBAL_GOBACK  "actionGoBack"
 #define WIZACTION_GLOBAL_SAVE_AS_PDF        "actionSaveAsPDF"
 #define WIZACTION_GLOBAL_SAVE_AS_HTML        "actionSaveAsHtml"
+#define WIZACTION_GLOBAL_IMPORT_FILE            "actionImportFile"
 #define WIZACTION_GLOBAL_PRINT        "actionPrint"
 #define WIZACTION_GLOBAL_PRINT_MARGIN        "actionPrintMargin"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"

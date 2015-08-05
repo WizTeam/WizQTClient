@@ -65,7 +65,7 @@ public:
     bool DeleteTagDocuments(const WIZTAGDATA& data, bool bReset);
 
     // Query tags by name
-    bool TagByName(const CString& strName, WIZTAGDATA& data, const CString& strExceptGUID = "");
+    bool TagByName(const CString& strName, CWizTagDataArray& arrayTag, const CString& strExceptGUID = "");
     bool TagByNameEx(const CString& strName, WIZTAGDATA& data);
     bool TagArrayByName(const CString& strName, CWizTagDataArray& arrayTag);
 

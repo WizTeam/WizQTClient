@@ -95,9 +95,9 @@ void CWizIAPDialog::loadUserInfo()
 {
     setWindowTitle(tr("Account settings"));
    ui->stackedWidget->setCurrentIndex(0);
-   QString extInfo = WizService::ApiEntry::appstoreParam(false);
+   QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
    QString strToken = WizService::Token::token();
-   QString strUrl = WizService::ApiEntry::standardCommandUrl("user_info", strToken, extInfo);
+   QString strUrl = WizService::CommonApiEntry::standardCommandUrl("user_info", strToken, extInfo);
    qDebug() << "load user info : " << strUrl;
    ui->webView->load(QUrl(strUrl));
 }
@@ -189,7 +189,7 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
 #else
     strPlat = "linux";
 #endif
-    QString asServerUrl = WizService::ApiEntry::asServerUrl();
+    QString asServerUrl = WizService::CommonApiEntry::asServerUrl();
     QString checkUrl = asServerUrl + "/a/pay2/ios";
 //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
 //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";

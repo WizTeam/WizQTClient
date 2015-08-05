@@ -2036,7 +2036,7 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                     newVer = std::max<__int64>(v, newVer);
                     //
                     TOLOG1("[Sync] User avatar changed : %1", it->second);
-                    WizService::AvatarHost::reload(it->second);
+                    WizService::AvatarHost::deleteAvatar(it->second);
                 }
             }
             //
@@ -3147,6 +3147,11 @@ bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, 
     {
         WIZDOCUMENTDATA data;
         if (DocumentFromGUID(strGUID, data)) {
+            CString strZipFileName = GetDocumentFileName(strGUID);
+            if (PathFileExists(strZipFileName))
+            {
+                WizDeleteFile(strZipFileName);
+            }
             return DeleteDocument(data, bLog);
         }
         return true;
@@ -3155,6 +3160,11 @@ bool CWizDatabase::DeleteObject(const QString& strGUID, const QString& strType, 
     {
         WIZDOCUMENTATTACHMENTDATA data;
         if (AttachmentFromGUID(strGUID, data)) {
+            CString strZipFileName = GetAttachmentFileName(strGUID);
+            if (PathFileExists(strZipFileName))
+            {
+                WizDeleteFile(strZipFileName);
+            }
             return DeleteAttachment(data, bLog, false);
         }
         return true;
@@ -3263,10 +3273,9 @@ bool CWizDatabase::UpdateSyncObjectLocalData(const WIZOBJECTDATA& data)
     {
         WIZDOCUMENTDATA document;
         if (!DocumentFromGUID(data.strObjectGUID, document)) {
-            qDebug() << "\n[Fatal] update object data failed, can't find database record!\n";
+            qCritical() << "Update object data failed, can't find database record!\n";
             return false;
         }
-
 
         CString strFileName = GetObjectFileName(data);
         if (!::WizSaveDataToFile(strFileName, data.arrayData))

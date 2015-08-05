@@ -94,6 +94,7 @@ void CWizDownloadObjectRunnable::run()
     //
     Q_EMIT downloadDone(m_data.strObjectGUID, ret);
 }
+
 bool CWizDownloadObjectRunnable::downloadNormalData()
 {
     WIZUSERINFO info;
@@ -112,11 +113,9 @@ bool CWizDownloadObjectRunnable::downloadNormalData()
 
 
 
-    m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
+    return m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
                                                   WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
-                                                  m_data.arrayData);
-
-    return true;
+                                                  m_data.arrayData);    
 }
 
 bool CWizDownloadObjectRunnable::downloadDocument()
@@ -176,7 +175,7 @@ bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
 
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
+    info.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

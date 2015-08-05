@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "utils/stylehelper.h"
+#include "utils/logger.h"
 #include "share/wizmisc.h"
 #include "share/wizDatabase.h"
 #include "share/wizDatabaseManager.h"
@@ -111,7 +112,7 @@ void CWizTagBar::on_removeTagRequest(const QString& guid)
     }
     else
     {
-        qDebug() << "[Tag]Can not find tag : " << guid;
+        qWarning() << "[Tag]Can not find tag : " << guid;
     }
 }
 
@@ -128,7 +129,7 @@ void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
         // qDebug() << "item guid : " << it.first << " item : " << it.second;
         if (guid == it.first)
         {
-            qDebug() << "[Tag]Try to add a same tag";
+            qInfo() << "[Tag]Try to add a same tag";
             return;
         }
 
@@ -238,7 +239,7 @@ void CWizTagBar::on_deleteTagRequest(const QString& guid)
     }
     else
     {
-        qDebug() << "[Tag]Can not delete tag : " << guid;
+        qWarning() << "[Tag]Can not delete tag : " << guid;
     }
 }
 
@@ -254,7 +255,7 @@ void CWizTagBar::on_renameTagRequest(const QString& guid, const QString& newName
     }
     else
     {
-        qDebug() << "[Tag]Can not find tag : " << guid;
+        qWarning() << "[Tag]Can not find tag : " << guid;
     }
 }
 
@@ -277,12 +278,21 @@ void CWizTagBar::on_lineEditReturnPressed()
     for (it = sl.begin(); it != sl.end(); it++) {
         CString strTagName = *it;
 
-        WIZTAGDATA tag;
-
         // only create tag for unique name
-        if (db.TagByName(strTagName, tag)) {
-            qDebug() << QString("Tag name already exist: %1").arg(strTagName);
-            //
+        WIZTAGDATA tag;
+        CWizTagDataArray arrayTag;
+        db.TagByName(strTagName, arrayTag);
+        for (WIZTAGDATA tagItem : arrayTag)
+        {
+            if (tagItem.strParentGUID.IsEmpty())
+            {
+                tag = tagItem;
+                break;
+            }
+        }
+        if (!tag.strGUID.IsEmpty())
+        {
+            qInfo() << QString("Tag name already exist: %1").arg(strTagName);
              doc.AddTag(tag);
         }
         else

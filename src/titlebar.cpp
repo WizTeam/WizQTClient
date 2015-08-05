@@ -670,7 +670,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     commentWidget->showLocalProgress();
     QString strKbGUID = noteView()->note().strKbGUID;
     QString strGUID = noteView()->note().strGUID;
-    m_commentsUrl =  WizService::ApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+    m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
 
     if (m_commentsUrl.isEmpty())
@@ -684,8 +684,8 @@ void TitleBar::onTokenAcquired(const QString& strToken)
         commentWidget->web()->load(m_commentsUrl);
     }
 
-    QString kUrl = WizService::ApiEntry::kUrlFromGuid(strToken, strKbGUID);
-    QString strCountUrl = WizService::ApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
+    QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
+    QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
 
     WizService::AsyncApi* api = new WizService::AsyncApi(this);
     connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));

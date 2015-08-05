@@ -22,7 +22,7 @@ QString WizKMGetDocumentEditStatusURL()
     if (strUrl.isEmpty())
     {
         QString strCmd = "note_edit_status_url";
-        QString strRequestUrl = WizService::ApiEntry::standardCommandUrl(strCmd);
+        QString strRequestUrl = WizService::CommonApiEntry::standardCommandUrl(strCmd);
 
         QNetworkAccessManager* net = new QNetworkAccessManager();
         QNetworkReply* reply = net->get(QNetworkRequest(strRequestUrl));
@@ -453,7 +453,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
         userInfo.strDatabaseServer = group.strDatabaseServer;
         if (userInfo.strDatabaseServer.isEmpty())
         {
-            userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+            userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
     CWizKMDatabaseServer server(userInfo, NULL);
@@ -634,7 +634,7 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
         userInfo.strDatabaseServer = group.strDatabaseServer;
         if (userInfo.strDatabaseServer.isEmpty())
         {
-            userInfo.strDatabaseServer = WizService::ApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+            userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
     CWizKMDatabaseServer server(userInfo, NULL);

@@ -99,7 +99,12 @@ void MarkdownPlugin::render(QWebEnginePage* page)
 #else
 void MarkdownPlugin::render(QWebFrame* frame)
 {
-    Q_ASSERT(frame);
+//    Q_ASSERT(frame);
+    if (!frame)
+    {
+        qCritical() << "can not find web frame.";
+        return;
+    }
 
     QString strExec = getExecString();
     frame->evaluateJavaScript(strExec);

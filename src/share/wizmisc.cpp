@@ -2215,7 +2215,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2454,7 +2454,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = WizService::ApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2462,7 +2462,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
 {
     QStringList fileTypes;
-    fileTypes << ".xls" << ".xlsx" << ".ppt" << ".pptx";
+    fileTypes << ".xls" << ".xlsx";
     return fileTypes.contains(doc.strFileType);
 }
 
@@ -2552,7 +2552,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
             return false;
 
         QEventLoop loop;
-#if QT_VERSION >= 0x050000
+#if QT_VERSION >= 0x050000        
         QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
             QObject::disconnect(downloaderHost, 0, 0, 0);
             loop.quit();

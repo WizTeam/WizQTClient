@@ -29,12 +29,12 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
 
     m_labelCreatedTime = new QLabel(this);
     m_labelModifiedTime = new QLabel(this);
-    m_labelAuthor = new QLabel(this);
+    m_labelOwner = new QLabel(this);
     m_labelSize = new QLabel(this);
 
     layout->addWidget(m_labelCreatedTime);
     layout->addWidget(m_labelModifiedTime);
-    layout->addWidget(m_labelAuthor);
+    layout->addWidget(m_labelOwner);
     layout->addWidget(m_labelSize);
     layout->addStretch();
 }
@@ -48,12 +48,21 @@ void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
     m_labelModifiedTime->setText(strModifiedTime);
 
 
-    QString strAuthor = m_app.databaseManager().db(data.strKbGUID).GetDocumentAuthorAlias(data);
-    strAuthor = QObject::tr("Author: ") + (strAuthor.isEmpty() ? data.strOwner : strAuthor);
-    strAuthor = fontMetrics().elidedText(strAuthor, Qt::ElideRight, 150);
-    m_labelAuthor->setText(strAuthor);
+    CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
+    if (db.IsGroup())
+    {
+        QString strOwner = db.GetDocumentOwnerAlias(data);
+        strOwner = QObject::tr("Owner: ") + (strOwner.isEmpty() ? data.strOwner : strOwner);
+        strOwner = fontMetrics().elidedText(strOwner, Qt::ElideRight, 150);
+        m_labelOwner->setVisible(true);
+        m_labelOwner->setText(strOwner);
+    }
+    else
+    {
+        m_labelOwner->setVisible(false);
+    }
 
-    QString strFile = CWizDatabaseManager::instance()->db(data.strKbGUID).GetDocumentFileName(data.strGUID);
+    QString strFile = db.GetDocumentFileName(data.strGUID);
     QString strSize = QObject::tr("Size: ") + ::WizGetFileSizeHumanReadalbe(strFile);
     m_labelSize->setText(strSize);
 }

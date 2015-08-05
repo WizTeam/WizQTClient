@@ -105,6 +105,10 @@ CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent) : QWebPage(par
 {
     action(QWebPage::Undo)->setShortcut(QKeySequence());
     action(QWebPage::Redo)->setShortcut(QKeySequence());
+    action(QWebPage::Copy)->setShortcut(QKeySequence());
+    action(QWebPage::Cut)->setShortcut(QKeySequence());
+    action(QWebPage::Paste)->setShortcut(QKeySequence());
+    action(QWebPage::SelectAll)->setShortcut(QKeySequence());
 }
 
 void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool checked)
@@ -146,7 +150,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     }
     else if (mime->hasHtml())   // special process for xcode
     {
-        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
+//        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
         QString strHtml = mime->html();
         if (WizGetBodyContentFromHtml(strHtml, true))
         {
@@ -306,12 +310,17 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         saveDocument(view()->note(), false);
         return;
     }
-    else if (event->key() == Qt::Key_A && event->modifiers() == Qt::ControlModifier && !isEditing())
+#if QT_VERSION >= 0x050402
+    //FIXME: QT5.4.2之后无法触发全局的保存按钮
+    else if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier)
     {
-        //阅读模式下selectall无法触发，强制触发阅读模式下的selectall。
-        emit selectAllKeyPressed();
+        WizGetAnalyzer().LogAction("paste");
+
+        setPastePlainTextEnable(false);
+        triggerPageAction(QWebPage::Paste);
         return;
     }
+#endif
     else if (event->key() == Qt::Key_Tab)
     {
         //set contentchanged
@@ -360,7 +369,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         }
     }
 
-    //special handled for qt4,case capslock doesn't work
     QWebView::keyPressEvent(event);
 #endif
 
@@ -548,7 +556,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                     {
                         QString strHtml, strLink;
                         db.DocumentToHtmlLink(document, strHtml, strLink);
-                        strLinkHtml += "<p>" + strHtml + "</p>";
+                        strLinkHtml += "<span>&nbsp;" + strHtml + "&nbsp;</span>";
                     }
                 }
             }
@@ -1290,7 +1298,9 @@ void CWizDocumentWebView::viewDocumentWithoutEditor()
 
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
+
 //    emit viewDocumentFinished();
+    onNoteLoadFinished();
 }
 
 void CWizDocumentWebView::onNoteLoadFinished()
@@ -1821,8 +1831,7 @@ bool CWizDocumentWebView::editorCommandExecutePlainText()
 
     setContentsChanged(true);
     m_strCurrentNoteHtml = strText;
-    QString strExec = QString("viewCurrentNote();");
-    return page()->mainFrame()->evaluateJavaScript(strExec).toBool();
+    return page()->mainFrame()->evaluateJavaScript("updateEditorHtml(true);").toBool();
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
@@ -2112,10 +2121,7 @@ void CWizDocumentWebView::saveAsPDF()
         printer.setColorMode(QPrinter::Color);
         printer.setOutputFileName(strFileName);
         //
-        frame->print(&printer);
-
-        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-        analyzer.LogAction("saveAsPDF");
+        frame->print(&printer);        
     }
 }
 
@@ -2123,10 +2129,7 @@ void CWizDocumentWebView::saveAsHtml(const QString& strDirPath)
 {
     const WIZDOCUMENTDATA& doc = view()->note();
     CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.ExportToHtmlFile(doc, strDirPath);
-
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("saveAsHtml");
+    db.ExportToHtmlFile(doc, strDirPath);    
 }
 
 void CWizDocumentWebView::printDocument()
@@ -2156,10 +2159,7 @@ void CWizDocumentWebView::printDocument()
         dlg.setWindowTitle(QObject::tr("Print Document"));
         if(dlg.exec() == QDialog::Accepted)
         {
-            frame->print(&printer);
-
-            CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-            analyzer.LogAction("print");
+            frame->print(&printer);            
         }
     }
 }

@@ -1,6 +1,7 @@
 #ifndef WIZSERVICE_APIENTRY_P_H
 #define WIZSERVICE_APIENTRY_P_H
 
+/*
 #include <QObject>
 #include <QMap>
 
@@ -68,6 +69,6 @@ private:
 
 } // namespace Internal
 } // namespace WizService
-
+*/
 
 #endif // WIZSERVICE_APIENTRY_P_H

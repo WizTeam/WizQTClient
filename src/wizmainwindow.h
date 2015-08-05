@@ -273,6 +273,7 @@ public Q_SLOTS:
     void on_actionFindReplace_triggered();
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
+    void on_actionImportFile_triggered();
     void on_actionPrint_triggered();
     void on_actionPrintMargin_triggered();
 

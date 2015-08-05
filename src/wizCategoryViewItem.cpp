@@ -18,6 +18,7 @@
 #include "wizmainwindow.h"
 #include "wizDocumentTransitionView.h"
 #include "share/wizObjectDataDownloader.h"
+#include "share/wizObjectOperator.h"
 #include "wizProgressDialog.h"
 
 #include "wizdef.h"
@@ -433,6 +434,9 @@ QString CWizCategoryViewMessageItem::unreadString() const
 
 bool CWizCategoryViewMessageItem::hitTestUnread()
 {
+    if (m_nUnread == 0)
+        return false;
+
     CWizCategoryBaseView* view = dynamic_cast<CWizCategoryBaseView*>(treeWidget());
     Q_ASSERT(view);
 
@@ -540,38 +544,46 @@ bool CWizCategoryViewShortcutRootItem::accept(CWizDatabase& /*db*/, const WIZDOC
     return false;
 }
 
-void CWizCategoryViewShortcutRootItem::drop(const WIZDOCUMENTDATA& doc, bool /*forceCopy*/)
+void CWizCategoryViewShortcutRootItem::drop(const CWizDocumentDataArray& arrayDocument, bool /*forceCopy*/)
 {
-    for (int i = 0; i < childCount(); i++)
+    bool changed = false;
+    for (WIZDOCUMENTDATA document : arrayDocument)
     {
-        CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
-        if (pItem)
+        for (int i = 0; i < childCount(); i++)
         {
-            if (pItem->guid() == doc.strGUID)
-                return;
+            CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
+            if (pItem)
+            {
+                if (pItem->guid() == document.strGUID)
+                    return;
+            }
         }
+
+        if (isContainsPlaceHoldItem())
+            removePlaceHoldItem();
+
+        bool isEncrypted = document.nProtected == 1;
+        CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
+                                                                               document.strTitle, CWizCategoryViewShortcutItem::Document,
+                                                                               document.strKbGUID, document.strGUID, document.strLocation, isEncrypted);
+        addChild(pItem);
+        sortChildren(0, Qt::AscendingOrder);
+        changed = true;
     }
 
-    if (isContainsPlaceHoldItem())
-        removePlaceHoldItem();
-
-    bool isEncrypted = doc.nProtected == 1;
-    CWizCategoryViewShortcutItem *pItem = new CWizCategoryViewShortcutItem(m_app,
-                                                                           doc.strTitle, CWizCategoryViewShortcutItem::Document,
-                                                                           doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
-    addChild(pItem);
-    sortChildren(0, Qt::AscendingOrder);
-
+    if (changed)
+    {
 #if QT_VERSION < 0x050400
-    CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
-    QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
-#else
-    QTimer::singleShot(200, [this]() {
         CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
-        Q_ASSERT(categoryView);
-        categoryView->saveShortcutState();
-    });
+        QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
+#else
+        QTimer::singleShot(200, [this]() {
+            CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
+            Q_ASSERT(categoryView);
+            categoryView->saveShortcutState();
+        });
 #endif
+    }
 }
 
 void CWizCategoryViewShortcutRootItem::drop(const CWizCategoryViewItemBase* pItem)
@@ -839,48 +851,41 @@ bool CWizCategoryViewFolderItem::acceptDrop(const CWizCategoryViewItemBase* pIte
     return NULL != item;
 }
 
-void CWizCategoryViewFolderItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+void CWizCategoryViewFolderItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
-   if (!acceptDrop(data))
-       return;
+    CWizDocumentDataArray arrayOp;
+    bool needCopy = false;
+    for (WIZDOCUMENTDATAEX doc : arrayDocument)
+    {
+        if (!acceptDrop(doc))
+            continue;
 
-   CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
+        arrayOp.push_back(doc);
+        if (forceCopy || kbGUID() != doc.strKbGUID)
+        {
+            needCopy = true;
+        }
+    }
 
-   Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-   CWizFolder folder(myDb, location());
-   if (!forceCopy && kbGUID() == data.strKbGUID)
-   {
-       CWizDocument doc(myDb, data);
-       doc.makeSureObjectDataExists(window->downloaderHost());
-       doc.MoveTo(&folder);
-   }
-   else
-   {
-       CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-       //QString strLocation = (location() == LOCATION_DELETED_ITEMS) ? LOCATION_DEFAULT : location();
-       QString strLocation = location();
-       WIZTAGDATA tagEmpty;
-       QString strNewDocGUID;
-       CWizDocument doc(sourceDb, data);
-       doc.makeSureObjectDataExists(window->downloaderHost());
-       doc.CopyTo(myDb, &folder, true, true, window->downloaderHost());
+    if (arrayOp.empty())
+        return;
 
-       /*
-       sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
-
-       // copy document tag for personal db
-       if (!sourceDb.IsGroup())
-       {
-           CWizStdStringArray arrayTagGUID;
-           sourceDb.GetDocumentTags(data.strGUID, arrayTagGUID);
-           WIZDOCUMENTDATA newDoc;
-           if (myDb.DocumentFromGUID(strNewDocGUID, newDoc))
-           {
-               myDb.SetDocumentTags(newDoc, arrayTagGUID);
-           }
-       }
-       */
-   }
+    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
+    CWizProgressDialog* progress = window->progressDialog();
+    documentOperator->bindSignalsToProgressDialog(progress);
+    if (needCopy)
+    {
+        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(location()));
+        documentOperator->copyDocumentsToPersonalFolder(arrayOp, location(), false, true, window->downloaderHost());
+        progress->exec();
+    }
+    else
+    {
+        progress->setWindowTitle(QObject::tr("Move note to %1").arg(location()));
+        documentOperator->moveDocumentsToPersonalFolder(arrayOp, location(), window->downloaderHost());
+        progress->exec();
+    }    
 }
 
 void CWizCategoryViewFolderItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -1046,22 +1051,24 @@ bool CWizCategoryViewTagItem::acceptDrop(const CWizCategoryViewItemBase* pItem) 
     return pItem && pItem->type() == Category_TagItem;
 }
 
-void CWizCategoryViewTagItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+void CWizCategoryViewTagItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
     Q_UNUSED(forceCopy);
 
-    if (!acceptDrop(data)) {
-        return;
-    }
-
-    // skip
     CWizDatabase& db = CWizDatabaseManager::instance()->db(kbGUID());
-    QString strTagGUIDs = db.GetDocumentTagGUIDsString(data.strGUID);
-    if (strTagGUIDs.indexOf(m_tag.strGUID) != -1)
-        return;
+    for (WIZDOCUMENTDATA document : arrayDocument)
+    {
+        if (!acceptDrop(document))
+            continue;
 
-    CWizDocument doc(db, data);
-    doc.AddTag(tag());
+        // skip
+        QString strTagGUIDs = db.GetDocumentTagGUIDsString(document.strGUID);
+        if (strTagGUIDs.indexOf(m_tag.strGUID) != -1)
+            continue;
+
+        CWizDocument doc(db, document);
+        doc.AddTag(tag());
+    }
 }
 
 void CWizCategoryViewTagItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -1503,45 +1510,52 @@ bool CWizCategoryViewGroupRootItem::acceptDrop(const CWizCategoryViewItemBase* p
     return item && item->kbGUID() == kbGUID();
 }
 
-void CWizCategoryViewGroupRootItem::drop(const WIZDOCUMENTDATA &data, bool forceCopy)
+bool CWizCategoryViewGroupRootItem::acceptDrop(const QString& urls) const
 {
-    if (!acceptDrop(data))
+    Q_UNUSED(urls);
+    CWizDatabase& db = m_app.databaseManager().db(kbGUID());
+
+    return WIZ_USERGROUP_AUTHOR >= db.permission();
+}
+
+void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
+{
+    CWizDocumentDataArray arrayOp;
+    bool needCopy = false;
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        if (!acceptDrop(doc))
+            continue;
+
+        if (forceCopy || doc.strKbGUID != m_strKbGUID)
+            needCopy = true;
+
+        arrayOp.push_back(doc);
+    }
+
+    if (arrayOp.empty())
         return;
 
-    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
-
     Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    if (!forceCopy && data.strKbGUID == m_strKbGUID)
-    {
-        CWizDocument doc(targetDb, data);
-        doc.makeSureObjectDataExists(window->downloaderHost());
-        if (data.strLocation == LOCATION_DELETED_ITEMS)
-        {
-            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
-            doc.MoveTo(&folder);
-        }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
+    CWizProgressDialog* progress = window->progressDialog();
+    documentOperator->bindSignalsToProgressDialog(progress);
 
-        CWizTagDataArray arrayTag;
-        targetDb.GetDocumentTags(data.strGUID, arrayTag);
-        if (arrayTag.size() > 0)
-        {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
-            {
-                doc.RemoveTag(*it);
-            }
-        }
+    if (needCopy)
+    {
+        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
+        WIZTAGDATA tag;
+        tag.strKbGUID = m_strKbGUID;
+        documentOperator->copyDocumentsToGroupFolder(arrayOp, tag, false, window->downloaderHost());
+        progress->exec();
     }
     else
     {
-        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = targetDb.GetDefaultNoteLocation();
-        QString strNewDocGUID;
-        WIZTAGDATA tagEmpty;
-//        sourceDb.CopyDocumentTo(data.strGUID, targetDb, strLocation, tagEmpty, strNewDocGUID, window->downloaderHost());
-
-        CWizDocument doc(sourceDb, data);
-        doc.makeSureObjectDataExists(window->downloaderHost());
-        doc.CopyTo(targetDb, tagEmpty, true, window->downloaderHost());
+        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
+        WIZTAGDATA tag;
+        tag.strKbGUID = m_strKbGUID;
+        documentOperator->moveDocumentsToGroupFolder(arrayOp, tag, window->downloaderHost());
+        progress->exec();
     }
 }
 
@@ -1797,46 +1811,48 @@ bool CWizCategoryViewGroupItem::acceptDrop(const WIZDOCUMENTDATA& data) const
     return false;
 }
 
-void CWizCategoryViewGroupItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+bool CWizCategoryViewGroupItem::acceptDrop(const QString& urls) const
 {
-    if (!acceptDrop(data))
+    Q_UNUSED(urls);
+    CWizDatabase& db = m_app.databaseManager().db(kbGUID());
+
+    return WIZ_USERGROUP_AUTHOR >= db.permission();
+}
+
+void CWizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
+{
+    CWizDocumentDataArray arrayOp;
+    bool needCopy = false;
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        if (!acceptDrop(doc))
+            continue;
+
+        if (forceCopy || doc.strKbGUID != m_strKbGUID)
+            needCopy = true;
+
+        arrayOp.push_back(doc);
+    }
+
+    if (arrayOp.empty())
         return;
 
-    CWizDatabase& targetDb = CWizDatabaseManager::instance()->db(kbGUID());
-
     Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    if (!forceCopy && data.strKbGUID == m_strKbGUID)
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
+    CWizProgressDialog* progress = window->progressDialog();
+    documentOperator->bindSignalsToProgressDialog(progress);
+
+    if (needCopy)
     {
-        CWizDocument doc(targetDb, data);
-        doc.makeSureObjectDataExists(window->downloaderHost());
-        if (data.strLocation == LOCATION_DELETED_ITEMS)
-        {
-            CWizFolder folder(targetDb, targetDb.GetDefaultNoteLocation());
-            doc.MoveTo(&folder);
-        }
-
-        CWizTagDataArray arrayTag;
-        targetDb.GetDocumentTags(data.strGUID, arrayTag);
-        if (arrayTag.size() > 0)
-        {
-            for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
-            {
-                doc.RemoveTag(*it);
-            }
-        }
-        doc.AddTag(tag());
-
+        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
+        documentOperator->copyDocumentsToGroupFolder(arrayOp, m_tag, false, window->downloaderHost());
+        progress->exec();
     }
     else
     {
-        CWizDatabase& sourceDb = CWizDatabaseManager::instance()->db(data.strKbGUID);
-        QString strLocation = targetDb.GetDefaultNoteLocation();
-        QString strNewDocGUID;
-//        sourceDb.CopyDocumentTo(data.strGUID, myDb, strLocation, m_tag, strNewDocGUID, window->downloaderHost());
-
-        CWizDocument doc(sourceDb, data);
-        doc.makeSureObjectDataExists(window->downloaderHost());
-        doc.CopyTo(targetDb, m_tag, true, window->downloaderHost());
+        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
+        documentOperator->moveDocumentsToGroupFolder(arrayOp, m_tag, window->downloaderHost());
+        progress->exec();
     }
 }
 
@@ -1922,19 +1938,27 @@ bool CWizCategoryViewTrashItem::acceptDrop(const CWizCategoryViewItemBase* pItem
     return false;
 }
 
-void CWizCategoryViewTrashItem::drop(const WIZDOCUMENTDATA& data, bool forceCopy)
+void CWizCategoryViewTrashItem::drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy)
 {
-    if (!acceptDrop(data))
+    CWizDocumentDataArray arrayOp;
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        if (!acceptDrop(doc))
+            continue;
+
+        arrayOp.push_back(doc);
+    }
+
+    if (arrayOp.empty())
         return;
 
-    CWizDatabase& myDb = CWizDatabaseManager::instance()->db(kbGUID());
-
-    if (!forceCopy && kbGUID() == data.strKbGUID)
-    {
-//        CWizFolder folder(myDb, location());
-        CWizDocument doc(myDb, data);
-        doc.Delete();
-    }
+    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
+    CWizProgressDialog* progress = window->progressDialog();
+    documentOperator->bindSignalsToProgressDialog(progress);
+    progress->setWindowTitle(QObject::tr("Delete note"));
+    documentOperator->deleteDocuments(arrayOp);
+    progress->exec();
 }
 
 

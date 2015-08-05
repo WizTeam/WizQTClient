@@ -1040,7 +1040,7 @@ void PluginManagerPrivate::shutdown()
     }
     deleteAll();
     if (!allObjects.isEmpty())
-        qDebug() << "There are" << allObjects.size() << "objects left in the plugin manager pool: " << allObjects;
+        qWarning() << "There are" << allObjects.size() << "objects left in the plugin manager pool: " << allObjects;
 }
 
 /*!

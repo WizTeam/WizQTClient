@@ -127,15 +127,15 @@ protected Q_SLOTS:
                                                     const QString& strAttachFile);
     void on_dragHovered_timeOut();
 
-private:
+protected:
     QPoint m_hitPos;
     bool m_bDragHovered;
     QPoint m_dragHoveredPos;
     CWizDocumentDataArray m_dragDocArray;
+    bool m_dragUrls;
     QTimer* m_dragHoveredTimer;
-    CWizCategoryViewItemBase* m_dragHoveredItem;
-
     CWizCategoryViewItemBase* m_dragItem;
+    CWizCategoryViewItemBase* m_dragHoveredItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     CWizScrollBar* m_vScroll;
@@ -411,6 +411,7 @@ public Q_SLOTS:
     void on_action_emptyTrash();
 
     void on_itemSelectionChanged();
+    void on_itemChanged(QTreeWidgetItem * item, int column);
     void on_itemClicked(QTreeWidgetItem *item, int column);
 
     void updateGroupsData();
@@ -501,41 +502,44 @@ private:
     void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder,
                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
     void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
+    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder,
                                             CWizProgressDialog* progress);
 
-    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     //
     void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder,
-                                         const QString& targetParentFolder, bool keepDocTime, CWizProgressDialog* progress,
+    void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
                                          CWizObjectDataDownloaderHost* downloader);
 
-    void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder,
-                                         const WIZTAGDATA& targetFolder, bool keepDocTime, CWizProgressDialog* progress,
+    void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                      bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
                                       CWizObjectDataDownloaderHost* downloader);
     //
     void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
                             CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     void copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
-                                            bool keepDocTime, bool keepTag, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                            bool keepDocTime, bool keepTag, bool combineFolder,
+                                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
 
     void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
-                                         bool keepDocTime, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    //
+    void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
@@ -548,11 +552,19 @@ private:
                                 QTreeWidgetItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
-
+    bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
+    bool renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);
     void removeShortcut(CWizCategoryViewItemBase* shortcut);
+
+    //
+    QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name);
+    bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
+    bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
+
+    bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
 
 private:
     QPointer<QMenu> m_menuShortcut;

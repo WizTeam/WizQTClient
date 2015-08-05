@@ -102,6 +102,19 @@ protected Q_SLOTS:
     void on_editor_cut_triggered();
     void on_editor_copy_triggered();
     void on_editor_paste_triggered();
+    void on_editor_bold_triggered();
+    void on_editor_italic_triggered();
+    void on_editor_underline_triggered();
+    void on_editor_strikethrough_triggered();
+    void on_editor_insertLink_triggered();
+    void on_editor_editLink_triggered();
+    void on_editor_removeLink_triggered();
+    void on_editor_insertTable_triggered();
+    void on_editor_deleteTable_triggered();
+    void on_editor_justifyLeft_triggered();
+    void on_editor_justifyCenter_triggered();
+    void on_editor_justifyRight_triggered();
+
 
     void on_comboParagraph_indexChanged(int index);
     void on_comboFontFamily_indexChanged(const QString& strFamily);

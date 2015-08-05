@@ -109,7 +109,7 @@ void CWizMobileXmlProcesser::processXML(const QByteArray& datagram)
         }
     }
     if (xml.hasError()) {
-        qDebug() << "process xml failed : " << xml.errorString();
+        qWarning() << "process xml failed : " << xml.errorString();
     }
     xml.clear();
 }
