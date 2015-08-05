@@ -842,6 +842,7 @@ void MainWindow::initMenuBar()
     m_actions->actionFromName(WIZCATEGORY_OPTION_QUICKSEARCH)->setChecked(checked);
     checked = m_category->isSectionVisible(Section_Folders);
     m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setChecked(checked);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setEnabled(false);
     checked = m_category->isSectionVisible(Section_Tags);
     m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setChecked(checked);
     checked = m_category->isSectionVisible(Section_BizGroups);
@@ -3184,9 +3185,9 @@ void MainWindow::on_message_itemSelectionChanged()
                 if (li.size() == 2)
                 {
                     QList<int> lin;
-                    const int COMMENT_FRAME_WIDTH = 310;
-                    lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
-                    lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+                    const int COMMENT_FRAME_WIDTH = 315;
+                    lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
+                    lin.push_back(COMMENT_FRAME_WIDTH);
                     splitter->setSizes(lin);
                     commentWidget->show();
                 }

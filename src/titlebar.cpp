@@ -556,7 +556,7 @@ bool isNetworkAccessible()
     //return man.isOnline();
 }
 
-#define COMMENT_FRAME_WIDTH 310
+#define COMMENT_FRAME_WIDTH 315
 
 void TitleBar::onCommentsButtonClicked()
 {
