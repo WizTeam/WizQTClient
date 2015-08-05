@@ -4053,6 +4053,7 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
 //                          "DOCUMENT_LOCATION='%3'").arg(TABLE_NAME_WIZ_DOCUMENT)
 //                          .arg(strNewLocation).arg(strOldLocation);
 //    bool result = ExecSQL(sql);
+    qDebug() << "update location from : " << strOldLocation << " to : " << strNewLocation;
 
     CWizDocumentDataArray docArray;
     if (!GetDocumentsByLocation(strOldLocation, docArray, true))

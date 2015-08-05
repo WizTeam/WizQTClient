@@ -1003,6 +1003,7 @@ bool CWizCategoryView::isCombineSameNameFolder(const QString& parentFolder, cons
 
 bool CWizCategoryView::combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem)
 {
+    qDebug() << "merge group folder : " << sourceItem->text(0);
     CWizDatabase& db = m_dbMgr.db(sourceItem->kbGUID());
     CWizDocumentDataArray arrayDocument;
     if (db.GetDocumentsByTag(sourceItem->tag(), arrayDocument))
@@ -3619,11 +3620,11 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
         {
             findFolder(childLocation, true, true);
         }
-    }
 
-    QString str = getAllFoldersPosition();
-    db.SetFoldersPos(str, -1);
-    db.SetFoldersPosModified();
+        QString str = getAllFoldersPosition();
+        db.SetFoldersPos(str, -1);
+        db.SetFoldersPosModified();
+    }
 
     emit categoryItemPositionChanged(db.kbGUID());
 }
@@ -5360,6 +5361,7 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
 
 void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
 {
+    qDebug() << "category item position changed, try to update item position data, item text : " << pItem->text(0);
     CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
     if (db.IsGroup())
     {
