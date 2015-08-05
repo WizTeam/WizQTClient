@@ -14176,7 +14176,7 @@ UE.plugins['paste'] = function () {
         //trace:717 隐藏的span不能得到top
         //bk.start.innerHTML = '&nbsp;';
         bk.start.style.display = '';
-        pastebin.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;left:-1000px;white-space:nowrap;top:" +
+        pastebin.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;left:-1000px;top:" +
             //要在现在光标平行的位置加入，否则会出现跳动的问题
             domUtils.getXY(bk.start).y + 'px';
 
