@@ -560,6 +560,10 @@ private:
     //
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
 
+    //  ask user cipher to copy encrypted notes, after copy need to clear cipher.
+    bool askUserCipherToAccessEncryptedNotes(const QString& sourceFolder);
+    void clearUserCipher();
+
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
                                    bool dropAtTop, bool deleteDragSource);
