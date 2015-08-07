@@ -773,9 +773,13 @@ void MainWindow::restoreStatus()
 
     // main window
     if (geometry.isEmpty()) {
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
-                                        sizeHint(), qApp->desktop()->availableGeometry()
-                                        ));
+        QRect rcDesktop = qApp->desktop()->availableGeometry();
+        QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
+                               rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
+        setGeometry(rcWindow);
+//        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
+//                                        sizeHint(), qApp->desktop()->availableGeometry()
+//                                        ));
     } else {
         restoreGeometry(geometry);
     }
@@ -3177,19 +3181,22 @@ void MainWindow::on_message_itemSelectionChanged()
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
             QWidget* commentWidget = m_doc->commentWidget();
-            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
-            if (splitter)
+            if (!commentWidget->isVisible())
             {
-                QList<int> li = splitter->sizes();
-                Q_ASSERT(li.size() == 2);
-                if (li.size() == 2)
+                QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
+                if (splitter)
                 {
-                    QList<int> lin;
-                    const int COMMENT_FRAME_WIDTH = 315;
-                    lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
-                    lin.push_back(COMMENT_FRAME_WIDTH);
-                    splitter->setSizes(lin);
-                    commentWidget->show();
+                    QList<int> li = splitter->sizes();
+                    Q_ASSERT(li.size() == 2);
+                    if (li.size() == 2)
+                    {
+                        QList<int> lin;
+                        const int COMMENT_FRAME_WIDTH = 315;
+                        lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
+                        lin.push_back(COMMENT_FRAME_WIDTH);
+                        splitter->setSizes(lin);
+                        commentWidget->show();
+                    }
                 }
             }
         }
