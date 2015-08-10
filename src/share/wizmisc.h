@@ -215,6 +215,18 @@ bool WizIsKMURLOpenDocument(const QString& strURL);
 WizKMUrlType GetWizUrlType(const QString& strURL);
 QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
 
+
+struct WizLocalUser {
+    QString strGuid;
+    QString strDataFolderName;
+    QString strUserId;
+    int nUserType;
+};
+
+bool WizGetLocalUsers(QList<WizLocalUser>& userList);
+QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& strGuid);
+
+
 class CWizBufferAlloc
 {
 public:

@@ -83,7 +83,7 @@ private:
 };
 
 
-CWizLoginDialog::CWizLoginDialog(const QString &strLocale, QWidget *parent)
+CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent)
 #ifdef Q_OS_MAC
     : QDialog(parent)
 #else
@@ -97,6 +97,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, QWidget *parent)
     , m_searchingDialog(nullptr)
     , m_oemDownloader(nullptr)
     , m_oemThread(nullptr)
+    , m_userList(localUsers)
 {
 
 #ifdef Q_OS_MAC
@@ -154,7 +155,6 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, QWidget *parent)
     connect(m_menuUsers, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
     connect(m_menuServers, SIGNAL(triggered(QAction*)), SLOT(serverListMenuClicked(QAction*)));
 
-    connect(m_lineEditPassword, SIGNAL(returnPressed()), SLOT(on_btn_login_clicked()));
     connect(m_lineEditNewPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(m_lineEditNewUserName, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
     connect(m_lineEditRepeatPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
@@ -194,7 +194,6 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, QWidget *parent)
     //
     initSateMachine();
 
-    loadLocalUsersInfo();
     loadDefaultUser();
 }
 
@@ -223,6 +222,11 @@ QString CWizLoginDialog::userId() const
     return m_lineEditUserName->text();
 }
 
+QString CWizLoginDialog::loginUserGuid() const
+{
+    return m_loginUserGuid;
+}
+
 QString CWizLoginDialog::password() const
 {
     return m_lineEditPassword->text();
@@ -242,21 +246,22 @@ void CWizLoginDialog::resetUserList()
 {
     m_menuUsers->clear();
 
-    for (UserData user : m_userList)
+    for (WizLocalUser user : m_userList)
     {
         if (user.nUserType == m_serverType || (WizServer == m_serverType && user.nUserType == 0))
         {
-            m_menuUsers->addAction(user.strUserId);
+            QAction* action = m_menuUsers->addAction(user.strUserId);
+            action->setData(user.strGuid);
         }
     }
     //
     QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
-    QString strDefault = (WizServer == m_serverType) ? settings->value("Users/DefaultWizUser").toString()
-                                                     : settings->value("Users/DefaultWizBoxUser").toString();
+    QString strDefault = (WizServer == m_serverType) ? settings->value("Users/DefaultWizUserGuid").toString()
+                                                     : settings->value("Users/DefaultWizBoxUserGuid").toString();
 
     if (strDefault.isEmpty() && m_menuUsers->actions().count() > 0)
     {
-        strDefault = m_menuUsers->actions().first()->text();
+        strDefault = m_menuUsers->actions().first()->data().toString();
     }
 
     // set default user as default login entry.
@@ -268,18 +273,27 @@ void CWizLoginDialog::resetUserList()
     }
 }
 
-void CWizLoginDialog::setUser(const QString &strUserId)
+void CWizLoginDialog::setUser(const QString &strUserGuid)
 {
-    if (strUserId.isEmpty())
+    if (strUserGuid.isEmpty())
         return;
 
-    QString strAccountFolder = strUserId;
-    for (UserData user : m_userList)
+    QString strAccountFolder;
+    QString strUserId;
+    for (WizLocalUser user : m_userList)
     {
-        if (user.strUserId == strUserId)
+        if (user.strGuid == strUserGuid)
         {
-            strAccountFolder = user.strFolderName;
+            strAccountFolder = user.strDataFolderName;
+            strUserId = user.strUserId;
+            break;
         }
+    }
+
+    if (strAccountFolder.isEmpty())
+    {
+        qWarning() << "can not found user guid in local users : " << strUserGuid;
+        return;
     }
 
     CWizUserSettings userSettings(strAccountFolder);
@@ -287,6 +301,7 @@ void CWizLoginDialog::setUser(const QString &strUserId)
     QString strUserName = userSettings.get("ACCOUNT", "USERNAME");
     strUserName = strUserName.isEmpty() ? strUserId : strUserName;
 
+    m_loginUserGuid = strUserGuid;
     m_lineEditUserName->setText(strUserName);
     if (strPassword.isEmpty())
     {
@@ -321,7 +336,10 @@ void CWizLoginDialog::setUser(const QString &strUserId)
 
 void CWizLoginDialog::doAccountVerify()
 {
-    CWizUserSettings userSettings(userId());
+    QString strUserid = WizGetLocalUserId(m_userList, m_loginUserGuid);
+    strUserid.isEmpty() ? (strUserid = userId()) : 0;
+    qDebug() << "do account verify , user id : " << strUserid;
+    CWizUserSettings userSettings(strUserid);
 
     //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
     //  如果登录过企业服务则需要登录到企业服务器
@@ -350,7 +368,7 @@ void CWizLoginDialog::doAccountVerify()
     qDebug() << "do account verify , server type : " << m_serverType;
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
-        Token::setUserId(userId());
+        Token::setUserId(strUserid);
         Token::setPasswd(password());
         // check server licence and update oem settings
         if (EnterpriseServer == m_serverType)
@@ -378,13 +396,16 @@ void CWizLoginDialog::doOnlineVerify()
 bool CWizLoginDialog::updateGlobalProfile()
 {
     QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
-    settings->setValue("Users/DefaultUser", userId());
+    settings->setValue("Users/DefaultUserGuid", m_loginUserGuid);
     return true;
 }
 
 bool CWizLoginDialog::updateUserProfile(bool bLogined)
 {
-    CWizUserSettings userSettings(userId());
+    QString localUserId = WizGetLocalUserId(m_userList, m_loginUserGuid);
+    qDebug() << "udate user profile , userid  " << localUserId;
+    localUserId.isEmpty() ? (localUserId = userId()) : 0;
+    CWizUserSettings userSettings(localUserId);
 
     if(ui->cbx_autologin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);
@@ -396,21 +417,21 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
         userSettings.setPassword();
     }
 
-    if (bLogined) {
+    CWizDatabase db;
+    if (!db.Open(localUserId)) {
+        ui->label_passwordError->setText(tr("Can not open database while update user profile"));
+        return false;
+    }
+
+    if (bLogined)
+    {
         if (ui->cbx_remberPassword->checkState() == Qt::Checked)
             userSettings.setPassword(::WizEncryptPassword(password()));
 
-        CWizDatabase db;
-        if (!db.Open(userId())) {
-            //QMessageBox::critical(0, tr("Update user profile"), QObject::tr("Can not open database while update user profile"));
-            ui->label_passwordError->setText(tr("Can not open database while update user profile"));
-            return false;
-        }
-
         db.SetUserInfo(Token::info());
-        db.SetMeta("ACCOUNT", "USERID", userId());
-        db.Close();
     }
+    db.SetMeta("ACCOUNT", "USERID", userId());
+    db.Close();
 
     userSettings.setServerType(m_serverType);
     if (EnterpriseServer == m_serverType)
@@ -696,12 +717,12 @@ bool CWizLoginDialog::checkSignMessage()
     return true;
 }
 
-QAction *CWizLoginDialog::findActionInMenu(const QString &strActText)
+QAction *CWizLoginDialog::findActionInMenu(const QString &strActData)
 {
     QList<QAction*> actionList = m_menuUsers->actions();
     for (int i = 0; i < actionList.count(); i++)
     {
-        if (actionList.at(i)->text() == strActText)
+        if (actionList.at(i)->data().toString() == strActData)
             return actionList.at(i);
     }
     return 0;
@@ -1034,6 +1055,7 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
         }
     }
 
+    m_loginUserGuid = Token::info().strUserGUID;
     if (updateUserProfile(true) && updateGlobalProfile())
         QDialog::accept();
 }
@@ -1051,7 +1073,7 @@ void CWizLoginDialog::userListMenuClicked(QAction *action)
     if (action)
     {
         m_menuUsers->setDefaultAction(action);
-        setUser(action->text());
+        setUser(action->data().toString());
     }
 }
 
@@ -1105,6 +1127,8 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
             strUrl += "&name=wiz-box-search-help.html";
             QDesktopServices::openUrl(strUrl);
         }
+
+        resetUserList();
     }
 }
 
@@ -1355,9 +1379,7 @@ void CWizLoginDialog::onWizLogInStateEntered()
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
     setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
 
-    setLogo(m_wizLogoPath);
-
-    resetUserList();
+    setLogo(m_wizLogoPath);    
 }
 
 void CWizLoginDialog::onWizBoxLogInStateEntered()
@@ -1393,10 +1415,7 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
             QString strLogoPath = settings.logoPath();
             setLogo(strLogoPath);
         }
-    }
-
-    //
-    resetUserList();
+    }    
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()
@@ -1434,64 +1453,38 @@ void CWizLoginDialog::onSignUpCheckEnd()
     enableSignUpControls(true);
 }
 
-void CWizLoginDialog::loadLocalUsersInfo()
-{
-    QString dataPath = Utils::PathResolve::dataStorePath();
-    QDir dir(dataPath);
-    QStringList folderList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    qDebug() << "get local data folder list " << folderList;
-    for (QString folder : folderList)
-    {
-        UserData user;
-        QString dataBase = dataPath + folder + "/data/index.db";
-        qDebug() << "database file : " << dataBase;
-        CWizIndex db;
-        if (!QFile::exists(dataBase) || !db.Open(dataBase))
-            continue;
-
-        user.strFolderName = folder;
-        user.strGuid = db.GetMetaDef("ACCOUNT", "GUID");
-        if (user.strGuid.isEmpty())
-        {
-            qWarning() << "can not get user guid from index.db in folder : " << folder;
-            continue;
-        }
-        user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
-        user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
-        user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
-        m_userList.append(user);
-    }
-}
-
 void CWizLoginDialog::loadDefaultUser()
 {
     QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
-    QString strDefaultID = settings->value("Users/DefaultUser").toString();
-    if (!strDefaultID.isEmpty())
+    QString strDefaultGuid = settings->value("Users/DefaultUserGuid").toString();
+    if (!strDefaultGuid.isEmpty())
     {
-        CWizDatabase db;
-        if (db.Open(strDefaultID))
+        QString strUserId = WizGetLocalUserId(m_userList, strDefaultGuid);
+        if (!strUserId.isEmpty())
         {
-            int serverType = db.meta("QT_WIZNOTE", "SERVERTYPE").toInt();
-            if (EnterpriseServer == serverType)
+            CWizDatabase db;
+            if (db.Open(strUserId))
             {
-                m_serverType = EnterpriseServer;
-                settings->setValue("Users/DefaultWizBoxUser", strDefaultID);
-                onWizBoxLogInStateEntered();
-            }
-            else
-            {
-                m_serverType = WizServer;
-                settings->setValue("Users/DefaultWizUser", strDefaultID);
-                onWizLogInStateEntered();
+                int serverType = db.meta("QT_WIZNOTE", "SERVERTYPE").toInt();
+                if (EnterpriseServer == serverType)
+                {
+                    m_serverType = EnterpriseServer;
+                    settings->setValue("Users/DefaultWizBoxUserGuid", strDefaultGuid);
+                }
+                else
+                {
+                    m_serverType = WizServer;
+                    settings->setValue("Users/DefaultWizUserGuid", strDefaultGuid);
+                }
             }
         }
     }
     else
     {
         m_serverType = WizServer;
-        onWizLogInStateEntered();
     }
+
+    resetUserList();
 }
 
 void CWizLoginDialog::initSateMachine()

@@ -57,15 +57,16 @@ class CWizLoginDialog
     Q_OBJECT
 
 public:
-    explicit CWizLoginDialog(const QString& strLocale, QWidget *parent = 0);
+    explicit CWizLoginDialog(const QString& strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent = 0);
     ~CWizLoginDialog();
 
     QString userId() const;
+    QString loginUserGuid() const;
     QString password() const;
     QString serverIp() const;
     WizServerType serverType() const;
 
-    void setUser(const QString& strUserId);
+    void setUser(const QString& strUserGuid);
 
     void doAccountVerify();
     void doOnlineVerify();
@@ -142,18 +143,17 @@ private slots:
     void onSignUpCheckStart();
     void onSignUpCheckEnd();
 
+    void resetUserList();
 
 private:
-    void loadLocalUsersInfo();
-    void loadDefaultUser();
-    void resetUserList();
+    void loadDefaultUser();    
 
     void initSateMachine();
     void initOEMDownloader();
     //
     void applyElementStyles(const QString& strLocal);
     bool checkSignMessage();
-    QAction* findActionInMenu(const QString& strActText);
+    QAction* findActionInMenu(const QString& strActData);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
     void searchWizBoxServer();
@@ -166,15 +166,7 @@ private:
     void setSwicthServerActionEnable(const QString &strActionData, bool bEnable);
     void downloadLogoFromWizBox(const QString& strUrl);
     void downloadOEMSettingsFromWizBox();
-    void setLogo(const QString& logoPath);
-
-private:
-    struct UserData {
-        QString strGuid;
-        QString strFolderName;
-        QString strUserId;
-        int nUserType;
-    };
+    void setLogo(const QString& logoPath);    
 
 private:
     Ui::wizLoginWidget *ui;
@@ -211,7 +203,8 @@ private:
     QThread* m_oemThread;
     CWizOEMDownloader* m_oemDownloader;
 
-    QList<UserData> m_userList;
+    QList<WizLocalUser> m_userList;
+    QString m_loginUserGuid;
 };
 
 #endif // WIZLOGINWIDGET_H

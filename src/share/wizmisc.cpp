@@ -2526,7 +2526,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
         QEventLoop loop;
 #if QT_VERSION > 0x050000
         QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-            QObject::disconnect(downloaderHost, 0, 0, 0);
+//            QObject::disconnect(downloaderHost, 0, 0, 0);
             loop.quit();
         });
 #else
@@ -2555,7 +2555,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
         QEventLoop loop;
 #if QT_VERSION > 0x050000
         QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-            QObject::disconnect(downloaderHost, 0, 0, 0);
+//            QObject::disconnect(downloaderHost, 0, 0, 0);
             loop.quit();
         });
 #else
@@ -2593,4 +2593,46 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
     }
 
     return PathFileExists(strAttachmentFileName);
+}
+
+
+bool WizGetLocalUsers(QList<WizLocalUser>& userList)
+{
+    QString dataPath = Utils::PathResolve::dataStorePath();
+    QDir dir(dataPath);
+    QStringList folderList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    qDebug() << "get local data folder list " << folderList;
+    for (QString folder : folderList)
+    {
+        WizLocalUser user;
+        QString dataBase = dataPath + folder + "/data/index.db";
+        qDebug() << "database file : " << dataBase;
+        CWizIndex db;
+        if (!QFile::exists(dataBase) || !db.Open(dataBase))
+            continue;
+
+        user.strDataFolderName = folder;
+        user.strGuid = db.GetMetaDef("ACCOUNT", "GUID");
+        if (user.strGuid.isEmpty())
+        {
+            qWarning() << "can not get user guid from index.db in folder : " << folder;
+            continue;
+        }
+        user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
+        user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
+        user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
+        userList.append(user);
+    }
+    return true;
+}
+
+
+QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& strGuid)
+{
+    for (WizLocalUser user : userList)
+    {
+        if (strGuid == user.strGuid)
+            return user.strDataFolderName;
+    }
+    return "";
 }

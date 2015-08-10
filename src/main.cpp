@@ -244,9 +244,12 @@ int mainCore(int argc, char *argv[])
     int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();
     QPixmapCache::setCacheLimit(nCacheSize);
 
-    QString strUserId = globalSettings->value("Users/DefaultUser").toString();
-    QString strPassword;
+    QString strUserGuid = globalSettings->value("Users/DefaultUserGuid").toString();
+    QList<WizLocalUser> localUsers;
+    WizGetLocalUsers(localUsers);
+    QString strUserId = WizGetLocalUserId(localUsers, strUserGuid);
 
+    QString strPassword;
     CWizUserSettings userSettings(strUserId);
 
     // setup locale for welcome dialog
@@ -306,13 +309,15 @@ int mainCore(int argc, char *argv[])
     // manually login
     if (bFallback)
     {
-        CWizLoginDialog loginDialog(strUserId, strLocale);
+        CWizLoginDialog loginDialog(strLocale, localUsers);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
-        if (loginDialog.userId() != strUserId)
+        qDebug() << "deafult user id : " << strUserGuid << " login dailog user id : " << loginDialog.loginUserGuid();
+        if (loginDialog.loginUserGuid() != strUserGuid)
         {
-            strUserId = loginDialog.userId();
+            strUserId = WizGetLocalUserId(localUsers, loginDialog.loginUserGuid());
+            qDebug() << "login user id : " << strUserId;
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
             PluginManager::setSettings(settings);
         }
