@@ -1750,6 +1750,29 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
+//FIXME:更新企业群组成员头像实际应该在获取biz列表的时候处理。但是现在服务器端返回的数据
+//存在问题，需要在本地强制更新数据
+bool WizSyncBizGroupAvatar(IWizSyncableDatabase* pPersonalDatabase)
+{
+    QString strt = pPersonalDatabase->meta(_T("SYNC_INFO"), _T("SyncBizGroupAvatar"));
+    if (strt.isEmpty() || QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
+    {
+        CWizStdStringArray arrayUsers;
+        _TR("Remove all user avatar.");
+        pPersonalDatabase->GetAllBizUserIds(arrayUsers);
+        for (CString userId : arrayUsers)
+        {
+            WizService::AvatarHost::deleteAvatar(userId);
+        }
+
+        pPersonalDatabase->setMeta(_T("SYNC_INFO"), _T("SyncBizGroupAvatar"),
+                                   QDateTime::currentDateTime().toString());
+    }
+    return true;
+}
+
+
+
 QString downloadFromUrl(const QString& strUrl)
 {
     QNetworkAccessManager net;
@@ -1817,19 +1840,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     server.SetUserInfo(info);
 
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
-    pEvents->OnStatus(QObject::tr("Signing in"));
-
-    //QString strPassword = pDatabase->GetPassword();
-    //while (1)
-    //{
-    //    if (server.Login(pDatabase->GetUserId(), strPassword, _T("normal")))
-    //        break;
-
-    //    pEvents->SetLastErrorCode(server.GetLastErrorCode());
-    //    pEvents->OnError(server.GetLastErrorMessage());
-
-    //    return false;
-    //}
+    pEvents->OnStatus(QObject::tr("Signing in"));    
 
     pDatabase->SetUserInfo(server.GetUserInfo());
     pEvents->OnSyncProgress(1);
@@ -1841,7 +1852,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
-        WizService::AvatarHost::reload(pDatabase->GetUserId());
         pDatabase->ClearLastSyncError();
         pEvents->ClearLastSyncError(pDatabase);
         pEvents->OnStatus(QObject::tr("Get Biz info"));
@@ -1849,12 +1859,15 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         if (server.GetBizList(arrayBiz))
         {
             pDatabase->OnDownloadBizs(arrayBiz);
+            //FIXME: 因为目前服务器返回的biz列表中无头像更新数据，需要强制更新群组用户的头像。
+            WizSyncBizGroupAvatar(pDatabase);
         }
         else
         {
             pEvents->SetLastErrorCode(server.GetLastErrorCode());
             return false;
         }
+        WizService::AvatarHost::reload(pDatabase->GetUserId());
     }
 
 
@@ -1966,7 +1979,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             if (!group.IsBiz())
             {
                 WizSyncPersonalGroupAvatar(pGroupDatabase);
-            }
+            }            
         }
         else
         {
