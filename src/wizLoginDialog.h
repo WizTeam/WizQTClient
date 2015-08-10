@@ -57,14 +57,14 @@ class CWizLoginDialog
     Q_OBJECT
 
 public:
-    explicit CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent = 0);
+    explicit CWizLoginDialog(const QString& strLocale, QWidget *parent = 0);
     ~CWizLoginDialog();
 
     QString userId() const;
     QString password() const;
+    QString serverIp() const;
     WizServerType serverType() const;
 
-    void setUsers(const QString& strDefault);
     void setUser(const QString& strUserId);
 
     void doAccountVerify();
@@ -144,12 +144,16 @@ private slots:
 
 
 private:
+    void loadLocalUsersInfo();
+    void loadDefaultUser();
+    void resetUserList();
+
     void initSateMachine();
     void initOEMDownloader();
     //
     void applyElementStyles(const QString& strLocal);
     bool checkSignMessage();
-    QAction* findActionInMenu(const QString& strActName);
+    QAction* findActionInMenu(const QString& strActText);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
     void searchWizBoxServer();
@@ -164,6 +168,13 @@ private:
     void downloadOEMSettingsFromWizBox();
     void setLogo(const QString& logoPath);
 
+private:
+    struct UserData {
+        QString strGuid;
+        QString strFolderName;
+        QString strUserId;
+        int nUserType;
+    };
 
 private:
     Ui::wizLoginWidget *ui;
@@ -199,6 +210,8 @@ private:
     QMap<QString, QString> m_oemLogoMap;
     QThread* m_oemThread;
     CWizOEMDownloader* m_oemDownloader;
+
+    QList<UserData> m_userList;
 };
 
 #endif // WIZLOGINWIDGET_H
