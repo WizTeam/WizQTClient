@@ -259,6 +259,7 @@ public:
     virtual bool ProcessValue(const QString& strKey);
 
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
+    virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser);
 
     virtual void ClearLastSyncError();
     virtual QString GetLastSyncErrorMessage();

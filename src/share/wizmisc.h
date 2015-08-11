@@ -185,6 +185,8 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsOffline();
 bool WizIsHighPixel();
 
+bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isImage);
+
 
 ///  make sure document exist, if not try to download document, show download dialog by default.
 bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,

@@ -17,6 +17,9 @@
 #include <QtCore>
 //#include <QtNetwork>
 #include <QNetworkConfigurationManager>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
@@ -2606,7 +2609,6 @@ bool WizGetLocalUsers(QList<WizLocalUser>& userList)
     {
         WizLocalUser user;
         QString dataBase = dataPath + folder + "/data/index.db";
-        qDebug() << "database file : " << dataBase;
         CWizIndex db;
         if (!QFile::exists(dataBase) || !db.Open(dataBase))
             continue;
@@ -2635,4 +2637,42 @@ QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& st
             return user.strDataFolderName;
     }
     return "";
+}
+
+
+bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isImage)
+{
+    QString newUrl = url;
+    QNetworkAccessManager netCtrl;
+    QNetworkReply* reply;
+    do
+    {
+        QNetworkRequest request(newUrl);
+        QEventLoop loop;
+        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        reply = netCtrl.get(request);
+        loop.exec();
+
+        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+        newUrl = redirectUrl.toString();
+    }
+    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+
+    WizDeleteFile(fileName);
+
+    QByteArray byData = reply->readAll();
+    if (isImage)
+    {
+        QPixmap pix;
+        pix.loadFromData(byData);
+        return pix.save(fileName);
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return false;
+    file.write(byData);
+    file.close();
+
+    return true;
 }

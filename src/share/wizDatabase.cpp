@@ -1491,6 +1491,11 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
     }
 }
 
+bool CWizDatabase::GetAllBizUsers(CWizBizUserDataArray& arrayUser)
+{
+    return GetAllUsers(arrayUser);
+}
+
 void CWizDatabase::ClearLastSyncError()
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));

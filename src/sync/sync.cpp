@@ -3,6 +3,7 @@
 
 #include <QString>
 
+#include "utils/pathresolve.h"
 #include "apientry.h"
 #include "avatar.h"
 #include "rapidjson/document.h"
@@ -1750,24 +1751,66 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
+class CWizDownloadAvatarRunable : public QRunnable
+{
+public:
+    CWizDownloadAvatarRunable(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
+        : m_arrayUser(arrayUser)
+        , m_currentUserGUID(currentUserGUID)
+    {
+    }
+private:
+    CWizBizUserDataArray m_arrayUser;
+    QString m_currentUserGUID;
+public:
+    void	run()
+    {
+        QMap<QString, QString> mapAllUser;
+        for (WIZBIZUSER bizUser : m_arrayUser)
+        {
+            mapAllUser.insert(bizUser.userGUID, bizUser.userId);
+        }
+        //
+        for (QMap<QString, QString>::Iterator it = mapAllUser.begin(); it != mapAllUser.end(); it++)
+        {
+            QString strFileName = Utils::PathResolve::avatarPath() + it.value() + ".png";
+            if (it.key() != m_currentUserGUID)
+            {
+                QFileInfo info(strFileName);
+                if (info.created().daysTo(QDateTime::currentDateTime()) < 7)
+                {
+                    continue;
+                }
+            }
+
+            QString strDownLoadUrl = WizService::CommonApiEntry::avatarDownloadUrl(it.key());
+            if (!strDownLoadUrl.startsWith("http"))
+                continue;
+
+            qDebug() << "update user avatar  : " << it.value();
+            WizService::AvatarHost::deleteAvatar(it.value());
+            WizURLDownloadToFile(strDownLoadUrl, strFileName, true);
+            WizService::AvatarHost::load(it.value());
+        }
+    }
+};
+
 //FIXME:更新企业群组成员头像实际应该在获取biz列表的时候处理。但是现在服务器端返回的数据
 //存在问题，需要在本地强制更新数据
 bool WizSyncBizGroupAvatar(IWizSyncableDatabase* pPersonalDatabase)
 {
-    QString strt = pPersonalDatabase->meta(_T("SYNC_INFO"), _T("SyncBizGroupAvatar"));
-    if (strt.isEmpty() || QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
-    {
-        CWizStdStringArray arrayUsers;
-        _TR("Remove all user avatar.");
-        pPersonalDatabase->GetAllBizUserIds(arrayUsers);
-        for (CString userId : arrayUsers)
-        {
-            WizService::AvatarHost::deleteAvatar(userId);
-        }
+    CWizBizUserDataArray arrayUser;
+    pPersonalDatabase->GetAllBizUsers(arrayUser);
+    WIZBIZUSER userSelf;
+    userSelf.userGUID = pPersonalDatabase->GetUserGUID();
+    userSelf.userId = pPersonalDatabase->GetUserId();
+    arrayUser.push_back(userSelf);
 
-        pPersonalDatabase->setMeta(_T("SYNC_INFO"), _T("SyncBizGroupAvatar"),
-                                   QDateTime::currentDateTime().toString());
-    }
+    CWizDownloadAvatarRunable* downloader = new CWizDownloadAvatarRunable(arrayUser,
+                                                                          userSelf.userGUID);
+    downloader->setAutoDelete(true);
+    QThreadPool::globalInstance()->start(downloader);
+
     return true;
 }
 
@@ -1867,9 +1910,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             pEvents->SetLastErrorCode(server.GetLastErrorCode());
             return false;
         }
-        WizService::AvatarHost::reload(pDatabase->GetUserId());
     }
-
 
     pEvents->OnStatus(QObject::tr("Get groups info"));
     CWizGroupDataArray arrayGroup;

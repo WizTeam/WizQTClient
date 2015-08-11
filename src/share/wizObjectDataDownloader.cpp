@@ -218,35 +218,5 @@ void CWizFileDownloader::startDownload()
 
 bool CWizFileDownloader::download()
 {
-     QNetworkAccessManager m_WebCtrl;
-     QNetworkReply* reply;
-     do
-     {
-         QNetworkRequest request(m_strUrl);
-         QEventLoop loop;
-         loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
-         reply = m_WebCtrl.get(request);
-         loop.exec();
-
-         QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-         m_strUrl = redirectUrl.toString();
-     }
-     while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
-
-
-     QByteArray byData = reply->readAll();
-     if (m_isImage)
-     {
-         QPixmap pix;
-         pix.loadFromData(byData);
-         return pix.save(m_strFileName);
-     }
-
-     QFile file(m_strFileName);
-     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-         return false;
-     file.write(byData);
-     file.close();
-
-     return true;
+     WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
 }

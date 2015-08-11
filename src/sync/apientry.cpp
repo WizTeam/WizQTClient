@@ -450,7 +450,7 @@ QString CommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR));
 
-    strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
+    strRawUrl.replace("{userGuid}", strUserGUID);
     strRawUrl += "?default=false"; // Do not download server default avatar
     return strRawUrl;
 }
