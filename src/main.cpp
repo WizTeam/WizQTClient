@@ -317,6 +317,7 @@ int mainCore(int argc, char *argv[])
         if (loginDialog.loginUserGuid() != strUserGuid)
         {
             strUserId = WizGetLocalUserId(localUsers, loginDialog.loginUserGuid());
+            strUserId.isEmpty() ? (strUserId = loginDialog.userId()) : 0;
             qDebug() << "login user id : " << strUserId;
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
             PluginManager::setSettings(settings);
