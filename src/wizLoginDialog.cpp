@@ -336,8 +336,16 @@ void CWizLoginDialog::setUser(const QString &strUserGuid)
 
 void CWizLoginDialog::doAccountVerify()
 {
-    QString strUserid = WizGetLocalUserId(m_userList, m_loginUserGuid);
-    strUserid.isEmpty() ? (strUserid = userId()) : 0;
+    QString strUserid;
+    for (WizLocalUser user : m_userList)
+    {
+        if (user.strDataFolderName == userId())
+        {
+            strUserid = user.strDataFolderName;
+            break;
+        }
+    }
+
     qDebug() << "do account verify , user id : " << strUserid;
     CWizUserSettings userSettings(strUserid);
 
@@ -365,10 +373,10 @@ void CWizLoginDialog::doAccountVerify()
         return;
     }
 
-    qDebug() << "do account verify , server type : " << m_serverType;
+    qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password()) {
-        Token::setUserId(strUserid);
+        Token::setUserId(userId());
         Token::setPasswd(password());
         // check server licence and update oem settings
         if (EnterpriseServer == m_serverType)
