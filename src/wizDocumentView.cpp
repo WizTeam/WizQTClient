@@ -2,6 +2,7 @@
 
 #include <QWebElement>
 #include <QWebFrame>
+#include <QWebHistory>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -101,6 +102,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->setPage(commentPage);
+    m_comments->history()->setMaximumItemCount(0);
     m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);

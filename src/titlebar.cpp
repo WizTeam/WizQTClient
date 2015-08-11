@@ -4,6 +4,7 @@
 #include <QUrl>
 #include <QNetworkConfigurationManager>
 #include <QMessageBox>
+#include <QWebHistory>
 #include <QSplitter>
 #include <QList>
 
@@ -604,6 +605,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
     QWebEngineView* comments = noteView()->commentView();
 #else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    commentWidget->web()->history()->clear();
 #endif
     if (!ok)
     {
