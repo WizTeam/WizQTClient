@@ -244,8 +244,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     versionName.SetString(WIZ_CLIENT_VERSION);
     dd.AddMember("versionName", versionName, allocator);
 
-    rapidjson::Value versionCode(WizGetVersionCode());
-    dd.AddMember("versionCode", versionCode, allocator);
+    dd.AddMember("versionCode", WizGetVersionCode(), allocator);
 
     //
     Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
@@ -329,8 +328,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 		it++)
 	{        
         const QByteArray& baKey = it.key();
-        const QByteArray& baValue = it.value();
-        rapidjson::Value vValue(baValue.constData(), baValue.size());
+        rapidjson::Value vValue(it.value().toInt());
         rapidjson::Value vKey(baKey.constData(), baKey.size());
         actions.AddMember(vKey, vValue, allocator);
 	}
@@ -378,7 +376,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
     if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
         && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
-        return;
+        return;    
 
     QNetworkAccessManager net;
     QNetworkRequest request;
