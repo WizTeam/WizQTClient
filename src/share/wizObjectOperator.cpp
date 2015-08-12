@@ -448,9 +448,22 @@ void CWizDocumentOperator::movePersonalFolderToGroupDB()
 
 void CWizDocumentOperator::copyDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc)
 {
-    CWizFolder folder(m_dbMgr.db(), m_targetFolder);
-    CWizDocument wizDoc(m_dbMgr.db(doc.strKbGUID), doc);
-    wizDoc.CopyTo(m_dbMgr.db(), &folder, m_keepDocTime, m_keepTag, m_downloader);
+    CWizDatabase& sourceDb = m_dbMgr.db(doc.strKbGUID);
+    CWizDatabase& targetDb = m_dbMgr.db();
+    CWizFolder folder(targetDb, m_targetFolder);
+    CWizDocument wizDoc(sourceDb, doc);
+    QString newDocGUID;
+    if (!wizDoc.CopyTo(targetDb, &folder, m_keepDocTime, m_keepTag, newDocGUID, m_downloader))
+        return;
+
+    if (!sourceDb.IsGroup() && doc.nProtected == 1)
+    {
+        WIZDOCUMENTDATA newDoc;
+        if (targetDb.DocumentFromGUID(newDocGUID, newDoc))
+        {
+            sourceDb.EncryptDocument(newDoc);
+        }
+    }
 }
 
 void CWizDocumentOperator::copyDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)

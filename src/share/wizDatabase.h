@@ -34,7 +34,8 @@ public:
     bool MoveTo(CWizFolder* pFolder);
     bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
     bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
-    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime, bool keepDocTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
+                bool keepDocTag, QString& newDocGUID, CWizObjectDataDownloaderHost* downloader);
     bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
     bool AddTag(const WIZTAGDATA& dataTag);
     bool RemoveTag(const WIZTAGDATA& dataTag);
