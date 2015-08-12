@@ -9753,9 +9753,9 @@ UE.plugins['defaultfilter'] = function () {
                         break;
                     case 'li':
                         var className = node.getAttr('class');
-                        if (!className || !/list\-/.test(className)) {
-                            node.setAttr()
-                        }
+                        // if (!className || !/list\-/.test(className)) {
+                        //     node.setAttr()
+                        // }
                         var tmpNodes = node.getNodesByTagName('ol ul');
                         UE.utils.each(tmpNodes, function (n) {
                             node.parentNode.insertAfter(n, node);
@@ -12968,51 +12968,53 @@ UE.plugins['insertcode'] = function() {
         }
     };
 
-    me.addInputRule(function(root){
-       utils.each(root.getNodesByTagName('pre'),function(pre){
-           var brs = pre.getNodesByTagName('br');
-           if(brs.length){
-               browser.ie && browser.ie11below && browser.version > 8 && utils.each(brs,function(br){
-                   var txt = UE.uNode.createText('\n');
-                   br.parentNode.insertBefore(txt,br);
-                   br.parentNode.removeChild(br);
-               });
-               return;
-            }
-           if(browser.ie && browser.ie11below && browser.version > 8)
-                return;
-            var code = pre.innerText().split(/\n/);
-            pre.innerHTML('');
-            utils.each(code,function(c){
-                if(c.length){
-                    pre.appendChild(UE.uNode.createText(c));
-                }
-                pre.appendChild(UE.uNode.createElement('br'))
-            })
-       })
-    });
-    me.addOutputRule(function(root){
-        utils.each(root.getNodesByTagName('pre'),function(pre){
-            var code = '';
-            utils.each(pre.children,function(n){
-               if(n.type == 'text'){
-                   //在ie下文本内容有可能末尾带有\n要去掉
-                   //trace:3396
-                   code += n.data.replace(/[ ]/g,'&nbsp;').replace(/\n$/,'');
-               }else{
-                   if(n.tagName == 'br'){
-                       code  += '\n'
-                   }else{
-                       code += (!dtd.$empty[n.tagName] ? '' : n.innerText());
-                   }
+    //对pre进行过滤的方法存在问题。现在保留原样式
+    // me.addInputRule(function(root){
+    //    utils.each(root.getNodesByTagName('pre'),function(pre){
+    //        var brs = pre.getNodesByTagName('br');
+    //        if(brs.length){
+    //            browser.ie && browser.ie11below && browser.version > 8 && utils.each(brs,function(br){
+    //                var txt = UE.uNode.createText('\n');
+    //                br.parentNode.insertBefore(txt,br);
+    //                br.parentNode.removeChild(br);
+    //            });
+    //            return;
+    //         }
+    //        if(browser.ie && browser.ie11below && browser.version > 8)
+    //             return;
+    //         var code = pre.innerText().split(/\n/);
+    //         pre.innerHTML('');
+    //         utils.each(code,function(c){
+    //             if(c.length){
+    //                 pre.appendChild(UE.uNode.createText(c));
+    //             }
+    //             pre.appendChild(UE.uNode.createElement('br'))
+    //         })
+    //    })
+    // });
+    
+    // me.addOutputRule(function(root){
+    //     utils.each(root.getNodesByTagName('pre'),function(pre){
+    //         var code = '';
+    //         utils.each(pre.children,function(n){
+    //            if(n.type == 'text'){
+    //                //在ie下文本内容有可能末尾带有\n要去掉
+    //                //trace:3396
+    //                code += n.data.replace(/[ ]/g,'&nbsp;').replace(/\n$/,'');
+    //            }else{
+    //                if(n.tagName == 'br'){
+    //                    code  += '\n'
+    //                }else{
+    //                    code += (!dtd.$empty[n.tagName] ? '' : n.innerText());
+    //                }
 
-               }
+    //            }
 
-            });
+    //         });
 
-            pre.innerText(code.replace(/(&nbsp;|\n)+$/,''))
-        })
-    });
+    //         pre.innerText(code.replace(/(&nbsp;|\n)+$/,''))
+    //     })
+    // });
     //不需要判断highlight的command列表
     me.notNeedCodeQuery ={
         help:1,
@@ -14789,31 +14791,32 @@ UE.plugins['list'] = function () {
         });
     });
     //进入编辑器的li要套p标签
-    me.addInputRule(function(root){
+    me.addInputRule(function(root){        
         utils.each(root.getNodesByTagName('li'),function(li){
-            var tmpP = UE.uNode.createElement('p');
-            for(var i= 0,ci;ci=li.children[i];){
-                if(ci.type == 'text' || dtd.p[ci.tagName]){
-                    tmpP.appendChild(ci);
-                }else{
-                    if(tmpP.firstChild()){
-                        li.insertBefore(tmpP,ci);
-                        tmpP = UE.uNode.createElement('p');
-                        i = i + 2;
-                    }else{
-                        i++;
-                    }
+            //不能在li后注入p标签，否则会导致插入的代码格式变乱
+            // var tmpP = UE.uNode.createElement('p');
+            // for(var i= 0,ci;ci=li.children[i];){
+            //     if(ci.type == 'text' || dtd.p[ci.tagName]){
+            //         tmpP.appendChild(ci);
+            //     }else{
+            //         if(tmpP.firstChild()){
+            //             li.insertBefore(tmpP,ci);
+            //             tmpP = UE.uNode.createElement('p');
+            //             i = i + 2;
+            //         }else{
+            //             i++;
+            //         }
 
-                }
-            }
-            if(tmpP.firstChild() && !tmpP.parentNode || !li.firstChild()){
-                li.appendChild(tmpP);
-            }
-            //trace:3357
-            //p不能为空
-            if (!tmpP.firstChild()) {
-                tmpP.innerHTML(browser.ie ? '&nbsp;' : '<br/>')
-            }
+            //     }
+            // }
+            // if(tmpP.firstChild() && !tmpP.parentNode || !li.firstChild()){
+            //     li.appendChild(tmpP);
+            // }
+            // //trace:3357
+            // //p不能为空
+            // if (!tmpP.firstChild()) {
+            //     tmpP.innerHTML(browser.ie ? '&nbsp;' : '<br/>')
+            // }
             //去掉末尾的空白
             var p = li.firstChild();
             var lastChild = p.lastChild();
