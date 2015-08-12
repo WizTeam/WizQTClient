@@ -611,7 +611,11 @@ QString CWizUserSettings::defaultFontFamily()
     if (!strFont.isEmpty())
         return strFont;
 
-    return "sans-serif";
+#ifdef Q_OS_MAC
+    return "Helvetica Neue";
+#elif
+    return "Arial";
+#endif
 }
 
 void CWizUserSettings::setDefaultFontFamily(const QString& strFont)

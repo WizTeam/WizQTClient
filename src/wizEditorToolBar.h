@@ -117,7 +117,7 @@ protected Q_SLOTS:
 
 
     void on_comboParagraph_indexChanged(int index);
-    void on_comboFontFamily_indexChanged(const QString& strFamily);
+    void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
     void on_btnBold_clicked();
@@ -153,6 +153,8 @@ protected Q_SLOTS:
     void on_showForeColorBoard();
     void on_backColor_changed();
     void on_showBackColorBoard();
+
+    void on_fontDailogFontChanged(const QFont & font);
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);

@@ -14,6 +14,7 @@
 #include <QMimeData>
 #include <QStyledItemDelegate>
 #include <QListWidget>
+#include <QFontDialog>
 #include <QDebug>
 
 #include "share/wizmisc.h"
@@ -29,6 +30,13 @@
 #include "utils/stylehelper.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
+const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
+
+#define WIZSEPARATOR    "separator"
+#define WIZFONTPANEL    "fontpanel"
+#define WIZRECENTFONT   "recentfont"
+
+#define WIZRECENTFONTLIST  "RecentlyUsedFont"
 
 struct WizComboboxStyledItem
 {    
@@ -39,6 +47,19 @@ struct WizComboboxStyledItem
     bool bBold;
 };
 
+const int nCommonlyUsedFontCount = 9;
+const QString CommonlyUsedFont[] =
+{
+    "Arial",
+    "Helvetica Neue",
+    "Times",
+    "Times New Roman",
+    "Tahoma",
+    "Verdana",
+    "Songti SC",
+    "Heiti SC",
+    "Kaiti SC"
+};
 
 const int nParagraphItemCount = 8;
 WizComboboxStyledItem* ParagraphItems()
@@ -164,8 +185,8 @@ public:
         : QStyledItemDelegate(parent), m_itemArray(items), m_arrayCount(count), m_widget(widget)
     {}
 
-    void paint(QPainter *painter,
-               const QStyleOptionViewItem &option, const QModelIndex &index) const
+    void drawTextItem(QPainter *painter, const QStyleOptionViewItem &option,
+                      const QModelIndex &index, bool useDefaultFont = false) const
     {
         QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
@@ -184,20 +205,23 @@ public:
             opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::black));
         }
         //
-        QString text = index.model()->data(index, Qt::DisplayRole).toString();
-        WizComboboxStyledItem styledItem = itemFromArrayByText(text, m_itemArray, m_arrayCount);
-        if (styledItem.strText.isEmpty())
+        if (!useDefaultFont)
         {
-            //set default data
-            styledItem.bBold = false;
-            styledItem.nFontSize = 14;
-            styledItem.strFontFamily = text;
-        }
-        opt.font.setPointSize(styledItem.nFontSize);
-        opt.font.setBold(styledItem.bBold);
-        if (!styledItem.strFontFamily.isEmpty())
-        {
-            opt.font.setFamily(styledItem.strFontFamily);
+            QString text = index.model()->data(index, Qt::DisplayRole).toString();
+            WizComboboxStyledItem styledItem = itemFromArrayByText(text, m_itemArray, m_arrayCount);
+            if (styledItem.strText.isEmpty())
+            {
+                //set default data
+                styledItem.bBold = false;
+                styledItem.nFontSize = 14;
+                styledItem.strFontFamily = text;
+            }
+            opt.font.setPointSize(styledItem.nFontSize);
+            opt.font.setBold(styledItem.bBold);
+            if (!styledItem.strFontFamily.isEmpty())
+            {
+                opt.font.setFamily(styledItem.strFontFamily);
+            }
         }
 
         const int nIconSize = 16;
@@ -215,11 +239,49 @@ public:
         QStyledItemDelegate::paint(painter, opt, index);
     }
 
+    void drawSeparatorItem(QPainter *painter,
+                           const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QStyleOptionViewItem opt = option;
+        initStyleOption(&opt, index);
+        //
+        painter->save();
+        painter->setPen(QColor("#cccccc"));
+        painter->setBrush(Qt::NoBrush);
+        painter->drawLine(QLine(opt.rect.x(), opt.rect.y() + opt.rect.height() / 2 - 1,
+                                opt.rect.right(), opt.rect.y() + opt.rect.height() / 2));
+        painter->restore();
+    }
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option, const QModelIndex &index) const
+    {
+        QString helperData = index.data(WizFontFamilyHelperRole).toString();
+        if (helperData.isEmpty() || helperData == WIZRECENTFONT)
+        {
+            drawTextItem(painter, option, index);
+        }
+        else if (helperData == WIZSEPARATOR)
+        {
+            drawSeparatorItem(painter, option, index);
+        }
+        else
+        {
+            drawTextItem(painter, option, index, true);
+        }
+    }
+
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
         QStyleOptionViewItemV4 opt = option;
         initStyleOption(&opt, index);
 
+        if (index.data(WizFontFamilyHelperRole).toString() == WIZSEPARATOR)
+        {
+            return QSize(opt.rect.width(), 5);
+        }
+
+        //
         WizComboboxStyledItem styledItem = itemFromArrayByText(opt.text, m_itemArray, m_arrayCount);
         if (styledItem.strText.isEmpty())
         {
@@ -261,6 +323,24 @@ const QColor colors[6][8] =
 
     {QColor(85, 0, 255, 255), QColor(255, 0, 255, 255), QColor(85, 85, 255, 255), QColor(255, 85, 255, 255),
     QColor(85, 170, 255, 255), QColor(255, 170, 255, 255), QColor(85, 255, 255, 255), QColor(255, 255, 255, 255)}
+};
+
+const QColor macColors[5][6] =
+{
+    {QColor(100, 179, 223, 255), QColor(157, 225, 89, 255), QColor(255, 224, 97, 255),
+    QColor(255, 192, 114, 255), QColor(255, 95, 94, 255), QColor(157, 69, 184, 255)},
+
+    {QColor(73, 155, 201, 255), QColor(111, 192, 55, 255), QColor(241, 209, 48, 255),
+    QColor(255, 169, 58, 255), QColor(255, 44, 33, 255), QColor(107, 33, 133, 255)},
+
+    {QColor(54, 125, 162, 255), QColor(122, 174, 61, 255), QColor(226, 184, 0, 255),
+    QColor(236, 159, 46, 255), QColor(206, 34, 43, 255), QColor(84, 20, 108, 255)},
+
+    {QColor(23, 87, 121, 255), QColor(88, 135, 37, 255), QColor(198, 147, 0, 255),
+    QColor(209, 127, 20, 255), QColor(174, 25, 22, 255), QColor(60, 10, 74, 255)},
+
+    {QColor(255, 255, 255, 255), QColor(204, 204, 204, 255), QColor(153, 153, 153, 255),
+    QColor(102, 102, 102, 255), QColor(51, 51, 51, 255), QColor(0, 0, 0, 255)},
 };
 
 QIcon createColorIcon(QColor color)
@@ -685,9 +765,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_comboParagraph_indexChanged(int)));
 
     //
-    m_comboFontFamily = new CWizToolComboBox(this);
-//    m_comboFontFamily->setStyleSheet("QComboBox QListView::item:hover {background-color: #448aff;}"
-//                                     "QComboBox QListView::item:selected {background-color: #448aff;}");
+    m_comboFontFamily = new CWizToolComboBox(this);    
 
     m_comboFontSize = new CWizToolComboBox(this);
     WizComboboxStyledItem* fontItems = FontSizes();
@@ -708,16 +786,35 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboFontSize->setItemDelegate(fontDelegate);
 #endif
 
-    QFontDatabase fontDB;
-    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
-    QStringList fontFamilies = fontDB.families();
-    for (QString font : fontFamilies)
+    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/');
+    for (QString recent : fontList)
     {
-       WizComboboxStyledItem familyItem = itemFromArrayByKey(font, fontFamilyItems, nFontFamilyCount);
-        m_comboFontFamily->addItem(familyItem.strText.isEmpty() ? font : familyItem.strText, font);
+        m_comboFontFamily->addItem(recent, recent);
+        m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZRECENTFONT, WizFontFamilyHelperRole);
     }
-    connect(m_comboFontFamily, SIGNAL(activated(const QString&)),
-            SLOT(on_comboFontFamily_indexChanged(const QString&)));
+
+    if (!fontList.isEmpty())
+    {
+        m_comboFontFamily->addItem("separator");
+        m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZSEPARATOR, WizFontFamilyHelperRole);
+    }
+
+    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
+    for (int i = 0; i < nCommonlyUsedFontCount; i++)
+    {
+        QString font = CommonlyUsedFont[i];
+        WizComboboxStyledItem familyItem = itemFromArrayByKey(font, fontFamilyItems, nFontFamilyCount);
+         m_comboFontFamily->addItem(familyItem.strText.isEmpty() ? font : familyItem.strText, font);
+    }
+
+    m_comboFontFamily->addItem("separator");
+    m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZSEPARATOR, WizFontFamilyHelperRole);
+
+    m_comboFontFamily->addItem(tr("Font Panel"), WIZFONTPANEL);
+    m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZFONTPANEL, WizFontFamilyHelperRole);
+
+    connect(m_comboFontFamily, SIGNAL(activated(int)),
+            SLOT(on_comboFontFamily_indexChanged(int)));
 
     for (int i = 0; i < nFontSizeCount; i++)
     {
@@ -1136,8 +1233,9 @@ void EditorToolBar::resetToolbar()
     m_comboParagraph->setText(styledItem.strText);
     m_comboParagraph->setEnabled(!isSourceMode);
 
-    value = m_editor->editorCommandQueryCommandValue("fontFamily");
-    m_comboFontFamily->setText(value);
+    CString fontName = m_editor->editorCommandQueryCommandValue("fontFamily");
+    fontName.Trim('\'');
+    m_comboFontFamily->setText(fontName);
     m_comboFontFamily->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
@@ -1174,11 +1272,11 @@ void EditorToolBar::resetToolbar()
     }
 
     value = m_editor->editorCommandQueryCommandValue("foreColor");
-    m_btnForeColor->setColor(QColor(value));
+    m_btnForeColor->setColor(value.isEmpty() ? QColor(Qt::transparent) : QColor(value));
     m_btnForeColor->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("backColor");
-    m_btnBackColor->setColor(QColor(value));
+    m_btnBackColor->setColor(value.isEmpty() ? QColor(Qt::transparent) : QColor(value));
     m_btnBackColor->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("bold");
@@ -1588,14 +1686,14 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pActionTransparent->setText(tr("transparent"));
     connect(pActionTransparent, SIGNAL(triggered()), this, slot);
     QToolButton *pBtnTransparent = new QToolButton(this);
-    pBtnTransparent->setFixedSize(QSize(142, 20));
+    pBtnTransparent->setFixedSize(QSize(110, 20));
     pBtnTransparent->setText(tr("transparent"));
     pBtnTransparent->setDefaultAction(pActionTransparent);
 
     // 选择其他颜色
     QToolButton *pBtnOtherColor = new QToolButton(this);
     pBtnOtherColor->setText(tr("show more colors..."));
-    pBtnOtherColor->setFixedSize(QSize(142, 20));
+    pBtnOtherColor->setFixedSize(QSize(110, 20));
     pBtnOtherColor->setAutoRaise(true);
     pBtnOtherColor->setToolTip(tr("show more colors..."));
     connect(pBtnOtherColor, SIGNAL(clicked()), this, slotColorBoard);
@@ -1606,20 +1704,19 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pGridLayout->setContentsMargins(0, 0, 0, 0);
     pGridLayout->setSpacing(2);
 
-    for (int iRow = 0; iRow < 6; iRow++)
+    for (int iRow = 0; iRow < 5; iRow++)
     {
-        for (int iCol = 0; iCol < 8; iCol++)
+        for (int iCol = 0; iCol < 6; iCol++)
         {
             QAction *action = new QAction(this);
-            action->setData(colors[iRow][iCol]);
-            action->setIcon(createColorIcon(colors[iRow][iCol]));
+            action->setData(macColors[iRow][iCol]);
+            action->setIcon(createColorIcon(macColors[iRow][iCol]));
             connect(action, SIGNAL(triggered()), this, slot);
 
             QToolButton *pBtnColor = new QToolButton(this);
             pBtnColor->setFixedSize(QSize(16, 16));
             pBtnColor->setAutoRaise(true);
             pBtnColor->setDefaultAction(action);
-            pBtnColor->setToolTip("white");
 
             pGridLayout->addWidget(pBtnColor, iRow, iCol);
         }
@@ -1694,6 +1791,47 @@ void EditorToolBar::on_showBackColorBoard()
     connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
             SLOT(editorCommandExecuteBackColor(QColor)));
     dlg.exec();
+}
+
+void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
+{
+    QString strFontFamily = font.family();
+    m_editor->editorCommandExecuteFontFamily(strFontFamily);
+    m_comboFontFamily->setText(strFontFamily);
+
+    //
+    for (int i = 0; i < nCommonlyUsedFontCount; i++)
+    {
+        if (CommonlyUsedFont[i] == strFontFamily)
+            return;
+    }
+
+    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/');
+    for (QString recent : fontList)
+    {
+        if (recent == strFontFamily)
+            return;
+    }
+
+    if (fontList.isEmpty())
+    {
+        m_comboFontFamily->insertItem(0, "separator");
+        m_comboFontFamily->setItemData(0, WIZSEPARATOR, WizFontFamilyHelperRole);
+    }
+
+    if (m_comboFontFamily->itemData(2, WizFontFamilyHelperRole).toString() == WIZRECENTFONT)
+    {
+        m_comboFontFamily->removeItem(2);
+    }
+
+    m_comboFontFamily->insertItem(0, strFontFamily, strFontFamily);
+    m_comboFontFamily->setItemData(0, WIZRECENTFONT, WizFontFamilyHelperRole);
+
+    fontList.insert(0, strFontFamily);
+    while (fontList.count() > 3)
+        fontList.pop_back();
+    QString fonts = fontList.join('/');
+    m_app.userSettings().set(WIZRECENTFONTLIST, fonts);
 }
 
 void EditorToolBar::saveImage(QString strFileName)
@@ -2070,19 +2208,38 @@ void EditorToolBar::on_comboParagraph_indexChanged(int index)
     }
 }
 
-void EditorToolBar::on_comboFontFamily_indexChanged(const QString& strFamily)
+void EditorToolBar::on_comboFontFamily_indexChanged(int index)
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarFontFamily");
-    if (strFamily == m_comboFontFamily->text())
-        return;
 
-    if (m_editor) {
-        m_editor->editorCommandExecuteFontFamily(strFamily);
-        m_comboFontFamily->setText(strFamily);
-        //
-        clearWizCheckState(m_comboFontFamily);
-        QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
-        m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+    QString helperData = m_comboFontFamily->itemData(index, WizFontFamilyHelperRole).toString();
+    if (helperData.isEmpty() || helperData == WIZRECENTFONT)
+    {
+        if (m_editor) {
+            QString text = m_comboFontFamily->itemData(index, Qt::DisplayRole).toString();
+            m_editor->editorCommandExecuteFontFamily(text);
+            m_comboFontFamily->setText(text);
+            //
+            clearWizCheckState(m_comboFontFamily);
+            QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
+            m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+        }
+    }
+    else if (helperData == WIZFONTPANEL)
+    {
+        QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
+        qDebug() << "current font value : " << value;
+        m_comboFontFamily->setText(value);
+        QFontDialog dlg;
+        connect(&dlg, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
+        dlg.setCurrentFont(value);
+        dlg.exec();
+    }
+    else if (helperData == WIZSEPARATOR)
+    {
+        QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
+        qDebug() << "current font value : " << value;
+        m_comboFontFamily->setText(value);
     }
 }
 
