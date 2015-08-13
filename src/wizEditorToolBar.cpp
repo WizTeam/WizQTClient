@@ -291,7 +291,6 @@ public:
         font.setPointSize(styledItem.nFontSize);
         QFontMetrics fm(font);
         QRect rc = fm.boundingRect(opt.text);
-//        qDebug()
         //
         QSize size(rc.width() + 4, rc.height() + 4);
         return size;
@@ -770,17 +769,17 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboFontSize = new CWizToolComboBox(this);
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
-    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;}"
+    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#ffffff;}"
                                     "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
     m_comboParagraph->setItemDelegate(paragraphDelegate);
     //
-    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:95px;}"
+    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:95px;background:#ffffff;}"
                                      "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
     WizToolComboboxItemDelegate* fontFamilyDelegate = new WizToolComboboxItemDelegate(m_comboFontFamily, m_comboFontFamily, paraItems, nParagraphItemCount);
     m_comboFontFamily->setItemDelegate(fontFamilyDelegate);
     //
-    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;}"
+    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;background:#ffffff;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
@@ -2228,7 +2227,6 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     else if (helperData == WIZFONTPANEL)
     {
         QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
-        qDebug() << "current font value : " << value;
         m_comboFontFamily->setText(value);
         QFontDialog dlg;
         connect(&dlg, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
@@ -2238,7 +2236,6 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     else if (helperData == WIZSEPARATOR)
     {
         QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
-        qDebug() << "current font value : " << value;
         m_comboFontFamily->setText(value);
     }
 }
