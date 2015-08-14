@@ -184,7 +184,7 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
             if (QFile::exists(strZiwFile))
             {
                 QString strNewFile = dir.dirName();
-                QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + strNewFile + "/";
+                QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + tr("custom") + "/";
                 WizEnsurePathExists(strDestPath);
                 if (!QFile::copy(strZiwFile, strDestPath + strNewFile + ".ziw"))
                 {
