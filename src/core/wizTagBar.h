@@ -17,6 +17,23 @@ class CWizTagListWidget;
 namespace Core {
 namespace Internal {
 
+class CTagLineEdit : public QLineEdit
+{
+    Q_OBJECT
+public:
+    CTagLineEdit(QWidget* parent = 0);
+    void resetCompleter(const QStringList& tagNames);
+
+signals:
+    void completerFinished();
+
+protected:
+    void keyPressEvent(QKeyEvent* event);
+
+private:
+    QCompleter* m_completer;
+};
+
 class CTagItem : public QWidget
 {
     Q_OBJECT
@@ -106,6 +123,7 @@ private:
     void addTagToTagBar(const QString& guid, const QString text);
     void calculateTagWidgetWidth();
     void clearTagSelection();
+    void resetLineEditCompleter();
 
 private:
     WIZDOCUMENTDATA m_doc;
@@ -115,7 +133,7 @@ private:
     QToolButton* m_btnAdd;
     QToolButton* m_btnMore;
     QHBoxLayout* m_tagLayout;
-    QLineEdit* m_lineEdit;
+    CTagLineEdit* m_lineEdit;
     std::map<QString, CTagItem*> m_mapTagWidgets;
     std::map<QString, QString> m_mapMoreTags;
     CWizExplorerApp& m_app;
