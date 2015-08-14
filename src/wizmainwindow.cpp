@@ -528,15 +528,20 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
 
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
-            if (!m_userVerifyDialog)
-            {
-                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
-                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
-            }
 
-            m_userVerifyDialog->exec();
-            m_userVerifyDialog->deleteLater();
-            m_userVerifyDialog = nullptr;
+            qDebug() << "username or password error, need relogin.";
+            CWizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            on_actionLogout_triggered();
+
+//            if (!m_userVerifyDialog)
+//            {
+//                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
+//                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
+//            }
+
+//            m_userVerifyDialog->exec();
+//            m_userVerifyDialog->deleteLater();
+//            m_userVerifyDialog = nullptr;
         }
     }
 }
@@ -3102,6 +3107,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pShortcut)
         {
             viewDocumentByShortcut(pShortcut);
+            WizGetAnalyzer().LogAction("categoryShortcutItem");
         }
     }
         break;
@@ -3111,6 +3117,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pSearchItem)
         {
             searchNotesBySQL(pSearchItem->getSQLWhere());
+            WizGetAnalyzer().LogAction("categoryBuildInQuickSearchItem");
         }
     }
         break;
@@ -3120,6 +3127,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pSearchItem)
         {
             searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword(), pSearchItem->searchScope());
+            WizGetAnalyzer().LogAction("categoryCustomQuickSearchItem");
         }
     }
         break;
@@ -3809,7 +3817,7 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void MainWindow::showDocumentList(CWizCategoryBaseView* category)
+void MainWindow::showDocumentList()
 {
     if (!m_noteListWidget->isVisible())
     {
@@ -3817,6 +3825,11 @@ void MainWindow::showDocumentList(CWizCategoryBaseView* category)
         m_noteListWidget->show();
         m_msgListWidget->hide();
     }
+}
+
+void MainWindow::showDocumentList(CWizCategoryBaseView* category)
+{
+    showDocumentList();
     QString kbGUID = category->selectedItemKbGUID();
     if (!kbGUID.isEmpty())
     {
@@ -3854,6 +3867,8 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
 {
+    showDocumentList();
+    //
     CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
     switch (pShortcut->shortcutType()) {
     case CWizCategoryViewShortcutItem::Document:

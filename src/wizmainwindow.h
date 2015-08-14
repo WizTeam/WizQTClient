@@ -498,6 +498,7 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
+    void showDocumentList();
     void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
