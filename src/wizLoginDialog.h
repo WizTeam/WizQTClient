@@ -157,7 +157,9 @@ private:
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
     void searchWizBoxServer();
-    void initSearchingDialog();
+    void initAnimationWaitingDialog(const QString& text);
+    int showAnimationWaitingDialog(const QString& text);
+    void closeAnimationWaitingDialog();
     void showSearchingDialog();
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
@@ -172,7 +174,7 @@ private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menuUsers;
     QMenu* m_menuServers;
-    QDialog* m_searchingDialog;
+    QDialog* m_animationWaitingDialog;
     CWizUdpClient* m_udpClient;
     QThread* m_udpThread;
     WizServerType m_serverType;

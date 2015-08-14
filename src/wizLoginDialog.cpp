@@ -94,7 +94,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     , m_menuServers(new QMenu(this))
     , m_udpClient(0)
     , m_serverType(WizServer)
-    , m_searchingDialog(nullptr)
+    , m_animationWaitingDialog(nullptr)
     , m_oemDownloader(nullptr)
     , m_oemThread(nullptr)
     , m_userList(localUsers)
@@ -191,18 +191,18 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
 
     //
     applyElementStyles(strLocale);
-    //
-    initSateMachine();
 
     loadDefaultUser();
+    //
+    initSateMachine();
 }
 
 CWizLoginDialog::~CWizLoginDialog()
 {
     delete ui;
-    if (m_searchingDialog)
+    if (m_animationWaitingDialog)
     {
-        m_searchingDialog->deleteLater();
+        m_animationWaitingDialog->deleteLater();
     }
     if (m_udpClient)
     {
@@ -321,7 +321,6 @@ void CWizLoginDialog::setUser(const QString &strUserGuid)
     {
         m_lineEditServer->setText(userSettings.enterpriseServerIP());
         CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
-        emit wizBoxServerSelected();
         // update oem settings
         downloadOEMSettingsFromWizBox();
     }
@@ -330,7 +329,6 @@ void CWizLoginDialog::setUser(const QString &strUserGuid)
     {
         m_currentUserServerType = WizServer;
         CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
-        emit wizServerSelected();
     }
 }
 
@@ -375,7 +373,8 @@ void CWizLoginDialog::doAccountVerify()
 
     qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
     // FIXME: should verify password if network is available to avoid attack?
-    if (password() != userSettings.password()) {
+    if (password() != userSettings.password())
+    {
         Token::setUserId(userId());
         Token::setPasswd(password());
         // check server licence and update oem settings
@@ -389,8 +388,22 @@ void CWizLoginDialog::doAccountVerify()
         doOnlineVerify();
         return;
     }
+    else if (EnterpriseServer == m_serverType)
+    {
+        if (userSettings.enterpriseServerIP() != serverIp())
+        {
+            checkServerLicence();
+            return;
+        }
+        else
+        {
+            WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+        }
+    }
 
-    if (updateUserProfile(false) && updateGlobalProfile()) {
+    //
+    if (updateUserProfile(false) && updateGlobalProfile())
+    {
         QDialog::accept();
     }
 }
@@ -399,6 +412,7 @@ void CWizLoginDialog::doOnlineVerify()
 {
     connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::requestToken();
+    showAnimationWaitingDialog(tr("Connecting..."));
 }
 
 bool CWizLoginDialog::updateGlobalProfile()
@@ -763,20 +777,8 @@ void CWizLoginDialog::searchWizBoxServer()
 
 void CWizLoginDialog::showSearchingDialog()
 {
-    if (m_searchingDialog)
-    {
-        //NOTE:修复按钮样式问题，每次重新创建
-        delete m_searchingDialog;
-    }
-    initSearchingDialog();
-
-    //
-    QPoint leftTop = geometry().topLeft();
-    leftTop.setX(leftTop.x() + (width() - m_searchingDialog->width()) / 2);
-    leftTop.setY(leftTop.y() + (height() - m_searchingDialog->height()) / 2);
-    m_searchingDialog->move(leftTop);
-    //
-    if (m_searchingDialog->exec() == QDialog::Rejected)
+    int result = showAnimationWaitingDialog(tr("Finding Service...."));
+    if (QDialog::Rejected == result)
     {
         m_wizBoxSearchingTimer.stop();
         qDebug() << "Searching cancel";
@@ -790,19 +792,19 @@ void CWizLoginDialog::showSearchingDialog()
     }
 }
 
-void CWizLoginDialog::initSearchingDialog()
+void CWizLoginDialog::initAnimationWaitingDialog(const QString& text)
 {
-    m_searchingDialog = new QDialog();
-    m_searchingDialog->setWindowFlags(Qt::FramelessWindowHint);
-    m_searchingDialog->setFixedSize(150, 100);
-    QPalette pl = m_searchingDialog->palette();
+    m_animationWaitingDialog = new QDialog();
+    m_animationWaitingDialog->setWindowFlags(Qt::FramelessWindowHint);
+    m_animationWaitingDialog->setFixedSize(150, 100);
+    QPalette pl = m_animationWaitingDialog->palette();
     pl.setColor(QPalette::Window, QColor(0, 0, 0, 200));
-    m_searchingDialog->setPalette(pl);
-    m_searchingDialog->setAutoFillBackground(true);
-    m_searchingDialog->setWindowOpacity(0.7);
+    m_animationWaitingDialog->setPalette(pl);
+    m_animationWaitingDialog->setAutoFillBackground(true);
+    m_animationWaitingDialog->setWindowOpacity(0.7);
 
     QHBoxLayout* closeLayout = new QHBoxLayout();
-    QToolButton* closeButton = new QToolButton(m_searchingDialog);
+    QToolButton* closeButton = new QToolButton(m_animationWaitingDialog);
     QString strBtnCloseNormal = Utils::StyleHelper::skinResourceFileName("linuxlogindialoclose_white");
     QString strBtnCloseHover = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_on");
     QString strBtnCloseDown = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_selected"); // ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_selected");
@@ -813,11 +815,11 @@ void CWizLoginDialog::initSearchingDialog()
     closeLayout->setContentsMargins(0, 0, 0, 0);
     closeLayout->addStretch();
     closeLayout->addWidget(closeButton);
-    connect(closeButton, SIGNAL(clicked()), m_searchingDialog, SLOT(reject()));
+    connect(closeButton, SIGNAL(clicked()), m_animationWaitingDialog, SLOT(reject()));
     //
-    QLabel* labelSearching = new QLabel(m_searchingDialog);
+    QLabel* labelSearching = new QLabel(m_animationWaitingDialog);
     labelSearching->setFixedSize(32, 32);
-    QMovie* movie =new QMovie(m_searchingDialog);
+    QMovie* movie =new QMovie(m_animationWaitingDialog);
     movie->setFileName(":/searching.gif");
     labelSearching->setMovie(movie);
     QHBoxLayout* labelLayout = new QHBoxLayout();
@@ -828,8 +830,8 @@ void CWizLoginDialog::initSearchingDialog()
     QHBoxLayout* textLayout = new QHBoxLayout();
     textLayout->setContentsMargins(0, 5, 0, 0);
     textLayout->addStretch();
-    QLabel* labelText = new QLabel(m_searchingDialog);
-    labelText->setText(tr("Finding Service...."));
+    QLabel* labelText = new QLabel(m_animationWaitingDialog);
+    labelText->setText(text);
     QPalette plText = labelText->palette();
     plText.setColor(QPalette::WindowText, QColor(255, 255, 255, 200));
     labelText->setPalette(plText);
@@ -840,9 +842,35 @@ void CWizLoginDialog::initSearchingDialog()
     layout->addLayout(closeLayout);
     layout->addLayout(labelLayout);
     layout->addLayout(textLayout);
-   m_searchingDialog->setLayout(layout);
+   m_animationWaitingDialog->setLayout(layout);
 
-    movie->start();
+   movie->start();
+}
+
+int CWizLoginDialog::showAnimationWaitingDialog(const QString& text)
+{
+    if (m_animationWaitingDialog)
+    {
+        //NOTE:修复按钮样式问题，每次重新创建
+        delete m_animationWaitingDialog;
+    }
+    initAnimationWaitingDialog(text);
+
+    //
+    QPoint leftTop = geometry().topLeft();
+    leftTop.setX(leftTop.x() + (width() - m_animationWaitingDialog->width()) / 2);
+    leftTop.setY(leftTop.y() + (height() - m_animationWaitingDialog->height()) / 2);
+    m_animationWaitingDialog->move(leftTop);
+
+    return m_animationWaitingDialog->exec();
+}
+
+void CWizLoginDialog::closeAnimationWaitingDialog()
+{
+    if (m_animationWaitingDialog && m_animationWaitingDialog->isVisible())
+    {
+        m_animationWaitingDialog->accept();
+    }
 }
 
 void CWizLoginDialog::startWizBoxUdpClient()
@@ -877,6 +905,7 @@ void CWizLoginDialog::closeWizBoxUdpClient()
 
 void CWizLoginDialog::checkServerLicence()
 {
+    qDebug() << "current server ip : " << serverIp();
     if (serverIp().isEmpty())
     {
         CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
@@ -888,11 +917,14 @@ void CWizLoginDialog::checkServerLicence()
         initOEMDownloader();
     }
     m_oemDownloader->setServerIp(serverIp());
+    WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
 
 //    downloadOEMSettingsFromWizBox();
     CWizUserSettings userSettings(userId());
     QString strOldLicence = userSettings.serverLicence();
     emit checkServerLicenceRequest(strOldLicence);
+
+    showAnimationWaitingDialog(tr("Connecting...."));
 }
 
 void CWizLoginDialog::setSwicthServerSelectedAction(const QString& strActionData)
@@ -1024,6 +1056,8 @@ void CWizLoginDialog::onLoginInputChanged()
 
 void CWizLoginDialog::onTokenAcquired(const QString &strToken)
 {
+    closeAnimationWaitingDialog();
+    //
     Token::instance()->disconnect(this);
 
     qDebug() << "on tonken acquired : " << strToken;
@@ -1282,7 +1316,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
 //        m_searchingDialog->reject();
 //        return;
 //    }
-    m_searchingDialog->accept();
+    m_animationWaitingDialog->accept();
     m_lineEditServer->setText(ip);
     m_serverType = EnterpriseServer;
     CommonApiEntry::setEnterpriseServerIP(ip);
@@ -1294,7 +1328,7 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
 void CWizLoginDialog::onWizBoxSearchingTimeOut()
 {
     m_wizBoxSearchingTimer.stop();
-    m_searchingDialog->reject();
+    m_animationWaitingDialog->reject();
     closeWizBoxUdpClient();
     CWizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
 }
@@ -1340,11 +1374,14 @@ void CWizLoginDialog::onOEMLogoDownloaded(const QString& logoFile)
 
 void CWizLoginDialog::showErrorMessage(const QString& stterror)
 {
+    closeAnimationWaitingDialog();
     ui->label_passwordError->setText(stterror);
 }
 
 void CWizLoginDialog::onCheckServerLicenceFinished(bool result, const QString& settings)
 {
+    closeAnimationWaitingDialog();
+    //
     if (result)
     {
         // update oem setttings
@@ -1490,6 +1527,7 @@ void CWizLoginDialog::loadDefaultUser()
     else
     {
         m_serverType = WizServer;
+        emit wizServerSelected();
     }
 
     resetUserList();
@@ -1650,9 +1688,7 @@ void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
     if (settings.isEmpty())
     {
         return;
-    }
-
-    qDebug() << "oem settings : " << settings;
+    }    
     //
     rapidjson::Document d;
     d.Parse<0>(settings.toUtf8().constData());
