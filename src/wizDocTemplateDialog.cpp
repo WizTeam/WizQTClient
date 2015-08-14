@@ -206,7 +206,6 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
                     }
                 }
             }
-
             resetTempalteTree();
         }
     }

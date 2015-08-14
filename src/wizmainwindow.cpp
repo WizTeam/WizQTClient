@@ -1558,7 +1558,7 @@ void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
     // if current app is not active, there will no activewindow. remenber last active window to set menu item checkstate
     static QWidget * lastActiveWidget = activeWidget;
     activeWidget == nullptr ? (activeWidget = lastActiveWidget) : (lastActiveWidget = activeWidget);
-    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
+//    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
 
     QList<QAction*> newActions;
     QAction* action = nullptr;
@@ -1568,7 +1568,7 @@ void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
         menu->removeAction(action);
     }
 
-    action = new QAction(icon, tr("WizNote"), menu);
+    action = new QAction(tr("WizNote"), menu);
     action->setData(MAINWINDOW);
     action->setCheckable(true);
     action->setChecked((activeWidget == nullptr || activeWidget == this));
@@ -1584,7 +1584,7 @@ void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
             action = actionByGuid(actionList, keys.at(i));
             menu->removeAction(action);
         }
-        action = new QAction(icon, viewer->windowTitle(), menu);
+        action = new QAction(viewer->windowTitle(), menu);
         action->setData(keys.at(i));
         action->setCheckable(true);
         action->setChecked(viewer == activeWidget);
@@ -2419,17 +2419,45 @@ void MainWindow::on_actionViewToggleFullscreen_triggered()
 #endif // Q_OS_MAC
 }
 
-void MainWindow::on_actionMinimize_triggered()
+void MainWindow::on_actionViewMinimize_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarMinimize");
 
-    while (true) {
-        QWidget* wgt = qApp->activeWindow();
-        if (wgt == 0)
-            return;
+    QWidget* wgt = qApp->activeWindow();
+    if (wgt == 0)
+        return;
 
-        wgt->setWindowState(Qt::WindowMinimized);
+    wgt->setWindowState(Qt::WindowMinimized);
+}
+
+void MainWindow::on_actionZoom_triggered()
+{
+    WizGetAnalyzer().LogAction("MenuBarZoom");
+    QWidget* wgt = qApp->activeWindow();
+    if (!wgt)
+        return;
+
+    if (wgt->windowState() & Qt::WindowMaximized)
+    {
+        wgt->setWindowState(wgt->windowState() & ~Qt::WindowMaximized);
     }
+    else
+    {
+        wgt->setWindowState(wgt->windowState() | Qt::WindowMaximized);
+    }
+}
+
+void MainWindow::on_actionBringFront_triggered()
+{
+    WizGetAnalyzer().LogAction("MenuBarBringFront");
+
+    wizMacShowCurrentApplication();
+
+//    QWindowList widgetList = qApp->allWindows();
+//    for (QWindow* wgt : widgetList)
+//    {
+//        wgt->setVisible(true);
+//    }
 }
 
 void MainWindow::on_actionCategoryMessageCenter_triggered()

@@ -307,7 +307,9 @@ public Q_SLOTS:
     // menu view
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
-    void on_actionMinimize_triggered();
+    void on_actionViewMinimize_triggered();
+    void on_actionZoom_triggered();
+    void on_actionBringFront_triggered();
 
     void on_actionCategoryMessageCenter_triggered();
     void on_actionCategoryShortcuts_triggered();
