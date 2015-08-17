@@ -120,6 +120,7 @@ WizComboboxStyledItem* FontFamilies()
         {QObject::tr("HanziPen TC"), "HanziPen TC", "HanziPen TC", 14, false},
         {QObject::tr("Heiti SC"), "Heiti SC", "Heiti SC", 14, false},
         {QObject::tr("Heiti TC"), "Heiti TC", "Heiti TC", 14, false},
+        {QObject::tr("Kaiti SC"), "Kaiti SC", "Kaiti SC", 14, false},
         {QObject::tr("Kaiti TC"), "Kaiti TC", "Kaiti TC", 14, false},
         {QObject::tr("Lantinghei SC"), "Lantinghei SC", "Lantinghei SC", 14, false},
         {QObject::tr("Lantinghei TC"), "Lantinghei TC", "Lantinghei TC", 14, false},
@@ -786,9 +787,11 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 #endif
 
     QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/');
+    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
     for (QString recent : fontList)
     {
-        m_comboFontFamily->addItem(recent, recent);
+        WizComboboxStyledItem familyItem = itemFromArrayByKey(recent, fontFamilyItems, nFontFamilyCount);
+        m_comboFontFamily->addItem(familyItem.strText.isEmpty() ? recent : familyItem.strText, recent);
         m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZRECENTFONT, WizFontFamilyHelperRole);
     }
 
@@ -798,7 +801,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
         m_comboFontFamily->setItemData(m_comboFontFamily->count() - 1, WIZSEPARATOR, WizFontFamilyHelperRole);
     }
 
-    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
     for (int i = 0; i < nCommonlyUsedFontCount; i++)
     {
         QString font = CommonlyUsedFont[i];
@@ -1823,7 +1825,9 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
         m_comboFontFamily->removeItem(2);
     }
 
-    m_comboFontFamily->insertItem(0, strFontFamily, strFontFamily);
+    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
+    WizComboboxStyledItem familyItem = itemFromArrayByKey(strFontFamily, fontFamilyItems, nFontFamilyCount);
+    m_comboFontFamily->insertItem(0, familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText, strFontFamily);
     m_comboFontFamily->setItemData(0, WIZRECENTFONT, WizFontFamilyHelperRole);
 
     fontList.insert(0, strFontFamily);
