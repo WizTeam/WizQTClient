@@ -283,10 +283,10 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     m_menu = new QMenu(this);
     m_menu->addAction(WIZACTION_LIST_MESSAGE_MARK_READ, this,
                       SLOT(on_action_message_mark_read()));
-    m_menu->addAction(tr("View in Separate Window"), this,
-                      SLOT(on_action_message_viewInSeparateWindow()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_LOCATE, this,
                       SLOT(on_action_message_locate()));
+    m_menu->addAction(tr("View in Separate Window"), this,
+                      SLOT(on_action_message_viewInSeparateWindow()));
     m_menu->addSeparator();
     m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
                       SLOT(on_action_message_delete()));
@@ -307,6 +307,9 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(&m_dbMgr.db(),
             SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
             SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
+
+    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            SLOT(on_itemDoubleClicked(QListWidgetItem*)));
 
     connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));    
 }
