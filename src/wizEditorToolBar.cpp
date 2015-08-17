@@ -249,8 +249,8 @@ public:
         painter->save();
         painter->setPen(QColor("#cccccc"));
         painter->setBrush(Qt::NoBrush);
-        painter->drawLine(QLine(opt.rect.x(), opt.rect.y() + opt.rect.height() / 2 - 1,
-                                opt.rect.right(), opt.rect.y() + opt.rect.height() / 2));
+        int lineY = opt.rect.y() + opt.rect.height() / 2;
+        painter->drawLine(QLine(opt.rect.x(), lineY, opt.rect.right(), lineY));
         painter->restore();
     }
 
@@ -786,7 +786,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboFontSize->setItemDelegate(fontDelegate);
 #endif
 
-    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/');
+    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/', QString::SkipEmptyParts);
     WizComboboxStyledItem* fontFamilyItems = FontFamilies();
     for (QString recent : fontList)
     {
