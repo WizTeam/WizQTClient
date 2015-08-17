@@ -1276,9 +1276,11 @@ void CWizLoginDialog::onSNSLoginSuccess(const QString& strUrl)
             encryptedPassword = str.remove(0, keyOfAccessToken.length());
         }
     }
+    userIdString = QByteArray::fromPercentEncoding(userIdString.toUtf8());
     m_lineEditUserName->setText(userIdString);
     QString strPassword(QByteArray::fromBase64(encryptedPassword.toUtf8()));
     m_lineEditPassword->setText(strPassword);
+    m_loginUserGuid = userGuidString;
 
     accept();
 }
