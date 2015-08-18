@@ -1807,7 +1807,7 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
             return;
     }
 
-    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/');
+    QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/', QString::SkipEmptyParts);
     for (QString recent : fontList)
     {
         if (recent == strFontFamily)
