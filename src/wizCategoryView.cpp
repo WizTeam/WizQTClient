@@ -2852,7 +2852,14 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         {
             emit itemSelectionChanged();
         }
-
+    }
+    else if (item->type() == Category_ShortcutItem)
+    {
+        CWizCategoryViewShortcutItem* shortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(item);
+        if (shortcut && shortcut->shortcutType() == CWizCategoryViewShortcutItem::Document)
+        {
+            emit itemSelectionChanged();
+        }
     }
 }
 
