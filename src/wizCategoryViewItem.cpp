@@ -652,6 +652,7 @@ CWizCategoryViewShortcutItem* CWizCategoryViewShortcutRootItem::addItemToShortcu
 
     //
     addChild(newItem);
+    sortChildren(0, Qt::AscendingOrder);
     if (isContainsPlaceHoldItem())
         removePlaceHoldItem();
 

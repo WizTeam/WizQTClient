@@ -732,7 +732,7 @@ bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
     for (it = arrayData.begin(); it != arrayData.end(); it++) {
         WIZTAGDATA data(*it);
         data.strKbGUID = kbGUID();
-        //WARNING:当前同步数据时不会从服务器中下载tag的position数据。
+        //NOTE:当前同步数据时不会从服务器中下载tag的position数据。
         //将position数据保留为原本的数据。如果后期规则修改，此处需要修改
         WIZTAGDATA dataTemp;
         if (TagFromGUID(data.strGUID, dataTemp))

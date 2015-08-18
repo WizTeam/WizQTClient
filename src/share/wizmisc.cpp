@@ -1890,7 +1890,8 @@ void WizDeleteFolder(const CString& strPath)
     if (dir.isRoot())
         return;
 
-    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
+    dir = QDir(strPath);
+    dir.removeRecursively();
 }
 
 void WizDeleteFile(const CString& strFileName)
@@ -2604,7 +2605,6 @@ bool WizGetLocalUsers(QList<WizLocalUser>& userList)
     QString dataPath = Utils::PathResolve::dataStorePath();
     QDir dir(dataPath);
     QStringList folderList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
-    qDebug() << "get local data folder list " << folderList;
     for (QString folder : folderList)
     {
         WizLocalUser user;
@@ -2617,7 +2617,6 @@ bool WizGetLocalUsers(QList<WizLocalUser>& userList)
         user.strGuid = db.GetMetaDef("ACCOUNT", "GUID");
         if (user.strGuid.isEmpty())
         {
-            qWarning() << "can not get user guid from index.db in folder : " << folder;
             continue;
         }
         user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");

@@ -152,7 +152,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     ui->wgt_passwordRepeat->setAutoClearRightIcon(true);
 
 
-    connect(m_menuUsers, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
+//    connect(m_menuUsers, SIGNAL(triggered(QAction*)), SLOT(userListMenuClicked(QAction*)));
     connect(m_menuServers, SIGNAL(triggered(QAction*)), SLOT(serverListMenuClicked(QAction*)));
 
     connect(m_lineEditNewPassword, SIGNAL(textChanged(QString)), SLOT(onSignUpInputDataChanged()));
@@ -250,8 +250,12 @@ void CWizLoginDialog::resetUserList()
     {
         if (user.nUserType == m_serverType || (WizServer == m_serverType && user.nUserType == 0))
         {
-            QAction* action = m_menuUsers->addAction(user.strUserId);
-            action->setData(user.strGuid);
+//            QAction* action = m_menuUsers->addAction(user.strUserId);
+            CWizUserItemAction* userItem = new CWizUserItemAction(user, m_menuUsers);
+            connect(userItem, SIGNAL(userDeleteRequest(WizLocalUser)), SLOT(onDeleteUserRequest(WizLocalUser)));
+            connect(userItem, SIGNAL(userSelected(WizLocalUser)), SLOT(onUserSelected(WizLocalUser)));
+            userItem->setData(user.strGuid);
+            m_menuUsers->addAction(userItem);
         }
     }
     //
@@ -270,6 +274,11 @@ void CWizLoginDialog::resetUserList()
     if (action)
     {
         m_menuUsers->setDefaultAction(action);
+        CWizUserItemAction* userAction = dynamic_cast<CWizUserItemAction*>(action);
+        if (userAction)
+        {
+            userAction->setSelected(true);
+        }
     }
 }
 
@@ -694,13 +703,12 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_passwordError->setText("");
 
     m_menuUsers->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}"
-                          "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
-                          "QMenu::item:selected {background-color: #E7F5FF; }"
-                          "QMenu::item:default {background-color: #E7F5FF; }");
+    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}");
+//                          "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
+//                          "QMenu::item:selected {background-color: #E7F5FF; }"
+//                          "QMenu::item:default {background-color: #E7F5FF; }");
 
     QString status_switchserver_selected = ::WizGetSkinResourceFileName(strThemeName, "status_switchserver_selected");
-    //  font-family:'黑体','Microsoft YaHei UI', 'Microsoft YaHei UI' ;
     m_menuServers->setStyleSheet(QString("QMenu {background-color: #ffffff; border-style: solid; border-color: #3399ff; border-width: 1px; padding: 0px 0px 0px 0px;  menu-scrollable: 1;}"
                                  "QMenu::item {padding: 4px 10px 4px 25px; color: #000000;  background-color: #ffffff;}"
                                  "QMenu::item:selected {background-color: #E7F5FF; }"
@@ -1246,6 +1254,32 @@ void CWizLoginDialog::onUserNameEdited(const QString& arg1)
     m_lineEditPassword->setText("");
 }
 
+void CWizLoginDialog::onDeleteUserRequest(const WizLocalUser& user)
+{
+    QAction* action = findActionInMenu(user.strGuid);
+    if (action)
+    {
+        if (CWizMessageBox::question(this, tr("Info"), tr("Remove user will delete local cache files, are you sure to remove"
+                                                      " user %1 ?").arg(user.strUserId)) == QMessageBox::Yes)
+        {
+            m_menuUsers->removeAction(action);
+            QString folderPath = Utils::PathResolve::dataStorePath() + user.strDataFolderName;
+            qDebug() << "remove folder path : " << folderPath;
+            ::WizDeleteFolder(folderPath);
+        }
+    }
+}
+
+void CWizLoginDialog::onUserSelected(const WizLocalUser& user)
+{
+    QAction* action = findActionInMenu(user.strGuid);
+    if (action)
+    {
+        m_menuUsers->setDefaultAction(action);
+        setUser(user.strGuid);
+    }
+}
+
 void CWizLoginDialog::onSNSPageUrlChanged(const QUrl& url)
 {
     QString strUrl = url.toString();
@@ -1374,10 +1408,14 @@ void CWizLoginDialog::onOEMLogoDownloaded(const QString& logoFile)
     m_oemLogoMap.insert(serverIp(), logoFile);
 }
 
-void CWizLoginDialog::showErrorMessage(const QString& stterror)
+void CWizLoginDialog::showOEMErrorMessage(const QString& stterror)
 {
-    closeAnimationWaitingDialog();
-    ui->label_passwordError->setText(stterror);
+    if (EnterpriseServer == m_serverType && m_oemDownloader
+            && m_oemDownloader->serverIp() == serverIp())
+    {
+        closeAnimationWaitingDialog();
+        ui->label_passwordError->setText(stterror);
+    }
 }
 
 void CWizLoginDialog::onCheckServerLicenceFinished(bool result, const QString& settings)
@@ -1593,7 +1631,7 @@ void CWizLoginDialog::initOEMDownloader()
     connect(m_oemDownloader, SIGNAL(logoDownloaded(QString)),
             SLOT(onOEMLogoDownloaded(QString)));
     connect(m_oemDownloader, SIGNAL(errorMessage(QString)),
-            SLOT(showErrorMessage(QString)));
+            SLOT(showOEMErrorMessage(QString)));
     connect(m_oemDownloader, SIGNAL(checkLicenceFinished(bool, QString)),
             SLOT(onCheckServerLicenceFinished(bool, QString)));
     connect(this, SIGNAL(logoDownloadRequest(QString)),
@@ -1646,6 +1684,11 @@ CWizOEMDownloader::CWizOEMDownloader(QObject* parent)
     : QObject(parent)
     , m_server(QString())
 {
+}
+
+QString CWizOEMDownloader::serverIp() const
+{
+    return m_server;
 }
 
 void CWizOEMDownloader::setServerIp(const QString& ip)
@@ -1717,4 +1760,124 @@ void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
         emit errorMessage(tr("Licence not found : %1").arg(settings.left(100)));
         qDebug() << "Can not find licence from oem settings";
     }
+}
+
+
+CWizUserItemAction::CWizUserItemAction(const WizLocalUser& localUser, QMenu* parent)
+    : QWidgetAction(parent)
+    , m_menu(parent)
+    , m_userData(localUser)
+{
+    m_widget = new CWizActionWidget(m_userData.strUserId, parent);
+    setDefaultWidget(m_widget);
+    connect(m_widget, SIGNAL(delButtonClicked()), SLOT(on_delButtonClicked()));
+    connect(m_widget, SIGNAL(widgetClicked()), SLOT(on_widgetClicked()));
+}
+
+WizLocalUser CWizUserItemAction::getUserData()
+{
+    return m_userData;
+}
+
+void CWizUserItemAction::setSelected(bool selected)
+{
+    m_widget->setSelected(selected);
+}
+
+void CWizUserItemAction::on_delButtonClicked()
+{
+    emit userDeleteRequest(m_userData);
+}
+
+void CWizUserItemAction::on_widgetClicked()
+{
+    m_menu->hide();
+    emit userSelected(m_userData);
+}
+
+
+CWizActionWidget::CWizActionWidget(const QString& text, QWidget* parent)
+    : m_mousePress(false)
+    , m_text(text)
+    , m_selected(false)
+    , QWidget(parent)
+{
+    setMouseTracking(true);
+    m_deleteButton = new QPushButton();
+    QString pixFile = Utils::StyleHelper::skinResourceFileName("loginCloseButton_hot");
+    QPixmap pixmap(pixFile);
+    m_deleteButton->setIcon(pixmap);
+    m_deleteButton->setIconSize(pixmap.size());
+    m_deleteButton->setStyleSheet("background:transparent;");
+    connect(m_deleteButton, SIGNAL(clicked()), this, SIGNAL(delButtonClicked()));
+
+    QHBoxLayout *main_layout = new QHBoxLayout();
+    main_layout->addStretch();
+    main_layout->addWidget(m_deleteButton);
+    main_layout->setContentsMargins(5, 5, 10, 5);
+    main_layout->setSpacing(5);
+    setLayout(main_layout);
+    setMinimumHeight(40);
+    m_deleteButton->setVisible(false);
+}
+
+void CWizActionWidget::setSelected(bool selected)
+{
+    m_selected = selected;
+}
+
+void CWizActionWidget::mousePressEvent(QMouseEvent* event)
+{
+    if(event->button() == Qt::LeftButton)
+    {
+        m_mousePress = true;
+    }
+    update();
+    QWidget::mousePressEvent(event);
+}
+
+void CWizActionWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+    QPoint delLeftTop = m_deleteButton->mapToParent(QPoint(0, 0));
+    if(m_mousePress && (rect().contains(event->pos()))
+            && (event->pos().x() < delLeftTop.x()))
+    {
+        emit widgetClicked();
+    }
+    m_mousePress = false;
+    update();
+    QWidget::mouseReleaseEvent(event);
+}
+
+void CWizActionWidget::enterEvent(QEvent* event)
+{
+    m_deleteButton->setVisible(true);
+    QWidget::enterEvent(event);
+}
+
+void CWizActionWidget::leaveEvent(QEvent* event)
+{
+    m_deleteButton->setVisible(false);
+    QWidget::leaveEvent(event);
+}
+
+void CWizActionWidget::paintEvent(QPaintEvent * event)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);    
+
+    QRect rcText = opt.rect;
+    rcText.setRight(rcText.right() - 40);
+    rcText.setLeft(rcText.left() + 45);
+    if (opt.state & QStyle::State_MouseOver || m_selected)
+    {
+        p.fillRect(opt.rect, QBrush(QColor("#E7F5FF")));
+    }
+    else
+    {
+        p.fillRect(opt.rect, QBrush(Qt::white));
+    }
+    p.setPen(QColor("#5F5F5F"));
+    p.drawText(rcText, Qt::AlignVCenter | Qt::AlignLeft, m_text);
 }

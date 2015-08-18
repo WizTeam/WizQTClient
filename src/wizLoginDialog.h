@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QWidgetAction>
 #include <QTimer>
 #include "share/wizsettings.h"
 
@@ -24,6 +25,7 @@ class CWizOEMDownloader : public QObject
 public:
     CWizOEMDownloader(QObject* parent);
 
+    QString serverIp() const;
 public slots:
     void setServerIp(const QString& ip);
     void downloadOEMLogo(const QString& strUrl);
@@ -40,6 +42,53 @@ private:
     QString _downloadOEMSettings();
 
     QString m_server;
+};
+
+class CWizActionWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    CWizActionWidget(const QString& text, QWidget* parent);
+    void setSelected(bool selected);
+
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void enterEvent(QEvent * event);
+    void leaveEvent(QEvent * event);
+    void paintEvent(QPaintEvent*);
+
+signals:
+    void delButtonClicked();
+    void widgetClicked();
+
+private:
+    bool m_mousePress;
+    bool m_selected;
+    QString m_text;
+    QPushButton *m_deleteButton;
+};
+
+class CWizUserItemAction : public QWidgetAction
+{
+    Q_OBJECT
+public:
+    explicit CWizUserItemAction(const WizLocalUser& localUser, QMenu *parent);
+    WizLocalUser getUserData();
+    void setSelected(bool selected);
+
+signals:
+    void userDeleteRequest(const WizLocalUser& WizLocalUser);
+    void userSelected(const WizLocalUser& WizLocalUser);
+
+private slots:
+    void on_delButtonClicked();
+    void on_widgetClicked();
+
+private:
+    WizLocalUser m_userData;
+    QMenu* m_menu;
+    CWizActionWidget* m_widget;
 };
 
 
@@ -120,6 +169,8 @@ private slots:
     void on_cbx_autologin_toggled(bool checked);
 
     void onUserNameEdited(const QString& arg1);
+    void onDeleteUserRequest(const WizLocalUser& user);
+    void onUserSelected(const WizLocalUser& user);
 
     void onSNSPageUrlChanged(const QUrl& url);
     void onSNSLoginSuccess(const QString& strUrl);
@@ -131,7 +182,7 @@ private slots:
     // download oem
     bool onOEMSettingsDownloaded(const QString& settings);
     void onOEMLogoDownloaded(const QString& logoFile);
-    void showErrorMessage(const QString& stterror);
+    void showOEMErrorMessage(const QString& stterror);
     void onCheckServerLicenceFinished(bool result, const QString& settings);
 
     // state machine

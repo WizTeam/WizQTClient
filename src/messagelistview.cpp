@@ -772,7 +772,6 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
                     m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);
                 }
-
             }
         }
         else
