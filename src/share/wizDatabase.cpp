@@ -2592,12 +2592,19 @@ QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
         return QString();
 
     QString strUserID = doc.strOwner;
+
+    //NOTE: 用户可能使用手机号登录，此时owner为手机号，需要使用昵称
+    if (strUserID == personDb->GetUserId())
+    {
+        personDb->GetUserDisplayName(strUserID);
+    }
+
     WIZBIZUSER bizUser;
     personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
     if (bizUser.alias.isEmpty())
     {
-        int index = doc.strOwner.indexOf('@');
-        return index == -1 ? doc.strOwner :  doc.strOwner.left(index);
+        int index = strUserID.indexOf('@');
+        return index == -1 ? strUserID :  strUserID.left(index);
     }
     return bizUser.alias;
 }
