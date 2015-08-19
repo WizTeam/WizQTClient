@@ -44,19 +44,17 @@ void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
     QDesktopServices::openUrl(strUrl);
 }
 
-
-
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 {
     QString strFoler = Utils::PathResolve::builtinTemplatePath();
-    initFolderTemplateItems(strFoler);
+    initFolderTemplateItems(strFoler, BuildInTemplate);
     strFoler = Utils::PathResolve::downloadedTemplatesPath();
-    initFolderTemplateItems(strFoler);
+    initFolderTemplateItems(strFoler, CustomTemplate);
 
     ui->treeWidget->expandAll();
 }
 
-void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler)
+void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler, TemplateType type)
 {
     CWizSettings settings(strFoler + "template.ini");
 
@@ -69,6 +67,7 @@ void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler)
         strDir = strFoler + strDir + "/";
         folderName += languangeCode();
         QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
+        topLevelItem->setData(0, Qt::UserRole, type);
         QString strLocalTitle;
         if (getLocalization(settings, folderName, strLocalTitle))
         {
@@ -80,7 +79,7 @@ void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler)
         }
         topLevelItem->setText(0, folderName);
         ui->treeWidget->addTopLevelItem(topLevelItem);
-        initFolderItems(topLevelItem, strDir, settings);
+        initFolderItems(topLevelItem, strDir, settings, type);
     }
 }
 
@@ -133,7 +132,7 @@ QString CWizDocTemplateDialog::previewFileName()
 }
 
 void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
-                                            const QString& strDir, CWizSettings& settings)
+                                            const QString& strDir, CWizSettings& settings, TemplateType type)
 {
     QDir dir(strDir);
     QStringList files = dir.entryList();
@@ -156,6 +155,7 @@ void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
 
             ziwFile = strDir + ziwFile;
             CWizTemplateFileItem *item = new CWizTemplateFileItem(ziwFile, parentItem);
+            item->setData(0, Qt::UserRole, type);
             item->setText(0, strTitle);
             parentItem->addChild(item);
         }
@@ -240,7 +240,11 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
 
 void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
 {
+    bool bDelAble = item->data(0, Qt::UserRole).toInt() == CustomTemplate;
+    ui->btn_delete->setEnabled(bDelAble);
+    //
     CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
+    ui->btn_ok->setEnabled(pItem != nullptr);
     if (pItem)
     {
         QString strZiwFile = pItem->filePath();
@@ -289,5 +293,28 @@ void CWizDocTemplateDialog::on_pushButton_import_clicked()
     QStringList fileList = QFileDialog::getOpenFileNames(0, tr("Select one or more template files"), QDir::homePath(), "Wiz Template (*.wiztemplate)");
     foreach (QString strFile, fileList) {
         importTemplateFile(strFile);
+    }
+}
+
+void CWizDocTemplateDialog::on_btn_delete_clicked()
+{
+    QTreeWidgetItem* item = ui->treeWidget->currentItem();
+    if (!item)
+        return;
+
+    CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
+    if (pItem)
+    {
+        QString strZiwFile = pItem->filePath();
+        WizDeleteFile(strZiwFile);
+        pItem->parent()->removeChild(item);
+        delete item;
+    }
+    else
+    {
+        QString path = Utils::PathResolve::downloadedTemplatesPath() + item->text(0);
+        WizDeleteFolder(path);
+        ui->treeWidget->takeTopLevelItem(ui->treeWidget->indexOfTopLevelItem(item));
+        delete item;
     }
 }
