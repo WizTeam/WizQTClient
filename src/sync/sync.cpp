@@ -1866,11 +1866,8 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 }
 
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
-                     IWizSyncableDatabase* pDatabase,
-                     bool bUseWizServer, bool bBackground)
+                     IWizSyncableDatabase* pDatabase, bool bBackground)
 {
-    Q_UNUSED(bUseWizServer);
-
     pEvents->OnStatus(QObject::tr("----------Sync start----------"));
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(QObject::tr("Connecting to server"));

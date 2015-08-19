@@ -222,7 +222,6 @@ void CWizUserInfoWidget::on_action_logout_triggered()
 
 void CWizUserInfoWidget::on_userInfo_changed()
 {
-    AvatarHost::reload(m_db.GetUserId());
     resetUserInfo();
 }
 QString CWizUserInfoWidget::userId()

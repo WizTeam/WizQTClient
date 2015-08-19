@@ -276,7 +276,7 @@ bool CWizKMSyncThread::syncAll()
 
     syncUserCert();
 
-    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);    
+    ::WizSyncDatabase(m_info, m_pEvents, &m_db, m_bBackground);
 
     return true;
 }
