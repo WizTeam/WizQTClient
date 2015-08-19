@@ -584,8 +584,10 @@ private:
 
     //
     QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name);
-    bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
-    bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
+    bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName,
+                                 bool& isCombine, QTreeWidgetItem* exceptBrother = nullptr);
+    bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName,
+                                 bool& isCombine, QTreeWidgetItem* exceptBrother = nullptr);
 
     bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
 
