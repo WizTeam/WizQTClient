@@ -637,15 +637,12 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     if (!bOk)
         return;
 
+    CWizDocumentView* docView = noteView();
+    qDebug() << "docview ; " << docView << " note view ; " << view;
+
     if (view != noteView()) {
         return;
-    }
-
-    static QString docGUID = "";
-    if (docGUID == note.strGUID)
-        return;
-    docGUID = note.strGUID;
-
+    }    
 
     m_commentsUrl.clear();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
