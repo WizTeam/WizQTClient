@@ -4323,6 +4323,20 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
     CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, db.kbGUID());
     pGroupItem->addChild(pTrashItem);
 
+    //对父文件夹数据出现错误的文件夹进行容错处理，如果有父标签指向，但标签不存在则显示在根目录
+    CWizTagDataArray arrayTag;
+    if (db.GetAllTagsWithErrorParent(arrayTag)) {
+        CWizTagDataArray::const_iterator it;
+        for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
+            qWarning() << "group folder with error parent fount, folder name : " << (QString)it->strName << " folder guid : "
+                       << (QString)it->strGUID << "  parent guid : " << (QString)it->strParentGUID;
+            CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
+            pGroupItem->addChild(pTagItem);
+            initGroup(db, pTagItem, it->strGUID);
+        }
+    }
+
+
     // only show trash if permission is enough
     if (db.permission() > WIZ_USERGROUP_SUPER) {
         pTrashItem->setHidden(true);

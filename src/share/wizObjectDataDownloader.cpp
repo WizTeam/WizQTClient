@@ -218,5 +218,5 @@ void CWizFileDownloader::startDownload()
 
 bool CWizFileDownloader::download()
 {
-     WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
+     return WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
 }

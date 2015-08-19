@@ -1289,6 +1289,15 @@ bool CWizIndexBase::GetAllChildTags(const CString& strParentTagGUID, CWizTagData
     return true;
 }
 
+bool CWizIndexBase::GetAllTagsWithErrorParent(CWizTagDataArray& arrayTag)
+{
+    CString strWhere = QString("TAG_GROUP_GUID is not null and TAG_GROUP_GUID "
+                               "not in (select distinct TAG_GUID from %1)").arg(TABLE_NAME_WIZ_TAG);
+
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
+    return SQLToTagDataArray(strSQL, arrayTag);
+}
+
 bool CWizIndexBase::GetChildTagsSize(const CString &strParentTagGUID, int &size)
 {
     CString strWhere = strParentTagGUID.isEmpty() ?
