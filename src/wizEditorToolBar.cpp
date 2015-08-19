@@ -325,8 +325,13 @@ const QColor colors[6][8] =
     QColor(85, 170, 255, 255), QColor(255, 170, 255, 255), QColor(85, 255, 255, 255), QColor(255, 255, 255, 255)}
 };
 
-const QColor macColors[5][6] =
+const int nMacColorRow = 6;
+const int nMacColorColum = 6;
+const QColor macColors[nMacColorRow][nMacColorColum] =
 {
+    {QColor("#00b0f0"), QColor("#92d050"), QColor("#ffff00"),
+    QColor("#fcc00f"), QColor("#ff0000"), QColor("#7030a0")},
+
     {QColor(100, 179, 223, 255), QColor(157, 225, 89, 255), QColor(255, 224, 97, 255),
     QColor(255, 192, 114, 255), QColor(255, 95, 94, 255), QColor(157, 69, 184, 255)},
 
@@ -1705,9 +1710,9 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pGridLayout->setContentsMargins(0, 0, 0, 0);
     pGridLayout->setSpacing(2);
 
-    for (int iRow = 0; iRow < 5; iRow++)
+    for (int iRow = 0; iRow < nMacColorRow; iRow++)
     {
-        for (int iCol = 0; iCol < 6; iCol++)
+        for (int iCol = 0; iCol < nMacColorColum; iCol++)
         {
             QAction *action = new QAction(this);
             action->setData(macColors[iRow][iCol]);
