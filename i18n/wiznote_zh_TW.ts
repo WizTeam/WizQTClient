@@ -250,7 +250,7 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="1227"/>
         <source>Add to Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translation>添加到捷徑</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="2758"/>
@@ -412,27 +412,27 @@
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5833"/>
         <source>Source folders contains encrypted notes, are you sure to operate these notes?</source>
-        <translation type="unfinished"></translation>
+        <translation>資料夾中包含加密筆記，是否繼續執行操作？</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5840"/>
         <source>Encrypted notes are not downloaded to local, can not verify password!</source>
-        <translation type="unfinished"></translation>
+        <translation>加密筆記未下載到本地，無法進行密碼驗證！</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5845"/>
         <source>Please input note password</source>
-        <translation type="unfinished"></translation>
+        <translation>請輸入筆記密碼</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5846"/>
         <source>Password :</source>
-        <translation type="unfinished">密碼：</translation>
+        <translation>密碼：</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5857"/>
         <source>Password error!</source>
-        <translation type="unfinished"></translation>
+        <translation>密碼錯誤！</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="2756"/>
@@ -671,7 +671,7 @@
     <message>
         <location filename="../src/wizDocTemplateDialog.cpp" line="187"/>
         <source>custom</source>
-        <translation type="unfinished"></translation>
+        <translation>自定義</translation>
     </message>
     <message>
         <location filename="../src/wizDocTemplateDialog.cpp" line="264"/>
@@ -1224,7 +1224,7 @@
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="415"/>
         <source>Connecting...</source>
-        <translation type="unfinished"></translation>
+        <translation>正在連接...</translation>
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="629"/>
@@ -1264,7 +1264,7 @@
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="927"/>
         <source>Connecting....</source>
-        <translation type="unfinished"></translation>
+        <translation type="unfinished">正在連接...</translation>
     </message>
     <message>
         <location filename="../src/wizLoginDialog.cpp" line="1396"/>
@@ -1625,7 +1625,7 @@
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="330"/>
         <source>Only download attachments title</source>
-        <translation type="unfinished"></translation>
+        <translation>只下載附件標題</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="363"/>
@@ -1776,7 +1776,7 @@
         <location filename="../src/ui/wizpreferencedialog.ui" line="234"/>
         <location filename="../src/ui/wizpreferencedialog.ui" line="288"/>
         <source>Only download note title</source>
-        <translation type="unfinished"></translation>
+        <translation>只下載筆記標題</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="369"/>
@@ -2044,27 +2044,27 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/ui/wizupdaterprogressdialog.ui" line="14"/>
         <source>updaterDialog</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ui/wizupdaterprogressdialog.ui" line="64"/>
         <source>Update ongoing:</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/ui/wizupdaterprogressdialog.ui" line="77"/>
         <source>(Please do not close the window to avoid damage your data)</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizupdaterprogressdialog.cpp" line="243"/>
         <source>Error</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
     <message>
         <location filename="../src/wizupdaterprogressdialog.cpp" line="243"/>
         <source>the .wiznote directory should be empty, please contect R&amp;D team!</source>
-        <translation type="unfinished"></translation>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -2383,7 +2383,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="813"/>
         <source>Font Panel</source>
-        <translation type="unfinished"></translation>
+        <translation>字體面板</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="828"/>
@@ -2558,7 +2558,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="533"/>
         <source>Username / password error. Please login again.</source>
-        <translation type="unfinished"></translation>
+        <translation>用戶名 / 密碼錯誤，請重新登錄。</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="1455"/>
@@ -2901,12 +2901,12 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="55"/>
         <source>Category Option</source>
-        <translation type="unfinished"></translation>
+        <translation>自定義目錄欄</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="56"/>
         <source>Sort By</source>
-        <translation type="unfinished"></translation>
+        <translation>排序方式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="66"/>
@@ -2958,52 +2958,52 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="70"/>
         <source>New Note by Template...</source>
-        <translation type="unfinished"></translation>
+        <translation>通過模板創建筆記...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="75"/>
         <source>Print Page Margins...</source>
-        <translation type="unfinished"></translation>
+        <translation>頁面打印邊距...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="80"/>
         <source>Rebuild Full Text Search Index</source>
-        <translation type="unfinished"></translation>
+        <translation>重建搜尋索引</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="81"/>
         <source>Search Note</source>
-        <translation type="unfinished"></translation>
+        <translation>搜尋筆記</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="82"/>
         <source>Advanced Search</source>
-        <translation type="unfinished">進階搜尋</translation>
+        <translation>進階搜尋</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="83"/>
         <source>Reset Search</source>
-        <translation type="unfinished"></translation>
+        <translation>重置搜尋</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="84"/>
         <source>User Feedback...</source>
-        <translation type="unfinished"></translation>
+        <translation>用戶反饋...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="85"/>
         <source>User Support...</source>
-        <translation type="unfinished"></translation>
+        <translation>用戶支持...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="86"/>
         <source>User Manual...</source>
-        <translation type="unfinished"></translation>
+        <translation>用戶手冊...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="87"/>
         <source>Find and Replace...</source>
-        <translation type="unfinished"></translation>
+        <translation>尋找取代...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="90"/>
@@ -3018,12 +3018,12 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="95"/>
         <source>Paste as Plain Text</source>
-        <translation type="unfinished"></translation>
+        <translation>粘貼為純文字</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="97"/>
         <source>Select All</source>
-        <translation type="unfinished"></translation>
+        <translation>全選</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="100"/>
@@ -3048,22 +3048,22 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="114"/>
         <source>Hide Sidebar</source>
-        <translation type="unfinished"></translation>
+        <translation>隱藏側邊欄</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="114"/>
         <source>Show Sidebar</source>
-        <translation type="unfinished"></translation>
+        <translation>顯示側邊欄</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="115"/>
         <source>Enter Fullscreen</source>
-        <translation type="unfinished"></translation>
+        <translation>進入全屏</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="115"/>
         <source>Leave Fullscreen</source>
-        <translation type="unfinished"></translation>
+        <translation>退出全屏</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="117"/>
@@ -3073,177 +3073,177 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="118"/>
         <source>Zoom</source>
-        <translation type="unfinished"></translation>
+        <translation>縮放</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="119"/>
         <source>Bring All to Front</source>
-        <translation type="unfinished"></translation>
+        <translation>前置所有窗口</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="124"/>
         <source>QuickSearch</source>
-        <translation type="unfinished"></translation>
+        <translation>快速搜尋</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="125"/>
         <source>Folders</source>
-        <translation type="unfinished"></translation>
+        <translation>資料夾</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="127"/>
         <source>Biz Groups</source>
-        <translation type="unfinished"></translation>
+        <translation>企業群組</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="128"/>
         <source>Personal Groups</source>
-        <translation type="unfinished"></translation>
+        <translation>個人群組</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="129"/>
         <source>Thumbnail View</source>
-        <translation type="unfinished"></translation>
+        <translation>摘要檢視方式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="130"/>
         <source>Two Line View</source>
-        <translation type="unfinished"></translation>
+        <translation>兩行檢視方式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="131"/>
         <source>One Line View</source>
-        <translation type="unfinished"></translation>
+        <translation>單行檢視方式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="132"/>
         <source>Sort by Created Time</source>
-        <translation type="unfinished"></translation>
+        <translation>按建立時間排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="133"/>
         <source>Sort by Updated Time</source>
-        <translation type="unfinished"></translation>
+        <translation>按更新時間排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="134"/>
         <source>Sort by Access Time</source>
-        <translation type="unfinished"></translation>
+        <translation>按存取時間排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="135"/>
         <source>Sort by Title</source>
-        <translation type="unfinished"></translation>
+        <translation>按標題排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="136"/>
         <source>Sort by Folder</source>
-        <translation type="unfinished"></translation>
+        <translation>按資料夾排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="137"/>
         <source>Sort by Tag</source>
-        <translation type="unfinished"></translation>
+        <translation>按標籤排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="138"/>
         <source>Sort by Size</source>
-        <translation type="unfinished"></translation>
+        <translation>按大小排序</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="141"/>
         <source>Justify Left</source>
-        <translation type="unfinished"></translation>
+        <translation>靠左對齊</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="142"/>
         <source>Justify Right</source>
-        <translation type="unfinished"></translation>
+        <translation>靠右對齊</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="143"/>
         <source>Justify Center</source>
-        <translation type="unfinished"></translation>
+        <translation>置中</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="144"/>
         <source>Justify Both Side</source>
-        <translation type="unfinished"></translation>
+        <translation>兩端對齊</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="147"/>
         <source>Convert to Unoredered List</source>
-        <translation type="unfinished"></translation>
+        <translation>轉為(無序)符號列表</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="148"/>
         <source>Convert to Ordered List</source>
-        <translation type="unfinished"></translation>
+        <translation>轉為(有序)編號列表</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="149"/>
         <source>Insert Table</source>
-        <translation type="unfinished">插入表格</translation>
+        <translation>插入表格</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="154"/>
         <source>Strike Through</source>
-        <translation type="unfinished"></translation>
+        <translation>刪除線</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="155"/>
         <source>Insert Horizontal</source>
-        <translation type="unfinished"></translation>
+        <translation>插入水平線</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="156"/>
         <source>Insert Date</source>
-        <translation type="unfinished"></translation>
+        <translation>插入日期</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="157"/>
         <source>Insert Time</source>
-        <translation type="unfinished"></translation>
+        <translation>插入時間</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="158"/>
         <source>Insert Check List</source>
-        <translation type="unfinished"></translation>
+        <translation>插入清單</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="159"/>
         <source>Insert Code</source>
-        <translation type="unfinished"></translation>
+        <translation>插入代碼</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="160"/>
         <source>Insert Image</source>
-        <translation type="unfinished"></translation>
+        <translation>插入圖片</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="161"/>
         <source>Remove Format</source>
-        <translation type="unfinished"></translation>
+        <translation>清除樣式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="162"/>
         <source>Convert to Plain Text</source>
-        <translation type="unfinished"></translation>
+        <translation>轉為純文字</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="163"/>
         <source>View Html Source...</source>
-        <translation type="unfinished"></translation>
+        <translation>查看源碼...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="164"/>
         <source>Screen Shot...</source>
-        <translation type="unfinished"></translation>
+        <translation>螢幕擷圖...</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="165"/>
         <source>Developer Mode</source>
-        <translation type="unfinished"></translation>
+        <translation>開發者模式</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="1447"/>
@@ -3298,7 +3298,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="35"/>
         <source>&amp;Window</source>
-        <translation type="unfinished"></translation>
+        <translation>窗口(&amp;W)</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="36"/>
@@ -3328,7 +3328,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="44"/>
         <source>Window</source>
-        <translation type="unfinished"></translation>
+        <translation>窗口</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="45"/>
@@ -3667,7 +3667,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="168"/>
         <source>Add to Shortcuts</source>
-        <translation type="unfinished"></translation>
+        <translation>添加到捷徑</translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="5803"/>
@@ -3793,22 +3793,22 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="112"/>
         <source>Adobe Fangsong Std</source>
-        <translation type="unfinished"></translation>
+        <translation>Adobe 仿宋 Std</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="113"/>
         <source>Adobe Heiti Std</source>
-        <translation type="unfinished"></translation>
+        <translation>Adobe 黑體 Std</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="114"/>
         <source>Adobe Kaiti Std</source>
-        <translation type="unfinished"></translation>
+        <translation>Adobe 楷體 Std</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="115"/>
         <source>Adobe Song Std</source>
-        <translation type="unfinished"></translation>
+        <translation>Adobe 宋體 Std</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="116"/>
@@ -3838,32 +3838,32 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="121"/>
         <source>Heiti SC</source>
-        <translation type="unfinished"></translation>
+        <translation>黑體-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="122"/>
         <source>Heiti TC</source>
-        <translation type="unfinished"></translation>
+        <translation>黑體-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="123"/>
         <source>Kaiti SC</source>
-        <translation type="unfinished"></translation>
+        <translation>楷體-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="124"/>
         <source>Kaiti TC</source>
-        <translation type="unfinished"></translation>
+        <translation>楷體-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="125"/>
         <source>Lantinghei SC</source>
-        <translation type="unfinished"></translation>
+        <translation>蘭亭黑-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="126"/>
         <source>Lantinghei TC</source>
-        <translation type="unfinished"></translation>
+        <translation>蘭亭黑-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="127"/>
@@ -3873,67 +3873,67 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="128"/>
         <source>Microsoft YaHei</source>
-        <translation type="unfinished"></translation>
+        <translation>微軟雅黑</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="129"/>
         <source>Songti SC</source>
-        <translation type="unfinished"></translation>
+        <translation>宋體-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="130"/>
         <source>Songti TC</source>
-        <translation type="unfinished"></translation>
+        <translation>宋體-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="131"/>
         <source>STFangsong</source>
-        <translation type="unfinished"></translation>
+        <translation>華文仿宋</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="132"/>
         <source>STHeiti</source>
-        <translation type="unfinished"></translation>
+        <translation>華文黑體</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="133"/>
         <source>STKaiti</source>
-        <translation type="unfinished"></translation>
+        <translation>華文楷體</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="134"/>
         <source>STSong</source>
-        <translation type="unfinished"></translation>
+        <translation>華文宋體</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="135"/>
         <source>Wawati SC</source>
-        <translation type="unfinished"></translation>
+        <translation>娃娃體-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="136"/>
         <source>Wawati TC</source>
-        <translation type="unfinished"></translation>
+        <translation>娃娃體-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="137"/>
         <source>Weibei SC</source>
-        <translation type="unfinished"></translation>
+        <translation>魏碑-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="138"/>
         <source>Weibei TC</source>
-        <translation type="unfinished"></translation>
+        <translation>魏碑-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="139"/>
         <source>Xingkai SC</source>
-        <translation type="unfinished"></translation>
+        <translation>行楷-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="140"/>
         <source>Yuanti SC</source>
-        <translation type="unfinished"></translation>
+        <translation>圓體-簡</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="141"/>
@@ -4442,7 +4442,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/sync/sync.cpp" line="96"/>
         <source>Connect to server</source>
-        <translation type="unfinished">鏈接伺服器</translation>
+        <translation>鏈接伺服器</translation>
     </message>
     <message>
         <location filename="../src/sync/sync.cpp" line="101"/>
@@ -4950,7 +4950,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/messagelistview.cpp" line="286"/>
         <source>View in Separate Window</source>
-        <translation type="unfinished"></translation>
+        <translation>在獨立窗口打開筆記</translation>
     </message>
 </context>
 <context>

@@ -2901,12 +2901,12 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizactions.cpp" line="55"/>
         <source>Category Option</source>
-        <translation type="unfinished">自定义目录</translation>
+        <translation>自定义目录栏</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="56"/>
         <source>Sort By</source>
-        <translation type="unfinished">排序方式</translation>
+        <translation>排序方式</translation>
     </message>
     <message>
         <location filename="../src/wizactions.cpp" line="66"/>
@@ -4467,7 +4467,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/sync/sync.cpp" line="141"/>
         <source>Upload deleted objects list</source>
-        <translation type="unfinished">上传已删除列表</translation>
+        <translation>上传已删除列表</translation>
     </message>
     <message>
         <location filename="../src/sync/sync.cpp" line="144"/>
@@ -4652,7 +4652,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/sync/sync.cpp" line="1876"/>
         <source>Connecting to server</source>
-        <translation type="unfinished">连接服务器</translation>
+        <translation>连接服务器</translation>
     </message>
     <message>
         <location filename="../src/sync/sync.cpp" line="1886"/>
@@ -4924,7 +4924,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/sync/wizkmsync.cpp" line="101"/>
         <source>OnEndKb kb_guid: %1</source>
-        <translation type="unfinished">完成群组: %1</translation>
+        <translation>完成群组: %1</translation>
     </message>
 </context>
 <context>
