@@ -32,6 +32,7 @@ private:
 };
 
 
+
 class CWizSingleDocumentViewDelegate : public QObject
 {
     Q_OBJECT
@@ -50,10 +51,14 @@ signals:
     void documentViewerClosed(QString guid);
 
 private:
+
+private:
     QMap<QString, CWizSingleDocumentViewer*> m_viewerMap;
     CWizExplorerApp& m_app;
 };
 
 }
+
+void bindESCToQuitFullScreen(QWidget* wgt);
 
 #endif // CWIZSINGLEDOCUMENTVIEW_H

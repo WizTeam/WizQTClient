@@ -1,5 +1,6 @@
 #include "wizSingleDocumentView.h"
 #include <QVBoxLayout>
+#include <QAction>
 #include "wizDocumentView.h"
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
@@ -88,6 +89,8 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
         docView->activateWindow();
         docView->setFocus();
         m_viewerMap.insert(doc.strGUID, wgt);
+
+        bindESCToQuitFullScreen(wgt);
     }
 }
 
@@ -96,4 +99,24 @@ void CWizSingleDocumentViewDelegate::onDocumentViewerDeleted(QString guid)
     m_viewerMap.remove(guid);
 
     emit documentViewerClosed(guid);
+}
+
+
+void bindESCToQuitFullScreen(QWidget* wgt)
+{
+    //ESC键退出全屏
+#ifdef Q_OS_MAC
+    QAction* action = new QAction(wgt);
+    action->setShortcut(QKeySequence(Qt::Key_Escape));
+    QObject::connect(action, &QAction::triggered, [wgt](){
+        if (!wgt->isActiveWindow())
+            return;
+        //
+        if (wgt->windowState() & Qt::WindowFullScreen)
+        {
+            wgt->setWindowState(wgt->windowState() & ~Qt::WindowFullScreen);
+        }
+    });
+    wgt->addAction(action);
+#endif
 }

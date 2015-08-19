@@ -2124,6 +2124,9 @@ void MainWindow::init()
             SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+
+    //ESC键退出全屏
+    bindESCToQuitFullScreen(this);
 }
 
 void MainWindow::on_actionAutoSync_triggered()
