@@ -74,12 +74,14 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
         connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
                 mainWindow, SLOT(on_shareDocumentByLink_request(QString,QString)));
         connect(wgt, SIGNAL(documentViewerDeleted(QString)), SLOT(onDocumentViewerDeleted(QString)));
-
-        wgt->setGeometry((mainWindow->width() - mainWindow->documentView()->width())  / 2,
-                         (mainWindow->height() - wgt->height()) / 2,
+        static int nOffset = 0;
+        wgt->setGeometry((mainWindow->width() - mainWindow->documentView()->width())  / 2 + nOffset,
+                         (mainWindow->height() - wgt->height()) / 2 + nOffset,
                          mainWindow->documentView()->width(), wgt->height());
         wgt->setWindowTitle(doc.strTitle);
         wgt->show();
+        nOffset += 22;
+        nOffset > 250 ? nOffset = 0 : 0;
         //
         docView->viewNote(doc, false);
         docView->raise();
