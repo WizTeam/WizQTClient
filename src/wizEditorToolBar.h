@@ -93,6 +93,8 @@ private:
 
     bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
     bool processBase64Image(bool bUseForCopy);
+    void savePixmap(QPixmap& pix, const QString& strType, bool bUseForCopy);
+    void saveGif(const QByteArray& ba);
 
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
 

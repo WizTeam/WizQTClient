@@ -1852,14 +1852,7 @@ void EditorToolBar::saveImage(QString strFileName)
         return;
     }
 
-    QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
-                                                       QDir::homePath() + "/untitled." + info.suffix(), tr("Image Files (*.%1)").arg(info.suffix()));
-    if (strFilePath.isEmpty())
-        return;
-
-    bool ret = pix.save(strFilePath, info.suffix().toUtf8());
-    TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
-           ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
+    savePixmap(pix, info.suffix(), false);
 }
 
 void EditorToolBar::copyImage(QString strFileName)
@@ -1940,15 +1933,30 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
     if (!WizBase64Decode(m_strImageSrc, baData))
         return false;
 
+    // QT only support to read gif
+    //  GIF	Graphic Interchange Format (optional)	Read
+//    if (strType.toLower() == "gif" && !bUseForCopy)
+//    {
+//        saveGif(baData);
+//    }
+
     //
     QPixmap pix;
     pix.loadFromData(baData, strType.toUtf8());
+
+    savePixmap(pix, strType, bUseForCopy);
+
+    return true;
+}
+
+void EditorToolBar::savePixmap(QPixmap& pix, const QString& strType, bool bUseForCopy)
+{
     if (!bUseForCopy)
     {
         QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save as..."),
                                                            QDir::homePath() + "/untitled." + strType, tr("Image Files (*.%1)").arg(strType));
         if (strFilePath.isEmpty())
-            return false;
+            return;
 
         bool ret = pix.save(strFilePath, strType.toUtf8());
         TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
@@ -1959,8 +1967,11 @@ bool EditorToolBar::processBase64Image(bool bUseForCopy)
         QClipboard* clip = QApplication::clipboard();
         clip->setPixmap(pix);
     }
+}
 
-    return true;
+void EditorToolBar::saveGif(const QByteArray& ba)
+{
+
 }
 
 bool EditorToolBar::hasFocus()
