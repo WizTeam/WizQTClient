@@ -83,7 +83,7 @@ public Q_SLOTS:
 
 signals:
     void notifyBar_link_clicked(const QString& link);
-
+    void loadComment_request(const QString& url);
 private:
     void showInfoBar();
     void showEditorBar();

@@ -149,9 +149,9 @@ private slots:
     void on_btn_changeToSignin_clicked();
     void on_btn_changeToLogin_clicked();
     void on_btn_proxysetting_clicked();
+    void on_btn_snsLogin_clicked();
     void on_btn_fogetpass_clicked();
     void on_btn_login_clicked();
-    void on_btn_snsLogin_clicked();
     void on_btn_singUp_clicked();
 
 
@@ -194,7 +194,7 @@ private slots:
     void onSignUpCheckStart();
     void onSignUpCheckEnd();
 
-    void resetUserList();
+    void resetUserList();    
 
 private:
     void loadDefaultUser();    

@@ -52,6 +52,9 @@ private slots:
 
     void checkUnfinishedTransation();
 
+    void on_purchase_successed();
+    void on_purchase_failed(const QString& errorMsg);
+
 private:
     void initStyles();
     void createIAPHelper();

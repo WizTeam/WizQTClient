@@ -761,11 +761,10 @@ QAction *CWizLoginDialog::findActionInMenu(const QString &strActData)
 bool CWizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha)
 {
     strCaptchaID = QString::number(QDateTime::currentMSecsSinceEpoch()).right(8);
-    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);
-    QString strUrl = WizService::CommonApiEntry::captchaUrl(strCaptchaID);
+    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().Right(6);    
 
     CWizVerificationCodeDialog dlg(this);
-    if (dlg.verificationRequest(strUrl) == QDialog::Accepted)
+    if (dlg.verificationRequest(strCaptchaID) == QDialog::Accepted)
     {
         strCaptcha = dlg.getVerificationCode();
         return true;
@@ -1037,16 +1036,7 @@ void CWizLoginDialog::on_btn_login_clicked()
 void CWizLoginDialog::on_btn_singUp_clicked()
 {
     if (checkSignMessage())
-    {
-
-//    #if defined Q_OS_MAC
-//        QString strCode = "129ce11c";
-//    #elif defined Q_OS_LINUX
-//        QString strCode = "7abd8f4a";
-//    #else
-//        QString strCode = "8480c6d7";
-//    #endif
-
+    {        
         AsyncApi* api = new AsyncApi(this);
         connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
         api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "");

@@ -15,7 +15,7 @@ public:
     explicit CWizVerificationCodeDialog(QWidget *parent = 0);
     virtual ~CWizVerificationCodeDialog();
 
-    int verificationRequest(const QString& strUrl);
+    int verificationRequest(const QString& strCaptchaID);
     QString getVerificationCode() const;
 
 signals:
@@ -28,11 +28,13 @@ private slots:
 
     void inputFinished();
 
+    void on_image_downloaded(const QByteArray& ba);
+
 private:
-    bool downloadImage(QPixmap& pix);
+    void downloadImage();
 
     Ui::CWizVerificationCodeDialog *ui;
-    QString m_strUrl;
+    QString m_strCaptchaID;
 };
 
 #endif // WIZVERIFICATIONCODEDIALOG_H

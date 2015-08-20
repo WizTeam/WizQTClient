@@ -158,6 +158,7 @@ public Q_SLOTS:
     void on_command_request();
     //
     void on_comment_populateJavaScriptWindowObject();
+    void on_loadComment_request(const QString& url);
 
 
 private:

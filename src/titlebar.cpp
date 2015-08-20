@@ -7,6 +7,7 @@
 #include <QWebHistory>
 #include <QSplitter>
 #include <QList>
+#include <QtConcurrent>
 
 #include "share/websocketclientwrapper.h"
 #include "share/websockettransport.h"
@@ -635,10 +636,7 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     Q_UNUSED(note);
 
     if (!bOk)
-        return;
-
-    CWizDocumentView* docView = noteView();
-    qDebug() << "docview ; " << docView << " note view ; " << view;
+        return;    
 
     if (view != noteView()) {
         return;
@@ -669,26 +667,28 @@ void TitleBar::onTokenAcquired(const QString& strToken)
     commentWidget->showLocalProgress();
     QString strKbGUID = noteView()->note().strKbGUID;
     QString strGUID = noteView()->note().strGUID;
-    m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
 
+    //
+    QtConcurrent::run([this, strKbGUID, strGUID, strToken, commentWidget](){
+        m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+        if (m_commentsUrl.isEmpty())
+        {
+            loadErrorPage();
+            return;
+        }
 
-    if (m_commentsUrl.isEmpty())
-    {
-        loadErrorPage();
-        return;
-    }
+        if (commentWidget->isVisible())
+        {
+            emit loadComment_request(m_commentsUrl);
+        }
 
-    if (commentWidget->isVisible())
-    {
-        commentWidget->web()->load(m_commentsUrl);
-    }
+        QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
+        QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
 
-    QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
-    QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
-
-    WizService::AsyncApi* api = new WizService::AsyncApi(this);
-    connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
-    api->getCommentsCount(strCountUrl);
+        WizService::AsyncApi* api = new WizService::AsyncApi(nullptr);
+        connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
+        api->getCommentsCount(strCountUrl);
+    });
 }
 
 void TitleBar::onGetCommentsCountFinished(int nCount)

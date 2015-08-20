@@ -1,6 +1,6 @@
 #include <QtGlobal>
 #include "wizUserInfoWidget.h"
-
+#include <QtConcurrent>
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -178,14 +178,17 @@ void CWizUserInfoWidget::on_action_changeAvatar_triggered()
         return;
     }
 
-    AvatarUploader* uploader = new AvatarUploader(this);
-    connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
-    uploader->upload(listFiles[0]);
+    QString fileName = listFiles[0];
+    QtConcurrent::run([this, fileName](){
+        AvatarUploader* uploader = new AvatarUploader(nullptr);
+        connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
+        uploader->upload(fileName);
+    });
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 {
-    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());
+    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());    
 
     if (ok) {
         AvatarHost::reload(m_db.GetUserId());

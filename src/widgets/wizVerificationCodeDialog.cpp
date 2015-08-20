@@ -1,11 +1,15 @@
 #include "wizVerificationCodeDialog.h"
 #include "ui_wizVerificationCodeDialog.h"
+
 #include <QIcon>
 #include <QPixmap>
 #include <QEventLoop>
+#include <QtConcurrent>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
+
+#include "sync/apientry.h"
 #include "utils/pathresolve.h"
 #include "share/wizmisc.h"
 #include "share/wizMessageBox.h"
@@ -24,21 +28,15 @@ CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
     delete ui;
 }
 
-int CWizVerificationCodeDialog::verificationRequest(const QString& strUrl)
+int CWizVerificationCodeDialog::verificationRequest(const QString& strCaptchaID)
 {
-    m_strUrl = strUrl;
-    QPixmap pix;
-    if (downloadImage(pix))
-    {
-        QIcon icon(pix);
-        ui->btn_image->setFixedSize(pix.size());
-        ui->btn_image->setMinimumSize(pix.size());
-        ui->btn_image->setIcon(icon);
+    m_strCaptchaID = strCaptchaID;
+    ui->btn_image->setText(tr("Downloading..."));
 
-        return exec();
-    }
+    //
+    downloadImage();
 
-    return QDialog::Rejected;
+    return exec();
 }
 
 QString CWizVerificationCodeDialog::getVerificationCode() const
@@ -46,38 +44,28 @@ QString CWizVerificationCodeDialog::getVerificationCode() const
     return ui->lineEdit->text();
 }
 
-bool CWizVerificationCodeDialog::downloadImage(QPixmap& pix)
+void CWizVerificationCodeDialog::downloadImage()
 {
-    QNetworkAccessManager m_WebCtrl;
-    QNetworkRequest request(m_strUrl);
-    QEventLoop loop;
-    loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
-    QNetworkReply* reply = m_WebCtrl.get(request);
-    loop.exec();
+    QtConcurrent::run([this](){
+        QNetworkAccessManager m_WebCtrl;
+        QString strUrl = WizService::CommonApiEntry::captchaUrl(m_strCaptchaID);
+        QNetworkRequest request(strUrl);
+        QEventLoop loop;
+        loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        QNetworkReply* reply = m_WebCtrl.get(request);
+        loop.exec();
 
-    QByteArray byData = reply->readAll();
-    pix.loadFromData(byData);
-    if (pix.isNull() && !byData.isEmpty())
-    {
-        CWizMessageBox::warning(parentWidget(), tr("Info"), tr("Too many request, please wait for one minute."));
-        return false;
-    }
-    return true;
+        QByteArray byData = reply->readAll();
+
+        QMetaObject::invokeMethod(this, "on_image_downloaded", Qt::QueuedConnection,
+                                  Q_ARG(QByteArray, byData));
+    });
 }
 
 void CWizVerificationCodeDialog::on_btn_image_clicked()
 {
-    QPixmap pix;
-    if (downloadImage(pix))
-    {
-        QIcon icon(pix);
-        ui->btn_image->setIcon(icon);
-        update();
-    }
-    else
-    {
-        reject();
-    }
+    ui->btn_image->setText(tr("Downloading..."));
+    downloadImage();
 }
 
 void CWizVerificationCodeDialog::on_btn_OK_clicked()
@@ -91,4 +79,25 @@ void CWizVerificationCodeDialog::on_btn_OK_clicked()
 void CWizVerificationCodeDialog::inputFinished()
 {
     on_btn_OK_clicked();
+}
+
+void CWizVerificationCodeDialog::on_image_downloaded(const QByteArray& ba)
+{
+    QPixmap pix;
+    pix.loadFromData(ba);
+    if (pix.isNull() && !ba.isEmpty())
+    {
+        CWizMessageBox::warning(parentWidget(), tr("Info"), tr("Too many request, please wait for one minute."));
+        reject();
+    }
+    else
+    {
+        QIcon icon(pix);
+        ui->btn_image->setText("");
+        ui->btn_image->setFixedSize(pix.size());
+        ui->btn_image->setMinimumSize(pix.size());
+        ui->btn_image->setIcon(icon);
+
+        update();
+    }
 }

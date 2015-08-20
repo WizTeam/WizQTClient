@@ -28,12 +28,16 @@ private slots:
 
     void on_contactsListItemClicked(QListWidgetItem *item);
 
+    void on_networkError(const QString& errorMsg);
+
 private:
     QString getExInfo();
     void mailShareFinished(int nCode, const QString& returnMessage);
     void processReturnMessage(const QString& returnMessage, int& nCode, QString& message);
     void saveContacts();
     void updateContactList();
+
+    void sendEmails();
 
 private:
     Ui::CWizEmailShareDialog *ui;
