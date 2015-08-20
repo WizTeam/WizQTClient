@@ -2620,6 +2620,7 @@ bool WizGetLocalUsers(QList<WizLocalUser>& userList)
             continue;
         }
         user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
+        qDebug() << "load user id ; " << user.strUserId << "  folder : " << folder;
         user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
         user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
         userList.append(user);
@@ -2633,7 +2634,7 @@ QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& st
     for (WizLocalUser user : userList)
     {
         if (strGuid == user.strGuid)
-            return user.strDataFolderName;
+            return user.strUserId;
     }
     return "";
 }
@@ -2674,4 +2675,15 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
     file.close();
 
     return true;
+}
+
+
+QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid)
+{
+    for (WizLocalUser user : userList)
+    {
+        if (strGuid == user.strGuid)
+            return user.strDataFolderName;
+    }
+    return "";
 }

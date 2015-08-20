@@ -65,7 +65,7 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& s
     m_note = note;
     ui->lineEdit_subject->setText(m_note.strTitle);
     ui->lineEdit_to->setText(sendTo);
-    ui->comboBox_replyTo->insertItem(0, m_app.userSettings().user());
+    ui->comboBox_replyTo->insertItem(0, m_app.userSettings().userId());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
 }
 

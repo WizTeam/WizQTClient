@@ -221,6 +221,7 @@ private:
     void downloadOEMSettingsFromWizBox();
     void setLogo(const QString& logoPath);    
 
+    void checkLocalUser(const QString& strAccountFolder, const QString& strUserGUID);
 private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menuUsers;

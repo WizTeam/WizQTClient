@@ -42,6 +42,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //class CWizDocument
 
+QString CWizDatabase::m_strUserId = QString();
 
 QString GetResoucePathFromFile(const QString& strHtmlFileName)
 {
@@ -2308,11 +2309,11 @@ bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDelet
 }
 
 
-bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = NULL */)
+bool CWizDatabase::Open(const QString& strAccountFolderName, const QString& strKbGUID /* = NULL */)
 {
-    Q_ASSERT(!strUserId.isEmpty());
+    Q_ASSERT(!strAccountFolderName.isEmpty());
 
-    m_strUserId = strUserId;
+    m_strAccountFolderName = strAccountFolderName;
 
     if (strKbGUID.isEmpty()) {
         m_bIsPersonal = true;
@@ -2355,7 +2356,14 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
 bool CWizDatabase::LoadDatabaseInfo()
 {
-    if (!kbGUID().isEmpty()) {
+    QString strUserId = GetMetaDef(g_strAccountSection, "USERID");
+    if (!strUserId.isEmpty())
+    {
+        m_strUserId = strUserId;
+    }
+
+    if (!kbGUID().isEmpty())
+    {
         m_info.bizName = GetMetaDef(g_strDatabaseInfoSection, "BizName");
         m_info.bizGUID = GetMetaDef(g_strDatabaseInfoSection, "BizGUID");
     }
@@ -2472,9 +2480,9 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 
 QString CWizDatabase::GetAccountPath() const
 {
-    Q_ASSERT(!m_strUserId.isEmpty());
+    Q_ASSERT(!m_strAccountFolderName.isEmpty());
 
-    QString strPath = Utils::PathResolve::dataStorePath() + m_strUserId + "/";
+    QString strPath = Utils::PathResolve::dataStorePath() + m_strAccountFolderName + "/";
     WizEnsurePathExists(strPath);
 
     return strPath;
@@ -2594,7 +2602,7 @@ QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
     QString strUserID = doc.strOwner;
 
     //NOTE: 用户可能使用手机号登录，此时owner为手机号，需要使用昵称
-    if (strUserID == personDb->GetUserId())
+    if (!strUserID.contains('@') && strUserID == personDb->GetUserId())
     {
         personDb->GetUserDisplayName(strUserID);
     }

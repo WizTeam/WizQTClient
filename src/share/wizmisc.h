@@ -227,6 +227,7 @@ struct WizLocalUser {
 
 bool WizGetLocalUsers(QList<WizLocalUser>& userList);
 QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& strGuid);
+QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid);
 
 
 class CWizBufferAlloc

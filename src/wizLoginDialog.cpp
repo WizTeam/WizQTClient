@@ -343,78 +343,26 @@ void CWizLoginDialog::setUser(const QString &strUserGuid)
 
 void CWizLoginDialog::doAccountVerify()
 {
-    QString strUserid;
+    QString strUserGUID;
+    QString strAccountFolder;
     for (WizLocalUser user : m_userList)
     {
-        if (user.strDataFolderName == userId())
+        if (user.strUserId == userId())
         {
-            strUserid = user.strDataFolderName;
+            strAccountFolder = user.strDataFolderName;
+            strUserGUID = user.strGuid;
             break;
         }
     }
 
-    qDebug() << "do account verify , user id : " << strUserid;
-    CWizUserSettings userSettings(strUserid);
-
-    //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
-    //  如果登录过企业服务则需要登录到企业服务器
-    if (EnterpriseServer == m_serverType)
+    if (strAccountFolder.isEmpty())
     {
-        if (serverIp().isEmpty())
-        {
-            CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
-            return;
-        }
-
-        if (userSettings.enterpriseServerIP().isEmpty() && !userSettings.myWizMail().isEmpty())
-        {
-            CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
-            return;
-        }
-        // clear proxy for app
-//        QNetworkProxy::setApplicationProxy(QNetworkProxy::NoProxy);
-    }
-    else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
-    {
-        CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
-        return;
-    }
-
-    qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
-    // FIXME: should verify password if network is available to avoid attack?
-    if (password() != userSettings.password())
-    {
-        Token::setUserId(userId());
-        Token::setPasswd(password());
-        // check server licence and update oem settings
-        if (EnterpriseServer == m_serverType)
-        {
-            checkServerLicence();
-            return;
-        }
-        //
         emit accountCheckStart();
         doOnlineVerify();
         return;
     }
-    else if (EnterpriseServer == m_serverType)
-    {
-        if (userSettings.enterpriseServerIP() != serverIp())
-        {
-            checkServerLicence();
-            return;
-        }
-        else
-        {
-            WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
-        }
-    }
 
-    //
-    if (updateUserProfile(false) && updateGlobalProfile())
-    {
-        QDialog::accept();
-    }
+    checkLocalUser(strAccountFolder, strUserGUID);
 }
 
 void CWizLoginDialog::doOnlineVerify()
@@ -990,6 +938,73 @@ void CWizLoginDialog::setLogo(const QString& logoPath)
                                   arg(logoPath.isEmpty() ? m_wizLogoPath : logoPath));
 }
 
+void CWizLoginDialog::checkLocalUser(const QString& strAccountFolder, const QString& strUserGUID)
+{
+    qDebug() << "do local account verify , folder path : " << strAccountFolder;
+    CWizUserSettings userSettings(strAccountFolder);
+
+    //  首先判断用户的服务器类型，如果是之前使用过但是没有记录服务器类型，则使用wiz服务器
+    //  如果登录过企业服务则需要登录到企业服务器
+    if (EnterpriseServer == m_serverType)
+    {
+        if (serverIp().isEmpty())
+        {
+            CWizMessageBox::warning(this, tr("Info"), tr("There is no server address, please input it."));
+            return;
+        }
+
+        if (userSettings.enterpriseServerIP().isEmpty() && !userSettings.myWizMail().isEmpty())
+        {
+            CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to enterprise server, it was signed in to WizNote."));
+            return;
+        }
+        // clear proxy for app
+//        QNetworkProxy::setApplicationProxy(QNetworkProxy::NoProxy);
+    }
+    else if (WizServer == m_serverType && !userSettings.enterpriseServerIP().isEmpty())
+    {
+        CWizMessageBox::warning(this, tr("Info"), tr("The user name can't switch to WizNote, it was signed in to enterprise server. "));
+        return;
+    }
+
+    qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
+    // FIXME: should verify password if network is available to avoid attack?
+    if (password() != userSettings.password())
+    {
+        Token::setUserId(userId());
+        Token::setPasswd(password());
+        // check server licence and update oem settings
+        if (EnterpriseServer == m_serverType)
+        {
+            checkServerLicence();
+            return;
+        }
+        //
+        emit accountCheckStart();
+        doOnlineVerify();
+        return;
+    }
+    else if (EnterpriseServer == m_serverType)
+    {
+        if (userSettings.enterpriseServerIP() != serverIp())
+        {
+            checkServerLicence();
+            return;
+        }
+        else
+        {
+            WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+        }
+    }
+
+    //
+    m_loginUserGuid = strUserGUID;
+    if (updateUserProfile(false) && updateGlobalProfile())
+    {
+        QDialog::accept();
+    }
+}
+
 
 void CWizLoginDialog::on_btn_changeToSignin_clicked()
 {
@@ -1123,43 +1138,33 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
     {
         QString strActionData = action->data().toString();
         if (strActionData == WIZ_SERVERACTION_CONNECT_WIZSERVER)
-        {
-//            if (EnterpriseServer == m_currentUserServerType)
-//            {
-//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to WizNote,"
-//                                                       " it was signed in to enterprise server."));
-//                return;
-//            }
-
+        {            
             m_serverType = WizServer;
             emit wizServerSelected();
+            action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_CONNECT_BIZSERVER)
-        {
-//            if (WizServer == m_currentUserServerType)
-//            {
-//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
-//                                                       " it was signed in to WizNote."));
-//                return;
-//            }
-//            CWizUserSettings userSettings(userId());
-//            qDebug() << "server type : " << userSettings.serverType();
-//            qDebug() << "my wiz ; " << userSettings.myWizMail();
-//            if (EnterpriseServer != userSettings.serverType() && !userSettings.myWizMail().isEmpty())
-//            {
-//                QMessageBox::warning(0, tr("Info"), tr("The user name can't switch to enterprise server,"
-//                                                       " it was signed in to WizNote."));
-//                return;
-//            }
+        {            
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
             searchWizBoxServer();
+            action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_SEARCH_SERVER)
         {
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
             searchWizBoxServer();
+
+            QList<QAction*> actionList = m_menuServers->actions();
+            for (QAction* act : actionList)
+            {
+                if (act->data().toString() == WIZ_SERVERACTION_CONNECT_BIZSERVER)
+                {
+                    act->setChecked(true);
+                    break;
+                }
+            }
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {

@@ -25,7 +25,7 @@ class CWizDatabaseManager : public QObject
     Q_OBJECT
 
 public:
-    CWizDatabaseManager(const QString& strUserId);
+    CWizDatabaseManager(const QString& strAccountFolderName);
     ~CWizDatabaseManager();
 
     static CWizDatabaseManager* instance();
@@ -54,7 +54,7 @@ public:
 
 private:
     QMutex m_mutex;
-    QString m_strUserId;
+    QString m_strAccountFolderName;
     QPointer<CWizDatabase> m_dbPrivate;
     QMap<QString, CWizDatabase*> m_mapGroups;
 

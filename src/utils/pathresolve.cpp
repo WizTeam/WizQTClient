@@ -160,9 +160,9 @@ QString PathResolve::globalSettingsFile()
     return strConfigHome + "wiznote.ini";
 }
 
-QString PathResolve::userSettingsFile(const QString strUserId)
+QString PathResolve::userSettingsFile(const QString strAccountFolderName)
 {
-    return dataStorePath() + strUserId + "/wiznote.ini";
+    return dataStorePath() + strAccountFolderName + "/wiznote.ini";
 }
 
 QString PathResolve::qtLocaleFileName(const QString &strLocale)

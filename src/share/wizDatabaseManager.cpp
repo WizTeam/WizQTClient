@@ -13,8 +13,8 @@ CWizDatabaseManager* CWizDatabaseManager::instance()
     return m_instance;
 }
 
-CWizDatabaseManager::CWizDatabaseManager(const QString& strUserId)
-    : m_strUserId(strUserId)
+CWizDatabaseManager::CWizDatabaseManager(const QString& strAccountFolderName)
+    : m_strAccountFolderName(strAccountFolderName)
     , m_mutex(QMutex::Recursive)
 {
     Q_ASSERT(!m_instance);
@@ -30,14 +30,14 @@ CWizDatabaseManager::~CWizDatabaseManager()
 
 bool CWizDatabaseManager::openWithInfo(const QString& strKbGUID, const WIZDATABASEINFO* pInfo)
 {
-    Q_ASSERT(!m_strUserId.isEmpty());
+    Q_ASSERT(!m_strAccountFolderName.isEmpty());
 
     if (isOpened(strKbGUID))
         return true;
 
     CWizDatabase* db = new CWizDatabase();
 
-    if (!db->Open(m_strUserId, strKbGUID)) {
+    if (!db->Open(m_strAccountFolderName, strKbGUID)) {
         delete db;
         return false;
     }

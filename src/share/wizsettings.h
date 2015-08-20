@@ -96,13 +96,13 @@ class CWizUserSettings
 public:
 
     // m_db should always 0 if init as this way.
-    CWizUserSettings(const QString& strUserId);
+    CWizUserSettings(const QString& strAccountFolderName);
 
     // m_strUserId should always 0 if init as this way.
     CWizUserSettings(CWizDatabase& db);
 
 private:
-    QString m_strUserId;
+    QString m_strAccountFolderName;
     QString m_strSkinName;
     QString m_strLocale;
     CWizDatabase* m_db;
@@ -114,8 +114,10 @@ public:
     QString get(const QString& section, const QString& strKey) const;
     void set(const QString& section, const QString& strKey, const QString& strValue);
 
-    QString user() const;
-    void setUser(const QString& strUser);
+    QString userId() const;
+    void setUserId(const QString& strUserId);
+
+    void setAccountFolderName(const QString& strAccountFolderName);
 
     QString myWizMail() const;
 

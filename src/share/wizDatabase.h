@@ -111,7 +111,9 @@ class CWizDatabase
     Q_OBJECT
 
 private:
-    QString m_strUserId;
+    QString m_strAccountFolderName;
+    // all databases share one user id, user id data only stored in personal databases
+    static QString m_strUserId;
     QString m_strPassword;
     WIZDATABASEINFO m_info;
     QPointer<CWizZiwReader> m_ziwReader;
@@ -308,7 +310,7 @@ public:
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
 
 public:
-    bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
+    bool Open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();
     bool SetDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool InitDatabaseInfo(const WIZDATABASEINFO& dbInfo);
