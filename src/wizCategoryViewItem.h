@@ -351,6 +351,7 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return true; }
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
+    virtual void drop(const CWizCategoryViewItemBase* pItem);
 
     virtual QTreeWidgetItem *clone() const;
 

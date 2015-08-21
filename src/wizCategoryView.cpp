@@ -446,12 +446,10 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         if( !droppedIndex.isValid() )
           return;
 
-        if (pItem->type() == Category_ShortcutRootItem)
+        if (pItem->type() == Category_ShortcutRootItem || pItem->type() == Category_TagItem)
         {
-            CWizCategoryViewShortcutRootItem* shortcutRoot = dynamic_cast<CWizCategoryViewShortcutRootItem*>(pItem);
-            shortcutRoot->drop(m_dragItem);
+            pItem->drop(m_dragItem);
             setCurrentItem(m_dragItem);
-            event->setDropAction(Qt::CopyAction);
             event->accept();
         }
         else

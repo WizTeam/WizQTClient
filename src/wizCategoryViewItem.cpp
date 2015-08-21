@@ -1091,6 +1091,17 @@ void CWizCategoryViewTagItem::drop(const CWizDocumentDataArray& arrayDocument, b
     }
 }
 
+void CWizCategoryViewTagItem::drop(const CWizCategoryViewItemBase* pItem)
+{
+    if (pItem && pItem->type() == Category_TagItem)
+    {
+        const CWizCategoryViewTagItem* childItem = dynamic_cast<const CWizCategoryViewTagItem*>(pItem);
+        WIZTAGDATA childTag = childItem->tag();
+        childTag.strParentGUID = tag().strGUID;
+        m_app.databaseManager().db().ModifyTag(childTag);
+    }
+}
+
 void CWizCategoryViewTagItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
 {
     if (CWizCategoryView* view = dynamic_cast<CWizCategoryView *>(pCtrl)) {
