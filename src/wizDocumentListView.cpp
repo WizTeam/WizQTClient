@@ -1190,12 +1190,13 @@ void CWizDocumentListView::on_action_deleteDocument()
     if (count() == 0)
     {
         emit lastDocumentDeleted();
+        return;
     }
     else if (selectedItems().isEmpty())
     {
         setItemSelected(documentItemAt(index), true);
-        emit documentsSelectionChanged();
     }
+    emit documentsSelectionChanged();
 }
 
 void CWizDocumentListView::on_action_moveDocument()
