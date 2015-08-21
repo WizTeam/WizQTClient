@@ -1243,6 +1243,10 @@ void EditorToolBar::resetToolbar()
     fontName.Trim('\'');
     m_comboFontFamily->setText(fontName);
     m_comboFontFamily->setEnabled(!isSourceMode);
+    if (!fontName.isEmpty())
+    {
+        setCurrentFont(fontName);
+    }
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
     m_comboFontSize->setText(value);
@@ -1805,6 +1809,11 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
     m_editor->editorCommandExecuteFontFamily(strFontFamily);
     m_comboFontFamily->setText(strFontFamily);
 
+    setCurrentFont(strFontFamily);
+}
+
+void EditorToolBar::setCurrentFont(const QString& strFontFamily)
+{
     //
     for (int i = 0; i < nCommonlyUsedFontCount; i++)
     {
@@ -2248,10 +2257,13 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     {
         QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
         m_comboFontFamily->setText(value);
-        QFontDialog dlg;
-        connect(&dlg, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
-        dlg.setCurrentFont(value);
-        dlg.exec();
+
+        //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
+        // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
+        QFontDialog fontDialog;
+        connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
+        fontDialog.setCurrentFont(value);
+        fontDialog.exec();
     }
     else if (helperData == WIZSEPARATOR)
     {

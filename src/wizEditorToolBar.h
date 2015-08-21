@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QTimer>
 
+class QFontDialog;
 class QString;
 class QMenu;
 class CWizDocumentWebEngine;
@@ -80,7 +81,7 @@ private:
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
-    QTimer m_resetLockTimer;    
+    QTimer m_resetLockTimer;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -157,6 +158,7 @@ protected Q_SLOTS:
     void on_showBackColorBoard();
 
     void on_fontDailogFontChanged(const QFont & font);
+    void setCurrentFont(const QString& strFontFamily);
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);
