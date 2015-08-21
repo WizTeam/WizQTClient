@@ -1254,7 +1254,7 @@ void CWizLoginDialog::onDeleteUserRequest(const WizLocalUser& user)
     QAction* action = findActionInMenu(user.strGuid);
     if (action)
     {
-        if (CWizMessageBox::question(this, tr("Info"), tr("Remove user will delete local cache files, are you sure to remove"
+        if (CWizMessageBox::question(this, tr("Info"), tr("Remove user will delete local cache notes, are you sure to remove"
                                                       " user %1 ?").arg(user.strUserId)) == QMessageBox::Yes)
         {
             m_menuUsers->removeAction(action);
