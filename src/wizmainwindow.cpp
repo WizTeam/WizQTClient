@@ -553,18 +553,6 @@ void MainWindow::on_quickSync_request(const QString& strKbGUID)
 
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
 {
-    //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
-//    if (bVisible)
-//    {
-//        //
-//        if (m_tray)
-//        {
-//            if (m_tray->isVisible())
-//                return;
-
-//            delete m_tray;
-//        }
-
 //        //
     if (!m_tray)
     {
@@ -572,16 +560,7 @@ void MainWindow::setSystemTrayIconVisible(bool bVisible)
         initTrayIcon(m_tray);
         m_tray->show();
     }
-//    }
-//    else
-//    {
-//        if (m_tray)
-//        {
-//            m_tray->hide();
-//            delete m_tray;
-//            m_tray = 0;
-//        }
-//    }
+
     m_tray->setVisible(bVisible);
 }
 

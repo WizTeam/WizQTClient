@@ -460,9 +460,10 @@ void CWizLoginDialog::enableLoginControls(bool bEnable)
 
 void CWizLoginDialog::enableSignUpControls(bool bEnable)
 {
-    m_lineEditNewUserName->setEnabled(bEnable);
-    m_lineEditNewPassword->setEnabled(bEnable);
-    m_lineEditRepeatPassword->setEnabled(bEnable);
+    //NOTE: 很奇怪的问题，修改编辑框的状态会导致sns登录按钮被触发
+//    m_lineEditNewUserName->setEnabled(bEnable);
+//    m_lineEditNewPassword->setEnabled(bEnable);
+//    m_lineEditRepeatPassword->setEnabled(bEnable);
     ui->btn_singUp->setEnabled(bEnable);
     ui->btn_changeToLogin->setEnabled(bEnable);
 }
