@@ -580,6 +580,7 @@ void CWizDocumentStatusChecker::startRecheck()
 void CWizDocumentStatusChecker::startCheck()
 {
 //    qDebug() << "----------    CWizDocumentStatusChecker::startCheck start";
+    m_networkError = false;
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
 
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
@@ -609,7 +610,15 @@ void CWizDocumentStatusChecker::startCheck()
 
 //    qDebug() << "------------   CWizDocumentStatusChecker::startCheck  finished";
 
-    emit checkEditStatusFinished(m_strCurGUID, !editingByOthers);
+    if (m_networkError)
+    {
+        //NOTE: 网络错误时不一定会导致超时，此处发送超时消息进行离线编辑的提示
+        emit checkTimeOut(m_strCurGUID);
+    }
+    else
+    {
+        emit checkEditStatusFinished(m_strCurGUID, !editingByOthers);
+    }
 }
 
 bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
@@ -680,7 +689,7 @@ bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
     loop.exec();
 
     if (reply->error()) {
-        Q_EMIT documentEditingByOthers(QString(), QStringList());
+        m_networkError = true;
         reply->deleteLater();
         return false;
     }

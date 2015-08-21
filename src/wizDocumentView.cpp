@@ -457,6 +457,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
         // 保存标题，防止因多线程保存引起覆盖
         m_title->onTitleEditFinished();
+        m_title->hideMessageTips(false);
     }
     m_title->setEditingDocument(bEdit);
     m_web->setEditingDocument(bEdit);
