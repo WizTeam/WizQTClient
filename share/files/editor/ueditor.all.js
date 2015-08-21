@@ -9751,16 +9751,17 @@ UE.plugins['defaultfilter'] = function () {
                     case 'dd':
                         node.tagName = 'li';
                         break;
-                    case 'li':
-                        var className = node.getAttr('class');
+                        //为了和代码格式兼容，不对li进行处理
+                    // case 'li':
+                        // var className = node.getAttr('class');
                         // if (!className || !/list\-/.test(className)) {
                         //     node.setAttr()
                         // }
-                        var tmpNodes = node.getNodesByTagName('ol ul');
-                        UE.utils.each(tmpNodes, function (n) {
-                            node.parentNode.insertAfter(n, node);
-                        });
-                        break;
+                        // var tmpNodes = node.getNodesByTagName('ol ul');
+                        // UE.utils.each(tmpNodes, function (n) {
+                        //     node.parentNode.insertAfter(n, node);
+                        // });
+                        // break;
                     case 'td':
                     case 'th':
                     case 'caption':
