@@ -159,6 +159,7 @@ protected Q_SLOTS:
 
     void on_fontDailogFontChanged(const QFont & font);
     void setCurrentFont(const QString& strFontFamily);
+    void selectCurrentFontFamilyItem(const QString& strFontFamily);
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);

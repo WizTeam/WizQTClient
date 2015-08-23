@@ -1241,7 +1241,6 @@ void EditorToolBar::resetToolbar()
 
     CString fontName = m_editor->editorCommandQueryCommandValue("fontFamily");
     fontName.Trim('\'');
-    m_comboFontFamily->setText(fontName);
     m_comboFontFamily->setEnabled(!isSourceMode);
     if (!fontName.isEmpty())
     {
@@ -1807,7 +1806,6 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
 {
     QString strFontFamily = font.family();
     m_editor->editorCommandExecuteFontFamily(strFontFamily);
-    m_comboFontFamily->setText(strFontFamily);
 
     setCurrentFont(strFontFamily);
 }
@@ -1818,14 +1816,20 @@ void EditorToolBar::setCurrentFont(const QString& strFontFamily)
     for (int i = 0; i < nCommonlyUsedFontCount; i++)
     {
         if (CommonlyUsedFont[i] == strFontFamily)
+        {
+            selectCurrentFontFamilyItem(strFontFamily);
             return;
+        }
     }
 
     QStringList fontList = m_app.userSettings().get(WIZRECENTFONTLIST).split('/', QString::SkipEmptyParts);
     for (QString recent : fontList)
     {
         if (recent == strFontFamily)
+        {
+            selectCurrentFontFamilyItem(strFontFamily);
             return;
+        }
     }
 
     if (fontList.isEmpty())
@@ -1849,6 +1853,18 @@ void EditorToolBar::setCurrentFont(const QString& strFontFamily)
         fontList.pop_back();
     QString fonts = fontList.join('/');
     m_app.userSettings().set(WIZRECENTFONTLIST, fonts);
+}
+
+void EditorToolBar::selectCurrentFontFamilyItem(const QString& strFontFamily)
+{
+    WizComboboxStyledItem* fontFamilyItems = FontFamilies();
+    WizComboboxStyledItem familyItem = itemFromArrayByKey(strFontFamily, fontFamilyItems, nFontFamilyCount);
+    m_comboFontFamily->setCurrentText(familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText);
+    m_comboFontFamily->setText(familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText);
+    //
+    clearWizCheckState(m_comboFontFamily);
+    QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
+    m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
 }
 
 void EditorToolBar::saveImage(QString strFileName)
@@ -2244,9 +2260,10 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     if (helperData.isEmpty() || helperData == WIZRECENTFONT)
     {
         if (m_editor) {
-            QString text = m_comboFontFamily->itemData(index, Qt::DisplayRole).toString();
+            QString text = m_comboFontFamily->itemData(index, Qt::UserRole).toString();
             m_editor->editorCommandExecuteFontFamily(text);
-            m_comboFontFamily->setText(text);
+            QString displayText = m_comboFontFamily->itemData(index, Qt::DisplayRole).toString();
+            m_comboFontFamily->setText(displayText);
             //
             clearWizCheckState(m_comboFontFamily);
             QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
