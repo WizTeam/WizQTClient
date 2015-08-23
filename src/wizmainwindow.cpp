@@ -204,6 +204,10 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
             m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
     connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
             SLOT(on_shortcutDataChanged(QString)));
+    connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)),
+            m_singleViewDelegate, SIGNAL(documentChanged(QString,CWizDocumentView*)));
+    connect(m_singleViewDelegate, SIGNAL(documentChanged(QString,CWizDocumentView*)),
+            m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
