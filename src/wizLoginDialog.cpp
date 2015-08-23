@@ -367,6 +367,9 @@ void CWizLoginDialog::doAccountVerify()
 
 void CWizLoginDialog::doOnlineVerify()
 {
+    Token::setUserId(userId());
+    Token::setPasswd(password());
+
     connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
     Token::requestToken();
     showAnimationWaitingDialog(tr("Connecting..."));
@@ -971,9 +974,7 @@ void CWizLoginDialog::checkLocalUser(const QString& strAccountFolder, const QStr
     qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password())
-    {
-        Token::setUserId(userId());
-        Token::setPasswd(password());
+    {       
         // check server licence and update oem settings
         if (EnterpriseServer == m_serverType)
         {
@@ -1800,10 +1801,8 @@ CWizActionWidget::CWizActionWidget(const QString& text, QWidget* parent)
 {
     setMouseTracking(true);
     m_deleteButton = new QPushButton();
-    QString pixFile = Utils::StyleHelper::skinResourceFileName("loginCloseButton_hot");
-    QPixmap pixmap(pixFile);
-    m_deleteButton->setIcon(pixmap);
-    m_deleteButton->setIconSize(pixmap.size());
+    QIcon deleteIcon = Utils::StyleHelper::loadIcon("loginCloseButton_hot");
+    m_deleteButton->setIcon(deleteIcon);
     m_deleteButton->setStyleSheet("background:transparent;");
     connect(m_deleteButton, SIGNAL(clicked()), this, SIGNAL(delButtonClicked()));
 
