@@ -158,12 +158,24 @@ bool CWizDownloadObjectRunnable::downloadDocument()
             if (ksServer.attachment_getData(attach.strGUID, nPart, attachRet))
             {
 //                qDebug() << "get attachment from server : " << attachRet.strName;
+                //
+                db.blockSignals(true);
                 db.UpdateAttachment(attachRet);
+                db.blockSignals(false);
             }
         }
     }
 
-    return db.UpdateDocument(document);
+    bool ret = false;
+    db.blockSignals(true);
+    if (db.UpdateObjectData(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
+                             document.arrayData))
+    {
+        ret = db.UpdateDocument(document);
+        db.SetObjectDataDownloaded(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument), true);
+    }
+    db.blockSignals(false);
+    return ret;
 }
 
 bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
