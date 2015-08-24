@@ -228,10 +228,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setAcceptDrops(true);
 
     // refers
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-
-    m_transitionView = mainWindow->transitionView();
-
     m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
     connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
             SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
@@ -1273,15 +1269,14 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     }
 
     // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
-        window->showClient(false);
-        window->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
+        view()->showClient(false);
+        view()->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
         return;
     }
 
-    window->showClient(true);
-    window->transitionView()->hide();
+    view()->showClient(true);
+    view()->transitionView()->hide();
 
     page()->undoStack()->clear();
     m_timerAutoSave.start();
@@ -1314,10 +1309,9 @@ void CWizDocumentWebView::viewDocumentWithoutEditor()
     //
     page()->mainFrame()->setHtml(strHtml);
 
-    // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->showClient(true);
-    window->transitionView()->hide();
+    // show client    
+    view()->showClient(true);
+    view()->transitionView()->hide();
 
     page()->undoStack()->clear();
 

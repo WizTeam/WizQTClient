@@ -11,6 +11,7 @@ class QScrollArea;
 class QLineEdit;
 class QLabel;
 
+
 struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 class CWizExplorerApp;
@@ -31,6 +32,7 @@ class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
 class CWizDocumentWebEngine;
 class CWizLocalProgressWebView;
+class CWizDocumentTransitionView;
 
 namespace Core {
 namespace Internal {
@@ -57,6 +59,8 @@ public:
     QWebView* commentView() const;
     CWizLocalProgressWebView* commentWidget() const;
     //
+    CWizDocumentTransitionView* transitionView();
+    //
     void waitForDone();
 
 protected:
@@ -64,6 +68,7 @@ protected:
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
     CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizDocumentTransitionView* m_transitionView;
 
     QStackedWidget* m_tab;
     QWidget* m_msgWidget;
@@ -163,7 +168,7 @@ public Q_SLOTS:
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
-    void downloadDocumentFromServer();
+    void downloadNoteFromServer(const WIZDOCUMENTDATA& note);
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();
     void startCheckDocumentEditStatus();

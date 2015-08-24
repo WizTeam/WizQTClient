@@ -177,7 +177,6 @@ private:
 
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
-    CWizDocumentTransitionView* m_transitionView;
     std::shared_ptr<CWizSplitter> m_splitter;
     QWidget* m_docListContainer;
     CWizSingleDocumentViewDelegate* m_singleViewDelegate;
@@ -231,7 +230,6 @@ public:
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
-    CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
     CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);

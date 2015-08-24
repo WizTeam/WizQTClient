@@ -60,6 +60,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
+    , m_transitionView(new CWizDocumentTransitionView(this))
     , m_bLocked(false)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
@@ -130,6 +131,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layoutMain->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutMain);
     layoutMain->addWidget(m_tab);
+
+    //
+    layoutMain->addWidget(m_transitionView);
+    m_transitionView->hide();
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
@@ -229,6 +234,11 @@ QWebView*CWizDocumentView::commentView() const
 CWizLocalProgressWebView*CWizDocumentView::commentWidget() const
 {
     return m_commentWidget;
+}
+
+CWizDocumentTransitionView* CWizDocumentView::transitionView()
+{
+    return m_transitionView;
 }
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
@@ -331,7 +341,6 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_web->closeDocument(m_note);
     m_web->saveDocument(m_note, false);
     if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
@@ -352,11 +361,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
     QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
     if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-
-        window->downloaderHost()->downloadData(data);
-        window->showClient(false);
-        window->transitionView()->showAsMode(data.strGUID, CWizDocumentTransitionView::Downloading);
+            !PathFileExists(strDocumentFileName))
+    {
+        downloadNoteFromServer(data);
 
         return;
     }
@@ -395,11 +402,9 @@ void CWizDocumentView::reviewCurrentNote()
     CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
     QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
     if (!db.IsObjectDataDownloaded(m_note.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        window->downloaderHost()->downloadData(m_note);
-        window->showClient(false);
-        window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+            !PathFileExists(strDocumentFileName))
+    {
+        downloadNoteFromServer(m_note);
 
         return;
     }
@@ -622,16 +627,13 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void CWizDocumentView::downloadDocumentFromServer()
+void CWizDocumentView::downloadNoteFromServer(const WIZDOCUMENTDATA& note)
 {
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
-    QFile::remove(strDocumentFileName);
-
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->downloaderHost()->downloadDocument(m_note);
-    window->showClient(false);
-    window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+    connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+            m_transitionView, SLOT(onDownloadProgressChanged(QString,int,int)), Qt::UniqueConnection);
+    m_downloaderHost->downloadDocument(note);
+    showClient(false);
+    m_transitionView->showAsMode(note.strGUID, CWizDocumentTransitionView::Downloading);
 }
 
 void CWizDocumentView::sendDocumentEditingStatus()
@@ -735,11 +737,11 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
             || m_note.strGUID != data.strObjectGUID)
         return;
 
-    if (!bSucceed)
+    m_transitionView->setVisible(false);
+
+    if (!bSucceed || m_bEditingMode)
         return;
 
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->transitionView()->setVisible(false);
 
     bool onEditRequest = m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST;
 
@@ -888,7 +890,11 @@ void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
 {
     if (link == NOTIFYBAR_LABELLINK_DOWNLOAD)
     {
-        downloadDocumentFromServer();
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+        WizDeleteFile(strDocumentFileName);
+
+        downloadNoteFromServer(m_note);
     }
 }
 

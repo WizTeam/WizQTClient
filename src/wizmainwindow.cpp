@@ -120,7 +120,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
-    , m_transitionView(new CWizDocumentTransitionView(this))
     , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
@@ -171,12 +170,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
-#endif
-
-    //CWizCloudPool::instance()->init(&m_dbMgr);
-
-    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString, int,int)),
-            m_transitionView, SLOT(onDownloadProgressChanged(QString, int,int)));
+#endif    
 
     // search and full text search
     m_searchIndexer->start(QThread::IdlePriority);
@@ -1910,9 +1904,7 @@ void MainWindow::initClient()
     layoutDocument->addWidget(m_doc);
     layoutDocument->addWidget(m_documentSelection);
     m_documentSelection->hide();
-    // append after client
-    m_doc->layout()->addWidget(m_transitionView);
-    m_transitionView->hide();
+    // append after client   
 
     m_splitter->addWidget(m_category);
 
