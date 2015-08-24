@@ -1244,7 +1244,7 @@ void EditorToolBar::resetToolbar()
     m_comboFontFamily->setEnabled(!isSourceMode);
     if (!fontName.isEmpty())
     {
-        setCurrentFont(fontName);
+        setCurrentFontFamily(fontName);
     }
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
@@ -1804,13 +1804,79 @@ void EditorToolBar::on_showBackColorBoard()
 
 void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
 {
-    QString strFontFamily = font.family();
-    m_editor->editorCommandExecuteFontFamily(strFontFamily);
-
-    setCurrentFont(strFontFamily);
+    if (m_editor)
+    {
+        setCurrentFont(font);
+        qDebug() << "font dialog changed ; strike through ; " << font.strikeOut() << "  underline : " << font.underline();
+    }
 }
 
-void EditorToolBar::setCurrentFont(const QString& strFontFamily)
+void EditorToolBar::queryCurrentFont(QFont& font)
+{
+    QString familyName = m_editor->editorCommandQueryCommandValue("fontFamily");
+    familyName.isEmpty() ? void() : font.setFamily(familyName);
+
+    int value = m_editor->editorCommandQueryCommandState("bold");
+//    qDebug() << "query current font bold : " << value;
+    font.setBold(value == 1);
+
+    value = m_editor->editorCommandQueryCommandState("italic");
+//    qDebug() << "query current font italic : " << value;
+    font.setItalic(value == 1);
+
+    QString fontSize = m_editor->editorCommandQueryCommandValue("fontSize");
+    fontSize.remove("px");
+    value = fontSize.toInt();
+//    qDebug() << "query current font size : " << value;
+    font.setPointSize(value == 0 ? m_app.userSettings().defaultFontSize() : value);
+
+    value = m_editor->editorCommandQueryCommandState("underline");
+//    qDebug() << "query current font underline : " << value;
+    font.setUnderline(value == 1);
+
+    value = m_editor->editorCommandQueryCommandState("strikethrough");
+//    qDebug() << "query current font strikethrough : " << value;
+    font.setStrikeOut(value == 1);
+}
+
+void EditorToolBar::setCurrentFont(const QFont& font)
+{
+    QFont currentFont;
+    queryCurrentFont(currentFont);
+
+    if (font.family() != currentFont.family())
+    {
+        QString strFontFamily = font.family();
+        setCurrentFontFamily(strFontFamily);
+    }
+
+    if (font.pointSize() != currentFont.pointSize())
+    {
+        setFontPointSize(QString("%1px").arg(font.pointSize()));
+    }
+
+    if (font.bold() != currentFont.bold())
+    {
+        m_editor->editorCommandExecuteBold();
+    }
+
+    if (font.italic() !=  currentFont.italic())
+    {
+        m_editor->editorCommandExecuteItalic();
+    }
+
+    if (font.strikeOut() != currentFont.strikeOut())
+    {
+        m_editor->editorCommandExecuteStrikeThrough();
+    }
+
+    if (font.underline() != currentFont.underline())
+    {
+        m_editor->editorCommandExecuteUnderLine();
+    }
+}
+
+void EditorToolBar::setCurrentFontFamily(const QString& strFontFamily)
 {
     //
     for (int i = 0; i < nCommonlyUsedFontCount; i++)
@@ -1865,6 +1931,21 @@ void EditorToolBar::selectCurrentFontFamilyItem(const QString& strFontFamily)
     clearWizCheckState(m_comboFontFamily);
     QModelIndex modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
     m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+}
+
+void EditorToolBar::setFontPointSize(const QString& strSize)
+{
+    if (strSize == m_comboFontSize->text())
+        return;
+
+    if (m_editor) {
+        m_editor->editorCommandExecuteFontSize(strSize);
+        m_comboFontSize->setText(strSize);
+        //
+        clearWizCheckState(m_comboFontSize);
+        QModelIndex modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
+        m_comboFontSize->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
+    }
 }
 
 void EditorToolBar::saveImage(QString strFileName)
@@ -2272,14 +2353,13 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     }
     else if (helperData == WIZFONTPANEL)
     {
-        QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
-        m_comboFontFamily->setText(value);
-
+        QFont font;
+        queryCurrentFont(font);
         //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
         // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
         QFontDialog fontDialog;
         connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
-        fontDialog.setCurrentFont(value);
+        fontDialog.setCurrentFont(font);
         fontDialog.exec();
     }
     else if (helperData == WIZSEPARATOR)
@@ -2292,17 +2372,7 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
 void EditorToolBar::on_comboFontSize_indexChanged(const QString& strSize)
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarFontSize");
-    if (strSize == m_comboFontSize->text())
-        return;
-
-    if (m_editor) {
-        m_editor->editorCommandExecuteFontSize(strSize);
-        m_comboFontSize->setText(strSize);
-        //
-        clearWizCheckState(m_comboFontSize);
-        QModelIndex modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
-        m_comboFontSize->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
-    }
+    setFontPointSize(strSize);
 }
 
 void EditorToolBar::on_btnFormatMatch_clicked()

@@ -158,8 +158,13 @@ protected Q_SLOTS:
     void on_showBackColorBoard();
 
     void on_fontDailogFontChanged(const QFont & font);
-    void setCurrentFont(const QString& strFontFamily);
+
+private:
+    void queryCurrentFont(QFont& font);
+    void setCurrentFont(const QFont& font);
+    void setCurrentFontFamily(const QString& strFontFamily);
     void selectCurrentFontFamilyItem(const QString& strFontFamily);
+    void setFontPointSize(const QString& strSize);
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);
