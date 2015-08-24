@@ -163,7 +163,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
     connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
-    connect(m_title, SIGNAL(loadComment_request(QString)), SLOT(on_loadComment_request(QString)));
+    connect(m_title, SIGNAL(loadComment_request(QString)), SLOT(on_loadComment_request(QString)), Qt::QueuedConnection);
 
 //    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
 //            SLOT(on_checkEditStatus_finished(QString,QStringList)));

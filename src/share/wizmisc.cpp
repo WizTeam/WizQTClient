@@ -2620,7 +2620,7 @@ bool WizGetLocalUsers(QList<WizLocalUser>& userList)
             continue;
         }
         user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
-        qDebug() << "load user id ; " << user.strUserId << "  folder : " << folder;
+//        qDebug() << "load user id ; " << user.strUserId << "  folder : " << folder;
         user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
         user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
         userList.append(user);
