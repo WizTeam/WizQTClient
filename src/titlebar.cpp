@@ -610,6 +610,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
 #endif
     if (!ok)
     {
+        qDebug() << "Wow, load comment page failed! " << m_commentsUrl;
         loadErrorPage();
         commentWidget->show();
     }
@@ -657,22 +658,22 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 #else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
-
     if (strToken.isEmpty())
     {
+        qDebug() << "Can not get token, hide the comment widget";
         commentWidget->hide();
         return;
     }
 
     commentWidget->showLocalProgress();
-    QString strKbGUID = noteView()->note().strKbGUID;
-    QString strGUID = noteView()->note().strGUID;
-
     //
-    QtConcurrent::run([this, strKbGUID, strGUID, strToken, commentWidget](){
+    QtConcurrent::run([this, strToken, commentWidget](){
+        QString strKbGUID = noteView()->note().strKbGUID;
+        QString strGUID = noteView()->note().strGUID;
         m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
         if (m_commentsUrl.isEmpty())
         {
+            qDebug() << "Can not get comment url by token : " << strToken;
             loadErrorPage();
             return;
         }
