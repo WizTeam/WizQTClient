@@ -5706,7 +5706,8 @@ void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceF
 void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
                                                        CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    if (!askUserCipherToAccessEncryptedNotes(sourceFolder))
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
     qDebug() << "move personal folder : " << sourceFolder << "  to gorup folder ; " << targetFolder.strName;
@@ -5716,7 +5717,7 @@ void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFold
     documentOperator->movePersonalFolderToGroupDB(sourceFolder, targetFolder, combineFolder, downloader);
     progress->exec();
 
-    clearUserCipher();
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
@@ -5815,7 +5816,8 @@ void CWizCategoryView::copyPersonalFolderToPersonalFolder(const QString& sourceF
                                                           const QString& targetParentFolder, bool keepDocTime, bool keepTag, bool combineFolder,
                                                           CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    if (!askUserCipherToAccessEncryptedNotes(sourceFolder))
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
@@ -5825,14 +5827,15 @@ void CWizCategoryView::copyPersonalFolderToPersonalFolder(const QString& sourceF
                                                      keepDocTime, keepTag, combineFolder, downloader);
     progress->exec();
 
-    clearUserCipher();
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizCategoryView::copyPersonalFolderToGroupFolder(const QString& sourceFolder,
                                                        const WIZTAGDATA& targetFolder, bool keepDocTime, bool combineFolder,
                                                        CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
 {
-    if (!askUserCipherToAccessEncryptedNotes(sourceFolder))
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
@@ -5841,7 +5844,7 @@ void CWizCategoryView::copyPersonalFolderToGroupFolder(const QString& sourceFold
     documentOperator->copyPersonalFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder, downloader);
     progress->exec();
 
-    clearUserCipher();
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizCategoryView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
@@ -5864,72 +5867,6 @@ void CWizCategoryView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& a
     }
 }
 
-bool CWizCategoryView::askUserCipherToAccessEncryptedNotes(const QString& sourceFolder)
-{
-    CWizDatabase& db = m_dbMgr.db();
-    CWizDocumentDataArray arrayDoc;
-    db.GetDocumentsByLocation(sourceFolder, arrayDoc, true);
-
-    bool includeEncrpyted = false;
-    WIZDOCUMENTDATA encryptedDoc;
-    for (WIZDOCUMENTDATA doc : arrayDoc)
-    {
-        if (doc.nProtected == 1)
-        {
-            includeEncrpyted = true;
-            if (db.IsDocumentDownloaded(doc.strGUID))
-            {
-                encryptedDoc = doc;
-                break;
-            }
-        }
-    }
-
-    if (includeEncrpyted)
-    {
-        if (CWizMessageBox::question(m_app.mainWindow(), tr("Info"), tr("Source folders contains "
-                                "encrypted notes, are you sure to operate these notes?")) != QMessageBox::Yes)
-            return false;
-
-
-        if (encryptedDoc.strGUID.isEmpty())
-        {
-            CWizMessageBox::warning(m_app.mainWindow(), tr("Info"), tr("Encrypted notes are not downloaded to local, "
-                                                                       "can not verify password!"));
-            return false;
-        }
-
-        CWizLineInputDialog dlg(tr("Please input note password"),
-                                tr("Password :"), "", 0, QLineEdit::Password);
-        if (dlg.exec() == QDialog::Rejected)
-            return false;
-
-        db.loadUserCert();
-        db.setUserCipher(dlg.input());
-
-        if (db.IsDocumentDownloaded(encryptedDoc.strGUID))
-        {
-            if (!db.IsFileAccessible(encryptedDoc))
-            {
-                CWizMessageBox::warning(m_app.mainWindow(), tr("Info"), tr("Password error!"));
-                return false;
-            }
-        }
-        db.setSaveUserCipher(true);
-    }
-
-    return true;
-}
-
-void CWizCategoryView::clearUserCipher()
-{
-    if (!m_app.userSettings().isRememberNotePasswordForSession())
-    {
-        CWizDatabase& db = m_dbMgr.db();
-        db.setUserCipher(QString());
-        db.setSaveUserCipher(false);
-    }
-}
 
 void CWizCategoryView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
                                          CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)

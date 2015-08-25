@@ -4,6 +4,7 @@
 #include <QObject>
 #include "wizobject.h"
 
+class CWizUserSettings;
 class CWizDatabase;
 class CWizProgressDialog;
 class CWizDatabaseManager;
@@ -126,6 +127,11 @@ protected:
     int m_counter;
 };
 
+
+//  ask user cipher to operate encrypted notes, after operation need to clear cipher.
+bool WizAskUserCipherToOperateEncryptedNotes(const QString& sourceFolder, CWizDatabase& db);
+bool WizAskUserCipherToOperateEncryptedNote(const CWizDocumentDataArray& arrayDocument, CWizDatabase& db);
+void WizClearUserCipher(CWizDatabase& db, CWizUserSettings& settings);
 
 
 #endif // CWIZOBJECTOPERATOR_H

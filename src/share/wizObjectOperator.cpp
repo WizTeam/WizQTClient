@@ -2,10 +2,14 @@
 #include <QThread>
 #include <QDebug>
 #include <QTimer>
+#include <QApplication>
 #include "wizProgressDialog.h"
 #include "wizObjectDataDownloader.h"
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
+#include "wizLineInputDialog.h"
+#include "share/wizMessageBox.h"
+#include "share/wizsettings.h"
 
 CWizDocumentOperator::CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* parent)
     : m_dbMgr(dbMgr)
@@ -1021,3 +1025,103 @@ QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, c
     return locationName;
 }
 
+
+bool getUserCipher(CWizDatabase& db, const WIZDOCUMENTDATA& encryptedDoc)
+{
+    if (encryptedDoc.strGUID.isEmpty())
+    {
+        CWizMessageBox::warning(qApp->activeWindow(), QObject::tr("Info"), QObject::tr("Encrypted notes are not downloaded to local, "
+                                                                   "can not verify password!"));
+        return false;
+    }
+
+    CWizLineInputDialog dlg(QObject::tr("Please input note password"),
+                            QObject::tr("Password :"), "", 0, QLineEdit::Password);
+    if (dlg.exec() == QDialog::Rejected)
+        return false;
+
+    db.loadUserCert();
+    db.setUserCipher(dlg.input());
+
+    if (db.IsDocumentDownloaded(encryptedDoc.strGUID))
+    {
+        if (!db.IsFileAccessible(encryptedDoc))
+        {
+            CWizMessageBox::warning(qApp->activeWindow(), QObject::tr("Info"), QObject::tr("Password error!"));
+            return false;
+        }
+    }
+    db.setSaveUserCipher(true);
+    return true;
+}
+
+bool WizAskUserCipherToOperateEncryptedNotes(const QString& sourceFolder, CWizDatabase& db)
+{
+    CWizDocumentDataArray arrayDoc;
+    db.GetDocumentsByLocation(sourceFolder, arrayDoc, true);
+
+    bool includeEncrpyted = false;
+    WIZDOCUMENTDATA encryptedDoc;
+    for (WIZDOCUMENTDATA doc : arrayDoc)
+    {
+        if (doc.nProtected == 1)
+        {
+            includeEncrpyted = true;
+            if (db.IsDocumentDownloaded(doc.strGUID))
+            {
+                encryptedDoc = doc;
+                break;
+            }
+        }
+    }
+
+    if (includeEncrpyted)
+    {
+        if (CWizMessageBox::question(qApp->activeWindow(), QObject::tr("Info"), QObject::tr("Source folders contains "
+                                "encrypted notes, are you sure to operate these notes?")) != QMessageBox::Yes)
+            return false;
+
+        return getUserCipher(db, encryptedDoc);
+    }
+
+    return true;
+}
+
+bool WizAskUserCipherToOperateEncryptedNote(const CWizDocumentDataArray& arrayDocument, CWizDatabase& db)
+{
+    bool includeEncrpyted = false;
+    WIZDOCUMENTDATA encryptedDoc;
+    for (WIZDOCUMENTDATA doc : arrayDocument)
+    {
+        if (doc.nProtected == 1)
+        {
+            includeEncrpyted = true;
+            if (db.IsDocumentDownloaded(doc.strGUID))
+            {
+                encryptedDoc = doc;
+                break;
+            }
+        }
+    }
+
+    if (includeEncrpyted)
+    {
+        if (CWizMessageBox::question(qApp->activeWindow(), QObject::tr("Info"), QObject::tr("Source notes list contains "
+                                "encrypted notes, are you sure to operate these notes?")) != QMessageBox::Yes)
+            return false;
+
+        return getUserCipher(db, encryptedDoc);
+    }
+
+    return true;
+}
+
+
+void WizClearUserCipher(CWizDatabase& db, CWizUserSettings& settings)
+{
+    if (!settings.isRememberNotePasswordForSession())
+    {
+        db.setUserCipher(QString());
+        db.setSaveUserCipher(false);
+    }
+}
