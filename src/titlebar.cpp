@@ -123,7 +123,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
-    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
     m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
@@ -224,7 +224,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
-        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
         m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
         m_shareBtn->setVisible(bIsGroup ? false : !oemSettings.isHideShare());
@@ -313,7 +313,11 @@ void TitleBar::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    QUrl url = QUrl::fromLocalFile(strFileName);    
+    // clear old url
+    comments->load(QUrl());
+    QUrl url = QUrl::fromLocalFile(strFileName);
+    qDebug() << "clear comment url : " << comments->url() <<  "  and load the error page : "
+             << url;
     comments->load(url);
 }
 
@@ -610,7 +614,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
 #endif
     if (!ok)
     {
-        qDebug() << "Wow, load comment page failed! " << m_commentsUrl;
+        qDebug() << "Wow, load comment page failed! " << commentWidget->web()->url();
         loadErrorPage();
         commentWidget->show();
     }
