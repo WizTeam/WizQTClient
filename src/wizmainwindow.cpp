@@ -752,12 +752,20 @@ void MainWindow::restoreStatus()
     // main window
     if (geometry.isEmpty()) {
         QRect rcDesktop = qApp->desktop()->availableGeometry();
-        QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
-                               rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
-        setGeometry(rcWindow);
-//        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
-//                                        sizeHint(), qApp->desktop()->availableGeometry()
-//                                        ));
+        if (rcDesktop.width() > 1280)
+        {
+            const int DefaultAppWidth = 1200;
+            const int DefaultAppHeight = 760;
+            QRect rcWindow = QRect(rcDesktop.x() + (rcDesktop.width() - DefaultAppWidth) / 2,
+                                   rcDesktop.y() + (rcDesktop.height() - DefaultAppHeight) / 2, DefaultAppWidth, DefaultAppHeight);
+            setGeometry(rcWindow);
+        }
+        else
+        {
+            QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
+                                   rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
+            setGeometry(rcWindow);
+        }
     } else {
         restoreGeometry(geometry);
     }
