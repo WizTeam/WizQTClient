@@ -313,8 +313,8 @@ void TitleBar::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    QUrl url = QUrl::fromLocalFile(strFileName);
-    comments->setHtml(strHtml, url);
+    QUrl url = QUrl::fromLocalFile(strFileName);    
+    comments->load(url);
 }
 
 void TitleBar::setTagBarVisible(bool visible)
@@ -674,7 +674,7 @@ void TitleBar::onTokenAcquired(const QString& strToken)
         if (m_commentsUrl.isEmpty())
         {
             qDebug() << "Can not get comment url by token : " << strToken;
-            loadErrorPage();
+            QMetaObject::invokeMethod(this, "loadErrorPage", Qt::QueuedConnection);
             return;
         }
 

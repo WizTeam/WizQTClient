@@ -81,13 +81,13 @@ public Q_SLOTS:
     //
     void onTitleEditFinished();
 
+    void loadErrorPage();
 signals:
     void notifyBar_link_clicked(const QString& link);
     void loadComment_request(const QString& url);
 private:
     void showInfoBar();
     void showEditorBar();
-    void loadErrorPage();
     void setTagBarVisible(bool visible);
 #ifdef USEWEBENGINE
     //

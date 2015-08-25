@@ -225,7 +225,6 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
         QString strResult = reply->readAll();
         reply->deleteLater();
 
-        m_waitingMsgBox->done(0);
         QMetaObject::invokeMethod(m_waitingMsgBox, "done", Qt::QueuedConnection,
                                   Q_ARG(int, 0));
         removeTransationFromUnfinishedList(strTransationID);
