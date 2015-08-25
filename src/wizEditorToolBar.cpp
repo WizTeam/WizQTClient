@@ -1240,6 +1240,8 @@ void EditorToolBar::resetToolbar()
     m_comboParagraph->setEnabled(!isSourceMode);
 
     CString fontName = m_editor->editorCommandQueryCommandValue("fontFamily");
+    QStringList fontList = fontName.split(',', QString::SkipEmptyParts);
+    fontName = fontList.isEmpty() ? "" : fontList.first();
     fontName.Trim('\'');
     m_comboFontFamily->setEnabled(!isSourceMode);
     if (!fontName.isEmpty())
