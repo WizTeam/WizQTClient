@@ -117,7 +117,13 @@ void Logger::saveToLogFile(const QString& strMsg)
 {
     QFile f(logFileName());
     f.open(QIODevice::Append | QIODevice::Text);
-    f.write(msg2LogMsg(strMsg).toUtf8());
+    try
+    {
+        f.write(msg2LogMsg(strMsg).toUtf8());
+    }
+    catch(...)
+    {
+    }
     f.close();
 }
 
