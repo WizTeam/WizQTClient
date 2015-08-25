@@ -3803,22 +3803,22 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="117"/>
         <source>Hannotate SC</source>
-        <translation type="unfinished"></translation>
+        <translation>手札体-简</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="118"/>
         <source>Hannotate TC</source>
-        <translation type="unfinished"></translation>
+        <translation>手札体-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="119"/>
         <source>HanziPen SC</source>
-        <translation type="unfinished"></translation>
+        <translation>翩翩体-简</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="120"/>
         <source>HanziPen TC</source>
-        <translation type="unfinished"></translation>
+        <translation>翩翩体-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="121"/>
@@ -3923,12 +3923,13 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="141"/>
         <source>Yuppy TC</source>
-        <translation type="unfinished"></translation>
+        <translatorcomment>雅痞-繁</translatorcomment>
+        <translation>雅痞-繁</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="142"/>
         <source>Yuppy SC</source>
-        <translation type="unfinished"></translation>
+        <translation>雅痞-简</translation>
     </message>
     <message>
         <location filename="../src/wizEditorToolBar.cpp" line="1435"/>

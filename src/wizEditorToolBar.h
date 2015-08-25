@@ -162,7 +162,7 @@ protected Q_SLOTS:
 private:
     void queryCurrentFont(QFont& font);
     void setCurrentFont(const QFont& font);
-    void setCurrentFontFamily(const QString& strFontFamily);
+    void selectCurrentFontFamily(const QString& strFontFamily);
     void selectCurrentFontFamilyItem(const QString& strFontFamily);
     void setFontPointSize(const QString& strSize);
 

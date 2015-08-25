@@ -1246,7 +1246,7 @@ void EditorToolBar::resetToolbar()
     m_comboFontFamily->setEnabled(!isSourceMode);
     if (!fontName.isEmpty())
     {
-        setCurrentFontFamily(fontName);
+        selectCurrentFontFamily(fontName);
     }
 
     value = m_editor->editorCommandQueryCommandValue("fontSize");
@@ -1809,7 +1809,6 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
     if (m_editor)
     {
         setCurrentFont(font);
-        qDebug() << "font dialog changed ; strike through ; " << font.strikeOut() << "  underline : " << font.underline();
     }
 }
 
@@ -1849,7 +1848,8 @@ void EditorToolBar::setCurrentFont(const QFont& font)
     if (font.family() != currentFont.family())
     {
         QString strFontFamily = font.family();
-        setCurrentFontFamily(strFontFamily);
+        m_editor->editorCommandExecuteFontFamily(strFontFamily);
+        selectCurrentFontFamily(strFontFamily);
     }
 
     if (font.pointSize() != currentFont.pointSize())
@@ -1878,7 +1878,7 @@ void EditorToolBar::setCurrentFont(const QFont& font)
     }
 }
 
-void EditorToolBar::setCurrentFontFamily(const QString& strFontFamily)
+void EditorToolBar::selectCurrentFontFamily(const QString& strFontFamily)
 {
     //
     for (int i = 0; i < nCommonlyUsedFontCount; i++)
@@ -1915,6 +1915,7 @@ void EditorToolBar::setCurrentFontFamily(const QString& strFontFamily)
     WizComboboxStyledItem familyItem = itemFromArrayByKey(strFontFamily, fontFamilyItems, nFontFamilyCount);
     m_comboFontFamily->insertItem(0, familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText, strFontFamily);
     m_comboFontFamily->setItemData(0, WIZRECENTFONT, WizFontFamilyHelperRole);
+    selectCurrentFontFamilyItem(strFontFamily);
 
     fontList.insert(0, strFontFamily);
     while (fontList.count() > 3)
@@ -2360,8 +2361,8 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
         //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
         // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
         QFontDialog fontDialog;
-        connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
         fontDialog.setCurrentFont(font);
+        connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
         fontDialog.exec();
     }
     else if (helperData == WIZSEPARATOR)
