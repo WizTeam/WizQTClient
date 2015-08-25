@@ -60,5 +60,6 @@ private:
 }
 
 void bindESCToQuitFullScreen(QWidget* wgt);
+void bringWidgetToFront(QWidget* wgt);
 
 #endif // CWIZSINGLEDOCUMENTVIEW_H

@@ -595,17 +595,6 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
     m_msgList->selectMessage(messageID);
 }
 
-void makeWidgetActive(QWidget* widget)
-{
-    widget->setVisible(true);
-    if (widget->windowState() & Qt::WindowMinimized)
-    {
-        widget->setWindowState(widget->windowState() & ~Qt::WindowMinimized);
-    }
-    widget->raise();
-    widget->activateWindow();
-}
-
 void MainWindow::on_dockMenuAction_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
@@ -614,14 +603,14 @@ void MainWindow::on_dockMenuAction_triggered()
         QString guid = action->data().toString();
         if (guid == MAINWINDOW)
         {
-            makeWidgetActive(this);
+            bringWidgetToFront(this);
         }
         else
         {
             CWizSingleDocumentViewer* viewer = m_singleViewDelegate->getDocumentViewer(guid);
             if (viewer)
             {                
-                makeWidgetActive(viewer);
+                bringWidgetToFront(viewer);
             }
         }
     }

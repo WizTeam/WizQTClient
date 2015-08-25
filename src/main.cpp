@@ -313,11 +313,11 @@ int mainCore(int argc, char *argv[])
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
-        qDebug() << "deafult user id : " << strUserGuid << " login dailog user id : " << loginDialog.loginUserGuid();
+//        qDebug() << "deafult user id : " << strUserGuid << " login dailog user id : " << loginDialog.loginUserGuid();
         if (loginDialog.loginUserGuid() != strUserGuid)
         {
             strAccountFolderName = WizGetLocalFolderName(localUsers, loginDialog.loginUserGuid());
-            qDebug() << "login user id : " << loginDialog.userId();
+//            qDebug() << "login user id : " << loginDialog.userId();
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
             PluginManager::setSettings(settings);
         }

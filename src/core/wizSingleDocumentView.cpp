@@ -1,6 +1,7 @@
 #include "wizSingleDocumentView.h"
 #include <QVBoxLayout>
 #include <QAction>
+#include <QDebug>
 #include "wizDocumentView.h"
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
@@ -27,6 +28,13 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
         m_docView = new CWizDocumentView(app, this);
         layout->addWidget(m_docView);
         setLayout(layout);
+
+#ifdef Q_OS_MAC
+        //追踪单独窗口中编辑器消失的问题
+   connect(m_docView, &QWidget::destroyed, [](){
+      qDebug() << "doc view destroyed";
+   });
+#endif
 }
 
 CWizDocumentView*CWizSingleDocumentViewer::docView()
@@ -62,7 +70,7 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
 {
     if (m_viewerMap.find(doc.strGUID) != m_viewerMap.end())
     {
-        m_viewerMap.value(doc.strGUID)->raise();
+        bringWidgetToFront(m_viewerMap.value(doc.strGUID));
         return;
     }
     else
@@ -85,9 +93,7 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
         nOffset > 250 ? nOffset = 0 : 0;
         //
         docView->viewNote(doc, false);
-        docView->raise();
-        docView->activateWindow();
-        docView->setFocus();
+        bringWidgetToFront(wgt);
         m_viewerMap.insert(doc.strGUID, wgt);
 
         bindESCToQuitFullScreen(wgt);
@@ -119,4 +125,16 @@ void bindESCToQuitFullScreen(QWidget* wgt)
     });
     wgt->addAction(action);
 #endif
+}
+
+
+void bringWidgetToFront(QWidget* wgt)
+{
+    wgt->setVisible(true);
+    if (wgt->windowState() & Qt::WindowMinimized)
+    {
+        wgt->setWindowState(wgt->windowState() & ~Qt::WindowMinimized);
+    }
+    wgt->raise();
+    wgt->activateWindow();
 }
