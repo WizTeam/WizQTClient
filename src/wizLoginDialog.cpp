@@ -385,9 +385,10 @@ bool CWizLoginDialog::updateGlobalProfile()
 bool CWizLoginDialog::updateUserProfile(bool bLogined)
 {
     QString localUserId = WizGetLocalUserId(m_userList, m_loginUserGuid);
+    QString strUserAccount = WizGetLocalFolderName(m_userList, m_loginUserGuid);
     qDebug() << "udate user profile , userid  " << localUserId;
-    localUserId.isEmpty() ? (localUserId = userId()) : 0;
-    CWizUserSettings userSettings(localUserId);
+    strUserAccount.isEmpty() ? (strUserAccount = userId()) : 0;
+    CWizUserSettings userSettings(strUserAccount);
 
     if(ui->cbx_autologin->checkState() == Qt::Checked) {
         userSettings.setAutoLogin(true);
@@ -400,7 +401,7 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
     }
 
     CWizDatabase db;
-    if (!db.Open(localUserId)) {
+    if (!db.Open(strUserAccount)) {
         ui->label_passwordError->setText(tr("Can not open database while update user profile"));
         return false;
     }
@@ -424,11 +425,12 @@ bool CWizLoginDialog::updateUserProfile(bool bLogined)
         //
         QString logoFile = m_oemLogoMap.value(serverIp());
         qDebug() << "update oem logo path : " << logoFile;
-        if (logoFile.isEmpty() || !CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
+        QString strAccountPath = Utils::PathResolve::dataStorePath() + m_lineEditNewUserName->text() + "/";
+        if (logoFile.isEmpty() || !CWizOEMSettings::settingFileExists(strAccountPath))
             return true;
 
         //
-        CWizOEMSettings settings(m_lineEditUserName->text());
+        CWizOEMSettings settings(strAccountPath);
         QString strOldPath = settings.logoPath();
         if (!strOldPath.isEmpty())
         {
@@ -1423,7 +1425,8 @@ void CWizLoginDialog::onCheckServerLicenceFinished(bool result, const QString& s
     {
         // update oem setttings
         onOEMSettingsDownloaded(settings);
-        CWizOEMSettings::updateOEMSettings(userId(), settings);
+        QString strAccountPath = Utils::PathResolve::dataStorePath() + userId() + "/";
+        CWizOEMSettings::updateOEMSettings(strAccountPath, settings);
         //
         emit accountCheckStart();
         doOnlineVerify();
@@ -1491,9 +1494,10 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
     // update logo if user server is oem server
     if (m_currentUserServerType == EnterpriseServer)
     {
-        if (CWizOEMSettings::settingFileExists(m_lineEditUserName->text()))
+        QString strAccountPath = Utils::PathResolve::dataStorePath() + m_lineEditNewUserName->text() + "/";
+        if (CWizOEMSettings::settingFileExists(strAccountPath))
         {
-            CWizOEMSettings settings(m_lineEditUserName->text());
+            CWizOEMSettings settings(strAccountPath);
             QString strLogoPath = settings.logoPath();
             setLogo(strLogoPath);
         }
@@ -1541,11 +1545,11 @@ void CWizLoginDialog::loadDefaultUser()
     QString strDefaultGuid = settings->value("Users/DefaultUserGuid").toString();
     if (!strDefaultGuid.isEmpty())
     {
-        QString strUserId = WizGetLocalUserId(m_userList, strDefaultGuid);
-        if (!strUserId.isEmpty())
+        QString strUserAccount = WizGetLocalFolderName(m_userList, strDefaultGuid);
+        if (!strUserAccount.isEmpty())
         {
             CWizDatabase db;
-            if (db.Open(strUserId))
+            if (db.Open(strUserAccount))
             {
                 int serverType = db.meta("QT_WIZNOTE", "SERVERTYPE").toInt();
                 if (EnterpriseServer == serverType)

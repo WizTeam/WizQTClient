@@ -419,8 +419,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
 QString analyzerFile()
 {
-    QString strUserId = CWizDatabaseManager::instance()->db().GetUserId();
-    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/analyzer.ini";
+    QString strFile = CWizDatabaseManager::instance()->db().GetAccountPath() + "analyzer.ini";
     return strFile;
 }
 

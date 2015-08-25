@@ -32,23 +32,23 @@ void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, Q
     }
 }
 
-CWizOEMSettings::CWizOEMSettings(const QString& strUserId)
-    : QSettings(Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini", QSettings::IniFormat)
+CWizOEMSettings::CWizOEMSettings(const QString& strUserAccountPath)
+    : QSettings(strUserAccountPath + "oem.ini", QSettings::IniFormat)
 {
 }
 
 
-bool CWizOEMSettings::settingFileExists(const QString& strUserId)
+bool CWizOEMSettings::settingFileExists(const QString& strUserAccountPath)
 {
-    return QFile::exists(Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini");
+    return QFile::exists(strUserAccountPath + "oem.ini");
 }
 
-void CWizOEMSettings::updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData)
+void CWizOEMSettings::updateOEMSettings(const QString& strUserAccountPath, const QString& strOEMJSONData)
 {
-    if (strUserId.isEmpty() || strOEMJSONData.isEmpty())
+    if (strUserAccountPath.isEmpty() || strOEMJSONData.isEmpty())
         return;
 
-    QString strFile = Utils::PathResolve::dataStorePath() + strUserId + "/oem.ini";
+    QString strFile = strUserAccountPath + "oem.ini";
     QSettings settings(strFile, QSettings::IniFormat);
 
     rapidjson::Document d;

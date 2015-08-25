@@ -2488,6 +2488,11 @@ QString CWizDatabase::GetAccountPath() const
     return strPath;
 }
 
+QString CWizDatabase::GetAccountFolderName() const
+{
+    return m_strAccountFolderName;
+}
+
 QString CWizDatabase::GetDataPath() const
 {
     QString strPath;

@@ -64,7 +64,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
-    CWizOEMSettings oemSettings(m_db.GetUserId());
+    CWizOEMSettings oemSettings(m_db.GetAccountPath());
     if (!oemSettings.isHideBuyVip())
     {
         QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);

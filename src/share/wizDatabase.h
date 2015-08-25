@@ -318,6 +318,7 @@ public:
 
     // path resolve
     QString GetAccountPath() const;
+    QString GetAccountFolderName() const;
 
     QString GetDataPath() const;
     QString GetIndexFileName() const;
