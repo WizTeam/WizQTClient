@@ -1606,7 +1606,7 @@
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="330"/>
         <source>Only download attachments title</source>
-        <translation>只下载附件标题</translation>
+        <translation type="unfinished">只下载附件名称</translation>
     </message>
     <message>
         <location filename="../src/ui/wizpreferencedialog.ui" line="363"/>

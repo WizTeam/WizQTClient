@@ -314,10 +314,14 @@ int mainCore(int argc, char *argv[])
             return 0;
 
 //        qDebug() << "deafult user id : " << strUserGuid << " login dailog user id : " << loginDialog.loginUserGuid();
-        if (loginDialog.loginUserGuid() != strUserGuid)
+        if (strUserId.isEmpty() || loginDialog.loginUserGuid() != strUserGuid)
         {
             strAccountFolderName = WizGetLocalFolderName(localUsers, loginDialog.loginUserGuid());
-//            qDebug() << "login user id : " << loginDialog.userId();
+            if (strAccountFolderName.isEmpty())
+            {
+                strAccountFolderName = loginDialog.userId();
+            }
+            qDebug() << "login user id : " << loginDialog.userId();
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
             PluginManager::setSettings(settings);
         }
