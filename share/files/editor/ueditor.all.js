@@ -1903,7 +1903,7 @@ var domUtils = dom.domUtils = {
     POSITION_CONTAINS:16,
     //ie6使用其他的会有一段空白出现
     // fillChar:ie && browser.version == '6' ? '\ufeff' : '\u200B',
-    fillChar:'',
+    fillChar:'\ufeff',
     //-------------------------Node部分--------------------------------
     keys:{
         /*Backspace*/ 8:1, /*Delete*/ 46:1,
@@ -7217,7 +7217,7 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
                 return '';
             }
             me.fireEvent('beforegetcontent');
-            var root = UE.htmlparser(me.body.innerHTML,ignoreBlank);
+            var root = UE.htmlparser(me.body.innerHTML,!ignoreBlank);
             me.filterOutputRule(root);
             me.fireEvent('aftergetcontent', cmd,root);
             return  root.toHtml(formatter);
@@ -7316,11 +7316,11 @@ var fillCharReg = new RegExp(domUtils.fillChar, 'g');
          * editor.setContent('<p>new text</p>', true); //插入的结果是<p>old text</p><p>new text</p>
          * ```
          */
-        setContent: function (html, isAppendTo, notFireSelectionchange) {
+        setContent: function (html, isAppendTo, notFireSelectionchange, ignoreBlank) {
             var me = this;
 
             me.fireEvent('beforesetcontent', html);
-            var root = UE.htmlparser(html);
+            var root = UE.htmlparser(html, !ignoreBlank);
             me.filterInputRule(root);
             html = root.toHtml();
 
@@ -9021,7 +9021,7 @@ var filterWord = UE.filterWord = function () {
  * html字符串转换成uNode节点的静态方法
  * @method htmlparser
  * @param { String } htmlstr 要转换的html代码
- * @param { Boolean } ignoreBlank 若设置为true，转换的时候忽略\n\r\t等空白字符
+ * @param { Boolean } ignoreBlank 若设置为true，转换的时候忽略\n\r\t等空白字符   !keepBlank
  * @return { uNode } 给定的html片段转换形成的uNode对象
  * @example
  * ```javascript
@@ -9029,7 +9029,7 @@ var filterWord = UE.filterWord = function () {
  * ```
  */
 
-var htmlparser = UE.htmlparser = function (htmlstr,ignoreBlank) {
+var htmlparser = UE.htmlparser = function (htmlstr,keepBlank) {
     //todo 原来的方式  [^"'<>\/] 有\/就不能配对上 <TD vAlign=top background=../AAA.JPG> 这样的标签了
     //先去掉了，加上的原因忘了，这里先记录
     var re_tag = /<(?:(?:\/([^>]+)>)|(?:!--([\S|\s]*?)-->)|(?:([^\s\/<>]+)\s*((?:(?:"[^"]*")|(?:'[^']*')|[^"'<>])*)\/?>))/g,
@@ -9041,15 +9041,15 @@ var htmlparser = UE.htmlparser = function (htmlstr,ignoreBlank) {
         sub:1,img:1,sup:1,font:1,big:1,small:1,iframe:1,a:1,br:1,pre:1
     };
     htmlstr = htmlstr.replace(new RegExp(domUtils.fillChar, 'g'), '');
-    // if(!ignoreBlank){
-    //     htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(ignoreBlank?'':' ')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(ignoreBlank?'':' ')+']*','g'), function(a,b){
-    //         //br暂时单独处理
-    //         if(b && allowEmptyTags[b.toLowerCase()]){
-    //             return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
-    //         }
-    //         return a.replace(new RegExp('^[\\r\\n'+(ignoreBlank?'':' ')+']+'),'').replace(new RegExp('[\\r\\n'+(ignoreBlank?'':' ')+']+$'),'');
-    //     });
-    // }
+    if(keepBlank){
+        htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(keepBlank?' ':'')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(keepBlank?' ':'')+']*','g'), function(a,b){
+            //br暂时单独处理
+            if(b && allowEmptyTags[b.toLowerCase()]){
+                return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
+            }
+            return a.replace(new RegExp('^[\\r\\n'+(keepBlank?' ':'')+']+'),'').replace(new RegExp('[\\r\\n'+(keepBlank?' ':'')+']+$'),'');
+        });
+    }
 
     var notTransAttrs = {
         'href':1,
@@ -14304,7 +14304,7 @@ UE.plugins['paste'] = function () {
             //过滤word粘贴过来的冗余属性
             // html = UE.filterWord(html);
             //取消了忽略空白的第二个参数，粘贴过来的有些是有空白的，会被套上相关的标签
-            var root = UE.htmlparser(html, true);
+            var root = UE.htmlparser(html);
             //如果给了过滤规则就先进行过滤
             if (me.options.filterRules) {
                 UE.filterNode(root, me.options.filterRules);
@@ -14329,7 +14329,7 @@ UE.plugins['paste'] = function () {
             if(!html.html){
                 return;
             }
-            root = UE.htmlparser(html.html,true);
+            root = UE.htmlparser(html.html);
             //如果开启了纯文本模式
             if (me.queryCommandState('pasteplain') === 1) {
                 puerHtml = UE.filterNode(root, me.options.filterTxtRules).toHtml();
@@ -14730,7 +14730,7 @@ UE.plugins['list'] = function () {
     me.addListener('beforepaste',function(type,html){
         var me = this,
             rng = me.selection.getRange(),li;
-        var root = UE.htmlparser(html.html,true);
+        var root = UE.htmlparser(html.html);
         if(li = domUtils.findParentByTagName(rng.startContainer,'li',true)){
             var list = li.parentNode,tagName = list.tagName == 'OL' ? 'ul':'ol';
             utils.each(root.getNodesByTagName(tagName),function(n){
@@ -16021,11 +16021,11 @@ UE.plugins['list'] = function () {
                             return a.replace(/(^[\n\r\t ]*)|([\n\r\t ]*$)/g,'');
                         }
                         return a.replace(/(^[\n\r\t]*)|([\n\r\t]*$)/g,'')
-                    });
+                    });                  
 
                     me.setContent = orgSetContent;
 
-                    me.setContent(cont);
+                    me.setContent(cont, false, false, false);
                     sourceEditor.dispose();
                     sourceEditor = null;
                     //还原getContent方法
@@ -27595,7 +27595,8 @@ UE.ui = baidu.editor.ui = {};
                         if(pastePop.isHidden()){
                             var span = domUtils.createElement(editor.document, 'span', {
                                     'style':"line-height:0px;",
-                                    'innerHTML':''
+                                    'innerHTML':'\ufeff'
+                                    // 'innerHTML':''
                                 }),
                                 range = editor.selection.getRange();
                             range.insertNode(span);
