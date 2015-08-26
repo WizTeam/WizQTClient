@@ -27588,28 +27588,28 @@ UE.ui = baidu.editor.ui = {};
                 isPaste = true;
             });
 
-            // editor.addListener("afterinserthtml", function () {
-            //     clearTimeout(timer);
-            //     timer = setTimeout(function () {
-            //         if (pastePop && (isPaste || editor.ui._isTransfer)) {
-            //             if(pastePop.isHidden()){
-            //                 var span = domUtils.createElement(editor.document, 'span', {
-            //                         'style':"line-height:0px;",
-            //                         'innerHTML':'\ufeff'
-            //                     }),
-            //                     range = editor.selection.getRange();
-            //                 range.insertNode(span);
-            //                 var tmp= getDomNode(span, 'firstChild', 'previousSibling');
-            //                 tmp && pastePop.showAnchor(tmp.nodeType == 3 ? tmp.parentNode : tmp);
-            //                 domUtils.remove(span);
-            //             }else{
-            //                 pastePop.show();
-            //             }
-            //             delete editor.ui._isTransfer;
-            //             isPaste = false;
-            //         }
-            //     }, 200)
-            // });
+            editor.addListener("afterinserthtml", function () {
+                clearTimeout(timer);
+                timer = setTimeout(function () {
+                    if (pastePop && (isPaste || editor.ui._isTransfer)) {
+                        if(pastePop.isHidden()){
+                            var span = domUtils.createElement(editor.document, 'span', {
+                                    'style':"line-height:0px;",
+                                    'innerHTML':''
+                                }),
+                                range = editor.selection.getRange();
+                            range.insertNode(span);
+                            var tmp= getDomNode(span, 'firstChild', 'previousSibling');
+                            tmp && pastePop.showAnchor(tmp.nodeType == 3 ? tmp.parentNode : tmp);
+                            domUtils.remove(span);
+                        }else{
+                            pastePop.show();
+                        }
+                        delete editor.ui._isTransfer;
+                        isPaste = false;
+                    }
+                }, 200)
+            });
             editor.addListener('contextmenu', function (t, evt) {
                 baidu.editor.ui.Popup.postHide(evt);
             });
