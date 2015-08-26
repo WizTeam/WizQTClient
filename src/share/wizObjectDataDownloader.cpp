@@ -63,6 +63,7 @@ void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSuc
     m_mapObject.remove(objectGUID);
     //
     Q_EMIT downloadDone(data, bSucceed);
+    Q_EMIT finished();
 }
 
 void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)

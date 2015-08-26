@@ -2505,10 +2505,12 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+        QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
 
         downloaderHost->downloadData(doc);
         dlg.exec();
+        //
+        downloaderHost->disconnect(&dlg);
     }
 
     return PathFileExists(strFileName);
@@ -2528,16 +2530,10 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
             return false;
 
         QEventLoop loop;
-#if QT_VERSION > 0x050000
-        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-//            QObject::disconnect(downloaderHost, 0, 0, 0);
-            loop.quit();
-        });
-#else
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
-#endif
+        QObject::connect(downloaderHost, SIGNAL(finished()), &loop, SLOT(quit()));
         downloaderHost->downloadData(doc);
         loop.exec();
+        //
     }
 
     return PathFileExists(strFileName);
@@ -2557,17 +2553,10 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
             return false;
 
         QEventLoop loop;
-#if QT_VERSION > 0x050000
-        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-//            QObject::disconnect(downloaderHost, 0, 0, 0);
-            loop.quit();
-        });
-#else
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
-#endif
-
+        QObject::connect(downloaderHost, SIGNAL(finished()), &loop, SLOT(quit()));
         downloaderHost->downloadData(attachData);
         loop.exec();
+        //
     }
 
     return PathFileExists(strAttachmentFileName);
@@ -2590,10 +2579,12 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+        QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
 
         downloaderHost->downloadData(attachData);
         dlg.exec();
+        //
+        downloaderHost->disconnect(&dlg);
     }
 
     return PathFileExists(strAttachmentFileName);
