@@ -64,7 +64,6 @@
 #include "widgets/wizImageButton.h"
 #include "widgets/wizIAPDialog.h"
 #include "widgets/wizLocalProgressWebView.h"
-#include "titlebar.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -2774,9 +2773,6 @@ void MainWindow::on_actionDeveloper_triggered()
     m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
 
     WizGetAnalyzer().LogAction("MenuBarDeveloperMode");
-
-    TitleBar::TitleBarTest = !TitleBar::TitleBarTest;
-    qDebug() << "title bar test ; " << TitleBar::TitleBarTest;
 }
 
 

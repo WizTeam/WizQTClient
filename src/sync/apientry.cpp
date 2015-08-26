@@ -72,14 +72,9 @@ using namespace WizService::Internal;
 static QString LocalLanguage = QLocale::system().name();
 QString CommonApiEntry::m_server = QString();
 
-static QSet<long long> threadsIds;
 
 QString _requestUrl(const QString& strUrl)
 {
-    long long thead = (long long)QThread::currentThreadId();
-    threadsIds.insert(thead);
-    qDebug() << "current thread count ; " << threadsIds.count();
-
     QNetworkAccessManager* net = new QNetworkAccessManager();
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
 

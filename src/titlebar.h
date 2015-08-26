@@ -29,17 +29,14 @@ class EditorToolBar;
 class CellButton;
 class CWizTagBar;
 
-
 class TitleBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    static bool TitleBarTest;
-
     explicit TitleBar(CWizExplorerApp& app, QWidget *parent);
     CWizDocumentView* noteView();
-    void setLocked(bool bReadOnly, int nReason, bool bIsGroup);    
+    void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
 #ifdef USEWEBENGINE
