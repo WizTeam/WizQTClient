@@ -3645,11 +3645,12 @@ void CWizCategoryView::updatePersonalFolderLocation(CWizDatabase& db, \
         {
             findFolder(childLocation, true, true);
         }
-
-        QString str = getAllFoldersPosition();
-        db.SetFoldersPos(str, -1);
-        db.SetFoldersPosModified();
     }
+
+    // 文件夹移动后触发folder loacation changed，需要更新顺序
+    QString str = getAllFoldersPosition();
+    db.SetFoldersPos(str, -1);
+    db.SetFoldersPosModified();
 
     emit categoryItemPositionChanged(db.kbGUID());
 }
