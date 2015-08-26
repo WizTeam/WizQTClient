@@ -5618,7 +5618,8 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
-        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strParentGUID || tag.strGUID == sourceFolder.strGUID)
+        if (tag.strKbGUID.isEmpty() || (!tag.strGUID.IsEmpty() && tag.strGUID == sourceFolder.strParentGUID)
+                || tag.strGUID == sourceFolder.strGUID)
             return;
 
         //        
@@ -5743,7 +5744,8 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
-        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strGUID || tag.strGUID == sourceFolder.strParentGUID)
+        if (tag.strKbGUID.isEmpty() || tag.strGUID == sourceFolder.strGUID ||
+                (!tag.strGUID.IsEmpty() && tag.strGUID == sourceFolder.strParentGUID))
             return;
         qDebug() << "copy group folder to group folder " << tag.strName;
         //        
