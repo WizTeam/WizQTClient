@@ -1902,7 +1902,8 @@ var domUtils = dom.domUtils = {
     POSITION_IS_CONTAINED:8,
     POSITION_CONTAINS:16,
     //ie6使用其他的会有一段空白出现
-    fillChar:ie && browser.version == '6' ? '\ufeff' : '\u200B',
+    // fillChar:ie && browser.version == '6' ? '\ufeff' : '\u200B',
+    fillChar:'',
     //-------------------------Node部分--------------------------------
     keys:{
         /*Backspace*/ 8:1, /*Delete*/ 46:1,
@@ -12346,7 +12347,7 @@ UE.plugins['paragraph'] = function() {
             }
             return range.moveToBookmark( bookmark2 ).moveToBookmark( bookmark );
         };
-    me.setOpt('paragraph',{'p':'', 'h1':'', 'h2':'', 'h3':'', 'h4':'', 'h5':'', 'h6':''});
+    me.setOpt('paragraph',{'p':'', 'div':'', 'h1':'', 'h2':'', 'h3':'', 'h4':'', 'h5':'', 'h6':''});
     me.commands['paragraph'] = {
         execCommand : function( cmdName, style,attrs,sourceCmdName ) {
             var range = this.selection.getRange();
@@ -12393,7 +12394,7 @@ UE.plugins['paragraph'] = function() {
             return true;
         },
         queryCommandValue : function() {
-            var node = domUtils.filterNodeList(this.selection.getStartElementPath(),'p h1 h2 h3 h4 h5 h6');
+            var node = domUtils.filterNodeList(this.selection.getStartElementPath(),'p div h1 h2 h3 h4 h5 h6');
             return node ? node.tagName.toLowerCase() : '';
         }
     };
@@ -27587,28 +27588,28 @@ UE.ui = baidu.editor.ui = {};
                 isPaste = true;
             });
 
-            editor.addListener("afterinserthtml", function () {
-                clearTimeout(timer);
-                timer = setTimeout(function () {
-                    if (pastePop && (isPaste || editor.ui._isTransfer)) {
-                        if(pastePop.isHidden()){
-                            var span = domUtils.createElement(editor.document, 'span', {
-                                    'style':"line-height:0px;",
-                                    'innerHTML':'\ufeff'
-                                }),
-                                range = editor.selection.getRange();
-                            range.insertNode(span);
-                            var tmp= getDomNode(span, 'firstChild', 'previousSibling');
-                            tmp && pastePop.showAnchor(tmp.nodeType == 3 ? tmp.parentNode : tmp);
-                            domUtils.remove(span);
-                        }else{
-                            pastePop.show();
-                        }
-                        delete editor.ui._isTransfer;
-                        isPaste = false;
-                    }
-                }, 200)
-            });
+            // editor.addListener("afterinserthtml", function () {
+            //     clearTimeout(timer);
+            //     timer = setTimeout(function () {
+            //         if (pastePop && (isPaste || editor.ui._isTransfer)) {
+            //             if(pastePop.isHidden()){
+            //                 var span = domUtils.createElement(editor.document, 'span', {
+            //                         'style':"line-height:0px;",
+            //                         'innerHTML':'\ufeff'
+            //                     }),
+            //                     range = editor.selection.getRange();
+            //                 range.insertNode(span);
+            //                 var tmp= getDomNode(span, 'firstChild', 'previousSibling');
+            //                 tmp && pastePop.showAnchor(tmp.nodeType == 3 ? tmp.parentNode : tmp);
+            //                 domUtils.remove(span);
+            //             }else{
+            //                 pastePop.show();
+            //             }
+            //             delete editor.ui._isTransfer;
+            //             isPaste = false;
+            //         }
+            //     }, 200)
+            // });
             editor.addListener('contextmenu', function (t, evt) {
                 baidu.editor.ui.Popup.postHide(evt);
             });

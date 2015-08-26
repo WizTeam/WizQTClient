@@ -739,7 +739,13 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
 
     m_transitionView->setVisible(false);
 
-    if (!bSucceed || m_bEditingMode)
+    if (!bSucceed)
+    {
+        m_transitionView->showAsMode(data.strObjectGUID, CWizDocumentTransitionView::ErrorOccured);
+        return;
+    }
+
+    if (m_bEditingMode)
         return;
 
 
