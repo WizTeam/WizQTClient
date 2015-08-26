@@ -636,6 +636,8 @@ void TitleBar::onCommentPageLoaded(bool ok)
 #endif
 }
 
+bool TitleBar::TitleBarTest = false;
+
 void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     Q_UNUSED(note);
@@ -645,7 +647,11 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
 
     if (view != noteView()) {
         return;
-    }    
+    }
+
+    qDebug() << TitleBarTest;
+    if (TitleBarTest == true)
+        return;
 
     m_commentsUrl.clear();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
