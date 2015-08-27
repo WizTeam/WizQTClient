@@ -635,7 +635,7 @@ QString CWizUserSettings::defaultFontFamily()
 
 #ifdef Q_OS_MAC
     return "Helvetica Neue";
-#elif
+#else
     return "Arial";
 #endif
 }

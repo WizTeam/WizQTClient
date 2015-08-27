@@ -8,7 +8,11 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QEventLoop>
+#if QT_VERSION > 0x050000
 #include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 #include <QUrl>
 #include <QDebug>
 

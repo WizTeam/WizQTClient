@@ -889,11 +889,13 @@ void MainWindow::initMenuBar()
 
 void MainWindow::initDockMenu()
 {
+#ifdef Q_OS_MAC
     m_dockMenu = new QMenu(this);
     qt_mac_set_dock_menu(m_dockMenu);
 
     connect(m_dockMenu, SIGNAL(aboutToShow()),
             SLOT(resetDockMenu()));
+#endif
 }
 
 void MainWindow::on_editor_statusChanged()
@@ -2432,9 +2434,9 @@ void MainWindow::on_actionZoom_triggered()
 void MainWindow::on_actionBringFront_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarBringFront");
-
+#ifdef Q_OS_MAC
     wizMacShowCurrentApplication();
-
+#endif
 //    QWindowList widgetList = qApp->allWindows();
 //    for (QWindow* wgt : widgetList)
 //    {

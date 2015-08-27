@@ -4,7 +4,11 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QEventLoop>
+#if QT_VERSION > 0x050000
 #include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>

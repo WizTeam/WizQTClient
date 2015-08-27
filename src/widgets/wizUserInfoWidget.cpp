@@ -1,6 +1,10 @@
 #include <QtGlobal>
 #include "wizUserInfoWidget.h"
+#if QT_VERSION > 0x050000
 #include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>

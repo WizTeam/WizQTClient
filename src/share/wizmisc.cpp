@@ -1891,7 +1891,12 @@ void WizDeleteFolder(const CString& strPath)
         return;
 
     dir = QDir(strPath);
+
+#if QT_VERSION > 0x050000
     dir.removeRecursively();
+#else
+    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
+#endif
 }
 
 void WizDeleteFile(const CString& strFileName)

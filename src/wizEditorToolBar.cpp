@@ -1920,7 +1920,7 @@ void EditorToolBar::selectCurrentFontFamily(const QString& strFontFamily)
     fontList.insert(0, strFontFamily);
     while (fontList.count() > 3)
         fontList.pop_back();
-    QString fonts = fontList.join('/');
+    QString fonts = fontList.join("/");
     m_app.userSettings().set(WIZRECENTFONTLIST, fonts);
 }
 
@@ -1928,7 +1928,7 @@ void EditorToolBar::selectCurrentFontFamilyItem(const QString& strFontFamily)
 {
     WizComboboxStyledItem* fontFamilyItems = FontFamilies();
     WizComboboxStyledItem familyItem = itemFromArrayByKey(strFontFamily, fontFamilyItems, nFontFamilyCount);
-    m_comboFontFamily->setCurrentText(familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText);
+//    m_comboFontFamily->setCurrentText(familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText);
     m_comboFontFamily->setText(familyItem.strText.isEmpty() ? strFontFamily : familyItem.strText);
     //
     clearWizCheckState(m_comboFontFamily);
