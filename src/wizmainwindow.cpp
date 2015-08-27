@@ -754,7 +754,7 @@ void MainWindow::restoreStatus()
         QRect rcDesktop = qApp->desktop()->availableGeometry();
         if (rcDesktop.width() > 1280)
         {
-            const int DefaultAppWidth = 1200;
+            const int DefaultAppWidth = 1280;
             const int DefaultAppHeight = 760;
             QRect rcWindow = QRect(rcDesktop.x() + (rcDesktop.width() - DefaultAppWidth) / 2,
                                    rcDesktop.y() + (rcDesktop.height() - DefaultAppHeight) / 2, DefaultAppWidth, DefaultAppHeight);
