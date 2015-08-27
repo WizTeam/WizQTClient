@@ -157,7 +157,7 @@ private slots:
 
     void onLoginInputChanged();
     void onSignUpInputDataChanged();
-    void userListMenuClicked(QAction* action);
+//    void userListMenuClicked(QAction* action);
     void serverListMenuClicked(QAction* action);
     void showUserListMenu();
     void showServerListMenu();

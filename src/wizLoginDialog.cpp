@@ -1127,14 +1127,26 @@ void CWizLoginDialog::onSignUpInputDataChanged()
     ui->btn_singUp->setEnabled(bInputFinished);
 }
 
-void CWizLoginDialog::userListMenuClicked(QAction *action)
-{
-    if (action)
-    {
-        m_menuUsers->setDefaultAction(action);
-        setUser(action->data().toString());
-    }
-}
+//void CWizLoginDialog::userListMenuClicked(QAction *action)
+//{
+//    if (action)
+//    {
+//        QAction* currentDefault = m_menuUsers->defaultAction();
+//        CWizUserItemAction* userAction = dynamic_cast<CWizUserItemAction*>(currentDefault);
+//        if (userAction)
+//        {
+//            userAction->setSelected(false);
+//        }
+
+//        m_menuUsers->setDefaultAction(action);
+//        userAction = dynamic_cast<CWizUserItemAction*>(action);
+//        if (userAction)
+//        {
+//            userAction->setSelected(true);
+//        }
+//        setUser(action->data().toString());
+//    }
+//}
 
 void CWizLoginDialog::serverListMenuClicked(QAction* action)
 {
@@ -1271,10 +1283,24 @@ void CWizLoginDialog::onDeleteUserRequest(const WizLocalUser& user)
 
 void CWizLoginDialog::onUserSelected(const WizLocalUser& user)
 {
+    // clear old selected
+    QAction* currentDefault = m_menuUsers->defaultAction();
+    CWizUserItemAction* userAction = dynamic_cast<CWizUserItemAction*>(currentDefault);
+    if (userAction)
+    {
+        userAction->setSelected(false);
+    }
+
+    //
     QAction* action = findActionInMenu(user.strGuid);
     if (action)
     {
         m_menuUsers->setDefaultAction(action);
+        userAction = dynamic_cast<CWizUserItemAction*>(action);
+        if (userAction)
+        {
+            userAction->setSelected(true);
+        }
         setUser(user.strGuid);
     }
 }
