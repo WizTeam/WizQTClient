@@ -4013,6 +4013,13 @@ void CWizIndex::AddExtraFolder(const QString& strLocation)
     QString strParent = strLocation;
     int idx = strParent.lastIndexOf("/", -2);
     while (idx) {
+        // 如果文件夹格式错误，直接退出，防止死循环
+        if (strParent.left(1) != "/" || strParent.right(1) != "/")
+        {
+            qCritical() << "try to add a error location : " << strParent;
+            return;
+        }
+
         strParent = strParent.left(idx + 1);
         idx = strParent.lastIndexOf("/", -2);
 
