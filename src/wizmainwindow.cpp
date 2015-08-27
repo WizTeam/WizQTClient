@@ -186,6 +186,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
+    // 如果没有禁止自动同步，则在打开软件后立即同步一次
+    if (m_settings->syncInterval() > 0)
+    {
+        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
+    }
+
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
