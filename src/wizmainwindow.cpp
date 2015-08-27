@@ -1600,8 +1600,10 @@ void MainWindow::changeDocumentsSortTypeByAction(QAction* action)
 
 void MainWindow::resetDockMenu()
 {
+#ifdef Q_OS_MAC
     m_dockMenu->clear();
     resetWindowListMenu(m_dockMenu, false);
+#endif
 }
 
 void MainWindow::resetWindowMenu()
