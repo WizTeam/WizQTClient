@@ -251,7 +251,6 @@ private:
     //
     bool m_bContentsChanged;
 
-    CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
     CWizDocumentWebViewSaverThread* m_docSaverThread;
 

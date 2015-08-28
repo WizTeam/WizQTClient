@@ -92,6 +92,8 @@ bool CWizFolderSelector::isSelectGroupFolder()
         }
     }
 
+    qDebug() << "folder selector , item type : " << item->type() << " accept root : " << m_bAcceptRoot;
+
     if (!m_bAcceptRoot)
         return item->type() == Category_GroupNoTagItem || item->type() == Category_GroupItem;
 
@@ -120,6 +122,8 @@ QString CWizFolderSelector::selectedFolder()
 bool CWizFolderSelector::isSelectPersonalFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
+
+    qDebug() << "folder selector , item type : " << item->type() << " accept root : " << m_bAcceptRoot;
     if (!m_bAcceptRoot)
         return item->type() == Category_FolderItem;
 

@@ -85,6 +85,7 @@ private:
     QTimer* m_timeOutTimer;
 //    QTimer* m_loopCheckTimer;
     bool m_stop;
+    bool m_networkError;
 
     QString m_strKbGUID;
     QString m_strGUID;

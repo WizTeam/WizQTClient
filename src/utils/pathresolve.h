@@ -23,7 +23,7 @@ public:
     static QString upgradePath();
     static QString logFile();
     static QString globalSettingsFile();
-    static QString userSettingsFile(const QString strUserId);
+    static QString userSettingsFile(const QString strAccountFolderName);
     static QString qtLocaleFileName(const QString& strLocale);
     static QString localeFileName(const QString& strLocale);
 

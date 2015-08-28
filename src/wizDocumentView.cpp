@@ -2,6 +2,7 @@
 
 #include <QWebElement>
 #include <QWebFrame>
+#include <QWebHistory>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
@@ -59,6 +60,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
+    , m_transitionView(new CWizDocumentTransitionView(this))
     , m_bLocked(false)
     , m_bEditingMode(false)
     , m_noteLoaded(false)
@@ -101,6 +103,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->setPage(commentPage);
+    m_comments->history()->setMaximumItemCount(0);
     m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
     m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
@@ -128,6 +131,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layoutMain->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutMain);
     layoutMain->addWidget(m_tab);
+
+    //
+    layoutMain->addWidget(m_transitionView);
+    m_transitionView->hide();
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
@@ -161,6 +168,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
     connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
+    connect(m_title, SIGNAL(loadComment_request(QString)), SLOT(on_loadComment_request(QString)), Qt::QueuedConnection);
 
 //    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
 //            SLOT(on_checkEditStatus_finished(QString,QStringList)));
@@ -226,6 +234,11 @@ QWebView*CWizDocumentView::commentView() const
 CWizLocalProgressWebView*CWizDocumentView::commentWidget() const
 {
     return m_commentWidget;
+}
+
+CWizDocumentTransitionView* CWizDocumentView::transitionView()
+{
+    return m_transitionView;
 }
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
@@ -328,7 +341,6 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_web->closeDocument(m_note);
     m_web->saveDocument(m_note, false);
     if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
@@ -349,11 +361,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
     CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
     QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
     if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-
-        window->downloaderHost()->downloadData(data);
-        window->showClient(false);
-        window->transitionView()->showAsMode(data.strGUID, CWizDocumentTransitionView::Downloading);
+            !PathFileExists(strDocumentFileName))
+    {
+        downloadNoteFromServer(data);
 
         return;
     }
@@ -392,11 +402,9 @@ void CWizDocumentView::reviewCurrentNote()
     CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
     QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
     if (!db.IsObjectDataDownloaded(m_note.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName)) {
-        MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-        window->downloaderHost()->downloadData(m_note);
-        window->showClient(false);
-        window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+            !PathFileExists(strDocumentFileName))
+    {
+        downloadNoteFromServer(m_note);
 
         return;
     }
@@ -454,6 +462,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
 
         // 保存标题，防止因多线程保存引起覆盖
         m_title->onTitleEditFinished();
+        m_title->hideMessageTips(false);
     }
     m_title->setEditingDocument(bEdit);
     m_web->setEditingDocument(bEdit);
@@ -618,16 +627,13 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void CWizDocumentView::downloadDocumentFromServer()
+void CWizDocumentView::downloadNoteFromServer(const WIZDOCUMENTDATA& note)
 {
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
-    QFile::remove(strDocumentFileName);
-
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->downloaderHost()->downloadDocument(m_note);
-    window->showClient(false);
-    window->transitionView()->showAsMode(m_note.strGUID, CWizDocumentTransitionView::Downloading);
+    connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+            m_transitionView, SLOT(onDownloadProgressChanged(QString,int,int)), Qt::UniqueConnection);
+    m_downloaderHost->downloadDocument(note);
+    showClient(false);
+    m_transitionView->showAsMode(note.strGUID, CWizDocumentTransitionView::Downloading);
 }
 
 void CWizDocumentView::sendDocumentEditingStatus()
@@ -710,6 +716,7 @@ void CWizDocumentView::onCipherCheckRequest()
 
     db.setUserCipher(m_passwordView->userCipher());
     db.setSaveUserCipher(m_passwordView->isSaveForSession());
+    m_app.userSettings().setRememberNotePasswordForSession(m_passwordView->isSaveForSession());
 
     if (!db.IsFileAccessible(noteData))
     {
@@ -730,11 +737,17 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
             || m_note.strGUID != data.strObjectGUID)
         return;
 
+    m_transitionView->setVisible(false);
+
     if (!bSucceed)
+    {
+        m_transitionView->showAsMode(data.strObjectGUID, CWizDocumentTransitionView::ErrorOccured);
+        return;
+    }
+
+    if (m_bEditingMode)
         return;
 
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-    mainWindow->transitionView()->setVisible(false);
 
     bool onEditRequest = m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST;
 
@@ -750,10 +763,10 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
     reloadNote();
 }
 
-void CWizDocumentView::on_document_data_saved(const QString& strGUID,
+void CWizDocumentView::on_document_data_changed(const QString& strGUID,
                                               CWizDocumentView* viewer)
 {
-    if (viewer != this && strGUID == note().strGUID)
+    if (viewer != this && strGUID == note().strGUID && !m_bEditingMode)
     {
         reloadNote();
     }
@@ -883,7 +896,11 @@ void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
 {
     if (link == NOTIFYBAR_LABELLINK_DOWNLOAD)
     {
-        downloadDocumentFromServer();
+        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+        WizDeleteFile(strDocumentFileName);
+
+        downloadNoteFromServer(m_note);
     }
 }
 
@@ -905,34 +922,10 @@ void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
     m_comments->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
 }
 
-
-WizFloatDocumentViewer::WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent) : QWidget(parent)
+void CWizDocumentView::on_loadComment_request(const QString& url)
 {
-        setAttribute(Qt::WA_DeleteOnClose);
-        setContentsMargins(0, 0, 0, 0);
-        setPalette(QPalette(Qt::white));
-        QVBoxLayout* layout = new QVBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-//        m_webEngine = new CWizDocumentWebEngine(app, this);
-//        layout->addWidget(m_webEngine);
-//        m_edit = new QLineEdit(this);
-//        layout->addWidget(m_edit);
-//        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-//        WIZDOCUMENTDATA doc;
-//        m_webEngine->viewDocument(doc, true);
-        m_docView = new CWizDocumentView(app, this);
-        layout->addWidget(m_docView);
-        setLayout(layout);
+    m_comments->load(url);
 }
 
-WizFloatDocumentViewer::~WizFloatDocumentViewer()
-{
-        m_docView->waitForDone();
-}
 
-void WizFloatDocumentViewer::on_textInputFinished()
-{
-//    qDebug() << "run js : " << m_edit->text();
-//    m_webEngine->page()->runJavaScript(m_edit->text());
-}
 

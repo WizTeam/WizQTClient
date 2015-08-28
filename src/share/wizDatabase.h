@@ -34,7 +34,8 @@ public:
     bool MoveTo(CWizFolder* pFolder);
     bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
     bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
-    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime, bool keepDocTag, CWizObjectDataDownloaderHost* downloader);
+    bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
+                bool keepDocTag, QString& newDocGUID, CWizObjectDataDownloaderHost* downloader);
     bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
     bool AddTag(const WIZTAGDATA& dataTag);
     bool RemoveTag(const WIZTAGDATA& dataTag);
@@ -110,7 +111,9 @@ class CWizDatabase
     Q_OBJECT
 
 private:
-    QString m_strUserId;
+    QString m_strAccountFolderName;
+    // all databases share one user id, user id data only stored in personal databases
+    static QString m_strUserId;
     QString m_strPassword;
     WIZDATABASEINFO m_info;
     QPointer<CWizZiwReader> m_ziwReader;
@@ -259,6 +262,7 @@ public:
     virtual bool ProcessValue(const QString& strKey);
 
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
+    virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser);
 
     virtual void ClearLastSyncError();
     virtual QString GetLastSyncErrorMessage();
@@ -306,7 +310,7 @@ public:
     virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
 
 public:
-    bool Open(const QString& strUserId, const QString& strKbGUID = NULL);
+    bool Open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
     bool LoadDatabaseInfo();
     bool SetDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool InitDatabaseInfo(const WIZDATABASEINFO& dbInfo);
@@ -314,6 +318,7 @@ public:
 
     // path resolve
     QString GetAccountPath() const;
+    QString GetAccountFolderName() const;
 
     QString GetDataPath() const;
     QString GetIndexFileName() const;

@@ -6,6 +6,7 @@
 #include <QDesktopWidget>
 #include <QUndoStack>
 #include <QEvent>
+#include <QAction>
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QComboBox>
@@ -91,6 +92,9 @@
 #include "share/wizAnalyzer.h"
 #include "share/wizTranslater.h"
 #include "widgets/wizShareLinkDialog.h"
+#include "core/wizSingleDocumentView.h"
+
+#define MAINWINDOW  "MainWindow"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -116,14 +120,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif
     //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
-    //, m_avatarDownloaderHost(new CWizUserAvatarDownloaderHost(dbMgr.db().GetAvatarPath(), this))
-    , m_transitionView(new CWizDocumentTransitionView(this))
     , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
 #endif
     , m_menuBar(nullptr)
+    , m_dockMenu(nullptr)
+    , m_windowListMenu(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
@@ -146,6 +150,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_doc(new CWizDocumentView(*this, this))
     , m_history(new CWizDocumentViewHistory())
     , m_animateSync(new CWizAnimateAction(*this, this))
+    , m_singleViewDelegate(new CWizSingleDocumentViewDelegate(*this, this))
     , m_bRestart(false)
     , m_bLogoutRestart(false)
     , m_bUpdatingSelection(false)
@@ -165,12 +170,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
-#endif
-
-    //CWizCloudPool::instance()->init(&m_dbMgr);
-
-    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString, int,int)),
-            m_transitionView, SLOT(onDownloadProgressChanged(QString, int,int)));
+#endif    
 
     // search and full text search
     m_searchIndexer->start(QThread::IdlePriority);
@@ -186,16 +186,28 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
     connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
 
+    // 如果没有禁止自动同步，则在打开软件后立即同步一次
+    if (m_settings->syncInterval() > 0)
+    {
+        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
+    }
+
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
         SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
+    connect(m_documents, SIGNAL(addDocumentToShortcutsRequest(WIZDOCUMENTDATA)),
+            m_category, SLOT(addDocumentToShortcuts(WIZDOCUMENTDATA)));
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
     connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
-            m_doc, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
+            m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
     connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
             SLOT(on_shortcutDataChanged(QString)));
+    connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)),
+            m_singleViewDelegate, SIGNAL(documentChanged(QString,CWizDocumentView*)));
+    connect(m_singleViewDelegate, SIGNAL(documentChanged(QString,CWizDocumentView*)),
+            m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
@@ -209,6 +221,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initActions();
 #ifdef Q_OS_MAC
     initMenuBar();
+    initDockMenu();
 #else
     if (m_useSystemBasedStyle) {
         initMenuBar();
@@ -366,7 +379,8 @@ void MainWindow::closeEvent(QCloseEvent* event)
 #ifdef Q_OS_MAC
     if (event->spontaneous())
     {
-        wizMacHideCurrentApplication();
+//        wizMacHideCurrentApplication();
+        setVisible(false);
         event->ignore();
         return;
     }
@@ -518,15 +532,20 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
 
             //try to relogin wiz server, but failed. may be password error
             m_settings->setPassword("");
-            if (!m_userVerifyDialog)
-            {
-                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
-                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
-            }
 
-            m_userVerifyDialog->exec();
-            m_userVerifyDialog->deleteLater();
-            m_userVerifyDialog = nullptr;
+            qDebug() << "username or password error, need relogin.";
+            CWizMessageBox::warning(this, tr("Info"), tr("Username / password error. Please login again."));
+            on_actionLogout_triggered();
+
+//            if (!m_userVerifyDialog)
+//            {
+//                m_userVerifyDialog = new CWizUserVerifyDialog(m_dbMgr.db().GetUserId(), tr("sorry, sync failed. please input your password and try again."), this);
+//                connect(m_userVerifyDialog, SIGNAL(accepted()), SLOT(on_syncDone_userVerified()));
+//            }
+
+//            m_userVerifyDialog->exec();
+//            m_userVerifyDialog->deleteLater();
+//            m_userVerifyDialog = nullptr;
         }
     }
 }
@@ -538,18 +557,6 @@ void MainWindow::on_quickSync_request(const QString& strKbGUID)
 
 void MainWindow::setSystemTrayIconVisible(bool bVisible)
 {
-    //FIXME: There is a bug. Must delete trayicon at hide, otherwise will crash when show it again.
-//    if (bVisible)
-//    {
-//        //
-//        if (m_tray)
-//        {
-//            if (m_tray->isVisible())
-//                return;
-
-//            delete m_tray;
-//        }
-
 //        //
     if (!m_tray)
     {
@@ -557,16 +564,7 @@ void MainWindow::setSystemTrayIconVisible(bool bVisible)
         initTrayIcon(m_tray);
         m_tray->show();
     }
-//    }
-//    else
-//    {
-//        if (m_tray)
-//        {
-//            m_tray->hide();
-//            delete m_tray;
-//            m_tray = 0;
-//        }
-//    }
+
     m_tray->setVisible(bVisible);
 }
 
@@ -601,6 +599,27 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
     CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
     showMessageList(pItem);
     m_msgList->selectMessage(messageID);
+}
+
+void MainWindow::on_dockMenuAction_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        QString guid = action->data().toString();
+        if (guid == MAINWINDOW)
+        {
+            bringWidgetToFront(this);
+        }
+        else
+        {
+            CWizSingleDocumentViewer* viewer = m_singleViewDelegate->getDocumentViewer(guid);
+            if (viewer)
+            {                
+                bringWidgetToFront(viewer);
+            }
+        }
+    }
 }
 
 void MainWindow::on_trayIcon_newDocument_clicked()
@@ -738,9 +757,21 @@ void MainWindow::restoreStatus()
 
     // main window
     if (geometry.isEmpty()) {
-        setGeometry(QStyle::alignedRect(Qt::LeftToRight, Qt::AlignCenter, \
-                                        sizeHint(), qApp->desktop()->availableGeometry()
-                                        ));
+        QRect rcDesktop = qApp->desktop()->availableGeometry();
+        if (rcDesktop.width() > 1280)
+        {
+            const int DefaultAppWidth = 1280;
+            const int DefaultAppHeight = 760;
+            QRect rcWindow = QRect(rcDesktop.x() + (rcDesktop.width() - DefaultAppWidth) / 2,
+                                   rcDesktop.y() + (rcDesktop.height() - DefaultAppHeight) / 2, DefaultAppWidth, DefaultAppHeight);
+            setGeometry(rcWindow);
+        }
+        else
+        {
+            QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
+                                   rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
+            setGeometry(rcWindow);
+        }
     } else {
         restoreGeometry(geometry);
     }
@@ -767,12 +798,110 @@ void MainWindow::initActions()
     on_editor_statusChanged();
 }
 
+void setActionCheckState(const QList<QAction*>& actionList, int type)
+{
+    for (int i = 0; i < actionList.count(); i++)
+    {
+        QAction* action = actionList.at(i);
+        if (action->data().toInt() == type)
+        {
+            action->setChecked(true);
+            break;
+        }
+    }
+}
 
 void MainWindow::initMenuBar()
 {
     m_menuBar = new QMenuBar(this);
     setMenuBar(m_menuBar);
-    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini");
+    m_actions->buildMenuBar(m_menuBar, Utils::PathResolve::resourcesPath() + "files/mainmenu.ini", m_windowListMenu);
+
+    connect(m_windowListMenu, SIGNAL(aboutToShow()), SLOT(resetWindowMenu()));
+    connect(m_singleViewDelegate, SIGNAL(documentViewerClosed(QString)),
+            SLOT(removeWindowsMenuItem(QString)));
+
+    //
+    m_actions->actionFromName(WIZCATEGORY_OPTION_MESSAGECENTER)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_SHORTCUTS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_QUICKSEARCH)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setCheckable(true);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setCheckable(true);
+
+    bool checked = m_category->isSectionVisible(Section_MessageCenter);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_MESSAGECENTER)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_Shortcuts);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_SHORTCUTS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_QuickSearch);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_QUICKSEARCH)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_Folders);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setChecked(checked);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_FOLDERS)->setEnabled(false);
+    checked = m_category->isSectionVisible(Section_Tags);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_TAGS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_BizGroups);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_BIZGROUPS)->setChecked(checked);
+    checked = m_category->isSectionVisible(Section_PersonalGroups);
+    m_actions->actionFromName(WIZCATEGORY_OPTION_PERSONALGROUPS)->setChecked(checked);
+
+    //
+    m_viewTypeActions = new QActionGroup(m_menuBar);
+    QAction* action = m_actions->actionFromName(WIZCATEGORY_OPTION_THUMBNAILVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeThumbnail);
+    m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeTwoLine);
+    m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_ONELINEVIEW);
+    action->setCheckable(true);
+    action->setData(CWizDocumentListView::TypeOneLine);
+    m_viewTypeActions->addAction(action);
+    int viewType = userSettings().get("VIEW_TYPE").toInt();
+    setActionCheckState(m_viewTypeActions->actions(), viewType);
+
+    m_sortTypeActions = new QActionGroup(m_menuBar);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME);
+    action->setData(CWizSortingPopupButton::SortingCreateTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME);
+    action->setData(CWizSortingPopupButton::SortingUpdateTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME);
+    action->setData(CWizSortingPopupButton::SortingAccessTime);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE);
+    action->setData(CWizSortingPopupButton::SortingTitle);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
+    action->setData(CWizSortingPopupButton::SortingLocation);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
+    action->setData(CWizSortingPopupButton::SortingTag);
+    m_sortTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
+    action->setData(CWizSortingPopupButton::SortingSize);
+    m_sortTypeActions->addAction(action);
+    for (QAction* actionItem : m_sortTypeActions->actions())
+    {
+        actionItem->setCheckable(true);
+    }
+    int sortType = qAbs(userSettings().get("SORT_TYPE").toInt());
+    setActionCheckState(m_sortTypeActions->actions(), sortType);
+}
+
+void MainWindow::initDockMenu()
+{
+#ifdef Q_OS_MAC
+    m_dockMenu = new QMenu(this);
+    qt_mac_set_dock_menu(m_dockMenu);
+
+    connect(m_dockMenu, SIGNAL(aboutToShow()),
+            SLOT(resetDockMenu()));
+#endif
 }
 
 void MainWindow::on_editor_statusChanged()
@@ -1375,6 +1504,126 @@ void MainWindow::loadMessageByUserGuid(const QString& guid)
     m_msgList->setMessages(arrayMsg);
 }
 
+
+QAction* actionByGuid(const QList<QAction*>& actionList, const QString guid)
+{
+    for (QAction* action : actionList)
+    {
+        if (action->data().toString() == guid)
+            return action;
+    }
+
+    return nullptr;
+}
+
+bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
+    //
+    const QString k1 = action1->text().toLower();
+    const QString k2 = action2->text().toLower();
+
+    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    if (isSimpChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(k1);
+            QByteArray arrOther = pCodec->fromUnicode(k2);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return  k1.compare(k2) < 0;
+}
+
+
+void MainWindow::resetWindowListMenu(QMenu* menu, bool removeExists)
+{
+    QList<QAction*> actionList = menu->actions();
+    QWidget * activeWidget = QApplication::activeWindow();
+    // if current app is not active, there will no activewindow. remenber last active window to set menu item checkstate
+    static QWidget * lastActiveWidget = activeWidget;
+    activeWidget == nullptr ? (activeWidget = lastActiveWidget) : (lastActiveWidget = activeWidget);
+//    QIcon icon = Utils::StyleHelper::loadIcon("actionSaveAsHtml");
+
+    QList<QAction*> newActions;
+    QAction* action = nullptr;
+    if (removeExists)
+    {
+        action = actionByGuid(actionList, MAINWINDOW);
+        menu->removeAction(action);
+    }
+
+    action = new QAction(tr("WizNote"), menu);
+    action->setData(MAINWINDOW);
+    action->setCheckable(true);
+    action->setChecked((activeWidget == nullptr || activeWidget == this));
+    newActions.append(action);
+    //
+    QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
+    QList<QString> keys = viewerMap.keys();
+    for (int i = 0; i < keys.count(); i++)
+    {
+        CWizSingleDocumentViewer* viewer = viewerMap.value(keys.at(i));
+        if (removeExists)
+        {
+            action = actionByGuid(actionList, keys.at(i));
+            menu->removeAction(action);
+        }
+        action = new QAction(viewer->windowTitle(), menu);
+        action->setData(keys.at(i));
+        action->setCheckable(true);
+        action->setChecked(viewer == activeWidget);
+        newActions.append(action);
+    }
+
+    qSort(newActions.begin(), newActions.end(), caseInsensitiveLessThan);
+    for (QAction* action : newActions)
+    {
+        connect(action, SIGNAL(triggered()), SLOT(on_dockMenuAction_triggered()));
+    }
+    menu->addActions(newActions);
+}
+
+void MainWindow::changeDocumentsSortTypeByAction(QAction* action)
+{
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsSortingType(type);
+        emit documentsSortTypeChanged(type);
+    }
+}
+
+void MainWindow::resetDockMenu()
+{
+#ifdef Q_OS_MAC
+    m_dockMenu->clear();
+    resetWindowListMenu(m_dockMenu, false);
+#endif
+}
+
+void MainWindow::resetWindowMenu()
+{
+    resetWindowListMenu(m_windowListMenu, true);
+}
+
+void MainWindow::removeWindowsMenuItem(QString guid)
+{
+    QList<QAction*> actionList = m_windowListMenu->actions();
+    QAction* action = actionByGuid(actionList, guid);
+    if (action)
+    {
+        m_windowListMenu->removeAction(action);
+    }
+
+    //
+    resetDockMenu();
+}
+
 void MainWindow::windowActived()
 {
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
@@ -1662,9 +1911,7 @@ void MainWindow::initClient()
     layoutDocument->addWidget(m_doc);
     layoutDocument->addWidget(m_documentSelection);
     m_documentSelection->hide();
-    // append after client
-    m_doc->layout()->addWidget(m_transitionView);
-    m_transitionView->hide();
+    // append after client   
 
     m_splitter->addWidget(m_category);
 
@@ -1702,6 +1949,7 @@ QWidget* MainWindow::createNoteListView()
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
+    connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
     QWidget* line = new QWidget(this);
     line->setFixedWidth(1);
@@ -1710,6 +1958,7 @@ QWidget* MainWindow::createNoteListView()
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
+    connect(this, SIGNAL(documentsSortTypeChanged(int)), sortBtn, SLOT(on_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
@@ -1779,6 +2028,11 @@ void MainWindow::showClient(bool visible) const
     return m_doc->showClient(visible);
 }
 
+CWizDocumentView* MainWindow::documentView() const
+{
+    return m_doc;
+}
+
 CWizIAPDialog*MainWindow::iapDialog()
 {
 #ifdef Q_OS_MAC
@@ -1829,12 +2083,16 @@ void MainWindow::on_documents_viewTypeChanged(int type)
 {
     WizGetAnalyzer().LogAction("DocumentsViewTypeChanged");
     m_documents->resetItemsViewType(type);
+
+    setActionCheckState(m_viewTypeActions->actions(), type);
 }
 
 void MainWindow::on_documents_sortingTypeChanged(int type)
 {
     WizGetAnalyzer().LogAction("DocumentsSortTypeChanged");
     m_documents->resetItemsSortingType(type);
+
+    setActionCheckState(m_sortTypeActions->actions(), type);
 }
 
 void MainWindow::init()
@@ -1846,6 +2104,8 @@ void MainWindow::init()
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
     connect(m_msgList, SIGNAL(loacteDocumetRequest(QString,QString)), SLOT(locateDocument(QString,QString)));
+    connect(m_msgList, SIGNAL(viewNoteInSparateWindowRequest(WIZDOCUMENTDATA)),
+            SLOT(viewNoteInSeparateWindow(WIZDOCUMENTDATA)));
     connect(m_documents, SIGNAL(documentsSelectionChanged()), SLOT(on_documents_itemSelectionChanged()));
     connect(m_documents, SIGNAL(itemDoubleClicked(QListWidgetItem*)), SLOT(on_documents_itemDoubleClicked(QListWidgetItem*)));
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
@@ -1853,6 +2113,9 @@ void MainWindow::init()
             SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+
+    //ESC键退出全屏
+    bindESCToQuitFullScreen(this);
 }
 
 void MainWindow::on_actionAutoSync_triggered()
@@ -2152,13 +2415,179 @@ void MainWindow::on_actionViewMinimize_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarMinimize");
 
-    while (true) {
-        QWidget* wgt = qApp->activeWindow();
-        if (wgt == 0)
-            return;
+    QWidget* wgt = qApp->activeWindow();
+    if (wgt == 0)
+        return;
 
-        wgt->setWindowState(Qt::WindowMinimized);
+    wgt->setWindowState(Qt::WindowMinimized);
+}
+
+void MainWindow::on_actionZoom_triggered()
+{
+    WizGetAnalyzer().LogAction("MenuBarZoom");
+    QWidget* wgt = qApp->activeWindow();
+    if (!wgt)
+        return;
+
+    if (wgt->windowState() & Qt::WindowMaximized)
+    {
+        wgt->setWindowState(wgt->windowState() & ~Qt::WindowMaximized);
     }
+    else
+    {
+        wgt->setWindowState(wgt->windowState() | Qt::WindowMaximized);
+    }
+}
+
+void MainWindow::on_actionBringFront_triggered()
+{
+    WizGetAnalyzer().LogAction("MenuBarBringFront");
+#ifdef Q_OS_MAC
+    wizMacShowCurrentApplication();
+#endif
+//    QWindowList widgetList = qApp->allWindows();
+//    for (QWindow* wgt : widgetList)
+//    {
+//        wgt->setVisible(true);
+//    }
+}
+
+void MainWindow::on_actionCategoryMessageCenter_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_MessageCenter, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryShortcuts_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Shortcuts, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryQuickSearch_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_QuickSearch, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryFolders_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Folders, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryTags_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_Tags, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryBizGroups_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_BizGroups, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionCategoryPersonalGroups_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        m_category->setSectionVisible(Section_PersonalGroups, action->isChecked());
+    }
+}
+
+void MainWindow::on_actionThumbnailView_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
+}
+
+void MainWindow::on_actionTwoLineView_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
+}
+
+void MainWindow::on_actionOneLineView_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
+}
+
+void MainWindow::on_actionSortByCreatedTime_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortByUpdatedTime_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortByAccessTime_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortByTitle_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortByFolder_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortByTag_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_actionSortBySize_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    changeDocumentsSortTypeByAction(action);
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered()
@@ -2379,10 +2808,9 @@ void MainWindow::on_actionFeedback_triggered()
     CWizDatabase& personDb = m_dbMgr.db();
     QString strUserName = "Unkown";
     personDb.GetUserDisplayName(strUserName);
-    strUrl.replace(QHostInfo::localHostName(), strUserName);
+    strUrl.replace(QHostInfo::localHostName(), QUrl::toPercentEncoding(strUserName));
 
     QDesktopServices::openUrl(strUrl);
-
     WizGetAnalyzer().LogAction("MenuBarFeedback");
 }
 
@@ -2699,6 +3127,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pShortcut)
         {
             viewDocumentByShortcut(pShortcut);
+            WizGetAnalyzer().LogAction("categoryShortcutItem");
         }
     }
         break;
@@ -2708,6 +3137,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pSearchItem)
         {
             searchNotesBySQL(pSearchItem->getSQLWhere());
+            WizGetAnalyzer().LogAction("categoryBuildInQuickSearchItem");
         }
     }
         break;
@@ -2717,6 +3147,7 @@ void MainWindow::on_category_itemSelectionChanged()
         if (pSearchItem)
         {
             searchNotesBySQLAndKeyword(pSearchItem->getSQLWhere(), pSearchItem->getKeyword(), pSearchItem->searchScope());
+            WizGetAnalyzer().LogAction("categoryCustomQuickSearchItem");
         }
     }
         break;
@@ -2751,7 +3182,7 @@ void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
         WIZDOCUMENTDATA doc = pItem->document();
         if (m_dbMgr.db(doc.strKbGUID).IsDocumentDownloaded(doc.strGUID))
         {
-            viewDocumentInFloatWidget(doc);
+            viewNoteInSeparateWindow(doc);
             resortDocListAfterViewDocument(doc);
         }
     }
@@ -2778,19 +3209,22 @@ void MainWindow::on_message_itemSelectionChanged()
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
             QWidget* commentWidget = m_doc->commentWidget();
-            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
-            if (splitter)
+            if (!commentWidget->isVisible())
             {
-                QList<int> li = splitter->sizes();
-                Q_ASSERT(li.size() == 2);
-                if (li.size() == 2)
+                QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
+                if (splitter)
                 {
-                    QList<int> lin;
-                    const int COMMENT_FRAME_WIDTH = 310;
-                    lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
-                    lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
-                    splitter->setSizes(lin);
-                    commentWidget->show();
+                    QList<int> li = splitter->sizes();
+                    Q_ASSERT(li.size() == 2);
+                    if (li.size() == 2)
+                    {
+                        QList<int> lin;
+                        const int COMMENT_FRAME_WIDTH = 315;
+                        lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
+                        lin.push_back(COMMENT_FRAME_WIDTH);
+                        splitter->setSizes(lin);
+                        commentWidget->show();
+                    }
                 }
             }
         }
@@ -3403,7 +3837,7 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void MainWindow::showDocumentList(CWizCategoryBaseView* category)
+void MainWindow::showDocumentList()
 {
     if (!m_noteListWidget->isVisible())
     {
@@ -3411,6 +3845,11 @@ void MainWindow::showDocumentList(CWizCategoryBaseView* category)
         m_noteListWidget->show();
         m_msgListWidget->hide();
     }
+}
+
+void MainWindow::showDocumentList(CWizCategoryBaseView* category)
+{
+    showDocumentList();
     QString kbGUID = category->selectedItemKbGUID();
     if (!kbGUID.isEmpty())
     {
@@ -3448,6 +3887,8 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
 {
+    showDocumentList();
+    //
     CWizDatabase &db = m_dbMgr.db(pShortcut->kbGUID());
     switch (pShortcut->shortcutType()) {
     case CWizCategoryViewShortcutItem::Document:
@@ -3559,21 +4000,11 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->exec();
 }
 
-void MainWindow::viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data)
+void MainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
 {
-    WizFloatDocumentViewer* wgt = new WizFloatDocumentViewer(*this);
-    CWizDocumentView* docView = wgt->docView();
-    connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
-    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)), docView, SLOT(on_document_data_saved(QString,CWizDocumentView*)));
-    connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
-            SLOT(on_shareDocumentByLink_request(QString,QString)));
-
-    wgt->setGeometry((width() - m_doc->width())  / 2, (height() - wgt->height()) / 2,
-                     m_doc->width(), wgt->height());
-    wgt->setWindowTitle(data.strTitle);
-    wgt->show();
-    //
-    docView->viewNote(data, false);
+    m_singleViewDelegate->viewDocument(data);
+    // update dock menu
+    resetDockMenu();
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)

@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QTimer>
 
+class QFontDialog;
 class QString;
 class QMenu;
 class CWizDocumentWebEngine;
@@ -50,7 +51,7 @@ private:
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
     CWizToolComboBox* m_comboParagraph;
-    CWizToolComboBoxFont* m_comboFontFamily;
+    CWizToolComboBox* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
     CWizToolButtonColor* m_btnForeColor;
     CWizToolButtonColor* m_btnBackColor;
@@ -80,7 +81,7 @@ private:
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
-    QTimer m_resetLockTimer;    
+    QTimer m_resetLockTimer;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -93,6 +94,8 @@ private:
 
     bool processImageSrc(bool bUseForCopy, bool& bNeedSubsequent);
     bool processBase64Image(bool bUseForCopy);
+    void savePixmap(QPixmap& pix, const QString& strType, bool bUseForCopy);
+    void saveGif(const QByteArray& ba);
 
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
 
@@ -117,7 +120,7 @@ protected Q_SLOTS:
 
 
     void on_comboParagraph_indexChanged(int index);
-    void on_comboFontFamily_indexChanged(const QString& strFamily);
+    void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
     void on_btnBold_clicked();
@@ -153,6 +156,15 @@ protected Q_SLOTS:
     void on_showForeColorBoard();
     void on_backColor_changed();
     void on_showBackColorBoard();
+
+    void on_fontDailogFontChanged(const QFont & font);
+
+private:
+    void queryCurrentFont(QFont& font);
+    void setCurrentFont(const QFont& font);
+    void selectCurrentFontFamily(const QString& strFontFamily);
+    void selectCurrentFontFamilyItem(const QString& strFontFamily);
+    void setFontPointSize(const QString& strSize);
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);

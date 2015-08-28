@@ -35,6 +35,9 @@ public:
     explicit CWizViewTypePopupButton(CWizExplorerApp &app, QWidget* parent = 0);
     void setActionIcon(int type);
 
+public slots:
+    void on_viewTypeChanged(int type);
+
 private:
     QIcon m_iconOneLine;
     QIcon m_iconTwoLine;
@@ -68,6 +71,9 @@ public:
     };
 
     explicit CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent = 0);
+
+public slots:
+    void on_sortingTypeChanged(int type);
 
 protected:
     virtual QSize sizeHint() const;

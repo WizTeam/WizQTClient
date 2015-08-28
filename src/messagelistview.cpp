@@ -285,6 +285,8 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
                       SLOT(on_action_message_mark_read()));
     m_menu->addAction(WIZACTION_LIST_MESSAGE_LOCATE, this,
                       SLOT(on_action_message_locate()));
+    m_menu->addAction(tr("View in Separate Window"), this,
+                      SLOT(on_action_message_viewInSeparateWindow()));
     m_menu->addSeparator();
     m_menu->addAction(WIZACTION_LIST_MESSAGE_DELETE, this,
                       SLOT(on_action_message_delete()));
@@ -305,6 +307,9 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(&m_dbMgr.db(),
             SIGNAL(messageDeleted(const WIZMESSAGEDATA&)),
             SLOT(on_message_deleted(const WIZMESSAGEDATA&)));
+
+    connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
+            SLOT(on_itemDoubleClicked(QListWidgetItem*)));
 
     connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));    
 }
@@ -642,6 +647,27 @@ void MessageListView::on_action_message_locate()
     }
 }
 
+void MessageListView::on_action_message_viewInSeparateWindow()
+{
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
+
+    MessageListViewItem* pItem = m_rightButtonFocusedItems.first();
+    if (pItem)
+    {
+        WIZMESSAGEDATA message = pItem->data();
+        WIZDOCUMENTDATA doc;
+        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.DocumentFromGUID(message.documentGUID, doc))
+            return;
+
+        if (db.IsDocumentDownloaded(doc.strGUID))
+        {
+            emit viewNoteInSparateWindowRequest(doc);
+        }
+    }
+}
+
 void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
 {
     if (rowFromId(msg.nId) == -1) {
@@ -681,6 +707,24 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     }
 
     updateTreeItem();
+}
+
+void MessageListView::on_itemDoubleClicked(QListWidgetItem* item)
+{
+    MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item);
+    if (pItem)
+    {
+        WIZMESSAGEDATA message = pItem->data();
+        WIZDOCUMENTDATA doc;
+        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.DocumentFromGUID(message.documentGUID, doc))
+            return;
+
+        if (db.IsDocumentDownloaded(doc.strGUID))
+        {
+            emit viewNoteInSparateWindowRequest(doc);
+        }
+    }
 }
 
 void MessageListView::clearRightMenuFocus()
@@ -728,7 +772,6 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
                     m_rightButtonFocusedItems.append(pItem);
                     pItem->setSpecialFocused(true);
                 }
-
             }
         }
         else

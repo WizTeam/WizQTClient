@@ -158,8 +158,8 @@ CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
 }
 
 
-CWizUserSettings::CWizUserSettings(const QString& strUserId)
-    : m_strUserId(strUserId)
+CWizUserSettings::CWizUserSettings(const QString& strAccountFolderName)
+    : m_strAccountFolderName(strAccountFolderName)
     , m_db(NULL)
 {
 }
@@ -169,10 +169,10 @@ CWizUserSettings::CWizUserSettings(CWizDatabase& db)
 {
 }
 
-void CWizUserSettings::setUser(const QString& strUser)
+void CWizUserSettings::setAccountFolderName(const QString& strAccountFolderName)
 {
     if (!m_db) {
-        m_strUserId = strUser;
+        m_strAccountFolderName = strAccountFolderName;
         m_strSkinName.clear();
         m_strLocale.clear();
     }
@@ -185,9 +185,9 @@ QString CWizUserSettings::myWizMail() const
 
 QString CWizUserSettings::get(const QString& section, const QString& strKey) const
 {
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             return db.GetMetaDef(section, strKey);
         }
     }
@@ -201,9 +201,9 @@ QString CWizUserSettings::get(const QString& section, const QString& strKey) con
 
 void CWizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
 {
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             db.SetMeta(section, strKey, strValue);
             return;
         }
@@ -215,19 +215,41 @@ void CWizUserSettings::set(const QString& section, const QString& strKey, const 
     }
 }
 
-QString CWizUserSettings::user() const
+QString CWizUserSettings::userId() const
 {
-    if (m_strUserId.isEmpty())
+    if (m_db)
         return m_db->GetUserId();
 
-    return m_strUserId;
+    if (!m_strAccountFolderName.isEmpty()) {
+        CWizDatabase db;
+        if (db.Open(m_strAccountFolderName)) {
+            return db.GetUserId();
+        }
+    }
+
+    return QString();
+}
+
+void CWizUserSettings::setUserId(const QString& strUserId)
+{
+    if (m_db)
+    {
+        m_db->SetMeta("Account", "USERID", strUserId);
+    }
+    else if (!m_strAccountFolderName.isEmpty())
+    {
+        CWizDatabase db;
+        if (db.Open(m_strAccountFolderName)) {
+            db.SetMeta("Account", "USERID", strUserId);
+        }
+    }
 }
 
 QString CWizUserSettings::get(const QString& strKey) const
 {
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             return db.GetMetaDef(USER_SETTINGS_SECTION, strKey);
         }
     }
@@ -241,9 +263,9 @@ QString CWizUserSettings::get(const QString& strKey) const
 
 void CWizUserSettings::set(const QString& strKey, const QString& strValue)
 {
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             db.SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
             return;
         }
@@ -258,9 +280,9 @@ void CWizUserSettings::set(const QString& strKey, const QString& strValue)
 QString CWizUserSettings::password() const
 {
     QString strPassword;
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             strPassword = db.GetMetaDef("Account", "Password");
         }
     }
@@ -274,9 +296,9 @@ QString CWizUserSettings::password() const
 
 void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
 {
-    if (!m_strUserId.isEmpty()) {
+    if (!m_strAccountFolderName.isEmpty()) {
         CWizDatabase db;
-        if (db.Open(m_strUserId)) {
+        if (db.Open(m_strAccountFolderName)) {
             db.SetMeta("Account", "Password", strPassword);
             return;
         }
@@ -484,6 +506,17 @@ void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
     set("EncryptedNotePassword", strEncryptPass);
 }
 
+static bool rememberPasswordForSession = false;
+bool CWizUserSettings::isRememberNotePasswordForSession()
+{
+    return rememberPasswordForSession;
+}
+
+void CWizUserSettings::setRememberNotePasswordForSession(bool remember)
+{
+    rememberPasswordForSession = remember;
+}
+
 QString CWizUserSettings::editorBackgroundColor()
 {
     QString strColor = get("EditorBackgroundColor");
@@ -600,7 +633,11 @@ QString CWizUserSettings::defaultFontFamily()
     if (!strFont.isEmpty())
         return strFont;
 
-    return "sans-serif";
+#ifdef Q_OS_MAC
+    return "Helvetica Neue";
+#else
+    return "Arial";
+#endif
 }
 
 void CWizUserSettings::setDefaultFontFamily(const QString& strFont)

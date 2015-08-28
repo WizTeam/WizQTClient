@@ -3,6 +3,7 @@
 
 #include <QString>
 
+#include "utils/pathresolve.h"
 #include "apientry.h"
 #include "avatar.h"
 #include "rapidjson/document.h"
@@ -1750,6 +1751,71 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
+class CWizDownloadAvatarRunable : public QRunnable
+{
+public:
+    CWizDownloadAvatarRunable(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
+        : m_arrayUser(arrayUser)
+        , m_currentUserGUID(currentUserGUID)
+    {
+    }
+private:
+    CWizBizUserDataArray m_arrayUser;
+    QString m_currentUserGUID;
+public:
+    void	run()
+    {
+        QMap<QString, QString> mapAllUser;
+        for (WIZBIZUSER bizUser : m_arrayUser)
+        {
+            mapAllUser.insert(bizUser.userGUID, bizUser.userId);
+        }
+        //
+        for (QMap<QString, QString>::Iterator it = mapAllUser.begin(); it != mapAllUser.end(); it++)
+        {
+            QString strFileName = Utils::PathResolve::avatarPath() + it.value() + ".png";
+            if (it.key() != m_currentUserGUID)
+            {
+                QFileInfo info(strFileName);
+                if (info.created().daysTo(QDateTime::currentDateTime()) < 7)
+                {
+                    continue;
+                }
+            }
+
+            QString strDownLoadUrl = WizService::CommonApiEntry::avatarDownloadUrl(it.key());
+            if (!strDownLoadUrl.startsWith("http"))
+                continue;
+
+            qDebug() << "update user avatar  : " << it.value();
+            WizService::AvatarHost::deleteAvatar(it.value());
+            WizURLDownloadToFile(strDownLoadUrl, strFileName, true);
+            WizService::AvatarHost::load(it.value());
+        }
+    }
+};
+
+//FIXME:更新企业群组成员头像实际应该在获取biz列表的时候处理。但是现在服务器端返回的数据
+//存在问题，需要在本地强制更新数据
+bool WizSyncBizGroupAvatar(IWizSyncableDatabase* pPersonalDatabase)
+{
+    CWizBizUserDataArray arrayUser;
+    pPersonalDatabase->GetAllBizUsers(arrayUser);
+    WIZBIZUSER userSelf;
+    userSelf.userGUID = pPersonalDatabase->GetUserGUID();
+    userSelf.userId = pPersonalDatabase->GetUserId();
+    arrayUser.push_back(userSelf);
+
+    CWizDownloadAvatarRunable* downloader = new CWizDownloadAvatarRunable(arrayUser,
+                                                                          userSelf.userGUID);
+    downloader->setAutoDelete(true);
+    QThreadPool::globalInstance()->start(downloader);
+
+    return true;
+}
+
+
+
 QString downloadFromUrl(const QString& strUrl)
 {
     QNetworkAccessManager net;
@@ -1800,11 +1866,8 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
 }
 
 bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
-                     IWizSyncableDatabase* pDatabase,
-                     bool bUseWizServer, bool bBackground)
+                     IWizSyncableDatabase* pDatabase, bool bBackground)
 {
-    Q_UNUSED(bUseWizServer);
-
     pEvents->OnStatus(QObject::tr("----------Sync start----------"));
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(QObject::tr("Connecting to server"));
@@ -1817,19 +1880,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     server.SetUserInfo(info);
 
     pEvents->OnSyncProgress(::GetSyncStartProgress(syncAccountLogin));
-    pEvents->OnStatus(QObject::tr("Signing in"));
-
-    //QString strPassword = pDatabase->GetPassword();
-    //while (1)
-    //{
-    //    if (server.Login(pDatabase->GetUserId(), strPassword, _T("normal")))
-    //        break;
-
-    //    pEvents->SetLastErrorCode(server.GetLastErrorCode());
-    //    pEvents->OnError(server.GetLastErrorMessage());
-
-    //    return false;
-    //}
+    pEvents->OnStatus(QObject::tr("Signing in"));    
 
     pDatabase->SetUserInfo(server.GetUserInfo());
     pEvents->OnSyncProgress(1);
@@ -1841,7 +1892,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //only check biz list at first sync of day, or sync by manual
     if (!bBackground || WizIsDayFirstSync(pDatabase))
     {
-        WizService::AvatarHost::reload(pDatabase->GetUserId());
         pDatabase->ClearLastSyncError();
         pEvents->ClearLastSyncError(pDatabase);
         pEvents->OnStatus(QObject::tr("Get Biz info"));
@@ -1849,6 +1899,8 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
         if (server.GetBizList(arrayBiz))
         {
             pDatabase->OnDownloadBizs(arrayBiz);
+            //FIXME: 因为目前服务器返回的biz列表中无头像更新数据，需要强制更新群组用户的头像。
+            WizSyncBizGroupAvatar(pDatabase);
         }
         else
         {
@@ -1856,7 +1908,6 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             return false;
         }
     }
-
 
     pEvents->OnStatus(QObject::tr("Get groups info"));
     CWizGroupDataArray arrayGroup;
@@ -1966,7 +2017,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             if (!group.IsBiz())
             {
                 WizSyncPersonalGroupAvatar(pGroupDatabase);
-            }
+            }            
         }
         else
         {

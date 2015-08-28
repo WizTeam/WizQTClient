@@ -26,7 +26,8 @@ enum ItemType
     Category_JoinedGroupRootItem,
     Category_GroupRootItem,
     Category_GroupItem,
-    Category_GroupNoTagItem
+    Category_GroupNoTagItem,
+    Category_SectionItem
 };
 
 enum DateInterval{
@@ -145,6 +146,7 @@ private:
     QSize m_szUnreadSize;
 };
 
+class CWizCategoryViewShortcutItem;
 class CWizCategoryViewShortcutRootItem : public CWizCategoryViewItemBase
 {
 public:
@@ -161,6 +163,9 @@ public:
     virtual void drop(const CWizCategoryViewItemBase* pItem);
     virtual bool acceptDrop(const WIZDOCUMENTDATA& /*data*/) const {return true;}
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
+
+    CWizCategoryViewShortcutItem* addItemToShortcuts(const CWizCategoryViewItemBase* pItem);
+    CWizCategoryViewShortcutItem* addDocumentToShortcuts(const WIZDOCUMENTDATA& document);
 
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 11; }
@@ -199,6 +204,8 @@ public:
     virtual void getDocuments(CWizDatabase& db,
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
+
+    virtual bool accept(CWizDatabase& db, const WIZDOCUMENTDATA& data);
 
     QString guid() const {return m_strGuid;}
     QString location() const { return m_location; }
@@ -344,6 +351,7 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool dragAble() const { return true; }
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
+    virtual void drop(const CWizCategoryViewItemBase* pItem);
 
     virtual QTreeWidgetItem *clone() const;
 

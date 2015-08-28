@@ -244,10 +244,13 @@ int mainCore(int argc, char *argv[])
     int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();
     QPixmapCache::setCacheLimit(nCacheSize);
 
-    QString strUserId = globalSettings->value("Users/DefaultUser").toString();
-    QString strPassword;
+    QString strUserGuid = globalSettings->value("Users/DefaultUserGuid").toString();
+    QList<WizLocalUser> localUsers;
+    WizGetLocalUsers(localUsers);    
+    QString strAccountFolderName = WizGetLocalFolderName(localUsers, strUserGuid);
 
-    CWizUserSettings userSettings(strUserId);
+    QString strPassword;
+    CWizUserSettings userSettings(strAccountFolderName);
 
     // setup locale for welcome dialog
     QString strLocale = userSettings.locale();
@@ -287,7 +290,7 @@ int mainCore(int argc, char *argv[])
     }    
 
     //
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
     PluginManager::setSettings(settings);
     //set network proxy
     CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
@@ -302,21 +305,28 @@ int mainCore(int argc, char *argv[])
         QNetworkProxy::setApplicationProxy(proxy);
     }
 
-
+    QString strUserId = WizGetLocalUserId(localUsers, strUserGuid);
     // manually login
     if (bFallback)
     {
-        CWizLoginDialog loginDialog(strUserId, strLocale);
+        CWizLoginDialog loginDialog(strLocale, localUsers);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
-        if (loginDialog.userId() != strUserId)
+//        qDebug() << "deafult user id : " << strUserGuid << " login dailog user id : " << loginDialog.loginUserGuid();
+        if (strUserId.isEmpty() || loginDialog.loginUserGuid() != strUserGuid)
         {
-            strUserId = loginDialog.userId();
-            settings = new QSettings(Utils::PathResolve::userSettingsFile(strUserId), QSettings::IniFormat);
+            strAccountFolderName = WizGetLocalFolderName(localUsers, loginDialog.loginUserGuid());
+            if (strAccountFolderName.isEmpty())
+            {
+                strAccountFolderName = loginDialog.userId();
+            }
+            qDebug() << "login user id : " << loginDialog.userId();
+            settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
             PluginManager::setSettings(settings);
         }
         strPassword = loginDialog.password();
+        strUserId = loginDialog.userId();
     }
     else
     {
@@ -334,7 +344,8 @@ int mainCore(int argc, char *argv[])
     //
     //
     // reset locale for current user.
-    userSettings.setUser(strUserId);
+    userSettings.setAccountFolderName(strAccountFolderName);
+    userSettings.setUserId(strUserId);
     strLocale = userSettings.locale();
 
     a.removeTranslator(&translatorWizNote);
@@ -349,12 +360,14 @@ int mainCore(int argc, char *argv[])
 
     WizService::CommonApiEntry::setLanguage(strLocale);
 
-    CWizDatabaseManager dbMgr(strUserId);
+    CWizDatabaseManager dbMgr(strAccountFolderName);
     if (!dbMgr.openAll()) {
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
     }
 
+
+    qDebug() << "set user id for token ; " << strUserId;
     WizService::Token::setUserId(strUserId);
     WizService::Token::setPasswd(strPassword);
 

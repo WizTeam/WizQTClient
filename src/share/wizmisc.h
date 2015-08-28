@@ -185,6 +185,8 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 bool WizIsOffline();
 bool WizIsHighPixel();
 
+bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isImage);
+
 
 ///  make sure document exist, if not try to download document, show download dialog by default.
 bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
@@ -214,6 +216,19 @@ bool IsWizKMURL(const QString& strURL);
 bool WizIsKMURLOpenDocument(const QString& strURL);
 WizKMUrlType GetWizUrlType(const QString& strURL);
 QString GetParamFromWizKMURL(const QString& strURL, const QString& strParamName);
+
+
+struct WizLocalUser {
+    QString strGuid;
+    QString strDataFolderName;
+    QString strUserId;
+    int nUserType;
+};
+
+bool WizGetLocalUsers(QList<WizLocalUser>& userList);
+QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& strGuid);
+QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid);
+
 
 class CWizBufferAlloc
 {

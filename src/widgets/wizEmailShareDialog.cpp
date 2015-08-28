@@ -4,12 +4,17 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QEventLoop>
-#include <QMessageBox>
 #include <QTextCodec>
 #include <QPixmap>
 #include <QVBoxLayout>
+#if QT_VERSION > 0x050000
+#include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 #include <QDebug>
 
+#include "share/wizMessageBox.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "share/wizsettings.h"
@@ -22,6 +27,7 @@
 enum returnCode {
     codeOK = 200,                   //:ok,
     codeErrorParam = 322,      //:参数错误，
+    codeErrorFrequent = 429,    //请求超出频率限制！
     codeErrorFile = 3330,         //: 笔记不存在，
     codeErrorSize = 3370,        //:邮件大小超出尺寸，
     codeErrorEncrypt = 3371,   //:加密笔记无法分享，
@@ -63,7 +69,7 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& s
     m_note = note;
     ui->lineEdit_subject->setText(m_note.strTitle);
     ui->lineEdit_to->setText(sendTo);
-    ui->comboBox_replyTo->insertItem(0, m_app.userSettings().user());
+    ui->comboBox_replyTo->insertItem(0, m_app.userSettings().userId());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
 }
 
@@ -71,41 +77,7 @@ void CWizEmailShareDialog::on_toolButton_send_clicked()
 {
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
-    QString strToken = WizService::Token::token();
-    QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
-    QString strExInfo = getExInfo();
-    QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
-//    strUrl += strExInfo;
-
-//    QUrl url(strKS);
-//    strUrl.remove("http://{ks_host}");
-//    strUrl = url.scheme() + "://" + url.host() + strUrl;
-
-
-
-    QNetworkAccessManager net;
-    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-
-//    QEventLoop loop;
-    QMessageBox msgBox(this);
-    msgBox.setText(tr("Sending..."));
-    msgBox.setWindowTitle(tr("Info"));
-    connect(reply, SIGNAL(finished()), &msgBox, SLOT(accept()));
-    msgBox.exec();
-
-    if (reply->error() != QNetworkReply::NoError) {
-        QMessageBox::information(this, tr("Info"), reply->errorString());
-        reply->deleteLater();
-        return;
-    }
-
-    QString strReply = QString::fromUtf8(reply->readAll());
-    int nCode;
-    QString returnMessage;
-    processReturnMessage(strReply, nCode, returnMessage);
-    mailShareFinished(nCode, returnMessage);
-
-    reply->deleteLater();
+    sendEmails();
 }
 
 QString CWizEmailShareDialog::getExInfo()
@@ -141,11 +113,14 @@ void CWizEmailShareDialog::mailShareFinished(int nCode, const QString& returnMes
     case codeErrorSize:
     case codeErrorEncrypt:
     case codeErrorEmail:
+    case codeErrorFrequent:
     case codeErrorServer:
-        QMessageBox::warning(this, tr("Info"), returnMessage);
+        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
+                                  Q_ARG(QString, returnMessage));
         break;
     default:
-        QMessageBox::warning(this, tr("Info"), tr("Unkown error."));
+        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
+                                  Q_ARG(QString, tr("Unkown error.")));
         break;
     }
 }
@@ -198,6 +173,46 @@ void CWizEmailShareDialog::updateContactList()
     }
 }
 
+void CWizEmailShareDialog::sendEmails()
+{
+    QMessageBox msgBox(this);
+    msgBox.setText(tr("Sending..."));
+    msgBox.setWindowTitle(tr("Info"));
+
+    QtConcurrent::run([this, &msgBox](){
+        QString strToken = WizService::Token::token();
+        QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+        QString strExInfo = getExInfo();
+        QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+
+        QEventLoop loop;
+
+        QNetworkAccessManager net;
+        QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
+
+        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+        loop.exec();
+        QMetaObject::invokeMethod(&msgBox, "accept", Qt::QueuedConnection);
+
+        if (reply->error() != QNetworkReply::NoError) {
+            QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
+                                      Q_ARG(QString, reply->errorString()));
+            reply->deleteLater();
+            return;
+        }
+
+        QString strReply = QString::fromUtf8(reply->readAll());
+        int nCode;
+        QString returnMessage;
+        processReturnMessage(strReply, nCode, returnMessage);
+        mailShareFinished(nCode, returnMessage);
+
+        reply->deleteLater();
+    });
+
+    msgBox.exec();
+}
+
 void CWizEmailShareDialog::on_toolButton_contacts_clicked()
 {
     updateContactList();
@@ -215,4 +230,9 @@ void CWizEmailShareDialog::on_contactsListItemClicked(QListWidgetItem *item)
     }
     strTo += strUserName + ";";
     ui->lineEdit_to->setText(strTo);
+}
+
+void CWizEmailShareDialog::on_networkError(const QString& errorMsg)
+{
+    CWizMessageBox::information(this, tr("Info"), errorMsg);
 }

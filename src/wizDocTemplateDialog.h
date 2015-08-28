@@ -22,6 +22,11 @@ private:
     QString m_filePath;
 };
 
+enum TemplateType
+{
+    BuildInTemplate,
+    CustomTemplate
+};
 
 class CWizDocTemplateDialog : public QDialog
 {
@@ -46,14 +51,16 @@ private slots:
 
     void on_pushButton_import_clicked();
 
+    void on_btn_delete_clicked();
+
 private:
     //
     void initTemplateFileTreeWidget();
     QString languangeCode() const;
     QString previewFileName();
-    void initFolderTemplateItems(const QString& strFoler);
+    void initFolderTemplateItems(const QString& strFoler, TemplateType type);
     void initFolderItems(QTreeWidgetItem *parentItem, const QString& strDir,
-                         CWizSettings& settings);
+                         CWizSettings& settings, TemplateType type);
 
     bool getLocalization(CWizSettings& settings, const QString& strKey, QString& strValue);
     //

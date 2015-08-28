@@ -165,6 +165,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     actionOnTop->setCheckable(true);
     addAction(actionOnTop);
 
+    QAction* actionAddToShortcuts = m_menuDocument->addAction(QObject::tr("Add to Shortcuts"),
+                                                              this, SLOT(on_action_addToShortcuts()));
+    addAction(actionAddToShortcuts);
 
     m_menuDocument->addSeparator();
 
@@ -289,85 +292,69 @@ void CWizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataA
 {    
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());       
 
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    // move, show progress if size > 3
-    if (arrayDocument.size() <= 3)
-    {
-        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
-    }
-    else
-    {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
-        documentOperator->bindSignalsToProgressDialog(progress);
-        documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
-        progress->exec();
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);  
+    CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
+    progress->exec();
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
+        return;
+
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    // move, show progress if size > 3
-    if (arrayDocument.size() <= 3)
-    {
-        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
-    }
-    else
-    {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
-        documentOperator->bindSignalsToProgressDialog(progress);
-        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
-        progress->exec();
-    }
+    CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+    progress->exec();
+
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
                                                         const QString& targetFolder, bool keepDocTime, bool keepTag)
 {
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
+        return;
+
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
 
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    //  show progress if size > 3
-    if (arrayDocument.size() <= 3)
-    {
-        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
-                                                       keepTag, mainWindow->downloaderHost());
-    }
-    else
-    {
-        qDebug() << " main thread : " << QThread::currentThreadId();
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
-        documentOperator->bindSignalsToProgressDialog(progress);
-        documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
-                                                       keepTag, mainWindow->downloaderHost());
-        progress->exec();
-    }
+    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);   
+    CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                    keepTag, mainWindow->downloaderHost());
+    progress->exec();
+
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
                                                       const WIZTAGDATA& targetTag, bool keepDocTime)
 {
+    CWizDatabase& db = m_dbMgr.db();
+    if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
+        return;
+
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
 
     CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    // show progress if size > 3
-    if (arrayDocument.size() <= 3)
-    {
-        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
-    }
-    else
-    {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
-        documentOperator->bindSignalsToProgressDialog(progress);
-        documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
-        progress->exec();
-    }
+    CWizProgressDialog* progress = mainWindow->progressDialog();
+    progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
+    documentOperator->bindSignalsToProgressDialog(progress);
+    documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
+    progress->exec();
+
+    WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -507,8 +494,6 @@ void CWizDocumentListView::resetPermission()
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setCheckable(true);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
-
-
 
     // disable note history if selection is not only one
     if (m_rightButtonFocusedItems.count() != 1)
@@ -1189,12 +1174,13 @@ void CWizDocumentListView::on_action_deleteDocument()
     if (count() == 0)
     {
         emit lastDocumentDeleted();
+        return;
     }
     else if (selectedItems().isEmpty())
     {
         setItemSelected(documentItemAt(index), true);
-        emit documentsSelectionChanged();
     }
+    emit documentsSelectionChanged();
 }
 
 void CWizDocumentListView::on_action_moveDocument()
@@ -1338,7 +1324,7 @@ void CWizDocumentListView::on_action_showDocumentInFloatWindow()
     foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
-        mainWindow->viewDocumentInFloatWidget(document);
+        mainWindow->viewNoteInSeparateWindow(document);
     }
 }
 
@@ -1413,6 +1399,20 @@ void CWizDocumentListView::on_action_alwaysOnTop()
     }
 
     sortItems();
+}
+
+void CWizDocumentListView::on_action_addToShortcuts()
+{
+    ::WizGetAnalyzer().LogAction("documentListMenuAddToShortcuts");
+    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    {
+        CWizDatabase& db = m_dbMgr.db(item->document().strKbGUID);
+        WIZDOCUMENTDATA doc;
+        if (db.DocumentFromGUID(item->document().strGUID, doc))
+        {
+            emit addDocumentToShortcutsRequest(doc);
+        }
+    }
 }
 
 

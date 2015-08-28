@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QPushButton>
+#include <QWidgetAction>
 #include <QTimer>
 #include "share/wizsettings.h"
 
@@ -24,6 +25,7 @@ class CWizOEMDownloader : public QObject
 public:
     CWizOEMDownloader(QObject* parent);
 
+    QString serverIp() const;
 public slots:
     void setServerIp(const QString& ip);
     void downloadOEMLogo(const QString& strUrl);
@@ -42,6 +44,53 @@ private:
     QString m_server;
 };
 
+class CWizActionWidget : public QWidget
+{
+    Q_OBJECT
+public:
+    CWizActionWidget(const QString& text, QWidget* parent);
+    void setSelected(bool selected);
+
+protected:
+    void mousePressEvent(QMouseEvent *event);
+    void mouseReleaseEvent(QMouseEvent *event);
+    void enterEvent(QEvent * event);
+    void leaveEvent(QEvent * event);
+    void paintEvent(QPaintEvent*);
+
+signals:
+    void delButtonClicked();
+    void widgetClicked();
+
+private:
+    bool m_mousePress;
+    bool m_selected;
+    QString m_text;
+    QPushButton *m_deleteButton;
+};
+
+class CWizUserItemAction : public QWidgetAction
+{
+    Q_OBJECT
+public:
+    explicit CWizUserItemAction(const WizLocalUser& localUser, QMenu *parent);
+    WizLocalUser getUserData();
+    void setSelected(bool selected);
+
+signals:
+    void userDeleteRequest(const WizLocalUser& WizLocalUser);
+    void userSelected(const WizLocalUser& WizLocalUser);
+
+private slots:
+    void on_delButtonClicked();
+    void on_widgetClicked();
+
+private:
+    WizLocalUser m_userData;
+    QMenu* m_menu;
+    CWizActionWidget* m_widget;
+};
+
 
 namespace Ui {
 class wizLoginWidget;
@@ -57,15 +106,16 @@ class CWizLoginDialog
     Q_OBJECT
 
 public:
-    explicit CWizLoginDialog(const QString& strDefaultUserId, const QString& strLocale, QWidget *parent = 0);
+    explicit CWizLoginDialog(const QString& strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent = 0);
     ~CWizLoginDialog();
 
     QString userId() const;
+    QString loginUserGuid() const;
     QString password() const;
+    QString serverIp() const;
     WizServerType serverType() const;
 
-    void setUsers(const QString& strDefault);
-    void setUser(const QString& strUserId);
+    void setUser(const QString& strUserGuid);
 
     void doAccountVerify();
     void doOnlineVerify();
@@ -99,15 +149,15 @@ private slots:
     void on_btn_changeToSignin_clicked();
     void on_btn_changeToLogin_clicked();
     void on_btn_proxysetting_clicked();
+    void on_btn_snsLogin_clicked();
     void on_btn_fogetpass_clicked();
     void on_btn_login_clicked();
-    void on_btn_snsLogin_clicked();
     void on_btn_singUp_clicked();
 
 
     void onLoginInputChanged();
     void onSignUpInputDataChanged();
-    void userListMenuClicked(QAction* action);
+//    void userListMenuClicked(QAction* action);
     void serverListMenuClicked(QAction* action);
     void showUserListMenu();
     void showServerListMenu();
@@ -119,6 +169,8 @@ private slots:
     void on_cbx_autologin_toggled(bool checked);
 
     void onUserNameEdited(const QString& arg1);
+    void onDeleteUserRequest(const WizLocalUser& user);
+    void onUserSelected(const WizLocalUser& user);
 
     void onSNSPageUrlChanged(const QUrl& url);
     void onSNSLoginSuccess(const QString& strUrl);
@@ -130,7 +182,7 @@ private slots:
     // download oem
     bool onOEMSettingsDownloaded(const QString& settings);
     void onOEMLogoDownloaded(const QString& logoFile);
-    void showErrorMessage(const QString& stterror);
+    void showOEMErrorMessage(const QString& stterror);
     void onCheckServerLicenceFinished(bool result, const QString& settings);
 
     // state machine
@@ -142,18 +194,23 @@ private slots:
     void onSignUpCheckStart();
     void onSignUpCheckEnd();
 
+    void resetUserList();    
 
 private:
+    void loadDefaultUser();    
+
     void initSateMachine();
     void initOEMDownloader();
     //
     void applyElementStyles(const QString& strLocal);
     bool checkSignMessage();
-    QAction* findActionInMenu(const QString& strActName);
+    QAction* findActionInMenu(const QString& strActData);
     bool doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha);
     //
     void searchWizBoxServer();
-    void initSearchingDialog();
+    void initAnimationWaitingDialog(const QString& text);
+    int showAnimationWaitingDialog(const QString& text);
+    void closeAnimationWaitingDialog();
     void showSearchingDialog();
     void startWizBoxUdpClient();
     void closeWizBoxUdpClient();
@@ -162,14 +219,14 @@ private:
     void setSwicthServerActionEnable(const QString &strActionData, bool bEnable);
     void downloadLogoFromWizBox(const QString& strUrl);
     void downloadOEMSettingsFromWizBox();
-    void setLogo(const QString& logoPath);
+    void setLogo(const QString& logoPath);    
 
-
+    void checkLocalUser(const QString& strAccountFolder, const QString& strUserGUID);
 private:
     Ui::wizLoginWidget *ui;
     QMenu* m_menuUsers;
     QMenu* m_menuServers;
-    QDialog* m_searchingDialog;
+    QDialog* m_animationWaitingDialog;
     CWizUdpClient* m_udpClient;
     QThread* m_udpThread;
     WizServerType m_serverType;
@@ -199,6 +256,9 @@ private:
     QMap<QString, QString> m_oemLogoMap;
     QThread* m_oemThread;
     CWizOEMDownloader* m_oemDownloader;
+
+    QList<WizLocalUser> m_userList;
+    QString m_loginUserGuid;
 };
 
 #endif // WIZLOGINWIDGET_H

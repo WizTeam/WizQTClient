@@ -119,6 +119,7 @@ struct IWizSyncableDatabase
 
     //virtual CComPtr<IWizBizUserCollection> GetBizUsers() = 0;
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText) = 0;
+    virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser) = 0;
     virtual bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID) = 0;
 
     //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;

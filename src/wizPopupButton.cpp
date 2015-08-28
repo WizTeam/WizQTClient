@@ -160,6 +160,12 @@ void CWizViewTypePopupButton::setActionIcon(int type)
     }
 }
 
+void CWizViewTypePopupButton::on_viewTypeChanged(int type)
+{
+    setActionChecked(menu(), type);
+    setActionIcon(type);
+}
+
 
 /* ------------------------ CWizSortingPopupButton ------------------------ */
 CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent)
@@ -210,6 +216,12 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
         setActionChecked(menu, type);
         m_app.userSettings().set("SORT_TYPE", QString::number(type));
     }
+}
+
+void CWizSortingPopupButton::on_sortingTypeChanged(int type)
+{
+    QMenu* myMenu = menu();
+    setActionChecked(myMenu, type);
 }
 
 QSize CWizSortingPopupButton::sizeHint () const

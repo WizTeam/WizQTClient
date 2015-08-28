@@ -47,6 +47,7 @@ public:
     bool GetRootTags(CWizTagDataArray& arrayTag);
     bool GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag); // 1 level
     bool GetAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag);
+    bool GetAllTagsWithErrorParent(CWizTagDataArray& arrayTag);
 
     // used to test whether tag have child or not
     bool GetChildTagsSize(const CString& strParentTagGUID, int& size); // 1 level

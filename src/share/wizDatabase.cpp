@@ -42,6 +42,7 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //class CWizDocument
 
+QString CWizDatabase::m_strUserId = QString();
 
 QString GetResoucePathFromFile(const QString& strHtmlFileName)
 {
@@ -209,7 +210,8 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjec
     if (targetDB.kbGUID() == m_db.kbGUID())
         return MoveTo(pFolder);
 
-    if (!CopyTo(targetDB, pFolder, true, true,downloader))
+    QString newDocGUID;
+    if (!CopyTo(targetDB, pFolder, true, true, newDocGUID, downloader))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
@@ -255,13 +257,12 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, C
 }
 
 bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
-                          bool keepDocTag, CWizObjectDataDownloaderHost* downloader)
+                          bool keepDocTag, QString& newDocGUID, CWizObjectDataDownloaderHost* downloader)
 {
     qDebug() << "wizdocu copy to : " << pFolder->Location();
     QString strLocation = pFolder->Location();
-    QString strNewDocGUID;
     WIZTAGDATA tagEmpty;
-    if (!copyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, strNewDocGUID, downloader, keepDocTime))
+    if (!copyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, newDocGUID, downloader, keepDocTime))
     {
         TOLOG1(_T("Failed to copy document %1."), m_data.strTitle);
         return false;
@@ -270,7 +271,7 @@ bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keep
     if (keepDocTag && !m_db.IsGroup() && m_db.kbGUID() == targetDB.kbGUID())
     {
         WIZDOCUMENTDATA newDoc;
-        if (!targetDB.DocumentFromGUID(strNewDocGUID, newDoc))
+        if (!targetDB.DocumentFromGUID(newDocGUID, newDoc))
             return false;
 
         CWizStdStringArray arrayTag;
@@ -732,7 +733,7 @@ bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
     for (it = arrayData.begin(); it != arrayData.end(); it++) {
         WIZTAGDATA data(*it);
         data.strKbGUID = kbGUID();
-        //WARNING:当前同步数据时不会从服务器中下载tag的position数据。
+        //NOTE:当前同步数据时不会从服务器中下载tag的position数据。
         //将position数据保留为原本的数据。如果后期规则修改，此处需要修改
         WIZTAGDATA dataTemp;
         if (TagFromGUID(data.strGUID, dataTemp))
@@ -1489,6 +1490,11 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
         const WIZBIZUSER& user = *it;
         arrayText.push_back(user.userId);
     }
+}
+
+bool CWizDatabase::GetAllBizUsers(CWizBizUserDataArray& arrayUser)
+{
+    return GetAllUsers(arrayUser);
 }
 
 void CWizDatabase::ClearLastSyncError()
@@ -2303,11 +2309,11 @@ bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDelet
 }
 
 
-bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = NULL */)
+bool CWizDatabase::Open(const QString& strAccountFolderName, const QString& strKbGUID /* = NULL */)
 {
-    Q_ASSERT(!strUserId.isEmpty());
+    Q_ASSERT(!strAccountFolderName.isEmpty());
 
-    m_strUserId = strUserId;
+    m_strAccountFolderName = strAccountFolderName;
 
     if (strKbGUID.isEmpty()) {
         m_bIsPersonal = true;
@@ -2350,7 +2356,14 @@ bool CWizDatabase::Open(const QString& strUserId, const QString& strKbGUID /* = 
 
 bool CWizDatabase::LoadDatabaseInfo()
 {
-    if (!kbGUID().isEmpty()) {
+    QString strUserId = GetMetaDef(g_strAccountSection, "USERID");
+    if (!strUserId.isEmpty())
+    {
+        m_strUserId = strUserId;
+    }
+
+    if (!kbGUID().isEmpty())
+    {
         m_info.bizName = GetMetaDef(g_strDatabaseInfoSection, "BizName");
         m_info.bizGUID = GetMetaDef(g_strDatabaseInfoSection, "BizGUID");
     }
@@ -2467,12 +2480,17 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
 
 QString CWizDatabase::GetAccountPath() const
 {
-    Q_ASSERT(!m_strUserId.isEmpty());
+    Q_ASSERT(!m_strAccountFolderName.isEmpty());
 
-    QString strPath = Utils::PathResolve::dataStorePath() + m_strUserId + "/";
+    QString strPath = Utils::PathResolve::dataStorePath() + m_strAccountFolderName + "/";
     WizEnsurePathExists(strPath);
 
     return strPath;
+}
+
+QString CWizDatabase::GetAccountFolderName() const
+{
+    return m_strAccountFolderName;
 }
 
 QString CWizDatabase::GetDataPath() const
@@ -2587,12 +2605,19 @@ QString CWizDatabase::GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
         return QString();
 
     QString strUserID = doc.strOwner;
+
+    //NOTE: 用户可能使用手机号登录，此时owner为手机号，需要使用昵称
+    if (!strUserID.contains('@') && strUserID == personDb->GetUserId())
+    {
+        personDb->GetUserDisplayName(strUserID);
+    }
+
     WIZBIZUSER bizUser;
     personDb->userFromID(doc.strKbGUID, strUserID, bizUser);
     if (bizUser.alias.isEmpty())
     {
-        int index = doc.strOwner.indexOf('@');
-        return index == -1 ? doc.strOwner :  doc.strOwner.left(index);
+        int index = strUserID.indexOf('@');
+        return index == -1 ? strUserID :  strUserID.left(index);
     }
     return bizUser.alias;
 }

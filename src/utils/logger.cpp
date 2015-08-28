@@ -57,8 +57,10 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
     Q_UNUSED(context);
 
     //FIXME: useless waning message from qt, ignore it
-    if (msg.startsWith("libpng warning: iCCP:"))
+#ifndef QT_DEBUG
+    if (msg.startsWith("libpng warning: iCCP:") || msg.startsWith("QSslSocket: cannot call unresolved"))
         return;
+#endif
 
 //    bool saveLog = true;
 //#ifndef QT_DEBUG
@@ -115,7 +117,13 @@ void Logger::saveToLogFile(const QString& strMsg)
 {
     QFile f(logFileName());
     f.open(QIODevice::Append | QIODevice::Text);
-    f.write(msg2LogMsg(strMsg).toUtf8());
+    try
+    {
+        f.write(msg2LogMsg(strMsg).toUtf8());
+    }
+    catch(...)
+    {
+    }
     f.close();
 }
 

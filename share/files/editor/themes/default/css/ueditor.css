@@ -121,6 +121,8 @@ div.edui-box {
     padding: 1px;
     overflow: hidden; /*全屏下单独一行不占位*/
     zoom: 1;
+    width:auto;
+    height:auto;
 }
 
 .edui-default .edui-toolbar .edui-button,
@@ -139,7 +141,10 @@ div.edui-box {
     -moz-border-radius: 4px;
     border-radius: 4px;
 }
-
+.edui-editor div{
+    width:auto;
+    height:auto;
+}
 .edui-default .edui-editor-toolbarbox {
     position: relative;
     zoom: 1;
@@ -160,9 +165,9 @@ div.edui-box {
     background-image: linear-gradient(to bottom, #ffffff, #f2f2f2);
     background-repeat: repeat-x;
     /*border: 1px solid #d4d4d4;*/
-    -webkit-border-radius: 4px;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
+    -webkit-border-radius: 4px 4px 0 0;
+    -moz-border-radius: 4px 4px 0 0;
+    border-radius: 4px 4px 0 0;
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#ffffffff', endColorstr='#fff2f2f2', GradientType=0);
     *zoom: 1;
     -webkit-box-shadow: 0 1px 4px rgba(0, 0, 0, 0.065);
@@ -517,6 +522,7 @@ div.edui-box {
     opacity: 0.3;
     filter: alpha(opacity = 30);
 }
+
 /* toolbar icons */
 .edui-default .edui-for-undo .edui-icon {
     background-position: -160px 0;
@@ -622,7 +628,7 @@ div.edui-box {
 }
 
 .edui-default  .edui-for-insertimage .edui-icon {
-    background-position: -380px 0;
+    background-position: -726px -77px;
 }
 
 .edui-default  .edui-for-insertframe .edui-icon {
@@ -706,7 +712,7 @@ div.edui-box {
 }
 
 .edui-default  .edui-for-source .edui-icon {
-    background-position: -260px -0px;
+    background-position: -261px -0px;
 }
 
 .edui-default  .edui-for-removeformat .edui-icon {
@@ -862,7 +868,7 @@ div.edui-box {
 }
 
 .edui-default  .edui-for-background .edui-icon {
-    background-position: -678px -40px;
+    background-position: -680px -40px;
 }
 
 .edui-default  .edui-for-music .edui-icon {
@@ -931,6 +937,10 @@ div.edui-box {
 
 .edui-default  .edui-for-deletetitlecol  .edui-icon {
     background-position: -698px -76px;
+}
+
+.edui-default  .edui-for-simpleupload  .edui-icon {
+    background-position: -380px 0px;
 }
 /*splitbutton*/
 .edui-default .edui-toolbar .edui-splitbutton-body .edui-arrow,
@@ -1021,6 +1031,8 @@ div.edui-box {
 .edui-default .edui-popup {
     z-index: 3000;
     background-color: #ffffff;
+    width:auto;
+    height:auto;
 
 }
 
@@ -1084,10 +1096,85 @@ div.edui-box {
     border-right: 1px solid gray;
 }
 
+.edui-popup div{
+    width:auto;
+    height:auto;
+}
+.edui-default .edui-editor-messageholder {
+    display: block;
+    width: 150px;
+    height: auto;
+    border: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 28px;
+    right: 3px;
+}
+
+.edui-default .edui-message{
+    min-height: 10px;
+    text-shadow: 0 1px 0 rgba(255,255,255,0.5);
+    padding: 0;
+    margin-bottom: 3px;
+    position: relative;
+}
+.edui-default .edui-message-body{
+    border-radius: 3px;
+    padding: 8px 15px 8px 8px;
+    color: #c09853;
+    background-color: #fcf8e3;
+    border: 1px solid #fbeed5;
+}
+.edui-default .edui-message-type-info{
+    color: #3a87ad;
+    background-color: #d9edf7;
+    border-color: #bce8f1
+}
+.edui-default .edui-message-type-success{
+    color: #468847;
+    background-color: #dff0d8;
+    border-color: #d6e9c6
+}
+.edui-default .edui-message-type-danger,
+.edui-default .edui-message-type-error{
+    color: #b94a48;
+    background-color: #f2dede;
+    border-color: #eed3d7
+}
+.edui-default .edui-message .edui-message-closer {
+    display: block;
+    width: 16px;
+    height: 16px;
+    line-height: 16px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0;
+    cursor: pointer;
+    background: transparent;
+    border: 0;
+    float: right;
+    font-size: 20px;
+    font-weight: bold;
+    color: #999;
+    text-shadow: 0 1px 0 #fff;
+    font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+}
+.edui-default .edui-message .edui-message-content {
+    font-size: 10pt;
+    word-wrap: break-word;
+    word-break: normal;
+}
 /* 弹出对话框按钮和对话框大小 */
 .edui-default .edui-dialog {
     z-index: 2000;
     position: absolute;
+
+}
+
+.edui-dialog div{
+    width:auto;
 }
 
 .edui-default .edui-dialog-wrap {
@@ -1273,8 +1360,8 @@ div.edui-box {
 
 /*image-dialog*/
 .edui-default .edui-for-insertimage .edui-dialog-content {
-    width: 640px;
-    height: 390px;
+    width: 650px;
+    height: 400px;
     overflow: hidden;
 }
 /*webapp-dialog*/
@@ -1301,8 +1388,8 @@ div.edui-box {
 
 /*attachment-dialog*/
 .edui-default .edui-for-attachment .edui-dialog-content {
-    width: 480px;
-    height: 360px;
+    width: 650px;
+    height: 400px;
     overflow: hidden;
 }
 
@@ -1374,13 +1461,6 @@ div.edui-box {
     height: 360px;
 }
 
-/*preview-dialog*/
-.edui-default .edui-for-preview .edui-dialog-content {
-    width: 620px;
-    height: 500px;
-    *width: 630px;
-    *height: 570px;
-}
 /*段落弹出菜单*/
 .edui-default .edui-for-paragraph .edui-listitem-label {
     font-family: Tahoma, Verdana, Arial, Helvetica;
@@ -1668,8 +1748,8 @@ div.edui-box {
     width: 2px;
     height: 20px;
     margin: 2px 4px 2px 3px;
-    background: url(../images/icons.png) -180px 0;
-    background: url(../images/icons.gif) -180px 0 \9;
+    background: url(../images/icons.png) -181px 0;
+    background: url(../images/icons.gif) -181px 0 \9;
 }
 
 /*颜色按钮 */

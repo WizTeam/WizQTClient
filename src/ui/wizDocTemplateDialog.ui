@@ -60,6 +60,13 @@
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
+      <widget class="QPushButton" name="btn_delete">
+       <property name="text">
+        <string>Delete Selected</string>
+       </property>
+      </widget>
+     </item>
+     <item>
       <widget class="QPushButton" name="pushButton_import">
        <property name="text">
         <string>Import Templates</string>
@@ -116,6 +123,7 @@
   <tabstop>btn_cancel</tabstop>
   <tabstop>treeWidget</tabstop>
   <tabstop>webView_preview</tabstop>
+  <tabstop>btn_delete</tabstop>
   <tabstop>pushButton_import</tabstop>
   <tabstop>btn_downloadNew</tabstop>
  </tabstops>

@@ -79,8 +79,7 @@ QString _requestUrl(const QString& strUrl)
     QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
 
     CWizAutoTimeOutEventLoop loop(reply);
-//    loop.setTimeoutWaitSeconds(5);
-    loop.exec(QEventLoop::ExcludeUserInputEvents);
+    loop.exec();
 
     if (loop.error() != QNetworkReply::NoError)
         return NULL;
@@ -416,7 +415,7 @@ void CommonApiEntry::setLanguage(const QString& strLocal)
 QString CommonApiEntry::syncUrl()
 {
     QString strSyncUrl = requestUrl("sync_https");
-    qDebug() << "get sync url, result :  " << strSyncUrl;
+//    qDebug() << "get sync url, result :  " << strSyncUrl;
     if (!strSyncUrl.startsWith("http"))
     {
         qCritical() << "request url by command error. command : sync_https,  return : " << strSyncUrl;
@@ -450,7 +449,7 @@ QString CommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR));
 
-    strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
+    strRawUrl.replace("{userGuid}", strUserGUID);
     strRawUrl += "?default=false"; // Do not download server default avatar
     return strRawUrl;
 }
@@ -572,7 +571,7 @@ QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& str
     Q_ASSERT(!strToken.isEmpty());
 
     WIZUSERINFO info = Token::info();
-    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
+//    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
     if (info.strKbGUID == strKbGUID)
         return info.strDatabaseServer;
 
@@ -584,13 +583,15 @@ QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& str
         CWizGroupDataArray::const_iterator it = arrayGroup.begin();
         for (; it != arrayGroup.end(); it++) {
             const WIZGROUPDATA& group = *it;
-            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
+//            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
             if (group.strGroupGUID == strKbGUID)
                 return group.strDatabaseServer;
         }
     } else {
         qDebug() << asServer.GetLastErrorMessage();
     }
+
+    qWarning() << "can not get kurl by kbguid : " << strKbGUID << "  current token : " << strToken;
 
     return NULL;
 }

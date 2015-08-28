@@ -231,7 +231,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Not download data when syncing</string>
+              <string>Only download note title</string>
              </property>
             </item>
             <item>
@@ -285,7 +285,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Not download data when syncing</string>
+              <string>Only download note title</string>
              </property>
             </item>
             <item>
@@ -327,7 +327,7 @@
             </property>
             <item>
              <property name="text">
-              <string>Not download attachments</string>
+              <string>Only download attachments title</string>
              </property>
             </item>
             <item>

@@ -21,6 +21,7 @@ class QToolBar;
 class QLabel;
 class QSystemTrayIcon;
 class QComboBox;
+class QActionGroup;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -68,6 +69,7 @@ class WizMessageListTitleBar;
 namespace Core {
 class ICore;
 class CWizDocumentView;
+class CWizSingleDocumentViewDelegate;
 
 namespace Internal {
 
@@ -109,7 +111,7 @@ public:
 
     static MainWindow* instance();
 
-    QNetworkDiskCache* webViewNetworkCache();
+    QNetworkDiskCache* webViewNetworkCache();   
 
 protected:
     virtual bool eventFilter(QObject* watched, QEvent* event);
@@ -136,7 +138,6 @@ private:
     CWizIAPDialog* m_iapDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
-    //CWizUserAvatarDownloaderHost* m_avatarDownloaderHost;
     //
     CWizTrayIcon* m_tray;
     QMenu* m_trayMenu;
@@ -150,6 +151,10 @@ private:
 #endif
 
     QMenuBar* m_menuBar;
+    QMenu* m_dockMenu;
+    QMenu* m_windowListMenu;
+    QActionGroup* m_viewTypeActions;
+    QActionGroup* m_sortTypeActions;
 #ifdef Q_OS_LINUX
     QMenu* m_menu;
     QToolButton* m_menuButton;    
@@ -172,9 +177,9 @@ private:
 
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
-    CWizDocumentTransitionView* m_transitionView;
     std::shared_ptr<CWizSplitter> m_splitter;
     QWidget* m_docListContainer;
+    CWizSingleDocumentViewDelegate* m_singleViewDelegate;
 
     QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
@@ -209,6 +214,7 @@ private:
     void initMenuList();
 #endif
     void initMenuBar();
+    void initDockMenu();
 
     QWidget* createNoteListView();
     QWidget* createMessageListView();
@@ -218,19 +224,16 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     void showClient(bool visible) const;
+    CWizDocumentView* documentView() const;
 
     CWizActions* actions() const { return m_actions; }
     //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
-    //CWizUserAvatarDownloaderHost* avatarHost() const { return m_avatarDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
-    CWizDocumentTransitionView* transitionView() const { return m_transitionView; }
     CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
-    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);
-    //
-    void viewDocumentInFloatWidget(const WIZDOCUMENTDATA& data);
+    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
     //
     static void quickSyncKb(const QString& kbGuid);
 
@@ -249,6 +252,9 @@ signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
+
+    void documentsViewTypeChanged(int);
+    void documentsSortTypeChanged(int);
 
 public Q_SLOTS:
     void on_actionExit_triggered();
@@ -300,6 +306,26 @@ public Q_SLOTS:
     void on_actionViewToggleCategory_triggered();
     void on_actionViewToggleFullscreen_triggered();
     void on_actionViewMinimize_triggered();
+    void on_actionZoom_triggered();
+    void on_actionBringFront_triggered();
+
+    void on_actionCategoryMessageCenter_triggered();
+    void on_actionCategoryShortcuts_triggered();
+    void on_actionCategoryQuickSearch_triggered();
+    void on_actionCategoryFolders_triggered();
+    void on_actionCategoryTags_triggered();
+    void on_actionCategoryBizGroups_triggered();
+    void on_actionCategoryPersonalGroups_triggered();
+    void on_actionThumbnailView_triggered();
+    void on_actionTwoLineView_triggered();
+    void on_actionOneLineView_triggered();
+    void on_actionSortByCreatedTime_triggered();
+    void on_actionSortByUpdatedTime_triggered();
+    void on_actionSortByAccessTime_triggered();
+    void on_actionSortByTitle_triggered();
+    void on_actionSortByFolder_triggered();
+    void on_actionSortByTag_triggered();
+    void on_actionSortBySize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
     void on_messageSelector_indexChanged(int index);
@@ -398,6 +424,8 @@ public Q_SLOTS:
     void showTrayIconMenu();
     void on_viewMessage_request(qint64 messageID);
     //
+    void on_dockMenuAction_triggered();
+    //
     void shiftVisableStatus();
 
     //
@@ -408,6 +436,9 @@ public Q_SLOTS:
     //
     void locateDocument(const WIZDOCUMENTDATA& data);
     void locateDocument(const QString& strKbGuid, const QString& strGuid);
+
+    //
+    void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
 
 public:
     // WizExplorerApp pointer
@@ -467,6 +498,7 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
+    void showDocumentList();
     void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
     void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
@@ -483,9 +515,16 @@ private:
     //
     void loadMessageByUserGuid(const QString& guid);
 
-    //
+    void resetWindowListMenu(QMenu* menu, bool removeExists);
+
+    void changeDocumentsSortTypeByAction(QAction* action);
+
 private slots:
     void windowActived();
+    //
+    void resetDockMenu();
+    void resetWindowMenu();
+    void removeWindowsMenuItem(QString guid);
 };
 
 } // namespace Internal

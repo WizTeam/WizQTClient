@@ -34,9 +34,9 @@ QString TokenPrivate::token()
     //
 //    Q_ASSERT(!m_strUserId.isEmpty() && !m_strPasswd.isEmpty());
 
-    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
     if (m_info.strToken.isEmpty())
     {
+        CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
         if (asServer.Login(m_strUserId, m_strPasswd))
         {
             m_info = asServer.GetUserInfo();
@@ -60,6 +60,7 @@ QString TokenPrivate::token()
         WIZUSERINFO info;
         info.strToken = m_info.strToken;
         info.strKbGUID = m_info.strKbGUID;
+        CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
         asServer.SetUserInfo(info);
 
         if (asServer.KeepAlive(m_info.strToken))

@@ -6,11 +6,11 @@
 class CWizOEMSettings : public QSettings
 {
 public:
-    CWizOEMSettings(const QString& strUserId);
+    CWizOEMSettings(const QString& strUserAccountPath);
 
-    static bool settingFileExists(const QString& strUserId);
+    static bool settingFileExists(const QString& strUserAccountPath);
     //
-    static void updateOEMSettings(const QString& strUserId, const QString& strOEMJSONData);
+    static void updateOEMSettings(const QString& strUserAccountPath, const QString& strOEMJSONData);
 
     bool isHideShareByEmail();
     bool isHidePersonalGroup();

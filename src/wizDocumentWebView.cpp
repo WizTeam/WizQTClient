@@ -119,6 +119,10 @@ void CWizDocumentWebViewPage::triggerAction(QWebPage::WebAction typeAction, bool
 
     if (typeAction == QWebPage::Paste) {
         on_editorCommandPaste_triggered();
+    } else if (typeAction == QWebPage::Undo || typeAction == QWebPage::Redo) {
+        //FIXME: 在QT5.4.2之后无法禁止webpage的快捷键，webpage的快捷键会覆盖menubar上的
+        Q_EMIT actionTriggered(typeAction);
+        return;
     }
 
     QWebPage::triggerAction(typeAction, checked);
@@ -224,10 +228,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setAcceptDrops(true);
 
     // refers
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
-
-    m_transitionView = mainWindow->transitionView();
-
     m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
     connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
             SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
@@ -311,6 +311,10 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 #if QT_VERSION >= 0x050402
+//    else if (event->modifiers() == Qt::ControlModifier)
+//    {
+//        return;
+//    }
     //FIXME: QT5.4.2之后无法触发全局的保存按钮
     else if (event->key() == Qt::Key_V && event->modifiers() == Qt::ControlModifier)
     {
@@ -362,7 +366,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
             editorCommandExecuteRemoveStartOfLine();
             return;
         }
-        else
+        else if(m_bEditingMode)
         {
             //FIXME: would not trigger content change event, when delete row and image by backspace
             setContentsChanged(true);
@@ -456,8 +460,22 @@ void CWizDocumentWebView::dragMoveEvent(QDragMoveEvent* event)
 
 void CWizDocumentWebView::onActionTriggered(QWebPage::WebAction act)
 {
+    //在QT5.4.2之后webpage会覆盖menubar的快捷键，且无法禁止。某些操作需要由编辑器进行操作(undo, redo)，
+   //需要webpage将操作反馈给webview来执行编辑器操作
     if (act == QWebPage::Paste)
+    {
         tryResetTitle();
+    }
+    else if (QWebPage::Undo == act)
+    {
+        WizGetAnalyzer().LogAction("Undo");
+        undo();
+    }
+    else if (QWebPage::Redo == act)
+    {
+        WizGetAnalyzer().LogAction("Redo");
+        redo();
+    }
 }
 
 void CWizDocumentWebView::tryResetTitle()
@@ -1071,7 +1089,10 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
     strHead.replace(regHead, "");
 
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    // 此处不使用editor.getContent()来获取笔记内容，因为editor.getContent()会对内容进行过滤，在某些情况下会导致
+    //保存的内容与编辑模式下看到的内容不一致
+//    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
     //
     m_strCurrentNoteHtml = strHtml;
     //
@@ -1248,15 +1269,14 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     }
 
     // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (!ret) {
-        window->showClient(false);
-        window->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
+        view()->showClient(false);
+        view()->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
         return;
     }
 
-    window->showClient(true);
-    window->transitionView()->hide();
+    view()->showClient(true);
+    view()->transitionView()->hide();
 
     page()->undoStack()->clear();
     m_timerAutoSave.start();
@@ -1289,10 +1309,9 @@ void CWizDocumentWebView::viewDocumentWithoutEditor()
     //
     page()->mainFrame()->setHtml(strHtml);
 
-    // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
-    window->showClient(true);
-    window->transitionView()->hide();
+    // show client    
+    view()->showClient(true);
+    view()->transitionView()->hide();
 
     page()->undoStack()->clear();
 
@@ -1589,13 +1608,13 @@ void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool 
 
 bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
-    WizGetAnalyzer().LogAction("editorFontFamily");
+    WizGetAnalyzer().LogAction(QString("editorSetFontFamily : %1").arg(strFamily));
     return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
 bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
-    WizGetAnalyzer().LogAction("editorFontSize");
+    WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1").arg(strSize));
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 

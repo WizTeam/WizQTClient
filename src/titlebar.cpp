@@ -4,8 +4,14 @@
 #include <QUrl>
 #include <QNetworkConfigurationManager>
 #include <QMessageBox>
+#include <QWebHistory>
 #include <QSplitter>
 #include <QList>
+#if QT_VERSION > 0x050000
+#include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 
 #include "share/websocketclientwrapper.h"
 #include "share/websockettransport.h"
@@ -121,7 +127,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
     m_emailBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_email"), tr("Share document by email (Alt + 6)"));
     connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
-    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
     m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
     m_shareBtn = new CellButton(CellButton::Center, this);
@@ -222,7 +228,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
-        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetUserId());
+        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
         m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
         m_shareBtn->setVisible(bIsGroup ? false : !oemSettings.isHideShare());
@@ -311,8 +317,12 @@ void TitleBar::loadErrorPage()
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
+    // clear old url
+    comments->load(QUrl());
     QUrl url = QUrl::fromLocalFile(strFileName);
-    comments->setHtml(strHtml, url);
+    qDebug() << "clear comment url : " << comments->url() <<  "  and load the error page : "
+             << url;
+    comments->load(url);
 }
 
 void TitleBar::setTagBarVisible(bool visible)
@@ -556,7 +566,7 @@ bool isNetworkAccessible()
     //return man.isOnline();
 }
 
-#define COMMENT_FRAME_WIDTH 310
+#define COMMENT_FRAME_WIDTH 315
 
 void TitleBar::onCommentsButtonClicked()
 {
@@ -604,9 +614,11 @@ void TitleBar::onCommentPageLoaded(bool ok)
     QWebEngineView* comments = noteView()->commentView();
 #else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    commentWidget->web()->history()->clear();
 #endif
     if (!ok)
     {
+        qDebug() << "Wow, load comment page failed! " << commentWidget->web()->url();
         loadErrorPage();
         commentWidget->show();
     }
@@ -633,17 +645,11 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     Q_UNUSED(note);
 
     if (!bOk)
-        return;
+        return;    
 
     if (view != noteView()) {
         return;
-    }
-
-    static QString docGUID = "";
-    if (docGUID == note.strGUID)
-        return;
-    docGUID = note.strGUID;
-
+    }    
 
     m_commentsUrl.clear();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
@@ -660,36 +666,38 @@ void TitleBar::onTokenAcquired(const QString& strToken)
 #else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 #endif
-
     if (strToken.isEmpty())
     {
+        qDebug() << "Can not get token, hide the comment widget";
         commentWidget->hide();
         return;
     }
 
     commentWidget->showLocalProgress();
-    QString strKbGUID = noteView()->note().strKbGUID;
-    QString strGUID = noteView()->note().strGUID;
-    m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+    //
+    QtConcurrent::run([this, strToken, commentWidget](){
+        QString strKbGUID = noteView()->note().strKbGUID;
+        QString strGUID = noteView()->note().strGUID;
+        m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
+        if (m_commentsUrl.isEmpty())
+        {
+            qDebug() << "Can not get comment url by token : " << strToken;
+            QMetaObject::invokeMethod(this, "loadErrorPage", Qt::QueuedConnection);
+            return;
+        }
 
+        if (commentWidget->isVisible())
+        {
+            emit loadComment_request(m_commentsUrl);
+        }
 
-    if (m_commentsUrl.isEmpty())
-    {
-        loadErrorPage();
-        return;
-    }
+        QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
+        QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
 
-    if (commentWidget->isVisible())
-    {
-        commentWidget->web()->load(m_commentsUrl);
-    }
-
-    QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
-    QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
-
-    WizService::AsyncApi* api = new WizService::AsyncApi(this);
-    connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
-    api->getCommentsCount(strCountUrl);
+        WizService::AsyncApi* api = new WizService::AsyncApi(nullptr);
+        connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
+        api->getCommentsCount(strCountUrl);
+    });
 }
 
 void TitleBar::onGetCommentsCountFinished(int nCount)

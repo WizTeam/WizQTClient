@@ -157,6 +157,7 @@ public Q_SLOTS:
     void on_action_encryptDocument();
     void on_action_cancelEncryption();
     void on_action_alwaysOnTop();
+    void on_action_addToShortcuts();
 
     void on_action_moveDocument();
     void on_action_moveDocument_confirmed(int result);
@@ -191,6 +192,7 @@ Q_SIGNALS:
     void documentsSelectionChanged();
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
     void changeUploadRequest(const QString& strKbGUID);
+    void addDocumentToShortcutsRequest(const WIZDOCUMENTDATA& doc);
 
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);

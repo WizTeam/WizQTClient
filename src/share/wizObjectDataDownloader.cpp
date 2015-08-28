@@ -63,6 +63,7 @@ void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSuc
     m_mapObject.remove(objectGUID);
     //
     Q_EMIT downloadDone(data, bSucceed);
+    Q_EMIT finished();
 }
 
 void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
@@ -158,12 +159,24 @@ bool CWizDownloadObjectRunnable::downloadDocument()
             if (ksServer.attachment_getData(attach.strGUID, nPart, attachRet))
             {
 //                qDebug() << "get attachment from server : " << attachRet.strName;
+                //
+                db.blockSignals(true);
                 db.UpdateAttachment(attachRet);
+                db.blockSignals(false);
             }
         }
     }
 
-    return db.UpdateDocument(document);
+    bool ret = false;
+    db.blockSignals(true);
+    if (db.UpdateObjectData(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
+                             document.arrayData))
+    {
+        ret = db.UpdateDocument(document);
+        db.SetObjectDataDownloaded(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument), true);
+    }
+    db.blockSignals(false);
+    return ret;
 }
 
 bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
@@ -218,35 +231,5 @@ void CWizFileDownloader::startDownload()
 
 bool CWizFileDownloader::download()
 {
-     QNetworkAccessManager m_WebCtrl;
-     QNetworkReply* reply;
-     do
-     {
-         QNetworkRequest request(m_strUrl);
-         QEventLoop loop;
-         loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
-         reply = m_WebCtrl.get(request);
-         loop.exec();
-
-         QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-         m_strUrl = redirectUrl.toString();
-     }
-     while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
-
-
-     QByteArray byData = reply->readAll();
-     if (m_isImage)
-     {
-         QPixmap pix;
-         pix.loadFromData(byData);
-         return pix.save(m_strFileName);
-     }
-
-     QFile file(m_strFileName);
-     if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
-         return false;
-     file.write(byData);
-     file.close();
-
-     return true;
+     return WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
 }

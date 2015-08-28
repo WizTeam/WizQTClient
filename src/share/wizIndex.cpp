@@ -4013,6 +4013,13 @@ void CWizIndex::AddExtraFolder(const QString& strLocation)
     QString strParent = strLocation;
     int idx = strParent.lastIndexOf("/", -2);
     while (idx) {
+        // 如果文件夹格式错误，直接退出，防止死循环
+        if (strParent.left(1) != "/" || strParent.right(1) != "/")
+        {
+            qCritical() << "try to add a error location : " << strParent;
+            return;
+        }
+
         strParent = strParent.left(idx + 1);
         idx = strParent.lastIndexOf("/", -2);
 
@@ -4053,6 +4060,7 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
 //                          "DOCUMENT_LOCATION='%3'").arg(TABLE_NAME_WIZ_DOCUMENT)
 //                          .arg(strNewLocation).arg(strOldLocation);
 //    bool result = ExecSQL(sql);
+    qDebug() << "update location from : " << strOldLocation << " to : " << strNewLocation;
 
     CWizDocumentDataArray docArray;
     if (!GetDocumentsByLocation(strOldLocation, docArray, true))

@@ -116,7 +116,6 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_mutex(QMutex::Recursive)
     , m_nfullSyncInterval(DEFAULT_FULL_SYNC_INTERVAL)
 {
-    QTimer::singleShot(10 * 1000, this, SLOT(syncAfterStart()));
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
     m_pEvents = new CWizKMSyncEvents();
@@ -276,7 +275,7 @@ bool CWizKMSyncThread::syncAll()
 
     syncUserCert();
 
-    ::WizSyncDatabase(m_info, m_pEvents, &m_db, true, m_bBackground);    
+    ::WizSyncDatabase(m_info, m_pEvents, &m_db, m_bBackground);
 
     return true;
 }

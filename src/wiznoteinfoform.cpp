@@ -50,9 +50,10 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 
     ui->editTitle->setText(data.strTitle);
 
+    QString strLocation;
     // private document
     if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
-        ui->labelNotebook->setText(data.strLocation);
+        strLocation = data.strLocation;
 
         QString tags = db.GetDocumentTagsText(data.strGUID);
         ui->labelTags->setText(tags);
@@ -63,7 +64,6 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     } else {
         CWizTagDataArray arrayTag;
         if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
-            ui->labelNotebook->clear();
         } else {
             if (arrayTag.size() > 1) {
                 TOLOG1("Group document should only have one tag: %1", data.strTitle);
@@ -73,13 +73,17 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
             if (arrayTag.size()) {
                 tagText = db.getTagTreeText(arrayTag[0].strGUID);
             }
-
-            ui->labelNotebook->setText("/" + db.name() + tagText + "/");
+            strLocation = "/" + db.name() + tagText + "/";
         }
 
         ui->labelTags->clear();
         ui->editAuthor->setText(data.strAuthor);
     }
+
+    QFont font;
+    QFontMetrics fm(font);
+    strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, 280);
+    ui->labelNotebook->setText(strLocation);
 
     // common fields
     ui->editCreateTime->setText(data.tCreated.toString());

@@ -5,6 +5,9 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include <QMessageBox>
+#include <QCompleter>
+#include <QStyledItemDelegate>
+#include <QAbstractItemView>
 #include <QDebug>
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
@@ -52,7 +55,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     m_btnMore = new QToolButton(this);
     hLayout->addWidget(m_btnMore);
     m_btnMore->setVisible(false);
-    m_lineEdit = new QLineEdit(this);
+    m_lineEdit = new CTagLineEdit(this);
     hLayout->addWidget(m_lineEdit);
     hLayout->addStretch();
 
@@ -63,6 +66,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     applyStyleSheet();
 
     connect(m_lineEdit, SIGNAL(returnPressed()), SLOT(on_lineEditReturnPressed()));
+    connect(m_lineEdit, SIGNAL(completerFinished()), SLOT(on_lineEditReturnPressed()));
     connect(m_lineEdit, SIGNAL(textChanged(QString)), SLOT(on_lineEditTextChanged(QString)));
     connect(m_btnMore, SIGNAL(clicked()), SLOT(on_buttonMoreClicked()));
     connect(m_btnAdd, SIGNAL(clicked()), SLOT(on_buttonAddClicked()));
@@ -76,6 +80,9 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_tagDeleted(WIZTAGDATA)));
     connect(&m_dbMgr, SIGNAL(documentTagModified(WIZDOCUMENTDATA)),
             SLOT(on_documentTagModified(WIZDOCUMENTDATA)));
+
+    //
+    resetLineEditCompleter();
 }
 
 CWizTagBar::~CWizTagBar()
@@ -229,6 +236,19 @@ void CWizTagBar::clearTagSelection()
     }
 }
 
+void CWizTagBar::resetLineEditCompleter()
+{
+    CWizTagDataArray arrayTag;
+    m_dbMgr.db().GetAllTags(arrayTag);
+    QSet<QString> tagNameSet;
+    for (WIZTAGDATA tag : arrayTag)
+    {
+        tagNameSet.insert(tag.strName);
+    }
+    QStringList tagNames(tagNameSet.toList());
+    m_lineEdit->resetCompleter(tagNames);
+}
+
 void CWizTagBar::on_deleteTagRequest(const QString& guid)
 {    
     CWizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
@@ -264,6 +284,7 @@ void CWizTagBar::on_lineEditReturnPressed()
     QString strTagNames = m_lineEdit->text();
     if (strTagNames.isEmpty())
         return;
+    m_lineEdit->setText("");
 
     WizGetAnalyzer().LogAction("addTagByTagBarInput");
 
@@ -300,8 +321,7 @@ void CWizTagBar::on_lineEditReturnPressed()
             db.CreateTag("", strTagName, "", tag);
             doc.AddTag(tag);
         }
-    }
-    m_lineEdit->clear();
+    }    
 }
 
 void CWizTagBar::on_selectedItemChanged(CTagItem* item)
@@ -352,13 +372,18 @@ void CWizTagBar::on_buttonAddClicked()
 void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
 {
     //NOTE: do not process tag created signal. new tag could be created in other place
-    Q_UNUSED(tag);
+    if (tag.strKbGUID == m_dbMgr.db().kbGUID())
+    {
+        resetLineEditCompleter();
+    }
 }
 
 void CWizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
     if (tagNew.strKbGUID == m_dbMgr.db().kbGUID())
     {
+        resetLineEditCompleter();
+        //
         for (auto tagWgt : m_mapTagWidgets)
         {
             if (tagWgt.first == tagOld.strGUID)
@@ -384,6 +409,8 @@ void CWizTagBar::on_tagDeleted(const WIZTAGDATA& tag)
 {
     if (tag.strKbGUID == m_dbMgr.db().kbGUID())
     {
+        resetLineEditCompleter();
+        //
         for (auto tagWgt : m_mapTagWidgets)
         {
             if (tagWgt.first == tag.strGUID)
@@ -692,4 +719,42 @@ void CTagItem::on_menuActionDelete()
         return;
 
     emit deleteTagRequest(m_tagGuid);
+}
+
+
+CTagLineEdit::CTagLineEdit(QWidget* parent)
+    : QLineEdit(parent)
+    , m_completer(nullptr)
+{
+
+}
+
+void CTagLineEdit::resetCompleter(const QStringList& tagNames)
+{
+    if (m_completer)
+    {
+        m_completer->deleteLater();
+    }
+    m_completer = new QCompleter(tagNames, this);
+    QStyledItemDelegate* mCompleterItemDelegate = new QStyledItemDelegate(m_completer);
+    m_completer->popup()->setItemDelegate(mCompleterItemDelegate); //Must be set after every time the model is set
+    m_completer->popup()->setStyleSheet("QAbstractItemView::item:selected{background:#448aff;}"
+                                        "QAbstractItemView::item:hover{background:#448aff;}");
+    setCompleter(m_completer);
+}
+
+void CTagLineEdit::keyPressEvent(QKeyEvent* event)
+{
+    if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
+    {
+        if (m_completer->popup()->isVisible())
+        {
+            m_completer->popup()->hide();
+            emit completerFinished();
+            event->accept();
+            return;
+        }
+    }
+
+    QLineEdit::keyPressEvent(event);
 }

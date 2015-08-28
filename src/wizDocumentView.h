@@ -11,6 +11,7 @@ class QScrollArea;
 class QLineEdit;
 class QLabel;
 
+
 struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 class CWizExplorerApp;
@@ -31,6 +32,7 @@ class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
 class CWizDocumentWebEngine;
 class CWizLocalProgressWebView;
+class CWizDocumentTransitionView;
 
 namespace Core {
 namespace Internal {
@@ -57,6 +59,8 @@ public:
     QWebView* commentView() const;
     CWizLocalProgressWebView* commentWidget() const;
     //
+    CWizDocumentTransitionView* transitionView();
+    //
     void waitForDone();
 
 protected:
@@ -64,6 +68,7 @@ protected:
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
     CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizDocumentTransitionView* m_transitionView;
 
     QStackedWidget* m_tab;
     QWidget* m_msgWidget;
@@ -140,7 +145,7 @@ public Q_SLOTS:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_data_modified(const WIZDOCUMENTDATA& data);
-    void on_document_data_saved(const QString& strGUID, CWizDocumentView* viewer);
+    void on_document_data_changed(const QString& strGUID, CWizDocumentView* viewer);
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);
@@ -158,11 +163,12 @@ public Q_SLOTS:
     void on_command_request();
     //
     void on_comment_populateJavaScriptWindowObject();
+    void on_loadComment_request(const QString& url);
 
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
-    void downloadDocumentFromServer();
+    void downloadNoteFromServer(const WIZDOCUMENTDATA& note);
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();
     void startCheckDocumentEditStatus();
@@ -170,31 +176,6 @@ private:
     bool checkDocumentEditable();
     //
     void stopCheckDocumentAnimations();
-};
-
-class WizFloatDocumentViewer : public QWidget
-{
-    Q_OBJECT
-public:
-    WizFloatDocumentViewer(CWizExplorerApp& app, QWidget* parent = 0);
-
-    CWizDocumentView* docView()
-    {
-        return m_docView;
-    }
-
-    ~WizFloatDocumentViewer();
-
-public slots:
-    void on_textInputFinished();
-
-private:
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_webEngine;
-#else
-    CWizDocumentView* m_docView;
-#endif
-    QLineEdit* m_edit;
 };
 
 } // namespace Core

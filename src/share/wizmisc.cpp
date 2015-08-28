@@ -17,6 +17,9 @@
 #include <QtCore>
 //#include <QtNetwork>
 #include <QNetworkConfigurationManager>
+#include <QNetworkAccessManager>
+#include <QNetworkRequest>
+#include <QNetworkReply>
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
@@ -1887,7 +1890,13 @@ void WizDeleteFolder(const CString& strPath)
     if (dir.isRoot())
         return;
 
+    dir = QDir(strPath);
+
+#if QT_VERSION > 0x050000
+    dir.removeRecursively();
+#else
     dir.rmdir(Utils::Misc::extractLastPathName(strPath));
+#endif
 }
 
 void WizDeleteFile(const CString& strFileName)
@@ -2501,10 +2510,12 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+        QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
 
         downloaderHost->downloadData(doc);
         dlg.exec();
+        //
+        downloaderHost->disconnect(&dlg);
     }
 
     return PathFileExists(strFileName);
@@ -2524,16 +2535,10 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
             return false;
 
         QEventLoop loop;
-#if QT_VERSION >= 0x050000
-        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-            QObject::disconnect(downloaderHost, 0, 0, 0);
-            loop.quit();
-        });
-#else
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
-#endif
+        QObject::connect(downloaderHost, SIGNAL(finished()), &loop, SLOT(quit()));        
         downloaderHost->downloadData(doc);
         loop.exec();
+        //
     }
 
     return PathFileExists(strFileName);
@@ -2552,17 +2557,10 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
             return false;
 
         QEventLoop loop;
-#if QT_VERSION >= 0x050000        
-        QObject::connect(downloaderHost, &CWizObjectDataDownloaderHost::downloadDone, [&](const WIZOBJECTDATA& data, bool bSucceed){
-            QObject::disconnect(downloaderHost, 0, 0, 0);
-            loop.quit();
-        });
-#else
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop, SLOT(quit()));
-#endif
-
+        QObject::connect(downloaderHost, SIGNAL(finished()), &loop, SLOT(quit()));        
         downloaderHost->downloadData(attachData);
         loop.exec();
+        //
     }
 
     return PathFileExists(strAttachmentFileName);
@@ -2585,11 +2583,102 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
-        QObject::connect(downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &dlg, SLOT(accept()));
+        QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
 
         downloaderHost->downloadData(attachData);
         dlg.exec();
+        //
+        downloaderHost->disconnect(&dlg);
     }
 
     return PathFileExists(strAttachmentFileName);
+}
+
+
+bool WizGetLocalUsers(QList<WizLocalUser>& userList)
+{
+    QString dataPath = Utils::PathResolve::dataStorePath();
+    QDir dir(dataPath);
+    QStringList folderList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (QString folder : folderList)
+    {
+        WizLocalUser user;
+        QString dataBase = dataPath + folder + "/data/index.db";
+        CWizIndex db;
+        if (!QFile::exists(dataBase) || !db.Open(dataBase))
+            continue;
+
+        user.strDataFolderName = folder;
+        user.strGuid = db.GetMetaDef("ACCOUNT", "GUID");
+        if (user.strGuid.isEmpty())
+        {
+            continue;
+        }
+        user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
+//        qDebug() << "load user id ; " << user.strUserId << "  folder : " << folder;
+        user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
+        user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
+        userList.append(user);
+    }
+    return true;
+}
+
+
+QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& strGuid)
+{
+    for (WizLocalUser user : userList)
+    {
+        if (strGuid == user.strGuid)
+            return user.strUserId;
+    }
+    return "";
+}
+
+
+bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isImage)
+{
+    QString newUrl = url;
+    QNetworkAccessManager netCtrl;
+    QNetworkReply* reply;
+    do
+    {
+        QNetworkRequest request(newUrl);
+        QEventLoop loop;
+        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        reply = netCtrl.get(request);
+        loop.exec();
+
+        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+        newUrl = redirectUrl.toString();
+    }
+    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+
+    WizDeleteFile(fileName);
+
+    QByteArray byData = reply->readAll();
+    if (isImage)
+    {
+        QPixmap pix;
+        pix.loadFromData(byData);
+        return pix.save(fileName);
+    }
+
+    QFile file(fileName);
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Truncate))
+        return false;
+    file.write(byData);
+    file.close();
+
+    return true;
+}
+
+
+QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid)
+{
+    for (WizLocalUser user : userList)
+    {
+        if (strGuid == user.strGuid)
+            return user.strDataFolderName;
+    }
+    return "";
 }

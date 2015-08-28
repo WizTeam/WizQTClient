@@ -142,6 +142,16 @@ protected:
 #endif
 };
 
+enum CategorySection
+{
+    Section_MessageCenter,
+    Section_Shortcuts,
+    Section_QuickSearch,
+    Section_Folders,
+    Section_Tags,
+    Section_BizGroups,
+    Section_PersonalGroups
+};
 
 class CWizCategoryView : public CWizCategoryBaseView
 {
@@ -175,6 +185,7 @@ public:
         ActionQuitGroup,
         ActionItemManage,
         ActionRemoveShortcutItem,
+        ActionAddToShortcuts,
         ActionAdvancedSearch,
         ActionAddCustomSearch,
         ActionEditCustomSearch,
@@ -219,6 +230,10 @@ public:
     void showShortcutContextMenu(QPoint pos);
     void showCustomSearchContextMenu(QPoint pos, bool removable = false);
 
+
+    bool setSectionVisible(CategorySection section, bool visible);
+    bool isSectionVisible(CategorySection section) const;
+    void loadSectionStatus();
 
 public:
     CWizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
@@ -266,7 +281,6 @@ public:
     // helper
     QAction* findAction(CategoryActions type);
 
-    CWizCategoryViewItemBase* findShortcutRootItem();
     CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
     CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
     CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
@@ -275,6 +289,7 @@ public:
     CWizCategoryViewItemBase* findAllTagsItem();
     CWizCategoryViewItemBase* findAllSearchItem();
     CWizCategoryViewItemBase* findAllMessagesItem();
+    CWizCategoryViewItemBase* findAllShortcutItem();
     CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
@@ -402,6 +417,7 @@ public Q_SLOTS:
     void on_action_manageBiz();
 
     void on_action_removeShortcut();
+    void on_action_addToShortcuts();
 
     void on_action_advancedSearch();
     void on_action_addCustomSearch();
@@ -417,6 +433,9 @@ public Q_SLOTS:
     void updateGroupsData();
 
     void on_shortcutDataChanged(const QString& shortcut);
+
+    //
+    void addDocumentToShortcuts(const WIZDOCUMENTDATA& doc);
 
 public:
     // Public API:
@@ -539,7 +558,7 @@ private:
     void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
                                          bool keepDocTime, bool combineFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
     //
-    void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
+    void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);    
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
@@ -561,8 +580,10 @@ private:
 
     //
     QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name);
-    bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
-    bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName, QTreeWidgetItem* exceptBrother = nullptr);
+    bool isCombineSameNameFolder(const WIZTAGDATA& parentTag, const QString& folderName,
+                                 bool& isCombine, QTreeWidgetItem* exceptBrother = nullptr);
+    bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName,
+                                 bool& isCombine, QTreeWidgetItem* exceptBrother = nullptr);
 
     bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
 

@@ -1,6 +1,10 @@
 #include <QtGlobal>
 #include "wizUserInfoWidget.h"
-
+#if QT_VERSION > 0x050000
+#include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -64,7 +68,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
-    CWizOEMSettings oemSettings(m_db.GetUserId());
+    CWizOEMSettings oemSettings(m_db.GetAccountPath());
     if (!oemSettings.isHideBuyVip())
     {
         QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
@@ -178,14 +182,17 @@ void CWizUserInfoWidget::on_action_changeAvatar_triggered()
         return;
     }
 
-    AvatarUploader* uploader = new AvatarUploader(this);
-    connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
-    uploader->upload(listFiles[0]);
+    QString fileName = listFiles[0];
+    QtConcurrent::run([this, fileName](){
+        AvatarUploader* uploader = new AvatarUploader(nullptr);
+        connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
+        uploader->upload(fileName);
+    });
 }
 
 void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 {
-    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());
+    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());    
 
     if (ok) {
         AvatarHost::reload(m_db.GetUserId());
@@ -222,7 +229,6 @@ void CWizUserInfoWidget::on_action_logout_triggered()
 
 void CWizUserInfoWidget::on_userInfo_changed()
 {
-    AvatarHost::reload(m_db.GetUserId());
     resetUserInfo();
 }
 QString CWizUserInfoWidget::userId()
