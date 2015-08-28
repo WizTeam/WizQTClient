@@ -28,7 +28,7 @@ CWizDocumentOperator::CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* 
 CWizDocumentOperator::~CWizDocumentOperator()
 {
     if (m_thread)
-    {       
+    {
         connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
         m_thread->quit();
     }
