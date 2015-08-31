@@ -27,6 +27,7 @@ public:
     static QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
     static QString createGroupUrl(const QString& strToken);
     static QString captchaUrl(const QString& strCaptchaID, int nWidth = 120, int nHeight = 40);
+    static QString editStatusUrl();
 
     //
     static QString standardCommandUrl(const QString& strCommand);
@@ -48,7 +49,7 @@ private:
     static QString makeUpUrlFromCommand(const QString& strCommand);
     static void getEndPoints();
     static void updateUrlCache(const QString& strCommand, const QString& url);
-    static QString getUrlFromCahe(const QString& strCommand);
+    static QString getUrlFromCache(const QString& strCommand);
     static QString getUrlByCommand(const QString& strCommand);
 
 private:

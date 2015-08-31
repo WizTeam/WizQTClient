@@ -18,29 +18,7 @@
 
 QString WizKMGetDocumentEditStatusURL()
 {
-    static QString strUrl = 0;
-    if (strUrl.isEmpty())
-    {
-        QString strCmd = "note_edit_status_url";
-        QString strRequestUrl = WizService::CommonApiEntry::standardCommandUrl(strCmd);
-
-        QNetworkAccessManager* net = new QNetworkAccessManager();
-        QNetworkReply* reply = net->get(QNetworkRequest(strRequestUrl));
-
-        QEventLoop loop;
-        QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-        if (reply->error()) {
-            return 0;
-        }
-
-        strUrl = QString::fromUtf8(reply->readAll().constData());
-
-        net->deleteLater();
-    }
-
-    return strUrl;
+    return WizService::CommonApiEntry::editStatusUrl();
 }
 
 CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* parent)

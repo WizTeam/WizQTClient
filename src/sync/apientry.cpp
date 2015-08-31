@@ -430,7 +430,7 @@ QString CommonApiEntry::syncUrl()
 QString CommonApiEntry::asServerUrl()
 {
     //使用endpoints获取as使用的API地址和之前的不同
-    QString strAsUrl = getUrlFromCahe("wizas");
+    QString strAsUrl = getUrlFromCache("wizas");
 
     if (strAsUrl.isEmpty())
     {
@@ -478,7 +478,7 @@ QString CommonApiEntry::avatarUploadUrl()
 QString CommonApiEntry::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
 {
     // 通过endpoints获得api命令为mail_share，和之前使用的mail_share2不同，需要分开处理
-    QString strMailShare = getUrlFromCahe("mail_share");
+    QString strMailShare = getUrlFromCache("mail_share");
     if (strMailShare.isEmpty())
     {
         strMailShare = requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE);
@@ -546,6 +546,20 @@ QString CommonApiEntry::captchaUrl(const QString& strCaptchaID, int nWidth, int 
 {
     QString strUrl = asServerUrl();
     strUrl += QString("/a/captcha/%1?width=%2&height=%3").arg(strCaptchaID).arg(nWidth).arg(nHeight);
+    return strUrl;
+}
+
+QString CommonApiEntry::editStatusUrl()
+{
+    //使用endpoints获取edit使用的API地址和之前的不同
+    QString strUrl = getUrlFromCache("edit_status");
+    
+    if (strUrl.isEmpty())
+    {
+        strUrl = requestUrl("note_edit_status_url");
+        updateUrlCache("edit_status", strUrl);
+    }
+    
     return strUrl;
 }
 
@@ -692,13 +706,10 @@ void CommonApiEntry::updateUrlCache(const QString& strCommand, const QString& ur
     m_cacheMap.insert(strCommand, url);
 }
 
-QString CommonApiEntry::getUrlFromCahe(const QString& strCommand)
+QString CommonApiEntry::getUrlFromCache(const QString& strCommand)
 {
-    if (!m_cacheMap.value(strCommand).isEmpty())
-        return m_cacheMap.value(strCommand);
-
-    getEndPoints();
-
+    if (m_cacheMap.isEmpty())
+        getEndPoints();
     if (!m_cacheMap.value(strCommand).isEmpty())
         return m_cacheMap.value(strCommand);
 
@@ -707,7 +718,7 @@ QString CommonApiEntry::getUrlFromCahe(const QString& strCommand)
 
 QString CommonApiEntry::getUrlByCommand(const QString& strCommand)
 {
-    QString strUrl = getUrlFromCahe(strCommand);
+    QString strUrl = getUrlFromCache(strCommand);
 
     if (strUrl.isEmpty())
     {
