@@ -16,9 +16,10 @@ using namespace WizService::Internal;
 #define TOKEN_TIMEOUT_INTERVAL 60 * 5
 
 TokenPrivate::TokenPrivate(Token* token)
-    : q(token)
+    : m_bProcessing(false)
     , m_mutex(new QMutex(QMutex::Recursive))
-    , m_bProcessing(false)
+    , q(token)
+
 {
 }
 
