@@ -4,6 +4,7 @@
 # you can download old sdk from here: https://github.com/JuliaEichler/Mac_OSX_SDKs
 # default is 10.7 for binary release.
 
+
 if (APPLE)
     cmake_minimum_required(VERSION 2.8.12)
 else(APPLE)
@@ -59,11 +60,16 @@ if(APPLE)
 endif(APPLE)
 
 if(APPLE)
-    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
-    set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
-    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
-    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
-    set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources/plugIns)
+    if (XCODEBUILD)
+        set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/Debug/WizNote.app)
+        add_definitions(-DXCODEBUILD=TRUE)
+    else(XCODEBUILD)
+        set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
+    endif(XCODEBUILD)
+        set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
+        set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
+        set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
+        set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources/plugIns)
 else(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR})
     set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/lib/wiznote/plugins)
