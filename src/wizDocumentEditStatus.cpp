@@ -23,11 +23,12 @@ QString WizKMGetDocumentEditStatusURL()
 
 CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* parent)
     : QThread(parent)
-    , m_mutext(QMutex::Recursive)
     , m_stop(false)
+    , m_mutext(QMutex::Recursive)
     , m_sendNow(false)
 {
 }
+
 
 void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {

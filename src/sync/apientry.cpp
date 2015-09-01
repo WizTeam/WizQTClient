@@ -78,19 +78,20 @@ QMap<QString, QString> CommonApiEntry::m_mapkUrl = QMap<QString, QString>();
 
 QString _requestUrl(const QString& strUrl)
 {
-    QNetworkAccessManager* net = new QNetworkAccessManager();
-    QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     if (loop.error() != QNetworkReply::NoError)
+    {
         return NULL;
+    }
 
     //NOTE: reply has been delete in event loop, should not be deleted here
 //    reply->deleteLater();
 
-    net->deleteLater();
 
     return loop.result();
 }
