@@ -4,6 +4,7 @@
 #define WIZNOTE_API_SERVER      "http://api.wiz.cn/"
 
 #include <QString>
+#include <QMap>
 
 namespace WizService {
 
@@ -15,7 +16,6 @@ public:
     static QString syncUrl();
     static QString asServerUrl();
     static QString messageServerUrl();
-    static QString messageVersionUrl();
     static QString avatarDownloadUrl(const QString& strUserGUID);
     static QString avatarUploadUrl();
     static QString mailShareUrl(const QString& strKUrl, const QString& strMailInfo);
@@ -27,6 +27,7 @@ public:
     static QString groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID);
     static QString createGroupUrl(const QString& strToken);
     static QString captchaUrl(const QString& strCaptchaID, int nWidth = 120, int nHeight = 40);
+    static QString editStatusUrl();
 
     //
     static QString standardCommandUrl(const QString& strCommand);
@@ -45,10 +46,16 @@ public:
 
 private:
     static QString requestUrl(const QString& strCommand);
-    static QString urlFromCommand(const QString& strCommand);
+    static QString makeUpUrlFromCommand(const QString& strCommand);
+    static void getEndPoints();
+    static void updateUrlCache(const QString& strCommand, const QString& url);
+    static QString getUrlFromCache(const QString& strCommand);
+    static QString getUrlByCommand(const QString& strCommand);
 
 private:
     static QString m_server;
+    static QMap<QString, QString> m_cacheMap;
+    static QMap<QString, QString> m_mapkUrl;
 };
 
 class WizApiEntry

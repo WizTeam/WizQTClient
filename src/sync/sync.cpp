@@ -67,11 +67,11 @@ int GetSyncStartProgress(WizKMSyncProgress progress)
 
 CWizKMSync::CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info, IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent)
     : m_pDatabase(pDatabase)
+    , m_bUploadOnly(bUploadOnly)
     , m_info(info)
     , m_pEvents(pEvents)
     , m_bGroup(bGroup)
     , m_server(m_info, parent)
-    , m_bUploadOnly(bUploadOnly)
 {
 #ifdef _DEBUG
     pEvents->OnError(WizFormatString1(_T("XmlRpcUrl: %1"), info.strDatabaseServer));
@@ -1273,7 +1273,7 @@ bool CWizKMSync::DownloadFullDocumentList()
     ::GetSyncProgressRange(::syncDownloadFullDocumentList, start, size);
     m_pEvents->OnSyncProgress(start);
     //
-    int total = int(m_arrayDocumentNeedToBeDownloaded.size());
+//    int total = int(m_arrayDocumentNeedToBeDownloaded.size());
     //
     CWizStdStringArray arrayDocumentGUID;
     //

@@ -53,7 +53,11 @@ static inline QStringList getPluginPaths()
 #else
     // 2) "PlugIns" (OS X)
     QString pluginPath = rootDirPath;
+    #ifdef XCODEBUILD
+    pluginPath += QLatin1String("/PlugIns/Debug");
+    #else
     pluginPath += QLatin1String("/PlugIns");
+    #endif
     rc.push_back(pluginPath);
 #endif
     // 3) <localappdata>/plugins/<ideversion>
