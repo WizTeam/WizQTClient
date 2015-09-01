@@ -320,8 +320,6 @@ void TitleBar::loadErrorPage()
     // clear old url
     comments->load(QUrl());
     QUrl url = QUrl::fromLocalFile(strFileName);
-    qDebug() << "clear comment url : " << comments->url() <<  "  and load the error page : "
-             << url;
     comments->load(url);
 }
 
