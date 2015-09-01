@@ -509,7 +509,8 @@ QString CommonApiEntry::commentCountUrl(const QString& strKUrl, const QString& s
                                   const QString& strKbGUID, const QString& strGUID)
 {
     //通过endpoints获得api命令为comment_count，和之前使用的comment_count2不同，需要分开处理
-    QString strCommentCountUrl = getUrlByCommand("comment_count");
+    //不能通过comment_count命令直接向服务器请求地址，返回的是已废弃的内容。如果endpoints的缓存中没有则使用comment_count2获取
+    QString strCommentCountUrl = getUrlFromCache("comment_count");// getUrlByCommand("comment_count");
     if (strCommentCountUrl.isEmpty())
     {
         strCommentCountUrl = requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT);
