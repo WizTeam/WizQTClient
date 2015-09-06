@@ -32,6 +32,7 @@ QString WizKMGetDocumentEditStatusURL()
         loop.exec();
 
         if (reply->error()) {
+            net->deleteLater();
             return 0;
         }
 
@@ -50,6 +51,7 @@ CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* pare
     , m_sendNow(false)
 {
 }
+
 
 void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
