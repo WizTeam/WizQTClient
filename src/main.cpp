@@ -219,6 +219,9 @@ int mainCore(int argc, char *argv[])
     wizMacInitUncaughtExceptionHandler();
     wizMacRegisterSystemService();
 
+    initCrashReporter();
+
+
     //FIXME: 在Mac osx安全更新之后存在ssl握手问题，此处进行特殊处理
     QSslConfiguration conf = QSslConfiguration::defaultConfiguration();
     conf.setPeerVerifyMode(QSslSocket::VerifyNone);

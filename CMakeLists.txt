@@ -5,6 +5,13 @@
 # default is 10.7 for binary release.
 
 
+# CMake arguments for WizNote
+# WIZNOTE_USE_QT5   use qt5 to compile project
+# APPSTORE_BUILD  build for Apple Appsotre, would not use qt deploy
+# XCODEBUILD      adjust project params to suit for xcode
+# PLCrashReporter   use PLCrashReporter for mac, need PLCrashReporter framework
+
+
 if (APPLE)
     cmake_minimum_required(VERSION 2.8.12)
 else(APPLE)
@@ -55,6 +62,9 @@ if(APPLE)
         set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -gdwarf-2")
         add_definitions(-DBUILD4APPSTORE=TRUE)
     endif(APPSTORE_BUILD)
+    if (PLCrashReporter)
+        add_definitions(-DUsePLCrashReporter=TRUE)
+    endif(PLCrashReporter)
 #    add_definitions(-DUSECOCOATOOLBAR=TRUE)
 #    add_definitions(-DUSEWEBENGINE=FALSE)
 endif(APPLE)

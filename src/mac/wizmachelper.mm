@@ -1,10 +1,6 @@
 #include "wizmachelper.h"
 #include "wizmachelper_mm.h"
 
-#include "wizmainwindow.h"
-
-#include "share/wizRtfReader.h"
-#include "utils/pathresolve.h"
 
 #include <QLocale>
 #include <QMainWindow>
@@ -19,6 +15,19 @@
 #include <QDebug>
 
 #import <WebKit/WebKit.h>
+
+#ifdef UsePLCrashReporter
+#import <CrashReporter/CrashReporter.h>
+#import <CrashReporter/PLCrashReporterConfig.h>
+#import <CrashReporter/PLCrashReportTextFormatter.h>
+#endif
+
+#include "wizmainwindow.h"
+
+#include "share/wizRtfReader.h"
+#include "utils/pathresolve.h"
+#include "widgets/wizCrashReportDialog.h"
+
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
@@ -661,3 +670,104 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 
     return true;
 }
+
+
+
+#ifdef UsePLCrashReporter
+//
+// Called to handle a pending crash report.
+//
+void handleCrashReport(PLCrashReporter *crashReporter)
+{
+    NSData *crashData;
+    NSError *error;
+
+    // Try loading the crash report
+    crashData = [crashReporter loadPendingCrashReportDataAndReturnError: &error];
+    if (crashData == nil) {
+        NSLog(@"Could not load crash report: %@", error);
+
+        // Purge the report
+        [crashReporter purgePendingCrashReport];
+        return;
+    }
+
+    // We could send the report from here, but we'll just print out
+    // some debugging info instead
+    PLCrashReport *report = [[[PLCrashReport alloc] initWithData: crashData error: &error] autorelease];
+    if (report == nil) {
+        NSLog(@"Could not parse crash report");
+
+        // Purge the report
+        [crashReporter purgePendingCrashReport];
+        return;
+    }
+
+    NSLog(@"Crashed founded. on %@", report.systemInfo.timestamp);
+    NSLog(@"Crashed with signal %@ (code %@, address=0x%" PRIx64 ")", report.signalInfo.name,
+          report.signalInfo.code, report.signalInfo.address);
+
+
+    ///////// save to local file
+
+//    NSFileManager *fm = [NSFileManager defaultManager];
+
+//    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//    NSString *documentsDirectory = [paths objectAtIndex:0];
+//    if (![fm createDirectoryAtPath: documentsDirectory withIntermediateDirectories: YES attributes:nil error: &error]) {
+//        NSLog(@"Could not create documents directory: %@", error);
+//        return;
+//    }
+
+//    QString time = QDateTime::currentDateTime().toString();
+//    NSString* nsTime = WizToNSString(time);
+//    NSString *outputPath = [documentsDirectory stringByAppendingPathComponent: nsTime];
+//    if (![crashData writeToFile: outputPath atomically: YES]) {
+//        NSLog(@"Failed to write crash report");
+//    }
+
+//    NSLog(@"Saved crash report to: %@", outputPath);
+
+
+    //////////
+    /* Verify that the format is supported. Only one is actually supported currently */
+    PLCrashReportTextFormat textFormat = PLCrashReportTextFormatiOS;
+
+    /* Format the report */
+    NSString* reports = [PLCrashReportTextFormatter stringValueForCrashReport: report withTextFormat: textFormat];
+//    fprintf(output, "%s", [reports UTF8String]);
+//    NSLog(@"report : %@", reports);
+    QString strReport = WizToQString(reports);
+    qDebug() << "report size : " << strReport.toUtf8().size();
+
+    //
+    [crashReporter purgePendingCrashReport];
+
+    CWizCrashReportDialog dlg(strReport);
+    dlg.exec();
+}
+
+void initCrashReporter()
+{
+    PLCrashReporterConfig* config = [[[PLCrashReporterConfig alloc] initWithSignalHandlerType: PLCrashReporterSignalHandlerTypeBSD
+    symbolicationStrategy: PLCrashReporterSymbolicationStrategySymbolTable] autorelease];
+    PLCrashReporter *crashReporter = [[[PLCrashReporter alloc] initWithConfiguration: config] autorelease];
+
+
+    // Check if we previously crashed
+    if ([crashReporter hasPendingCrashReport])
+    {
+        handleCrashReport(crashReporter);
+    }
+
+    NSError *error = nil;
+    // Enable the Crash Reporter
+    if (![crashReporter enableCrashReporterAndReturnError: &error])
+        NSLog(@"Warning: Could not enable crash reporter: %@", error);
+
+}
+
+#else
+void initCrashReporter()
+{}
+#endif

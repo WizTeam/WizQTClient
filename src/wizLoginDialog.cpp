@@ -1792,8 +1792,8 @@ void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
 
 CWizUserItemAction::CWizUserItemAction(const WizLocalUser& localUser, QMenu* parent)
     : QWidgetAction(parent)
-    , m_menu(parent)
     , m_userData(localUser)
+    , m_menu(parent)
 {
     m_widget = new CWizActionWidget(m_userData.strUserId, parent);
     setDefaultWidget(m_widget);
@@ -1824,10 +1824,10 @@ void CWizUserItemAction::on_widgetClicked()
 
 
 CWizActionWidget::CWizActionWidget(const QString& text, QWidget* parent)
-    : m_mousePress(false)
-    , m_text(text)
+    : QWidget(parent)
+    , m_mousePress(false)
     , m_selected(false)
-    , QWidget(parent)
+    , m_text(text)
 {
     setMouseTracking(true);
     m_deleteButton = new QPushButton();
