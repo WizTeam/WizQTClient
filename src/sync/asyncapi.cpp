@@ -123,8 +123,11 @@ bool AsyncApi::registerAccount_impl(const QString& strUserId, const QString& str
 void AsyncApi::getCommentsCount(const QString& strUrl)
 {
     QNetworkReply* reply = m_networkManager->get(QNetworkRequest(strUrl));
-
+    
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
     connect(reply, SIGNAL(finished()), this, SLOT(on_comments_finished()));
+    loop.exec();
 }
 
 void AsyncApi::on_comments_finished()
