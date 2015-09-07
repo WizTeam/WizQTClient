@@ -59,10 +59,10 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_nViewType = (ViewType)app.userSettings().get("VIEW_TYPE").toInt();
     m_nSortingType = app.userSettings().get("SORT_TYPE").toInt();
-    if (qAbs(m_nSortingType) < CWizSortingPopupButton::SortingCreateTime ||
-            qAbs(m_nSortingType) > CWizSortingPopupButton::SortingSize)
+    if (qAbs(m_nSortingType) < SortingByCreatedTime ||
+            qAbs(m_nSortingType) > SortingBySize)
     {
-        m_nSortingType = CWizSortingPopupButton::SortingCreateTime;
+        m_nSortingType = SortingByCreatedTime;
     }
 
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
@@ -225,6 +225,8 @@ void CWizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocume
 {
     //reset
     clear();
+    m_sectionItems.clear();
+
 
     verticalScrollBar()->setValue(0);
 
@@ -238,6 +240,8 @@ void CWizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDoc
         addDocument(*it);
     }
 
+    updateSectionItems();
+
     sortItems();
 
     Q_EMIT documentCountChanged();
@@ -246,6 +250,8 @@ void CWizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDoc
 int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 {
     addDocument(doc);
+
+    updateSectionItems();
 
     if (sort) {
         sortItems();
@@ -262,14 +268,14 @@ void CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
     data.doc = doc;
 
     if (doc.strKbGUID.isEmpty() || m_dbMgr.db().kbGUID() == doc.strKbGUID) {
-        data.nType = CWizDocumentListViewItem::TypePrivateDocument;
+        data.nType = CWizDocumentListViewDocumentItem::TypePrivateDocument;
     } else {
-        data.nType = CWizDocumentListViewItem::TypeGroupDocument;
+        data.nType = CWizDocumentListViewDocumentItem::TypeGroupDocument;
         data.strAuthorId = doc.strOwner;
     }
 
 
-    CWizDocumentListViewItem* pItem = new CWizDocumentListViewItem(m_app, data);
+    CWizDocumentListViewDocumentItem* pItem = new CWizDocumentListViewDocumentItem(m_app, data);
     pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
     pItem->setSortingType(m_nSortingType);
 
@@ -391,6 +397,237 @@ void CWizDocumentListView::duplicateDocuments(const CWizDocumentDataArray& array
     }
 }
 
+void CWizDocumentListView::addSectionItem(const WizDocumentListViewSectionData& secData, const QString& text, int docCount)
+{
+    CWizDocumentListViewSectionItem* sectionItem = new CWizDocumentListViewSectionItem(secData, text, docCount);
+    sectionItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(Utils::StyleHelper::ListTypeSection)));
+    sectionItem->setSortingType(m_nSortingType);
+    addItem(sectionItem);
+    m_sectionItems.append(sectionItem);
+}
+
+void CWizDocumentListView::updateSectionItems()
+{
+    for (CWizDocumentListViewSectionItem* sectionItem : m_sectionItems)
+    {
+        int index = row(sectionItem);
+
+        takeItem(index);
+        sectionItem->deleteLater();
+    }
+    m_sectionItems.clear();
+
+    //
+    switch (m_nSortingType) {
+    case SortingByCreatedTime:
+    case -SortingByCreatedTime:
+    case SortingByModifiedTime:
+    case -SortingByModifiedTime:
+    case SortingByAccessedTime:
+    case -SortingByAccessedTime:
+    {
+        QMap<QDate, int> dateMap;
+        getDocumentDateSections(dateMap);
+        QMap<QDate, int>::iterator it;
+        for (it = dateMap.begin(); it != dateMap.end(); it++)
+        {
+            WizDocumentListViewSectionData secData;
+            secData.date = it.key();
+            QString text = secData.date.toString("MM.yyyy");
+            addSectionItem(secData, text, it.value());
+        }
+    }
+        break;
+    case SortingByTitle:
+    case -SortingByTitle:
+    {
+        QMap<QString, int> dateMap;
+        getDocumentTitleSections(dateMap);
+        QMap<QString, int>::iterator it;
+        for (it = dateMap.begin(); it != dateMap.end(); it++)
+        {
+            WizDocumentListViewSectionData secData;
+            secData.strInfo = it.key();
+            addSectionItem(secData, secData.strInfo, it.value());
+        }
+    }
+        break;
+    case SortingByLocation:
+    case -SortingByLocation:
+    {
+        QMap<QString, int> dateMap;
+        getDocumentLocationSections(dateMap);
+        QMap<QString, int>::iterator it;
+        for (it = dateMap.begin(); it != dateMap.end(); it++)
+        {
+            WizDocumentListViewSectionData secData;
+            secData.strInfo = it.key();
+            addSectionItem(secData, secData.strInfo, it.value());
+        }
+    }
+        break;
+    case SortingBySize:
+    case -SortingBySize:
+    {
+        QMap<int, int> dateMap;
+        getDocumentSizeSections(dateMap);
+        QMap<int, int>::iterator it;
+        for (it = dateMap.begin(); it != dateMap.end(); it++)
+        {
+            WizDocumentListViewSectionData secData;
+            secData.nSize = it.key();
+            QString text = QString::number(secData.nSize) + " KB";
+            addSectionItem(secData, text, it.value());
+        }
+    }
+        break;
+    case SortingByTag:
+    case -SortingByTag:
+        //TODO:
+        break;
+    default:
+        Q_ASSERT(0);
+    }
+
+}
+
+bool CWizDocumentListView::getDocumentDateSections(QMap<QDate, int>& dateMap)
+{
+    for (int i = 0; i < count(); i++)
+    {
+        QListWidgetItem * child = item(i);
+        if (child->type() != WizDocumentListType_Document)
+            continue;
+
+        CWizDocumentListViewDocumentItem* docItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(child);
+        if (!docItem || docItem->document().nFlags & wizDocumentAlwaysOnTop)
+            continue;
+
+        //
+        QDate dateTime;
+        switch (m_nSortingType) {
+        case SortingByAccessedTime:
+        case -SortingByAccessedTime:
+        {
+            dateTime = docItem->document().tAccessed.date();
+        }
+            break;
+        case SortingByCreatedTime:
+        case -SortingByCreatedTime:
+        {
+            dateTime = docItem->document().tCreated.date();
+        }
+            break;
+        case SortingByModifiedTime:
+        case -SortingByModifiedTime:
+        {
+            dateTime = docItem->document().tModified.date();
+        }
+            break;
+        default:
+            return false;
+        }
+        //
+        dateTime.setDate(dateTime.year(), dateTime.month(), 1);
+
+        if (dateMap.contains(dateTime))
+        {
+            dateMap[dateTime] ++;
+        }
+        else
+        {
+            dateMap.insert(dateTime, 1);
+        }
+    }
+
+    return !dateMap.isEmpty();
+}
+
+bool CWizDocumentListView::getDocumentSizeSections(QMap<int, int>& sizeMap)
+{
+    const int sizeNum  = 10;
+    int sizes[sizeNum] = {-1, 5, 10, 30, 60, 100, 200, 300, 400, 500};
+    sizeMap.insert(-1, 0);
+    //
+    for (int i = 0; i < count(); i++)
+    {
+        QListWidgetItem * child = item(i);
+        if (child->type() != WizDocumentListType_Document)
+            continue;
+
+        CWizDocumentListViewDocumentItem* docItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(child);
+        if (!docItem || docItem->document().nFlags & wizDocumentAlwaysOnTop)
+            continue;
+
+        CWizDatabase& db = m_app.databaseManager().db(docItem->document().strKbGUID);
+        QString strFileName = db.GetDocumentFileName(docItem->document().strGUID);
+        QFileInfo fi(strFileName);
+        if (!fi.exists())
+        {
+            sizeMap[-1] ++;
+        }
+        else
+        {
+            int m_nSize = fi.size() / 1000;
+            for (int k = 0; k < sizeNum - 1; k++)
+            {
+                if (m_nSize > sizes[k] && m_nSize <= sizes[k + 1])
+                {
+                    if (sizeMap.contains(sizes[k + 1]))
+                        sizeMap[sizes[k + 1]] ++;
+                    else
+                        sizeMap.insert(sizes[k + 1], 0);
+                }
+            }
+        }
+    }
+
+    return !sizeMap.isEmpty();
+}
+
+bool CWizDocumentListView::getDocumentTitleSections(QMap<QString, int>& titleMap)
+{
+    for (int i = 0; i < count(); i++)
+    {
+        QListWidgetItem * child = item(i);
+        if (child->type() != WizDocumentListType_Document)
+            continue;
+
+        CWizDocumentListViewDocumentItem* docItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(child);
+        if (!docItem || docItem->document().nFlags & wizDocumentAlwaysOnTop)
+            continue;
+
+        QString title = docItem->document().strTitle.toUpper().trimmed();
+        QString firstChar = title.left(1);
+        if (titleMap.contains(firstChar))
+            titleMap[firstChar] ++;
+        else
+            titleMap.insert(firstChar, 1);
+    }
+    return !titleMap.isEmpty();
+}
+
+bool CWizDocumentListView::getDocumentLocationSections(QMap<QString, int>& locationMap)
+{
+    for (int i = 0; i < count(); i++)
+    {
+        QListWidgetItem * child = item(i);
+        if (child->type() != WizDocumentListType_Document)
+            continue;
+
+        CWizDocumentListViewDocumentItem* docItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(child);
+        if (!docItem || docItem->document().nFlags & wizDocumentAlwaysOnTop)
+            continue;
+
+        QString firstChar = docItem->document().strLocation;
+        if (locationMap.contains(firstChar))
+            locationMap[firstChar] ++;
+        else
+            locationMap.insert(firstChar, 0);
+    }
+    return !locationMap.isEmpty();
+}
+
 bool CWizDocumentListView::acceptDocument(const WIZDOCUMENTDATA& document)
 {
     /*
@@ -437,11 +674,11 @@ void CWizDocumentListView::getSelectedDocuments(CWizDocumentDataArray& arrayDocu
     {
         QListWidgetItem* pItem = *it;
 
-        CWizDocumentListViewItem* pDocumentItem = dynamic_cast<CWizDocumentListViewItem*>(pItem);
+        CWizDocumentListViewDocumentItem* pDocumentItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(pItem);
         if (!pDocumentItem)
             continue;
 
-        arrayDocument.push_back(pDocumentItem->data().doc);
+        arrayDocument.push_back(pDocumentItem->itemData().doc);
     }
 }
 
@@ -465,7 +702,7 @@ void CWizDocumentListView::resetPermission()
 {
     CWizDocumentDataArray arrayDocument;
     //QList<QListWidgetItem*> items = selectedItems();
-    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
+    foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
     }
 
@@ -603,7 +840,7 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
     {
         m_rightButtonFocusedItems.clear();
         //
-        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos()));
+        CWizDocumentListViewDocumentItem* pItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(itemAt(event->pos()));
         if (!pItem)
             return;
 
@@ -612,7 +849,7 @@ void CWizDocumentListView::mousePressEvent(QMouseEvent* event)
         {
             foreach (QListWidgetItem* lsItem, selectedItems())
             {
-                pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+                pItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(lsItem);
                 if (pItem)
                 {
                     m_rightButtonFocusedItems.append(pItem);
@@ -742,7 +979,7 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     CWizDocumentDataArray arrayDocument;
     QList<QListWidgetItem*> items = selectedItems();
     foreach (QListWidgetItem* it, items) {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(it)) {
+        if (CWizDocumentListViewDocumentItem* item = dynamic_cast<CWizDocumentListViewDocumentItem*>(it)) {
 //            CWizDatabase& db = CWizDatabaseManager::instance()->db(item->document().strKbGUID);
             arrayDocument.push_back(item->document());
         }
@@ -799,7 +1036,7 @@ void CWizDocumentListView::dropEvent(QDropEvent * event)
 {
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_TAGS))
     {
-        if (CWizDocumentListViewItem* item = dynamic_cast<CWizDocumentListViewItem*>(itemAt(event->pos())))
+        if (CWizDocumentListViewDocumentItem* item = dynamic_cast<CWizDocumentListViewDocumentItem*>(itemAt(event->pos())))
         {
             QByteArray data = event->mimeData()->data(WIZNOTE_MIMEFORMAT_TAGS);
             QString strTagGUIDs = QString::fromUtf8(data, data.length());
@@ -840,9 +1077,11 @@ void CWizDocumentListView::resetItemsViewType(int type)
 {
     m_nViewType = (ViewType)type;
 
-    for (int i = 0; i < count(); i++) {
-        item(i)->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
-        //item(i)->setSizeHint(itemSizeFromViewType(m_nViewType));
+    for (int i = 0; i < count(); i++)
+    {
+        int nHeight = Utils::StyleHelper::listViewItemHeight(item(i)->type() == WizDocumentListType_Document ?
+                                                                 m_nViewType : Utils::StyleHelper::ListTypeOneLine);
+        item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
 }
 
@@ -868,16 +1107,19 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
 }
 
 void CWizDocumentListView::resetItemsSortingType(int type)
-{
-    // FIXME!!!
-    //QPixmapCache::clear();
+{    
     setItemsNeedUpdate();
 
-    m_nSortingType = type;
+    if (m_nSortingType != type)
+    {
+        m_nSortingType = type;
 
-    for (int i = 0; i < count(); i++) {
-        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item(i));
-        pItem->setSortingType(type);
+        updateSectionItems();
+
+        for (int i = 0; i < count(); i++) {
+            CWizDocumentListViewBaseItem* pItem = dynamic_cast<CWizDocumentListViewBaseItem*>(item(i));
+            pItem->setSortingType(type);
+        }
     }
 
     sortItems();
@@ -885,8 +1127,21 @@ void CWizDocumentListView::resetItemsSortingType(int type)
 
 bool CWizDocumentListView::isSortedByAccessDate()
 {
-    return m_nSortingType == CWizSortingPopupButton::SortingAccessTime ||
-            m_nSortingType == -CWizSortingPopupButton::SortingAccessTime;
+    return m_nSortingType == SortingByAccessedTime ||
+            m_nSortingType == -SortingByAccessedTime;
+}
+
+int CWizDocumentListView::documentCount() const
+{
+    int result = 0;
+    for (int i = 0; i < count(); i++)
+    {
+        if (item(i)->type() != WizDocumentListType_Document)
+            continue;
+
+        result++;
+    }
+    return result;
 }
 
 void CWizDocumentListView::on_itemSelectionChanged()
@@ -897,7 +1152,7 @@ void CWizDocumentListView::on_itemSelectionChanged()
     m_rightButtonFocusedItems.clear();
     foreach (QListWidgetItem* lsItem, selectedItems())
     {
-        CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(lsItem);
+        CWizDocumentListViewDocumentItem* pItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(lsItem);
         if (pItem)
         {
             m_rightButtonFocusedItems.append(pItem);
@@ -945,7 +1200,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         if (-1 == index) {
             addDocument(documentNew, true);
         } else {
-            if (CWizDocumentListViewItem* pItem = documentItemAt(index)) {
+            if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index)) {
                 pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
                 pItem->setSortingType(m_nSortingType);
                 update(indexFromItem(pItem));
@@ -973,7 +1228,7 @@ void CWizDocumentListView::on_documentReadCount_changed(const WIZDOCUMENTDATA& d
     if (acceptDocument(document))
     {
         int index = documentIndexFromGUID(document.strGUID);
-        if (CWizDocumentListViewItem* pItem = documentItemAt(index))
+        if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index))
         {
             pItem->reload(m_dbMgr.db(document.strKbGUID));
             update(indexFromItem(pItem));
@@ -988,27 +1243,19 @@ void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)
         return;
 
     // kbGUID also should equal
-    CWizDocumentListViewItem* pItem = documentItemAt(index);
-    //if (!pItem->document().strKbGUID.isEmpty() &&
-    //        pItem->document().strKbGUID != abs.strKbGUID) {
-    //    return;
-    //}
-
-    //if (!pItem->message().kbGUID.isEmpty() &&
-    //        pItem->message().kbGUID != abs.strKbGUID) {
-    //    return;
-    //}
-
-    pItem->resetAbstract(abs);
-    update(indexFromItem(pItem));
+    if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index))
+    {
+        pItem->resetAbstract(abs);
+        update(indexFromItem(pItem));
+    }
 }
 
 void CWizDocumentListView::on_userAvatar_loaded(const QString& strUserGUID)
 {
-    CWizDocumentListViewItem* pItem = NULL;
+    CWizDocumentListViewDocumentItem* pItem = NULL;
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
-        if (pItem->data().strAuthorId == strUserGUID) {
+        if (pItem && pItem->itemData().strAuthorId == strUserGUID) {
             update(indexFromItem(pItem));
         }
     }
@@ -1018,10 +1265,10 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
 {
     setItemsNeedUpdate(strKbGUID, strGUID);
 
-    CWizDocumentListViewItem* pItem = NULL;
+    CWizDocumentListViewDocumentItem* pItem = NULL;
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
-        if (pItem->data().doc.strKbGUID == strKbGUID && pItem->data().doc.strGUID == strGUID) {
+        if (pItem && pItem->itemData().doc.strKbGUID == strKbGUID && pItem->itemData().doc.strGUID == strGUID) {
             update(indexFromItem(pItem));
         }
     }
@@ -1033,7 +1280,7 @@ void CWizDocumentListView::on_action_documentHistory()
     if (m_rightButtonFocusedItems.count() != 1)
         return;
 
-   CWizDocumentListViewItem* item = m_rightButtonFocusedItems.first();
+   CWizDocumentListViewDocumentItem* item = m_rightButtonFocusedItems.first();
    if (!item)
        return;
 
@@ -1047,7 +1294,7 @@ void CWizDocumentListView::on_action_shareDocumentByLink()
     if (m_rightButtonFocusedItems.count() != 1)
         return;
 
-   CWizDocumentListViewItem* item = m_rightButtonFocusedItems.first();
+   CWizDocumentListViewDocumentItem* item = m_rightButtonFocusedItems.first();
    if (!item)
        return;
 
@@ -1129,7 +1376,7 @@ void CWizDocumentListView::on_action_selectTags()
 
     CWizDocumentDataArray arrayDocument;
     for (int i = 0; i < m_rightButtonFocusedItems.size(); i++) {
-        CWizDocumentListViewItem* pItem = m_rightButtonFocusedItems.at(i);
+        CWizDocumentListViewDocumentItem* pItem = m_rightButtonFocusedItems.at(i);
         arrayDocument.push_back(pItem->document());
     }
 
@@ -1147,8 +1394,8 @@ void CWizDocumentListView::on_action_deleteDocument()
     blockSignals(true);
     int index = -1;
     QSet<QString> setKb;
-    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
-        if (item->type() == CWizDocumentListViewItem::TypeMessage) {
+    foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
+        if (item->type() == CWizDocumentListViewDocumentItem::TypeMessage) {
             continue;
         }
 
@@ -1208,7 +1455,7 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
     QSet<QString> dbSet;
     // collect documents
     CWizDocumentDataArray arrayDocument;
-    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
+    foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
         dbSet.insert(item->document().strKbGUID);
     }
@@ -1269,7 +1516,7 @@ void CWizDocumentListView::on_action_copyDocument_confirmed(int result)
     QSet<QString> dbSet;
     // collect documents
     CWizDocumentDataArray arrayDocument;
-    foreach (CWizDocumentListViewItem* item, m_rightButtonFocusedItems) {
+    foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
         dbSet.insert(item->document().strKbGUID);
     }
@@ -1309,7 +1556,7 @@ void CWizDocumentListView::on_action_copyDocumentLink()
         return;
     //
     QList<WIZDOCUMENTDATA> documents;
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
         documents.append(document);
@@ -1321,7 +1568,7 @@ void CWizDocumentListView::on_action_showDocumentInFloatWindow()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuOpenInFloatWindow");
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         const WIZDOCUMENTDATA& document = item->document();
         mainWindow->viewNoteInSeparateWindow(document);
@@ -1330,7 +1577,7 @@ void CWizDocumentListView::on_action_showDocumentInFloatWindow()
 
 void CWizDocumentListView::on_menu_aboutToHide()
 {
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         item->setSpecialFocused(false);
     }
@@ -1340,7 +1587,7 @@ void CWizDocumentListView::on_menu_aboutToHide()
 void CWizDocumentListView::on_action_encryptDocument()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuEncryptDocument");
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         WIZDOCUMENTDATA doc = item->document();
         CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
@@ -1362,7 +1609,7 @@ void CWizDocumentListView::on_action_cancelEncryption()
         return;
 
     //
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         WIZDOCUMENTDATA doc = item->document();
         if (doc.nProtected)
@@ -1381,7 +1628,7 @@ void CWizDocumentListView::on_action_alwaysOnTop()
     actionAlwaysOnTop->setChecked(actionAlwaysOnTop->isChecked());
     bool bAlwaysOnTop = actionAlwaysOnTop->isChecked();
 
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         CWizDatabase& db = m_dbMgr.db(item->document().strKbGUID);
         WIZDOCUMENTDATA doc;
@@ -1404,7 +1651,7 @@ void CWizDocumentListView::on_action_alwaysOnTop()
 void CWizDocumentListView::on_action_addToShortcuts()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuAddToShortcuts");
-    foreach(CWizDocumentListViewItem* item, m_rightButtonFocusedItems)
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
         CWizDatabase& db = m_dbMgr.db(item->document().strKbGUID);
         WIZDOCUMENTDATA doc;
@@ -1420,8 +1667,8 @@ int CWizDocumentListView::documentIndexFromGUID(const QString& strGUID)
 {
     Q_ASSERT(!strGUID.isEmpty());
 
-    for (int i = 0; i < count(); i++) {
-        if (CWizDocumentListViewItem *pItem = documentItemAt(i)) {
+    for (int i = 0; i < count() && item(i)->type() == WizDocumentListType_Document; i++) {
+        if (CWizDocumentListViewDocumentItem *pItem = documentItemAt(i)) {
             if (pItem->document().strGUID == strGUID) {
                 return i;
             }
@@ -1431,19 +1678,29 @@ int CWizDocumentListView::documentIndexFromGUID(const QString& strGUID)
     return -1;
 }
 
-CWizDocumentListViewItem *CWizDocumentListView::documentItemAt(int index)
+CWizDocumentListViewBaseItem* CWizDocumentListView::itemFromIndex(int index) const
 {
-    return dynamic_cast<CWizDocumentListViewItem*>(item(index));
+    return dynamic_cast<CWizDocumentListViewBaseItem*>(item(index));
 }
 
-CWizDocumentListViewItem *CWizDocumentListView::documentItemFromIndex(const QModelIndex &index) const
+CWizDocumentListViewBaseItem* CWizDocumentListView::itemFromIndex(const QModelIndex& index) const
 {
-    return dynamic_cast<CWizDocumentListViewItem*>(itemFromIndex(index));
+    return dynamic_cast<CWizDocumentListViewBaseItem*>(QListWidget::itemFromIndex(index));
+}
+
+CWizDocumentListViewDocumentItem*CWizDocumentListView::documentItemAt(int index) const
+{
+    return dynamic_cast<CWizDocumentListViewDocumentItem*>(item(index));
+}
+
+CWizDocumentListViewDocumentItem *CWizDocumentListView::documentItemFromIndex(const QModelIndex &index) const
+{
+    return dynamic_cast<CWizDocumentListViewDocumentItem*>(itemFromIndex(index));
 }
 
 const WizDocumentListViewItemData& CWizDocumentListView::documentItemDataFromIndex(const QModelIndex& index) const
 {
-    return documentItemFromIndex(index)->data();
+    return documentItemFromIndex(index)->itemData();
 }
 
 const WIZDOCUMENTDATA& CWizDocumentListView::documentFromIndex(const QModelIndex &index) const
@@ -1606,10 +1863,12 @@ void CWizDocumentListView::on_vscroll_actionTriggered(int action)
 
 void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    CWizDocumentListViewItem* pItem = documentItemFromIndex(vopt->index);
-    if (pItem)
-        pItem->draw(p, vopt, viewType());
+    if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
+    {
+            pItem->draw(p, vopt, m_nViewType);
+    }
 }
+
 
 void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& strGUID)
 {
@@ -1617,8 +1876,7 @@ void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& s
     if (-1 == index)
         return;
 
-    CWizDocumentListViewItem* pItem = documentItemAt(index);
-    if (pItem)
+    if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index))
     {
         pItem->reload(m_dbMgr.db(strKbGUID));
         //m_dbMgr.db(strKbGUID).UpdateDocumentAbstract(strGUID);
@@ -1634,8 +1892,8 @@ void CWizDocumentListView::setAcceptAllSearchItems(bool bAccept)
 void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QString& strGUID)
 {
     if (strKbGUID.isEmpty() || strGUID.isEmpty()) {
-        for (int i = 0; i < count(); i++) {
-            CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item(i));
+        for (int i = 0; i < count() && item(i)->type() == WizDocumentListType_Document; i++) {
+            CWizDocumentListViewDocumentItem* pItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(item(i));
             Q_ASSERT(pItem);
 
             pItem->setNeedUpdate();
@@ -1644,10 +1902,10 @@ void CWizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QS
         return;
     }
 
-    CWizDocumentListViewItem* pItem = NULL;
+    CWizDocumentListViewDocumentItem* pItem = NULL;
     for (int i = 0; i < count(); i++) {
         pItem = documentItemAt(i);
-        if (pItem->data().doc.strKbGUID == strKbGUID && pItem->data().doc.strGUID == strGUID) {
+        if (pItem && pItem->itemData().doc.strKbGUID == strKbGUID && pItem->itemData().doc.strGUID == strGUID) {
             pItem->setNeedUpdate();
         }
     }

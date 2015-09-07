@@ -294,6 +294,8 @@ int StyleHelper::listViewItemHeight(int nType)
         return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
         return thumbnailHeight() + margin() * 2;
+    case ListTypeSection:
+        return 31;
     default:
         Q_ASSERT(0);
         return 0;
@@ -306,7 +308,12 @@ QColor StyleHelper::listViewBackground()
     if (!m_settings) {
         m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
     }
-    return QColor(m_settings->value("Documents/Background", "#F9F9F8").toString());
+    return QColor(m_settings->value("Documents/Background", "#ffffff").toString());
+}
+
+int StyleHelper::listViewItemHorizontalPadding()
+{
+    return 12;
 }
 
 QColor StyleHelper::listViewItemSeperator()
@@ -314,7 +321,25 @@ QColor StyleHelper::listViewItemSeperator()
     if (!m_settings) {
         m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
     }
-    return QColor(m_settings->value("Documents/Line", "#DADAD9").toString());
+    return QColor(m_settings->value("Documents/Line", "#e7e7e7").toString());
+}
+
+QColor StyleHelper::listViewSectionItemText()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    return QColor(m_settings->value("Documents/SectionItemText", "#a7a7a7").toString());
+}
+
+QColor StyleHelper::listViewSectionItemBackground()
+{
+    if (!m_settings) {
+        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+    }
+
+    return QColor(m_settings->value("Documents/SectionItemBackground", "#f7f7f7").toString());
 }
 
 QColor StyleHelper::listViewItemBackground(int stat)
@@ -326,7 +351,10 @@ QColor StyleHelper::listViewItemBackground(int stat)
         return QColor(m_settings->value("Documents/ItemLoseFocusBackground", "#D3E4ED").toString());
     } else if (stat == Active) {
         return QColor(m_settings->value("Documents/ItemFocusBackground", "#3498DB").toString());
+    } else if (stat == ListBGTypeUnread) {
+        return QColor(m_settings->value("Documents/ItemUnreadBackground", "#f7f7f7").toString());
     }
+
 
     Q_ASSERT(0);
     return QColor();
@@ -452,7 +480,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
         p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
     case ListBGTypeUnread:
-        p->fillRect(rcBg, QColor("#edf0ec"));
+        p->fillRect(rcBg, listViewItemBackground(ListBGTypeUnread));
         break;
     default:
         break;
@@ -488,7 +516,7 @@ QSize StyleHelper::avatarSize(bool bNoScreenFactor)
 int StyleHelper::avatarHeight(bool bNoScreenFactor)
 {
     QFont f;
-    int nHeight = fontHead(f) + fontNormal(f) + margin() * 3 ;
+    int nHeight = 36;//fontHead(f) + fontNormal(f) + margin() * 3 ;
     if (bNoScreenFactor)
         return nHeight;
 

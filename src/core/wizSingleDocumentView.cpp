@@ -51,8 +51,8 @@ CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
 
 
 CWizSingleDocumentViewDelegate::CWizSingleDocumentViewDelegate(CWizExplorerApp& app, QObject* parent)
-    : m_app(app)
-    , QObject(parent)
+    : QObject(parent)
+    ,m_app(app)
 {
 }
 

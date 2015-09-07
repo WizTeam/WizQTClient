@@ -216,6 +216,7 @@ void TitleEdit::onTitleEditingFinished()
         }
         strNewTitle.replace("\n", " ");
         strNewTitle.replace("\r", " ");
+        strNewTitle = strNewTitle.trimmed();
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             db.ModifyDocumentInfo(data);

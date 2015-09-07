@@ -164,6 +164,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setWindowStyleForLinux(m_useSystemBasedStyle);
 #endif
     windowInstance = this;
+    setWindowOpacity(0.5);
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
@@ -865,25 +866,25 @@ void MainWindow::initMenuBar()
 
     m_sortTypeActions = new QActionGroup(m_menuBar);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_CREATEDTIME);
-    action->setData(CWizSortingPopupButton::SortingCreateTime);
+    action->setData(SortingByCreatedTime);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_UPDATEDTIME);
-    action->setData(CWizSortingPopupButton::SortingUpdateTime);
+    action->setData(SortingByModifiedTime);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_ACCESSTIME);
-    action->setData(CWizSortingPopupButton::SortingAccessTime);
+    action->setData(SortingByAccessedTime);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TITLE);
-    action->setData(CWizSortingPopupButton::SortingTitle);
+    action->setData(SortingByTitle);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
-    action->setData(CWizSortingPopupButton::SortingLocation);
+    action->setData(SortingByLocation);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
-    action->setData(CWizSortingPopupButton::SortingTag);
+    action->setData(SortingByTag);
     m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
-    action->setData(CWizSortingPopupButton::SortingSize);
+    action->setData(SortingBySize);
     m_sortTypeActions->addAction(action);
     for (QAction* actionItem : m_sortTypeActions->actions())
     {
@@ -2048,7 +2049,7 @@ CWizIAPDialog*MainWindow::iapDialog()
 void MainWindow::on_documents_documentCountChanged()
 {
     QString text;
-    int count = m_documents->count();
+    int count = m_documents->documentCount();
     if (count == 1)
     {
         text = tr("1 note");
@@ -2241,7 +2242,7 @@ void MainWindow::on_bubbleNotification_request(const QVariant& param)
 }
 
 void MainWindow::on_actionNewNote_triggered()
-{
+{    
     WizGetAnalyzer().LogAction("newNote");
 
     initVariableBeforCreateNote();
@@ -3176,7 +3177,7 @@ void MainWindow::on_documents_itemSelectionChanged()
 
 void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
 {
-    CWizDocumentListViewItem* pItem = dynamic_cast<CWizDocumentListViewItem*>(item);
+    CWizDocumentListViewDocumentItem* pItem = dynamic_cast<CWizDocumentListViewDocumentItem*>(item);
     if (pItem)
     {
         WIZDOCUMENTDATA doc = pItem->document();

@@ -31,7 +31,8 @@ public:
     enum ListViewType {
         ListTypeThumb,
         ListTypeTwoLine,
-        ListTypeOneLine
+        ListTypeOneLine,
+        ListTypeSection
     };
 
     enum ListViewBGType {
@@ -75,7 +76,10 @@ public:
 
     static int listViewItemHeight(int nType);
     static QColor listViewBackground();
+    static int listViewItemHorizontalPadding();
     static QColor listViewItemSeperator();
+    static QColor listViewSectionItemText();
+    static QColor listViewSectionItemBackground();
     static QColor listViewItemBackground(int stat);
     static QColor listViewItemTitle(bool bSelected, bool bFocused);
     static QColor listViewItemLead(bool bSelected, bool bFocused);

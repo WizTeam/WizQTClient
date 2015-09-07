@@ -22,6 +22,19 @@ class CWizUserAvatarDownloaderHost;
 #endif
 
 
+enum DocumentsSortingType {
+    SortingByCreatedTime = 1,
+    SortingByModifiedTime,
+    SortingByAccessedTime,
+    SortingByTitle,
+    SortingByLocation,
+    SortingByTag,
+    SortingBySize,
+    SortingAsAscendingOrder,
+    SortingAsDescendingOrder
+};
+
+
 class CWizDocumentListView : public QListWidget
 {
     Q_OBJECT
@@ -44,6 +57,8 @@ public:
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
     bool isSortedByAccessDate();
+
+    int documentCount() const;
 
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
@@ -81,7 +96,9 @@ private:
 
     QPoint m_dragStartPosition;
 
-    QList<CWizDocumentListViewItem*> m_rightButtonFocusedItems;
+    QList<CWizDocumentListViewDocumentItem*> m_rightButtonFocusedItems;
+
+    QList<CWizDocumentListViewSectionItem*> m_sectionItems;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -117,10 +134,11 @@ public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
 
     int documentIndexFromGUID(const QString &strGUID);
-    CWizDocumentListViewItem *documentItemAt(int index);
+    CWizDocumentListViewBaseItem *itemFromIndex(int index) const;
+    CWizDocumentListViewBaseItem* itemFromIndex(const QModelIndex &index) const;
+    CWizDocumentListViewDocumentItem* documentItemAt(int index) const;
+    CWizDocumentListViewDocumentItem *documentItemFromIndex(const QModelIndex &index) const;
 
-    // drawing passthrought methods
-    CWizDocumentListViewItem *documentItemFromIndex(const QModelIndex &index) const;
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
 
@@ -213,6 +231,15 @@ private:
 
     //
     void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);
+
+    //
+    void addSectionItem(const WizDocumentListViewSectionData& secData, const QString& text, int docCount);
+    void updateSectionItems();
+    bool getDocumentDateSections(QMap<QDate, int>& dateMap);
+    bool getDocumentSizeSections(QMap<int, int>& sizeMap);
+    bool getDocumentTitleSections(QMap<QString, int>& titleMap);
+    bool getDocumentLocationSections(QMap<QString, int>& locationMap);
+    bool getDocumentTagSections(QMap<QString, int>& tagMap);
 };
 
 

@@ -57,18 +57,7 @@ class CWizSortingPopupButton : public CWizPopupButton
 {
     Q_OBJECT
 
-public:
-    enum SortingType {
-        SortingCreateTime = 1,
-        SortingUpdateTime,
-        SortingAccessTime,
-        SortingTitle,
-        SortingLocation,
-        SortingTag,
-        SortingSize,
-        AscendingOrder,
-        DescendingOrder
-    };
+public:       
 
     explicit CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent = 0);
 

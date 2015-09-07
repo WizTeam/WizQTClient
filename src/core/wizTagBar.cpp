@@ -506,14 +506,14 @@ void CWizTagBar::applyStyleSheet()
 
 CTagItem::CTagItem(const QString guid, const QString text, QWidget* parent)
     : QWidget(parent)
-    , m_tagName(text)
     , m_tagGuid(guid)
-    , m_pixDeleteNormal(nullptr)
-    , m_pixDeletePressed(nullptr)
-    , m_menu(nullptr)
+    , m_tagName(text)
     , m_readOnly(false)
     , m_selected(false)
     , m_closeButtonPressed(false)
+    , m_menu(nullptr)
+    , m_pixDeleteNormal(nullptr)
+    , m_pixDeletePressed(nullptr)
 {
     if (!m_pixDeleteNormal)
     {        
