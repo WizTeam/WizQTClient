@@ -204,7 +204,7 @@ void CWizAttachmentListView::addAttachments()
                              this,
                              tr("Add attachments"),
                              QDir::home().absolutePath(),
-                             tr("All files(*.*)"));
+                             tr("All files(*)"));
     //
     CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
 
