@@ -414,6 +414,12 @@ void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
 
 void CWizKMSyncThread::quickDownloadMesages()
 {
+    // 一分钟中内不重复查询，防止过于频繁的请求
+    static QTime time = QTime::currentTime().addSecs(-61);
+    if (time.secsTo(QTime::currentTime()) < 60)
+        return;
+    time = QTime::currentTime();
+
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     m_bNeedDownloadMessages = true;
