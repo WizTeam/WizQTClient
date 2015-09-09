@@ -224,7 +224,6 @@ void CWizAttachmentListView::addAttachments()
     {
         MainWindow::quickSyncKb(db.IsGroup() ? db.kbGUID() : "");
     }
-
 }
 
 void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)

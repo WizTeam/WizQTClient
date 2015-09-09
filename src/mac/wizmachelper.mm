@@ -41,6 +41,44 @@
 //#endif
 
 
+
+@interface NSView (Vibrancy)
+
+//Returns NSVisualEffectView
+- (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
+
+@end
+
+@implementation NSView (Vibrancy)
+
+- (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
+{
+    Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
+    if (vibrantClass)
+    {
+        NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
+        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
+        [vibrant setBlendingMode:mode];
+        [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
+
+        return vibrant;
+    }
+    return nil;
+}
+
+@end
+
+
+@implementation NSWindow (BackgroundBlur)
+
+- (void)enableBlur
+{
+    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+}
+
+@end
+
+
 @interface CreateNoteService : NSObject
 
 - (void) serviceCreateNote:(NSPasteboard *)pboard
@@ -771,3 +809,11 @@ void initCrashReporter()
 void initCrashReporter()
 {}
 #endif
+
+
+void enableBlurOnOSX10_10(QMainWindow* mainWindow)
+{
+    NSView *nsview = (NSView *) mainWindow->winId();
+    NSWindow *nswindow = [nsview window];
+    [nswindow enableBlur];
+}

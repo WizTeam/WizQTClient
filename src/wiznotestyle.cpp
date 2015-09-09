@@ -139,11 +139,15 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
 
     if (view->isHelperItemByIndex(vopt->index)) {
+        p->save();
         if (NULL != dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
             QString str = vopt->text;
             QRect rc(vopt->rect);
-            rc.setTop(rc.top() + 12);
-            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
+//            rc.setTop(rc.top() + 12);
+            p->setPen(QColor("#888888"));
+            QFont font = p->font();
+            Utils::StyleHelper::fontNormal(font);
+            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), font);
         }
         else if (NULL != dynamic_cast<const CWizCategoryViewLinkItem*>(pItem)) {
             QString str = vopt->text;
@@ -152,10 +156,12 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
             Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemLinkText(), m_fontLink);
         }
 
+        p->restore();
         return;
     }
 
     p->save();
+
 
     bool bSelected = vopt->state.testFlag(State_Selected);
     int nLeftMargin = 4;
@@ -177,8 +183,18 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
-        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus));
 
+//        在透明的背景上直接绘制文本会造成锯齿效果，首先绘制一个灰色的背景
+//        if (!bSelected)
+//        {
+//            QFontMetrics fm(p->font());
+//            int nTextWidth = fm.width(strText) + 4;
+//            QRect rc(rcText);
+//            rc.setWidth(nTextWidth);
+//            p->fillRect(rc, QColor("#f0f0f0"));
+//        }
+
+        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus));
         p->setPen(colorText);
         int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
         //
@@ -488,6 +504,8 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 if (opt->state & State_Selected) {
                     QRect rc(vopt->rect);
                     rc.setWidth(p->window().width());
+                    int nMargin = (opt->rect.height() - 20) / 2;
+                    rc.adjust(0, nMargin, 0, -nMargin);
                     Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
                 }
 

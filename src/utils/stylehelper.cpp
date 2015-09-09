@@ -96,7 +96,7 @@ QIcon StyleHelper::loadIcon(const QString& strName)
 
 int StyleHelper::treeViewItemHeight()
 {
-    return 31;
+    return 26;
 }
 
 QColor StyleHelper::treeViewBackground()
@@ -116,7 +116,7 @@ QColor StyleHelper::treeViewItemBackground(int stat)
     if (stat == Selected) {
         return QColor(m_settings->value("Category/ItemSelectedNoFocus", "#D3E4ED").toString());
     } else if (stat == Active) {
-        return QColor(m_settings->value("Category/ItemSelected", "#3498DB").toString());
+        return QColor(m_settings->value("Category/ItemSelected", "#5990ef").toString());
     }
 
     Q_ASSERT(0);
@@ -177,11 +177,11 @@ QColor StyleHelper::treeViewItemText(bool bSelected)
     if (!m_settings) {
         m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
     }
-    if (bSelected) {
-        return QColor(m_settings->value("Category/TextSelected", "#ffffff").toString());
-    } else {
-        return QColor(m_settings->value("Category/Text", "#777775").toString());
-    }
+//    if (bSelected) {
+//        return QColor(m_settings->value("Category/TextSelected", "#ffffff").toString());
+//    } else {
+        return QColor(m_settings->value("Category/Text", "#111111").toString());
+//    }
 }
 
 QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
@@ -199,15 +199,17 @@ QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
 void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)
 {
     QRect rcd(rc);
-    QColor bg1 = treeViewItemBackground(Active);
-    QColor bg2 = treeViewItemBackground(Selected);
+//    QColor bg1 = treeViewItemBackground(Active);
+//    QColor bg2 = treeViewItemBackground(Selected);
 
     p->save();
-    if (bFocused) {
-        p->fillRect(rcd, bg1);
-    } else {
-        p->fillRect(rcd, bg2);
-    }
+//    if (bFocused) {
+//        p->fillRect(rcd, bg1);
+//    } else {
+//        p->fillRect(rcd, bg2);
+//    }
+    p->setCompositionMode( QPainter::CompositionMode_Clear );
+    p->fillRect(rcd, Qt::SolidPattern );
     p->restore();
 }
 
@@ -765,7 +767,7 @@ int StyleHelper::fontHead(QFont& f)
 
     //f.setFamily(strFont);
     //FIXME: should not use fix font size. but different widget has different default font size.
-    f.setPixelSize(13);
+    f.setPixelSize(14);
     //f.setBold(true);
 #endif
 
@@ -783,7 +785,7 @@ int StyleHelper::fontNormal(QFont& f)
 
 //    f.setFamily(strFont);
     //FIXME: should not use fix font size. but different widget has different default font size.
-    f.setPixelSize(13);
+    f.setPixelSize(14);
 #endif
     return QFontMetrics(f).height();
 }

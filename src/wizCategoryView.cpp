@@ -112,10 +112,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setAnimated(true);
     setFrameStyle(QFrame::NoFrame);
     viewport()->setAttribute(Qt::WA_AcceptTouchEvents, true);
-    setAttribute(Qt::WA_MacShowFocusRect, false);
-    setAutoFillBackground(true);
+    setAttribute(Qt::WA_MacShowFocusRect, false);   
     setTextElideMode(Qt::ElideMiddle);
-    setIndentation(12);
+    setIndentation(14);
 
     // scrollbar        ScrollPerPixel could cause drag and drop problem    
 //    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -134,10 +133,13 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 
     // style
     setStyle(::WizGetStyle(m_app.userSettings().skin()));
-    QColor colorBg = Utils::StyleHelper::treeViewBackground();
-    QPalette pal = palette();
-    pal.setBrush(QPalette::Base, colorBg);
-    setPalette(pal);
+//    QColor colorBg = Utils::StyleHelper::treeViewBackground();
+//    QPalette pal = palette();
+//    colorBg.setAlpha(200);
+//    pal.setBrush(QPalette::Base, colorBg);
+//    setPalette(pal);
+    setStyleSheet("background-color: transparent;");
+    setAutoFillBackground(true);
     //
     setCursor(QCursor(Qt::ArrowCursor));
     setMouseTracking(true);
@@ -1129,7 +1131,6 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::InternalMove);
-
 
     initMenus();
 

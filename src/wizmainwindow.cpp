@@ -164,13 +164,15 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setWindowStyleForLinux(m_useSystemBasedStyle);
 #endif
     windowInstance = this;
-    setWindowOpacity(0.5);
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
+
+    setAutoFillBackground(false);
+    setAttribute(Qt::WA_TranslucentBackground, true);
 #endif    
 
     // search and full text search
@@ -431,6 +433,23 @@ void MainWindow::changeEvent(QEvent* event)
     else
         _baseClass::changeEvent(event);
 }
+
+#ifdef Q_OS_MAC
+void MainWindow::paintEvent(QPaintEvent*event)
+{
+    QMainWindow::paintEvent(event);
+
+    QPainter painter(this);
+
+    painter.setCompositionMode( QPainter::CompositionMode_Clear );
+    painter.fillRect(rect(), Qt::SolidPattern );
+
+    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    QColor c("#cccccc");
+    c.setAlpha(210);
+    painter.fillRect(rect(), c);
+}
+#endif
 
 #ifdef USECOCOATOOLBAR
 void MainWindow::showEvent(QShowEvent* event)
@@ -1822,6 +1841,8 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
     #endif
+
+    m_toolBar->setStyleSheet("QToolBar{background-color:#fcfcfc;}");
 #else
     layoutTitleBar();
     //
@@ -1893,7 +1914,11 @@ void MainWindow::initClient()
     client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = client->palette();
-    pal.setBrush(QPalette::Window, QBrush("#FFFFFF"));
+//    pal.setColor(QPalette::Window, QColor(Qt::white));
+//    pal.setColor(QPalette::Base, QColor(Qt::white));
+    pal.setColor(QPalette::Window, QColor(255, 255, 255, 220));
+    pal.setColor(QPalette::Base, QColor(255, 255, 255, 220));
+//    pal.setBrush(QPalette::Window, QBrush(QColor(255, 255, 255, 0)));
     client->setPalette(pal);
     client->setAutoFillBackground(true);
 
@@ -1902,7 +1927,7 @@ void MainWindow::initClient()
     client->setLayout(layout);
 
     m_splitter = std::make_shared<CWizSplitter>();
-    layout->addWidget(m_splitter.get());
+    layout->addWidget(m_splitter.get());    
 
     QWidget* documentPanel = new QWidget();
     QHBoxLayout* layoutDocument = new QHBoxLayout();
@@ -1913,6 +1938,42 @@ void MainWindow::initClient()
     layoutDocument->addWidget(m_documentSelection);
     m_documentSelection->hide();
     // append after client   
+
+    m_category->setPalette(pal);
+    m_category->setAutoFillBackground(true);
+
+//    QWidget* wgt = new QWidget(this);
+//    wgt->setPalette(pal);
+//    QVBoxLayout* caLayout = new QVBoxLayout(wgt);
+//    wgt->setLayout(caLayout);
+//    QTreeWidget* tree = new QTreeWidget(this);
+////    tree->setAttribute(Qt::WA_TranslucentBackground, true);
+//    tree->setStyleSheet("background-color: transparent;");
+//    tree->setPalette(pal);
+//    tree->setAutoFillBackground(true);
+//    caLayout->addWidget(m_category);
+//    caLayout->addWidget(tree);
+//    connect(tree, SIGNAL(clicked(QModelIndex)), tree, SLOT(repaint()));
+
+//    QTreeWidgetItem* item = new QTreeWidgetItem(tree);
+//    item->setText(0, "top level");
+//    tree->addTopLevelItem(item);
+//    QTreeWidgetItem* child1 = new QTreeWidgetItem(item);
+//    child1->setText(0, "child1");
+//    item->addChild(child1);
+//    child1 = new QTreeWidgetItem(item);
+//    child1->setText(0, "child2");
+//    item->addChild(child1);
+//    child1 = new QTreeWidgetItem(item);
+//    child1->setText(0, "child3");
+//    item->addChild(child1);
+
+//    //
+//    QWidget* trans = new QWidget(this);
+//    trans->setPalette(pal);
+//    caLayout->addWidget(trans);
+//    trans->setMinimumHeight(55);
+//    trans->setAutoFillBackground(true);
 
     m_splitter->addWidget(m_category);
 

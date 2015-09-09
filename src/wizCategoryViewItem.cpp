@@ -41,6 +41,8 @@
 #define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag doucment form document list")
 
 
+const int nNumberButtonHeight = 14;
+
 using namespace Core;
 
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
@@ -340,9 +342,9 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
 
 void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    QRect rc = vopt->rect;
-    rc.setTop(rc.bottom());
-    p->fillRect(rc, Utils::StyleHelper::treeViewItemBottomLine());
+//    QRect rc = vopt->rect;
+//    rc.setTop(rc.bottom());
+//    p->fillRect(rc, Utils::StyleHelper::treeViewItemBottomLine());
 
     CWizCategoryViewItemBase::draw(p, vopt);
 }
@@ -394,14 +396,15 @@ void CWizCategoryViewMessageItem::setUnreadCount(int nCount)
        //
        QSize szText = fm.size(0, unreadString());
        int textWidth = szText.width();
-       int textHeight = szText.height();
+//       int textHeight = szText.height();
        //
        //int nMargin = textHeight / 4;
        //
        int nWidth = textWidth;
-       int nHeight = textHeight + 2;
-       if (nWidth < nHeight)
-           nWidth = nHeight;
+       int nHeight = nNumberButtonHeight;
+//       int nHeight = textHeight + 2;
+//       if (nWidth < nHeight)
+//           nWidth = nHeight;
        //
        QRect rcIemBorder = view->visualItemRect(this);
        QRect rcExtButton = getExtraButtonRect(rcIemBorder, true);
@@ -1147,9 +1150,9 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
     : CWizCategoryViewItemBase(app, strName, "", Category_GroupsRootItem)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
@@ -1220,9 +1223,9 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
     , m_unReadCount(0)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_biz_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_biz_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_biz_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
 }
@@ -1363,12 +1366,12 @@ void CWizCategoryViewBizGroupRootItem::updateUnreadCount()
         //
         QSize szText = fm.size(0, unreadString());
         int textWidth = szText.width();
-        int textHeight = szText.height();
+//        int textHeight = szText.height();
         //
         //int nMargin = textHeight / 4;
         //
         int nWidth = textWidth;
-        int nHeight = textHeight + 2;
+        int nHeight = nNumberButtonHeight;// textHeight + 2;
         if (nWidth < nHeight)
             nWidth = nHeight;
         //
@@ -1428,9 +1431,9 @@ CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerA
     : CWizCategoryViewGroupsRootItem(app, CATEGORY_OWN_GROUPS)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
 }
@@ -1449,9 +1452,9 @@ CWizCategoryViewJionedGroupRootItem::CWizCategoryViewJionedGroupRootItem(CWizExp
     : CWizCategoryViewGroupsRootItem(app, CATEGORY_OTHER_GROUPS)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
 }
@@ -1471,9 +1474,9 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
     , m_nUnread(0)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
                  QSize(16, 16), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "group_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
                  QSize(16, 16), QIcon::Selected);
     setIcon(0, icon);
     setText(0, m_strName);
@@ -1682,12 +1685,12 @@ void CWizCategoryViewGroupRootItem::setUnreadCount(int nCount)
         //
         QSize szText = fm.size(0, unreadString());
         int textWidth = szText.width();
-        int textHeight = szText.height();
+//        int textHeight = szText.height();
         //
         //int nMargin = textHeight / 4;
         //
         int nWidth = textWidth;
-        int nHeight = textHeight + 2;
+        int nHeight = nNumberButtonHeight;//  textHeight + 2;
         if (nWidth < nHeight)
             nWidth = nHeight;
         //

@@ -122,6 +122,10 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void changeEvent(QEvent *event);
 
+#ifdef Q_OS_MAC
+    virtual void paintEvent(QPaintEvent* event);
+#endif
+
 #ifdef USECOCOATOOLBAR
     virtual void showEvent(QShowEvent *event);
 #endif

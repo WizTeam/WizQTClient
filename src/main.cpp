@@ -392,6 +392,8 @@ int mainCore(int argc, char *argv[])
 #ifdef Q_OS_LINUX
     QObject::connect(&a, SIGNAL(messageAvailable(QString)), &w,
                      SLOT(on_application_messageAvailable(QString)));
+#else
+//    enableBlurOnOSX10_10(&w);
 #endif
 
     //settings->setValue("Users/DefaultUser", strUserId);
@@ -429,3 +431,17 @@ int main(int argc, char *argv[])
 
     return ret;
 }
+
+// test
+//int main(int argc, char *argv[])
+//{
+//    QApplication a(argc, argv);
+
+//    QMainWindow window;
+//    window.setGeometry(500, 500, 500, 300);
+//    enableBlurOnOSX10_10(&window);
+//    window.show();
+
+//    return a.exec();
+//}
+
