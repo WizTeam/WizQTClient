@@ -300,10 +300,15 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         else if (event->type() == QEvent::ApplicationActivate)
         {
             if (!window()->isVisible())
-            {
-                window()->setVisible(true);
-                window()->raise();
+            {                
+                window()->setVisible(true);                
             }
+            if (window()->windowState() & Qt::WindowMinimized)
+            {
+                window()->setWindowState(window()->windowState() & ~Qt::WindowMinimized);
+            }
+
+            window()->raise();
         }
         else
         {
@@ -388,6 +393,15 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if (event->spontaneous())
     {
 //        wizMacHideCurrentApplication();
+        if (windowState() & Qt::WindowFullScreen)
+        {
+            setWindowState(windowState() & ~Qt::WindowFullScreen);
+            event->ignore();
+            // wait for process finished
+            QTimer::singleShot(1500, this, SLOT(hide()));
+            return;
+        }
+
         setVisible(false);
         event->ignore();
         return;
