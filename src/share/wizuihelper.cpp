@@ -47,7 +47,7 @@ public:
         QPainter painter(this);
 
         // FIXME: hard-coded
-        QColor bgColor = QColor(165, 165, 165);
+        QColor bgColor = QColor("#F5F5F5");
         painter.fillRect(event->rect(), bgColor);
     }
 
@@ -63,7 +63,7 @@ public:
 
     virtual QSize sizeHint() const
     {
-        return QSize(1, 1);
+        return QSize(2, 1);
     }
 };
 
@@ -71,7 +71,7 @@ public:
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
-    setHandleWidth(1);
+    setHandleWidth(2);
     setChildrenCollapsible(false);
 }
 

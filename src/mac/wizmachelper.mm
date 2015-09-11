@@ -56,9 +56,11 @@
     Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
     if (vibrantClass)
     {
+        NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-        [vibrant setAutoresizingMask:NSViewWidthSizable|NSViewHeightSizable];
-        [vibrant setBlendingMode:mode];
+        [vibrant setAutoresizingMask:NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
+        [vibrant setBlendingMode:mode];        
+
         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
 
         return vibrant;
@@ -78,6 +80,13 @@
 
 @end
 
+
+void enableBlurOnOSX10_10(QWidget* wgt)
+{
+    NSView *nsview = (NSView *) wgt->winId();
+    NSWindow *nswindow = [nsview window];
+    [nswindow enableBlur];
+}
 
 @interface CreateNoteService : NSObject
 
@@ -811,9 +820,25 @@ void initCrashReporter()
 #endif
 
 
-void enableBlurOnOSX10_10(QMainWindow* mainWindow)
+
+void adjustSubViews(QWidget* wgt)
 {
-    NSView *nsview = (NSView *) mainWindow->winId();
-    NSWindow *nswindow = [nsview window];
-    [nswindow enableBlur];
+    qDebug() << "wgt size : " << wgt->size() << " wgt pos : " << wgt->mapToGlobal(QPoint(0, 0));
+    NSView *nsview = (NSView *) wgt->winId();
+    NSArray* subviewArray = [nsview subviews];
+    for (NSView* subview in subviewArray)
+    {
+        NSLog(@"self bounds %f, %f  ; pos %f %f", subview.frame.size.width, subview.frame.size.height,
+              subview.frame.origin.x, subview.frame.origin.y);
+
+        if (subview.frame.size.width == 640)
+        {
+            NSRect f = subview.frame;
+            f.origin.x = 20;
+            f.origin.y = 40;
+            f.size.width = 300;
+            f.size.height = 100;
+            subview.frame = f;
+        }
+    }
 }

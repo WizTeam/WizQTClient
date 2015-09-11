@@ -50,7 +50,9 @@ QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);
 
 void initCrashReporter();
 
-void enableBlurOnOSX10_10(QMainWindow* mainWindow);
+void enableBlurOnOSX10_10(QWidget* wgt);
+
+void adjustSubViews(QWidget* wgt);
 
 #endif // Q_OS_MAC
 

@@ -143,7 +143,6 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         if (NULL != dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
             QString str = vopt->text;
             QRect rc(vopt->rect);
-//            rc.setTop(rc.top() + 12);
             p->setPen(QColor("#888888"));
             QFont font = p->font();
             Utils::StyleHelper::fontNormal(font);
@@ -168,6 +167,8 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     if (!vopt->icon.isNull()) {
         QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
         iconRect.adjust(nLeftMargin, 0, nLeftMargin, 0);
+        iconRect.setWidth(14);
+        iconRect.setHeight(14);
         Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected && (vopt->state & State_HasFocus));
     }
 
@@ -183,19 +184,13 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
-
-//        在透明的背景上直接绘制文本会造成锯齿效果，首先绘制一个灰色的背景
-//        if (!bSelected)
-//        {
-//            QFontMetrics fm(p->font());
-//            int nTextWidth = fm.width(strText) + 4;
-//            QRect rc(rcText);
-//            rc.setWidth(nTextWidth);
-//            p->fillRect(rc, QColor("#f0f0f0"));
-//        }
-
-        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus));
+        QTreeWidgetItem *item = view->categoryItemFromIndex(vopt->index);
+        bool secondLevelFolder = (item->parent() && (item->parent()->type() == Category_GroupItem
+                                                     || item->parent()->type() == Category_FolderItem));
+        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus), secondLevelFolder);
+        colorText.setAlpha(240);
         p->setPen(colorText);
+        f.setStyleStrategy(QFont::PreferBitmap);
         int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
         //
         rcText.setLeft(right + 4);
@@ -446,7 +441,8 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         {
             if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
-                Q_UNUSED(view);
+                if (!view->isCursorEntered())
+                    return;
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;

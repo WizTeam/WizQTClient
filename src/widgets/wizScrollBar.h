@@ -14,12 +14,14 @@ class CWizScrollBar : public QScrollBar
 public:
     explicit CWizScrollBar(QWidget* parent = 0);
     void syncWith(QScrollBar* source);
-    void show();
 
     virtual QSize sizeHint() const;
     virtual void mouseMoveEvent(QMouseEvent* event);
 
 public Q_SLOTS:
+    void showHandle();
+    void hideHandle();
+
     void on_sourceValueChanged(int value);
     void on_sourceRangeChanged(int min, int max);
     void on_valueChanged(int value);

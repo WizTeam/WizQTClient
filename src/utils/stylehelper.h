@@ -54,12 +54,13 @@ public:
     static QString skinResourceFileName(const QString& strName, bool need2x = false);
     static QIcon loadIcon(const QString& strName);
 
-    static int treeViewItemHeight();
+    static QSize treeViewItemIconSize();
+    static int treeViewItemHeight(bool isSection);
     static QColor treeViewBackground();
     static QColor treeViewItemBackground(int stat);
     static QColor treeViewItemCategoryBackground();
     static QColor treeViewItemCategoryText();
-    static QColor treeViewItemText(bool bSelected);
+    static QColor treeViewItemText(bool bSelected, bool bSecondLevel);
     static QColor treeViewItemTextExtend(bool bSelected);
     static QColor treeViewItemLinkText();
     static QColor treeViewItemBottomLine();

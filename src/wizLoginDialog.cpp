@@ -492,12 +492,6 @@ void CWizLoginDialog::mouseReleaseEvent(QMouseEvent *)
 {
     m_mousePoint = QPoint(0, 0);
 }
-//#else
-//void layoutTitleBar()
-//{
-//    CWizShadowWindow<QDialog>::layoutTitleBar();
-
-//}
 
 #endif
 

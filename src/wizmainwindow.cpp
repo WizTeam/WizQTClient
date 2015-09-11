@@ -93,6 +93,7 @@
 #include "share/wizTranslater.h"
 #include "widgets/wizShareLinkDialog.h"
 #include "core/wizSingleDocumentView.h"
+#include "widgets/wizCustomToolBar.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -132,7 +133,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
     #else
-    , m_toolBar(new QToolBar(this))
+//    , m_toolBar(new QToolBar(this))
+    , m_toolBar(nullptr)
     #endif
     , m_useSystemBasedStyle(true)
 #else
@@ -172,7 +174,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     installEventFilter(this);
 
     setAutoFillBackground(false);
+    setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_TranslucentBackground, true);
+
 #endif    
 
     // search and full text search
@@ -439,15 +443,46 @@ void MainWindow::paintEvent(QPaintEvent*event)
 {
     QMainWindow::paintEvent(event);
 
-    QPainter painter(this);
+//    QPainter painter(this);
 
-    painter.setCompositionMode( QPainter::CompositionMode_Clear );
-    painter.fillRect(rect(), Qt::SolidPattern );
+//    painter.setCompositionMode( QPainter::CompositionMode_Clear );
+//    painter.fillRect(rect(), Qt::SolidPattern );
 
-    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-    QColor c("#cccccc");
-    c.setAlpha(210);
-    painter.fillRect(rect(), c);
+//    QPainterPath path;
+//    QRectF rect = geometry();
+//    path.addRoundRect(rect, 4, 1);
+//    QPolygon polygon= path.toFillPolygon().toPolygon();
+//    QRegion region(polygon);
+////    setMask(region);
+//    painter.setClipRegion(region);
+
+////    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+////    QColor c("#cccccc");
+////    c.setAlpha(210);
+////    painter.fillRect(rect(), c);
+
+
+    QPainter pt(this);
+
+    pt.setCompositionMode( QPainter::CompositionMode_Clear );
+    pt.fillRect(rect(), Qt::SolidPattern );
+
+    pt.setCompositionMode(QPainter::CompositionMode_SourceOver);
+
+    QColor c(Qt::white);
+    c.setAlpha(100);
+    QColor greyBorder(Qt::white);
+    pt.setPen(QPen(c));
+    pt.setBrush(QBrush(c));
+    pt.drawRoundedRect(rect(), 15, 10);
+
+    pt.setCompositionMode( QPainter::CompositionMode_Clear );
+    QRect rc = rect();
+    rc.adjust(4, 4, -4, -4);
+    pt.fillRect(rc, Qt::SolidPattern);
+
+    pt.setCompositionMode(QPainter::CompositionMode_SourceOver);
+    pt.fillRect(rc, c);
 }
 #endif
 
@@ -505,11 +540,12 @@ void MainWindow::on_actionClose_triggered()
 #endif
 }
 
-//void MainWindow::resizeEvent(QResizeEvent *event)
-//{
-//    Q_UNUSED(event);
-//    updateHistoryButtonStatus();
-//}
+void MainWindow::resizeEvent(QResizeEvent *event)
+{
+    QMainWindow::resizeEvent(event);
+    Q_UNUSED(event);
+    adjustSubViews(m_clienWgt);
+}
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
@@ -1809,6 +1845,11 @@ void MainWindow::initToolBar()
     //
     m_search = m_toolBar->getSearchWidget();
     #else
+
+
+    return;
+
+
     setUnifiedTitleAndToolBarOnMac(true);
     setContextMenuPolicy(Qt::NoContextMenu);
     addToolBar(m_toolBar);
@@ -1900,8 +1941,31 @@ void MainWindow::initToolBar()
 void MainWindow::initClient()
 {
 #ifdef Q_OS_MAC
-    QWidget* client = new QWidget(this);
-    setCentralWidget(client);
+
+    QWidget* borderClient = new QWidget(this);
+    QPalette pal1 = borderClient->palette();
+    pal1.setColor(QPalette::Window, QColor(Qt::transparent));
+    pal1.setColor(QPalette::Base, QColor(Qt::transparent));
+    borderClient->setPalette(pal1);
+    borderClient->setAutoFillBackground(true);
+    QVBoxLayout* borderLayout = new QVBoxLayout(borderClient);
+//    borderLayout->setContentsMargins(100, 100, 100, 100);
+    setCentralWidget(borderClient);
+
+    setContentsMargins(4, 4, 4, 4);
+
+    CWizFixedSpacer* spacer = new CWizFixedSpacer(QSize(10, 30), borderClient);
+    borderLayout->addWidget(spacer);
+
+    m_clienWgt = new QWidget(nullptr);
+//    setContentsMargins(40, 40, 40, 40);
+//    setCentralWidget(client);
+    borderLayout->addWidget(m_clienWgt);
+
+    spacer->setMaximumSize(50, 50);
+    enableBlurOnOSX10_10(m_clienWgt);
+
+
 #else
     setCentralWidget(rootWidget());
     //
@@ -1911,25 +1975,30 @@ void MainWindow::initClient()
     clientLayout()->addWidget(client);
 #endif
 
-    client->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
+    m_clienWgt->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
-    QPalette pal = client->palette();
-//    pal.setColor(QPalette::Window, QColor(Qt::white));
-//    pal.setColor(QPalette::Base, QColor(Qt::white));
-    pal.setColor(QPalette::Window, QColor(255, 255, 255, 220));
-    pal.setColor(QPalette::Base, QColor(255, 255, 255, 220));
-//    pal.setBrush(QPalette::Window, QBrush(QColor(255, 255, 255, 0)));
-    client->setPalette(pal);
-    client->setAutoFillBackground(true);
+    QPalette pal = m_clienWgt->palette();
+    pal.setColor(QPalette::Window, QColor(255, 255, 255, 100));
+    pal.setColor(QPalette::Base, QColor(255, 255, 255, 100));
+    m_clienWgt->setPalette(pal);
+    m_clienWgt->setAutoFillBackground(true);
 
-    QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 0, 0, 0);
-    client->setLayout(layout);
+    QVBoxLayout* layout = new QVBoxLayout();
+    layout->setContentsMargins(0, 0, 0, 0);    
+    m_clienWgt->setLayout(layout);
+
+    CWizCustomToolBar* customToolBar = new CWizCustomToolBar(this, this);
+    layout->addWidget(customToolBar);
 
     m_splitter = std::make_shared<CWizSplitter>();
-    layout->addWidget(m_splitter.get());    
+    layout->addWidget(m_splitter.get());
 
+
+    pal.setColor(QPalette::Window, QColor(Qt::white));
+    pal.setColor(QPalette::Base, QColor(Qt::white));
     QWidget* documentPanel = new QWidget();
+    documentPanel->setPalette(pal);
+    documentPanel->setAutoFillBackground(true);
     QHBoxLayout* layoutDocument = new QHBoxLayout();
     layoutDocument->setContentsMargins(0, 0, 0, 0);
     layoutDocument->setSpacing(0);
@@ -1942,42 +2011,11 @@ void MainWindow::initClient()
     m_category->setPalette(pal);
     m_category->setAutoFillBackground(true);
 
-//    QWidget* wgt = new QWidget(this);
-//    wgt->setPalette(pal);
-//    QVBoxLayout* caLayout = new QVBoxLayout(wgt);
-//    wgt->setLayout(caLayout);
-//    QTreeWidget* tree = new QTreeWidget(this);
-////    tree->setAttribute(Qt::WA_TranslucentBackground, true);
-//    tree->setStyleSheet("background-color: transparent;");
-//    tree->setPalette(pal);
-//    tree->setAutoFillBackground(true);
-//    caLayout->addWidget(m_category);
-//    caLayout->addWidget(tree);
-//    connect(tree, SIGNAL(clicked(QModelIndex)), tree, SLOT(repaint()));
-
-//    QTreeWidgetItem* item = new QTreeWidgetItem(tree);
-//    item->setText(0, "top level");
-//    tree->addTopLevelItem(item);
-//    QTreeWidgetItem* child1 = new QTreeWidgetItem(item);
-//    child1->setText(0, "child1");
-//    item->addChild(child1);
-//    child1 = new QTreeWidgetItem(item);
-//    child1->setText(0, "child2");
-//    item->addChild(child1);
-//    child1 = new QTreeWidgetItem(item);
-//    child1->setText(0, "child3");
-//    item->addChild(child1);
-
-//    //
-//    QWidget* trans = new QWidget(this);
-//    trans->setPalette(pal);
-//    caLayout->addWidget(trans);
-//    trans->setMinimumHeight(55);
-//    trans->setAutoFillBackground(true);
-
     m_splitter->addWidget(m_category);
 
-    m_docListContainer = new QWidget(this);
+    m_docListContainer = new QWidget(this);   
+    m_docListContainer->setPalette(pal);
+    m_docListContainer->setAutoFillBackground(true);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);

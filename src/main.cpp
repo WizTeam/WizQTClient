@@ -392,15 +392,13 @@ int mainCore(int argc, char *argv[])
 #ifdef Q_OS_LINUX
     QObject::connect(&a, SIGNAL(messageAvailable(QString)), &w,
                      SLOT(on_application_messageAvailable(QString)));
-#else
-//    enableBlurOnOSX10_10(&w);
 #endif
 
     //settings->setValue("Users/DefaultUser", strUserId);
     PluginManager::loadPlugins();
 
     w.show();
-    w.init();
+    w.init();   
 
     int ret = a.exec();
     if (w.isLogout()) {
@@ -433,14 +431,33 @@ int main(int argc, char *argv[])
 }
 
 // test
+//#include <QLabel>
+//#include <QVBoxLayout>
+//#include <QToolBar>
 //int main(int argc, char *argv[])
 //{
 //    QApplication a(argc, argv);
 
 //    QMainWindow window;
 //    window.setGeometry(500, 500, 500, 300);
-//    enableBlurOnOSX10_10(&window);
+
+//    window.setAutoFillBackground(false);
+//    window.setAttribute(Qt::WA_TranslucentBackground, true);
+
+
+//    QLabel* label = new QLabel(&window);
+//    label->setText("Hello World");
+//    QToolBar* toolBar = new QToolBar(&window);
+//    window.addToolBar(toolBar);
+//    QWidget* wgt = new QWidget(&window);
+//    QVBoxLayout* layout = new QVBoxLayout(wgt);
+//    wgt->setLayout(layout);
+//    layout->addWidget(label);
+//    window.setCentralWidget(wgt);
+
 //    window.show();
+
+//    enableBlurOnOSX10_10(wgt);
 
 //    return a.exec();
 //}

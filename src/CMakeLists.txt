@@ -184,6 +184,7 @@ set(wiznote_SOURCES
     share/wizObjectOperator.cpp
     widgets/wizLocalProgressWebView.cpp
     widgets/wizCrashReportDialog.cpp
+    widgets/wizCustomToolBar.cpp
     core/wizSingleDocumentView.cpp
 )
 
@@ -351,6 +352,7 @@ set(wiznote_HEADERS
     share/wizObjectOperator.h
     widgets/wizLocalProgressWebView.h
     widgets/wizCrashReportDialog.h
+    widgets/wizCustomToolBar.h
     core/wizSingleDocumentView.h
 )
 

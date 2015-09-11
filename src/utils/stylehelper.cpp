@@ -94,8 +94,16 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
-int StyleHelper::treeViewItemHeight()
+QSize StyleHelper::treeViewItemIconSize()
 {
+    return QSize(14, 14);
+}
+
+int StyleHelper::treeViewItemHeight(bool isSection)
+{
+    if (isSection)
+        return 32;
+
     return 26;
 }
 
@@ -172,7 +180,7 @@ QColor StyleHelper::treeViewItemMessageText()
     return QColor(m_settings->value("Category/ItemMessageText", "#FFFFFF").toString());
 }
 
-QColor StyleHelper::treeViewItemText(bool bSelected)
+QColor StyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
 {
     if (!m_settings) {
         m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
@@ -180,7 +188,11 @@ QColor StyleHelper::treeViewItemText(bool bSelected)
 //    if (bSelected) {
 //        return QColor(m_settings->value("Category/TextSelected", "#ffffff").toString());
 //    } else {
-        return QColor(m_settings->value("Category/Text", "#111111").toString());
+        if (bSecondLevel) {
+            return QColor(m_settings->value("Category/SecondLevelText", "#535353").toString());
+        } else {
+            return QColor(m_settings->value("Category/Text", "#111111").toString());
+        }
 //    }
 }
 
@@ -189,11 +201,11 @@ QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
     if (!m_settings) {
         m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
     }
-    if (bSelected) {
-        return QColor(m_settings->value("Category/TextExtendSelected", "#e6e6e6").toString());
-    } else {
-        return QColor(m_settings->value("Category/TextExtend", "#969696").toString());
-    }
+//    if (bSelected) {
+//        return QColor(m_settings->value("Category/TextExtendSelected", "#e6e6e6").toString());
+//    } else {
+        return QColor(m_settings->value("Category/TextExtend", "#888888").toString());
+//    }
 }
 
 void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)

@@ -106,6 +106,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dragHoveredItem(0)
     , m_dragItem(NULL)
     , m_dragUrls(false)
+    , m_cursorEntered(false)
 {
     // basic features
     header()->hide();
@@ -503,6 +504,22 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 
     viewport()->repaint();
     event->accept();
+}
+
+void CWizCategoryBaseView::enterEvent(QEvent* event)
+{
+    m_cursorEntered = true;
+    QTreeWidget::enterEvent(event);
+
+    update();
+}
+
+void CWizCategoryBaseView::leaveEvent(QEvent* event)
+{
+    m_cursorEntered = false;
+    QTreeWidget::leaveEvent(event);
+
+    update();
 }
 
 void CWizCategoryBaseView::importFiles(QStringList &strFileList)
@@ -1277,11 +1294,11 @@ void CWizCategoryView::initMenus()
 
 
     // shortcut menu
-    m_menuShortcut = new QMenu(this);
+    m_menuShortcut = std::make_shared<QMenu>();
     m_menuShortcut->addAction(actionRemoveShortcut);
 
     // custom search menu
-    m_menuCustomSearch = new QMenu(this);
+    m_menuCustomSearch = std::make_shared<QMenu>();
     m_menuCustomSearch->addAction(actionAdvancedSearch);
     m_menuCustomSearch->addSeparator();
     m_menuCustomSearch->addAction(actionAddCustomSearch);
@@ -1289,16 +1306,16 @@ void CWizCategoryView::initMenus()
     m_menuCustomSearch->addAction(actionRemoveCustomSearch);
 
     // trash menu
-    m_menuTrash = new QMenu(this);
+    m_menuTrash = std::make_shared<QMenu>();
     m_menuTrash->addAction(actionTrash);
     m_menuTrash->addAction(actionRecovery);
 
     // folder root menu
-    m_menuFolderRoot = new QMenu(this);
+    m_menuFolderRoot = std::make_shared<QMenu>();
     m_menuFolderRoot->addAction(actionNewItem);
 
     // folder menu
-    m_menuFolder = new QMenu(this);
+    m_menuFolder = std::make_shared<QMenu>();
     m_menuFolder->addAction(actionNewDoc);
     m_menuFolder->addAction(actionImportFile);
     m_menuFolder->addAction(actionNewItem);
@@ -1311,11 +1328,11 @@ void CWizCategoryView::initMenus()
     m_menuFolder->addAction(actionDeleteItem);
 
     // tag root menu
-    m_menuTagRoot = new QMenu(this);
+    m_menuTagRoot = std::make_shared<QMenu>();
     m_menuTagRoot->addAction(actionNewItem);
 
     // tag menu
-    m_menuTag = new QMenu(this);
+    m_menuTag = std::make_shared<QMenu>();
     m_menuTag->addAction(actionNewItem);
     m_menuTag->addAction(actionRenameItem);
     m_menuTag->addAction(actionAddToShortcuts);
@@ -1323,7 +1340,7 @@ void CWizCategoryView::initMenus()
     m_menuTag->addAction(actionDeleteItem);
 
     // group root menu normal
-    m_menuNormalGroupRoot = new QMenu(this);
+    m_menuNormalGroupRoot = std::make_shared<QMenu>();
     m_menuNormalGroupRoot->addAction(actionNewDoc);
     m_menuNormalGroupRoot->addAction(actionNewItem);
     m_menuNormalGroupRoot->addSeparator();
@@ -1331,7 +1348,7 @@ void CWizCategoryView::initMenus()
 //    m_menuNormalGroupRoot->addAction(actionQuitGroup);
 
     // group root menu admin
-    m_menuAdminGroupRoot = new QMenu(this);
+    m_menuAdminGroupRoot = std::make_shared<QMenu>();
     m_menuAdminGroupRoot->addAction(actionNewDoc);
     m_menuAdminGroupRoot->addAction(actionNewItem);
     m_menuAdminGroupRoot->addSeparator();
@@ -1339,23 +1356,23 @@ void CWizCategoryView::initMenus()
 //    m_menuAdminGroupRoot->addAction(actionQuitGroup);
 
     // group root menu normal
-    m_menuOwnerGroupRoot = new QMenu(this);
+    m_menuOwnerGroupRoot = std::make_shared<QMenu>();
     m_menuOwnerGroupRoot->addAction(actionNewDoc);
     m_menuOwnerGroupRoot->addAction(actionNewItem);
     m_menuOwnerGroupRoot->addSeparator();
     m_menuOwnerGroupRoot->addAction(actionManageGroup);
 
     //biz group root menu normal
-    m_menuNormalBizGroupRoot = new QMenu(this);
+    m_menuNormalBizGroupRoot = std::make_shared<QMenu>();
     m_menuNormalBizGroupRoot->addAction(actionItemAttr);
 
     //biz group root menu admin
-    m_menuAdminBizGroupRoot = new QMenu(this);
+    m_menuAdminBizGroupRoot = std::make_shared<QMenu>();
     m_menuAdminBizGroupRoot->addAction(actionManageBiz);
 
 
     // group menu
-    m_menuGroup = new QMenu(this);
+    m_menuGroup = std::make_shared<QMenu>();
     m_menuGroup->addAction(actionNewDoc);
     m_menuGroup->addAction(actionNewItem);
     m_menuGroup->addAction(actionRenameItem);
