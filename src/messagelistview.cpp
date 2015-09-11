@@ -440,6 +440,7 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
 {
     Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
     MessageListViewItem* pItem = messageItem(vopt->index);
+
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
     {
         Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);

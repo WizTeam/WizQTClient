@@ -1865,6 +1865,7 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
 {
     if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
+        qDebug() << "document item rect : " << vopt->rect;
             pItem->draw(p, vopt, m_nViewType);
     }
 }

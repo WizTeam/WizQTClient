@@ -65,7 +65,7 @@ if(APPLE)
     if (PLCrashReporter)
         add_definitions(-DUsePLCrashReporter=TRUE)
     endif(PLCrashReporter)
-#    add_definitions(-DUSECOCOATOOLBAR=TRUE)
+    add_definitions(-DUSECOCOATOOLBAR=TRUE)
 #    add_definitions(-DUSEWEBENGINE=FALSE)
 endif(APPLE)
 

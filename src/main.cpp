@@ -1,5 +1,6 @@
 #include <QtGlobal>
 #include <QApplication>
+#include <QTreeWidget>
 #include <QMessageBox>
 #include <QIcon>
 #include <QDir>
@@ -443,6 +444,7 @@ int main(int argc, char *argv[])
 
 //    window.setAutoFillBackground(false);
 //    window.setAttribute(Qt::WA_TranslucentBackground, true);
+////    window.setUnifiedTitleAndToolBarOnMac(true);
 
 
 //    QLabel* label = new QLabel(&window);
@@ -452,7 +454,12 @@ int main(int argc, char *argv[])
 //    QWidget* wgt = new QWidget(&window);
 //    QVBoxLayout* layout = new QVBoxLayout(wgt);
 //    wgt->setLayout(layout);
+//    layout->setContentsMargins(0, 0, 0, 0);
 //    layout->addWidget(label);
+//    QTreeWidget* tree = new QTreeWidget(wgt);
+//    tree->setStyleSheet("background-color:transparent;");
+//    tree->setAutoFillBackground(true);
+//    layout->addWidget(tree);
 //    window.setCentralWidget(wgt);
 
 //    window.show();

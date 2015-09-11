@@ -7,28 +7,7 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
 {
 
     // FIXME:  hard code
-    setStyleSheet(
-        "QScrollBar {\
-            background: #F5F5F5;\
-        }\
-        QScrollBar::handle {\
-            background: #D8D8D8;\
-            min-height: 30px;\
-        }\
-        QScrollBar::handle:vertical {\
-            margin: 0px 0px 0px 2px;\
-        }\
-        QScrollBar::add-page, QScrollBar::sub-page {\
-            background: transparent;\
-        }\
-        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-            background: transparent;\
-        }\
-        QScrollBar::add-line, QScrollBar::sub-line {\
-            height: 0px;\
-            width: 0px;\
-        }"\
-    );
+    setHandleVisible(true);
 
     setMouseTracking(true);
 
@@ -41,7 +20,7 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
 
 QSize CWizScrollBar::sizeHint() const
 {
-    return QSize(6, 1);
+    return QSize(8, 1);
 }
 
 void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -71,59 +50,17 @@ void CWizScrollBar::showHandle()
     if (maximum() == minimum())
         return;
 
-    setStyleSheet(
-        "QScrollBar {\
-            background: #F5F5F5;\
-        }\
-        QScrollBar::handle {\
-            background: #D8D8D8;\
-            min-height: 30px;\
-        }\
-        QScrollBar::handle:vertical {\
-            margin: 0px 0px 0px 2px;\
-        }\
-        QScrollBar::add-page, QScrollBar::sub-page {\
-            background: transparent;\
-        }\
-        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-            background: transparent;\
-        }\
-        QScrollBar::add-line, QScrollBar::sub-line {\
-            height: 0px;\
-            width: 0px;\
-        }"\
-    );
-        update();
+    setHandleVisible(true);
+    update();
 
 //    QScrollBar::show();
-        m_timerScrollTimeout.start(1000);
+    m_timerScrollTimeout.start(1000);
 }
 
 void CWizScrollBar::hideHandle()
 {
-    setStyleSheet(
-        "QScrollBar {\
-            background: #F5F5F5;\
-        }\
-        QScrollBar::handle {\
-            background: transparent;\
-            min-height: 30px;\
-        }\
-        QScrollBar::handle:vertical {\
-            margin: 0px 0px 0px 2px;\
-        }\
-        QScrollBar::add-page, QScrollBar::sub-page {\
-            background: transparent;\
-        }\
-        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-            background: transparent;\
-        }\
-        QScrollBar::add-line, QScrollBar::sub-line {\
-            height: 0px;\
-            width: 0px;\
-        }"\
-    );
-        update();
+    setHandleVisible(false);
+    update();
 }
 
 void CWizScrollBar::on_sourceValueChanged(int value)
@@ -151,6 +88,31 @@ void CWizScrollBar::on_valueChanged(int value)
 void CWizScrollBar::on_scrollTimeout()
 {
     hideHandle();
+}
+
+void CWizScrollBar::setHandleVisible(bool visible)
+{
+    setStyleSheet(
+        QString("QScrollBar {\
+            background: #F5F5F5;\
+        }\
+        QScrollBar::handle {\
+            background: %1;\
+            min-height: 30px;\
+        }\
+        QScrollBar::handle:vertical {\
+            margin: 0px 2px 0px 2px;\
+        }\
+        QScrollBar::add-page, QScrollBar::sub-page {\
+            background: transparent;\
+        }\
+        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+            background: transparent;\
+        }\
+        QScrollBar::add-line, QScrollBar::sub-line {\
+            height: 0px;\
+            width: 0px;\
+        }").arg(visible ? "#D8D8D8" : "transparent"));
 }
 
 

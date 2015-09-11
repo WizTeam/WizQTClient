@@ -28,6 +28,9 @@ public Q_SLOTS:
     void on_scrollTimeout();
 
 private:
+    void setHandleVisible(bool visible);
+
+private:
     QPointer<QScrollBar> m_scrollSyncSource;
     QTimer m_timerScrollTimeout;
 };

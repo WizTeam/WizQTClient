@@ -89,6 +89,8 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
 
     setFocusPolicy(Qt::StrongFocus);
     d->m_targetWindow = 0;
+
+//    enableBlendingBlurOnOSX10_10(this);
 }
 
 CWizMacToolBar::~CWizMacToolBar()
@@ -116,7 +118,7 @@ CWizMacToolBar::SizeMode CWizMacToolBar::sizeMode() const
 
 void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 {
-    [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
+//    [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
 }
 
 // show the Toolbar in the given window, delayed

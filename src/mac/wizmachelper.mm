@@ -58,7 +58,7 @@
     {
         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-        [vibrant setAutoresizingMask:NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
+        [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
         [vibrant setBlendingMode:mode];        
 
         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
@@ -73,19 +73,31 @@
 
 @implementation NSWindow (BackgroundBlur)
 
-- (void)enableBlur
+- (void)enableBehindBlur
 {
     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+}
+
+- (void)enableBlendingBlur
+{
+    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
 }
 
 @end
 
 
-void enableBlurOnOSX10_10(QWidget* wgt)
+void enableBehindBlurOnOSX10_10(QWidget* wgt)
 {
     NSView *nsview = (NSView *) wgt->winId();
     NSWindow *nswindow = [nsview window];
-    [nswindow enableBlur];
+    [nswindow enableBehindBlur];
+}
+
+void enableBlendingBlurOnOSX10_10(QWidget* wgt)
+{
+    NSView *nsview = (NSView *) wgt->winId();
+    NSWindow *nswindow = [nsview window];
+    [nswindow enableBlendingBlur];
 }
 
 @interface CreateNoteService : NSObject
@@ -842,3 +854,4 @@ void adjustSubViews(QWidget* wgt)
         }
     }
 }
+
