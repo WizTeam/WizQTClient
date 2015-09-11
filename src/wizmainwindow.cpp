@@ -162,11 +162,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
     setWindowStyleForLinux(m_useSystemBasedStyle);
+    connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
 #endif
     windowInstance = this;
     //
     connect(qApp, SIGNAL(aboutToQuit()), SLOT(on_application_aboutToQuit()));
-    connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
     qApp->installEventFilter(this);
 #ifdef Q_OS_MAC
     installEventFilter(this);
@@ -295,6 +295,14 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                         return true;
                     }
                 }
+            }
+        }
+        else if (event->type() == QEvent::ApplicationActivate)
+        {
+            if (!window()->isVisible())
+            {
+                window()->setVisible(true);
+                window()->raise();
             }
         }
         else
@@ -678,7 +686,7 @@ void MainWindow::shiftVisableStatus()
     }
     else
     {
-        wizMacShowCurrentApplication();
+//        wizMacShowCurrentApplication();
         // wait for process finished
         QCoreApplication::processEvents(QEventLoop::AllEvents, 200);
         raise();
