@@ -57,6 +57,7 @@ public:
     WizApiEntry();
 
     static QString analyzerUploadUrl();
+    static QString crashReportUrl();
     static QString standardCommandUrl(const QString& strCommand);
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken);
     static QString standardCommandUrl(const QString& strCommand, const QString& strToken,
