@@ -221,7 +221,7 @@ void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool 
 //        p->fillRect(rcd, bg2);
 //    }
     p->setCompositionMode( QPainter::CompositionMode_Clear );
-    p->fillRect(rcd, Qt::SolidPattern );
+    p->fillRect(rcd, Qt::SolidPattern);
     p->restore();
 }
 

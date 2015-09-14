@@ -75,6 +75,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void keyReleaseEvent(QKeyEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -146,7 +147,6 @@ public:
     // used for smoothly scroll
     void vscrollBeginUpdate(int delta);
     //virtual void updateGeometries();
-    virtual void wheelEvent(QWheelEvent* event);
 //#endif // Q_OS_MAC
 
 public Q_SLOTS:

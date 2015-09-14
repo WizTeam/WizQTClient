@@ -173,9 +173,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     installEventFilter(this);
 
-    setAutoFillBackground(false);
+//    setAutoFillBackground(false);
 //    setWindowFlags(Qt::FramelessWindowHint);
-    setAttribute(Qt::WA_TranslucentBackground, true);
+//    setAttribute(Qt::WA_TranslucentBackground, true);
 
 #endif    
 
@@ -463,48 +463,12 @@ void MainWindow::changeEvent(QEvent* event)
 #ifdef Q_OS_MAC
 void MainWindow::paintEvent(QPaintEvent*event)
 {
-    QMainWindow::paintEvent(event);
-
-//    QPainter painter(this);
-
-//    painter.setCompositionMode( QPainter::CompositionMode_Clear );
-//    painter.fillRect(rect(), Qt::SolidPattern );
-
-//    QPainterPath path;
-//    QRectF rect = geometry();
-//    path.addRoundRect(rect, 4, 1);
-//    QPolygon polygon= path.toFillPolygon().toPolygon();
-//    QRegion region(polygon);
-////    setMask(region);
-//    painter.setClipRegion(region);
-
-////    painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-////    QColor c("#cccccc");
-////    c.setAlpha(210);
-////    painter.fillRect(rect(), c);
-
-
-    QPainter pt(this);
-
-    pt.setCompositionMode( QPainter::CompositionMode_Clear );
-    pt.fillRect(rect(), Qt::SolidPattern );
-
-//    pt.setCompositionMode(QPainter::CompositionMode_SourceOver);
-
-//    QColor c(Qt::white);
-//    c.setAlpha(100);
-//    QColor greyBorder(Qt::white);
-//    pt.setPen(QPen(c));
-//    pt.setBrush(QBrush(c));
-//    pt.drawRoundedRect(rect(), 15, 10);
+//    QPainter pt(this);
 
 //    pt.setCompositionMode( QPainter::CompositionMode_Clear );
-//    QRect rc = rect();
-//    rc.adjust(4, 4, -4, -4);
-//    pt.fillRect(rc, Qt::SolidPattern);
+//    pt.fillRect(rect(), Qt::SolidPattern );
 
-//    pt.setCompositionMode(QPainter::CompositionMode_SourceOver);
-//    pt.fillRect(rc, c);
+    QMainWindow::paintEvent(event);
 }
 #endif
 
@@ -1968,7 +1932,7 @@ void MainWindow::initClient()
     m_clienWgt = new QWidget(nullptr);
     setCentralWidget(m_clienWgt);
 
-    enableBehindBlurOnOSX10_10(m_clienWgt);
+//    enableBehindBlurOnOSX10_10(m_clienWgt);
 
 #else
     setCentralWidget(rootWidget());
@@ -1982,8 +1946,8 @@ void MainWindow::initClient()
     m_clienWgt->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = m_clienWgt->palette();
-    pal.setColor(QPalette::Window, QColor(Qt::transparent));
-    pal.setColor(QPalette::Base, QColor(Qt::transparent));
+    pal.setColor(QPalette::Window, QColor(255, 255, 255, 50));
+    pal.setColor(QPalette::Base, QColor(255, 255, 255, 50));
     m_clienWgt->setPalette(pal);
     m_clienWgt->setAutoFillBackground(true);
 
@@ -2000,7 +1964,7 @@ void MainWindow::initClient()
     pal.setColor(QPalette::Window, QColor(Qt::white));
     pal.setColor(QPalette::Base, QColor(Qt::white));
     QWidget* documentPanel = new QWidget(this);
-    documentPanel->setPalette(pal);
+//    documentPanel->setPalette(pal);
     documentPanel->setAutoFillBackground(true);
     QHBoxLayout* layoutDocument = new QHBoxLayout();
     layoutDocument->setContentsMargins(0, 0, 0, 0);
@@ -2016,7 +1980,7 @@ void MainWindow::initClient()
     m_splitter->addWidget(m_category);
 
     m_docListContainer = new QWidget(this);   
-    m_docListContainer->setPalette(pal);
+//    m_docListContainer->setPalette(pal);
     m_docListContainer->setAutoFillBackground(true);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);

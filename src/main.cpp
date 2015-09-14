@@ -431,7 +431,49 @@ int main(int argc, char *argv[])
     return ret;
 }
 
-// test
+
+//#include <QPainter>
+//#include <QPaintEvent>
+//class TransWindow : public QMainWindow
+//{
+//public:
+//    TransWindow(QWidget* parent = 0) : QMainWindow(parent)
+//    {
+//    }
+
+//protected:
+//    void paintEvent(QPaintEvent*)
+//    {
+//        QPainter p(this);
+//        p.setCompositionMode( QPainter::CompositionMode_Clear );
+//        p.fillRect(rect(), Qt::SolidPattern );
+
+//    //    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+////        p.fillRect( 10, 10, 300, 300, QColor(255, 255, 255, m_alpha));
+//    }
+//};
+
+//class TransWidget : public QWidget
+//{
+//public:
+//    TransWidget(QWidget* parent = 0) : QWidget(parent)
+//    {
+//    }
+
+//protected:
+//    void paintEvent(QPaintEvent*)
+//    {
+//        QPainter p(this);
+//        p.setCompositionMode( QPainter::CompositionMode_Clear );
+//        p.fillRect(rect(), Qt::SolidPattern );
+
+//    //    p.setCompositionMode(QPainter::CompositionMode_SourceOver);
+////        p.fillRect( 10, 10, 300, 300, QColor(255, 255, 255, m_alpha));
+//    }
+//};
+
+
+//// test
 //#include <QLabel>
 //#include <QVBoxLayout>
 //#include <QToolBar>
@@ -439,7 +481,7 @@ int main(int argc, char *argv[])
 //{
 //    QApplication a(argc, argv);
 
-//    QMainWindow window;
+//    TransWindow window;
 //    window.setGeometry(500, 500, 500, 300);
 
 //    window.setAutoFillBackground(false);
@@ -456,6 +498,9 @@ int main(int argc, char *argv[])
 //    wgt->setLayout(layout);
 //    layout->setContentsMargins(0, 0, 0, 0);
 //    layout->addWidget(label);
+//    TransWidget* transWgt = new TransWidget(&window);
+//    transWgt->setMinimumHeight(50);
+//    layout->addWidget(transWgt);
 //    QTreeWidget* tree = new QTreeWidget(wgt);
 //    tree->setStyleSheet("background-color:transparent;");
 //    tree->setAutoFillBackground(true);
@@ -464,7 +509,7 @@ int main(int argc, char *argv[])
 
 //    window.show();
 
-//    enableBlurOnOSX10_10(wgt);
+//    enableBehindBlurOnOSX10_10(wgt);
 
 //    return a.exec();
 //}

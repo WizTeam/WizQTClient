@@ -128,8 +128,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_vScroll = new CWizScrollBar(this);
-    m_vScroll->syncWith(verticalScrollBar());
+//    m_vScroll = new CWizScrollBar(this);
+//    m_vScroll->syncWith(verticalScrollBar());
 #endif
 
     // style
@@ -250,8 +250,8 @@ void CWizCategoryBaseView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar
-    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
-    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+//    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+//    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 #endif
 
     QTreeWidget::resizeEvent(event);
