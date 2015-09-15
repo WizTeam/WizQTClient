@@ -301,14 +301,15 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         {
             if (!window()->isVisible())
             {                
-                window()->setVisible(true);                
+                window()->setVisible(true);
+                window()->raise();
             }
-            if (window()->windowState() & Qt::WindowMinimized)
+            else if (window()->windowState() & Qt::WindowMinimized)
             {
                 window()->setWindowState(window()->windowState() & ~Qt::WindowMinimized);
+                window()->raise();
             }
 
-            window()->raise();
         }
         else
         {
