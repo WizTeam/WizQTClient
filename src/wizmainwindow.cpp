@@ -173,9 +173,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     installEventFilter(this);
 
-//    setAutoFillBackground(false);
+    setAutoFillBackground(false);
 //    setWindowFlags(Qt::FramelessWindowHint);
-//    setAttribute(Qt::WA_TranslucentBackground, true);
+    setAttribute(Qt::WA_TranslucentBackground, true);
 
 #endif    
 
@@ -463,10 +463,10 @@ void MainWindow::changeEvent(QEvent* event)
 #ifdef Q_OS_MAC
 void MainWindow::paintEvent(QPaintEvent*event)
 {
-//    QPainter pt(this);
+    QPainter pt(this);
 
-//    pt.setCompositionMode( QPainter::CompositionMode_Clear );
-//    pt.fillRect(rect(), Qt::SolidPattern );
+    pt.setCompositionMode( QPainter::CompositionMode_Clear );
+    pt.fillRect(rect(), Qt::SolidPattern );
 
     QMainWindow::paintEvent(event);
 }
@@ -1932,7 +1932,7 @@ void MainWindow::initClient()
     m_clienWgt = new QWidget(nullptr);
     setCentralWidget(m_clienWgt);
 
-//    enableBehindBlurOnOSX10_10(m_clienWgt);
+    enableBehindBlurOnOSX10_10(m_clienWgt);
 
 #else
     setCentralWidget(rootWidget());
@@ -1946,8 +1946,8 @@ void MainWindow::initClient()
     m_clienWgt->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
 
     QPalette pal = m_clienWgt->palette();
-    pal.setColor(QPalette::Window, QColor(255, 255, 255, 50));
-    pal.setColor(QPalette::Base, QColor(255, 255, 255, 50));
+    pal.setColor(QPalette::Window, QColor(Qt::transparent));
+    pal.setColor(QPalette::Base, QColor(Qt::transparent));
     m_clienWgt->setPalette(pal);
     m_clienWgt->setAutoFillBackground(true);
 
@@ -1964,9 +1964,9 @@ void MainWindow::initClient()
     pal.setColor(QPalette::Window, QColor(Qt::white));
     pal.setColor(QPalette::Base, QColor(Qt::white));
     QWidget* documentPanel = new QWidget(this);
-//    documentPanel->setPalette(pal);
+    documentPanel->setPalette(pal);
     documentPanel->setAutoFillBackground(true);
-    QHBoxLayout* layoutDocument = new QHBoxLayout();
+    QVBoxLayout* layoutDocument = new QVBoxLayout();
     layoutDocument->setContentsMargins(0, 0, 0, 0);
     layoutDocument->setSpacing(0);
     documentPanel->setLayout(layoutDocument);
@@ -1980,7 +1980,7 @@ void MainWindow::initClient()
     m_splitter->addWidget(m_category);
 
     m_docListContainer = new QWidget(this);   
-//    m_docListContainer->setPalette(pal);
+    m_docListContainer->setPalette(pal);
     m_docListContainer->setAutoFillBackground(true);
     QHBoxLayout* layoutList = new QHBoxLayout();
     layoutList->setContentsMargins(0, 0, 0, 0);
@@ -2008,8 +2008,15 @@ QWidget* MainWindow::createNoteListView()
     layoutList->setSpacing(0);
     m_noteListWidget->setLayout(layoutList);
 
+    //FIXME: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
+//    QPalette pal = m_noteListWidget->palette();
+//    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+//    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+//    m_noteListWidget->setPalette(pal);
+//    m_noteListWidget->setAutoFillBackground(true);
+
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 0, 0);
+    layoutActions->setContentsMargins(0, 0, 8, 0);
     layoutList->setSpacing(0);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
@@ -2017,10 +2024,12 @@ QWidget* MainWindow::createNoteListView()
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
     layoutActions->addWidget(viewBtn);
-    QWidget* line = new QWidget(this);
-    line->setFixedWidth(1);
-    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
-    layoutActions->addWidget(line);
+
+//    QWidget* line = new QWidget(this);
+//    line->setFixedWidth(1);
+//    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
+//    layoutActions->addWidget(line);
+
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(sortBtn, SIGNAL(sortingTypeChanged(int)), SLOT(on_documents_sortingTypeChanged(int)));
@@ -2028,26 +2037,26 @@ QWidget* MainWindow::createNoteListView()
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
-    m_labelDocumentsHint = new QLabel(this);
-    m_labelDocumentsHint->setMargin(5);
-    layoutActions->addWidget(m_labelDocumentsHint);
-    connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
+//    m_labelDocumentsHint = new QLabel(this);
+//    m_labelDocumentsHint->setMargin(5);
+//    layoutActions->addWidget(m_labelDocumentsHint);
+//    connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
-    m_labelDocumentsCount = new QLabel("", this);
-    m_labelDocumentsCount->setMargin(5);
-    layoutActions->addWidget(m_labelDocumentsCount);
-    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
-    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
+//    m_labelDocumentsCount = new QLabel("", this);
+//    m_labelDocumentsCount->setMargin(5);
+//    layoutActions->addWidget(m_labelDocumentsCount);
+//    connect(m_documents, SIGNAL(documentCountChanged()), SLOT(on_documents_documentCountChanged()));
+//    connect(m_documents, SIGNAL(changeUploadRequest(QString)), SLOT(on_quickSync_request(QString)));
 
 
-    //sortBtn->setStyleSheet("padding-top:10px;");
-    m_labelDocumentsHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
-    m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+//    //sortBtn->setStyleSheet("padding-top:10px;");
+//    m_labelDocumentsHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+//    m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
 
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(layoutActions);
     layoutList->addWidget(line2);

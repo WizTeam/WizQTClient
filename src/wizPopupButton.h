@@ -33,15 +33,15 @@ class CWizViewTypePopupButton: public CWizPopupButton
 public:
 
     explicit CWizViewTypePopupButton(CWizExplorerApp &app, QWidget* parent = 0);
-    void setActionIcon(int type);
+//    void setActionIcon(int type);
 
 public slots:
     void on_viewTypeChanged(int type);
 
 private:
-    QIcon m_iconOneLine;
-    QIcon m_iconTwoLine;
-    QIcon m_iconThumbnail;
+//    QIcon m_iconOneLine;
+//    QIcon m_iconTwoLine;
+//    QIcon m_iconThumbnail;
 
 protected:
     virtual QSize sizeHint() const;

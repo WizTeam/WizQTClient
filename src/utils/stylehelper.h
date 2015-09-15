@@ -1,6 +1,7 @@
 #ifndef UTILS_STYLEHELPER_H
 #define UTILS_STYLEHELPER_H
 
+#include <QVariant>
 class QSize;
 class QRect;
 class QPainter;
@@ -126,6 +127,8 @@ public:
 
 private:
     static CWizSettings* m_settings;
+
+    static QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant());
 };
 } // namespace Utils
 

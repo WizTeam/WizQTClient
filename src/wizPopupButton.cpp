@@ -13,8 +13,8 @@ CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
 {
     setPopupMode(QToolButton::InstantPopup);
 
-    QString strIconPath = ::WizGetSkinResourcePath(app.userSettings().skin()) + "arrow.png";
-    m_iconArraw.addFile(strIconPath);
+//    QString strIconPath = ::WizGetSkinResourcePath(app.userSettings().skin()) + "arrow.png";
+//    m_iconArraw.addFile(strIconPath);
 }
 
 void CWizPopupButton::paintEvent(QPaintEvent* event)
@@ -22,8 +22,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     Q_UNUSED(event);
 
     // FIXME
-    int nArrawWidth = 10;
-    int nMargin = 8;
+    int nMargin = 4;
 
     QStyleOptionToolButton opt;
     initStyleOption(&opt);
@@ -35,22 +34,12 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     p.setPen("#787878");
     if (opt.state & QStyle::State_Sunken) {
         p.fillRect(opt.rect, QColor("#dadada"));
-    }
-
-    // draw arraw
-    if (!m_iconArraw.isNull()) {
-        QRect rectArrow = opt.rect;
-        rectArrow.setLeft(rectArrow.right() - nArrawWidth - nMargin);
-        rectArrow.setWidth(nArrawWidth);
-        m_iconArraw.paint(&p, rectArrow, Qt::AlignVCenter, QIcon::Normal);
-    }
+    }    
 
     if (!opt.icon.isNull()) {
         QRect rectIcon = opt.rect;
-        rectIcon.setLeft(rectIcon.left() + nMargin);
-        rectIcon.setRight(rectIcon.right() - nArrawWidth - nMargin * 2);
 
-        if (opt.state & QStyle::State_Active) {
+        if (opt.state & QStyle::State_Sunken) {
             opt.icon.paint(&p, rectIcon, Qt::AlignCenter, QIcon::Active);
         } else {
             opt.icon.paint(&p, rectIcon, Qt::AlignCenter, QIcon::Normal);
@@ -62,7 +51,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     if (!opt.text.isEmpty()) {
         QRect rectText = opt.rect;
         rectText.setLeft(rectText.left() + nMargin);
-        rectText.setRight(rectText.right() - nArrawWidth - nMargin * 2);
+        rectText.setRight(rectText.right() - nMargin * 2);
         QString str = fontMetrics().elidedText(opt.text, Qt::ElideRight, rectText.width());
 #ifdef Q_OS_MAC
         QFont font;
@@ -113,14 +102,16 @@ CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* 
     createAction(tr("One line view"), CWizDocumentListView::TypeOneLine, menu, group);
     setMenu(menu);
 
-    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
-    m_iconOneLine.addFile(strSkinPath + "view_one_line.png");
-    m_iconTwoLine.addFile(strSkinPath + "view_two_line.png");
-    m_iconThumbnail.addFile(strSkinPath + "view_thumbnail.png");
+//    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
+//    m_iconOneLine.addFile(strSkinPath + "view_one_line.png");
+//    m_iconTwoLine.addFile(strSkinPath + "view_two_line.png");
+//    m_iconThumbnail.addFile(strSkinPath + "view_thumbnail.png");
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_view_type");
+    setIcon(icon);
 
     int type = m_app.userSettings().get("VIEW_TYPE").toInt();
     setActionChecked(menu, type);
-    setActionIcon(type);
+//    setActionIcon(type);
 }
 
 QSize CWizViewTypePopupButton::sizeHint() const
@@ -136,34 +127,34 @@ void CWizViewTypePopupButton::on_action_triggered()
     setText(action->text());
 
     int type = action->data().toInt();
-    setActionIcon(type);
+//    setActionIcon(type);
 
     m_app.userSettings().set("VIEW_TYPE", QString::number(type));
 
     Q_EMIT viewTypeChanged(type);
 }
 
-void CWizViewTypePopupButton::setActionIcon(int type)
-{
-    switch (type) {
-    case CWizDocumentListView::TypeOneLine:
-        setIcon(m_iconOneLine);
-        break;
-    case CWizDocumentListView::TypeTwoLine:
-        setIcon(m_iconTwoLine);
-        break;
-    case CWizDocumentListView::TypeThumbnail:
-        setIcon(m_iconThumbnail);
-        break;
-    default:
-        Q_ASSERT(0);
-    }
-}
+//void CWizViewTypePopupButton::setActionIcon(int type)
+//{
+//    switch (type) {
+//    case CWizDocumentListView::TypeOneLine:
+//        setIcon(m_iconOneLine);
+//        break;
+//    case CWizDocumentListView::TypeTwoLine:
+//        setIcon(m_iconTwoLine);
+//        break;
+//    case CWizDocumentListView::TypeThumbnail:
+//        setIcon(m_iconThumbnail);
+//        break;
+//    default:
+//        Q_ASSERT(0);
+//    }
+//}
 
 void CWizViewTypePopupButton::on_viewTypeChanged(int type)
 {
     setActionChecked(menu(), type);
-    setActionIcon(type);
+//    setActionIcon(type);
 }
 
 
@@ -171,7 +162,7 @@ void CWizViewTypePopupButton::on_viewTypeChanged(int type)
 CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent)
     : CWizPopupButton(app, parent)
 {
-    setToolButtonStyle(Qt::ToolButtonTextOnly);
+    setToolButtonStyle(Qt::ToolButtonIconOnly);
 
     // only one action can be checked
     QActionGroup* group = new QActionGroup(this);
@@ -216,6 +207,9 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
         setActionChecked(menu, type);
         m_app.userSettings().set("SORT_TYPE", QString::number(type));
     }
+
+    QIcon icon = ::WizLoadSkinIcon(app.userSettings().skin(), "documents_sort_type");
+    setIcon(icon);
 }
 
 void CWizSortingPopupButton::on_sortingTypeChanged(int type)
@@ -226,11 +220,13 @@ void CWizSortingPopupButton::on_sortingTypeChanged(int type)
 
 QSize CWizSortingPopupButton::sizeHint () const
 {
-#ifdef Q_OS_MAC
-    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
-#else
-    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 12);
-#endif
+//#ifdef Q_OS_MAC
+//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
+//#else
+//    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 12);
+//#endif
+
+    return QSize(32 + 10, fontMetrics().height() + 10);
 }
 
 void CWizSortingPopupButton::on_action_triggered()
@@ -249,7 +245,7 @@ void CWizSortingPopupButton::on_action_triggered()
     else
     {
         type = type * (m_isAscendingOrder ? -1 : 1);
-        setText(action->text());
+//        setText(action->text());
     }
     m_app.userSettings().set("SORT_TYPE", QString::number(type));
 

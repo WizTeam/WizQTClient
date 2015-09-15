@@ -47,24 +47,23 @@ public:
         QPainter painter(this);
 
         // FIXME: hard-coded
-//        QColor bgColor = QColor("#F5F5F5");
-        QColor bgColor(Qt::red);
+        QColor bgColor = QColor("#F5F5F5");
         painter.fillRect(event->rect(), bgColor);
     }
 
     virtual void resizeEvent(QResizeEvent *event)
     {
-        if (orientation() == Qt::Horizontal)
-            setContentsMargins(2, 0, 2, 0);
-        else
-            setContentsMargins(0, 2, 0, 2);
-        setMask(QRegion(contentsRect()));
+//        if (orientation() == Qt::Horizontal)
+//            setContentsMargins(2, 0, 2, 0);
+//        else
+//            setContentsMargins(0, 2, 0, 2);
+//        setMask(QRegion(contentsRect()));
         QSplitterHandle::resizeEvent(event);
     }
 
     virtual QSize sizeHint() const
     {
-        return QSize(2, 1);
+        return QSize(1, 1);
     }
 };
 
@@ -72,7 +71,7 @@ public:
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
-    setHandleWidth(2);
+    setHandleWidth(0);
     setChildrenCollapsible(false);
 }
 

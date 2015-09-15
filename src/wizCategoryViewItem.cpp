@@ -357,9 +357,9 @@ CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_messages_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "messages_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "messages_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 
@@ -508,9 +508,9 @@ CWizCategoryViewShortcutRootItem::CWizCategoryViewShortcutRootItem(CWizExplorerA
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_shortcut_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "shortcut_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_shortcut_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -724,9 +724,9 @@ CWizCategoryViewSearchRootItem::CWizCategoryViewSearchRootItem(CWizExplorerApp& 
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -753,9 +753,9 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folders_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folders_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folders_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -812,14 +812,14 @@ CWizCategoryViewFolderItem::CWizCategoryViewFolderItem(CWizExplorerApp& app,
     QIcon icon;
     if (::WizIsPredefinedLocation(strLocation) && strLocation == "/My Journals/") {
         icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_diary_normal"),
-                     QSize(16, 16), QIcon::Normal);
-//        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_diary_selected"),
-//                     QSize(16, 16), QIcon::Selected);
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_diary_selected"),
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     } else {
         icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_normal"),
-                     QSize(16, 16), QIcon::Normal);
-//        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
-//                     QSize(16, 16), QIcon::Selected);
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_selected"),
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     }
     setIcon(0, icon);
     setText(0, CWizDatabase::GetLocationDisplayName(strLocation));
@@ -977,9 +977,9 @@ CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_normal"),
-                 QSize(16, 16), QIcon::Normal);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_selected"),
-                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -1030,9 +1030,9 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
 }
@@ -1131,9 +1131,9 @@ CWizCategoryViewStyleRootItem::CWizCategoryViewStyleRootItem(CWizExplorerApp& ap
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "style_normal"),
-                 QSize(16, 16), QIcon::Normal);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "style_selected"),
-                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -1150,9 +1150,9 @@ CWizCategoryViewGroupsRootItem::CWizCategoryViewGroupsRootItem(CWizExplorerApp& 
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }
@@ -1223,9 +1223,9 @@ CWizCategoryViewBizGroupRootItem::CWizCategoryViewBizGroupRootItem(CWizExplorerA
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_biz_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_biz_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_biz_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
 }
 
@@ -1431,9 +1431,9 @@ CWizCategoryViewOwnGroupRootItem::CWizCategoryViewOwnGroupRootItem(CWizExplorerA
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
 }
 
@@ -1452,9 +1452,9 @@ CWizCategoryViewJionedGroupRootItem::CWizCategoryViewJionedGroupRootItem(CWizExp
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
 }
 
@@ -1474,9 +1474,9 @@ CWizCategoryViewGroupRootItem::CWizCategoryViewGroupRootItem(CWizExplorerApp& ap
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, m_strName);
 }
@@ -1754,10 +1754,10 @@ CWizCategoryViewGroupNoTagItem::CWizCategoryViewGroupNoTagItem(CWizExplorerApp& 
     : CWizCategoryViewItemBase(app, PREDEFINED_UNCLASSIFIED, strKbGUID, Category_GroupNoTagItem)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_unclassified_normal"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_unclassified_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, PREDEFINED_UNCLASSIFIED);
 }
@@ -1794,9 +1794,9 @@ CWizCategoryViewGroupItem::CWizCategoryViewGroupItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_normal"),
-                 QSize(16, 16), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
 }
@@ -1931,9 +1931,9 @@ CWizCategoryViewTrashItem::CWizCategoryViewTrashItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "trash_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, PREDEFINED_TRASH);
 }
@@ -2039,16 +2039,16 @@ CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
         if (bEncrypted)
         {
             icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted"),
-                         QSize(16, 16), QIcon::Normal);
-//            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
-//                         QSize(16, 16), QIcon::Selected);
+                         Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_encrypted_selected"),
+                         Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
         }
         else
         {
             icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge"),
-                         QSize(16, 16), QIcon::Normal);
-//            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
-//                         QSize(16, 16), QIcon::Selected);
+                         Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+            icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "document_badge_selected"),
+                         Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
         }
     }
         break;
@@ -2056,17 +2056,17 @@ CWizCategoryViewShortcutItem::CWizCategoryViewShortcutItem(CWizExplorerApp& app,
     case GroupTag:
     {
         icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_normal"),
-                     QSize(14, 14), QIcon::Normal);
-//        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "folder_selected"),
-//                     QSize(16, 16), QIcon::Selected);
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_folder_selected"),
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     }
         break;
     case PersonalTag:
     {
         icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_normal"),
-                     QSize(14, 14), QIcon::Normal);
-//        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tag_selected"),
-//                     QSize(16, 16), QIcon::Selected);
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_selected"),
+                     Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     }
         break;
     }
@@ -2138,9 +2138,9 @@ CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app,
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_normal"),
-                 QSize(14, 14), QIcon::Normal);
-//    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "search_selected"),
-//                 QSize(16, 16), QIcon::Selected);
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_selected"),
+                 Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
 }

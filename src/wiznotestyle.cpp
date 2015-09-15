@@ -382,7 +382,7 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {
-                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
+//                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);
             }

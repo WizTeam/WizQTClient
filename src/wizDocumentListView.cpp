@@ -78,8 +78,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-//    m_vScroll = new CWizScrollBar(this);
-//    m_vScroll->syncWith(verticalScrollBar());
+    m_vScroll = new CWizScrollBar(this);
+    m_vScroll->syncWith(verticalScrollBar());
 #endif
 
     // setup style
@@ -211,8 +211,8 @@ void CWizDocumentListView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar position
-//    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
-//    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
+    m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());
+    m_vScroll->move(event->size().width() - m_vScroll->sizeHint().width(), 0);
 #endif
 
     // FIXME!!!
@@ -1865,13 +1865,11 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
 {
     if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
-        qDebug() << "document item rect : " << vopt->rect << " left top ; " << mapToGlobal(vopt->rect.topLeft());
-        pItem->draw(p, vopt, m_nViewType);
-
-        p->save();
-        p->setPen(QPen(Qt::blue));
-        p->drawPoint(mapToGlobal(vopt->rect.topLeft()));
-        p->restore();
+        int nRightMargin = 8;
+        QStyleOptionViewItemV4 newVopt(*vopt);
+        newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
+        newVopt.rect.setLeft(newVopt.rect.left() + 2);
+        pItem->draw(p, &newVopt, m_nViewType);
     }
 }
 
