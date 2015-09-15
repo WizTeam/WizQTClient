@@ -642,12 +642,6 @@ QString WizApiEntry::analyzerUploadUrl()
     return analyzerUrl;
 }
 
-QString WizApiEntry::crashReportUrl()
-{
-    QString strUrl = requestUrl("crash_http");
-    return strUrl;
-}
-
 QString WizApiEntry::standardCommandUrl(const QString& strCommand)
 {
     QString strUrl = urlFromCommand(strCommand);

@@ -48,8 +48,6 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 bool wizIsYosemiteFilePath(const QString& strPath);
 QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);
 
-void initCrashReporter();
-
 #endif // Q_OS_MAC
 
 #endif // COCOAHELP_H

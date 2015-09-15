@@ -183,7 +183,6 @@ set(wiznote_SOURCES
     sync/wizJSONServerBase.cpp
     share/wizObjectOperator.cpp
     widgets/wizLocalProgressWebView.cpp
-    widgets/wizCrashReportDialog.cpp
     core/wizSingleDocumentView.cpp
 )
 
@@ -350,7 +349,6 @@ set(wiznote_HEADERS
     sync/wizJSONServerBase.h
     share/wizObjectOperator.h
     widgets/wizLocalProgressWebView.h
-    widgets/wizCrashReportDialog.h
     core/wizSingleDocumentView.h
 )
 
@@ -374,7 +372,6 @@ set(wiznote_FORMS
     ui/wizMarkdownTemplateDialog.ui
     ui/wizIAPDialog.ui
     ui/wizAdvancedSearchDialog.ui
-    ui/wizCrashReportDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -422,13 +419,10 @@ if(UNIX)
         find_library(_WEBKIT_LIBRARY WebKit)
         find_library(_STORE_LIBRARY StoreKit)
         find_library(_IO_LIBRARY IOKit)
-        if (PLCrashReporter)
-            find_library(_CRASHREPORTER CrashReporter)
-        endif(if (PLCrashReporter))
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY} ${_CRASHREPORTER})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")

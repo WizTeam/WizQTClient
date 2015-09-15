@@ -184,7 +184,6 @@ int mainCore(int argc, char *argv[])
 #ifdef BUILD4APPSTORE
     CWizIAPHelper helper;
     helper.validteReceiptOnLauch();
-    //
 #endif
 #endif
 
@@ -273,8 +272,6 @@ int mainCore(int argc, char *argv[])
         globalSettings->setValue("Common/Installed", 1);
         installOnLinux();
     }
-#else
-    initCrashReporter();
 #endif
 
 
