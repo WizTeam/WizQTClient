@@ -619,7 +619,7 @@ UINT CWizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
         lpszBegin = ::wiz_strinc(lpszBegin);
 
     // name doesn't begin with an alphabet?
-    if (!::wiz_isalpha(*lpszBegin))
+    if (!::wiz_isalpha(*lpszBegin)  && (*lpszBegin != _T('_')))
         return (0U);
 
     lpszEnd = lpszBegin;
