@@ -93,11 +93,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab->addWidget(m_docView);
     m_tab->addWidget(m_passwordView);
     m_tab->addWidget(m_msgWidget);
-    m_tab->setCurrentWidget(m_docView);
+    m_tab->setCurrentWidget(m_docView);    
 
-    m_splitter = new CWizSplitter(this);
-    m_splitter->addWidget(m_web);
-    m_splitter->addWidget(m_commentWidget);
     m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
     m_comments = m_commentWidget->web();
     QWebPage *commentPage = new QWebPage(m_comments);
@@ -116,10 +113,21 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_commentWidget->hide();
 
-    layoutDoc->addWidget(m_title);
+    QWidget* wgtEditor = new QWidget(m_docView);
+    QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
+    layoutEditor->setSpacing(0);
+    layoutEditor->setContentsMargins(0, 0, 0, 0);
+    layoutEditor->addWidget(m_title);
+    layoutEditor->addWidget(m_web);
+
+    m_splitter = new CWizSplitter(this);
+    m_splitter->addWidget(wgtEditor);
+    m_splitter->addWidget(m_commentWidget);
+    m_splitter->setOrientation(Qt::Horizontal);
+
     layoutDoc->addWidget(m_splitter);
-    layoutDoc->setStretchFactor(m_title, 0);
-    layoutDoc->setStretchFactor(m_splitter, 1);
+//    layoutDoc->setStretchFactor(m_title, 0);
+//    layoutDoc->setStretchFactor(m_splitter, 1);
 
 #ifdef USEWEBENGINE
     QLineEdit *commandLine = new QLineEdit(this);

@@ -69,7 +69,7 @@ QPixmap CWizToolButtonWidget::getBackgroundImage(bool selected)
         pt.setBrush(Qt::NoBrush);
         pt.drawPixmap(QRect(0, 0, left.width(), nPixHeight), left);
         pt.drawPixmap(QRect(left.width(), 0, pix.width() - left.width() - right.width(), nPixHeight), mid);
-        pt.drawPixmap(QRect(pix.width() - right.width(), 0, right.width(), nPixHeight), right);
+        pt.drawPixmap(QRect(pix.width() - right.width() - 1, 0, right.width(), nPixHeight), right);
         m_backgroundNormal = pix;
         return m_backgroundNormal;
     }

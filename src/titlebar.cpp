@@ -70,7 +70,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
     int nEditToolBarHeight = Utils::StyleHelper::editToolBarHeight();
-    m_editorBar->setFixedHeight(nEditToolBarHeight);
+//    m_editorBar->setFixedHeight(nEditToolBarHeight);
     m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
     m_infoBar->setFixedHeight(nEditToolBarHeight);
 
@@ -163,7 +163,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
-    layoutInfo2->setContentsMargins(0, 0, 0, 0);
+    layoutInfo2->setContentsMargins(14, 0, 14, 0);
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
@@ -180,12 +180,12 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo1->setContentsMargins(0, 0, 0, 0);
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
-    layoutInfo1->addWidget(line1);
+//    layoutInfo1->addWidget(line1);
     layoutInfo1->addWidget(m_tagBar);
     layoutInfo1->addWidget(m_tagBarSpacer);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
-    layoutInfo1->addWidget(line3);
+//    layoutInfo1->addWidget(line3);
     m_editorBar->hide();
 
     layout->addLayout(layoutInfo1);

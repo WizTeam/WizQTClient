@@ -96,12 +96,12 @@ void CellButton::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_On)
         state = QIcon::On;
 
-    if (m_pos == Center || m_pos == Right)
-    {
-        p.setPen(QColor("#F8F8F8"));
-        QRect rcBorder = rect();
-        p.drawLine(rcBorder.topLeft(), rcBorder.bottomLeft());
-    }
+//    if (m_pos == Center || m_pos == Right)
+//    {
+//        p.setPen(QColor("#F8F8F8"));
+//        QRect rcBorder = rect();
+//        p.drawLine(rcBorder.topLeft(), rcBorder.bottomLeft());
+//    }
     //m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
 
     QSize size = iconSize();

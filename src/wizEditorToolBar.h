@@ -37,8 +37,6 @@ public:
 
     bool hasFocus();
 
-protected:
-    QSize sizeHint() const;
 
 private:
     CWizExplorerApp& m_app;
@@ -72,12 +70,15 @@ private:
     CWizToolButton* m_btnScreenShot;
     CWizToolButton* m_btnViewSource;
     CWizToolButton* m_btnInsertCode;
+    CWizToolButton* m_btnShowExtra;
     QMenu* m_menuJustify;
     QAction* m_actionJustifyLeft;
     QAction* m_actionJustifyCenter;
     QAction* m_actionJustifyRight;
 
     QString m_strImageSrc;
+
+    QWidget* m_extraButtonsWidget;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
@@ -142,6 +143,7 @@ protected Q_SLOTS:
     void on_btnScreenShot_clicked();
     void on_btnViewSource_clicked();
     void on_btnInsertCode_clicked();
+    void on_btnShowExtra_clicked();
     void on_editor_saveImageAs_triggered();
     void on_editor_copyImage_triggered();
     void on_editor_copyImageLink_triggered();

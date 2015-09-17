@@ -12,6 +12,7 @@ class QPolygonF;
 class QFont;
 class QIcon;
 class CWizSettings;
+class QMargins;
 
 namespace Utils {
 class StyleHelper
@@ -118,6 +119,8 @@ public:
     static int fontNormal(QFont& f);
     static int fontExtend(QFont& f);
 
+    static int editorButtonHeight();
+    static QMargins editorBarMargins();
     static int titleEditorHeight();
     static int editToolBarHeight();
     static int infoBarHeight();

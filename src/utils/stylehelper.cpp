@@ -744,6 +744,16 @@ int StyleHelper::fontExtend(QFont& f)
     return QFontMetrics(f).height();
 }
 
+int StyleHelper::editorButtonHeight()
+{
+    return 27;
+}
+
+QMargins StyleHelper::editorBarMargins()
+{
+    return QMargins(14, 0, 14, 0);
+}
+
 int StyleHelper::titleEditorHeight()
 {
     return 30;
