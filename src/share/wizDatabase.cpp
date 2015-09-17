@@ -3799,7 +3799,7 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
             } else if (strLocation == "/My Journals/") {
                 return tr("My Journals");
             } else if (strLocation == "/My Contacts/") {
-                return tr("My Journals");
+                return tr("My Contacts");
             } else if (strLocation == "/My Events/") {
                 return tr("My Events");
             } else if (strLocation == "/My Sticky Notes/") {
