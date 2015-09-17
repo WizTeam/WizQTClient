@@ -1,7 +1,6 @@
 #ifndef WIZUSERINFOWIDGET_H
 #define WIZUSERINFOWIDGET_H
 
-
 #ifdef USECOCOATOOLBAR
 #include "mac/wizUserInfoWidgetBaseMac_mm.h"
 #define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac

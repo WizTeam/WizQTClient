@@ -22,6 +22,7 @@ enum documentType {
 
 class QMainWindow;
 class QWidget;
+class QMacCocoaViewContainer;
 
 float qt_mac_get_scalefactor(QWidget *window);
 
@@ -54,6 +55,8 @@ void enableBehindBlurOnOSX10_10(QWidget* wgt);
 void enableBlendingBlurOnOSX10_10(QWidget* wgt);
 
 void adjustSubViews(QWidget* wgt);
+
+QMacCocoaViewContainer* createViewContainer(QWidget* wgt);
 
 #endif // Q_OS_MAC
 

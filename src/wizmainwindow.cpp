@@ -528,10 +528,13 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
+    m_doc->setVisible(false);
     QMainWindow::resizeEvent(event);
 //    Q_UNUSED(event);
 //    adjustSubViews(m_clienWgt);
     update();
+
+    m_doc->setVisible(true);
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -1817,18 +1820,27 @@ void MainWindow::initToolBar()
     #ifdef USECOCOATOOLBAR
     m_toolBar->showInWindow(this);
 
-    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info, "", "");
-
-    m_toolBar->addStandardItem(CWizMacToolBar::Space);
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 1), m_toolBar);
-    m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
-    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(140, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addSearch(tr("Search"), "");
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+
+    CWizToolButtonWidget* toolButtonContainer = new CWizToolButtonWidget(m_toolBar);
+    QIcon iconNewNote = Utils::StyleHelper::loadIcon("toolButtonNewNote");
+    toolButtonContainer->setIcon(iconNewNote);
+    toolButtonContainer->setText(tr("New Note"));
+    connect(toolButtonContainer, SIGNAL(triggered(bool)),
+            m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
+    m_toolBar->addWidget(toolButtonContainer, "", "");
+
+    m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(info, "", "");
     //
     m_searchWidget = m_toolBar->getSearchWidget();
     #else
@@ -2007,13 +2019,8 @@ QWidget* MainWindow::createNoteListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_noteListWidget->setLayout(layoutList);
-
-    //FIXME: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-//    QPalette pal = m_noteListWidget->palette();
-//    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
-//    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
-//    m_noteListWidget->setPalette(pal);
-//    m_noteListWidget->setAutoFillBackground(true);
+    m_noteListWidget->setStyleSheet("background-color:#F5F5F5;");
+    m_noteListWidget->setAutoFillBackground(true);
 
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 8, 0);
@@ -2023,12 +2030,7 @@ QWidget* MainWindow::createNoteListView()
     viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
-    layoutActions->addWidget(viewBtn);
-
-//    QWidget* line = new QWidget(this);
-//    line->setFixedWidth(1);
-//    line->setStyleSheet("border-left-width:1;border-left-style:solid;border-left-color:#DADAD9");
-//    layoutActions->addWidget(line);
+    layoutActions->addWidget(viewBtn);    
 
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
@@ -2056,11 +2058,15 @@ QWidget* MainWindow::createNoteListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; margin-right:8px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(layoutActions);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
+
+    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
+    m_documents->setStyleSheet("background-color: qlineargradient(x1: 0px, y1: 0px, x2: 0.01, y2: 0, \
+                               stop: 0 #F5F5F5, stop: 0.5 #FAFAFA stop:1 #FFFFFF)");
 
     return m_noteListWidget;
 }
@@ -3513,6 +3519,9 @@ void MainWindow::adjustToolBarLayout()
     }
 #else
 //#ifndef USECOCOATOOLBAR
+
+    return;
+
     if (!m_toolBar)
         return;
     //

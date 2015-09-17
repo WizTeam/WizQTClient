@@ -12,6 +12,7 @@
 #include <QWebElementCollection>
 #include <QWebFrame>
 #include <QEventLoop>
+#include <QMacCocoaViewContainer>
 #include <QDebug>
 
 #import <WebKit/WebKit.h>
@@ -59,7 +60,7 @@
         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
         [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
-        [vibrant setBlendingMode:mode];        
+        [vibrant setBlendingMode:mode];
 
         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
 
@@ -855,3 +856,11 @@ void adjustSubViews(QWidget* wgt)
     }
 }
 
+
+
+QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
+{
+    NSView* wgtView = (NSView *) wgt->winId();
+    QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
+    return container;
+}

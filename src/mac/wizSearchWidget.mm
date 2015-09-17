@@ -111,6 +111,9 @@
         widget->clearFocus();
     }
 
+    [self selectText:self];
+    [[self currentEditor] setSelectedRange:NSMakeRange([[self stringValue] length], 0)];
+
     return YES;
 }
 - (void)textDidEndEditing:(NSNotification *)aNotification

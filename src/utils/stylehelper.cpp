@@ -115,9 +115,9 @@ QColor StyleHelper::treeViewBackground()
 QColor StyleHelper::treeViewItemBackground(int stat)
 {    
     if (stat == Selected) {
-        return QColor(getValue("Category/ItemSelectedNoFocus", "#D3E4ED").toString());
+        return QColor(getValue("Category/ItemSelectedNoFocus", "#3177EE").toString());
     } else if (stat == Active) {
-        return QColor(getValue("Category/ItemSelected", "#5990ef").toString());
+        return QColor(getValue("Category/ItemSelected", "#C1C1C1").toString());
     }
 
     Q_ASSERT(0);

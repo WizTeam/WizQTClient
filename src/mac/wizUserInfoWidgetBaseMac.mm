@@ -4,6 +4,7 @@
 #ifdef USECOCOATOOLBAR
 #include <QWidget>
 #include <QMenu>
+#include <QToolButton>
 
 
 #if QT_VERSION >= 0x050200
@@ -99,7 +100,7 @@
 }
 - (void)drawRect:(NSRect)dirtyRect
 {
-    const int nAvatarWidth = 32;
+    const int nAvatarWidth = 26;
     //
     CGRect rect = [self frame];
     //
@@ -108,9 +109,7 @@
     //
     CGRect avatarRect = rect;
     avatarRect.size.width = nAvatarWidth;
-    avatarRect.size.height = nAvatarWidth;
-    avatarRect.size.height -= 4;
-    avatarRect.size.width -= 4;
+    avatarRect.size.height = nAvatarWidth;    
     //
     QPixmap pixmap = m_widget->getAvatar(avatarRect.size.width, avatarRect.size.height);
     if (!pixmap.isNull())
@@ -238,6 +237,203 @@
 @end
 
 
+@interface WizToolButtonView: NSView
+{
+    CWizToolButtonWidget *m_widget;
+    NSFont* m_font;
+    BOOL m_mouseDown;
+}
+- (id)initWithWidget:(CWizToolButtonWidget*)object;
+- (NSFont*) font;
+@end
+
+@implementation WizToolButtonView
+- (id)initWithWidget:(CWizToolButtonWidget*)object;
+{
+    self = [super init];
+    m_widget = object;
+    m_font = [NSFont systemFontOfSize:12];
+    m_mouseDown = NO;
+    return self;
+}
+- (NSFont*) font
+{
+    return m_font;
+}
+
+//- (void)viewDidMoveToWindow
+//{
+//    if (m_oldTracking > 0)
+//    {
+//        [self removeTrackingRect:m_oldTracking];
+//    }
+//    m_oldTracking = [self addTrackingRect:self.frame owner:self userData:NULL assumeInside:NO];
+//}
+
+- (NSPoint)convertToScreenFromLocalPoint:(NSPoint)point relativeToView:(NSView *)view
+    {
+        NSScreen *currentScreen = [NSScreen currentScreenForMouseLocation];
+        if(currentScreen)
+        {
+            NSPoint windowPoint = [view convertPoint:point toView:nil];
+            NSPoint screenPoint = [[view window] convertBaseToScreen:windowPoint];
+            NSPoint flippedScreenPoint = [currentScreen flipPoint:screenPoint];
+            flippedScreenPoint.y += [currentScreen frame].origin.y;
+
+            return flippedScreenPoint;
+        }
+
+        return NSZeroPoint;
+    }
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+        const int nHeight = 26;
+        const int nTopMargin = 10;
+        //
+        CGRect rect = [self frame];
+//        NSLog(@"tool button rect : %@", rect);
+
+        //
+        //[[NSColor whiteColor] set];
+        //[NSBezierPath fillRect:rect];
+        //
+        CGRect bgRect = rect;
+        bgRect.origin.y = -2;
+        bgRect.size.height = nHeight;
+        //
+        QPixmap pixmap = m_widget->getBackgroundImage(true);
+        if (!pixmap.isNull())
+        {
+            NSImage* img = ::WizToNSImage(pixmap);
+            if (img)
+            {
+                NSSize imageSize = [img size];
+                CGRect imageRect;
+                imageRect.origin = NSZeroPoint;
+//                imageRect.origin.y = 5;
+//                bgRect.size.height = nHeight;
+                imageRect.size = imageSize;
+                imageRect.size.height = nHeight;
+//                bgRect.size = imageSize;
+                //
+//                [img drawInRect: bgRect fromRect:imageRect operation:NSCompositeSourceOver fraction:1];
+//                [img drawInRect: bgRect];
+                int x = rect.origin.x;
+                int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
+                NSPoint pt;
+                pt.x = x;
+                pt.y = y - nTopMargin;
+                [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+                [img release];
+            }
+        }
+
+        CGRect iconRect = rect;
+        iconRect.origin.x = 14;
+        QIcon icon = m_widget->getIcon();
+        if (!icon.isNull())
+        {
+            NSImage* img = ::WizToNSImage(icon);
+            if (img)
+            {
+                NSSize imageSize = [img size];
+                CGRect imageRect;
+                imageRect.origin = NSZeroPoint;
+                imageRect.size = imageSize;
+                //
+                int x = iconRect.origin.x;
+                int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
+                NSPoint pt;
+                pt.x = x;
+                pt.y = y - 9;
+                //
+                [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+                [img release];
+            }
+        }
+
+        //
+        CGRect textRect = rect;
+        textRect.origin.x = textRect.origin.x + 28;
+//        textRect.size.width = m_widget->textWidth();
+        //
+        QString text = m_widget->getText();
+        if (!text.isEmpty())
+        {
+            int fontHeight = 14;//m_widget->textHeight();
+            //
+            CGFloat yOffset = (textRect.size.height - fontHeight) / 2.0 + textRect.origin.y - 7;
+            textRect = CGRectMake(textRect.origin.x, yOffset, textRect.size.width, fontHeight);
+            //
+            NSNumber* underLine = [[NSNumber alloc] initWithInteger: (m_mouseDown ? 1 :0 )];
+            NSColor* textColor = [NSColor colorWithDeviceRed:0x78/255.0 green:0x78/255.0 blue:0x78/255.0 alpha:1.0];
+
+
+            NSString* nsText = ::WizToNSString(text);
+            //
+            NSMutableParagraphStyle * paragraphStyle =
+                [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+            [paragraphStyle setAlignment:NSLeftTextAlignment];
+            NSDictionary * attributes = [NSDictionary dictionaryWithObjectsAndKeys:
+                    paragraphStyle, NSParagraphStyleAttributeName,
+                    m_font, NSFontAttributeName,
+                    underLine, NSUnderlineStyleAttributeName,
+                    textColor, NSForegroundColorAttributeName,
+                    nil];
+
+            [nsText drawInRect:textRect withAttributes:attributes];
+        }
+        //
+        return;
+        //
+//        m_menuPos.x = textRect.origin.x - self.frame.origin.x;
+//        m_menuPos.y = textRect.origin.y - self.frame.origin.y;
+        //
+
+//        QIcon iconArrow = m_widget->getArrow();
+//        if (!iconArrow.isNull())
+//        {
+//            NSImage* img = ::WizToNSImage(iconArrow);
+//            if (img)
+//            {
+//                NSSize imageSize = [img size];
+//                CGRect imageRect;
+//                imageRect.origin = NSZeroPoint;
+//                imageRect.size = imageSize;
+//                //
+//                int x = textRect.origin.x + textRect.size.width;
+//                int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
+//                NSPoint pt;
+//                pt.x = x;
+//                pt.y = y - 6;
+//                //
+//                [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+//                [img release];
+//            }
+//        }
+}
+
+    - (void)mouseUp:(NSEvent *)theEvent
+    {
+        [super mouseUp:theEvent];
+        m_mouseDown = NO;
+        [self setNeedsDisplay: YES];
+
+        m_widget->buttonClicked();
+    }
+
+    - (void)mouseDown:(NSEvent *)theEvent
+    {
+        [super mouseDown:theEvent];
+        m_mouseDown = YES;
+        [self setNeedsDisplay: YES];
+    }
+
+
+    @end
+
+
 CWizUserInfoWidgetBaseMac::CWizUserInfoWidgetBaseMac(QWidget* parent)
     : QMacCocoaViewContainer(nil, parent)
     , m_menuPopup(NULL)
@@ -306,5 +502,17 @@ void CWizUserInfoWidgetBaseMac::updateUI()
     //
     [view setNeedsDisplay: YES];
 }
+
+CWizToolButtonWidget::CWizToolButtonWidget(QWidget* parent)
+    : QMacCocoaViewContainer(nil, parent)
+{
+    WizToolButtonView* view = [[WizToolButtonView alloc] initWithWidget:this];
+
+    [view setAutoresizesSubviews: YES];
+    [view setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+    setCocoaView(view);
+    [view release];
+}
+
 
 #endif
