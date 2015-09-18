@@ -137,7 +137,7 @@ private:
     bool isAvatarNeedUpdate(const QString& strFileName);
     bool isContainsAttachment() const;
 
-    int badgeType() const;
+    int badgeType(bool isSummaryView = false) const;
 
     //bool adjust(const QListWidgetItem &other) const;
 

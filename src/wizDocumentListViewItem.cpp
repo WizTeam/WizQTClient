@@ -74,10 +74,11 @@ bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
     return false;
 }
 
-int CWizDocumentListViewDocumentItem::badgeType() const
+int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
-    int nType = m_data.doc.nProtected ? Utils::StyleHelper::BadgeEncryted : Utils::StyleHelper::BadgeNormal;
-    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? Utils::StyleHelper::BadgeAlwaysOnTop : nType;
+    int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInTitle : DocTypeEncrytedInTitle) : DocTypeNormal;
+    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? (DocTypeAlwaysOnTop | nType) : nType;
+    nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
     return nType;
 }
 
@@ -478,9 +479,8 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
         rcd.setRight(rcp.left());
     }
 
-    int nType = badgeType();
-    bool bContainsAttach = isContainsAttachment();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
+    int nType = badgeType(true);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -499,9 +499,8 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
     int nAvatarRightMargin = 4;
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
-    int nType = badgeType();
-    bool bContainsAttach = isContainsAttachment();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected, bContainsAttach);
+    int nType = badgeType(true);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -512,8 +511,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    bool bContainsAttach = isContainsAttachment();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -530,8 +528,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = badgeType();
-    bool bContainsAttach = isContainsAttachment();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected, bContainsAttach);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
@@ -542,8 +539,7 @@ void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    bool bContainsAttach = isContainsAttachment();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected, bContainsAttach);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const

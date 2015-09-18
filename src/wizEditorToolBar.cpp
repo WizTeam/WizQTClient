@@ -583,7 +583,7 @@ protected:
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
-        QRect rectColor(opt.rect.x() + 4, opt.iconSize.height() + 1, opt.iconSize.width() - 4, 4);
+        QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 5, opt.iconSize.width() - 2, 2);
         p.fillRect(QRect(rectColor), m_color);
     }
 

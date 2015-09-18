@@ -684,7 +684,7 @@ void CommonApiEntry::getEndPoints()
 {
     qDebug() << "get end points";
     QString urls = requestUrl("endpoints");
-    if (urls.isEmpty())
+    if (urls.isEmpty() || !urls.contains("http"))
         return;
 
     rapidjson::Document d;

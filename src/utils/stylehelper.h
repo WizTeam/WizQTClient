@@ -14,6 +14,13 @@ class QIcon;
 class CWizSettings;
 class QMargins;
 
+#define  DocTypeNormal                         0x0000
+#define  DocTypeEncrytedInTitle             0x0001
+#define  DocTypeEncrytedInSummary   0x0002
+#define  DocTypeAlwaysOnTop               0x0004
+#define  DocTypeContainsAttachment    0x0008
+
+
 namespace Utils {
 class StyleHelper
 {
@@ -25,10 +32,11 @@ public:
     };
 
     enum BadgeType {
-        BadgeNormal,
-        BadgeEncryted,
-        BadgeAlwaysOnTop
+        BadgeAttachment,
+        BadgeEncryptedInTitle,
+        BadgeEncryptedInSummary
     };
+
 
     enum ListViewType {
         ListTypeThumb,
@@ -84,8 +92,10 @@ public:
     static QColor listViewSectionItemText();
     static QColor listViewSectionItemBackground();
     static QColor listViewItemBackground(int stat);
+    static QColor listViewItemType(bool bSelected, bool bFocused);
     static QColor listViewItemTitle(bool bSelected, bool bFocused);
     static QColor listViewItemLead(bool bSelected, bool bFocused);
+    static QColor listViewItemLocation(bool bSelected, bool bFocused);
     static QColor listViewItemSummary(bool bSelected, bool bFocused);
     static QColor listViewMultiLineFirstLine(bool bSelected);
     static QColor listViewMultiLineOtherLine(bool bSelected);
@@ -93,7 +103,7 @@ public:
     static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QString& lead, const QString& abs,
-                                      bool bFocused, bool bSelected, bool bContainsAttach);
+                                      bool bFocused, bool bSelected);
 
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
@@ -109,7 +119,7 @@ public:
     static void drawListViewItemBackground(QPainter* p, const QRect& rc, ListViewBGType bgType);
     static QRect drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);
-    static QRect drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
+    static QRect drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, bool bFocus, bool bSelect);
 
     static int avatarHeight(bool bNoScreenFactor = false);
     static QSize avatarSize(bool bNoScreenFactor = false);
@@ -117,6 +127,7 @@ public:
 
     static int fontHead(QFont& f);
     static int fontNormal(QFont& f);
+    static int fontThumb(QFont& f);
     static int fontExtend(QFont& f);
 
     static int editorButtonHeight();

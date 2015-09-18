@@ -762,8 +762,12 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
         structData->ToStringMap(mapAvatarChanges);
     }
 
-    return !bizGUID.isEmpty()
-            && !bizName.isEmpty();
+    if (bizGUID.isEmpty() || bizName.isEmpty())
+    {
+        qWarning() << "Biz data warning, guid : " << bizGUID << " biz name : " << bizName;
+    }
+
+    return true;
 }
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */

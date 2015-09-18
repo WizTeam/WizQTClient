@@ -319,6 +319,19 @@ QColor StyleHelper::listViewItemBackground(int stat)
     return QColor();
 }
 
+QColor StyleHelper::listViewItemType(bool bSelected, bool bFocused)
+{
+    if (bSelected) {
+        if (bFocused) {
+            return QColor(getValue("Documents/TypeFocus", "#3177EE").toString());
+        } else {
+            return QColor(getValue("Documents/TypeLoseFocus", "#3177EE").toString());
+        }
+    } else {
+        return QColor(getValue("Documents/Type", "#3177EE").toString());
+    }
+}
+
 QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
     if (bSelected) {
@@ -333,15 +346,28 @@ QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 }
 
 QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
+{
+    if (bSelected) {
+        if (bFocused) {
+            return QColor(getValue("Documents/LeadFocus", "#ffffff").toString());
+        } else {
+            return QColor(getValue("Documents/LeadLoseFocus", "#6a6a6a").toString());
+        }
+    } else {
+        return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
+    }
+}
+
+QColor StyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 {   
     if (bSelected) {
         if (bFocused) {
-            return QColor(getValue("Documents/DateFocus", "#ffffff").toString());
+            return QColor(getValue("Documents/LocationFocus", "#ffffff").toString());
         } else {
-            return QColor(getValue("Documents/DateLoseFocus", "#6a6a6a").toString());
+            return QColor(getValue("Documents/LocationLoseFocus", "#6a6a6a").toString());
         }
     } else {
-        return QColor(getValue("Documents/Date", "#3CA2E0").toString());
+        return QColor(getValue("Documents/Location", "#3177EE").toString());
     }
 }
 
@@ -379,14 +405,14 @@ QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
 QIcon StyleHelper::listViewBadge(int type)
 {
     switch (type) {
-    case BadgeNormal:
-        return loadIcon("document_badge");
+    case BadgeAttachment:
+        return loadIcon("document_containsattach");
         break;
-    case BadgeEncryted:
-        return loadIcon("document_badge_encrypted");
-        break;
-    case BadgeAlwaysOnTop:
-        return loadIcon("document_badge_onTop");
+    case BadgeEncryptedInTitle:
+        return loadIcon("document_encryptedInTitle");
+        break;        
+    case BadgeEncryptedInSummary:
+        return loadIcon("document_encryptedInSummary");
         break;
     default:
         break;
@@ -615,9 +641,9 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int t
     return rcb;
 }
 
-QRect StyleHelper::drawAttachIcon(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
+QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
 {
-    QIcon attachIcon(loadIcon("document_containsattach"));
+    QIcon attachIcon(listViewBadge(nType));
     QSize iconSize = rc.size();
     int nLeftMargin = 2;
     QRect rcb = rc.adjusted(nLeftMargin, margin(), 0, 0);
@@ -730,6 +756,14 @@ int StyleHelper::fontNormal(QFont& f)
     return QFontMetrics(f).height();
 }
 
+int StyleHelper::fontThumb(QFont& f)
+{
+#ifdef Q_OS_MAC
+    f.setPixelSize(12);
+#endif
+    return QFontMetrics(f).height();
+}
+
 int StyleHelper::fontExtend(QFont& f)
 {
     QSettings* st = ExtensionSystem::PluginManager::settings();
@@ -802,7 +836,7 @@ QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListVi
 
 void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                         const QString& title, const QString& lead, const QString& abs,
-                                        bool bFocused, bool bSelected, bool bContainsAttach)
+                                        bool bFocused, bool bSelected)
 {
     QRect rcd(rc);
 
@@ -810,25 +844,41 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
-        QRect rcTitle = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
+        QRect rcTitle = rcd;
+        //
+        if (nBadgeType & DocTypeAlwaysOnTop)
+        {
+            QString strBadgeText(QObject::tr("[ Top ]"));
+            QColor colorType = Utils::StyleHelper::listViewItemType(bSelected, bFocused);
+            rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strBadgeText, 1, Qt::AlignVCenter | Qt::AlignLeft, colorType, fontTitle);
+//            QRect rcTitle  = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
+            QFontMetrics fm(fontTitle);
+            int nSpace4AttachIcon = fm.width(strBadgeText) + 4;
+            rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
+        }
 
-        int nSpace4AttachIcon = 20;
-        rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
+        //
         QString strTitle(title);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
         QRect rcAttach = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
 
-        if (bContainsAttach) {
+        if (nBadgeType & DocTypeEncrytedInTitle) {
             rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
             rcAttach.setHeight(nFontHeight);
-            Utils::StyleHelper::drawAttachIcon(p, rcAttach, bFocused, bSelected);
+            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, bSelected);
+        }
+
+        if (nBadgeType & DocTypeContainsAttachment) {
+            rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
+            rcAttach.setHeight(nFontHeight);
+            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, bSelected);
         }
 
         rcd.adjust(0, rcAttach.height() + margin(), 0, 0);
     }
 
     QFont fontThumb;
-    nFontHeight = Utils::StyleHelper::fontNormal(fontThumb);
+    nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
 
     QRect rcLead;   //排序类型或标签等
     if (!lead.isEmpty()) {
@@ -837,15 +887,24 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
     }
 
-    if (!abs.isEmpty()) {          //  笔记内容
+    QRect rcLine1(rcd.adjusted(0, rcLead.height(), 0, 0));
+    if (nBadgeType == DocTypeEncrytedInSummary) {
+        QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
+        if (bSelected && bFocused) {
+            badgeIcon.paint(p, rcLine1, Qt::AlignCenter, QIcon::Active, QIcon::On);
+        } else {
+            badgeIcon.paint(p, rcLine1, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+        }
+
+    } else if (!abs.isEmpty()) {          //  笔记内容
         QString strText(abs);
-        QRect rcLine1(rcd.adjusted(rcLead.width(), 0, 0, 0));
         QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
-        rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
+//        rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
 
         if (!strText.isEmpty()) {
-            QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
-            rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+//            QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
+//            rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+            Utils::StyleHelper::drawText(p, rcLine1, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
         }
     }
 }
