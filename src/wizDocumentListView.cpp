@@ -1667,7 +1667,11 @@ int CWizDocumentListView::documentIndexFromGUID(const QString& strGUID)
 {
     Q_ASSERT(!strGUID.isEmpty());
 
-    for (int i = 0; i < count() && item(i)->type() == WizDocumentListType_Document; i++) {
+
+    for (int i = 0; i < count();  i++) {
+        if (item(i)->type() != WizDocumentListType_Document)
+            continue;
+
         if (CWizDocumentListViewDocumentItem *pItem = documentItemAt(i)) {
             if (pItem->document().strGUID == strGUID) {
                 return i;

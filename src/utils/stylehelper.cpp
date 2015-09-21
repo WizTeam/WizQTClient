@@ -74,7 +74,7 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     QString strIconActive2 = ::WizGetSkinResourceFileName(strThemeName, strName+ "_selected");
 
     if (!QFile::exists(strIconNormal)) {
-        qWarning() << "load icon failed, filePath:" << strIconNormal;
+        qWarning() << "load icon failed, filePath:" << strIconNormal << " name : " << strName;
         return QIcon();
     }
 
@@ -265,11 +265,14 @@ int StyleHelper::listViewItemHeight(int nType)
     QFont f;
     switch (nType) {
     case ListTypeOneLine:
-        return fontHead(f) + margin() * 4;
+        return 38;
+//        return fontHead(f) + margin() * 4;
     case ListTypeTwoLine:
-        return fontHead(f) + fontNormal(f) + margin() * 5;
+        return 52;
+//        return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
-        return thumbnailHeight() + margin() * 2;
+        return 122;
+//        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return 31;
     default:
@@ -531,7 +534,8 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 }
 
 QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
-                          int nFlags, const QColor& color, const QFont& font, bool bElided)
+                          int nFlags, const QColor& color, const QFont& font, bool bElided,
+                            Qt::TextElideMode elidedMode)
 {
     if (str.isEmpty()) {
         qDebug() << "[WARNING]: the text should not be empty when drawing!";
@@ -574,7 +578,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
 
         QString lineText;
         if (nLines == 1 && bElided) { // the last line
-            lineText = p->fontMetrics().elidedText(str, Qt::ElideRight, rcRet.width());
+            lineText = p->fontMetrics().elidedText(str, elidedMode, rcRet.width());
             nWidth = qMax<int>(p->fontMetrics().width(lineText), nWidth);
         } else {
             lineText = str.left(line.textLength());
@@ -607,11 +611,12 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
         return QRect(rc.x(), rc.y(), 0, 0);
     }
 
-    QRect rcd = rc.adjusted(rc.width() - rc.height(), margin(), -margin(), -margin());
+//    QRect rcd = rc.adjusted(rc.width() - rc.height(), margin(), -margin(), -margin());
+    QRect rcd(rc.x() + rc.right() - 62, rc.y() + rc.height() - 64, 50, 50);
 
     int nWidth = 0, nHeight = 0;
-    if (pm.width() > rcd.width() || pm.height() > rcd.height()) {
-        double fRate = qMin<double>(double(rcd.width()) / pm.width(), double(rcd.height()) / pm.height());
+    if (pm.width() > nThumbnailPixmapMaxWidth || pm.height() > nThumbnailPixmapMaxWidth) {
+        double fRate = qMin<double>(double(nThumbnailPixmapMaxWidth) / pm.width(), double(nThumbnailPixmapMaxWidth) / pm.height());
         nWidth = int(pm.width() * fRate);
         nHeight = int(pm.height() * fRate);
     } else {
@@ -734,7 +739,7 @@ int StyleHelper::fontHead(QFont& f)
     //f.setFamily(strFont);
     //FIXME: should not use fix font size. but different widget has different default font size.
     f.setPixelSize(14);
-    //f.setBold(true);
+    f.setBold(true);
 #endif
 
     return QFontMetrics(f).height();
@@ -835,16 +840,16 @@ QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListVi
 }
 
 void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
-                                        const QString& title, const QString& lead, const QString& abs,
-                                        bool bFocused, bool bSelected)
+                                        const QString& title, const QStringList& lead, const QString& location,
+                                        const QString& abs, bool bFocused, bool bSelected)
 {
-    QRect rcd(rc);
+    QRect rcd = rc.adjusted(2, 6, 0, 0); //
 
     QFont fontTitle = p->font();
     int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
-        QRect rcTitle = rcd;
+        QRect rcTitle = rcd.adjusted(0, 4, 0, 0);
         //
         if (nBadgeType & DocTypeAlwaysOnTop)
         {
@@ -874,20 +879,51 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, bSelected);
         }
 
-        rcd.adjust(0, rcAttach.height() + margin(), 0, 0);
+        rcd.adjust(0, rcAttach.height() + 6, 0, 0);
+    }
+
+
+    QFont fontLead;
+    Utils::StyleHelper::fontThumb(fontLead);
+    fontLead.setBold(true);
+    QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
+    QRect rcLead = rcd;   //排序类型或标签等
+    if (!lead.isEmpty()) {
+        for (int i = 0; i < lead.count(); i++) {
+            QString strInfo(lead.at(i));
+            if (strInfo.isEmpty())
+                continue;
+
+            if (i > 0) {
+                QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+                rcGreyPoint.setWidth(4);
+                rcGreyPoint.setHeight(4);
+                Utils::StyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
+                rcLead.adjust(6, 0, 0, 0);
+            }
+
+            QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
+            rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontLead);
+            rcLead = rcd.adjusted(rcLead.width() + rcLead.x() - rcd.x(), 0, 0, 0);
+        }
     }
 
     QFont fontThumb;
     nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
+    if (!location.isEmpty()) {
+        QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
+        rcGreyPoint.setWidth(4);
+        rcGreyPoint.setHeight(4);
+        Utils::StyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
+        rcLead.adjust(4, 0, 0, 0);
 
-    QRect rcLead;   //排序类型或标签等
-    if (!lead.isEmpty()) {
-        QString strInfo(lead);
-        QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-        rcLead = Utils::StyleHelper::drawText(p, rcd, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+        QColor colorLocation = Utils::StyleHelper::listViewItemLocation(bSelected, bFocused);
+        QString strInfo(location);
+        rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorLocation,
+                                              fontThumb, true, Qt::ElideMiddle);
     }
 
-    QRect rcLine1(rcd.adjusted(0, rcLead.height(), 0, 0));
+    QRect rcLine1(rcd.adjusted(0, rcLead.height() + 8, 0, 0));
     if (nBadgeType == DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
         if (bSelected && bFocused) {

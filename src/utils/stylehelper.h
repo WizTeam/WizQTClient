@@ -102,15 +102,16 @@ public:
 
     static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
-                                      const QString& title, const QString& lead, const QString& abs,
-                                      bool bFocused, bool bSelected);
+                                      const QString& title, const QStringList& lead, const QString& location,
+                                      const QString& abs, bool bFocused, bool bSelected);
 
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 
     static QIcon listViewBadge(int type);
     static QPolygonF bubbleFromSize(const QSize& sz, int nAngle = 10, bool bAlignLeft = true);
     static QRect drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
-                        int nFlags, const QColor& color, const QFont& font, bool bElided = true);
+                        int nFlags, const QColor& color, const QFont& font, bool bElided = true,
+                          Qt::TextElideMode elidedMode = Qt::ElideRight);
     static int drawSingleLineText(QPainter* p, const QRect& rc, QString& str, int nFlags, const QColor& color, const QFont& font);
 
     static void drawListViewItemSeperator(QPainter* p, const QRect& rc);

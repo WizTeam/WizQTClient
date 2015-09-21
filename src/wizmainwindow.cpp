@@ -2019,7 +2019,11 @@ QWidget* MainWindow::createNoteListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_noteListWidget->setLayout(layoutList);
-    m_noteListWidget->setStyleSheet("background-color:#F5F5F5;");
+//    m_noteListWidget->setStyleSheet("background-color:#F5F5F5;");
+    QPalette pal = m_noteListWidget->palette();
+    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    m_noteListWidget->setPalette(pal);
     m_noteListWidget->setAutoFillBackground(true);
 
     QHBoxLayout* layoutActions = new QHBoxLayout();

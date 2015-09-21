@@ -203,36 +203,37 @@ void CWizDocumentListViewDocumentItem::setSortingType(int type)
 {
     m_nSortingType = type;
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    m_data.infoList.clear();
 
 
     if (m_data.nType == TypeGroupDocument) {
         QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
-        strAuthor += strAuthor.isEmpty() ? "" : " ";
+//        strAuthor += strAuthor.isEmpty() ? "" : " ";
 
         switch (m_nSortingType) {
         case SortingByCreatedTime:
         case -SortingByCreatedTime:
-            m_data.strInfo = strAuthor + m_data.doc.tCreated.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tCreated.toHumanFriendlyString();
             break;
         case SortingByModifiedTime:
         case -SortingByModifiedTime:
-            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tModified.toHumanFriendlyString();
             break;
         case SortingByAccessedTime:
         case -SortingByAccessedTime:
-            m_data.strInfo = strAuthor + m_data.doc.tAccessed.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tAccessed.toHumanFriendlyString();
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.strInfo = strAuthor + m_data.doc.tModified.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tModified.toHumanFriendlyString();
             break;
         case SortingByTag:
         case -SortingByTag:
-            m_data.strInfo = strAuthor + tagTree();
+            m_data.infoList << strAuthor << tagTree();
             break;
         case SortingByLocation:
         case -SortingByLocation:
-            m_data.strInfo = strAuthor + tagTree();
+            m_data.infoList << strAuthor << tagTree();
             break;
         case SortingBySize:
         case -SortingBySize:
@@ -240,10 +241,10 @@ void CWizDocumentListViewDocumentItem::setSortingType(int type)
             QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
             QFileInfo fi(strFileName);
             if (!fi.exists()) {
-                m_data.strInfo = strAuthor + QObject::tr("Unknown");
+                m_data.infoList << strAuthor << QObject::tr("Unknown");
             } else {
                 m_nSize = fi.size();
-                m_data.strInfo = strAuthor + ::WizGetFileSizeHumanReadalbe(strFileName);
+                m_data.infoList << strAuthor << ::WizGetFileSizeHumanReadalbe(strFileName);
             }
             break;
         }
@@ -255,27 +256,27 @@ void CWizDocumentListViewDocumentItem::setSortingType(int type)
         switch (m_nSortingType) {
         case SortingByCreatedTime:
         case -SortingByCreatedTime:
-            m_data.strInfo = m_data.doc.tCreated.toHumanFriendlyString() + " " + tags();
+            m_data.infoList << m_data.doc.tCreated.toHumanFriendlyString() << tags();
             break;
         case SortingByModifiedTime:
         case -SortingByModifiedTime:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
             break;
         case SortingByAccessedTime:
         case -SortingByAccessedTime:
-            m_data.strInfo = m_data.doc.tAccessed.toHumanFriendlyString() + " " + tags();
+            m_data.infoList << m_data.doc.tAccessed.toHumanFriendlyString() << tags();
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
             break;
         case SortingByTag:
         case -SortingByTag:
-            m_data.strInfo = m_data.doc.tModified.toHumanFriendlyString() + " " + tags();
+            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
             break;
         case SortingByLocation:
         case -SortingByLocation:
-            m_data.strInfo = ::WizLocation2Display(m_data.doc.strLocation);
+            m_data.infoList << ::WizLocation2Display(m_data.doc.strLocation);
             break;
         case SortingBySize:
         case -SortingBySize:
@@ -283,10 +284,10 @@ void CWizDocumentListViewDocumentItem::setSortingType(int type)
             QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
             QFileInfo fi(strFileName);
             if (!fi.exists()) {
-                m_data.strInfo = QObject::tr("Unknown") + " " + tags();
+                m_data.infoList << QObject::tr("Unknown") << tags();
             } else {
                 m_nSize = fi.size();
-                m_data.strInfo = ::WizGetFileSizeHumanReadalbe(strFileName) + " "  + tags();
+                m_data.infoList << ::WizGetFileSizeHumanReadalbe(strFileName) << tags();
             }
             break;
         }
@@ -363,9 +364,17 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
     case -SortingByTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
     case SortingByLocation:
-        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) < 0;
+    {
+        QString otherInfo = pOther->m_data.infoList.join(' ');
+        QString info = pOther->m_data.infoList.join(' ');
+        return otherInfo.localeAwareCompare(info) < 0;
+    }
     case -SortingByLocation:
-        return pOther->m_data.strInfo.localeAwareCompare(m_data.strInfo) > 0;
+    {
+        QString otherInfo = pOther->m_data.infoList.join(' ');
+        QString info = pOther->m_data.infoList.join(' ');
+        return otherInfo.localeAwareCompare(info) > 0;
+    }
     case SortingByTag:
         return pOther->m_strTags < m_strTags;
     case -SortingByTag:
@@ -480,9 +489,10 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
     }
 
     int nType = badgeType(true);
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList, m_data.doc.strLocation, thumb.text, bFocused, bSelected);
 }
 
+const int nAvatarRightMargin = 8;
 void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
@@ -495,12 +505,13 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
-    QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-    int nAvatarRightMargin = 4;
+    QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
+    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = badgeType(true);
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, thumb.text, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+                                              m_data.doc.strLocation, thumb.text, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -511,7 +522,8 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+                                              m_data.doc.strLocation, NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -523,12 +535,13 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
-    QRect rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-    int nAvatarRightMargin = 4;
+    QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
+    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.strInfo, NULL, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+                                              m_data.doc.strLocation, NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
@@ -539,7 +552,7 @@ void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, NULL, NULL, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const

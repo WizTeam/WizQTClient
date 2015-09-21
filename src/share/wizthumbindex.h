@@ -6,6 +6,8 @@
 #include "cppsqlite3.h"
 #include "wizobject.h"
 
+const int nThumbnailPixmapMaxWidth = 50;
+
 class CThumbIndex
 {
 private:

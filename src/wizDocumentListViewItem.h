@@ -24,7 +24,7 @@ struct WizDocumentListViewItemData
     WIZDOCUMENTDATA doc;
     WIZABSTRACT thumb;
 
-    QString strInfo; // for second line info drawing (auto change when sorting type change)
+    QStringList infoList; // for second line info drawing (auto change when sorting type change)
 
     // only used for group or message document
     qint64 nMessageId;
