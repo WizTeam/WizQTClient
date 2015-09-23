@@ -71,8 +71,8 @@ void CWizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
 
 void CWizAutoTimeOutEventLoop::on_timeOut()
 {
-    qDebug() << "auto time event loop time out " << "download bytes : " << m_downloadBytes << "  last bytes : " << m_lastDownloadBytes
-             << " upload bytes : " << m_uploadBytes << " last bytes : " << m_lastUploadBytes;
+    qDebug() << "network status check, " << "downloaded bytes : " << m_downloadBytes << "  last time : " << m_lastDownloadBytes
+             << " uploaded bytes : " << m_uploadBytes << " last time : " << m_lastUploadBytes;
     if (m_downloadBytes != m_lastDownloadBytes)
     {
         m_lastDownloadBytes = m_downloadBytes;
