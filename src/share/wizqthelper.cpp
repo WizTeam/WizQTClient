@@ -26,7 +26,7 @@ QString COleDateTime::toHumanFriendlyString() const
     } else if (nElapseDays == 2) {
         return QObject::tr("The day before yesterday");
     } else if (nElapseDays > 2) {
-        return toString("yy-M-d");
+        return toString("yyyy/M/d");
     }
 
     if (nElapseSecs < 60) {

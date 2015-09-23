@@ -268,7 +268,7 @@ int StyleHelper::listViewItemHeight(int nType)
         return 38;
 //        return fontHead(f) + margin() * 4;
     case ListTypeTwoLine:
-        return 52;
+        return 68;
 //        return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
         return 122;
@@ -324,67 +324,67 @@ QColor StyleHelper::listViewItemBackground(int stat)
 
 QColor StyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
-    if (bSelected) {
-        if (bFocused) {
-            return QColor(getValue("Documents/TypeFocus", "#3177EE").toString());
-        } else {
-            return QColor(getValue("Documents/TypeLoseFocus", "#3177EE").toString());
-        }
-    } else {
+//    if (bSelected) {
+//        if (bFocused) {
+//            return QColor(getValue("Documents/TypeFocus", "#3177EE").toString());
+//        } else {
+//            return QColor(getValue("Documents/TypeLoseFocus", "#3177EE").toString());
+//        }
+//    } else {
         return QColor(getValue("Documents/Type", "#3177EE").toString());
-    }
+//    }
 }
 
 QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
-    if (bSelected) {
-        if (bFocused) {
-            return QColor(getValue("Documents/TitleFocus", "#ffffff").toString());
-        } else {
-            return QColor(getValue("Documents/TitleLoseFocus", "#6a6a6a").toString());
-        }
-    } else {
+//    if (bSelected) {
+//        if (bFocused) {
+//            return QColor(getValue("Documents/TitleFocus", "#ffffff").toString());
+//        } else {
+//            return QColor(getValue("Documents/TitleLoseFocus", "#6a6a6a").toString());
+//        }
+//    } else {
         return QColor(getValue("Documents/Title", "#464646").toString());
-    }
+//    }
 }
 
 QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
-    if (bSelected) {
-        if (bFocused) {
-            return QColor(getValue("Documents/LeadFocus", "#ffffff").toString());
-        } else {
-            return QColor(getValue("Documents/LeadLoseFocus", "#6a6a6a").toString());
-        }
-    } else {
+//    if (bSelected) {
+//        if (bFocused) {
+//            return QColor(getValue("Documents/LeadFocus", "#ffffff").toString());
+//        } else {
+//            return QColor(getValue("Documents/LeadLoseFocus", "#6a6a6a").toString());
+//        }
+//    } else {
         return QColor(getValue("Documents/Lead", "#6B6B6B").toString());
-    }
+//    }
 }
 
 QColor StyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 {   
-    if (bSelected) {
-        if (bFocused) {
-            return QColor(getValue("Documents/LocationFocus", "#ffffff").toString());
-        } else {
-            return QColor(getValue("Documents/LocationLoseFocus", "#6a6a6a").toString());
-        }
-    } else {
+//    if (bSelected) {
+//        if (bFocused) {
+//            return QColor(getValue("Documents/LocationFocus", "#ffffff").toString());
+//        } else {
+//            return QColor(getValue("Documents/LocationLoseFocus", "#6a6a6a").toString());
+//        }
+//    } else {
         return QColor(getValue("Documents/Location", "#3177EE").toString());
-    }
+//    }
 }
 
 QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {    
-    if (bSelected) {
-        if (bFocused) {
-            return QColor(getValue("Documents/SummaryFocus", "#ffffff").toString());
-        } else {
-            return QColor(getValue("Documents/SummaryLoseFocus", "#6a6a6a").toString());
-        }
-    } else {
+//    if (bSelected) {
+//        if (bFocused) {
+//            return QColor(getValue("Documents/SummaryFocus", "#ffffff").toString());
+//        } else {
+//            return QColor(getValue("Documents/SummaryLoseFocus", "#6a6a6a").toString());
+//        }
+//    } else {
         return QColor(getValue("Documents/Summary", "#8c8c8c").toString());
-    }
+//    }
 }
 
 QColor StyleHelper::listViewMultiLineFirstLine(bool bSelected)
@@ -437,6 +437,21 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
     }
 }
 
+
+void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color)
+{
+    p->save();
+    p->setRenderHint(QPainter::Antialiasing);
+    QRect rcBg = rc.adjusted(1, 1, -1, -2);
+    QPen pen;
+    pen.setWidth(2);
+    pen.setColor(color);
+    p->setPen(pen);
+    p->setBrush(Qt::NoBrush);
+    p->drawRect(rcBg);
+    p->restore();
+}
+
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
     QRect rcBg = rc;
@@ -445,10 +460,16 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
         //p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
     case ListBGTypeActive:
-        p->fillRect(rcBg, listViewItemBackground(Active));
+    {
+        drawSelectBorder(p, rc, QColor("#5990EF"));
+    }
+//        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
     case ListBGTypeHalfActive:
-        p->fillRect(rcBg, listViewItemBackground(Normal));
+    {
+        drawSelectBorder(p, rc,QColor("#5990EF"));
+    }
+//        p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
     case ListBGTypeUnread:
         p->fillRect(rcBg, listViewItemBackground(ListBGTypeUnread));
@@ -456,15 +477,16 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
     default:
         break;
     }
-
 }
 
-void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType)
+void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType,
+                                            bool useFullSeperatorLine)
 {
     QRect rcLine = rc;
     p->save();
 
-    switch (bgType) {
+    switch (bgType)
+    {
     case ListBGTypeActive:
     case ListBGTypeHalfActive:
         p->setPen(QColor("#d2d8d6"));
@@ -474,7 +496,14 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListVi
         p->setPen(listViewItemSeperator());
         break;
     }
-    p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
+
+    QPoint pLeft(rcLine.bottomLeft());
+    if (!useFullSeperatorLine)
+    {
+        const int nSeperatorLeftMargin = 12;
+        pLeft.setX(pLeft.x() + nSeperatorLeftMargin);
+    }
+    p->drawLine(pLeft, rcLine.bottomRight());
     p->restore();
 }
 
@@ -739,7 +768,7 @@ int StyleHelper::fontHead(QFont& f)
     //f.setFamily(strFont);
     //FIXME: should not use fix font size. but different widget has different default font size.
     f.setPixelSize(14);
-    f.setBold(true);
+//    f.setBold(true);
 #endif
 
     return QFontMetrics(f).height();
@@ -827,13 +856,13 @@ QVariant StyleHelper::getValue(const QString& key, const QVariant& defaultValue)
     return m_settings->value(key, defaultValue);
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType)
+QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine)
 {
     QRect rc = lrc;
 
     Utils::StyleHelper::drawListViewItemBackground(p, rc, bgType);
 
-    Utils::StyleHelper::drawListViewItemSeperator(p, rc, bgType);
+    Utils::StyleHelper::drawListViewItemSeperator(p, rc, bgType, useFullSeperatorLine);
 
     int nMargin = Utils::StyleHelper::margin();
     return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);
@@ -843,7 +872,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
                                         const QString& title, const QStringList& lead, const QString& location,
                                         const QString& abs, bool bFocused, bool bSelected)
 {
-    QRect rcd = rc.adjusted(2, 6, 0, 0); //
+    QRect rcd = rc.adjusted(2, 0, 0, 0); //
 
     QFont fontTitle = p->font();
     int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
@@ -883,9 +912,8 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     }
 
 
-    QFont fontLead;
-    Utils::StyleHelper::fontThumb(fontLead);
-    fontLead.setBold(true);
+    QFont fontThumb;
+    nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
     QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
     QRect rcLead = rcd;   //排序类型或标签等
     if (!lead.isEmpty()) {
@@ -903,13 +931,11 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             }
 
             QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-            rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontLead);
+            rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
             rcLead = rcd.adjusted(rcLead.width() + rcLead.x() - rcd.x(), 0, 0, 0);
         }
     }
 
-    QFont fontThumb;
-    nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
     if (!location.isEmpty()) {
         QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
         rcGreyPoint.setWidth(4);

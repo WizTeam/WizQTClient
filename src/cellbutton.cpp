@@ -17,16 +17,16 @@ CellButton::CellButton(Position pos, QWidget *parent)
     : QToolButton(parent)
     , m_state(0)
 {
-    QString strName;
-    if (pos == Left) {
-        strName = "utility_button_left";
-    } else if (pos == Center) {
-        strName = "utility_button_center";
-    } else if (pos == Right) {
-        strName = "utility_button_right";
-    } else {
-        Q_ASSERT(0);
-    }
+//    QString strName;
+//    if (pos == Left) {
+//        strName = "utility_button_left";
+//    } else if (pos == Center) {
+//        strName = "utility_button_center";
+//    } else if (pos == Right) {
+//        strName = "utility_button_right";
+//    } else {
+//        Q_ASSERT(0);
+//    }
 
     m_pos = pos;
 
@@ -115,12 +115,10 @@ void CellButton::paintEvent(QPaintEvent *event)
 
 QSize CellButton::sizeHint() const
 {
-    switch (m_pos) {
-    case Left:
-        return QSize(35, 26);
-    case Center:
+    switch (m_pos) {    
+    case ImageOnly:
         return QSize(33, 26);
-    case Right:
-        return QSize(35, 26);
+    case HasCountInfo:
+        return QSize(25, 26);
     }
 }

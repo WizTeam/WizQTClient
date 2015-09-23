@@ -3257,6 +3257,8 @@ void MainWindow::on_documents_itemSelectionChanged()
     }
 
     updateHistoryButtonStatus();
+
+    m_documents->viewport()->update();
 }
 
 void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)

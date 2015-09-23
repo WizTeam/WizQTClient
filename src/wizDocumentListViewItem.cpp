@@ -472,6 +472,8 @@ QString CWizDocumentListViewDocumentItem::cacheKey() const
     return "Core::ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
 }
 
+const int nTextTopMargin = 6;
+
 void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
@@ -485,11 +487,13 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
     if (!thumb.image.isNull()) {
         QPixmap pmt = QPixmap::fromImage(thumb.image);
         QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(p, rcd, pmt);
-        rcd.setRight(rcp.left());
+        rcd.setRight(rcp.left() - 8);
     }
 
+    rcd.setTop(rcd.top() + nTextTopMargin);
     int nType = badgeType(true);
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList, m_data.doc.strLocation, thumb.text, bFocused, bSelected);
+    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+                                              m_data.doc.strLocation, thumb.text, bFocused, bSelected);
 }
 
 const int nAvatarRightMargin = 8;
@@ -508,6 +512,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
     QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
     rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
+    rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
@@ -520,6 +525,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
     bool bFocused = listWidget()->hasFocus();
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
+    rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
@@ -535,9 +541,10 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
 
     QPixmap pmAvatar;
     WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
-    QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
-    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+    QRect rcAvatar = rcd.adjusted(8 ,10, 0, 0);
+    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
+    rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
@@ -603,20 +610,24 @@ void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleO
 
 QRect CWizDocumentListViewDocumentItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
 {
+    int index = listWidget()->row(this);
+    // if next brother is section item, use full line seperator
+    bool useFullLineSeperator = (listWidget()->count() > index + 1) &&
+            (listWidget()->item(index + 1)->type() == WizDocumentListType_Section);
     if (selected && focused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,Utils::StyleHelper::ListBGTypeActive);
+        return Utils::StyleHelper::initListViewItemPainter(p, rect,Utils::StyleHelper::ListBGTypeActive, useFullLineSeperator);
     }
     else if ((selected && !focused) || m_specialFocused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,  Utils::StyleHelper::ListBGTypeHalfActive);
+        return Utils::StyleHelper::initListViewItemPainter(p, rect,  Utils::StyleHelper::ListBGTypeHalfActive, useFullLineSeperator);
     }
     else if (m_documentUnread)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeUnread);
+        return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeUnread, useFullLineSeperator);
     }
 
-    return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeNone);
+    return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeNone, useFullLineSeperator);
 }
 
 

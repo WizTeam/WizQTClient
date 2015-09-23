@@ -7,6 +7,7 @@
 #include <QWebHistory>
 #include <QSplitter>
 #include <QList>
+#include <QLabel>
 #if QT_VERSION > 0x050000
 #include <QtConcurrent>
 #else
@@ -82,7 +83,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layout->setSpacing(0);
     setLayout(layout);
 
-    m_editBtn = new CellButton(CellButton::Left, this);
+    m_editBtn = new CellButton(CellButton::ImageOnly, this);
     m_editBtn->setFixedHeight(nTitleHeight);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
@@ -91,7 +92,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save and switch to Reading View (Alt + 1)"));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
 
-    m_tagBtn = new CellButton(CellButton::Center, this);
+    m_tagBtn = new CellButton(CellButton::ImageOnly, this);
     m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
@@ -99,7 +100,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
 
-    m_attachBtn = new CellButton(CellButton::Center, this);
+    m_attachBtn = new CellButton(CellButton::HasCountInfo, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
@@ -107,21 +108,21 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments (Alt + 3)"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
-    m_historyBtn = new CellButton(CellButton::Center, this);
+    m_historyBtn = new CellButton(CellButton::ImageOnly, this);
     m_historyBtn->setFixedHeight(nTitleHeight);
     QString historyShortcut = ::WizGetShortcut("EditNoteHistory", "Alt+4");
     m_historyBtn->setShortcut(QKeySequence::fromString(historyShortcut));
     m_historyBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_history"), tr("View and recover note's history (Alt + 4)"));
     connect(m_historyBtn, SIGNAL(clicked()), SLOT(onHistoryButtonClicked()));
 
-    m_infoBtn = new CellButton(CellButton::Center, this);
+    m_infoBtn = new CellButton(CellButton::ImageOnly, this);
     m_infoBtn->setFixedHeight(nTitleHeight);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info (Alt + 5)"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
-    m_emailBtn = new CellButton(CellButton::Center, this);
+    m_emailBtn = new CellButton(CellButton::ImageOnly, this);
     m_emailBtn->setFixedHeight(nTitleHeight);
     QString emailShortcut = ::WizGetShortcut("EditNoteEmail", "Alt+6");
     m_emailBtn->setShortcut(QKeySequence::fromString(emailShortcut));
@@ -130,7 +131,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
     m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
-    m_shareBtn = new CellButton(CellButton::Center, this);
+    m_shareBtn = new CellButton(CellButton::ImageOnly, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
     QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+7");
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
@@ -139,7 +140,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setVisible(!oemSettings.isHideShare());
 
     // comments
-    m_commentsBtn = new CellButton(CellButton::Right, this);
+    m_commentsBtn = new CellButton(CellButton::HasCountInfo, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
@@ -157,6 +158,13 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_tagBarSpacer->setFixedHeight(1);
     m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
+    m_attachCountLabel = new QLabel(this);
+    m_attachCountLabel->setText("10");
+    m_attachCountLabel->setStyleSheet("color:#B6B6B6");
+
+    m_commentsCountLabel = new QLabel(this);
+    m_commentsCountLabel->setText("99+");
+    m_commentsCountLabel->setStyleSheet("color:#B6B6B6");
 
     QWidget* line3 = new QWidget(this);
     line3->setFixedHeight(1);
@@ -168,12 +176,14 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
     layoutInfo2->addWidget(m_tagBtn);
-    layoutInfo2->addWidget(m_attachBtn);
     layoutInfo2->addWidget(m_historyBtn);
     layoutInfo2->addWidget(m_infoBtn);
     layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_shareBtn);
+    layoutInfo2->addWidget(m_attachBtn);
+    layoutInfo2->addWidget(m_attachCountLabel);
     layoutInfo2->addWidget(m_commentsBtn);
+    layoutInfo2->addWidget(m_commentsCountLabel);
 
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();

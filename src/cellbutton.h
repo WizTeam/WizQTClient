@@ -18,9 +18,8 @@ class CellButton : public QToolButton
 
 public:
     enum Position {
-        Left,
-        Center,
-        Right
+        ImageOnly,
+        HasCountInfo
     };
 
     enum State {

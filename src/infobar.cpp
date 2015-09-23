@@ -41,10 +41,10 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
 
 void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
 {
-    QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy-MM-dd");
+    QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy/M/d");
     m_labelCreatedTime->setText(strCreateTime);
 
-    QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy-MM-dd");
+    QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy/M/d");
     m_labelModifiedTime->setText(strModifiedTime);
 
 

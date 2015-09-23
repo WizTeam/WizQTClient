@@ -100,7 +100,7 @@ public:
     static QColor listViewMultiLineFirstLine(bool bSelected);
     static QColor listViewMultiLineOtherLine(bool bSelected);
 
-    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType);
+    static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine = true);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QStringList& lead, const QString& location,
                                       const QString& abs, bool bFocused, bool bSelected);
@@ -116,7 +116,7 @@ public:
 
     static void drawListViewItemSeperator(QPainter* p, const QRect& rc);
     static void drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect);
-    static void drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType);
+    static void drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType, bool useFullSeperatorLine);
     static void drawListViewItemBackground(QPainter* p, const QRect& rc, ListViewBGType bgType);
     static QRect drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm);
     static QRect drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect);

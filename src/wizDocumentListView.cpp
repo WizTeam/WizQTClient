@@ -433,7 +433,15 @@ void CWizDocumentListView::updateSectionItems()
         {
             WizDocumentListViewSectionData secData;
             secData.date = it.key();
-            QString text = secData.date.toString("MM.yyyy");
+            QString text = secData.date.toString("yyyy-MM");
+//            if (WizIsChineseLanguage(m_app.userSettings().locale()))
+//            {
+//                text = secData.date.toString("yyyy") + tr("year") + secData.date.toString("MMMM");
+//            }
+//            else
+//            {
+//                text = secData.date.toString("MMMM yyyy");
+//            }
             addSectionItem(secData, text, it.value());
         }
     }

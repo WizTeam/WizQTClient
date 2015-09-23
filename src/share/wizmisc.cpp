@@ -2682,3 +2682,12 @@ QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString
     }
     return "";
 }
+
+
+bool WizIsChineseLanguage(const QString& local)
+{
+    if (local.toUpper() == "ZH_CN" || local.toUpper() == "ZH_TW")
+        return true;
+
+    return false;
+}

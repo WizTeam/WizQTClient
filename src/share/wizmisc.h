@@ -73,6 +73,7 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 CString WizDateToLocalString(const COleDateTime& t);
 
 void WizGetTranslatedLocales(QStringList& locales);
+bool WizIsChineseLanguage(const QString& local);
 QString WizGetDefaultTranslatedLocal();
 QString WizGetTranslatedLocaleDisplayName(int index);
 

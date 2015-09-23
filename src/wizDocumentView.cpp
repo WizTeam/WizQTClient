@@ -48,8 +48,8 @@ using namespace Core::Internal;
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
     , m_app(app)
-    , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
+    , m_userSettings(app.userSettings())
     #ifdef USEWEBENGINE
     , m_web(new CWizDocumentWebEngine(app, this))
     , m_comments(new QWebEngineView(this))
@@ -95,7 +95,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab->addWidget(m_msgWidget);
     m_tab->setCurrentWidget(m_docView);    
 
-    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_comments = m_commentWidget->web();
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -119,6 +119,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layoutEditor->setContentsMargins(0, 0, 0, 0);
     layoutEditor->addWidget(m_title);
     layoutEditor->addWidget(m_web);
+    layoutEditor->setStretchFactor(m_title, 0);
+    layoutEditor->setStretchFactor(m_web, 1);
 
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(wgtEditor);
