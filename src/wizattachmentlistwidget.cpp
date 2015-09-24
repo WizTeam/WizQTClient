@@ -148,11 +148,11 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
         strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
+            strIconPath += isRetina ? "document_needDownload@2x.png" : "document_needDownload.png";
         }
         else if (db.IsAttachmentModified(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
+            strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";
         }
         else
             return false;

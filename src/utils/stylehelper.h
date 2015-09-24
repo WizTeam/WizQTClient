@@ -85,6 +85,8 @@ public:
 
     static int listViewSortControlWidgetHeight();
 
+    static int messageViewItemHeight();
+
     static int listViewItemHeight(int nType);
     static QColor listViewBackground();
     static int listViewItemHorizontalPadding();

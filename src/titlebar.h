@@ -5,7 +5,6 @@
 #include <QIcon>
 
 class QString;
-class QLabel;
 
 struct WIZDOCUMENTDATA;
 class CWizDatabase;
@@ -115,10 +114,7 @@ private:
     CellButton* m_shareBtn;
     CellButton* m_attachBtn;
     CellButton* m_historyBtn;
-    CellButton* m_infoBtn;
-
-    QLabel* m_attachCountLabel;
-    QLabel* m_commentsCountLabel;
+    CellButton* m_infoBtn;    
 
     CellButton* m_commentsBtn;
     QString m_commentsUrl;

@@ -100,7 +100,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
 
-    m_attachBtn = new CellButton(CellButton::HasCountInfo, this);
+    m_attachBtn = new CellButton(CellButton::WithCountInfo, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
@@ -140,7 +140,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_shareBtn->setVisible(!oemSettings.isHideShare());
 
     // comments
-    m_commentsBtn = new CellButton(CellButton::HasCountInfo, this);
+    m_commentsBtn = new CellButton(CellButton::WithCountInfo, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
@@ -156,15 +156,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 
     m_tagBarSpacer = new QWidget(this);
     m_tagBarSpacer->setFixedHeight(1);
-    m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
-
-    m_attachCountLabel = new QLabel(this);
-    m_attachCountLabel->setText("10");
-    m_attachCountLabel->setStyleSheet("color:#B6B6B6");
-
-    m_commentsCountLabel = new QLabel(this);
-    m_commentsCountLabel->setText("99+");
-    m_commentsCountLabel->setStyleSheet("color:#B6B6B6");
+    m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");    
 
     QWidget* line3 = new QWidget(this);
     line3->setFixedHeight(1);
@@ -181,9 +173,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_shareBtn);
     layoutInfo2->addWidget(m_attachBtn);
-    layoutInfo2->addWidget(m_attachCountLabel);
     layoutInfo2->addWidget(m_commentsBtn);
-    layoutInfo2->addWidget(m_commentsCountLabel);
 
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
@@ -417,6 +407,7 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
     m_infoBar->setDocument(doc);
     m_editTitle->setText(doc.strTitle);
     m_attachBtn->setState(doc.nAttachmentCount > 0 ? CellButton::Badge : CellButton::Normal);
+    m_attachBtn->setCount(doc.nAttachmentCount);
 }
 
 void TitleBar::setEditingDocument(bool editing)
@@ -714,6 +705,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
     api->disconnect(this);
     api->deleteLater();    
 
+    m_commentsBtn->setCount(nCount);
     if (nCount) {
         m_commentsBtn->setState(CellButton::Badge);
     } else {

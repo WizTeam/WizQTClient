@@ -76,7 +76,7 @@ bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
 
 int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
-    int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInTitle : DocTypeEncrytedInTitle) : DocTypeNormal;
+    int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInSummary : DocTypeEncrytedInTitle) : DocTypeNormal;
     nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? (DocTypeAlwaysOnTop | nType) : nType;
     nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
     return nType;
@@ -580,11 +580,11 @@ void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleO
     }
     if (db.IsDocumentModified(m_data.doc.strGUID) || attachModified)
     {
-        strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
+        strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";
     }
     else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
     {
-        strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
+        strIconPath += isRetina ? "document_needDownload@2x.png" : "document_needDownload.png";
     }
     else
         return;

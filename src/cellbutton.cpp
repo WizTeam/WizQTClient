@@ -6,6 +6,7 @@
 #include <QSettings>
 #include <QSize>
 #include <QDebug>
+#include <QFontMetrics>
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -13,25 +14,12 @@
 
 using namespace Core::Internal;
 
-CellButton::CellButton(Position pos, QWidget *parent)
+CellButton::CellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)
     , m_state(0)
-{
-//    QString strName;
-//    if (pos == Left) {
-//        strName = "utility_button_left";
-//    } else if (pos == Center) {
-//        strName = "utility_button_center";
-//    } else if (pos == Right) {
-//        strName = "utility_button_right";
-//    } else {
-//        Q_ASSERT(0);
-//    }
-
-    m_pos = pos;
-
-    //QString strTheme = ExtensionSystem::PluginManager::globalSettings()->value("theme", "default").toString();
-    //m_backgroundIcon = ::WizLoadSkinIcon(strTheme, strName);
+    , m_count(0)
+    , m_buttonType(type)
+{    
 }
 
 void CellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
@@ -81,6 +69,12 @@ void CellButton::setState(int state)
     }
 }
 
+void CellButton::setCount(int count)
+{
+    m_count = count;
+    update();
+}
+
 void CellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -94,31 +88,53 @@ void CellButton::paintEvent(QPaintEvent *event)
         mode = QIcon::Active;
     QIcon::State state = QIcon::Off;
     if (opt.state & QStyle::State_On)
-        state = QIcon::On;
-
-//    if (m_pos == Center || m_pos == Right)
-//    {
-//        p.setPen(QColor("#F8F8F8"));
-//        QRect rcBorder = rect();
-//        p.drawLine(rcBorder.topLeft(), rcBorder.bottomLeft());
-//    }
-    //m_backgroundIcon.paint(&p, opt.rect, Qt::AlignCenter, QIcon::Normal, state);
+        state = QIcon::On;    
 
     QSize size = iconSize();
-    QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
-    if (opt.icon.isNull()) {
+    int nLeft = (opt.rect.width() - size.width()) / 2;
+    if (WithCountInfo == m_buttonType)
+    {
+        QFont font;
+        QFontMetrics fm(font);
+        nLeft = (opt.rect.width() - fm.width(countInfo())  - size.width()) / 2;  //nLeft - fm.width(countInfo()) + 2;
+    }
+
+    QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+    if (opt.icon.isNull())
+    {
         m_iconNomal.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
-    } else {
+    }
+    else
+    {
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
+    }
+
+    if (WithCountInfo == m_buttonType)
+    {
+        QRect rcText(rcIcon.right() + 6, opt.rect.y(), opt.rect.width() - rcIcon.width(), opt.rect.height());
+        p.setPen(QColor("#B6B6B6"));
+        p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, countInfo());
     }
 }
 
 QSize CellButton::sizeHint() const
 {
-    switch (m_pos) {    
+    switch (m_buttonType) {
     case ImageOnly:
-        return QSize(33, 26);
-    case HasCountInfo:
-        return QSize(25, 26);
+        return QSize(28, 26);
+    case WithCountInfo:
+    {
+        QFont font;
+        QFontMetrics fm(font);
+        int nWidth = 28 + fm.width(countInfo());
+        return QSize(nWidth, 26);
     }
+    }
+}
+
+QString CellButton::countInfo() const
+{
+    if (m_count > 99)
+        return "99+";
+    return QString::number(m_count);
 }

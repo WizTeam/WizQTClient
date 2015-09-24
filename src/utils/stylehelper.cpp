@@ -260,6 +260,11 @@ int StyleHelper::listViewSortControlWidgetHeight()
     return getValue("Documents/SortControlWidgetHeight", 20).toInt();
 }
 
+int StyleHelper::messageViewItemHeight()
+{
+    return 98;
+}
+
 int StyleHelper::listViewItemHeight(int nType)
 {
     QFont f;
@@ -899,13 +904,13 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         if (nBadgeType & DocTypeEncrytedInTitle) {
             rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
             rcAttach.setHeight(nFontHeight);
-            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, bSelected);
+            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
         }
 
         if (nBadgeType & DocTypeContainsAttachment) {
             rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
             rcAttach.setHeight(nFontHeight);
-            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, bSelected);
+            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
         }
 
         rcd.adjust(0, rcAttach.height() + 6, 0, 0);

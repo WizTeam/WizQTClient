@@ -17,9 +17,9 @@ class CellButton : public QToolButton
     Q_OBJECT
 
 public:
-    enum Position {
+    enum ButtonType {
         ImageOnly,
-        HasCountInfo
+        WithCountInfo
     };
 
     enum State {
@@ -28,7 +28,7 @@ public:
         Badge
     };
 
-    explicit CellButton(Position pos, QWidget* parent);
+    explicit CellButton(ButtonType type, QWidget* parent);
     void setNormalIcon(const QIcon& icon, const QString& strTips);
     void setCheckedIcon(const QIcon& icon, const QString& strTips);
     void setBadgeIcon(const QIcon& icon, const QString& strTips);
@@ -36,10 +36,12 @@ public:
 
 public slots:
     void setState(int state);
+    void setCount(int count);
 
 private:
-    Position m_pos;
+    ButtonType m_buttonType;
     int m_state;
+    int m_count;
     QIcon m_iconNomal;
     QIcon m_iconChecked;
     QIcon m_iconBadge;
@@ -52,7 +54,7 @@ private:
 protected:
     virtual void paintEvent(QPaintEvent* event);
     virtual QSize sizeHint() const;
-
+    QString countInfo() const;
 };
 
 }

@@ -151,75 +151,80 @@ public:
 
     void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {
-        int nMargin = Utils::StyleHelper::margin();
-        QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, -nMargin);
+        if (m_data.nReadStatus == 0)
+        {
+            p->fillRect(vopt->rect, QColor("#F7FBFF"));
+        }
 
+        int nMargin = 10;//Utils::StyleHelper::margin();
+        QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, 0);
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-        int nAvatarRightMargin = 4;
-        rcd.setLeft(rectAvatar.right() + nAvatarRightMargin);
+        int nAvatarRightMargin = 10;
 
         QFont f;
         int nHeight = Utils::StyleHelper::fontNormal(f);
 
-        p->save();
-        bool bItemActive = vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus);
-        if (bItemActive)
-        {
-            p->setPen("#FFFFFF");
-        }
+        p->save();        
+        p->setPen("#000000");
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
-        QRect rectSender = Utils::StyleHelper::drawText(p, rcd, strSender, 1, Qt::AlignVCenter, p->pen().color(), f);
+        QRect  rectSender = rcd;
+        rectSender.setLeft(rectAvatar.right() + nAvatarRightMargin);
+        rectSender = Utils::StyleHelper::drawText(p, rectSender, strSender, 1,
+                                                  Qt::AlignVCenter | Qt::AlignLeft, p->pen().color(), f);
 
+        QColor messageTextColor("#888888");
         QString strType = descriptionOfMessageType(m_data.nMessageType);
         QRect rectType = rcd;
-        rectType.setLeft(rectSender.right() + 2);
-        Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
-        rcd.setTop(rectSender.bottom());
+        rectType.setLeft(rectAvatar.right() + nAvatarRightMargin);
+        rectType.setTop(rectSender.bottom() - 2);
+        nHeight = Utils::StyleHelper::fontThumb(f);
+        Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
+                                     messageTextColor, f);
 
-        QRect rcBottom(rcd);
-        rcBottom.setTop(rcd.bottom() - nHeight);
+        QRect rcTime(rcd.adjusted(0, -4, 0, 0));
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
-        QRect rcTime = Utils::StyleHelper::drawText(p, rcBottom, strTime, 1, Qt::AlignRight | Qt::AlignVCenter, QColor(bItemActive? "#ffffff" : "#999999"), f);
+        rcTime = Utils::StyleHelper::drawText(p, rcTime, strTime, 1, Qt::AlignRight | Qt::AlignTop,
+                                              messageTextColor, f);
 
-        QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-        QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-        po.translate(rcd.left() + nMargin, rcd.top());
+//        QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
+//        QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
+//        po.translate(rcd.left() + nMargin, rcd.top());
 
-        if (vopt->state.testFlag(QStyle::State_Selected)) {
-            p->save();
-            p->setBrush(Qt::NoBrush);
-            if (vopt->state.testFlag(QStyle::State_HasFocus)) {
-                p->setPen("#2a7aaf");
-            } else {
-                p->setPen("#a9b6bd");
-            }
-            p->drawPolygon(po);
-            p->restore();
-        } else {
-            p->save();
-            if (!m_data.nReadStatus) {
-#ifdef Q_OS_MAC
-                p->setBrush(QBrush("#CBEBFA"));
-#else
-                p->setBrush(QBrush("#dcdcdc"));
-#endif
-            }
-            p->setPen("#dcdcdc");
-            p->drawPolygon(po);
-            p->restore();
-        }
+//        if (vopt->state.testFlag(QStyle::State_Selected)) {
+//            p->save();
+//            p->setBrush(Qt::NoBrush);
+//            if (vopt->state.testFlag(QStyle::State_HasFocus)) {
+//                p->setPen("#2a7aaf");
+//            } else {
+//                p->setPen("#a9b6bd"); }
+//            p->drawPolygon(po);
+//            p->restore();
+//        } else {
+//            p->save();
+//            if (!m_data.nReadStatus) {
+//#ifdef Q_OS_MAC
+//                p->setBrush(QBrush("#CBEBFA"));
+//#else
+//                p->setBrush(QBrush("#dcdcdc"));
+//#endif
+//            }
+//            p->setPen("#dcdcdc");
+//            p->drawPolygon(po);
+//            p->restore();
+//        }
 
-        QRect rcTitle(rcd.x() + 10, rcd.y() + 15, sz.width() - 6, sz.height() - 15);
+        QRect rcTitle(rcd.x(), rectAvatar.bottom() + nAvatarRightMargin, rcd.width(),
+                      rcd.bottom() - rectAvatar.bottom() - nAvatarRightMargin);
 //        drawColorMessageBody(p, rcMsg, f);
         QString strTitle(m_data.title);
-        QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
-        if (!strTitle.isEmpty())
-        {
-            rcTitle.setTop(rcFirstLine.bottom());
-            Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
-        }
+//        QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
+//        if (!strTitle.isEmpty())
+//        {
+//            rcTitle.setTop(rcFirstLine.bottom());
+            Utils::StyleHelper::drawText(p, rcTitle, strTitle, 2, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
+//        }
 
         p->restore();
     }
@@ -362,7 +367,7 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 
     MessageListViewItem* pItem = new MessageListViewItem(msg);
 
-    int nHeight = Utils::StyleHelper::thumbnailHeight() + Utils::StyleHelper::margin() * 5;
+    int nHeight = Utils::StyleHelper::messageViewItemHeight();
     pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
 
     addItem(pItem);
