@@ -1123,6 +1123,7 @@ struct CWizKMDataUploadParam
         AddString(_T("obj_guid"), strObjectGUID);
         AddString(_T("obj_type"), strObjectType);
         AddString(_T("obj_md5"), strObjectMD5);
+        AddInt(_T("obj_size"), allSize);
         AddInt(_T("part_count"), partCount);
         AddInt(_T("part_sn"), partIndex);
         AddInt64(_T("part_size"), stream.size());
