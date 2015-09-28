@@ -13,6 +13,7 @@ class Misc
 {
 public:
     static QString time2humanReadable(const QDateTime& time);
+    static QString time2humanReadable(const QDateTime& time, const QString& formate);
     static bool loadUnicodeTextFromFile(const QString& strFileName, QString& strText);
 
     //

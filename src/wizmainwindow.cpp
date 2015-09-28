@@ -1822,10 +1822,10 @@ void MainWindow::initToolBar()
 
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(140, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(20, 1), m_toolBar);
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addSearch(tr("Search"), "");
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
 
@@ -3319,6 +3319,7 @@ void MainWindow::on_message_itemSelectionChanged()
 
         viewDocument(doc, true);
     }
+    m_msgList->viewport()->update();
 }
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)
@@ -3524,12 +3525,10 @@ void MainWindow::adjustToolBarLayout()
         m_searchWidget->setFixedWidth(searchWidth);
     }
 #else
-//#ifndef USECOCOATOOLBAR
-
-    return;
-
     if (!m_toolBar)
         return;
+
+#ifndef USECOCOATOOLBAR
     //
     QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
     //
@@ -3542,7 +3541,13 @@ void MainWindow::adjustToolBarLayout()
         return;
     //
     m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
-//#endif
+#else
+//    m_toolBar
+    int nFixedSpacerWidth = m_category->width() - 75;
+    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
+    m_searchWidget->setFixedWidth(m_docListContainer->width() - 52);
+    m_toolBar->resize(width(), m_toolBar->height());
+#endif
 #endif
 }
 

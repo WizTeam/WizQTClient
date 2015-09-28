@@ -9,6 +9,11 @@
 namespace Utils {
 
 QString Misc::time2humanReadable(const QDateTime& time) {
+    return time2humanReadable(time, "yy-MM-dd");
+}
+
+QString Misc::time2humanReadable(const QDateTime& time, const QString& formate)
+{
     QDateTime t(QDateTime::currentDateTime());
     int nElapseSecs = time.secsTo(t);
     int nElapseDays = time.daysTo(t);
@@ -18,7 +23,7 @@ QString Misc::time2humanReadable(const QDateTime& time) {
     } else if (nElapseDays == 2) {
         return QObject::tr("The day before yesterday");
     } else if (nElapseDays > 2) {
-        return time.toString("yy-M-d");
+        return time.toString(formate);
     }
 
     if (nElapseSecs < 60) {

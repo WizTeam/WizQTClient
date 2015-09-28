@@ -156,12 +156,12 @@ public:
             p->fillRect(vopt->rect, QColor("#F7FBFF"));
         }
 
-        int nMargin = 10;//Utils::StyleHelper::margin();
+        int nMargin = 12;
         QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, 0);
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
-        int nAvatarRightMargin = 10;
+        int nAvatarRightMargin = 12;
 
         QFont f;
         int nHeight = Utils::StyleHelper::fontNormal(f);
@@ -184,47 +184,17 @@ public:
                                      messageTextColor, f);
 
         QRect rcTime(rcd.adjusted(0, -4, 0, 0));
-        QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated);
+        QFont fTime = f;
+        fTime.setPixelSize(10);
+        QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated, "yyyy.MM.dd");
         rcTime = Utils::StyleHelper::drawText(p, rcTime, strTime, 1, Qt::AlignRight | Qt::AlignTop,
-                                              messageTextColor, f);
+                                              messageTextColor, fTime);
 
-//        QSize sz(rcd.width() - nMargin * 2, rcd.height() - rcTime.height() - nMargin);
-//        QPolygonF po = Utils::StyleHelper::bubbleFromSize(sz, 4);
-//        po.translate(rcd.left() + nMargin, rcd.top());
-
-//        if (vopt->state.testFlag(QStyle::State_Selected)) {
-//            p->save();
-//            p->setBrush(Qt::NoBrush);
-//            if (vopt->state.testFlag(QStyle::State_HasFocus)) {
-//                p->setPen("#2a7aaf");
-//            } else {
-//                p->setPen("#a9b6bd"); }
-//            p->drawPolygon(po);
-//            p->restore();
-//        } else {
-//            p->save();
-//            if (!m_data.nReadStatus) {
-//#ifdef Q_OS_MAC
-//                p->setBrush(QBrush("#CBEBFA"));
-//#else
-//                p->setBrush(QBrush("#dcdcdc"));
-//#endif
-//            }
-//            p->setPen("#dcdcdc");
-//            p->drawPolygon(po);
-//            p->restore();
-//        }
-
-        QRect rcTitle(rcd.x(), rectAvatar.bottom() + nAvatarRightMargin, rcd.width(),
-                      rcd.bottom() - rectAvatar.bottom() - nAvatarRightMargin);
-//        drawColorMessageBody(p, rcMsg, f);
-        QString strTitle(m_data.title);
-//        QRect rcFirstLine = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f, false);
-//        if (!strTitle.isEmpty())
-//        {
-//            rcTitle.setTop(rcFirstLine.bottom());
-            Utils::StyleHelper::drawText(p, rcTitle, strTitle, 2, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
-//        }
+        int nAvatarBottomMargin = 10;
+        QRect rcTitle(rcd.x(), rectAvatar.bottom() + nAvatarBottomMargin, rcd.width(),
+                      rcd.bottom() - rectAvatar.bottom() - nAvatarBottomMargin);
+        QString strTitle(m_data.title);       
+        Utils::StyleHelper::drawText(p, rcTitle, strTitle, 2, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
 
         p->restore();
     }
@@ -443,7 +413,8 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
 
 void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    p->save();
+    p->setClipRect(vopt->rect);
     MessageListViewItem* pItem = messageItem(vopt->index);
 
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
@@ -455,6 +426,10 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
         Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
     }
     pItem->paint(p, vopt);
+
+    // draw seperator at last
+    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    p->restore();
 }
 
 void MessageListView::markAllMessagesReaded()

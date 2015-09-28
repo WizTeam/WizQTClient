@@ -262,7 +262,7 @@ int StyleHelper::listViewSortControlWidgetHeight()
 
 int StyleHelper::messageViewItemHeight()
 {
-    return 98;
+    return 102;
 }
 
 int StyleHelper::listViewItemHeight(int nType)
@@ -429,33 +429,35 @@ QIcon StyleHelper::listViewBadge(int type)
     return QIcon();
 }
 
+void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int width)
+{
+    p->save();
+//    p->setRenderHint(QPainter::Antialiasing);
+    QPen pen;
+    pen.setWidth(width);
+    pen.setColor(color);
+    p->setPen(pen);
+    p->setBrush(Qt::NoBrush);
+    p->drawRect(rc);
+    p->restore();
+}
+
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc;
-    rcBg.setHeight(rcBg.height() - 1);
+    QRect rcBg = rc.adjusted(2, 0, -9, -2);
     if (bSelect) {
-        if (bFocus) {
-            p->fillRect(rcBg, listViewItemBackground(Active));
-        } else {
-            p->fillRect(rcBg, listViewItemBackground(Normal));
-        }
+//        if (bFocus) {
+//            p->fillRect(rcBg, listViewItemBackground(Active));
+            drawSelectBorder(p, rcBg, QColor("#111111"), 1);
+//        } else
+//    {
+//            p->fillRect(rcBg, listViewItemBackground(Normal));
+//        }
     }
 }
 
 
-void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color)
-{
-    p->save();
-    p->setRenderHint(QPainter::Antialiasing);
-    QRect rcBg = rc.adjusted(1, 1, -1, -2);
-    QPen pen;
-    pen.setWidth(2);
-    pen.setColor(color);
-    p->setPen(pen);
-    p->setBrush(Qt::NoBrush);
-    p->drawRect(rcBg);
-    p->restore();
-}
+
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
@@ -466,13 +468,15 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
         break;
     case ListBGTypeActive:
     {
-        drawSelectBorder(p, rc, QColor("#5990EF"));
+        QRect rcBg = rc.adjusted(1, 1, -1, -2);
+        drawSelectBorder(p, rcBg, QColor("#5990EF"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
     case ListBGTypeHalfActive:
     {
-        drawSelectBorder(p, rc,QColor("#5990EF"));
+        QRect rcBg = rc.adjusted(1, 1, -1, -2);
+        drawSelectBorder(p, rcBg,QColor("#5990EF"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
@@ -560,7 +564,7 @@ int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, 
 void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 {
     QRect rcLine = rc;
-    //rcLine.adjust(1, 0, -1, 0);
+    rcLine.adjust(12, 0, 0, 0);
     p->save();
     p->setPen(listViewItemSeperator());
     p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());

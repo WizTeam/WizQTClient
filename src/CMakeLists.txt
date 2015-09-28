@@ -186,6 +186,7 @@ set(wiznote_SOURCES
     widgets/wizCrashReportDialog.cpp
     widgets/wizCustomToolBar.cpp
     core/wizSingleDocumentView.cpp
+    mac/wizSearchWidget_mm.cpp
 )
 
 set(wiznote_HEADERS
