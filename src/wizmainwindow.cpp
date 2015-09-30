@@ -1814,6 +1814,7 @@ void MainWindow::initMenuList()
 
 #endif
 
+
 void MainWindow::initToolBar()
 {
 #ifdef Q_OS_MAC
@@ -1822,7 +1823,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 1), m_toolBar);
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
@@ -1843,6 +1844,7 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(info, "", "");
     //
     m_searchWidget = m_toolBar->getSearchWidget();
+    m_searchWidget->setUserSettings(m_settings);
     #else
 
 
@@ -2254,7 +2256,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
 {
     Q_UNUSED(strErrorMsg);
 
-    m_animateSync->stopPlay();
+    m_animateSync->stopPlay();    
 
     //
     if (errorTokenInvalid == nErrorCode)
@@ -3056,6 +3058,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_noteListWidget->show();
     m_msgListWidget->hide();
     //
+    m_settings->appendRecentSearch(keywords);
     m_searcher->search(keywords, 500);
     startSearchStatus();
 }
@@ -3544,9 +3547,16 @@ void MainWindow::adjustToolBarLayout()
 #else
 //    m_toolBar
     int nFixedSpacerWidth = m_category->width() - 75;
-    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
-    m_searchWidget->setFixedWidth(m_docListContainer->width() - 52);
+//    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
+    m_spacerForToolButtonAdjust->adjustWidth(nFixedSpacerWidth);
+    m_toolBar->adjustWidgetToolBarItemWidth(m_spacerForToolButtonAdjust, nFixedSpacerWidth);
+    const int nSearchWgtMargin = 26;
+//    m_searchWidget->setFixedWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
+    m_toolBar->adjustSearchWidgetWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
     m_toolBar->resize(width(), m_toolBar->height());
+    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
+                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
+//    m_spacerForToolButtonAdjust->sets
 #endif
 #endif
 }
@@ -3632,7 +3642,10 @@ void MainWindow::reconnectServer()
 {
     CWizDatabase& db = m_dbMgr.db();
     WizService::Token::setUserId(db.GetUserId());
-    WizService::Token::setPasswd(m_settings->password());
+    if (!m_settings->password().isEmpty())
+    {
+        WizService::Token::setPasswd(m_settings->password());
+    }
 
     m_sync->clearCurrentToken();
     connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),

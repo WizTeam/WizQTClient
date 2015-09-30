@@ -29,6 +29,7 @@ public:
     static QString token(); // sync
     static void requestToken(); // async
     static void clearToken();
+    static void clearLastError();
     static void setUserId(const QString& strUserId);
     static void setPasswd(const QString& strPasswd);
 
