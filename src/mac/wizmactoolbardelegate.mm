@@ -305,7 +305,7 @@ public:
 #endif
         [toolbarItem setView: nsview];
         [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(300,NSHeight([nsview frame]))];
 
         return toolbarItem;
     }
@@ -466,6 +466,19 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     // Noop for now.
 }
 
+- (NSToolbarItem*) getSearchToolBarItem
+{
+    foreach (CWizMacToolBarItem* item, *items)
+    {
+        if (CWizMacToolBarSearchItem* search = dynamic_cast<CWizMacToolBarSearchItem*> (item))
+        {
+            NSString* nsId = search->itemIdentifier();
+            return [self itemIdentifierToItem: nsId];
+        }
+    }
+    return NULL;
+}
+
 - (CWizSearchWidget*) getSearchWidget
 {
     foreach (CWizMacToolBarItem* item, *items)
@@ -476,6 +489,22 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
         }
     }
     //
+    return NULL;
+}
+
+- (NSToolbarItem*) getWidgetToolBarItemByWidget:(QWidget*) widget
+{
+    foreach (CWizMacToolBarItem* item, *items)
+    {
+        if (CWizMacToolBarWidgetItem* widgetItem = dynamic_cast<CWizMacToolBarWidgetItem*> (item))
+        {
+            if (widgetItem->widget() == widget)
+            {
+                NSString* nsId = widgetItem->itemIdentifier();
+                return [self itemIdentifierToItem: nsId];
+            }
+        }
+    }
     return NULL;
 }
 

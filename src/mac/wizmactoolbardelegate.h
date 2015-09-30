@@ -54,6 +54,8 @@ class QMacCocoaViewContainer;
 - (IBAction)itemClicked:(id)sender;
 
 - (CWizSearchWidget*) getSearchWidget;
+- (NSToolbarItem*) getSearchToolBarItem;
+- (NSToolbarItem*) getWidgetToolBarItemByWidget:(QWidget*) widget;
 @end
 
 

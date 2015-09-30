@@ -6,7 +6,7 @@
 #ifdef USECOCOATOOLBAR
 
 #import <Cocoa/Cocoa.h>
-
+#include "share/wizsettings.h"
 #include "wizmachelper_mm.h"
 
 // NSSearchField delegate
@@ -288,6 +288,18 @@ void CWizSearchWidget::setText(const QString& text)
     focus();
 }
 
+QString CWizSearchWidget::currentText()
+{
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
+    NSString* nstring = [pSearchField stringValue];
+    return WizToQString(nstring);
+}
+
+void CWizSearchWidget::setUserSettings(CWizUserSettings* settings)
+{
+    m_completer->setUserSettings(settings);
+}
+
 bool CWizSearchWidget::isEditing()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
@@ -312,6 +324,14 @@ void CWizSearchWidget::moveCompleter(bool up)
 QString CWizSearchWidget::getCurrentCompleterText()
 {
     return m_completer->getCurrentText();
+}
+
+void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
+{
+    if (m_completer)
+    {
+        m_completer->setPopupOffset(popupWgtWidth, offset);
+    }
 }
 
 QSize CWizSearchWidget::sizeHint() const

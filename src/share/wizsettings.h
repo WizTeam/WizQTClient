@@ -203,6 +203,9 @@ public:
     // set: 1, 7, 30, 99999(all), -1(no), default: 1
     int syncGroupMethod() const;
     void setSyncGroupMethod(int days);
+
+    void appendRecentSearch(const QString& search);
+    QStringList getRecentSearches(bool reverseOrder = false);
 };
 
 #endif // WIZSETTINGS_H

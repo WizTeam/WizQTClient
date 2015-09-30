@@ -11,6 +11,7 @@ QT_BEGIN_NAMESPACE
 class QLineEdit;
 class QTimer;
 class QTreeWidget;
+class CWizUserSettings;
 QT_END_NAMESPACE
 
 class WizSuggestCompletionon;
@@ -24,6 +25,9 @@ public:
     void clear();
     void focus();
     void setText(const QString& text);
+    QString currentText();
+
+    void setUserSettings(CWizUserSettings* settings);
 
     bool isEditing();
 
@@ -31,6 +35,8 @@ public:
     void hideCompleter();
     void moveCompleter(bool up);
     QString getCurrentCompleterText();
+
+    void setPopupWgtOffset(int popupWgtWidth, const QSize& offset);
 
     virtual QSize sizeHint() const;
 
@@ -50,17 +56,6 @@ private:
     WizSuggestCompletionon* m_completer;
 };
 
-class CWizSuggestiongContainer : public QWidget
-{
-    Q_OBJECT
-public:
-    CWizSuggestiongContainer(QWidget* parent = 0);
-
-protected:
-//    void paintEvent(QPaintEvent* ev);
-//    void showEvent(QShowEvent* ev);
-};
-
 class CWizSuggestiongList : public QTreeWidget
 {
     Q_OBJECT
@@ -70,7 +65,7 @@ public:
 
 protected:
     void mouseMoveEvent(QMouseEvent* event);
-
+    void leaveEvent(QEvent* ev);
 };
 
 
@@ -81,15 +76,20 @@ class WizSuggestCompletionon : public QObject
 public:
     WizSuggestCompletionon(CWizSearchWidget *parent = 0);
     ~WizSuggestCompletionon();
+
+    void setUserSettings(CWizUserSettings* settings);
+
     bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_OVERRIDE;
-    void showCompletion(const QStringList &choices);
 
     bool isVisible();
     void hide();
     void selectSuggestItem(bool up);
     QString getCurrentText();
 
+    void setPopupOffset(int popupWgtWidth, const QSize& offset);
+
 public slots:
+    void showCompletion(const QStringList &choices, bool isRecentSearches);
 
     void doneCompletion();
     void preventSuggest();
@@ -104,6 +104,10 @@ private:
     QWidget *m_infoWgt;
     QTreeWidget *m_treeWgt;
     QTimer *m_timer;
+    QSize m_popupOffset;
+    int m_popupWgtWidth;
+
+    CWizUserSettings* m_settings;
 };
 
 #endif

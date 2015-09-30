@@ -976,9 +976,9 @@ CWizCategoryViewAllTagsItem::CWizCategoryViewAllTagsItem(CWizExplorerApp& app,
     : CWizCategoryViewItemBase(app, strName, strKbGUID, Category_AllTagsItem)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tags_normal"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "tags_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tags_selected"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);

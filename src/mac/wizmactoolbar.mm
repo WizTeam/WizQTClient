@@ -181,6 +181,31 @@ CWizSearchWidget* CWizMacToolBar::getSearchWidget()
     return [d->delegate getSearchWidget];
 }
 
+void CWizMacToolBar::adjustSearchWidgetWidth(int nWidth)
+{
+    NSToolbarItem* toolbarItem = [d->delegate getSearchToolBarItem];
+    NSSize maxSize = [toolbarItem maxSize];
+    [toolbarItem setMaxSize: NSMakeSize(nWidth, maxSize.height)];
+    NSView* nsView = [toolbarItem view];
+    NSRect f = nsView.frame;
+    f.size.width = nWidth;
+    nsView.frame = f;
+}
+
+void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
+{
+   NSToolbarItem* toolbarItem = [d->delegate getWidgetToolBarItemByWidget: widget];
+   if (toolbarItem)
+   {
+       NSSize maxSize = [toolbarItem maxSize];
+       [toolbarItem setMaxSize: NSMakeSize(nWidth, maxSize.height)];
+       NSView* nsView = [toolbarItem view];
+       NSRect f = nsView.frame;
+       f.size.width = nWidth;
+       nsView.frame = f;
+   }
+}
+
 CWizMacFixedSpacer::CWizMacFixedSpacer(QSize sz, QWidget* parent)
     : QMacCocoaViewContainer(nil, parent)
     , m_sz(sz)
@@ -193,6 +218,7 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 {
      m_sz.setWidth(width);
      setFixedWidth(width);
+//     setMinimumWidth(width);
 }
 
 #endif

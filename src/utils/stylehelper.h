@@ -64,6 +64,8 @@ public:
     static QString skinResourceFileName(const QString& strName, bool need2x = false);
     static QIcon loadIcon(const QString& strName);
 
+    static QRegion borderRadiusRegion(const QRect& rect);
+
     static QSize treeViewItemIconSize();
     static int treeViewItemHeight(bool isSection);
     static QColor treeViewBackground();

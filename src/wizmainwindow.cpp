@@ -1828,7 +1828,7 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
     m_toolBar->addSearch(tr("Search"), "");
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
 
     CWizToolButtonWidget* toolButtonContainer = new CWizToolButtonWidget(m_toolBar);
     QIcon iconNewNote = Utils::StyleHelper::loadIcon("toolButtonNewNote");
@@ -3115,7 +3115,7 @@ void MainWindow::on_menuButtonClicked()
 
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
-    adjustToolBarLayout();
+//    adjustToolBarLayout();
 }
 
 void MainWindow::on_actionGoBack_triggered()
@@ -3554,9 +3554,10 @@ void MainWindow::adjustToolBarLayout()
 //    m_searchWidget->setFixedWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
     m_toolBar->adjustSearchWidgetWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
     m_toolBar->resize(width(), m_toolBar->height());
-    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
-                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
+//    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
+//                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
 //    m_spacerForToolButtonAdjust->sets
+    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(283, 0));
 #endif
 #endif
 }

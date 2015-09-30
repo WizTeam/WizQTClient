@@ -94,6 +94,28 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
+QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
+{
+    QVector<QPoint> points;
+    int nBorderInterval = 2;
+    points.append(QPoint(rect.left(), rect.top() + nBorderInterval));
+    points.append(QPoint(rect.left() + 1, rect.top() + 1));
+    points.append(QPoint(rect.left() + nBorderInterval, rect.top()));
+    points.append(QPoint(rect.right() - nBorderInterval, rect.top()));
+    points.append(QPoint(rect.right() - 1, rect.top() + 1));
+    points.append(QPoint(rect.right(), rect.top() + nBorderInterval));
+    points.append(QPoint(rect.right(), rect.bottom() - nBorderInterval));
+    points.append(QPoint(rect.right() - 1, rect.bottom() - 1));
+    points.append(QPoint(rect.right() - nBorderInterval, rect.bottom()));
+    points.append(QPoint(rect.left() + nBorderInterval, rect.bottom()));
+    points.append(QPoint(rect.left() + 1, rect.bottom() - 1));
+    points.append(QPoint(rect.left(), rect.bottom() - nBorderInterval));
+
+    QPolygon polygon(points);
+
+    return QRegion(polygon);
+}
+
 QSize StyleHelper::treeViewItemIconSize()
 {
     return QSize(14, 14);

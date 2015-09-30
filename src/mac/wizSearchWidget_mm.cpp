@@ -10,23 +10,67 @@
 #include <QPalette>
 #include <QKeyEvent>
 #include <QMouseEvent>
+#include <QStyledItemDelegate>
 #include <QPainter>
+#include <QtConcurrent>
+#include "share/wizDatabaseManager.h"
+#include "share/wizDatabase.h"
 #include "utils/stylehelper.h"
+#include "share/wizsettings.h"
 
-WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent): QObject(parent), m_editor(parent)
+
+class WizSuggestionItemDelegate :  public QStyledItemDelegate
 {
-    m_popupWgt = new CWizSuggestiongContainer;
+public:
+    WizSuggestionItemDelegate(QObject* parent = 0) : QStyledItemDelegate(parent)
+    {}
+
+    virtual QSize sizeHint(const QStyleOptionViewItem & option, const QModelIndex & index) const
+    {
+        return QSize(QStyledItemDelegate::sizeHint(option, index).width(), 20);
+    }
+
+    virtual void	paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
+    {
+        QStyleOptionViewItemV4 opt = option;
+        initStyleOption(&opt, index);
+
+
+        painter->save();
+        painter->setPen(Qt::black);
+        if ((option.state & QStyle::State_Selected))
+        {
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor("#5990EF"));
+            painter->fillRect(option.rect, painter->brush());
+            painter->setPen(Qt::white);
+        }
+
+        QRect rcText = opt.rect.adjusted(20, 0, 0, 0);
+        painter->drawText(rcText, Qt::AlignLeft | Qt::AlignVCenter, opt.text);
+        painter->restore();
+    }
+};
+
+
+
+WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
+    : QObject(parent)
+    , m_editor(parent)
+    , m_popupWgtWidth(270)
+{
+    m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
     m_popupWgt->setFocusPolicy(Qt::NoFocus);
     m_popupWgt->setFocusProxy(parent);
     m_popupWgt->setMouseTracking(true);
     m_popupWgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
-    resetContainerSize(270, 170);
+    resetContainerSize(m_popupWgtWidth, 170);
 
     m_treeWgt = new CWizSuggestiongList;
     m_treeWgt->setFixedHeight(134);
-    m_treeWgt->setFixedWidth(270);
+    m_treeWgt->setFixedWidth(m_popupWgtWidth);
     m_treeWgt->setFocusPolicy(Qt::NoFocus);
 //    treeWgt->setFocusProxy(popup);
     m_treeWgt->setColumnCount(1);
@@ -41,10 +85,14 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent): QObjec
     m_treeWgt->setMouseTracking(true);
     m_treeWgt->installEventFilter(this);
     m_treeWgt->setAttribute(Qt::WA_MacShowFocusRect, false);
-    m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; }  QTreeView::item { padding-left:20px; }");
-    m_treeWgt->header()->setStyleSheet("QHeaderView::section{ background-color:#FFFFFF; border:0px; padding-left:8px; color:#C1C1C1; }");
+    m_treeWgt->setStyleSheet("QTreeWidget{ border:0px; outline:0; }  "
+                             "QTreeView::item { color:#AAAAAA; border-left:20px solid #FFFFFF;  margin-left:20px; }");
+    m_treeWgt->header()->setStyleSheet("QHeaderView::section{ background-color:#FFFFFF; height:20px; "
+                                       "border:0px; padding-left:8px; color:#C1C1C1; font-size:12px; }");
 //    m_treeWgt->header()->setMinimumHeight(20);
 //    m_treeWgt->header()->setFixedHeight(26);
+    WizSuggestionItemDelegate* suggestionDelegate = new WizSuggestionItemDelegate(m_treeWgt);
+    m_treeWgt->setItemDelegate(suggestionDelegate);
 
 
     QPushButton* button = new QPushButton(m_popupWgt);
@@ -66,7 +114,8 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent): QObjec
     buttonLayout->addStretch(0);
 
     m_infoWgt = new QWidget(m_popupWgt);
-    m_infoWgt->setFixedHeight(340);
+    m_infoWgt->setFixedHeight(135);
+    m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
     QVBoxLayout* infoLayout = new QVBoxLayout(m_infoWgt);
     QLabel* label = new QLabel(m_infoWgt);
     label->setText("Suggestion will be showed here");
@@ -89,7 +138,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent): QObjec
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
-    m_timer->setInterval(500);
+    m_timer->setInterval(200);
     connect(m_timer, SIGNAL(timeout()), SLOT(autoSuggest()));
     connect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
 }
@@ -97,6 +146,11 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent): QObjec
 WizSuggestCompletionon::~WizSuggestCompletionon()
 {
     delete m_popupWgt;
+}
+
+void WizSuggestCompletionon::setUserSettings(CWizUserSettings* settings)
+{
+    m_settings = settings;
 }
 
 bool WizSuggestCompletionon::eventFilter(QObject *obj, QEvent *ev)
@@ -148,13 +202,14 @@ bool WizSuggestCompletionon::eventFilter(QObject *obj, QEvent *ev)
 //! [4]
 
 //! [5]
-void WizSuggestCompletionon::showCompletion(const QStringList &choices)
+void WizSuggestCompletionon::showCompletion(const QStringList &choices, bool isRecentSearches)
 {
 
     if (choices.isEmpty())
     {
         m_treeWgt->setVisible(false);
         m_infoWgt->setVisible(true);
+        m_popupWgt->setFixedHeight(170);
     }
     else
     {
@@ -162,6 +217,9 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices)
         m_treeWgt->setVisible(true);
         m_treeWgt->setUpdatesEnabled(false);
         m_treeWgt->clear();
+
+        m_treeWgt->setHeaderLabel(isRecentSearches? tr("Recent Searches") : tr("Suggestions"));
+
         for (int i = 0; i < choices.count(); ++i)
         {
             QTreeWidgetItem * item;
@@ -173,20 +231,17 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices)
         m_treeWgt->adjustSize();
         m_treeWgt->setUpdatesEnabled(true);
 
-        resetContainerSize(270, treeWgtHeight + 35);
-        }
-    //    int h = treeWgt->sizeHintForRow(0) * qMin(7, choices.count()) + 3;
-//    popup->resize(treeWgt->width(), h);
+        m_treeWgt->setFixedWidth(m_popupWgtWidth);
+        resetContainerSize(m_popupWgtWidth, treeWgtHeight + 35);
+        }    
 
-    QPoint bottomLeft(280, -5); // = m_editor->geometry().bottomLeft();
+    QPoint bottomLeft(m_popupOffset.width(), -10); // = m_editor->geometry().bottomLeft();
 
     qApp->activeWindow()->mapToGlobal(bottomLeft);
     m_popupWgt->move(qApp->activeWindow()->mapToGlobal(bottomLeft));
     m_popupWgt->setFocus();
-//    editor->setFocus();
     m_treeWgt->setFocus();
     m_treeWgt->setCurrentItem(nullptr);
-//    popup->setFixedHeight(100);
     m_popupWgt->show();
 }
 
@@ -220,6 +275,12 @@ QString WizSuggestCompletionon::getCurrentText()
     return QString();
 }
 
+void WizSuggestCompletionon::setPopupOffset(int popupWgtWidth, const QSize& offset)
+{
+    m_popupWgtWidth = popupWgtWidth;
+    m_popupOffset = offset;
+}
+
 void WizSuggestCompletionon::doneCompletion()
 {
     m_timer->stop();
@@ -239,21 +300,50 @@ void WizSuggestCompletionon::autoSuggest()
     if (!m_editor->isEditing())
         return;
 
-    QStringList choices;
+    QString inputedText = m_editor->currentText();
+    if (inputedText.isEmpty())
+    {
+        QStringList recentSearches = m_settings->getRecentSearches(true);
+        m_treeWgt->setHeaderLabel(tr("Recent Searches"));
+        showCompletion(recentSearches, true);
+    }
+    else
+    {
+        QtConcurrent::run([this, inputedText](){
+            QStringList suggestions;
+            CWizDatabaseManager* manager = CWizDatabaseManager::instance();
+            for (int i = 0; i < manager->count(); i++)
+            {
+                CWizDatabase& db = manager->at(i);
+                CWizStdStringArray arrayTitle;
+                if (db.GetDocumentTitleStartWith(inputedText, 5, arrayTitle))
+                {
+                    for (CString title : arrayTitle)
+                    {
+                        if (suggestions.count() >= 5)
+                            break;
 
-    choices << "choices1" << "choices2" << "choices3";
-
-    showCompletion(choices);
+                        suggestions.append(title);
+                    }
+                }
+                if (suggestions.count() >= 5)
+                    break;
+            }
+            QMetaObject::invokeMethod(this, "showCompletion", Qt::QueuedConnection,
+                                      Q_ARG(QStringList, suggestions), Q_ARG(bool, false));
+        });
+    }
 }
 
 void WizSuggestCompletionon::resetContainerSize(int width, int height)
 {
-    m_popupWgt->setFixedSize(width, height);
-    QPainterPath path;
-    QRectF rect(0, 0, width, height); //= geometry();
-    path.addRoundRect(rect, 5, 5);
-    QPolygon polygon= path.toFillPolygon().toPolygon();
-    QRegion region(polygon);
+    m_popupWgt->setFixedSize(m_editor->sizeHint().width(), height);
+//    QPainterPath path;
+    QRect rect(0, 0, m_editor->sizeHint().width(), height); //= geometry();
+//    path.addRoundRect(rect, 3, 5);
+//    QPolygon polygon= path.toFillPolygon().toPolygon();
+//    QRegion region(polygon);
+    QRegion region = Utils::StyleHelper::borderRadiusRegion(rect);
     m_popupWgt->setMask(region);
 }
 
@@ -276,34 +366,10 @@ void CWizSuggestiongList::mouseMoveEvent(QMouseEvent* event)
     update();
 }
 
-
-
-CWizSuggestiongContainer::CWizSuggestiongContainer(QWidget* parent)
-    : QWidget(parent)
+void CWizSuggestiongList::leaveEvent(QEvent* ev)
 {
-
+    QTreeWidget::leaveEvent(ev);
+    setCurrentItem(nullptr);
+    update();
 }
 
-//void CWizSuggestiongContainer::showEvent(QShowEvent* ev)
-//{
-//    clearMask();
-//    QWidget::showEvent(ev);
-
-//    QPainterPath path;
-//    QRectF rect = geometry();
-//    path.addRoundRect(rect, 4, 4);
-//    QPolygon polygon= path.toFillPolygon().toPolygon();
-//    QRegion region(polygon);
-//    setMask(region);
-//}
-
-//void CWizSuggestiongContainer::paintEvent(QPaintEvent* ev)
-//{
-//    //
-//    QPainter pt(this);
-
-//    pt.setCompositionMode( QPainter::CompositionMode_Clear );
-//    pt.fillRect(rect(), Qt::SolidPattern );
-
-////    QWidget::paintEvent(event);
-//}

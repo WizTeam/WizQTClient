@@ -428,6 +428,8 @@ public:
 
     static bool IsInDeletedItems(const CString& strLocation);
 
+    bool GetDocumentTitleStartWith(const QString& titleStart, int nMaxCount, CWizStdStringArray& arrayTitle);
+
     bool CreateDocumentAndInit(const CString& strHtml, \
                                const CString& strHtmlUrl, \
                                int nFlags, \

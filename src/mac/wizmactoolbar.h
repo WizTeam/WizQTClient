@@ -81,10 +81,13 @@ public:
     void addStandardItem(StandardItem standardItem);
     void addSearch(const QString& label, const QString& tooltip);
     void addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip);
+    void addNSToolBarItem();
 
     void onSearchEndEditing(const QString& str);
     //
-    CWizSearchWidget* getSearchWidget();
+    CWizSearchWidget* getSearchWidget();    
+    void adjustSearchWidgetWidth(int nWidth);
+    void adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth);
 
 private:
     void showInWindowImpl(QWidget *window);

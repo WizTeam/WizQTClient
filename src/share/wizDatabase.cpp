@@ -3384,6 +3384,20 @@ bool CWizDatabase::IsInDeletedItems(const CString& strLocation)
     return strLocation.startsWith(LOCATION_DELETED_ITEMS);
 }
 
+bool CWizDatabase::GetDocumentTitleStartWith(const QString& titleStart, int nMaxCount, CWizStdStringArray& arrayTitle)
+{
+    QString sql = QString("SELECT DISTINCT DOCUMENT_TITLE FROM WIZ_DOCUMENT WHERE "
+                          "DOCUMENT_TITLE LIKE '" + titleStart + "%' LIMIT " + QString::number(nMaxCount) + ";");
+
+//    CString strSQL;
+//    strSQL.Format(_T("SELECT DISTINCT DOCUMENT_TITLE FROM WIZ_DOCUMENT WHERE "
+//                     "DOCUMENT_TITLE LIKE 's%%' LIMIT s%;"),
+//                  titleStart.utf16(),
+//                  WizIntToStr(nMaxCount).utf16());
+
+    return SQLToStringArray(sql, 0, arrayTitle);
+}
+
 bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                                          const CString& strHtmlUrl, \
                                          int nFlags, \
