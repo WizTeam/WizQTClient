@@ -7,6 +7,7 @@
 #include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QPlainTextEdit>
+#include "wizdef.h"
 #include "share/wizEventLoop.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
@@ -54,7 +55,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
         QUrlQuery postData;
         postData.addQueryItem("platform", "mac");
         postData.addQueryItem("token", "");
-        postData.addQueryItem("subject", "Crash-report:" + WizGenGUIDLowerCaseLetterOnly());
+        postData.addQueryItem("subject", "Version: " + QString(WIZ_CLIENT_VERSION) + "  UUID : " + WizGenGUIDLowerCaseLetterOnly());
         postData.addQueryItem("error", reportText);
 
         QNetworkAccessManager net;
