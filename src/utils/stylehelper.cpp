@@ -99,7 +99,9 @@ QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
     QVector<QPoint> points;
     int nBorderInterval = 2;
     points.append(QPoint(rect.left(), rect.top() + nBorderInterval));
+//    points.append(QPoint(rect.left() + 1, rect.top() + 2));
     points.append(QPoint(rect.left() + 1, rect.top() + 1));
+//    points.append(QPoint(rect.left() + 2, rect.top() + 1));
     points.append(QPoint(rect.left() + nBorderInterval, rect.top()));
     points.append(QPoint(rect.right() - nBorderInterval, rect.top()));
     points.append(QPoint(rect.right() - 1, rect.top() + 1));
@@ -114,6 +116,73 @@ QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
     QPolygon polygon(points);
 
     return QRegion(polygon);
+}
+
+QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
+                                                    int nTriangleMargin, int nTriangleWidth, int nTriangleHeight)
+{
+    QVector<QPoint> points;
+    int nBorderInterval = 2;
+    int nRectTop = rect.top() + nTriangleHeight;
+    points.append(QPoint(rect.left(), nRectTop + nBorderInterval));
+    points.append(QPoint(rect.left() + 1, nRectTop + 1));
+    points.append(QPoint(rect.left() + nBorderInterval, nRectTop));
+
+    //triangle
+    if (triangleAlginLeft)
+    {
+        points.append(QPoint(rect.left() + nTriangleMargin, nRectTop));
+        points.append(QPoint(rect.left() + nTriangleMargin + (nTriangleWidth + 1) / 2, 0));
+        points.append(QPoint(rect.left() + nTriangleMargin + nTriangleWidth, nRectTop));
+    }
+    else
+    {
+        points.append(QPoint(rect.right() - nTriangleMargin - nTriangleWidth, nRectTop));
+        points.append(QPoint(rect.right() - nTriangleMargin - nTriangleWidth / 2, 0));
+        points.append(QPoint(rect.right() - nTriangleMargin, nRectTop));
+    }
+
+    points.append(QPoint(rect.right() - nBorderInterval, nRectTop));
+    points.append(QPoint(rect.right() - 1, nRectTop + 1));
+    points.append(QPoint(rect.right(), nRectTop + nBorderInterval));
+    points.append(QPoint(rect.right(), rect.bottom() - nBorderInterval));
+    points.append(QPoint(rect.right() - 1, rect.bottom() - 1));
+    points.append(QPoint(rect.right() - nBorderInterval, rect.bottom()));
+    points.append(QPoint(rect.left() + nBorderInterval, rect.bottom()));
+    points.append(QPoint(rect.left() + 1, rect.bottom() - 1));
+    points.append(QPoint(rect.left(), rect.bottom() - nBorderInterval));
+    QPolygon polygon(points);
+
+    return QRegion(polygon);
+}
+
+
+QString StyleHelper::wizCommonListViewStyleSheet()
+{
+    return QString("QListView{ border-width: 1px; \
+        background-color:#FFFFFF; \
+        padding: 1px; \
+        border-style: solid; \
+        border-color: #ECECEC; \
+        border-radius: 5px; \
+        border-bottom-color:#E0E0E0;}");
+}
+
+QString StyleHelper::wizCommonStyleSheet()
+{
+    QString location = Utils::PathResolve::skinResourcesPath(themeName()) + "style.qss";
+    QString style;
+    QFile qss(location);
+    if (qss.exists())
+    {
+        qss.open(QFile::ReadOnly);
+        style = qss.readAll();
+        qss.close();
+
+        //
+        style.replace("WizComboBoxDownArrow", skinResourceFileName("comboBox_downArrow", true));
+    }
+    return style;
 }
 
 QSize StyleHelper::treeViewItemIconSize()
@@ -468,13 +537,14 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 {
     QRect rcBg = rc.adjusted(2, 0, -9, -2);
     if (bSelect) {
-//        if (bFocus) {
+        if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));
-            drawSelectBorder(p, rcBg, QColor("#111111"), 1);
-//        } else
-//    {
+            drawSelectBorder(p, rcBg, QColor("#3177EE"), 1);
+        } else
+        {
 //            p->fillRect(rcBg, listViewItemBackground(Normal));
-//        }
+            drawSelectBorder(p, rcBg, QColor("#D8D8D8"), 1);
+        }
     }
 }
 
@@ -491,14 +561,14 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
     case ListBGTypeActive:
     {
         QRect rcBg = rc.adjusted(1, 1, -1, -2);
-        drawSelectBorder(p, rcBg, QColor("#5990EF"), 2);
+        drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
     case ListBGTypeHalfActive:
     {
         QRect rcBg = rc.adjusted(1, 1, -1, -2);
-        drawSelectBorder(p, rcBg,QColor("#5990EF"), 2);
+        drawSelectBorder(p, rcBg,QColor("#D8D8D8"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Normal));
         break;

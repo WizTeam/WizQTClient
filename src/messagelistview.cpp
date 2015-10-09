@@ -776,10 +776,16 @@ void WizMessageSelector::showPopup()
     QComboBox::showPopup();
 
     QWidget* popup = findChild<QFrame*>();
+
     int topMargin = 4;
     QPoint pos(0, height() + topMargin * 2);
     pos = parentWidget()->mapToGlobal(pos);
     popup->move(pos);
+
+
+//    QRegion mask = Utils::StyleHelper::borderRadiusRegionWithTriangle(popup->geometry(), true, 18, 7, 3);
+//    popup->setMask(mask);
+
 }
 
 //bool WizMessageSelector::event(QEvent* event)
@@ -863,7 +869,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
                                              height: 0px;\
                                              width: 0px;\
                                          }"\
-                                             "QComboBox QListView{background-color:white;border:0px; min-width:180px;}"
+                                             "QComboBox QListView{background-color:transparent;border:1px; border-radius:5px; padding-top:4px; min-width:180px;}"
                                              "QComboBox QAbstractItemView::item {min-height:24px; min-width:180px; max-width:180px; margin:2px 0px 2px 0px;background:transparent;}"
                                              /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
 

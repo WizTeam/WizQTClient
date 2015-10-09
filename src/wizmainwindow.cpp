@@ -2159,12 +2159,12 @@ void MainWindow::on_documents_lastDocumentDeleted()
     ICore::instance()->emitCloseNoteRequested(m_doc);
 }
 
-void MainWindow::on_documents_hintChanged(const QString& strHint)
-{
-    QFontMetrics fmx(font());
-    QString strMsg = fmx.elidedText(strHint, Qt::ElideRight, 150);
-    m_labelDocumentsHint->setText(strMsg);
-}
+//void MainWindow::on_documents_hintChanged(const QString& strHint)
+//{
+//    QFontMetrics fmx(font());
+//    QString strMsg = fmx.elidedText(strHint, Qt::ElideRight, 150);
+//    m_labelDocumentsHint->setText(strMsg);
+//}
 
 void MainWindow::on_documents_viewTypeChanged(int type)
 {
@@ -4012,7 +4012,6 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
                 CWizDocumentDataArray arrayDocument;
                 baseItem->getDocuments(db, arrayDocument);
                 m_documents->setDocuments(arrayDocument);
-                on_documents_hintChanged(baseItem->text(0));
                 m_documents->setAcceptAllSearchItems(true);
                 m_documents->addAndSelectDocument(doc);
                 m_documents->setAcceptAllSearchItems(false);

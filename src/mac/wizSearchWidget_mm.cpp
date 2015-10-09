@@ -338,12 +338,9 @@ void WizSuggestCompletionon::autoSuggest()
 void WizSuggestCompletionon::resetContainerSize(int width, int height)
 {
     m_popupWgt->setFixedSize(m_editor->sizeHint().width(), height);
-//    QPainterPath path;
-    QRect rect(0, 0, m_editor->sizeHint().width(), height); //= geometry();
-//    path.addRoundRect(rect, 3, 5);
-//    QPolygon polygon= path.toFillPolygon().toPolygon();
-//    QRegion region(polygon);
+    QRect rect(0, 0, m_editor->sizeHint().width(), height); //= geometry();    
     QRegion region = Utils::StyleHelper::borderRadiusRegion(rect);
+
     m_popupWgt->setMask(region);
 }
 

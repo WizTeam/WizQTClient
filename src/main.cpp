@@ -30,6 +30,7 @@
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
+#include "utils/stylehelper.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/avatar.h"
@@ -311,6 +312,9 @@ int mainCore(int argc, char *argv[])
         proxy.setPassword(wizSettings.GetProxyPassword());
         QNetworkProxy::setApplicationProxy(proxy);
     }
+
+    //
+    a.setStyleSheet(Utils::StyleHelper::wizCommonStyleSheet());
 
     QString strUserId = WizGetLocalUserId(localUsers, strUserGuid);
     // manually login

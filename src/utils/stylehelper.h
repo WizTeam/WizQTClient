@@ -65,6 +65,11 @@ public:
     static QIcon loadIcon(const QString& strName);
 
     static QRegion borderRadiusRegion(const QRect& rect);
+    static QRegion borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
+                                                  int nTriangleMargin, int nTriangleWidth, int nTriangleHeight);
+
+    static QString wizCommonListViewStyleSheet();
+    static QString wizCommonStyleSheet();
 
     static QSize treeViewItemIconSize();
     static int treeViewItemHeight(bool isSection);

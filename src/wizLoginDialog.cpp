@@ -597,6 +597,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
     QString strBtnDisable = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
     //
+    m_buttonLogin->setStyleSheet("QPushButton, QPushButton:default{background-color:transparent;}");
     m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                               QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonLogin->setText(tr("Login"));
@@ -633,11 +634,11 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 //                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
 
     ui->btn_proxysetting->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                "color: #b1b1b1;margin-left:10px; margin-right:10px;  padding-bottom: 5px}"));
+                                                "color: #b1b1b1; margin:0px; margin-left:10px; margin-right:10px;  padding:0px; padding-bottom: 5px}"));
     ui->btn_fogetpass->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                                 "color: #b1b1b1; margin-left: 10px; margin-right:10px; padding-bottom: 5px}"));
+                                                 "color: #b1b1b1; margin:0px; margin-left: 10px; margin-right:10px; padding:0px; padding-bottom: 5px}"));
     ui->btn_snsLogin->setStyleSheet(QString("QPushButton { border: none; background: none; "
-                                            "color: #b1b1b1; margin-left: 10px; margin-right:10px; padding-bottom: 5px}"));
+                                            "color: #b1b1b1; margin:0px; margin-left: 10px; margin-right:10px; padding:0px; padding-bottom: 5px}"));
 
     QString strLineSeparator = ::WizGetSkinResourceFileName(strThemeName, "loginLineSeparator");
     ui->label_separator3->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"

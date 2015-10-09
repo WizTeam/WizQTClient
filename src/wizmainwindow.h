@@ -187,7 +187,7 @@ private:
     QWidget* m_docListContainer;
     CWizSingleDocumentViewDelegate* m_singleViewDelegate;
 
-    QLabel* m_labelDocumentsHint;
+//    QLabel* m_labelDocumentsHint;
     QLabel* m_labelDocumentsCount;
 
     CWizDocumentViewHistory* m_history;
@@ -374,7 +374,7 @@ public Q_SLOTS:
     void on_message_itemSelectionChanged();
     void on_documents_documentCountChanged();
     void on_documents_lastDocumentDeleted();
-    void on_documents_hintChanged(const QString& strHint);
+//    void on_documents_hintChanged(const QString& strHint);
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
     //void on_document_contentChanged();
