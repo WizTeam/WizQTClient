@@ -2,6 +2,7 @@
 #define WIZDOCUMENTLISTVIEW_H
 
 #include <QListWidget>
+#include <memory>
 
 #include "wizdef.h"
 #include "share/wizobject.h"
@@ -92,7 +93,7 @@ private:
     CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
 
-    QMenu* m_menuDocument;
+    std::shared_ptr<QMenu> m_menuDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;

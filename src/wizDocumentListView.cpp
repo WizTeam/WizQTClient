@@ -144,7 +144,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     //                         SLOT(on_action_message_delete()));
 
     // document context menu
-    m_menuDocument = new QMenu(this);
+    m_menuDocument = std::make_shared<QMenu>();
     m_menuDocument->addAction(WIZACTION_LIST_TAGS, this,
                               SLOT(on_action_selectTags()));
     m_menuDocument->addSeparator();
@@ -200,7 +200,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
     //m_menu->addAction(m_actionEncryptDocument);
-    connect(m_menuDocument, SIGNAL(aboutToHide()), SLOT(on_menu_aboutToHide()));
+    connect(m_menuDocument.operator ->(), SIGNAL(aboutToHide()), SLOT(on_menu_aboutToHide()));
 }
 
 CWizDocumentListView::~CWizDocumentListView()
