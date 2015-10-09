@@ -1936,7 +1936,7 @@ void MainWindow::initToolBar()
     //
     connect(m_searchWidget, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
     connect(m_searchWidget, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
-    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
+//    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void MainWindow::initClient()
@@ -2071,8 +2071,11 @@ QWidget* MainWindow::createNoteListView()
     layoutList->addWidget(m_documents);
 
     //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-    m_documents->setStyleSheet("background-color: qlineargradient(x1: 0px, y1: 0px, x2: 0.01, y2: 0, \
-                               stop: 0 #F5F5F5, stop: 0.5 #FAFAFA stop:1 #FFFFFF)");
+//    m_documents->setStyleSheet("background-color: qlineargradient(x1: 0px, y1: 0px, x2: 0.01, y2: 0, \
+//                               stop: 0 #F5F5F5, stop: 0.5 #FAFAFA stop:1 #FFFFFF)");
+    m_documents->setStyleSheet(QString("background-color: #FFFFFF;background-image:url(%1); background-repeat: repeat-y; "
+                                       "background-position: left;").arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", true)));
+    m_documents->setAutoFillBackground(true);
 
     return m_noteListWidget;
 }

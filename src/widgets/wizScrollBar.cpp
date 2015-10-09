@@ -4,6 +4,7 @@
 
 CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
+    , m_width(8)
 {
 
     // FIXME:  hard code
@@ -20,7 +21,7 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
 
 QSize CWizScrollBar::sizeHint() const
 {
-    return QSize(8, 1);
+    return QSize(m_width, 1);
 }
 
 void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -43,6 +44,11 @@ void CWizScrollBar::syncWith(QScrollBar* source)
 
     m_scrollSyncSource = source;
 
+}
+
+void CWizScrollBar::setWidth(int width)
+{
+    m_width = width;
 }
 
 void CWizScrollBar::showHandle()
@@ -101,7 +107,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
             min-height: 30px;\
         }\
         QScrollBar::handle:vertical {\
-            margin: 0px 2px 0px 2px;\
+            margin: 0px %2 0px 2px;\
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -112,7 +118,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(visible ? "#D8D8D8" : "transparent"));
+        }").arg(visible ? "#D8D8D8" : "transparent").arg(m_width - 6));
 }
 
 

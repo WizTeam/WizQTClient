@@ -234,8 +234,11 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
     [pSearchField setSearchWidget: this];
     [pSearchField setAutoresizesSubviews: YES];
-    [pSearchField setAutoresizingMask: NSViewHeightSizable | NSViewWidthSizable];
+    [pSearchField setAutoresizingMask: NSViewMinYMargin | NSViewWidthSizable];
     [pSearchField setDelegate: pSearchField];
+    NSRect f = pSearchField.frame;
+    f.size.height = 28;
+    pSearchField.frame = f;
     setCocoaView(pSearchField);
 
     WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
@@ -336,7 +339,7 @@ void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(300, 50);
+    return QSize(300, 60);
 }
 
 void CWizSearchWidget::processEvent(QEvent* ev)
@@ -364,6 +367,14 @@ void CWizSearchWidget::clearSearchFocus()
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
     QMacCocoaViewContainer::clearFocus();
+}
+
+void CWizSearchWidget::on_advanced_buttonClicked()
+{
+    clearSearchFocus();
+
+    emit advancedSearchRequest();
+    m_completer->hide();
 }
 
 #endif

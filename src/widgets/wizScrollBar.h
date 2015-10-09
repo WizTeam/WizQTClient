@@ -14,6 +14,7 @@ class CWizScrollBar : public QScrollBar
 public:
     explicit CWizScrollBar(QWidget* parent = 0);
     void syncWith(QScrollBar* source);
+    void setWidth(int width);
 
     virtual QSize sizeHint() const;
     virtual void mouseMoveEvent(QMouseEvent* event);
@@ -33,6 +34,7 @@ private:
 private:
     QPointer<QScrollBar> m_scrollSyncSource;
     QTimer m_timerScrollTimeout;
+    int m_width;
 };
 
 class CWizListWidgetWithCustomScorllBar : public  QListWidget

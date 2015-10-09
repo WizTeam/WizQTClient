@@ -47,10 +47,12 @@ public Q_SLOTS:
     void on_search_textChanged(const QString& strText);
     void setFocus();
     void clearSearchFocus();
+    void on_advanced_buttonClicked();
 
 Q_SIGNALS:
     void doSearch(const QString& keywords);
     void textEdited(const QString& text);
+    void advancedSearchRequest();
 
 private:
     WizSuggestCompletionon* m_completer;

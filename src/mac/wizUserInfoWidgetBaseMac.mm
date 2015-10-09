@@ -288,8 +288,8 @@
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-        const int nHeight = 26;
-        const int nTopMargin = 10;
+        const int nHeight = 24;
+        const int nTopMargin = 9;
         //
         CGRect rect = [self frame];
 //        NSLog(@"tool button rect : %@", rect);

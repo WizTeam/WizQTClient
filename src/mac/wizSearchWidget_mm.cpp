@@ -103,6 +103,8 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
                           padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
                           border-radius: 2px; border-bottom-color:#E0E0E0; }");
 
+    connect(button, SIGNAL(clicked(bool)), parent, SLOT(on_advanced_buttonClicked()));
+
     QWidget* buttonContainer = new QWidget(m_popupWgt);
     buttonContainer->setFixedHeight(35);
     buttonContainer->setStyleSheet("background-color:#F7F7F7; border-top:1px solid #E7E7E7;");
