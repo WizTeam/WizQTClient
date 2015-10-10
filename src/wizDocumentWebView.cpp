@@ -1246,19 +1246,16 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
     // 将默认的css样式放到最前面，防止覆盖文件本身的css样式
+    if (!QFile::exists(m_strDefaultCssFilePath))
+    {
+        resetDefaultCss();
+    }
     m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
             m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
-    //
-    /*
-    QString strExec = QString("viewNote('%1', %2, '%3', '%4');")
-            .arg(strGUID)
-            .arg(editing ? "true" : "false")
-            .arg(strHtml)
-            .arg(strHead);
-            */
+    //    
     QString strExec = QString("viewCurrentNote();");
 
     ret = page()->mainFrame()->evaluateJavaScript(strExec).toBool();

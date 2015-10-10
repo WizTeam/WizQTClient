@@ -230,7 +230,13 @@ QString MarkdownPlugin::getExecString()
 {
     QString strFile = cachePath() + "plugins/markdown/WizNote-Markdown.js";
     QFile f(strFile);
-    if (!f.open(QIODevice::ReadOnly)) {
+    if (!f.exists())
+    {
+        copyRes2Cache();
+    }
+
+    if (!f.open(QIODevice::ReadOnly))
+    {
         qDebug() << "[Markdown]Failed to get render execute code";
         return "";
     }
