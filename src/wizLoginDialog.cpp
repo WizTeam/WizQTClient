@@ -1272,6 +1272,8 @@ void CWizLoginDialog::onDeleteUserRequest(const WizLocalUser& user)
             QString folderPath = Utils::PathResolve::dataStorePath() + user.strDataFolderName;
             qDebug() << "remove folder path : " << folderPath;
             ::WizDeleteFolder(folderPath);
+            m_lineEditUserName->clear();
+            m_lineEditPassword->clear();
         }
     }
 }
