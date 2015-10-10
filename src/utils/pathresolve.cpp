@@ -53,7 +53,18 @@ QString PathResolve::builtinTemplatePath()
 
 QString PathResolve::downloadedTemplatesPath()
 {
-    return cachePath() + "templates/";
+    QString strPath;
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strPath = QDir::homePath() + "/Library/Templates/";
+    #else
+        strPath = dataStorePath() + "templates/";
+    #endif
+#else
+    strPath = dataStorePath() + "templates/";
+#endif
+
+    return strPath;
 }
 
 QString PathResolve::dataStorePath()

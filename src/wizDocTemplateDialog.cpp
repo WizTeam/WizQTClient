@@ -46,6 +46,21 @@ void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
 
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 {
+    //REMOVEME:  2015年10月10日 修复缓存路径中的数据会被自动删除的问题
+    //将数据移动到固定目录，防止用户添加的数据被删除
+    QString strOldPath = Utils::PathResolve::cachePath() + "templates/";
+    QDir dir(strOldPath);
+    if (dir.exists())
+    {
+        QStringList dirs = dir.entryList(QDir::AllDirs);
+        foreach (QString dirItem , dirs)
+        {
+            WizCopyFolder(strOldPath + dirItem, Utils::PathResolve::downloadedTemplatesPath() + dirItem, true);
+        }
+        WizDeleteFolder(strOldPath);
+    }
+
+
     QString strFoler = Utils::PathResolve::builtinTemplatePath();
     initFolderTemplateItems(strFoler, BuildInTemplate);
     strFoler = Utils::PathResolve::downloadedTemplatesPath();
