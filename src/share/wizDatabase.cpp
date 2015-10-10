@@ -194,7 +194,8 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
         return true;
 
     m_data.strLocation = strNewLocation;
-    if (!m_db.ModifyDocumentInfo(m_data))
+    m_data.nVersion = -1;
+    if (!m_db.ModifyDocumentInfoEx(m_data))
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
@@ -582,8 +583,9 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
 
         data.strLocation.remove(0, strOldLocation.length());
         data.strLocation.insert(0, strDestLocation);
+        data.nVersion = -1;
 
-        if (!m_db.ModifyDocumentInfo(data)) {
+        if (!m_db.ModifyDocumentInfoEx(data)) {
             TOLOG("Failed to move note to new folder!");
             continue;
         }

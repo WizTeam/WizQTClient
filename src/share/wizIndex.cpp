@@ -4054,6 +4054,12 @@ void CWizIndex::DeleteExtraFolder(const QString& strLocation)
     SetExtraFolder(arrayLocation);
 }
 
+/**
+ * @brief CWizIndex::UpdateLocation     just modify document location, do not change document modify date
+ * @param strOldLocation
+ * @param strNewLocation
+ * @return
+ */
 bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& strNewLocation)
 {
 //    QString sql = QString("update %1 set DOCUMENT_LOCATION='%2' where "
@@ -4073,7 +4079,8 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
     {
         WIZDOCUMENTDATA doc = *it;
         doc.strLocation.replace(strOldLocation, strNewLocation);
-        ModifyDocumentInfo(doc);
+        doc.nVersion = -1;
+        ModifyDocumentInfoEx(doc);
     }
 
     CWizStdStringArray arrayExtra;
