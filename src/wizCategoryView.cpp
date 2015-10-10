@@ -140,8 +140,8 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 //    colorBg.setAlpha(200);
 //    pal.setBrush(QPalette::Base, colorBg);
 //    setPalette(pal);
-    setStyleSheet("background-color: transparent;");
-    setAutoFillBackground(true);
+//    setStyleSheet("background-color: transparent;");
+//    setAutoFillBackground(true);
     //
     setCursor(QCursor(Qt::ArrowCursor));
     setMouseTracking(true);
@@ -300,7 +300,7 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
     m_bDragHovered = true;
     repaint();
 
-    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) || m_dragItem)
+    if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS))
     {
         event->acceptProposedAction();
         event->accept();
@@ -313,6 +313,9 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
     }
     else
     {
+        if (m_dragItem)
+            event->acceptProposedAction();
+
         QTreeWidget::dragEnterEvent(event);
     }
 }
