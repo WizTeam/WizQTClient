@@ -75,7 +75,7 @@ QPixmap CWizToolButtonWidget::getBackgroundImage(bool selected)
 //    }
 //    return QPixmap();
 
-    return Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground");
+    return Utils::StyleHelper::skinResourceFileName("toolBarButtonBackground");
 }
 
 #endif

@@ -210,6 +210,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
     m_editStatusChecker->moveToThread(checkThread);
     checkThread->start();
+
+    setStyleSheet(QString("QLineEdit{padding:0px; padding-bottom:1px; border:0px; border-radius:0px;}"
+                          "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
 }
 
 CWizDocumentView::~CWizDocumentView()

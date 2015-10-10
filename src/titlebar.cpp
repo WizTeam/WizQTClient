@@ -75,8 +75,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
     m_infoBar->setFixedHeight(nEditToolBarHeight);
 
-    // FIXME
-    QString strTheme = "default";
+    QString strTheme = Utils::StyleHelper::themeName();
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -154,10 +153,6 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line1->setFixedHeight(1);
     line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
 
-    m_tagBarSpacer = new QWidget(this);
-    m_tagBarSpacer->setFixedHeight(1);
-    m_tagBarSpacer->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");    
-
     QWidget* line3 = new QWidget(this);
     line3->setFixedHeight(1);
     line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
@@ -182,7 +177,6 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo1->addLayout(layoutInfo2);
 //    layoutInfo1->addWidget(line1);
     layoutInfo1->addWidget(m_tagBar);
-    layoutInfo1->addWidget(m_tagBarSpacer);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
 //    layoutInfo1->addWidget(line3);
@@ -326,7 +320,6 @@ void TitleBar::loadErrorPage()
 void TitleBar::setTagBarVisible(bool visible)
 {
     m_tagBar->setVisible(visible);
-    m_tagBarSpacer->setVisible(visible);
 }
 
 #ifdef USEWEBENGINE

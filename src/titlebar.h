@@ -103,7 +103,6 @@ private:
 
     TitleEdit* m_editTitle;
     CWizTagBar* m_tagBar;
-    QWidget* m_tagBarSpacer;
     InfoBar* m_infoBar;
     NotifyBar* m_notifyBar;
     EditorToolBar* m_editorBar;

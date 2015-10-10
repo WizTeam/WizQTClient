@@ -38,7 +38,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     setFocusPolicy(Qt::ClickFocus);
 
     QPalette pl = palette();
-    pl.setColor(QPalette::Window, QColor("#f7f8f9"));
+    pl.setColor(QPalette::Window, QColor("#FFFFFF"));
 //    pl.setBrush(QPalette::Window, QColor("#f7f8f9"));
     setPalette(pl);
     setAutoFillBackground(true);
@@ -448,13 +448,11 @@ void CWizTagBar::on_lineEditTextChanged(const QString& text)
 {
     if (text.isEmpty())
     {
-        m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                                  "background: #f7f8f9; color:#6c6c6c;}");
+        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#6c6c6c;}");
     }
     else
     {
-        m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                                  "background: #f7f8f9; color:#000000;}");
+        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#000000;}");
     }
 }
 
@@ -488,7 +486,7 @@ void CWizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
     m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                              "background: #f7f8f9; color:#6c6c6c;}");
+                              "background: #FFFFFF; color:#B6B6B6;}");
     m_lineEdit->setFixedWidth(150);
     m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
@@ -586,10 +584,10 @@ void CTagItem::paintEvent(QPaintEvent* event)
     QRect rcBorder(0, (height() - TAGITEM_HEIGHT) / 2, width(), TAGITEM_HEIGHT);
 
     pt.setPen(Qt::NoPen);
-    pt.setBrush(QBrush(QColor(m_selected ? "#c4d7e7" : "#d8e7ef")));
-
-    pt.drawRoundedRect(rcBorder, 10, 10);
-    pt.setPen(Qt::black);
+    pt.setBrush(QBrush(QColor(m_selected ? "#c4d7e7" : "#B6B6B6")));
+    pt.setRenderHint(QPainter::Antialiasing, true);
+    pt.drawRoundedRect(rcBorder, 8, 8);
+    pt.setPen(Qt::white);
     pt.drawText(rcBorder, Qt::AlignCenter, m_tagName);
 
     if (!m_readOnly)

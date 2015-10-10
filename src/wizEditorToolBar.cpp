@@ -757,7 +757,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     , m_app(app)
     , m_resetLocked(false)
 {
-    QString skin = "default";   
+    QString skin = Utils::StyleHelper::themeName();
 
     m_comboParagraph = new CWizToolComboBox(this);
     if (m_app.userSettings().locale() == ::WizGetDefaultTranslatedLocal())

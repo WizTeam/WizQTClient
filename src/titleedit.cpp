@@ -22,9 +22,9 @@ TitleEdit::TitleEdit(QWidget *parent)
     , m_separator('@')
 {
     //FIXME: just for alignment with documentlistwidget
-    setStyleSheet("padding-bottom:1px;");
+    setStyleSheet("QLineEdit { padding:0px; padding-bottom:1px; border:0px; border-radius:0px;}");
 
-    setContentsMargins(5, 0, 0, 0);
+    setContentsMargins(0, 0, 0, 0);
     setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setFrame(false);
