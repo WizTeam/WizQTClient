@@ -20,10 +20,7 @@ TitleEdit::TitleEdit(QWidget *parent)
     : QLineEdit(parent)
     , c(NULL)
     , m_separator('@')
-{
-    //FIXME: just for alignment with documentlistwidget
-    setStyleSheet("QLineEdit { padding:0px; padding-bottom:1px; border:0px; border-radius:0px;}");
-
+{    
     setContentsMargins(0, 0, 0, 0);
     setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     setAttribute(Qt::WA_MacShowFocusRect, false);

@@ -158,7 +158,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
-    layoutInfo2->setContentsMargins(14, 0, 14, 0);
+    layoutInfo2->setContentsMargins(Utils::StyleHelper::editorBarMargins());
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
