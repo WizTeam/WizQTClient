@@ -1057,7 +1057,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     setLayout(vLayout);
-    vLayout->setContentsMargins(Utils::StyleHelper::editorBarMargins());
+    vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->setSpacing(0);
     vLayout->addWidget(buttonWidget);
     vLayout->addWidget(m_extraButtonsWidget);

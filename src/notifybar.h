@@ -38,6 +38,7 @@ signals:
     void labelLink_clicked(const QString& link);
 
 private:
+    QWidget* m_childWgt;
     QLabel* m_labelNotify;
     wizImageButton* m_buttonClose;
     QPropertyAnimation* m_animation;
@@ -48,6 +49,7 @@ private:
 
     void showNotify();
     void hideNotify(bool bUseAnimation);
+    void applyStyleSheet(bool isForbidden);
 };
 
 } // namespace Internal

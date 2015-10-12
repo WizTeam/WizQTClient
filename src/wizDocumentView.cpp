@@ -860,7 +860,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 //            }
 //            else
 //            {
-                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
+                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to download new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
 //            }
                 m_editStatus |= DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }

@@ -35,7 +35,7 @@ CWizNoteInfoForm::~CWizNoteInfoForm()
 
 QSize CWizNoteInfoForm::sizeHint() const
 {
-    return QSize(420, 350);
+    return QSize(420, 370);
 }
 
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
@@ -50,12 +50,16 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 
     ui->editTitle->setText(data.strTitle);
 
+    QFont font;
+    QFontMetrics fm(font);
+    const int nMaxTextWidth = 280;
     QString strLocation;
     // private document
     if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
         strLocation = data.strLocation;
 
         QString tags = db.GetDocumentTagsText(data.strGUID);
+        tags = fm.elidedText(tags, Qt::ElideMiddle, nMaxTextWidth);
         ui->labelTags->setText(tags);
 
         ui->editAuthor->setText(data.strAuthor);
@@ -80,9 +84,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
         ui->editAuthor->setText(data.strAuthor);
     }
 
-    QFont font;
-    QFontMetrics fm(font);
-    strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, 280);
+    strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, nMaxTextWidth);
     ui->labelNotebook->setText(strLocation);
 
     // common fields

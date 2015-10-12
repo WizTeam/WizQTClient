@@ -34,7 +34,6 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     setFixedHeight(nHeight);
 
 //    setStyleSheet("font-size: 11px; color: #646464;");
-    setContentsMargins(Utils::StyleHelper::editorBarMargins());
     setFocusPolicy(Qt::ClickFocus);
 
     QPalette pl = palette();

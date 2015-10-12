@@ -23,7 +23,7 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     setFixedHeight(nHeight);
 
     QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(Utils::StyleHelper::editorBarMargins());
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(10);
     setLayout(layout);
 
