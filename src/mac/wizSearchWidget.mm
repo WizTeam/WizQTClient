@@ -236,9 +236,8 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     [pSearchField setAutoresizesSubviews: YES];
     [pSearchField setAutoresizingMask: NSViewMinYMargin | NSViewWidthSizable];
     [pSearchField setDelegate: pSearchField];
-    NSRect f = pSearchField.frame;
-    f.size.height = 28;
-    pSearchField.frame = f;
+//    NSRect f = pSearchField.frame;
+//    pSearchField.frame = f;
     setCocoaView(pSearchField);
 
     WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
@@ -339,7 +338,7 @@ void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(300, 60);
+    return QSize(300, TOOLBARITEMHEIGHT);
 }
 
 void CWizSearchWidget::processEvent(QEvent* ev)

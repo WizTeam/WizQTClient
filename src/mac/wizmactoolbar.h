@@ -18,6 +18,19 @@ class CWizMacToolBarItem;
 class CWizSearchWidget;
 
 
+class CWizMacToolBarButtonItem : public QMacCocoaViewContainer
+{
+    Q_OBJECT
+public:
+    CWizMacToolBarButtonItem(const QString& title, int buttonType, int bezelStyle,QWidget* parent = 0);
+
+    QSize sizeHint() const;
+
+    void buttonClicked();
+signals:
+    void triggered(bool);
+};
+
 class CWizMacFixedSpacer : public QMacCocoaViewContainer
 {
     QSize m_sz;

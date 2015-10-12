@@ -45,25 +45,10 @@
 #include "wizmachelper.h"
 #include "wizmactoolbar.h"
 #include "wizmactoolbardelegate.h"
+#include "wizmachelper_mm.h"
+#include "wizSearchWidget_mm.h"
 
 #import <AppKit/AppKit.h>
-
-class CWizNSAutoReleasePool
-{
-public:
-    CWizNSAutoReleasePool()
-    {
-        pool = [[NSAutoreleasePool alloc] init];
-    }
-
-    ~CWizNSAutoReleasePool()
-    {
-       [pool release];
-    }
-
-private:
-    NSAutoreleasePool* pool;
-};
 
 class CWizMacToolBarPrivate
 {
@@ -219,6 +204,59 @@ void CWizMacFixedSpacer::adjustWidth(int width)
      m_sz.setWidth(width);
      setFixedWidth(width);
 //     setMinimumWidth(width);
+}
+
+
+@interface WizButtonItem: NSButton
+{
+    CWizMacToolBarButtonItem* m_pButtonWidget;
+}
+
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget;
+- (void)buttonPressed;
+@end
+
+@implementation WizButtonItem
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget
+{
+    m_pButtonWidget = buttonWidget;
+}
+
+- (void)buttonPressed
+{
+    m_pButtonWidget->buttonClicked();
+}
+@end
+
+
+CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
+                                                           int buttonType, int bezelStyle, QWidget* parent)
+    : QMacCocoaViewContainer(nil, parent)
+{
+    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 2, 120, 28)];
+    [myButton setTitle: WizToNSString(title)];
+    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+    [myButton setImagePosition: NSImageLeft];
+    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
+    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
+
+    [myButton setButtonWidget: this];
+    [myButton setTarget:myButton];
+    [myButton setAction:@selector(buttonPressed)];
+
+    setCocoaView(myButton);
+
+    [myButton release];
+}
+
+QSize CWizMacToolBarButtonItem::sizeHint() const
+{
+     return  QSize(120, TOOLBARITEMHEIGHT);
+}
+
+void CWizMacToolBarButtonItem::buttonClicked()
+{
+    emit triggered(true);
 }
 
 #endif

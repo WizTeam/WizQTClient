@@ -1827,16 +1827,14 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
+
     m_toolBar->addSearch(tr("Search"), "");
 //    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
 
-    CWizToolButtonWidget* toolButtonContainer = new CWizToolButtonWidget(m_toolBar);
-    QIcon iconNewNote = Utils::StyleHelper::loadIcon("toolButtonNewNote");
-    toolButtonContainer->setIcon(iconNewNote);
-    toolButtonContainer->setText(tr("New Note"));
-    connect(toolButtonContainer, SIGNAL(triggered(bool)),
+    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), 0, 11, m_toolBar);
+    connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
-    m_toolBar->addWidget(toolButtonContainer, "", "");
+    m_toolBar->addWidget(texturedItem, "", "");
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
 

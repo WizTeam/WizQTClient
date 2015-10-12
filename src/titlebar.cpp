@@ -158,7 +158,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
-    layoutInfo2->setContentsMargins(Utils::StyleHelper::editorBarMargins());
+    layoutInfo2->setContentsMargins(0, 0, 0, 0);
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
@@ -172,19 +172,19 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
-    layoutInfo1->setContentsMargins(0, 0, 0, 0);
+    layoutInfo1->setContentsMargins(Utils::StyleHelper::editorBarMargins());
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
 //    layoutInfo1->addWidget(line1);
     layoutInfo1->addWidget(m_tagBar);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
+    layoutInfo1->addWidget(m_notifyBar);
 //    layoutInfo1->addWidget(line3);
     m_editorBar->hide();
 
     layout->addLayout(layoutInfo1);
     //layout->addLayout(layoutInfo4);
-    layout->addWidget(m_notifyBar);
 
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));

@@ -49,35 +49,6 @@ public:
     virtual int textHeight() const;
 };
 
-class CWizToolButtonWidget : public QMacCocoaViewContainer
-{
-    Q_OBJECT
-
-public:
-    CWizToolButtonWidget(QWidget *parent = 0);
-    void setIcon(const QIcon& icon) { m_icon = icon; }
-    QIcon getIcon() const { return m_icon; }
-    void setText(const QString& text) { m_text = text; }
-    QString getText() const { return m_text; }
-    QPixmap getBackgroundImage(bool selected);
-
-    void buttonClicked();
-
-protected:
-    virtual QSize sizeHint() const;
-
-signals:
-    void triggered(bool checked);
-
-private:
-    QString m_text;
-    QSize m_size;
-    QIcon m_icon;
-    QPixmap m_backgroundNormal;
-    QPixmap m_backgroundSelected;
-};
-
-
 #endif
 
 #endif // WIZUSERINFOWIDGETBASEMAC_H

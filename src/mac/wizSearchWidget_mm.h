@@ -16,6 +16,8 @@ QT_END_NAMESPACE
 
 class WizSuggestCompletionon;
 
+const int TOOLBARITEMHEIGHT =  50;
+
 class CWizSearchWidget : public QMacCocoaViewContainer
 {
     Q_OBJECT

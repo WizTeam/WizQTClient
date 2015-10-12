@@ -53,11 +53,11 @@ class CWizMacToolBarActionItem : public CWizMacToolBarItem
 {
 public:
     CWizMacToolBarActionItem(CWizMacToolBarDelegate* delegate, QAction* action)
-        : m_delegate(delegate)
+        : m_helper(this, action, NULL)
+        , m_delegate(delegate)
         , m_action(action)
         , m_id(WizGenGUID())
         , m_item(nil)
-        , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
         //connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
