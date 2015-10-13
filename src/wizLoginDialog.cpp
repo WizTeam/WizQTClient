@@ -1097,9 +1097,21 @@ void CWizLoginDialog::onTokenAcquired(const QString &strToken)
         }
         else
         {
-            if (errorTokenInvalid == nErrorCode)
+            if (WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode)
             {
                 ui->label_passwordError->setText(tr("User name or password is not correct!"));
+            }
+            else if (WIZKM_XMLRPC_ERROR_INVALID_USER == nErrorCode)
+            {
+                ui->label_passwordError->setText(tr("User not exists!"));
+            }
+            else if (WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode)
+            {
+                ui->label_passwordError->setText(tr("Password error!"));
+            }
+            else if (WIZKM_XMLRPC_ERROR_TOO_MANY_LOGINS == nErrorCode)
+            {
+                ui->label_passwordError->setText(tr("Log in too many times in a short time, please try again later."));
             }
             else
             {

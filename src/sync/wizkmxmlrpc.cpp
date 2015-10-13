@@ -470,11 +470,7 @@ BOOL CWizKMAccountsServer::document_shareSNS(const QString& strToken, const QStr
 
 BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
 {
-    CWizKMTokenOnlyParam param(GetToken(), GetKbGUID());
-    if (WIZKM_WEBAPI_VERSION < 4)
-    {
-        param.ChangeApiVersion(4);
-    }
+    CWizKMTokenOnlyParam param(GetToken(), GetKbGUID());    
     //
     param.AddString(_T("kb_type"), _T("group"));
 //    param.AddString(_T("protocol"), "https");
@@ -492,11 +488,7 @@ BOOL CWizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
 }
 bool CWizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
 {
-    CWizKMTokenOnlyParam param(GetToken(), GetKbGUID());
-    if (WIZKM_WEBAPI_VERSION < 4)
-    {
-        param.ChangeApiVersion(4);
-    }
+    CWizKMTokenOnlyParam param(GetToken(), GetKbGUID());    
     //
     std::deque<WIZBIZDATA> arrayWrap;
     if (!Call(_T("accounts.getUserBizs"), arrayWrap, &param))

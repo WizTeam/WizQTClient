@@ -557,6 +557,13 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     }
 }
 
+bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
+{
+    return WIZKM_XMLRPC_ERROR_INVALID_TOKEN == nErrorCode ||
+            WIZKM_XMLRPC_ERROR_INVALID_USER == nErrorCode ||
+            WIZKM_XMLRPC_ERROR_INVALID_PASSWORD == nErrorCode;
+}
+
 void MainWindow::on_TokenAcquired(const QString& strToken)
 {
     //WizService::Token::instance()->disconnect(this);
@@ -571,7 +578,7 @@ void MainWindow::on_TokenAcquired(const QString& strToken)
         {
             QMessageBox::critical(this, tr("Info"), tr("Connection is not available, please check your network connection."));
         }
-        else if (errorTokenInvalid == nErrorCode)
+        else if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))
         {
             // disable quick download message to stop request token again
             m_bQuickDownloadMessageEnable = false;
@@ -2260,7 +2267,7 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
     m_animateSync->stopPlay();    
 
     //
-    if (errorTokenInvalid == nErrorCode)
+    if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))
     {
         qDebug() << "sync done reconnectServer";
         reconnectServer();
@@ -3990,7 +3997,6 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
     m_msgList->setMessages(arrayMsg);
 
     // msg title bar
-    m_msgListTitleBar->setSelectorIndex(0);
     bool showUnreadBar = pItem->hitTestUnread();
     m_msgListTitleBar->setUnreadMode(showUnreadBar);
 }
