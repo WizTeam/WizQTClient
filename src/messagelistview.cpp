@@ -825,6 +825,7 @@ void WizMessageSelector::focusInEvent(QFocusEvent* event)
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
     : QWidget(parent)
     , m_dbMgr(dbMgr)
+    , m_userSelector(new WizMessageSenderSelector(m_dbMgr, this))
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
@@ -832,56 +833,67 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     layoutActions->setSpacing(0);
     setLayout(layoutActions);
 
-    m_msgSelector = new WizMessageSelector(this);
-//    m_msgSelector->setMinimumHeight(22);
-    m_msgSelector->setFixedHeight(22);
-    m_msgSelector->setFixedWidth(122);
-    m_msgSelector->setIconSize(QSize(20, 20));
-    m_msgSelector->setEditable(true);
+//    m_msgSelector = new WizMessageSelector(this);
+////    m_msgSelector->setMinimumHeight(22);
+//    m_msgSelector->setFixedHeight(22);
+//    m_msgSelector->setFixedWidth(122);
+//    m_msgSelector->setIconSize(QSize(20, 20));
+//    m_msgSelector->setEditable(true);
 
-    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");    
-    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
-                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"                                         
-                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
-                                             "QComboBox::down-arrow {image:url(%1);}"
-                                         "QComboBox QListView QScrollBar {\
-                                             background: transparent;\
-                                             width: 10px;\
-                                         }\
-                                         QComboBox QListView QScrollBar::handle {\
-                                             background: rgba(85, 85, 85, 200);\
-                                             border-radius: 4px;\
-                                             min-height: 30px;\
-                                         }\
-                                         QComboBox QListView QScrollBar::handle:vertical {\
-                                             margin: 0px 2px 0px 0px;\
-                                         }\
-                                         QComboBox QListView QScrollBar::handle:horizontal {\
-                                             margin: 0px 0px 2px 0px;\
-                                         }\
-                                         QComboBox QListView QScrollBar::add-page, QScrollBar::sub-page {\
-                                             background: transparent;\
-                                         }\
-                                         QComboBox QListView QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-                                             background: transparent;\
-                                         }\
-                                         QComboBox QListView QScrollBar::add-line, QScrollBar::sub-line {\
-                                             height: 0px;\
-                                             width: 0px;\
-                                         }"\
-                                             "QComboBox QListView{background-color:transparent;border:1px; border-radius:5px; padding-top:4px; min-width:180px;}"
-                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:180px; max-width:180px; margin:2px 0px 2px 0px;background:transparent;}"
-                                             /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
+//    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
+//    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
+//                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"
+//                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
+//                                             "QComboBox::down-arrow {image:url(%1);}"
+//                                         "QComboBox QListView QScrollBar {\
+//                                             background: transparent;\
+//                                             width: 10px;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::handle {\
+//                                             background: rgba(85, 85, 85, 200);\
+//                                             border-radius: 4px;\
+//                                             min-height: 30px;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::handle:vertical {\
+//                                             margin: 0px 2px 0px 0px;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::handle:horizontal {\
+//                                             margin: 0px 0px 2px 0px;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::add-page, QScrollBar::sub-page {\
+//                                             background: transparent;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+//                                             background: transparent;\
+//                                         }\
+//                                         QComboBox QListView QScrollBar::add-line, QScrollBar::sub-line {\
+//                                             height: 0px;\
+//                                             width: 0px;\
+//                                         }"\
+//                                             "QComboBox QListView{background-color:transparent;border:1px; border-radius:5px; padding-top:4px; min-width:180px;}"
+//                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:180px; max-width:180px; margin:2px 0px 2px 0px;background:transparent;}"
+//                                             /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
 
-    m_msgSelector->setMaxVisibleItems(15);
-    WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
-    m_msgSelector->setItemDelegate(itemDelegate);    
+//    m_msgSelector->setMaxVisibleItems(15);
+//    WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
+//    m_msgSelector->setItemDelegate(itemDelegate);
 
     initUserList();
 
-    layoutActions->addWidget(m_msgSelector);
-    connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
-            SLOT(on_selector_indexChanged(int)));
+//    layoutActions->addWidget(m_msgSelector);
+//    connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
+//            SLOT(on_selector_indexChanged(int)));
+
+    m_labelCurrentSender = new QLabel(this);
+    m_labelCurrentSender->setText(tr("All Users"));
+    m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    layoutActions->addWidget(m_labelCurrentSender);
+
+    m_btnSelectSender = new QToolButton(this);
+    m_btnSelectSender->setText("V");
+    m_btnSelectSender->setStyleSheet("border:0px;");
+    connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
+    layoutActions->addWidget(m_btnSelectSender);
 
     layoutActions->addStretch();
     m_msgListHintLabel = new QLabel(this);
@@ -925,14 +937,15 @@ bool WizMessageListTitleBar::isUnreadMode() const
 
 void WizMessageListTitleBar::setSelectorIndex(int index)
 {
-    m_msgSelector->blockSignals(true);
-    m_msgSelector->setCurrentIndex(index);
-    m_msgSelector->blockSignals(false);
+//    m_msgSelector->blockSignals(true);
+//    m_msgSelector->setCurrentIndex(index);
+//    m_msgSelector->blockSignals(false);
 }
 
 QString WizMessageListTitleBar::selectorItemData(int index) const
 {
-    return m_msgSelector->itemData(index).toString();
+//    return m_msgSelector->itemData(index).toString();
+    return "";
 }
 
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
@@ -950,70 +963,91 @@ void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
 
 
     // update message list
-    messageSelector_indexChanged(m_msgSelector->currentIndex());
+//    messageSelector_indexChanged(m_msgSelector->currentIndex());
 }
 
 void WizMessageListTitleBar::on_selector_indexChanged(int index)
 {
-    QString text = m_msgSelector->currentText();
-    QFont f;
-    QFontMetrics fm(f);
-    const int elidedTextWidth = 78;
-    QString elidedText = fm.elidedText(text, Qt::ElideRight, elidedTextWidth);
-    m_msgSelector->setEditText(elidedText);
-    emit messageSelector_indexChanged(index);
+//    QString text = m_msgSelector->currentText();
+//    QFont f;
+//    QFontMetrics fm(f);
+//    const int elidedTextWidth = 78;
+//    QString elidedText = fm.elidedText(text, Qt::ElideRight, elidedTextWidth);
+//    m_msgSelector->setEditText(elidedText);
+    //    emit messageSelector_indexChanged(index);
 }
 
-void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
+void WizMessageListTitleBar::on_sender_selected(const QString& userGUID, const QString& userAlias)
 {
-    CWizBizUserDataArray arrayUser;
-    if (!m_dbMgr.db().userFromGUID(userGUID, arrayUser))
-        return;
-
-    QSet<QString> userSet;
-    QString strUserId;
-    for (WIZBIZUSER user : arrayUser)
-    {
-        userSet.insert(user.alias);
-        strUserId = user.userId;
-    }
-    QStringList userList(userSet.toList());
-    QString strText = userList.join(";");
-//    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
-    QPixmap pix;
-    WizService::AvatarHost::load(strUserId);
-    WizService::AvatarHost::avatar(strUserId, &pix);
-    QIcon icon(pix);
-    m_msgSelector->addItem(icon, strText, userGUID);
+    m_labelCurrentSender->setText(userAlias);
+    emit messageSelector_senderSelected(userGUID);
 }
+
+void WizMessageListTitleBar::on_userSelectButton_clicked()
+{
+    showUserSelector();
+}
+
+void WizMessageListTitleBar::showUserSelector()
+{
+    QPoint leftTop = m_labelCurrentSender->mapToGlobal(m_labelCurrentSender->rect().bottomLeft());
+    m_userSelector->move(leftTop);
+    m_userSelector->show();
+}
+
+//void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
+//{
+//    CWizBizUserDataArray arrayUser;
+//    if (!m_dbMgr.db().userFromGUID(userGUID, arrayUser))
+//        return;
+
+//    QSet<QString> userSet;
+//    QString strUserId;
+//    for (WIZBIZUSER user : arrayUser)
+//    {
+//        userSet.insert(user.alias);
+//        strUserId = user.userId;
+//    }
+//    QStringList userList(userSet.toList());
+//    QString strText = userList.join(";");
+////    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
+//    QPixmap pix;
+//    WizService::AvatarHost::load(strUserId);
+//    WizService::AvatarHost::avatar(strUserId, &pix);
+//    QIcon icon(pix);
+//    m_msgSelector->addItem(icon, strText, userGUID);
+//}
 
 void WizMessageListTitleBar::initUserList()
 {
     CWizStdStringArray arraySender;
     CWizDatabase& db = m_dbMgr.db();
     db.getAllMessageSenders(arraySender);
-    for (auto sender : arraySender)
-    {
-        addUserToSelector(sender);
-    }
 
-    static bool once = true;
-    if (once)
-    {
-        WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
-        proxy->setSourceModel(m_msgSelector->model());                            // <--
-        m_msgSelector->model()->setParent(proxy);                                 // <--
-        m_msgSelector->setModel(proxy);
-        once = false;
-    }
-    //
-    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
-    QIcon icon(pix);
-//    m_msgSelector->insertItem(0, icon, tr("All members"));
-    m_msgSelector->addItem(icon, tr("All members"), "");
+    m_userSelector->setUsers(arraySender);
 
-    m_msgSelector->model()->sort(0);
-    m_msgSelector->setCurrentIndex(0);
+//    for (auto sender : arraySender)
+//    {
+//        addUserToSelector(sender);
+//    }
+
+//    static bool once = true;
+//    if (once)
+//    {
+//        WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
+//        proxy->setSourceModel(m_msgSelector->model());                            // <--
+//        m_msgSelector->model()->setParent(proxy);                                 // <--
+//        m_msgSelector->setModel(proxy);
+//        once = false;
+//    }
+//    //
+//    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+//    QIcon icon(pix);
+////    m_msgSelector->insertItem(0, icon, tr("All members"));
+//    m_msgSelector->addItem(icon, tr("All members"), "");
+
+//    m_msgSelector->model()->sort(0);
+//    m_msgSelector->setCurrentIndex(0);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
@@ -1098,6 +1132,165 @@ bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelInde
     //
     return leftString.compare(rightString) < 0;
 
+}
+
+class WizUserSelectorList : public QListWidget
+{
+public:
+    explicit WizUserSelectorList(QWidget *parent = 0)
+        : QListWidget(parent)
+    {
+        setMouseTracking(true);
+        setAttribute(Qt::WA_MacShowFocusRect, false);
+    }
+
+protected:
+    void mouseMoveEvent(QMouseEvent* event)
+    {
+        QListWidget::mouseMoveEvent(event);
+
+        QListWidgetItem* hoveredItem = itemAt(event->pos());
+        if (hoveredItem != nullptr && hoveredItem != currentItem())
+        {
+            setCurrentItem(hoveredItem);
+            update();
+        }
+    }
+};
+
+WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent)
+    : QWidget(parent)
+    , m_dbMgr(dbMgr)
+    , m_userList(new WizUserSelectorList(this))
+{
+    setWindowFlags(Qt::Popup);
+//    setFixedWidth(150);
+    QSize wgtSize(150, 200);
+    setWidgetSize(wgtSize);
+    QVBoxLayout* layout = new QVBoxLayout(this);
+    layout->setContentsMargins(0, 10, 0, 0);
+    setLayout(layout);
+
+    layout->addWidget(m_userList);
+    //
+    setStyleSheet(".QWidget{background-color:#FFFFFF;} QListWidget{border:0px;background-color:#FFFFFF;}");
+    QPalette pl = palette();
+    pl.setColor(QPalette::Window, QColor("#FFFFFF"));
+    setPalette(pl);
+
+    CWizListItemStyle<WizSenderSelectorItem>* listStyle = new CWizListItemStyle<WizSenderSelectorItem>();
+    m_userList->setStyle(listStyle);
+
+    connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
+}
+
+void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
+{
+    for (auto sender : arraySender)
+    {
+        addUser(sender);
+    }
+
+    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(tr("All members"), "", pix, m_userList);
+    selectorItem->setSizeHint(QSize(m_userList->width(), 22));
+    m_userList->addItem(selectorItem);
+
+    m_userList->sortItems();
+
+    int nHeight = m_userList->count() > 10 ?  200 :  m_userList->count() * 22 + 14;
+    setWidgetSize(QSize(width(), nHeight));
+}
+
+void WizMessageSenderSelector::on_selectorItem_clicked(QListWidgetItem* selectorItem)
+{
+    WizSenderSelectorItem* senderItem = dynamic_cast<WizSenderSelectorItem*>(selectorItem);
+    if (senderItem)
+    {
+        QString userGUID = senderItem->itemID();
+
+        emit senderSelected(userGUID, senderItem->itemText());
+    }
+}
+
+void WizMessageSenderSelector::addUser(const QString& userGUID)
+{
+    CWizBizUserDataArray arrayUser;
+    if (!m_dbMgr.db().userFromGUID(userGUID, arrayUser))
+        return;
+
+    QSet<QString> userSet;
+    QString strUserId;
+    for (WIZBIZUSER user : arrayUser)
+    {
+        userSet.insert(user.alias);
+        strUserId = user.userId;
+    }
+    QStringList userList(userSet.toList());
+    QString strText = userList.join(";");
+//    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
+    QPixmap pix;
+    WizService::AvatarHost::load(strUserId);
+    WizService::AvatarHost::avatar(strUserId, &pix);
+
+    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, strUserId, pix, m_userList);
+    selectorItem->setSizeHint(QSize(m_userList->width(), 22));
+    m_userList->addItem(selectorItem);
+
+
+}
+
+void WizMessageSenderSelector::setWidgetSize(const QSize& size)
+{
+    setFixedSize(size);
+    setMask(Utils::StyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size.width(), size.height()), true, 10, 4, 4));
+}
+
+WizSenderSelectorItem::WizSenderSelectorItem(const QString& text, const QString& id, const QPixmap& avatar,
+                                             QListWidget* view, int type)
+    : QListWidgetItem(view, type)
+    , m_text(text)
+    , m_id(id)
+    , m_avatar(avatar)
+{
+
+}
+
+void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+{
+    p->save();
+    p->setClipRect(vopt->rect);
+
+    bool selected = vopt->state & QStyle::State_Selected;
+
+    if (selected)
+    {
+        p->fillRect(vopt->rect, QBrush("#5990EF"));
+    }
+
+    QRect rcAvatar(vopt->rect.x() + 8, vopt->rect.y() + 4, 16, 16);
+    p->drawPixmap(rcAvatar, m_avatar);
+
+    QRect rcText(QPoint(rcAvatar.right() + 8, vopt->rect.y() + 5), QPoint(vopt->rect.right(), vopt->rect.bottom() - 5));
+    p->setPen(QColor(selected ? "#FFFFFF" : "#535353"));
+    QFont font = p->font();
+    font.setPixelSize(12);
+    QFontMetrics fm(p->font());
+    QString text = fm.elidedText(m_text, Qt::ElideMiddle, rcText.width());
+    p->setFont(font);
+    p->drawText(rcText, Qt::AlignVCenter | Qt::AlignLeft, text);
+
+    p->restore();
+}
+
+QString WizSenderSelectorItem::itemID() const
+{
+    return m_id;
+}
+
+QString WizSenderSelectorItem::itemText() const
+{
+    return m_text;
 }
 
 

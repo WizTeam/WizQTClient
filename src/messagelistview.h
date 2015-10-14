@@ -6,6 +6,9 @@
 #include <deque>
 #include <QComboBox>
 #include <QLabel>
+#include <QList>
+#include <QString>
+#include <QToolButton>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 //#include <memory>
@@ -13,10 +16,12 @@
 class CWizScrollBar;
 class CWizDatabaseManager;
 class wizImageButton;
+class CString;
 
 struct WIZMESSAGEDATA;
 struct WIZDOCUMENTDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
+typedef std::deque<CString> CWizStdStringArray;
 
 #ifdef Q_OS_LINUX
 #define WIZNOTE_CUSTOM_SCROLLBAR
@@ -39,6 +44,46 @@ class WizSortFilterProxyModel : public QSortFilterProxyModel
 public:
     WizSortFilterProxyModel(QObject *parent = 0);
     bool lessThan(const QModelIndex &left, const QModelIndex &right) const;
+};
+
+class WizSenderSelectorItem : public QListWidgetItem
+{
+public:
+    explicit WizSenderSelectorItem(const QString& text, const QString& id, const QPixmap& avatar,
+                                   QListWidget *view = 0, int type = Type);
+
+    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    QString itemID() const;
+    QString itemText() const;
+
+private:
+    QPixmap m_avatar;
+    QString m_text;
+    QString m_id;
+};
+
+class WizMessageSenderSelector : public QWidget
+{
+    Q_OBJECT
+public:
+    WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+
+    void setUsers(const CWizStdStringArray& arraySender);
+
+public slots:
+    void on_selectorItem_clicked(QListWidgetItem* selectorItem);
+
+signals:
+    void senderSelected(const QString& userGUID, const QString& userAlias);
+
+
+private:
+    void addUser(const QString& userGUID);
+    void setWidgetSize(const QSize& size);
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QListWidget* m_userList;
 };
 
 class WizMessageSelectorItemDelegate : public QStyledItemDelegate
@@ -84,20 +129,29 @@ public:
 
 signals:
     void messageSelector_indexChanged(int index);
+    void messageSelector_senderSelected(QString userGUID);
     void markAllMessageRead_request();
 
 public slots:
     void on_message_created(const WIZMESSAGEDATA& msg);
     void on_selector_indexChanged(int index);
 
+    void on_sender_selected(const QString& userGUID, const QString& userAlias);
+
+    void on_userSelectButton_clicked();
+
+    void showUserSelector();
+
 private:
-    void addUserToSelector(const QString& userGUID);
+//    void addUserToSelector(const QString& userGUID);
     void initUserList();
 
 private:
     CWizDatabaseManager& m_dbMgr;
     WizMessageSelector* m_msgSelector;
-    QListWidget* m_listWidget;
+    WizMessageSenderSelector* m_userSelector;
+    QLabel* m_labelCurrentSender;
+    QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;
 };

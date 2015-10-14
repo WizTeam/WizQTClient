@@ -334,7 +334,7 @@ public Q_SLOTS:
     void on_actionSortBySize_triggered();
 
     void on_actionMarkAllMessageRead_triggered();
-    void on_messageSelector_indexChanged(int index);
+    void on_messageSelector_senderSelected(QString userGUID);
 
     // menu format
     void on_actionFormatJustifyLeft_triggered();

@@ -2095,8 +2095,8 @@ QWidget*MainWindow::createMessageListView()
     m_msgListWidget->setLayout(layoutList);
 
     m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
-    connect(m_msgListTitleBar, SIGNAL(messageSelector_indexChanged(int)),
-            SLOT(on_messageSelector_indexChanged(int)));
+    connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
+            SLOT(on_messageSelector_senderSelected(QString)));
     connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request()),
             SLOT(on_actionMarkAllMessageRead_triggered()));
 
@@ -2692,11 +2692,10 @@ void MainWindow::on_actionMarkAllMessageRead_triggered()
     m_msgList->markAllMessagesReaded();
 }
 
-void MainWindow::on_messageSelector_indexChanged(int index)
+void MainWindow::on_messageSelector_senderSelected(QString userGUID)
 {
     WizGetAnalyzer().LogAction("messageSelector");
-    QString guid = m_msgListTitleBar->selectorItemData(index);
-    loadMessageByUserGuid(guid);
+    loadMessageByUserGuid(userGUID);
 }
 
 void MainWindow::on_actionFormatJustifyLeft_triggered()
