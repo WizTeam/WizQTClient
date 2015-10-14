@@ -19580,8 +19580,8 @@ UE.plugins['table'] = function () {
         needIEHack = true;
 
     me.setOpt({
-        'maxColNum':20,
-        'maxRowNum':100,
+        'maxColNum':2000,
+        'maxRowNum':10000,
         'defaultCols':5,
         'defaultRows':5,
         'tdvalign':'top',
