@@ -23,6 +23,7 @@
 
 #include "wizmainwindow.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
 #include "utils/misc.h"
 
 using namespace Core::Internal;
@@ -42,19 +43,12 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     , m_dbMgr(*CWizDatabaseManager::instance())
 {
     // FIXME
-    QString strTheme = "default";
+    QString strTheme = Utils::StyleHelper::themeName();
     setFrameStyle(QFrame::NoFrame);
     setStyle(WizGetStyle(strTheme));
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    QPalette pal;
-#ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
-#elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
-#endif
-    setPalette(pal);
 
     //QVBoxLayout* layout = new QVBoxLayout();
     //setStyleSheet("background-color: #F7F7F7");
@@ -181,6 +175,11 @@ void CWizAttachmentListView::resetAttachments()
 //    CWizDocumentAttachmentDataArray::const_iterator it;
     for (auto it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         addItem(newAttachmentItem(*it));
+
+        if (isAttachmentModified(*it))
+        {
+            updateAttachmentInfo(*it);
+        }
     }
 }
 
@@ -380,6 +379,40 @@ void CWizAttachmentListView::waitForDownload()
     loop.exec();
 }
 
+bool CWizAttachmentListView::isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment)
+{
+    QString fileNmae = m_dbMgr.db(attachment.strKbGUID).GetAttachmentFileName(attachment.strGUID);
+    QFileInfo info(fileNmae);
+    if (info.exists())
+    {
+        qDebug() << "info modified : " << info.lastModified() << " attach last modified ; " << attachment.tDataModified;
+        return info.lastModified() > attachment.tDataModified;
+    }
+    return false;
+}
+
+void CWizAttachmentListView::updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDATAEX& attachment)
+{
+    QString fileNmae = m_dbMgr.db(attachment.strKbGUID).GetAttachmentFileName(attachment.strGUID);
+    QFileInfo info(fileNmae);
+    if (info.exists())
+    {
+
+        QString strMD5 = WizMd5FileString(fileNmae);
+        if (strMD5 == attachment.strDataMD5)
+        {
+            qDebug() << "file modified, but md5 keep same";
+            return;
+        }
+        //
+
+        WIZDOCUMENTATTACHMENTDATAEX newData = attachment;
+        newData.tDataModified = info.lastModified();
+        m_dbMgr.db(attachment.strKbGUID).onAttachmentModified(attachment.strKbGUID, attachment.strGUID,
+                                                              fileNmae, strMD5, info.lastModified());
+    }
+}
+
 void CWizAttachmentListView::on_action_addAttachment()
 {
     addAttachments();
@@ -542,9 +575,10 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     : CWizPopupWidget(parent)
     , m_list(new CWizAttachmentListView(this))
 {
-    // FIXME
-    QString strTheme = "default";
+    QString strTheme = Utils::StyleHelper::themeName();
     setContentsMargins(0, 20, 0, 0);
+
+    setFixedWidth(270);
 
     QIcon iconAddAttachment = ::WizLoadSkinIcon(strTheme, "document_add_attachment");
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
@@ -567,13 +601,13 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     layoutMain->addWidget(m_list);
     connect(m_list, SIGNAL(closeRequest()), SLOT(on_attachList_closeRequest()));
 
-    QPalette pal;
+    QPalette pal = palette();
 #ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+    pal.setBrush(QPalette::Window, QBrush("#D7D7D7"));
 #elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+    pal.setBrush(QPalette::Window, QBrush("#F7F7F7"));
 #endif
-    m_list->setPalette(pal);
+    setPalette(pal);
 }
 
 bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)

@@ -296,6 +296,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         QRect rc = textRect;
         rc.setTop(rc.top() + line * lineHeight);
         rc.setHeight(lineHeight);
+        rc.setWidth(150);
         ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, true);
     }
 
