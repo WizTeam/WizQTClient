@@ -917,7 +917,7 @@ int StyleHelper::fontExtend(QFont& f)
 
 int StyleHelper::editorButtonHeight()
 {
-    return 27;
+    return 28;
 }
 
 QMargins StyleHelper::editorBarMargins()

@@ -2013,6 +2013,11 @@ void MainWindow::initClient()
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
 
+    m_category->setMinimumWidth(165);
+    m_docListContainer->setMinimumWidth(244);
+    m_doc->web()->setMinimumWidth(555);
+    m_doc->commentWidget()->setMinimumWidth(195);
+
     m_msgListWidget->hide();
     //
     connect(m_splitter.get(), SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));

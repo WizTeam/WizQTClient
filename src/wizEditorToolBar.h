@@ -54,6 +54,7 @@ private:
     CWizToolButtonColor* m_btnForeColor;
     CWizToolButtonColor* m_btnBackColor;
     CWizToolButton* m_btnFormatMatch;
+    CWizToolButton* m_btnRemoveFormat;
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
@@ -64,7 +65,9 @@ private:
     CWizToolButton* m_btnTable;
     CWizToolButton* m_btnHorizontal;
     CWizToolButton* m_btnCheckList;
+    CWizToolButton* m_btnInsertLink;
     CWizToolButton* m_btnInsertImage;
+    CWizToolButton* m_btnInsertDate;
     CWizToolButton* m_btnSearchReplace;
     CWizToolButton* m_btnMobileImage;
     CWizToolButton* m_btnScreenShot;
@@ -78,11 +81,16 @@ private:
 
     QString m_strImageSrc;
 
-    QWidget* m_extraButtonsWidget;
+    QWidget* m_firstLineButtonContainer;
+    QWidget* m_secondLineButtonContainer;
+    QWidget* m_moveableButtonContainer;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
     QTimer m_resetLockTimer;
+
+    // flag to adjust button position, if it is ture m_btnJustify is in first line, else m_btnJustify is in second line
+    bool m_moveableButtonsInFirstLine;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -161,6 +169,9 @@ protected Q_SLOTS:
 
     void on_fontDailogFontChanged(const QFont & font);
 
+protected:
+    void showEvent(QShowEvent* ev);
+
 private:
     void queryCurrentFont(QFont& font);
     void setCurrentFont(const QFont& font);
@@ -170,6 +181,8 @@ private:
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);
+
+    void adjustButtonPosition();
 };
 
 

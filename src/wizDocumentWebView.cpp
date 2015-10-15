@@ -1611,8 +1611,8 @@ bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamil
 
 bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
-    WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1").arg(strSize));
-    return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
+    WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1px").arg(strSize));
+    return editorCommandExecuteCommand("fontSize", "'" + strSize + "px'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
