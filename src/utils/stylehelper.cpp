@@ -145,12 +145,14 @@ QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool tria
     points.append(QPoint(rect.right() - nBorderInterval, nRectTop));
     points.append(QPoint(rect.right() - 1, nRectTop + 1));
     points.append(QPoint(rect.right(), nRectTop + nBorderInterval));
-    points.append(QPoint(rect.right(), rect.bottom() - nBorderInterval));
-    points.append(QPoint(rect.right() - 1, rect.bottom() - 1));
-    points.append(QPoint(rect.right() - nBorderInterval, rect.bottom()));
-    points.append(QPoint(rect.left() + nBorderInterval, rect.bottom()));
-    points.append(QPoint(rect.left() + 1, rect.bottom() - 1));
-    points.append(QPoint(rect.left(), rect.bottom() - nBorderInterval));
+    points.append(QPoint(rect.right(), rect.bottom() - nBorderInterval - 1));
+    points.append(QPoint(rect.right() - 1, rect.bottom() - nBorderInterval));
+    points.append(QPoint(rect.right() - 2, rect.bottom() - 1));
+    points.append(QPoint(rect.right() - 3, rect.bottom()));
+    points.append(QPoint(rect.left() + 3, rect.bottom()));
+    points.append(QPoint(rect.left() + 2, rect.bottom() - 1));
+    points.append(QPoint(rect.left() + 1, rect.bottom() - nBorderInterval));
+    points.append(QPoint(rect.left(), rect.bottom() - nBorderInterval - 1));
     QPolygon polygon(points);
 
     return QRegion(polygon);

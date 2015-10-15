@@ -86,6 +86,21 @@ private:
     QListWidget* m_userList;
 };
 
+class WizClickableLabel : public QLabel
+{
+    Q_OBJECT
+public:
+    WizClickableLabel(QWidget* parent = 0)
+        : QLabel(parent)
+    {}
+
+signals:
+    void labelClicked();
+
+protected:
+    void mouseReleaseEvent(QMouseEvent* ev);
+};
+
 class WizMessageSelectorItemDelegate : public QStyledItemDelegate
 {
 public:
@@ -150,7 +165,7 @@ private:
     CWizDatabaseManager& m_dbMgr;
     WizMessageSelector* m_msgSelector;
     WizMessageSenderSelector* m_userSelector;
-    QLabel* m_labelCurrentSender;
+    WizClickableLabel* m_labelCurrentSender;
     QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;

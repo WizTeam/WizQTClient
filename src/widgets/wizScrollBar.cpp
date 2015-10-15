@@ -118,7 +118,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(visible ? "#D8D8D8" : "transparent").arg(m_width - 6));
+        }").arg(visible ? "#D8D8D8" : "transparent").arg(m_width >= 6 ? m_width - 6 : 0));
 }
 
 

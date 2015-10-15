@@ -822,6 +822,8 @@ void WizMessageSelector::focusInEvent(QFocusEvent* event)
 //    setCursor(QCursor(Qt::ArrowCursor));
 //}
 
+const int SenderNameFontSize = 14;
+
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
     : QWidget(parent)
     , m_dbMgr(dbMgr)
@@ -831,67 +833,24 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(2, 0, 16, 0);
     layoutActions->setSpacing(0);
-    setLayout(layoutActions);
+    setLayout(layoutActions);    
 
-//    m_msgSelector = new WizMessageSelector(this);
-////    m_msgSelector->setMinimumHeight(22);
-//    m_msgSelector->setFixedHeight(22);
-//    m_msgSelector->setFixedWidth(122);
-//    m_msgSelector->setIconSize(QSize(20, 20));
-//    m_msgSelector->setEditable(true);
+    initUserList();    
 
-//    QString strDropArrow = Utils::StyleHelper::skinResourceFileName("arrow");
-//    m_msgSelector->setStyleSheet(QString("QComboBox{background-color: white;selection-color: #000000; selection-background-color: transparent;}"
-//                                             "QComboBox{border: 0px;padding: 1px 1px 1px 3px;}"
-//                                             "QComboBox::drop-down {width: 15px;border:0px;subcontrol-origin: padding;subcontrol-position: top right;width: 15px;}"
-//                                             "QComboBox::down-arrow {image:url(%1);}"
-//                                         "QComboBox QListView QScrollBar {\
-//                                             background: transparent;\
-//                                             width: 10px;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::handle {\
-//                                             background: rgba(85, 85, 85, 200);\
-//                                             border-radius: 4px;\
-//                                             min-height: 30px;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::handle:vertical {\
-//                                             margin: 0px 2px 0px 0px;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::handle:horizontal {\
-//                                             margin: 0px 0px 2px 0px;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::add-page, QScrollBar::sub-page {\
-//                                             background: transparent;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-//                                             background: transparent;\
-//                                         }\
-//                                         QComboBox QListView QScrollBar::add-line, QScrollBar::sub-line {\
-//                                             height: 0px;\
-//                                             width: 0px;\
-//                                         }"\
-//                                             "QComboBox QListView{background-color:transparent;border:1px; border-radius:5px; padding-top:4px; min-width:180px;}"
-//                                             "QComboBox QAbstractItemView::item {min-height:24px; min-width:180px; max-width:180px; margin:2px 0px 2px 0px;background:transparent;}"
-//                                             /*"QComboBox::item:selected {background:transparent;color:#ffffff;}"*/).arg(strDropArrow));
+    connect(m_userSelector, SIGNAL(senderSelected(QString,QString)), SLOT(on_sender_selected(QString,QString)));
 
-//    m_msgSelector->setMaxVisibleItems(15);
-//    WizMessageSelectorItemDelegate* itemDelegate = new WizMessageSelectorItemDelegate();
-//    m_msgSelector->setItemDelegate(itemDelegate);
-
-    initUserList();
-
-//    layoutActions->addWidget(m_msgSelector);
-//    connect(m_msgSelector, SIGNAL(currentIndexChanged(int)),
-//            SLOT(on_selector_indexChanged(int)));
-
-    m_labelCurrentSender = new QLabel(this);
+    m_labelCurrentSender = new WizClickableLabel(this);
     m_labelCurrentSender->setText(tr("All Users"));
     m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+    m_labelCurrentSender->setFixedWidth(102);
+    m_labelCurrentSender->setStyleSheet(QString("padding-left:5px; padding-right:4px; font: %1px #888888;").arg(SenderNameFontSize));
+    connect(m_labelCurrentSender, SIGNAL(labelClicked()), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_labelCurrentSender);
 
     m_btnSelectSender = new QToolButton(this);
-    m_btnSelectSender->setText("V");
-    m_btnSelectSender->setStyleSheet("border:0px;");
+    m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); background-repeat: no-repeat;"
+                                             "background-position: center;").arg(Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", true)));
+    m_btnSelectSender->setFixedWidth(5);
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
 
@@ -979,7 +938,11 @@ void WizMessageListTitleBar::on_selector_indexChanged(int index)
 
 void WizMessageListTitleBar::on_sender_selected(const QString& userGUID, const QString& userAlias)
 {
-    m_labelCurrentSender->setText(userAlias);
+    QFont font;
+    font.setPixelSize(SenderNameFontSize);
+    QFontMetrics fm(font);
+    QString text = fm.elidedText(userAlias, Qt::ElideRight, 90);
+    m_labelCurrentSender->setText(text);
     emit messageSelector_senderSelected(userGUID);
 }
 
@@ -1165,7 +1128,7 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
 {
     setWindowFlags(Qt::Popup);
 //    setFixedWidth(150);
-    QSize wgtSize(150, 200);
+    QSize wgtSize(125, 200);
     setWidgetSize(wgtSize);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 10, 0, 0);
@@ -1173,10 +1136,35 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
 
     layout->addWidget(m_userList);
     //
-    setStyleSheet(".QWidget{background-color:#FFFFFF;} QListWidget{border:0px;background-color:#FFFFFF;}");
+    setStyleSheet(".QWidget{background-color:#FFFFFF;} \
+                  QListWidget{border:0px;background-color:#FFFFFF; margin-right:4px;} \
+                  QScrollBar {\
+                  background: #F5F5F5;\
+                  width: 4px; \
+              }\
+              QScrollBar::handle {\
+                  background: #D8D8D8;\
+                  min-height: 30px;\
+                  width: 4px; \
+              }\
+              QScrollBar::handle:vertical {\
+                  margin: 0px 0 0px 0;\
+              }\
+              QScrollBar::add-page, QScrollBar::sub-page {\
+                  background: transparent;\
+              }\
+              QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+                  background: transparent;\
+              }\
+              QScrollBar::add-line, QScrollBar::sub-line {\
+                  height: 0px;\
+                  width: 0px;\
+              }");
     QPalette pl = palette();
     pl.setColor(QPalette::Window, QColor("#FFFFFF"));
     setPalette(pl);
+
+    connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
 
     CWizListItemStyle<WizSenderSelectorItem>* listStyle = new CWizListItemStyle<WizSenderSelectorItem>();
     m_userList->setStyle(listStyle);
@@ -1210,6 +1198,7 @@ void WizMessageSenderSelector::on_selectorItem_clicked(QListWidgetItem* selector
         QString userGUID = senderItem->itemID();
 
         emit senderSelected(userGUID, senderItem->itemText());
+        hide();
     }
 }
 
@@ -1233,7 +1222,7 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     WizService::AvatarHost::load(strUserId);
     WizService::AvatarHost::avatar(strUserId, &pix);
 
-    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, strUserId, pix, m_userList);
+    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
     selectorItem->setSizeHint(QSize(m_userList->width(), 22));
     m_userList->addItem(selectorItem);
 
@@ -1243,15 +1232,17 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
 void WizMessageSenderSelector::setWidgetSize(const QSize& size)
 {
     setFixedSize(size);
-    setMask(Utils::StyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size.width(), size.height()), true, 10, 4, 4));
+    setMask(Utils::StyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size.width(), size.height()), true, 10, 8, 4));
 }
+
+const QSize SelectorAvatarSize = QSize(16, 16);
 
 WizSenderSelectorItem::WizSenderSelectorItem(const QString& text, const QString& id, const QPixmap& avatar,
                                              QListWidget* view, int type)
     : QListWidgetItem(view, type)
     , m_text(text)
     , m_id(id)
-    , m_avatar(avatar)
+    , m_avatar(avatar.scaled(SelectorAvatarSize, Qt::KeepAspectRatio, Qt::SmoothTransformation))
 {
 
 }
@@ -1268,7 +1259,7 @@ void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt
         p->fillRect(vopt->rect, QBrush("#5990EF"));
     }
 
-    QRect rcAvatar(vopt->rect.x() + 8, vopt->rect.y() + 4, 16, 16);
+    QRect rcAvatar(vopt->rect.x() + 8, vopt->rect.y() + 4, SelectorAvatarSize.width(), SelectorAvatarSize.height());
     p->drawPixmap(rcAvatar, m_avatar);
 
     QRect rcText(QPoint(rcAvatar.right() + 8, vopt->rect.y() + 5), QPoint(vopt->rect.right(), vopt->rect.bottom() - 5));
@@ -1291,6 +1282,13 @@ QString WizSenderSelectorItem::itemID() const
 QString WizSenderSelectorItem::itemText() const
 {
     return m_text;
+}
+
+void WizClickableLabel::mouseReleaseEvent(QMouseEvent* ev)
+{
+    QLabel::mouseReleaseEvent(ev);
+
+    emit labelClicked();
 }
 
 

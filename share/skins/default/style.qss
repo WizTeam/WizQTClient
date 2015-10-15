@@ -47,3 +47,9 @@ QComboBox::drop-down {
 QComboBox::down-arrow {
     image: url(WizComboBoxDownArrow);
 }
+QToolTip {
+    font: 12px #000000;
+    padding:0px 1px;
+    background-color: #F8F8F8;
+    border:0px;
+}
