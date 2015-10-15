@@ -505,6 +505,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
     setFixedWidth(354);
+    ui->widget_titleBar->setFixedHeight(40);
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
@@ -523,13 +524,13 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 #ifdef Q_OS_MAC
     QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_normal");
     QString strBtnCloseHot = ::WizGetSkinResourceFileName(strThemeName, "loginCloseButton_hot");
-    ui->btn_close->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}"
+    ui->btn_close->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); padding:0px; height: 13px; width: 13px;}"
                                          "QToolButton:hover{ image:url(%2);}"
                                            "QToolButton:pressed { image:url(%3);}")
                                  .arg(strBtnCloseNormal).arg(strBtnCloseHot).arg(strBtnCloseHot));
     QString strGrayButton = ::WizGetSkinResourceFileName(strThemeName, "loginGrayButton");
-    ui->btn_min->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
-    ui->btn_max->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); height: 13px; width: 13px;}").arg(strGrayButton));
+    ui->btn_min->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); padding:0px; height: 13px; width: 13px;}").arg(strGrayButton));
+    ui->btn_max->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); padding:0px; height: 13px; width: 13px;}").arg(strGrayButton));
 #else
     CWizTitleBar* m_titleBar = qobject_cast<CWizTitleBar*>(titleBar());
     if (m_titleBar)
@@ -597,12 +598,13 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
     QString strBtnDisable = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
     //
-    m_buttonLogin->setStyleSheet("QPushButton, QPushButton:default{background-color:transparent;}");
+    m_buttonLogin->setStyleSheet("QPushButton, QPushButton:default{border-width: 0px;background-color:#4AAEF0;}");
     m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                               QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonLogin->setText(tr("Login"));
     m_buttonLogin->setEnabled(false);
 
+    m_buttonSignUp->setStyleSheet("QPushButton, QPushButton:default{border-width: 0px;background-color:#4AAEF0; color:#FFFFFF;}");
     m_buttonSignUp->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                                    QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonSignUp->setText(tr("Create Account"));
@@ -628,7 +630,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString bg_switchserver_menu = ::WizGetSkinResourceFileName(strThemeName, "bg_switchserver_menu");
     ui->btn_selectServer->setStyleSheet(QString("QPushButton { border: none; background-image: url(%1);"
                                                 "background-position: right center; background-repeat: no-repeat;"
-                                                     "color: rgba(255, 255, 255, 153); padding-right:15px; margin-right: 20px; margin-top: 5px}").arg(bg_switchserver_menu));
+                                                     "color: rgba(255, 255, 255, 153); padding:0px; padding-right:15px; margin-right: 20px; margin-top: 5px}").arg(bg_switchserver_menu));
 //    QString strWizBoxLogInOn = ::WizGetSkinResourceFileName(strThemeName, "action_logInWizBox_on");
 //    ui->btn_wizBoxLogIn->setStyleSheet(QString("QPushButton{ border-image:url(%1); height: 16px; width: 16px;  margin-right: 25px; margin-top:5px;}"
 //                                               "QPushButton:pressed{border-image:url(%2);}").arg(strWizBoxLogIn).arg(strWizBoxLogInOn));
@@ -645,6 +647,8 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                 "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
     ui->label_separator4->setStyleSheet(QString("QLabel {border: none;background-image: url(%1);"
                                                 "background-position: center; background-repeat: no-repeat}").arg(strLineSeparator));
+
+    setStyleSheet("QLineEdit { padding:0px; border:0px; }");
 
     //
     ui->btn_changeToLogin->setVisible(false);
@@ -754,6 +758,7 @@ void CWizLoginDialog::initAnimationWaitingDialog(const QString& text)
     m_animationWaitingDialog->setWindowFlags(Qt::FramelessWindowHint);
     m_animationWaitingDialog->setFixedSize(150, 100);
     QPalette pl = m_animationWaitingDialog->palette();
+    m_animationWaitingDialog->setStyleSheet("QDialog{background-color:#000000;} ");
     pl.setColor(QPalette::Window, QColor(0, 0, 0, 200));
     m_animationWaitingDialog->setPalette(pl);
     m_animationWaitingDialog->setAutoFillBackground(true);
@@ -764,9 +769,9 @@ void CWizLoginDialog::initAnimationWaitingDialog(const QString& text)
     QString strBtnCloseNormal = Utils::StyleHelper::skinResourceFileName("linuxlogindialoclose_white");
     QString strBtnCloseHover = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_on");
     QString strBtnCloseDown = Utils::StyleHelper::skinResourceFileName("linuxwindowclose_selected"); // ::WizGetSkinResourceFileName(strThemeName, "linuxwindowclose_selected");
-    closeButton->setStyleSheet(QString("QToolButton{ border-image:url(%1); height: 16px; width: 16px;}"
-                                                     "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
-                                                     "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
+    closeButton->setStyleSheet(QString("QToolButton{ image:url(%1); background:transparent; padding:0px; border:0px; height: 16px; width: 16px;}"
+                                                     "QToolButton:hover{ image:url(%2); height: 16px; width: 16px;}"
+                                                     "QToolButton:pressed{ image:url(%3); height: 16px; width: 16px;}")
                                              .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
     closeLayout->setContentsMargins(0, 0, 0, 0);
     closeLayout->addStretch();
