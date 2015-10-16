@@ -34,6 +34,7 @@ const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 
 const int RecommendedWidthForTwoLine = 685;
+const int RecommendedWidthForOneLine = 1055;
 
 #define WIZSEPARATOR    "separator"
 #define WIZFONTPANEL    "fontpanel"
@@ -761,11 +762,23 @@ public:
     }
 };
 
+
+QWidget* createMoveAbleWidget(QWidget* parent)
+{
+    QWidget*  moveableButtonContainer = new QWidget(parent);
+    QHBoxLayout* moveableLayout = new QHBoxLayout(moveableButtonContainer);
+    moveableLayout->setContentsMargins(0, 0, 0, 0);
+    moveableLayout->setSpacing(0);
+    moveableLayout->setAlignment(Qt::AlignVCenter);
+    moveableButtonContainer->setLayout(moveableLayout);
+
+    return moveableButtonContainer;
+}
+
 EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
     , m_resetLocked(false)
-    , m_moveableButtonsInFirstLine(true)
 {
     QString skin = Utils::StyleHelper::themeName();
 
@@ -1062,21 +1075,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->setAlignment(Qt::AlignVCenter);
     m_firstLineButtonContainer->setLayout(layout);
 
-    m_moveableButtonContainer = new QWidget(this);
-    QHBoxLayout* moveableLayout = new QHBoxLayout(m_moveableButtonContainer);
-    moveableLayout->setContentsMargins(0, 0, 0, 0);
-    moveableLayout->setSpacing(0);
-    moveableLayout->setAlignment(Qt::AlignVCenter);
-    m_moveableButtonContainer->setLayout(moveableLayout);
-
-    moveableLayout->addWidget(m_btnJustify);
-    moveableLayout->addSpacing(12);
-    moveableLayout->addWidget(m_btnUnorderedList);
-    moveableLayout->addWidget(new CWizEditorButtonSpliter(this));
-    moveableLayout->addWidget(m_btnOrderedList);
-    moveableLayout->addSpacing(12);
-
-
     layout->addWidget(m_comboParagraph);
     layout->addSpacing(12);
     layout->addWidget(m_comboFontFamily);
@@ -1095,46 +1093,85 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->addWidget(new CWizEditorButtonSpliter(this));
     layout->addWidget(m_btnBackColor);
     layout->addSpacing(12);
-    layout->addWidget(m_moveableButtonContainer);
-    layout->addWidget(m_btnShowExtra);    
-    layout->addStretch();
+
+
+    QWidget*  moveableButtonContainer1 = createMoveAbleWidget(this);
+    moveableButtonContainer1->layout()->addWidget(m_btnJustify);
+    qobject_cast<QHBoxLayout*>(moveableButtonContainer1->layout())->addSpacing(12);
+
+    layout->addWidget(moveableButtonContainer1);
+
+    QWidget*  moveableButtonContainer2 = createMoveAbleWidget(this);
+    QHBoxLayout* moveableLayout2 = qobject_cast<QHBoxLayout*>(moveableButtonContainer2->layout());
+    moveableLayout2->addWidget(m_btnUnorderedList);
+    moveableLayout2->addWidget(new CWizEditorButtonSpliter(this));
+    moveableLayout2->addWidget(m_btnOrderedList);
+    moveableLayout2->addSpacing(12);
+
+    layout->addWidget(moveableButtonContainer2);
+    layout->addWidget(m_btnShowExtra);
+
+    QWidget* firstLineWidget = createMoveAbleWidget(this);
+    firstLineWidget->layout()->addWidget(m_firstLineButtonContainer);
+    qobject_cast<QHBoxLayout*>(firstLineWidget->layout())->addStretch();
+
+    m_moveableButtonContainersInFirstLine.append(moveableButtonContainer1);
+    m_moveableButtonContainersInFirstLine.append(moveableButtonContainer2);
 
     m_secondLineButtonContainer = new QWidget(this);
     QHBoxLayout* hLayout = new QHBoxLayout(m_secondLineButtonContainer);
     hLayout->setContentsMargins(0, 1, 0, 1);
     hLayout->setSpacing(0);
 
+    QWidget*  moveableButtonContainer3 = createMoveAbleWidget(this);
+    QHBoxLayout* moveableLayout3 = qobject_cast<QHBoxLayout*>(moveableButtonContainer3->layout());
+    moveableLayout3->addWidget(m_btnCheckList);
+    moveableLayout3->addWidget(m_btnInsertLink);
+    moveableLayout3->addWidget(new CWizEditorButtonSpliter(this));
+    moveableLayout3->addWidget(m_btnHorizontal);
+    moveableLayout3->addWidget(m_btnInsertImage);
+    moveableLayout3->addWidget(m_btnMobileImage);
+    moveableLayout3->addWidget(new CWizEditorButtonSpliter(this));
+    moveableLayout3->addWidget(m_btnTable);
+    moveableLayout3->addWidget(m_btnInsertDate);
+    moveableLayout3->addSpacing(12);
 
-    hLayout->addWidget(m_btnCheckList);
-    hLayout->addWidget(m_btnInsertLink);
-    hLayout->addWidget(new CWizEditorButtonSpliter(this));
-    hLayout->addWidget(m_btnHorizontal);
-    hLayout->addWidget(m_btnInsertImage);
-    hLayout->addWidget(m_btnMobileImage);
-    hLayout->addWidget(new CWizEditorButtonSpliter(this));
-    hLayout->addWidget(m_btnTable);
-    hLayout->addWidget(m_btnInsertDate);
-    hLayout->addSpacing(12);
-    hLayout->addWidget(m_btnFormatMatch);
-    hLayout->addWidget(new CWizEditorButtonSpliter(this));
-    hLayout->addWidget(m_btnRemoveFormat);
-    hLayout->addSpacing(11);
-    hLayout->addWidget(m_btnInsertCode);
-    hLayout->addWidget(m_btnViewSource);
+    hLayout->addWidget(moveableButtonContainer3);
+
+
+    QWidget*  moveableButtonContainer4 = createMoveAbleWidget(this);
+    QHBoxLayout* moveableLayout4 = qobject_cast<QHBoxLayout*>(moveableButtonContainer4->layout());
+    moveableLayout4->addWidget(m_btnFormatMatch);
+    moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
+    moveableLayout4->addWidget(m_btnRemoveFormat);
+    moveableLayout4->addSpacing(11);
+
+    hLayout->addWidget(moveableButtonContainer4);
+
+
+    QWidget*  moveableButtonContainer5 = createMoveAbleWidget(this);
+    QHBoxLayout* moveableLayout5 = qobject_cast<QHBoxLayout*>(moveableButtonContainer5->layout());
+    moveableLayout5->addWidget(m_btnInsertCode);
+    moveableLayout5->addWidget(m_btnViewSource);
 #ifndef Q_OS_MAC
     hLayout->addWidget(m_btnScreenShot);
 #endif
-    hLayout->addWidget(new CWizEditorButtonSpliter(this));
-    hLayout->addWidget(m_btnSearchReplace);
+    moveableLayout5->addWidget(new CWizEditorButtonSpliter(this));
+    moveableLayout5->addWidget(m_btnSearchReplace);
+
+    hLayout->addWidget(moveableButtonContainer5);
     hLayout->addStretch();
 
 
+    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer3);
+    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer4);
+    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer5);
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     setLayout(vLayout);
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->setSpacing(8);
-    vLayout->addWidget(m_firstLineButtonContainer);
+    vLayout->addWidget(firstLineWidget);
     vLayout->addWidget(m_secondLineButtonContainer);
 
     int nHeight = Utils::StyleHelper::editToolBarHeight();
@@ -1953,13 +1990,6 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
     }
 }
 
-void EditorToolBar::showEvent(QShowEvent* ev)
-{
-    adjustButtonPosition();
-
-    QWidget::showEvent(ev);
-}
-
 void EditorToolBar::queryCurrentFont(QFont& font)
 {
     QString familyName = m_editor->editorCommandQueryCommandValue("fontFamily");
@@ -2126,29 +2156,91 @@ void EditorToolBar::copyImage(QString strFileName)
     clip->setPixmap(pix);
 }
 
+void EditorToolBar::moveWidgetFromSecondLineToFirstLine(QWidget* widget)
+{
+    m_secondLineButtonContainer->layout()->removeWidget(widget);
+    QHBoxLayout* firstLayout = qobject_cast<QHBoxLayout*>(m_firstLineButtonContainer->layout());
+    int index = firstLayout->indexOf(m_btnShowExtra);
+    firstLayout->insertWidget(index, widget);
+    m_moveableButtonContainersInSecondLine.removeFirst();
+    m_moveableButtonContainersInFirstLine.append(widget);
+}
+
+void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
+{
+    m_firstLineButtonContainer->layout()->removeWidget(widget);
+    QHBoxLayout* secondLayout = qobject_cast<QHBoxLayout*>(m_secondLineButtonContainer->layout());
+    secondLayout->insertWidget(0, widget);
+    m_moveableButtonContainersInFirstLine.removeLast();
+    m_moveableButtonContainersInSecondLine.insert(0, widget);
+}
+
 void EditorToolBar::adjustButtonPosition()
 {
-    if (parentWidget()->width() < RecommendedWidthForTwoLine && m_moveableButtonsInFirstLine)
+    qDebug() << "adjust button position , parent : " << parentWidget()->width()
+             << "first con : " << m_firstLineButtonContainer->width() << "  seco con : " << m_secondLineButtonContainer->width();
+    const int nMargin = 40;
+    int parentWidgetWidth = parentWidget()->width();
+    int firstLineWidth = m_firstLineButtonContainer->width();
+    if (parentWidgetWidth < RecommendedWidthForTwoLine)
     {
-        // move buttons to second line
-        m_firstLineButtonContainer->layout()->removeWidget(m_moveableButtonContainer);
-        if (QHBoxLayout* secondLayout = qobject_cast<QHBoxLayout*>(m_secondLineButtonContainer->layout()))
-        {
-            secondLayout->insertWidget(0, m_moveableButtonContainer);
-        }
-        m_moveableButtonsInFirstLine = false;
-    }
-    else if (parentWidget()->width() > RecommendedWidthForTwoLine && !m_moveableButtonsInFirstLine)
-    {
-        // move buttons to first line
-        m_secondLineButtonContainer->layout()->removeWidget(m_moveableButtonContainer);
-        int index = m_firstLineButtonContainer->layout()->indexOf(m_btnShowExtra);
-        if (QHBoxLayout* firstLayout = qobject_cast<QHBoxLayout*>(m_firstLineButtonContainer->layout()))
-        {
-            firstLayout->insertWidget(index, m_moveableButtonContainer);
-        }
+        //  move moveable buttons to second line
+        if (m_moveableButtonContainersInFirstLine.isEmpty())
+            return;
 
-        m_moveableButtonsInFirstLine = true;
+        for (int i = m_moveableButtonContainersInFirstLine.count() - 1; i >= 0; i--)
+        {
+            QWidget* widget = m_moveableButtonContainersInFirstLine.at(i);
+            moveWidgetFromFristLineToSecondLine(widget);
+        }
+    }
+    else if (parentWidgetWidth < RecommendedWidthForOneLine)
+    {
+        // move movealbe buttons to first line or to second line
+        if (firstLineWidth < parentWidgetWidth &&
+                m_moveableButtonContainersInSecondLine.count() > 0)
+        {
+            QWidget * widget = m_moveableButtonContainersInSecondLine.first();
+            while (widget && widget->width() + firstLineWidth + nMargin < parentWidgetWidth)
+            {
+                moveWidgetFromSecondLineToFirstLine(widget);
+                firstLineWidth += widget->width();
+
+                widget = m_moveableButtonContainersInSecondLine.isEmpty() ? nullptr :
+                                                                            m_moveableButtonContainersInSecondLine.first();
+            }
+            if (m_moveableButtonContainersInSecondLine.isEmpty())
+            {
+                m_btnShowExtra->hide();
+            }
+        }
+        else if (firstLineWidth > parentWidgetWidth - nMargin &&
+                 m_moveableButtonContainersInFirstLine.count() > 0)
+        {
+            QWidget* widget = m_moveableButtonContainersInFirstLine.last();
+            while(widget && firstLineWidth > parentWidgetWidth  - nMargin)
+            {
+                moveWidgetFromFristLineToSecondLine(widget);
+                firstLineWidth -= widget->width();
+
+                widget = m_moveableButtonContainersInFirstLine.isEmpty() ? nullptr :
+                                                                           m_moveableButtonContainersInFirstLine.last();
+            }
+            if (!m_moveableButtonContainersInSecondLine.isEmpty())
+            {
+                m_btnShowExtra->show();
+            }
+        }
+    }
+    else
+    {
+        // move moveable buttons to first line
+        for (int i = 0; i < m_moveableButtonContainersInSecondLine.count(); i++)
+        {
+            QWidget* widget = m_moveableButtonContainersInSecondLine.first();
+            moveWidgetFromSecondLineToFirstLine(widget);
+        }
+        m_btnShowExtra->hide();
     }
 }
 

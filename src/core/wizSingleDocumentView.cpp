@@ -6,6 +6,8 @@
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
 #include "share/wizmisc.h"
+#include "titlebar.h"
+#include "wizEditorToolBar.h"
 
 using namespace Core;
 
@@ -28,18 +30,18 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
         m_docView = new CWizDocumentView(app, this);
         layout->addWidget(m_docView);
         setLayout(layout);
-
-#ifdef Q_OS_MAC
-        //追踪单独窗口中编辑器消失的问题
-   connect(m_docView, &QWidget::destroyed, [](){
-      qDebug() << "doc view destroyed";
-   });
-#endif
 }
 
 CWizDocumentView*CWizSingleDocumentViewer::docView()
 {
     return m_docView;
+}
+
+void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
+{
+    QWidget::resizeEvent(ev);
+
+    m_docView->titleBar()->editorToolBar()->adjustButtonPosition();
 }
 
 CWizSingleDocumentViewer::~CWizSingleDocumentViewer()

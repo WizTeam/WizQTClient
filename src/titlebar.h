@@ -36,6 +36,7 @@ class TitleBar : public QWidget
 public:
     explicit TitleBar(CWizExplorerApp& app, QWidget *parent);
     CWizDocumentView* noteView();
+    EditorToolBar* editorToolBar();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);

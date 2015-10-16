@@ -22,6 +22,9 @@ public:
 signals:
     void documentViewerDeleted(QString guid);
 
+protected:
+    void resizeEvent(QResizeEvent* ev);
+
 private:
 #ifdef USEWEBENGINE
     CWizDocumentWebEngine* m_webEngine;

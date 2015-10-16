@@ -4,7 +4,7 @@ QPushButton, QToolButton {
     background-color:#FFFFFF;
     color:#000000; 
     font:12px; 
-    padding: 6px 14px; 
+    padding: 5px 14px; 
     border-style: solid; 
     border-color: #ECECEC; 
     border-radius: 4px; 
@@ -15,7 +15,7 @@ QPushButton:default, QToolButton:default {
     background-color:#3177EE;
     color:#FFFFFF; 
     font:12px; 
-    padding: 6px 14px; 
+    padding: 5px 14px; 
     border-style: solid; 
     border-color: #ECECEC; 
     border-radius: 4px; 
@@ -31,8 +31,9 @@ QLineEdit {
 	padding:5px 8px;
 	border:1px solid #E7E7E7;
 	border-radius:4px;
+    min-height:18px;
 }
-QComboBox {
+QComboBox, QSpinBox, QDoubleSpinBox {
     border: 1px solid #E7E7E7;
     border-radius: 4px;
     padding: 5px 10px 5px 8px;

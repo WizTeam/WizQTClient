@@ -9,7 +9,6 @@ CWizEditorInsertTableForm::CWizEditorInsertTableForm(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    setFixedSize(size());
     setWindowModality(Qt::ApplicationModal);
 
     QIntValidator *validator = new QIntValidator(1, 30, this);

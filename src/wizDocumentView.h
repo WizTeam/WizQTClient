@@ -61,6 +61,8 @@ public:
     //
     CWizDocumentTransitionView* transitionView();
     //
+    Core::Internal::TitleBar* titleBar();
+    //
     void waitForDone();
 
 protected:

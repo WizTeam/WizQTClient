@@ -385,7 +385,6 @@ bool CWizAttachmentListView::isAttachmentModified(const WIZDOCUMENTATTACHMENTDAT
     QFileInfo info(fileNmae);
     if (info.exists())
     {
-        qDebug() << "info modified : " << info.lastModified() << " attach last modified ; " << attachment.tDataModified;
         return info.lastModified() > attachment.tDataModified;
     }
     return false;

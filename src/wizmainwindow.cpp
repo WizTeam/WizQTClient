@@ -41,6 +41,8 @@
 #include "wizcertmanager.h"
 #include "wizusercipherform.h"
 #include "wizDocumentView.h"
+#include "titlebar.h"
+#include "wizEditorToolBar.h"
 
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
@@ -532,6 +534,9 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
 //    Q_UNUSED(event);
 //    adjustSubViews(m_clienWgt);
+
+    adjustEditorButtonsPosition();
+
     update();
 
     m_doc->setVisible(true);
@@ -2213,6 +2218,7 @@ void MainWindow::init()
             SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+    QTimer::singleShot(500, this, SLOT(adjustEditorButtonsPosition()));
 
     //ESC键退出全屏
     bindESCToQuitFullScreen(this);
@@ -3128,6 +3134,7 @@ void MainWindow::on_menuButtonClicked()
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
 //    adjustToolBarLayout();
+    adjustEditorButtonsPosition();
 }
 
 void MainWindow::on_actionGoBack_triggered()
@@ -3513,7 +3520,7 @@ void MainWindow::checkWizUpdate()
 }
 
 
-void MainWindow::adjustToolBarLayout()
+void MainWindow:: adjustToolBarLayout()
 {
 #ifdef Q_OS_LINUX
     if (!m_toolBar)
@@ -3572,6 +3579,14 @@ void MainWindow::adjustToolBarLayout()
     m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(283, 0));
 #endif
 #endif
+}
+
+void MainWindow::adjustEditorButtonsPosition()
+{
+    if (m_doc->titleBar()->editorToolBar())
+    {
+        m_doc->titleBar()->editorToolBar()->adjustButtonPosition();
+    }
 }
 
 

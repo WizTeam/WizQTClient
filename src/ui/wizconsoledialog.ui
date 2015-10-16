@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>657</width>
-    <height>400</height>
+    <height>389</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -43,6 +43,9 @@
      </property>
      <property name="leftMargin">
       <number>0</number>
+     </property>
+     <property name="bottomMargin">
+      <number>12</number>
      </property>
      <item>
       <widget class="QPushButton" name="buttonClear">

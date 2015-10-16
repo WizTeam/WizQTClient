@@ -37,6 +37,7 @@ public:
 
     bool hasFocus();
 
+    void adjustButtonPosition();
 
 private:
     CWizExplorerApp& m_app;
@@ -83,14 +84,10 @@ private:
 
     QWidget* m_firstLineButtonContainer;
     QWidget* m_secondLineButtonContainer;
-    QWidget* m_moveableButtonContainer;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
     QTimer m_resetLockTimer;
-
-    // flag to adjust button position, if it is ture m_btnJustify is in first line, else m_btnJustify is in second line
-    bool m_moveableButtonsInFirstLine;
 
     WizEditorContextMenuItem* contextMenuData();
     void buildMenu();
@@ -107,6 +104,9 @@ private:
     void saveGif(const QByteArray& ba);
 
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
+
+    QList<QWidget*> m_moveableButtonContainersInFirstLine;
+    QList<QWidget*> m_moveableButtonContainersInSecondLine;
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
@@ -167,10 +167,7 @@ protected Q_SLOTS:
     void on_backColor_changed();
     void on_showBackColorBoard();
 
-    void on_fontDailogFontChanged(const QFont & font);
-
-protected:
-    void showEvent(QShowEvent* ev);
+    void on_fontDailogFontChanged(const QFont & font);    
 
 private:
     void queryCurrentFont(QFont& font);
@@ -182,7 +179,9 @@ private:
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);
 
-    void adjustButtonPosition();
+    void moveWidgetFromSecondLineToFirstLine(QWidget* widget);
+    void moveWidgetFromFristLineToSecondLine(QWidget* widget);
+
 };
 
 

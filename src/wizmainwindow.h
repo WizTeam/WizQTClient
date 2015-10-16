@@ -411,6 +411,7 @@ public Q_SLOTS:
     void on_menuButtonClicked();
 #endif
     void adjustToolBarLayout();
+    void adjustEditorButtonsPosition();
     void on_client_splitterMoved(int pos, int index);
 
     void on_application_aboutToQuit();

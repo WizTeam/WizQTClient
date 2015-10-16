@@ -149,13 +149,6 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
 
-    QWidget* line1 = new QWidget(this);
-    line1->setFixedHeight(1);
-    line1->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DFDFD7;");
-
-    QWidget* line3 = new QWidget(this);
-    line3->setFixedHeight(1);
-    line3->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#d9dcdd");
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
     layoutInfo2->setContentsMargins(0, 0, 0, 0);
@@ -171,16 +164,15 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_commentsBtn);
 
 
+
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
     layoutInfo1->setContentsMargins(Utils::StyleHelper::editorBarMargins());
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
-//    layoutInfo1->addWidget(line1);
     layoutInfo1->addWidget(m_tagBar);
     layoutInfo1->addWidget(m_infoBar);
     layoutInfo1->addWidget(m_editorBar);
     layoutInfo1->addWidget(m_notifyBar);
-//    layoutInfo1->addWidget(line3);
     m_editorBar->hide();
 
     layout->addLayout(layoutInfo1);
@@ -204,6 +196,11 @@ CWizDocumentView* TitleBar::noteView()
 
     Q_ASSERT(0);
     return 0;
+}
+
+EditorToolBar*TitleBar::editorToolBar()
+{
+    return m_editorBar;
 }
 
 void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)

@@ -253,6 +253,11 @@ CWizDocumentTransitionView* CWizDocumentView::transitionView()
 {
     return m_transitionView;
 }
+
+TitleBar*CWizDocumentView::titleBar()
+{
+    return m_title;
+}
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
