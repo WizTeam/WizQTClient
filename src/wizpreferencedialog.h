@@ -67,6 +67,8 @@ private slots:
 
 
 
+    void on_tabWidget_currentChanged(int index);
+
 private:
     Ui::CWizPreferenceWindow *ui;
     CWizExplorerApp& m_app;

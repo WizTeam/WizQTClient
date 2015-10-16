@@ -23,6 +23,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
 
+    setFixedSize(430, 290);
+
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
     // general tab
@@ -179,8 +181,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColor));
-    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
+                                                         "{background: %1;} ").arg(strColor));
+//    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
@@ -459,7 +461,7 @@ void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
 void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
 {
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColorName));
+                                                         "{ background-color: %1;} ").arg(strColorName));
     m_app.userSettings().setEditorBackgroundColor(strColorName);
     Q_EMIT settingsChanged(wizoptionsFont);
 }
@@ -494,4 +496,18 @@ void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
     }
 
     Q_EMIT settingsChanged(wizoptionsSync);
+}
+
+void CWizPreferenceWindow::on_tabWidget_currentChanged(int index)
+{
+    if (index == 1)
+    {
+        setFixedHeight(350);
+        resize(width(), 350);
+    }
+    else
+    {
+        setFixedHeight(290);
+        resize(width(), 290);
+    }
 }
