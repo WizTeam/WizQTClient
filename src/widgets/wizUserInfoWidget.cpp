@@ -269,10 +269,15 @@ QPixmap CWizUserInfoWidget::getAvatar(int width, int height)
     return getCircleAvatar(width, width);
 }
 
+QIcon CWizUserInfoWidget::getVipIcon()
+{
+    return m_iconVipIndicator;
+}
+
 QSize CWizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
-
-    return QSize(36+ textWidth() + 24, 40);
+    int vipIconWidth = 35;
+    return QSize(36+ textWidth() + 24 + vipIconWidth, 40);
 }
 

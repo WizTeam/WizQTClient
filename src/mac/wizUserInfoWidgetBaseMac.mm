@@ -157,6 +157,32 @@
 
         [nsText drawInRect:textRect withAttributes:attributes];
     }
+
+
+    QIcon vipIcon = m_widget->getVipIcon();
+    if (!vipIcon.isNull())
+    {
+        NSImage* img = ::WizToNSImage(vipIcon);
+        if (img)
+        {
+            NSSize imageSize = [img size];
+            CGRect imageRect;
+            imageRect.origin = NSZeroPoint;
+            imageRect.size = imageSize;
+            //
+            int x = textRect.origin.x + textRect.size.width;
+            int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
+            NSPoint pt;
+            pt.x = x;
+            pt.y = y - 6;
+            //
+            [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+            [img release];
+            textRect.origin.x = x + 4;
+            textRect.size.width = imageRect.size.width;
+        }
+    }
+
     //
     m_menuPos.x = textRect.origin.x - self.frame.origin.x;
     m_menuPos.y = textRect.origin.y - self.frame.origin.y;
