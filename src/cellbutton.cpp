@@ -112,7 +112,7 @@ void CellButton::paintEvent(QPaintEvent *event)
     if (WithCountInfo == m_buttonType)
     {
         QRect rcText(rcIcon.right() + 6, opt.rect.y(), opt.rect.width() - rcIcon.width(), opt.rect.height());
-        p.setPen(QColor("#B6B6B6"));
+        p.setPen(m_count == 0 ? QColor("#B6B6B6") : QColor("#5990EF"));
         p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, countInfo());
     }
 }
