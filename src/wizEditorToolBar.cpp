@@ -1075,24 +1075,28 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     layout->setAlignment(Qt::AlignVCenter);
     m_firstLineButtonContainer->setLayout(layout);
 
-    layout->addWidget(m_comboParagraph);
-    layout->addSpacing(12);
-    layout->addWidget(m_comboFontFamily);
-    layout->addSpacing(12);
-    layout->addWidget(m_comboFontSize);
-    layout->addSpacing(12);
-    layout->addWidget(m_btnBold);
-    layout->addWidget(new CWizEditorButtonSpliter(this));
-    layout->addWidget(m_btnItalic);
-    layout->addWidget(new CWizEditorButtonSpliter(this));
-    layout->addWidget(m_btnUnderLine);
-    layout->addWidget(new CWizEditorButtonSpliter(this));
-    layout->addWidget(m_btnStrikeThrough);
-    layout->addSpacing(12);
-    layout->addWidget(m_btnForeColor);
-    layout->addWidget(new CWizEditorButtonSpliter(this));
-    layout->addWidget(m_btnBackColor);
-    layout->addSpacing(12);
+    QWidget*  buttonContainer0 = createMoveAbleWidget(this);
+    QHBoxLayout* containerLayout = qobject_cast<QHBoxLayout*>(buttonContainer0->layout());
+    containerLayout->addWidget(m_comboParagraph);
+    containerLayout->addSpacing(12);
+    containerLayout->addWidget(m_comboFontFamily);
+    containerLayout->addSpacing(12);
+    containerLayout->addWidget(m_comboFontSize);
+    containerLayout->addSpacing(12);
+    containerLayout->addWidget(m_btnBold);
+    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout->addWidget(m_btnItalic);
+    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout->addWidget(m_btnUnderLine);
+    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout->addWidget(m_btnStrikeThrough);
+    containerLayout->addSpacing(12);
+    containerLayout->addWidget(m_btnForeColor);
+    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout->addWidget(m_btnBackColor);
+    containerLayout->addSpacing(12);
+
+    layout->addWidget(buttonContainer0);
 
 
     QWidget*  moveableButtonContainer1 = createMoveAbleWidget(this);
@@ -1115,8 +1119,9 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     firstLineWidget->layout()->addWidget(m_firstLineButtonContainer);
     qobject_cast<QHBoxLayout*>(firstLineWidget->layout())->addStretch();
 
-    m_moveableButtonContainersInFirstLine.append(moveableButtonContainer1);
-    m_moveableButtonContainersInFirstLine.append(moveableButtonContainer2);
+    m_buttonContainersInFirstLine.append(buttonContainer0);
+    m_buttonContainersInFirstLine.append(moveableButtonContainer1);
+    m_buttonContainersInFirstLine.append(moveableButtonContainer2);
 
     m_secondLineButtonContainer = new QWidget(this);
     QHBoxLayout* hLayout = new QHBoxLayout(m_secondLineButtonContainer);
@@ -1163,9 +1168,9 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     hLayout->addStretch();
 
 
-    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer3);
-    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer4);
-    m_moveableButtonContainersInSecondLine.append(moveableButtonContainer5);
+    m_buttonContainersInSecondLine.append(moveableButtonContainer3);
+    m_buttonContainersInSecondLine.append(moveableButtonContainer4);
+    m_buttonContainersInSecondLine.append(moveableButtonContainer5);
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
     setLayout(vLayout);
@@ -2162,8 +2167,8 @@ void EditorToolBar::moveWidgetFromSecondLineToFirstLine(QWidget* widget)
     QHBoxLayout* firstLayout = qobject_cast<QHBoxLayout*>(m_firstLineButtonContainer->layout());
     int index = firstLayout->indexOf(m_btnShowExtra);
     firstLayout->insertWidget(index, widget);
-    m_moveableButtonContainersInSecondLine.removeFirst();
-    m_moveableButtonContainersInFirstLine.append(widget);
+    m_buttonContainersInSecondLine.removeFirst();
+    m_buttonContainersInFirstLine.append(widget);
 }
 
 void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
@@ -2171,26 +2176,28 @@ void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
     m_firstLineButtonContainer->layout()->removeWidget(widget);
     QHBoxLayout* secondLayout = qobject_cast<QHBoxLayout*>(m_secondLineButtonContainer->layout());
     secondLayout->insertWidget(0, widget);
-    m_moveableButtonContainersInFirstLine.removeLast();
-    m_moveableButtonContainersInSecondLine.insert(0, widget);
+    m_buttonContainersInFirstLine.removeLast();
+    m_buttonContainersInSecondLine.insert(0, widget);
 }
 
 void EditorToolBar::adjustButtonPosition()
-{
-    qDebug() << "adjust button position , parent : " << parentWidget()->width()
-             << "first con : " << m_firstLineButtonContainer->width() << "  seco con : " << m_secondLineButtonContainer->width();
-    const int nMargin = 40;
-    int parentWidgetWidth = parentWidget()->width();
-    int firstLineWidth = m_firstLineButtonContainer->width();
+{    
+    int parentWidgetWidth = parentWidget()->width() - 28;
+    int firstLineWidth = m_btnShowExtra->width();
+    for (QWidget* widget : m_buttonContainersInFirstLine)
+    {
+        firstLineWidth += widget->sizeHint().width();
+    }
     if (parentWidgetWidth < RecommendedWidthForTwoLine)
     {
         //  move moveable buttons to second line
-        if (m_moveableButtonContainersInFirstLine.isEmpty())
+        if (m_buttonContainersInFirstLine.isEmpty())
             return;
 
-        for (int i = m_moveableButtonContainersInFirstLine.count() - 1; i >= 0; i--)
+        // except first button container
+        for (int i = m_buttonContainersInFirstLine.count() - 1; i > 0; i--)
         {
-            QWidget* widget = m_moveableButtonContainersInFirstLine.at(i);
+            QWidget* widget = m_buttonContainersInFirstLine.at(i);
             moveWidgetFromFristLineToSecondLine(widget);
         }
     }
@@ -2198,35 +2205,35 @@ void EditorToolBar::adjustButtonPosition()
     {
         // move movealbe buttons to first line or to second line
         if (firstLineWidth < parentWidgetWidth &&
-                m_moveableButtonContainersInSecondLine.count() > 0)
+                m_buttonContainersInSecondLine.count() > 0)
         {
-            QWidget * widget = m_moveableButtonContainersInSecondLine.first();
-            while (widget && widget->width() + firstLineWidth + nMargin < parentWidgetWidth)
+            QWidget * widget = m_buttonContainersInSecondLine.first();
+            while (widget && widget->sizeHint().width() + firstLineWidth < parentWidgetWidth)
             {
                 moveWidgetFromSecondLineToFirstLine(widget);
-                firstLineWidth += widget->width();
+                firstLineWidth += widget->sizeHint().width();
 
-                widget = m_moveableButtonContainersInSecondLine.isEmpty() ? nullptr :
-                                                                            m_moveableButtonContainersInSecondLine.first();
+                widget = m_buttonContainersInSecondLine.isEmpty() ? nullptr :
+                                                                            m_buttonContainersInSecondLine.first();
             }
-            if (m_moveableButtonContainersInSecondLine.isEmpty())
+            if (m_buttonContainersInSecondLine.isEmpty())
             {
                 m_btnShowExtra->hide();
             }
         }
-        else if (firstLineWidth > parentWidgetWidth - nMargin &&
-                 m_moveableButtonContainersInFirstLine.count() > 0)
+        else if (firstLineWidth >= parentWidgetWidth &&
+                 m_buttonContainersInFirstLine.count() > 1)
         {
-            QWidget* widget = m_moveableButtonContainersInFirstLine.last();
-            while(widget && firstLineWidth > parentWidgetWidth  - nMargin)
+            QWidget* widget = m_buttonContainersInFirstLine.last();
+            while(widget && firstLineWidth >= parentWidgetWidth)
             {
                 moveWidgetFromFristLineToSecondLine(widget);
-                firstLineWidth -= widget->width();
+                firstLineWidth -= widget->sizeHint().width();
 
-                widget = m_moveableButtonContainersInFirstLine.isEmpty() ? nullptr :
-                                                                           m_moveableButtonContainersInFirstLine.last();
+                widget = m_buttonContainersInFirstLine.isEmpty() ? nullptr :
+                                                                           m_buttonContainersInFirstLine.last();
             }
-            if (!m_moveableButtonContainersInSecondLine.isEmpty())
+            if (!m_buttonContainersInSecondLine.isEmpty())
             {
                 m_btnShowExtra->show();
             }
@@ -2235,13 +2242,16 @@ void EditorToolBar::adjustButtonPosition()
     else
     {
         // move moveable buttons to first line
-        for (int i = 0; i < m_moveableButtonContainersInSecondLine.count(); i++)
+        for (int i = 0; i < m_buttonContainersInSecondLine.count(); i++)
         {
-            QWidget* widget = m_moveableButtonContainersInSecondLine.first();
+            QWidget* widget = m_buttonContainersInSecondLine.first();
             moveWidgetFromSecondLineToFirstLine(widget);
         }
         m_btnShowExtra->hide();
     }
+
+    m_firstLineButtonContainer->updateGeometry();
+    m_secondLineButtonContainer->updateGeometry();
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)

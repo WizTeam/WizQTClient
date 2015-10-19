@@ -105,8 +105,8 @@ private:
 
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
 
-    QList<QWidget*> m_moveableButtonContainersInFirstLine;
-    QList<QWidget*> m_moveableButtonContainersInSecondLine;
+    QList<QWidget*> m_buttonContainersInFirstLine;
+    QList<QWidget*> m_buttonContainersInSecondLine;
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
