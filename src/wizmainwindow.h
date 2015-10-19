@@ -526,6 +526,9 @@ private:
 
     void changeDocumentsSortTypeByAction(QAction* action);
 
+    //
+    bool processApplicationActiveEvent();
+
 private slots:
     void windowActived();
     //

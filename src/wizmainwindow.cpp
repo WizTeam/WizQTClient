@@ -308,17 +308,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
         }
         else if (event->type() == QEvent::ApplicationActivate)
         {
-            if (!isVisible())
-            {
-                setVisible(true);
-            }
-            if (windowState() & Qt::WindowMinimized)
-            {
-                setWindowState(windowState() & ~Qt::WindowMinimized);
-            }
-
-            raise();
-            return true;
+            return processApplicationActiveEvent();
         }
         else
         {
@@ -1654,6 +1644,30 @@ void MainWindow::changeDocumentsSortTypeByAction(QAction* action)
         m_documents->resetItemsSortingType(type);
         emit documentsSortTypeChanged(type);
     }
+}
+
+bool MainWindow::processApplicationActiveEvent()
+{
+    QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
+    QList<CWizSingleDocumentViewer*> singleViewrList = viewerMap.values();
+    for (CWizSingleDocumentViewer* viewer : singleViewrList)
+    {
+        if (viewer->isVisible())
+            return true;
+    }
+
+    //
+    if (!isVisible())
+    {
+        setVisible(true);
+    }
+    if (windowState() & Qt::WindowMinimized)
+    {
+        setWindowState(windowState() & ~Qt::WindowMinimized);
+    }
+
+    raise();
+    return true;
 }
 
 void MainWindow::resetDockMenu()
