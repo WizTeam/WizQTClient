@@ -392,6 +392,7 @@ public:
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
                           bool bResetDocInfo, bool updateAttachList = true);
+    bool DeleteGroupFolder(const WIZTAGDATA& data, bool bLog);
 
     bool IsDocumentModified(const CString& strGUID);
     bool IsAttachmentModified(const CString& strGUID);

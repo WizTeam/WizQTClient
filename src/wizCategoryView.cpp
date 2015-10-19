@@ -2455,7 +2455,7 @@ void CWizCategoryView::on_action_user_deleteFolder()
     QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
     msgBox->setDefaultButton(btnOK);
 
-    QString strWarning = tr("Do you really want to delete all notes inside folder: %1 ? (All notes will move to trash folder and remove from cloud server)").arg(p->location());
+    QString strWarning = tr("Do you really want to delete all notes inside folder: %1 ? (All notes will deleted in local and removed to trash from cloud server)").arg(p->location());
     msgBox->setText(strWarning);
     msgBox->exec();
 
@@ -2535,7 +2535,7 @@ void CWizCategoryView::on_action_group_deleteFolder()
     QPushButton* btnOK = msgBox->addButton(tr("OK"), QMessageBox::YesRole);
     msgBox->setDefaultButton(btnOK);
 
-    QString strWarning = tr("Do you really want to delete folder: %1? (All notes will move to unclassified folder, It's safe.)").arg(p->tag().strName);
+    QString strWarning = tr("Do you really want to delete folder: %1? (All notes will deleted in local and removed to trash from cloud server)").arg(p->tag().strName);
     msgBox->setText(strWarning);
     msgBox->exec();    
 
@@ -2555,7 +2555,7 @@ void CWizCategoryView::on_action_group_deleteFolder_confirmed(int result)
 
     if (result == QMessageBox::Accepted) {
         WIZTAGDATA tag = p->tag();
-        m_dbMgr.db(p->kbGUID()).DeleteTagWithChildren(tag, true);
+        m_dbMgr.db(p->kbGUID()).DeleteGroupFolder(tag, true);
     }
 }
 

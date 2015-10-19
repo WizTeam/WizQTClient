@@ -3221,6 +3221,27 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
     return bRet;
 }
 
+bool CWizDatabase::DeleteGroupFolder(const WIZTAGDATA& data, bool bLog)
+{
+    CWizTagDataArray arrayChildTag;
+    GetChildTags(data.strGUID, arrayChildTag);
+    foreach (const WIZTAGDATA& childTag, arrayChildTag)
+    {
+        DeleteGroupFolder(childTag, bLog);
+    }
+
+    CWizDocumentDataArray arrayDocument;
+    GetDocumentsByTag(data, arrayDocument);
+
+    for (WIZDOCUMENTDATAEX doc : arrayDocument)
+    {
+        CWizDocument document(*this, doc);
+        document.deleteToTrash();
+    }
+
+    return DeleteTag(data, bLog);
+}
+
 bool CWizDatabase::IsDocumentModified(const CString& strGUID)
 {
     return CWizIndex::IsObjectDataModified(strGUID, "document");
