@@ -2,6 +2,7 @@
 #define CORE_NOTIFYBAR_H
 
 #include <QWidget>
+#include <QIcon>
 
 class QLabel;
 class wizImageButton;
@@ -40,7 +41,8 @@ signals:
 private:
     QWidget* m_childWgt;
     QLabel* m_labelNotify;
-    wizImageButton* m_buttonClose;
+    wizImageButton* m_buttonCloseRed;
+    wizImageButton* m_buttonCloseBlue;
     QPropertyAnimation* m_animation;
     NotifyType m_type;
 
@@ -50,6 +52,7 @@ private:
     void showNotify();
     void hideNotify(bool bUseAnimation);
     void applyStyleSheet(bool isForbidden);
+    void showCloseButton(bool isForbidden);
 };
 
 } // namespace Internal
