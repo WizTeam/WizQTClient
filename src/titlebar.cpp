@@ -96,6 +96,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+2");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
     m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags (Alt + 2)"));
+    m_tagBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_tag_on"), tr("View and add tags (Alt + 2)"));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
 
@@ -104,7 +105,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+3");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
     m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments (Alt + 3)"));
-    m_attachBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_attachment_exist"), tr("View and add attachments (Alt + 3)"));
+    m_attachBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_attachment_on"), tr("Add attachments (Alt + 3)"));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     m_historyBtn = new CellButton(CellButton::ImageOnly, this);
@@ -119,6 +120,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
     m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info (Alt + 5)"));
+    m_infoBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_info_on"), tr("View and modify note's info (Alt + 5)"));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
     m_emailBtn = new CellButton(CellButton::ImageOnly, this);
@@ -144,7 +146,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments (Alt + c)"));
-    m_commentsBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "comments_exist"), tr("View and add comments (Alt + c)"));
+    m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments (Alt + c)"));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
@@ -180,7 +182,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
-
+    connect(m_tagBar, SIGNAL(widgetStatusChanged()), SLOT(updateTagButtonStatus()));
 }
 
 CWizDocumentView* TitleBar::noteView()
@@ -277,6 +279,38 @@ void TitleBar::onEditorFocusOut()
     showEditorBar();
     if (!m_editorBar->hasFocus())
         showInfoBar();
+}
+
+void TitleBar::updateTagButtonStatus()
+{
+    if (m_tagBar && m_tagBtn)
+    {
+        m_tagBtn->setState(m_tagBar->isVisible() ? CellButton::Checked : CellButton::Normal);
+    }
+}
+
+void TitleBar::updateAttachButtonStatus()
+{
+    if (m_attachments && m_attachBtn)
+    {
+        m_attachBtn->setState(m_attachments->isVisible() ? CellButton::Checked : CellButton::Normal);
+    }
+}
+
+void TitleBar::updateInfoButtonStatus()
+{
+    if (m_info && m_infoBtn)
+    {
+        m_infoBtn->setState(m_info->isVisible() ? CellButton::Checked : CellButton::Normal);
+    }
+}
+
+void TitleBar::updateCommentsButtonStatus()
+{
+    if (m_commentsBtn && noteView()->commentWidget())
+    {
+        m_commentsBtn->setState(noteView()->commentWidget()->isVisible() ? CellButton::Checked : CellButton::Normal);
+    }
 }
 
 void TitleBar::onTitleEditFinished()
@@ -396,7 +430,6 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
 {
     m_infoBar->setDocument(doc);
     m_editTitle->setText(doc.strTitle);
-    m_attachBtn->setState(doc.nAttachmentCount > 0 ? CellButton::Badge : CellButton::Normal);
     m_attachBtn->setCount(doc.nAttachmentCount);
 }
 
@@ -510,6 +543,7 @@ void TitleBar::onAttachButtonClicked()
 {
     if (!m_attachments) {
         m_attachments = new CWizAttachmentListWidget(topLevelWidget());
+        connect(m_attachments, SIGNAL(widgetStatusChanged()), SLOT(updateAttachButtonStatus()));
     }
 
 
@@ -518,6 +552,7 @@ void TitleBar::onAttachButtonClicked()
         QRect rc = m_attachBtn->rect();
         QPoint pt = m_attachBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
         m_attachments->showAtPoint(pt);
+        updateAttachButtonStatus();
     }
 
     WizGetAnalyzer().LogAction("showAttachments");
@@ -537,6 +572,7 @@ void TitleBar::onInfoButtonClicked()
 {
     if (!m_info) {
         m_info = new CWizNoteInfoForm(topLevelWidget());
+        connect(m_info, SIGNAL(widgetStatusChanged()), SLOT(updateInfoButtonStatus()));
     }
 
     m_info->setDocument(noteView()->note());
@@ -544,6 +580,7 @@ void TitleBar::onInfoButtonClicked()
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_info->showAtPoint(pt);
+    updateInfoButtonStatus();
 
     WizGetAnalyzer().LogAction("showNoteInfo");
 }
@@ -563,6 +600,9 @@ void TitleBar::onCommentsButtonClicked()
     QWebEngineView* comments = noteView()->commentView();
 #else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    connect(commentWidget, SIGNAL(widgetStatusChanged()), this,
+            SLOT(updateCommentsButtonStatus()), Qt::UniqueConnection);
+
 #endif
     if (commentWidget->isVisible()) {
         commentWidget->hide();
@@ -695,12 +735,7 @@ void TitleBar::onGetCommentsCountFinished(int nCount)
     api->disconnect(this);
     api->deleteLater();    
 
-    m_commentsBtn->setCount(nCount);
-    if (nCount) {
-        m_commentsBtn->setState(CellButton::Badge);
-    } else {
-        m_commentsBtn->setState(CellButton::Normal);
-    }
+    m_commentsBtn->setCount(nCount);    
 }
 
 void TitleBar::showMessageTips(Qt::TextFormat format, const QString& strInfo)

@@ -22,8 +22,13 @@ public:
     void hideLocalProgress();
 
 signals:
+    void widgetStatusChanged();
 
 public slots:
+
+protected:
+    void hideEvent(QHideEvent* ev);
+    void showEvent(QShowEvent* ev);
 
 private:
     QWebView* m_web;

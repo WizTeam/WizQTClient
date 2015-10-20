@@ -80,6 +80,12 @@ public Q_SLOTS:
     void onEditorFocusOut();
 
     //
+    void updateTagButtonStatus();
+    void updateAttachButtonStatus();
+    void updateInfoButtonStatus();
+    void updateCommentsButtonStatus();
+
+    //
     void onTitleEditFinished();
 
     void loadErrorPage();

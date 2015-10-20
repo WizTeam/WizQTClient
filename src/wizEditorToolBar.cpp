@@ -782,17 +782,9 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 {
     QString skin = Utils::StyleHelper::themeName();
 
-    m_comboParagraph = new CWizToolComboBox(this);
-    if (m_app.userSettings().locale() == ::WizGetDefaultTranslatedLocal())
-    {
-//        m_comboParagraph->setMinimumWidth(90);
-        m_comboParagraph->setFixedWidth(80);
-    }
-    else
-    {
-//        m_comboParagraph->setMinimumWidth(70);
-        m_comboParagraph->setFixedWidth(68);
-    }
+    m_comboParagraph = new CWizToolComboBox(this);    
+    m_comboParagraph->setFixedWidth(90);
+
 
     WizComboboxStyledItem* paraItems = ParagraphItems();    
     for (int i = 0; i < nParagraphItemCount; i ++)
@@ -972,7 +964,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
-    m_btnTable->setHorizontalPadding(6);
+//    m_btnTable->setHorizontalPadding(6);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
     m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
     m_btnTable->setToolTip(tr("InsertTable"));
@@ -981,7 +973,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
-    m_btnHorizontal->setHorizontalPadding(8);
+//    m_btnHorizontal->setHorizontalPadding(8);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
     m_btnHorizontal->setToolTip(tr("InsertHorizontal"));
@@ -1023,7 +1015,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
 
     m_btnMobileImage = new CWizToolButton(this);
-    m_btnMobileImage->setHorizontalPadding(6);
+//    m_btnMobileImage->setHorizontalPadding(6);
     m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage"));
     m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
     m_btnMobileImage->setToolTip(tr("Receive mobile image"));
@@ -1149,7 +1141,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     moveableLayout4->addWidget(m_btnFormatMatch);
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
-    moveableLayout4->addSpacing(11);
+    moveableLayout4->addSpacing(13);
 
     hLayout->addWidget(moveableButtonContainer4);
 

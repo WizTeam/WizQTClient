@@ -125,6 +125,12 @@ public:
     CWizAttachmentListWidget(QWidget* parent);
     bool setDocument(const WIZDOCUMENTDATA& document);
 
+signals:
+    void widgetStatusChanged();
+
+protected:
+    void hideEvent(QHideEvent* ev);
+
 private:
     CWizAttachmentListView* m_list;
     CWizButton* m_btnAddAttachment;

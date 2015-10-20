@@ -2034,7 +2034,7 @@ void MainWindow::initClient()
 
     m_category->setMinimumWidth(165);
     m_docListContainer->setMinimumWidth(244);
-    m_doc->web()->setMinimumWidth(555);
+    m_doc->web()->setMinimumWidth(570);
     m_doc->commentWidget()->setMinimumWidth(195);
 
     m_msgListWidget->hide();

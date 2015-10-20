@@ -469,6 +469,20 @@ void CWizTagBar::focusOutEvent(QFocusEvent* event)
     clearTagSelection();
 }
 
+void CWizTagBar::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
+}
+
+void CWizTagBar::showEvent(QShowEvent* ev)
+{
+    QWidget::showEvent(ev);
+
+    emit widgetStatusChanged();
+}
+
 void CWizTagBar::reset()
 {
     for (auto tagIt : m_mapTagWidgets)

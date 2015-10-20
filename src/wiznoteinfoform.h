@@ -19,8 +19,13 @@ public:
     void setDocument(const WIZDOCUMENTDATA& data);
 
     void setGroupLabelVisible(bool isGroupNote);
+
+signals:
+    void widgetStatusChanged();
+
 protected:
     virtual QSize sizeHint() const;
+    void hideEvent(QHideEvent* ev);
 
 private slots:
     void on_labelOpenDocument_linkActivated(const QString &link);

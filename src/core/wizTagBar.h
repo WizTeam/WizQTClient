@@ -113,9 +113,15 @@ public slots:
     //
     void on_lineEditTextChanged(const QString& text);
 
+signals:
+    void widgetStatusChanged();
+
 protected:
     void resizeEvent(QResizeEvent* event);
     void focusOutEvent(QFocusEvent* event);
+
+    void hideEvent(QHideEvent* ev);
+    void showEvent(QShowEvent* ev);
 
 private:
     void reset();

@@ -49,6 +49,13 @@ QSize CWizNoteInfoForm::sizeHint() const
     return m_size;
 }
 
+void CWizNoteInfoForm::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
+}
+
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strKbGUID.isEmpty());

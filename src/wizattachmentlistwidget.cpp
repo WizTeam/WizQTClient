@@ -628,6 +628,13 @@ bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
     return true;
 }
 
+void CWizAttachmentListWidget::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
+}
+
 void CWizAttachmentListWidget::on_addAttachment_clicked()
 {
     m_list->addAttachments();
