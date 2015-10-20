@@ -119,16 +119,16 @@
 
 #include <stdlib.h>
 
-#include <openssl/e_os2.h>
+#include <openssl/include/e_os2.h>
 
 #ifndef OPENSSL_NO_FP_API
 #include <stdio.h>
 #endif
 
-#include <openssl/stack.h>
-#include <openssl/safestack.h>
-#include <openssl/opensslv.h>
-#include <openssl/ossl_typ.h>
+#include <openssl/include/stack.h>
+#include <openssl/include/safestack.h>
+#include <openssl/include/opensslv.h>
+#include <openssl/include/ossl_typ.h>
 
 #ifdef CHARSET_EBCDIC
 #include <openssl/ebcdic.h>
@@ -136,7 +136,7 @@
 
 /* Resolve problems on some operating systems with symbol names that clash
    one way or another */
-#include <openssl/symhacks.h>
+#include <openssl/include/symhacks.h>
 
 #ifdef  __cplusplus
 extern "C" {

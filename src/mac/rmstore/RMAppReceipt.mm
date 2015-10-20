@@ -20,10 +20,10 @@
 
 #import "RMAppReceipt.h"
 #import <IOKit/IOKitLib.h>
-#import <openssl/pkcs7.h>
-#import <openssl/objects.h>
-#import <openssl/sha.h>
-#import <openssl/x509.h>
+#import <openssl/include/pkcs7.h>
+#import <openssl/include/objects.h>
+#import <openssl/include/sha.h>
+#import <openssl/include/x509.h>
 
 #ifdef BUILD4APPSTORE
 
