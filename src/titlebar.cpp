@@ -78,7 +78,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     QString strTheme = Utils::StyleHelper::themeName();
 
     QVBoxLayout* layout = new QVBoxLayout(this);
-    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setContentsMargins(0, 0, 0, 6);
     layout->setSpacing(0);
     setLayout(layout);
 
@@ -266,6 +266,19 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
     connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
 
     m_editor = editor;
+}
+
+void TitleBar::setBackgroundColor(QColor color)
+{
+    QPalette pal = m_editTitle->palette();
+    pal.setColor(QPalette::Window, color);
+    m_editTitle->setPalette(pal);
+
+    m_editTitle->setStyleSheet("QLineEdit{background:#F5F5F5; border: 1px solid red;}");
+
+//    pal = m_infoBar->palette();
+//    pal.setColor(QPalette::Window, color);
+//    m_infoBar->setPalette(pal);
 }
 #endif
 

@@ -46,6 +46,7 @@ public:
     void setEditor(CWizDocumentWebView* editor);
 #endif
 
+    void setBackgroundColor(QColor color);
 
     void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);

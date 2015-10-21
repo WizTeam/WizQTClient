@@ -2037,6 +2037,9 @@ void MainWindow::initClient()
     m_doc->web()->setMinimumWidth(570);
     m_doc->commentWidget()->setMinimumWidth(195);
 
+    m_doc->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"
+                          "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
+
     m_msgListWidget->hide();
     //
     connect(m_splitter.get(), SIGNAL(splitterMoved(int, int)), SLOT(on_client_splitterMoved(int, int)));

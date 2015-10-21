@@ -36,11 +36,11 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
 //    setStyleSheet("font-size: 11px; color: #646464;");
     setFocusPolicy(Qt::ClickFocus);
 
-    QPalette pl = palette();
+/*    QPalette pl = palette();
     pl.setColor(QPalette::Window, QColor("#FFFFFF"));
 //    pl.setBrush(QPalette::Window, QColor("#f7f8f9"));
     setPalette(pl);
-    setAutoFillBackground(true);
+    setAutoFillBackground(true)*/;
 
     //
     QHBoxLayout* hLayout = new QHBoxLayout(this);
