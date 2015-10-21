@@ -33,7 +33,7 @@
 @end
 
 // WizSearchField
-@interface WizSearchField: NSSearchField <NSTextFieldDelegate>
+@interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
 {
     CWizSearchWidget* m_pSearchWidget;
     BOOL m_isEditing;

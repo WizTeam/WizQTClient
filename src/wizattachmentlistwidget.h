@@ -125,6 +125,7 @@ public:
     CWizAttachmentListWidget(QWidget* parent);
     bool setDocument(const WIZDOCUMENTDATA& document);
 
+    virtual QSize sizeHint() const;
 signals:
     void widgetStatusChanged();
 

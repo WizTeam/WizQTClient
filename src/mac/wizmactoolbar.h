@@ -8,8 +8,8 @@
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QAction>
-#include <QtDeclarative/QDeclarativeListProperty>
-#include <QtDeclarative/QDeclarativeParserStatus>
+//#include <QtDeclarative/QDeclarativeListProperty>
+//#include <QtDeclarative/QDeclarativeParserStatus>
 #include <QMacCocoaViewContainer>
 
 

@@ -531,8 +531,10 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                 strFileName = wizConvertYosemiteFilePathToNormalPath(strFileName);
             }
 #endif
-            QImageReader reader(strFileName);
-            if (reader.canRead())
+//            QImageReader reader(strFileName);
+            QFileInfo info(strFileName);
+            QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
+            if (imageFormats.contains(info.suffix().toUtf8()))
             {
                 QString strHtml;
                 bool bUseCopyFile = true;

@@ -28,6 +28,8 @@
 
 using namespace Core::Internal;
 
+const int nAttachmentListViewItemHeight  = 40;
+
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
 //#define WIZACTION_ATTACHMENT_DOWNLOAD    QObject::tr("Download")
@@ -42,13 +44,13 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     : CWizMultiLineListWidget(2, parent)
     , m_dbMgr(*CWizDatabaseManager::instance())
 {
-    // FIXME
     QString strTheme = Utils::StyleHelper::themeName();
     setFrameStyle(QFrame::NoFrame);
     setStyle(WizGetStyle(strTheme));
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     //QVBoxLayout* layout = new QVBoxLayout();
     //setStyleSheet("background-color: #F7F7F7");
@@ -101,7 +103,7 @@ bool CWizAttachmentListView::imageAlignLeft() const
 }
 int CWizAttachmentListView::imageWidth() const
 {
-    return 32;
+    return 28;
 }
 QString CWizAttachmentListView::itemText(const QModelIndex& index, int line) const
 {
@@ -124,8 +126,8 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
 {
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
-        QString name = item->attachment().strName;
-        return m_iconProvider.icon(name).pixmap(32, 32);
+        QString path = m_dbMgr.db(item->attachment().strKbGUID).GetAttachmentFileName(item->attachment().strGUID);
+        return m_iconProvider.icon(path).pixmap(32, 32);
     }
     //
     return QPixmap();
@@ -362,6 +364,7 @@ void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
 CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att)
 {
     CWizAttachmentListViewItem* newItem = new CWizAttachmentListViewItem(att, this);
+    newItem->setSizeHint(QSize(width(), nAttachmentListViewItemHeight));
     connect(newItem, SIGNAL(updateRequet()), SLOT(forceRepaint()));
     connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), newItem,
             SLOT(on_downloadFinished(WIZOBJECTDATA,bool)));
@@ -577,7 +580,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     QString strTheme = Utils::StyleHelper::themeName();
     setContentsMargins(0, 20, 0, 0);
 
-    setFixedWidth(270);
+    setFixedWidth(sizeHint().width());
 
     QIcon iconAddAttachment = ::WizLoadSkinIcon(strTheme, "document_add_attachment");
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
@@ -626,6 +629,11 @@ bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
     }
 
     return true;
+}
+
+QSize CWizAttachmentListWidget::sizeHint() const
+{
+    return QSize(271, 310);
 }
 
 void CWizAttachmentListWidget::hideEvent(QHideEvent* ev)
