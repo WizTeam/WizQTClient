@@ -70,6 +70,7 @@ public:
 
     static QString wizCommonListViewStyleSheet();
     static QString wizCommonStyleSheet();
+    static QString wizCommonScrollBarStyleSheet();
 
     static QSize treeViewItemIconSize();
     static int treeViewItemHeight(bool isSection);

@@ -11,6 +11,7 @@
 #include <QToolButton>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
+#include "share/wizpopupwidget.h"
 //#include <memory>
 
 class CWizScrollBar;
@@ -62,11 +63,13 @@ private:
     QString m_id;
 };
 
-class WizMessageSenderSelector : public QWidget
+class WizMessageSenderSelector : public CWizPopupWidget
 {
     Q_OBJECT
 public:
     WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+
+    virtual QSize sizeHint() const;
 
     void setUsers(const CWizStdStringArray& arraySender);
 

@@ -551,8 +551,8 @@ int	CWizNoteStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, c
     {
         case PM_SplitterWidth:
             return 20;
-        case PM_ScrollBarExtent:
-            return 4;
+//        case PM_ScrollBarExtent:
+//            return 4;
         default:
             return CWizNoteBaseStyle::pixelMetric(metric, option, widget);
     }

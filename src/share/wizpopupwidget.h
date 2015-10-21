@@ -20,9 +20,13 @@ public:
 
 private:
     QVector<QPoint> m_pointsRegion;
-    QVector<QPoint> m_pointsPolygon;
+//    QVector<QPoint> m_pointsPolygon;
     bool m_leftAlign;
     QPoint m_pos;
+
+    int m_triangleMargin;
+    int m_triangleWidth;
+    int m_triangleHeight;
 
     QRegion maskRegion();
 
@@ -32,6 +36,7 @@ protected:
 public:
     void setLeftAlign(bool b) { m_leftAlign = b; }
     void showAtPoint(const QPoint& pt);
+    void setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight);
 };
 
 #endif // WIZPOPUPWIDGET_H

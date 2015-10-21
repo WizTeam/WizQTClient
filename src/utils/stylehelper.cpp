@@ -120,40 +120,37 @@ QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
 
 QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
                                                     int nTriangleMargin, int nTriangleWidth, int nTriangleHeight)
-{
-    QVector<QPoint> points;
-    int nBorderInterval = 2;
-    int nRectTop = rect.top() + nTriangleHeight;
-    points.append(QPoint(rect.left(), nRectTop + nBorderInterval));
-    points.append(QPoint(rect.left() + 1, nRectTop + 1));
-    points.append(QPoint(rect.left() + nBorderInterval, nRectTop));
+{    
+    QVector<QPoint> pointsRegion;
 
-    //triangle
     if (triangleAlginLeft)
     {
-        points.append(QPoint(rect.left() + nTriangleMargin, nRectTop));
-        points.append(QPoint(rect.left() + nTriangleMargin + (nTriangleWidth + 1) / 2, 0));
-        points.append(QPoint(rect.left() + nTriangleMargin + nTriangleWidth, nRectTop));
+        pointsRegion.push_back(QPoint(rect.left() + 1, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin + nTriangleWidth / 2, rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin + nTriangleWidth, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width(), 1 + nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width(), rect.top() + rect.height() - 2));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 2, rect.top() + rect.height()));
+        pointsRegion.push_back(QPoint(rect.left() + 2, rect.top() + rect.height()));
+        pointsRegion.push_back(QPoint(rect.left(), rect.top() + rect.height() - 2));
+        pointsRegion.push_back(QPoint(rect.left(), 1 + nTriangleHeight + rect.top()));
     }
     else
     {
-        points.append(QPoint(rect.right() - nTriangleMargin - nTriangleWidth, nRectTop));
-        points.append(QPoint(rect.right() - nTriangleMargin - nTriangleWidth / 2, 0));
-        points.append(QPoint(rect.right() - nTriangleMargin, nRectTop));
+        pointsRegion.push_back(QPoint(rect.left() + 1, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin - nTriangleWidth, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin - nTriangleWidth / 2, rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1, nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width(), 1 + nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width(), rect.top() + rect.height()));
+        pointsRegion.push_back(QPoint(rect.left(), rect.top() + rect.height()));
+        pointsRegion.push_back(QPoint(rect.left(), 1 + nTriangleHeight + rect.top()));
     }
 
-    points.append(QPoint(rect.right() - nBorderInterval, nRectTop));
-    points.append(QPoint(rect.right() - 1, nRectTop + 1));
-    points.append(QPoint(rect.right(), nRectTop + nBorderInterval));
-    points.append(QPoint(rect.right(), rect.bottom() - nBorderInterval - 1));
-    points.append(QPoint(rect.right() - 1, rect.bottom() - nBorderInterval));
-    points.append(QPoint(rect.right() - 2, rect.bottom() - 1));
-    points.append(QPoint(rect.right() - 3, rect.bottom()));
-    points.append(QPoint(rect.left() + 3, rect.bottom()));
-    points.append(QPoint(rect.left() + 2, rect.bottom() - 1));
-    points.append(QPoint(rect.left() + 1, rect.bottom() - nBorderInterval));
-    points.append(QPoint(rect.left(), rect.bottom() - nBorderInterval - 1));
-    QPolygon polygon(points);
+    QPolygon polygon(pointsRegion);
 
     return QRegion(polygon);
 }
@@ -183,8 +180,39 @@ QString StyleHelper::wizCommonStyleSheet()
 
         //
         style.replace("WizComboBoxDownArrow", skinResourceFileName("comboBox_downArrow", true));
+        style.replace("WizSpinBoxUpButton", skinResourceFileName("spinbox_upButton"));
+        style.replace("WizSpinBoxUpButtonPressed", skinResourceFileName("spinbox_upButton_selected"));
+        style.replace("WizSpinBoxDownButton", skinResourceFileName("spinbox_downButton"));
+        style.replace("WizSpinBoxDownButtonPressed", skinResourceFileName("spinbox_downButton_selected"));
+
     }
     return style;
+}
+
+QString StyleHelper::wizCommonScrollBarStyleSheet()
+{
+    return "QScrollBar {\
+            background: #F5F5F5;\
+            width: 8px; \
+        }\
+        QScrollBar::handle {\
+            background: #D8D8D8;\
+            min-height: 30px;\
+            width: 4px; \
+        }\
+        QScrollBar::handle:vertical {\
+            margin: 0 2px 0 2px;\
+        }\
+        QScrollBar::add-page, QScrollBar::sub-page {\
+            background: transparent;\
+        }\
+        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+            background: transparent;\
+        }\
+        QScrollBar::add-line, QScrollBar::sub-line {\
+            height: 0px;\
+            width: 0px;\
+        }";
 }
 
 QSize StyleHelper::treeViewItemIconSize()

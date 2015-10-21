@@ -610,6 +610,8 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     pal.setBrush(QPalette::Window, QBrush("#F7F7F7"));
 #endif
     setPalette(pal);
+
+    setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet());
 }
 
 bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
