@@ -478,7 +478,7 @@ void TitleBar::startEditButtonAnimation()
     {
         m_editButtonAnimation = new CWizAnimateAction(m_app, this);
         m_editButtonAnimation->setToolButton(m_editBtn);
-        m_editButtonAnimation->setTogetherIcon("editButtonProcessing");
+        m_editButtonAnimation->setSingleIcons("editButtonProcessing");
     }
     m_editButtonAnimation->startPlay();
 }
