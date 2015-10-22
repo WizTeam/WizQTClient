@@ -1,9 +1,9 @@
 #ifndef WIZCRASHREPORTDIALOG_H
 #define WIZCRASHREPORTDIALOG_H
 
-#ifdef Q_OS_MAC
-
 #include <QDialog>
+
+#ifdef Q_OS_MAC
 
 namespace Ui {
 class WizCrashReportDialog;

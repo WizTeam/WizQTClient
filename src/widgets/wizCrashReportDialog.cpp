@@ -2,13 +2,14 @@
 #include "ui_wizCrashReportDialog.h"
 
 #ifdef Q_OS_MAC
-
+#include <QUrlQuery>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QPlainTextEdit>
+#include <QtConcurrentRun>
 #include "wizdef.h"
 #include "share/wizEventLoop.h"
 #include "sync/apientry.h"
