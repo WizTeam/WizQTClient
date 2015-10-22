@@ -75,6 +75,7 @@ void CellButton::setCount(int count)
     update();
 }
 
+const int nTextWidth = 20;
 void CellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
@@ -94,9 +95,7 @@ void CellButton::paintEvent(QPaintEvent *event)
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
     {
-        QFont font;
-        QFontMetrics fm(font);
-        nLeft = (opt.rect.width() - fm.width(countInfo())  - size.width()) / 2;  //nLeft - fm.width(countInfo()) + 2;
+        nLeft = (opt.rect.width() - nTextWidth - size.width()) / 2;
     }
 
     QRect rcIcon(nLeft, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
@@ -111,7 +110,7 @@ void CellButton::paintEvent(QPaintEvent *event)
 
     if (WithCountInfo == m_buttonType)
     {
-        QRect rcText(rcIcon.right() + 6, opt.rect.y(), opt.rect.width() - rcIcon.width(), opt.rect.height());
+        QRect rcText(rcIcon.right() + 5, opt.rect.y(), opt.rect.width() - rcIcon.width(), opt.rect.height());
         p.setPen(m_count == 0 ? QColor("#B6B6B6") : QColor("#5990EF"));
         p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, countInfo());
     }
@@ -123,11 +122,8 @@ QSize CellButton::sizeHint() const
     case ImageOnly:
         return QSize(28, 26);
     case WithCountInfo:
-    {
-        QFont font;
-        QFontMetrics fm(font);
-        int nWidth = 28 + fm.width(countInfo());
-        return QSize(nWidth, 26);
+    {        
+        return QSize(28 + nTextWidth, 26);
     }
     }
 }
