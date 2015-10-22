@@ -57,6 +57,8 @@ public:
     QString itemID() const;
     QString itemText() const;
 
+    virtual bool operator<(const QListWidgetItem &other) const;
+
 private:
     QPixmap m_avatar;
     QString m_text;
@@ -72,6 +74,10 @@ public:
     virtual QSize sizeHint() const;
 
     void setUsers(const CWizStdStringArray& arraySender);
+    void appendUser(const QString& userGUID);
+    void sort();
+
+    QSet<QString>& userGUIDSet();
 
 public slots:
     void on_selectorItem_clicked(QListWidgetItem* selectorItem);
@@ -87,6 +93,7 @@ private:
 private:
     CWizDatabaseManager& m_dbMgr;
     QListWidget* m_userList;
+    QSet<QString> m_userGUIDSet;
 };
 
 class WizClickableLabel : public QLabel
@@ -114,24 +121,6 @@ public:
 
 };
 
-class WizMessageSelector : public QComboBox
-{
-    Q_OBJECT
-public:
-    WizMessageSelector(QWidget *parent = 0);
-
-    virtual void showPopup();   
-
-//    bool event(QEvent *event);
-
-protected:
-    void focusOutEvent(QFocusEvent* event);
-    void focusInEvent(QFocusEvent* event);
-//    void	mouseMoveEvent(QMouseEvent * event);
-//    void	enterEvent(QEvent * event);
-};
-
-
 class WizMessageListTitleBar : public QWidget
 {
     Q_OBJECT
@@ -139,20 +128,14 @@ public:
     WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
 
     void setUnreadMode(bool unread);
-    bool isUnreadMode() const;
-
-    void setSelectorIndex(int index);
-
-    QString selectorItemData(int index) const;
+    bool isUnreadMode() const;    
 
 signals:
-    void messageSelector_indexChanged(int index);
     void messageSelector_senderSelected(QString userGUID);
     void markAllMessageRead_request();
 
 public slots:
     void on_message_created(const WIZMESSAGEDATA& msg);
-    void on_selector_indexChanged(int index);
 
     void on_sender_selected(const QString& userGUID, const QString& userAlias);
 
@@ -161,13 +144,13 @@ public slots:
     void showUserSelector();
 
 private:
-//    void addUserToSelector(const QString& userGUID);
+    void addUserToSelector(const QString& userGUID);
+    void initSenderSelector();
     void initUserList();
 
 private:
     CWizDatabaseManager& m_dbMgr;
-    WizMessageSelector* m_msgSelector;
-    WizMessageSenderSelector* m_userSelector;
+    WizMessageSenderSelector* m_msgSenderSelector;
     WizClickableLabel* m_labelCurrentSender;
     QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;

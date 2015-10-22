@@ -75,7 +75,7 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
     QString strThis = text(0).toLower();
     QString strOther = pOther->text(0).toLower();
     //
-    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    static bool isSimpChinese = Utils::Misc::isChinese();
     if (isSimpChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))

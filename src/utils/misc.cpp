@@ -184,12 +184,29 @@ void Misc::deleteFile(const CString& strFileName)
     dir.remove(extractFileName(strFileName));
 }
 
+bool Misc::isChinese()
+{
+    return isSimpChinese() || isTraditionChinese();
+}
+
 bool Misc::isSimpChinese()
 {
     QLocale local;
     QString name = local.name().toLower();
     if (name == "zh_cn"
         || name == "zh-cn")
+    {
+        return true;
+    }
+    return false;
+}
+
+bool Misc::isTraditionChinese()
+{
+    QLocale local;
+    QString name = local.name().toLower();
+    if (name == "zh_tw"
+        || name == "zh-tw")
     {
         return true;
     }

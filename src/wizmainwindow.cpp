@@ -1569,7 +1569,7 @@ bool caseInsensitiveLessThan(QAction* action1, QAction* action2) {
     const QString k1 = action1->text().toLower();
     const QString k2 = action2->text().toLower();
 
-    static bool isSimpChinese = Utils::Misc::isSimpChinese();
+    static bool isSimpChinese = Utils::Misc::isChinese();
     if (isSimpChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))

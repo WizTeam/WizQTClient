@@ -765,79 +765,19 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
     }
 }
 
-WizMessageSelector::WizMessageSelector(QWidget* parent)
-    : QComboBox(parent)
-{   
-}
-
-void WizMessageSelector::showPopup()
-{
-    setEditable(true);
-    QComboBox::showPopup();
-
-    QWidget* popup = findChild<QFrame*>();
-
-    int topMargin = 4;
-    QPoint pos(0, height() + topMargin * 2);
-    pos = parentWidget()->mapToGlobal(pos);
-    popup->move(pos);
-
-
-//    QRegion mask = Utils::StyleHelper::borderRadiusRegionWithTriangle(popup->geometry(), true, 18, 7, 3);
-//    popup->setMask(mask);
-
-}
-
-//bool WizMessageSelector::event(QEvent* event)
-//{
-//    qDebug() << "event type  : " << event << "  cursor shape ; " << cursor().shape();
-//    return QComboBox::event(event);
-//}
-
-
-void WizMessageSelector::focusOutEvent(QFocusEvent* event)
-{
-    QComboBox::focusOutEvent(event);
-}
-
-void WizMessageSelector::focusInEvent(QFocusEvent* event)
-{
-    //NOTE:为了使用弹出列表的滚动条，将combobox设置为可编辑。此处移除focusin来取消可编辑
-//    QComboBox::focusInEvent(event);
-    event->accept();
-    setCursor(QCursor(Qt::ArrowCursor));
-    clearFocus();
-}
-
-//void WizMessageSelector::mouseMoveEvent(QMouseEvent* event)
-//{
-//    QComboBox::mouseMoveEvent(event);
-//    qDebug() << "mousr move event ; " << cursor().shape();
-//    setCursor(QCursor(Qt::ArrowCursor));
-//}
-
-//void WizMessageSelector::enterEvent(QEvent* event)
-//{
-//    QComboBox::enterEvent(event);
-//    setCursor(QCursor(Qt::ArrowCursor));
-//}
 
 const int SenderNameFontSize = 14;
 
 WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
     : QWidget(parent)
     , m_dbMgr(dbMgr)
-    , m_userSelector(new WizMessageSenderSelector(m_dbMgr, this))
+    , m_msgSenderSelector(nullptr)
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(2, 0, 16, 0);
     layoutActions->setSpacing(0);
-    setLayout(layoutActions);    
-
-    initUserList();    
-
-    connect(m_userSelector, SIGNAL(senderSelected(QString,QString)), SLOT(on_sender_selected(QString,QString)));
+    setLayout(layoutActions);        
 
     m_labelCurrentSender = new WizClickableLabel(this);
     m_labelCurrentSender->setText(tr("All Users"));
@@ -892,46 +832,20 @@ bool WizMessageListTitleBar::isUnreadMode() const
     return m_msgListMarkAllBtn->isVisible();
 }
 
-void WizMessageListTitleBar::setSelectorIndex(int index)
-{
-//    m_msgSelector->blockSignals(true);
-//    m_msgSelector->setCurrentIndex(index);
-//    m_msgSelector->blockSignals(false);
-}
-
-QString WizMessageListTitleBar::selectorItemData(int index) const
-{
-//    return m_msgSelector->itemData(index).toString();
-    return "";
-}
-
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
 {
+    if (msg.senderGUID.isEmpty())
+        return;
 
-    //FIXME:在添加新的项目到列表中时存在icon丢失的问题，暂不提供根据新消息添加用户的功能
-//    if (msg.senderGUID.isEmpty())
-//        return;
+    if (nullptr == m_msgSenderSelector)
+    {
+        initSenderSelector();
+    }
 
-//    if (m_msgSelector->findData(msg.senderGUID, Qt::UserRole) == -1)
-//    {
-//        addUserToSelector(msg.senderGUID);
-//        m_msgSelector->model()->sort(0);
-//    }
+    if (m_msgSenderSelector->userGUIDSet().contains(msg.senderGUID))
+        return;
 
-
-    // update message list
-//    messageSelector_indexChanged(m_msgSelector->currentIndex());
-}
-
-void WizMessageListTitleBar::on_selector_indexChanged(int index)
-{
-//    QString text = m_msgSelector->currentText();
-//    QFont f;
-//    QFontMetrics fm(f);
-//    const int elidedTextWidth = 78;
-//    QString elidedText = fm.elidedText(text, Qt::ElideRight, elidedTextWidth);
-//    m_msgSelector->setEditText(elidedText);
-    //    emit messageSelector_indexChanged(index);
+    addUserToSelector(msg.senderGUID);
 }
 
 void WizMessageListTitleBar::on_sender_selected(const QString& userGUID, const QString& userAlias)
@@ -951,33 +865,28 @@ void WizMessageListTitleBar::on_userSelectButton_clicked()
 
 void WizMessageListTitleBar::showUserSelector()
 {
+    if (nullptr == m_msgSenderSelector)
+    {
+        initSenderSelector();
+    }
+
     QPoint leftTop = m_labelCurrentSender->mapToGlobal(m_labelCurrentSender->rect().bottomLeft());
-    m_userSelector->move(leftTop);
-    m_userSelector->show();
+    m_msgSenderSelector->move(leftTop);
+    m_msgSenderSelector->show();
 }
 
-//void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
-//{
-//    CWizBizUserDataArray arrayUser;
-//    if (!m_dbMgr.db().userFromGUID(userGUID, arrayUser))
-//        return;
+void WizMessageListTitleBar::initSenderSelector()
+{
+    m_msgSenderSelector = new WizMessageSenderSelector(m_dbMgr, this);
+    initUserList();
 
-//    QSet<QString> userSet;
-//    QString strUserId;
-//    for (WIZBIZUSER user : arrayUser)
-//    {
-//        userSet.insert(user.alias);
-//        strUserId = user.userId;
-//    }
-//    QStringList userList(userSet.toList());
-//    QString strText = userList.join(";");
-////    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
-//    QPixmap pix;
-//    WizService::AvatarHost::load(strUserId);
-//    WizService::AvatarHost::avatar(strUserId, &pix);
-//    QIcon icon(pix);
-//    m_msgSelector->addItem(icon, strText, userGUID);
-//}
+    connect(m_msgSenderSelector, SIGNAL(senderSelected(QString,QString)), SLOT(on_sender_selected(QString,QString)));
+}
+
+void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
+{
+    m_msgSenderSelector->appendUser(userGUID);
+}
 
 void WizMessageListTitleBar::initUserList()
 {
@@ -985,30 +894,7 @@ void WizMessageListTitleBar::initUserList()
     CWizDatabase& db = m_dbMgr.db();
     db.getAllMessageSenders(arraySender);
 
-    m_userSelector->setUsers(arraySender);
-
-//    for (auto sender : arraySender)
-//    {
-//        addUserToSelector(sender);
-//    }
-
-//    static bool once = true;
-//    if (once)
-//    {
-//        WizSortFilterProxyModel* proxy = new WizSortFilterProxyModel(m_msgSelector);
-//        proxy->setSourceModel(m_msgSelector->model());                            // <--
-//        m_msgSelector->model()->setParent(proxy);                                 // <--
-//        m_msgSelector->setModel(proxy);
-//        once = false;
-//    }
-//    //
-//    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
-//    QIcon icon(pix);
-////    m_msgSelector->insertItem(0, icon, tr("All members"));
-//    m_msgSelector->addItem(icon, tr("All members"), "");
-
-//    m_msgSelector->model()->sort(0);
-//    m_msgSelector->setCurrentIndex(0);
+    m_msgSenderSelector->setUsers(arraySender);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
@@ -1076,8 +962,8 @@ bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelInde
 //    return QString::localeAwareCompare(leftString, rightString) < 0;
 
 
-    static bool isSimpChinese = Utils::Misc::isSimpChinese();
-    if (isSimpChinese)
+    static bool isChinese = Utils::Misc::isChinese();
+    if (isChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
         {
@@ -1176,6 +1062,21 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
     setWidgetSize(QSize(width(), nHeight));
 }
 
+void WizMessageSenderSelector::appendUser(const QString& userGUID)
+{
+    addUser(userGUID);
+
+    m_userList->sortItems();
+
+    int nHeight = m_userList->count() > 10 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
+    setWidgetSize(QSize(width(), nHeight));
+}
+
+QSet<QString>&WizMessageSenderSelector::userGUIDSet()
+{
+    return m_userGUIDSet;
+}
+
 void WizMessageSenderSelector::on_selectorItem_clicked(QListWidgetItem* selectorItem)
 {
     WizSenderSelectorItem* senderItem = dynamic_cast<WizSenderSelectorItem*>(selectorItem);
@@ -1203,14 +1104,21 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     }
     QStringList userList(userSet.toList());
     QString strText = userList.join(";");
-//    qDebug() << "add user to selector , guid : " << userGUID << "  alias : " << strText << "  user id ; " << strUserId;
+
     QPixmap pix;
     WizService::AvatarHost::load(strUserId);
     WizService::AvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 22));
-    m_userList->addItem(selectorItem);    
+    m_userList->addItem(selectorItem);
+
+    m_userGUIDSet.insert(userGUID);
+}
+
+void WizMessageSenderSelector::sort()
+{
+    m_userList->sortItems();
 }
 
 void WizMessageSenderSelector::setWidgetSize(const QSize& size)
@@ -1265,6 +1173,33 @@ QString WizSenderSelectorItem::itemID() const
 QString WizSenderSelectorItem::itemText() const
 {
     return m_text;
+}
+
+bool WizSenderSelectorItem::operator<(const QListWidgetItem& other) const
+{
+    const WizSenderSelectorItem* pOther = dynamic_cast<const WizSenderSelectorItem*>(&other);
+
+    if (m_id.isEmpty())
+        return true;
+    if (pOther->itemID().isEmpty())
+        return false;
+
+    static bool isChinese = Utils::Misc::isChinese();
+    if (isChinese)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(m_text);
+            QByteArray arrOther = pCodec->fromUnicode(pOther->itemText());
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+
+    return m_text.localeAwareCompare(pOther->itemText()) < 0;
 }
 
 void WizClickableLabel::mouseReleaseEvent(QMouseEvent* ev)

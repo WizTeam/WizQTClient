@@ -37,7 +37,9 @@ public:
     static void deleteFile(const CString& strFileName);
 
     //
+    static bool isChinese();
     static bool isSimpChinese();
+    static bool isTraditionChinese();
 
     static int getVersionCode();
 };
