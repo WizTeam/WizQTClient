@@ -365,14 +365,14 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
     case SortingByLocation:
     {
-        QString otherInfo = pOther->m_data.infoList.join(' ');
-        QString info = pOther->m_data.infoList.join(' ');
+        QString otherInfo = pOther->m_data.infoList.join(" ");
+        QString info = pOther->m_data.infoList.join(" ");
         return otherInfo.localeAwareCompare(info) < 0;
     }
     case -SortingByLocation:
     {
-        QString otherInfo = pOther->m_data.infoList.join(' ');
-        QString info = pOther->m_data.infoList.join(' ');
+        QString otherInfo = pOther->m_data.infoList.join(" ");
+        QString info = pOther->m_data.infoList.join(" ");
         return otherInfo.localeAwareCompare(info) > 0;
     }
     case SortingByTag:

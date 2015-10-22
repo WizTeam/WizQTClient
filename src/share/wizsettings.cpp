@@ -720,7 +720,7 @@ void CWizUserSettings::appendRecentSearch(const QString& search)
         recentSearches.pop_front();
 
     recentSearches.append(search);
-    QString searches = recentSearches.join('/');
+    QString searches = recentSearches.join("/");
     set("RecentSearches", searches);
 }
 

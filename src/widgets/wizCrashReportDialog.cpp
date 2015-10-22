@@ -1,6 +1,8 @@
 #include "wizCrashReportDialog.h"
 #include "ui_wizCrashReportDialog.h"
-#include <QtConcurrent>
+
+#ifdef Q_OS_MAC
+
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -118,3 +120,5 @@ void CWizCrashReportDialog::on_btn_details_clicked()
     }
 
 }
+
+#endif

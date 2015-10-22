@@ -1,4 +1,7 @@
 #include "wizSearchWidget_mm.h"
+
+#ifdef USECOCOATOOLBAR
+
 #include <QWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -372,3 +375,4 @@ void CWizSuggestiongList::leaveEvent(QEvent* ev)
     update();
 }
 
+#endif

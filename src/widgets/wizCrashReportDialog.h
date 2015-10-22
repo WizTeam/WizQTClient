@@ -1,6 +1,8 @@
 #ifndef WIZCRASHREPORTDIALOG_H
 #define WIZCRASHREPORTDIALOG_H
 
+#ifdef Q_OS_MAC
+
 #include <QDialog>
 
 namespace Ui {
@@ -28,5 +30,7 @@ private:
     QString m_reports;
     QPlainTextEdit* m_textEdit;
 };
+
+#endif
 
 #endif // WIZCRASHREPORTDIALOG_H

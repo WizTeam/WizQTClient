@@ -1977,8 +1977,8 @@ void MainWindow::initClient()
     //
     QWidget* main = clientWidget();
     //
-    QWidget* client = new QWidget(main);
-    clientLayout()->addWidget(client);
+    m_clienWgt = new QWidget(main);
+    clientLayout()->addWidget(m_clienWgt);
 #endif
 
     m_clienWgt->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Minimum);
