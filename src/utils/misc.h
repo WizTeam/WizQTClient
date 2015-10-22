@@ -38,6 +38,8 @@ public:
 
     //
     static bool isSimpChinese();
+
+    static int getVersionCode();
 };
 
 } // namespace Utils

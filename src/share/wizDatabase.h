@@ -316,6 +316,9 @@ public:
     bool InitDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool GetUserInfo(WIZUSERINFO& userInfo);
 
+    // when upgrade app, remove or update invalid data
+    void UpdateInvalidData();
+
     // path resolve
     QString GetAccountPath() const;
     QString GetAccountFolderName() const;

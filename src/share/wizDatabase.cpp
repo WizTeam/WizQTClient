@@ -2759,6 +2759,17 @@ bool CWizDatabase::GetUserInfo(WIZUSERINFO& userInfo)
     return true;
 }
 
+void CWizDatabase::UpdateInvalidData()
+{
+    int nVersion = meta(USER_SETTINGS_SECTION, "AppVersion").toInt();
+    if (nVersion < 202006)
+    {
+        setMeta(USER_SETTINGS_SECTION, "EditorBackgroundColor", "");
+    }
+
+    setMeta(USER_SETTINGS_SECTION, "AppVersion", QString::number(Utils::Misc::getVersionCode()));
+}
+
 bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
 {
     bool bRet = false;

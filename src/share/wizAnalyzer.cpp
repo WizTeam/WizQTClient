@@ -172,27 +172,6 @@ void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
     AddDuration(strAction, seconds);
 }
 //
-static int WizGetVersionCode()
-{
-    QString str(WIZ_CLIENT_VERSION);
-    QStringList strList = str.split('.');
-    Q_ASSERT(strList.count() >= 3);
-
-    QString strNum = strList.first();
-    QString strSec = strList.at(1);
-    while (strSec.length() < 2) {
-        strSec.insert(0, "0");
-    }
-    QString strThr = strList.at(2);
-    while (strThr.length() < 3) {
-        strThr.insert(0, "0");
-    }
-
-    strNum.append(strSec);
-    strNum.append(strThr);
-
-    return strNum.toInt();
-}
 //
 void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 {
@@ -244,7 +223,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     versionName.SetString(WIZ_CLIENT_VERSION);
     dd.AddMember("versionName", versionName, allocator);
 
-    dd.AddMember("versionCode", WizGetVersionCode(), allocator);
+    dd.AddMember("versionCode", Utils::Misc::getVersionCode(), allocator);
 
     //
     Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();

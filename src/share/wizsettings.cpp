@@ -1,6 +1,7 @@
 #include "wizsettings.h"
 #include "utils/pathresolve.h"
 
+#include "wizdef.h"
 #include <QLocale>
 
 CWizSettings::CWizSettings(const QString& strFileName)
@@ -519,10 +520,7 @@ void CWizUserSettings::setRememberNotePasswordForSession(bool remember)
 
 QString CWizUserSettings::editorBackgroundColor()
 {
-    QString strColor = get("EditorBackgroundColor");
-    if (strColor.isEmpty())
-        return "#FFFFFF";
-
+    QString strColor = get("EditorBackgroundColor");    
     return strColor;
 }
 

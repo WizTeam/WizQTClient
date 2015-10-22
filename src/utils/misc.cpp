@@ -6,6 +6,8 @@
 #include <QFileInfo>
 #include <QTextStream>
 
+#include "wizdef.h"
+
 namespace Utils {
 
 QString Misc::time2humanReadable(const QDateTime& time) {
@@ -192,6 +194,28 @@ bool Misc::isSimpChinese()
         return true;
     }
     return false;
+}
+
+int Misc::getVersionCode()
+{
+    QString str(WIZ_CLIENT_VERSION);
+    QStringList strList = str.split('.');
+    Q_ASSERT(strList.count() >= 3);
+
+    QString strNum = strList.first();
+    QString strSec = strList.at(1);
+    while (strSec.length() < 2) {
+        strSec.insert(0, "0");
+    }
+    QString strThr = strList.at(2);
+    while (strThr.length() < 3) {
+        strThr.insert(0, "0");
+    }
+
+    strNum.append(strSec);
+    strNum.append(strThr);
+
+    return strNum.toInt();
 }
 
 

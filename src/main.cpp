@@ -383,6 +383,7 @@ int mainCore(int argc, char *argv[])
     WizService::Token::setPasswd(strPassword);
 
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
+    dbMgr.db().UpdateInvalidData();
 
     // FIXME: move to plugins
     WizService::AvatarHost avatarHost;
