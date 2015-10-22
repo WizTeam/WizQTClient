@@ -191,6 +191,8 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(const QString& message, i
     qDebug() << "[Console]line: " << lineNumber << ", " << message;
 }
 
+static int nWindowIDCounter = 0;
+
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     : QWebView(parent)
     , m_app(app)
@@ -201,6 +203,8 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_noteFrame(nullptr)
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
+    , m_bInSeperateWindow(false)
+    , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
@@ -698,6 +702,11 @@ void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
     closeSourceMode();
 }
 
+void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
+{
+    m_bInSeperateWindow = inSeperateWindow;
+}
+
 QString CWizDocumentWebView::getDefaultCssFilePath() const
 {
     return m_strDefaultCssFilePath;
@@ -720,13 +729,19 @@ bool CWizDocumentWebView::resetDefaultCss()
 
     strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
     strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
-    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
-                   m_app.userSettings().editorBackgroundColor()));
+    QString backgroundColor = m_app.userSettings().editorBackgroundColor();
+    if (backgroundColor.isEmpty())
+    {
+        backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
+    }
+    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
 
     QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserGUID()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
 
-    m_strDefaultCssFilePath = strPath + "default.css";
+    // use to update css in seperate window
+    m_strDefaultCssFilePath = strPath;
+    m_strDefaultCssFilePath.append(m_bInSeperateWindow ? QString("default%1.css").arg(m_nWindowID) : "default.css");
 
     QFile f2(m_strDefaultCssFilePath);
     if (!f2.open(QIODevice::Truncate | QIODevice::WriteOnly)) {

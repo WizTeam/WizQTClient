@@ -14,7 +14,6 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
-//    ui->checkSave->setVisible(false);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
     ui->editUserCipher->setAttribute(Qt::WA_MacShowFocusRect, false);
 

@@ -28,14 +28,9 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //        WIZDOCUMENTDATA doc;
 //        m_webEngine->viewDocument(doc, true);
         m_docView = new CWizDocumentView(app, this);
-//        m_docView->titleBar()->setBackgroundColor(QColor("#F5F5F5"));
         m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
                               "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
-//        m_docView->setStyleSheet("QWidget{background-color:grey;}");
-//        QPalette pal = m_docView->palette();
-//        pal.setColor(QPalette::Window, QColor(Qt::red));
-//        m_docView->setPalette(pal);
-//        m_docView->setBackgroundColor(QColor(Qt::red));
+        m_docView->web()->setInSeperateWindow(true);
         layout->addWidget(m_docView);
         setLayout(layout);
 }

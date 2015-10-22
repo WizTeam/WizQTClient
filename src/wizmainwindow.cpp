@@ -3371,7 +3371,16 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         m_sync->setFullSyncInterval(userSettings().syncInterval());
         break;
     case wizoptionsFont:
+    {
         m_doc->web()->editorResetFont();
+        QMap<QString, CWizSingleDocumentViewer*>& viewerMap = m_singleViewDelegate->getDocumentViewerMap();
+        QList<CWizSingleDocumentViewer*> singleViewrList = viewerMap.values();
+        for (CWizSingleDocumentViewer* viewer : singleViewrList)
+        {
+            viewer->docView()->web()->resetDefaultCss();
+            viewer->docView()->web()->editorResetFont();
+        }
+    }
         break;
     case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);

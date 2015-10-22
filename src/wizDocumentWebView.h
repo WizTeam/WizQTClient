@@ -132,6 +132,8 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
+    void setInSeperateWindow(bool inSeperateWindow);
+
     Q_INVOKABLE QString currentNoteGUID();
     Q_INVOKABLE QString currentNoteHtml();
     Q_INVOKABLE QString currentNoteHead();
@@ -234,8 +236,6 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
 
-    QString m_strDefaultCssFilePath;
-
     QWebFrame* m_noteFrame;
 
     QTimer m_timerAutoSave;
@@ -250,6 +250,13 @@ private:
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;
+
+    // flag : if current webview is in seperate window, editor background-color will
+    //different with webview in mainwindow
+    bool m_bInSeperateWindow;
+    QString m_strDefaultCssFilePath;
+
+    int m_nWindowID;
 
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
     CWizDocumentWebViewSaverThread* m_docSaverThread;

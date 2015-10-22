@@ -180,6 +180,10 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
+    if (strColor.isEmpty())
+    {
+        strColor = "#FFFFFF";
+    }
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
                                                          "{background: %1;} ").arg(strColor));
 //    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
@@ -455,14 +459,14 @@ void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 
 void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
 {
-    updateEditorBackgroundColor("#FFFFFF");
+    updateEditorBackgroundColor("");
 }
 
 void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
 {
+    m_app.userSettings().setEditorBackgroundColor(strColorName);
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
                                                          "{ background-color: %1;} ").arg(strColorName));
-    m_app.userSettings().setEditorBackgroundColor(strColorName);
     Q_EMIT settingsChanged(wizoptionsFont);
 }
 
