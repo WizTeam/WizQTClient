@@ -75,7 +75,7 @@ void CellButton::setCount(int count)
     update();
 }
 
-const int nTextWidth = 20;
+const int nTextWidth = 14;
 void CellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
