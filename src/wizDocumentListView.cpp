@@ -45,6 +45,24 @@ using namespace Core::Internal;
 //#define WIZACTION_LIST_CANCEL_ON_TOP  QObject::tr("Cancel always on top")
 
 
+enum DocSize {
+    _0KB = 0,
+    _5KB = 5 * 1024,
+    _10KB = 10 * 1024,
+    _30KB = 30 * 1024,
+    _60KB = 60 * 1024,
+    _100KB = 100 * 1024,
+    _200KB = 200 * 1024,
+    _300KB = 300 * 1024,
+    _500KB = 500 * 1024,
+    _1MB = 1 * 1024 * 1024,
+    _10MB = 10 * 1024 * 1024,
+    _30MB = 30 * 1024 * 1024,
+    _100MB = 100 * 1024 * 1024,
+    _1GB = 1 * 1024 * 1024 * 1024
+};
+
+
 CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent /*= 0*/)
     : QListWidget(parent)
     , m_app(app)
@@ -52,6 +70,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_tagList(NULL)
     , m_itemSelectionChanged(false)
     , m_accpetAllSearchItems(false)
+    , m_nLeadInfoState(DocumentLeadInfo_None)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -277,6 +296,7 @@ void CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
 
     CWizDocumentListViewDocumentItem* pItem = new CWizDocumentListViewDocumentItem(m_app, data);
     pItem->setSizeHint(QSize(sizeHint().width(), Utils::StyleHelper::listViewItemHeight(m_nViewType)));
+    pItem->setLeadInfoState(m_nLeadInfoState);
     pItem->setSortingType(m_nSortingType);
 
     addItem(pItem);
@@ -406,6 +426,44 @@ void CWizDocumentListView::addSectionItem(const WizDocumentListViewSectionData& 
     m_sectionItems.append(sectionItem);
 }
 
+QString textFromSize(DocSize size)
+{
+    switch (size) {
+    case _0KB:
+        return QString(QObject::tr("Unknown size"));
+    case _5KB:
+        return QString("0KB ~ 5KB");
+    case _10KB:
+        return QString("5KB ~ 10KB");
+    case _30KB:
+        return QString("10KB ~ 30KB");
+    case _60KB:
+        return QString("30KB ~ 60KB");
+    case _100KB:
+        return QString("60KB ~ 100KB");
+    case _200KB:
+        return QString("100KB ~ 200KB");
+    case _300KB:
+        return QString("200KB ~ 300KB");
+    case _500KB:
+        return QString("300KB ~ 500KB");
+    case _1MB:
+        return QString("500KB ~ 1MB");
+    case _10MB:
+        return QString("1MB ~ 10MB");
+    case  _30MB:
+        return QString("10MB ~ 30MB");
+    case  _100MB:
+        return QString("30MB ~ 100MB");
+    case _1GB:
+        return QString(QObject::tr("More than 100MB"));
+    default:
+        Q_ASSERT(0);
+        break;
+    }
+    return QString();
+}
+
 void CWizDocumentListView::updateSectionItems()
 {
     for (CWizDocumentListViewSectionItem* sectionItem : m_sectionItems)
@@ -477,14 +535,14 @@ void CWizDocumentListView::updateSectionItems()
     case SortingBySize:
     case -SortingBySize:
     {
-        QMap<int, int> dateMap;
+        QMap<QPair<int, int>, int> dateMap;
         getDocumentSizeSections(dateMap);
-        QMap<int, int>::iterator it;
+        QMap<QPair<int, int>, int>::iterator it;
         for (it = dateMap.begin(); it != dateMap.end(); it++)
         {
             WizDocumentListViewSectionData secData;
-            secData.nSize = it.key();
-            QString text = QString::number(secData.nSize) + " KB";
+            secData.sizePair = it.key();
+            QString text = textFromSize((DocSize)secData.sizePair.second);
             addSectionItem(secData, text, it.value());
         }
     }
@@ -551,11 +609,12 @@ bool CWizDocumentListView::getDocumentDateSections(QMap<QDate, int>& dateMap)
     return !dateMap.isEmpty();
 }
 
-bool CWizDocumentListView::getDocumentSizeSections(QMap<int, int>& sizeMap)
+bool CWizDocumentListView::getDocumentSizeSections(QMap<QPair<int, int>, int>& sizeMap)
 {
-    const int sizeNum  = 10;
-    int sizes[sizeNum] = {-1, 5, 10, 30, 60, 100, 200, 300, 400, 500};
-    sizeMap.insert(-1, 0);
+    const int SizesCount  = 13;
+    int sizes[SizesCount + 1] = {_0KB, _5KB, _10KB, _30KB, _60KB, _100KB, _200KB, _300KB,
+                         _500KB, _1MB, _10MB, _30MB, _100MB, _1GB};
+    sizeMap.insert(QPair<int, int>(_0KB, _0KB), 0);
     //
     for (int i = 0; i < count(); i++)
     {
@@ -572,22 +631,27 @@ bool CWizDocumentListView::getDocumentSizeSections(QMap<int, int>& sizeMap)
         QFileInfo fi(strFileName);
         if (!fi.exists())
         {
-            sizeMap[-1] ++;
+            sizeMap[QPair<int, int>(_0KB, _0KB)] ++;
         }
         else
         {
-            int m_nSize = fi.size() / 1000;
-            for (int k = 0; k < sizeNum - 1; k++)
+            int m_nSize = fi.size();
+            for (int k = 0; k < SizesCount - 1; k++)
             {
                 if (m_nSize > sizes[k] && m_nSize <= sizes[k + 1])
                 {
-                    if (sizeMap.contains(sizes[k + 1]))
-                        sizeMap[sizes[k + 1]] ++;
+                    if (sizeMap.contains(QPair<int, int>(sizes[k], sizes[k + 1])))
+                        sizeMap[QPair<int, int>(sizes[k], sizes[k + 1])] ++;
                     else
-                        sizeMap.insert(sizes[k + 1], 0);
+                        sizeMap.insert(QPair<int, int>(sizes[k], sizes[k + 1]), 1);
                 }
             }
         }
+    }
+
+    if (sizeMap.value(QPair<int, int>(_0KB, _0KB)) == 0)
+    {
+        sizeMap.remove(QPair<int, int>(_0KB, _0KB));
     }
 
     return !sizeMap.isEmpty();
@@ -980,6 +1044,38 @@ QString note2Mime(const CWizDocumentDataArray& arrayDocument)
     return strMime;
 }
 
+bool mime2Notes(const QString& mime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
+{
+    if (mime.isEmpty())
+        return false;
+
+    QStringList docIDList = mime.split(';', QString::SkipEmptyParts);
+    for (QString docID : docIDList)
+    {
+        QStringList docIDS = docID.split(':');
+        if (docIDS.count() != 2)
+            continue;
+
+        QString kbGUID = docIDS.first();
+        QString guid = docIDS.last();
+        WIZDOCUMENTDATA doc;
+        if (dbMgr.db(kbGUID).DocumentFromGUID(guid, doc))
+        {
+            arrayDocument.push_back(doc);
+        }
+    }
+    return !arrayDocument.empty();
+}
+
+QPixmap createDragImage(const QString& strMime, CWizDatabaseManager& dbMgr, Qt::DropActions supportedActions)
+{
+    CWizDocumentDataArray arrayDocument;
+    if (!mime2Notes(strMime, dbMgr, arrayDocument))
+        return QPixmap();
+
+    return WizGetDocumentDragBadget(arrayDocument.size());
+}
+
 void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
 {
     Q_UNUSED(supportedActions);
@@ -1002,7 +1098,9 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     QMimeData* mimeData = new QMimeData();
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
-    drag->setPixmap(WizGetDocumentDragBadget(items.size()));
+    drag->setPixmap(createDragImage(strMime, m_dbMgr, Qt::MoveAction));
+
+    connect(drag, SIGNAL(actionChanged(Qt::DropAction)), SLOT(updateDragOperationImage(Qt::DropAction)));
 
 //    Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
 //    bool forceCopy = keyMod.testFlag(Qt::AltModifier);
@@ -1112,6 +1210,21 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
     }
 
     return sz;
+}
+
+void CWizDocumentListView::setLeadInfoState(int state)
+{
+    if (m_nLeadInfoState != state)
+    {
+        m_nLeadInfoState = state;
+
+        for (int i = 0; i < count(); i++) {
+            CWizDocumentListViewBaseItem* pItem = dynamic_cast<CWizDocumentListViewBaseItem*>(item(i));
+            pItem->setLeadInfoState(state);
+        }
+
+        setItemsNeedUpdate();
+    }
 }
 
 void CWizDocumentListView::resetItemsSortingType(int type)
@@ -1818,6 +1931,17 @@ void CWizDocumentListView::on_vscrollAnimation_finished()
     //reset
     //m_vscrollDelta = 0;
     //m_vscrollCurrent = 0;
+}
+
+
+
+void CWizDocumentListView::updateDragOperationImage(Qt::DropAction action)
+{
+    qDebug() << "drag drop action changed ; " << action;
+    if (QDrag* drag = dynamic_cast<QDrag*>(sender()))
+    {
+//        drag->mimeData();
+    }
 }
 
 int CWizDocumentListView::numOfEncryptedDocuments(const CWizDocumentDataArray& docArray)

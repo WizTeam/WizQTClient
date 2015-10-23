@@ -129,79 +129,36 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
     case -SortingByTag:
         return false;
     case SortingBySize:
+    {
+        bool result = m_nSize >= secItem->sectionData().sizePair.second;
+        return result;
+    }
     case -SortingBySize:
-        return false;
+    {
+        bool result = m_nSize < secItem->sectionData().sizePair.first;
+        return result;
+    }
     default:
         Q_ASSERT(0);
     }
 
     return false;
 }
-bool CWizDocumentListViewDocumentItem::isSpecialFocus() const
-{
-    return m_specialFocused;
-}
 
-void CWizDocumentListViewDocumentItem::setSpecialFocused(bool bSpecialFocus)
+QString CWizDocumentListViewDocumentItem::documentLocation() const
 {
-    m_specialFocused = bSpecialFocus;
-}
-
-void CWizDocumentListViewDocumentItem::updateDocumentUnreadCount()
-{
-    if (m_data.doc.strKbGUID != CWizDatabaseManager::instance()->db().kbGUID())
+    if ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
+            (m_nLeadInfoState & DocumentLeadInfo_GroupRoot) ||
+            (m_nLeadInfoState & DocumentLeadInfo_SearchResult))
     {
-        m_documentUnread = (m_data.doc.nReadCount == 0);
+        CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+        return db.GetDocumentLocation(m_data.doc);
     }
+        return "";
 }
 
-void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
+void CWizDocumentListViewDocumentItem::updateInfoList()
 {
-    m_data.thumb.strKbGUID = abs.strKbGUID;
-    m_data.thumb.guid= abs.guid;
-    m_data.thumb.text = abs.text;
-    m_data.thumb.image = abs.image;
-
-    Q_EMIT thumbnailReloaded();
-}
-
-const QString& CWizDocumentListViewDocumentItem::tags()
-{
-    if (m_strTags.isEmpty()) {
-        m_strTags = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagDisplayNameText(m_data.doc.strGUID);
-    }
-
-    return m_strTags;
-}
-
-const QString& CWizDocumentListViewDocumentItem::tagTree()
-{
-    if (m_strTags.isEmpty()) {
-        m_strTags = "/" + m_app.databaseManager().db(m_data.doc.strKbGUID).name();
-        m_strTags += m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagTreeDisplayString(m_data.doc.strGUID);
-    }
-
-    return m_strTags;
-}
-
-void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
-{
-    Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
-
-    m_strTags.clear();
-    m_data.thumb = WIZABSTRACT();
-    setSortingType(m_nSortingType); // reset info
-
-    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
-    setText(m_data.doc.strTitle);
-    updateDocumentUnreadCount();
-
-    Q_EMIT thumbnailReloaded();
-}
-
-void CWizDocumentListViewDocumentItem::setSortingType(int type)
-{
-    m_nSortingType = type;
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     m_data.infoList.clear();
 
@@ -298,6 +255,94 @@ void CWizDocumentListViewDocumentItem::setSortingType(int type)
     }
 }
 
+bool CWizDocumentListViewDocumentItem::isSpecialFocus() const
+{
+    return m_specialFocused;
+}
+
+void CWizDocumentListViewDocumentItem::setSpecialFocused(bool bSpecialFocus)
+{
+    m_specialFocused = bSpecialFocus;
+}
+
+void CWizDocumentListViewDocumentItem::updateDocumentUnreadCount()
+{
+    if (m_data.doc.strKbGUID != CWizDatabaseManager::instance()->db().kbGUID())
+    {
+        m_documentUnread = (m_data.doc.nReadCount == 0);
+    }
+}
+
+void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
+{
+    m_data.thumb.strKbGUID = abs.strKbGUID;
+    m_data.thumb.guid= abs.guid;
+    m_data.thumb.text = abs.text;
+    m_data.thumb.image = abs.image;
+
+    Q_EMIT thumbnailReloaded();
+}
+
+const QString& CWizDocumentListViewDocumentItem::tags()
+{
+    if ((qAbs(m_nSortingType) != SortingByTag) && ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
+                                                   (m_nLeadInfoState & DocumentLeadInfo_SearchResult)))
+    {
+        m_strTags.clear();
+        return m_strTags;
+    }
+
+    if (m_strTags.isEmpty()) {
+        m_strTags = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagDisplayNameText(m_data.doc.strGUID);
+    }
+
+    return m_strTags;
+}
+
+const QString& CWizDocumentListViewDocumentItem::tagTree()
+{
+    if (m_strTags.isEmpty()) {
+        m_strTags = "/" + m_app.databaseManager().db(m_data.doc.strKbGUID).name();
+        m_strTags += m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagTreeDisplayString(m_data.doc.strGUID);
+    }
+
+    return m_strTags;
+}
+
+void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
+{
+    Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
+
+    m_strTags.clear();
+    m_data.thumb = WIZABSTRACT();
+    setSortingType(m_nSortingType); // reset info
+
+    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
+    setText(m_data.doc.strTitle);
+    updateDocumentUnreadCount();
+
+    Q_EMIT thumbnailReloaded();
+}
+
+void CWizDocumentListViewDocumentItem::setSortingType(int type)
+{
+    m_nSortingType = type;
+
+    updateInfoList();
+}
+
+void CWizDocumentListViewDocumentItem::setLeadInfoState(int state)
+{
+    CWizDocumentListViewBaseItem::setLeadInfoState(state);
+
+    updateInfoList();
+}
+
+int CWizDocumentListViewDocumentItem::documentSize() const
+{
+    return m_nSize;
+}
+
 bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) const
 {
 //    qDebug() << "compare by doc Item ; " << text() << " with : " << other.text();
@@ -380,9 +425,15 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
     case -SortingByTag:
         return pOther->m_strTags > m_strTags;
     case SortingBySize:
-        return pOther->m_nSize < m_nSize;
+    {
+        bool result = pOther->m_nSize < m_nSize;
+        return result;
+    }
     case -SortingBySize:
-        return pOther->m_nSize > m_nSize;
+    {
+        bool result = pOther->m_nSize > m_nSize;
+        return result;
+    }
     default:
         Q_ASSERT(0);
     }
@@ -493,7 +544,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
     rcd.setTop(rcd.top() + nTextTopMargin);
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              m_data.doc.strLocation, thumb.text, bFocused, bSelected);
+                                              documentLocation(), thumb.text, bFocused, bSelected);
 }
 
 const int nAvatarRightMargin = 8;
@@ -516,7 +567,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
 
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              m_data.doc.strLocation, thumb.text, bFocused, bSelected);
+                                              documentLocation(), thumb.text, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -529,7 +580,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              m_data.doc.strLocation, NULL, bFocused, bSelected);
+                                              documentLocation(), NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -548,7 +599,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              m_data.doc.strLocation, NULL, bFocused, bSelected);
+                                              documentLocation(), NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
@@ -676,8 +727,15 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
         case -SortingByTag:
             return 0;
         case SortingBySize:
+        {
+            bool result = sectionData().sizePair.second > secItem->sectionData().sizePair.second;
+            return result;
+        }
         case -SortingBySize:
-            return 0;
+        {
+            bool result = sectionData().sizePair.first < secItem->sectionData().sizePair.first;
+            return result;
+        }
         default:
             Q_ASSERT(0);
         }
@@ -744,8 +802,15 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
     case -SortingByTag:
         return true;
     case SortingBySize:
+    {
+        bool result = docItem->documentSize() <= sectionData().sizePair.second;
+        return result;
+    }
     case -SortingBySize:
-        return true;
+    {
+        bool result = docItem->documentSize() > sectionData().sizePair.first;
+        return result;
+    }
     default:
         Q_ASSERT(0);
     }
@@ -757,7 +822,8 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
 CWizDocumentListViewBaseItem::CWizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type)
     : QListWidgetItem(0, type)
     , QObject(parent)
-    , m_nSortingType(0)
+    , m_nSortingType(SortingByCreatedTime)
+    , m_nLeadInfoState(0)
 {
 
 }
@@ -765,4 +831,9 @@ CWizDocumentListViewBaseItem::CWizDocumentListViewBaseItem(QObject* parent, WizD
 void CWizDocumentListViewBaseItem::setSortingType(int type)
 {
     m_nSortingType = type;
+}
+
+void CWizDocumentListViewBaseItem::setLeadInfoState(int state)
+{
+    m_nLeadInfoState = state;
 }

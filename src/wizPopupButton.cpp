@@ -176,7 +176,7 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
     menu->addSeparator();
     createAction(tr("Sorting by title"), SortingByTitle, menu, group);
     createAction(tr("Sorting by location"), SortingByLocation, menu, group);
-    createAction(tr("Sorting by tag"), SortingByTag, menu, group);
+//    createAction(tr("Sorting by tag"), SortingByTag, menu, group);
     createAction(tr("Sorting by size"), SortingBySize, menu, group);
 
     menu->addSeparator();

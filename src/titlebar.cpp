@@ -163,9 +163,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_emailBtn);
     layoutInfo2->addWidget(m_shareBtn);
     layoutInfo2->addWidget(m_attachBtn);
-    layoutInfo2->addWidget(m_commentsBtn);
-
-
+    layoutInfo2->addWidget(m_commentsBtn);    
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
     layoutInfo1->setContentsMargins(Utils::StyleHelper::editorBarMargins());

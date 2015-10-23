@@ -35,7 +35,7 @@ struct WizDocumentListViewItemData
 struct WizDocumentListViewSectionData
 {
     QDate date;
-    int nSize;
+    QPair<int, int> sizePair;
     QString strInfo;
 };
 
@@ -47,12 +47,14 @@ public:
     explicit CWizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type);
 
     virtual void setSortingType(int type);
+    virtual void setLeadInfoState(int state);
 
     // drawing
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const {}
 
 protected:
     int m_nSortingType;      // upercase : -  decrease : +
+    int m_nLeadInfoState;
 };
 
 class CWizDocumentListViewDocumentItem;
@@ -91,11 +93,13 @@ public:
     explicit CWizDocumentListViewDocumentItem(CWizExplorerApp& app,
                                       const WizDocumentListViewItemData& data);
 
-    void setSortingType(int type);
+    virtual void setSortingType(int type);
+    virtual void setLeadInfoState(int state);
 
     const WizDocumentListViewItemData& itemData() { return m_data; }
     const WIZDOCUMENTDATA& document() const { return m_data.doc; }
     int itemType() const { return m_data.nType; }
+    int documentSize() const;
     void reload(CWizDatabase& db);
 
     const QImage& avatar(const CWizDatabase& db);
@@ -142,6 +146,10 @@ private:
     //bool adjust(const QListWidgetItem &other) const;
 
     bool compareWithSectionItem(const CWizDocumentListViewSectionItem* secItem) const;
+
+    QString documentLocation() const;
+
+    void updateInfoList();
 
 private:
     CWizExplorerApp& m_app;

@@ -23,6 +23,14 @@ class CWizUserAvatarDownloaderHost;
 #endif
 
 
+#define DocumentLeadInfo_None                      0x0000
+#define DocumentLeadInfo_PersonalRoot         0x0001
+#define DocumentLeadInfo_PersonalFolder       0x0002
+#define DocumentLeadInfo_PersonalTag           0x0004
+#define DocumentLeadInfo_GroupRoot              0x0008
+#define DocumentLeadInfo_GroupFolder            0x0010
+#define DocumentLeadInfo_SearchResult           0x0020
+
 enum DocumentsSortingType {
     SortingByCreatedTime = 1,
     SortingByModifiedTime,
@@ -54,6 +62,8 @@ public:
     int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
     QSize itemSizeFromViewType(CWizDocumentListView::ViewType type);
+
+    void setLeadInfoState(int state);
 
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
@@ -92,6 +102,7 @@ private:
 
     CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
+    int m_nLeadInfoState;
 
     std::shared_ptr<QMenu> m_menuDocument;
     CWizTagListWidget* m_tagList;
@@ -205,6 +216,8 @@ public Q_SLOTS:
     void on_vscrollAnimation_finished();
 //#endif // Q_OS_MAC
 
+    void updateDragOperationImage(Qt::DropAction action);
+
 Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
@@ -231,16 +244,17 @@ private:
                                     bool keepDocTime);
 
     //
-    void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);
+    void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);   
 
     //
     void addSectionItem(const WizDocumentListViewSectionData& secData, const QString& text, int docCount);
     void updateSectionItems();
     bool getDocumentDateSections(QMap<QDate, int>& dateMap);
-    bool getDocumentSizeSections(QMap<int, int>& sizeMap);
+    bool getDocumentSizeSections(QMap<QPair<int, int>, int>& sizeMap);
     bool getDocumentTitleSections(QMap<QString, int>& titleMap);
     bool getDocumentLocationSections(QMap<QString, int>& locationMap);
     bool getDocumentTagSections(QMap<QString, int>& tagMap);
+
 };
 
 
