@@ -434,6 +434,8 @@ public:
 
     bool GetDocumentTitleStartWith(const QString& titleStart, int nMaxCount, CWizStdStringArray& arrayTitle);
 
+    QString GetDocumentLocation(const WIZDOCUMENTDATA& doc);
+
     bool CreateDocumentAndInit(const CString& strHtml, \
                                const CString& strHtmlUrl, \
                                int nFlags, \

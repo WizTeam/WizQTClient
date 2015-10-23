@@ -71,11 +71,9 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     QFont font;
     QFontMetrics fm(font);
     const int nMaxTextWidth = 280;
-    QString strLocation;
+    QString strLocation = db.GetDocumentLocation(data);
     // private document
     if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
-        strLocation = data.strLocation;
-
         QString tags = db.GetDocumentTagsText(data.strGUID);
         tags = fm.elidedText(tags, Qt::ElideMiddle, nMaxTextWidth);
         ui->labelTags->setText(tags);
@@ -83,21 +81,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
         ui->editAuthor->setText(data.strAuthor);
 
     // group document
-    } else {
-        CWizTagDataArray arrayTag;
-        if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
-        } else {
-            if (arrayTag.size() > 1) {
-                TOLOG1("Group document should only have one tag: %1", data.strTitle);
-            }
-
-            QString tagText;
-            if (arrayTag.size()) {
-                tagText = db.getTagTreeText(arrayTag[0].strGUID);
-            }
-            strLocation = "/" + db.name() + tagText + "/";
-        }
-
+    } else {        
         ui->labelTags->clear();
         ui->editAuthor->setText(data.strAuthor);
     }

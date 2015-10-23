@@ -927,9 +927,9 @@ void MainWindow::initMenuBar()
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
     action->setData(SortingByLocation);
     m_sortTypeActions->addAction(action);
-    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
-    action->setData(SortingByTag);
-    m_sortTypeActions->addAction(action);
+//    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
+//    action->setData(SortingByTag);
+//    m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
     action->setData(SortingBySize);
     m_sortTypeActions->addAction(action);
@@ -2105,8 +2105,9 @@ QWidget* MainWindow::createNoteListView()
     //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
 //    m_documents->setStyleSheet("background-color: qlineargradient(x1: 0px, y1: 0px, x2: 0.01, y2: 0, \
 //                               stop: 0 #F5F5F5, stop: 0.5 #FAFAFA stop:1 #FFFFFF)");
-    m_documents->setStyleSheet(QString("background-color: #FFFFFF;background-image:url(%1); background-repeat: repeat-y; "
-                                       "background-position: left;").arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", true)));
+    m_documents->setStyleSheet(QString("background-color: #FFFFFF;background-image:url(%1);"
+                                       "background-position: left; background-repeat: repeat-y;")
+                               .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", true)));
     m_documents->setAutoFillBackground(true);
 
     return m_noteListWidget;
@@ -3111,6 +3112,7 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
 //    }
 
     if (bStart) {
+        m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
     } else {
 //        m_documents->setDocuments(arrayDocument);
@@ -3983,7 +3985,7 @@ bool MainWindow::needShowNewFeatureGuide()
     if (strGuideVserion.isEmpty())
         return true;
 
-    //FIXME:  之前的版本误将版本号写入了新特性的数据中，此处将其忽略 。2015年07月之后可以将其移除
+    //REMOVEME:  之前的版本误将版本号写入了新特性的数据中，此处将其忽略 。2015年07月之后可以将其移除
     if (strGuideVserion.contains("2.1"))
         strGuideVserion = "0";
 
@@ -4009,6 +4011,25 @@ void MainWindow::showDocumentList()
     }
 }
 
+int getDocumentLeadInfoStateByCategoryItemType(int categoryItemType)
+{
+    switch (categoryItemType) {
+    case Category_AllFoldersItem:
+        return DocumentLeadInfo_PersonalRoot;
+    case Category_GroupRootItem:
+        return DocumentLeadInfo_GroupRoot;
+    case Category_FolderItem:
+        return DocumentLeadInfo_PersonalFolder;
+    case Category_GroupItem:
+        return DocumentLeadInfo_GroupFolder;
+    case Category_TagItem:
+        return DocumentLeadInfo_PersonalTag;
+    default:
+        break;
+    }
+    return DocumentLeadInfo_None;
+}
+
 void MainWindow::showDocumentList(CWizCategoryBaseView* category)
 {
     showDocumentList();
@@ -4020,6 +4041,11 @@ void MainWindow::showDocumentList(CWizCategoryBaseView* category)
 
     CWizDocumentDataArray arrayDocument;
     category->getDocuments(arrayDocument);
+    if (category->selectedItems().size() > 0)
+    {
+        int leadInfoState = getDocumentLeadInfoStateByCategoryItemType(category->selectedItems().first()->type());
+        m_documents->setLeadInfoState(leadInfoState);
+    }
     m_documents->setDocuments(arrayDocument);
 
     if (arrayDocument.empty())
@@ -4063,6 +4089,8 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
             {
                 CWizDocumentDataArray arrayDocument;
                 baseItem->getDocuments(db, arrayDocument);
+                int infoState = getDocumentLeadInfoStateByCategoryItemType(baseItem->type());
+                m_documents->setLeadInfoState(infoState);
                 m_documents->setDocuments(arrayDocument);
                 m_documents->setAcceptAllSearchItems(true);
                 m_documents->addAndSelectDocument(doc);
@@ -4076,6 +4104,7 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         CWizDocumentDataArray array;
         if (db.GetDocumentsByLocation(pShortcut->location(), array))
         {
+            m_documents->setLeadInfoState(DocumentLeadInfo_PersonalFolder);
             m_documents->setDocuments(array);
         }
     }
@@ -4088,6 +4117,10 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         db.TagFromGUID(pShortcut->guid(), tag);
         if (db.GetDocumentsByTag(tag, array))
         {
+            int leadState = pShortcut->shortcutType() == CWizCategoryViewShortcutItem::GroupTag?
+                        DocumentLeadInfo_GroupFolder
+                      : DocumentLeadInfo_PersonalTag;
+            m_documents->setLeadInfoState(leadState);
             m_documents->setDocuments(array);
         }
     }

@@ -1047,6 +1047,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
     QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
     QRect rcLead = rcd;   //排序类型或标签等
+    int nLeadHeight;
     if (!lead.isEmpty()) {
         for (int i = 0; i < lead.count(); i++) {
             QString strInfo(lead.at(i));
@@ -1063,6 +1064,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
 
             QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
             rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+            nLeadHeight = rcLead.height();
             rcLead = rcd.adjusted(rcLead.width() + rcLead.x() - rcd.x(), 0, 0, 0);
         }
     }
@@ -1078,9 +1080,10 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         QString strInfo(location);
         rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorLocation,
                                               fontThumb, true, Qt::ElideMiddle);
+        nLeadHeight = rcLead.height();
     }
 
-    QRect rcLine1(rcd.adjusted(0, rcLead.height() + 8, 0, 0));
+    QRect rcLine1(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
     if (nBadgeType == DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
         if (bSelected && bFocused) {

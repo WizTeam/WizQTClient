@@ -3432,6 +3432,32 @@ bool CWizDatabase::GetDocumentTitleStartWith(const QString& titleStart, int nMax
     return SQLToStringArray(sql, 0, arrayTitle);
 }
 
+QString CWizDatabase::GetDocumentLocation(const WIZDOCUMENTDATA& doc)
+{
+    WIZDOCUMENTDATA docExists;
+    if (!DocumentFromGUID(doc.strGUID, docExists))
+        return QString();
+
+    if (!IsGroup())
+        return docExists.strLocation;
+
+    CWizTagDataArray arrayTag;
+    if (GetDocumentTags(docExists.strGUID, arrayTag))
+    {
+        if (arrayTag.size() > 1) {
+            TOLOG1("Group document should only have one tag: %1", docExists.strTitle);
+        }
+
+        QString tagText;
+        if (arrayTag.size()) {
+            tagText = getTagTreeText(arrayTag[0].strGUID);
+        }
+        return "/" + name() + tagText + "/";
+    }
+
+    return QString();
+}
+
 bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                                          const CString& strHtmlUrl, \
                                          int nFlags, \
