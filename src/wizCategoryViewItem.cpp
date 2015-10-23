@@ -772,12 +772,7 @@ bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTD
         return false;
     }
 
-    COleDateTime t = data.tCreated;
-    if (t.addDays(60) >= WizGetCurrentTime() && data.strKbGUID == kbGUID()) {
-        return true;
-    }
-
-    return false;
+    return !db.IsGroup();
 }
 
 bool CWizCategoryViewAllFoldersItem::acceptDrop(const CWizCategoryViewItemBase* pItem) const
