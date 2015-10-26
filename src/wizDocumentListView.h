@@ -253,7 +253,7 @@ private:
     bool getDocumentSizeSections(QMap<QPair<int, int>, int>& sizeMap);
     bool getDocumentTitleSections(QMap<QString, int>& titleMap);
     bool getDocumentLocationSections(QMap<QString, int>& locationMap);
-    bool getDocumentTagSections(QMap<QString, int>& tagMap);
+//    bool getDocumentTagSections(QMap<QString, int>& tagMap);
 
 };
 

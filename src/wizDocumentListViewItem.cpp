@@ -39,6 +39,8 @@ CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerA
 
     updateDocumentUnreadCount();
 
+    updateDocumentLocationData();
+
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
 
@@ -117,14 +119,27 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
         if (document().strTitle.toUpper().trimmed().startsWith(secItem->sectionData().strInfo))
             return false;
         return document().strTitle.localeAwareCompare(secItem->sectionData().strInfo) < 0;
+//    case SortingByLocation:
+////        if (m_data.location.startsWith(secItem->sectionData().strInfo))
+////            return false;
+//    {
+//        bool result = m_data.location.localeAwareCompare(secItem->sectionData().strInfo) > 0;
+//        qDebug() << "compare doc and sec 1, loc : " << m_data.location << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
+//        return result;
+//    }
+        //文件夹排序时子文件夹排在父文件夹的后面
     case SortingByLocation:
-        if (document().strLocation.startsWith(secItem->sectionData().strInfo))
-            return false;
-        return document().strLocation.localeAwareCompare(secItem->sectionData().strInfo) > 0;
     case -SortingByLocation:
-        if (document().strLocation.startsWith(secItem->sectionData().strInfo))
+    {
+        if (m_data.location.startsWith(secItem->sectionData().strInfo))
+        {
+//            qDebug() << "compare doc and sec 2.1, loc : " << m_data.location << "  other loc : " << secItem->sectionData().strInfo << "result : " << false;
             return false;
-        return document().strLocation.localeAwareCompare(secItem->sectionData().strInfo) < 0;
+        }
+        bool result = m_data.location.localeAwareCompare(secItem->sectionData().strInfo) < 0;
+//        qDebug() << "compare doc and sec 2.2, loc : " << m_data.location << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
+        return result;
+    }
     case SortingByTag:
     case -SortingByTag:
         return false;
@@ -147,14 +162,24 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
 
 QString CWizDocumentListViewDocumentItem::documentLocation() const
 {
+    return m_data.location;
+}
+
+void CWizDocumentListViewDocumentItem::updateDocumentLocationData()
+{
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    m_data.location = db.GetDocumentLocation(m_data.doc);
+}
+
+bool CWizDocumentListViewDocumentItem::needDrawDocumentLocation() const
+{
     if ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
             (m_nLeadInfoState & DocumentLeadInfo_GroupRoot) ||
             (m_nLeadInfoState & DocumentLeadInfo_SearchResult))
     {
-        CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-        return db.GetDocumentLocation(m_data.doc);
+        return true;
     }
-        return "";
+    return false;
 }
 
 void CWizDocumentListViewDocumentItem::updateInfoList()
@@ -190,7 +215,11 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByLocation:
         case -SortingByLocation:
-            m_data.infoList << strAuthor << tagTree();
+        {
+            CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+            m_data.location = db.GetDocumentLocation(m_data.doc);
+            m_data.infoList << strAuthor << m_data.location;
+        }
             break;
         case SortingBySize:
         case -SortingBySize:
@@ -233,7 +262,8 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByLocation:
         case -SortingByLocation:
-            m_data.infoList << ::WizLocation2Display(m_data.doc.strLocation);
+            m_data.location = ::WizLocation2Display(m_data.doc.strLocation);
+            m_data.infoList << m_data.location;
             break;
         case SortingBySize:
         case -SortingBySize:
@@ -408,17 +438,25 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
     case -SortingByTitle:
         return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
+//    case SortingByLocation:
+//    {
+////        QString otherInfo = pOther->m_data.infoList.join(" ");
+////        QString info = pOther->m_data.infoList.join(" ");
+////        return otherInfo.localeAwareCompare(info) < 0;
+//        bool result = pOther->documentLocation().localeAwareCompare(m_data.location) < 0;
+//        qDebug() << "compare doc and doc 1, loc : " << m_data.location << "  other loc : " << pOther->documentLocation() << "result : " << result;
+//        return result;
+//    }
+        //NOTE: 笔记安装路径排序时，子目录的笔记永远排在父目录的后面
     case SortingByLocation:
-    {
-        QString otherInfo = pOther->m_data.infoList.join(" ");
-        QString info = pOther->m_data.infoList.join(" ");
-        return otherInfo.localeAwareCompare(info) < 0;
-    }
     case -SortingByLocation:
     {
-        QString otherInfo = pOther->m_data.infoList.join(" ");
-        QString info = pOther->m_data.infoList.join(" ");
-        return otherInfo.localeAwareCompare(info) > 0;
+//        QString otherInfo = pOther->m_data.infoList.join(" ");
+//        QString info = pOther->m_data.infoList.join(" ");
+//        return otherInfo.localeAwareCompare(info) > 0;
+        bool result = pOther->documentLocation().localeAwareCompare(m_data.location) > 0;
+//        qDebug() << "compare doc and doc 2, loc : " << m_data.location << "  other loc : " << pOther->documentLocation() << "result : " << result;
+        return result;
     }
     case SortingByTag:
         return pOther->m_strTags < m_strTags;
@@ -544,7 +582,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
     rcd.setTop(rcd.top() + nTextTopMargin);
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              documentLocation(), thumb.text, bFocused, bSelected);
+                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
 }
 
 const int nAvatarRightMargin = 8;
@@ -567,7 +605,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
 
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              documentLocation(), thumb.text, bFocused, bSelected);
+                                              needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -580,7 +618,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              documentLocation(), NULL, bFocused, bSelected);
+                                              needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
@@ -599,7 +637,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
 
     int nType = badgeType();
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                              documentLocation(), NULL, bFocused, bSelected);
+                                              needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
 void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
@@ -717,12 +755,33 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
         case -SortingByAccessedTime:
             return m_data.date < secItem->sectionData().date;
         case SortingByTitle:
-        case SortingByLocation:
-            return (m_data.strInfo.localeAwareCompare(secItem->sectionData().strInfo) > 0);
+//        case SortingByLocation:
+        {
+            if (m_data.strInfo.startsWith(secItem->sectionData().strInfo) &&
+                    m_data.strInfo.length() > secItem->sectionData().strInfo.length())
+            {
+//                qDebug() << "compare sec and sec 1.1 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << false;
+                return false;
+            }
+            bool result = (m_data.strInfo.localeAwareCompare(secItem->sectionData().strInfo) > 0);
+//            qDebug() << "compare sec and sec 1.1 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
+            return result;
+        }
         case -SortingByTitle:
         case -SortingByLocation:
-            return (m_data.strInfo.localeAwareCompare(secItem->sectionData().strInfo) < 0);
+        case SortingByLocation:     //NOTE: 按文件夹排序目前只提供一种排序方向，降序排列需要重新整理算法
+        {
+//            if (m_data.strInfo.startsWith(secItem->sectionData().strInfo) &&
+//                    m_data.strInfo.length() > secItem->sectionData().strInfo.length())
+//            {
+//                qDebug() << "compare sec and sec 2 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << 1;
+//                return true;
+//            }
 
+            bool result = (m_data.strInfo.localeAwareCompare(secItem->sectionData().strInfo) < 0);
+//            qDebug() << "compare sec and sec 2 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
+            return result;
+        }
         case SortingByTag:
         case -SortingByTag:
             return 0;
@@ -790,14 +849,31 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
         if (docItem->document().strTitle.toUpper().trimmed().startsWith(sectionData().strInfo))
             return true;
         return docItem->document().strTitle.localeAwareCompare(sectionData().strInfo) >= 0;
+//    case SortingByLocation:
+//    {
+//        if (docItem->documentLocation().startsWith(sectionData().strInfo) &&
+//                docItem->documentLocation().length() > sectionData().strInfo.length())
+//        {
+//            qDebug() << "compare sec and doc 1.1 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << true;
+//            return false;
+//        }
+//        bool result = docItem->documentLocation().localeAwareCompare(sectionData().strInfo) <= 0;
+//        qDebug() << "compare sec and doc 1.2 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << result;
+//        return result;
+//    }
+        //按照路径排序的时候子文件夹排在父文件夹的后面
     case SortingByLocation:
-        if (docItem->document().strLocation.startsWith(sectionData().strInfo))
-            return true;
-        return docItem->document().strLocation.localeAwareCompare(sectionData().strInfo) <= 0;
     case -SortingByLocation:
-        if (docItem->document().strLocation.startsWith(sectionData().strInfo))
-            return true;
-        return docItem->document().strLocation.localeAwareCompare(sectionData().strInfo) >= 0;
+    {
+//        if (docItem->documentLocation().startsWith(sectionData().strInfo))
+//        {
+//            qDebug() << "compare sec and doc 2 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << -1;
+//            return false;
+//        }
+        bool result = docItem->documentLocation().localeAwareCompare(sectionData().strInfo) >= 0;
+//        qDebug() << "compare sec and doc 2 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << result;
+        return result;
+    }
     case SortingByTag:
     case -SortingByTag:
         return true;

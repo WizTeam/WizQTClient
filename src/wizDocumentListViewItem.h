@@ -24,6 +24,7 @@ struct WizDocumentListViewItemData
     WIZDOCUMENTDATA doc;
     WIZABSTRACT thumb;
 
+    QString location;    // use to sort by location
     QStringList infoList; // for second line info drawing (auto change when sorting type change)
 
     // only used for group or message document
@@ -100,6 +101,7 @@ public:
     const WIZDOCUMENTDATA& document() const { return m_data.doc; }
     int itemType() const { return m_data.nType; }
     int documentSize() const;
+    QString documentLocation() const;
     void reload(CWizDatabase& db);
 
     const QImage& avatar(const CWizDatabase& db);
@@ -147,7 +149,9 @@ private:
 
     bool compareWithSectionItem(const CWizDocumentListViewSectionItem* secItem) const;
 
-    QString documentLocation() const;
+    void updateDocumentLocationData();
+
+    bool needDrawDocumentLocation() const;
 
     void updateInfoList();
 

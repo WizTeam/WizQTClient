@@ -691,11 +691,17 @@ bool CWizDocumentListView::getDocumentLocationSections(QMap<QString, int>& locat
         if (!docItem || docItem->document().nFlags & wizDocumentAlwaysOnTop)
             continue;
 
-        QString firstChar = docItem->document().strLocation;
+        CWizDatabase& db = m_dbMgr.db(docItem->document().strKbGUID);
+        QString firstChar = db.GetDocumentLocation(docItem->document());// docItem->document().strLocation;
+        if (!db.IsGroup())
+        {
+            firstChar = WizLocation2Display(firstChar);
+        }
+        //
         if (locationMap.contains(firstChar))
             locationMap[firstChar] ++;
         else
-            locationMap.insert(firstChar, 0);
+            locationMap.insert(firstChar, 1);
     }
     return !locationMap.isEmpty();
 }
