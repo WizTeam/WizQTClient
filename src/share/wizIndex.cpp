@@ -280,7 +280,7 @@ bool CWizIndex::modifyMessageLocalChanged(const WIZMESSAGEDATA& msg)
 int CWizIndex::getUnreadMessageCount()
 {
     CString strSQL;
-    strSQL.Format("select count(*) from WIZ_MESSAGE where READ_STATUS=0");
+    strSQL.Format("select count(*) from WIZ_MESSAGE where READ_STATUS=0 and DELETE_STATUS=0");
 
     CppSQLite3Query query = m_db.execQuery(strSQL);
 
