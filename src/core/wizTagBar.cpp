@@ -21,6 +21,7 @@
 
 const int TAGITEM_MARGIN = 16;
 const int TAGITEM_HEIGHT  = 16;
+const int TAGITEM_DELETEICONSIZE = 10;
 
 using namespace Core::Internal;
 
@@ -445,14 +446,14 @@ void CWizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
 
 void CWizTagBar::on_lineEditTextChanged(const QString& text)
 {
-    if (text.isEmpty())
-    {
-        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#6c6c6c;}");
-    }
-    else
-    {
-        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#000000;}");
-    }
+//    if (text.isEmpty())
+//    {
+//        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#6c6c6c;}");
+//    }
+//    else
+//    {
+//        m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#000000;}");
+//    }
 }
 
 void CWizTagBar::resizeEvent(QResizeEvent* event)
@@ -498,8 +499,7 @@ void CWizTagBar::reset()
 void CWizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
-    m_lineEdit->setStyleSheet("QLineEdit {border: 0px;"
-                              "background: #FFFFFF; color:#B6B6B6;}");
+    m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#535353; background-color:transparent;}");
     m_lineEdit->setFixedWidth(150);
     m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
@@ -507,7 +507,6 @@ void CWizTagBar::applyStyleSheet()
     QIcon icon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "action_addEditorBarItem");
     m_btnAdd->setIcon(icon);
     m_btnAdd->setStyleSheet("QToolButton { border: 0px; margin-top:2px;}");
-
 
     icon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "action_moreTags");
     m_btnMore->setIcon(icon);
@@ -597,7 +596,7 @@ void CTagItem::paintEvent(QPaintEvent* event)
     QRect rcBorder(0, (height() - TAGITEM_HEIGHT) / 2, width(), TAGITEM_HEIGHT);
 
     pt.setPen(Qt::NoPen);
-    pt.setBrush(QBrush(QColor(m_selected ? "#c4d7e7" : "#B6B6B6")));
+    pt.setBrush(QBrush(QColor(m_selected ? "#535453" : "#B6B6B6")));
     pt.setRenderHint(QPainter::Antialiasing, true);
     pt.drawRoundedRect(rcBorder, 8, 8);
     pt.setPen(Qt::white);
@@ -607,14 +606,14 @@ void CTagItem::paintEvent(QPaintEvent* event)
     {
         if (m_selected && !m_closeButtonPressed)
         {
-            QRect rcDel(rcBorder.right() - TAGITEM_MARGIN, (height() - TAGITEM_HEIGHT) / 2, TAGITEM_MARGIN,
-                        TAGITEM_HEIGHT);
+            QRect rcDel(rcBorder.right() - TAGITEM_DELETEICONSIZE - 2, (height() - TAGITEM_DELETEICONSIZE) / 2, TAGITEM_DELETEICONSIZE,
+                        TAGITEM_DELETEICONSIZE);
             pt.drawPixmap(rcDel, m_pixDeleteNormal.operator *());
         }
         else if (m_closeButtonPressed)
         {
-            QRect rcDel(rcBorder.right() - TAGITEM_MARGIN, (height() - TAGITEM_HEIGHT) / 2, TAGITEM_MARGIN,
-                        TAGITEM_HEIGHT);
+            QRect rcDel(rcBorder.right() - TAGITEM_DELETEICONSIZE - 2, (height() - TAGITEM_DELETEICONSIZE) / 2, TAGITEM_DELETEICONSIZE,
+                        TAGITEM_DELETEICONSIZE);
             pt.drawPixmap(rcDel, m_pixDeletePressed.operator *());
         }
     }
@@ -751,6 +750,7 @@ void CTagLineEdit::resetCompleter(const QStringList& tagNames)
     m_completer->popup()->setItemDelegate(mCompleterItemDelegate); //Must be set after every time the model is set
     m_completer->popup()->setStyleSheet("QAbstractItemView::item:selected{background:#448aff;}"
                                         "QAbstractItemView::item:hover{background:#448aff;}");
+    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
     setCompleter(m_completer);
 }
 

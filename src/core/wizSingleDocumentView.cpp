@@ -1,5 +1,6 @@
 #include "wizSingleDocumentView.h"
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QAction>
 #include <QDebug>
 #include "wizDocumentView.h"
@@ -17,9 +18,12 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 {
         setAttribute(Qt::WA_DeleteOnClose);
         setContentsMargins(0, 0, 0, 0);
-        setPalette(QPalette(QColor("#F5F5F5")));
-        QVBoxLayout* layout = new QVBoxLayout(this);
+        QPalette pal = palette();
+        pal.setColor(QPalette::Window, QColor("#DDDDDD"));
+        setPalette(pal);
+        QHBoxLayout* layout = new QHBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
+        setLayout(layout);
 //        m_webEngine = new CWizDocumentWebEngine(app, this);
 //        layout->addWidget(m_webEngine);
 //        m_edit = new QLineEdit(this);
@@ -27,12 +31,33 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
 //        WIZDOCUMENTDATA doc;
 //        m_webEngine->viewDocument(doc, true);
-        m_docView = new CWizDocumentView(app, this);
+
+        QWidget* containerWgt = new QWidget(this);
+        containerWgt->setStyleSheet(".QWidget{background-color:#F5F5F5;}");
+//        pal = containerWgt->palette();
+//        pal.setColor(QPalette::Window, QColor("#DDDDDD"));
+//        containerWgt->setPalette(pal);
+        containerWgt->setMaximumWidth(1054);
+
+        layout->addStretch(0);
+        layout->addWidget(containerWgt);
+        layout->addStretch(0);
+
+        QHBoxLayout* containerLayout = new QHBoxLayout(containerWgt);
+        containerLayout->setContentsMargins(0, 0, 0, 0);
+        containerWgt->setLayout(containerLayout);
+
+        m_docView = new CWizDocumentView(app, containerWgt);
         m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
                               "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
         m_docView->web()->setInSeperateWindow(true);
-        layout->addWidget(m_docView);
-        setLayout(layout);
+        m_docView->setMaximumWidth(1054);
+        m_docView->setSizeHint(QSize(1054, 1));
+        m_docView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+        containerLayout->addStretch(0);
+        containerLayout->addWidget(m_docView);
+        containerLayout->addStretch(0);
 }
 
 CWizDocumentView*CWizSingleDocumentViewer::docView()

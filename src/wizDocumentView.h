@@ -48,7 +48,8 @@ class CWizDocumentView : public INoteView
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
     ~CWizDocumentView();
-    virtual QSize sizeHint() const { return QSize(200, 1); }
+    virtual QSize sizeHint() const;
+    void setSizeHint(QSize size);
 
     QWidget* client() const;
 #ifdef USEWEBENGINE
@@ -102,6 +103,7 @@ private:
     bool m_noteLoaded;
     //
     int m_editStatus;  // document edit or version status
+    QSize m_sizeHint;
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }

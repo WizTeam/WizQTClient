@@ -67,6 +67,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
     //, m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
     , m_editStatus(0)
+    , m_sizeHint(QSize(200, 1))
 {
     m_title->setEditor(m_web);
 
@@ -216,6 +217,16 @@ CWizDocumentView::~CWizDocumentView()
 {
     if (m_editStatusChecker)
         delete m_editStatusChecker;
+}
+
+QSize CWizDocumentView::sizeHint() const
+{
+    return m_sizeHint;
+}
+
+void CWizDocumentView::setSizeHint(QSize size)
+{
+    m_sizeHint = size;
 }
 
 void CWizDocumentView::waitForDone()
