@@ -510,7 +510,6 @@ protected:
         bool bDrawRight = (m_position == Right) || (m_position == NoPosition);
         drawButtonBackground(&p, opt.rect, bDrawLeft, bDrawRight);
 
-
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         if (opt.arrowType == Qt::RightArrow)
@@ -964,7 +963,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
-//    m_btnTable->setHorizontalPadding(6);
+    m_btnTable->setHorizontalPadding(8);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
     m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
     m_btnTable->setToolTip(tr("InsertTable"));
@@ -973,7 +972,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
-//    m_btnHorizontal->setHorizontalPadding(8);
+    m_btnHorizontal->setHorizontalPadding(8);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
     m_btnHorizontal->setToolTip(tr("InsertHorizontal"));
@@ -1015,7 +1014,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
 
     m_btnMobileImage = new CWizToolButton(this);
-//    m_btnMobileImage->setHorizontalPadding(6);
+    m_btnMobileImage->setHorizontalPadding(6);
     m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage"));
     m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
     m_btnMobileImage->setToolTip(tr("Receive mobile image"));
@@ -1043,7 +1042,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnViewSource = new CWizToolButton(this);
     m_btnViewSource->setCheckable(true);
-    m_btnViewSource->setHorizontalPadding(6);
+    m_btnViewSource->setHorizontalPadding(7);
     m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
     m_btnViewSource->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatViewSource")).size());
     m_btnViewSource->setToolTip(tr("View source"));
@@ -1062,7 +1061,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_firstLineButtonContainer = new QWidget(this);
 
     QHBoxLayout* layout = new QHBoxLayout();
-    layout->setContentsMargins(0, 1, 0, 1);
+    layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     layout->setAlignment(Qt::AlignVCenter);
     m_firstLineButtonContainer->setLayout(layout);
@@ -1074,21 +1073,26 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     containerLayout->addWidget(m_comboFontFamily);
     containerLayout->addSpacing(12);
     containerLayout->addWidget(m_comboFontSize);
-    containerLayout->addSpacing(12);
-    containerLayout->addWidget(m_btnBold);
-    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
-    containerLayout->addWidget(m_btnItalic);
-    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
-    containerLayout->addWidget(m_btnUnderLine);
-    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
-    containerLayout->addWidget(m_btnStrikeThrough);
-    containerLayout->addSpacing(12);
-    containerLayout->addWidget(m_btnForeColor);
-    containerLayout->addWidget(new CWizEditorButtonSpliter(this));
-    containerLayout->addWidget(m_btnBackColor);
-    containerLayout->addSpacing(12);
+    containerLayout->addSpacing(12);    
 
     layout->addWidget(buttonContainer0);
+
+    QWidget*  buttonContainer1 = createMoveAbleWidget(this);
+    QHBoxLayout* containerLayout1 = qobject_cast<QHBoxLayout*>(buttonContainer1->layout());
+    containerLayout1->addWidget(m_btnBold);
+    containerLayout1->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout1->addWidget(m_btnItalic);
+    containerLayout1->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout1->addWidget(m_btnUnderLine);
+    containerLayout1->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout1->addWidget(m_btnStrikeThrough);
+    containerLayout1->addSpacing(12);
+    containerLayout1->addWidget(m_btnForeColor);
+    containerLayout1->addWidget(new CWizEditorButtonSpliter(this));
+    containerLayout1->addWidget(m_btnBackColor);
+    containerLayout1->addSpacing(12);
+
+    layout->addWidget(buttonContainer1);
 
 
     QWidget*  moveableButtonContainer1 = createMoveAbleWidget(this);
@@ -1112,6 +1116,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     qobject_cast<QHBoxLayout*>(firstLineWidget->layout())->addStretch();
 
     m_buttonContainersInFirstLine.append(buttonContainer0);
+    m_buttonContainersInFirstLine.append(buttonContainer1);
     m_buttonContainersInFirstLine.append(moveableButtonContainer1);
     m_buttonContainersInFirstLine.append(moveableButtonContainer2);
 
@@ -1141,7 +1146,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     moveableLayout4->addWidget(m_btnFormatMatch);
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
-    moveableLayout4->addSpacing(13);
+    moveableLayout4->addSpacing(12);
 
     hLayout->addWidget(moveableButtonContainer4);
 
@@ -2183,11 +2188,11 @@ void EditorToolBar::adjustButtonPosition()
     if (parentWidgetWidth < RecommendedWidthForTwoLine)
     {
         //  move moveable buttons to second line
-        if (m_buttonContainersInFirstLine.isEmpty())
+        if (m_buttonContainersInFirstLine.size() <= 2)
             return;
 
         // except first button container
-        for (int i = m_buttonContainersInFirstLine.count() - 1; i > 0; i--)
+        for (int i = m_buttonContainersInFirstLine.count() - 1; i > 1; i--)
         {
             QWidget* widget = m_buttonContainersInFirstLine.at(i);
             moveWidgetFromFristLineToSecondLine(widget);

@@ -314,8 +314,6 @@ int mainCore(int argc, char *argv[])
     }
 
     //
-    a.setStyleSheet(Utils::StyleHelper::wizCommonStyleSheet());
-
     QString strUserId = WizGetLocalUserId(localUsers, strUserGuid);
     // manually login
     if (bFallback)

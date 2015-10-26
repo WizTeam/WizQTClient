@@ -598,13 +598,11 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     QString strBtnDown = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_down");
     QString strBtnDisable = ::WizGetSkinResourceFileName(strThemeName, "loginOKButton_normal");
     //
-    m_buttonLogin->setStyleSheet("QPushButton, QPushButton:default{border-width: 0px;background-color:#4AAEF0;}");
     m_buttonLogin->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                               QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonLogin->setText(tr("Login"));
     m_buttonLogin->setEnabled(false);
 
-    m_buttonSignUp->setStyleSheet("QPushButton, QPushButton:default{border-width: 0px;background-color:#4AAEF0; color:#FFFFFF;}");
     m_buttonSignUp->setButtonStyle(strBtnNormal, strBtnHover, strBtnDown, strBtnDisable, QColor("#ffffff"),
                                    QColor("#ffffff"), QColor("b1b1b1"));
     m_buttonSignUp->setText(tr("Create Account"));
