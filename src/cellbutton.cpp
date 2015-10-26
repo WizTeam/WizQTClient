@@ -10,6 +10,7 @@
 
 #include <extensionsystem/pluginmanager.h>
 
+#include "utils/stylehelper.h"
 #include "share/wizmisc.h"
 
 using namespace Core::Internal;
@@ -19,6 +20,7 @@ CellButton::CellButton(ButtonType type, QWidget *parent)
     , m_state(0)
     , m_count(0)
     , m_buttonType(type)
+    , m_iconSize(14, 14)
 {    
 }
 
@@ -91,7 +93,7 @@ void CellButton::paintEvent(QPaintEvent *event)
     if (opt.state & QStyle::State_On)
         state = QIcon::On;    
 
-    QSize size = iconSize();
+    QSize size = m_iconSize;// opt.icon.actualSize(iconSize());
     int nLeft = (opt.rect.width() - size.width()) / 2;
     if (WithCountInfo == m_buttonType)
     {

@@ -373,13 +373,13 @@ void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, 
 {
     static QPixmap pixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground", true));
 
-    static QPixmap pixBackgroundMid = pixBackground.copy(6, 0, 1, pixBackground.height());
+    static QPixmap pixBackgroundMid = pixBackground.copy(6, 0, 2, pixBackground.height());
     QRect rcLeft(rect.x(), rect.y(), 5, rect.size().height());
     static QPixmap pixBackgroundLeft = pixBackground.copy(0, 0, 6, pixBackground.height());
     painter->drawPixmap(rcLeft, bDrawLeft ? pixBackgroundLeft : pixBackgroundMid);
-    static QPixmap pixBackgroundRight = pixBackground.copy(pixBackground.width() - 3, 0, 3, pixBackground.height());
+    static QPixmap pixBackgroundRight = pixBackground.copy(pixBackground.width() - 4, 0, 4, pixBackground.height());
     painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - 6, rect.size().height(), pixBackgroundMid);
-    QRect rcRight(rect.size().width() - 3, rect.y(), pixBackgroundRight.width(), rect.size().height());
+    QRect rcRight(rect.size().width() - 4, rect.y(), pixBackgroundRight.width(), rect.size().height());
     painter->drawPixmap(rcRight, bDrawRight ? pixBackgroundRight : pixBackgroundMid);
 }
 

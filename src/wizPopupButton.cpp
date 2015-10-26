@@ -10,6 +10,7 @@
 CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
     , m_app(app)
+    , m_iconSize(23, 14)
 {
     setPopupMode(QToolButton::InstantPopup);
 
@@ -37,7 +38,8 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     }    
 
     if (!opt.icon.isNull()) {
-        QRect rectIcon = opt.rect;
+        QRect rectIcon(opt.rect.x() + (opt.rect.width() - m_iconSize.width()) / 2,
+                       opt.rect.y() + (opt.rect.height() - m_iconSize.height()) / 2, m_iconSize.width(), m_iconSize.height());
 
         if (opt.state & QStyle::State_Sunken) {
             opt.icon.paint(&p, rectIcon, Qt::AlignCenter, QIcon::Active);

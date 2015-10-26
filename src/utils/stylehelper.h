@@ -54,6 +54,7 @@ public:
 
     static void initPainterByDevice(QPainter* p);
     static QPixmap pixmapFromDevice(const QSize& sz);
+    static QSize applyScreenScaleFactor(const QSize& sz);
     static int lineSpacing();
     static int leading();
     static int margin();

@@ -18,6 +18,7 @@ public:
 protected:
     CWizExplorerApp& m_app;
     QIcon m_iconArraw;
+    QSize m_iconSize;
 
     void paintEvent(QPaintEvent* event);
 

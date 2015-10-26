@@ -47,6 +47,18 @@ QPixmap StyleHelper::pixmapFromDevice(const QSize& sz)
     return QPixmap(sz2);
 }
 
+QSize StyleHelper::applyScreenScaleFactor(const QSize& sz)
+{
+#ifdef Q_OS_MAC
+    float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
+    QSize sz2 = sz * factor;
+#else
+    QSize sz2 = sz;
+#endif
+
+    return sz2;
+}
+
 QString StyleHelper::themeName()
 {
     QSettings* st = ExtensionSystem::PluginManager::settings();
@@ -809,8 +821,15 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int t
 QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
 {
     QIcon attachIcon(listViewBadge(nType));
-    QSize iconSize = rc.size();
+    QList<QSize> sizes = attachIcon.availableSizes();
+    QSize iconSize = sizes.first();
+    if (WizIsHighPixel() && sizes.count() >=2)
+    {
+        iconSize = QSize(sizes.last().width() / 2, sizes.last().height() / 2);
+    }
     int nLeftMargin = 2;
+//    QRect rcb(rc.x() + (rc.width() - iconSize.width()) / 2, rc.y() + (rc.height() - iconSize.height()) / 2,
+//              iconSize.width(), iconSize.height());//
     QRect rcb = rc.adjusted(nLeftMargin, margin(), 0, 0);
     rcb.setSize(iconSize);
     if (bSelect && bFocus) {

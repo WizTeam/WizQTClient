@@ -42,6 +42,7 @@ private:
     ButtonType m_buttonType;
     int m_state;
     int m_count;
+    QSize m_iconSize;
     QIcon m_iconNomal;
     QIcon m_iconChecked;
     QIcon m_iconBadge;
