@@ -305,7 +305,7 @@ public:
 #endif
         [toolbarItem setView: nsview];
         [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(300,NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(SEARCHWIDGETWIDTH - 10, NSHeight([nsview frame]))];
 
         return toolbarItem;
     }

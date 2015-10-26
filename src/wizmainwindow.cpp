@@ -1856,6 +1856,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addSearch(tr("Search"), "");
 //    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
 
     CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), 0, 11, m_toolBar);
     connect(texturedItem, SIGNAL(triggered(bool)),

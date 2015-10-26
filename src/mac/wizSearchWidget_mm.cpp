@@ -33,7 +33,7 @@ public:
         return QSize(QStyledItemDelegate::sizeHint(option, index).width(), 20);
     }
 
-    virtual void	paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
+    virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
     {
         QStyleOptionViewItemV4 opt = option;
         initStyleOption(&opt, index);
@@ -60,7 +60,7 @@ public:
 WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     : QObject(parent)
     , m_editor(parent)
-    , m_popupWgtWidth(270)
+    , m_popupWgtWidth(SEARCHWIDGETWIDTH)
 {
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);

@@ -338,7 +338,7 @@ void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
 
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(300, TOOLBARITEMHEIGHT);
+    return QSize(SEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT);
 }
 
 void CWizSearchWidget::processEvent(QEvent* ev)
