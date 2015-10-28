@@ -827,10 +827,10 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, 
     {
         iconSize = QSize(sizes.last().width() / 2, sizes.last().height() / 2);
     }
-    int nLeftMargin = 2;
+//    int nLeftMargin = 2;
 //    QRect rcb(rc.x() + (rc.width() - iconSize.width()) / 2, rc.y() + (rc.height() - iconSize.height()) / 2,
 //              iconSize.width(), iconSize.height());//
-    QRect rcb = rc.adjusted(nLeftMargin, margin(), 0, 0);
+    QRect rcb = rc.adjusted(0, margin(), 0, 0);
     rcb.setSize(iconSize);
     if (bSelect && bFocus) {
         attachIcon.paint(p, rcb, Qt::AlignTop, QIcon::Active, QIcon::On);
@@ -1028,6 +1028,9 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
+        bool drawEncrpytIconInTitle = nBadgeType & DocTypeEncrytedInTitle;
+        bool drawAttachmentInTitle = nBadgeType & DocTypeContainsAttachment;
+        int nSpace4AttachIcon = drawEncrpytIconInTitle * 16 + drawAttachmentInTitle * 16;
         QRect rcTitle = rcd.adjusted(0, 4, 0, 0);
         //
         if (nBadgeType & DocTypeAlwaysOnTop)
@@ -1035,30 +1038,28 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             QString strBadgeText(QObject::tr("[ Top ]"));
             QColor colorType = Utils::StyleHelper::listViewItemType(bSelected, bFocused);
             rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strBadgeText, 1, Qt::AlignVCenter | Qt::AlignLeft, colorType, fontTitle);
-//            QRect rcTitle  = Utils::StyleHelper::drawBadgeIcon(p, rcd, nFontHeight, nBadgeType, bFocused, bSelected);
-            QFontMetrics fm(fontTitle);
-            int nSpace4AttachIcon = fm.width(strBadgeText) + 4;
-            rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right() - nSpace4AttachIcon, rcd.bottom());
+            rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.bottom());
         }
 
         //
         QString strTitle(title);
+        rcTitle.adjust(0, 0, - nSpace4AttachIcon, 0);
         QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
         QRect rcAttach = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+        int titleHeight = rcAttach.height();
 
-        if (nBadgeType & DocTypeEncrytedInTitle) {
-            rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
-            rcAttach.setHeight(nFontHeight);
-            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
+        rcAttach.setCoords(rcAttach.right(), rcAttach.top(), rcd.right(), rcTitle.bottom());
+        rcAttach.setHeight(nFontHeight);
+        if (drawEncrpytIconInTitle) {
+            QRect rcEncrypt = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
+            rcAttach.setCoords(rcEncrypt.right() + 4, rcAttach.top(), rcd.right(), rcTitle.bottom());
         }
 
-        if (nBadgeType & DocTypeContainsAttachment) {
-            rcAttach.setCoords(rcAttach.right(), rcd.top(), rcd.right(), rcTitle.bottom());
-            rcAttach.setHeight(nFontHeight);
+        if (drawAttachmentInTitle) {
             rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
         }
 
-        rcd.adjust(0, rcAttach.height() + 6, 0, 0);
+        rcd.adjust(0, titleHeight + 6, 0, 0);
     }
 
 
@@ -1102,24 +1103,24 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         nLeadHeight = rcLead.height();
     }
 
-    QRect rcLine1(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
+    QRect rcSummary(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
     if (nBadgeType == DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
+        QSize sz = badgeIcon.availableSizes().first();
+        QRect rcPix(rcSummary.x() + (rcSummary.width() - sz.width()) / 2, rcSummary.y() + (rcSummary.height() - sz.height()) / 2,
+                    sz.width(), sz.height());
         if (bSelected && bFocused) {
-            badgeIcon.paint(p, rcLine1, Qt::AlignCenter, QIcon::Active, QIcon::On);
+            badgeIcon.paint(p, rcPix, Qt::AlignCenter, QIcon::Active, QIcon::On);
         } else {
-            badgeIcon.paint(p, rcLine1, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
+            badgeIcon.paint(p, rcPix, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
     } else if (!abs.isEmpty()) {          //  笔记内容
         QString strText(abs);
         QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
-//        rcLine1 = Utils::StyleHelper::drawText(p, rcLine1, strText, 1, Qt::AlignVCenter, colorSummary, fontThumb, false);
 
-        if (!strText.isEmpty()) {
-//            QRect rcLine2(rcd.adjusted(0, rcLine1.height(), 0, 0));
-//            rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
-            Utils::StyleHelper::drawText(p, rcLine1, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+        if (!strText.isEmpty()) {            
+            Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
         }
     }
 }

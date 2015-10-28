@@ -16,7 +16,7 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
-    setStyleSheet("font-size: 11px; color: #646464;");
+    setStyleSheet("font-size: 12px; color: #646464;");
     setContentsMargins(0, 0, 0, 0);
 
     int nHeight = Utils::StyleHelper::infoBarHeight();
