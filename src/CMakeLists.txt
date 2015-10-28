@@ -427,7 +427,7 @@ if(UNIX)
         find_library(_IO_LIBRARY IOKit)
         if (PLCrashReporter)
             find_library(_CRASHREPORTER CrashReporter)
-        endif(if (PLCrashReporter))
+        endif(PLCrashReporter)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
