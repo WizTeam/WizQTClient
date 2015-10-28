@@ -11,15 +11,15 @@ package_output_path="$HOME"
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.4.0/lib/cmake ../WizQTClient && \
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.4.2/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk ../WizQTClient && \
 make -j5 
 
 MYAPP="WizNote"
 DEST="$MYAPP.app" # Our final App directory
 BUILDDIR=$(pwd);
-ICUDIR="/usr/local/icu54.1"
-ICULIBS="libicui18n.54 libicudata.54 libicuuc.54"
-QTDIR="/usr/local/qt/5.4.0"
+ICUDIR="/usr/local/icu56.1"
+ICULIBS="libicui18n.56 libicudata.56 libicuuc.56"
+QTDIR="/usr/local/qt/5.4.2"
 QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
 PLUGINS="sqldrivers imageformats  platforms printsupport \
@@ -133,9 +133,9 @@ done
 
 
 
-install_name_tool -change libicui18n.54.dylib @executable_path/../PlugIns/icu/libicui18n.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
-install_name_tool -change libicuuc.54.dylib @executable_path/../PlugIns/icu/libicuuc.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
-install_name_tool -change libicudata.54.dylib @executable_path/../PlugIns/icu/libicudata.54.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change libicui18n.56.dylib @executable_path/../PlugIns/icu/libicui18n.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change libicuuc.56.dylib @executable_path/../PlugIns/icu/libicuuc.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
+install_name_tool -change ../lib/libicudata.56.1.dylib @executable_path/../PlugIns/icu/libicudata.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change $QTDIR/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore WizNote.app/Contents/Frameworks/QtXml.framework/Versions/5/QtXml
 
 
