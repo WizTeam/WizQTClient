@@ -5,11 +5,17 @@
 #include <QWidget>
 #include <QMenu>
 #include <QToolButton>
+#include <QApplication>
 
 
 #if QT_VERSION >= 0x050200
 #import <Cocoa/Cocoa.h>
 #endif
+
+bool isHighPixel()
+{
+    return qApp->devicePixelRatio() >= 2;
+}
 
 @interface NSScreen (PointConversion)
 + (NSScreen *)currentScreenForMouseLocation;
@@ -98,6 +104,32 @@
 
     return NSZeroPoint;
 }
+
+    - (NSRect)drawImageAtPoint:(NSPoint)point image:(NSImage*)img
+    {
+        NSSize imageSize = [img size];
+        CGRect imageRect;
+        imageRect.origin = NSZeroPoint;
+        imageRect.size = imageSize;
+
+        NSRect destRect;
+        destRect.origin = point;
+        destRect.size = imageSize;
+
+        if (isHighPixel())
+        {
+            destRect.size.width = imageSize.width / 2;
+            destRect.size.height = imageSize.height / 2;
+            point.y += destRect.size.height / 2;
+            destRect.origin = point;
+        }
+        //
+    //            [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+        [img drawInRect:destRect fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+
+        return destRect;
+    }
+
 - (void)drawRect:(NSRect)dirtyRect
 {
     const int nAvatarWidth = 26;
@@ -111,7 +143,8 @@
     avatarRect.size.width = nAvatarWidth;
     avatarRect.size.height = nAvatarWidth;    
     //
-    QPixmap pixmap = m_widget->getAvatar(avatarRect.size.width, avatarRect.size.height);
+    int pixScale = isHighPixel() ? 2 : 1;
+    QPixmap pixmap = m_widget->getAvatar(avatarRect.size.width * pixScale, avatarRect.size.height * pixScale);
     if (!pixmap.isNull())
     {
         NSImage* img = ::WizToNSImage(pixmap);
@@ -166,20 +199,17 @@
         if (img)
         {
             NSSize imageSize = [img size];
-            CGRect imageRect;
-            imageRect.origin = NSZeroPoint;
-            imageRect.size = imageSize;
-            //
             int x = textRect.origin.x + textRect.size.width;
             int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
             NSPoint pt;
             pt.x = x;
             pt.y = y - 6;
             //
-            [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+            NSRect destRect = [self drawImageAtPoint:pt image:img];
+
             [img release];
             textRect.origin.x = x + 4;
-            textRect.size.width = imageRect.size.width;
+            textRect.size.width = destRect.size.width;
         }
     }
 
@@ -199,17 +229,13 @@
         if (img)
         {
             NSSize imageSize = [img size];
-            CGRect imageRect;
-            imageRect.origin = NSZeroPoint;
-            imageRect.size = imageSize;
-            //
             int x = textRect.origin.x + textRect.size.width;
             int y = rect.origin.y + (rect.size.height - imageSize.height) / 2;
             NSPoint pt;
             pt.x = x;
             pt.y = y - 6;
             //
-            [img drawAtPoint:(NSPoint)pt fromRect:(NSRect)imageRect operation:NSCompositeSourceOver fraction:(CGFloat)1];
+            [self drawImageAtPoint:pt image:img];
             [img release];
         }
     }
