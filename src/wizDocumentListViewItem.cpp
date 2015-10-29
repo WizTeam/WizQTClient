@@ -183,7 +183,7 @@ bool CWizDocumentListViewDocumentItem::needDrawDocumentLocation() const
 }
 
 void CWizDocumentListViewDocumentItem::updateInfoList()
-{
+{    
     CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     m_data.infoList.clear();
 
@@ -297,7 +297,7 @@ void CWizDocumentListViewDocumentItem::setSpecialFocused(bool bSpecialFocus)
 
 void CWizDocumentListViewDocumentItem::updateDocumentUnreadCount()
 {
-    if (m_data.doc.strKbGUID != CWizDatabaseManager::instance()->db().kbGUID())
+    if (CWizDatabaseManager::instance()->db(m_data.doc.strKbGUID).IsGroup())
     {
         m_documentUnread = (m_data.doc.nReadCount == 0);
     }
@@ -365,7 +365,7 @@ void CWizDocumentListViewDocumentItem::setLeadInfoState(int state)
 {
     CWizDocumentListViewBaseItem::setLeadInfoState(state);
 
-    updateInfoList();
+//    updateInfoList();
 }
 
 int CWizDocumentListViewDocumentItem::documentSize() const

@@ -3434,18 +3434,18 @@ bool CWizDatabase::GetDocumentTitleStartWith(const QString& titleStart, int nMax
 
 QString CWizDatabase::GetDocumentLocation(const WIZDOCUMENTDATA& doc)
 {
-    WIZDOCUMENTDATA docExists;
-    if (!DocumentFromGUID(doc.strGUID, docExists))
-        return QString();
+//    WIZDOCUMENTDATA doc;
+//    if (!DocumentFromGUID(doc.strGUID, doc))
+//        return QString();
 
     if (!IsGroup())
-        return docExists.strLocation;
+        return doc.strLocation;
 
     CWizTagDataArray arrayTag;
-    if (GetDocumentTags(docExists.strGUID, arrayTag))
+    if (GetDocumentTags(doc.strGUID, arrayTag))
     {
         if (arrayTag.size() > 1) {
-            TOLOG1("Group document should only have one tag: %1", docExists.strTitle);
+            TOLOG1("Group document should only have one tag: %1", doc.strTitle);
         }
 
         QString tagText;
