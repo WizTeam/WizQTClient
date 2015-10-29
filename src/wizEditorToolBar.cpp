@@ -549,6 +549,7 @@ class CWizToolButtonColor : public CWizToolButton
 {
 public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
+      , m_menu(menu())
     {
         setCheckable(false);
         setIconSize(QSize(12, 12));
@@ -564,6 +565,18 @@ public:
     QColor color() const
     {
         return m_color;
+    }
+
+    //修复按钮点击不弹出菜单的问题
+    void setMenu(QMenu* menu)
+    {
+        m_menu = menu;
+        QToolButton::setMenu(nullptr);
+    }
+
+    QMenu* menu() const
+    {
+        return m_menu;
     }
 
 protected:
@@ -596,8 +609,24 @@ protected:
         p.fillRect(QRect(rectColor), m_color);
     }
 
+    void mousePressEvent(QMouseEvent* ev)
+    {
+        QToolButton::mousePressEvent(ev);
+    }
+
+    void mouseReleaseEvent(QMouseEvent* ev)
+    {
+        QToolButton::mouseReleaseEvent(ev);
+        if (m_menu)
+        {
+            QPoint pt = mapToGlobal(rect().bottomLeft());
+            m_menu->popup(pt);
+        }
+    }
+
 private:
     QColor m_color;
+    QMenu* m_menu;
 };
 
 class CWizToolComboBox : public QComboBox
