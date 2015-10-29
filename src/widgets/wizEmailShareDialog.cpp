@@ -102,10 +102,11 @@ QString CWizEmailShareDialog::getExInfo()
     return result;
 }
 
-void CWizEmailShareDialog::mailShareFinished(int nCode, const QString& returnMessage)
+void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& returnMessage)
 {
     switch (nCode) {
     case codeOK:
+        ui->labelInfo->setText(tr("Send success"));
         accept();
         break;
     case codeErrorParam:
@@ -175,24 +176,26 @@ void CWizEmailShareDialog::updateContactList()
 
 void CWizEmailShareDialog::sendEmails()
 {
-    QMessageBox msgBox(this);
-    msgBox.setText(tr("Sending..."));
-    msgBox.setWindowTitle(tr("Info"));
+//    QMessageBox msgBox(this);
+//    msgBox.setText(tr("Sending..."));
+//    msgBox.setWindowTitle(tr("Info"));
 
-    QtConcurrent::run([this, &msgBox](){
+    ui->labelInfo->setText(tr("Sending..."));
+
+    QtConcurrent::run([this](){
         QString strToken = WizService::Token::token();
         QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
         QString strExInfo = getExInfo();
         QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
 
-        QEventLoop loop;
+        qDebug() << "share url : " << strUrl;
 
+        QEventLoop loop;
         QNetworkAccessManager net;
         QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
 
         connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
         loop.exec();
-        QMetaObject::invokeMethod(&msgBox, "accept", Qt::QueuedConnection);
 
         if (reply->error() != QNetworkReply::NoError) {
             QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
@@ -202,15 +205,15 @@ void CWizEmailShareDialog::sendEmails()
         }
 
         QString strReply = QString::fromUtf8(reply->readAll());
+        reply->deleteLater();
+
         int nCode;
         QString returnMessage;
         processReturnMessage(strReply, nCode, returnMessage);
-        mailShareFinished(nCode, returnMessage);
 
-        reply->deleteLater();
+        QMetaObject::invokeMethod(this, "on_mailShare_finished", Qt::QueuedConnection,
+                                  Q_ARG(int, nCode), Q_ARG(QString, returnMessage));
     });
-
-    msgBox.exec();
 }
 
 void CWizEmailShareDialog::on_toolButton_contacts_clicked()

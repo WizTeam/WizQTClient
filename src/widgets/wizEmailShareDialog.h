@@ -30,9 +30,10 @@ private slots:
 
     void on_networkError(const QString& errorMsg);
 
+    void on_mailShare_finished(int nCode, const QString& returnMessage);
+
 private:
-    QString getExInfo();
-    void mailShareFinished(int nCode, const QString& returnMessage);
+    QString getExInfo();    
     void processReturnMessage(const QString& returnMessage, int& nCode, QString& message);
     void saveContacts();
     void updateContactList();

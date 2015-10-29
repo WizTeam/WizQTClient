@@ -179,6 +179,13 @@
      <item>
       <widget class="QTextEdit" name="textEdit_notes"/>
      </item>
+     <item>
+      <widget class="QLabel" name="labelInfo">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
