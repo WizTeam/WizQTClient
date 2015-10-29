@@ -132,6 +132,7 @@ protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
+    void on_btnRemoveFormat_clicked();
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
@@ -146,7 +147,9 @@ protected Q_SLOTS:
     void on_btnTable_clicked();
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
-    void on_btnImage_clicked();
+    void on_btnInsertImage_clicked();
+    void on_btnInsertLink_clicked();
+    void on_btnInsertDate_clicked();
     void on_btnMobileImage_clicked();
     void on_btnScreenShot_clicked();
     void on_btnViewSource_clicked();

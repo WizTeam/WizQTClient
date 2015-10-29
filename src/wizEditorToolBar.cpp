@@ -868,7 +868,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
     m_btnRemoveFormat->setToolTip(tr("RemoveFormat"));
     m_btnRemoveFormat->setPosition(CWizToolButton::Right);
-    connect(m_btnRemoveFormat, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
+    connect(m_btnRemoveFormat, SIGNAL(clicked()), SLOT(on_btnRemoveFormat_clicked()));
 
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
@@ -994,7 +994,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
     m_btnInsertLink->setToolTip(tr("InsertLink"));
     m_btnInsertLink->setPosition(CWizToolButton::Center);
-    connect(m_btnInsertLink, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+    connect(m_btnInsertLink, SIGNAL(clicked()), SLOT(on_btnInsertLink_clicked()));
 
     m_btnInsertImage = new CWizToolButton(this);
     m_btnInsertImage->setCheckable(false);
@@ -1003,7 +1003,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertImage")).size());
     m_btnInsertImage->setToolTip(tr("InsertImage"));
     m_btnInsertImage->setPosition(CWizToolButton::Center);
-    connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+    connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnInsertImage_clicked()));
 
     m_btnInsertDate = new CWizToolButton(this);
     m_btnInsertDate->setCheckable(false);
@@ -1011,7 +1011,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertDate->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertDate")).size());
     m_btnInsertDate->setToolTip(tr("InsertDate"));
     m_btnInsertDate->setPosition(CWizToolButton::Right);
-    connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnImage_clicked()));
+    connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnInsertDate_clicked()));
 
     m_btnMobileImage = new CWizToolButton(this);
     m_btnMobileImage->setHorizontalPadding(6);
@@ -2659,6 +2659,14 @@ void EditorToolBar::on_btnFormatMatch_clicked()
     }
 }
 
+void EditorToolBar::on_btnRemoveFormat_clicked()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarRemoveFormat");
+    if (m_editor) {
+        m_editor->editorCommandExecuteRemoveFormat();
+    }
+}
+
 void EditorToolBar::on_btnBold_clicked()
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarBold");
@@ -2776,11 +2784,27 @@ void EditorToolBar::on_btnCheckList_clicked()
     }
 }
 
-void EditorToolBar::on_btnImage_clicked()
+void EditorToolBar::on_btnInsertImage_clicked()
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarImage");
     if (m_editor) {
         m_editor->editorCommandExecuteInsertImage();
+    }
+}
+
+void EditorToolBar::on_btnInsertLink_clicked()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarInserLink");
+    if (m_editor) {
+        m_editor->editorCommandExecuteLinkInsert();
+    }
+}
+
+void EditorToolBar::on_btnInsertDate_clicked()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarInserDate");
+    if (m_editor) {
+        m_editor->editorCommandExecuteInsertDate();
     }
 }
 
