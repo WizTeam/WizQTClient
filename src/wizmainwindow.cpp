@@ -2107,11 +2107,10 @@ QWidget* MainWindow::createNoteListView()
     layoutList->addWidget(m_documents);
 
     //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-//    m_documents->setStyleSheet("background-color: qlineargradient(x1: 0px, y1: 0px, x2: 0.01, y2: 0, \
-//                               stop: 0 #F5F5F5, stop: 0.5 #FAFAFA stop:1 #FFFFFF)");
-    m_documents->setStyleSheet(QString("background-color: #FFFFFF;background-image:url(%1);"
-                                       "background-position: left; background-repeat: repeat-y;")
-                               .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", true)));
+    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
+                                   "background-position: left; background-repeat: repeat-y;")
+                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
+    m_documents->setStyleSheet(docListStyle);
     m_documents->setAutoFillBackground(true);
 
     return m_noteListWidget;

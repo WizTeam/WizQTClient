@@ -777,7 +777,11 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(2, 0, 16, 0);
     layoutActions->setSpacing(0);
-    setLayout(layoutActions);        
+    setLayout(layoutActions);
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+    setPalette(pal);
+    setAutoFillBackground(true);
 
     m_labelCurrentSender = new WizClickableLabel(this);
     m_labelCurrentSender->setText(tr("All Users"));
@@ -789,7 +793,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
 
     m_btnSelectSender = new QToolButton(this);
     m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); background-repeat: no-repeat;"
-                                             "background-position: center;").arg(Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", true)));
+                                             "background-position: center;").arg(Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
     m_btnSelectSender->setFixedWidth(5);
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
