@@ -40,6 +40,7 @@ public:
     {
         setMask(QRegion(contentsRect()));
         setAttribute(Qt::WA_MouseNoMask, true);
+        setCursor(Qt::SplitHCursor);
     }
 
     virtual void paintEvent(QPaintEvent *event)
@@ -65,17 +66,31 @@ public:
     {
         return QSize(1, 1);
     }
+protected:
+    void enterEvent(QEvent* ev)
+    {
+        QWidget::enterEvent(ev);
+        setCursor(Qt::SplitHCursor);
+    }
+
+    void leaveEvent(QEvent* ev)
+    {
+        QWidget::leaveEvent(ev);
+        setCursor(Qt::ArrowCursor);
+    }
 };
 
 
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
-    setHandleWidth(0);
+    setHandleWidth(1);
     setChildrenCollapsible(false);
+    setCursor(Qt::SplitHCursor);
 }
 
 QSplitterHandle *CWizSplitter::createHandle()
 {
     return new CWizSplitterHandle(orientation(), this);
 }
+
