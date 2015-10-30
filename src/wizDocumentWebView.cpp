@@ -45,11 +45,13 @@
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizEmailShareDialog.h"
 #include "widgets/wizShareLinkDialog.h"
+#include "widgets/wizScrollBar.h"
 #include "share/wizAnalyzer.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "utils/misc.h"
+#include "utils/stylehelper.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -227,6 +229,11 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     // only accept focus by mouse click as the best way to trigger toolbar reset
     setFocusPolicy(Qt::ClickFocus);
     setAttribute(Qt::WA_AcceptTouchEvents, false);
+
+    QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+                                   + "webkit_scrollbar.css");
+    settings()->setUserStyleSheetUrl(url);
+
 
     // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(true);
@@ -595,6 +602,13 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
         event->accept();
         saveDocument(view()->note(), false);
     }
+}
+
+void CWizDocumentWebView::wheelEvent(QWheelEvent* ev)
+{
+    QWebView::wheelEvent(ev);
+
+    repaint();
 }
 
 CWizDocumentView* CWizDocumentWebView::view()

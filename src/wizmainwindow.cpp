@@ -331,6 +331,9 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
             }
+            m_category->repaint();
+            m_documents->repaint();
+            m_splitter->repaint();
         }
     }
 #endif
@@ -3594,14 +3597,14 @@ void MainWindow:: adjustToolBarLayout()
     m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
 #else
 //    m_toolBar
-    int nFixedSpacerWidth = m_category->width() - 75;
-//    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
-    m_spacerForToolButtonAdjust->adjustWidth(nFixedSpacerWidth);
-    m_toolBar->adjustWidgetToolBarItemWidth(m_spacerForToolButtonAdjust, nFixedSpacerWidth);
-    const int nSearchWgtMargin = 26;
-//    m_searchWidget->setFixedWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
-    m_toolBar->adjustSearchWidgetWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
-    m_toolBar->resize(width(), m_toolBar->height());
+//    int nFixedSpacerWidth = m_category->width() - 75;
+////    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
+//    m_spacerForToolButtonAdjust->adjustWidth(nFixedSpacerWidth);
+//    m_toolBar->adjustWidgetToolBarItemWidth(m_spacerForToolButtonAdjust, nFixedSpacerWidth);
+//    const int nSearchWgtMargin = 26;
+////    m_searchWidget->setFixedWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
+//    m_toolBar->adjustSearchWidgetWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
+//    m_toolBar->resize(width(), m_toolBar->height());
 //    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
 //                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
 //    m_spacerForToolButtonAdjust->sets

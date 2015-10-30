@@ -783,7 +783,6 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
         return QRect(rc.x(), rc.y(), 0, 0);
     }
 
-//    QRect rcd = rc.adjusted(rc.width() - rc.height(), margin(), -margin(), -margin());
     QRect rcd(rc.x() + rc.right() - 62, rc.y() + rc.height() - 64, 50, 50);
 
     int nWidth = 0, nHeight = 0;

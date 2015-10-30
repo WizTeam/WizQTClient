@@ -40,7 +40,6 @@ public:
     {
         setMask(QRegion(contentsRect()));
         setAttribute(Qt::WA_MouseNoMask, true);
-        setCursor(Qt::SplitHCursor);
     }
 
     virtual void paintEvent(QPaintEvent *event)
@@ -86,7 +85,6 @@ CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
 {
     setHandleWidth(1);
     setChildrenCollapsible(false);
-    setCursor(Qt::SplitHCursor);
 }
 
 QSplitterHandle *CWizSplitter::createHandle()
