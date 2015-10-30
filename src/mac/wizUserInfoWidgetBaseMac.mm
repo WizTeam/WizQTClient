@@ -243,8 +243,14 @@ bool isHighPixel()
 
 - (void)mouseUp:(NSEvent *)theEvent
 {
-    [super mouseUp:theEvent];
-    //
+    [super mouseUp:theEvent];        
+
+    NSPoint event_location = theEvent.locationInWindow;
+    NSPoint pos = [self convertPoint:event_location fromView:nil];
+    NSRect rect = [self frame];
+    if (!NSPointInRect(pos, rect))
+        return;
+   //
     NSPoint pt = [self convertPoint:m_menuPos toView:nil];
     //
 #if QT_VERSION >= 0x050200
