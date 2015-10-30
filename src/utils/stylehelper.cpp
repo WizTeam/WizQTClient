@@ -798,8 +798,12 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
     int adjustX = (rcd.width() - nWidth) / 2;
     int adjustY = (rcd.height() - nHeight) / 2;
     rcd.adjust(adjustX, adjustY, -adjustX, -adjustY);
+    p->save();
+    QPainterPath path;
+    path.addRoundedRect(rcd, 4, 4);
+    p->setClipPath(path);
     p->drawPixmap(rcd, pm);
-
+    p->restore();
     return rcd;
 }
 
@@ -1103,7 +1107,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
     }
 
     QRect rcSummary(rcd.adjusted(0, nLeadHeight + 8, 0, 0));
-    if (nBadgeType == DocTypeEncrytedInSummary) {
+    if (nBadgeType & DocTypeEncrytedInSummary) {
         QIcon badgeIcon(listViewBadge(BadgeEncryptedInSummary));
         QSize sz = badgeIcon.availableSizes().first();
         QRect rcPix(rcSummary.x() + (rcSummary.width() - sz.width()) / 2, rcSummary.y() + (rcSummary.height() - sz.height()) / 2,
