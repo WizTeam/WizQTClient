@@ -47,7 +47,7 @@ try {
 
     editor.addListener('aftersetcontent', function() {
         updateCss();
-        WizEditor.onNoteLoadFinished();
+        WizEditor.onNoteLoadFinished();        
     });
 
     //NOTE: 不能监听contentchange事件，否则仅仅进入编辑状态就会修改笔记为已修改
@@ -57,10 +57,40 @@ try {
 
     editor.addListener('wizcontentchange', function() {
         WizEditor.setContentsChanged(true);
-    });
+    });    
 
 } catch (err) {
     alert(err);
+}
+
+function initWizReader () {
+    var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
+    console.log("setup wizreader, dependencyFilePath " + dependencyFilePath);            
+
+    WizReader.init({
+    document: editor.document,
+    lang: 'zh-cn',
+    clientType: 'mac',
+    userInfo: {},
+    // usersData: '',
+    noAmend: false,  //wizReader 专用参数，用于关闭 修订功能,
+    dependencyCss: {
+        github2: dependencyFilePath + 'github2.css',  //markdown 使用
+        wizToc: dependencyFilePath + 'wizToc.css'     //toc 样式
+    },
+    dependencyJs: {
+        jquery: dependencyFilePath + 'jquery-1.11.3.js', //jquery
+        prettify: dependencyFilePath + 'prettify.js',       //代码高亮
+        raphael: dependencyFilePath + 'raphael.js',     //流程图 & 时序图 依赖
+        underscore: dependencyFilePath + 'underscore.js',   //时序图 依赖
+        flowchart: dependencyFilePath + 'flowchart.js',         //流程图
+        sequence: dependencyFilePath + 'sequence-diagram.js', //时序图
+        //mathJax 如果不传则使用 默认地址
+        mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML'
+    }
+    });
+
+    console.log("wizreader document : ", editor.document);
 }
 
 function setEditorHtml(html, bEditing)
