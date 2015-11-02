@@ -1,7 +1,5 @@
 .markdown-body {
-    font-family: "Microsoft YaHei", Simsun, Helvetica, arial, sans-serif;
     line-height: 1.6;
-    background-color: white;
     padding: 12px;
 }
 body.markdown-body,
@@ -45,7 +43,6 @@ body.markdown-body,
     margin: 20px 0 10px;
     padding: 0;
     font-weight: bold;
-    -webkit-font-smoothing: antialiased;
     cursor: text;
     position: relative;
 }

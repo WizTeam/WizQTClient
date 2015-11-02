@@ -1,6 +1,7 @@
 var
     editor = null,
     m_inited = false,
+    m_wizReaderInited = false;
     objApp = WizExplorerApp,
     m_currentGUID = "",
     m_defaultCss = WizEditor.getDefaultCssFilePath(),
@@ -41,13 +42,17 @@ try {
         editor.ui.getDom('scalelayer').style.display = 'none';
         editor.ui.getDom('elementpath').style.display = "none";
         editor.ui.getDom('wordcount').style.display = "none";
-        editor.ui._updateFullScreen();
+        editor.ui._updateFullScreen();    
 
+        var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
+        loadSingleJs(editor.document, reader);       
+        initWizReader();    
     });
 
     editor.addListener('aftersetcontent', function() {
         updateCss();
-        WizEditor.onNoteLoadFinished();        
+        WizEditor.onNoteLoadFinished();   
+
     });
 
     //NOTE: 不能监听contentchange事件，否则仅仅进入编辑状态就会修改笔记为已修改
@@ -63,11 +68,16 @@ try {
     alert(err);
 }
 
-function initWizReader () {
+function initWizReader() {                  
+    var f = window.document.getElementById('ueditor_0');
+    if (!f.contentWindow.WizReader) { 
+        console.log("wizReader is null, try init later");
+        setTimeout( "initWizReader()", 100);       
+        return;
+    }
     var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
-    console.log("setup wizreader, dependencyFilePath " + dependencyFilePath);            
 
-    WizReader.init({
+    m_wizReaderInited = f.contentWindow.WizReader.init({
     document: editor.document,
     lang: 'zh-cn',
     clientType: 'mac',
@@ -88,9 +98,31 @@ function initWizReader () {
         //mathJax 如果不传则使用 默认地址
         mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML'
     }
-    });
+    }) | true;
+}
 
-    console.log("wizreader document : ", editor.document);
+function renderMarkdown() {
+    var f = window.document.getElementById('ueditor_0');
+    if (!f.contentWindow.WizReader || !m_wizReaderInited) {        
+        console.log("wizReader is null, try again later");
+        setTimeout( "renderMarkdown()", 100);
+        return;
+    }
+    
+    f.contentWindow.WizReader.markdown();
+}
+
+function loadSingleJs(doc, path) {
+    var jsId = 'wiz_' + path;
+    if (doc.getElementById(jsId)) {
+        return true;
+    }
+    var s = doc.createElement('script');
+    s.type = 'text/javascript';
+    s.src = path.replace(/\\/g, '/');
+    s.id = jsId;
+    doc.getElementsByTagName('head')[0].insertBefore(s, null);
+    return s;
 }
 
 function setEditorHtml(html, bEditing)

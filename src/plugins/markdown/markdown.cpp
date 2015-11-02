@@ -59,7 +59,9 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
 #ifdef USEWEBENGINE
         render(view->notePage());
 #else
-        render(view->noteFrame());
+//        render(view->noteFrame());
+        QWebFrame* frame = view->noteFrame();
+        frame->evaluateJavaScript("renderMarkdown();");
 #endif
     }
 }

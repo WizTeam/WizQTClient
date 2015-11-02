@@ -726,6 +726,16 @@ QString CWizDocumentWebView::getDefaultCssFilePath() const
     return m_strDefaultCssFilePath;
 }
 
+QString CWizDocumentWebView::getWizReaderDependencyFilePath() const
+{
+    return Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/";
+}
+
+QString CWizDocumentWebView::getWizReaderFilePath() const
+{
+    return Utils::PathResolve::resourcesPath() + "files/editor/wizReader/";
+}
+
 bool CWizDocumentWebView::resetDefaultCss()
 {
     QFile f(":/default.css");
@@ -1281,6 +1291,12 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     {
         resetDefaultCss();
     }
+
+//    QString js = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/wizReader.js";
+//    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+//            m_strDefaultCssFilePath + "\">" + "<script type=\"text/javascript\" charset=\"utf-8\""
+//                                              " src=\"" + js + "\"></script>" + m_strCurrentNoteHead;
+
     m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
             m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 

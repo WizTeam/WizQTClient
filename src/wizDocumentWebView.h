@@ -145,6 +145,8 @@ public:
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();
     Q_INVOKABLE QString getDefaultCssFilePath() const;
+    Q_INVOKABLE QString getWizReaderDependencyFilePath() const;
+    Q_INVOKABLE QString getWizReaderFilePath() const;
 
     /* editor related */
     void editorResetFont();

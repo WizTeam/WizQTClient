@@ -586,7 +586,8 @@ QWebFrame* CWizDocumentView::noteFrame()
 #ifdef USEWEBENGINE
     return 0;
 #else
-    return m_web->noteFrame();
+//    return m_web->noteFrame();
+    return m_web->page()->mainFrame();
 #endif
 }
 
