@@ -312,7 +312,7 @@ CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, c
 
 int CWizCategoryViewSectionItem::getItemHeight(int nHeight) const
 {
-    return nHeight + 12;
+    return nHeight;
 }
 void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
 {
@@ -471,29 +471,32 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     p->save();
 
     QFont f;
-    Utils::StyleHelper::fontExtend(f);
+    f.setPixelSize(10);
     p->setFont(f);
     //
-    QRect rcRect = getExtraButtonRect(vopt->rect, true);
-    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-                      m_szUnreadSize.width(), m_szUnreadSize.height());
+    int nButtonWidth = 26;
+    int nButtonHeight = 14;
+//    QRect rcRect = getExtraButtonRect(vopt->rect, true);
+    QRect rcb(vopt->rect.right() - 14 - nButtonWidth, vopt->rect.y() + (vopt->rect.height() - nButtonHeight) / 2,
+              nButtonWidth, nButtonHeight);  //QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
+//                      m_szUnreadSize.width(), m_szUnreadSize.height());
 
     p->setRenderHint(QPainter::Antialiasing);
 
-    if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
+    if (vopt->state.testFlag(QStyle::State_Sunken))
     {
-        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-        p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
-        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
+        p->setPen("#C1C1C1");
+        p->setBrush(QBrush("#C1C1C1"));
+        p->drawRoundedRect(rcb, 8, 8);
+        p->setPen("999999");
         p->drawText(rcb, Qt::AlignCenter, text);
     }
     else
     {
-        p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-        p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
-        p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-        p->setPen(Utils::StyleHelper::treeViewItemMessageText());
+        p->setPen("#C1C1C1");
+        p->setBrush(QBrush("#FFFFFF"));
+        p->drawRoundedRect(rcb, 6, 8);
+        p->setPen("#999999");
         p->drawText(rcb, Qt::AlignCenter, text);
     }
     //
@@ -1024,9 +1027,9 @@ CWizCategoryViewTagItem::CWizCategoryViewTagItem(CWizExplorerApp& app,
     , m_tag(tag)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tagItem_normal"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tag_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_tagItem_selected"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, CWizDatabase::TagNameToDisplayName(tag.strName));
@@ -2132,9 +2135,9 @@ CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app,
     : CWizCategoryViewItemBase(app, strName, "", type)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_normal"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_searchItem_normal"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_search_selected"),
+    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_searchItem_selected"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
     setText(0, strName);
