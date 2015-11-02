@@ -199,7 +199,7 @@ public:
     Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
-
+    Q_INVOKABLE bool checkListClickable();
     //
     QNetworkDiskCache* networkCache();
 
@@ -399,6 +399,9 @@ Q_SIGNALS:
     void viewDocumentFinished();
     //
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
+
+    // signal connect to checklist in javascript
+    void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);

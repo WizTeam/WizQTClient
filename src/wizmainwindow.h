@@ -254,11 +254,7 @@ public:
     void createNoteWithText(const QString& strText);
     void createNoteWithImage(const QString& strImageFile);
 
-signals:
-    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
-    // signal connect to checklist in javascript
-    void clickingTodoCallBack(bool cancel, bool needCallAgain);
-
+signals:    
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
 
@@ -472,10 +468,9 @@ public:
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 
-    Q_INVOKABLE QString TranslateString(const QString& string);
 
-    Q_INVOKABLE bool checkListClickable();
     //NOTE: these functions would called by web page, do not delete
+    Q_INVOKABLE QString TranslateString(const QString& string);
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);

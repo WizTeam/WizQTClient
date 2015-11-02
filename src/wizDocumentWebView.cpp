@@ -2341,6 +2341,8 @@ void CWizDocumentWebView::saveHtmlToCurrentNote(const QString &strHtml, const QS
     mainWindow->quickSyncKb(docData.strKbGUID);
 
     updateNoteHtml();
+
+    view()->sendDocumentSavedSignal(docData.strGUID, docData.strKbGUID);
 }
 
 bool CWizDocumentWebView::hasEditPermissionOnCurrentNote()
@@ -2356,6 +2358,25 @@ void CWizDocumentWebView::setCurrentDocumentType(const QString &strType)
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
     docData.strType = strType;
     db.ModifyDocumentInfoEx(docData);
+}
+
+bool CWizDocumentWebView::checkListClickable()
+{
+    CWizDocumentView* v = view();
+    if (!m_dbMgr.db(v->note().strKbGUID).IsGroup())
+    {
+        emit clickingTodoCallBack(false, false);
+        return true;
+    }
+
+    if (v->checkListClickable())
+    {
+        emit clickingTodoCallBack(false, false);
+        v->setStatusToEditingByCheckList();
+        return true;
+    }
+    emit clickingTodoCallBack(true, true);
+    return false;
 }
 
 QNetworkDiskCache*CWizDocumentWebView::networkCache()

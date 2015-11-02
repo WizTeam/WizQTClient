@@ -206,11 +206,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     connect(m_documents, SIGNAL(addDocumentToShortcutsRequest(WIZDOCUMENTDATA)),
             m_category, SLOT(addDocumentToShortcuts(WIZDOCUMENTDATA)));
-    connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentSaved(QString,CWizDocumentView*)));
     connect(m_doc->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
-    connect(this, SIGNAL(documentSaved(QString,CWizDocumentView*)),
-            m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
     connect(&m_dbMgr, SIGNAL(favoritesChanged(QString)), m_category,
             SLOT(on_shortcutDataChanged(QString)));
     connect(m_doc, SIGNAL(documentSaved(QString,CWizDocumentView*)),
@@ -1707,24 +1704,6 @@ void MainWindow::windowActived()
 
     m_sync->quickDownloadMesages();
     WizGetAnalyzer().LogAction("bizUserQuickDownloadMessage");
-}
-
-bool MainWindow::checkListClickable()
-{
-    if (!m_dbMgr.db(m_doc->note().strKbGUID).IsGroup())
-    {
-        emit clickingTodoCallBack(false, false);
-        return true;
-    }
-
-    if (m_doc->checkListClickable())
-    {
-        emit clickingTodoCallBack(false, false);
-        m_doc->setStatusToEditingByCheckList();
-        return true;
-    }
-    emit clickingTodoCallBack(true, true);
-    return false;
 }
 
 /** web页面调用该方法，打开URL

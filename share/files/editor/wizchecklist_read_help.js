@@ -497,8 +497,8 @@ function WizTodoReadCheckedQt () {
     }
 
     function onClickingTodo(callback) {
-        objApp.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
-        return objApp.checkListClickable();
+        WizEditor.clickingTodoCallBack.connect(WizTodoReadChecked[callback]);
+        return WizEditor.checkListClickable();
     }
 
     function onBeforeSave(isModified) {
