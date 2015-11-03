@@ -30,6 +30,9 @@ TitleEdit::TitleEdit(QWidget *parent)
     connect(this, SIGNAL(editingFinished()), SLOT(onTitleEditingFinished()));
     connect(this, SIGNAL(textEdited(QString)), SLOT(onTextEdit(QString)));
     connect(this, SIGNAL(textChanged(QString)), SLOT(onTextChanged(QString)));
+    QFont f = font();
+    f.setPixelSize(14);
+    setFont(f);
 }
 
 QSize TitleEdit::sizeHint() const
@@ -227,6 +230,7 @@ void TitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
+    setStyleSheet("color:#878787;");
 }
 
 void TitleEdit::onTitleReturnPressed()

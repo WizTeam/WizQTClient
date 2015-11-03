@@ -60,9 +60,11 @@ public:
     void startEditButtonAnimation();
     void stopEditButtonAnimation();
 
+    void applyButtonStateForSeparateWindow(bool inSeparateWindow);
 
 public Q_SLOTS:
     void onEditButtonClicked();
+    void onSeparateButtonClicked();
     void onTagButtonClicked();
     void onEmailButtonClicked();
     void onShareButtonClicked();
@@ -93,6 +95,7 @@ public Q_SLOTS:
 signals:
     void notifyBar_link_clicked(const QString& link);
     void loadComment_request(const QString& url);
+    void viewNoteInSeparateWindow_request();
 private:
     void showInfoBar();
     void showEditorBar();
@@ -116,7 +119,8 @@ private:
     EditorToolBar* m_editorBar;
 
     CellButton* m_editBtn;
-    CellButton* m_tagBtn;
+    CellButton* m_separateBtn;
+    CellButton* m_tagBtn;    
     CellButton* m_emailBtn;
     CellButton* m_shareBtn;
     CellButton* m_attachBtn;

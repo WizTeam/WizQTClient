@@ -54,6 +54,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
         m_docView->setMaximumWidth(1054);
         m_docView->setSizeHint(QSize(1054, 1));
         m_docView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+        m_docView->titleBar()->applyButtonStateForSeparateWindow(true);
 
         containerLayout->addStretch(0);
         containerLayout->addWidget(m_docView);
