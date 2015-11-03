@@ -81,6 +81,7 @@ public:
     static QColor treeViewItemCategoryText();
     static QColor treeViewItemText(bool bSelected, bool bSecondLevel);
     static QColor treeViewItemTextExtend(bool bSelected);
+    static QColor treeViewSectionItemText();
     static QColor treeViewItemLinkText();
     static QColor treeViewItemBottomLine();
     static QColor treeViewItemMessageBackground();
@@ -141,6 +142,8 @@ public:
     static int fontNormal(QFont& f);
     static int fontThumb(QFont& f);
     static int fontExtend(QFont& f);
+    static int fontCategoryItem(QFont& f);
+    static int fontSection(QFont& f);
 
     static int editorButtonHeight();
     static QMargins editorBarMargins();

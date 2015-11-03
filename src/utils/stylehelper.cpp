@@ -248,7 +248,7 @@ QColor StyleHelper::treeViewBackground()
 QColor StyleHelper::treeViewItemBackground(int stat)
 {    
     if (stat == Selected) {
-        return QColor(getValue("Category/ItemSelectedNoFocus", "#3177EE").toString());
+        return QColor(getValue("Category/ItemSelectedNoFocus", "#888888").toString());
     } else if (stat == Active) {
         return QColor(getValue("Category/ItemSelected", "#C1C1C1").toString());
     }
@@ -308,6 +308,11 @@ QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
     } else {
         return QColor(getValue("Category/TextExtend", "#888888").toString());
     }
+}
+
+QColor StyleHelper::treeViewSectionItemText()
+{
+    return QColor(getValue("Category/SectionItemText", "#C1C1C1").toString());
 }
 
 void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)
@@ -965,6 +970,22 @@ int StyleHelper::fontExtend(QFont& f)
     return QFontMetrics(f).height();
 }
 
+int StyleHelper::fontCategoryItem(QFont& f)
+{
+#ifdef Q_OS_MAC
+    f.setPixelSize(13);
+#endif
+    return QFontMetrics(f).height();
+}
+
+int StyleHelper::fontSection(QFont& f)
+{
+#ifdef Q_OS_MAC
+    f.setPixelSize(11);
+#endif
+    return QFontMetrics(f).height();
+}
+
 int StyleHelper::editorButtonHeight()
 {
     return 28;
@@ -1062,7 +1083,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
         }
 
-        rcd.adjust(0, titleHeight + 6, 0, 0);
+        rcd.adjust(0, titleHeight + 4, 0, 0);
     }
 
 

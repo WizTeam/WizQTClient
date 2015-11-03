@@ -2107,8 +2107,8 @@ QWidget*MainWindow::createMessageListView()
     m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
     connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
             SLOT(on_messageSelector_senderSelected(QString)));
-    connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request()),
-            SLOT(on_actionMarkAllMessageRead_triggered()));
+    connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request(bool)),
+            SLOT(on_actionMarkAllMessageRead_triggered(bool)));
 
 
     QWidget* line2 = new QWidget(this);
@@ -2696,11 +2696,11 @@ void MainWindow::on_actionSortBySize_triggered()
     changeDocumentsSortTypeByAction(action);
 }
 
-void MainWindow::on_actionMarkAllMessageRead_triggered()
+void MainWindow::on_actionMarkAllMessageRead_triggered(bool removeItems)
 {
     WizGetAnalyzer().LogAction("markAllMessagesRead");
 
-    m_msgList->markAllMessagesReaded();
+    m_msgList->markAllMessagesReaded(removeItems);
 }
 
 void MainWindow::on_messageSelector_senderSelected(QString userGUID)
@@ -4049,9 +4049,11 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
     pItem->getMessages(m_dbMgr.db(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
 
+    //
+    int unreadCount = m_dbMgr.db().getUnreadMessageCount();
     // msg title bar
     bool showUnreadBar = pItem->hitTestUnread();
-    m_msgListTitleBar->setUnreadMode(showUnreadBar);
+    m_msgListTitleBar->setUnreadMode(showUnreadBar, unreadCount);
 }
 
 void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)

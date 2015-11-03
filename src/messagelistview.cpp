@@ -432,7 +432,7 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
     p->restore();
 }
 
-void MessageListView::markAllMessagesReaded()
+void MessageListView::markAllMessagesReaded(bool removeItems)
 {
     for (int i = 0; i < count(); i++) {
         MessageListViewItem* pItem = messageItem(i);
@@ -442,6 +442,17 @@ void MessageListView::markAllMessagesReaded()
         }
     }
     m_timerTriggerSync.start();
+
+    if (removeItems)
+    {
+        while (count() > 0)
+        {
+            if (QListWidgetItem* item = takeItem(0))
+            {
+                delete item;
+            }
+        }
+    }
 }
 
 void MessageListView::on_uploadReadStatus_finished(const QString& ids)
@@ -772,6 +783,8 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     : QWidget(parent)
     , m_dbMgr(dbMgr)
     , m_msgSenderSelector(nullptr)
+    , m_bUnreadMode(false)
+    , m_nUnreadCount(0)
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QHBoxLayout* layoutActions = new QHBoxLayout();
@@ -810,18 +823,20 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgListMarkAllBtn->setIcon(btnIcon);
     m_msgListMarkAllBtn->setFixedSize(QSize(16, 16));
     m_msgListMarkAllBtn->setToolTip(tr("Mark all messages read"));
-    connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SIGNAL(markAllMessageRead_request()));
+    connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SLOT(on_markAllReadbutton_clicked()));
     layoutActions->addWidget(m_msgListMarkAllBtn);
 
     connect(&m_dbMgr, SIGNAL(messageCreated(WIZMESSAGEDATA)),
             SLOT(on_message_created(WIZMESSAGEDATA)));
 }
 
-void WizMessageListTitleBar::setUnreadMode(bool unread)
+void WizMessageListTitleBar::setUnreadMode(bool unread, int unreadCount)
 {
+    m_bUnreadMode = unread;
+    m_nUnreadCount = unreadCount;
     m_msgListHintLabel->setText(unread ? tr("Unread messages") : tr("All messages"));
-    m_msgListMarkAllBtn->setVisible(unread);
-    if (unread)
+    m_msgListMarkAllBtn->setVisible(unreadCount > 0);
+    if (m_bUnreadMode || (unreadCount > 0))
     {
         layout()->setContentsMargins(2, 0, 16, 0);
     }
@@ -833,7 +848,7 @@ void WizMessageListTitleBar::setUnreadMode(bool unread)
 
 bool WizMessageListTitleBar::isUnreadMode() const
 {
-    return m_msgListMarkAllBtn->isVisible();
+    return m_bUnreadMode;
 }
 
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
@@ -865,6 +880,11 @@ void WizMessageListTitleBar::on_sender_selected(const QString& userGUID, const Q
 void WizMessageListTitleBar::on_userSelectButton_clicked()
 {
     showUserSelector();
+}
+
+void WizMessageListTitleBar::on_markAllReadbutton_clicked()
+{
+    emit markAllMessageRead_request(m_bUnreadMode);
 }
 
 void WizMessageListTitleBar::showUserSelector()

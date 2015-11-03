@@ -115,7 +115,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     viewport()->setAttribute(Qt::WA_AcceptTouchEvents, true);
     setAttribute(Qt::WA_MacShowFocusRect, false);   
     setTextElideMode(Qt::ElideMiddle);
-    setIndentation(14);
+    setIndentation(24);
 
     // scrollbar        ScrollPerPixel could cause drag and drop problem    
 //    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -217,6 +217,30 @@ void CWizCategoryBaseView::mousePressEvent(QMouseEvent* event)
     m_hitPos = event->pos();
 
     QTreeWidget::mousePressEvent(event);
+
+    if (CWizCategoryViewItemBase* item = itemAt(event->pos()))
+    {
+       if (item->acceptMousePressedInfo())
+       {
+           item->mousePressed(event->pos());
+           update();
+       }
+    }
+}
+
+void CWizCategoryBaseView::mouseReleaseEvent(QMouseEvent* event)
+{
+    QTreeWidget::mouseReleaseEvent(event);
+
+    if (CWizCategoryViewItemBase* item = itemAt(event->pos()))
+    {
+       if (item->acceptMousePressedInfo())
+       {
+           item->mouseReleased(event->pos());
+           update();
+       }
+    }
+
 }
 
 void CWizCategoryBaseView::mouseMoveEvent(QMouseEvent* event)
@@ -1152,7 +1176,7 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     invisibleRootItem()->setFlags(invisibleRootItem()->flags() & ~Qt::ItemIsDropEnabled);
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::InternalMove);
-
+    setContentsMargins(0, 8, 0, 0);
     initMenus();
 
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));

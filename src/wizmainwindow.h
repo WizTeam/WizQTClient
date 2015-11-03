@@ -329,7 +329,7 @@ public Q_SLOTS:
     void on_actionSortByTag_triggered();
     void on_actionSortBySize_triggered();
 
-    void on_actionMarkAllMessageRead_triggered();
+    void on_actionMarkAllMessageRead_triggered(bool removeItems);
     void on_messageSelector_senderSelected(QString userGUID);
 
     // menu format

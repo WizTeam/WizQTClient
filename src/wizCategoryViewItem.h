@@ -57,6 +57,10 @@ public:
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false) { Q_UNUSED(arrayDocument); Q_UNUSED(forceCopy);}
     virtual void drop(const CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
+    virtual bool acceptMousePressedInfo() { return false; }
+    virtual void mousePressed(const QPoint& pos) { Q_UNUSED(pos); }
+    virtual void mouseReleased(const QPoint& pos) { Q_UNUSED(pos); }
+
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
     virtual QVariant data(int column, int role) const;
@@ -132,6 +136,11 @@ public:
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
+
+    virtual bool acceptMousePressedInfo() { return true; }
+    virtual void mousePressed(const QPoint& pos);
+    virtual void mouseReleased(const QPoint& pos);
+
     void getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg);
     void setUnreadCount(int nCount);
     QString unreadString() const;
@@ -140,10 +149,13 @@ public:
     virtual QString getSectionName();
     virtual int getSortOrder() const { return 10; }
 
+    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
+
 private:
     int m_nFilter;
     int m_nUnread;
     QSize m_szUnreadSize;
+    bool m_extraButtonIconPressed;
 };
 
 class CWizCategoryViewShortcutItem;

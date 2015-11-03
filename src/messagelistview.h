@@ -127,12 +127,12 @@ class WizMessageListTitleBar : public QWidget
 public:
     WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
 
-    void setUnreadMode(bool unread);
+    void setUnreadMode(bool unread, int unreadCount);
     bool isUnreadMode() const;    
 
 signals:
     void messageSelector_senderSelected(QString userGUID);
-    void markAllMessageRead_request();
+    void markAllMessageRead_request(bool removeItems);
 
 public slots:
     void on_message_created(const WIZMESSAGEDATA& msg);
@@ -140,6 +140,7 @@ public slots:
     void on_sender_selected(const QString& userGUID, const QString& userAlias);
 
     void on_userSelectButton_clicked();
+    void on_markAllReadbutton_clicked();
 
     void showUserSelector();
 
@@ -155,6 +156,8 @@ private:
     QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;
+    bool m_bUnreadMode;
+    int m_nUnreadCount;
 };
 
 class MessageListView : public QListWidget
@@ -180,7 +183,7 @@ public:
     void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
 public slots:
-    void markAllMessagesReaded();
+    void markAllMessagesReaded(bool removeItems);
     void on_uploadReadStatus_finished(const QString& ids);
     void on_uploadDeleteStatus_finished(const QString& ids);
 

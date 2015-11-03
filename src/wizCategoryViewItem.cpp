@@ -214,6 +214,7 @@ void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* v
 
         QRect rcb = getExtraButtonRect(vopt->rect);
         p->setRenderHint(QPainter::Antialiasing);
+        p->setClipRect(rcb);
         p->drawPixmap(rcb, pixmap);
 
         p->restore();
@@ -312,7 +313,7 @@ CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, c
 
 int CWizCategoryViewSectionItem::getItemHeight(int nHeight) const
 {
-    return nHeight;
+    return nHeight - 10;
 }
 void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
 {
@@ -354,6 +355,7 @@ CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName, "", Category_MessageItem)
     , m_nUnread(0)
+    , m_extraButtonIconPressed(false)
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_messages_normal"),
@@ -445,18 +447,25 @@ bool CWizCategoryViewMessageItem::hitTestUnread()
     QRect rcItem = view->visualItemRect(this);
     QPoint pt = view->hitPoint();
     //
-    int nMargin = 4;
     QRect rcRect = getExtraButtonRect(rcItem, true);
-    QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-                      m_szUnreadSize.width(), m_szUnreadSize.height());
-    rcb.adjust(-nMargin, -nMargin, nMargin, nMargin);
-
-    return rcb.contains(pt);
+    return rcRect.contains(pt);
 }
 
 QString CWizCategoryViewMessageItem::getSectionName()
 {
     return WIZ_CATEGORY_SECTION_GENERAL;
+}
+
+QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, bool ignoreIconExist) const
+{
+    if (!m_nUnread)
+        return QRect();
+
+    int nButtonWidth = 26;
+    int nButtonHeight = 14;
+    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+             nButtonWidth, nButtonHeight);
+    return rc;
 }
 
 void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
@@ -473,35 +482,46 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
     QFont f;
     f.setPixelSize(10);
     p->setFont(f);
-    //
-    int nButtonWidth = 26;
-    int nButtonHeight = 14;
-//    QRect rcRect = getExtraButtonRect(vopt->rect, true);
-    QRect rcb(vopt->rect.right() - 14 - nButtonWidth, vopt->rect.y() + (vopt->rect.height() - nButtonHeight) / 2,
-              nButtonWidth, nButtonHeight);  //QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-//                      m_szUnreadSize.width(), m_szUnreadSize.height());
+    //    
+    QRect rcb = getExtraButtonRect(vopt->rect, true);
 
     p->setRenderHint(QPainter::Antialiasing);
 
-    if (vopt->state.testFlag(QStyle::State_Sunken))
+    if (m_extraButtonIconPressed)
     {
-        p->setPen("#C1C1C1");
-        p->setBrush(QBrush("#C1C1C1"));
-        p->drawRoundedRect(rcb, 8, 8);
+        rcb.adjust(0, 0, 0, 2);
+        QPixmap pixBg(Utils::StyleHelper::skinResourceFileName("category_unreadButton_selected", true));
+        p->drawPixmap(rcb, pixBg);
+        rcb.adjust(0, 0, 0, -2);
         p->setPen("999999");
         p->drawText(rcb, Qt::AlignCenter, text);
     }
     else
     {
-        p->setPen("#C1C1C1");
-        p->setBrush(QBrush("#FFFFFF"));
-        p->drawRoundedRect(rcb, 6, 8);
-        p->setPen("#999999");
+        rcb.adjust(0, 0, 0, 2);
+        QPixmap pixBg(Utils::StyleHelper::skinResourceFileName("category_unreadButton", true));
+        p->drawPixmap(rcb, pixBg);
+        rcb.adjust(0, 0, 0, -2);
         p->drawText(rcb, Qt::AlignCenter, text);
     }
     //
 
     p->restore();
+}
+
+void CWizCategoryViewMessageItem::mousePressed(const QPoint& pos)
+{
+    QRect rcBorder = treeWidget()->visualItemRect(this);
+    QRect rcIcon = getExtraButtonRect(rcBorder, true);
+    if (rcIcon.contains(pos))
+    {
+        m_extraButtonIconPressed = true;
+    }
+}
+
+void CWizCategoryViewMessageItem::mouseReleased(const QPoint& pos)
+{
+    m_extraButtonIconPressed = false;
 }
 
 /* -------------------- CWizCategoryViewShortcutRootItem -------------------- */
