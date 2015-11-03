@@ -31,7 +31,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     , m_dbMgr(app.databaseManager())
     , m_tagList(nullptr)
 {
-    int nHeight = Utils::StyleHelper::tagBarHeight();
+    int nHeight = Utils::StyleHelper::tagBarHeight() - 8;
     setFixedHeight(nHeight);
 
 //    setStyleSheet("font-size: 11px; color: #646464;");
@@ -46,7 +46,9 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     //
     QHBoxLayout* hLayout = new QHBoxLayout(this);
     hLayout->setContentsMargins(0, 0, 0, 0);
+    hLayout->setSpacing(6);
     m_label = new QLabel(tr("Tag"), this);
+    m_label->setStyleSheet("font-size:12px; color:#A2A2A2;");
     hLayout->addWidget(m_label);
     m_btnAdd = new QToolButton(this);
     hLayout->addWidget(m_btnAdd);
@@ -56,12 +58,16 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     hLayout->addWidget(m_btnMore);
     m_btnMore->setVisible(false);
     m_lineEdit = new CTagLineEdit(this);
+    QFont f = m_lineEdit->font();
+    f.setPixelSize(12);
+    m_lineEdit->setFont(f);
     hLayout->addWidget(m_lineEdit);
     hLayout->addStretch();
 
     //
     m_tagLayout = new QHBoxLayout(m_tagWidget);
     m_tagLayout->setContentsMargins(0, 0, 0, 0);
+    m_tagLayout->setSpacing(6);
 
     applyStyleSheet();
 
@@ -499,7 +505,7 @@ void CWizTagBar::reset()
 void CWizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
-    m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#535353; background-color:transparent;}");
+    m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#B6B6B6; background-color:transparent;}");
     m_lineEdit->setFixedWidth(150);
     m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
@@ -600,6 +606,9 @@ void CTagItem::paintEvent(QPaintEvent* event)
     pt.setRenderHint(QPainter::Antialiasing, true);
     pt.drawRoundedRect(rcBorder, 8, 8);
     pt.setPen(Qt::white);
+    QFont f = pt.font();
+    f.setPixelSize(11);
+    pt.setFont(f);
     pt.drawText(rcBorder, Qt::AlignCenter, m_tagName);
 
     if (!m_readOnly)
@@ -736,7 +745,6 @@ CTagLineEdit::CTagLineEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_completer(nullptr)
 {
-
 }
 
 void CTagLineEdit::resetCompleter(const QStringList& tagNames)
