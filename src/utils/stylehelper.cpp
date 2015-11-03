@@ -205,15 +205,19 @@ QString StyleHelper::wizCommonScrollBarStyleSheet()
 {
     return "QScrollBar {\
             background: #F5F5F5;\
-            width: 8px; \
-        }\
-        QScrollBar::handle {\
-            background: #D8D8D8;\
-            min-height: 30px;\
             width: 4px; \
+            margin-right:2px; \
+        }\
+        QScrollBar:vertical { \
+            width:4px; \
+            background:rgba(0,0,0,0%); \
+            margin:0px,0px,0px,0px; \
         }\
         QScrollBar::handle:vertical {\
-            margin: 0 2px 0 2px;\
+            width: 4px; \
+            background:rgba(0,0,0,25%); \
+            border-radius:2px;\
+            min-height:20; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -248,9 +252,9 @@ QColor StyleHelper::treeViewBackground()
 QColor StyleHelper::treeViewItemBackground(int stat)
 {    
     if (stat == Selected) {
-        return QColor(getValue("Category/ItemSelectedNoFocus", "#888888").toString());
+        return QColor(getValue("Category/ItemSelectedNoFocus", "#C1C1C1").toString());
     } else if (stat == Active) {
-        return QColor(getValue("Category/ItemSelected", "#C1C1C1").toString());
+        return QColor(getValue("Category/ItemSelected", "#5990EF").toString());
     }
 
     Q_ASSERT(0);
@@ -765,7 +769,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
         str.remove(0, line.textLength());
         p->drawText(rcRet, nFlags, lineText);
 
-        nHeight += nHeightLine;
+        nHeight = nHeight + nHeightLine + lineSpacing();
         rcRet.setRect(rc.x(), rc.y() + nHeight, nWidth, nHeightLine);
         rcRet.adjust(margin(), 0, -margin(), 0);
 
@@ -788,7 +792,7 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
         return QRect(rc.x(), rc.y(), 0, 0);
     }
 
-    QRect rcd(rc.x() + rc.right() - 62, rc.y() + rc.height() - 64, 50, 50);
+    QRect rcd(rc.x() + rc.right() - 66, rc.y() + rc.height() - 60, 50, 50);
 
     int nWidth = 0, nHeight = 0;
     if (pm.width() > nThumbnailPixmapMaxWidth || pm.height() > nThumbnailPixmapMaxWidth) {
@@ -851,7 +855,7 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, 
 
 int StyleHelper::lineSpacing()
 {
-    return 5;
+    return 4;
 }
 
 int StyleHelper::leading()
@@ -1044,7 +1048,7 @@ QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListVi
 
 void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                         const QString& title, const QStringList& lead, const QString& location,
-                                        const QString& abs, bool bFocused, bool bSelected)
+                                        const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix)
 {
     QRect rcd = rc.adjusted(2, 0, 0, 0); //
 
@@ -1083,7 +1087,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
         }
 
-        rcd.adjust(0, titleHeight + 4, 0, 0);
+        rcd.adjust(0, titleHeight, 0, 0);
     }
 
 
@@ -1139,12 +1143,20 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             badgeIcon.paint(p, rcPix, Qt::AlignCenter, QIcon::Normal, QIcon::Off);
         }
 
-    } else if (!abs.isEmpty()) {          //  笔记内容
-        QString strText(abs);
-        QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+    } else {
 
-        if (!strText.isEmpty()) {            
-            Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+        if (!thumbPix.isNull()) {
+            QRect rcPix = drawThumbnailPixmap(p, rcd, thumbPix);
+            rcSummary.setRight(rcPix.left() - 4);
+        }
+
+        if (!abs.isEmpty()) {          //  笔记内容
+            QString strText(abs);
+            rcSummary.adjust(0, -4, 0, 0);
+            QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+            if (!strText.isEmpty()) {
+                Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+            }
         }
     }
 }

@@ -2,6 +2,7 @@
 #define UTILS_STYLEHELPER_H
 
 #include <QVariant>
+#include <QPixmap>
 class QSize;
 class QRect;
 class QPainter;
@@ -115,7 +116,7 @@ public:
     static QRect initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine = true);
     static void drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                       const QString& title, const QStringList& lead, const QString& location,
-                                      const QString& abs, bool bFocused, bool bSelected);
+                                      const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix = QPixmap());
 
     //static void drawListViewItem(QPainter* p, const QRect& rc);
 

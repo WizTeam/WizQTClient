@@ -573,16 +573,16 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
+    QPixmap pmt;
     if (!thumb.image.isNull()) {
-        QPixmap pmt = QPixmap::fromImage(thumb.image);
-        QRect rcp = Utils::StyleHelper::drawThumbnailPixmap(p, rcd, pmt);
-        rcd.setRight(rcp.left() - 8);
+        pmt = QPixmap::fromImage(thumb.image);
     }
 
     rcd.setTop(rcd.top() + nTextTopMargin);
     int nType = badgeType(true);
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
-                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
+                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text,
+                                              bFocused, bSelected, pmt);
 }
 
 const int nAvatarRightMargin = 8;
