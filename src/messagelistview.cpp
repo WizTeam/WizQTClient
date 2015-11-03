@@ -1031,7 +1031,7 @@ protected:
     }
 };
 
-const int maxSenderSelectorHeight = 200;
+const int maxSenderSelectorHeight = 378;
 WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_dbMgr(dbMgr)
@@ -1049,8 +1049,8 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
     layout->addWidget(m_userList);
     //
     setStyleSheet(QString(".QWidget{padding:0px; background-color:#FFFFFF;} \
-                  QListWidget{border:0px;padding:0xp;background-color:#FFFFFF;} \
-                    %1").arg(Utils::StyleHelper::wizCommonScrollBarStyleSheet()));
+                  QListWidget{border:0px;padding:0xp;background-color:#FFFFFF;}"));
+    m_userList->verticalScrollBar()->setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet());
     QPalette pl = palette();
     pl.setColor(QPalette::Window, QColor(Qt::white));
     setPalette(pl);
@@ -1082,7 +1082,7 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
 
     m_userList->sortItems();
 
-    int nHeight = m_userList->count() > 10 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
+    int nHeight = m_userList->count() > 15 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
     setWidgetSize(QSize(width(), nHeight));
 }
 
@@ -1092,7 +1092,7 @@ void WizMessageSenderSelector::appendUser(const QString& userGUID)
 
     m_userList->sortItems();
 
-    int nHeight = m_userList->count() > 10 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
+    int nHeight = m_userList->count() > 15 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
     setWidgetSize(QSize(width(), nHeight));
 }
 
@@ -1134,7 +1134,7 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     WizService::AvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
-    selectorItem->setSizeHint(QSize(width(), 22));
+    selectorItem->setSizeHint(QSize(width(), 24));
     m_userList->addItem(selectorItem);
 
     m_userGUIDSet.insert(userGUID);

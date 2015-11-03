@@ -578,7 +578,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     , m_list(new CWizAttachmentListView(this))
 {
     QString strTheme = Utils::StyleHelper::themeName();
-    setContentsMargins(0, 20, 0, 0);
+    setContentsMargins(0, 13, 2, 0);
 
     setFixedWidth(sizeHint().width());
 
@@ -589,7 +589,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     m_btnAddAttachment->setAction(actionAddAttach);
 
     QHBoxLayout* layoutHeader = new QHBoxLayout();
-    layoutHeader->setContentsMargins(20, 0, 20, 0);
+    layoutHeader->setContentsMargins(12, 0, 4, 0);
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
     layoutHeader->addStretch();
     layoutHeader->addWidget(m_btnAddAttachment);
