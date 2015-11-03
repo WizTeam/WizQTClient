@@ -75,6 +75,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);
+    setCursor(Qt::ArrowCursor);
 
     m_nViewType = (ViewType)app.userSettings().get("VIEW_TYPE").toInt();
     m_nSortingType = app.userSettings().get("SORT_TYPE").toInt();

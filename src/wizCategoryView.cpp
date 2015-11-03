@@ -116,6 +116,9 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     setAttribute(Qt::WA_MacShowFocusRect, false);   
     setTextElideMode(Qt::ElideMiddle);
     setIndentation(24);
+    setCursor(Qt::ArrowCursor);
+    //
+    setMouseTracking(true);
 
     // scrollbar        ScrollPerPixel could cause drag and drop problem    
 //    setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
@@ -141,10 +144,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
 //    pal.setBrush(QPalette::Base, colorBg);
 //    setPalette(pal);
 //    setStyleSheet("background-color: transparent;");
-//    setAutoFillBackground(true);
-    //
-    setCursor(QCursor(Qt::ArrowCursor));
-    setMouseTracking(true);
+//    setAutoFillBackground(true);   
 
     // signals from database
     connect(&m_dbMgr, SIGNAL(documentCreated(const WIZDOCUMENTDATA&)),

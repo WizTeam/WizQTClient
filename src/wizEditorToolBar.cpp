@@ -88,21 +88,21 @@ WizComboboxStyledItem* FontSizes()
 {
     static WizComboboxStyledItem fontItems[] =
     {
-        {"9", "9px", "", 9, false},
-        {"10", "10px", "", 10, false},
-        {"11", "11px", "", 11, false},
-        {"12", "12px", "", 12, false},
-        {"13", "13px", "", 13, false},
+        {"9", "9px", "", 14, false},
+        {"10", "10px", "", 14, false},
+        {"11", "11px", "", 14, false},
+        {"12", "12px", "", 14, false},
+        {"13", "13px", "", 14, false},
         {"14", "14px", "", 14, false},
-        {"15", "15px", "", 15, false},
-        {"16", "16px", "", 16, false},
-        {"17", "17px", "", 17, false},
-        {"18", "18px", "", 18, false},
-        {"24", "24px", "", 24, false},
-        {"36", "36px", "", 36, false},
-        {"48", "48px", "", 48, false},
-        {"64", "64px", "", 64, false},
-        {"72", "72px", "", 72, false}
+        {"15", "15px", "", 14, false},
+        {"16", "16px", "", 14, false},
+        {"17", "17px", "", 14, false},
+        {"18", "18px", "", 14, false},
+        {"24", "24px", "", 14, false},
+        {"36", "36px", "", 14, false},
+        {"48", "48px", "", 14, false},
+        {"64", "64px", "", 14, false},
+        {"72", "72px", "", 14, false}
     };
     return fontItems;
 }

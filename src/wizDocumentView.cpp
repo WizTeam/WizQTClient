@@ -117,7 +117,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     QWidget* wgtEditor = new QWidget(m_docView);
     QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
     layoutEditor->setSpacing(0);
-    layoutEditor->setContentsMargins(0, 0, 0, 0);
+    layoutEditor->setContentsMargins(0, 5, 0, 0);
     layoutEditor->addWidget(m_title);
     layoutEditor->addWidget(m_web);
     layoutEditor->setStretchFactor(m_title, 0);

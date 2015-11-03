@@ -442,6 +442,7 @@ public Q_SLOTS:
 
     //
     void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
+    void viewCurrentNoteInSeparateWindow();
 
 public:
     // WizExplorerApp pointer

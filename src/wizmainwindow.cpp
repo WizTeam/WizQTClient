@@ -215,6 +215,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_singleViewDelegate, SIGNAL(documentChanged(QString,CWizDocumentView*)),
             m_doc, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
 
+    connect(m_doc->titleBar(), SIGNAL(viewNoteInSeparateWindow_request()), SLOT(viewCurrentNoteInSeparateWindow()));
+
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
         WizService::AvatarHost::deleteAvatar(oldId);
@@ -1836,14 +1838,16 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
-    m_toolBar->addSearch(tr("Search"), "");
-//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
-
     CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), 0, 11, m_toolBar);
     connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
     m_toolBar->addWidget(texturedItem, "", "");
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
+
+    m_toolBar->addSearch(tr("Search"), "");
+//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+
+
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
 
@@ -4182,6 +4186,12 @@ void MainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
     m_singleViewDelegate->viewDocument(data);
     // update dock menu
     resetDockMenu();
+}
+
+void MainWindow::viewCurrentNoteInSeparateWindow()
+{
+    WIZDOCUMENTDATA doc = m_doc->note();
+    viewNoteInSeparateWindow(doc);
 }
 
 void MainWindow::quickSyncKb(const QString& kbGuid)
