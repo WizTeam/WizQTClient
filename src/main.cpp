@@ -230,6 +230,13 @@ int mainCore(int argc, char *argv[])
     QSslConfiguration::setDefaultConfiguration(conf);
 #endif
 
+    a.setStyleSheet("QToolTip { \
+                    font: 12px #000000; \
+                    padding:0px 1px; \
+                    background-color: #F8F8F8; \
+                    border:0px; \
+                }");
+
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
