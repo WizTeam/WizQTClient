@@ -175,7 +175,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     installEventFilter(this);
 
-    if (!systemWidgetBlurAvailable())
+    if (systemWidgetBlurAvailable())
     {
         setAutoFillBackground(false);
         //    setWindowFlags(Qt::FramelessWindowHint);
@@ -460,7 +460,7 @@ void MainWindow::changeEvent(QEvent* event)
 #ifdef Q_OS_MAC
 void MainWindow::paintEvent(QPaintEvent*event)
 {
-    if (!systemWidgetBlurAvailable())
+    if (systemWidgetBlurAvailable())
     {
         QPainter pt(this);
 

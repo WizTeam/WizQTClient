@@ -179,7 +179,7 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
     int nHeight = szBtn.height() + 2 * nMargin;
     //
     int nTop = rcItemBorder.y() + (rcItemBorder.height() - nHeight) / 2;
-    QRect rcb(rcItemBorder.right() - nWidth - 2 * nMargin, nTop, nWidth, nHeight);
+    QRect rcb(rcItemBorder.right() - nWidth - 2 * nMargin - 2, nTop, nWidth, nHeight);
     rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
     return rcb;
 }
