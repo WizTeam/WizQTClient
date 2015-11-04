@@ -404,7 +404,7 @@ int StyleHelper::listViewSortControlWidgetHeight()
 
 int StyleHelper::messageViewItemHeight()
 {
-    return 102;
+    return 83;
 }
 
 int StyleHelper::listViewItemHeight(int nType)

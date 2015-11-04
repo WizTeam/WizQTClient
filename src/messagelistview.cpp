@@ -157,44 +157,44 @@ public:
         }
 
         int nMargin = 12;
-        QRect rcd = vopt->rect.adjusted(nMargin, nMargin, -nMargin, 0);
+        QRect rcd = vopt->rect.adjusted(nMargin, 26, -nMargin, 0);
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         int nAvatarRightMargin = 12;
 
         QFont f;
-        int nHeight = Utils::StyleHelper::fontNormal(f);
-
+        f.setPixelSize(12);
         p->save();        
-        p->setPen("#000000");
+        p->setPen(QColor("#535353"));
         QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
         QRect  rectSender = rcd;
         rectSender.setLeft(rectAvatar.right() + nAvatarRightMargin);
+        rectSender.setTop(vopt->rect.top() + 24);
         rectSender = Utils::StyleHelper::drawText(p, rectSender, strSender, 1,
                                                   Qt::AlignVCenter | Qt::AlignLeft, p->pen().color(), f);
 
-        QColor messageTextColor("#888888");
+        QColor messageTextColor("#A7A7A7");
         QString strType = descriptionOfMessageType(m_data.nMessageType);
         QRect rectType = rcd;
-        rectType.setLeft(rectAvatar.right() + nAvatarRightMargin);
-        rectType.setTop(rectSender.bottom() - 2);
-        nHeight = Utils::StyleHelper::fontThumb(f);
+        rectType.setLeft(rectSender.right());
+        rectType.setTop(vopt->rect.top() + 25);
+        f.setPixelSize(11);
         Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
                                      messageTextColor, f);
 
-        QRect rcTime(rcd.adjusted(0, -4, 0, 0));
-        QFont fTime = f;
-        fTime.setPixelSize(10);
+        QRect rcTime = vopt->rect.adjusted(0, 8, -14, 0);
+        QColor dateColor("#C1C1C1");
+        f.setPixelSize(10);
         QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated, "yyyy.MM.dd");
         rcTime = Utils::StyleHelper::drawText(p, rcTime, strTime, 1, Qt::AlignRight | Qt::AlignTop,
-                                              messageTextColor, fTime);
+                                              dateColor, f);
 
-        int nAvatarBottomMargin = 10;
-        QRect rcTitle(rcd.x(), rectAvatar.bottom() + nAvatarBottomMargin, rcd.width(),
-                      rcd.bottom() - rectAvatar.bottom() - nAvatarBottomMargin);
-        QString strTitle(m_data.title);       
-        Utils::StyleHelper::drawText(p, rcTitle, strTitle, 2, Qt::AlignLeft| Qt::AlignVCenter, p->pen().color(), f);
+        QRect rcTitle(rectAvatar.right() + nAvatarRightMargin, rectSender.bottom(), vopt->rect.right() - 12 - rectAvatar.right() - 16,
+                      vopt->rect.bottom() - rectSender.bottom());
+        f.setPixelSize(14);
+        QString strTitle(m_data.title);
+        Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignTop, p->pen().color(), f);
 
         p->restore();
     }
@@ -792,7 +792,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     layoutActions->setSpacing(0);
     setLayout(layoutActions);
     QPalette pal = palette();
-    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+    pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     setPalette(pal);
     setAutoFillBackground(true);
 
@@ -800,7 +800,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_labelCurrentSender->setText(tr("All Users"));
     m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_labelCurrentSender->setFixedWidth(102);
-    m_labelCurrentSender->setStyleSheet(QString("padding-left:5px; padding-right:4px; font: %1px;color:#888888;").arg(SenderNameFontSize));
+    m_labelCurrentSender->setStyleSheet(QString("padding-left:7px; padding-top:2px; padding-right:4px; font: %1px;color:#888888;").arg(SenderNameFontSize));
     connect(m_labelCurrentSender, SIGNAL(labelClicked()), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_labelCurrentSender);
 
@@ -815,7 +815,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgListHintLabel = new QLabel(this);
     m_msgListHintLabel->setText(tr("Unread messages"));
     m_msgListHintLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    m_msgListHintLabel->setStyleSheet("color: #787878; margin-right:10px;");
+    m_msgListHintLabel->setStyleSheet("color: #888888; padding-top:2px; margin-right:10px;");
     layoutActions->addWidget(m_msgListHintLabel);
 
     m_msgListMarkAllBtn = new wizImageButton(this);
@@ -825,6 +825,10 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgListMarkAllBtn->setToolTip(tr("Mark all messages read"));
     connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SLOT(on_markAllReadbutton_clicked()));
     layoutActions->addWidget(m_msgListMarkAllBtn);
+
+    QWidget* placeHoldWgt = new QWidget(this);
+    placeHoldWgt->setFixedSize(8, 1);
+    layoutActions->addWidget(placeHoldWgt);
 
     connect(&m_dbMgr, SIGNAL(messageCreated(WIZMESSAGEDATA)),
             SLOT(on_message_created(WIZMESSAGEDATA)));
