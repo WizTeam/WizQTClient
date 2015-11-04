@@ -90,6 +90,8 @@ private:
     void addUser(const QString& userGUID);
     void setWidgetSize(const QSize& size);
 
+    void adjustWidgetHeight();
+
 private:
     CWizDatabaseManager& m_dbMgr;
     QListWidget* m_userList;

@@ -821,7 +821,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgListMarkAllBtn = new wizImageButton(this);
     QIcon btnIcon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "actionMarkMessagesRead");
     m_msgListMarkAllBtn->setIcon(btnIcon);
-    m_msgListMarkAllBtn->setFixedSize(QSize(16, 16));
+    m_msgListMarkAllBtn->setFixedSize(QSize(18, 18));
     m_msgListMarkAllBtn->setToolTip(tr("Mark all messages read"));
     connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SLOT(on_markAllReadbutton_clicked()));
     layoutActions->addWidget(m_msgListMarkAllBtn);
@@ -1082,8 +1082,7 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
 
     m_userList->sortItems();
 
-    int nHeight = m_userList->count() > 15 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
-    setWidgetSize(QSize(width(), nHeight));
+    adjustWidgetHeight();
 }
 
 void WizMessageSenderSelector::appendUser(const QString& userGUID)
@@ -1092,8 +1091,7 @@ void WizMessageSenderSelector::appendUser(const QString& userGUID)
 
     m_userList->sortItems();
 
-    int nHeight = m_userList->count() > 15 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 24;
-    setWidgetSize(QSize(width(), nHeight));
+    adjustWidgetHeight();
 }
 
 QSet<QString>&WizMessageSenderSelector::userGUIDSet()
@@ -1148,6 +1146,12 @@ void WizMessageSenderSelector::sort()
 void WizMessageSenderSelector::setWidgetSize(const QSize& size)
 {
     setFixedSize(size);
+}
+
+void WizMessageSenderSelector::adjustWidgetHeight()
+{
+    int nHeight = m_userList->count() > 15 ?  maxSenderSelectorHeight :  m_userList->count() * 22 + 30;
+    setWidgetSize(QSize(width(), nHeight));
 }
 
 const QSize SelectorAvatarSize = QSize(16, 16);
