@@ -256,18 +256,16 @@ private:
     QString m_strTooltip;
 };
 
-
-
 class CWizMacToolBarSearchItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip)
+    CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip, int width)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
         , m_searchField(new CWizSearchWidget())
         , m_strLabel(label)
         , m_strTooltip(tooltip)
-
+        , m_width(width)
     {
     }
 private:
@@ -276,6 +274,7 @@ private:
     CWizSearchWidget* m_searchField;
     QString m_strLabel;
     QString m_strTooltip;
+    int m_width;
 public:
     CWizSearchWidget* widget() const { return m_searchField; }
 
@@ -304,8 +303,10 @@ public:
         NSView* nsview = (NSView *)m_searchField->cocoaView();
 #endif
         [toolbarItem setView: nsview];
-        [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(SEARCHWIDGETWIDTH - 10, NSHeight([nsview frame]))];
+        [toolbarItem setMinSize:NSMakeSize(m_width, NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(m_width, NSHeight([nsview frame]))];
+
+        m_searchField->setSizeHint(QSize(m_width, m_searchField->sizeHint().height()));
 
         return toolbarItem;
     }
@@ -519,15 +520,24 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(new CWizMacToolBarStandardItem(standardItem));
 }
 
-- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip width:(int)width
 {
-    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip);
+    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip, width);
     items->append(pItem);
 }
 
 - (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip
 {
     items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
+}
+
+- (void)deleteAllToolBarItem
+{
+//    foreach (CWizMacToolBarItem* item, *items)
+//    {
+//        item->deleteLater();
+//    }
+//    items->clear();
 }
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier

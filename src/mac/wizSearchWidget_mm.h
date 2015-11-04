@@ -16,7 +16,7 @@ QT_END_NAMESPACE
 
 class WizSuggestCompletionon;
 
-const int TOOLBARITEMHEIGHT =  50;
+const int TOOLBARITEMHEIGHT =  10;
 const int SEARCHWIDGETWIDTH = 240;
 
 class CWizSearchWidget : public QMacCocoaViewContainer
@@ -41,6 +41,7 @@ public:
 
     void setPopupWgtOffset(int popupWgtWidth, const QSize& offset);
 
+    void setSizeHint(QSize sizeHint);
     virtual QSize sizeHint() const;
 
     void processEvent(QEvent* ev);
@@ -59,6 +60,7 @@ Q_SIGNALS:
 
 private:
     WizSuggestCompletionon* m_completer;
+    QSize m_sizeHint;
 };
 
 class CWizSuggestiongList : public QTreeWidget

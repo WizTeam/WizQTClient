@@ -1838,15 +1838,15 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
+
+    m_toolBar->addSearch(tr("Search"), "");
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
+//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+
     CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), 0, 11, m_toolBar);
     connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
     m_toolBar->addWidget(texturedItem, "", "");
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
-
-    m_toolBar->addSearch(tr("Search"), "");
-//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-
 
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);

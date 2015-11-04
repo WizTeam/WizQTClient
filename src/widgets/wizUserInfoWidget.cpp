@@ -278,6 +278,6 @@ QSize CWizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
     int vipIconWidth = 35;
-    return QSize(36+ textWidth() + 24 + vipIconWidth, 40);
+    return QSize(36+ textWidth() + 24 + vipIconWidth, 36);
 }
 

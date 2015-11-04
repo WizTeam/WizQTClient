@@ -88,14 +88,12 @@
 {    
     if (commandSelector == @selector(insertNewline:))
     {
-        NSLog(@"enter pressed");
         [self enterKeyPressed];
         return NO;
     }
     else if (commandSelector == @selector(cancelOperation:))
     {
         // just hide suggestion list and pass command to system
-        NSLog(@"esc pressed");
         [self hideSearchCompleter];
         return NO;
     }
@@ -205,7 +203,6 @@
     if (textMove == NSReturnTextMovement) {
         m_pSearchWidget->on_search_editFinished(WizToQString([self stringValue]));
     }
-    NSLog(@"text did end editing");
     [self hideSearchCompleter];
 
     self->m_isEditing = NO;
@@ -213,10 +210,7 @@
     [super textDidEndEditing:aNotification];
 }
 - (void)textDidChange:(NSNotification *)aNotification
-{
-    NSLog(@"searchWidgt text changed: %@", [self stringValue]);
-
-    NSLog(@"text editalbe %d", [self isEditable]);
+{        
     //
     QString text = WizToQString([self stringValue]);
     m_pSearchWidget->on_search_textChanged(text);
@@ -225,6 +219,7 @@
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QMacCocoaViewContainer(0, parent)
+    , m_sizeHint(QSize(SEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
 {
     // Many Cocoa objects create temporary autorelease objects,
     // so create a pool to catch them.
@@ -336,9 +331,14 @@ void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
     }
 }
 
+void CWizSearchWidget::setSizeHint(QSize sizeHint)
+{
+    m_sizeHint = sizeHint;
+}
+
 QSize CWizSearchWidget::sizeHint() const
 {
-    return QSize(SEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT);
+    return m_sizeHint;
 }
 
 void CWizSearchWidget::processEvent(QEvent* ev)

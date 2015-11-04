@@ -92,9 +92,11 @@ public:
     // Add actions to the Toolbar
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
-    void addSearch(const QString& label, const QString& tooltip);
+    void addSearch(const QString& label, const QString& tooltip,int width = 250);
     void addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip);
     void addNSToolBarItem();
+
+    void deleteAllToolBarItems();
 
     void onSearchEndEditing(const QString& str);
     //

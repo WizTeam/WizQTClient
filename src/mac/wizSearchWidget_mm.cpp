@@ -242,7 +242,6 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices, bool isR
 
     QPoint bottomLeft(m_popupOffset.width(), -10); // = m_editor->geometry().bottomLeft();
 
-    qApp->activeWindow()->mapToGlobal(bottomLeft);
     m_popupWgt->move(qApp->activeWindow()->mapToGlobal(bottomLeft));
     m_popupWgt->setFocus();
     m_treeWgt->setFocus();

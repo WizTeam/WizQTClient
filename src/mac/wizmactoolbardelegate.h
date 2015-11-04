@@ -44,8 +44,10 @@ class QMacCocoaViewContainer;
 
 - (void)addAction:(QAction *)action;
 - (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
-- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip;
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip width:(int)width;
 - (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip;
+
+- (void)deleteAllToolBarItem;
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;
@@ -77,6 +79,7 @@ public:
     virtual void childItemTriggerred(CWizMacToolBarItem* itemChild) { Q_UNUSED(itemChild); }
     virtual void setChildItemEnabled(CWizMacToolBarItem* itemChild, bool enabled) { Q_UNUSED(itemChild); Q_UNUSED(enabled); }
 };
+
 
 
 

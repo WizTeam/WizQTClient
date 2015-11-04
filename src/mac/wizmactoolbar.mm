@@ -132,6 +132,7 @@ void CWizMacToolBar::showInWindowImpl(QWidget *window)
     NSView *nsview = (NSView *)window->winId();
     NSWindow *macWindow = [nsview window];
 
+    [macWindow setToolbar: nil];
     [macWindow setToolbar: d->toolbar];
     [d->toolbar setVisible: YES];
 }
@@ -146,14 +147,19 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
     [d->delegate addStandardItem:standardItem];
 }
 
-void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
+void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip, int width)
 {
-    [d->delegate addSearch:label tooltip:tooltip];
+    [d->delegate addSearch:label tooltip:tooltip width: width];
 }
 
 void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
 {
     [d->delegate addWidget:widget label:label tooltip:tooltip];
+}
+
+void CWizMacToolBar::deleteAllToolBarItems()
+{
+    [d->delegate deleteAllToolBarItem];
 }
 
 void CWizMacToolBar::onSearchEndEditing(const QString& str)
@@ -233,18 +239,19 @@ CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
                                                            int buttonType, int bezelStyle, QWidget* parent)
     : QMacCocoaViewContainer(nil, parent)
 {
-    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 2, 120, 28)];
+    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
     [myButton setTitle: WizToNSString(title)];
     [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
     [myButton setImagePosition: NSImageLeft];
     [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
     [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
 
+
     [myButton setButtonWidget: this];
     [myButton setTarget:myButton];
     [myButton setAction:@selector(buttonPressed)];
 
-    setCocoaView(myButton);
+    setCocoaView(myButton);   
 
     [myButton release];
 }
