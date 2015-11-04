@@ -79,12 +79,7 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
     connect(m_radioGroup, SIGNAL(buttonClicked(QAbstractButton*)),
             SLOT(onRadioButtonClicked(QAbstractButton*)));
 
-    ui->listWidget->setStyleSheet(Utils::StyleHelper::wizCommonListViewStyleSheet());
-
-    ui->widget_sperator->setFixedHeight(1);
-    ui->widget_sperator->setStyleSheet("border-top:1px solid #E7E7E7");
-    ui->widget_sperator2->setFixedHeight(1);
-    ui->widget_sperator2->setStyleSheet("border-top:1px solid #E7E7E7");
+    ui->listWidget->setStyleSheet(Utils::StyleHelper::wizCommonListViewStyleSheet());    
 
     //
 //    ui->label_5->setVisible(false);
