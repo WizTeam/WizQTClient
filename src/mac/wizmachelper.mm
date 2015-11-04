@@ -864,3 +864,10 @@ QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
     QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
     return container;
 }
+
+
+int getSystemMinorVersion()
+{
+    NSOperatingSystemVersion systemVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
+    return systemVersion.minorVersion;
+}

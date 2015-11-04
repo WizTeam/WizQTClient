@@ -54,6 +54,8 @@ void initCrashReporter();
 void enableBehindBlurOnOSX10_10(QWidget* wgt);
 void enableBlendingBlurOnOSX10_10(QWidget* wgt);
 
+int getSystemMinorVersion();
+
 void adjustSubViews(QWidget* wgt);
 
 QMacCocoaViewContainer* createViewContainer(QWidget* wgt);

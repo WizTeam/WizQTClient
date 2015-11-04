@@ -22,13 +22,16 @@ class CWizMacToolBarButtonItem : public QMacCocoaViewContainer
 {
     Q_OBJECT
 public:
-    CWizMacToolBarButtonItem(const QString& title, int buttonType, int bezelStyle,QWidget* parent = 0);
+    CWizMacToolBarButtonItem(const QString& title, int buttonType, int bezelStyle, int width, QWidget* parent = 0);
 
     QSize sizeHint() const;
 
     void buttonClicked();
 signals:
     void triggered(bool);
+
+private:
+    int m_width;
 };
 
 class CWizMacFixedSpacer : public QMacCocoaViewContainer

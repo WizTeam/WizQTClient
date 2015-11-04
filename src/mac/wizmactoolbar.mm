@@ -236,8 +236,9 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 
 
 CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
-                                                           int buttonType, int bezelStyle, QWidget* parent)
+                                                           int buttonType, int bezelStyle, int width, QWidget* parent)
     : QMacCocoaViewContainer(nil, parent)
+    , m_width(width)
 {
     WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
     [myButton setTitle: WizToNSString(title)];
@@ -245,7 +246,6 @@ CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
     [myButton setImagePosition: NSImageLeft];
     [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
     [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
-
 
     [myButton setButtonWidget: this];
     [myButton setTarget:myButton];
@@ -258,7 +258,7 @@ CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
 
 QSize CWizMacToolBarButtonItem::sizeHint() const
 {
-     return  QSize(120, TOOLBARITEMHEIGHT);
+     return  QSize(m_width, TOOLBARITEMHEIGHT);
 }
 
 void CWizMacToolBarButtonItem::buttonClicked()

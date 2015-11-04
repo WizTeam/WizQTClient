@@ -240,7 +240,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
-    setWindowTitle(tr("WizNote"));
+//    setWindowTitle(tr("WizNote"));
 
     restoreStatus();
 
@@ -1833,17 +1833,17 @@ void MainWindow::initToolBar()
 
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
+    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
-    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
 
     m_toolBar->addSearch(tr("Search"), "");
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(40, 1), m_toolBar), "", "");
 //    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), 0, 11, m_toolBar);
+    int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;
+    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, m_toolBar);
     connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
     m_toolBar->addWidget(texturedItem, "", "");
@@ -1957,7 +1957,16 @@ void MainWindow::initClient()
     m_clienWgt = new QWidget(nullptr);
     setCentralWidget(m_clienWgt);
 
-    enableBehindBlurOnOSX10_10(m_clienWgt);
+    if (getSystemMinorVersion() >= 10)
+    {
+        enableBehindBlurOnOSX10_10(m_clienWgt);
+    }
+    else
+    {
+        QPalette pal = m_doc->palette();
+        pal.setColor(QPalette::Window, QColor("#F6F6F6"));
+        m_doc->setPalette(pal);
+    }
 
 #else
     setCentralWidget(rootWidget());
