@@ -196,7 +196,9 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
         int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
         //
-        rcText.setLeft(right + 4);
+        if (right != -1) {
+            rcText.setLeft(right + 4);
+        }
     }
 
     if (!strCount.isEmpty() && (rcText.width() > 10)) {

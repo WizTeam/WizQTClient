@@ -3171,7 +3171,7 @@ void CWizCategoryView::resetSections()
                     CWizOEMSettings oemSettings(m_dbMgr.db().GetAccountPath());
                     if(CATEGORY_TEAM_GROUPS == sectionName && !oemSettings.isForbidCreateBiz())
                     {
-                        QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "plus.png";
+                        QString strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin()) + "category_create_group.png";
                         pExistingSection->setExtraButtonIcon(strIconPath);
                     }
                     insertTopLevelItem(i, pExistingSection);
