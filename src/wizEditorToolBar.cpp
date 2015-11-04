@@ -29,12 +29,13 @@
 #include "share/wizAnalyzer.h"
 #include "wizdef.h"
 #include "utils/stylehelper.h"
+#include "wizDocumentView.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
 
 const int RecommendedWidthForTwoLine = 685;
-const int RecommendedWidthForOneLine = 1055;
+const int RecommendedWidthForOneLine = 1060;
 
 #define WIZSEPARATOR    "separator"
 #define WIZFONTPANEL    "fontpanel"
@@ -198,7 +199,7 @@ public:
         //
         if (option.state & QStyle::State_Selected)
         {
-            painter->fillRect(option.rect, QBrush(QColor("#448aff")));
+            painter->fillRect(option.rect, QBrush(QColor("#5990EF")));
             opt.palette.setColor(QPalette::Text, QColor(Qt::white));
             opt.palette.setColor(QPalette::WindowText, QColor(Qt::white));
             opt.palette.setColor(QPalette::HighlightedText, QColor(Qt::white));
@@ -371,15 +372,17 @@ void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QSt
 
 void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight)
 {
-    static QPixmap pixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground", true));
+    int nScale = WizIsHighPixel() ? 2 : 1;
 
+    static QPixmap pixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground", true));
     static QPixmap pixBackgroundMid = pixBackground.copy(6, 0, 2, pixBackground.height());
-    QRect rcLeft(rect.x(), rect.y(), 5, rect.size().height());
-    static QPixmap pixBackgroundLeft = pixBackground.copy(0, 0, 6, pixBackground.height());
+    QRect rcLeft(rect.x(), rect.y(), 6, rect.size().height());
+    static QPixmap pixBackgroundLeft = pixBackground.copy(0, 0, 6 * nScale, pixBackground.height());
     painter->drawPixmap(rcLeft, bDrawLeft ? pixBackgroundLeft : pixBackgroundMid);
-    static QPixmap pixBackgroundRight = pixBackground.copy(pixBackground.width() - 4, 0, 4, pixBackground.height());
-    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - 6, rect.size().height(), pixBackgroundMid);
-    QRect rcRight(rect.size().width() - 4, rect.y(), pixBackgroundRight.width(), rect.size().height());
+    int rightWidth = 8;
+    static QPixmap pixBackgroundRight = pixBackground.copy(pixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, pixBackground.height());
+    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixBackgroundMid);
+    QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, rect.size().height());
     painter->drawPixmap(rcRight, bDrawRight ? pixBackgroundRight : pixBackgroundMid);
 }
 
@@ -831,17 +834,17 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_comboFontSize->setFixedWidth(48);
     WizComboboxStyledItem* fontItems = FontSizes();
 #ifdef Q_OS_MAC
-    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#ffffff;}"
+    m_comboParagraph->setStyleSheet("QComboBox QListView{min-width:95px;background:#F6F6F6;}"
                                     "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizToolComboboxItemDelegate* paragraphDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, paraItems, nParagraphItemCount);
     m_comboParagraph->setItemDelegate(paragraphDelegate);
     //
-    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#ffffff;}"
+    m_comboFontFamily->setStyleSheet("QComboBox QListView{min-width:150px;background:#F6F6F6;}"
                                      "QComboBox QAbstractItemView::item {min-height:30px;background:transparent;}");
     WizToolComboboxItemDelegate* fontFamilyDelegate = new WizToolComboboxItemDelegate(m_comboFontFamily, m_comboFontFamily, paraItems, nParagraphItemCount);
     m_comboFontFamily->setItemDelegate(fontFamilyDelegate);
     //
-    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:210px;background:#ffffff;}"
+    m_comboFontSize->setStyleSheet("QComboBox QListView{min-width:50px;background:#F6F6F6;}"
                                    "QComboBox QAbstractItemView::item {min-height:20px;background:transparent;}");
     WizToolComboboxItemDelegate* fontDelegate = new WizToolComboboxItemDelegate(m_comboParagraph, m_comboParagraph, fontItems, nFontSizeCount);
     m_comboFontSize->setItemDelegate(fontDelegate);
@@ -992,7 +995,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
-    m_btnTable->setHorizontalPadding(8);
+//    m_btnTable->setHorizontalPadding(8);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
     m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
     m_btnTable->setToolTip(tr("InsertTable"));
@@ -1001,7 +1004,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
-    m_btnHorizontal->setHorizontalPadding(8);
+    m_btnHorizontal->setHorizontalPadding(10);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
     m_btnHorizontal->setToolTip(tr("InsertHorizontal"));
@@ -1018,7 +1021,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnInsertLink = new CWizToolButton(this);
     m_btnInsertLink->setCheckable(false);
-    m_btnInsertLink->setHorizontalPadding(8);
+//    m_btnInsertLink->setHorizontalPadding(8);
     m_btnInsertLink->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertLink"));
     m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
     m_btnInsertLink->setToolTip(tr("InsertLink"));
@@ -1043,7 +1046,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnInsertDate_clicked()));
 
     m_btnMobileImage = new CWizToolButton(this);
-    m_btnMobileImage->setHorizontalPadding(6);
+//    m_btnMobileImage->setHorizontalPadding(6);
     m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage"));
     m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
     m_btnMobileImage->setToolTip(tr("Receive mobile image"));
@@ -1071,7 +1074,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnViewSource = new CWizToolButton(this);
     m_btnViewSource->setCheckable(true);
-    m_btnViewSource->setHorizontalPadding(7);
+    m_btnViewSource->setHorizontalPadding(6);
     m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
     m_btnViewSource->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatViewSource")).size());
     m_btnViewSource->setToolTip(tr("View source"));
@@ -1098,11 +1101,11 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     QWidget*  buttonContainer0 = createMoveAbleWidget(this);
     QHBoxLayout* containerLayout = qobject_cast<QHBoxLayout*>(buttonContainer0->layout());
     containerLayout->addWidget(m_comboParagraph);
-    containerLayout->addSpacing(12);
+    containerLayout->addSpacing(18);
     containerLayout->addWidget(m_comboFontFamily);
-    containerLayout->addSpacing(12);
+    containerLayout->addSpacing(20);
     containerLayout->addWidget(m_comboFontSize);
-    containerLayout->addSpacing(12);    
+    containerLayout->addSpacing(16);
 
     layout->addWidget(buttonContainer0);
 
@@ -2207,8 +2210,9 @@ void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
 }
 
 void EditorToolBar::adjustButtonPosition()
-{    
-    int parentWidgetWidth = parentWidget()->width() - 28;
+{
+    //
+    int parentWidgetWidth = m_editor->width() - 28;
     int firstLineWidth = m_btnShowExtra->width();
     for (QWidget* widget : m_buttonContainersInFirstLine)
     {
@@ -2227,7 +2231,7 @@ void EditorToolBar::adjustButtonPosition()
             moveWidgetFromFristLineToSecondLine(widget);
         }
     }
-    else if (parentWidgetWidth < RecommendedWidthForOneLine)
+    else if ((parentWidgetWidth < RecommendedWidthForOneLine) || (parentWidgetWidth == m_editor->view()->maximumWidth()))
     {
         // move movealbe buttons to first line or to second line
         if (firstLineWidth < parentWidgetWidth &&

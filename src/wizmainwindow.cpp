@@ -175,9 +175,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     installEventFilter(this);
 
-    setAutoFillBackground(false);
-//    setWindowFlags(Qt::FramelessWindowHint);
-    setAttribute(Qt::WA_TranslucentBackground, true);
+    if (!systemWidgetBlurAvailable())
+    {
+        setAutoFillBackground(false);
+        //    setWindowFlags(Qt::FramelessWindowHint);
+        setAttribute(Qt::WA_TranslucentBackground, true);
+    }
 
 #endif    
 
@@ -457,10 +460,13 @@ void MainWindow::changeEvent(QEvent* event)
 #ifdef Q_OS_MAC
 void MainWindow::paintEvent(QPaintEvent*event)
 {
-    QPainter pt(this);
+    if (!systemWidgetBlurAvailable())
+    {
+        QPainter pt(this);
 
-    pt.setCompositionMode( QPainter::CompositionMode_Clear );
-    pt.fillRect(rect(), Qt::SolidPattern );
+        pt.setCompositionMode( QPainter::CompositionMode_Clear );
+        pt.fillRect(rect(), Qt::SolidPattern );
+    }
 
     QMainWindow::paintEvent(event);
 }
@@ -1957,9 +1963,9 @@ void MainWindow::initClient()
     m_clienWgt = new QWidget(nullptr);
     setCentralWidget(m_clienWgt);
 
-    if (getSystemMinorVersion() >= 10)
+    if (systemWidgetBlurAvailable())
     {
-        enableBehindBlurOnOSX10_10(m_clienWgt);
+        enableWidgetBehindBlur(m_clienWgt);
     }
     else
     {
@@ -2231,7 +2237,7 @@ void MainWindow::init()
             SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
-    QTimer::singleShot(500, this, SLOT(adjustEditorButtonsPosition()));
+    QTimer::singleShot(1000, this, SLOT(adjustEditorButtonsPosition()));
 
     //ESC键退出全屏
     bindESCToQuitFullScreen(this);

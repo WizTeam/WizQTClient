@@ -96,6 +96,7 @@ protected:
     QString m_strKbGUID;
     QPixmap m_extraButtonIcon;
     QString m_countString;
+    bool m_extraButtonIconPressed;
 };
 
 
@@ -154,8 +155,7 @@ public:
 private:
     int m_nFilter;
     int m_nUnread;
-    QSize m_szUnreadSize;
-    bool m_extraButtonIconPressed;
+    QSize m_szUnreadSize;   
 };
 
 class CWizCategoryViewShortcutItem;
@@ -419,12 +419,18 @@ public:
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 
     //
+    virtual bool acceptMousePressedInfo() { return true; }
+    virtual void mousePressed(const QPoint& pos);
+    virtual void mouseReleased(const QPoint& pos);
+
+    //
     bool isExtraButtonUseable() const;
     bool isUnreadButtonUseable() const;
     void updateUnreadCount();
     QString unreadString() const;
     bool hitTestUnread();
     virtual QString getExtraButtonToolTip() const;
+    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
     //
     bool isOwner();
     bool isAdmin();
@@ -502,6 +508,10 @@ public:
     virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     void reload(CWizDatabase& db);
     //
+    virtual bool acceptMousePressedInfo() { return true; }
+    virtual void mousePressed(const QPoint& pos);
+    virtual void mouseReleased(const QPoint& pos);
+    //
     bool isAdmin(CWizDatabase& db);
     bool isOwner(CWizDatabase& db);
 
@@ -513,6 +523,7 @@ public:
     QString unreadString() const;
     bool hitTestUnread();
     virtual QString getExtraButtonToolTip() const;
+    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
 
 private:
     WIZGROUPDATA m_group;

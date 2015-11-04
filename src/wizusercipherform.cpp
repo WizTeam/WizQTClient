@@ -4,6 +4,7 @@
 #include <QGraphicsDropShadowEffect>
 
 #include "wizmainwindow.h"
+#include "Utils/stylehelper.h"
 
 using namespace Core::Internal;
 
@@ -23,12 +24,12 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
 
 
 
-    QString strIconNormal = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done.png";
-    QString strIconHot = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done_hot.png";
-    QString strIconDown = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done_down.png";
+    QString strIconNormal = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done.png";
+    QString strIconHot = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_hot", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done_hot.png";
+    QString strIconDown = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done_down.png";
 
     QSize szBtn(19, 19);
     ui->buttonOk->setMinimumSize(szBtn);

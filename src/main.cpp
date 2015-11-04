@@ -235,7 +235,10 @@ int mainCore(int argc, char *argv[])
                     padding:0px 1px; \
                     background-color: #F8F8F8; \
                     border:0px; \
-                }");
+//                    }\
+//                    QMenu::item:selected { \
+//                        background-color: #5990EF; \
+                    }");
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);

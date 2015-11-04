@@ -87,14 +87,14 @@
 @end
 
 
-void enableBehindBlurOnOSX10_10(QWidget* wgt)
+void enableWidgetBehindBlur(QWidget* wgt)
 {
     NSView *nsview = (NSView *) wgt->winId();
     NSWindow *nswindow = [nsview window];
     [nswindow enableBehindBlur];
 }
 
-void enableBlendingBlurOnOSX10_10(QWidget* wgt)
+void enableWidgetBlendingBlur(QWidget* wgt)
 {
     NSView *nsview = (NSView *) wgt->winId();
     NSWindow *nswindow = [nsview window];
@@ -877,4 +877,10 @@ int getSystemMinorVersion()
 //    return systemVersion.minorVersion;
 
     return minor;
+}
+
+
+bool systemWidgetBlurAvailable()
+{
+    return getSystemMinorVersion() >= 10;
 }

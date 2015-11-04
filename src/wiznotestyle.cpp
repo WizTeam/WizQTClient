@@ -15,6 +15,7 @@
 #include "share/wizuihelper.h"
 #include "share/wizui.h"
 #include "share/wizmultilinelistwidget.h"
+#include "share/wizmisc.h"
 //#include "share/wizimagepushbutton.h"
 
 #include "messagelistview.h"
@@ -164,13 +165,16 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     p->save();
 
 
-    bool bSelected = vopt->state.testFlag(State_Selected);
+    bool bSelected = vopt->state.testFlag(State_Selected);    
+
+    QRect rcIcon = subElementRect(SE_ItemViewItemDecoration, vopt, view);
     if (!vopt->icon.isNull()) {
-        QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-        iconRect.adjust(-6, 0, 0, 0);
-        iconRect.setWidth(14);
-        iconRect.setHeight(14);
-        Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected);
+        const int iconSize = 14;
+        rcIcon.adjust(-6, 0, 0, 0);
+        rcIcon.setTop(vopt->rect.top() + (vopt->rect.height() - iconSize) / 2);
+        rcIcon.setWidth(iconSize);
+        rcIcon.setHeight(iconSize);
+        Utils::StyleHelper::drawTreeViewItemIcon(p, rcIcon, vopt->icon, bSelected);
     }
 
     QFont f;
@@ -179,9 +183,12 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
     QFont fontCount;
     Utils::StyleHelper::fontExtend(fontCount);
 
-    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
-    rcText.adjust(2, 0, -16, 0);
-    QString strCount = pItem->countString();
+    //通过subElementRect获取范围会产生不同的结果。此处通过icon进行计算
+//    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
+                 vopt->rect.height());
+//    rcText.adjust(2, 0, -16, 0);
+    QString strCount = pItem->countString();    
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
@@ -252,22 +259,24 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
             imageRect.setLeft(imageRect.left() - 12);
         }
 
-        if (img.width() > imageRect.width() || img.height() > imageRect.height())
-        {
-            double fRate = std::min<double>(double(imageRect.width()) / img.width(), double(imageRect.height()) / img.height());
-            int newWidth = int(img.width() * fRate);
-            int newHeight = int(img.height() * fRate);
-            //
-            int adjustX = (imageRect.width() - newWidth) / 2;
-            int adjustY = (imageRect.height() - newHeight) / 2;
-            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-        }
-        else
-        {
+//        int imgWidth = WizIsHighPixel() ? img.width() / 2 : img.width();
+//        int imgHeight = WizIsHighPixel() ? img.height() / 2 : img.height();
+//        if (imgWidth > imageRect.width() || imgHeight > imageRect.height())
+//        {
+//            double fRate = std::min<double>(double(imageRect.width()) / imgWidth, double(imageRect.height()) / imgHeight);
+//            int newWidth = int(imgWidth * fRate);
+//            int newHeight = int(imgHeight * fRate);
+//            //
+//            int adjustX = (imageRect.width() - newWidth) / 2;
+//            int adjustY = (imageRect.height() - newHeight) / 2;
+//            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+//        }
+//        else
+//        {
             int adjustX = (imageRect.width() - imageWidth) / 2;
             int adjustY = (imageRect.height() - imageWidth) / 2;
             imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-        }
+//        }
         p->drawPixmap(imageRect, img);
     }
 
@@ -378,9 +387,11 @@ void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItemV4* vo
 //        m_multiLineListSelectedItemBackground.Draw(pt, vopt->rect, 0);
         pt->save();
 
-        pt->setPen(QColor("#3177EE"));
+        QPen pen(QColor("#3177EE"));
+//        pen.setWidth(2);
+        pt->setPen(pen);
         pt->setBrush(Qt::NoBrush);
-        pt->drawRect(vopt->rect.adjusted(0, 0, -1, -2));
+        pt->drawRect(vopt->rect.adjusted(1, 1, -1, -2));
 
         pt->restore();
     }

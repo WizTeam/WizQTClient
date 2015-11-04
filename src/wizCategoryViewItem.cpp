@@ -55,6 +55,7 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
     , m_app(app)
     , m_strName(strName)
     , m_strKbGUID(strKbGUID)
+    , m_extraButtonIconPressed(false)
 {
 }
 
@@ -354,8 +355,7 @@ void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4
 CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
                                                                  const QString& strName, int nFilterType)
     : CWizCategoryViewItemBase(app, strName, "", Category_MessageItem)
-    , m_nUnread(0)
-    , m_extraButtonIconPressed(false)
+    , m_nUnread(0)    
 {
     QIcon icon;
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_messages_normal"),
@@ -468,26 +468,14 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
     return rc;
 }
 
-void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& text, bool isPressed)
 {
-    if (!m_nUnread)
-        return;
-    //
-    QString text = unreadString();
-    if (text.isEmpty())
-        return;
-
-    p->save();
-
     QFont f;
     f.setPixelSize(10);
     p->setFont(f);
-    //    
-    QRect rcb = getExtraButtonRect(vopt->rect, true);
-
-    p->setRenderHint(QPainter::Antialiasing);
-
-    if (m_extraButtonIconPressed)
+    //
+    QRect rcb = rcd;
+    if (isPressed)
     {
         rcb.adjust(0, 0, 0, 2);
         QPixmap pixBg(Utils::StyleHelper::skinResourceFileName("category_unreadButton_selected", true));
@@ -504,6 +492,23 @@ void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4
         rcb.adjust(0, 0, 0, -2);
         p->drawText(rcb, Qt::AlignCenter, text);
     }
+}
+
+void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+{
+    if (!m_nUnread)
+        return;
+    //
+    QString text = unreadString();
+    if (text.isEmpty())
+        return;
+
+    p->save();
+
+    //    
+    QRect rcb = getExtraButtonRect(vopt->rect, true);
+    p->setRenderHint(QPainter::Antialiasing);
+    drawClickableUnreadButton(p, rcb, text, m_extraButtonIconPressed);
     //
 
     p->restore();
@@ -1301,34 +1306,10 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
             return;
 
         p->save();
-
-        QFont f;
-        Utils::StyleHelper::fontExtend(f);
-        p->setFont(f);
         //
+        QRect rcb = getExtraButtonRect(vopt->rect, true);
         p->setRenderHint(QPainter::Antialiasing);
-
-        QRect rcRect = getExtraButtonRect(vopt->rect, true);
-        QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-                          m_szUnreadSize.width(), m_szUnreadSize.height());
-
-
-        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
-        {
-            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-            p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
-            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->drawText(rcb, Qt::AlignCenter, text);
-        }
-        else
-        {
-            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-            p->drawText(rcb, Qt::AlignCenter, text);
-        }
+        drawClickableUnreadButton(p, rcb, text, m_extraButtonIconPressed);
         //
         p->restore();
     }
@@ -1336,6 +1317,21 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
     {
         CWizCategoryViewGroupsRootItem::draw(p, vopt);
     }
+}
+
+void CWizCategoryViewBizGroupRootItem::mousePressed(const QPoint& pos)
+{
+    QRect rcBorder = treeWidget()->visualItemRect(this);
+    QRect rcIcon = getExtraButtonRect(rcBorder, true);
+    if (rcIcon.contains(pos))
+    {
+        m_extraButtonIconPressed = true;
+    }
+}
+
+void CWizCategoryViewBizGroupRootItem::mouseReleased(const QPoint& pos)
+{
+    m_extraButtonIconPressed = false;
 }
 
 QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
@@ -1347,6 +1343,21 @@ QString CWizCategoryViewBizGroupRootItem::getExtraButtonToolTip() const
         return "";
 
     return QObject::tr("Your enterprise services has expired");
+}
+
+QRect CWizCategoryViewBizGroupRootItem::getExtraButtonRect(const QRect& itemBorder, bool ignoreIconExist) const
+{
+    if (!isUnreadButtonUseable())
+        return CWizCategoryViewItemBase::getExtraButtonRect(itemBorder, ignoreIconExist);
+
+    if (!m_unReadCount && !ignoreIconExist)
+        return QRect();
+
+    int nButtonWidth = 26;
+    int nButtonHeight = 14;
+    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+             nButtonWidth, nButtonHeight);
+    return rc;
 }
 
 bool CWizCategoryViewBizGroupRootItem::isExtraButtonUseable() const
@@ -1617,34 +1628,10 @@ void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItem
     {
         QString text = unreadString();
         p->save();
-
-        QFont f;
-        Utils::StyleHelper::fontExtend(f);
-        p->setFont(f);
         //
+        QRect rcb = getExtraButtonRect(vopt->rect, true);
         p->setRenderHint(QPainter::Antialiasing);
-
-        QRect rcRect = getExtraButtonRect(vopt->rect, true);
-        QRect rcb = QRect(rcRect.right() - m_szUnreadSize.width() + 1, rcRect.y() + (rcRect.height() - m_szUnreadSize.height())/2,
-                          m_szUnreadSize.width(), m_szUnreadSize.height());
-
-
-        if (vopt->state.testFlag(QStyle::State_Selected) && vopt->state.testFlag(QStyle::State_HasFocus))
-        {
-            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-            p->setBrush(Utils::StyleHelper::treeViewItemMessageText());
-            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->drawText(rcb, Qt::AlignCenter, text);
-        }
-        else
-        {
-            p->setPen(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->setBrush(Utils::StyleHelper::treeViewItemMessageBackground());
-            p->drawRoundedRect(rcb, rcb.height() / 2, rcb.height() / 2);
-            p->setPen(Utils::StyleHelper::treeViewItemMessageText());
-            p->drawText(rcb, Qt::AlignCenter, text);
-        }
+        drawClickableUnreadButton(p, rcb, text, m_extraButtonIconPressed);
         //
         p->restore();
     }
@@ -1658,6 +1645,21 @@ void CWizCategoryViewGroupRootItem::reload(CWizDatabase& db)
 {
     m_strName = db.name();
     setText(0, db.name());
+}
+
+void CWizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
+{
+    QRect rcBorder = treeWidget()->visualItemRect(this);
+    QRect rcIcon = getExtraButtonRect(rcBorder, true);
+    if (rcIcon.contains(pos))
+    {
+        m_extraButtonIconPressed = true;
+    }
+}
+
+void CWizCategoryViewGroupRootItem::mouseReleased(const QPoint& pos)
+{
+    m_extraButtonIconPressed = false;
 }
 
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
@@ -1764,6 +1766,21 @@ QString CWizCategoryViewGroupRootItem::getExtraButtonToolTip() const
         return "";
 
     return QObject::tr("Your group is in the abnormal state");
+}
+
+QRect CWizCategoryViewGroupRootItem::getExtraButtonRect(const QRect& itemBorder, bool ignoreIconExist) const
+{
+    if (m_nUnread == 0)
+        return CWizCategoryViewItemBase::getExtraButtonRect(itemBorder, ignoreIconExist);
+
+    if (!m_nUnread && !ignoreIconExist)
+        return QRect();
+
+    int nButtonWidth = 26;
+    int nButtonHeight = 14;
+    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+             nButtonWidth, nButtonHeight);
+    return rc;
 }
 
 /* --------------------- CWizCategoryViewGroupNoTagItem --------------------- */

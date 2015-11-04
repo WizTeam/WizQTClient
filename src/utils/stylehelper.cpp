@@ -241,7 +241,7 @@ int StyleHelper::treeViewItemHeight(bool isSection)
     if (isSection)
         return 32;
 
-    return 26;
+    return 28;
 }
 
 QColor StyleHelper::treeViewBackground()

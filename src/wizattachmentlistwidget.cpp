@@ -127,7 +127,8 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
         QString path = m_dbMgr.db(item->attachment().strKbGUID).GetAttachmentFileName(item->attachment().strGUID);
-        return m_iconProvider.icon(path).pixmap(32, 32);
+        int nIconSize = WizIsHighPixel() ? 64 : 32;
+        return m_iconProvider.icon(path).pixmap(nIconSize, nIconSize);
     }
     //
     return QPixmap();
@@ -578,7 +579,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     , m_list(new CWizAttachmentListView(this))
 {
     QString strTheme = Utils::StyleHelper::themeName();
-    setContentsMargins(0, 13, 2, 0);
+    setContentsMargins(0, 13, 0, 0);
 
     setFixedWidth(sizeHint().width());
 
@@ -586,6 +587,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
     connect(actionAddAttach, SIGNAL(triggered()), SLOT(on_addAttachment_clicked()));
     m_btnAddAttachment = new CWizButton(this);
+    m_btnAddAttachment->setFixedSize(14, 14);
     m_btnAddAttachment->setAction(actionAddAttach);
 
     QHBoxLayout* layoutHeader = new QHBoxLayout();
