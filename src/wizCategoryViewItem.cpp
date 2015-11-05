@@ -326,6 +326,8 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
 
 QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist) const
 {
+    return CWizCategoryViewItemBase::getExtraButtonRect(itemBorder, ignoreIconExist);
+
     QSize szBtn = Utils::StyleHelper::treeViewItemIconSize();
     if (!m_extraButtonIcon.isNull()) {
         szBtn = m_extraButtonIcon.size();
