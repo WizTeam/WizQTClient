@@ -225,7 +225,7 @@ function WizDoc(wizDoc) {
 	this.setHtml = setHtml;
 	this.canEdit = canEdit;
 	this.getTitle = getTitle;
-    	this.isGroupObject = isGroupObject;
+    this.isGroupObject = isGroupObject;
 
 	function getHtml() {
 		if (!this.doc)
@@ -250,16 +250,17 @@ function WizDoc(wizDoc) {
 	function getTitle() {
 		return this.doc.Title;
 	}
+
     function isGroupObject() {
         return this.doc.Database.KbGUID !== "";
-	}
+    }
 }
 
 function WizInitReadCss(document, destNode) {
 	var WIZ_TODO_STYLE_ID = 'wiz_todo_style_id';
 	var WIZ_STYLE = 'wiz_style';
 	var WIZ_LINK_VERSION = 'wiz_link_version';
-	var WIZ_TODO_STYLE_VERSION = "01.01.00";// must above todo edit css version
+	var WIZ_TODO_STYLE_VERSION = "01.01.01";// must above todo edit css version
 
 	var style = document.getElementById(WIZ_TODO_STYLE_ID);
 	if (style && !!style.getAttribute && style.getAttribute(WIZ_LINK_VERSION) >= WIZ_TODO_STYLE_VERSION)
@@ -269,7 +270,7 @@ function WizInitReadCss(document, destNode) {
 		style.parentElement.removeChild(style);
 	}
 	//
-	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -7%;-webkit-user-select: none;} .wiz-todo-label { line-height: 2.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
+	var strStyle = '.wiz-todo, .wiz-todo-img {width: 16px; height: 16px; cursor: default; padding: 0 10px 0 2px; vertical-align: -7%;-webkit-user-select: none;} .wiz-todo-label { display: inline-block; padding-top: 7px; padding-bottom: 6px; line-height: 1.5;} .wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;} .wiz-todo-label-unchecked {text-decoration: initial;} .wiz-todo-completed-info {padding-left: 44px; display: inline-block; } .wiz-todo-avatar { width:20px; height: 20px; vertical-align: -20%; margin-right:10px; border-radius: 2px;} .wiz-todo-account, .wiz-todo-dt { color: #666; }';
 	//
 	var objStyle = document.createElement('style');
 	objStyle.type = 'text/css';
