@@ -336,6 +336,10 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
             m_category->repaint();
             m_documents->repaint();
             m_splitter->repaint();
+            for (int i = 0; i < m_splitter->count(); i++)
+            {
+                m_splitter->handle(i)->repaint();
+            }
         }
     }
 #endif
@@ -1845,7 +1849,7 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
 
-    m_toolBar->addSearch(tr("Search"), "");
+    m_toolBar->addSearch(tr("Search"), "", SEARCHWIDGETWIDTH);
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(40, 1), m_toolBar), "", "");
 //    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;

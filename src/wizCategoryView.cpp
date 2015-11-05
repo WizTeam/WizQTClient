@@ -115,7 +115,7 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     viewport()->setAttribute(Qt::WA_AcceptTouchEvents, true);
     setAttribute(Qt::WA_MacShowFocusRect, false);   
     setTextElideMode(Qt::ElideMiddle);
-    setIndentation(24);
+    setIndentation(22);
     setCursor(Qt::ArrowCursor);
     //
     setMouseTracking(true);

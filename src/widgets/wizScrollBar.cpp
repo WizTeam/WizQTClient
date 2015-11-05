@@ -108,6 +108,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
         }\
         QScrollBar::handle:vertical {\
             margin: 0px %2 0px 2px;\
+            border-radius:2px;\
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
