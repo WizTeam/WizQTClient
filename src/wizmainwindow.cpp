@@ -2105,6 +2105,10 @@ QWidget* MainWindow::createNoteListView()
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
+//    QWidget* bottomMargin = new QWidget(m_noteListWidget);
+//    bottomMargin->setFixedHeight(20);
+//    layoutList->addWidget(bottomMargin);
+
     //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
     QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
                                    "background-position: left; background-repeat: repeat-y;")
@@ -3388,7 +3392,7 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         m_category->sortItems(0, Qt::AscendingOrder);
         break;
     case wizoptionsMarkdown:
-        Core::ICore::instance()->emitMarkdownSettingChanged();
+        m_doc->web()->resetMarkdownCssPath();
         break;
     default:
         break;

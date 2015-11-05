@@ -147,6 +147,8 @@ public:
     Q_INVOKABLE QString getDefaultCssFilePath() const;
     Q_INVOKABLE QString getWizReaderDependencyFilePath() const;
     Q_INVOKABLE QString getWizReaderFilePath() const;
+    Q_INVOKABLE QString getMarkdownCssFilePath() const;
+    void resetMarkdownCssPath();
 
     /* editor related */
     void editorResetFont();
@@ -210,7 +212,7 @@ private:
     void resetEditor();
     void viewDocumentInEditor(bool editing);
     void viewDocumentWithoutEditor();
-    void tryResetTitle();
+    void tryResetTitle();    
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);
@@ -258,6 +260,7 @@ private:
     //different with webview in mainwindow
     bool m_bInSeperateWindow;
     QString m_strDefaultCssFilePath;
+    QString m_strMarkdownCssFilePath;
 
     int m_nWindowID;
 
