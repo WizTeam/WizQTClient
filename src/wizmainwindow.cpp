@@ -332,13 +332,10 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
             }
-            m_category->repaint();
-            m_documents->repaint();
-            m_splitter->repaint();
-            for (int i = 0; i < m_splitter->count(); i++)
-            {
-                m_splitter->handle(i)->repaint();
-            }
+            m_category->update();
+            m_documents->update();
+//            m_splitter->update();
+//            m_splitter->handle(0)->repaint();
         }
     }
 #endif
@@ -828,12 +825,13 @@ void MainWindow::restoreStatus()
             QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
                                    rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
             setGeometry(rcWindow);
-        }
+        }        
+        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe4\0\0\0\xf8\0\0\x3\x1e\0\0\0\0\x1\x1\0\0\0\x1\x1)");
+        m_splitter->restoreState(state);
     } else {
         restoreGeometry(geometry);
+        m_splitter->restoreState(settings->value("Window/Splitter").toByteArray());
     }
-
-    m_splitter->restoreState(settings->value("Window/Splitter").toByteArray());
 }
 
 void MainWindow::initActions()
@@ -1841,10 +1839,9 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(120, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(70, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
-
 
     m_toolBar->addSearch(tr("Search"), "", SEARCHWIDGETWIDTH);
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(40, 1), m_toolBar), "", "");
