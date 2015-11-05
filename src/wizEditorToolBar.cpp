@@ -921,7 +921,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     QMenu* backColorMenu = createColorMenu(SLOT(on_backColor_changed()),
                                            SLOT(on_showBackColorBoard()));
     m_btnBackColor->setMenu(backColorMenu);
-
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
     m_btnBold->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBold")).size());

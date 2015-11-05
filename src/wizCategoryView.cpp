@@ -725,18 +725,6 @@ CWizCategoryViewItemBase* CWizCategoryBaseView::categoryItemFromIndex(const QMod
     return dynamic_cast<CWizCategoryViewItemBase*>(itemFromIndex(index));
 }
 
-bool CWizCategoryBaseView::isHelperItemByIndex(const QModelIndex &index) const
-{
-    CWizCategoryViewItemBase* pItem = categoryItemFromIndex(index);
-    if (NULL != dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
-        return true;
-    }
-    else if (NULL != dynamic_cast<const CWizCategoryViewLinkItem*>(pItem)) {
-        return true;
-    }
-    return false;
-}
-
 QModelIndex CWizCategoryBaseView::moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers)
 {
     QModelIndex index = QTreeWidget::moveCursor(cursorAction, modifiers);
@@ -1131,15 +1119,6 @@ Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
         return m_dragItem->flags();
 
     return Qt::NoItemFlags;
-}
-
-void CWizCategoryBaseView::drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
-{
-    CWizCategoryViewItemBase* pItem = categoryItemFromIndex(vopt->index);
-    Q_ASSERT(pItem);
-
-    if (pItem)
-        pItem->draw(p, vopt);
 }
 
 void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, const QString& /*strTitle*/)
