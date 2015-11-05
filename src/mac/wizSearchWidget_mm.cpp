@@ -49,8 +49,10 @@ public:
             painter->setPen(Qt::white);
         }
 
-        QRect rcText = opt.rect.adjusted(20, 0, 0, 0);
-        painter->drawText(rcText, Qt::AlignLeft | Qt::AlignVCenter, opt.text);
+        QRect rcText = opt.rect.adjusted(20, 0, -20, 0);
+        QFontMetrics fm(painter->font());
+        QString text = fm.elidedText(opt.text, Qt::ElideRight, rcText.width());
+        painter->drawText(rcText, Qt::AlignLeft | Qt::AlignVCenter, text);
         painter->restore();
     }
 };
