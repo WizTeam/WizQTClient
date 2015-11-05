@@ -2,6 +2,8 @@
 ::-webkit-scrollbar {
     width: 6px;
     height: 6px;
+    background-color: #E7E7E7;
+    border-radius: 4px;
 }
  
 /* Track */
@@ -14,8 +16,8 @@
 /* Handle */
 ::-webkit-scrollbar-thumb {
     -webkit-border-radius: 6px;
-    border-radius: 10px;
-    background: rgba(211,211,211,1); 
+    border-radius: 4px;
+    background-color: #D3D3D3;
     -webkit-box-shadow: rgba(0,0,0,0.5); 
 }
 /*::-webkit-scrollbar-thumb:window-inactive {
