@@ -346,6 +346,7 @@ void TitleBar::showEditorBar()
 {
     m_infoBar->hide();
     m_editorBar->show();
+    m_editorBar->adjustButtonPosition();
 }
 
 void TitleBar::loadErrorPage()

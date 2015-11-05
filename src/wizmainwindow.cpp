@@ -42,7 +42,6 @@
 #include "wizusercipherform.h"
 #include "wizDocumentView.h"
 #include "titlebar.h"
-#include "wizEditorToolBar.h"
 
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
@@ -536,8 +535,6 @@ void MainWindow::resizeEvent(QResizeEvent *event)
     QMainWindow::resizeEvent(event);
 //    Q_UNUSED(event);
 //    adjustSubViews(m_clienWgt);
-
-    adjustEditorButtonsPosition();
 
     update();
 
@@ -2040,7 +2037,7 @@ void MainWindow::initClient()
 
     m_category->setMinimumWidth(165);
     m_docListContainer->setMinimumWidth(244);
-    m_doc->web()->setMinimumWidth(570);
+    m_doc->web()->setMinimumWidth(575);
     m_doc->commentWidget()->setMinimumWidth(195);
 
     m_doc->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"
@@ -2241,7 +2238,6 @@ void MainWindow::init()
             SLOT(on_shareDocumentByLink_request(QString,QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
-    QTimer::singleShot(1000, this, SLOT(adjustEditorButtonsPosition()));
 
     //ESC键退出全屏
     bindESCToQuitFullScreen(this);
@@ -3158,7 +3154,6 @@ void MainWindow::on_menuButtonClicked()
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
 //    adjustToolBarLayout();
-    adjustEditorButtonsPosition();
 }
 
 void MainWindow::on_actionGoBack_triggered()
@@ -3612,14 +3607,6 @@ void MainWindow:: adjustToolBarLayout()
     m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(283, 0));
 #endif
 #endif
-}
-
-void MainWindow::adjustEditorButtonsPosition()
-{
-    if (m_doc->titleBar()->editorToolBar())
-    {
-        m_doc->titleBar()->editorToolBar()->adjustButtonPosition();
-    }
 }
 
 

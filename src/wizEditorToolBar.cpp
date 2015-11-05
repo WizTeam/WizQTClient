@@ -1004,7 +1004,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
-    m_btnHorizontal->setHorizontalPadding(10);
+    m_btnHorizontal->setHorizontalPadding(9);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
     m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
     m_btnHorizontal->setToolTip(tr("InsertHorizontal"));
@@ -1103,7 +1103,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     containerLayout->addWidget(m_comboParagraph);
     containerLayout->addSpacing(18);
     containerLayout->addWidget(m_comboFontFamily);
-    containerLayout->addSpacing(20);
+    containerLayout->addSpacing(18);
     containerLayout->addWidget(m_comboFontSize);
     containerLayout->addSpacing(16);
 
@@ -2198,6 +2198,11 @@ void EditorToolBar::moveWidgetFromSecondLineToFirstLine(QWidget* widget)
     firstLayout->insertWidget(index, widget);
     m_buttonContainersInSecondLine.removeFirst();
     m_buttonContainersInFirstLine.append(widget);
+
+    if (m_buttonContainersInSecondLine.size() == 0)
+    {
+        m_secondLineButtonContainer->setVisible(false);
+    }
 }
 
 void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
@@ -2207,6 +2212,11 @@ void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
     secondLayout->insertWidget(0, widget);
     m_buttonContainersInFirstLine.removeLast();
     m_buttonContainersInSecondLine.insert(0, widget);
+
+    if (m_buttonContainersInSecondLine.size() > 0)
+    {
+        m_secondLineButtonContainer->setVisible(true);
+    }
 }
 
 void EditorToolBar::adjustButtonPosition()

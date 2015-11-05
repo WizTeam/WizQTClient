@@ -13,6 +13,7 @@
 #include "wizmainwindow.h"
 #include "wizDocumentTransitionView.h"
 #include "wizDocumentWebEngine.h"
+#include "wizEditorToolBar.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
@@ -111,6 +112,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
     connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(on_comment_populateJavaScriptWindowObject()));
+    connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_adjustEditorToolBar_request()));
 
     m_commentWidget->hide();
 
@@ -269,6 +271,13 @@ TitleBar*CWizDocumentView::titleBar()
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
+}
+
+void CWizDocumentView::resizeEvent(QResizeEvent* ev)
+{
+    QWidget::resizeEvent(ev);
+
+    on_adjustEditorToolBar_request();
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -952,6 +961,11 @@ void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
 void CWizDocumentView::on_loadComment_request(const QString& url)
 {
     m_comments->load(url);
+}
+
+void CWizDocumentView::on_adjustEditorToolBar_request()
+{
+    m_title->editorToolBar()->adjustButtonPosition();
 }
 
 

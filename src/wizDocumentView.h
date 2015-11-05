@@ -94,6 +94,7 @@ protected:
     CWizDocumentStatusChecker* m_editStatusChecker;
 
     virtual void showEvent(QShowEvent *event);
+    virtual void resizeEvent(QResizeEvent* ev);
 
 private:
     WIZDOCUMENTDATA m_note;
@@ -169,6 +170,7 @@ public Q_SLOTS:
     void on_comment_populateJavaScriptWindowObject();
     void on_loadComment_request(const QString& url);
 
+    void on_adjustEditorToolBar_request();
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
