@@ -299,12 +299,28 @@ void WizSuggestCompletionon::doneCompletion()
     }
 }
 
+void searchTitleFromDB(CWizDatabase& db, const QString& title, QStringList& suggestions)
+{
+    CWizStdStringArray arrayTitle;
+    if (db.GetDocumentTitleStartWith(title, 5, arrayTitle))
+    {
+        for (CString title : arrayTitle)
+        {
+            if (suggestions.count() >= 5)
+                break;
+
+            suggestions.append(title);
+        }
+    }
+}
+
 void WizSuggestCompletionon::autoSuggest()
 {
     if (!m_editor->isEditing())
         return;
 
     QString inputedText = m_editor->currentText();
+
     if (inputedText.isEmpty())
     {
         QStringList recentSearches = m_settings->getRecentSearches(true);
@@ -316,22 +332,17 @@ void WizSuggestCompletionon::autoSuggest()
         QtConcurrent::run([this, inputedText](){
             QStringList suggestions;
             CWizDatabaseManager* manager = CWizDatabaseManager::instance();
+
+            CWizDatabase& db = manager->db();
+            searchTitleFromDB(db, inputedText, suggestions);
+
             for (int i = 0; i < manager->count(); i++)
             {
-                CWizDatabase& db = manager->at(i);
-                CWizStdStringArray arrayTitle;
-                if (db.GetDocumentTitleStartWith(inputedText, 5, arrayTitle))
-                {
-                    for (CString title : arrayTitle)
-                    {
-                        if (suggestions.count() >= 5)
-                            break;
-
-                        suggestions.append(title);
-                    }
-                }
                 if (suggestions.count() >= 5)
                     break;
+
+                CWizDatabase& db = manager->at(i);
+                searchTitleFromDB(db, inputedText, suggestions);
             }
             QMetaObject::invokeMethod(this, "showCompletion", Qt::QueuedConnection,
                                       Q_ARG(QStringList, suggestions), Q_ARG(bool, false));
