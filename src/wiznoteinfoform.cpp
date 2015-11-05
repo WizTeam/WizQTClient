@@ -21,7 +21,7 @@ QString formatLabelLink(const QString& linkHref, const QString& text)
 CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     : CWizPopupWidget(parent)
     , ui(new Ui::CWizNoteInfoForm)
-    , m_size(QSize(420, 370))
+    , m_size(QSize(370, 370))
 {
     ui->setupUi(this);
     setContentsMargins(0, 8, 0, 0);
