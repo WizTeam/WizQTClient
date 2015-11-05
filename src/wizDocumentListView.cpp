@@ -2008,6 +2008,15 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
 {
     if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
+        p->save();
+        p->setPen(QColor(Qt::red));
+        QRect rcBg = vopt->rect;
+        rcBg.setWidth(2);
+        p->setPen(QColor("#F5F5F5"));
+        p->setBrush(QColor("#F5F5F5"));
+        p->drawRect(rcBg);
+        p->restore();
+
         int nRightMargin = 8;
         QStyleOptionViewItemV4 newVopt(*vopt);
         newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);

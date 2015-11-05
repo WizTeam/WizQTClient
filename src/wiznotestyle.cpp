@@ -532,20 +532,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                     int nMargin = (opt->rect.height() - 20) / 2;
                     rc.adjust(0, nMargin, 0, -nMargin);
                     Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
-                }
-
-                //if (opt->state & QStyle::State_Selected)
-                //{
-                //    QRect rect = opt->rect;
-                //    rect.setWidth(p->window().width());
-                //    if (opt->state & QStyle::State_HasFocus) {
-                //        p->fillRect(rect, m_colorCategorySelectedBackground);
-                //    } else {
-                //        p->fillRect(rect, m_colorCategorySelctedBackgroundNoFocus);
-                //        rect.setWidth(5); // FIXME
-                //        p->fillRect(rect, m_colorCategorySelectedBackground);
-                //    }
-                //}
+                }                
             }
 
             return;
