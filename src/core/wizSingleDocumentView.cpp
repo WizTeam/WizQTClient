@@ -37,7 +37,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //        pal = containerWgt->palette();
 //        pal.setColor(QPalette::Window, QColor("#DDDDDD"));
 //        containerWgt->setPalette(pal);
-        containerWgt->setMaximumWidth(1095);
+//        containerWgt->setMaximumWidth(1095);
 
         layout->addStretch(0);
         layout->addWidget(containerWgt);
@@ -51,7 +51,8 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
         m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
                               "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
         m_docView->web()->setInSeperateWindow(true);
-//        m_docView->setMaximumWidth(1070);
+//        m_docView->setMaximumWidth(1095);
+        m_docView->setMaximumWidth(1095);
         m_docView->setSizeHint(QSize(1095, 1));
         m_docView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
         m_docView->titleBar()->applyButtonStateForSeparateWindow(true);

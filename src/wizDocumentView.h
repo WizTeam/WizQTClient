@@ -170,7 +170,7 @@ public Q_SLOTS:
     void on_comment_populateJavaScriptWindowObject();
     void on_loadComment_request(const QString& url);
 
-    void on_adjustEditorToolBar_request();
+    void on_commentWidget_statusChanged();
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);

@@ -133,6 +133,7 @@ public:
     bool isEditing() const { return m_bEditingMode; }
 
     void setInSeperateWindow(bool inSeperateWindow);
+    bool isInSeperateWindow() const;
 
     Q_INVOKABLE QString currentNoteGUID();
     Q_INVOKABLE QString currentNoteHtml();

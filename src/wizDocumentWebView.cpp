@@ -749,6 +749,11 @@ void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
     m_bInSeperateWindow = inSeperateWindow;
 }
 
+bool CWizDocumentWebView::isInSeperateWindow() const
+{
+    return m_bInSeperateWindow;
+}
+
 QString CWizDocumentWebView::getDefaultCssFilePath() const
 {
     return m_strDefaultCssFilePath;
