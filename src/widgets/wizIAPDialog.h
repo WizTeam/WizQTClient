@@ -61,7 +61,7 @@ private:
     void setPurchaseAvailable(bool b);
     void hideInfoLabel();
     void checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID);
-    void parseCheckResult(const QString& strResult);
+    void parseCheckResult(const QString& strResult, const QString& strTransationID);
 
     //
     QStringList getUnfinishedTransations();
