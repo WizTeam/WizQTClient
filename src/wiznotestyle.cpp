@@ -138,87 +138,11 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         p->drawRect(rect);
     }
 
-    CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
-
-    if (view->isHelperItemByIndex(vopt->index)) {
-        p->save();
-        if (const CWizCategoryViewSectionItem* secItem = dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
-            QString str = vopt->text;
-            QRect rc(vopt->rect);
-            rc.adjust(-12, 2, 0, 0);
-            QFont font = p->font();
-            Utils::StyleHelper::fontSection(font);
-            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewSectionItemText(), font);
-            secItem->draw(p,vopt);
-        }
-        else if (NULL != dynamic_cast<const CWizCategoryViewLinkItem*>(pItem)) {
-            QString str = vopt->text;
-            QRect rc(vopt->rect);
-            rc.setLeft(rc.left() + 16);
-            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemLinkText(), m_fontLink);
-        }
-
-        p->restore();
-        return;
-    }
-
     p->save();
-
-
-    bool bSelected = vopt->state.testFlag(State_Selected);    
-
-    QRect rcIcon = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-    if (!vopt->icon.isNull()) {
-        const int iconSize = 14;
-        rcIcon.adjust(-6, 0, 0, 0);
-        rcIcon.setTop(vopt->rect.top() + (vopt->rect.height() - iconSize) / 2);
-        rcIcon.setWidth(iconSize);
-        rcIcon.setHeight(iconSize);
-        Utils::StyleHelper::drawTreeViewItemIcon(p, rcIcon, vopt->icon, bSelected);
-    }
-
-    QFont f;
-    Utils::StyleHelper::fontCategoryItem(f);
-
-    QFont fontCount;
-    Utils::StyleHelper::fontExtend(fontCount);
-
-    //通过subElementRect获取范围会产生不同的结果。此处通过icon进行计算
-//    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
-    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
-                 vopt->rect.height());
-//    rcText.adjust(2, 0, -16, 0);
-    QString strCount = pItem->countString();    
-
-    QString strText = vopt->text;
-    if (!strText.isEmpty()) {
-        QTreeWidgetItem *item = view->categoryItemFromIndex(vopt->index);
-        bool secondLevelFolder = (item->parent() && (item->parent()->type() == Category_GroupItem
-                                                     || item->parent()->type() == Category_FolderItem));
-        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected, secondLevelFolder);
-        colorText.setAlpha(240);
-        p->setPen(colorText);
-        f.setStyleStrategy(QFont::PreferBitmap);
-        QFontMetrics fm(f);
-        strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
-        int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
-        //
-        if (right != -1) {
-            rcText.setLeft(right + 4);
-        }
-    }
-
-    if (!strCount.isEmpty() && (rcText.width() > 10)) {
-        QRect rcCount = rcText;
-        rcCount.setTop(rcCount.top() + 1);  //add extra 1 pixel for vcenter / 2
-        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
-        Utils::StyleHelper::drawSingleLineText(p, rcCount, strCount, Qt::AlignVCenter, colorCount, fontCount);
-    }
-
+    view->categoryItemFromIndex(vopt->index)->drawItemBody(p, vopt);
+    view->categoryItemFromIndex(vopt->index)->drawExtraBadge(p, vopt);
     p->restore();
 
-    // FIXME: this is used for drawing additional badge, please merge it.
-    view->categoryItemFromIndex(vopt->index)->draw(p, vopt);
 }
 
 void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizMultiLineListWidget *view) const

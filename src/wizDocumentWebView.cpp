@@ -30,6 +30,7 @@
 #endif
 
 #include <coreplugin/icore.h>
+#include <extensionsystem/pluginmanager.h>
 
 #include "wizdef.h"
 #include "share/wizmisc.h"
@@ -521,6 +522,33 @@ void CWizDocumentWebView::tryResetTitle()
     m_bNewNoteTitleInited = true;
 }
 
+void CWizDocumentWebView::resetMarkdownCssPath()
+{
+    const QString strCategory = "MarkdownTemplate/";
+    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
+    QString strFile = QString::fromUtf8(ba);
+    if (strFile.isEmpty())
+    {
+        strFile = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/github2.css";//  Utils::PathResolve::cachePath() + "plugins/markdown/markdown/github2.css";
+    }
+    else if (QFile::exists(strFile))
+    {
+    }
+    else
+    {
+        qDebug() << QString("[Markdown] You have choose %1 as you Markdown style template, but"
+                            "we can not find this file. Please check wether file exists.").arg(strFile);
+        strFile  = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/github2.css";//  Utils::PathResolve::cachePath() + "plugins/markdown/markdown/github2.css";
+    }
+    m_strMarkdownCssFilePath = strFile;
+
+    if (isInited())
+    {
+        page()->mainFrame()->evaluateJavaScript("initWizReader();");
+    }
+}
+
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
@@ -721,6 +749,11 @@ void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
     m_bInSeperateWindow = inSeperateWindow;
 }
 
+bool CWizDocumentWebView::isInSeperateWindow() const
+{
+    return m_bInSeperateWindow;
+}
+
 QString CWizDocumentWebView::getDefaultCssFilePath() const
 {
     return m_strDefaultCssFilePath;
@@ -734,6 +767,11 @@ QString CWizDocumentWebView::getWizReaderDependencyFilePath() const
 QString CWizDocumentWebView::getWizReaderFilePath() const
 {
     return Utils::PathResolve::resourcesPath() + "files/editor/wizReader/";
+}
+
+QString CWizDocumentWebView::getMarkdownCssFilePath() const
+{
+    return m_strMarkdownCssFilePath;
 }
 
 bool CWizDocumentWebView::resetDefaultCss()
@@ -818,7 +856,9 @@ void CWizDocumentWebView::initEditor()
         return;
 
     if (!resetDefaultCss())
-        return;
+        return;    
+
+    resetMarkdownCssPath();
 
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/index.html";
     QString strHtml;
@@ -978,7 +1018,7 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
         m_bEditorInited = false;
         TOLOG("Wow, loading editor failed!");
         return;
-    }
+    }    
 
     m_bEditorInited = true;
     viewDocumentInEditor(m_bEditingMode);

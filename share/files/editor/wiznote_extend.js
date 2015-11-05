@@ -76,6 +76,8 @@ function initWizReader() {
         return;
     }
     var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
+    var cssFile = WizEditor.getMarkdownCssFilePath();
+    console.log("css " + cssFile);
 
     m_wizReaderInited = f.contentWindow.WizReader.init({
     document: editor.document,
@@ -85,7 +87,7 @@ function initWizReader() {
     // usersData: '',
     noAmend: false,  //wizReader 专用参数，用于关闭 修订功能,
     dependencyCss: {
-        github2: dependencyFilePath + 'github2.css',  //markdown 使用
+        github2: cssFile,  //markdown 使用
         wizToc: dependencyFilePath + 'wizToc.css'     //toc 样式
     },
     dependencyJs: {

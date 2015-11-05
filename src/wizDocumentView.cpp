@@ -112,7 +112,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
     connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(on_comment_populateJavaScriptWindowObject()));
-    connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_adjustEditorToolBar_request()));
+    connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
 
     m_commentWidget->hide();
 
@@ -277,7 +277,7 @@ void CWizDocumentView::resizeEvent(QResizeEvent* ev)
 {
     QWidget::resizeEvent(ev);
 
-    on_adjustEditorToolBar_request();
+    m_title->editorToolBar()->adjustButtonPosition();
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -963,9 +963,28 @@ void CWizDocumentView::on_loadComment_request(const QString& url)
     m_comments->load(url);
 }
 
-void CWizDocumentView::on_adjustEditorToolBar_request()
+void CWizDocumentView::on_commentWidget_statusChanged()
 {
     m_title->editorToolBar()->adjustButtonPosition();
+
+    if (m_web->isInSeperateWindow())
+    {
+        int commentWidth = 271;
+        int maxWidth = maximumWidth();
+        maxWidth = m_commentWidget->isVisible() ? (maxWidth + commentWidth) : (maxWidth - commentWidth);
+        if (width() > 1000)
+        {
+            m_commentWidget->setFixedWidth(271);
+        }
+        else
+        {
+            m_commentWidget->setMinimumWidth(0);
+            m_commentWidget->setMaximumWidth(500);
+        }
+        setMaximumWidth(maxWidth);
+        setSizeHint(QSize(maxWidth, 1));
+
+    }
 }
 
 

@@ -273,10 +273,5 @@ void TitleEdit::onTextEdit(const QString& text)
 }
 
 void TitleEdit::onTextChanged(const QString& text)
-{
-    if (text.isEmpty()) {
-        setStyleSheet("QLineEdit{color:#666666;}");
-    } else {
-        setStyleSheet("QLineEdit{color:black;}");
-    }
+{    
 }

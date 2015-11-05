@@ -59,6 +59,58 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
+void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+    bool bSelected = vopt->state.testFlag(QStyle::State_Selected);
+
+    QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
+    if (!vopt->icon.isNull()) {
+        const int iconSize = 14;
+        rcIcon.adjust(-6, 0, 0, 0);
+        rcIcon.setTop(vopt->rect.top() + (vopt->rect.height() - iconSize) / 2);
+        rcIcon.setWidth(iconSize);
+        rcIcon.setHeight(iconSize);
+        Utils::StyleHelper::drawTreeViewItemIcon(p, rcIcon, vopt->icon, bSelected);
+    }
+
+    QFont f;
+    Utils::StyleHelper::fontCategoryItem(f);
+
+    QFont fontCount;
+    Utils::StyleHelper::fontExtend(fontCount);
+
+    //通过subElementRect获取范围会产生不同的结果。此处通过icon进行计算
+//    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
+    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
+                 vopt->rect.height());
+//    rcText.adjust(2, 0, -16, 0);
+    QString strCount = countString();
+
+    QString strText = vopt->text;
+    if (!strText.isEmpty()) {
+        bool secondLevelFolder = (parent() && (parent()->type() == Category_GroupItem
+                                                     || parent()->type() == Category_FolderItem));
+        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected, secondLevelFolder);
+        colorText.setAlpha(240);
+        p->setPen(colorText);
+        f.setStyleStrategy(QFont::PreferBitmap);
+        QFontMetrics fm(f);
+        strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
+        int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
+        //
+        if (right != -1) {
+            rcText.setLeft(right + 4);
+        }
+    }
+
+    if (!strCount.isEmpty() && (rcText.width() > 10)) {
+        QRect rcCount = rcText;
+        rcCount.setTop(rcCount.top() + 1);  //add extra 1 pixel for vcenter / 2
+        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected);
+        Utils::StyleHelper::drawSingleLineText(p, rcCount, strCount, Qt::AlignVCenter, colorCount, fontCount);
+    }
+}
+
 bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 {
     const CWizCategoryViewItemBase* pOther = dynamic_cast<const CWizCategoryViewItemBase*>(&other);
@@ -206,8 +258,10 @@ QString CWizCategoryViewItemBase::getExtraButtonToolTip() const
     return "";
 }
 
-void CWizCategoryViewItemBase::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewItemBase::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
+
+
     QPixmap pixmap;
     if(getExtraButtonIcon(pixmap) && !pixmap.isNull())
     {
@@ -324,6 +378,16 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
+void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+    QString str = vopt->text;
+    QRect rc(vopt->rect);
+    rc.adjust(-12, 2, 0, 0);
+    QFont font = p->font();
+    Utils::StyleHelper::fontSection(font);
+    Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewSectionItemText(), font);
+}
+
 QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist) const
 {
     return CWizCategoryViewItemBase::getExtraButtonRect(itemBorder, ignoreIconExist);
@@ -343,13 +407,13 @@ QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, b
     return rcb;
 }
 
-void CWizCategoryViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
 //    QRect rc = vopt->rect;
 //    rc.setTop(rc.bottom());
 //    p->fillRect(rc, Utils::StyleHelper::treeViewItemBottomLine());
 
-    CWizCategoryViewItemBase::draw(p, vopt);
+    CWizCategoryViewItemBase::drawExtraBadge(p, vopt);
 }
 
 
@@ -496,7 +560,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     }
 }
 
-void CWizCategoryViewMessageItem::draw(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewMessageItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
 {
     if (!m_nUnread)
         return;
@@ -1298,7 +1362,7 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
     }
 }
 
-void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewBizGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     if (isUnreadButtonUseable())
     {
@@ -1317,7 +1381,7 @@ void CWizCategoryViewBizGroupRootItem::draw(QPainter* p, const QStyleOptionViewI
     }
     else
     {
-        CWizCategoryViewGroupsRootItem::draw(p, vopt);
+        CWizCategoryViewGroupsRootItem::drawExtraBadge(p, vopt);
     }
 }
 
@@ -1623,7 +1687,7 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     }
 }
 
-void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     //
     if (m_nUnread > 0)
@@ -1639,7 +1703,7 @@ void CWizCategoryViewGroupRootItem::draw(QPainter* p, const QStyleOptionViewItem
     }
     else
     {
-        CWizCategoryViewItemBase::draw(p, vopt);
+        CWizCategoryViewItemBase::drawExtraBadge(p, vopt);
     }
 }
 
@@ -2168,6 +2232,31 @@ CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
 
 }
 
+void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+    QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
+    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
+                 vopt->rect.height());
+
+    QString strText = vopt->text;
+    if (!strText.isEmpty()) {
+
+        QColor colorText("#BEBEBE");
+        colorText.setAlpha(240);
+        p->setPen(colorText);
+        QFont f;
+        f.setPixelSize(10);
+        f.setStyleStrategy(QFont::PreferBitmap);
+        QFontMetrics fm(f);
+        strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
+        int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
+        //
+        if (right != -1) {
+            rcText.setLeft(right + 4);
+        }
+    }
+}
+
 
 CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app,
                                                        const QString& strName, int type)
@@ -2179,7 +2268,7 @@ CWizCategoryViewSearchItem::CWizCategoryViewSearchItem(CWizExplorerApp& app,
     icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_searchItem_selected"),
                  Utils::StyleHelper::treeViewItemIconSize(), QIcon::Selected);
     setIcon(0, icon);
-    setText(0, strName);
+    setText(0, strName);    
 }
 
 void CWizCategoryViewSearchItem::showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
@@ -2298,3 +2387,13 @@ void CWizCategoryViewCustomSearchItem::setSearchScope(int nSearchScope)
     m_nSearchScope = nSearchScope;
 }
 
+void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+{
+    QString str = vopt->text;
+    QRect rc(vopt->rect);
+    rc.setLeft(rc.left() + 16);
+    QFont fontLink = p->font();
+    fontLink.setItalic(true);
+    fontLink.setPixelSize(12);
+    Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::StyleHelper::treeViewItemLinkText(), fontLink);
+}

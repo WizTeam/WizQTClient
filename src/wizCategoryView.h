@@ -56,7 +56,6 @@ public:
     }
 
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
-    bool isHelperItemByIndex(const QModelIndex &index) const;
 
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
@@ -65,7 +64,6 @@ public:
 
     bool isCursorEntered() const { return m_cursorEntered; }
 
-    void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
     QPoint hitPoint() const { return m_hitPos; }
 
 protected:
