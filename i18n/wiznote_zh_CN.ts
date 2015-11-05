@@ -1424,12 +1424,12 @@
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="155"/>
         <source>Owner:</source>
-        <translation type="unfinished">创建者:</translation>
+        <translation type="unfinished">创建者：</translation>
     </message>
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="165"/>
         <source>History:</source>
-        <translation type="unfinished">版本历史:</translation>
+        <translation type="unfinished">版本历史：</translation>
     </message>
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="188"/>
@@ -1439,7 +1439,7 @@
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="198"/>
         <source>Encrypt:</source>
-        <translation type="unfinished">加密:</translation>
+        <translation type="unfinished">加密：</translation>
     </message>
     <message>
         <location filename="../src/ui/wiznoteinfoform.ui" line="208"/>
