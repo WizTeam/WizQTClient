@@ -539,6 +539,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     QFont f;
     f.setPixelSize(10);
     p->setFont(f);
+    p->setPen("999999");
     //
     QRect rcb = rcd;
     if (isPressed)
@@ -547,7 +548,6 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
         QPixmap pixBg(Utils::StyleHelper::skinResourceFileName("category_unreadButton_selected", true));
         p->drawPixmap(rcb, pixBg);
         rcb.adjust(0, 0, 0, -2);
-        p->setPen("999999");
         p->drawText(rcb, Qt::AlignCenter, text);
     }
     else
