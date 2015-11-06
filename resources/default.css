@@ -3,7 +3,7 @@
     padding:0;
     word-wrap:break-word;
     cursor:text;
-    height:90%;
+    height:90%;    
 }
 
 .selectTdClass{background-color:#edf5fa !important}
@@ -25,7 +25,8 @@ body {
     /*default-font-family*/
     /*default-font-size*/
     /*default-line-height*/
-    margin:0px 14px;
+    /*margin:0px 14px;*/
+    margin: 20px 40px;
 }
 html, body {
     /*default-color*/
