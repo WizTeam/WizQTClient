@@ -1170,10 +1170,10 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
     strHead.replace(regHead, "");
 
-    // 此处不使用editor.getContent()来获取笔记内容，因为editor.getContent()会对内容进行过滤，在某些情况下会导致
-    //保存的内容与编辑模式下看到的内容不一致
-//    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent();").toString();
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
+    // 此处不能使用editor.document.body.innerHTML;直接获取Html进行保存，会得到很多UEditor的内部元素
+    //需要getContent()来过滤。  但是不能过滤换行符和空格。否则会造成一些网页粘贴后看到的样式与实际保存的样式不一致
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent(null,null,true,true);").toString();
+//    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
     //
     m_strCurrentNoteHtml = strHtml;
     //

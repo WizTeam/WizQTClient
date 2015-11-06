@@ -406,6 +406,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
             QTimer::singleShot(1500, this, SLOT(hide()));
             return;
         }
+
         setVisible(false);
         event->ignore();
         return;
@@ -732,7 +733,7 @@ void MainWindow::shiftVisableStatus()
     }
     else
     {
-        wizMacShowCurrentApplication();
+//        wizMacShowCurrentApplication();
         // wait for process finished
         QCoreApplication::processEvents(QEventLoop::AllEvents, 200);
         raise();

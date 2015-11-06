@@ -4,13 +4,11 @@
 # you can download old sdk from here: https://github.com/JuliaEichler/Mac_OSX_SDKs
 # default is 10.7 for binary release.
 
-
 # CMake arguments for WizNote
 # WIZNOTE_USE_QT5   use qt5 to compile project
 # APPSTORE_BUILD  build for Apple Appsotre, would not use qt deploy
 # XCODEBUILD      adjust project params to suit for xcode
 # PLCrashReporter   use PLCrashReporter for mac, need PLCrashReporter framework
-
 
 if (APPLE)
     cmake_minimum_required(VERSION 2.8.12)
@@ -70,16 +68,11 @@ if(APPLE)
 endif(APPLE)
 
 if(APPLE)
-    if (XCODEBUILD)
-        set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/Debug/WizNote.app)
-        add_definitions(-DXCODEBUILD=TRUE)
-    else(XCODEBUILD)
-        set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
-    endif(XCODEBUILD)
-        set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
-        set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
-        set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
-        set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources/plugIns)
+    set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
+    set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
+    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
+    set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
+    set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources/plugIns)
 else(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR})
     set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/lib/wiznote/plugins)
