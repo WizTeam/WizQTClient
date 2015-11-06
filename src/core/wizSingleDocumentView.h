@@ -17,13 +17,21 @@ public:
     ~CWizSingleDocumentViewer();
 
     CWizDocumentView* docView();
-    QString guid() const { return m_guid; }
+    QString guid() const { return m_guid; }   
+
+public slots:
+    void on_commentWidget_statusChanged();
+    void on_commentWidget_willShow();
 
 signals:
     void documentViewerDeleted(QString guid);
 
 protected:
     void resizeEvent(QResizeEvent* ev);
+    bool event(QEvent *ev);
+
+private:
+    void applyWidgetBackground(bool isFullScreen);
 
 private:
 #ifdef USEWEBENGINE
@@ -32,6 +40,8 @@ private:
     CWizDocumentView* m_docView;
 #endif
     QString m_guid;
+
+    QWidget* m_containerWgt;
 };
 
 

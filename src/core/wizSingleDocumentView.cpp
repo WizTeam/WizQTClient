@@ -2,76 +2,166 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QAction>
+#include <QPainter>
 #include <QDebug>
 #include "wizDocumentView.h"
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
 #include "share/wizmisc.h"
+#include "utils/stylehelper.h"
 #include "titlebar.h"
 #include "wizEditorToolBar.h"
+#include "widgets/wizLocalProgressWebView.h"
+
+#ifdef Q_OS_MAC
+#include "mac/wizmachelper.h"
+#endif
 
 using namespace Core;
+
+QRegion creteRoundMask(const QRectF& rect)
+{
+    QPolygon polygon;
+    polygon.append(QPoint(rect.x(), rect.y() + 1));
+    polygon.append(QPoint(rect.x() + 1, rect.y()));
+    polygon.append(QPoint(rect.right() - 1, rect.y()));
+    polygon.append(QPoint(rect.right(), rect.y() + 1));
+
+    polygon.append(QPoint(rect.right(), rect.bottom()));
+    polygon.append(QPoint(rect.left(), rect.bottom()));
+
+    return QRegion(polygon);
+}
 
 CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const QString& guid, QWidget* parent) :
     QWidget(parent)
   , m_guid(guid)
+  , m_docView(nullptr)
+  , m_containerWgt(nullptr)
 {
-        setAttribute(Qt::WA_DeleteOnClose);
-        setContentsMargins(0, 0, 0, 0);
-        QPalette pal = palette();
-        pal.setColor(QPalette::Window, QColor("#DDDDDD"));
-        setPalette(pal);
-        QHBoxLayout* layout = new QHBoxLayout(this);
-        layout->setContentsMargins(0, 0, 0, 0);
-        setLayout(layout);
-//        m_webEngine = new CWizDocumentWebEngine(app, this);
-//        layout->addWidget(m_webEngine);
-//        m_edit = new QLineEdit(this);
-//        layout->addWidget(m_edit);
-//        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-//        WIZDOCUMENTDATA doc;
-//        m_webEngine->viewDocument(doc, true);
+    setAttribute(Qt::WA_DeleteOnClose);
+    setContentsMargins(0, 0, 0, 0);
+    QHBoxLayout* layout = new QHBoxLayout(this);
+    layout->setContentsMargins(0, 0, 0, 0);
+    setLayout(layout);
 
-        QWidget* containerWgt = new QWidget(this);
-        containerWgt->setStyleSheet(".QWidget{background-color:#F5F5F5;}");
-//        pal = containerWgt->palette();
-//        pal.setColor(QPalette::Window, QColor("#DDDDDD"));
-//        containerWgt->setPalette(pal);
-//        containerWgt->setMaximumWidth(1095);
+    applyWidgetBackground(false);
+    //        m_webEngine = new CWizDocumentWebEngine(app, this);
+    //        layout->addWidget(m_webEngine);
+    //        m_edit = new QLineEdit(this);
+    //        layout->addWidget(m_edit);
+    //        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
+    //        WIZDOCUMENTDATA doc;
+    //        m_webEngine->viewDocument(doc, true);
 
-        layout->addStretch(0);
-        layout->addWidget(containerWgt);
-        layout->addStretch(0);
+    m_containerWgt = new QWidget(this);
+    m_containerWgt->setStyleSheet(".QWidget{background-color:#F5F5F5;}");
 
-        QHBoxLayout* containerLayout = new QHBoxLayout(containerWgt);
-        containerLayout->setContentsMargins(0, 0, 0, 0);
-        containerWgt->setLayout(containerLayout);
+    layout->addStretch(0);
+    layout->addWidget(m_containerWgt);
+    layout->addStretch(0);
 
-        m_docView = new CWizDocumentView(app, containerWgt);
-        m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
-                              "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
-        m_docView->web()->setInSeperateWindow(true);
-//        m_docView->setMaximumWidth(1095);
-        m_docView->setMaximumWidth(1095);
-        m_docView->setSizeHint(QSize(1095, 1));
-        m_docView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-        m_docView->titleBar()->applyButtonStateForSeparateWindow(true);
+    QHBoxLayout* containerLayout = new QHBoxLayout(m_containerWgt);
+    containerLayout->setContentsMargins(0, 0, 0, 0);
+    m_containerWgt->setLayout(containerLayout);
 
-        containerLayout->addStretch(0);
-        containerLayout->addWidget(m_docView);
-        containerLayout->addStretch(0);
+    m_docView = new CWizDocumentView(app, m_containerWgt);
+    m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
+                                     "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
+    m_docView->web()->setInSeperateWindow(true);
+    m_docView->setMaximumWidth(1095);
+    m_docView->setSizeHint(QSize(1095, 1));
+    m_docView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_docView->titleBar()->applyButtonStateForSeparateWindow(true);
+
+    connect(m_docView->commentWidget(), SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
+    connect(m_docView->commentWidget(), SIGNAL(willShow()), SLOT(on_commentWidget_willShow()));
+
+    containerLayout->addStretch(0);
+    containerLayout->addWidget(m_docView);
+    containerLayout->addStretch(0);
+
+//#ifdef Q_OS_MAC
+//    if (systemWidgetBlurAvailable())
+//    {
+//        setAutoFillBackground(false);
+//        enableWidgetBehindBlur(this);
+//    }
+//#endif
 }
 
-CWizDocumentView*CWizSingleDocumentViewer::docView()
-{
+CWizDocumentView* CWizSingleDocumentViewer::docView()
+{        
     return m_docView;
+}
+
+void CWizSingleDocumentViewer::on_commentWidget_statusChanged()
+{
+    if ((windowState() & Qt::WindowFullScreen) && !m_docView->isVisible())
+    {
+        applyWidgetBackground(true);
+    }
+}
+
+void CWizSingleDocumentViewer::on_commentWidget_willShow()
+{
+    m_containerWgt->clearMask();
 }
 
 void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
 {
     QWidget::resizeEvent(ev);
 
-    m_docView->titleBar()->editorToolBar()->adjustButtonPosition();
+    m_docView->titleBar()->editorToolBar()->adjustButtonPosition();    
+}
+
+bool CWizSingleDocumentViewer::event(QEvent* ev)
+{
+    if (ev->type() == QEvent::WindowStateChange)
+    {
+        if (QWindowStateChangeEvent* stateEvent = dynamic_cast<QWindowStateChangeEvent*>(ev))
+        {
+            static int state = -1;
+            int oldState = stateEvent->oldState();
+            if (state != oldState)
+            {
+                //quit full screen
+                if ((oldState & Qt::WindowFullScreen) && !(windowState() & Qt::WindowFullScreen))
+                {
+                    applyWidgetBackground(false);
+                }
+                else if (!(oldState & Qt::WindowFullScreen) && (windowState() & Qt::WindowFullScreen))
+                {
+                    applyWidgetBackground(true);
+                }
+            }
+        }
+    }
+
+    return QWidget::event(ev);
+}
+
+void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
+{
+    QPalette pal = palette();
+    pal.setColor(QPalette::Window, isFullScreen ? QColor("#3e3e3e") : QColor("#DDDDDD"));
+    setPalette(pal);
+
+    layout()->setContentsMargins(0, isFullScreen ? 20 : 0, 0, 0);
+
+    if (m_containerWgt)
+    {
+        if (isFullScreen)
+        {
+            QRectF rect = m_containerWgt->rect();
+            QRegion region =  creteRoundMask(rect);
+            m_containerWgt->setMask(region);
+        }
+        else
+        {
+            m_containerWgt->clearMask();
+        }
+    }
 }
 
 CWizSingleDocumentViewer::~CWizSingleDocumentViewer()

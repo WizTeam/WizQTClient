@@ -23,6 +23,7 @@ public:
 
 signals:
     void widgetStatusChanged();
+    void willShow();
 
 public slots:
 

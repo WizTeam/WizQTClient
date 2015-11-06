@@ -326,7 +326,7 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                 // 使用程序右上角按钮将窗口最大化时，需要修改按钮名称
                 static int state = -1;
                 int oldState = stateEvent->oldState();
-                if (state != oldState && (oldState == Qt::WindowFullScreen || windowState() == Qt::WindowFullScreen))
+                if (state != oldState && (oldState & Qt::WindowFullScreen || windowState() & Qt::WindowFullScreen))
                 {
                     state = oldState;
                     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);

@@ -79,6 +79,8 @@ void CWizLocalProgressWebView::hideEvent(QHideEvent* ev)
 
 void CWizLocalProgressWebView::showEvent(QShowEvent* ev)
 {
+    emit willShow();
+
     QWidget::showEvent(ev);
 
     emit widgetStatusChanged();
