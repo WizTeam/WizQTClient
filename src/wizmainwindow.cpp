@@ -1861,6 +1861,7 @@ void MainWindow::initToolBar()
     //
     m_searchWidget = m_toolBar->getSearchWidget();
     m_searchWidget->setUserSettings(m_settings);
+    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(233, 0));
     #else
 
 
@@ -3613,7 +3614,7 @@ void MainWindow:: adjustToolBarLayout()
 //    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
 //                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
 //    m_spacerForToolButtonAdjust->sets
-    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(283, 0));
+//    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(235, 0));
 #endif
 #endif
 }
