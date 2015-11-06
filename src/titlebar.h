@@ -5,6 +5,7 @@
 #include <QIcon>
 
 class QString;
+class QMenu;
 
 struct WIZDOCUMENTDATA;
 class CWizDatabase;
@@ -66,11 +67,13 @@ public Q_SLOTS:
     void onEditButtonClicked();
     void onSeparateButtonClicked();
     void onTagButtonClicked();
-    void onEmailButtonClicked();
     void onShareButtonClicked();
     void onAttachButtonClicked();
     void onHistoryButtonClicked();
     void onInfoButtonClicked();
+
+    void onEmailActionClicked();
+    void onShareActionClicked();
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
@@ -121,11 +124,13 @@ private:
     CellButton* m_editBtn;
     CellButton* m_separateBtn;
     CellButton* m_tagBtn;    
-    CellButton* m_emailBtn;
+//    CellButton* m_emailBtn;
     CellButton* m_shareBtn;
     CellButton* m_attachBtn;
-    CellButton* m_historyBtn;
+//    CellButton* m_historyBtn;
     CellButton* m_infoBtn;    
+
+    QMenu* m_shareMenu;
 
     CellButton* m_commentsBtn;
     QString m_commentsUrl;

@@ -48,6 +48,7 @@
 #include "widgets/wizShareLinkDialog.h"
 #include "widgets/wizScrollBar.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizMessageBox.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
@@ -1009,6 +1010,14 @@ void CWizDocumentWebView::shareNoteByEmail()
 void CWizDocumentWebView::shareNoteByLink()
 {
     const WIZDOCUMENTDATA& doc = view()->note();
+
+    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    if (db.IsGroup())
+    {
+        CWizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Share group notes by link will available later"));
+        return;
+    }
+
     emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 
