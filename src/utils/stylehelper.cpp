@@ -586,7 +586,7 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc.adjusted(2, 0, -9, -2);
+    QRect rcBg = rc.adjusted(3, 0, -9, -2);
     if (bSelect) {
         if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));

@@ -413,8 +413,7 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
 
 void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
-    p->save();
-    p->setClipRect(vopt->rect);
+    p->save();    
     MessageListViewItem* pItem = messageItem(vopt->index);
 
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
@@ -429,6 +428,12 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
 
     // draw seperator at last
     Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+
+    //修补毛玻璃引起的偏差
+    QRect rcLeft = vopt->rect;
+    rcLeft.setWidth(2);
+    p->fillRect(rcLeft, QBrush(QColor("#F5F5F5")));
+
     p->restore();
 }
 

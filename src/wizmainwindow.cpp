@@ -2142,6 +2142,13 @@ QWidget*MainWindow::createMessageListView()
     layoutList->addWidget(m_msgList);
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
+    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
+    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
+                                   "background-position: left; background-repeat: repeat-y;")
+                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
+    m_msgList->setStyleSheet(docListStyle);
+    m_msgList->setAutoFillBackground(true);
+
     return m_msgListWidget;
 }
 
