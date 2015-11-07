@@ -399,8 +399,8 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     NSWindow* window3 = [NSApp mainWindow];
     //NSWindow* window4 = [self window];
 
-    //[[self window] makeFirstResponder:[self window]];
-    //[[NSApp mainWindow] makeFirstResponder:[NSApp mainWindow]];
+//    [[self window] makeFirstResponder:[self window]];
+//    [[NSApp mainWindow] makeFirstResponder:[NSApp mainWindow]];
     return;
 }
 
@@ -412,9 +412,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     if (!m_toolbar)
         return YES;
 
-    //[[NSApp mainWindow] makeFirstResponder:nil];
-    //NSWindow* window1 = [[NSApp windows] objectAtIndex:1];
-    //[window1 makeFirstResponder:window1];
+//    [[NSApp mainWindow] makeFirstResponder:nil];
+//    NSWindow* window1 = [[NSApp windows] objectAtIndex:1];
+//    [window1 makeFirstResponder:window1];
 
 
     //NSWindow* window1 = [[NSApp windows] objectAtIndex:0];

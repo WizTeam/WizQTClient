@@ -16,7 +16,7 @@ QT_END_NAMESPACE
 
 class WizSuggestCompletionon;
 
-const int TOOLBARITEMHEIGHT =  22;
+const int TOOLBARITEMHEIGHT =  23;
 const int SEARCHWIDGETWIDTH = 260;
 
 class CWizSearchWidget : public QMacCocoaViewContainer
@@ -34,7 +34,9 @@ public:
 
     bool isEditing();
 
+    void setCompleterUsable(bool usable);
     bool isCompleterVisible();
+    void showCompleter();
     void hideCompleter();
     void moveCompleter(bool up);
     QString getCurrentCompleterText();
@@ -88,6 +90,7 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_OVERRIDE;
 
+    bool setUsable(bool usable);
     bool isVisible();
     void hide();
     void selectSuggestItem(bool up);
@@ -113,6 +116,7 @@ private:
     QTimer *m_timer;
     QSize m_popupOffset;
     int m_popupWgtWidth;
+    bool m_usable;
 
     CWizUserSettings* m_settings;
 };

@@ -8,6 +8,7 @@
 #import <Cocoa/Cocoa.h>
 #include "share/wizsettings.h"
 #include "wizmachelper_mm.h"
+#include "wizmactoolbar.h"
 
 // NSSearchField delegate
 @interface WizSearchTarget: NSObject
@@ -33,7 +34,7 @@
 @end
 
 // WizSearchField
-@interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
+@interface WizSearchField: NSSearchField <NSTextFieldDelegate>
 {
     CWizSearchWidget* m_pSearchWidget;
     BOOL m_isEditing;
@@ -49,6 +50,7 @@
 - (void)enterKeyPressed;
 - (void)hideSearchCompleter;
 - (BOOL)isEditing;
+- (void)mouseDown:(NSEvent *)theEvent;
 @end
 
 @implementation WizSearchField
@@ -171,12 +173,23 @@
     return NO;
 }
 
-- (BOOL)becomeFirstResponder
+- (void)mouseDown:(NSEvent *)theEvent
 {
+    [super mouseDown:theEvent];
+    m_pSearchWidget->setCompleterUsable(true);
+    m_pSearchWidget->showCompleter();
+}
+
+- (BOOL)becomeFirstResponder
+{       
+
     // FIXME: qt can't switch focus between native and alien widgets, manually do it.
     QWidget* widget = QApplication::focusWidget();
-
+        // CWizMacToolBar
     if (widget) {
+        if (CWizMacToolBar* toolbar = dynamic_cast<CWizMacToolBar*>(widget))
+            return NO;
+
         widget->clearFocus();
     }
 
@@ -184,7 +197,8 @@
     [[self currentEditor] setSelectedRange:NSMakeRange([[self stringValue] length], 0)];
 
     //
-    self->m_isEditing = YES;
+    self->m_isEditing = YES;    
+
     m_pSearchWidget->on_search_textChanged("");
 
     return YES;
@@ -231,6 +245,7 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     [pSearchField setAutoresizesSubviews: YES];
     [pSearchField setAutoresizingMask: NSViewMinYMargin | NSViewWidthSizable];
     [pSearchField setDelegate: pSearchField];
+    [pSearchField.window makeFirstResponder:nil];
 //    NSRect f = pSearchField.frame;
 //    pSearchField.frame = f;
     setCocoaView(pSearchField);
@@ -273,7 +288,7 @@ void CWizSearchWidget::clear()
 void CWizSearchWidget::focus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
-    [pSearchField.window makeFirstResponder:pSearchField];
+//    [pSearchField.window makeFirstResponder:pSearchField];
     [pSearchField selectText:pSearchField];
 }
 
@@ -303,9 +318,19 @@ bool CWizSearchWidget::isEditing()
     return [pSearchField isEditing];
 }
 
+void CWizSearchWidget::setCompleterUsable(bool usable)
+{
+    m_completer->setUsable(usable);
+}
+
 bool CWizSearchWidget::isCompleterVisible()
 {
     return m_completer->isVisible();
+}
+
+void CWizSearchWidget::showCompleter()
+{
+    m_completer->autoSuggest();
 }
 
 void CWizSearchWidget::hideCompleter()

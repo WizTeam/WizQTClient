@@ -331,11 +331,17 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                     state = oldState;
                     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_FULLSCREEN);
                 }
+
+                if (!(oldState & Qt::WindowFullScreen) && (windowState() & Qt::WindowFullScreen))
+                {
+                    //NOTE:全屏时隐藏搜索提示
+                    m_searchWidget->hideCompleter();
+                    m_searchWidget->setCompleterUsable(false);
+                }
             }
             m_category->update();
             m_documents->update();
-//            m_splitter->update();
-//            m_splitter->handle(0)->repaint();
+            m_splitter->update();
         }
     }
 #endif

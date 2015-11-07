@@ -77,7 +77,6 @@ function initWizReader() {
     }
     var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
     var cssFile = WizEditor.getMarkdownCssFilePath();
-    console.log("css " + cssFile);
 
     m_wizReaderInited = f.contentWindow.WizReader.init({
     document: editor.document,

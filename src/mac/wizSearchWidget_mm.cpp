@@ -63,6 +63,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     : QObject(parent)
     , m_editor(parent)
     , m_popupWgtWidth(SEARCHWIDGETWIDTH)
+    , m_usable(true)
 {
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
@@ -206,6 +207,11 @@ bool WizSuggestCompletionon::eventFilter(QObject *obj, QEvent *ev)
 
     return false;
 }
+
+bool WizSuggestCompletionon::setUsable(bool usable)
+{
+    m_usable = usable;
+}
 //! [4]
 
 //! [5]
@@ -318,7 +324,7 @@ void searchTitleFromDB(CWizDatabase& db, const QString& title, QStringList& sugg
 
 void WizSuggestCompletionon::autoSuggest()
 {
-    if (!m_editor->isEditing())
+    if (!m_editor->isEditing() || !m_usable)
         return;
 
     QString inputedText = m_editor->currentText();

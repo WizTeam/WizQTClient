@@ -42,6 +42,22 @@
 //#endif
 
 
+@interface DBSCustomView: NSView
+
+- (void)drawRect:(NSRect)dirtyRect;
+@end
+
+@implementation DBSCustomView
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+   // Drawing code here.
+    [super drawRect: dirtyRect];  //父类，
+    NSColor* textColor = [NSColor colorWithDeviceRed:0x78/255.0 green:0x78/255.0 blue:0x78/255.0 alpha:0.2];
+    [textColor set];  //设置颜色
+    NSRectFill(dirtyRect);//填充rect区域
+}
+@end
 
 @interface NSView (Vibrancy)
 
@@ -77,12 +93,16 @@
 - (void)enableBehindBlur
 {
     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+
+//    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
+//    [self.contentView addSubview:view];
 }
 
-- (void)enableBlendingBlur
-{
-    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
-}
+
+//- (void)enableBlendingBlur
+//{
+//    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
+//}
 
 @end
 
@@ -94,12 +114,12 @@ void enableWidgetBehindBlur(QWidget* wgt)
     [nswindow enableBehindBlur];
 }
 
-void enableWidgetBlendingBlur(QWidget* wgt)
-{
-    NSView *nsview = (NSView *) wgt->winId();
-    NSWindow *nswindow = [nsview window];
-    [nswindow enableBlendingBlur];
-}
+//void enableWidgetBlendingBlur(QWidget* wgt)
+//{
+//    NSView *nsview = (NSView *) wgt->winId();
+//    NSWindow *nswindow = [nsview window];
+//    [nswindow enableBlendingBlur];
+//}
 
 @interface CreateNoteService : NSObject
 
