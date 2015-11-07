@@ -2126,6 +2126,11 @@ QWidget*MainWindow::createMessageListView()
     layoutList->setContentsMargins(0, 0, 0, 0);
     layoutList->setSpacing(0);
     m_msgListWidget->setLayout(layoutList);
+    QPalette pal = m_msgListWidget->palette();
+    pal.setColor(QPalette::Window, QColor("#F5F5F5"));
+    pal.setColor(QPalette::Base, QColor("#F5F5F5"));
+    m_msgListWidget->setPalette(pal);
+    m_msgListWidget->setAutoFillBackground(true);
 
     m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
     connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
@@ -2136,7 +2141,8 @@ QWidget*MainWindow::createMessageListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; margin-right:8px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+
 
     layoutList->addWidget(m_msgListTitleBar);
     layoutList->addWidget(line2);

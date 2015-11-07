@@ -418,11 +418,11 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
 
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect.adjusted(1, 0, 0, 0), false, true);
     }
     else
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect.adjusted(1, 0, 0, 0), hasFocus(), vopt->state & QStyle::State_Selected);
     }
     pItem->paint(p, vopt);
 

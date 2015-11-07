@@ -75,7 +75,7 @@ public:
     static QString wizCommonScrollBarStyleSheet();
 
     static QSize treeViewItemIconSize();
-    static int treeViewItemHeight(bool isSection);
+    static int treeViewItemHeight();
     static QColor treeViewBackground();
     static QColor treeViewItemBackground(int stat);
     static QColor treeViewItemCategoryBackground();

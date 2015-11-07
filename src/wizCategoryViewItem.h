@@ -200,6 +200,8 @@ public:
                               CWizDocumentDataArray& arrayDocument)
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
 
+    virtual int getItemHeight(int hintHeight) const;
+
     virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
 };
 

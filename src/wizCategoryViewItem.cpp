@@ -149,10 +149,9 @@ bool CWizCategoryViewItemBase::operator < (const QTreeWidgetItem &other) const
 QVariant CWizCategoryViewItemBase::data(int column, int role) const
 {
     if (role == Qt::SizeHintRole) {
-        //int fontHeight = treeWidget()->fontMetrics().height();
-        //int defHeight = fontHeight + 8;
-        bool isSection = type() == Category_SectionItem;
-        int height = Utils::StyleHelper::treeViewItemHeight(isSection);//getItemHeight(defHeight);
+        int fontHeight = treeWidget()->fontMetrics().height();
+        int defHeight = fontHeight + 8;
+        int height = getItemHeight(defHeight);
         QSize sz(-1, height);
         return QVariant(sz);
     } else {
@@ -160,9 +159,9 @@ QVariant CWizCategoryViewItemBase::data(int column, int role) const
     }
 }
 
-int CWizCategoryViewItemBase::getItemHeight(int hintHeight) const
+int CWizCategoryViewItemBase::getItemHeight(int /*hintHeight*/) const
 {
-    return hintHeight;
+    return Utils::StyleHelper::treeViewItemHeight();
 }
 
 
@@ -366,9 +365,9 @@ CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, c
     setText(0, strName);
 }
 
-int CWizCategoryViewSectionItem::getItemHeight(int nHeight) const
-{
-    return nHeight - 10;
+int CWizCategoryViewSectionItem::getItemHeight(int /*nHeight*/) const
+{    
+    return 32;
 }
 void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
 {
@@ -2232,6 +2231,11 @@ CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
 
 }
 
+int CWizCategoryViewShortcutPlaceHoldItem::getItemHeight(int /*hintHeight*/) const
+{
+    return 20;
+}
+
 void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
 {
     QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
@@ -2240,8 +2244,8 @@ void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QSty
 
     QString strText = vopt->text;
     if (!strText.isEmpty()) {
-
-        QColor colorText("#BEBEBE");
+        bool isSelected = vopt->state & QStyle::State_Selected;
+        QColor colorText(isSelected ? "#FFFFFF" : "#BEBEBE");
         colorText.setAlpha(240);
         p->setPen(colorText);
         QFont f;
