@@ -473,7 +473,8 @@ public:
         , m_colorHoverBorder("#c8dae8")
         , m_colorHoverFill("#e8f0f3")
         , m_colorSunkenBorder("#0072c4")
-        , m_horizontalPadding(10)
+        , m_horizontalPadding_left(10)
+        , m_horizontalPadding_rgiht(10)
     {
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
@@ -488,7 +489,14 @@ public:
 
     void setHorizontalPadding(int padding)
     {
-        m_horizontalPadding = padding;
+        m_horizontalPadding_left = padding;
+        m_horizontalPadding_rgiht = padding;
+    }
+
+    void setHorizontalPadding(int leftPadding, int rightPadding)
+    {
+        m_horizontalPadding_left = leftPadding;
+        m_horizontalPadding_rgiht = rightPadding;
     }
 
 protected:    
@@ -533,7 +541,7 @@ protected:
 
     virtual QSize sizeHint() const
     {
-        int width = m_horizontalPadding * 2 + iconSize().width();
+        int width = m_horizontalPadding_left + m_horizontalPadding_rgiht + iconSize().width();
         if (arrowType() == Qt::RightArrow)
             return QSize(width + TOOLBUTTON_MARGIN_WIDTH, Utils::StyleHelper::editorButtonHeight());
         return QSize(width, Utils::StyleHelper::editorButtonHeight());
@@ -541,7 +549,8 @@ protected:
 
 
     Position m_position;
-    int m_horizontalPadding;
+    int m_horizontalPadding_left;
+    int m_horizontalPadding_rgiht;
 private:
     QColor m_colorHoverBorder;
     QColor m_colorHoverFill;
@@ -1020,7 +1029,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnInsertLink = new CWizToolButton(this);
     m_btnInsertLink->setCheckable(false);
-//    m_btnInsertLink->setHorizontalPadding(8);
+    m_btnInsertLink->setHorizontalPadding(6, 10);
     m_btnInsertLink->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertLink"));
     m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
     m_btnInsertLink->setToolTip(tr("InsertLink"));
@@ -1029,7 +1038,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnInsertImage = new CWizToolButton(this);
     m_btnInsertImage->setCheckable(false);
-    m_btnInsertImage->setHorizontalPadding(6);
+    m_btnInsertImage->setHorizontalPadding(8);
     m_btnInsertImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
     m_btnInsertImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertImage")).size());
     m_btnInsertImage->setToolTip(tr("InsertImage"));
@@ -1038,6 +1047,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnInsertDate = new CWizToolButton(this);
     m_btnInsertDate->setCheckable(false);
+    m_btnInsertDate->setHorizontalPadding(8, 10);
     m_btnInsertDate->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertDate"));
     m_btnInsertDate->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertDate")).size());
     m_btnInsertDate->setToolTip(tr("InsertDate"));
@@ -1073,7 +1083,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnViewSource = new CWizToolButton(this);
     m_btnViewSource->setCheckable(true);
-    m_btnViewSource->setHorizontalPadding(6);
+    m_btnViewSource->setHorizontalPadding(3, 8);
     m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
     m_btnViewSource->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatViewSource")).size());
     m_btnViewSource->setToolTip(tr("View source"));

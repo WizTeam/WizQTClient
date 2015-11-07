@@ -601,6 +601,8 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
+    int borderMargin = WizIsHighPixel() ? 3 : 2;
+
     QRect rcBg = rc;
     switch (bgType) {
     case ListBGTypeNone:
@@ -608,14 +610,14 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
         break;
     case ListBGTypeActive:
     {
-        QRect rcBg = rc.adjusted(1, 1, -1, -3);
+        QRect rcBg = rc.adjusted(1, 1, -1, -borderMargin);
         drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
     case ListBGTypeHalfActive:
     {
-        QRect rcBg = rc.adjusted(1, 1, -1, -3);
+        QRect rcBg = rc.adjusted(1, 1, -1, -borderMargin);
         drawSelectBorder(p, rcBg,QColor("#D8D8D8"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Normal));
