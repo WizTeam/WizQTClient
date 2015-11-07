@@ -882,5 +882,22 @@ int getSystemMinorVersion()
 
 bool systemWidgetBlurAvailable()
 {
-    return getSystemMinorVersion() >= 10;
+    return (getSystemMinorVersion() >= 11) || (getSystemMinorVersion() == 10 && getSystemPatchVersion() >= 4);
+}
+
+
+int getSystemMajorVersion()
+{
+    SInt32 major;
+    Gestalt(gestaltSystemVersionMajor, &major);
+
+    return major;
+}
+
+
+int getSystemPatchVersion()
+{
+    SInt32 bugfix;
+    Gestalt(gestaltSystemVersionBugFix, &bugfix);
+    return bugfix;
 }
