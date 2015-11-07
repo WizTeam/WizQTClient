@@ -129,6 +129,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     connect(&m_dbMgr, SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)),
             SLOT(on_documentReadCount_changed(const WIZDOCUMENTDATA&)));
+    connect(&m_dbMgr, SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)),
+            SLOT(on_documentAccessDate_changed(WIZDOCUMENTDATA)));
 
     // message
     //connect(&m_dbMgr.db(), SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
@@ -1355,6 +1357,22 @@ void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 != index) {
         takeItem(index);
+    }
+}
+
+void CWizDocumentListView::on_documentAccessDate_changed(const WIZDOCUMENTDATA &document)
+{
+    if (acceptDocument(document) && qAbs(m_nSortingType) == SortingByAccessedTime)
+    {
+        int index = documentIndexFromGUID(document.strGUID);
+        if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index))
+        {
+            pItem->reload(m_dbMgr.db(document.strKbGUID));
+            update(indexFromItem(pItem));
+            //
+            updateSectionItems();
+            sortItems();
+        }
     }
 }
 

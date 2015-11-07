@@ -735,6 +735,7 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 	if (!ExecSQL(strSQL))
         return false;
 
+    emit documentAccessDateModified(data);
     return true;
 }
 

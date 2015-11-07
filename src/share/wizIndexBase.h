@@ -247,6 +247,7 @@ Q_SIGNALS:
     void documentDataModified(const WIZDOCUMENTDATA& document);
     void documentAbstractModified(const WIZDOCUMENTDATA& document);
     void documentTagModified(const WIZDOCUMENTDATA& document);
+    void documentAccessDateModified(const WIZDOCUMENTDATA& document);
     void documentReadCountChanged(const WIZDOCUMENTDATA& document);
 
     void groupDocumentUnreadCountModified(const QString& strKbGUID);

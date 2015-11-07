@@ -279,6 +279,8 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
 
     connect(db, SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)),
             SIGNAL(documentTagModified(const WIZDOCUMENTDATA&)));
+    connect(db, SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)),
+            SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)));
 
     connect(db, SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)),
             SIGNAL(documentReadCountChanged(const WIZDOCUMENTDATA&)));

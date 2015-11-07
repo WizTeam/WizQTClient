@@ -169,6 +169,7 @@ public Q_SLOTS:
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
+    void on_documentAccessDate_changed(const WIZDOCUMENTDATA& document);
     void on_documentReadCount_changed(const WIZDOCUMENTDATA& document);
 
     // message related signals
