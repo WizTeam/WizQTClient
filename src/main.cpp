@@ -205,7 +205,6 @@ int mainCore(int argc, char *argv[])
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));
 
-
     QIcon icon;
     icon.addPixmap(QPixmap(":/logo_16.png"));
     icon.addPixmap(QPixmap(":/logo_32.png"));
@@ -215,11 +214,19 @@ int mainCore(int argc, char *argv[])
     icon.addPixmap(QPixmap(":/logo_256.png"));
     QApplication::setWindowIcon(icon);
 
-
-
 #ifdef Q_OS_MAC
     wizMacInitUncaughtExceptionHandler();
     wizMacRegisterSystemService();
+
+    // init sys local for crash report
+    QString sysLocal = QLocale::system().name();
+    if (WizIsChineseLanguage(sysLocal))
+    {
+        QTranslator translatorSys;
+        QString sysLocalFile = Utils::PathResolve::localeFileName(sysLocal);
+        translatorSys.load(sysLocalFile);
+        a.installTranslator(&translatorSys);
+    }
 
     initCrashReporter();
 
