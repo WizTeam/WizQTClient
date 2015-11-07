@@ -220,16 +220,14 @@ int mainCore(int argc, char *argv[])
 
     // init sys local for crash report
     QString sysLocal = QLocale::system().name();
-    if (WizIsChineseLanguage(sysLocal))
-    {
-        QTranslator translatorSys;
-        QString sysLocalFile = Utils::PathResolve::localeFileName(sysLocal);
-        translatorSys.load(sysLocalFile);
-        a.installTranslator(&translatorSys);
-    }
+    QTranslator translatorSys;
+    QString sysLocalFile = Utils::PathResolve::localeFileName(sysLocal);
+    translatorSys.load(sysLocalFile);
+    a.installTranslator(&translatorSys);
 
     initCrashReporter();
 
+    a.removeTranslator(&translatorSys);
 
     //FIXME: 在Mac osx安全更新之后存在ssl握手问题，此处进行特殊处理
     QSslConfiguration conf = QSslConfiguration::defaultConfiguration();

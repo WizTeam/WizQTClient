@@ -778,7 +778,7 @@
     <message>
         <location filename="../src/wizDocumentWebView.cpp" line="1017"/>
         <source>Share group notes by link will available later</source>
-        <translation type="unfinished">通過鏈接分享筆記功能暫未開放</translation>
+        <translation type="unfinished">羣組筆記暫不支持分享鏈接功能</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentWebView.cpp" line="1892"/>

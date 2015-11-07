@@ -119,8 +119,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
     m_shareBtn->setVisible(!oemSettings.isHideShare());
     m_shareMenu = new QMenu(m_shareBtn);
-    m_shareMenu->addAction(WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL, this, SLOT(onEmailActionClicked()));
     m_shareMenu->addAction(WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK, this, SLOT(onShareActionClicked()));
+    m_shareMenu->addAction(WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL, this, SLOT(onEmailActionClicked()));
 //    m_shareBtn->setMenu(shareMenu);
 
 //    m_historyBtn = new CellButton(CellButton::ImageOnly, this);
