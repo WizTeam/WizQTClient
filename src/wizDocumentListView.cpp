@@ -1323,7 +1323,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
 
     // FIXME: if user search on-going, acceptDocument will remove this document from the list.
     if (acceptDocument(documentNew))
-    {
+    {        
         int index = documentIndexFromGUID(documentNew.strGUID);
         if (-1 == index) {
             addDocument(documentNew, true);
@@ -1332,6 +1332,10 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
                 pItem->reload(m_dbMgr.db(documentNew.strKbGUID));
                 pItem->setSortingType(m_nSortingType);
                 update(indexFromItem(pItem));
+                if (qAbs(m_nSortingType) == SortingByModifiedTime)
+                {
+                    updateSectionItems();
+                }
                 sortItems();
             }
         }
@@ -1339,6 +1343,9 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         int index = documentIndexFromGUID(documentNew.strGUID);
         if (-1 != index) {
             takeItem(index);
+            //
+            updateSectionItems();
+            sortItems();
         }
     }
 }
