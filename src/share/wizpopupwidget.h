@@ -23,12 +23,13 @@ private:
 //    QVector<QPoint> m_pointsPolygon;
     bool m_leftAlign;
     QPoint m_pos;
+    QRegion maskRegion();
 
+protected:
     int m_triangleMargin;
     int m_triangleWidth;
     int m_triangleHeight;
 
-    QRegion maskRegion();
 
 protected:
     virtual void paintEvent(QPaintEvent* event);

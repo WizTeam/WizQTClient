@@ -230,7 +230,7 @@ void TitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
-    setStyleSheet("color:#878787;");
+    setStyleSheet("color:#535353;");
 }
 
 void TitleEdit::onTitleReturnPressed()

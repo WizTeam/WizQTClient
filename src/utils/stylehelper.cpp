@@ -135,32 +135,36 @@ QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool tria
 {    
     QVector<QPoint> pointsRegion;
 
+    pointsRegion.push_back(QPoint(rect.left() + 1, nTriangleHeight + rect.top()));
     if (triangleAlginLeft)
     {
-        pointsRegion.push_back(QPoint(rect.left() + 1, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin + nTriangleWidth / 2, rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + 1 + nTriangleMargin + nTriangleWidth, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1, nTriangleHeight + rect.top()));
-        pointsRegion.push_back(QPoint(rect.left() + rect.width(), 1 + nTriangleHeight + rect.top()));
-        pointsRegion.push_back(QPoint(rect.left() + rect.width(), rect.top() + rect.height() - 2));
-        pointsRegion.push_back(QPoint(rect.left() + rect.width() - 2, rect.top() + rect.height()));
-        pointsRegion.push_back(QPoint(rect.left() + 2, rect.top() + rect.height()));
-        pointsRegion.push_back(QPoint(rect.left(), rect.top() + rect.height() - 2));
-        pointsRegion.push_back(QPoint(rect.left(), 1 + nTriangleHeight + rect.top()));
+        pointsRegion.push_back(QPoint(rect.left() + rect.width(), 1 + nTriangleHeight + rect.top()));        
     }
     else
     {
-        pointsRegion.push_back(QPoint(rect.left() + 1, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin - nTriangleWidth, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin - nTriangleWidth / 2, rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1 - nTriangleMargin, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1, nTriangleHeight + rect.top()));
         pointsRegion.push_back(QPoint(rect.left() + rect.width(), 1 + nTriangleHeight + rect.top()));
-        pointsRegion.push_back(QPoint(rect.left() + rect.width(), rect.top() + rect.height()));
-        pointsRegion.push_back(QPoint(rect.left(), rect.top() + rect.height()));
-        pointsRegion.push_back(QPoint(rect.left(), 1 + nTriangleHeight + rect.top()));
     }
+    pointsRegion.push_back(QPoint(rect.left() + rect.width(), rect.top() + rect.height() - 3));
+    pointsRegion.push_back(QPoint(rect.left() + rect.width() - 1, rect.top() + rect.height() - 2));
+    pointsRegion.push_back(QPoint(rect.left() + rect.width() - 2, rect.top() + rect.height() - 1));
+    pointsRegion.push_back(QPoint(rect.left() + rect.width() - 3, rect.top() + rect.height()));
+    //pointsRegion.push_back(QPoint(rect.left() + rect.width() - 4, rect.top() + rect.height() - 1));
+    //pointsRegion.push_back(QPoint(rect.left() + rect.width() - 5, rect.top() + rect.height() - 1));
+//    pointsRegion.push_back(QPoint(rect.left() + rect.width() - 4, rect.top() + rect.height() - 2));
+//    pointsRegion.push_back(QPoint(rect.left() + rect.width() - , rect.top() + rect.height()));
+    pointsRegion.push_back(QPoint(rect.left() + 3, rect.top() + rect.height()));
+    pointsRegion.push_back(QPoint(rect.left() + 2, rect.top() + rect.height() - 1));
+    pointsRegion.push_back(QPoint(rect.left() + 1, rect.top() + rect.height() - 2));
+    pointsRegion.push_back(QPoint(rect.left(), rect.top() + rect.height() - 3));
+    pointsRegion.push_back(QPoint(rect.left(), 1 + nTriangleHeight + rect.top()));
 
     QPolygon polygon(pointsRegion);
 

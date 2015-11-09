@@ -504,14 +504,14 @@ void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
 
 void CWizPreferenceWindow::on_tabWidget_currentChanged(int index)
 {
-    if (index == 1)
-    {
-        setFixedHeight(350);
-        resize(width(), 350);
-    }
-    else
-    {
-        setFixedHeight(290);
-        resize(width(), 290);
-    }
+//    if (index == 1)
+//    {
+//        setFixedHeight(350);
+//        resize(width(), 350);
+//    }
+//    else
+//    {
+//        setFixedHeight(290);
+//        resize(width(), 290);
+//    }
 }

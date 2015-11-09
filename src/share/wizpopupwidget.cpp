@@ -46,8 +46,8 @@ void CWizPopupWidget::paintEvent(QPaintEvent* event)
 
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
-    int xOffset = m_leftAlign ? 21 : sizeHint().width() - 21;
-    int yOffset = 4;
+    int xOffset = m_leftAlign ? (m_triangleMargin + m_triangleWidth / 2) : sizeHint().width() - (m_triangleMargin + m_triangleWidth / 2);
+    int yOffset = 0;
 
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
@@ -79,7 +79,9 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
 
 void CWizPopupWidget::setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight)
 {
-
+    m_triangleMargin = triangleMargin;
+    m_triangleWidth = triangleWidth;
+    m_triangleHeight = triangleHeight;
 }
 
 QRegion CWizPopupWidget::maskRegion()

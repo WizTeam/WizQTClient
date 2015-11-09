@@ -38,6 +38,8 @@ public:
     bool hasFocus();
 
     void adjustButtonPosition();
+    //
+    void showCoachingTips();
 
 private:
     CWizExplorerApp& m_app;

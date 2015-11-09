@@ -129,6 +129,8 @@ public:
     void promptMessage(const QString& strMsg);
     bool checkListClickable();
     void setStatusToEditingByCheckList();
+    //
+    void showCoachingTips();
 
     QWebFrame* noteFrame();
     QWebEnginePage* notePage();
@@ -181,7 +183,7 @@ private:
     void stopCheckDocumentEditStatus();
     bool checkDocumentEditable();
     //
-    void stopCheckDocumentAnimations();
+    void stopCheckDocumentAnimations();    
 };
 
 } // namespace Core

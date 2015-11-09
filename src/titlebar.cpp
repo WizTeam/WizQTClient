@@ -41,6 +41,7 @@
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
+#include "widgets/wizTipsWidget.h"
 
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -506,6 +507,18 @@ void TitleBar::moveTitileTextToPlaceHolder()
 void TitleBar::clearPlaceHolderText()
 {
     m_editTitle->setPlaceholderText("");
+}
+
+void TitleBar::showCoachingTips()
+{
+    CWizTipsWidget* widget = new CWizTipsWidget(this);
+    widget->setAttribute(Qt::WA_DeleteOnClose, true);
+    widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can be"
+                                                     "edited and markdown note can be redered."));
+    widget->setSizeHint(QSize(280, 74));
+    widget->setButtonVisible(false);
+    //
+    widget->addToTipListManager(m_editBtn, 0, -6);
 }
 
 void TitleBar::startEditButtonAnimation()

@@ -185,6 +185,7 @@ set(wiznote_SOURCES
     widgets/wizLocalProgressWebView.cpp
     widgets/wizCrashReportDialog.cpp
     widgets/wizCustomToolBar.cpp
+    widgets/wizTipsWidget.cpp
     core/wizSingleDocumentView.cpp
     mac/wizSearchWidget_mm.cpp
 )
@@ -354,6 +355,7 @@ set(wiznote_HEADERS
     widgets/wizLocalProgressWebView.h
     widgets/wizCrashReportDialog.h
     widgets/wizCustomToolBar.h
+    widgets/wizTipsWidget.cpp
     core/wizSingleDocumentView.h
 )
 

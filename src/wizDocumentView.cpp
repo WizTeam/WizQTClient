@@ -372,6 +372,11 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     {
         startCheckDocumentEditStatus();
     }
+
+    if(bEditing)
+    {
+        showCoachingTips();
+    }
 }
 
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
@@ -581,7 +586,14 @@ void CWizDocumentView::setStatusToEditingByCheckList()
     stopCheckDocumentEditStatus();
     sendDocumentEditingStatus();
     m_title->showMessageTips(Qt::PlainText, tr("You have occupied this note by clicking checklist !  " \
-             "Switch to other notes to free this note."));
+                                               "Switch to other notes to free this note."));
+}
+
+void CWizDocumentView::showCoachingTips()
+{
+    m_title->editorToolBar()->showCoachingTips();
+    m_title->showCoachingTips();
+    m_web->setFocus();
 }
 
 void CWizDocumentView::setEditorFocus()

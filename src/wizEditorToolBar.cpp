@@ -30,6 +30,7 @@
 #include "wizdef.h"
 #include "utils/stylehelper.h"
 #include "wizDocumentView.h"
+#include "widgets/wizTipsWidget.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
@@ -2301,6 +2302,17 @@ void EditorToolBar::adjustButtonPosition()
 
     m_firstLineButtonContainer->updateGeometry();
     m_secondLineButtonContainer->updateGeometry();
+}
+
+void EditorToolBar::showCoachingTips()
+{
+    CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+    tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+    tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
+    tipWidget->setSizeHint(QSize(280, 60));
+    tipWidget->setButtonVisible(false);
+    //
+    tipWidget->addToTipListManager(m_btnShowExtra, 0, -6);
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)

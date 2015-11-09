@@ -57,6 +57,7 @@ public:
     void resetTitle(const QString& strTitle);
     void moveTitileTextToPlaceHolder();
     void clearPlaceHolderText();
+    void showCoachingTips();
 
     void startEditButtonAnimation();
     void stopEditButtonAnimation();
