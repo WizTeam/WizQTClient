@@ -965,8 +965,7 @@ void CWizDocumentWebView::closeSourceMode()
 void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QString& strGuid)
 {
     QImage img;
-    QString strBG = getSkinResourcePath() + "html_attachment_bg.png";
-    ::WizCreateThumbnailForAttachment(img, strFile, strBG, QSize(32, 32));
+    ::WizCreateThumbnailForAttachment(img, strFile, QSize(32, 32));
     QString strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + ".png";
     img.save(strDestFile, "PNG");
     QString strLink = QString("wiz://open_attachment?guid=%1").arg(strGuid);

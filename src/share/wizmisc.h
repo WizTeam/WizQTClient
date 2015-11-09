@@ -153,8 +153,7 @@ QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
 void WizScaleIconSizeForRetina(QSize& size);
 
-bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
-                                  const QString& bgImage, const QSize& iconSize);
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName, const QSize& iconSize);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);

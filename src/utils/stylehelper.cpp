@@ -1095,7 +1095,6 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         rcd.adjust(0, titleHeight, 0, 0);
     }
 
-
     QFont fontThumb;
     nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
     QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
