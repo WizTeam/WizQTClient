@@ -616,7 +616,10 @@ bool CWizUnzipFile::open(const CString& strFileName)
     close();
     //
     m_zip = ::JlCompress::openReadonlyZip(strFileName);
-    m_names = m_zip->getFileNameList();
+    if (m_zip)
+    {
+        m_names = m_zip->getFileNameList();
+    }
     //
     return m_zip ? true : false;
 }
