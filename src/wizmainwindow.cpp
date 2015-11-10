@@ -2068,9 +2068,12 @@ QWidget* MainWindow::createNoteListView()
     m_noteListWidget->setPalette(pal);
     m_noteListWidget->setAutoFillBackground(true);
 
+    QWidget* noteButtonsContainer = new QWidget(this);
+    noteButtonsContainer->setFixedHeight(30);
     QHBoxLayout* layoutActions = new QHBoxLayout();
     layoutActions->setContentsMargins(0, 0, 8, 0);
-    layoutList->setSpacing(0);
+    layoutActions->setSpacing(0);
+    noteButtonsContainer->setLayout(layoutActions);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
@@ -2106,7 +2109,7 @@ QWidget* MainWindow::createNoteListView()
     line2->setFixedHeight(1);
     line2->setStyleSheet("margin-left:2px; margin-right:8px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
-    layoutList->addLayout(layoutActions);
+    layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 

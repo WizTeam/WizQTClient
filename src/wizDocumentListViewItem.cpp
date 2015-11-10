@@ -810,7 +810,7 @@ void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewIt
 
     p->setPen(Utils::StyleHelper::listViewSectionItemText());
     QFont font;
-    font.setPixelSize(14);
+    font.setPixelSize(12);
     p->setFont(font);
     QRect rc = vopt->rect;
     rc.setLeft(rc.x() + Utils::StyleHelper::listViewItemHorizontalPadding());

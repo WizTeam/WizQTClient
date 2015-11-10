@@ -410,7 +410,7 @@ int StyleHelper::messageViewItemHeight()
 
 int StyleHelper::listViewItemHeight(int nType)
 {
-    QFont f;
+//    QFont f;
     switch (nType) {
     case ListTypeOneLine:
         return 38;
@@ -422,7 +422,7 @@ int StyleHelper::listViewItemHeight(int nType)
         return 122;
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
-        return 31;
+        return 20;
     default:
         Q_ASSERT(0);
         return 0;
