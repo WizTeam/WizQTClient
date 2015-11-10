@@ -177,7 +177,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     if (systemWidgetBlurAvailable())
     {
         setAutoFillBackground(false);
-        //    setWindowFlags(Qt::FramelessWindowHint);
         setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
@@ -3188,7 +3187,6 @@ void MainWindow::on_searchProcess(const QString& strKeywords, const CWizDocument
         m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
     } else {
-//        m_documents->setDocuments(arrayDocument);
         m_documents->appendDocuments(arrayDocument);
     }
     on_documents_itemSelectionChanged();
@@ -3558,6 +3556,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
         m_bUpdatingSelection = true;
         if (m_category->setCurrentIndex(data))
         {
+            m_bUpdatingSelection = false;
             m_documents->addAndSelectDocument(data);
         }
     }
@@ -3567,6 +3566,7 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
     }
 
     m_bUpdatingSelection = false;
+    raise();
 }
 
 void MainWindow::locateDocument(const QString& strKbGuid, const QString& strGuid)
