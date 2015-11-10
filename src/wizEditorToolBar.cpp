@@ -44,6 +44,8 @@ const int RecommendedWidthForOneLine = 1060;
 
 #define WIZRECENTFONTLIST  "RecentlyUsedFont"
 
+#define WIZSHOWEXTRABUTTONITEMS "ShowExtraButtonItems"
+
 struct WizComboboxStyledItem
 {    
     QString strText;
@@ -1222,7 +1224,8 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_firstLineButtonContainer->setFixedHeight(nHeight);
     m_secondLineButtonContainer->setFixedHeight(nHeight);
 
-    m_secondLineButtonContainer->hide();
+    bool showExtraButtons = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
+    m_secondLineButtonContainer->setVisible(showExtraButtons);
 
     connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
 }
@@ -2285,7 +2288,7 @@ void EditorToolBar::adjustButtonPosition()
             }
             if (!m_buttonContainersInSecondLine.isEmpty())
             {
-                m_btnShowExtra->show();
+                m_btnShowExtra->show();                
             }
         }
     }
@@ -2302,6 +2305,13 @@ void EditorToolBar::adjustButtonPosition()
 
     m_firstLineButtonContainer->updateGeometry();
     m_secondLineButtonContainer->updateGeometry();
+
+    if (!m_buttonContainersInSecondLine.isEmpty())
+    {
+        bool showExtra = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
+        m_secondLineButtonContainer->setVisible(showExtra);
+        m_btnShowExtra->setChecked(showExtra);
+    }
 }
 
 void EditorToolBar::showCoachingTips()
@@ -2912,6 +2922,7 @@ void EditorToolBar::on_btnInsertCode_clicked()
 void EditorToolBar::on_btnShowExtra_clicked()
 {
     m_secondLineButtonContainer->setVisible(!m_secondLineButtonContainer->isVisible());
+    m_app.userSettings().set(WIZSHOWEXTRABUTTONITEMS, QString::number(m_secondLineButtonContainer->isVisible()));
 }
 
 void EditorToolBar::on_editor_saveImageAs_triggered()
