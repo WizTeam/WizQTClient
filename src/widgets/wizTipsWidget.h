@@ -26,6 +26,7 @@ public slots:
 
 protected:
     void mouseReleaseEvent(QMouseEvent* ev);
+    void showEvent(QShowEvent* ev);
 
 private:
     QLabel* m_labelTitle;

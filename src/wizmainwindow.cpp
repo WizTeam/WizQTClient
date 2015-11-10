@@ -95,6 +95,7 @@
 #include "widgets/wizShareLinkDialog.h"
 #include "core/wizSingleDocumentView.h"
 #include "widgets/wizCustomToolBar.h"
+#include "wizPositionDelegate.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -461,6 +462,18 @@ void MainWindow::changeEvent(QEvent* event)
         QMainWindow::changeEvent(event);
     else
         _baseClass::changeEvent(event);
+}
+
+void MainWindow::moveEvent(QMoveEvent* ev)
+{
+    if (m_useSystemBasedStyle)
+        QMainWindow::changeEvent(ev);
+    else
+        _baseClass::changeEvent(ev);
+
+    qDebug() << "main window moved";
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.mainwindowPositionChanged(ev->oldPos(), ev->pos());
 }
 
 #ifdef Q_OS_MAC

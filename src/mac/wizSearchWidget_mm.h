@@ -90,7 +90,7 @@ public:
 
     bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_OVERRIDE;
 
-    bool setUsable(bool usable);
+    void setUsable(bool usable);
     bool isVisible();
     void hide();
     void selectSuggestItem(bool up);

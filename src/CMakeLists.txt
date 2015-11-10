@@ -357,6 +357,7 @@ set(wiznote_HEADERS
     widgets/wizCustomToolBar.h
     widgets/wizTipsWidget.cpp
     core/wizSingleDocumentView.h
+    wizPositionDelegate.h
 )
 
 set(wiznote_FORMS

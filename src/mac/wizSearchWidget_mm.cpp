@@ -20,6 +20,7 @@
 #include "share/wizDatabase.h"
 #include "utils/stylehelper.h"
 #include "share/wizsettings.h"
+#include "wizPositionDelegate.h"
 
 
 class WizSuggestionItemDelegate :  public QStyledItemDelegate
@@ -149,6 +150,9 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     m_timer->setInterval(200);
     connect(m_timer, SIGNAL(timeout()), SLOT(autoSuggest()));
     connect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
+
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.addListener(m_popupWgt);
 }
 
 WizSuggestCompletionon::~WizSuggestCompletionon()
@@ -208,7 +212,7 @@ bool WizSuggestCompletionon::eventFilter(QObject *obj, QEvent *ev)
     return false;
 }
 
-bool WizSuggestCompletionon::setUsable(bool usable)
+void WizSuggestCompletionon::setUsable(bool usable)
 {
     m_usable = usable;
 }

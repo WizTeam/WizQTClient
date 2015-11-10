@@ -115,13 +115,14 @@ public:
     QNetworkDiskCache* webViewNetworkCache();   
 
 protected:
-    virtual bool eventFilter(QObject* watched, QEvent* event);
-    virtual void resizeEvent(QResizeEvent* event);
-    virtual void closeEvent(QCloseEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    virtual void changeEvent(QEvent *event);
+    bool eventFilter(QObject* watched, QEvent* event);
+    void resizeEvent(QResizeEvent* event);
+    void closeEvent(QCloseEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void changeEvent(QEvent *event);
+    void moveEvent(QMoveEvent* ev);
 
 #ifdef Q_OS_MAC
     virtual void paintEvent(QPaintEvent* event);

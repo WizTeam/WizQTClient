@@ -4,6 +4,8 @@
 #include <QLabel>
 #include <QPushButton>
 
+#include "wizPositionDelegate.h"
+
 CWizTipsWidget::CWizTipsWidget(QWidget *parent)
     : CWizPopupWidget(parent)
     , m_hintSize(308, 82)
@@ -94,8 +96,19 @@ void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
 
     close();
 
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.removeListener(this);
+
     CWizTipListManager* manager = CWizTipListManager::instance();
     manager->displayNextTipWidget();
+}
+
+void CWizTipsWidget::showEvent(QShowEvent* ev)
+{
+    QWidget::showEvent(ev);
+
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.addListener(this);
 }
 
 CWizTipListManager* CWizTipListManager::m_instance = nullptr;
