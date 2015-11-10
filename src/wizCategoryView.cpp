@@ -5430,7 +5430,7 @@ void CWizCategoryView::on_group_bizChanged(const QString& strKbGUID)
 
 void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& strKbGUID)
 {
-    updateGroupFolderDocumentCount(strKbGUID);
+    updateGroupFolderDocumentCount_impl(strKbGUID);
 }
 
 void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)

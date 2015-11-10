@@ -613,7 +613,7 @@ void CWizCategoryViewShortcutRootItem::getDocuments(CWizDatabase& /*db*/, CWizDo
     for (int i = 0; i < childCount(); i++)
     {
         CWizCategoryViewShortcutItem *pItem = dynamic_cast<CWizCategoryViewShortcutItem*>(child(i));
-        if (pItem)
+        if (pItem && !pItem->guid().isEmpty())
         {
             CWizDatabase &db = m_app.databaseManager().db(pItem->kbGUID());
             WIZDOCUMENTDATA doc;
@@ -1348,9 +1348,7 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
             CWizDocumentDataArray arrayDoc;
             if (db.getGroupUnreadDocuments(arrayDoc))
             {
-                db.setGroupDocumentsReaded();
                 arrayDocument.insert(arrayDocument.begin(), arrayDoc.begin(), arrayDoc.end());
-                pGroup->setUnreadCount(0);
             }
         }
         updateUnreadCount();
@@ -1598,8 +1596,6 @@ void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentD
     if (hitTestUnread() && m_nUnread)
     {
         db.getGroupUnreadDocuments(arrayDocument);
-        db.setGroupDocumentsReaded();
-        setUnreadCount(0);
     }
     else
     {
