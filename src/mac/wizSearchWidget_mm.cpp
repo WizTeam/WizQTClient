@@ -246,7 +246,7 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices, bool isR
 
         m_treeWgt->setFixedWidth(m_popupWgtWidth);
         resetContainerSize(m_popupWgtWidth, treeWgtHeight + 35);
-        }    
+    }
 
     QPoint bottomLeft(m_popupOffset.width(), -10); // = m_editor->geometry().bottomLeft();
 
@@ -302,7 +302,7 @@ void WizSuggestCompletionon::doneCompletion()
     if (item) {
         m_editor->setText(item->text(0));
         disconnect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
-        QMetaObject::invokeMethod(m_editor, "doSearch", Q_ARG(QString, item->text(0)));
+        QMetaObject::invokeMethod(m_editor, "on_search_editFinished", Q_ARG(QString, item->text(0)));
         connect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
     }
 }

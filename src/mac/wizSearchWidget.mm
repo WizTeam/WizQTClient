@@ -10,6 +10,7 @@
 #include "wizmachelper_mm.h"
 #include "wizmactoolbar.h"
 
+
 // NSSearchField delegate
 @interface WizSearchTarget: NSObject
 {
@@ -34,7 +35,7 @@
 @end
 
 // WizSearchField
-@interface WizSearchField: NSSearchField <NSTextFieldDelegate>
+@interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
 {
     CWizSearchWidget* m_pSearchWidget;
     BOOL m_isEditing;
@@ -61,7 +62,7 @@
 
 - (BOOL)isEditing
 {
-        return self->m_isEditing;
+     return self->m_isEditing;
 }
 
 - (void)enterKeyPressed
@@ -217,6 +218,7 @@
     if (textMove == NSReturnTextMovement) {
         m_pSearchWidget->on_search_editFinished(WizToQString([self stringValue]));
     }
+
     [self hideSearchCompleter];
 
     self->m_isEditing = NO;
@@ -371,13 +373,23 @@ void CWizSearchWidget::processEvent(QEvent* ev)
     event(ev);
 }
 
+
+static QString oldSearchText = QString();
+
 void CWizSearchWidget::on_search_editFinished(const QString& strText)
 {
     emit doSearch(strText);
+    oldSearchText = strText;
 }
 
 void CWizSearchWidget::on_search_textChanged(const QString& strText)
 {
+    if (!oldSearchText.isEmpty() && strText.isEmpty())
+    {
+        emit doSearch("");
+        oldSearchText = "";
+    }
+
     emit textEdited(strText);
 }
 
