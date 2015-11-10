@@ -333,6 +333,8 @@ signals:
     void newDocument();
     void documentsHint(const QString& strHint);
 
+    void unreadButtonClicked();
+
     void categoryItemPositionChanged(const QString& strKbGUID);
 
 

@@ -1383,7 +1383,13 @@ void CWizDocumentListView::on_documentReadCount_changed(const WIZDOCUMENTDATA& d
         int index = documentIndexFromGUID(document.strGUID);
         if (CWizDocumentListViewDocumentItem* pItem = documentItemAt(index))
         {
-            pItem->reload(m_dbMgr.db(document.strKbGUID));
+            CWizDatabase& db = m_dbMgr.db(document.strKbGUID);
+            if (pItem->document().nReadCount == 0 && db.IsGroup())
+            {
+                emit groupDocumentReadCountChanged(document.strKbGUID);
+            }
+
+            pItem->reload(db);
             update(indexFromItem(pItem));
         }
     }

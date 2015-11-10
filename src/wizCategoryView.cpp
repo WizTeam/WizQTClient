@@ -2894,6 +2894,15 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         else if (pItem->hitTestUnread())
         {
             emit itemSelectionChanged();
+            emit unreadButtonClicked();
+        }
+    }
+    else if (item->type() == Category_BizGroupRootItem)
+    {
+        CWizCategoryViewBizGroupRootItem* bizRoot = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item);
+        if (bizRoot && bizRoot->hitTestUnread())
+        {
+            emit unreadButtonClicked();
         }
     }
     else if (item->type() == Category_ShortcutItem)

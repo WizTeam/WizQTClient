@@ -820,7 +820,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_msgListHintLabel = new QLabel(this);
     m_msgListHintLabel->setText(tr("Unread messages"));
     m_msgListHintLabel->setAlignment(Qt::AlignVCenter | Qt::AlignRight);
-    m_msgListHintLabel->setStyleSheet("color: #888888; padding-top:2px; margin-right:10px;");
+    m_msgListHintLabel->setStyleSheet("color: #A7A7A7; font-size:14px; padding-top:2px; margin-right:6px;");
     layoutActions->addWidget(m_msgListHintLabel);
 
     m_msgListMarkAllBtn = new wizImageButton(this);

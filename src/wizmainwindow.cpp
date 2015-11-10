@@ -2071,7 +2071,7 @@ QWidget* MainWindow::createNoteListView()
     QWidget* noteButtonsContainer = new QWidget(this);
     noteButtonsContainer->setFixedHeight(30);
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 8, 0);
+    layoutActions->setContentsMargins(0, 0, 24, 0);
     layoutActions->setSpacing(0);
     noteButtonsContainer->setLayout(layoutActions);
 
@@ -2088,9 +2088,12 @@ QWidget* MainWindow::createNoteListView()
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
 
-//    m_labelDocumentsHint = new QLabel(this);
-//    m_labelDocumentsHint->setMargin(5);
-//    layoutActions->addWidget(m_labelDocumentsHint);
+
+
+    m_labelDocumentsHint = new QLabel(this);
+    m_labelDocumentsHint->setText(tr("Unread documents"));
+    m_labelDocumentsHint->setStyleSheet("color: #A7A7A7; font-size:14px; padding-top:2px; margin-right:6px;"); //font: 12px;
+    layoutActions->addWidget(m_labelDocumentsHint);
 //    connect(m_category, SIGNAL(documentsHint(const QString&)), SLOT(on_documents_hintChanged(const QString&)));
 
 //    m_labelDocumentsCount = new QLabel("", this);
@@ -2101,9 +2104,20 @@ QWidget* MainWindow::createNoteListView()
 
 
 //    //sortBtn->setStyleSheet("padding-top:10px;");
-//    m_labelDocumentsHint->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
 //    m_labelDocumentsCount->setStyleSheet("color: #787878;padding-bottom:1px;"); //font: 12px;
+//    m_btnMarkDocumentsReaded->setVisible(false);
+//    m_labelDocumentsHint->setVisible(false);
 
+    m_btnMarkDocumentsReaded = new wizImageButton(this);
+    QIcon btnIcon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "actionMarkMessagesRead");
+    m_btnMarkDocumentsReaded->setIcon(btnIcon);
+    m_btnMarkDocumentsReaded->setFixedSize(QSize(18, 18));
+    m_btnMarkDocumentsReaded->setToolTip(tr("Mark all documents read"));
+    connect(m_btnMarkDocumentsReaded, SIGNAL(clicked()), SLOT(on_btnMarkDocumentsRead_triggered()));
+    layoutActions->addWidget(m_btnMarkDocumentsReaded);
+
+    m_labelDocumentsHint->setVisible(false);
+    m_btnMarkDocumentsReaded->setVisible(false);
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
@@ -2195,31 +2209,54 @@ CWizIAPDialog*MainWindow::iapDialog()
 #endif
 }
 
-void MainWindow::on_documents_documentCountChanged()
-{
-    QString text;
-    int count = m_documents->documentCount();
-    if (count == 1)
-    {
-        text = tr("1 note");
-    }
-    else if (count > 1)
-    {
-        if (count >= 1000)
-        {
-            text = tr("%1 notes").arg("1000+");
-        }
-        else
-        {
-            text = tr("%1 notes").arg(count);
-        }
-    }
-    m_labelDocumentsCount->setText(text);
-}
+//void MainWindow::on_documents_documentCountChanged()
+//{
+//    QString text;
+//    int count = m_documents->documentCount();
+//    if (count == 1)
+//    {
+//        text = tr("1 note");
+//    }
+//    else if (count > 1)
+//    {
+//        if (count >= 1000)
+//        {
+//            text = tr("%1 notes").arg("1000+");
+//        }
+//        else
+//        {
+//            text = tr("%1 notes").arg(count);
+//        }
+//    }
+//    m_labelDocumentsCount->setText(text);
+//}
 
 void MainWindow::on_documents_lastDocumentDeleted()
 {
     ICore::instance()->emitCloseNoteRequested(m_doc);
+}
+
+void MainWindow::on_btnMarkDocumentsRead_triggered()
+{
+    m_btnMarkDocumentsReaded->setVisible(false);
+    m_labelDocumentsHint->setVisible(false);
+    //
+    QSet<QString> setKb;
+    for (int i = 0; i < m_documents->count(); i++)
+    {
+        if (CWizDocumentListViewDocumentItem* item = m_documents->documentItemAt(i))
+        {
+            setKb.insert(item->document().strKbGUID);
+        }
+    }
+
+    for (QString kb : setKb)
+    {
+        CWizDatabase& db = m_dbMgr.db(kb);
+        db.setGroupDocumentsReaded();
+    }
+
+    m_documents->clear();
 }
 
 //void MainWindow::on_documents_hintChanged(const QString& strHint)
@@ -2250,6 +2287,7 @@ void MainWindow::init()
     connect(m_category, SIGNAL(itemSelectionChanged()), SLOT(on_category_itemSelectionChanged()));
     connect(m_category, SIGNAL(newDocument()), SLOT(on_actionNewNote_triggered()));
     connect(m_category, SIGNAL(categoryItemPositionChanged(QString)), SLOT(on_quickSync_request(QString)));
+    connect(m_category, SIGNAL(unreadButtonClicked()), SLOT(on_categoryUnreadButton_triggered()));
     m_category->init();
 
     connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
@@ -2261,6 +2299,9 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
     connect(m_documents, SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
+
+    connect(m_documents, SIGNAL(groupDocumentReadCountChanged(QString)), m_category,
+            SLOT(on_groupDocuments_unreadCount_modified(QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
 
@@ -2738,6 +2779,12 @@ void MainWindow::on_actionSortBySize_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
     changeDocumentsSortTypeByAction(action);
+}
+
+void MainWindow::on_categoryUnreadButton_triggered()
+{
+    m_btnMarkDocumentsReaded->setVisible(true);
+    m_labelDocumentsHint->setVisible(true);
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered(bool removeItems)
@@ -4064,6 +4111,8 @@ void MainWindow::showDocumentList(CWizCategoryBaseView* category)
         m_documents->setLeadInfoState(leadInfoState);
     }
     m_documents->setDocuments(arrayDocument);
+    m_labelDocumentsHint->setVisible(false);
+    m_btnMarkDocumentsReaded->setVisible(false);
 
     if (arrayDocument.empty())
     {

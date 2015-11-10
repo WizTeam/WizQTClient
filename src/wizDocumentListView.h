@@ -223,6 +223,7 @@ Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
     void documentsSelectionChanged();
+    void groupDocumentReadCountChanged(const QString& strKbGUID);
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
     void changeUploadRequest(const QString& strKbGUID);
     void addDocumentToShortcutsRequest(const WIZDOCUMENTDATA& doc);

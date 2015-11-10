@@ -45,6 +45,7 @@ class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
+class wizImageButton;
 
 class CWizMacToolBar;
 class QNetworkDiskCache;
@@ -187,8 +188,9 @@ private:
     QWidget* m_docListContainer;
     CWizSingleDocumentViewDelegate* m_singleViewDelegate;
 
-//    QLabel* m_labelDocumentsHint;
-    QLabel* m_labelDocumentsCount;
+    QLabel* m_labelDocumentsHint;
+//    QLabel* m_labelDocumentsCount;
+    wizImageButton* m_btnMarkDocumentsReaded;
 
     CWizDocumentViewHistory* m_history;
     CWizAnimateAction* m_animateSync;
@@ -329,6 +331,8 @@ public Q_SLOTS:
     void on_actionSortByTag_triggered();
     void on_actionSortBySize_triggered();
 
+    void on_categoryUnreadButton_triggered();
+
     void on_actionMarkAllMessageRead_triggered(bool removeItems);
     void on_messageSelector_senderSelected(QString userGUID);
 
@@ -368,9 +372,10 @@ public Q_SLOTS:
     void on_documents_itemSelectionChanged();
     void on_documents_itemDoubleClicked(QListWidgetItem * item);
     void on_message_itemSelectionChanged();
-    void on_documents_documentCountChanged();
     void on_documents_lastDocumentDeleted();
+//    void on_documents_documentCountChanged();
 //    void on_documents_hintChanged(const QString& strHint);
+    void on_btnMarkDocumentsRead_triggered();
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
     //void on_document_contentChanged();
