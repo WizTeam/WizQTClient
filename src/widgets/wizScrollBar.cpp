@@ -4,7 +4,8 @@
 
 CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
-    , m_width(8)
+    , m_bgColor("transparent")
+    , m_handleColor("#C1C1C1")
 {
 
     // FIXME:  hard code
@@ -21,7 +22,7 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
 
 QSize CWizScrollBar::sizeHint() const
 {
-    return QSize(m_width, 1);
+    return QSize(12, 1);
 }
 
 void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -46,9 +47,10 @@ void CWizScrollBar::syncWith(QScrollBar* source)
 
 }
 
-void CWizScrollBar::setWidth(int width)
+void CWizScrollBar::applyStyle(const QString& bgColorName, const QString& handleColorName)
 {
-    m_width = width;
+    m_bgColor = bgColorName;
+    m_handleColor = handleColorName;
 }
 
 void CWizScrollBar::showHandle()
@@ -100,15 +102,16 @@ void CWizScrollBar::setHandleVisible(bool visible)
 {
     setStyleSheet(
         QString("QScrollBar {\
-            background: #F5F5F5;\
+            background: %1;\
         }\
         QScrollBar::handle {\
-            background: %1;\
+            background: %2;\
             min-height: 30px;\
         }\
         QScrollBar::handle:vertical {\
-            margin: 0px %2 0px 2px;\
-            border-radius:2px;\
+            margin: 0px 3px 0px 3px;\
+            border-radius:3px;\
+            width:6px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -119,7 +122,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }").arg(visible ? "#D8D8D8" : "transparent").arg(m_width >= 6 ? m_width - 6 : 0));
+        }").arg(m_bgColor).arg(visible ? m_handleColor : "transparent"));
 }
 
 

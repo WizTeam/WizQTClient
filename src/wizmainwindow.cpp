@@ -471,7 +471,6 @@ void MainWindow::moveEvent(QMoveEvent* ev)
     else
         _baseClass::changeEvent(ev);
 
-    qDebug() << "main window moved";
     CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
     delegate.mainwindowPositionChanged(ev->oldPos(), ev->pos());
 }
