@@ -600,7 +600,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
         } else
         {
 //            p->fillRect(rcBg, listViewItemBackground(Normal));
-            drawSelectBorder(p, rcBg, QColor("#D8D8D8"), 2);
+            drawSelectBorder(p, rcBg, QColor("#DCDCDC"), 2);
         }
     }
 }
@@ -625,7 +625,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
     case ListBGTypeHalfActive:
     {
         QRect rcBg = rc.adjusted(1, 1, -1, -borderMargin);
-        drawSelectBorder(p, rcBg,QColor("#D8D8D8"), 2);
+        drawSelectBorder(p, rcBg,QColor("#DCDCDC"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
