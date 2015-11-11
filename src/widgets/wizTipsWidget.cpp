@@ -8,23 +8,23 @@
 
 CWizTipsWidget::CWizTipsWidget(QWidget *parent)
     : CWizPopupWidget(parent)
-    , m_hintSize(308, 82)
+    , m_hintSize(318, 82)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & ~Qt::Popup;
     flags = flags | Qt::WindowStaysOnTopHint | Qt::Tool;
     setWindowFlags(flags);
     setContentsMargins(0,0,0,0);
-    setMaximumWidth(308);
+    setMaximumWidth(318);
     setLeftAlign(true);
 
     QWidget* containerWidget = this;//new QWidget(this);
     QPalette pal = containerWidget->palette();
-    pal.setBrush(QPalette::Window, QBrush(QColor("#fbfbfb")));
+    pal.setBrush(QPalette::Window, QBrush(QColor("#F6F6F6")));
     containerWidget->setPalette(pal);
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
-    vLayout->setContentsMargins(12, 16, 12, 0);
+    vLayout->setContentsMargins(16, 16, 16, 0);
     vLayout->setSpacing(6);
     containerWidget->setLayout(vLayout);
 //    layout()->addWidget(containerWidget);
@@ -43,11 +43,11 @@ CWizTipsWidget::CWizTipsWidget(QWidget *parent)
     hLayout->addWidget(m_btnOK);
     vLayout->addLayout(hLayout);
 
-    m_labelTitle->setStyleSheet("color:#000000; font-size:12px;");
+    m_labelTitle->setStyleSheet("color:#000000; font-size:14px;");
     m_labelInfo->setStyleSheet("color:#888888; font-size:12px;");
     m_labelInfo->setWordWrap(true);
     m_labelInfo->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-    m_btnOK->setStyleSheet("color:#3177EE; font-size:12px; margin-top:8px; margin-bottom:8px; border:0px; background:none;");
+    m_btnOK->setStyleSheet("color:#3177EE; font-size:12px; line-height:18px; margin-top:8px; margin-bottom:8px; border:0px; background:none;");
 
     setSizeHint(m_hintSize);
 }
