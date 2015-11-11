@@ -1857,7 +1857,7 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(70, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(68, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
@@ -1878,7 +1878,7 @@ void MainWindow::initToolBar()
     //
     m_searchWidget = m_toolBar->getSearchWidget();
     m_searchWidget->setUserSettings(m_settings);
-    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(233, 0));
+    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(231, 0));
     #else
 
 
