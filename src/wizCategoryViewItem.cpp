@@ -213,9 +213,10 @@ bool CWizCategoryViewItemBase::getExtraButtonIcon(QPixmap &ret) const
     return !m_extraButtonIcon.isNull();
 }
 
+const int EXTRABUTTONRIGHTMARGIN = 10;
+
 QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bool ignoreIconExist) const
 {
-    int nMargin = 4;
     QSize szBtn(16, 16);
     if (!m_extraButtonIcon.isNull())
     {
@@ -226,12 +227,11 @@ QRect CWizCategoryViewItemBase::getExtraButtonRect(const QRect &rcItemBorder, bo
     {
         return QRect(0, 0, 0, 0);
     }
-    int nWidth = szBtn.width() + 2 * nMargin;
-    int nHeight = szBtn.height() + 2 * nMargin;
+    int nWidth = szBtn.width();
+    int nHeight = szBtn.height();
     //
     int nTop = rcItemBorder.y() + (rcItemBorder.height() - nHeight) / 2;
-    QRect rcb(rcItemBorder.right() - nWidth - 2 * nMargin - 2, nTop, nWidth, nHeight);
-    rcb.adjust(nMargin, nMargin, -nMargin, -nMargin);
+    QRect rcb(rcItemBorder.right() - nWidth - EXTRABUTTONRIGHTMARGIN, nTop, nWidth, nHeight);
     return rcb;
 }
 
@@ -387,25 +387,6 @@ void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionVi
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewSectionItemText(), font);
 }
 
-QRect CWizCategoryViewSectionItem::getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist) const
-{
-    return CWizCategoryViewItemBase::getExtraButtonRect(itemBorder, ignoreIconExist);
-
-    QSize szBtn = Utils::StyleHelper::treeViewItemIconSize();
-    if (!m_extraButtonIcon.isNull()) {
-        szBtn = m_extraButtonIcon.size();
-        WizScaleIconSizeForRetina(szBtn);
-    } else if (!ignoreIconExist){
-        return QRect(0, 0, 0, 0);
-    }
-
-    //
-    int nTop = itemBorder.y() + (itemBorder.height() - szBtn.height()) / 2;
-    int nMargin = 13;
-    QRect rcb(itemBorder.right() - szBtn.width() - nMargin, nTop, szBtn.width(), szBtn.height());
-    return rcb;
-}
-
 void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
 //    QRect rc = vopt->rect;
@@ -523,12 +504,12 @@ QString CWizCategoryViewMessageItem::getSectionName()
 
 QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, bool ignoreIconExist) const
 {
-    if (!m_nUnread)
+    if (!m_nUnread && !ignoreIconExist)
         return QRect();
 
     int nButtonWidth = 26;
     int nButtonHeight = 14;
-    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+    QRect rc(itemBorder.right() - EXTRABUTTONRIGHTMARGIN - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
              nButtonWidth, nButtonHeight);
     return rc;
 }
@@ -1418,7 +1399,7 @@ QRect CWizCategoryViewBizGroupRootItem::getExtraButtonRect(const QRect& itemBord
 
     int nButtonWidth = 26;
     int nButtonHeight = 14;
-    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+    QRect rc(itemBorder.right() - EXTRABUTTONRIGHTMARGIN - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
              nButtonWidth, nButtonHeight);
     return rc;
 }
@@ -1839,7 +1820,7 @@ QRect CWizCategoryViewGroupRootItem::getExtraButtonRect(const QRect& itemBorder,
 
     int nButtonWidth = 26;
     int nButtonHeight = 14;
-    QRect rc(itemBorder.right() - 14 - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
+    QRect rc(itemBorder.right() - EXTRABUTTONRIGHTMARGIN - nButtonWidth, itemBorder.y() + (itemBorder.height() - nButtonHeight) / 2,
              nButtonWidth, nButtonHeight);
     return rc;
 }

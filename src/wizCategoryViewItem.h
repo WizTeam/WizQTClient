@@ -114,8 +114,6 @@ public:
 
     virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
     virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-
-    virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
 protected:
     int m_sortOrder;
 };
