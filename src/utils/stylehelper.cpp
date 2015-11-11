@@ -442,7 +442,7 @@ QColor StyleHelper::listViewBackground()
 
 int StyleHelper::listViewItemHorizontalPadding()
 {
-    return 12;
+    return 6;
 }
 
 QColor StyleHelper::listViewItemSeperator()
@@ -592,20 +592,18 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc.adjusted(2, 0, -9, -2);
+    QRect rcBg = rc.adjusted(1, 0, -13, -3);
     if (bSelect) {
         if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));
-            drawSelectBorder(p, rcBg, QColor("#3177EE"), 1);
+            drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
         } else
         {
 //            p->fillRect(rcBg, listViewItemBackground(Normal));
-            drawSelectBorder(p, rcBg, QColor("#D8D8D8"), 1);
+            drawSelectBorder(p, rcBg, QColor("#D8D8D8"), 2);
         }
     }
 }
-
-
 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
