@@ -591,7 +591,7 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     m_btnAddAttachment->setAction(actionAddAttach);
 
     QHBoxLayout* layoutHeader = new QHBoxLayout();
-    layoutHeader->setContentsMargins(12, 0, 4, 0);
+    layoutHeader->setContentsMargins(12, 0, 12, 0);
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
     layoutHeader->addStretch();
     layoutHeader->addWidget(m_btnAddAttachment);
