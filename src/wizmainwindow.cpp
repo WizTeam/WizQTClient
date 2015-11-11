@@ -832,7 +832,7 @@ void MainWindow::restoreStatus()
         QRect rcDesktop = qApp->desktop()->availableGeometry();
         if (rcDesktop.width() > 1280)
         {
-            const int DefaultAppWidth = 1280;
+            const int DefaultAppWidth = 1300;
             const int DefaultAppHeight = 760;
             QRect rcWindow = QRect(rcDesktop.x() + (rcDesktop.width() - DefaultAppWidth) / 2,
                                    rcDesktop.y() + (rcDesktop.height() - DefaultAppHeight) / 2, DefaultAppWidth, DefaultAppHeight);
@@ -844,7 +844,7 @@ void MainWindow::restoreStatus()
                                    rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
             setGeometry(rcWindow);
         }        
-        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe4\0\0\0\xf8\0\0\x3\x1e\0\0\0\0\x1\x1\0\0\0\x1\x1)");
+        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe6\0\0\x1#\0\0\x3\n\x1\xff\xff\xff\xff\x1\0\0\0\x1\0)");
         m_splitter->restoreState(state);
     } else {
         restoreGeometry(geometry);
