@@ -47,7 +47,7 @@ public:
         QPainter painter(this);
 
         // FIXME: hard-coded
-        QColor bgColor = QColor("#BBBBBB");
+        QColor bgColor = QColor("#dbdbdb");
         painter.setPen(bgColor);
         painter.setBrush(bgColor);
         painter.fillRect(event->rect(), bgColor);
@@ -55,11 +55,11 @@ public:
 
     virtual void resizeEvent(QResizeEvent *event)
     {
-//        if (orientation() == Qt::Horizontal)
-//            setContentsMargins(2, 0, 2, 0);
-//        else
-//            setContentsMargins(0, 2, 0, 2);
-//        setMask(QRegion(contentsRect()));
+        if (orientation() == Qt::Horizontal)
+            setContentsMargins(2, 0, 2, 0);
+        else
+            setContentsMargins(0, 2, 0, 2);
+        setMask(QRegion(contentsRect()));
         QSplitterHandle::resizeEvent(event);
     }
 

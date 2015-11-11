@@ -81,9 +81,8 @@ void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewI
 
     //通过subElementRect获取范围会产生不同的结果。此处通过icon进行计算
 //    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
-    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
+    QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 20,
                  vopt->rect.height());
-//    rcText.adjust(2, 0, -16, 0);
     QString strCount = countString();
 
     QString strText = vopt->text;

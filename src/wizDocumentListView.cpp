@@ -100,7 +100,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
-    m_vScroll->applyStyle("#F5F5F5", "#C1C1C1");
+    m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
 #endif
 
     // setup style
@@ -2041,17 +2041,17 @@ void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* v
     if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
         p->save();
-        p->setPen(QColor(Qt::red));
-        QRect rcBg = vopt->rect;
-        rcBg.setWidth(2);
-        p->setPen(QColor("#F5F5F5"));
-        p->setBrush(QColor("#F5F5F5"));
-        p->drawRect(rcBg);
+//        p->setPen(QColor(Qt::red));
+//        QRect rcBg = vopt->rect;
+//        rcBg.setWidth(2);
+//        p->setPen(QColor("#F5F5F5"));
+//        p->setBrush(QColor("#F5F5F5"));
+//        p->drawRect(rcBg);
 
         int nRightMargin = 12;
         QStyleOptionViewItemV4 newVopt(*vopt);
         newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
-        newVopt.rect.setLeft(newVopt.rect.left() + 2);
+        newVopt.rect.setLeft(newVopt.rect.left());
         pItem->draw(p, &newVopt, m_nViewType);
 
         p->restore();

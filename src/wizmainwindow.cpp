@@ -2132,22 +2132,33 @@ QWidget* MainWindow::createNoteListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; margin-right:8px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
 
+
+//    QListWidget* listWidget = new QListWidget(this);
+//    QStringList itemList;
+//    itemList << "apple" << "google" << "baidu" << "microsoft" << "ali" << "amzon" << "tencent" << "facebook"
+//                << "apple" << "google" << "baidu" << "microsoft" << "ali" << "amzon" << "tencent" << "facebook";
+//    listWidget->addItems(itemList);
+//    listWidget->setFixedHeight(100);
+//    listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
+//    layoutList->addWidget(listWidget);
+
+
 //    QWidget* bottomMargin = new QWidget(m_noteListWidget);
 //    bottomMargin->setFixedHeight(20);
 //    layoutList->addWidget(bottomMargin);
 
-    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
-                                   "background-position: left; background-repeat: repeat-y;")
-                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
-    m_documents->setStyleSheet(docListStyle);
-    m_documents->setAutoFillBackground(true);
+//    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
+//    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
+//                                   "background-position: left; background-repeat: repeat-y;")
+//                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
+//    m_documents->setStyleSheet(docListStyle);
+//    m_documents->setAutoFillBackground(true);
 
     return m_noteListWidget;
 }
@@ -2183,12 +2194,12 @@ QWidget*MainWindow::createMessageListView()
     layoutList->addWidget(m_msgList);
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
 
-    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
-                                   "background-position: left; background-repeat: repeat-y;")
-                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
-    m_msgList->setStyleSheet(docListStyle);
-    m_msgList->setAutoFillBackground(true);
+//    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
+//    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
+//                                   "background-position: left; background-repeat: repeat-y;")
+//                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
+//    m_msgList->setStyleSheet(docListStyle);
+//    m_msgList->setAutoFillBackground(true);
 
     return m_msgListWidget;
 }
