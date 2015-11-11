@@ -55,10 +55,10 @@ public:
 
     virtual void resizeEvent(QResizeEvent *event)
     {
-        if (orientation() == Qt::Horizontal)
-            setContentsMargins(2, 0, 2, 0);
-        else
-            setContentsMargins(0, 2, 0, 2);
+//        if (orientation() == Qt::Horizontal)
+//            setContentsMargins(2, 0, 2, 0);
+//        else
+//            setContentsMargins(0, 2, 0, 2);
         setMask(QRegion(contentsRect()));
         QSplitterHandle::resizeEvent(event);
     }
@@ -81,7 +81,6 @@ protected:
     }
 };
 
-
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
@@ -91,6 +90,7 @@ CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
 
 QSplitterHandle *CWizSplitter::createHandle()
 {
-    return new CWizSplitterHandle(orientation(), this);
+    CWizSplitterHandle* spliter =  new CWizSplitterHandle(orientation(), this);
+    return spliter;
 }
 

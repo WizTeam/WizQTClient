@@ -149,15 +149,20 @@ public:
         return QObject::tr("Unknown meesage type");
     }
 
-    void paint(QPainter* p, const QStyleOptionViewItemV4* vopt) const
-    {
-        if (m_data.nReadStatus == 0)
-        {
-            p->fillRect(vopt->rect, QColor("#F7FBFF"));
-        }
+    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+    {     
+        //unread
+        int nUnreadSymSize = 8;
+        QRect rcUnread = QRect(6, vopt->rect.top() + (vopt->rect.height() - nUnreadSymSize) / 2 + 3,
+                               nUnreadSymSize, nUnreadSymSize);
+        p->setPen(Qt::NoPen);
+        p->setBrush(QBrush(QColor("#5990EF")));
+        p->setRenderHint(QPainter::Antialiasing, true);
+        p->drawEllipse(rcUnread);
 
+        //avatar
         int nMargin = 12;
-        QRect rcd = vopt->rect.adjusted(nMargin, 26, -nMargin, 0);
+        QRect rcd = vopt->rect.adjusted(nMargin + nUnreadSymSize, 26, -nMargin, 0);
         QPixmap pmAvatar;
         WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
@@ -244,6 +249,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     m_vScroll = new CWizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
+    m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
 #endif
 
     // init
@@ -418,21 +424,16 @@ void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) 
 
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect.adjusted(1, 0, 0, 0), false, true);
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);
     }
     else
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect.adjusted(1, 0, 0, 0), hasFocus(), vopt->state & QStyle::State_Selected);
+        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
     }
-    pItem->paint(p, vopt);
+    pItem->draw(p, vopt);
 
     // draw seperator at last
     Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
-
-    //修补毛玻璃引起的偏差
-    QRect rcLeft = vopt->rect;
-    rcLeft.setWidth(2);
-    p->fillRect(rcLeft, QBrush(QColor("#F5F5F5")));
 
     p->restore();
 }
@@ -792,14 +793,19 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     , m_nUnreadCount(0)
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
-    QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(2, 0, 16, 0);
-    layoutActions->setSpacing(0);
-    setLayout(layoutActions);
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     setPalette(pal);
     setAutoFillBackground(true);
+
+    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    hLayout->setContentsMargins(0, 0, 0, 0);
+    hLayout->setSpacing(0);
+    setLayout(hLayout);
+
+    QHBoxLayout* layoutActions = new QHBoxLayout();
+    layoutActions->setContentsMargins(2, 0, 0, 0);
+    layoutActions->setSpacing(0);
 
     m_labelCurrentSender = new WizClickableLabel(this);
     m_labelCurrentSender->setText(tr("All Users"));
@@ -831,9 +837,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     connect(m_msgListMarkAllBtn, SIGNAL(clicked()), SLOT(on_markAllReadbutton_clicked()));
     layoutActions->addWidget(m_msgListMarkAllBtn);
 
-    QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(8, 1);
-    layoutActions->addWidget(placeHoldWgt);
+    hLayout->addLayout(layoutActions);
 
     connect(&m_dbMgr, SIGNAL(messageCreated(WIZMESSAGEDATA)),
             SLOT(on_message_created(WIZMESSAGEDATA)));

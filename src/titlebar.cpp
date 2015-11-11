@@ -513,9 +513,9 @@ void TitleBar::showCoachingTips()
 {
     CWizTipsWidget* widget = new CWizTipsWidget(this);
     widget->setAttribute(Qt::WA_DeleteOnClose, true);
-    widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can be"
+    widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
                                                      "edited and markdown note can be redered."));
-    widget->setSizeHint(QSize(280, 74));
+    widget->setSizeHint(QSize(280, 82));
     widget->setButtonVisible(false);
     //
     widget->addToTipListManager(m_editBtn, 0, -6);

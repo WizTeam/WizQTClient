@@ -1977,7 +1977,7 @@ void MainWindow::initClient()
 {
 #ifdef Q_OS_MAC    
 
-    m_clienWgt = new QWidget(nullptr);
+    m_clienWgt = new QWidget(this);
     setCentralWidget(m_clienWgt);
 
     if (systemWidgetBlurAvailable())
@@ -2009,10 +2009,11 @@ void MainWindow::initClient()
     m_clienWgt->setAutoFillBackground(true);
 
     QVBoxLayout* layout = new QVBoxLayout(m_clienWgt);
-    layout->setContentsMargins(0, 0, 0, 0);    
+    layout->setContentsMargins(0, 0, 0, 0);
+    layout->setSpacing(0);
     m_clienWgt->setLayout(layout);    
 
-    m_splitter = std::make_shared<CWizSplitter>();
+    m_splitter = std::make_shared<CWizSplitter>(this);
     layout->addWidget(m_splitter.get());
 
     m_category->setPalette(pal);
@@ -2031,8 +2032,6 @@ void MainWindow::initClient()
     layoutDocument->addWidget(m_documentSelection);
     m_documentSelection->hide();
     // append after client   
-
-
 
     m_splitter->addWidget(m_category);
 
@@ -2081,16 +2080,20 @@ QWidget* MainWindow::createNoteListView()
 
     QWidget* noteButtonsContainer = new QWidget(this);
     noteButtonsContainer->setFixedHeight(30);
+    QHBoxLayout* layoutButtonContainer = new QHBoxLayout();
+    layoutButtonContainer->setContentsMargins(0, 0, 0, 0);
+    layoutButtonContainer->setSpacing(0);
+    noteButtonsContainer->setLayout(layoutButtonContainer);
+
     QHBoxLayout* layoutActions = new QHBoxLayout();
-    layoutActions->setContentsMargins(0, 0, 24, 0);
+    layoutActions->setContentsMargins(0, 0, 12, 0);
     layoutActions->setSpacing(0);
-    noteButtonsContainer->setLayout(layoutActions);
 
     CWizViewTypePopupButton* viewBtn = new CWizViewTypePopupButton(*this, this);
     viewBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     connect(viewBtn, SIGNAL(viewTypeChanged(int)), SLOT(on_documents_viewTypeChanged(int)));
     connect(this, SIGNAL(documentsViewTypeChanged(int)), viewBtn, SLOT(on_viewTypeChanged(int)));
-    layoutActions->addWidget(viewBtn);    
+    layoutActions->addWidget(viewBtn);
 
     CWizSortingPopupButton* sortBtn = new CWizSortingPopupButton(*this, this);
     sortBtn->setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
@@ -2098,8 +2101,6 @@ QWidget* MainWindow::createNoteListView()
     connect(this, SIGNAL(documentsSortTypeChanged(int)), sortBtn, SLOT(on_sortingTypeChanged(int)));
     layoutActions->addWidget(sortBtn);
     layoutActions->addStretch(0);
-
-
 
     m_labelDocumentsHint = new QLabel(this);
     m_labelDocumentsHint->setText(tr("Unread documents"));
@@ -2125,40 +2126,26 @@ QWidget* MainWindow::createNoteListView()
     m_btnMarkDocumentsReaded->setFixedSize(QSize(18, 18));
     m_btnMarkDocumentsReaded->setToolTip(tr("Mark all documents read"));
     connect(m_btnMarkDocumentsReaded, SIGNAL(clicked()), SLOT(on_btnMarkDocumentsRead_triggered()));
-    layoutActions->addWidget(m_btnMarkDocumentsReaded);
+    layoutActions->addWidget(m_btnMarkDocumentsReaded);    
 
     m_labelDocumentsHint->setVisible(false);
     m_btnMarkDocumentsReaded->setVisible(false);
 
+    layoutButtonContainer->addLayout(layoutActions);
+
+    QWidget* wgtRightBorder = new QWidget(this);
+    wgtRightBorder->setFixedWidth(12);
+    wgtRightBorder->setFixedHeight(30);
+    wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
+    layoutButtonContainer->addWidget(wgtRightBorder);
+
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_documents);
-
-
-//    QListWidget* listWidget = new QListWidget(this);
-//    QStringList itemList;
-//    itemList << "apple" << "google" << "baidu" << "microsoft" << "ali" << "amzon" << "tencent" << "facebook"
-//                << "apple" << "google" << "baidu" << "microsoft" << "ali" << "amzon" << "tencent" << "facebook";
-//    listWidget->addItems(itemList);
-//    listWidget->setFixedHeight(100);
-//    listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
-//    layoutList->addWidget(listWidget);
-
-
-//    QWidget* bottomMargin = new QWidget(m_noteListWidget);
-//    bottomMargin->setFixedHeight(20);
-//    layoutList->addWidget(bottomMargin);
-
-//    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-//    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
-//                                   "background-position: left; background-repeat: repeat-y;")
-//                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
-//    m_documents->setStyleSheet(docListStyle);
-//    m_documents->setAutoFillBackground(true);
 
     return m_noteListWidget;
 }
@@ -2184,22 +2171,29 @@ QWidget*MainWindow::createMessageListView()
             SLOT(on_actionMarkAllMessageRead_triggered(bool)));
 
 
+    QHBoxLayout* titleBarLayout = new QHBoxLayout(this);
+    titleBarLayout->setContentsMargins(0, 0, 0, 0);
+    titleBarLayout->setSpacing(0);
+    titleBarLayout->addWidget(m_msgListTitleBar);
+
+    QWidget* placeHoldWgt = new QWidget(this);
+    placeHoldWgt->setFixedSize(12, 30);
+    placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
+    QHBoxLayout* layout2 = new QHBoxLayout(this);
+    layout2->setContentsMargins(0, 0, 0, 0);
+    layout2->setSpacing(0);
+    layout2->addWidget(placeHoldWgt);
+    titleBarLayout->addLayout(layout2);
+
+
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; margin-right:8px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
-
-    layoutList->addWidget(m_msgListTitleBar);
+    layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);
     layoutList->addWidget(m_msgList);
     m_msgList->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Expanding);
-
-//    //NOTE: 添加毛玻璃效果后，会导致笔记列表绘制时右移两个像素，此处通过修改背景色来修补
-//    QString docListStyle = QString("background-color: #FFFFFF;background-image:url(%1);"
-//                                   "background-position: left; background-repeat: repeat-y;")
-//                           .arg(Utils::StyleHelper::skinResourceFileName("listWidget_background_left", false));
-//    m_msgList->setStyleSheet(docListStyle);
-//    m_msgList->setAutoFillBackground(true);
 
     return m_msgListWidget;
 }

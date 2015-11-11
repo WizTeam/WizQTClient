@@ -70,6 +70,8 @@ public:
     static QRegion borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
                                                   int nTriangleMargin, int nTriangleWidth, int nTriangleHeight);
 
+    static QColor splitterLineColor();
+
     static QString wizCommonListViewStyleSheet();
     static QString wizCommonStyleSheet();
     static QString wizCommonScrollBarStyleSheet();
