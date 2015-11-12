@@ -823,6 +823,8 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     , m_app(app)
     , m_resetLocked(false)
 {
+    setContentsMargins(0, 4, 0, 0);
+
     QString skin = Utils::StyleHelper::themeName();
 
     m_comboParagraph = new CWizToolComboBox(this);    

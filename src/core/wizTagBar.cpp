@@ -31,7 +31,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     , m_dbMgr(app.databaseManager())
     , m_tagList(nullptr)
 {
-    int nHeight = Utils::StyleHelper::tagBarHeight() - 8;
+    int nHeight = Utils::StyleHelper::tagBarHeight() - 4;
     setFixedHeight(nHeight);
 
 //    setStyleSheet("font-size: 11px; color: #646464;");
