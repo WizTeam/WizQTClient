@@ -592,7 +592,7 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc.adjusted(1, 0, -13, -3);
+    QRect rcBg = rc.adjusted(1, 0, -14, -3);
     if (bSelect) {
         if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));
@@ -600,7 +600,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
         } else
         {
 //            p->fillRect(rcBg, listViewItemBackground(Normal));
-            drawSelectBorder(p, rcBg, QColor("#DCDCDC"), 2);
+            drawSelectBorder(p, rcBg, QColor("#9BC0FF"), 2);
         }
     }
 }
@@ -608,7 +608,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
-    int borderMargin = WizIsHighPixel() ? 3 : 2;
+    int borderMargin = WizIsHighPixel() ? 2 : 1;
 
     QRect rcBg = rc;
     switch (bgType) {
@@ -617,15 +617,15 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
         break;
     case ListBGTypeActive:
     {
-        QRect rcBg = rc.adjusted(1, 1, -1, -borderMargin);
+        QRect rcBg = rc.adjusted(1, 1, -2, -borderMargin);
         drawSelectBorder(p, rcBg, QColor("#3177EE"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Active));
         break;
     case ListBGTypeHalfActive:
     {
-        QRect rcBg = rc.adjusted(1, 1, -1, -borderMargin);
-        drawSelectBorder(p, rcBg,QColor("#DCDCDC"), 2);
+        QRect rcBg = rc.adjusted(1, 1, -2, -borderMargin);
+        drawSelectBorder(p, rcBg,QColor("#9BC0FF"), 2);
     }
 //        p->fillRect(rcBg, listViewItemBackground(Normal));
         break;
@@ -1018,7 +1018,7 @@ int StyleHelper::editToolBarHeight()
 
 int StyleHelper::infoBarHeight()
 {
-    return 32;
+    return 34;
 }
 
 int StyleHelper::tagBarHeight()

@@ -23,7 +23,7 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
 
 QSize CWizScrollBar::sizeHint() const
 {
-    return QSize(12, 1);
+    return m_bLeftBorder ? QSize(13, 1) : QSize(12, 1);
 }
 
 void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -113,7 +113,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
         }\
         QScrollBar::handle:vertical {\
             margin: 0px 3px 0px 3px;\
-            border-radius:%4px;\
+            border-radius:3px;\
             width:6px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
@@ -126,7 +126,7 @@ void CWizScrollBar::setHandleVisible(bool visible)
             height: 0px;\
             width: 0px;\
         }").arg(m_bgColor).arg(m_bLeftBorder ? "border-left:1px solid #e7e7e7;" : "")
-        .arg(visible ? m_handleColor : "transparent").arg(m_bLeftBorder ? "2" : "3"));
+        .arg(visible ? m_handleColor : "transparent"));
 }
 
 

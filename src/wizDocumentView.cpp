@@ -593,7 +593,9 @@ void CWizDocumentView::showCoachingTips()
 {
     m_title->editorToolBar()->showCoachingTips();
     m_title->showCoachingTips();
-    m_web->setFocus();
+    m_app.mainWindow()->setFocus(Qt::MouseFocusReason);
+    setFocus();
+    setEditorFocus();
 }
 
 void CWizDocumentView::setEditorFocus()
