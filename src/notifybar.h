@@ -39,6 +39,7 @@ signals:
     void labelLink_clicked(const QString& link);
 
 private:
+    QLabel* m_spacer;
     QWidget* m_childWgt;
     QLabel* m_labelNotify;
     wizImageButton* m_buttonCloseRed;

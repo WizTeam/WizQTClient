@@ -16,14 +16,15 @@ NotifyBar::NotifyBar(QWidget *parent)
     , m_type(NoNotify)
     , m_childWgt(new QWidget(this))
 {
-    //setStyleSheet("* {font-size:12px; color: #FFFFFF;} *:active {background: url(:/notify_bg.png);} *:!active {background: url(:/notify_bg_inactive.png);}");
-//    setFixedHeight(Utils::StyleHelper::notifyBarHeight());
-    setAutoFillBackground(true);
-
-    QHBoxLayout* layout = new QHBoxLayout();
+    QVBoxLayout* layout = new QVBoxLayout();
     layout->setContentsMargins(0, 0, 0, 0);    // On most platforms, the margin is 11 pixels in all directions.
     layout->setSpacing(0);
     setLayout(layout);
+
+    m_spacer = new QLabel(this);
+    m_spacer->setFixedHeight(2);
+    m_spacer->setText(QString());
+    layout->addWidget(m_spacer);
 
     //Q_OBJECT标志与stylesheet不能共存，创建一个子Widget来调整样式
     QHBoxLayout* childLayout = new QHBoxLayout();
@@ -101,6 +102,7 @@ void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
         m_labelNotify->setText(info);
         showNotify();
         m_type = CustomMessage;
+        m_spacer->show();
     }
     else
     {
@@ -146,6 +148,8 @@ void NotifyBar::showNotify()
 
 void NotifyBar::hideNotify(bool bUseAnimation)
 {
+    m_spacer->hide();
+
     m_animation->stop();
     m_type = NoNotify;
     if (maximumHeight() > 0)
@@ -179,12 +183,10 @@ void NotifyBar::applyStyleSheet(bool isForbidden)
     }
     else
     {
-        styleSheet = ".QWidget{border:1px solid #ABCDF3; border-radius:2px; background-color:#F5FAFD;}"
-                     "QLabel {font:11px; color:#5990EF;}";
+        styleSheet = ".QWidget{border:1px solid #FF9C00; border-radius:2px; background-color:#FFF6D7;}"
+                     "QLabel {font:11px; color:#FF9C00;}";
     }
-    setStyleSheet(styleSheet);
     m_childWgt->setStyleSheet(styleSheet);
-
     return;
 
 }

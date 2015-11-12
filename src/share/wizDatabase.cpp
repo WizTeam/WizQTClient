@@ -3495,7 +3495,6 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                 newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
             }
 
-            qDebug() << "create new note, html : " << newHtml;
             bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
 
             Q_EMIT documentCreated(data);

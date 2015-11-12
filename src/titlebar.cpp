@@ -75,10 +75,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editTitle->setAlignment(Qt::AlignVCenter);
     m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
 
-    int nEditToolBarHeight = Utils::StyleHelper::editToolBarHeight();
 //    m_editorBar->setFixedHeight(nEditToolBarHeight);
     m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
-    m_infoBar->setFixedHeight(nEditToolBarHeight);
 
     QString strTheme = Utils::StyleHelper::themeName();
 
