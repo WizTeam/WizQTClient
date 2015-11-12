@@ -180,13 +180,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
-    if (strColor.isEmpty())
-    {
-        strColor = "#FFFFFF";
-    }
-    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{background: %1;} ").arg(strColor));
-//    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
+    updateEditorBackgroundColor(strColor);
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
@@ -466,7 +460,10 @@ void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorNa
 {
     m_app.userSettings().setEditorBackgroundColor(strColorName);
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ background-color: %1;} ").arg(strColorName));
+                                                             "{ border: 1px; background: %1; height:20px;} ").arg(strColorName));
+    ui->pushButtonBackgroundColor->setText(strColorName.isEmpty() ? tr("Click to select color") : QString());
+    ui->pushButtonClearBackground->setVisible(!strColorName.isEmpty());
+
     Q_EMIT settingsChanged(wizoptionsFont);
 }
 
