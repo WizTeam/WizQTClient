@@ -31,6 +31,7 @@
 #include "utils/stylehelper.h"
 #include "wizDocumentView.h"
 #include "widgets/wizTipsWidget.h"
+#include "wizmainwindow.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
@@ -2312,19 +2313,37 @@ void EditorToolBar::adjustButtonPosition()
     {
         bool showExtra = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
         m_secondLineButtonContainer->setVisible(showExtra);
-        m_btnShowExtra->setChecked(showExtra);
     }
+    m_btnShowExtra->setVisible(!m_buttonContainersInSecondLine.isEmpty());
+    m_btnShowExtra->setChecked(m_secondLineButtonContainer->isVisible());
 }
+
+#define EDITORTOOLBARTIPSCHECKED   "EditorToolBarTipsChecked"
 
 void EditorToolBar::showCoachingTips()
 {
-    CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
-    tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
-    tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
-    tipWidget->setSizeHint(QSize(280, 60));
-    tipWidget->setButtonVisible(false);
-    //
-    tipWidget->addToTipListManager(m_btnShowExtra, 0, -6);
+    bool showTips = false;
+    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    {
+        showTips = mainWindow->userSettings().get(EDITORTOOLBARTIPSCHECKED).toInt() == 0;
+    }
+
+    if (showTips)
+    {
+        CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+        tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+        tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
+        tipWidget->setSizeHint(QSize(280, 60));
+        tipWidget->setButtonVisible(false);
+        tipWidget->bindFunction([](){
+            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            {
+                mainWindow->userSettings().set(EDITORTOOLBARTIPSCHECKED, "1");
+            }
+        });
+        //
+        tipWidget->addToTipListManager(m_btnShowExtra, 0, -6);
+    }
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)

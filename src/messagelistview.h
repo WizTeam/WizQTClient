@@ -12,7 +12,7 @@
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
 #include "share/wizpopupwidget.h"
-//#include <memory>
+#include "wizdef.h"
 
 class CWizScrollBar;
 class CWizDatabaseManager;
@@ -127,7 +127,7 @@ class WizMessageListTitleBar : public QWidget
 {
     Q_OBJECT
 public:
-    WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+    WizMessageListTitleBar(CWizExplorerApp& app, QWidget* parent = 0);
 
     void setUnreadMode(bool unread, int unreadCount);
     bool isUnreadMode() const;    
@@ -150,9 +150,11 @@ private:
     void addUserToSelector(const QString& userGUID);
     void initSenderSelector();
     void initUserList();
+    void showTipsWidget();
 
 private:
     CWizDatabaseManager& m_dbMgr;
+    CWizExplorerApp& m_app;
     WizMessageSenderSelector* m_msgSenderSelector;
     WizClickableLabel* m_labelCurrentSender;
     QToolButton* m_btnSelectSender;

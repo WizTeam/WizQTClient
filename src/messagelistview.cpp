@@ -25,6 +25,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizobject.h"
+#include "share/wizsettings.h"
 #include "wiznotestyle.h"
 #include "widgets/wizScrollBar.h"
 
@@ -32,6 +33,9 @@
 #include "wizCategoryViewItem.h"
 #include "coreplugin/itreeview.h"
 #include "utils/misc.h"
+#include "wizmainwindow.h"
+#include "widgets/wizTipsWidget.h"
+#include "share/wizsettings.h"
 
 namespace WizService {
 namespace Internal {
@@ -153,12 +157,15 @@ public:
     {     
         //unread
         int nUnreadSymSize = 8;
-        QRect rcUnread = QRect(6, vopt->rect.top() + (vopt->rect.height() - nUnreadSymSize) / 2 + 3,
-                               nUnreadSymSize, nUnreadSymSize);
-        p->setPen(Qt::NoPen);
-        p->setBrush(QBrush(QColor("#5990EF")));
-        p->setRenderHint(QPainter::Antialiasing, true);
-        p->drawEllipse(rcUnread);
+        if (m_data.nReadStatus == 0)
+        {
+            QRect rcUnread = QRect(6, vopt->rect.top() + (vopt->rect.height() - nUnreadSymSize) / 2 + 3,
+                                   nUnreadSymSize, nUnreadSymSize);
+            p->setPen(Qt::NoPen);
+            p->setBrush(QBrush(QColor("#5990EF")));
+            p->setRenderHint(QPainter::Antialiasing, true);
+            p->drawEllipse(rcUnread);
+        }
 
         //avatar
         int nMargin = 12;
@@ -785,9 +792,10 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
 
 const int SenderNameFontSize = 14;
 
-WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidget* parent)
+WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
-    , m_dbMgr(dbMgr)
+    , m_app(app)
+    , m_dbMgr(app.databaseManager())
     , m_msgSenderSelector(nullptr)
     , m_bUnreadMode(false)
     , m_nUnreadCount(0)
@@ -811,13 +819,17 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
     m_labelCurrentSender->setText(tr("All Users"));
     m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_labelCurrentSender->setFixedWidth(102);
-    m_labelCurrentSender->setStyleSheet(QString("padding-left:7px; padding-top:2px; padding-right:4px; font: %1px;color:#888888;").arg(SenderNameFontSize));
+    m_labelCurrentSender->setStyleSheet(QString("padding-left:7px; padding-top:2px; "
+                                                "padding-right:4px; font: %1px;color:#888888;")
+                                        .arg(SenderNameFontSize));
     connect(m_labelCurrentSender, SIGNAL(labelClicked()), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_labelCurrentSender);
 
     m_btnSelectSender = new QToolButton(this);
-    m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); background-repeat: no-repeat;"
-                                             "background-position: center;").arg(Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
+    m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); "
+                                             "background-repeat: no-repeat;"
+                                             "background-position: center;").arg(
+                                         Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
     m_btnSelectSender->setFixedWidth(5);
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
@@ -843,6 +855,8 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizDatabaseManager& dbMgr, QWidg
             SLOT(on_message_created(WIZMESSAGEDATA)));
 }
 
+#define MESSAGELISTTITLEBARTIPSCHECKED      "MessageListTitleBarTipsChecked"
+
 void WizMessageListTitleBar::setUnreadMode(bool unread, int unreadCount)
 {
     m_bUnreadMode = unread;
@@ -851,7 +865,14 @@ void WizMessageListTitleBar::setUnreadMode(bool unread, int unreadCount)
     m_msgListMarkAllBtn->setVisible(unreadCount > 0);
     if (m_bUnreadMode || (unreadCount > 0))
     {
-        layout()->setContentsMargins(2, 0, 16, 0);
+        layout()->setContentsMargins(2, 0, 6, 0);
+
+        //show tips
+        bool showTips = m_app.userSettings().get(MESSAGELISTTITLEBARTIPSCHECKED).toInt() == 0;
+        if (showTips)
+        {
+            showTipsWidget();
+        }
     }
     else
     {
@@ -932,6 +953,23 @@ void WizMessageListTitleBar::initUserList()
     db.getAllMessageSenders(arraySender);
 
     m_msgSenderSelector->setUsers(arraySender);
+}
+
+void WizMessageListTitleBar::showTipsWidget()
+{
+    CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+    tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+    tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
+    tipWidget->setSizeHint(QSize(280, 60));
+    tipWidget->setButtonVisible(false);
+    tipWidget->bindFunction([](){
+        if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+        {
+            mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");
+        }
+    });
+    //
+    tipWidget->addToTipListManager(m_msgListMarkAllBtn, -6, 2);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)

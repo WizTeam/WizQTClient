@@ -1,7 +1,9 @@
 #ifndef CWIZTIPSWIDGET_H
 #define CWIZTIPSWIDGET_H
 
+#include <functional>
 #include <QList>
+#include <QTimer>
 #include "share/wizpopupwidget.h"
 
 class QLabel;
@@ -20,6 +22,8 @@ public:
     void setButtonVisible(bool visible);
 
     void addToTipListManager(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
+
+    void bindFunction(std::function<void(void)> const& f);
 signals:
 
 public slots:
@@ -33,6 +37,7 @@ private:
     QLabel* m_labelInfo;
     QPushButton* m_btnOK;
     QSize m_hintSize;
+    std::function<void(void)> m_function;
 };
 
 class CWizTipListManager : public QObject
@@ -46,9 +51,15 @@ public:
     CWizTipsWidget* firstTipWidget();
 public slots:
     void displayNextTipWidget();
+    void displayCurrentTipWidget();
+
+private slots:
+    void on_timerOut();
 
 private:
     explicit CWizTipListManager(QObject* parent = 0);
+
+    void deleteManager();
 
     struct TipItem
     {
@@ -59,6 +70,7 @@ private:
     };
 
     QList<TipItem> m_tips;
+    QTimer m_timer;
 
     static CWizTipListManager* m_instance;
 };

@@ -3,12 +3,19 @@
 #include <QHBoxLayout>
 #include <QLabel>
 #include <QPushButton>
+#include <QDebug>
 
 #include "wizPositionDelegate.h"
+
+static void emptyFunction()
+{
+    qDebug() << "Hello World!";
+}
 
 CWizTipsWidget::CWizTipsWidget(QWidget *parent)
     : CWizPopupWidget(parent)
     , m_hintSize(318, 82)
+    , m_function(emptyFunction)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & ~Qt::Popup;
@@ -84,10 +91,13 @@ void CWizTipsWidget::addToTipListManager(QWidget* targetWidget, int nXOff, int n
 
     if (manager->firstTipWidget() == this)
     {
-        QRect rc = targetWidget->rect();
-        QPoint pt = targetWidget->mapToGlobal(QPoint(rc.width()/2 + nXOff, rc.height() + nYOff));
-        showAtPoint(pt);
+        manager->displayCurrentTipWidget();
     }
+}
+
+void CWizTipsWidget::bindFunction(const std::function<void ()>& f)
+{
+    m_function = f;
 }
 
 void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
@@ -95,6 +105,8 @@ void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
     QWidget::mouseReleaseEvent(ev);
 
     close();
+
+    m_function();
 
     CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
     delegate.removeListener(this);
@@ -144,13 +156,20 @@ CWizTipsWidget* CWizTipListManager::firstTipWidget()
 void CWizTipListManager::displayNextTipWidget()
 {
     if (m_tips.isEmpty())
+    {
+        deleteManager();
         return;
+    }
     m_tips.removeFirst();
 
+    displayCurrentTipWidget();
+}
+
+void CWizTipListManager::displayCurrentTipWidget()
+{
     if (m_tips.isEmpty())
     {
-        m_instance->deleteLater();
-        m_instance = nullptr;
+        deleteManager();
         return;
     }
 
@@ -158,9 +177,41 @@ void CWizTipListManager::displayNextTipWidget()
     QRect rc = item.targetWidget->rect();
     QPoint pt = item.targetWidget->mapToGlobal(QPoint(rc.width()/2 + item.nXOff, rc.height() + item.nYOff));
     item.widget->showAtPoint(pt);
+
+    m_timer.start(500);
+}
+
+void CWizTipListManager::on_timerOut()
+{
+    if (m_tips.isEmpty())
+    {
+        m_timer.stop();
+        deleteManager();
+        return;
+    }
+    else if (!m_tips.first().targetWidget->isVisible())
+    {
+        m_timer.stop();
+        m_tips.first().widget->hide();
+        for (TipItem item : m_tips)
+        {
+            item.widget->deleteLater();
+        }
+        m_tips.clear();
+
+        deleteManager();
+        return;
+    }
 }
 
 CWizTipListManager::CWizTipListManager(QObject* parent)
     : QObject(parent)
 {
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
+}
+
+void CWizTipListManager::deleteManager()
+{
+    m_instance->deleteLater();
+    m_instance = nullptr;
 }

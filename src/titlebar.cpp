@@ -48,6 +48,8 @@
 #include "sync/asyncapi.h"
 #include "messagecompleter.h"
 #include "wizOEMSettings.h"
+#include "wizmainwindow.h"
+#include "share/wizsettings.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -507,16 +509,33 @@ void TitleBar::clearPlaceHolderText()
     m_editTitle->setPlaceholderText("");
 }
 
+#define TITLEBARTIPSCHECKED        "TitleBarTipsChecked"
+
 void TitleBar::showCoachingTips()
 {
-    CWizTipsWidget* widget = new CWizTipsWidget(this);
-    widget->setAttribute(Qt::WA_DeleteOnClose, true);
-    widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
-                                                     "edited and markdown note can be redered."));
-    widget->setSizeHint(QSize(280, 82));
-    widget->setButtonVisible(false);
-    //
-    widget->addToTipListManager(m_editBtn, 0, -6);
+    bool showTips = false;
+    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    {
+        showTips = mainWindow->userSettings().get(TITLEBARTIPSCHECKED).toInt() == 0;
+    }
+
+    if (showTips)
+    {
+        CWizTipsWidget* widget = new CWizTipsWidget(this);
+        widget->setAttribute(Qt::WA_DeleteOnClose, true);
+        widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
+                                                         "edited and markdown note can be redered."));
+        widget->setSizeHint(QSize(280, 82));
+        widget->setButtonVisible(false);
+        widget->bindFunction([](){
+            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            {
+                mainWindow->userSettings().set(TITLEBARTIPSCHECKED, "1");
+            }
+        });
+        //
+        widget->addToTipListManager(m_editBtn, 0, -6);
+    }
 }
 
 void TitleBar::startEditButtonAnimation()

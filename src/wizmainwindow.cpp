@@ -95,6 +95,7 @@
 #include "widgets/wizShareLinkDialog.h"
 #include "core/wizSingleDocumentView.h"
 #include "widgets/wizCustomToolBar.h"
+#include "widgets/wizTipsWidget.h"
 #include "wizPositionDelegate.h"
 
 #define MAINWINDOW  "MainWindow"
@@ -547,12 +548,14 @@ void MainWindow::on_actionClose_triggered()
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
     m_doc->setVisible(false);
+    bool noteListVisible = m_noteListWidget->isVisible();
+    bool msgListVisible = m_msgListWidget->isVisible();
+
     QMainWindow::resizeEvent(event);
-//    Q_UNUSED(event);
-//    adjustSubViews(m_clienWgt);
 
     update();
-
+    m_noteListWidget->setVisible(noteListVisible);
+    m_msgListWidget->setVisible(msgListVisible);
     m_doc->setVisible(true);
 }
 
@@ -2134,14 +2137,14 @@ QWidget* MainWindow::createNoteListView()
     layoutButtonContainer->addLayout(layoutActions);
 
     QWidget* wgtRightBorder = new QWidget(this);
-    wgtRightBorder->setFixedWidth(12);
+    wgtRightBorder->setFixedWidth(13);
     wgtRightBorder->setFixedHeight(30);
     wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
     layoutButtonContainer->addWidget(wgtRightBorder);
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addWidget(noteButtonsContainer);
     layoutList->addWidget(line2);
@@ -2164,7 +2167,7 @@ QWidget*MainWindow::createMessageListView()
     m_msgListWidget->setPalette(pal);
     m_msgListWidget->setAutoFillBackground(true);
 
-    m_msgListTitleBar = new WizMessageListTitleBar(m_dbMgr, this);
+    m_msgListTitleBar = new WizMessageListTitleBar(*this, this);
     connect(m_msgListTitleBar, SIGNAL(messageSelector_senderSelected(QString)),
             SLOT(on_messageSelector_senderSelected(QString)));
     connect(m_msgListTitleBar, SIGNAL(markAllMessageRead_request(bool)),
@@ -2177,7 +2180,7 @@ QWidget*MainWindow::createMessageListView()
     titleBarLayout->addWidget(m_msgListTitleBar);
 
     QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(12, 30);
+    placeHoldWgt->setFixedSize(13, 30);
     placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
     QHBoxLayout* layout2 = new QHBoxLayout(this);
     layout2->setContentsMargins(0, 0, 0, 0);
@@ -2188,7 +2191,7 @@ QWidget*MainWindow::createMessageListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; margin-right:11px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-left:2px; margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);
@@ -2797,10 +2800,30 @@ void MainWindow::on_actionSortBySize_triggered()
     changeDocumentsSortTypeByAction(action);
 }
 
+#define MARKDOCUMENTSREADCHECKED       "MarkDocumentsReadedChecked"
+
 void MainWindow::on_categoryUnreadButton_triggered()
 {
     m_btnMarkDocumentsReaded->setVisible(true);
     m_labelDocumentsHint->setVisible(true);
+
+    bool showTips = userSettings().get(MARKDOCUMENTSREADCHECKED).toInt() == 0;
+    if (showTips)
+    {
+        CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+        tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+        tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
+        tipWidget->setSizeHint(QSize(280, 60));
+        tipWidget->setButtonVisible(false);
+        tipWidget->bindFunction([](){
+            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            {
+                mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
+            }
+        });
+        //
+        tipWidget->addToTipListManager(m_btnMarkDocumentsReaded, 0, 2);
+    }
 }
 
 void MainWindow::on_actionMarkAllMessageRead_triggered(bool removeItems)
@@ -3796,7 +3819,7 @@ void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
     m_documents->addAndSelectDocument(doc);
     m_documents->clearFocus();
     m_doc->setFocus(Qt::MouseFocusReason);
-    m_doc->web()->setFocus(Qt::MouseFocusReason);
+    m_doc->web()->editorFocus();
 }
 
 void MainWindow::viewDocumentByWizKMURL(const QString &strKMURL)
