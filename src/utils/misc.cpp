@@ -184,6 +184,33 @@ void Misc::deleteFile(const CString& strFileName)
     dir.remove(extractFileName(strFileName));
 }
 
+QString Misc::getHtmlBodyContent(QString strHtml)
+{
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    QString strBody;
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+    return strBody;
+}
+
+void Misc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
+{
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1) {
+        strHead = regh.cap(1).simplified();
+    }
+
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+}
+
 bool Misc::isChinese()
 {
     return isSimpChinese() || isTraditionChinese();

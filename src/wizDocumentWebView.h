@@ -218,9 +218,6 @@ private:
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);
     void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
-
-    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
-
     //
     void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);    

@@ -1807,7 +1807,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
 
     if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
     {
-        QString strBody = WizGetHtmlBodyContent(strHtml);
+        QString strBody = Utils::Misc::getHtmlBodyContent(strHtml);
         if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
         {
             TOLOG("Failed to new document!");
@@ -1899,17 +1899,6 @@ bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QSt
     quickSyncNewDocument(data.strKbGUID);
     //
     return true;
-}
-QString CWizCategoryView::WizGetHtmlBodyContent(QString strHtml)
-{
-    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
-    QString strBody;
-    if (regex.indexIn(strHtml) != -1) {
-        strBody = regex.cap(1);
-    } else {
-        strBody = strHtml;
-    }
-    return strBody;
 }
 
 void CWizCategoryView::on_action_newDocument()
@@ -3597,7 +3586,7 @@ bool CWizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZ
 
 void CWizCategoryView::quickSyncNewDocument(const QString& strKbGUID)
 {
-    /*FIXME:
+    /*NOTE:
      *创建笔记后快速同步笔记到服务器,防止用户新建笔记后使用评论功能时因服务器无该篇笔记导致问题.*/
     MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     mainWindow->quickSyncKb(strKbGUID);

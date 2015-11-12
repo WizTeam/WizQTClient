@@ -1,11 +1,13 @@
 .markdown-body {
+    font-family: Microsoft YaHei UI, "Microsoft Yahei", "微软雅黑", Helvetica, SimSun, SimHei, arial, sans-serif;
     line-height: 1.6;
-    padding: 12px;
+    background-color: white;
+    padding: 0px;
 }
 body.markdown-body,
 .markdown-body p,
 .markdown-body div {
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .markdown-body.mobile {
@@ -77,12 +79,12 @@ body.markdown-body,
 }
 
 .markdown-body h1 {
-    font-size: 28px;
+    font-size: 31px;
     color: black;
 }
 
 .markdown-body h2 {
-    font-size: 24px;
+    font-size: 20px;
     color: black;
 }
 
@@ -91,20 +93,21 @@ body.markdown-body,
 }
 
 .markdown-body h4 {
-    font-size: 16px;
+    font-size: 17px;
 }
 
 .markdown-body h5 {
-    font-size: 14px;
+    font-size: 15px;
 }
 
 .markdown-body h6 {
     color: #777777;
-    font-size: 14px;
+    font-size: 15px;
+    margin: 1em 0;
 }
 
 .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
-    margin: 8px 0;
+    margin: 10px 0;
 }
 
 .markdown-body hr {
@@ -153,7 +156,7 @@ body.markdown-body,
 }
 
 .markdown-body ul, .markdown-body ol {
-    padding-left: 30px;
+    padding-left: 32px;
 }
 .markdown-body ul p, .markdown-body ol p{
     margin: 0;
@@ -202,11 +205,11 @@ body.markdown-body,
 
 .markdown-body blockquote {
     border-left: 4px solid #dddddd;
-    padding: 0 15px;
-    color: #777777;
+    padding: 0 12px;
+    color: #aaa;
 }
 
-.markdown-bodyblockquote > :first-child {
+.markdown-body blockquote > :first-child {
     margin-top: 0;
 }
 
@@ -540,15 +543,67 @@ body.markdown-body,
 }
 
 
+@media screen and (max-width: 544px) {
+    body.markdown-body {
+        margin: 20px 18px;
+    }
+}
+
+
 @media only screen and (-webkit-max-device-width: 1024px),
 only screen and (-o-max-device-width: 1024px),
 only screen and (max-device-width: 1024px),
 only screen and (-webkit-min-device-pixel-ratio: 3),
 only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
+    body.markdown-body {
+        margin: 15px;
+        color: #353c47;
+    }
+
     body.markdown-body,
     .markdown-body p,
     .markdown-body div {
-        font-size: 17px;
+        font-size: 16px;
+        line-height: 1.8;
+    }
+
+    .markdown-body h1 {
+        font-size: 34px;
+    }
+
+    .markdown-body h2 {
+        font-size: 30px;
+    }
+
+    .markdown-body h3 {
+        font-size: 26px;
+    }
+
+    .markdown-body h4 {
+        font-size: 22px;
+    }
+
+    .markdown-body h5 {
+        font-size: 18px;
+    }
+
+    .markdown-body h6 {
+        font-size: 14px;
+        color: inherit;
+    }
+
+    .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
+        margin: 24px 0;
+    }
+
+    .markdown-body ul, .markdown-body ol {
+        padding-left: 40px;
+    }
+
+    .markdown-body blockquote {
+        border-left: 4px solid #c8d4e8;
+        padding: 0 15px;
+        color: #b3c2dd;
     }
 }

@@ -40,7 +40,7 @@ public:
 private:
     explicit CWizPositionDelegate() {}
     CWizPositionDelegate(const CWizPositionDelegate &) {}
-    CWizPositionDelegate& operator= (const CWizPositionDelegate &) {}
+    CWizPositionDelegate& operator= (const CWizPositionDelegate &) { return *this; }
 
 private:
     QList<QWidget*> m_widgetList;

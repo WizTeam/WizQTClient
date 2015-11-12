@@ -523,6 +523,11 @@ void CWizDocumentWebView::tryResetTitle()
     m_bNewNoteTitleInited = true;
 }
 
+QString defaultMarkdownCSS()
+{
+    return Utils::PathResolve::resourcesPath() + "files/markdown/markdown/github2.css";
+}
+
 void CWizDocumentWebView::resetMarkdownCssPath()
 {
     const QString strCategory = "MarkdownTemplate/";
@@ -531,7 +536,7 @@ void CWizDocumentWebView::resetMarkdownCssPath()
     QString strFile = QString::fromUtf8(ba);
     if (strFile.isEmpty())
     {
-        strFile = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/github2.css";//  Utils::PathResolve::cachePath() + "plugins/markdown/markdown/github2.css";
+        strFile = defaultMarkdownCSS();
     }
     else if (QFile::exists(strFile))
     {
@@ -540,7 +545,7 @@ void CWizDocumentWebView::resetMarkdownCssPath()
     {
         qDebug() << QString("[Markdown] You have choose %1 as you Markdown style template, but"
                             "we can not find this file. Please check wether file exists.").arg(strFile);
-        strFile  = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/github2.css";//  Utils::PathResolve::cachePath() + "plugins/markdown/markdown/github2.css";
+        strFile  = defaultMarkdownCSS();
     }
     m_strMarkdownCssFilePath = strFile;
 
@@ -790,14 +795,14 @@ bool CWizDocumentWebView::resetDefaultCss()
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
 
-    strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
-    strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
+    strCss.replace("/*default-font-family*/", QString("font-family:%1").arg(strFont));
+    strCss.replace("/*default-font-size*/", QString("font-size:%1px").arg(nSize));
     QString backgroundColor = m_app.userSettings().editorBackgroundColor();
     if (backgroundColor.isEmpty())
     {
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
     }
-    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
+    strCss.replace("/*default-background-color*/", QString("background-color:%1").arg(backgroundColor));
 
     QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserGUID()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
@@ -1141,21 +1146,6 @@ void CWizDocumentWebView::viewAttachmentByUrl(const QString& strKbGUID, const QS
     mainWindow->viewAttachmentByWizKMURL(strKbGUID, strUrl);
 }
 
-void CWizDocumentWebView::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
-{
-    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
-    if (regh.indexIn(strHtml) != -1) {
-        strHead = regh.cap(1).simplified();
-    }
-
-    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
-    if (regex.indexIn(strHtml) != -1) {
-        strBody = regex.cap(1);
-    } else {
-        strBody = strHtml;
-    }
-}
-
 void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
     //FIXME: remove me, just for find a image losses bug.
@@ -1266,7 +1256,7 @@ void CWizDocumentWebView::updateNoteHtml()
         if (!WizLoadUnicodeTextFromFile(strFileName, strHtml))
             return;
 
-        splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
+        Utils::Misc::splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
         m_strCurrentNoteHead += "<link rel=\"stylesheet\" type=\"text/css\" href=\"" + m_strDefaultCssFilePath + "\">";
 
         m_strCurrentNoteGUID = doc.strGUID;
@@ -1332,18 +1322,13 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     m_strCurrentNoteHead.clear();
     m_strCurrentNoteHtml.clear();
-    splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
+    Utils::Misc::splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
 
-    // 将默认的css样式放到最前面，防止覆盖文件本身的css样式
+    //
     if (!QFile::exists(m_strDefaultCssFilePath))
     {
         resetDefaultCss();
     }
-
-//    QString js = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/wizReader.js";
-//    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-//            m_strDefaultCssFilePath + "\">" + "<script type=\"text/javascript\" charset=\"utf-8\""
-//                                              " src=\"" + js + "\"></script>" + m_strCurrentNoteHead;
 
     m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
             m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;

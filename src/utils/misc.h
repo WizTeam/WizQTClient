@@ -36,6 +36,10 @@ public:
     static qint64 getFileSize(const CString& strFileName);
     static void deleteFile(const CString& strFileName);
 
+    //html process
+    static QString getHtmlBodyContent(QString strHtml);
+    static void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
     //
     static bool isChinese();
     static bool isSimpChinese();

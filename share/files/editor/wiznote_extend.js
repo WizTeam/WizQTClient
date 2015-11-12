@@ -267,7 +267,7 @@ function WizGetImgElementByPoint(posX, posY) {
     return '';
 }
 
-//special process to remove css style added by phone.   *** should remove before 2014-10-08
+//special process to remove css style added by phone.   *** should remove before 2016-1-1
 function WizSpecialProcessForPhoneCss() {
     
     var cssElem = editor.document.getElementById("wiz_phone_default_css");

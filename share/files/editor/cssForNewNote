@@ -1,0 +1,139 @@
+<style type="text/css" id="wiz_custom_css">
+    body, div, p {
+        font-family: Helvetica, SimSun, SimHei, arial, sans-serif, Microsoft YaHei UI, "Microsoft Yahei", "微软雅黑";
+        font-size: 15px;
+        line-height: 1.6;
+    }
+
+    body {
+        padding: 0;
+        margin: 20px 36px;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+        margin: 20px 0 10px;
+        padding: 0;
+        font-weight: bold;
+    }
+
+    h1 {
+        font-size: 21px;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    h3 {
+        font-size: 18px;
+    }
+
+    h4 {
+        font-size: 17px;
+    }
+
+    h5 {
+        font-size: 15px;
+    }
+
+    h6 {
+        font-size: 15px;
+        color: #777777;
+        margin: 1em 0;
+    }
+
+    p, blockquote, ul, ol, dl, li, table, pre {
+        margin: 10px 0;
+    }
+
+    ul, ol {
+        padding-left: 32px;
+    }
+
+    blockquote {
+        border-left: 4px solid #dddddd;
+        padding: 0 12px;
+        color: #aaa;
+    }
+
+    blockquote > :first-child {
+        margin-top: 0;
+    }
+
+    blockquote > :last-child {
+        margin-bottom: 0;
+    }
+
+    img {
+        border: 0;
+        max-width: 100%;
+        height: auto !important;
+    }
+
+    table {
+        border-collapse: collapse;
+        border: 1px solid #bbbbbb;
+    }
+
+    td {
+        border-collapse: collapse;
+        border: 1px solid #bbbbbb;
+    }
+
+    @media screen and (max-width: 544px) {
+        body {
+            margin: 20px 18px;
+        }
+    }
+
+    @media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {
+        body {
+            margin: 15px;
+            color: #353c47;
+        }
+
+        body, div, p {
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        h1 {
+            font-size: 34px;
+        }
+
+        h2 {
+            font-size: 30px;
+        }
+
+        h3 {
+            font-size: 26px;
+        }
+
+        h4 {
+            font-size: 22px;
+        }
+
+        h5 {
+            font-size: 18px;
+        }
+
+        h6 {
+            font-size: 16px;
+            color: inherit;
+        }
+
+        p, blockquote, ul, ol, dl, li, table, pre {
+            margin: 24px 0;
+        }
+
+        ul, ol {
+            padding-left: 40px;
+        }
+
+        blockquote {
+            border-left: 4px solid #c8d4e8;
+            padding: 0 15px;
+            color: #b3c2dd;
+        }
+    }
+</style>

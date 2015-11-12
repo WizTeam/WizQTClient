@@ -3477,7 +3477,26 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
-            bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
+            //add default css
+            QString newHtml = strHtml;
+            QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
+            cssFile.open(QFile::Text | QFile::ReadOnly);
+            QString strCSS = cssFile.readAll();
+            cssFile.close();
+            if (strHtml.contains("<html>", Qt::CaseInsensitive))
+            {
+                QString strHead;
+                Utils::Misc::splitHtmlToHeadAndBody(strHtml, strHead, newHtml);
+                strHead.append(strCSS);
+                newHtml = "<html><head>" + strHead + "</head><body>" + newHtml + "</body></html>";
+            }
+            else
+            {
+                newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
+            }
+
+            qDebug() << "create new note, html : " << newHtml;
+            bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
 
             Q_EMIT documentCreated(data);
         }
