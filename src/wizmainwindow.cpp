@@ -1868,7 +1868,8 @@ void MainWindow::initToolBar()
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(40, 1), m_toolBar), "", "");
 //    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, m_toolBar);
+    //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
+    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, nullptr);
     connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
     m_toolBar->addWidget(texturedItem, "", "");
@@ -1876,7 +1877,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
 
-    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, nullptr);
     m_toolBar->addWidget(info, "", "");
     //
     m_searchWidget = m_toolBar->getSearchWidget();

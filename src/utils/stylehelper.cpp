@@ -1160,6 +1160,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         if (!abs.isEmpty()) {          //  笔记内容
             QString strText(abs);
             rcSummary.adjust(0, -4, 0, 0);
+            p->setClipRect(rcSummary);
             QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
             if (!strText.isEmpty()) {
                 Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
