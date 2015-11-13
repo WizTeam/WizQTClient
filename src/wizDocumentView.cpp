@@ -7,6 +7,8 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QStackedWidget>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include <coreplugin/icore.h>
 
@@ -975,14 +977,19 @@ void CWizDocumentView::on_loadComment_request(const QString& url)
 }
 
 void CWizDocumentView::on_commentWidget_statusChanged()
-{
-    m_title->editorToolBar()->adjustButtonPosition();
-
+{    
     if (m_web->isInSeperateWindow())
     {
         int commentWidth = 271;
         int maxWidth = maximumWidth();
-        maxWidth = m_commentWidget->isVisible() ? (maxWidth + commentWidth) : (maxWidth - commentWidth);
+        if (!WizIsHighPixel())
+        {
+            if (qApp->desktop()->availableGeometry().width() < 1440)
+            {
+                maxWidth = 916;
+            }
+            maxWidth = m_commentWidget->isVisible() ? (maxWidth + commentWidth) : (maxWidth - commentWidth);
+        }
         if (width() > 1000)
         {
             m_commentWidget->setFixedWidth(271);
@@ -996,6 +1003,8 @@ void CWizDocumentView::on_commentWidget_statusChanged()
         setSizeHint(QSize(maxWidth, 1));
 
     }
+
+    m_title->editorToolBar()->adjustButtonPosition();
 }
 
 

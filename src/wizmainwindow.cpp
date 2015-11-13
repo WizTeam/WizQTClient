@@ -3,7 +3,6 @@
 #include <QToolBar>
 #include <QMenuBar>
 #include <QApplication>
-#include <QDesktopWidget>
 #include <QUndoStack>
 #include <QEvent>
 #include <QAction>
