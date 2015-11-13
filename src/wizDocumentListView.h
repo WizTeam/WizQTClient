@@ -208,6 +208,7 @@ public Q_SLOTS:
     void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
 
 
+
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
     void on_vscroll_valueChanged(int value);
@@ -237,6 +238,7 @@ private:
 
     bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 
+    void resetSectionData();
     //
     void moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder);
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);

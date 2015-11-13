@@ -1347,8 +1347,7 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
         if (-1 != index) {
             takeItem(index);
             //
-            updateSectionItems();
-            sortItems();
+            resetSectionData();
         }
     }
 }
@@ -1358,6 +1357,9 @@ void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
     int index = documentIndexFromGUID(document.strGUID);
     if (-1 != index) {
         takeItem(index);
+
+        //
+        resetSectionData();
     }
 }
 
@@ -1432,6 +1434,12 @@ void CWizDocumentListView::onThumbCacheLoaded(const QString& strKbGUID, const QS
             update(indexFromItem(pItem));
         }
     }
+}
+
+void CWizDocumentListView::resetSectionData()
+{
+    updateSectionItems();
+    sortItems();
 }
 
 void CWizDocumentListView::on_action_documentHistory()
