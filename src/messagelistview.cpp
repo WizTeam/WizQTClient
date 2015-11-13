@@ -957,7 +957,7 @@ void WizMessageListTitleBar::initUserList()
 
 void WizMessageListTitleBar::showTipsWidget()
 {
-    CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+    CWizTipsWidget* tipWidget = new CWizTipsWidget(MESSAGELISTTITLEBARTIPSCHECKED, this);
     tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
     tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
     tipWidget->setSizeHint(QSize(280, 60));

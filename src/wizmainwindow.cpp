@@ -2811,7 +2811,7 @@ void MainWindow::on_categoryUnreadButton_triggered()
     bool showTips = userSettings().get(MARKDOCUMENTSREADCHECKED).toInt() == 0;
     if (showTips)
     {
-        CWizTipsWidget* tipWidget = new CWizTipsWidget(this);
+        CWizTipsWidget* tipWidget = new CWizTipsWidget(MARKDOCUMENTSREADCHECKED, this);
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));

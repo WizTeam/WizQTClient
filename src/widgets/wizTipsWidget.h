@@ -13,10 +13,12 @@ class CWizTipsWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
-    explicit CWizTipsWidget(QWidget *parent = 0);
+    explicit CWizTipsWidget(const QString id,QWidget *parent = 0);
 
     void setSizeHint(const QSize& hintSize);
     virtual QSize sizeHint() const;
+
+    QString id();
 
     void setText(const QString& title, const QString& info, const QString& buttonText = tr("OK"));
     void setButtonVisible(bool visible);
@@ -37,6 +39,7 @@ private:
     QLabel* m_labelInfo;
     QPushButton* m_btnOK;
     QSize m_hintSize;
+    QString m_id;
     std::function<void(void)> m_function;
 };
 

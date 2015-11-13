@@ -12,10 +12,11 @@ static void emptyFunction()
     qDebug() << "Hello World!";
 }
 
-CWizTipsWidget::CWizTipsWidget(QWidget *parent)
+CWizTipsWidget::CWizTipsWidget(const QString id, QWidget *parent)
     : CWizPopupWidget(parent)
     , m_hintSize(318, 82)
     , m_function(emptyFunction)
+    , m_id(id)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & ~Qt::Popup;
@@ -72,6 +73,11 @@ QSize CWizTipsWidget::sizeHint() const
     return m_hintSize;
 }
 
+QString CWizTipsWidget::id()
+{
+    return m_id;
+}
+
 void CWizTipsWidget::setText(const QString& title, const QString& info, const QString& buttonText)
 {
     m_labelTitle->setText(title);
@@ -89,7 +95,7 @@ void CWizTipsWidget::addToTipListManager(QWidget* targetWidget, int nXOff, int n
     CWizTipListManager* manager = CWizTipListManager::instance();
     manager->addTipsWidget(this, targetWidget, nXOff, nYOff);
 
-    if (manager->firstTipWidget() == this)
+    if (manager->firstTipWidget()->id() == id())
     {
         manager->displayCurrentTipWidget();
     }
@@ -136,6 +142,21 @@ CWizTipListManager* CWizTipListManager::instance()
 
 void CWizTipListManager::addTipsWidget(CWizTipsWidget* widget, QWidget* targetWidget, int nXOff, int nYOff)
 {
+    for (int i = 0; i < m_tips.count(); i++)
+    {
+        const TipItem& item = m_tips.at(i);
+        if (item.widget->id() == widget->id())
+        {
+            qDebug() << "try to add a same id item, delete the old one";
+            item.widget->deleteLater();
+            CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+            delegate.removeListener(item.widget);
+            m_tips.removeAt(i);
+            break;
+        }
+    }
+
+
     TipItem item;
     item.widget = widget;
     item.targetWidget = targetWidget;

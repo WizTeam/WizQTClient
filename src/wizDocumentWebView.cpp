@@ -417,7 +417,7 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
 {
     // because qt will clear focus when context menu popup, we need keep focus there.
-    if (event->reason() == Qt::PopupFocusReason) {
+    if (event->reason() == Qt::PopupFocusReason || event->reason() == Qt::ActiveWindowFocusReason) {
         return;
     }
 
