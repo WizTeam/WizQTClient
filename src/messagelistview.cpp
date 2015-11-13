@@ -229,8 +229,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_dbMgr(dbMgr)
     , m_pCurrentItem(NULL)
     , m_api(NULL)
-{
-    setMinimumWidth(150);
+{    
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setSelectionMode(QAbstractItemView::ExtendedSelection);

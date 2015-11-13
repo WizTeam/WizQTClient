@@ -831,30 +831,26 @@ void MainWindow::restoreStatus()
 {
     QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
-
+    QByteArray splitterState = settings->value("Window/Splitter").toByteArray();
     // main window
     if (geometry.isEmpty()) {
-        QRect rcDesktop = qApp->desktop()->availableGeometry();
-        if (rcDesktop.width() > 1280)
+
+        bool isHighPix = WizIsHighPixel();
+        QSettings defaulSettings(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName()) + "skin.ini", QSettings::IniFormat);
+        if (isHighPix)
         {
-            const int DefaultAppWidth = 1300;
-            const int DefaultAppHeight = 760;
-            QRect rcWindow = QRect(rcDesktop.x() + (rcDesktop.width() - DefaultAppWidth) / 2,
-                                   rcDesktop.y() + (rcDesktop.height() - DefaultAppHeight) / 2, DefaultAppWidth, DefaultAppHeight);
-            setGeometry(rcWindow);
+            geometry = defaulSettings.value("Window/GeometryHighPix").toByteArray();
+            splitterState = defaulSettings.value("Window/SplitterHighPix").toByteArray();
         }
         else
         {
-            QRect rcWindow = QRect(rcDesktop.x() + rcDesktop.width() / 40, rcDesktop.y() + rcDesktop.height() / 8,
-                                   rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
-            setGeometry(rcWindow);
-        }        
-        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe9\0\0\x1\x1f\0\0\x3\n\0\0\0\0\x1\x1\0\0\0\x1\0)");
-        m_splitter->restoreState(state);
-    } else {
-        restoreGeometry(geometry);
-        m_splitter->restoreState(settings->value("Window/Splitter").toByteArray());
+            geometry = defaulSettings.value("Window/GeometryNormal").toByteArray();
+            splitterState = defaulSettings.value("Window/SplitterNormal").toByteArray();
+        }
     }
+
+    restoreGeometry(geometry);
+    m_splitter->restoreState(splitterState);
 }
 
 void MainWindow::initActions()
@@ -2056,11 +2052,14 @@ void MainWindow::initClient()
     m_splitter->setStretchFactor(1, 0);
     m_splitter->setStretchFactor(2, 1);
 
-    m_category->setMinimumWidth(165);
-    m_docListContainer->setMinimumWidth(244);
-    m_doc->web()->setMinimumWidth(575);
+    // set minimum width
+    bool isHighPix = WizIsHighPixel();
+    m_category->setMinimumWidth(isHighPix ? 76 : 165);
+    m_docListContainer->setMinimumWidth(isHighPix ? 113 : 244);
+    m_doc->web()->setMinimumWidth(576);
     m_doc->web()->setInSeperateWindow(false);
-    m_doc->commentWidget()->setMinimumWidth(195);
+    m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
+    setMinimumWidth(785);
 
     m_doc->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"
                           "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
