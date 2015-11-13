@@ -2840,7 +2840,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/titlebar.cpp" line="530"/>
         <source>In reading mode, the note can not be edited and markdown note can be redered.</source>
-        <translation type="unfinished">在閱讀模式下，不能夠編輯筆記。Markdown筆記會在閱讀模式下進行渲染</translation>
+        <translation type="unfinished">在閱讀模式下，不能編輯筆記。Markdown筆記會在閱讀模式下進行渲染</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="110"/>
