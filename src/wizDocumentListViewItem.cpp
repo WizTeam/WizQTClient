@@ -496,6 +496,7 @@ void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewI
 {
     int nItemType = itemType();
     draw_impl(p, vopt, nItemType, nViewType);
+    p->setClipRect(vopt->rect);
     drawSyncStatus(p, vopt, nViewType);
 }
 

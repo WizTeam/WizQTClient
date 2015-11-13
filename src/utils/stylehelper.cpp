@@ -592,7 +592,7 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc.adjusted(1, 0, -14, -3);
+    QRect rcBg = rc.adjusted(1, 1, -14, -2);
     if (bSelect) {
         if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));
@@ -608,7 +608,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
-    int borderMargin = WizIsHighPixel() ? 2 : 1;
+    int borderMargin = 2;
 
     QRect rcBg = rc;
     switch (bgType) {
@@ -1165,6 +1165,7 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             if (!strText.isEmpty()) {
                 Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
             }
+            p->setClipRect(rc);
         }
     }
 }
