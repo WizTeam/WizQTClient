@@ -232,11 +232,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setFocusPolicy(Qt::ClickFocus);
     setAttribute(Qt::WA_AcceptTouchEvents, false);
 
-    QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
-                                   + "webkit_scrollbar.css");
-    settings()->setUserStyleSheetUrl(url);
-
-
     // FIXME: should accept drop picture, attachment, link etc.
     setAcceptDrops(true);
 
@@ -753,6 +748,19 @@ void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
 void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
 {
     m_bInSeperateWindow = inSeperateWindow;
+
+    if (inSeperateWindow)
+    {
+        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+                                       + "webkit_separate_scrollbar.css");
+        settings()->setUserStyleSheetUrl(url);
+    }
+    else
+    {
+        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+                                       + "webkit_scrollbar.css");
+        settings()->setUserStyleSheetUrl(url);
+    }
 }
 
 bool CWizDocumentWebView::isInSeperateWindow() const
