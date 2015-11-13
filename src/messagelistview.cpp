@@ -799,6 +799,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     , m_msgSenderSelector(nullptr)
     , m_bUnreadMode(false)
     , m_nUnreadCount(0)
+    , m_currentSenderGUID(QString())
 {
     setFixedHeight(Utils::StyleHelper::titleEditorHeight());
     QPalette pal = palette();
@@ -885,6 +886,11 @@ bool WizMessageListTitleBar::isUnreadMode() const
     return m_bUnreadMode;
 }
 
+QString WizMessageListTitleBar::currentSenderGUID() const
+{
+    return m_currentSenderGUID;
+}
+
 void WizMessageListTitleBar::on_message_created(const WIZMESSAGEDATA& msg)
 {
     if (msg.senderGUID.isEmpty())
@@ -908,6 +914,7 @@ void WizMessageListTitleBar::on_sender_selected(const QString& userGUID, const Q
     QFontMetrics fm(font);
     QString text = fm.elidedText(userAlias, Qt::ElideRight, 90);
     m_labelCurrentSender->setText(text);
+    m_currentSenderGUID = userGUID;
     emit messageSelector_senderSelected(userGUID);
 }
 

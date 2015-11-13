@@ -414,12 +414,20 @@ CWizCategoryViewMessageItem::CWizCategoryViewMessageItem(CWizExplorerApp& app,
     m_nFilter = nFilterType;
 }
 
-void CWizCategoryViewMessageItem::getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg)
+void CWizCategoryViewMessageItem::getMessages(CWizDatabase& db, const QString& userGUID, CWizMessageDataArray& arrayMsg)
 {
     if (hitTestUnread() && m_nUnread) {
-        db.getUnreadMessages(arrayMsg);
+        if (userGUID.isEmpty()) {
+            db.getUnreadMessages(arrayMsg);
+        } else {
+            db.unreadMessageFromUserGUID(userGUID, arrayMsg);
+        }
     } else {
-        db.getLastestMessages(arrayMsg);
+        if (userGUID.isEmpty()) {
+            db.getLastestMessages(arrayMsg);
+        } else {
+            db.messageFromUserGUID(userGUID, arrayMsg);
+        }
     }
 }
 

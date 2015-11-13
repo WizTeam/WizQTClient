@@ -4177,8 +4177,9 @@ void MainWindow::showMessageList(CWizCategoryViewMessageItem* pItem)
         m_noteListWidget->hide();
     }
 
+
     CWizMessageDataArray arrayMsg;
-    pItem->getMessages(m_dbMgr.db(), arrayMsg);
+    pItem->getMessages(m_dbMgr.db(), m_msgListTitleBar->currentSenderGUID(), arrayMsg);
     m_msgList->setMessages(arrayMsg);
 
     //

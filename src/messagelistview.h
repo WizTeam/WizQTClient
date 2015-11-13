@@ -130,7 +130,9 @@ public:
     WizMessageListTitleBar(CWizExplorerApp& app, QWidget* parent = 0);
 
     void setUnreadMode(bool unread, int unreadCount);
-    bool isUnreadMode() const;    
+    bool isUnreadMode() const;
+
+    QString currentSenderGUID() const;
 
 signals:
     void messageSelector_senderSelected(QString userGUID);
@@ -157,6 +159,7 @@ private:
     CWizExplorerApp& m_app;
     WizMessageSenderSelector* m_msgSenderSelector;
     WizClickableLabel* m_labelCurrentSender;
+    QString m_currentSenderGUID;
     QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;
     wizImageButton* m_msgListMarkAllBtn;

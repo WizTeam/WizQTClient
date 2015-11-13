@@ -143,7 +143,7 @@ public:
     virtual void mousePressed(const QPoint& pos);
     virtual void mouseReleased(const QPoint& pos);
 
-    void getMessages(CWizDatabase& db, CWizMessageDataArray& arrayMsg);
+    void getMessages(CWizDatabase& db, const QString& userGUID, CWizMessageDataArray& arrayMsg);
     void setUnreadCount(int nCount);
     QString unreadString() const;
     bool hitTestUnread();
