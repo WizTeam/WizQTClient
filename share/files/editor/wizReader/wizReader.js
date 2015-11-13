@@ -1809,6 +1809,7 @@ var utils = {
         //e.stopImmediatePropagation();
     },
     //-------------------- 以下内容修改需要 保证与 wizUI 中的 utils 内 对应方法一致 start ----------------------
+    PcCustomTagClass: 'wiz-html-render-unsave', //此 class 专门用于 pc 端将 markdown 笔记选然后发email 或微博等处理
     loadCount: {},
     loadJs: function loadJs(doc, jsList, loadCallback) {
         if (!jsList) {
@@ -1856,6 +1857,7 @@ var utils = {
         var s = doc.createElement('link');
         s.rel = 'stylesheet';
         s.href = path.replace(/\\/g, '/');
+        //s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].insertBefore(s, null);
         return s;
     },
@@ -1868,6 +1870,7 @@ var utils = {
         s.type = 'text/javascript';
         s.src = path.replace(/\\/g, '/');
         s.id = jsId;
+        s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].insertBefore(s, null);
         return s;
     },
@@ -1875,12 +1878,14 @@ var utils = {
         var s = doc.createElement('script');
         s.type = type;
         s.text = jsStr;
+        s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].appendChild(s);
     },
     appendCssCode: function appendCssCode(doc, jsStr, type) {
         var s = doc.createElement('style');
         s.type = type;
         s.text = jsStr;
+        //s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].appendChild(s);
     },
     /**
@@ -2052,59 +2057,91 @@ var _env2 = _interopRequireDefault(_env);
 var TmpStyleName = 'wiz_tmp_editor_style',
     TmpEditorStyle = {
     phone: 'body {' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}',
-    pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'margin: 94px 36px 8px 36px;' + 'padding: 0;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}'
+    pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}'
 },
     TmpReaderStyle = {
     phone: 'img {' + 'max-width: 100%;' + 'height: auto !important;' + 'margin: 0px auto;' + '}' + 'a {' + 'word-wrap: break-word;' + '}' + 'body {' + 'word-wrap: break-word;' + '}'
 },
-    DefaultStyleName = 'wiz_default_style',
+    DefaultStyleId = 'wiz_custom_css',
+    DefaultFont = 'Helvetica, "Hiragino Sans GB", "Microsoft Yahei", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
-    ios: 'body{ margin-left:16px; margin-right:16px;}' + 'body, p, div {' + 'font-size:17px;' + 'line-height:1.8em;' + 'color:#333;' + '}'
+    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'padding: 0;margin: 20px 36px;margin: 1.33rem 2.4rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, blockquote, ul, ol, dl, li, table, pre {margin:10px 0;margin:0.667rem 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {border-left:4px solid #dddddd;padding:0 12px;padding:0 0.8rem;color: #aaa;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td {border-collapse:collapse;border:1px solid #bbbbbb;}' + '@media screen and (max-width: 544px) {' + 'body {margin:20px 18px;margin:1.33rem 1.2rem;}' + '}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;margin:12px 15px;margin:0.75rem 0.9375rem;color:#353c47;text-align:justify;text-justify:inter-word;}' + 'h1 {font-size:34px;font-size:2.125rem;}' + 'h2 {font-size:30px;font-size:1.875rem;}' + 'h3 {font-size:26px;font-size:1.625rem;}' + 'h4 {font-size:22px;font-size:1.375rem;}' + 'h5 {font-size:18px;font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'div, p, blockquote, ul, ol, dl, li, table, pre {margin:0;margin:0;}' + 'ul, ol {padding-left:40px;padding-left:2.5rem;}' + 'blockquote {border-left:4px solid #c8d4e8;padding:0 15px;padding:0 0.9375rem;color: #b3c2dd;}' + '}'
 };
 
-function insertStyle(id, css) {
+function insertStyleById(id, css, isReplace) {
+    //isReplace = true 则 只进行替换， 如无同id 的元素，不进行任何操作
+    isReplace = !!isReplace;
+
     var s = _env2['default'].doc.getElementById(id);
-    if (!s) {
+    if (!s && !isReplace) {
         s = _env2['default'].doc.createElement('style');
         s.id = id;
         _env2['default'].doc.getElementsByTagName('HEAD')[0].insertBefore(s, null);
     }
-    s.innerHTML = css;
-}
-function removeStyle(id) {
-    var s = _env2['default'].doc.getElementById(id);
     if (s) {
-        s.parentNode.removeChild(s);
+        s.innerHTML = css;
     }
 }
-function removeStyleByIdFromHtml(html, id) {
-    var reg = new RegExp('<style[^<>]*id *= *[\'"]' + id + '[\'"][^<>]*>[^<>]*<\/style>', 'ig');
+function insertStyleByName(name, css) {
+    var s = _env2['default'].doc.createElement('style');
+    s.name = name;
+    _env2['default'].doc.getElementsByTagName('HEAD')[0].insertBefore(s, null);
+    s.innerHTML = css;
+}
+function removeStyleByName(name) {
+    var s = _env2['default'].doc.getElementsByName(name);
+    var i, style;
+    for (i = s.length - 1; i >= 0; i--) {
+        style = s[i];
+        style.parentNode.removeChild(style);
+    }
+}
+function removeStyleByNameFromHtml(html, name) {
+    var reg = new RegExp('<style[^<>]*[ ]+name *= *[\'"]' + name + '[\'"][^<>]*>[^<>]*<\/style>', 'ig');
     return html.replace(reg, '');
 }
 
 var WizStyle = {
-    insertDefaultStyle: function insertDefaultStyle() {
-        if (_env2['default'].client.type.isIOS) {
-            insertStyle(DefaultStyleName, DefaultStyle.ios);
+    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+        insertStyleById(DefaultStyleId, DefaultStyle.common, isReplace);
+        if (!customCss) {
+            return;
+        }
+        var css = 'html, body{',
+            k,
+            hasCustomCss = false;
+        for (k in customCss) {
+            if (customCss.hasOwnProperty(k)) {
+                if (k.toLowerCase() == 'font-family') {
+                    css += k + ':' + customCss[k] + ',' + DefaultFont + ';';
+                } else {
+                    css += k + ':' + customCss[k] + ';';
+                }
+                hasCustomCss = true;
+            }
+        }
+        css += '}';
+        if (hasCustomCss) {
+            insertStyleByName(TmpStyleName, css);
         }
     },
     insertTmpEditorStyle: function insertTmpEditorStyle() {
         if (_env2['default'].client.type.isIOS && _env2['default'].client.type.isPhone) {
-            insertStyle(TmpStyleName, TmpEditorStyle.phone);
+            insertStyleByName(TmpStyleName, TmpEditorStyle.phone);
         } else if (_env2['default'].client.type.isIOS && _env2['default'].client.type.isPad) {
-            insertStyle(TmpStyleName, TmpEditorStyle.pad);
+            insertStyleByName(TmpStyleName, TmpEditorStyle.pad);
         }
     },
     insertTmpReaderStyle: function insertTmpReaderStyle() {
         if (_env2['default'].client.type.isIOS) {
-            insertStyle(TmpStyleName, TmpReaderStyle.phone);
+            insertStyleByName(TmpStyleName, TmpReaderStyle.phone);
         }
     },
     removeTmpStyle: function removeTmpStyle() {
-        removeStyle(TmpStyleName);
+        removeStyleByName(TmpStyleName);
     },
     removeTmpStyleFromHtml: function removeTmpStyleFromHtml(html) {
-        return removeStyleByIdFromHtml(html, TmpStyleName);
+        return removeStyleByNameFromHtml(html, TmpStyleName);
     }
 
 };
@@ -2853,7 +2890,7 @@ var domUtils = {
         return dom && dom == _commonEnv2['default'].doc.body;
     },
     /**
-     * 判断 dom 是否为空（里面j仅有 br 时 也被认为空）
+     * 判断 dom 是否为空（里面仅有 br 时 也被认为空）
      * @param dom
      * @returns {*}
      */
@@ -2894,8 +2931,8 @@ var domUtils = {
      * @returns {boolean}
      */
     isSelfClosingTag: function isSelfClosingTag(node) {
-        var selfLib = ',area,base,br,col,command,embed,hr,img,input,keygen,link,meta,param,source,track,wbr,';
-        return node.nodeType === 1 && selfLib.indexOf(',' + node.tagName.toLowerCase() + ',') > -1;
+        var selfLib = /^(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr)$/i;
+        return node.nodeType === 1 && selfLib.test(node.tagName);
     },
     /**
      * 判断两个 span 属性（style & attribute）是否相同（属性相同且相邻的两个 span 才可以合并）
@@ -3598,11 +3635,12 @@ var imgUtils = {
         return imageSrcs;
     },
     makeAttachmentHtml: function makeAttachmentHtml(guid, imgPath) {
-        return '<div><a href="wiz:open_attachment?guid=' + guid + '"><img src="' + imgPath + '" style="width: 280px; height:auto; margin-bottom: 15px;"></a></div>';
+        return '<div style="margin: 15px auto;"><a href="wiz:open_attachment?guid=' + guid + '"><img src="' + imgPath + '" style="width: 280px; height:auto;"></a></div><div><br/></div>';
     },
     makeDomByPath: function makeDomByPath(imgPath) {
         var result = [],
             paths = [],
+            main,
             img,
             i,
             j;
@@ -3612,13 +3650,24 @@ var imgUtils = {
             paths.push(imgPath);
         }
 
+        main = _commonEnv2['default'].doc.createElement("div");
+        main.style.margin = '15px auto';
+        result.push(main);
+
         for (i = 0, j = paths.length; i < j; i++) {
             img = _commonEnv2['default'].doc.createElement("img");
             img.src = paths[i];
             img.style.maxWidth = '100%';
-            result.push(img);
+            main.insertBefore(img, null);
+
+            if (i < j - 1) {
+                main.insertBefore(_commonEnv2['default'].doc.createElement("br"), null);
+            }
         }
 
+        main = _commonEnv2['default'].doc.createElement("div");
+        main.insertBefore(_commonEnv2['default'].doc.createElement("br"), null);
+        result.push(main);
         return result;
     }
 };
@@ -6324,14 +6373,17 @@ var Render = {
                     diagram.drawSVG(id);
 
                     //修正 svg 保证手机端自动适应大小
-                    var s = $('svg', flowLayer);
-                    if (s.attr('width')) {
-                        s.css({
-                            'max-width': s.attr('width')
-                        }).attr({
-                            'height': null,
-                            'width': '95%'
-                        });
+                    if (_commonEnv2['default'].client.isPhone) {
+                        //pc、mac 客户端 取消height 设置后， 会导致height 变为0，从而不显示
+                        var s = $('svg', flowLayer);
+                        if (s.attr('width')) {
+                            s.css({
+                                'max-width': s.attr('width')
+                            }).attr({
+                                'height': null,
+                                'width': '95%'
+                            });
+                        }
                     }
                 } catch (e) {
                     console.error(e);
@@ -6361,16 +6413,19 @@ var Render = {
                     diagram.drawSVG(id, { theme: 'simple' });
 
                     //修正 svg 保证手机端自动适应大小
-                    var s = $('svg', seqLayer);
-                    if (s.attr('width')) {
-                        s.get(0).setAttribute('viewBox', '0 0 ' + s.attr('width') + ' ' + s.attr('height'));
-                        s.css({
-                            'max-width': s.attr('width')
-                        }).attr({
-                            'preserveAspectRatio': 'xMidYMid meet',
-                            'height': null,
-                            'width': '95%'
-                        });
+                    if (_commonEnv2['default'].client.isPhone) {
+                        //pc、mac 客户端 取消height 设置后， 会导致height 变为0，从而不显示
+                        var s = $('svg', seqLayer);
+                        if (s.attr('width')) {
+                            s.get(0).setAttribute('viewBox', '0 0 ' + s.attr('width') + ' ' + s.attr('height'));
+                            s.css({
+                                'max-width': s.attr('width')
+                            }).attr({
+                                'preserveAspectRatio': 'xMidYMid meet',
+                                'height': null,
+                                'width': '95%'
+                            });
+                        }
                     }
                 } catch (e) {
                     console.error(e);
@@ -6960,6 +7015,9 @@ var reader = {
         //禁用 输入框（主要用于 九宫格 处理）
         setDomReadOnly('input', true);
         setDomReadOnly('textarea', true);
+    },
+    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+        _commonWizStyle2['default'].insertDefaultStyle(isReplace, customCss);
     }
 };
 
@@ -7120,6 +7178,9 @@ var WizReader = {
             _amendAmendUser2['default'].setUsersData(options.usersData);
             WizReader.amendInfo.on();
         }
+    },
+    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+        _readerBase2['default'].insertDefaultStyle(isReplace, customCss);
     },
     markdown: function markdown() {
         _markdownMarkdownRender2['default'].markdown({
