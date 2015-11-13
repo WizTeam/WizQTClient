@@ -2065,7 +2065,7 @@ var TmpStyleName = 'wiz_tmp_editor_style',
     DefaultStyleId = 'wiz_custom_css',
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "Microsoft Yahei", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
-    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'padding: 0;margin: 20px 36px;margin: 1.33rem 2.4rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, blockquote, ul, ol, dl, li, table, pre {margin:10px 0;margin:0.667rem 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {border-left:4px solid #dddddd;padding:0 12px;padding:0 0.8rem;color: #aaa;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td {border-collapse:collapse;border:1px solid #bbbbbb;}' + '@media screen and (max-width: 544px) {' + 'body {margin:20px 18px;margin:1.33rem 1.2rem;}' + '}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;margin:12px 15px;margin:0.75rem 0.9375rem;color:#353c47;text-align:justify;text-justify:inter-word;}' + 'h1 {font-size:34px;font-size:2.125rem;}' + 'h2 {font-size:30px;font-size:1.875rem;}' + 'h3 {font-size:26px;font-size:1.625rem;}' + 'h4 {font-size:22px;font-size:1.375rem;}' + 'h5 {font-size:18px;font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'div, p, blockquote, ul, ol, dl, li, table, pre {margin:0;margin:0;}' + 'ul, ol {padding-left:40px;padding-left:2.5rem;}' + 'blockquote {border-left:4px solid #c8d4e8;padding:0 15px;padding:0 0.9375rem;color: #b3c2dd;}' + '}'
+    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'padding: 0;margin: 20px 36px;margin: 1.33rem 2.4rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, blockquote, ul, ol, dl, table, pre {margin:10px 0;margin:0.667rem 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {border-left:4px solid #dddddd;padding:0 12px;padding:0 0.8rem;color: #aaa;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td {border-collapse:collapse;border:1px solid #bbbbbb;}' + '@media screen and (max-width: 660px) {' + 'body {margin:20px 18px;margin:1.33rem 1.2rem;}' + '}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;margin:12px 15px;margin:0.75rem 0.9375rem;color:#353c47;text-align:justify;text-justify:inter-word;}' + 'h1 {font-size:34px;font-size:2.125rem;}' + 'h2 {font-size:30px;font-size:1.875rem;}' + 'h3 {font-size:26px;font-size:1.625rem;}' + 'h4 {font-size:22px;font-size:1.375rem;}' + 'h5 {font-size:18px;font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'div, p, blockquote, ul, ol, dl, table, pre {margin:0;}' + 'ul, ol {padding-left:40px;padding-left:2.5rem;}' + 'blockquote {border-left:4px solid #c8d4e8;padding:0 15px;padding:0 0.9375rem;color: #b3c2dd;}' + '}'
 };
 
 function insertStyleById(id, css, isReplace) {
@@ -2107,20 +2107,27 @@ var WizStyle = {
         if (!customCss) {
             return;
         }
-        var css = 'html, body{',
+        var css,
             k,
             hasCustomCss = false;
-        for (k in customCss) {
-            if (customCss.hasOwnProperty(k)) {
-                if (k.toLowerCase() == 'font-family') {
-                    css += k + ':' + customCss[k] + ',' + DefaultFont + ';';
-                } else {
-                    css += k + ':' + customCss[k] + ';';
+        if (typeof customCss == 'string') {
+            css = customCss;
+            hasCustomCss = true;
+        } else {
+            css = 'html, body{';
+            for (k in customCss) {
+                if (customCss.hasOwnProperty(k)) {
+                    if (k.toLowerCase() == 'font-family') {
+                        css += k + ':' + customCss[k] + ',' + DefaultFont + ';';
+                    } else {
+                        css += k + ':' + customCss[k] + ';';
+                    }
+                    hasCustomCss = true;
                 }
-                hasCustomCss = true;
             }
+            css += '}';
         }
-        css += '}';
+
         if (hasCustomCss) {
             insertStyleByName(TmpStyleName, css);
         }
@@ -2130,11 +2137,15 @@ var WizStyle = {
             insertStyleByName(TmpStyleName, TmpEditorStyle.phone);
         } else if (_env2['default'].client.type.isIOS && _env2['default'].client.type.isPad) {
             insertStyleByName(TmpStyleName, TmpEditorStyle.pad);
+        } else if (_env2['default'].client.type.isWin) {
+            insertStyleByName(TmpStyleName, TmpReaderStyle.win);
         }
     },
     insertTmpReaderStyle: function insertTmpReaderStyle() {
         if (_env2['default'].client.type.isIOS) {
             insertStyleByName(TmpStyleName, TmpReaderStyle.phone);
+        } else if (_env2['default'].client.type.isWin) {
+            insertStyleByName(TmpStyleName, TmpReaderStyle.win);
         }
     },
     removeTmpStyle: function removeTmpStyle() {
