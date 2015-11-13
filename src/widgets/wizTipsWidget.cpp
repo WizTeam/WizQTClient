@@ -17,6 +17,7 @@ CWizTipsWidget::CWizTipsWidget(const QString id, QWidget *parent)
     , m_hintSize(318, 82)
     , m_function(emptyFunction)
     , m_id(id)
+    , m_autoAdjustPosition(false)
 {
     Qt::WindowFlags flags = windowFlags();
     flags = flags & ~Qt::Popup;
@@ -78,6 +79,16 @@ QString CWizTipsWidget::id()
     return m_id;
 }
 
+void CWizTipsWidget::setAutoAdjustPosition(bool autoAdjust)
+{
+    m_autoAdjustPosition = autoAdjust;
+}
+
+bool CWizTipsWidget::isAutoAdjustPosition() const
+{
+    return m_autoAdjustPosition;
+}
+
 void CWizTipsWidget::setText(const QString& title, const QString& info, const QString& buttonText)
 {
     m_labelTitle->setText(title);
@@ -90,15 +101,19 @@ void CWizTipsWidget::setButtonVisible(bool visible)
     m_btnOK->setVisible(visible);
 }
 
-void CWizTipsWidget::addToTipListManager(QWidget* targetWidget, int nXOff, int nYOff)
+bool CWizTipsWidget::addToTipListManager(QWidget* targetWidget, int nXOff, int nYOff)
 {
     CWizTipListManager* manager = CWizTipListManager::instance();
+    if (manager->tipsWidgetExists(id()))
+        return false;
+
     manager->addTipsWidget(this, targetWidget, nXOff, nYOff);
 
     if (manager->firstTipWidget()->id() == id())
     {
         manager->displayCurrentTipWidget();
     }
+    return true;
 }
 
 void CWizTipsWidget::bindFunction(const std::function<void ()>& f)
@@ -142,21 +157,6 @@ CWizTipListManager* CWizTipListManager::instance()
 
 void CWizTipListManager::addTipsWidget(CWizTipsWidget* widget, QWidget* targetWidget, int nXOff, int nYOff)
 {
-    for (int i = 0; i < m_tips.count(); i++)
-    {
-        const TipItem& item = m_tips.at(i);
-        if (item.widget->id() == widget->id())
-        {
-            qDebug() << "try to add a same id item, delete the old one";
-            item.widget->deleteLater();
-            CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
-            delegate.removeListener(item.widget);
-            m_tips.removeAt(i);
-            break;
-        }
-    }
-
-
     TipItem item;
     item.widget = widget;
     item.targetWidget = targetWidget;
@@ -172,6 +172,29 @@ CWizTipsWidget* CWizTipListManager::firstTipWidget()
         return nullptr;
 
     return m_tips.first().widget;
+}
+
+bool CWizTipListManager::tipsWidgetExists(const QString id)
+{
+    for (int i = 0; i < m_tips.count(); i++)
+    {
+        const TipItem& item = m_tips.at(i);
+        if (item.widget->id() == id)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+void CWizTipListManager::cleanOnQuit()
+{
+    if (m_instance)
+    {
+        m_instance->m_timer.stop();
+        m_instance->m_tips.clear();
+    }
 }
 
 void CWizTipListManager::displayNextTipWidget()
@@ -214,6 +237,8 @@ void CWizTipListManager::on_timerOut()
     {
         m_timer.stop();
         m_tips.first().widget->hide();
+        CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+        delegate.removeListener(m_tips.first().widget);
         for (TipItem item : m_tips)
         {
             item.widget->deleteLater();
@@ -223,12 +248,28 @@ void CWizTipListManager::on_timerOut()
         deleteManager();
         return;
     }
+    else
+    {
+        TipItem item = m_tips.first();
+        if (item.widget->isAutoAdjustPosition())
+        {
+            QRect rc = item.targetWidget->rect();
+            QPoint pt = item.targetWidget->mapToGlobal(QPoint(rc.width()/2 + item.nXOff, rc.height() + item.nYOff));
+            item.widget->showAtPoint(pt);
+        }
+    }
 }
 
 CWizTipListManager::CWizTipListManager(QObject* parent)
     : QObject(parent)
 {
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
+}
+
+CWizTipListManager::~CWizTipListManager()
+{
+    disconnect(&m_timer, SIGNAL(timeout()), this, SLOT(on_timerOut()));
+    m_timer.stop();
 }
 
 void CWizTipListManager::deleteManager()

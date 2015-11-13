@@ -521,6 +521,10 @@ void TitleBar::showCoachingTips()
 
     if (showTips)
     {
+        CWizTipListManager* manager = CWizTipListManager::instance();
+        if (manager->tipsWidgetExists(TITLEBARTIPSCHECKED))
+            return;
+
         CWizTipsWidget* widget = new CWizTipsWidget(TITLEBARTIPSCHECKED, this);
         widget->setAttribute(Qt::WA_DeleteOnClose, true);
         widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "

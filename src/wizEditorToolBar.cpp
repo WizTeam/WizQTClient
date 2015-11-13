@@ -2330,11 +2330,16 @@ void EditorToolBar::showCoachingTips()
 
     if (showTips)
     {
+        CWizTipListManager* manager = CWizTipListManager::instance();
+        if (manager->tipsWidgetExists(EDITORTOOLBARTIPSCHECKED))
+            return;
+
         CWizTipsWidget* tipWidget = new CWizTipsWidget(EDITORTOOLBARTIPSCHECKED, this);
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
+        tipWidget->setAutoAdjustPosition(true);
         tipWidget->bindFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
             {

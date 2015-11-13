@@ -957,6 +957,10 @@ void WizMessageListTitleBar::initUserList()
 
 void WizMessageListTitleBar::showTipsWidget()
 {
+    CWizTipListManager* manager = CWizTipListManager::instance();
+    if (manager->tipsWidgetExists(MESSAGELISTTITLEBARTIPSCHECKED))
+        return;
+
     CWizTipsWidget* tipWidget = new CWizTipsWidget(MESSAGELISTTITLEBARTIPSCHECKED, this);
     tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
     tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
@@ -969,7 +973,6 @@ void WizMessageListTitleBar::showTipsWidget()
         }
     });
     //
-    tipWidget->addToTipListManager(m_msgListMarkAllBtn, -6, 2);
 }
 
 WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)

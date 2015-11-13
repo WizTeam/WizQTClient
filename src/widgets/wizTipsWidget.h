@@ -20,10 +20,13 @@ public:
 
     QString id();
 
+    void setAutoAdjustPosition(bool autoAdjust);
+    bool isAutoAdjustPosition() const;
+
     void setText(const QString& title, const QString& info, const QString& buttonText = tr("OK"));
     void setButtonVisible(bool visible);
 
-    void addToTipListManager(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
+    bool addToTipListManager(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
 
     void bindFunction(std::function<void(void)> const& f);
 signals:
@@ -40,6 +43,7 @@ private:
     QPushButton* m_btnOK;
     QSize m_hintSize;
     QString m_id;
+    bool m_autoAdjustPosition;
     std::function<void(void)> m_function;
 };
 
@@ -48,10 +52,15 @@ class CWizTipListManager : public QObject
     Q_OBJECT
 public:
     static CWizTipListManager* instance();
+    static void cleanOnQuit();
 
     void addTipsWidget(CWizTipsWidget* widget, QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
 
     CWizTipsWidget* firstTipWidget();
+
+    bool tipsWidgetExists(const QString id);
+
+
 public slots:
     void displayNextTipWidget();
     void displayCurrentTipWidget();
@@ -61,6 +70,7 @@ private slots:
 
 private:
     explicit CWizTipListManager(QObject* parent = 0);
+    ~CWizTipListManager();
 
     void deleteManager();
 

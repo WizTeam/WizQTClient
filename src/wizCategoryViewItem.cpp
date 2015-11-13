@@ -20,6 +20,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizObjectOperator.h"
 #include "wizProgressDialog.h"
+#include "widgets/wizTipsWidget.h"
 
 #include "wizdef.h"
 #include "share/wizsettings.h"
@@ -512,6 +513,38 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
              nButtonWidth, nButtonHeight);
     return rc;
 }
+
+//#define CATEGORYMESSAGEITEMTIPSCHECKED "CategoryMessageItemTipsChecked"
+
+//void CWizCategoryViewMessageItem::showCoachingTips()
+//{
+//    bool showTips = false;
+//    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//    {
+//        showTips = mainWindow->userSettings().get(CATEGORYMESSAGEITEMTIPSCHECKED).toInt() == 0;
+//    }
+
+//    if (showTips)
+//    {
+//        CWizTipListManager* manager = CWizTipListManager::instance();
+//        if (manager->tipsWidgetExists(CATEGORYMESSAGEITEMTIPSCHECKED))
+//            return;
+
+//        CWizTipsWidget* tipWidget = new CWizTipsWidget(CATEGORYMESSAGEITEMTIPSCHECKED, this);
+//        tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
+//        tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
+//        tipWidget->setSizeHint(QSize(280, 60));
+//        tipWidget->setButtonVisible(false);
+//        tipWidget->bindFunction([](){
+//            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//            {
+//                mainWindow->userSettings().set(CATEGORYMESSAGEITEMTIPSCHECKED, "1");
+//            }
+//        });
+//        //
+//        tipWidget->addToTipListManager(m_btnShowExtra, 0, -6);
+//    }
+//}
 
 void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& text, bool isPressed)
 {

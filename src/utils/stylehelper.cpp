@@ -592,7 +592,8 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
-    QRect rcBg = rc.adjusted(1, 1, -14, -2);
+    int borderMargin = WizIsHighPixel() ? 3 : 2;
+    QRect rcBg = rc.adjusted(1, 1, -14, -borderMargin);
     if (bSelect) {
         if (bFocus) {
 //            p->fillRect(rcBg, listViewItemBackground(Active));
@@ -608,7 +609,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
-    int borderMargin = 2;
+    int borderMargin = WizIsHighPixel() ? 3 : 2;
 
     QRect rcBg = rc;
     switch (bgType) {

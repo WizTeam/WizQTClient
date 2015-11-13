@@ -153,6 +153,7 @@ public:
 
     virtual QRect getExtraButtonRect(const QRect &itemBorder, bool ignoreIconExist = false) const;
 
+//    void showCoachingTips();
 private:
     int m_nFilter;
     int m_nUnread;

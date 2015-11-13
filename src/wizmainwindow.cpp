@@ -360,7 +360,9 @@ void MainWindow::on_application_aboutToQuit()
 void MainWindow::cleanOnQuit()
 {
     m_category->saveExpandState();
-    saveStatus();
+    saveStatus();    
+    //
+    CWizTipListManager::cleanOnQuit();
     //
     m_sync->waitForDone();
     //
@@ -847,7 +849,7 @@ void MainWindow::restoreStatus()
                                    rcDesktop.width() / 20 * 19, rcDesktop.height() / 4 * 3);
             setGeometry(rcWindow);
         }        
-        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe6\0\0\x1#\0\0\x3\n\x1\xff\xff\xff\xff\x1\0\0\0\x1\0)");
+        QByteArray state("\0\0\0\xff\0\0\0\x1\0\0\0\x3\0\0\0\xe9\0\0\x1\x1f\0\0\x3\n\0\0\0\0\x1\x1\0\0\0\x1\0)");
         m_splitter->restoreState(state);
     } else {
         restoreGeometry(geometry);
@@ -2017,7 +2019,7 @@ void MainWindow::initClient()
     layout->setSpacing(0);
     m_clienWgt->setLayout(layout);    
 
-    m_splitter = std::make_shared<CWizSplitter>(this);
+    m_splitter = std::make_shared<CWizSplitter>();
     layout->addWidget(m_splitter.get());
 
     m_category->setPalette(pal);
@@ -2057,6 +2059,7 @@ void MainWindow::initClient()
     m_category->setMinimumWidth(165);
     m_docListContainer->setMinimumWidth(244);
     m_doc->web()->setMinimumWidth(575);
+    m_doc->web()->setInSeperateWindow(false);
     m_doc->commentWidget()->setMinimumWidth(195);
 
     m_doc->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"
@@ -2192,7 +2195,7 @@ QWidget*MainWindow::createMessageListView()
 
     QWidget* line2 = new QWidget(this);
     line2->setFixedHeight(1);
-    line2->setStyleSheet("margin-left:2px; margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
+    line2->setStyleSheet("margin-right:12px; border-top-width:1;border-top-style:solid;border-top-color:#DADAD9");
 
     layoutList->addLayout(titleBarLayout);
     layoutList->addWidget(line2);
@@ -2811,6 +2814,10 @@ void MainWindow::on_categoryUnreadButton_triggered()
     bool showTips = userSettings().get(MARKDOCUMENTSREADCHECKED).toInt() == 0;
     if (showTips)
     {
+        CWizTipListManager* manager = CWizTipListManager::instance();
+        if (manager->tipsWidgetExists(MARKDOCUMENTSREADCHECKED))
+            return;
+
         CWizTipsWidget* tipWidget = new CWizTipsWidget(MARKDOCUMENTSREADCHECKED, this);
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
