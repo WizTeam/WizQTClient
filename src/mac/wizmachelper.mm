@@ -902,6 +902,7 @@ int getSystemMinorVersion()
 
 bool systemWidgetBlurAvailable()
 {
+    return false;
     return (getSystemMinorVersion() >= 15) || (getSystemMinorVersion() == 10 && getSystemPatchVersion() >= 4);
 }
 
