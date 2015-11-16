@@ -543,11 +543,6 @@ void CWizDocumentWebView::resetMarkdownCssPath()
         strFile  = defaultMarkdownCSS();
     }
     m_strMarkdownCssFilePath = strFile;
-
-    if (isInited())
-    {
-        page()->mainFrame()->evaluateJavaScript("initWizReader();");
-    }
 }
 
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
@@ -775,7 +770,8 @@ QString CWizDocumentWebView::getDefaultCssFilePath() const
 
 QString CWizDocumentWebView::getWizReaderDependencyFilePath() const
 {
-    return Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/";
+     static QString dependencyFilePath = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/";
+     return dependencyFilePath;
 }
 
 QString CWizDocumentWebView::getWizReaderFilePath() const
@@ -870,7 +866,7 @@ void CWizDocumentWebView::initEditor()
         return;
 
     if (!resetDefaultCss())
-        return;    
+        return;
 
     resetMarkdownCssPath();
 
@@ -2643,7 +2639,6 @@ void CWizDocumentWebViewSaverThread::run()
 
         QString kbGuid = db.IsGroup() ? db.kbGUID() : "";
         emit saved(kbGuid, doc.strGUID, ok);
-
     };
 }
 

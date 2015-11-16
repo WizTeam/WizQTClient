@@ -2,13 +2,14 @@
     width: 14px;
     height: 14px;
     background-color: #FFFFFF;
+    cursor:pointer;
 }
 ::-webkit-scrollbar-thumb {
     height: 6px;
     border: 3px solid rgba(0, 0, 0, 0);
     background-clip: padding-box;
     -webkit-border-radius: 8px;
-    background-color: #D3D3D3;
+    background-color: #D3D3D3;    
     /*-webkit-box-shadow: inset -1px -1px 0px rgba(0, 0, 0, 0.05), inset 1px 1px 0px rgba(0, 0, 0, 0.05);*/
 }
 ::-webkit-scrollbar-button {

@@ -42,11 +42,7 @@ try {
         editor.ui.getDom('scalelayer').style.display = 'none';
         editor.ui.getDom('elementpath').style.display = "none";
         editor.ui.getDom('wordcount').style.display = "none";
-        editor.ui._updateFullScreen();    
-
-        var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
-        loadSingleJs(editor.document, reader);       
-        initWizReader();    
+        editor.ui._updateFullScreen();            
     });
 
     editor.addListener('aftersetcontent', function() {
@@ -71,8 +67,7 @@ try {
 function initWizReader() {                  
     var f = window.document.getElementById('ueditor_0');
     if (!f.contentWindow.WizReader) { 
-        console.log("wizReader is null, try init later");
-        setTimeout( "initWizReader()", 100);       
+        console.log("wizReader is null");
         return;
     }
     var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
@@ -102,20 +97,20 @@ function initWizReader() {
     }) | true;
 }
 
-function renderMarkdown() {
-    var f = window.document.getElementById('ueditor_0');
-    if (!f.contentWindow.WizReader || !m_wizReaderInited) {        
-        console.log("wizReader is null, try again later");
-        setTimeout( "renderMarkdown()", 100);
-        return;
-    }
-    
-    f.contentWindow.WizReader.markdown();
+function renderMarkdown() {    
+    var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
+    var wizReaderDocument = loadSingleJs(editor.document, reader);
+    wizReaderDocument.onload = function() {
+    	initWizReader();
+    	var f = window.document.getElementById('ueditor_0');
+		f.contentWindow.WizReader.markdown();
+    };
 }
 
 function loadSingleJs(doc, path) {
     var jsId = 'wiz_' + path;
     if (doc.getElementById(jsId)) {
+    	console.log("js file already exisits");
         return true;
     }
     var s = doc.createElement('script');
