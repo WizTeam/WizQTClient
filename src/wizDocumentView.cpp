@@ -31,7 +31,7 @@
 #include "notifybar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 
 #include "titlebar.h"
 

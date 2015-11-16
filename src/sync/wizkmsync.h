@@ -4,7 +4,7 @@
 #include <QThread>
 
 #include "sync.h"
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 
 class CWizDatabase;
 

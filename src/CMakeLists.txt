@@ -76,7 +76,7 @@ set(wiznote_SOURCES
     share/wizObjectDataDownloader.cpp
     #share/wizUserAvatar.cpp
     sync/avatar.cpp
-    sync/wizkmxmlrpc.cpp
+    sync/wizKMServer.cpp
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
     #sync/wizCloudPool.cpp
@@ -227,7 +227,7 @@ set(wiznote_HEADERS
     share/wizziwreader.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
-    sync/wizkmxmlrpc.h
+    sync/wizKMServer.h
     sync/wizkmsync.h
     sync/asyncapi.h
     #sync/wizCloudPool.h

@@ -6,7 +6,7 @@
 #include "share/wizDatabase.h"
 #include "share/wizDatabaseManager.h"
 #include "sync/token.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>

@@ -29,7 +29,7 @@
 #include "share/wizsettings.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectDataDownloader.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
 #include "wizproxydialog.h"

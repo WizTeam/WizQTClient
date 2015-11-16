@@ -5,7 +5,7 @@
 #include <QString>
 #include <QDebug>
 
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 #include "asyncapi.h"
 #include "apientry.h"
 

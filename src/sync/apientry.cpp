@@ -14,7 +14,7 @@
 
 #include "apientry.h"
 #include "token.h"
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 #include "wizdef.h"
 #include "share/wizEventLoop.h"
 #include "rapidjson/document.h"

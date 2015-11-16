@@ -1,4 +1,4 @@
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 #include "apientry.h"
 #include "token.h"
 

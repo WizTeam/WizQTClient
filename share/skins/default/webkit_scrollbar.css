@@ -2,7 +2,7 @@
     width: 14px;
     height: 14px;
     background-color: #FFFFFF;
-    cursor:pointer;
+    cursor:default;
 }
 ::-webkit-scrollbar-thumb {
     height: 6px;

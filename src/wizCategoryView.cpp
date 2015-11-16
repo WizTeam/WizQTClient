@@ -24,7 +24,7 @@
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "utils/stylehelper.h"

@@ -14,7 +14,7 @@
 #include "share/wizDatabaseManager.h"
 #include "../wizmainwindow.h"
 #include "sync/apientry.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 #include "wizWebSettingsDialog.h"
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
