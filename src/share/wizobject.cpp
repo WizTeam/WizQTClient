@@ -823,6 +823,7 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
     , messageBody(data.strMessageText)
     , nVersion(data.nVersion)
     , nLocalChanged(data.nLocalChanged)
+    , note(data.strNote)
 {
 
 }
@@ -889,5 +890,6 @@ BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
     data.GetStr(_T("receiver_alias"), strReceiver);
     data.GetStr(_T("sender_alias"), strSender);
     data.GetStr(_T("title"), strTitle);
+    data.GetStr(_T("note"), strNote);
     return 	TRUE;
 }

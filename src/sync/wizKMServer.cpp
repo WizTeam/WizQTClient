@@ -558,7 +558,6 @@ bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64
 {
     QString strUrl = WizService::CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&page_size=%2&version=%3").arg(m_retLogin.strToken).arg(nCountPerPage).arg(nVersion);
-    qDebug() << "get messages from message server";
     //
     QString strResult;
     if (!get(strUrl, strResult))

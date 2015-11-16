@@ -497,10 +497,10 @@ META_NAME=%s, META_KEY=%s, META_VALUE=%s, DT_MODIFIED=%s"
 #define FIELD_LIST_WIZ_MESSAGE "\
 MESSAGE_ID, BIZ_GUID, KB_GUID, DOCUMENT_GUID, SENDER, SENDER_ID, SENDER_GUID, \
 RECEIVER, RECEIVER_ID, RECEIVER_GUID, MESSAGE_TYPE, READ_STATUS,\
-DT_CREATED, MESSAGE_TITLE, MESSAGE_TEXT, WIZ_VERSION, DELETE_STATUS, LOCAL_CHANGED"
+DT_CREATED, MESSAGE_TITLE, MESSAGE_TEXT, WIZ_VERSION, DELETE_STATUS, LOCAL_CHANGED, MESSAGE_NOTE"
 
 #define PARAM_LIST_WIZ_MESSAGE "\
-%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d,%s, %s, %s, %s, %d, %d"
+%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d,%s, %s, %s, %s, %d, %d, %s"
 
 #define FIELD_LIST_WIZ_MESSAGE_MODIFY "READ_STATUS=%d, DELETE_STATUS=%d, WIZ_VERSION=%s, LOCAL_CHANGED=%d"
 #define TABLE_KEY_WIZ_MESSAGE   "MESSAGE_ID"
@@ -524,7 +524,8 @@ enum FieldIndex_WizMessage
     msgMESSAGE_TEXT,
     msgWIZ_VERSION,
     msgDELETE_STATUS,
-    msgLOCAL_CHANGED
+    msgLOCAL_CHANGED,
+    msgMESSAGE_NOTE
 };
 
 /* ------------------------------ WIZ_USER ------------------------------ */

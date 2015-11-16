@@ -150,6 +150,10 @@ bool CWizIndexBase::updateTableStructure(int oldVersion)
         Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
         Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
     }
+
+    if (oldVersion < 3) {
+        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+    }
     //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
@@ -577,6 +581,7 @@ bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
             data.nVersion = query.getInt64Field(msgWIZ_VERSION);
             data.nDeleteStatus = query.getIntField(msgDELETE_STATUS);
             data.nLocalChanged = query.getIntField(msgLOCAL_CHANGED);
+            data.note = query.getStringField(msgMESSAGE_NOTE);
 
             arrayMessage.push_back(data);
             query.nextRow();
@@ -644,7 +649,8 @@ bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
                   STR2SQL(data.messageBody).utf16(),
                   WizInt64ToStr(data.nVersion).utf16(),
                   data.nDeleteStatus,
-                  data.nLocalChanged
+                  data.nLocalChanged,
+                  STR2SQL(data.note).utf16()
         );
 
 

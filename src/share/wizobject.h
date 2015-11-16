@@ -663,6 +663,7 @@ struct WIZUSERMESSAGEDATA
     QString strSender;
     QString strReceiver;
     QString strTitle;
+    QString strNote;     //消息携带的数据，用于显示广告等内容
     int nLocalChanged;
 
     WIZUSERMESSAGEDATA()
