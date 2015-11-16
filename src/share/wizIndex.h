@@ -212,6 +212,7 @@ public:
     bool ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data);
     bool ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data);
     bool ModifyDocumentReadCount(const WIZDOCUMENTDATA& data);
+    bool ModifyDocumentLocation(WIZDOCUMENTDATA& data);
 
     bool DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog);
 

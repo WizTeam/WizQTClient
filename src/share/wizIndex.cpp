@@ -758,6 +758,20 @@ bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
     return ret;
 }
 
+bool CWizIndex::ModifyDocumentLocation(WIZDOCUMENTDATA& data)
+{
+    if (data.strGUID.isEmpty()) {
+        TOLOG(_T("Failed to modify document: guid is empty!"));
+        return false;
+    }
+
+    data.strInfoMD5 = CalDocumentInfoMD5(data);
+    data.tInfoModified = WizGetCurrentTime();
+    data.nVersion = -1;
+
+    return ModifyDocumentInfoEx(data);
+}
+
 bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
 {
     WIZDOCUMENTDATA dataTemp = data;
