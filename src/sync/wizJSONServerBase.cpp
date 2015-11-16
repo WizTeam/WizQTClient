@@ -19,22 +19,8 @@ int CWizJSONServerBase::returnCode()
     return m_nReturnCode;
 }
 
-QString CWizJSONServerBase::returnMessage()
+bool CWizJSONServerBase::get(const QString& strUrl, QString& strResult)
 {
-    return m_strReturnMessage;
-}
-
-QString CWizJSONServerBase::jsonResult()
-{
-    return m_strJSONResult;
-}
-
-void CWizJSONServerBase::getRequest(const QString& strUrl)
-{
-    m_nReturnCode = 0;
-    m_strReturnMessage.clear();
-    m_strJSONResult.clear();
-
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
@@ -42,37 +28,15 @@ void CWizJSONServerBase::getRequest(const QString& strUrl)
     if (loop.error() != QNetworkReply::NoError)
     {
         qDebug() << "[JSONRequest]Send get request failed.";
-        return;
+        return false;
     }
 
-    m_strJSONResult = loop.result();
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().toUtf8().constData());
-
-    if (!d.HasMember("return_code"))
-    {
-        qDebug() << "[JSONRequest]Send get request do not get return code ";
-        return;
-    }
-
-    m_nReturnCode = d.FindMember("return_code")->value.GetInt();
-    m_strReturnMessage = d.FindMember("return_message")->value.GetString();
-    if (m_nReturnCode != JSON_RETURNCODE_OK )
-    {
-        qDebug() << "[JSONRequest]Send get request error :  " << m_nReturnCode << loop.result();
-    }
-    else
-    {
-        qDebug() << "[JSONRequest]Send get request OK";
-    }
+    strResult = loop.result();
+    return !strResult.isEmpty();
 }
 
-void CWizJSONServerBase::deleteRequest(const QString& strUrl)
+bool CWizJSONServerBase::deleteResource(const QString& strUrl)
 {
-    m_nReturnCode = 0;
-    m_strReturnMessage.clear();
-    m_strJSONResult.clear();
-
     QNetworkReply* reply = m_net->deleteResource(QNetworkRequest(strUrl));
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
@@ -80,28 +44,50 @@ void CWizJSONServerBase::deleteRequest(const QString& strUrl)
     if (loop.error() != QNetworkReply::NoError)
     {
         qDebug() << "[JSONDelete]Send delete request failed. result : " << loop.result();
-        return;
+        return false;
     }
 
-    m_strJSONResult = loop.result();
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().toUtf8().constData());
+    QString result = loop.result();
 
-    if (!d.HasMember("return_code"))
-    {
-        qDebug() << "[JSONDelete]Send delete request do not get return code ";
-        return;
-    }
+    int returnCode = 0;
+    QString returnMessage;
+    if (!getReturnCodeAndMessageFromJSON(result, returnCode, returnMessage))
+        return false;
 
-    m_nReturnCode = d.FindMember("return_code")->value.GetInt();
-    m_strReturnMessage = d.FindMember("return_message")->value.GetString();
-    if (m_nReturnCode != JSON_RETURNCODE_OK )
+    if (returnCode != JSON_RETURNCODE_OK )
     {
-        qDebug() << "[JSONDelete]Send delete request status error :  " << m_nReturnCode << loop.result();
+        qDebug() << "[JSONDelete]Send delete request status error, code : " << returnCode << " message : " << returnMessage;
     }
     else
     {
         qDebug() << "[JSONDelete]Send delete request OK";
     }
+
+    return returnCode == JSON_RETURNCODE_OK;
+}
+
+bool CWizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
+                                                         int& returnCode, QString& returnMessage)
+{
+    rapidjson::Document d;
+    d.Parse<0>(strJSON.toUtf8().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "can not found return code from json data";
+        return false;
+    }
+
+    returnCode = d.FindMember("return_code")->value.GetInt();
+
+    if (!d.HasMember("return_message"))
+    {
+        qDebug() << "can not found return message from json data";
+        return false;
+    }
+
+    returnMessage = d.FindMember("return_message")->value.GetString();
+
+    return true;
 }
 

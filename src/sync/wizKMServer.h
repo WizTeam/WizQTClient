@@ -51,6 +51,8 @@ public:
     bool KeepAlive(const QString& strToken);
     bool GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
     bool SetMessageReadStatus(const QString& strMessageIDs, int nStatus);
+
+    //
     bool SetMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
 
     bool GetValueVersion(const QString& strKey, __int64& nVersion);
@@ -84,7 +86,10 @@ private:
     bool accounts_getGroupList(CWizGroupDataArray& arrayGroup);
     bool accounts_getBizList(CWizBizDataArray& arrayBiz);
     bool accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    bool accounts_getMessages(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
+    bool accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
+
+    //
+    bool accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage);
 };
 
 

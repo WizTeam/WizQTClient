@@ -1,6 +1,7 @@
 #include "wizKMServer.h"
 #include "apientry.h"
 #include "token.h"
+#include "rapidjson/document.h"
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
@@ -206,7 +207,7 @@ BOOL CWizKMAccountsServer::GetMessages(__int64 nVersion, CWizUserMessageDataArra
     {
         CWizUserMessageDataArray arrayPageData;
         //
-        if (!accounts_getMessages(nCountPerPage, nNextVersion, arrayPageData))
+        if (!accounts_getMessagesByJson(nCountPerPage, nNextVersion, arrayPageData))
         {
             TOLOG2(_T("Failed to get message list: CountPerPage=%1, Version=%2"), WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
             return FALSE;
@@ -253,9 +254,7 @@ bool CWizKMAccountsServer::SetMessageDeleteStatus(const QString& strMessageIDs, 
     strUrl += QString("/messages?token=%1&ids=%2").arg(m_retLogin.strToken).arg(strMessageIDs);
     qDebug() << "set message delete status, strken:" << m_retLogin.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
-    deleteRequest(strUrl);
-
-    return returnCode() == JSON_RETURNCODE_OK;
+    return deleteResource(strUrl);
 }
 
 BOOL CWizKMAccountsServer::GetValueVersion(const QString& strKey, __int64& nVersion)
@@ -528,7 +527,7 @@ BOOL CWizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, 
 
 
 
-BOOL CWizKMAccountsServer::accounts_getMessages(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
+BOOL CWizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
     CWizKMBaseParam param;
 
@@ -546,6 +545,68 @@ BOOL CWizKMAccountsServer::accounts_getMessages(int nCountPerPage, __int64 nVers
     arrayMessage.assign(arrayWrap.begin(), arrayWrap.end());
     //
     return TRUE;
+}
+
+QString getStringFromRapidValue(const rapidjson::Value& u, const QString& memberName)
+{
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QTextDecoder* encoder = codec->makeDecoder();
+    return encoder->toUnicode(u[memberName.toUtf8().constData()].GetString(), u[memberName.toUtf8().constData()].GetStringLength());
+}
+
+bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
+{
+    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
+    strUrl += QString("/messages?token=%1&page_size=%2&version=%3").arg(m_retLogin.strToken).arg(nCountPerPage).arg(nVersion);
+    qDebug() << "get messages from message server";
+    //
+    QString strResult;
+    if (!get(strUrl, strResult))
+        return false;
+
+    rapidjson::Document d;
+    d.Parse<0>(strResult.toUtf8().constData());
+
+    if (d.HasParseError() || !d.FindMember("result")) {
+        qDebug() << "Error occured when try to parse json of messages";
+        qDebug() << strResult;
+        return false;
+    }
+
+    const rapidjson::Value& users = d["result"];
+    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
+        const rapidjson::Value& u = users[i];
+        if (!u.IsObject()) {
+            qDebug() << "Error occured when parse json of messages";
+            return false;
+        }
+
+        WIZUSERMESSAGEDATA data;
+        data.nMessageID = (__int64)u["id"].GetInt64();
+        data.strBizGUID = getStringFromRapidValue(u, "biz_guid");
+        data.strKbGUID = getStringFromRapidValue(u, "kb_guid");
+        data.strDocumentGUID = getStringFromRapidValue(u, "document_guid");
+        data.strSenderGUID = getStringFromRapidValue(u, "sender_guid");
+        data.strSenderID = getStringFromRapidValue(u, "sender_id");
+        data.strReceiverGUID = getStringFromRapidValue(u, "receiver_guid");
+        data.strReceiverID = getStringFromRapidValue(u, "receiver_id");
+        data.strMessageText = getStringFromRapidValue(u, "message_body");
+        data.strSender = getStringFromRapidValue(u, "sender_alias");
+        data.strReceiver = getStringFromRapidValue(u, "receiver_alias");
+        data.strSender = getStringFromRapidValue(u, "sender_alias");
+        data.strTitle = getStringFromRapidValue(u, "title");
+        //
+        data.nMessageType = u["message_type"].GetInt();
+        data.nReadStatus = u["read_status"].GetInt();
+        data.nDeletedStatus = u["delete_status"].GetInt();
+        data.nVersion = (__int64)u["version"].GetInt64();
+        //
+        time_t dateCreated = __int64(u["dt_created"].GetInt64()) / 1000;
+        data.tCreated = COleDateTime(dateCreated);
+
+        arrayMessage.push_back(data);
+    }
+    return true;
 }
 
 
