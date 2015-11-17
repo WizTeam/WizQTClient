@@ -549,6 +549,9 @@ BOOL CWizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int
 
 QString getStringFromRapidValue(const rapidjson::Value& u, const QString& memberName)
 {
+    if (!u.FindMember(memberName.toUtf8().constData()))
+        return QString();
+
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
     return encoder->toUnicode(u[memberName.toUtf8().constData()].GetString(), u[memberName.toUtf8().constData()].GetStringLength());
@@ -557,7 +560,7 @@ QString getStringFromRapidValue(const rapidjson::Value& u, const QString& member
 bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
     QString strUrl = WizService::CommonApiEntry::messageServerUrl();
-    strUrl += QString("/messages?token=%1&page_size=%2&version=%3").arg(m_retLogin.strToken).arg(nCountPerPage).arg(nVersion);
+    strUrl += QString("/messages?token=%1&page_size=%2&version=%3&api_version=6").arg(m_retLogin.strToken).arg(nCountPerPage).arg(nVersion);
     //
     QString strResult;
     if (!get(strUrl, strResult))
@@ -571,6 +574,8 @@ bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64
         qDebug() << strResult;
         return false;
     }
+
+//    qDebug() << "url : " << strUrl << " result : " << strResult;
 
     const rapidjson::Value& users = d["result"];
     for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
