@@ -700,6 +700,7 @@ void CommonApiEntry::getEndPoints()
         QString key = (iter->name).GetString();
         QString url = (iter->value).GetString();
         qDebug() << "key: " << key << " url : " << url;
+        m_cacheMap.insert(key, url);
     }
 }
 
@@ -711,7 +712,9 @@ void CommonApiEntry::updateUrlCache(const QString& strCommand, const QString& ur
 QString CommonApiEntry::getUrlFromCache(const QString& strCommand)
 {
     if (m_cacheMap.isEmpty())
+    {
         getEndPoints();
+    }
     if (!m_cacheMap.value(strCommand).isEmpty())
         return m_cacheMap.value(strCommand);
 
