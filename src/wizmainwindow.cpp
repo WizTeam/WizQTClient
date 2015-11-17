@@ -17,6 +17,7 @@
 #include <QPrinter>
 #include <QWebFrame>
 #include <QCheckBox>
+#include <QtConcurrent>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -27,7 +28,7 @@
 #endif
 #include "wizSearchWidget.h"
 #include "share/wizMessageBox.h"
-#include "core/wizTrayIcon.h"
+#include "widgets/wizTrayIcon.h"
 
 #include <extensionsystem/pluginmanager.h>
 #include <coreplugin/icore.h>
@@ -92,7 +93,7 @@
 #include "share/wizAnalyzer.h"
 #include "share/wizTranslater.h"
 #include "widgets/wizShareLinkDialog.h"
-#include "core/wizSingleDocumentView.h"
+#include "widgets/wizSingleDocumentView.h"
 #include "widgets/wizCustomToolBar.h"
 #include "widgets/wizTipsWidget.h"
 #include "wizPositionDelegate.h"
@@ -2817,6 +2818,7 @@ void MainWindow::on_categoryUnreadButton_triggered()
             return;
 
         CWizTipsWidget* tipWidget = new CWizTipsWidget(MARKDOCUMENTSREADCHECKED, this);
+        connect(m_btnMarkDocumentsReaded, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));
@@ -3437,10 +3439,13 @@ void MainWindow::on_message_itemSelectionChanged()
     QList<WIZMESSAGEDATA> listMsg;
     m_msgList->selectedMessages(listMsg);
 
-    if (listMsg.size() == 1) {
+    if (listMsg.size() == 1)
+    {
         WIZMESSAGEDATA msg(listMsg[0]);
         WIZDOCUMENTDATA doc;
-        if (!m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)) {
+        if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP &&
+                !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc))
+        {
             m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
             return;
         }
@@ -3448,33 +3453,40 @@ void MainWindow::on_message_itemSelectionChanged()
         //  show comments
         WIZMESSAGEDATA msgData;
         m_dbMgr.db().messageFromId(msg.nId, msgData);
+
         if (msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
                 msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
         {
-            QWidget* commentWidget = m_doc->commentWidget();
-            if (!commentWidget->isVisible())
-            {
-                QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
-                if (splitter)
-                {
-                    QList<int> li = splitter->sizes();
-                    Q_ASSERT(li.size() == 2);
-                    if (li.size() == 2)
-                    {
-                        QList<int> lin;
-                        const int COMMENT_FRAME_WIDTH = 315;
-                        lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
-                        lin.push_back(COMMENT_FRAME_WIDTH);
-                        splitter->setSizes(lin);
-                        commentWidget->show();
-                    }
-                }
-            }
+            showCommentWidget();
+            viewDocument(doc, true);
+        }
+        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+                 || msgData.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP)
+        {
+            QtConcurrent::run([this, msgData](){
+                QString command = QString("message_%1").arg(msgData.nMessageType);
+                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);
+                qDebug() << "message url : " << strUrl;
+                strUrl.replace("{token}", WizService::Token::token());
+                strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
+                strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
+                strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
+                strUrl.replace("{sender_guid}", msgData.senderGUID.isEmpty() ? "{sender_guid}" : msgData.senderGUID);
+                strUrl.replace("{receiver_guid}", msgData.receiverGUID.isEmpty() ? "{receiver_guid}" : msgData.receiverGUID);
+                strUrl.replace("{sender_id}", msgData.senderGUID.isEmpty() ? "{sender_id}" : msgData.senderGUID);
+                strUrl.replace("{receiver_id}", msgData.receiverGUID.isEmpty() ? "{receiver_id}" : msgData.receiverGUID);
+
+                QDesktopServices::openUrl(strUrl);
+            });
+        }
+        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+        {
+            viewDocument(doc, true);
         }
 
 
-        viewDocument(doc, true);
+
     }
     m_msgList->viewport()->update();
 }
@@ -4108,6 +4120,29 @@ void MainWindow::resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc)
     {
         m_documents->reloadItem(doc.strKbGUID, doc.strGUID);
         m_documents->sortItems();
+    }
+}
+
+void MainWindow::showCommentWidget()
+{
+    QWidget* commentWidget = m_doc->commentWidget();
+    if (!commentWidget->isVisible())
+    {
+        QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
+        if (splitter)
+        {
+            QList<int> li = splitter->sizes();
+            Q_ASSERT(li.size() == 2);
+            if (li.size() == 2)
+            {
+                QList<int> lin;
+                const int COMMENT_FRAME_WIDTH = 315;
+                lin.push_back(splitter->width() - COMMENT_FRAME_WIDTH);
+                lin.push_back(COMMENT_FRAME_WIDTH);
+                splitter->setSizes(lin);
+                commentWidget->show();
+            }
+        }
     }
 }
 

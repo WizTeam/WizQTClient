@@ -506,6 +506,9 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
+    void showCommentWidget();
+
+    //
     void showDocumentList();
     void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);

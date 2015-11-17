@@ -177,8 +177,8 @@ set(wiznote_SOURCES
     share/wizUDPClient.cpp
     share/wizMessageBox.cpp
     wizOEMSettings.cpp
-    core/wizTagBar.cpp
-    core/wizTrayIcon.cpp
+    widgets/wizTagBar.cpp
+    widgets/wizTrayIcon.cpp
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
     share/wizObjectOperator.cpp
@@ -186,7 +186,7 @@ set(wiznote_SOURCES
     widgets/wizCrashReportDialog.cpp
     widgets/wizCustomToolBar.cpp
     widgets/wizTipsWidget.cpp
-    core/wizSingleDocumentView.cpp
+    widgets/wizSingleDocumentView.cpp
     mac/wizSearchWidget_mm.cpp
 )
 
@@ -347,8 +347,8 @@ set(wiznote_HEADERS
     share/wizUDPClient.h
     share/wizMessageBox.h
     wizOEMSettings.h
-    core/wizTagBar.h
-    core/wizTrayIcon.h
+    widgets/wizTagBar.h
+    widgets/wizTrayIcon.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
     share/wizObjectOperator.h
@@ -356,7 +356,7 @@ set(wiznote_HEADERS
     widgets/wizCrashReportDialog.h
     widgets/wizCustomToolBar.h
     widgets/wizTipsWidget.cpp
-    core/wizSingleDocumentView.h
+    widgets/wizSingleDocumentView.h
     wizPositionDelegate.h
 )
 
