@@ -191,21 +191,26 @@ public:
         f.setPixelSize(12);
         p->save();        
         p->setPen(QColor("#535353"));
-        QString strSender = m_data.senderAlias.isEmpty() ? m_data.senderId : m_data.senderAlias;
+        QString strSender = m_data.senderAlias.isEmpty() ?
+                    (m_data.nMessageType == WIZ_USER_MSG_TYPE_SYSTEM ? QObject::tr("System message") : m_data.senderId) :
+                    m_data.senderAlias;
         QRect  rectSender = rcd;
         rectSender.setLeft(rectAvatar.right() + nAvatarRightMargin);
         rectSender.setTop(vopt->rect.top() + 24);
         rectSender = Utils::StyleHelper::drawText(p, rectSender, strSender, 1,
                                                   Qt::AlignVCenter | Qt::AlignLeft, p->pen().color(), f);
 
-        QColor messageTextColor("#A7A7A7");
-        QString strType = descriptionOfMessageType(m_data.nMessageType);
-        QRect rectType = rcd;
-        rectType.setLeft(rectSender.right());
-        rectType.setTop(vopt->rect.top() + 25);
-        f.setPixelSize(11);
-        Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
-                                     messageTextColor, f);
+        if (m_data.nMessageType != WIZ_USER_MSG_TYPE_SYSTEM)
+        {
+            QColor messageTextColor("#A7A7A7");
+            QString strType = descriptionOfMessageType(m_data.nMessageType);
+            QRect rectType = rcd;
+            rectType.setLeft(rectSender.right());
+            rectType.setTop(vopt->rect.top() + 25);
+            f.setPixelSize(11);
+            Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
+                                         messageTextColor, f);
+        }
 
         QRect rcTime = vopt->rect.adjusted(0, 8, -14, 0);
         QColor dateColor("#C1C1C1");
@@ -217,7 +222,7 @@ public:
         QRect rcTitle(rectAvatar.right() + nAvatarRightMargin, rectSender.bottom(), vopt->rect.right() - 12 - rectAvatar.right() - 16,
                       vopt->rect.bottom() - rectSender.bottom());
         f.setPixelSize(14);
-        QString strTitle(m_data.title);
+        QString strTitle(m_data.title.isEmpty() ? m_data.messageBody : m_data.title);
         Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignTop, p->pen().color(), f);
 
         p->restore();
