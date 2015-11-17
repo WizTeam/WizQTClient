@@ -389,7 +389,6 @@ QString CommonApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QStri
 
 void CommonApiEntry::setEnterpriseServerIP(const QString& strIP)
 {
-    qDebug() << "try to set enterprise server ip : " << strIP;
     if (!strIP.isEmpty() && strIP == m_server)
         return;
 
@@ -403,7 +402,7 @@ void CommonApiEntry::setEnterpriseServerIP(const QString& strIP)
         {
             m_server = QString("http://%1/").arg(strIP);
         }
-        qDebug() << "set server ip : " << m_server;
+        qDebug() << "set server : " << m_server;
     }
     else
     {
@@ -565,20 +564,14 @@ QString CommonApiEntry::editStatusUrl()
     return strUrl;
 }
 
-QString CommonApiEntry::standardCommandUrl(const QString& strCommand)
-{
-    QString strUrl = makeUpUrlFromCommand(strCommand);
-    return strUrl;
-}
-
-QString CommonApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken)
+QString CommonApiEntry::makeUpUrlFromCommand(const QString& strCommand, const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
     QString strUrl = makeUpUrlFromCommand(strCommand);
     return addExtendedInfo(strUrl, strExt);
 }
 
-QString CommonApiEntry::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
+QString CommonApiEntry::makeUpUrlFromCommand(const QString& strCommand, const QString& strToken, const QString& strExtInfo)
 {
     QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
     QString strUrl = makeUpUrlFromCommand(strCommand);
@@ -728,7 +721,7 @@ QString CommonApiEntry::getUrlByCommand(const QString& strCommand)
     if (strUrl.isEmpty())
     {
         strUrl = requestUrl(strCommand);
-        if (!strUrl.isEmpty())
+        if (!strUrl.isEmpty() && strUrl.startsWith("http"))
             updateUrlCache(strCommand, strUrl);
     }
 

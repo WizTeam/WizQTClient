@@ -1031,7 +1031,7 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("forgot_password");
+    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("forgot_password");
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
@@ -1685,7 +1685,7 @@ void CWizLoginDialog::initOEMDownloader()
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("snspage");
+    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("snspage");
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
     connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
@@ -1698,7 +1698,7 @@ QString CWizOEMDownloader::_downloadOEMSettings()
     // get oem settings from server
     QNetworkAccessManager net;
     CommonApiEntry::setEnterpriseServerIP(m_server);
-    QString strUrl = CommonApiEntry::standardCommandUrl("oem");
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("oem");
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
     qDebug() << "get oem from server : " << strUrl;
 

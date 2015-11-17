@@ -30,15 +30,16 @@ public:
     static QString editStatusUrl();
 
     //
-    static QString standardCommandUrl(const QString& strCommand);
-    static QString standardCommandUrl(const QString& strCommand, const QString& strToken);
-    static QString standardCommandUrl(const QString& strCommand, const QString& strToken,
+    static QString makeUpUrlFromCommand(const QString& strCommand);
+    static QString makeUpUrlFromCommand(const QString& strCommand, const QString& strToken);
+    static QString makeUpUrlFromCommand(const QString& strCommand, const QString& strToken,
                                       const QString& strExtInfo);
-
 
     // new standard command url for new server
     static QString newStandardCommandUrl(const QString& strCommand, const QString& strToken,
                                          const QString& strExt);
+
+    static QString getUrlByCommand(const QString& strCommand);
 
     static QString kUrlFromGuid(const QString& strToken, const QString& strKbGUID);
 
@@ -46,11 +47,9 @@ public:
 
 private:
     static QString requestUrl(const QString& strCommand);
-    static QString makeUpUrlFromCommand(const QString& strCommand);
     static void getEndPoints();
     static void updateUrlCache(const QString& strCommand, const QString& url);
     static QString getUrlFromCache(const QString& strCommand);
-    static QString getUrlByCommand(const QString& strCommand);
 
 private:
     static QString m_server;
