@@ -121,10 +121,27 @@ void CWizTipsWidget::bindFunction(const std::function<void ()>& f)
     m_function = f;
 }
 
+void CWizTipsWidget::onTargetWidgetClicked()
+{
+    closeTip();
+}
+
 void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
 {
     QWidget::mouseReleaseEvent(ev);
+    closeTip();
+}
 
+void CWizTipsWidget::showEvent(QShowEvent* ev)
+{
+    QWidget::showEvent(ev);
+
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.addListener(this);
+}
+
+void CWizTipsWidget::closeTip()
+{
     close();
 
     m_function();
@@ -134,14 +151,6 @@ void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
 
     CWizTipListManager* manager = CWizTipListManager::instance();
     manager->displayNextTipWidget();
-}
-
-void CWizTipsWidget::showEvent(QShowEvent* ev)
-{
-    QWidget::showEvent(ev);
-
-    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
-    delegate.addListener(this);
 }
 
 CWizTipListManager* CWizTipListManager::m_instance = nullptr;

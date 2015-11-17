@@ -32,10 +32,15 @@ public:
 signals:
 
 public slots:
+    void onTargetWidgetClicked();
 
 protected:
     void mouseReleaseEvent(QMouseEvent* ev);
     void showEvent(QShowEvent* ev);
+
+
+private:
+    void closeTip();
 
 private:
     QLabel* m_labelTitle;
@@ -63,7 +68,7 @@ public:
 
 public slots:
     void displayNextTipWidget();
-    void displayCurrentTipWidget();
+    void displayCurrentTipWidget();    
 
 private slots:
     void on_timerOut();

@@ -138,16 +138,28 @@ public:
             return QObject::tr("@ you in note title");
             break;
         case WIZ_USER_MSG_TYPE_MODIFIED:
-            return QObject::tr("Modified your note");
+            return QObject::tr("modified your note");
             break;
         case WIZ_USER_MSG_TYPE_COMMENT:
-            return QObject::tr("Comment your note");
+            return QObject::tr("comment your note");
             break;
         case WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT:
             return QObject::tr("@ you in note comment");
             break;
         case WIZ_USER_MSG_TYPE_COMMENT_REPLY:
-            return QObject::tr("Reply your comment");
+            return QObject::tr("reply your comment");
+            break;
+        case WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP:
+            return QObject::tr("applied to join group");
+            break;
+        case WIZ_USER_MSG_TYPE_ADDED_TO_GROUP:
+            return QObject::tr("accepted your join-group apply");
+            break;
+        case WIZ_USER_MSG_TYPE_LIKE:
+            return QObject::tr("Note like");
+            break;
+        case WIZ_USER_MSG_TYPE_SYSTEM:
+            return QObject::tr("System");
             break;
         }
         return QObject::tr("Unknown meesage type");
@@ -342,8 +354,7 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
-    if (msg.nDeleteStatus == 1) {
-//        qDebug() << "[Message]Deleted message would not be displayed : " << msg.title;
+    if (msg.nDeleteStatus == 1 || msg.nMessageType > 100) {
         return;
     }
 
@@ -862,8 +873,8 @@ void WizMessageListTitleBar::setUnreadMode(bool unread, int unreadCount)
     m_bUnreadMode = unread;
     m_nUnreadCount = unreadCount;
     m_msgListHintLabel->setText(unread ? tr("Unread messages") : tr("All messages"));
-    m_msgListMarkAllBtn->setVisible(unreadCount > 0);
-    if (m_bUnreadMode || (unreadCount > 0))
+    m_msgListMarkAllBtn->setVisible(unread);
+    if (m_bUnreadMode)
     {
         layout()->setContentsMargins(2, 0, 6, 0);
 
@@ -968,6 +979,7 @@ void WizMessageListTitleBar::showTipsWidget()
         return;
 
     CWizTipsWidget* tipWidget = new CWizTipsWidget(MESSAGELISTTITLEBARTIPSCHECKED, this);
+    connect(m_msgListMarkAllBtn, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
     tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
     tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
     tipWidget->setSizeHint(QSize(280, 60));
@@ -978,6 +990,7 @@ void WizMessageListTitleBar::showTipsWidget()
             mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");
         }
     });
+    tipWidget->addToTipListManager(m_msgListMarkAllBtn, -6, 2);
     //
 }
 

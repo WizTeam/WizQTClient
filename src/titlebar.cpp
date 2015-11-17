@@ -21,7 +21,7 @@
 
 #include <coreplugin/icore.h>
 
-#include "core/wizTagBar.h"
+#include "widgets/wizTagBar.h"
 #include "titleedit.h"
 #include "cellbutton.h"
 #include "infobar.h"
@@ -526,6 +526,7 @@ void TitleBar::showCoachingTips()
             return;
 
         CWizTipsWidget* widget = new CWizTipsWidget(TITLEBARTIPSCHECKED, this);
+        connect(m_editBtn, SIGNAL(clicked(bool)), widget, SLOT(onTargetWidgetClicked()));
         widget->setAttribute(Qt::WA_DeleteOnClose, true);
         widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
                                                          "edited and markdown note can be redered."));

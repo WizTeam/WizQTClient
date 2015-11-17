@@ -2335,6 +2335,7 @@ void EditorToolBar::showCoachingTips()
             return;
 
         CWizTipsWidget* tipWidget = new CWizTipsWidget(EDITORTOOLBARTIPSCHECKED, this);
+        connect(m_btnShowExtra, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
         tipWidget->setSizeHint(QSize(280, 60));
