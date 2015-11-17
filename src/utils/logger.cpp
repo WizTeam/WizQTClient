@@ -69,7 +69,7 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 //#endif
 //    if (saveLog)
 //    {
-        logger()->saveToLogFile(msg);
+//        logger()->saveToLogFile(msg);
         logger()->addToBuffer(msg);
 //    }
 
@@ -115,16 +115,21 @@ QString Logger::msg2LogMsg(const QString& strMsg)
 
 void Logger::saveToLogFile(const QString& strMsg)
 {
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+
     QFile f(logFileName());
-    f.open(QIODevice::Append | QIODevice::Text);
-    try
+    if (f.open(QIODevice::Append | QIODevice::Text))
     {
-        f.write(msg2LogMsg(strMsg).toUtf8());
+        try
+        {
+            f.write(msg2LogMsg(strMsg).toUtf8());
+        }
+        catch(...)
+        {
+        }
+        f.close();
     }
-    catch(...)
-    {
-    }
-    f.close();
 }
 
 void Logger::addToBuffer(const QString& strMsg)
@@ -157,8 +162,7 @@ Logger* Logger::logger()
 
 void Logger::writeLog(const QString& strMsg)
 {
-//    qDebug() << strMsg;
-    logger()->saveToLogFile(strMsg);
+//    logger()->saveToLogFile(strMsg);
     logger()->addToBuffer(strMsg);
 
     fprintf(stderr, "[INFO] %s\n", strMsg.toUtf8().constData());
@@ -177,10 +181,10 @@ CWizInfo::~CWizInfo()
         if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
             stream->buffer.chop(1);
         if (stream->message_output) {
-//            qt_message_output(stream->type,
-//                              stream->context,
-//                              stream->buffer);
-            Utils::Logger::logger()->writeLog(stream->buffer);
+            qt_message_output(stream->type,
+                              stream->context,
+                              stream->buffer);
+//            Utils::Logger::logger()->writeLog(stream->buffer);
         }
         delete stream;
     }
