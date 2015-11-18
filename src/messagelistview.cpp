@@ -44,6 +44,54 @@
 #include "wizCategoryViewItem.h"
 #include "wizmainwindow.h"
 
+QString processMssageTitle(CWizDatabaseManager& dbMgr, const WIZMESSAGEDATA& data)
+{
+    if (data.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP && !data.kbGUID.isEmpty())
+    {
+        WIZGROUPDATA group;
+        if (!dbMgr.db().GetGroupData(data.kbGUID, group))
+            return data.title;
+        return QObject::tr("%1 applied to jion the group \" %2 \"").
+                arg(data.senderAlias.isEmpty() ? data.senderId : data.senderAlias).
+                arg(group.strGroupName);
+    }
+    else if (data.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP && !data.kbGUID.isEmpty())
+    {
+        WIZGROUPDATA group;
+        if (!dbMgr.db().GetGroupData(data.kbGUID, group))
+            return data.title;
+
+        return QObject::tr("%1 has agreed you to join the group \" %2 \"").
+                arg(data.senderAlias.isEmpty() ? data.senderId : data.senderAlias).
+                arg(group.strGroupName);
+    }
+
+    return data.title;
+}
+
+QString senderText(const WIZMESSAGEDATA& msg)
+{
+    if (msg.nMessageType == WIZ_USER_MSG_TYPE_SYSTEM)
+    {
+        return QObject::tr("System message");
+    }
+    else if (msg.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP)
+    {
+        return QObject::tr("Verification message");
+    }
+    else if (msg.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP)
+    {
+        return QObject::tr("Verified message");
+    }
+
+    return msg.senderAlias.isEmpty() ? msg.senderId : msg.senderAlias;
+}
+
+QString bodyText(const WIZMESSAGEDATA& msg)
+{
+    return msg.title.isEmpty() ? msg.messageBody : msg.title;
+}
+
 namespace WizService {
 namespace Internal {
 
@@ -159,20 +207,22 @@ public:
             return QObject::tr("reply your comment");
             break;
         case WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP:
-            return QObject::tr("applied to join group");
+            return QString();
             break;
         case WIZ_USER_MSG_TYPE_ADDED_TO_GROUP:
-            return QObject::tr("accepted your join-group apply");
+            return QString();
             break;
         case WIZ_USER_MSG_TYPE_LIKE:
-            return QObject::tr("Note like");
+            return QObject::tr("like you note");
             break;
         case WIZ_USER_MSG_TYPE_SYSTEM:
-            return QObject::tr("System");
+            return QString();
             break;
         }
-        return QObject::tr("Unknown meesage type");
+        return QObject::tr("unknown meesage type");
     }
+
+
 
     void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
     {     
@@ -200,19 +250,17 @@ public:
         f.setPixelSize(12);
         p->save();        
         p->setPen(QColor("#535353"));
-        QString strSender = m_data.senderAlias.isEmpty() ?
-                    (m_data.nMessageType == WIZ_USER_MSG_TYPE_SYSTEM ? QObject::tr("System message") : m_data.senderId) :
-                    m_data.senderAlias;
+        QString strSender = senderText(m_data);
         QRect  rectSender = rcd;
         rectSender.setLeft(rectAvatar.right() + nAvatarRightMargin);
         rectSender.setTop(vopt->rect.top() + 24);
         rectSender = Utils::StyleHelper::drawText(p, rectSender, strSender, 1,
                                                   Qt::AlignVCenter | Qt::AlignLeft, p->pen().color(), f);
 
-        if (m_data.nMessageType != WIZ_USER_MSG_TYPE_SYSTEM)
+        QString strType = descriptionOfMessageType(m_data.nMessageType);
+        if (!strType.isEmpty())
         {
             QColor messageTextColor("#A7A7A7");
-            QString strType = descriptionOfMessageType(m_data.nMessageType);
             QRect rectType = rcd;
             rectType.setLeft(rectSender.right());
             rectType.setTop(vopt->rect.top() + 25);
@@ -231,7 +279,7 @@ public:
         QRect rcTitle(rectAvatar.right() + nAvatarRightMargin, rectSender.bottom(), vopt->rect.right() - 12 - rectAvatar.right() - 16,
                       vopt->rect.bottom() - rectSender.bottom());
         f.setPixelSize(14);
-        QString strTitle(m_data.title.isEmpty() ? m_data.messageBody : m_data.title);
+        QString strTitle = bodyText(m_data);
         Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignTop, p->pen().color(), f);
 
         p->restore();
@@ -376,7 +424,10 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
         return;
     }
 
-    MessageListViewItem* pItem = new MessageListViewItem(msg);
+    WIZMESSAGEDATA msgData = msg;
+    msgData.title = processMssageTitle(m_dbMgr, msgData);
+
+    MessageListViewItem* pItem = new MessageListViewItem(msgData);
 
     int nHeight = Utils::StyleHelper::messageViewItemHeight();
     pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
