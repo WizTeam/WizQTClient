@@ -1535,17 +1535,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             && !it.strDocumentGUID.isEmpty())
         {
             CWizStdStringArray& documents = mapKbGUIDDocuments[it.strKbGUID];
-            documents.push_back(it.strDocumentGUID);
-
-            if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
-            {
-                QList<QVariant> paramList;
-                paramList.append(wizBubbleMessageCenter);
-                paramList.append(it.nMessageID);
-                paramList.append(QObject::tr("New Message"));
-                paramList.append(it.strMessageText);
-                pEvents->OnBubbleNotification(paramList);
-            }
+            documents.push_back(it.strDocumentGUID);            
         }
     }
     //
@@ -1628,28 +1618,24 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         pDatabase->CloseGroupDatabase(pGroupDatabase);
     }
     //
-    ////
-//    int count = int(arrayMessage.size());
-//    for (int i = count - 1; i >= 0; i--)
-//    {
-//        const WIZUSERMESSAGEDATA& data = arrayMessage[i];
-//        if (data.strKbGUID.isEmpty())
-//            continue;
-//        if (data.strDocumentGUID.isEmpty())
-//            continue;
-//        /*
-//        ////判断对应的笔记是否被下载了（如果没有，说明服务器已经没有这个笔记了，无法显示这个消息）////
-//        */
-//        if (setDownloadedDocumentGUID.find(data.strDocumentGUID) != setDownloadedDocumentGUID.end())
-//            continue;
-//        //
-//        arrayMessage.erase(arrayMessage.begin() + i);
-//    }
-    //
     __int64 nNewVersion = CWizKMSync::GetObjectsVersion<WIZUSERMESSAGEDATA>(nOldVersion, arrayMessage);
     //
     pDatabase->OnDownloadMessages(arrayMessage);
     pDatabase->SetObjectVersion(_T("Messages"), nNewVersion);
+
+    for (WIZUSERMESSAGEDATA it : arrayMessage)
+    {
+        if (it.nReadStatus == 0 && it.nDeletedStatus == 0)
+        {
+            QList<QVariant> paramList;
+            paramList.append(wizBubbleMessageCenter);
+            paramList.append(it.nMessageID);
+            paramList.append(QObject::tr("New Message"));
+            paramList.append(it.strMessageText);
+            pEvents->OnBubbleNotification(paramList);
+        }
+    }
+
     //
     return TRUE;
 }
