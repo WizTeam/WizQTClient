@@ -47,6 +47,8 @@
 namespace WizService {
 namespace Internal {
 
+const QString ALLMENBERS = QObject::tr("All Members");
+
 class MessageListViewItem : public QListWidgetItem
 {
 public:
@@ -911,7 +913,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     layoutActions->setSpacing(0);
 
     m_labelCurrentSender = new WizClickableLabel(this);
-    m_labelCurrentSender->setText(tr("All Users"));
+    m_labelCurrentSender->setText(ALLMENBERS);
     m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     m_labelCurrentSender->setFixedWidth(102);
     m_labelCurrentSender->setStyleSheet(QString("padding-left:7px; padding-top:2px; "
@@ -1233,7 +1235,7 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
     }
 
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
-    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(tr("All members"), "", pix, m_userList);
+    WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(ALLMENBERS, "", pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 22));
     m_userList->addItem(selectorItem);
 
