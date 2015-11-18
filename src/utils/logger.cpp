@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QTextStream>
+#include <iostream>
+#include <fstream>
 #include "misc.h"
 #include "pathresolve.h"
 
@@ -62,16 +64,16 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         return;
 #endif
 
-//    bool saveLog = true;
-//#ifndef QT_DEBUG
-//    if (type == QtDebugMsg)
-//        saveLog = false;
-//#endif
-//    if (saveLog)
-//    {
-//        logger()->saveToLogFile(msg);
+    bool saveLog = true;
+#ifndef QT_DEBUG
+    if (type == QtDebugMsg)
+        saveLog = false;
+#endif
+    if (saveLog)
+    {
+        logger()->saveToLogFile(msg);
         logger()->addToBuffer(msg);
-//    }
+    }
 
     switch (type) {
     case QtDebugMsg:
@@ -118,18 +120,10 @@ void Logger::saveToLogFile(const QString& strMsg)
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
 
-    QFile f(logFileName());
-    if (f.open(QIODevice::Append | QIODevice::Text))
-    {
-        try
-        {
-            f.write(msg2LogMsg(strMsg).toUtf8());
-        }
-        catch(...)
-        {
-        }
-        f.close();
-    }
+    std::ofstream logFile;
+    logFile.open(logFileName().toUtf8().constData(), std::ios::out | std::ios::app);
+    logFile << strMsg.toUtf8().constData() << std::endl;
+    logFile.close();
 }
 
 void Logger::addToBuffer(const QString& strMsg)
@@ -162,7 +156,7 @@ Logger* Logger::logger()
 
 void Logger::writeLog(const QString& strMsg)
 {
-//    logger()->saveToLogFile(strMsg);
+    logger()->saveToLogFile(strMsg);
     logger()->addToBuffer(strMsg);
 
     fprintf(stderr, "[INFO] %s\n", strMsg.toUtf8().constData());
