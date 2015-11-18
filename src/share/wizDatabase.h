@@ -216,7 +216,6 @@ public:
 
     virtual bool IsGroup();
     virtual bool HasBiz();
-    bool IsVip();
 
     virtual bool IsGroupAdmin();
     virtual bool IsGroupSuper();

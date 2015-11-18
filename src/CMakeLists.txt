@@ -188,6 +188,7 @@ set(wiznote_SOURCES
     widgets/wizTipsWidget.cpp
     widgets/wizSingleDocumentView.cpp
     mac/wizSearchWidget_mm.cpp
+    core/wizAccountManager.cpp
 )
 
 set(wiznote_HEADERS
@@ -358,6 +359,7 @@ set(wiznote_HEADERS
     widgets/wizTipsWidget.cpp
     widgets/wizSingleDocumentView.h
     wizPositionDelegate.h
+    core/wizAccountManager.h
 )
 
 set(wiznote_FORMS
