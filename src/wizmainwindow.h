@@ -509,6 +509,8 @@ private:
     void showCommentWidget();
 
     //
+    CWizDocumentWebView* getActiveEditor();
+    //
     void showDocumentList();
     void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);

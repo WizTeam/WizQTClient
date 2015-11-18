@@ -1008,7 +1008,7 @@ void MainWindow::on_editor_statusChanged()
 #ifdef USEWEBENGINE
     CWizDocumentWebEngine* editor = m_doc->web();
 #else
-    CWizDocumentWebView* editor = m_doc->web();
+    CWizDocumentWebView* editor = getActiveEditor();
 #endif
 
     if (!editor->isInited() || !editor->hasFocus()) {
@@ -2509,14 +2509,14 @@ void MainWindow::on_actionEditingUndo_triggered()
 {    
     WizGetAnalyzer().LogAction("MenuBarUndo");
 
-    m_doc->web()->undo();
+    getActiveEditor()->undo();
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarRedo");
 
-    m_doc->web()->redo();
+    getActiveEditor()->redo();
 }
 
 #ifdef USEWEBENGINE
@@ -2577,37 +2577,37 @@ void MainWindow::on_actionEditingCut_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarCut");
 
-    m_doc->web()->triggerPageAction(QWebPage::Cut);
+    getActiveEditor()->triggerPageAction(QWebPage::Cut);
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarCopy");
 
-    m_doc->web()->triggerPageAction(QWebPage::Copy);
+    getActiveEditor()->triggerPageAction(QWebPage::Copy);
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPaste");
 
-    m_doc->web()->setPastePlainTextEnable(false);
-    m_doc->web()->triggerPageAction(QWebPage::Paste);
+    getActiveEditor()->setPastePlainTextEnable(false);
+    getActiveEditor()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPastePlain");
 
-    m_doc->web()->setPastePlainTextEnable(true);
-    m_doc->web()->triggerPageAction(QWebPage::Paste);
+    getActiveEditor()->setPastePlainTextEnable(true);
+    getActiveEditor()->triggerPageAction(QWebPage::Paste);
 }
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarSelectAll");
 
-    m_doc->web()->triggerPageAction(QWebPage::SelectAll);
+    getActiveEditor()->triggerPageAction(QWebPage::SelectAll);
 }
 #endif
 
@@ -2876,145 +2876,145 @@ void MainWindow::on_messageSelector_senderSelected(QString userGUID)
 void MainWindow::on_actionFormatJustifyLeft_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyLeft");
-    m_doc->web()->editorCommandExecuteJustifyLeft();
+    getActiveEditor()->editorCommandExecuteJustifyLeft();
 }
 
 void MainWindow::on_actionFormatJustifyRight_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyRight");
-    m_doc->web()->editorCommandExecuteJustifyRight();
+    getActiveEditor()->editorCommandExecuteJustifyRight();
 }
 
 void MainWindow::on_actionFormatJustifyCenter_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyCenter");
-    m_doc->web()->editorCommandExecuteJustifyCenter();
+    getActiveEditor()->editorCommandExecuteJustifyCenter();
 }
 
 void MainWindow::on_actionFormatJustifyJustify_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyJustify");
-    m_doc->web()->editorCommandExecuteJustifyJustify();
+    getActiveEditor()->editorCommandExecuteJustifyJustify();
 }
 
 void MainWindow::on_actionFormatInsertOrderedList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarOrderedList");
-    m_doc->web()->editorCommandExecuteInsertOrderedList();
+    getActiveEditor()->editorCommandExecuteInsertOrderedList();
 }
 
 void MainWindow::on_actionFormatInsertUnorderedList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnorderedList");
-    m_doc->web()->editorCommandExecuteInsertUnorderedList();
+    getActiveEditor()->editorCommandExecuteInsertUnorderedList();
 }
 
 void MainWindow::on_actionFormatInsertTable_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnorderedList");
-    m_doc->web()->editorCommandExecuteTableInsert();
+    getActiveEditor()->editorCommandExecuteTableInsert();
 }
 
 void MainWindow::on_actionFormatInsertLink_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertLink");
-    m_doc->web()->editorCommandExecuteLinkInsert();
+    getActiveEditor()->editorCommandExecuteLinkInsert();
 }
 
 void MainWindow::on_actionFormatBold_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarBold");
-    m_doc->web()->editorCommandExecuteBold();
+    getActiveEditor()->editorCommandExecuteBold();
 }
 
 void MainWindow::on_actionFormatItalic_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarItalic");
-    m_doc->web()->editorCommandExecuteItalic();
+    getActiveEditor()->editorCommandExecuteItalic();
 }
 
 void MainWindow::on_actionFormatUnderLine_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnderLine");
-    m_doc->web()->editorCommandExecuteUnderLine();
+    getActiveEditor()->editorCommandExecuteUnderLine();
 }
 
 void MainWindow::on_actionFormatStrikeThrough_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarStrikeThrough");
-    m_doc->web()->editorCommandExecuteStrikeThrough();
+    getActiveEditor()->editorCommandExecuteStrikeThrough();
 }
 
 void MainWindow::on_actionFormatInsertHorizontal_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertHorizontal");
-    m_doc->web()->editorCommandExecuteInsertHorizontal();
+    getActiveEditor()->editorCommandExecuteInsertHorizontal();
 }
 
 void MainWindow::on_actionFormatInsertDate_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertDate");
-    m_doc->web()->editorCommandExecuteInsertDate();
+    getActiveEditor()->editorCommandExecuteInsertDate();
 }
 
 void MainWindow::on_actionFormatInsertTime_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertTime");
-    m_doc->web()->editorCommandExecuteInsertTime();
+    getActiveEditor()->editorCommandExecuteInsertTime();
 }
 
 void MainWindow::on_actionFormatIndent_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarIndent");
-    m_doc->web()->editorCommandExecuteIndent();
+    getActiveEditor()->editorCommandExecuteIndent();
 }
 
 void MainWindow::on_actionFormatOutdent_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarOutdent");
-    m_doc->web()->editorCommandExecuteOutdent();
+    getActiveEditor()->editorCommandExecuteOutdent();
 }
 
 void MainWindow::on_actionFormatRemoveFormat_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarRemoveFormat");
-    m_doc->web()->editorCommandExecuteRemoveFormat();
+    getActiveEditor()->editorCommandExecuteRemoveFormat();
 }
 
 void MainWindow::on_actionFormatPlainText_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPlainText");
-    m_doc->web()->editorCommandExecutePlainText();
+    getActiveEditor()->editorCommandExecutePlainText();
 }
 
 void MainWindow::on_actionEditorViewSource_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarViewSource");
-    m_doc->web()->editorCommandExecuteViewSource();
+    getActiveEditor()->editorCommandExecuteViewSource();
 }
 
 void MainWindow::on_actionFormatInsertCheckList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertCheckList");
-    m_doc->web()->editorCommandExecuteInsertCheckList();
+    getActiveEditor()->editorCommandExecuteInsertCheckList();
 }
 
 void MainWindow::on_actionFormatInsertCode_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertCode");
-    m_doc->web()->editorCommandExecuteInsertCode();
+    getActiveEditor()->editorCommandExecuteInsertCode();
 }
 
 void MainWindow::on_actionFormatInsertImage_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertImage");
-    m_doc->web()->editorCommandExecuteInsertImage();
+    getActiveEditor()->editorCommandExecuteInsertImage();
 }
 
 void MainWindow::on_actionFormatScreenShot_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarScreenShot");
-    m_doc->web()->editorCommandExecuteScreenShot();
+    getActiveEditor()->editorCommandExecuteScreenShot();
 }
 
 void MainWindow::on_actionConsole_triggered()
@@ -3159,22 +3159,22 @@ void MainWindow::on_actionAddCustomSearch_triggered()
 
 void MainWindow::on_actionFindReplace_triggered()
 {    
-    m_doc->web()->editorCommandExecuteFindReplace();
+    getActiveEditor()->editorCommandExecuteFindReplace();
     WizGetAnalyzer().LogAction("MenuBarFindReplace");
 }
 
 void MainWindow::on_actionSaveAsPDF_triggered()
 {
-    if (m_doc->web())
+    if (CWizDocumentWebView* editor = getActiveEditor())
     {
-        m_doc->web()->saveAsPDF();
+        editor->saveAsPDF();
     }
     WizGetAnalyzer().LogAction("MenuBarSaveAsPDF");
 }
 
 void MainWindow::on_actionSaveAsHtml_triggered()
 {
-    if (m_doc->web())
+    if (CWizDocumentWebView* editor = getActiveEditor())
     {
         QString strPath = QFileDialog::getExistingDirectory(0, tr("Open Directory"),
                                                            QDir::homePath(),
@@ -3182,7 +3182,7 @@ void MainWindow::on_actionSaveAsHtml_triggered()
                                                             | QFileDialog::DontResolveSymlinks);
         if (!strPath.isEmpty())
         {
-            m_doc->web()->saveAsHtml(strPath + "/");
+            editor->saveAsHtml(strPath + "/");
         }
     }
     WizGetAnalyzer().LogAction("MenuBarSaveAsHtml");
@@ -3199,7 +3199,7 @@ void MainWindow::on_actionImportFile_triggered()
 
 void MainWindow::on_actionPrint_triggered()
 {
-    m_doc->web()->printDocument();
+    getActiveEditor()->printDocument();
     WizGetAnalyzer().LogAction("MenuBarPrint");
 }
 
@@ -4113,6 +4113,21 @@ void MainWindow::showCommentWidget()
             }
         }
     }
+}
+
+CWizDocumentWebView*MainWindow::getActiveEditor()
+{
+    CWizDocumentWebView* editor = m_doc->web();
+    QWidget* activeWgt = qApp->activeWindow();
+    if (activeWgt != this)
+    {
+        if (CWizSingleDocumentViewer* singleViewer = dynamic_cast<CWizSingleDocumentViewer*>(activeWgt))
+        {
+            editor = singleViewer->docView()->web();
+        }
+    }
+
+    return editor;
 }
 
 void MainWindow::showDocumentList()

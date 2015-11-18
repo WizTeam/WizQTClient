@@ -212,6 +212,8 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
         connect(this, SIGNAL(documentChanged(QString,CWizDocumentView*)), docView, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
         connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
                 mainWindow, SLOT(on_shareDocumentByLink_request(QString,QString)));
+        connect(docView->web(), SIGNAL(statusChanged()), mainWindow,
+                SLOT(on_editor_statusChanged()));
         connect(wgt, SIGNAL(documentViewerDeleted(QString)), SLOT(onDocumentViewerDeleted(QString)));
         static int nOffset = 0;
         wgt->setGeometry((mainWindow->width() - mainWindow->documentView()->width())  / 2 + nOffset,
