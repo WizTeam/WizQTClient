@@ -647,6 +647,7 @@ const int WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP = 40;
 const int WIZ_USER_MSG_TYPE_ADDED_TO_GROUP = 50;
 const int WIZ_USER_MSG_TYPE_LIKE = 60;
 const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
+const int WIZ_USER_MSG_TYPE_MAX = 100;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
 struct WIZUSERMESSAGEDATA
 {
@@ -695,6 +696,8 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "messages"; }
+
+    bool isAd();
 
     enum LocalChanged{
         localChanged_None = 0x0000,

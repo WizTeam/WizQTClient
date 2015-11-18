@@ -3,6 +3,7 @@
 #include "wizxmlrpc.h"
 #include "wizmisc.h"
 #include "utils/logger.h"
+#include "rapidjson/document.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
@@ -857,6 +858,29 @@ bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetInt64("version", nVersion);
 
     return true;
+}
+
+bool WIZMESSAGEDATA::isAd()
+{
+    if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM)
+        return false;
+
+    rapidjson::Document d;
+    d.Parse<0>(note.toUtf8().constData());
+
+    if (d.HasParseError())
+    {
+        qWarning() << "parse message note data error : " << d.GetParseError();
+    }
+
+    if (!d.FindMember("type"))
+        return false;
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QTextDecoder* encoder = codec->makeDecoder();
+    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
+
+    return type == "ad";
 }
 
 /* ---------------------------- WIZKVRETURN ---------------------------- */
