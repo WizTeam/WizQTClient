@@ -599,6 +599,7 @@ bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64
         data.strReceiver = getStringFromRapidValue(u, "receiver_alias");
         data.strSender = getStringFromRapidValue(u, "sender_alias");
         data.strTitle = getStringFromRapidValue(u, "title");
+        data.strNote = getStringFromRapidValue(u, "note");
         //
         data.nMessageType = u["message_type"].GetInt();
         data.nReadStatus = u["read_status"].GetInt();
