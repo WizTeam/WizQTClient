@@ -53,7 +53,7 @@ class CWizAnimateAction : public QObject
     Q_OBJECT
 
 public:
-    CWizAnimateAction(CWizExplorerApp& app, QObject* parent);
+    CWizAnimateAction(QObject* parent);
     void setAction(QAction* action);
     void setToolButton(QToolButton* button);
     void setSingleIcons(const QString& strIconBaseName);
@@ -62,8 +62,7 @@ public:
     void stopPlay();
     bool isPlaying();
 
-private:
-    CWizExplorerApp& m_app;
+private:    
     CWizAnimateContainerBase* m_target;
     int m_nIconIndex;
     QIcon m_iconDefault;

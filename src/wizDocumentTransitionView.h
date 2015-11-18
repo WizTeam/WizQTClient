@@ -4,6 +4,8 @@
 #include <QWidget>
 
 class QLabel;
+class CWizAnimateAction;
+class QToolButton;
 
 class CWizDocumentTransitionView : public QWidget
 {
@@ -23,10 +25,15 @@ public:
 public slots:
     void onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded);
 
+protected:
+    void hideEvent(QHideEvent* ev);
+
 private:
     QLabel* m_labelHint;
     int m_mode;
     QString m_objGUID;
+    CWizAnimateAction* m_animation;
+    QToolButton* m_toolButton;
 };
 
 #endif // WIZDOCUMENTTRANSITIONVIEW_H
