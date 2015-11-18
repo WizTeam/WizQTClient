@@ -13,29 +13,36 @@
 #include <QDebug>
 #include <QApplication>
 #include <QTextCodec>
+#include <QtConcurrent>
 
 #include <extensionsystem/pluginmanager.h>
+
+#include "rapidjson/document.h"
 
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "sync/avatar.h"
 #include "sync/asyncapi.h"
-#include "widgets/wizImageButton.h"
+#include "sync/apientry.h"
+#include "sync/token.h"
+
+#include "coreplugin/itreeview.h"
 
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
-#include "wiznotestyle.h"
+#include "share/wizsettings.h"
 #include "widgets/wizScrollBar.h"
+#include "widgets/wizImageButton.h"
+#include "widgets/wizTipsWidget.h"
 
+#include "core/wizAccountManager.h"
+
+#include "wiznotestyle.h"
 #include "wizCategoryView.h"
 #include "wizCategoryViewItem.h"
-#include "coreplugin/itreeview.h"
-#include "utils/misc.h"
 #include "wizmainwindow.h"
-#include "widgets/wizTipsWidget.h"
-#include "share/wizsettings.h"
 
 namespace WizService {
 namespace Internal {
@@ -315,7 +322,10 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_itemDoubleClicked(QListWidgetItem*)));
 
-    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));    
+    connect(this, SIGNAL(itemSelectionChanged()),
+            SLOT(on_itemSelectionChanged()));
+
+    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
 }
 
 void MessageListView::resizeEvent(QResizeEvent* event)
@@ -359,7 +369,8 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 
 void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
-    if (msg.nDeleteStatus == 1 || msg.nMessageType > 100) {
+    if (msg.nDeleteStatus == 1 || msg.nMessageType > WIZ_USERGROUP_MAX)
+    {
         return;
     }
 
@@ -370,7 +381,8 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 
     addItem(pItem);
 
-    if (sort) {
+    if (sort)
+    {
         sortItems();
     }
 
@@ -727,6 +739,73 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     }
 
     updateTreeItem();
+}
+
+void MessageListView::on_itemSelectionChanged()
+{
+    QList<WIZMESSAGEDATA> listMsg;
+    selectedMessages(listMsg);
+
+    if (listMsg.size() == 1)
+    {
+        WIZMESSAGEDATA msgData;
+        m_dbMgr.db().messageFromId(listMsg[0].nId, msgData);
+
+        if (msgData.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
+                msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+        {
+            emit viewMessageRequest(msgData);
+        }
+        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+                 || msgData.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP)
+        {
+            QtConcurrent::run([msgData]() {
+                QString command = QString("message_%1").arg(msgData.nMessageType);
+                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);
+                qDebug() << "message url : " << strUrl;
+                strUrl.replace("{token}", WizService::Token::token());
+                strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
+                strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
+                strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
+                strUrl.replace("{sender_guid}", msgData.senderGUID.isEmpty() ? "{sender_guid}" : msgData.senderGUID);
+                strUrl.replace("{receiver_guid}", msgData.receiverGUID.isEmpty() ? "{receiver_guid}" : msgData.receiverGUID);
+                strUrl.replace("{sender_id}", msgData.senderGUID.isEmpty() ? "{sender_id}" : msgData.senderGUID);
+                strUrl.replace("{receiver_id}", msgData.receiverGUID.isEmpty() ? "{receiver_id}" : msgData.receiverGUID);
+
+                QDesktopServices::openUrl(strUrl);
+            });
+        }
+        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_SYSTEM && !msgData.note.isEmpty())
+        {
+            if (msgData.isAd())
+            {
+                CWizAccountManager account(m_dbMgr);
+                if (account.isPaidUser())
+                    return;
+            }
+            rapidjson::Document d;
+            d.Parse<0>(msgData.note.toUtf8().constData());
+
+            if (d.HasParseError() || !d.FindMember("link")) {
+                qDebug() << "Error occured when try to parse json of messages : " << msgData.note;
+                return;
+            }
+
+            QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+            QTextDecoder* encoder = codec->makeDecoder();
+            const rapidjson::Value& u = d["link"];
+            QString str = encoder->toUnicode(u.GetString(), u.GetStringLength());
+            QtConcurrent::run([str]() {
+                QString link = str;
+                if (link.contains("{token}"))
+                {
+                    link.replace("{token}", WizService::Token::token());
+                }
+                QDesktopServices::openUrl(link);
+            });
+        }
+    }
+    viewport()->update();
 }
 
 void MessageListView::on_itemDoubleClicked(QListWidgetItem* item)

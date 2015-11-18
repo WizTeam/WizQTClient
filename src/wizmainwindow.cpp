@@ -17,7 +17,6 @@
 #include <QPrinter>
 #include <QWebFrame>
 #include <QCheckBox>
-#include <QtConcurrent>
 
 #ifdef Q_OS_MAC
 #include <Carbon/Carbon.h>
@@ -97,6 +96,7 @@
 #include "widgets/wizCustomToolBar.h"
 #include "widgets/wizTipsWidget.h"
 #include "wizPositionDelegate.h"
+#include "core/wizAccountManager.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -676,6 +676,31 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
     CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
     showMessageList(pItem);
     m_msgList->selectMessage(messageID);
+}
+
+void MainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
+{
+    WIZDOCUMENTDATA doc;
+    if ((msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE) &&
+            !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc))
+    {
+        m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
+        return;
+    }
+
+    if (msg.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
+            msg.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
+            msg.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
+    {
+        //  show comments
+        showCommentWidget();
+        viewDocument(doc, true);
+    }
+    else if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
+             msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+    {
+        viewDocument(doc, true);
+    }
 }
 
 void MainWindow::on_dockMenuAction_triggered()
@@ -1500,7 +1525,8 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
 
 void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
 {
-    if (!m_dbMgr.db().IsVip())
+    CWizAccountManager account(m_dbMgr);
+    if (!account.isVip())
     {
         openVipPageInWebBrowser();
         return;
@@ -2312,7 +2338,7 @@ void MainWindow::init()
     connect(m_category, SIGNAL(unreadButtonClicked()), SLOT(on_categoryUnreadButton_triggered()));
     m_category->init();
 
-    connect(m_msgList, SIGNAL(itemSelectionChanged()), SLOT(on_message_itemSelectionChanged()));
+    connect(m_msgList, SIGNAL(viewMessageRequest(WIZMESSAGEDATA)), SLOT(on_viewMessage_request(WIZMESSAGEDATA)));
     connect(m_msgList, SIGNAL(loacteDocumetRequest(QString,QString)), SLOT(locateDocument(QString,QString)));
     connect(m_msgList, SIGNAL(viewNoteInSparateWindowRequest(WIZDOCUMENTDATA)),
             SLOT(viewNoteInSeparateWindow(WIZDOCUMENTDATA)));
@@ -3432,63 +3458,6 @@ void MainWindow::on_documents_itemDoubleClicked(QListWidgetItem* item)
             resortDocListAfterViewDocument(doc);
         }
     }
-}
-
-void MainWindow::on_message_itemSelectionChanged()
-{
-    QList<WIZMESSAGEDATA> listMsg;
-    m_msgList->selectedMessages(listMsg);
-
-    if (listMsg.size() == 1)
-    {
-        WIZMESSAGEDATA msg(listMsg[0]);
-        WIZDOCUMENTDATA doc;
-        if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP &&
-                !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc))
-        {
-            m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
-            return;
-        }
-
-        //  show comments
-        WIZMESSAGEDATA msgData;
-        m_dbMgr.db().messageFromId(msg.nId, msgData);
-
-        if (msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT ||
-                msgData.nMessageType == WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT||
-                msgData.nMessageType == WIZ_USER_MSG_TYPE_COMMENT_REPLY)
-        {
-            showCommentWidget();
-            viewDocument(doc, true);
-        }
-        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
-                 || msgData.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP)
-        {
-            QtConcurrent::run([this, msgData](){
-                QString command = QString("message_%1").arg(msgData.nMessageType);
-                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);
-                qDebug() << "message url : " << strUrl;
-                strUrl.replace("{token}", WizService::Token::token());
-                strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
-                strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
-                strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
-                strUrl.replace("{sender_guid}", msgData.senderGUID.isEmpty() ? "{sender_guid}" : msgData.senderGUID);
-                strUrl.replace("{receiver_guid}", msgData.receiverGUID.isEmpty() ? "{receiver_guid}" : msgData.receiverGUID);
-                strUrl.replace("{sender_id}", msgData.senderGUID.isEmpty() ? "{sender_id}" : msgData.senderGUID);
-                strUrl.replace("{receiver_id}", msgData.receiverGUID.isEmpty() ? "{receiver_id}" : msgData.receiverGUID);
-
-                QDesktopServices::openUrl(strUrl);
-            });
-        }
-        else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
-        {
-            viewDocument(doc, true);
-        }
-
-
-
-    }
-    m_msgList->viewport()->update();
 }
 
 void MainWindow::on_options_settingsChanged(WizOptionsType type)

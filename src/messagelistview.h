@@ -221,6 +221,7 @@ Q_SIGNALS:
     void sizeChanged(int nCount);
     void loacteDocumetRequest(const QString strKbGuid, const QString strGuid);
     void viewNoteInSparateWindowRequest(const WIZDOCUMENTDATA& doc);
+    void viewMessageRequest(const WIZMESSAGEDATA& msg);
 
 private Q_SLOTS:
     void onCurrentItemChanged(QListWidgetItem* current, QListWidgetItem* previous);
@@ -239,7 +240,8 @@ private Q_SLOTS:
                              const WIZMESSAGEDATA& newMsg);
     void on_message_deleted(const WIZMESSAGEDATA& msg);
 
-    void	on_itemDoubleClicked(QListWidgetItem * item);
+    void on_itemSelectionChanged();
+    void on_itemDoubleClicked(QListWidgetItem * item);
 
     void clearRightMenuFocus();
 };

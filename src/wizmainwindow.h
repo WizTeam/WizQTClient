@@ -372,14 +372,13 @@ public Q_SLOTS:
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
     void on_documents_itemDoubleClicked(QListWidgetItem * item);
-    void on_message_itemSelectionChanged();
     void on_documents_lastDocumentDeleted();
 //    void on_documents_documentCountChanged();
 //    void on_documents_hintChanged(const QString& strHint);
     void on_btnMarkDocumentsRead_triggered();
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
-    //void on_document_contentChanged();
+    //void on_document_contentChanged();  
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
@@ -431,6 +430,7 @@ public Q_SLOTS:
     void showBubbleNotification(const QString& strTitle, const QString& strInfo);
     void showTrayIconMenu();
     void on_viewMessage_request(qint64 messageID);
+    void on_viewMessage_request(const WIZMESSAGEDATA& msg);
     //
     void on_dockMenuAction_triggered();
     //

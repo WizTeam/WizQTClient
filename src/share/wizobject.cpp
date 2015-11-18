@@ -862,7 +862,7 @@ bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 
 bool WIZMESSAGEDATA::isAd()
 {
-    if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM)
+    if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM || note.isEmpty())
         return false;
 
     rapidjson::Document d;
