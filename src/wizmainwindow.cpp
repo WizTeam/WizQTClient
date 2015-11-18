@@ -2044,6 +2044,7 @@ void MainWindow::initClient()
     m_splitter = std::make_shared<CWizSplitter>();
     layout->addWidget(m_splitter.get());
 
+    pal.setColor(QPalette::Window, Utils::StyleHelper::treeViewBackground());
     m_category->setPalette(pal);
     m_category->setAutoFillBackground(true);
 

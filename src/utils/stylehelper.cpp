@@ -252,7 +252,7 @@ int StyleHelper::treeViewItemHeight()
 
 QColor StyleHelper::treeViewBackground()
 {
-    return QColor(getValue("Category/Background", "#000000").toString());
+    return QColor(getValue("Category/Background", "#F2F0EE").toString());
 }
 
 QColor StyleHelper::treeViewItemBackground(int stat)
