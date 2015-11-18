@@ -235,7 +235,7 @@
 
 CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     : QMacCocoaViewContainer(0, parent)
-    , m_sizeHint(QSize(SEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
+    , m_sizeHint(QSize(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
 {
     // Many Cocoa objects create temporary autorelease objects,
     // so create a pool to catch them.

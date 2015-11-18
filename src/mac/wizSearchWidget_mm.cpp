@@ -63,7 +63,7 @@ public:
 WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     : QObject(parent)
     , m_editor(parent)
-    , m_popupWgtWidth(SEARCHWIDGETWIDTH)
+    , m_popupWgtWidth(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH)
     , m_usable(true)
 {
     m_popupWgt = new QWidget;
@@ -253,6 +253,9 @@ void WizSuggestCompletionon::showCompletion(const QStringList &choices, bool isR
     }
 
     QPoint bottomLeft(m_popupOffset.width(), -10); // = m_editor->geometry().bottomLeft();
+
+    if (qApp->activeWindow() == nullptr)
+        return;
 
     m_popupWgt->move(qApp->activeWindow()->mapToGlobal(bottomLeft));
     m_popupWgt->setFocus();

@@ -1884,13 +1884,13 @@ void MainWindow::initToolBar()
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(68, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
+    bool isHighPix = WizIsHighPixel();
+    m_spacerForToolButtonAdjust = new CWizMacFixedSpacer(QSize(isHighPix ? 81 : 95, 5), m_toolBar); //new CWizMacFixedSpacer(QSize(120, 5), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust, "", "");
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(20, 1), m_toolBar), "", "");     // ->addStandardItem(CWizMacToolBar::Space);
 
-    m_toolBar->addSearch(tr("Search"), "", SEARCHWIDGETWIDTH);
-    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(40, 1), m_toolBar), "", "");
-//    m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addSearch(tr("Search"), "", isHighPix ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH);
+    m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(28, 1), m_toolBar), "", "");
+
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
     CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, nullptr);
@@ -1906,7 +1906,7 @@ void MainWindow::initToolBar()
     //
     m_searchWidget = m_toolBar->getSearchWidget();
     m_searchWidget->setUserSettings(m_settings);
-    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(231, 0));
+    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(isHighPix ? 217 : 230, 0));
     #else
 
 
