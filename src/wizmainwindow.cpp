@@ -2083,10 +2083,10 @@ void MainWindow::initClient()
     bool isHighPix = WizIsHighPixel();
     m_category->setMinimumWidth(isHighPix ? 76 : 165);
     m_docListContainer->setMinimumWidth(isHighPix ? 113 : 244);
-    m_doc->web()->setMinimumWidth(576);
+    setMinimumWidth(isHighPix ? 785 : 985);
     m_doc->web()->setInSeperateWindow(false);
     m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
-    setMinimumWidth(785);
+    m_doc->web()->setMinimumWidth(576);
 
     m_doc->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px; border-radius:0px;}"
                           "QToolButton {border:0px; padding:0px; border-radius:0px;}"));
