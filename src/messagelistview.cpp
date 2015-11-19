@@ -966,7 +966,8 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     m_labelCurrentSender = new WizClickableLabel(this);
     m_labelCurrentSender->setText(ALLMENBERS);
     m_labelCurrentSender->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
-    m_labelCurrentSender->setFixedWidth(102);
+//    m_labelCurrentSender->setFixedWidth(102);
+    m_labelCurrentSender->setMaximumWidth(102);
     m_labelCurrentSender->setStyleSheet(QString("padding-left:7px; padding-top:2px; "
                                                 "padding-right:4px; font: %1px;color:#888888;")
                                         .arg(SenderNameFontSize));
@@ -1242,6 +1243,7 @@ protected:
 };
 
 const int maxSenderSelectorHeight = 378;
+const int maxSenderSelectorWidth = 126;
 WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_dbMgr(dbMgr)
@@ -1249,7 +1251,7 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
 {
     setLeftAlign(true);
     setContentsMargins(0, 0, 0, 0);
-    QSize wgtSize(126, maxSenderSelectorHeight);
+    QSize wgtSize(maxSenderSelectorWidth, maxSenderSelectorHeight);
     setWidgetSize(wgtSize);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 14, 0, 8);
@@ -1275,7 +1277,7 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
 
 QSize WizMessageSenderSelector::sizeHint() const
 {
-    return QSize(126, maxSenderSelectorHeight);
+    return QSize(maxSenderSelectorWidth, maxSenderSelectorHeight);
 }
 
 void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
