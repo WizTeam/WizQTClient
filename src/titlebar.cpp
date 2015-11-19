@@ -87,13 +87,12 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layout->setSpacing(0);
     setLayout(layout);
 
-    m_editBtn = new CellButton(CellButton::ImageOnly, this);
-    m_editBtn->setFixedHeight(nTitleHeight);
+    m_editBtn = new RoundCellButton(this);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
-    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Switch to Editing View (Alt + 1)"));
-    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Switch to Reading View (Alt + 1)"));
-    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save and switch to Reading View (Alt + 1)"));
+    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View (Alt + 1)"));
+    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Read") , tr("Switch to Reading View (Alt + 1)"));
+    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save & Read"), tr("Save and switch to Reading View (Alt + 1)"));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
 
     m_separateBtn = new CellButton(CellButton::ImageOnly, this);

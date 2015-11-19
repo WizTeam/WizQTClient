@@ -7,6 +7,7 @@
 class QSize;
 class QPaintEvent;
 class QString;
+class QPropertyAnimation;
 
 namespace Core {
 namespace Internal {
@@ -38,7 +39,7 @@ public slots:
     void setState(int state);
     void setCount(int count);
 
-private:
+protected:
     ButtonType m_buttonType;
     int m_state;
     int m_count;
@@ -53,10 +54,36 @@ private:
     //QIcon m_backgroundIcon;
 
 protected:
-    virtual void paintEvent(QPaintEvent* event);
-    virtual QSize sizeHint() const;
+    void paintEvent(QPaintEvent* event);
+    QSize sizeHint() const;
     QString countInfo() const;
 };
+
+class RoundCellButton : public CellButton
+{
+    Q_OBJECT
+public:
+    explicit RoundCellButton(QWidget* parent = 0);
+
+    void setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips);
+    void setCheckedIcon(const QIcon& icon, const QString& text, const QString& strTips);
+    void setBadgeIcon(const QIcon& icon, const QString& text, const QString& strTips);
+
+    QString text() const;
+    int iconWidth() const;
+    int buttonWidth() const;
+protected:
+    void paintEvent(QPaintEvent* event);
+    QSize sizeHint() const;
+
+protected:
+    QString m_textNormal;
+    QString m_textChecked;
+    QString m_textBadge;
+
+    QPropertyAnimation* m_animation;
+};
+
 
 }
 } // namespace Core

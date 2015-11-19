@@ -28,6 +28,7 @@ class InfoBar;
 class NotifyBar;
 class EditorToolBar;
 class CellButton;
+class RoundCellButton;
 class CWizTagBar;
 
 class TitleBar : public QWidget
@@ -122,7 +123,7 @@ private:
     NotifyBar* m_notifyBar;
     EditorToolBar* m_editorBar;
 
-    CellButton* m_editBtn;
+    RoundCellButton* m_editBtn;
     CellButton* m_separateBtn;
     CellButton* m_tagBtn;    
 //    CellButton* m_emailBtn;
