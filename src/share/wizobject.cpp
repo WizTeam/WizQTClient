@@ -44,7 +44,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 
 bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
-    CWizXmlRpcStructValue& data = val;
+    CWizXmlRpcStructValue& data = val;    
     data.GetString("token", strToken);
     data.GetTime("expried_time", tTokenExpried);
 
@@ -873,7 +873,7 @@ bool WIZMESSAGEDATA::isAd()
         qWarning() << "parse message note data error : " << d.GetParseError();
     }
 
-    if (!d.FindMember("type"))
+    if (!d.HasMember("type"))
         return false;
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
