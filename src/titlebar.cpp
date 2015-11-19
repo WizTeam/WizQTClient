@@ -93,7 +93,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View (Alt + 1)"));
     m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Read") , tr("Switch to Reading View (Alt + 1)"));
     m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Save & Read"), tr("Save and switch to Reading View (Alt + 1)"));
-    connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
+    connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));    
 
     m_separateBtn = new CellButton(CellButton::ImageOnly, this);
     m_separateBtn->setFixedHeight(nTitleHeight);
@@ -171,6 +171,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->setSpacing(0);
     layoutInfo2->addWidget(m_editTitle);
     layoutInfo2->addWidget(m_editBtn);
+    layoutInfo2->addSpacing(7);
     layoutInfo2->addWidget(m_separateBtn);
     layoutInfo2->addWidget(m_tagBtn);
     layoutInfo2->addWidget(m_shareBtn);
