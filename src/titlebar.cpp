@@ -15,9 +15,9 @@
 #include <QtConcurrentRun>
 #endif
 
-#include "share/websocketclientwrapper.h"
-#include "share/websockettransport.h"
-#include "wizWebEngineInjectObject.h"
+//#include "share/websocketclientwrapper.h"
+//#include "share/websockettransport.h"
+//#include "wizWebEngineInjectObject.h"
 
 #include <coreplugin/icore.h>
 
@@ -43,13 +43,12 @@
 #include "widgets/wizLocalProgressWebView.h"
 #include "widgets/wizTipsWidget.h"
 
-#include "sync/token.h"
-#include "sync/apientry.h"
-#include "sync/asyncapi.h"
 #include "messagecompleter.h"
 #include "wizOEMSettings.h"
 #include "wizmainwindow.h"
 #include "share/wizsettings.h"
+
+#include "core/wizCommentManager.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -70,6 +69,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_info(NULL)
     , m_attachments(NULL)
     , m_editButtonAnimation(0)
+    , m_commentManager(new CWizCommentManager(this))
 {
     m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
@@ -196,6 +196,11 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layout->addStretch();
     connect(m_notifyBar, SIGNAL(labelLink_clicked(QString)), SIGNAL(notifyBar_link_clicked(QString)));
     connect(m_tagBar, SIGNAL(widgetStatusChanged()), SLOT(updateTagButtonStatus()));
+
+    connect(m_commentManager, SIGNAL(commentUrlAcquired(QString,QString)),
+            SLOT(on_commentUrlAcquired(QString,QString)));
+    connect(m_commentManager, SIGNAL(commentCountAcquired(QString,int)),
+            SLOT(on_commentCountAcquired(QString,int)));
 }
 
 CWizDocumentView* TitleBar::noteView()
@@ -690,7 +695,11 @@ void TitleBar::onCommentsButtonClicked()
 #ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
 #else
-    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    CWizDocumentView* view = noteView();
+    if (!view)
+        return;
+
+    CWizLocalProgressWebView* commentWidget = view->commentWidget();
     connect(commentWidget, SIGNAL(widgetStatusChanged()), this,
             SLOT(updateCommentsButtonStatus()), Qt::UniqueConnection);
 
@@ -706,23 +715,18 @@ void TitleBar::onCommentsButtonClicked()
     WizGetAnalyzer().LogAction("showComments");
 
     if (isNetworkAccessible()) {
-        if (!m_commentsUrl.isEmpty()) {
-            commentWidget->showLocalProgress();
-            commentWidget->web()->load(m_commentsUrl);
-            QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
-            Q_ASSERT(splitter);
-            QList<int> li = splitter->sizes();
-            Q_ASSERT(li.size() == 2);
-            QList<int> lin;
-            lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
-            lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
-            splitter->setSizes(lin);
-            commentWidget->show();
-        } else {
-            loadErrorPage();
-            commentWidget->show();
-        }
+        commentWidget->showLocalProgress();
+        QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
+        Q_ASSERT(splitter);
+        QList<int> li = splitter->sizes();
+        Q_ASSERT(li.size() == 2);
+        QList<int> lin;
+        lin.push_back(li.value(0) - COMMENT_FRAME_WIDTH);
+        lin.push_back(li.value(1) + COMMENT_FRAME_WIDTH);
+        splitter->setSizes(lin);
+        commentWidget->show();
 
+        m_commentManager->queryCommentUrl(view->note().strKbGUID, view->note().strGUID);
     } else {
         m_commentsBtn->setEnabled(false);
     }
@@ -762,8 +766,6 @@ void TitleBar::onCommentPageLoaded(bool ok)
 
 void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
-    Q_UNUSED(note);
-
     if (!bOk)
         return;    
 
@@ -771,62 +773,45 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
         return;
     }    
 
-    m_commentsUrl.clear();
-    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
-            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-    WizService::Token::requestToken();
-}
+    m_commentsBtn->setCount(0);
+    m_commentManager->queryCommentCount(note.strKbGUID, note.strGUID, true);
 
-void TitleBar::onTokenAcquired(const QString& strToken)
-{
-    WizService::Token::instance()->disconnect(this);
-
-#ifdef USEWEBENGINE
-    QWebEngineView* comments = noteView()->commentView();
-#else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
-#endif
-    if (strToken.isEmpty())
+    if (commentWidget && commentWidget->isVisible())
     {
-        qDebug() << "Can not get token, hide the comment widget";
-        commentWidget->hide();
-        return;
+        commentWidget->showLocalProgress();
+        m_commentManager->queryCommentUrl(note.strKbGUID, note.strGUID);
     }
-
-    commentWidget->showLocalProgress();
-    //
-    QtConcurrent::run([this, strToken, commentWidget](){
-        QString strKbGUID = noteView()->note().strKbGUID;
-        QString strGUID = noteView()->note().strGUID;
-        m_commentsUrl =  WizService::CommonApiEntry::commentUrl(strToken, strKbGUID, strGUID);
-        if (m_commentsUrl.isEmpty())
-        {
-            qDebug() << "Can not get comment url by token : " << strToken;
-            QMetaObject::invokeMethod(this, "loadErrorPage", Qt::QueuedConnection);
-            return;
-        }
-
-        if (commentWidget->isVisible())
-        {
-            emit loadComment_request(m_commentsUrl);
-        }
-
-        QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(strToken, strKbGUID);
-        QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, strToken, strKbGUID, strGUID);
-
-        WizService::AsyncApi* api = new WizService::AsyncApi(nullptr);
-        connect(api, SIGNAL(getCommentsCountFinished(int)), SLOT(onGetCommentsCountFinished(int)));
-        api->getCommentsCount(strCountUrl);
-    });
 }
 
-void TitleBar::onGetCommentsCountFinished(int nCount)
+void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
 {
-    WizService::AsyncApi* api = dynamic_cast<WizService::AsyncApi*>(sender());
-    api->disconnect(this);
-    api->deleteLater();    
+    CWizDocumentView* view = noteView();
+    if (view && view->note().strGUID == GUID)
+    {
+        CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+        if (commentWidget && commentWidget->isVisible())
+        {
+            if (url.isEmpty())
+            {
+                qDebug() << "Wow, query comment url failed!";
+                loadErrorPage();
+            }
+            else
+            {
+                commentWidget->web()->load(url);
+            }
+        }
+    }
+}
 
-    m_commentsBtn->setCount(nCount);    
+void TitleBar::on_commentCountAcquired(QString GUID, int count)
+{
+    CWizDocumentView* view = noteView();
+    if (view && view->note().strGUID == GUID)
+    {
+        m_commentsBtn->setCount(count);
+    }
 }
 
 void TitleBar::showMessageTips(Qt::TextFormat format, const QString& strInfo)

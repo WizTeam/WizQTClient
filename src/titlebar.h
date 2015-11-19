@@ -21,6 +21,7 @@ class QNetworkReply;
 namespace Core {
 class CWizDocumentView;
 class INoteView;
+class CWizCommentManager;
 
 namespace Internal {
 class TitleEdit;
@@ -80,8 +81,9 @@ public Q_SLOTS:
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
     void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
-    void onTokenAcquired(const QString& strToken);
-    void onGetCommentsCountFinished(int nCount);
+
+    void on_commentUrlAcquired(QString GUID, QString url);
+    void on_commentCountAcquired(QString GUID, int count);
 
     void onEditorChanged();
     void onEditorFocusIn();
@@ -135,7 +137,8 @@ private:
     QMenu* m_shareMenu;
 
     CellButton* m_commentsBtn;
-    QString m_commentsUrl;
+
+    CWizCommentManager* m_commentManager;
 
     CWizTagListWidget* m_tags;
     CWizAttachmentListWidget* m_attachments;
