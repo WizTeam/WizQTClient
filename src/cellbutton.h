@@ -72,10 +72,15 @@ public:
     QString text() const;
     int iconWidth() const;
     int buttonWidth() const;
+
+public slots:
+    void setState(int state);
+
 protected:
     void paintEvent(QPaintEvent* event);
     QSize sizeHint() const;
 
+    void applyAnimation();
 protected:
     QString m_textNormal;
     QString m_textChecked;

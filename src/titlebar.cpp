@@ -92,7 +92,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
     m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View (Alt + 1)"));
     m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Read") , tr("Switch to Reading View (Alt + 1)"));
-    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock_modified"), tr("Save & Read"), tr("Save and switch to Reading View (Alt + 1)"));
+    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Save & Read"), tr("Save and switch to Reading View (Alt + 1)"));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));
 
     m_separateBtn = new CellButton(CellButton::ImageOnly, this);

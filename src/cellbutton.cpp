@@ -198,22 +198,11 @@ int RoundCellButton::iconWidth() const
 {
     switch (m_state) {
     case Normal:
-    {
-        QList<QSize> sizeList = icon().availableSizes();
-        if (sizeList.count() > 0)
-        {
-            qDebug() << "availabel size : " << sizeList.first().width();
-            return sizeList.first().width();
-        }
-        qDebug() << "defalut size 10";
-        return 10;
-    }
+        return 12;
         break;
     case Checked:
-        return 13;
-        break;
     case Badge:
-        return 14;
+        return 13;
         break;
     default:
         Q_ASSERT(0);
@@ -229,6 +218,13 @@ int RoundCellButton::buttonWidth() const
     int width = RoundCellButtonConst::margin * 2 + RoundCellButtonConst::spacing
             + iconWidth() + fm.width(text());
     return width;
+}
+
+void RoundCellButton::setState(int state)
+{
+    CellButton::setState(state);
+
+    applyAnimation();
 }
 
 void RoundCellButton::paintEvent(QPaintEvent* /*event*/)
@@ -273,7 +269,18 @@ void RoundCellButton::paintEvent(QPaintEvent* /*event*/)
 
 QSize RoundCellButton::sizeHint() const
 {
-    // 设置一个最大宽度，实际宽度由maxWidth进行控制
-    int maxWidth = 100;
+    //NTOE: 设置一个最大宽度，实际宽度由animation通过maxWidth进行控制
+    int maxWidth = 200;
     return QSize(maxWidth, RoundCellButtonConst::buttonHeight);
+}
+
+void RoundCellButton::applyAnimation()
+{
+    m_animation->stop();
+    m_animation->setDuration(150);
+    m_animation->setStartValue(maximumWidth());
+    m_animation->setEndValue(buttonWidth());
+    m_animation->setEasingCurve(QEasingCurve::InCubic);
+
+    m_animation->start();
 }
