@@ -1195,6 +1195,9 @@ void CWizDocumentListView::resetItemsViewType(int type)
 
     for (int i = 0; i < count(); i++)
     {
+        if (item(i)->type() != WizDocumentListType_Document)
+            continue;
+
         int nHeight = Utils::StyleHelper::listViewItemHeight(item(i)->type() == WizDocumentListType_Document ?
                                                                  m_nViewType : Utils::StyleHelper::ListTypeOneLine);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
@@ -1212,7 +1215,6 @@ QSize CWizDocumentListView::itemSizeFromViewType(ViewType type)
         sz.setHeight(fontMetrics().height() * 2 + 15);
         return sz;
     case CWizDocumentListView::TypeThumbnail:
-        //sz.setHeight(fontMetrics().height() * 4 + 30);
         sz.setHeight(Utils::StyleHelper::thumbnailHeight());
         return sz;
     default:
