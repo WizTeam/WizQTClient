@@ -914,6 +914,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat"));
     m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
     m_btnRemoveFormat->setToolTip(tr("RemoveFormat"));
+    m_btnRemoveFormat->setCheckable(false);
     m_btnRemoveFormat->setPosition(CWizToolButton::Right);
     connect(m_btnRemoveFormat, SIGNAL(clicked()), SLOT(on_btnRemoveFormat_clicked()));
 
