@@ -3,6 +3,7 @@
     line-height: 1.6;
     background-color: white;
     padding: 0px;
+    margin: 20px 36px;
 }
 body.markdown-body,
 .markdown-body p,
@@ -45,6 +46,7 @@ body.markdown-body,
     margin: 20px 0 10px;
     padding: 0;
     font-weight: bold;
+    /*-webkit-font-smoothing: antialiased;*/
     cursor: text;
     position: relative;
 }
@@ -79,7 +81,7 @@ body.markdown-body,
 }
 
 .markdown-body h1 {
-    font-size: 31px;
+    font-size: 21px;
     color: black;
 }
 
@@ -106,7 +108,7 @@ body.markdown-body,
     margin: 1em 0;
 }
 
-.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
     margin: 10px 0;
 }
 
@@ -543,7 +545,7 @@ body.markdown-body,
 }
 
 
-@media screen and (max-width: 544px) {
+@media screen and (max-width: 660px) {
     body.markdown-body {
         margin: 20px 18px;
     }
@@ -557,15 +559,15 @@ only screen and (-webkit-min-device-pixel-ratio: 3),
 only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
     body.markdown-body {
-        margin: 15px;
+        margin: 12px 15px;
         color: #353c47;
     }
 
     body.markdown-body,
     .markdown-body p,
     .markdown-body div {
-        font-size: 16px;
-        line-height: 1.8;
+        font-size: 17px;
+        line-height: 1.7;
     }
 
     .markdown-body h1 {
@@ -589,11 +591,10 @@ only screen and (min-device-pixel-ratio: 3) {
     }
 
     .markdown-body h6 {
-        font-size: 14px;
         color: inherit;
     }
 
-    .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
+    .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
         margin: 24px 0;
     }
 

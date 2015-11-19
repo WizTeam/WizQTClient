@@ -108,8 +108,6 @@
                 margin: 12px 15px;
                 margin: 0.75rem 0.9375rem;
                 color: #353c47;
-                text-align: justify;
-                text-justify: inter-word;
             }
 
             h1 {
