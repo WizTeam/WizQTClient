@@ -59,59 +59,59 @@
 }
 @end
 
-@interface NSView (Vibrancy)
+// @interface NSView (Vibrancy)
 
-//Returns NSVisualEffectView
-- (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
+// //Returns NSVisualEffectView
+// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
 
-@end
+// @end
 
-@implementation NSView (Vibrancy)
+// @implementation NSView (Vibrancy)
 
-- (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
-{
-    Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
-    if (vibrantClass)
-    {
-        NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
-        NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
-        [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
-        [vibrant setBlendingMode:mode];
+// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
+// {
+//     Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
+//     if (vibrantClass)
+//     {
+//         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
+//         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
+//         [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
+//         [vibrant setBlendingMode:mode];
 
-        [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
+//         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
 
-        return vibrant;
-    }
-    return nil;
-}
+//         return vibrant;
+//     }
+//     return nil;
+// }
 
-@end
-
-
-@implementation NSWindow (BackgroundBlur)
-
-- (void)enableBehindBlur
-{
-    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
-
-//    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
-//    [self.contentView addSubview:view];
-}
+// @end
 
 
-//- (void)enableBlendingBlur
-//{
-//    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
-//}
+// @implementation NSWindow (BackgroundBlur)
 
-@end
+// - (void)enableBehindBlur
+// {
+//     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+
+// //    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
+// //    [self.contentView addSubview:view];
+// }
+
+
+// //- (void)enableBlendingBlur
+// //{
+// //    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
+// //}
+
+// @end
 
 
 void enableWidgetBehindBlur(QWidget* wgt)
 {
-    NSView *nsview = (NSView *) wgt->winId();
-    NSWindow *nswindow = [nsview window];
-    [nswindow enableBehindBlur];
+    // NSView *nsview = (NSView *) wgt->winId();
+    // NSWindow *nswindow = [nsview window];
+    // [nswindow enableBehindBlur];
 }
 
 //void enableWidgetBlendingBlur(QWidget* wgt)
