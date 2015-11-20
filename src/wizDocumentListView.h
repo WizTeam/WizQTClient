@@ -184,6 +184,7 @@ public Q_SLOTS:
     //void on_action_message_delete();
 
     // document context menu
+    void on_action_locate();
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
@@ -229,6 +230,7 @@ Q_SIGNALS:
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
     void changeUploadRequest(const QString& strKbGUID);
     void addDocumentToShortcutsRequest(const WIZDOCUMENTDATA& doc);
+    void loacteDocumetRequest(const WIZDOCUMENTDATA& doc);
 
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);

@@ -32,6 +32,7 @@ using namespace Core::Internal;
 
 
 // Document actions
+#define WIZACTION_LIST_LOCATE   QObject::tr("Locate")
 #define WIZACTION_LIST_DELETE   QObject::tr("Delete")
 #define WIZACTION_LIST_TAGS     QObject::tr("Tags...")
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move to...")
@@ -168,6 +169,9 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     // document context menu
     m_menuDocument = std::make_shared<QMenu>();
+    m_menuDocument->addAction(WIZACTION_LIST_LOCATE, this,
+                              SLOT(on_action_locate()));
+
     m_menuDocument->addAction(WIZACTION_LIST_TAGS, this,
                               SLOT(on_action_selectTags()));
     m_menuDocument->addSeparator();
@@ -788,6 +792,8 @@ void CWizDocumentListView::resetPermission()
         arrayDocument.push_back(item->document());
     }
 
+    findAction(WIZACTION_LIST_LOCATE)->setVisible(m_accpetAllSearchItems);
+
     bool bGroup = isDocumentsWithGroupDocument(arrayDocument);
     bool bDeleted = isDocumentsWithDeleted(arrayDocument);
     bool bCanEdit = isDocumentsAllCanDelete(arrayDocument);
@@ -1398,6 +1404,16 @@ void CWizDocumentListView::on_documentReadCount_changed(const WIZDOCUMENTDATA& d
             update(indexFromItem(pItem));
         }
     }
+}
+
+void CWizDocumentListView::on_action_locate()
+{
+    ::WizGetAnalyzer().LogAction("documentListMenuLocate");
+    if (m_rightButtonFocusedItems.size() == 0)
+        return;
+
+    WIZDOCUMENTDATA doc = m_rightButtonFocusedItems.first()->document();
+    emit loacteDocumetRequest(doc);
 }
 
 void CWizDocumentListView::on_document_abstractLoaded(const WIZABSTRACT& abs)

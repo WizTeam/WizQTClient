@@ -35,7 +35,7 @@
 @end
 
 // WizSearchField
-@interface WizSearchField: NSSearchField <NSTextFieldDelegate>
+@interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
 {
     CWizSearchWidget* m_pSearchWidget;
     BOOL m_isEditing;
@@ -188,9 +188,6 @@
     QWidget* widget = QApplication::focusWidget();
         // CWizMacToolBar
     if (widget) {
-        if (CWizMacToolBar* toolbar = dynamic_cast<CWizMacToolBar*>(widget))
-            return NO;
-
         widget->clearFocus();
     }
 
@@ -284,7 +281,13 @@ void CWizSearchWidget::clear()
     }
 
     [pSearchField setStringValue:@""];
-    focus();
+}
+
+void CWizSearchWidget::clearFocus()
+{
+    WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
+    [pSearchField.window makeFirstResponder:nil];
+    QMacCocoaViewContainer::clearFocus();
 }
 
 void CWizSearchWidget::focus()

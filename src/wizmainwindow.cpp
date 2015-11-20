@@ -2353,6 +2353,7 @@ void MainWindow::init()
     connect(m_documents, SIGNAL(lastDocumentDeleted()), SLOT(on_documents_lastDocumentDeleted()));
     connect(m_documents, SIGNAL(shareDocumentByLinkRequest(QString,QString)),
             SLOT(on_shareDocumentByLink_request(QString,QString)));
+    connect(m_documents, SIGNAL(loacteDocumetRequest(WIZDOCUMENTDATA)), SLOT(locateDocument(WIZDOCUMENTDATA)));
 
     connect(m_documents, SIGNAL(groupDocumentReadCountChanged(QString)), m_category,
             SLOT(on_groupDocuments_unreadCount_modified(QString)));
@@ -4068,6 +4069,7 @@ void MainWindow::quitSearchStatus()
     {
         m_searchWidget->clear();
         m_searchWidget->clearFocus();
+        m_strSearchKeywords.clear();
         m_doc->web()->applySearchKeywordHighlight();
     }
 

@@ -27,6 +27,7 @@ class CWizSearchWidget : public QMacCocoaViewContainer
 public:
     CWizSearchWidget(QWidget* parent = 0);
     void clear();
+    void clearFocus();
     void focus();
     void setText(const QString& text);
     QString currentText();
