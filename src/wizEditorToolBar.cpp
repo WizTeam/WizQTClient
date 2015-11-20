@@ -1835,7 +1835,7 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     if (!m_editor)
         return;
 
-    buildMenu();
+    buildMenu();    
 
     m_strImageSrc.clear();
     if (m_editor->findIMGElementAt(pos, m_strImageSrc))
@@ -1863,7 +1863,7 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(true);
     }
 
-    if (m_editor->isEditing()){
+    if (m_editor->isEditing() && m_editor->hasFocus()) {
         actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(true);
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(true);
     } else {
