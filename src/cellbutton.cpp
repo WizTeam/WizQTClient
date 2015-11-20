@@ -243,7 +243,7 @@ void RoundCellButton::paintEvent(QPaintEvent* /*event*/)
     p.setPen(Qt::NoPen);
     p.setBrush(QColor((mode & QIcon::Active) ? "#D3D3D3" : "#E6E6E6"));
     p.setRenderHint(QPainter::Antialiasing, true);
-    p.drawRoundedRect(opt.rect, 10, 10);
+    p.drawRoundedRect(opt.rect, 8, 10);
 
     QSize size = m_iconSize;
     int nLeft = RoundCellButtonConst::margin;
