@@ -43,7 +43,6 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     setContentsMargins(0, 0, 0, 0);
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    setLayout(layout);
 
     applyWidgetBackground(false);
     //        m_webEngine = new CWizDocumentWebEngine(app, this);

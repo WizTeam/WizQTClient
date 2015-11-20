@@ -954,12 +954,12 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     setPalette(pal);
     setAutoFillBackground(true);
 
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QHBoxLayout* hLayout = new QHBoxLayout;
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->setSpacing(0);
     setLayout(hLayout);
 
-    QHBoxLayout* layoutActions = new QHBoxLayout();
+    QHBoxLayout* layoutActions = new QHBoxLayout;
     layoutActions->setContentsMargins(2, 0, 0, 0);
     layoutActions->setSpacing(0);
 
@@ -1253,7 +1253,7 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
     setContentsMargins(0, 0, 0, 0);
     QSize wgtSize(maxSenderSelectorWidth, maxSenderSelectorHeight);
     setWidgetSize(wgtSize);
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 14, 0, 8);
     layout->setSpacing(0);
     setLayout(layout);

@@ -1218,7 +1218,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_buttonContainersInSecondLine.append(moveableButtonContainer5);
 
     QVBoxLayout* vLayout = new QVBoxLayout(this);
-    setLayout(vLayout);
     vLayout->setContentsMargins(0, 0, 0, 0);
     vLayout->setSpacing(8);
     vLayout->addWidget(firstLineWidget);

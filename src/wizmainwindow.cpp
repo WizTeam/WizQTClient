@@ -2204,7 +2204,7 @@ QWidget*MainWindow::createMessageListView()
             SLOT(on_actionMarkAllMessageRead_triggered(bool)));
 
 
-    QHBoxLayout* titleBarLayout = new QHBoxLayout(this);
+    QHBoxLayout* titleBarLayout = new QHBoxLayout();
     titleBarLayout->setContentsMargins(0, 0, 0, 0);
     titleBarLayout->setSpacing(0);
     titleBarLayout->addWidget(m_msgListTitleBar);
@@ -2212,7 +2212,7 @@ QWidget*MainWindow::createMessageListView()
     QWidget* placeHoldWgt = new QWidget(this);
     placeHoldWgt->setFixedSize(13, 30);
     placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
-    QHBoxLayout* layout2 = new QHBoxLayout(this);
+    QHBoxLayout* layout2 = new QHBoxLayout();
     layout2->setContentsMargins(0, 0, 0, 0);
     layout2->setSpacing(0);
     layout2->addWidget(placeHoldWgt);

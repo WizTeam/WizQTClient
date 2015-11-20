@@ -25,7 +25,7 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
 
     m_toolButton->setVisible(false);
 
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QHBoxLayout* hLayout = new QHBoxLayout();
     hLayout->addStretch(1);
     hLayout->addWidget(m_toolButton);
     hLayout->addWidget(m_labelHint);

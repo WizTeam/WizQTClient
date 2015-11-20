@@ -82,7 +82,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 
     QString strTheme = Utils::StyleHelper::themeName();
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 6);
     layout->setSpacing(0);
     setLayout(layout);

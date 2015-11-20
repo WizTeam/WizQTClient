@@ -25,7 +25,7 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     m_labelProgress->setAlignment(Qt::AlignCenter);
     m_labelProgress->setMovie(m_movie);
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
