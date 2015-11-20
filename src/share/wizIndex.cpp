@@ -1037,7 +1037,7 @@ bool CWizIndex::DeleteDocumentsByLocation(const CString& strLocation)
 
 bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 {
-	data.tModified = WizGetCurrentTime();
+//	data.tModified = WizGetCurrentTime();
 	data.tInfoModified = WizGetCurrentTime();
 	data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.nVersion = -1;
