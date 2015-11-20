@@ -2322,6 +2322,9 @@ void EditorToolBar::adjustButtonPosition()
 
 void EditorToolBar::showCoachingTips()
 {
+    if (m_buttonContainersInSecondLine.isEmpty())
+        return;
+
     bool showTips = false;
     if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
     {
@@ -2341,10 +2344,34 @@ void EditorToolBar::showCoachingTips()
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
         tipWidget->setAutoAdjustPosition(true);
-        tipWidget->bindFunction([](){
+
+        //NOTE：绑定方法来控制webview的焦点问题
+        tipWidget->bindShowFunction([](){
+            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            {
+                if (CWizDocumentView* docView = mainWindow->docView())
+                {
+                    docView->web()->setIgnoreActiveWindowEvent(true);
+                }
+            }
+        });
+        tipWidget->bindHideFunction([](){
+            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            {
+                if (CWizDocumentView* docView = mainWindow->docView())
+                {
+                    docView->web()->setIgnoreActiveWindowEvent(false);
+                }
+            }
+        });
+        tipWidget->bindCloseFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
             {
                 mainWindow->userSettings().set(EDITORTOOLBARTIPSCHECKED, "1");
+                if (CWizDocumentView* docView = mainWindow->docView())
+                {
+                    docView->web()->setIgnoreActiveWindowEvent(false);
+                }
             }
         });
         //

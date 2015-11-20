@@ -9,13 +9,14 @@
 
 static void emptyFunction()
 {
-    qDebug() << "Hello World!";
 }
 
 CWizTipsWidget::CWizTipsWidget(const QString id, QWidget *parent)
     : CWizPopupWidget(parent)
     , m_hintSize(318, 82)
-    , m_function(emptyFunction)
+    , m_showFunction(emptyFunction)
+    , m_hideFunction(emptyFunction)
+    , m_closeFunction(emptyFunction)
     , m_id(id)
     , m_autoAdjustPosition(false)
 {
@@ -116,9 +117,27 @@ bool CWizTipsWidget::addToTipListManager(QWidget* targetWidget, int nXOff, int n
     return true;
 }
 
-void CWizTipsWidget::bindFunction(const std::function<void ()>& f)
+void CWizTipsWidget::bindShowFunction(const std::function<void ()>& f)
 {
-    m_function = f;
+    m_showFunction = f;
+}
+
+void CWizTipsWidget::bindHideFunction(const std::function<void ()>& f)
+{
+    m_hideFunction = f;
+}
+
+void CWizTipsWidget::bindCloseFunction(const std::function<void ()>& f)
+{
+    m_closeFunction = f;
+}
+
+void CWizTipsWidget::hide()
+{
+    qDebug() << "hide tip widget";
+    m_hideFunction();
+
+    QWidget::hide();
 }
 
 void CWizTipsWidget::onTargetWidgetClicked()
@@ -134,6 +153,8 @@ void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
 
 void CWizTipsWidget::showEvent(QShowEvent* ev)
 {
+    m_showFunction();
+
     QWidget::showEvent(ev);
 
     CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
@@ -144,7 +165,7 @@ void CWizTipsWidget::closeTip()
 {
     close();
 
-    m_function();
+    m_closeFunction();
 
     CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
     delegate.removeListener(this);

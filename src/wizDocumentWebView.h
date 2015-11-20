@@ -156,6 +156,8 @@ public:
     void editorFocus();
     void setEditorEnable(bool enalbe);
 
+    void setIgnoreActiveWindowEvent(bool igoreEvent);
+
     bool evaluateJavaScript(const QString& js);
 
     // -1: command invalid
@@ -253,6 +255,8 @@ private:
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;
+    //
+    bool m_ignoreActiveWindowEvent;
 
     // flag : if current webview is in seperate window, editor background-color will
     //different with webview in mainwindow

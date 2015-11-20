@@ -398,7 +398,12 @@ MainWindow*MainWindow::instance()
 QNetworkDiskCache*MainWindow::webViewNetworkCache()
 {
     return 0;
-//    return m_doc->web()->networkCache();
+    //    return m_doc->web()->networkCache();
+}
+
+CWizDocumentView* MainWindow::docView()
+{
+    return m_doc;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -2850,7 +2855,7 @@ void MainWindow::on_categoryUnreadButton_triggered()
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
-        tipWidget->bindFunction([](){
+        tipWidget->bindCloseFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
             {
                 mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");

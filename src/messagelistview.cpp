@@ -1122,7 +1122,7 @@ void WizMessageListTitleBar::showTipsWidget()
     tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
     tipWidget->setSizeHint(QSize(280, 60));
     tipWidget->setButtonVisible(false);
-    tipWidget->bindFunction([](){
+    tipWidget->bindCloseFunction([](){
         if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
         {
             mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");

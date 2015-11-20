@@ -112,7 +112,8 @@ public:
 
     static MainWindow* instance();
 
-    QNetworkDiskCache* webViewNetworkCache();   
+    QNetworkDiskCache* webViewNetworkCache();
+    CWizDocumentView* docView();
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event);

@@ -537,7 +537,7 @@ void TitleBar::showCoachingTips()
                                                          "edited and markdown note can be redered."));
         widget->setSizeHint(QSize(280, 82));
         widget->setButtonVisible(false);
-        widget->bindFunction([](){
+        widget->bindCloseFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
             {
                 mainWindow->userSettings().set(TITLEBARTIPSCHECKED, "1");

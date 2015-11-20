@@ -28,7 +28,11 @@ public:
 
     bool addToTipListManager(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
 
-    void bindFunction(std::function<void(void)> const& f);
+    void bindShowFunction(std::function<void(void)> const& f);
+    void bindHideFunction(std::function<void(void)> const& f);
+    void bindCloseFunction(std::function<void(void)> const& f);
+
+    void hide();
 signals:
 
 public slots:
@@ -49,7 +53,9 @@ private:
     QSize m_hintSize;
     QString m_id;
     bool m_autoAdjustPosition;
-    std::function<void(void)> m_function;
+    std::function<void(void)> m_showFunction;       //tip显示的时候执行的方法
+    std::function<void(void)> m_hideFunction;       //用户没有点击tip，但是其他操作导致tip不应该被显示的时候执行的操作
+    std::function<void(void)> m_closeFunction;      //用户点击了tip时候执行的方法
 };
 
 class CWizTipListManager : public QObject

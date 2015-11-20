@@ -210,6 +210,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_bInSeperateWindow(false)
     , m_nWindowID(nWindowIDCounter ++)
     , m_searchReplaceWidget(nullptr)
+    , m_ignoreActiveWindowEvent(false)
 {
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
@@ -412,7 +413,14 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
 {
     // because qt will clear focus when context menu popup, we need keep focus there.
-    if (event->reason() == Qt::PopupFocusReason || event->reason() == Qt::ActiveWindowFocusReason) {
+    if (event->reason() == Qt::PopupFocusReason)
+    {
+        return;
+    }
+    else if (m_ignoreActiveWindowEvent && event->reason() == Qt::ActiveWindowFocusReason)
+    {
+        //NOTE:显示CWizTipsWidget的时候会造成编辑器失去焦点，进而导致toolbar关联的tips消失。此处通过
+        //忽略tips显示时产生的ActiveWindowFocusReason来进行tips的显示
         return;
     }
 
@@ -854,6 +862,11 @@ void CWizDocumentWebView::setEditorEnable(bool enalbe)
     }
 }
 
+void CWizDocumentWebView::setIgnoreActiveWindowEvent(bool igoreEvent)
+{
+    m_ignoreActiveWindowEvent = igoreEvent;
+}
+
 bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
 {
     page()->mainFrame()->evaluateJavaScript(js);
@@ -876,6 +889,7 @@ void CWizDocumentWebView::initEditor()
     QUrl url = QUrl::fromLocalFile(strFileName);
 
     page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+//    page()->setLinkDelegationPolicy(QWebPage::DelegateExternalLinks);
 
     connect(page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
@@ -1100,13 +1114,20 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
     else
     {
         QString strUrl = url.toString();
-        if (strUrl.left(12) == "http://file/")
+        if (strUrl.contains("#"))
         {
-            strUrl.replace(0, 12, "file:/");            
+            page()->mainFrame()->load(url);
         }
+        else
+        {
+            if (strUrl.left(12) == "http://file/")
+            {
+                strUrl.replace(0, 12, "file:/");
+            }
 
-        qDebug() << "Open url " << strUrl;
-        QDesktopServices::openUrl(strUrl);
+            qDebug() << "Open url " << strUrl;
+            QDesktopServices::openUrl(strUrl);
+        }
     }
 }
 
