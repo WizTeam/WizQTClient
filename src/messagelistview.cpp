@@ -979,7 +979,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
                                              "background-repeat: no-repeat;"
                                              "background-position: center;").arg(
                                          Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
-    m_btnSelectSender->setFixedWidth(5);
+    m_btnSelectSender->setFixedWidth(7);
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
 
@@ -1243,7 +1243,7 @@ protected:
 };
 
 const int maxSenderSelectorHeight = 378;
-const int maxSenderSelectorWidth = 126;
+const int maxSenderSelectorWidth = 152;
 WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent)
     : CWizPopupWidget(parent)
     , m_dbMgr(dbMgr)
@@ -1381,7 +1381,6 @@ WizSenderSelectorItem::WizSenderSelectorItem(const QString& text, const QString&
 void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     p->save();
-//    p->setClipRect(vopt->rect);
 
     bool selected = vopt->state & QStyle::State_Selected;
 

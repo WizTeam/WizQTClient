@@ -74,7 +74,7 @@ public:
 
     static QString wizCommonListViewStyleSheet();
     static QString wizCommonStyleSheet();
-    static QString wizCommonScrollBarStyleSheet();
+    static QString wizCommonScrollBarStyleSheet(int marginTop = 0);
 
     static QSize treeViewItemIconSize();
     static int treeViewItemHeight();

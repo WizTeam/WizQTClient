@@ -111,9 +111,7 @@ QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
     QVector<QPoint> points;
     int nBorderInterval = 2;
     points.append(QPoint(rect.left(), rect.top() + nBorderInterval));
-//    points.append(QPoint(rect.left() + 1, rect.top() + 2));
     points.append(QPoint(rect.left() + 1, rect.top() + 1));
-//    points.append(QPoint(rect.left() + 2, rect.top() + 1));
     points.append(QPoint(rect.left() + nBorderInterval, rect.top()));
     points.append(QPoint(rect.right() - nBorderInterval, rect.top()));
     points.append(QPoint(rect.right() - 1, rect.top() + 1));
@@ -210,23 +208,20 @@ QString StyleHelper::wizCommonStyleSheet()
     return style;
 }
 
-QString StyleHelper::wizCommonScrollBarStyleSheet()
+QString StyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
-    return "QScrollBar {\
-            background: #F5F5F5;\
-            width: 4px; \
-            margin-right:2px; \
-        }\
-        QScrollBar:vertical { \
-            width:4px; \
-            background:rgba(0,0,0,0%); \
-            margin:0px,0px,0px,0px; \
+    return QString("QScrollBar {\
+            background: #FFFFFF;\
+            width: 12px; \
         }\
         QScrollBar::handle:vertical {\
-            width: 4px; \
-            background:rgba(0,0,0,25%); \
-            border-radius:2px;\
+            width: 6px; \
+            background:#DADADA; \
+            border-radius:3px;\
             min-height:20; \
+            margin-top:%1px; \
+            margin-right:3px; \
+            margin-left:3px; \
         }\
         QScrollBar::add-page, QScrollBar::sub-page {\
             background: transparent;\
@@ -237,7 +232,7 @@ QString StyleHelper::wizCommonScrollBarStyleSheet()
         QScrollBar::add-line, QScrollBar::sub-line {\
             height: 0px;\
             width: 0px;\
-        }";
+        }").arg(marginTop);
 }
 
 QSize StyleHelper::treeViewItemIconSize()

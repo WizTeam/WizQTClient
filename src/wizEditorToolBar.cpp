@@ -1881,8 +1881,8 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     WizGetAnalyzer().LogAction("editorContextMenu");
 }
 
-/**     此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题
- * @brief EditorToolBar::on_delegate_selectionChanged
+/*
+ * 此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题
  */
 void EditorToolBar::on_delegate_selectionChanged()
 {
