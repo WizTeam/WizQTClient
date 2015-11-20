@@ -4063,6 +4063,14 @@ void MainWindow::startSearchStatus()
 
 void MainWindow::quitSearchStatus()
 {
+    // 如果当前是搜索模式，在退出搜索模式时清除搜索框中的内容
+    if (m_documents->acceptAllSearchItems())
+    {
+        m_searchWidget->clear();
+        m_searchWidget->clearFocus();
+        m_doc->web()->applySearchKeywordHighlight();
+    }
+
     m_documents->setAcceptAllSearchItems(false);
     if (m_category->selectedItems().count() > 0)
     {

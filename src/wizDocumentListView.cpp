@@ -2075,6 +2075,11 @@ void CWizDocumentListView::reloadItem(const QString& strKbGUID, const QString& s
     }
 }
 
+bool CWizDocumentListView::acceptAllSearchItems() const
+{
+    return m_accpetAllSearchItems;
+}
+
 void CWizDocumentListView::setAcceptAllSearchItems(bool bAccept)
 {
     m_accpetAllSearchItems = bAccept;

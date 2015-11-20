@@ -77,6 +77,7 @@ public:
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
     void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
+    bool acceptAllSearchItems() const;
     void setAcceptAllSearchItems(bool bAccept);
 
 protected:
