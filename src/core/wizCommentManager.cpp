@@ -125,8 +125,7 @@ public:
 
         if (loop.error() != QNetworkReply::NoError)
         {
-            QMetaObject::invokeMethod(m_manager, "on_commentCountAcquired", Qt::QueuedConnection,
-                                      Q_ARG(QString, m_GUID), Q_ARG(int, 0));
+            getCommentsCountFinished(0);
         }
 
         parseReplyData(loop.result());
