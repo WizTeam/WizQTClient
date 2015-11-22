@@ -186,6 +186,11 @@ QString PathResolve::localeFileName(const QString &strLocale)
     return resourcesPath() + "locales/wiznote_" + strLocale + ".qm";
 }
 
+QString PathResolve::introductionNotePath()
+{
+    return resourcesPath() + "files/introduction/";
+}
+
 void PathResolve::addBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');
