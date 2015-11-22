@@ -15,26 +15,27 @@
 #include <sys/stat.h>
 
 #include <extensionsystem/pluginmanager.h>
-#include "wizmainwindow.h"
-#include "wizDocumentWebEngine.h"
-#include "wizLoginDialog.h"
+#include "utils/pathresolve.h"
+#include "utils/logger.h"
+#include "utils/stylehelper.h"
 #include "share/wizsettings.h"
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizSingleApplication.h"
+#include "core/wizNoteManager.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #include "mac/wizIAPHelper.h"
 #endif
 
-#include "utils/pathresolve.h"
-#include "utils/logger.h"
-#include "utils/stylehelper.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/avatar.h"
 #include "thumbcache.h"
+#include "wizmainwindow.h"
+#include "wizDocumentWebEngine.h"
+#include "wizLoginDialog.h"
 
 using namespace ExtensionSystem;
 using namespace Core::Internal;
@@ -326,6 +327,7 @@ int mainCore(int argc, char *argv[])
 
     //
     QString strUserId = WizGetLocalUserId(localUsers, strUserGuid);
+    bool isNewRegisterAccount = false;
     // manually login
     if (bFallback)
     {
@@ -347,6 +349,7 @@ int mainCore(int argc, char *argv[])
         }
         strPassword = loginDialog.password();
         strUserId = loginDialog.userId();
+        isNewRegisterAccount = loginDialog.isNewRegisterAccount();
     }
     else
     {
@@ -413,6 +416,15 @@ int mainCore(int argc, char *argv[])
 
     w.show();
     w.init();   
+
+    //
+    CWizNoteManager::createSingleton(w);
+
+    if (isNewRegisterAccount)
+    {
+        CWizNoteManager* noteManager = CWizNoteManager::instance();
+        noteManager->createIntroductionNoteForNewRegisterAccount();
+    }
 
     int ret = a.exec();
     if (w.isLogout()) {

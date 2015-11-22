@@ -124,6 +124,8 @@ public:
     void enableLoginControls(bool bEnable);
     void enableSignUpControls(bool bEnable);
 
+    bool isNewRegisterAccount();
+
 signals:
     void snsLoginSuccess(const QString& strUrl);
     void wizBoxSearchRequest(int port, QString message);
@@ -259,6 +261,8 @@ private:
 
     QList<WizLocalUser> m_userList;
     QString m_loginUserGuid;
+
+    bool m_newRegisterAccount;
 };
 
 #endif // WIZLOGINWIDGET_H

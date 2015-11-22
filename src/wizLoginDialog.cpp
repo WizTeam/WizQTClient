@@ -98,6 +98,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     , m_oemDownloader(nullptr)
     , m_oemThread(nullptr)
     , m_userList(localUsers)
+    , m_newRegisterAccount(false)
 {
 
 #ifdef Q_OS_MAC
@@ -284,8 +285,10 @@ void CWizLoginDialog::resetUserList()
 
 void CWizLoginDialog::setUser(const QString &strUserGuid)
 {
+    m_newRegisterAccount = false;
+
     if (strUserGuid.isEmpty())
-        return;
+        return;    
 
     QString strAccountFolder;
     QString strUserId;
@@ -471,6 +474,11 @@ void CWizLoginDialog::enableSignUpControls(bool bEnable)
 //    m_lineEditRepeatPassword->setEnabled(bEnable);
     ui->btn_singUp->setEnabled(bEnable);
     ui->btn_changeToLogin->setEnabled(bEnable);
+}
+
+bool CWizLoginDialog::isNewRegisterAccount()
+{
+    return m_newRegisterAccount;
 }
 
 #ifdef Q_OS_MAC
@@ -1223,6 +1231,7 @@ void CWizLoginDialog::onRegisterAccountFinished(bool bFinish)
     AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
     emit accountCheckFinished();
     if (bFinish) {
+        m_newRegisterAccount = true;
         m_lineEditUserName->setText(m_lineEditNewUserName->text());
         m_lineEditPassword->setText(m_lineEditNewPassword->text());
         ui->cbx_remberPassword->setChecked(false);
@@ -1273,6 +1282,7 @@ void CWizLoginDialog::onUserNameEdited(const QString& arg1)
 {
     Q_UNUSED(arg1);
     m_lineEditPassword->setText("");
+    m_newRegisterAccount = false;
 }
 
 void CWizLoginDialog::onDeleteUserRequest(const WizLocalUser& user)
