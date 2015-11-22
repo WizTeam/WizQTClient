@@ -340,9 +340,6 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event)
                     m_searchWidget->setCompleterUsable(false);
                 }
             }
-            m_category->update();
-            m_documents->update();
-            m_splitter->update();
         }
     }
 #endif
@@ -554,16 +551,8 @@ void MainWindow::on_actionClose_triggered()
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    m_doc->setVisible(false);
-    bool noteListVisible = m_noteListWidget->isVisible();
-    bool msgListVisible = m_msgListWidget->isVisible();
-
     QMainWindow::resizeEvent(event);
-
-    update();
-    m_noteListWidget->setVisible(noteListVisible);
-    m_msgListWidget->setVisible(msgListVisible);
-    m_doc->setVisible(true);
+    update();    
 }
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -1718,12 +1707,7 @@ bool MainWindow::processApplicationActiveEvent()
     {
         setVisible(true);
     }
-    if (windowState() & Qt::WindowMinimized)
-    {
-        setWindowState(windowState() & ~Qt::WindowMinimized);
-    }
 
-    raise();
     return true;
 }
 
@@ -2665,7 +2649,7 @@ void MainWindow::on_actionViewMinimize_triggered()
     if (wgt == 0)
         return;
 
-    wgt->setWindowState(Qt::WindowMinimized);
+    wgt->setWindowState(wgt->windowState() | Qt::WindowMinimized);
 }
 
 void MainWindow::on_actionZoom_triggered()
@@ -2690,6 +2674,13 @@ void MainWindow::on_actionBringFront_triggered()
     WizGetAnalyzer().LogAction("MenuBarBringFront");
 #ifdef Q_OS_MAC
     wizMacShowCurrentApplication();
+
+    if (!isVisible())
+    {
+        bringWidgetToFront(this);
+    }
+
+
 #endif
 //    QWindowList widgetList = qApp->allWindows();
 //    for (QWindow* wgt : widgetList)
