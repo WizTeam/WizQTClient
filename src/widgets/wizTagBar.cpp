@@ -5,7 +5,6 @@
 #include <QMouseEvent>
 #include <QMenu>
 #include <QMessageBox>
-#include <QCompleter>
 #include <QStyledItemDelegate>
 #include <QAbstractItemView>
 #include <QDebug>
@@ -749,17 +748,18 @@ CTagLineEdit::CTagLineEdit(QWidget* parent)
 
 void CTagLineEdit::resetCompleter(const QStringList& tagNames)
 {
-    if (m_completer)
-    {
-        m_completer->deleteLater();
+    if (!m_completer)
+    {        
+        m_completer = new CWizStringListCompleter(tagNames, this);
+        QStyledItemDelegate* mCompleterItemDelegate = new QStyledItemDelegate(m_completer);
+        m_completer->popup()->setItemDelegate(mCompleterItemDelegate); //Must be set after every time the model is set
+        m_completer->popup()->setStyleSheet("QAbstractItemView::item:selected{background:#448aff;}"
+                                            "QAbstractItemView::item:hover{background:#448aff;}");
+        m_completer->setCaseSensitivity(Qt::CaseInsensitive);
+        setCompleter(m_completer);
     }
-    m_completer = new QCompleter(tagNames, this);
-    QStyledItemDelegate* mCompleterItemDelegate = new QStyledItemDelegate(m_completer);
-    m_completer->popup()->setItemDelegate(mCompleterItemDelegate); //Must be set after every time the model is set
-    m_completer->popup()->setStyleSheet("QAbstractItemView::item:selected{background:#448aff;}"
-                                        "QAbstractItemView::item:hover{background:#448aff;}");
-    m_completer->setCaseSensitivity(Qt::CaseInsensitive);
-    setCompleter(m_completer);
+
+    m_completer->resetStringList(tagNames);
 }
 
 void CTagLineEdit::keyPressEvent(QKeyEvent* event)
@@ -769,8 +769,8 @@ void CTagLineEdit::keyPressEvent(QKeyEvent* event)
         if (m_completer->popup()->isVisible())
         {
             m_completer->popup()->hide();
-            emit completerFinished();
             event->accept();
+            emit completerFinished();
             return;
         }
     }

@@ -6,6 +6,8 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QHBoxLayout>
+#include <QCompleter>
+#include <QStringListModel>
 #include <memory>
 #include <map>
 #include "share/wizobject.h"
@@ -16,6 +18,28 @@ class CWizTagListWidget;
 
 namespace Core {
 namespace Internal {
+
+class CWizStringListCompleter : public QCompleter
+{
+    Q_OBJECT
+
+public:
+    inline CWizStringListCompleter(const QStringList& words, QObject * parent)
+        : QCompleter(parent)
+        , m_model()
+    {
+        setModel(&m_model);
+        m_model.setStringList(words);
+    }
+
+    inline void resetStringList(QStringList wordList)
+    {
+        m_model.setStringList(wordList);
+    }
+
+private:
+    QStringListModel m_model;
+};
 
 class CTagLineEdit : public QLineEdit
 {
@@ -31,7 +55,7 @@ protected:
     void keyPressEvent(QKeyEvent* event);
 
 private:
-    QCompleter* m_completer;
+    CWizStringListCompleter* m_completer;
 };
 
 class CTagItem : public QWidget
