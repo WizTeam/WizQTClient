@@ -649,7 +649,7 @@ int CWizUserSettings::defaultFontSize()
     if (nSize)
         return nSize;
 
-    return 14; // default 14px
+    return 15; // default 15px
 }
 
 void CWizUserSettings::setDefaultFontSize(int nSize)
