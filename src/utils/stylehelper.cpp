@@ -604,7 +604,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 
 void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
 {
-    int borderMargin = WizIsHighPixel() ? 3 : 2;
+    int borderMargin = 2;
 
     QRect rcBg = rc;
     switch (bgType) {
@@ -657,7 +657,17 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListVi
         const int nSeperatorLeftMargin = 12;
         pLeft.setX(pLeft.x() + nSeperatorLeftMargin);
     }
-    p->drawLine(pLeft, rcLine.bottomRight());
+
+    if (WizIsHighPixel())
+    {
+        QLineF line(pLeft.x(), pLeft.y() + 0.5f, rcLine.bottomRight().x(),
+                    rcLine.bottomRight().y() + 0.5f);
+        p->drawLine(line);
+    }
+    else
+    {
+        p->drawLine(pLeft, rcLine.bottomRight());
+    }
     p->restore();
 }
 
