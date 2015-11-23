@@ -27,32 +27,37 @@ bool CWizNoteManager::createSingleton(CWizExplorerApp& app)
 
 void CWizNoteManager::createIntroductionNoteForNewRegisterAccount()
 {
-    //get local note
-    QDir dir(Utils::PathResolve::introductionNotePath());
-    QStringList introductions = dir.entryList(QDir::Files);
-    if (introductions.isEmpty())
-        return;
+    QtConcurrent::run([=](){
+        //get local note
+        QDir dir(Utils::PathResolve::introductionNotePath());
+        QStringList introductions = dir.entryList(QDir::Files);
+        if (introductions.isEmpty())
+            return;
 
-    QSettings settings(Utils::PathResolve::introductionNotePath() + "settings.ini", QSettings::IniFormat);
+        QSettings settings(Utils::PathResolve::introductionNotePath() + "settings.ini", QSettings::IniFormat);
 
-    //copy note to new account
-    CWizDatabase& db = m_app.databaseManager().db();
-    for (QString fileName : introductions)
-    {
-        QString filePath = Utils::PathResolve::introductionNotePath() + fileName;
-        QFileInfo info(filePath);
-        if (info.suffix() == "ini")
-            continue;
-        settings.beginGroup("Location");
-        QString location = settings.value(info.baseName(), "/My Notes/").toByteArray();
-        settings.endGroup();
-        WIZTAGDATA tag;
-        WIZDOCUMENTDATA doc;
-        if (!db.CreateDocumentByTemplate(filePath, location, tag, doc))
+        //copy note to new account
+        CWizDatabase& db = m_app.databaseManager().db();
+        for (QString fileName : introductions)
         {
-            qDebug() << "create introduction note failed : " << filePath;
+            QString filePath = Utils::PathResolve::introductionNotePath() + fileName;
+            QFileInfo info(filePath);
+            if (info.suffix() == "ini")
+                continue;
+            settings.beginGroup("Location");
+            QString location = settings.value(info.baseName(), "/My Notes/").toByteArray();
+            settings.endGroup();
+            WIZTAGDATA tag;
+            WIZDOCUMENTDATA doc;
+            settings.beginGroup("Title");
+            doc.strTitle = settings.value(info.baseName()).toString();
+            settings.endGroup();
+            if (!db.CreateDocumentByTemplate(filePath, location, tag, doc))
+            {
+                qDebug() << "create introduction note failed : " << filePath;
+            }
         }
-    }
+    });
 }
 
 CWizNoteManager::CWizNoteManager(CWizExplorerApp& app)

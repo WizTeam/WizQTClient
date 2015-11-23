@@ -5483,17 +5483,25 @@ void CWizCategoryView::loadChildState(QTreeWidgetItem* pItem, QSettings* setting
 {
     loadItemState(pItem, settings);
 
-    if (!m_strSelectedId.isEmpty()) {
+    if (!m_strSelectedId.isEmpty())
+    {
         CWizCategoryViewItemBase* pi = dynamic_cast<CWizCategoryViewItemBase*>(pItem);
         if (!pi)
             return;
 
-        if (pi->id() == m_strSelectedId) {
+        if (pi->id() == m_strSelectedId)
+        {
             setCurrentItem(pItem);
         }
     }
+    else
+    {
+        CWizCategoryViewItemBase* pi = findAllFolderItem();
+        setCurrentItem(pi);
+    }
 
-    for (int i = 0; i < pItem->childCount(); i++) {
+    for (int i = 0; i < pItem->childCount(); i++)
+    {
         loadChildState(pItem->child(i), settings);
     }
 }

@@ -3550,7 +3550,10 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
         return false;
 
     QString strTitle = Utils::Misc::extractFileTitle(templateZiwFile);
-    newDoc.strTitle = strTitle;
+    if (newDoc.strTitle.isEmpty())
+    {
+        newDoc.strTitle = strTitle;
+    }
 
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }
