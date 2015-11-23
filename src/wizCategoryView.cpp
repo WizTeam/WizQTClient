@@ -2859,6 +2859,10 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         if (bUseCount)
         {
             emit itemSelectionChanged();
+            if (pItem->hitTestUnread())
+            {
+                emit unreadButtonClicked();
+            }
         }
         else if (pItem->isExtraButtonUseable() && pItem->extraButtonClickTest())
         {
@@ -2882,14 +2886,6 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
         else if (pItem->hitTestUnread())
         {
             emit itemSelectionChanged();
-            emit unreadButtonClicked();
-        }
-    }
-    else if (item->type() == Category_BizGroupRootItem)
-    {
-        CWizCategoryViewBizGroupRootItem* bizRoot = dynamic_cast<CWizCategoryViewBizGroupRootItem*>(item);
-        if (bizRoot && bizRoot->hitTestUnread())
-        {
             emit unreadButtonClicked();
         }
     }
