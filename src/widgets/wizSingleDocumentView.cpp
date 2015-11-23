@@ -4,14 +4,14 @@
 #include <QAction>
 #include <QPainter>
 #include <QDebug>
+#include "utils/stylehelper.h"
+#include "share/wizmisc.h"
+#include "widgets/wizLocalProgressWebView.h"
+#include "titlebar.h"
 #include "wizDocumentView.h"
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
-#include "share/wizmisc.h"
-#include "utils/stylehelper.h"
-#include "titlebar.h"
 #include "wizEditorToolBar.h"
-#include "widgets/wizLocalProgressWebView.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
@@ -65,7 +65,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     m_containerWgt->setLayout(containerLayout);
 
     m_docView = new CWizDocumentView(app, m_containerWgt);
-    m_docView->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
+    m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
                                      "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
     m_docView->web()->setInSeperateWindow(true);
     if (WizIsHighPixel())
