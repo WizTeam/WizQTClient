@@ -2401,7 +2401,7 @@ void EditorToolBar::showCoachingTips()
             }
         });
         //
-        tipWidget->addToTipListManager(m_btnShowExtra, 0, -6);
+        tipWidget->addToTipListManager(m_btnShowExtra, 0, -4);
     }
 }
 
