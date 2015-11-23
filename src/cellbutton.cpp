@@ -196,18 +196,20 @@ QString RoundCellButton::text() const
 
 int RoundCellButton::iconWidth() const
 {
-    switch (m_state) {
-    case Normal:
-        return 12;
-        break;
-    case Checked:
-    case Badge:
-        return 13;
-        break;
-    default:
-        Q_ASSERT(0);
-        break;
-    }
+    return 14;
+
+//    switch (m_state) {
+//    case Normal:
+//        return 12;
+//        break;
+//    case Checked:
+//    case Badge:
+//        return 13;
+//        break;
+//    default:
+//        Q_ASSERT(0);
+//        break;
+//    }
 }
 
 int RoundCellButton::buttonWidth() const
