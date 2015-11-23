@@ -104,9 +104,9 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
     case -SortingByCreatedTime:
         return compareYearAndMothOfDate(document().tCreated.date(), secItem->sectionData().date) < 0;
     case SortingByModifiedTime:
-        return compareYearAndMothOfDate(document().tModified.date(), secItem->sectionData().date) > 0;
+        return compareYearAndMothOfDate(document().tDataModified.date(), secItem->sectionData().date) > 0;
     case -SortingByModifiedTime:
-        return compareYearAndMothOfDate(document().tModified.date(), secItem->sectionData().date) < 0;
+        return compareYearAndMothOfDate(document().tDataModified.date(), secItem->sectionData().date) < 0;
     case SortingByAccessedTime:
         return compareYearAndMothOfDate(document().tAccessed.date(), secItem->sectionData().date) > 0;
     case -SortingByAccessedTime:
@@ -199,7 +199,7 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByModifiedTime:
         case -SortingByModifiedTime:
-            m_data.infoList << strAuthor << m_data.doc.tModified.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tDataModified.toHumanFriendlyString();
             break;
         case SortingByAccessedTime:
         case -SortingByAccessedTime:
@@ -207,7 +207,7 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.infoList << strAuthor << m_data.doc.tModified.toHumanFriendlyString();
+            m_data.infoList << strAuthor << m_data.doc.tDataModified.toHumanFriendlyString();
             break;
         case SortingByTag:
         case -SortingByTag:
@@ -246,7 +246,7 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByModifiedTime:
         case -SortingByModifiedTime:
-            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
+            m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
             break;
         case SortingByAccessedTime:
         case -SortingByAccessedTime:
@@ -254,11 +254,11 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
+            m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
             break;
         case SortingByTag:
         case -SortingByTag:
-            m_data.infoList << m_data.doc.tModified.toHumanFriendlyString() << tags();
+            m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
             break;
         case SortingByLocation:
         case -SortingByLocation:
@@ -415,15 +415,15 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
         else
             return pOther->m_data.doc.tCreated > m_data.doc.tCreated;
     case SortingByModifiedTime:
-        if (pOther->m_data.doc.tModified == m_data.doc.tModified)
+        if (pOther->m_data.doc.tDataModified == m_data.doc.tDataModified)
             return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
         else
-            return pOther->m_data.doc.tModified < m_data.doc.tModified;
+            return pOther->m_data.doc.tDataModified < m_data.doc.tDataModified;
     case -SortingByModifiedTime:
-        if (pOther->m_data.doc.tModified == m_data.doc.tModified)
+        if (pOther->m_data.doc.tDataModified == m_data.doc.tDataModified)
             return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) > 0;
         else
-            return pOther->m_data.doc.tModified > m_data.doc.tModified;
+            return pOther->m_data.doc.tDataModified > m_data.doc.tDataModified;
     case SortingByAccessedTime:
         if (pOther->m_data.doc.tAccessed == m_data.doc.tAccessed)
             return pOther->m_data.doc.strTitle.localeAwareCompare(m_data.doc.strTitle) < 0;
@@ -835,9 +835,9 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
     case -SortingByCreatedTime:
         return compareYearAndMothOfDate(docItem->document().tCreated.date(), sectionData().date) >= 0;
     case SortingByModifiedTime:
-        return compareYearAndMothOfDate(docItem->document().tModified.date(), sectionData().date) <= 0;
+        return compareYearAndMothOfDate(docItem->document().tDataModified.date(), sectionData().date) <= 0;
     case -SortingByModifiedTime:
-        return compareYearAndMothOfDate(docItem->document().tModified.date(), sectionData().date) >= 0;
+        return compareYearAndMothOfDate(docItem->document().tDataModified.date(), sectionData().date) >= 0;
     case SortingByAccessedTime:
         return compareYearAndMothOfDate(docItem->document().tAccessed.date(), sectionData().date) <= 0;
     case -SortingByAccessedTime:

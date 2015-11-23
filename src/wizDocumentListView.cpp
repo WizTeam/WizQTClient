@@ -595,7 +595,7 @@ bool CWizDocumentListView::getDocumentDateSections(QMap<QDate, int>& dateMap)
         case SortingByModifiedTime:
         case -SortingByModifiedTime:
         {
-            dateTime = docItem->document().tModified.date();
+            dateTime = docItem->document().tDataModified.date();
         }
             break;
         default:

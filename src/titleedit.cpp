@@ -219,6 +219,7 @@ void TitleEdit::onTitleEditingFinished()
         strNewTitle = strNewTitle.trimmed();
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
+            data.tDataModified = WizGetCurrentTime();
             db.ModifyDocumentInfo(data);
 
             emit titleEdited(strNewTitle);

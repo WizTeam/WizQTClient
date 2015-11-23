@@ -94,7 +94,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 
     // common fields
     ui->editCreateTime->setText(data.tCreated.toString());
-    ui->editUpdateTime->setText(data.tModified.toString());
+    ui->editUpdateTime->setText(data.tDataModified.toString());
     ui->editAccessTime->setText(data.tAccessed.toString());
     ui->editURL->setText(data.strURL);
     QString text = data.strURL.isEmpty() ? "" : formatLabelLink(data.strURL, tr("Open"));
