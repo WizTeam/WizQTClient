@@ -5,26 +5,25 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QMenu>
-#include <QMessageBox>
 #include <QLabel>
 #include <QDebug>
 #include <QEventLoop>
 
 #include <coreplugin/icore.h>
 
+#include "wizdef.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizFileMonitor.h"
-#include "wiznotestyle.h"
 #include "share/wizmisc.h"
 #include "share/wizuihelper.h"
-#include "wizdef.h"
-#include "wizButton.h"
 #include "share/wizObjectDataDownloader.h"
-
-#include "wizmainwindow.h"
+#include "share/wizMessageBox.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
+#include "wiznotestyle.h"
+#include "wizButton.h"
+#include "wizmainwindow.h"
 
 using namespace Core::Internal;
 
@@ -213,6 +212,19 @@ void CWizAttachmentListView::addAttachments()
     bool ok = false;
     foreach (QString fileName, files)
     {
+        QFileInfo info(fileName);
+        if (info.size() == 0)
+        {
+            CWizMessageBox::warning(nullptr , tr("Info"), tr("Can not add a 0 bit size file as attachment! File name : ' %1 '").arg(fileName));
+            continue;
+        }
+
+        if (info.isBundle())
+        {
+            CWizMessageBox::warning(nullptr, tr("Info"), tr("Can not add a bundle file as attachment! File name : ' %1 '").arg(fileName));
+            continue;
+        }
+
         WIZDOCUMENTATTACHMENTDATA data;
         data.strKbGUID = m_document.strKbGUID; // needed by under layer
         if (db.AddAttachment(m_document, fileName, data))
