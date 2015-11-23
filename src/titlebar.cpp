@@ -99,31 +99,31 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editBtn = new RoundCellButton(this);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
-    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View  %1 1").arg(getOptionKey()));
-    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Read") , tr("Switch to Reading View  %1 1").arg(getOptionKey()));
-    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Save & Read"), tr("Save and switch to Reading View  %1 1").arg(getOptionKey()));
+    m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View  %1%2").arg(getOptionKey()).arg(1));
+    m_editBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Read") , tr("Switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
+    m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Save & Read"), tr("Save and switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));    
 
     m_separateBtn = new CellButton(CellButton::ImageOnly, this);
     m_separateBtn->setFixedHeight(nTitleHeight);
     QString separateShortcut = ::WizGetShortcut("EditNoteSeparate", "Alt+2");
     m_separateBtn->setShortcut(QKeySequence::fromString(separateShortcut));
-    m_separateBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_use_separate"), tr("View note in seperate window  %1 2").arg(getOptionKey()));
+    m_separateBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_use_separate"), tr("View note in seperate window  %1%2").arg(getOptionKey()).arg(2));
     connect(m_separateBtn, SIGNAL(clicked()), SLOT(onSeparateButtonClicked()));
 
     m_tagBtn = new CellButton(CellButton::ImageOnly, this);
     m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+3");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
-    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags  %1 3").arg(getOptionKey()));
-    m_tagBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_tag_on"), tr("View and add tags  %1 3").arg(getOptionKey()));
+    m_tagBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_tag"), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
+    m_tagBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_tag_on"), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
     m_shareBtn = new CellButton(CellButton::ImageOnly, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
     QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+4");
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
-    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document  %1 4").arg(getOptionKey()));
+    m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share document  %1%2").arg(getOptionKey()).arg(4));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
     CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
     m_shareBtn->setVisible(!oemSettings.isHideShare());
@@ -151,16 +151,16 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_infoBtn->setFixedHeight(nTitleHeight);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
-    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info  %1 5").arg(getOptionKey()));
-    m_infoBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_info_on"), tr("View and modify note's info  %1 5").arg(getOptionKey()));
+    m_infoBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_info"), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
+    m_infoBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_info_on"), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
     m_attachBtn = new CellButton(CellButton::WithCountInfo, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+6");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
-    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments  %1 6").arg(getOptionKey()));
-    m_attachBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_attachment_on"), tr("Add attachments  %1 6").arg(getOptionKey()));
+    m_attachBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_attachment"), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
+    m_attachBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_attachment_on"), tr("Add attachments  %1%2").arg(getOptionKey()).arg(6));
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     // comments
@@ -168,8 +168,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setFixedHeight(nTitleHeight);
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
-    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1 C").arg(getOptionKey()));
-    m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1 C").arg(getOptionKey()));
+    m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
+    m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
     connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
             SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));

@@ -2838,9 +2838,19 @@ w: %3  h: %4</translation>
         <translation>编辑</translation>
     </message>
     <message>
+        <location filename="../src/titlebar.cpp" line="102"/>
+        <source>Switch to Editing View  %1%2</source>
+        <translation type="unfinished">切换到编辑视图  %1%2</translation>
+    </message>
+    <message>
         <location filename="../src/titlebar.cpp" line="103"/>
         <source>Read</source>
         <translation>阅读</translation>
+    </message>
+    <message>
+        <location filename="../src/titlebar.cpp" line="103"/>
+        <source>Switch to Reading View  %1%2</source>
+        <translation type="unfinished">切换到阅读视图  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="104"/>
@@ -2848,53 +2858,43 @@ w: %3  h: %4</translation>
         <translation>保存并阅读</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="102"/>
-        <source>Switch to Editing View  %1 1</source>
-        <translation type="unfinished">切换到编辑视图  %1 1</translation>
-    </message>
-    <message>
-        <location filename="../src/titlebar.cpp" line="103"/>
-        <source>Switch to Reading View  %1 1</source>
-        <translation type="unfinished">切换到阅读视图  %1 1</translation>
-    </message>
-    <message>
         <location filename="../src/titlebar.cpp" line="104"/>
-        <source>Save and switch to Reading View  %1 1</source>
-        <translation type="unfinished">保存并切换到阅读视图  %1 1</translation>
+        <source>Save and switch to Reading View  %1%2</source>
+        <translation type="unfinished">保存并切换到阅读视图  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="111"/>
-        <source>View note in seperate window  %1 2</source>
-        <translation type="unfinished">在单独窗口打开笔记  %1 2</translation>
+        <source>View note in seperate window  %1%2</source>
+        <translation type="unfinished">在单独窗口打开笔记  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="118"/>
         <location filename="../src/titlebar.cpp" line="119"/>
-        <source>View and add tags  %1 3</source>
-        <translation type="unfinished">查看并添加标签  %1 3</translation>
+        <source>View and add tags  %1%2</source>
+        <translation type="unfinished">查看并添加标签  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="126"/>
-        <source>Share document  %1 4</source>
-        <translation type="unfinished">分享笔记  %1 4</translation>
+        <source>Share document  %1%2</source>
+        <translation type="unfinished">分享笔记  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="154"/>
         <location filename="../src/titlebar.cpp" line="155"/>
-        <source>View and modify note&apos;s info  %1 5</source>
-        <translation type="unfinished">查看并修改笔记属性  %1 5</translation>
+        <source>View and modify note&apos;s info  %1%2</source>
+        <translation type="unfinished">查看并修改笔记属性  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="162"/>
         <location filename="../src/titlebar.cpp" line="163"/>
-        <source>Add attachments  %1 6</source>
-        <translation type="unfinished">添加附件  %1 6</translation>
+        <source>Add attachments  %1%2</source>
+        <translation type="unfinished">添加附件  %1%2</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="171"/>
         <location filename="../src/titlebar.cpp" line="172"/>
-        <source>Add comments  %1 C</source>
-        <translation type="unfinished">浏览并添加评论  %1 C</translation>
+        <source>Add comments  %1C</source>
+        <translation type="unfinished">浏览并添加评论  %1C</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="545"/>
