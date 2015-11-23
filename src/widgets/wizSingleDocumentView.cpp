@@ -65,9 +65,9 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     m_containerWgt->setLayout(containerLayout);
 
     m_docView = new CWizDocumentView(app, m_containerWgt);
-    m_docView->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"));
-    m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"
+    m_docView->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
                                      "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
+    m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"));
     m_docView->web()->setInSeperateWindow(true);
     if (WizIsHighPixel())
     {
