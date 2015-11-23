@@ -2070,9 +2070,9 @@ void MainWindow::initClient()
 
     // set minimum width
     bool isHighPix = WizIsHighPixel();
+    setMinimumWidth(isHighPix ? 785 : 985);
     m_category->setMinimumWidth(isHighPix ? 76 : 165);
     m_docListContainer->setMinimumWidth(isHighPix ? 113 : 244);
-    setMinimumWidth(isHighPix ? 785 : 985);
     m_doc->web()->setInSeperateWindow(false);
     m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
     m_doc->web()->setMinimumWidth(576);
@@ -2871,145 +2871,145 @@ void MainWindow::on_messageSelector_senderSelected(QString userGUID)
     loadMessageByUserGuid(userGUID);
 }
 
-void MainWindow::on_actionFormatJustifyLeft_triggered()
+void MainWindow::on_actionMenuFormatJustifyLeft_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyLeft");
     getActiveEditor()->editorCommandExecuteJustifyLeft();
 }
 
-void MainWindow::on_actionFormatJustifyRight_triggered()
+void MainWindow::on_actionMenuFormatJustifyRight_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyRight");
     getActiveEditor()->editorCommandExecuteJustifyRight();
 }
 
-void MainWindow::on_actionFormatJustifyCenter_triggered()
+void MainWindow::on_actionMenuFormatJustifyCenter_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyCenter");
     getActiveEditor()->editorCommandExecuteJustifyCenter();
 }
 
-void MainWindow::on_actionFormatJustifyJustify_triggered()
+void MainWindow::on_actionMenuFormatJustifyJustify_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarJustifyJustify");
     getActiveEditor()->editorCommandExecuteJustifyJustify();
 }
 
-void MainWindow::on_actionFormatInsertOrderedList_triggered()
+void MainWindow::on_actionMenuFormatInsertOrderedList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarOrderedList");
     getActiveEditor()->editorCommandExecuteInsertOrderedList();
 }
 
-void MainWindow::on_actionFormatInsertUnorderedList_triggered()
+void MainWindow::on_actionMenuFormatInsertUnorderedList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnorderedList");
     getActiveEditor()->editorCommandExecuteInsertUnorderedList();
 }
 
-void MainWindow::on_actionFormatInsertTable_triggered()
+void MainWindow::on_actionMenuFormatInsertTable_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnorderedList");
     getActiveEditor()->editorCommandExecuteTableInsert();
 }
 
-void MainWindow::on_actionFormatInsertLink_triggered()
+void MainWindow::on_actionMenuFormatInsertLink_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertLink");
     getActiveEditor()->editorCommandExecuteLinkInsert();
 }
 
-void MainWindow::on_actionFormatBold_triggered()
+void MainWindow::on_actionMenuFormatBold_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarBold");
     getActiveEditor()->editorCommandExecuteBold();
 }
 
-void MainWindow::on_actionFormatItalic_triggered()
+void MainWindow::on_actionMenuFormatItalic_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarItalic");
     getActiveEditor()->editorCommandExecuteItalic();
 }
 
-void MainWindow::on_actionFormatUnderLine_triggered()
+void MainWindow::on_actionMenuFormatUnderLine_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarUnderLine");
     getActiveEditor()->editorCommandExecuteUnderLine();
 }
 
-void MainWindow::on_actionFormatStrikeThrough_triggered()
+void MainWindow::on_actionMenuFormatStrikeThrough_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarStrikeThrough");
     getActiveEditor()->editorCommandExecuteStrikeThrough();
 }
 
-void MainWindow::on_actionFormatInsertHorizontal_triggered()
+void MainWindow::on_actionMenuFormatInsertHorizontal_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertHorizontal");
     getActiveEditor()->editorCommandExecuteInsertHorizontal();
 }
 
-void MainWindow::on_actionFormatInsertDate_triggered()
+void MainWindow::on_actionMenuFormatInsertDate_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertDate");
     getActiveEditor()->editorCommandExecuteInsertDate();
 }
 
-void MainWindow::on_actionFormatInsertTime_triggered()
+void MainWindow::on_actionMenuFormatInsertTime_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertTime");
     getActiveEditor()->editorCommandExecuteInsertTime();
 }
 
-void MainWindow::on_actionFormatIndent_triggered()
+void MainWindow::on_actionMenuFormatIndent_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarIndent");
     getActiveEditor()->editorCommandExecuteIndent();
 }
 
-void MainWindow::on_actionFormatOutdent_triggered()
+void MainWindow::on_actionMenuFormatOutdent_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarOutdent");
     getActiveEditor()->editorCommandExecuteOutdent();
 }
 
-void MainWindow::on_actionFormatRemoveFormat_triggered()
+void MainWindow::on_actionMenuFormatRemoveFormat_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarRemoveFormat");
     getActiveEditor()->editorCommandExecuteRemoveFormat();
 }
 
-void MainWindow::on_actionFormatPlainText_triggered()
+void MainWindow::on_actionMenuFormatPlainText_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPlainText");
     getActiveEditor()->editorCommandExecutePlainText();
 }
 
-void MainWindow::on_actionEditorViewSource_triggered()
+void MainWindow::on_actionMenuEditorViewSource_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarViewSource");
     getActiveEditor()->editorCommandExecuteViewSource();
 }
 
-void MainWindow::on_actionFormatInsertCheckList_triggered()
+void MainWindow::on_actionMenuFormatInsertCheckList_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertCheckList");
     getActiveEditor()->editorCommandExecuteInsertCheckList();
 }
 
-void MainWindow::on_actionFormatInsertCode_triggered()
+void MainWindow::on_actionMenuFormatInsertCode_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertCode");
     getActiveEditor()->editorCommandExecuteInsertCode();
 }
 
-void MainWindow::on_actionFormatInsertImage_triggered()
+void MainWindow::on_actionMenuFormatInsertImage_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertImage");
     getActiveEditor()->editorCommandExecuteInsertImage();
 }
 
-void MainWindow::on_actionFormatScreenShot_triggered()
+void MainWindow::on_actionMenuFormatScreenShot_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarScreenShot");
     getActiveEditor()->editorCommandExecuteScreenShot();

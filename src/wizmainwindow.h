@@ -339,30 +339,30 @@ public Q_SLOTS:
     void on_messageSelector_senderSelected(QString userGUID);
 
     // menu format
-    void on_actionFormatJustifyLeft_triggered();
-    void on_actionFormatJustifyRight_triggered();
-    void on_actionFormatJustifyCenter_triggered();
-    void on_actionFormatJustifyJustify_triggered();
-    void on_actionFormatIndent_triggered();
-    void on_actionFormatOutdent_triggered();
-    void on_actionFormatInsertOrderedList_triggered();
-    void on_actionFormatInsertUnorderedList_triggered();
-    void on_actionFormatInsertTable_triggered();
-    void on_actionFormatInsertLink_triggered();
-    void on_actionFormatBold_triggered();
-    void on_actionFormatItalic_triggered();
-    void on_actionFormatUnderLine_triggered();
-    void on_actionFormatStrikeThrough_triggered();
-    void on_actionFormatInsertHorizontal_triggered();
-    void on_actionFormatInsertDate_triggered();
-    void on_actionFormatInsertTime_triggered();
-    void on_actionFormatRemoveFormat_triggered();
-    void on_actionFormatPlainText_triggered();
-    void on_actionEditorViewSource_triggered();
-    void on_actionFormatInsertCheckList_triggered();
-    void on_actionFormatInsertCode_triggered();
-    void on_actionFormatInsertImage_triggered();
-    void on_actionFormatScreenShot_triggered();
+    void on_actionMenuFormatJustifyLeft_triggered();
+    void on_actionMenuFormatJustifyRight_triggered();
+    void on_actionMenuFormatJustifyCenter_triggered();
+    void on_actionMenuFormatJustifyJustify_triggered();
+    void on_actionMenuFormatIndent_triggered();
+    void on_actionMenuFormatOutdent_triggered();
+    void on_actionMenuFormatInsertOrderedList_triggered();
+    void on_actionMenuFormatInsertUnorderedList_triggered();
+    void on_actionMenuFormatInsertTable_triggered();
+    void on_actionMenuFormatInsertLink_triggered();
+    void on_actionMenuFormatBold_triggered();
+    void on_actionMenuFormatItalic_triggered();
+    void on_actionMenuFormatUnderLine_triggered();
+    void on_actionMenuFormatStrikeThrough_triggered();
+    void on_actionMenuFormatInsertHorizontal_triggered();
+    void on_actionMenuFormatInsertDate_triggered();
+    void on_actionMenuFormatInsertTime_triggered();
+    void on_actionMenuFormatRemoveFormat_triggered();
+    void on_actionMenuFormatPlainText_triggered();
+    void on_actionMenuEditorViewSource_triggered();
+    void on_actionMenuFormatInsertCheckList_triggered();
+    void on_actionMenuFormatInsertCode_triggered();
+    void on_actionMenuFormatInsertImage_triggered();
+    void on_actionMenuFormatScreenShot_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
                           bool bStart, bool bEnd);
