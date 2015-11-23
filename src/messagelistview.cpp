@@ -44,6 +44,8 @@
 #include "wizCategoryViewItem.h"
 #include "wizmainwindow.h"
 
+#define ALLMENBERS QObject::tr("All Members")
+
 QString processMssageTitle(CWizDatabaseManager& dbMgr, const WIZMESSAGEDATA& data)
 {
     if (data.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP && !data.kbGUID.isEmpty())
@@ -95,7 +97,6 @@ QString bodyText(const WIZMESSAGEDATA& msg)
 namespace WizService {
 namespace Internal {
 
-const QString ALLMENBERS = QObject::tr("All Members");
 
 class MessageListViewItem : public QListWidgetItem
 {
