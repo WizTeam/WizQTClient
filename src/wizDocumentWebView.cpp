@@ -1114,20 +1114,13 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
     else
     {
         QString strUrl = url.toString();
-        if (strUrl.contains("#"))
+        if (strUrl.left(12) == "http://file/")
         {
-            page()->mainFrame()->load(url);
+            strUrl.replace(0, 12, "file:/");
         }
-        else
-        {
-            if (strUrl.left(12) == "http://file/")
-            {
-                strUrl.replace(0, 12, "file:/");
-            }
 
-            qDebug() << "Open url " << strUrl;
-            QDesktopServices::openUrl(strUrl);
-        }
+        qDebug() << "Open url " << strUrl;
+        QDesktopServices::openUrl(strUrl);
     }
 }
 
@@ -1933,7 +1926,6 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
     analyzer.LogAction("removeFormat");
     return editorCommandExecuteCommand("removeFormat");
 }
-
 bool CWizDocumentWebView::editorCommandExecutePlainText()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
