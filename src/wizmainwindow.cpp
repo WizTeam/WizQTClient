@@ -3582,7 +3582,9 @@ void MainWindow::locateDocument(const WIZDOCUMENTDATA& data)
         if (m_category->setCurrentIndex(data))
         {
             m_bUpdatingSelection = false;
+            m_documents->blockSignals(true);
             m_documents->addAndSelectDocument(data);
+            m_documents->blockSignals(false);
         }
     }
     catch (...)
