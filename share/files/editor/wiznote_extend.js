@@ -1,3 +1,34 @@
+//webview的锚点跳转存在问题，通过js来控制跳转
+var WizHref = function() {
+    var _doc;
+    var onClick = function(e) {
+        var a = e.target,
+            href = a.getAttribute('href') || '';
+        if (href && href.indexOf('#') === 0) {
+            var dom = _doc.querySelector(href);
+            if (dom) {
+                dom.scrollIntoView(true);
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }
+    };
+
+    var wizHref = {
+        on: function(doc) {
+            _doc = doc;
+            _doc.body.addEventListener('click', onClick);
+        },
+        off: function(doc) {
+            _doc = doc;
+            doc.body.removeEventListener('click', onClick);
+        }
+    };
+    return wizHref;
+};
+
+
+
 var
     editor = null,
     m_inited = false,
@@ -9,6 +40,7 @@ var
     m_header = "",
     wiz_html = "",
     wiz_head = "";
+    wiz_href = new WizHref();
 
 
 // setup ueditor
@@ -123,14 +155,10 @@ function loadSingleJs(doc, path) {
 
 function setEditorHtml(html, bEditing)
 {
-    editor.reset();
-    editor.document.head.innerHTML = wiz_head;
-    //if (bEditing) {
-    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = wiz_head;
-    //}
+    setWizHrefEnable(bEditing == false);
 
+    editor.reset();
+    editor.document.head.innerHTML = wiz_head;    
     editor.document.body.innerHTML = html;
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');
@@ -146,14 +174,10 @@ function setEditorHtml(html, bEditing)
     });
 }
 
-function setEditing(bEditing) {
-    editor.document.head.innerHTML = wiz_head;
-    //if (bEditing) {
-    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = wiz_head;
-    //}
+function setEditing(bEditing) {    
+    setWizHrefEnable(bEditing == false);
 
+    editor.document.head.innerHTML = wiz_head;
     editor.document.body.innerHTML = wiz_html;
 
     //special process to remove css style added by phone
@@ -431,4 +455,13 @@ function updateCustomCss() {
 	if (editor.document.head) {
 		editor.document.head.appendChild(objStyle);
 	}	
+}
+
+function setWizHrefEnable (enable) {
+    var iframeDoc = window.document.getElementById('ueditor_0').contentDocument;
+    if (enable) {       
+       wiz_href.on(iframeDoc);
+    } else {
+       wiz_href.off(iframeDoc);
+    }
 }
