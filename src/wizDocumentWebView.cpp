@@ -576,6 +576,19 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
 #endif
 //            QImageReader reader(strFileName);
             QFileInfo info(strFileName);
+
+            //FIXME: //TODO:  应该和附件列表中的添加附件合并
+            if (info.size() == 0)
+            {
+                CWizMessageBox::warning(nullptr , tr("Info"), tr("Can not add a 0 bit size file as attachment! File name : ' %1 '").arg(strFileName));
+                continue;
+            }
+            else if (info.isBundle())
+            {
+                CWizMessageBox::warning(nullptr, tr("Info"), tr("Can not add a bundle file as attachment! File name : ' %1 '").arg(strFileName));
+                continue;
+            }
+
             QList<QByteArray> imageFormats = QImageReader::supportedImageFormats();
             if (imageFormats.contains(info.suffix().toUtf8()))
             {
