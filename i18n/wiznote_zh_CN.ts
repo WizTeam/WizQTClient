@@ -797,27 +797,27 @@
         <translation type="unfinished">群组笔记暂不支持分享链接功能</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1901"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1894"/>
         <source>Image File</source>
         <translation>图片文件</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1901"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1894"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>图片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2228"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2220"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 文件 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2273"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2265"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2273"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2265"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未发现可用打印机！请在系统打印机列表中添加打印机。</translation>
     </message>
@@ -2702,30 +2702,30 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="2128"/>
         <source>Unread documents</source>
-        <translation type="unfinished">未读笔记</translation>
+        <translation>未读笔记</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="2149"/>
         <source>Mark all documents read</source>
-        <translation type="unfinished">将所有未读笔记标记为已读</translation>
+        <translation>将所有未读笔记标记为已读</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="2847"/>
         <source>Mark all as readed</source>
-        <translation type="unfinished">标记为已读</translation>
+        <translation>标记为已读</translation>
     </message>
     <message>
         <location filename="../src/wizmainwindow.cpp" line="2847"/>
         <source>Mark all documents as readed.</source>
-        <translation type="unfinished">将所有未读笔记标记为已读</translation>
+        <translation>将所有未读笔记标记为已读</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="4327"/>
+        <location filename="../src/wizmainwindow.cpp" line="4323"/>
         <source>Downloading attachment file  %1 ...</source>
         <translation>下载附件 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/wizmainwindow.cpp" line="4328"/>
+        <location filename="../src/wizmainwindow.cpp" line="4324"/>
         <source>Downloading</source>
         <translation>正在下载</translation>
     </message>
@@ -2853,40 +2853,40 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/titlebar.cpp" line="102"/>
         <source>View note in seperate window (Alt + 2)</source>
-        <translation type="unfinished">在独立窗口打开笔记 (Alt + 2)</translation>
+        <translation>在独立窗口打开笔记 (Alt + 2)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="145"/>
         <location filename="../src/titlebar.cpp" line="146"/>
         <source>View and modify note&apos;s info (Alt + 5)</source>
-        <translation type="unfinished">浏览并修改笔记属性 (Alt + 5)</translation>
+        <translation>浏览并修改笔记属性 (Alt + 5)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="153"/>
         <location filename="../src/titlebar.cpp" line="154"/>
         <source>Add attachments (Alt + 6)</source>
-        <translation type="unfinished">添加附件 (Alt + 6)</translation>
+        <translation>添加附件 (Alt + 6)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="536"/>
         <source>Switch to reading mode</source>
-        <translation type="unfinished">切换到阅读模式</translation>
+        <translation>切换到阅读模式</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="536"/>
         <source>In reading mode, the note can not be edited and markdown note can be redered.</source>
-        <translation type="unfinished">在阅读模式下，不能编辑笔记。Markdown笔记会在阅读模式下进行渲染</translation>
+        <translation>在阅读模式下，不能编辑笔记。Markdown笔记会在阅读模式下进行渲染</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="109"/>
         <location filename="../src/titlebar.cpp" line="110"/>
         <source>View and add tags (Alt + 3)</source>
-        <translation type="unfinished">浏览并添加标签 (Alt + 3)</translation>
+        <translation>浏览并添加标签 (Alt + 3)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="117"/>
         <source>Share document (Alt + 4)</source>
-        <translation type="unfinished">分享笔记 (Alt + 4)</translation>
+        <translation>分享笔记 (Alt + 4)</translation>
     </message>
     <message>
         <location filename="../src/titlebar.cpp" line="162"/>
@@ -3780,7 +3780,7 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="35"/>
         <source>Locate</source>
-        <translation type="unfinished">定位</translation>
+        <translation>定位</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="37"/>
@@ -4624,7 +4624,7 @@ w: %3  h: %4</translation>
         <translation>$分享给朋友的笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2280"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2272"/>
         <source>Print Document</source>
         <translation>打印文档</translation>
     </message>
@@ -5263,6 +5263,30 @@ w: %3  h: %4</translation>
         <location filename="../src/messagecompleter.cpp" line="140"/>
         <source>all</source>
         <translation>所有人</translation>
+    </message>
+</context>
+<context>
+    <name>WizSuggestCompletionon</name>
+    <message>
+        <location filename="../src/mac/wizSearchWidget_mm.cpp" line="108"/>
+        <source>Advanced Search</source>
+        <translation type="unfinished">高级搜索</translation>
+    </message>
+    <message>
+        <location filename="../src/mac/wizSearchWidget_mm.cpp" line="130"/>
+        <source>Suggestion will be showed here</source>
+        <translation type="unfinished">这里显示搜索建议</translation>
+    </message>
+    <message>
+        <location filename="../src/mac/wizSearchWidget_mm.cpp" line="238"/>
+        <location filename="../src/mac/wizSearchWidget_mm.cpp" line="342"/>
+        <source>Recent Searches</source>
+        <translation type="unfinished">近期搜索</translation>
+    </message>
+    <message>
+        <location filename="../src/mac/wizSearchWidget_mm.cpp" line="238"/>
+        <source>Suggestions</source>
+        <translation type="unfinished">建议</translation>
     </message>
 </context>
 <context>

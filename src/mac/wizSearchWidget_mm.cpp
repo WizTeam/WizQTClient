@@ -127,7 +127,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
     QVBoxLayout* infoLayout = new QVBoxLayout(m_infoWgt);
     QLabel* label = new QLabel(m_infoWgt);
-    label->setText("Suggestion will be showed here");
+    label->setText(tr("Suggestion will be showed here"));
     label->setAlignment(Qt::AlignCenter);
     infoLayout->addWidget(label);
 
