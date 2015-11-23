@@ -236,7 +236,7 @@
         <location filename="../src/wizCategoryView.cpp" line="1038"/>
         <location filename="../src/wizCategoryView.cpp" line="2875"/>
         <location filename="../src/wizCategoryView.cpp" line="3607"/>
-        <location filename="../src/wizCategoryView.cpp" line="5987"/>
+        <location filename="../src/wizCategoryView.cpp" line="5995"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -246,7 +246,7 @@
         <location filename="../src/wizCategoryView.cpp" line="1012"/>
         <location filename="../src/wizCategoryView.cpp" line="1038"/>
         <location filename="../src/wizCategoryView.cpp" line="3607"/>
-        <location filename="../src/wizCategoryView.cpp" line="5987"/>
+        <location filename="../src/wizCategoryView.cpp" line="5995"/>
         <source>Folder &apos;%1&apos; already exists, combine these folders?</source>
         <translation>資料夾 &apos;%1&apos; 已存在，是否合併？</translation>
     </message>
@@ -546,69 +546,69 @@
         <translation>密碼錯誤！</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3879"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3882"/>
         <source>My Notes</source>
         <translation>我的筆記</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3881"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3884"/>
         <source>My Journals</source>
         <translation>我的日記</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3883"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3886"/>
         <source>My Contacts</source>
         <translation>我的聯絡人</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3885"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3888"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3887"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3890"/>
         <source>My Sticky Notes</source>
         <translation>我的自黏便籤</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3889"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3892"/>
         <source>My Emails</source>
         <translation>我的郵件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3891"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3894"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3893"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3896"/>
         <source>My Tasks</source>
         <translation>我的任務</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3897"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3900"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3899"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3902"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4254"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4257"/>
         <source>Doucment  %1  Password</source>
         <translation>筆記 %1 密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4255"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4258"/>
         <source>Password :</source>
         <translation>密碼：</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="1025"/>
         <location filename="../src/share/wizDatabase.cpp" line="1058"/>
-        <location filename="../src/share/wizDatabase.cpp" line="4265"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4268"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -623,7 +623,7 @@
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4265"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4268"/>
         <source>password error!</source>
         <translation>密碼錯誤！</translation>
     </message>
@@ -3733,18 +3733,18 @@ w: %3  h: %4</translation>
         <translation>復原已刪除筆記...</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="5660"/>
-        <location filename="../src/wizCategoryView.cpp" line="5673"/>
-        <location filename="../src/wizCategoryView.cpp" line="5720"/>
-        <location filename="../src/wizCategoryView.cpp" line="5735"/>
+        <location filename="../src/wizCategoryView.cpp" line="5668"/>
+        <location filename="../src/wizCategoryView.cpp" line="5681"/>
+        <location filename="../src/wizCategoryView.cpp" line="5728"/>
+        <location filename="../src/wizCategoryView.cpp" line="5743"/>
         <source>Move folders to %1</source>
         <translation>移動資料夾到 %1</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="5784"/>
-        <location filename="../src/wizCategoryView.cpp" line="5794"/>
-        <location filename="../src/wizCategoryView.cpp" line="5845"/>
-        <location filename="../src/wizCategoryView.cpp" line="5863"/>
+        <location filename="../src/wizCategoryView.cpp" line="5792"/>
+        <location filename="../src/wizCategoryView.cpp" line="5802"/>
+        <location filename="../src/wizCategoryView.cpp" line="5853"/>
+        <location filename="../src/wizCategoryView.cpp" line="5871"/>
         <source>Copy folders to %1</source>
         <translation>複製資料夾到 %1</translation>
     </message>
@@ -3828,7 +3828,7 @@ w: %3  h: %4</translation>
         <translation>大于100MB</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="5884"/>
+        <location filename="../src/wizCategoryView.cpp" line="5892"/>
         <location filename="../src/wizDocumentListView.cpp" line="331"/>
         <location filename="../src/wizDocumentListView.cpp" line="347"/>
         <source>Move notes to %1</source>
