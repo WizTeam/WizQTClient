@@ -44,7 +44,7 @@ void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
     QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy/M/d");
     m_labelCreatedTime->setText(strCreateTime);
 
-    QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy/M/d");
+    QString strModifiedTime = QObject::tr("Update time: ") + data.tDataModified.toString("yyyy/M/d");
     m_labelModifiedTime->setText(strModifiedTime);
 
 
