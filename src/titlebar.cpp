@@ -61,7 +61,7 @@ QString getOptionKey()
 #ifdef Q_OS_MAC
     return "⌥";
 #else
-    return "Alt+"
+    return "Alt+";
 #endif
 }
 

@@ -824,7 +824,7 @@ QString commandKey()
 #ifdef Q_OS_MAC
     return "⌘";
 #else
-    return "Ctrl+"
+    return "Ctrl+";
 #endif
 }
 
@@ -833,7 +833,7 @@ QString optionKey()
 #ifdef Q_OS_MAC
     return "⌥";
 #else
-    return "Alt+"
+    return "Alt+";
 #endif
 }
 QString shiftKey()

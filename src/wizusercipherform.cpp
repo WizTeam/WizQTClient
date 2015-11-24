@@ -4,7 +4,7 @@
 #include <QGraphicsDropShadowEffect>
 
 #include "wizmainwindow.h"
-#include "Utils/stylehelper.h"
+#include "utils/stylehelper.h"
 
 using namespace Core::Internal;
 

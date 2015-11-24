@@ -3,7 +3,11 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
+#if QT_VERSION > 0x050000
 #include <QtConcurrent>
+#else
+#include <QtConcurrentRun>
+#endif
 
 #include "share/wizobject.h"
 #include "utils/pathresolve.h"

@@ -237,7 +237,8 @@ int mainCore(int argc, char *argv[])
 #endif
 
     a.setStyleSheet("QToolTip { \
-                    font: 12px #000000; \
+                    font: 12px; \
+                    color:#000000; \
                     padding:0px 1px; \
                     background-color: #F8F8F8; \
                     border:0px;}");
