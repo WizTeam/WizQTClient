@@ -15,24 +15,25 @@
 #include "wizmainwindow.h"
 #include "wizProgressDialog.h"
 #include "wiznotestyle.h"
+#include "utils/stylehelper.h"
+#include "utils/misc.h"
 #include "share/wizdrawtexthelper.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizSearchIndexer.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectOperator.h"
-#include "wizFolderSelector.h"
-#include "wizLineInputDialog.h"
-#include "wizWebSettingsDialog.h"
+#include "share/wizMessageBox.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
-#include "utils/stylehelper.h"
-#include "utils/misc.h"
+#include "mac/wizmachelper.h"
+#include "wizFolderSelector.h"
+#include "wizLineInputDialog.h"
+#include "wizWebSettingsDialog.h"
 #include "wizFileReader.h"
 #include "widgets/wizAdvancedSearchDialog.h"
 #include "wizOEMSettings.h"
-#include "share/wizMessageBox.h"
 
 using namespace WizService;
 
@@ -346,6 +347,26 @@ void CWizCategoryBaseView::dragEnterEvent(QDragEnterEvent *event)
 void CWizCategoryBaseView::dragMoveEvent(QDragMoveEvent *event)
 {
     m_dragHoveredPos = event->pos();
+
+#ifdef Q_OS_MAC
+    //osx10.11系统上自动滚动存在问题，通过判断进行强制滚动
+    static bool isEiCapitan = (getSystemMinorVersion() >= 11);
+    if (isEiCapitan)
+    {
+        QTreeWidgetItem* hoverItem = itemAt(event->pos());
+        QRect rcVisual = viewport()->rect();
+        QTreeWidgetItem* aboveItem = itemAbove(hoverItem);
+        QTreeWidgetItem* belowItem = itemBelow(hoverItem);
+        if (aboveItem && visualItemRect(aboveItem).top() < rcVisual.top())
+        {
+            scrollToItem(aboveItem);
+        }
+        if (belowItem && visualItemRect(belowItem).bottom() > rcVisual.bottom())
+        {
+            scrollToItem(belowItem);
+        }
+    }
+#endif
 
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS) )
     {
