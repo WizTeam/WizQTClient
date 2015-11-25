@@ -501,7 +501,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         {
             pItem->drop(m_dragItem);
             setCurrentItem(m_dragItem);
-            event->accept();
+            event->ignore();
         }
         else
         {
