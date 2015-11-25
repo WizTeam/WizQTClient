@@ -1982,12 +1982,6 @@ void MainWindow::initToolBar()
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
 
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-
-
-
-
     updateHistoryButtonStatus();
 
     //
