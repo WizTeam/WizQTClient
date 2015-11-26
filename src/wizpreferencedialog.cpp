@@ -5,12 +5,13 @@
 #include <QFontDialog>
 #include <QColorDialog>
 
+#include "plugins/coreplugin/icore.h"
+#include "utils/pathresolve.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
+#include "widgets/wizMarkdownTemplateDialog.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
-#include "widgets/wizMarkdownTemplateDialog.h"
-#include "plugins/coreplugin/icore.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -346,10 +347,9 @@ void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
     QString strLocaleName = m_locales[index];
     if (strLocaleName.compare(userSettings().locale())) {
         userSettings().setLocale(strLocaleName);
+
+        CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
     }
-
-
-    CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
 }
 
 void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
