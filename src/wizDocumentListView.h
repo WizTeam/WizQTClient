@@ -220,8 +220,6 @@ public Q_SLOTS:
     void on_vscrollAnimation_finished();
 //#endif // Q_OS_MAC
 
-    void updateDragOperationImage(Qt::DropAction action);
-
 Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();

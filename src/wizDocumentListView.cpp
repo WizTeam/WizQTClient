@@ -993,56 +993,6 @@ void CWizDocumentListView::keyReleaseEvent(QKeyEvent* event)
     QListWidget::keyReleaseEvent(event);
 }
 
-QPixmap WizGetDocumentDragBadget(int nCount)
-{
-    QString strFileName = Utils::PathResolve::resourcesPath() + "skins/document_drag.png";
-    QPixmap pixmap(strFileName);
-
-    if (pixmap.isNull()) {
-        return QPixmap();
-    }
-
-    // default
-    QSize szPixmap(32, 32);
-
-    // count badget width
-    QFont font;
-    font.setPixelSize(10);
-    QFontMetrics fm(font);
-    int width = fm.width(QString::number(nCount));
-    QRect rectBadget(0, 0, width + 15, 16);
-
-    QPixmap pixmapBadget(rectBadget.size());
-    pixmapBadget.fill(Qt::transparent);
-
-    // draw badget
-    QPainter p(&pixmapBadget);
-    p.setRenderHint(QPainter::Antialiasing);
-    QPen pen = p.pen();
-    pen.setWidth(2);
-    pen.setColor("white");
-    p.setPen(pen);
-    QBrush brush = p.brush();
-    brush.setColor("red");
-    brush.setStyle(Qt::SolidPattern);
-    p.setBrush(brush);
-
-    p.drawEllipse(rectBadget);
-    p.drawText(rectBadget,  Qt::AlignCenter, QString::number(nCount));
-
-    // draw badget on icon
-    QPixmap pixmapDragIcon(szPixmap.width() + rectBadget.width() / 2, szPixmap.height());
-    pixmapDragIcon.fill(Qt::transparent);
-    QPainter painter(&pixmapDragIcon);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.drawPixmap(0, 0, pixmap.scaled(szPixmap));
-    painter.drawPixmap(pixmapDragIcon.width() -  rectBadget.width(),
-                       pixmapDragIcon.height() - rectBadget.height(),
-                       pixmapBadget);
-
-    return pixmapDragIcon;
-}
-
 QString note2Mime(const CWizDocumentDataArray& arrayDocument)
 {
     CWizStdStringArray arrayGUID;
@@ -1083,6 +1033,80 @@ bool mime2Notes(const QString& mime, CWizDatabaseManager& dbMgr, CWizDocumentDat
     }
     return !arrayDocument.empty();
 }
+QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
+{
+    const int nImageWidth = 150;
+    const int nItemHeight = 22;
+
+
+    int nItemCount = arrayDocument.size() > 10 ? 10 : arrayDocument.size();
+
+    QPixmap pix(nImageWidth, nItemHeight* (nItemCount + 2) + 8);
+    pix.fill(Qt::transparent);
+
+
+    QPainter pt(&pix);
+    QRect rc = pix.rect();
+    //draw number
+    QRect rcNumber(rc.x() + 12, rc.y(), 18, 18);
+    QFont font = pt.font();
+    font.setPixelSize(12);
+    QFontMetrics fm(font);
+    int textWidth = fm.width(QString::number(arrayDocument.size()));
+    if (rcNumber.width() < (textWidth + 8))
+    {
+        rcNumber.setWidth(textWidth + 8);
+    }
+    qDebug() << "rcNumber rect ; " << rcNumber;
+    pt.setPen(QColor("#FF6052"));
+    pt.setBrush(QColor("#FF6052"));
+    pt.setRenderHint(QPainter::Antialiasing);
+    pt.drawEllipse(rcNumber);
+
+    pt.setPen(QColor("#FFFFFF"));
+    pt.drawText(rcNumber, Qt::AlignCenter, QString::number(arrayDocument.size()));
+
+    QRect rcItem(rc.left(), rcNumber.bottom() + 4, rc.width(), nItemHeight - 4);
+    //draw doc item
+    const int nIconHeight = 14;
+    for (int i = 0; i < nItemCount; i++)
+    {
+        const WIZDOCUMENTDATAEX& doc = arrayDocument.at(i);
+
+        QRect rcIcon(rcItem.left(), rcItem.top() + (rcItem.height() - nIconHeight)/2,
+                     nIconHeight, nIconHeight);
+        QPixmap pixIcon(Utils::StyleHelper::skinResourceFileName(
+                            doc.nProtected == 1 ? "document_badge_encrypted" : "document_badge", true));
+        pt.drawPixmap(rcIcon, pixIcon);
+
+        //
+        QRect rcTitle(rcIcon.right() + 4, rcItem.top(), rcItem.right() - rcIcon.right() - 4, rcItem.height());
+        QString text = fm.elidedText(doc.strTitle, Qt::ElideMiddle, rcTitle.width() - 8);
+        rcTitle.setWidth(fm.width(text) + 8);
+        pt.setPen(QColor("#3177EE"));
+        pt.setBrush(QColor("#3177EE"));
+        pt.drawRoundedRect(rcTitle, 8, 6);
+
+        rcTitle.adjust(4, 0, -4, 0);
+        pt.setPen(QColor("#FFFFFF"));
+        pt.drawText(rcTitle, Qt::AlignVCenter | Qt::AlignLeft, text);
+        rcItem = QRect(rc.left(), rcItem.bottom() + 4, rc.width(), nItemHeight - 4);
+    }
+
+    //draw more
+    if (nItemCount < arrayDocument.size())
+    {
+        rcItem.adjust(0, -nItemHeight / 2, 0, -nItemHeight / 2);
+        QPen pen(QColor("#3177EE"));
+        pen.setWidth(2);
+        pt.setPen(pen);
+        font.setPixelSize(20);
+        pt.setFont(font);
+        pt.drawText(rcItem, Qt::AlignLeft | Qt::AlignTop, "......");
+    }
+
+    return pix;
+}
 
 QPixmap createDragImage(const QString& strMime, CWizDatabaseManager& dbMgr, Qt::DropActions supportedActions)
 {
@@ -1090,7 +1114,7 @@ QPixmap createDragImage(const QString& strMime, CWizDatabaseManager& dbMgr, Qt::
     if (!mime2Notes(strMime, dbMgr, arrayDocument))
         return QPixmap();
 
-    return WizGetDocumentDragBadget(arrayDocument.size());
+    return CreateDocumentDragBadget(arrayDocument);
 }
 
 void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
@@ -1116,8 +1140,6 @@ void CWizDocumentListView::startDrag(Qt::DropActions supportedActions)
     mimeData->setData(WIZNOTE_MIMEFORMAT_DOCUMENTS, strMime.toUtf8());
     drag->setMimeData(mimeData);
     drag->setPixmap(createDragImage(strMime, m_dbMgr, Qt::MoveAction));
-
-    connect(drag, SIGNAL(actionChanged(Qt::DropAction)), SLOT(updateDragOperationImage(Qt::DropAction)));
 
 //    Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
 //    bool forceCopy = keyMod.testFlag(Qt::AltModifier);
@@ -2002,16 +2024,6 @@ void CWizDocumentListView::on_vscrollAnimation_finished()
     //m_vscrollCurrent = 0;
 }
 
-
-
-void CWizDocumentListView::updateDragOperationImage(Qt::DropAction action)
-{
-    qDebug() << "drag drop action changed ; " << action;
-    if (QDrag* drag = dynamic_cast<QDrag*>(sender()))
-    {
-//        drag->mimeData();
-    }
-}
 
 int CWizDocumentListView::numOfEncryptedDocuments(const CWizDocumentDataArray& docArray)
 {
