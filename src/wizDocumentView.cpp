@@ -390,6 +390,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
         stopDocumentEditingStatus();
     }
 
+    m_transitionView->hide();
+
     m_noteLoaded = false;
     m_note = data;
     initStat(data, forceEdit);
