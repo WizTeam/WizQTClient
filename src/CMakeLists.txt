@@ -191,6 +191,7 @@ set(wiznote_SOURCES
     core/wizAccountManager.cpp
     core/wizCommentManager.cpp
     core/wizNoteManager.cpp
+    share/wizthreads.cpp
 )
 
 set(wiznote_HEADERS
@@ -364,6 +365,8 @@ set(wiznote_HEADERS
     core/wizAccountManager.h
     core/wizCommentManager.h
     core/wizNoteManager.h
+    share/wizthreads.h
+    share/wizthreads_p.h
 )
 
 set(wiznote_FORMS
