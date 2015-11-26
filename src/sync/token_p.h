@@ -27,6 +27,7 @@ public:
     QString token();
     void requestToken();
     void clearToken();
+    void clearLastError();
     void setUserId(const QString& strUserId);
     void setPasswd(const QString& strPasswd);
     WIZUSERINFO info();

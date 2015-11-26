@@ -20,6 +20,7 @@ protected:
     //
     virtual QPixmap getAvatar(int width, int height) { return QPixmap(); }
     virtual QIcon getArrow() { return QIcon(); }
+    virtual QIcon getVipIcon() { return QIcon(); }
     //
     virtual int textWidth() const;
 

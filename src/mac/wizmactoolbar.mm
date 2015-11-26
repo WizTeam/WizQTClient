@@ -45,25 +45,10 @@
 #include "wizmachelper.h"
 #include "wizmactoolbar.h"
 #include "wizmactoolbardelegate.h"
+#include "wizmachelper_mm.h"
+#include "wizSearchWidget_mm.h"
 
 #import <AppKit/AppKit.h>
-
-class CWizNSAutoReleasePool
-{
-public:
-    CWizNSAutoReleasePool()
-    {
-        pool = [[NSAutoreleasePool alloc] init];
-    }
-
-    ~CWizNSAutoReleasePool()
-    {
-       [pool release];
-    }
-
-private:
-    NSAutoreleasePool* pool;
-};
 
 class CWizMacToolBarPrivate
 {
@@ -89,6 +74,8 @@ CWizMacToolBar::CWizMacToolBar(QWidget *parent)
 
     setFocusPolicy(Qt::StrongFocus);
     d->m_targetWindow = 0;
+
+//    enableBlendingBlurOnOSX10_10(this);
 }
 
 CWizMacToolBar::~CWizMacToolBar()
@@ -116,7 +103,7 @@ CWizMacToolBar::SizeMode CWizMacToolBar::sizeMode() const
 
 void CWizMacToolBar::setSizeMode(SizeMode sizeMode)
 {
-    [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
+//    [d->toolbar setDisplayMode : NSToolbarSizeMode(sizeMode)];
 }
 
 // show the Toolbar in the given window, delayed
@@ -145,6 +132,7 @@ void CWizMacToolBar::showInWindowImpl(QWidget *window)
     NSView *nsview = (NSView *)window->winId();
     NSWindow *macWindow = [nsview window];
 
+    [macWindow setToolbar: nil];
     [macWindow setToolbar: d->toolbar];
     [d->toolbar setVisible: YES];
 }
@@ -159,14 +147,19 @@ void CWizMacToolBar::addStandardItem(StandardItem standardItem)
     [d->delegate addStandardItem:standardItem];
 }
 
-void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip)
+void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip, int width)
 {
-    [d->delegate addSearch:label tooltip:tooltip];
+    [d->delegate addSearch:label tooltip:tooltip width: width];
 }
 
 void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
 {
     [d->delegate addWidget:widget label:label tooltip:tooltip];
+}
+
+void CWizMacToolBar::deleteAllToolBarItems()
+{
+    [d->delegate deleteAllToolBarItem];
 }
 
 void CWizMacToolBar::onSearchEndEditing(const QString& str)
@@ -177,6 +170,31 @@ void CWizMacToolBar::onSearchEndEditing(const QString& str)
 CWizSearchWidget* CWizMacToolBar::getSearchWidget()
 {
     return [d->delegate getSearchWidget];
+}
+
+void CWizMacToolBar::adjustSearchWidgetWidth(int nWidth)
+{
+    NSToolbarItem* toolbarItem = [d->delegate getSearchToolBarItem];
+    NSSize maxSize = [toolbarItem maxSize];
+    [toolbarItem setMaxSize: NSMakeSize(nWidth, maxSize.height)];
+    NSView* nsView = [toolbarItem view];
+    NSRect f = nsView.frame;
+    f.size.width = nWidth;
+    nsView.frame = f;
+}
+
+void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
+{
+   NSToolbarItem* toolbarItem = [d->delegate getWidgetToolBarItemByWidget: widget];
+   if (toolbarItem)
+   {
+       NSSize maxSize = [toolbarItem maxSize];
+       [toolbarItem setMaxSize: NSMakeSize(nWidth, maxSize.height)];
+       NSView* nsView = [toolbarItem view];
+       NSRect f = nsView.frame;
+       f.size.width = nWidth;
+       nsView.frame = f;
+   }
 }
 
 CWizMacFixedSpacer::CWizMacFixedSpacer(QSize sz, QWidget* parent)
@@ -191,6 +209,61 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 {
      m_sz.setWidth(width);
      setFixedWidth(width);
+//     setMinimumWidth(width);
+}
+
+
+@interface WizButtonItem: NSButton
+{
+    CWizMacToolBarButtonItem* m_pButtonWidget;
+}
+
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget;
+- (void)buttonPressed;
+@end
+
+@implementation WizButtonItem
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget
+{
+    m_pButtonWidget = buttonWidget;
+}
+
+- (void)buttonPressed
+{
+    m_pButtonWidget->buttonClicked();
+}
+@end
+
+
+CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
+                                                           int buttonType, int bezelStyle, int width, QWidget* parent)
+    : QMacCocoaViewContainer(nil, parent)
+    , m_width(width)
+{
+    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
+    [myButton setTitle: WizToNSString(title)];
+    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+    [myButton setImagePosition: NSImageLeft];
+    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
+    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
+
+    [myButton setButtonWidget: this];
+    [myButton setTarget:myButton];
+    [myButton setAction:@selector(buttonPressed)];
+
+    setCocoaView(myButton);   
+
+    [myButton release];
+}
+
+QSize CWizMacToolBarButtonItem::sizeHint() const
+{
+     return  QSize(m_width, TOOLBARITEMHEIGHT);
+}
+
+void CWizMacToolBarButtonItem::buttonClicked()
+{
+    emit triggered(true);
 }
 
 #endif

@@ -8,7 +8,7 @@ class CWizFileIconProvider : public QFileIconProvider
 public:
     CWizFileIconProvider();
 public:
-    virtual QIcon icon(const QString& strFileName) const;
+    virtual QIcon icon(const QString& strFilePath) const;
     virtual QString type(const QString& strFileName) const;
     //
     using QFileIconProvider::icon;

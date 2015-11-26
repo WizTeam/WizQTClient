@@ -37,8 +37,9 @@ public:
 
     bool hasFocus();
 
-protected:
-    QSize sizeHint() const;
+    void adjustButtonPosition();
+    //
+    void showCoachingTips();
 
 private:
     CWizExplorerApp& m_app;
@@ -56,6 +57,7 @@ private:
     CWizToolButtonColor* m_btnForeColor;
     CWizToolButtonColor* m_btnBackColor;
     CWizToolButton* m_btnFormatMatch;
+    CWizToolButton* m_btnRemoveFormat;
     CWizToolButton* m_btnBold;
     CWizToolButton* m_btnItalic;
     CWizToolButton* m_btnUnderLine;
@@ -66,18 +68,24 @@ private:
     CWizToolButton* m_btnTable;
     CWizToolButton* m_btnHorizontal;
     CWizToolButton* m_btnCheckList;
+    CWizToolButton* m_btnInsertLink;
     CWizToolButton* m_btnInsertImage;
+    CWizToolButton* m_btnInsertDate;
     CWizToolButton* m_btnSearchReplace;
     CWizToolButton* m_btnMobileImage;
     CWizToolButton* m_btnScreenShot;
     CWizToolButton* m_btnViewSource;
     CWizToolButton* m_btnInsertCode;
+    CWizToolButton* m_btnShowExtra;
     QMenu* m_menuJustify;
     QAction* m_actionJustifyLeft;
     QAction* m_actionJustifyCenter;
     QAction* m_actionJustifyRight;
 
     QString m_strImageSrc;
+
+    QWidget* m_firstLineButtonContainer;
+    QWidget* m_secondLineButtonContainer;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
@@ -98,6 +106,9 @@ private:
     void saveGif(const QByteArray& ba);
 
     QMenu* createColorMenu(const char *slot, const char *slotColorBoard);
+
+    QList<QWidget*> m_buttonContainersInFirstLine;
+    QList<QWidget*> m_buttonContainersInSecondLine;
 
 protected Q_SLOTS:
     void on_editor_google_triggered();
@@ -123,6 +134,7 @@ protected Q_SLOTS:
     void on_comboFontFamily_indexChanged(int index);
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
+    void on_btnRemoveFormat_clicked();
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
@@ -137,11 +149,14 @@ protected Q_SLOTS:
     void on_btnTable_clicked();
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
-    void on_btnImage_clicked();
+    void on_btnInsertImage_clicked();
+    void on_btnInsertLink_clicked();
+    void on_btnInsertDate_clicked();
     void on_btnMobileImage_clicked();
     void on_btnScreenShot_clicked();
     void on_btnViewSource_clicked();
     void on_btnInsertCode_clicked();
+    void on_btnShowExtra_clicked();
     void on_editor_saveImageAs_triggered();
     void on_editor_copyImage_triggered();
     void on_editor_copyImageLink_triggered();
@@ -157,7 +172,7 @@ protected Q_SLOTS:
     void on_backColor_changed();
     void on_showBackColorBoard();
 
-    void on_fontDailogFontChanged(const QFont & font);
+    void on_fontDailogFontChanged(const QFont & font);    
 
 private:
     void queryCurrentFont(QFont& font);
@@ -168,6 +183,10 @@ private:
 
     void saveImage(QString strFileName);
     void copyImage(QString strFileName);
+
+    void moveWidgetFromSecondLineToFirstLine(QWidget* widget);
+    void moveWidgetFromFristLineToSecondLine(QWidget* widget);
+
 };
 
 

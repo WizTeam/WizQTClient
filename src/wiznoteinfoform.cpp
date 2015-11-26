@@ -9,23 +9,34 @@
 #include "utils/logger.h"
 #include "wizmainwindow.h"
 #include "wizLineInputDialog.h"
+#include "share/wizAnalyzer.h"
+#include "share/wizMessageBox.h"
+
+QString formatLabelLink(const QString& linkHref, const QString& text)
+{
+    return WizFormatString2("<a href=\"%1\" style=\"color:#5990EF;"
+                    "text-decoration:none;\">%2</a>", linkHref, text);
+}
 
 CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     : CWizPopupWidget(parent)
     , ui(new Ui::CWizNoteInfoForm)
+    , m_size(QSize(370, 370))
 {
     ui->setupUi(this);
-    setContentsMargins(0, 20, 0, 0);
+    setContentsMargins(0, 8, 0, 0);
 
-//    ui->editTitle->setReadOnly(true);
     ui->editCreateTime->setReadOnly(true);
     ui->editUpdateTime->setReadOnly(true);
+    ui->editAccessTime->setReadOnly(true);
 //    ui->editURL->setReadOnly(true);
 //    ui->editAuthor->setReadOnly(true);
 //    ui->checkEncrypted->setEnabled(false);
 
-    QString openDocument = WizFormatString1("<a href=\"locate\" style=\"color:#3CA2E0;\">%1</a>", tr("Locate"));
+    QString openDocument = formatLabelLink("locate", tr("Locate"));
     ui->labelOpenDocument->setText(openDocument);
+    QString versionHistory = formatLabelLink("history", tr("Click to view version history"));
+    ui->labelHistory->setText(versionHistory);
 }
 
 CWizNoteInfoForm::~CWizNoteInfoForm()
@@ -35,7 +46,14 @@ CWizNoteInfoForm::~CWizNoteInfoForm()
 
 QSize CWizNoteInfoForm::sizeHint() const
 {
-    return QSize(420, 350);
+    return m_size;
+}
+
+void CWizNoteInfoForm::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
 }
 
 void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
@@ -45,59 +63,60 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     m_docGuid = data.strGUID;
 
     CWizDatabase& db = CWizDatabaseManager::instance()->db(data.strKbGUID);
+    m_size.setHeight(db.IsGroup() ? 320 : 370);
+    setGroupLabelVisible(db.IsGroup());
     QString doc = db.GetDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
 
-    ui->editTitle->setText(data.strTitle);
-
-    QString strLocation;
+    QFont font;
+    QFontMetrics fm(font);
+    const int nMaxTextWidth = 280;
+    QString strLocation = db.GetDocumentLocation(data);
     // private document
     if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
-        strLocation = data.strLocation;
-
         QString tags = db.GetDocumentTagsText(data.strGUID);
+        tags = fm.elidedText(tags, Qt::ElideMiddle, nMaxTextWidth);
         ui->labelTags->setText(tags);
 
         ui->editAuthor->setText(data.strAuthor);
 
     // group document
-    } else {
-        CWizTagDataArray arrayTag;
-        if (!db.GetDocumentTags(data.strGUID, arrayTag)) {
-        } else {
-            if (arrayTag.size() > 1) {
-                TOLOG1("Group document should only have one tag: %1", data.strTitle);
-            }
-
-            QString tagText;
-            if (arrayTag.size()) {
-                tagText = db.getTagTreeText(arrayTag[0].strGUID);
-            }
-            strLocation = "/" + db.name() + tagText + "/";
-        }
-
+    } else {        
         ui->labelTags->clear();
         ui->editAuthor->setText(data.strAuthor);
     }
 
-    QFont font;
-    QFontMetrics fm(font);
-    strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, 280);
+    strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, nMaxTextWidth);
     ui->labelNotebook->setText(strLocation);
+
+    QString userAlias = db.GetDocumentOwnerAlias(data);
+    ui->labelOwner->setText(userAlias);
 
     // common fields
     ui->editCreateTime->setText(data.tCreated.toString());
-    ui->editUpdateTime->setText(data.tModified.toString());
+    ui->editUpdateTime->setText(data.tDataModified.toString());
+    ui->editAccessTime->setText(data.tAccessed.toString());
     ui->editURL->setText(data.strURL);
-    ui->labelOpenURL->setText(WizFormatString2("<a href=\"%1\">%2</a>", data.strURL, tr("Open")));
+    QString text = data.strURL.isEmpty() ? "" : formatLabelLink(data.strURL, tr("Open"));
+    ui->labelOpenURL->setText(text);
     ui->labelSize->setText(sz);
     ui->checkEncrypted->setChecked(data.nProtected ? true : false);
 
     bool canEdit = (db.CanEditDocument(data) && !CWizDatabase::IsInDeletedItems(data.strLocation));
     ui->editAuthor->setReadOnly(!canEdit);
-    ui->editTitle->setReadOnly(!canEdit);
     ui->editURL->setReadOnly(!canEdit);
     ui->checkEncrypted->setEnabled(canEdit && !db.IsGroup());
+}
+
+void CWizNoteInfoForm::setGroupLabelVisible(bool isGroupNote)
+{
+    ui->labelEncrypted->setVisible(!isGroupNote);
+    ui->checkEncrypted->setVisible(!isGroupNote);
+    ui->labelTags->setVisible(!isGroupNote);
+    ui->labelTagsLabel->setVisible(!isGroupNote);
+
+    ui->labelOwner->setVisible(isGroupNote);
+    ui->labelOwnerLabel->setVisible(isGroupNote);
 }
 
 void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
@@ -109,20 +128,6 @@ void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
     {
         mainWindow->locateDocument(m_docKbGuid, m_docGuid);
         hide();
-    }
-}
-
-void CWizNoteInfoForm::on_editTitle_editingFinished()
-{
-    WIZDOCUMENTDATA doc;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
-    if (db.DocumentFromGUID(m_docGuid, doc))
-    {
-        if (doc.strTitle != ui->editTitle->text())
-        {
-            doc.strTitle = ui->editTitle->text();
-            db.ModifyDocumentInfo(doc);
-        }
     }
 }
 
@@ -182,5 +187,33 @@ void CWizNoteInfoForm::on_checkEncrypted_clicked(bool checked)
                     return;
             }
         }
+    }
+}
+
+void CWizNoteInfoForm::on_labelHistory_linkActivated(const QString &link)
+{
+    Q_UNUSED(link);
+
+    WIZDOCUMENTDATA doc;
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
+    if (db.DocumentFromGUID(m_docGuid, doc))
+    {
+        WizShowDocumentHistory(doc, nullptr);
+        WizGetAnalyzer().LogAction("showVersionHistory");
+    }
+}
+
+void CWizNoteInfoForm::on_labelOpenURL_linkActivated(const QString &link)
+{
+    Q_UNUSED(link);
+
+    QUrl url(link);
+    if (url.isValid())
+    {
+        QDesktopServices::openUrl(url.toString());
+    }
+    else
+    {
+        CWizMessageBox::information(nullptr, tr("Info"), tr("Url invalid, can not open!"));
     }
 }

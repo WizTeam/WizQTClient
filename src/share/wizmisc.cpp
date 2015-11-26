@@ -2224,7 +2224,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2304,41 +2304,47 @@ QString WizStr2Title(const QString& str)
     return str.left(idx);
 }
 
-bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
-                                  const QString& bgImage, const QSize& iconSize)
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName, const QSize& iconSize)
 {
-    QFileInfo info(fileName);
+    QFileInfo info(attachFileName);
     if (!info.exists())
         return false;
 
     // get info text and calculate width of image
     const int nMb = 1024 * 1024;
-    int nIconMargin = 4;
+    int nIconMargin = 14;
     QString fileSize = info.size() > 1024 ? (info.size() > nMb ? QString(QString::number(qCeil(info.size() / (double)nMb)) + " MB")
                                                          : QString(QString::number(qCeil(info.size() / (double)1024)) + " KB")) :
                                       QString(QString::number(info.size()) + " B");
-    QString infoText = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString() + ", " + fileSize;
+    QString dateInfo = QDate::currentDate().toString(Qt::ISODate) + " " + QTime::currentTime().toString();
 
-    bool isHighPix = WizIsHighPixel();
+    const int FONTSIZE = 12;
+    bool isHighPix = WizIsHighPixel();    
     QFont font;
+    font.setPixelSize(FONTSIZE);
     QFontMetrics fm(font);
-    int nTextWidth = fm.width(infoText);
-    int nWidth = nTextWidth + nIconMargin * 4 + iconSize.width();
-    QImage imageBg(bgImage);
-    int nHeight = imageBg.height();
+    int nTextWidth = fm.width(dateInfo + fileSize);
+    int nWidth = nTextWidth + nIconMargin * 4 - 4 + iconSize.width();
+    int nHeight = iconSize.height() + nIconMargin * 2;
 
     // draw icon and text on image
     int nBgWidth = isHighPix ? 2 * nWidth : nWidth;
     int nBgHeight = isHighPix ? 2 * nHeight : nHeight;
     img = QImage(nBgWidth, nBgHeight, QImage::Format_RGB888);
-    imageBg.scaledToWidth(nBgWidth);
     QPainter p(&img);
-    p.drawImage(QRect(0, 0, nBgWidth, nBgHeight), imageBg);
+    QRect rcd = QRect(0, 0, nBgWidth, nBgHeight);
+    p.fillRect(rcd, QBrush(QColor(Qt::white)));
+    p.setPen(QPen(QColor("#E7E7E7")));
+    p.setRenderHint(QPainter::Antialiasing);
+    p.drawRoundedRect(rcd.adjusted(1, 1, -2, -2), 8, 10);
 
+    QFont f = p.font();
+    f.setPixelSize(FONTSIZE);
+    p.setFont(f);
 
     if (isHighPix)
     {
-        // 如果是高分辨率的屏幕，则放大将坐标放大二倍进行绘制，使用时进行缩放，否则会造成图片模糊。
+        // 如果是高分辨率的屏幕，则将坐标放大二倍进行绘制，使用时进行缩放，否则会造成图片模糊。
         Utils::StyleHelper::initPainterByDevice(&p);
     }
     QFileIconProvider ip;
@@ -2346,16 +2352,27 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
     QPixmap pixIcon = icon.pixmap(iconSize);
     p.drawPixmap(nIconMargin, (nHeight - iconSize.height()) / 2, pixIcon);
 
-    //
-    QColor cText = QColor("#3c4d81");
-    p.setPen(QPen(cText));
-    QRect titleRect(QPoint(nIconMargin * 2 + iconSize.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
+    //    
+    p.setPen(QPen(QColor("#535353")));
+    QRect titleRect(QPoint(nIconMargin * 2 - 3 + iconSize.width(), nIconMargin), QPoint(nWidth, nHeight / 2));
     QString strTitle = fm.elidedText(info.fileName(), Qt::ElideMiddle, titleRect.width() - nIconMargin * 2);
     p.drawText(titleRect, strTitle);
     //
-    QRect infoRect(QPoint(nIconMargin * 2 + iconSize.width(), nHeight / 2),
+    QRect infoRect(QPoint(nIconMargin * 2 - 3 + iconSize.width(), nHeight / 2 + 2),
                       QPoint(nWidth, nHeight));
-    p.drawText(infoRect, infoText);
+    p.setPen(QColor("#888888"));
+    p.drawText(infoRect, dateInfo);
+
+    int dateWidth = fm.width(dateInfo);
+    infoRect.adjust(dateWidth + 4, 0, 0, 0);
+    QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
+    QRect rcPix = infoRect.adjusted(0, 6, 0, 0);
+    rcPix.setSize(QSize(4, 4));
+    p.drawPixmap(rcPix, pixGreyPoint);
+
+    infoRect.adjust(8, 0, 0, 0);
+    p.drawText(infoRect, fileSize);
+
     return true;
 }
 
@@ -2463,7 +2480,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::standardCommandUrl("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2681,4 +2698,13 @@ QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString
             return user.strDataFolderName;
     }
     return "";
+}
+
+
+bool WizIsChineseLanguage(const QString& local)
+{
+    if (local.toUpper() == "ZH_CN" || local.toUpper() == "ZH_TW")
+        return true;
+
+    return false;
 }

@@ -20,11 +20,8 @@ TitleEdit::TitleEdit(QWidget *parent)
     : QLineEdit(parent)
     , c(NULL)
     , m_separator('@')
-{
-    //FIXME: just for alignment with documentlistwidget
-    setStyleSheet("padding-bottom:1px;");
-
-    setContentsMargins(5, 0, 0, 0);
+{    
+    setContentsMargins(0, 0, 0, 0);
     setAlignment(Qt::AlignLeft | Qt::AlignBottom);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setFrame(false);
@@ -33,6 +30,9 @@ TitleEdit::TitleEdit(QWidget *parent)
     connect(this, SIGNAL(editingFinished()), SLOT(onTitleEditingFinished()));
     connect(this, SIGNAL(textEdited(QString)), SLOT(onTextEdit(QString)));
     connect(this, SIGNAL(textChanged(QString)), SLOT(onTextChanged(QString)));
+    QFont f = font();
+    f.setPixelSize(14);
+    setFont(f);
 }
 
 QSize TitleEdit::sizeHint() const
@@ -216,8 +216,10 @@ void TitleEdit::onTitleEditingFinished()
         }
         strNewTitle.replace("\n", " ");
         strNewTitle.replace("\r", " ");
+        strNewTitle = strNewTitle.trimmed();
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
+            data.tDataModified = WizGetCurrentTime();
             db.ModifyDocumentInfo(data);
 
             emit titleEdited(strNewTitle);
@@ -229,6 +231,7 @@ void TitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
+    setStyleSheet("color:#535353;");
 }
 
 void TitleEdit::onTitleReturnPressed()
@@ -271,10 +274,5 @@ void TitleEdit::onTextEdit(const QString& text)
 }
 
 void TitleEdit::onTextChanged(const QString& text)
-{
-    if (text.isEmpty()) {
-        setStyleSheet("QLineEdit{color:#666666;}");
-    } else {
-        setStyleSheet("QLineEdit{color:black;}");
-    }
+{    
 }

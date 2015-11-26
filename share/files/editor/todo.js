@@ -315,7 +315,7 @@ function WizTodoIphoneHelper() {
 	}
     
 	function initCss(document) {
-		initDefaultCss(document, document.body);
+		initDefaultCss(document, document.head);
 	}
 
 	function setDocumentType(type) {
@@ -1525,6 +1525,19 @@ var WizTodo = (function () {
 		var rng = sel.getRangeAt(0);
 		//
 		if (0 == rng.startOffset && 0 == rng.endOffset) {
+			var start = rng.startContainer;
+			if (start && isLabel(start)) { // <div>{caret at here}<label>...</label></div>
+				var p = getBlockParentElement(start);
+				if (p) {
+					var node = editorDocument.createElement(p.tagName);
+					var br = editorDocument.createElement("br");
+					node.insertBefore(br, null);
+					//
+					p.parentElement.insertBefore(node, p);
+					e.preventDefault();					
+				}
+			}
+			//
 			g_canInsertWizTodo = false;
 			enterkeyInTodo = false;
 			return;

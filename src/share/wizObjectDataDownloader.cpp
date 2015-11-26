@@ -7,7 +7,7 @@
 
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 
 #include "../sync/token.h"
 #include "../sync/apientry.h"

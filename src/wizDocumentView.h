@@ -48,7 +48,8 @@ class CWizDocumentView : public INoteView
 public:
     CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
     ~CWizDocumentView();
-    virtual QSize sizeHint() const { return QSize(200, 1); }
+    virtual QSize sizeHint() const;
+    void setSizeHint(QSize size);
 
     QWidget* client() const;
 #ifdef USEWEBENGINE
@@ -60,6 +61,8 @@ public:
     CWizLocalProgressWebView* commentWidget() const;
     //
     CWizDocumentTransitionView* transitionView();
+    //
+    Core::Internal::TitleBar* titleBar();
     //
     void waitForDone();
 
@@ -91,6 +94,7 @@ protected:
     CWizDocumentStatusChecker* m_editStatusChecker;
 
     virtual void showEvent(QShowEvent *event);
+    virtual void resizeEvent(QResizeEvent* ev);
 
 private:
     WIZDOCUMENTDATA m_note;
@@ -100,6 +104,7 @@ private:
     bool m_noteLoaded;
     //
     int m_editStatus;  // document edit or version status
+    QSize m_sizeHint;
 
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }
@@ -124,6 +129,8 @@ public:
     void promptMessage(const QString& strMsg);
     bool checkListClickable();
     void setStatusToEditingByCheckList();
+    //
+    void showCoachingTips();
 
     QWebFrame* noteFrame();
     QWebEnginePage* notePage();
@@ -165,6 +172,7 @@ public Q_SLOTS:
     void on_comment_populateJavaScriptWindowObject();
     void on_loadComment_request(const QString& url);
 
+    void on_commentWidget_statusChanged();
 
 private:
     void loadNote(const WIZDOCUMENTDATA &doc);
@@ -175,7 +183,7 @@ private:
     void stopCheckDocumentEditStatus();
     bool checkDocumentEditable();
     //
-    void stopCheckDocumentAnimations();
+    void stopCheckDocumentAnimations();    
 };
 
 } // namespace Core

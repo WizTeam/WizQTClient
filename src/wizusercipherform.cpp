@@ -4,6 +4,7 @@
 #include <QGraphicsDropShadowEffect>
 
 #include "wizmainwindow.h"
+#include "utils/stylehelper.h"
 
 using namespace Core::Internal;
 
@@ -14,7 +15,6 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     , m_bSaveForSession(false)
 {
     ui->setupUi(this);
-//    ui->checkSave->setVisible(false);
     ui->editUserCipher->setEchoMode(QLineEdit::Password);
     ui->editUserCipher->setAttribute(Qt::WA_MacShowFocusRect, false);
 
@@ -24,14 +24,15 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
 
 
 
-    QString strIconNormal = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done.png";
-    QString strIconHot = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done_hot.png";
-    QString strIconDown = ::WizGetSkinResourcePath(m_app.userSettings().skin())
-            + "mac_icons_password_done_down.png";
+    QString strIconNormal = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done.png";
+    QString strIconHot = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_hot", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done_hot.png";
+    QString strIconDown = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+//            + "mac_icons_password_done_down.png";
 
-    QSize szBtn(22, 22);
+    ui->editUserCipher->setFixedHeight(19);
+    QSize szBtn(19, 19);
     ui->buttonOk->setMinimumSize(szBtn);
     ui->buttonOk->setMaximumSize(szBtn);
     ui->buttonOk->setIconNormal(strIconNormal);
@@ -39,6 +40,7 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     ui->buttonOk->setIconDown(strIconDown);
     ui->buttonOk->setStatusNormal();
     ui->buttonOk->setLockNormalStatus(true);
+
 
     m_animation = new QPropertyAnimation(ui->editUserCipher, "pos", this);
 

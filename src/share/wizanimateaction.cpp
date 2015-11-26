@@ -1,5 +1,7 @@
 #include "wizanimateaction.h"
 
+#include "utils/stylehelper.h"
+
 #include "wizmisc.h"
 #include "wizsettings.h"
 
@@ -7,9 +9,8 @@
 #include <QAction>
 #include <QToolButton>
 
-CWizAnimateAction::CWizAnimateAction(CWizExplorerApp& app, QObject* parent)
+CWizAnimateAction::CWizAnimateAction(QObject* parent)
     : QObject(parent)
-    , m_app(app)
     , m_target(NULL)
     , m_nIconIndex(-1)
     , m_timer(new QTimer())
@@ -35,7 +36,7 @@ void CWizAnimateAction::setSingleIcons(const QString& strIconBaseName)
     int index = 1;
     while (1)
     {
-        CString strFileName = ::WizGetSkinResourceFileName(m_app.userSettings().skin(), strIconBaseName + WizIntToStr(index));
+        CString strFileName = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName + WizIntToStr(index));
         if (strFileName.isEmpty())
             return;
         QIcon icon(strFileName);
@@ -52,9 +53,9 @@ void CWizAnimateAction::setTogetherIcon(const QString& strIconBaseName)
 {
     CString strFileName;
     if (WizIsHighPixel()) {
-        strFileName  = ::WizGetSkinResourceFileName(m_app.userSettings().skin(), strIconBaseName + "@2x");
+        strFileName  = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName + "@2x");
     } else {
-        strFileName  = ::WizGetSkinResourceFileName(m_app.userSettings().skin(), strIconBaseName);
+        strFileName  = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName);
     }
 
     if (strFileName.IsEmpty())

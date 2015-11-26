@@ -1,0 +1,26 @@
+::-webkit-scrollbar {
+  height: 14px;
+  overflow: visible !important;
+  width: 14px;
+  background-color: #FFFFFF;
+}
+::-webkit-scrollbar-thumb {
+  background-color: rgba(0, 0, 0, .2);
+  min-height: 28px;
+  border: 3px solid rgba(0, 0, 0, 0);
+  background-clip: padding-box;
+  -webkit-border-radius: 8px;
+  background-color: #D3D3D3; 
+}
+::-webkit-scrollbar-button {
+  height: 0;
+  width: 0;
+}
+::-webkit-scrollbar-button {
+    width: 0;
+    height: 0;
+    display: none;
+}
+::-webkit-scrollbar-corner {
+    background-color: transparent;
+}

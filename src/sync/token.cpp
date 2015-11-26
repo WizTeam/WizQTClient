@@ -5,7 +5,7 @@
 #include <QString>
 #include <QDebug>
 
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 #include "asyncapi.h"
 #include "apientry.h"
 
@@ -123,6 +123,12 @@ void TokenPrivate::clearToken()
     m_info.strToken.clear();
 }
 
+void TokenPrivate::clearLastError()
+{
+    m_lastErrorCode = 0;
+    m_lastErrorMessage.clear();
+}
+
 void TokenPrivate::setUserId(const QString& strUserId)
 {
     m_strUserId = strUserId;
@@ -197,6 +203,11 @@ void Token::requestToken()
 void Token::clearToken()
 {
     d->clearToken();
+}
+
+void Token::clearLastError()
+{
+    d->clearLastError();
 }
 
 void Token::setUserId(const QString& strUserId)

@@ -216,7 +216,6 @@ public:
 
     virtual bool IsGroup();
     virtual bool HasBiz();
-    bool IsVip();
 
     virtual bool IsGroupAdmin();
     virtual bool IsGroupSuper();
@@ -316,6 +315,9 @@ public:
     bool InitDatabaseInfo(const WIZDATABASEINFO& dbInfo);
     bool GetUserInfo(WIZUSERINFO& userInfo);
 
+    // when upgrade app, remove or update invalid data
+    void UpdateInvalidData();
+
     // path resolve
     QString GetAccountPath() const;
     QString GetAccountFolderName() const;
@@ -392,6 +394,7 @@ public:
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
                           bool bResetDocInfo, bool updateAttachList = true);
+    bool DeleteGroupFolder(const WIZTAGDATA& data, bool bLog);
 
     bool IsDocumentModified(const CString& strGUID);
     bool IsAttachmentModified(const CString& strGUID);
@@ -427,6 +430,10 @@ public:
                                   CWizStdStringArray& arrayLocation);
 
     static bool IsInDeletedItems(const CString& strLocation);
+
+    bool GetDocumentTitleStartWith(const QString& titleStart, int nMaxCount, CWizStdStringArray& arrayTitle);
+
+    QString GetDocumentLocation(const WIZDOCUMENTDATA& doc);
 
     bool CreateDocumentAndInit(const CString& strHtml, \
                                const CString& strHtmlUrl, \

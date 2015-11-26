@@ -102,7 +102,7 @@ void CWizIAPDialog::loadUserInfo()
    ui->stackedWidget->setCurrentIndex(0);
    QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
    QString strToken = WizService::Token::token();
-   QString strUrl = WizService::CommonApiEntry::standardCommandUrl("user_info", strToken, extInfo);
+   QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
    qDebug() << "load user info : " << strUrl;
    ui->webView->load(QUrl(strUrl));
 }
@@ -230,13 +230,12 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
         reply->deleteLater();
 
         QMetaObject::invokeMethod(m_waitingMsgBox, "done", Qt::QueuedConnection,
-                                  Q_ARG(int, 0));
-        removeTransationFromUnfinishedList(strTransationID);
-        parseCheckResult(strResult);
+                                  Q_ARG(int, 0));        
+        parseCheckResult(strResult, strTransationID);
     });
 }
 
-void CWizIAPDialog::parseCheckResult(const QString& strResult)
+void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& strTransationID)
 {
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
@@ -251,6 +250,7 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult)
         if (nCode == 200) {
             qDebug() <<"IAP purchase successed!";
             QMetaObject::invokeMethod(this, "on_purchase_successed", Qt::QueuedConnection);
+            removeTransationFromUnfinishedList(strTransationID);
             return;
         } else {
             QString message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());

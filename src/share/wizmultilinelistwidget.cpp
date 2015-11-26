@@ -14,14 +14,14 @@ public:
     {
     }
 
-    virtual QSize sizeHint(const QStyleOptionViewItem &option,
-                           const QModelIndex &index) const
-    {
-        QSize sz = QStyledItemDelegate::sizeHint(option, index);
-        //
-        sz.setHeight(sz.height() + (option.fontMetrics.height() + 2) * (m_lineCount - 1) + 2 + 16);
-        return sz;
-    }
+//    virtual QSize sizeHint(const QStyleOptionViewItem &option,
+//                           const QModelIndex &index) const
+//    {
+//        QSize sz = QStyledItemDelegate::sizeHint(option, index);
+//        //
+//        sz.setHeight(sz.height() + (option.fontMetrics.height() + 2) * (m_lineCount - 1) + 2 + 16);
+//        return sz;
+//    }
     //
     int lineCount() const
     {

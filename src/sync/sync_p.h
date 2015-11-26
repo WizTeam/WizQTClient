@@ -1,7 +1,7 @@
 #ifndef WIZSERVICE_SYNC_P_H
 #define WIZSERVICE_SYNC_P_H
 
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 
 struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE;
 

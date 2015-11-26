@@ -618,8 +618,9 @@ UINT CWizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
     while (::wiz_isspace(*lpszBegin))
         lpszBegin = ::wiz_strinc(lpszBegin);
 
-    // name doesn't begin with an alphabet?
-    if (!::wiz_isalpha(*lpszBegin))
+
+    // name doesn't begin with an alphabet?             //NOTE:  lpszBegin  == 95   is _
+    if (!::wiz_isalpha(*lpszBegin) && (*lpszBegin != _T('_')))
         return (0U);
 
     lpszEnd = lpszBegin;
@@ -1247,7 +1248,7 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
 
     bOpeningTag = !bClosingTag;
     lpszEnd = lpszBegin;
-    do
+    do                 // 循环读取标签中的内容，遇到空格等跳出，提取并保存标签的类型名称
     {
         // tag name may contain letters (a-z, A-Z), digits (0-9),
         // underscores '_', hyphen '-', colons ':', and periods '.'

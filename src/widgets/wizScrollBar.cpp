@@ -4,46 +4,26 @@
 
 CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
+    , m_bgColor("transparent")
+    , m_handleColor("#C1C1C1")
+    , m_bLeftBorder(false)
 {
-    setStyleSheet(
-        "QScrollBar {\
-            background: transparent;\
-            width: 10px;\
-        }\
-        QScrollBar::handle {\
-            background: rgba(85, 85, 85, 200);\
-            border-radius: 4px;\
-            min-height: 30px;\
-        }\
-        QScrollBar::handle:vertical {\
-            margin: 0px 2px 0px 0px;\
-        }\
-        QScrollBar::handle:horizontal {\
-            margin: 0px 0px 2px 0px;\
-        }\
-        QScrollBar::add-page, QScrollBar::sub-page {\
-            background: transparent;\
-        }\
-        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
-            background: transparent;\
-        }\
-        QScrollBar::add-line, QScrollBar::sub-line {\
-            height: 0px;\
-            width: 0px;\
-        }"\
-    );
+
+    // FIXME:  hard code
+    setHandleVisible(true);
 
     setMouseTracking(true);
 
     connect(&m_timerScrollTimeout, SIGNAL(timeout()), this, SLOT(on_scrollTimeout()));
     connect(this, SIGNAL(valueChanged(int)), SLOT(on_valueChanged(int)));
 
-    hide();
+    m_timerScrollTimeout.setSingleShot(true);
+    m_timerScrollTimeout.start(3000);
 }
 
 QSize CWizScrollBar::sizeHint() const
 {
-    return QSize(10, 1);
+    return m_bLeftBorder ? QSize(13, 1) : QSize(12, 1);
 }
 
 void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
@@ -65,15 +45,32 @@ void CWizScrollBar::syncWith(QScrollBar* source)
     connect(source, SIGNAL(rangeChanged(int, int)), SLOT(on_sourceRangeChanged(int, int)));
 
     m_scrollSyncSource = source;
+
 }
 
-void CWizScrollBar::show()
+void CWizScrollBar::applyStyle(const QString& bgColorName, const QString& handleColorName, bool leftBorder)
+{
+    m_bgColor = bgColorName;
+    m_handleColor = handleColorName;
+    m_bLeftBorder = leftBorder;
+}
+
+void CWizScrollBar::showHandle()
 {
     if (maximum() == minimum())
         return;
 
-    QScrollBar::show();
+    setHandleVisible(true);
+    update();
+
+//    QScrollBar::show();
     m_timerScrollTimeout.start(1000);
+}
+
+void CWizScrollBar::hideHandle()
+{
+    setHandleVisible(false);
+    update();
 }
 
 void CWizScrollBar::on_sourceValueChanged(int value)
@@ -95,12 +92,41 @@ void CWizScrollBar::on_valueChanged(int value)
         m_scrollSyncSource->setSliderPosition(value);
     }
 
-    show();
+    showHandle();
 }
 
 void CWizScrollBar::on_scrollTimeout()
 {
-    hide();
+    hideHandle();
+}
+
+void CWizScrollBar::setHandleVisible(bool visible)
+{
+    setStyleSheet(
+        QString("QScrollBar {\
+            background: %1;\
+            %2\
+        }\
+        QScrollBar::handle {\
+            background: %3;\
+            min-height: 30px;\
+        }\
+        QScrollBar::handle:vertical {\
+            margin: 0px 3px 0px 3px;\
+            border-radius:3px;\
+            width:6px; \
+        }\
+        QScrollBar::add-page, QScrollBar::sub-page {\
+            background: transparent;\
+        }\
+        QScrollBar::up-arrow, QScrollBar::down-arrow, QScrollBar::left-arrow, QScrollBar::right-arrow {\
+            background: transparent;\
+        }\
+        QScrollBar::add-line, QScrollBar::sub-line {\
+            height: 0px;\
+            width: 0px;\
+        }").arg(m_bgColor).arg(m_bLeftBorder ? "border-left:1px solid #e7e7e7;" : "")
+        .arg(visible ? m_handleColor : "transparent"));
 }
 
 

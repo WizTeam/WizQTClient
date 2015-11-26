@@ -89,8 +89,6 @@ enum WizPositionType
     wizPositionRight
 };
 
-const QString USER_SETTINGS_SECTION = "QT_WIZNOTE";
-
 class CWizUserSettings
 {
 public:
@@ -169,6 +167,7 @@ public:
     bool isRememberNotePasswordForSession();
     void setRememberNotePasswordForSession(bool remember);
 
+    //NOTE:  editor background color string could be empty!!!   if it's empty, editor in seperate window could be grey
     QString editorBackgroundColor();
     void setEditorBackgroundColor(const QString& strColor);
 
@@ -203,6 +202,9 @@ public:
     // set: 1, 7, 30, 99999(all), -1(no), default: 1
     int syncGroupMethod() const;
     void setSyncGroupMethod(int days);
+
+    void appendRecentSearch(const QString& search);
+    QStringList getRecentSearches(bool reverseOrder = false);
 };
 
 #endif // WIZSETTINGS_H

@@ -18,6 +18,7 @@ public:
 protected:
     CWizExplorerApp& m_app;
     QIcon m_iconArraw;
+    QSize m_iconSize;
 
     void paintEvent(QPaintEvent* event);
 
@@ -33,15 +34,15 @@ class CWizViewTypePopupButton: public CWizPopupButton
 public:
 
     explicit CWizViewTypePopupButton(CWizExplorerApp &app, QWidget* parent = 0);
-    void setActionIcon(int type);
+//    void setActionIcon(int type);
 
 public slots:
     void on_viewTypeChanged(int type);
 
 private:
-    QIcon m_iconOneLine;
-    QIcon m_iconTwoLine;
-    QIcon m_iconThumbnail;
+//    QIcon m_iconOneLine;
+//    QIcon m_iconTwoLine;
+//    QIcon m_iconThumbnail;
 
 protected:
     virtual QSize sizeHint() const;
@@ -57,18 +58,7 @@ class CWizSortingPopupButton : public CWizPopupButton
 {
     Q_OBJECT
 
-public:
-    enum SortingType {
-        SortingCreateTime = 1,
-        SortingUpdateTime,
-        SortingAccessTime,
-        SortingTitle,
-        SortingLocation,
-        SortingTag,
-        SortingSize,
-        AscendingOrder,
-        DescendingOrder
-    };
+public:       
 
     explicit CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent = 0);
 

@@ -6,9 +6,16 @@
 #include <QFileInfo>
 #include <QTextStream>
 
+#include "wizdef.h"
+
 namespace Utils {
 
 QString Misc::time2humanReadable(const QDateTime& time) {
+    return time2humanReadable(time, "yy-MM-dd");
+}
+
+QString Misc::time2humanReadable(const QDateTime& time, const QString& formate)
+{
     QDateTime t(QDateTime::currentDateTime());
     int nElapseSecs = time.secsTo(t);
     int nElapseDays = time.daysTo(t);
@@ -18,7 +25,7 @@ QString Misc::time2humanReadable(const QDateTime& time) {
     } else if (nElapseDays == 2) {
         return QObject::tr("The day before yesterday");
     } else if (nElapseDays > 2) {
-        return time.toString("yy-M-d");
+        return time.toString(formate);
     }
 
     if (nElapseSecs < 60) {
@@ -177,6 +184,38 @@ void Misc::deleteFile(const CString& strFileName)
     dir.remove(extractFileName(strFileName));
 }
 
+QString Misc::getHtmlBodyContent(QString strHtml)
+{
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    QString strBody;
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+    return strBody;
+}
+
+void Misc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
+{
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1) {
+        strHead = regh.cap(1).simplified();
+    }
+
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strBody = regex.cap(1);
+    } else {
+        strBody = strHtml;
+    }
+}
+
+bool Misc::isChinese()
+{
+    return isSimpChinese() || isTraditionChinese();
+}
+
 bool Misc::isSimpChinese()
 {
     QLocale local;
@@ -187,6 +226,40 @@ bool Misc::isSimpChinese()
         return true;
     }
     return false;
+}
+
+bool Misc::isTraditionChinese()
+{
+    QLocale local;
+    QString name = local.name().toLower();
+    if (name == "zh_tw"
+        || name == "zh-tw")
+    {
+        return true;
+    }
+    return false;
+}
+
+int Misc::getVersionCode()
+{
+    QString str(WIZ_CLIENT_VERSION);
+    QStringList strList = str.split('.');
+    Q_ASSERT(strList.count() >= 3);
+
+    QString strNum = strList.first();
+    QString strSec = strList.at(1);
+    while (strSec.length() < 2) {
+        strSec.insert(0, "0");
+    }
+    QString strThr = strList.at(2);
+    while (strThr.length() < 3) {
+        strThr.insert(0, "0");
+    }
+
+    strNum.append(strSec);
+    strNum.append(strThr);
+
+    return strNum.toInt();
 }
 
 

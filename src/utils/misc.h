@@ -13,6 +13,7 @@ class Misc
 {
 public:
     static QString time2humanReadable(const QDateTime& time);
+    static QString time2humanReadable(const QDateTime& time, const QString& formate);
     static bool loadUnicodeTextFromFile(const QString& strFileName, QString& strText);
 
     //
@@ -35,8 +36,16 @@ public:
     static qint64 getFileSize(const CString& strFileName);
     static void deleteFile(const CString& strFileName);
 
+    //html process
+    static QString getHtmlBodyContent(QString strHtml);
+    static void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
+
     //
+    static bool isChinese();
     static bool isSimpChinese();
+    static bool isTraditionChinese();
+
+    static int getVersionCode();
 };
 
 } // namespace Utils

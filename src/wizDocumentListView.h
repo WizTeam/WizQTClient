@@ -2,6 +2,7 @@
 #define WIZDOCUMENTLISTVIEW_H
 
 #include <QListWidget>
+#include <memory>
 
 #include "wizdef.h"
 #include "share/wizobject.h"
@@ -20,6 +21,27 @@ class CWizUserAvatarDownloaderHost;
 #define WIZNOTE_CUSTOM_SCROLLBAR
 //#endif
 #endif
+
+
+#define DocumentLeadInfo_None                      0x0000
+#define DocumentLeadInfo_PersonalRoot         0x0001
+#define DocumentLeadInfo_PersonalFolder       0x0002
+#define DocumentLeadInfo_PersonalTag           0x0004
+#define DocumentLeadInfo_GroupRoot              0x0008
+#define DocumentLeadInfo_GroupFolder            0x0010
+#define DocumentLeadInfo_SearchResult           0x0020
+
+enum DocumentsSortingType {
+    SortingByCreatedTime = 1,
+    SortingByModifiedTime,
+    SortingByAccessedTime,
+    SortingByTitle,
+    SortingByLocation,
+    SortingByTag,
+    SortingBySize,
+    SortingAsAscendingOrder,
+    SortingAsDescendingOrder
+};
 
 
 class CWizDocumentListView : public QListWidget
@@ -41,9 +63,13 @@ public:
     void resetItemsViewType(int type);
     QSize itemSizeFromViewType(CWizDocumentListView::ViewType type);
 
+    void setLeadInfoState(int state);
+
     int sortingType() const { return m_nSortingType; }
     void resetItemsSortingType(int type);
     bool isSortedByAccessDate();
+
+    int documentCount() const;
 
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
@@ -51,6 +77,7 @@ public:
     void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
     void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
+    bool acceptAllSearchItems() const;
     void setAcceptAllSearchItems(bool bAccept);
 
 protected:
@@ -60,6 +87,7 @@ protected:
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void keyReleaseEvent(QKeyEvent* event);
+    virtual void wheelEvent(QWheelEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
@@ -75,13 +103,16 @@ private:
 
     CWizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
+    int m_nLeadInfoState;
 
-    QMenu* m_menuDocument;
+    std::shared_ptr<QMenu> m_menuDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;
 
-    QList<CWizDocumentListViewItem*> m_rightButtonFocusedItems;
+    QList<CWizDocumentListViewDocumentItem*> m_rightButtonFocusedItems;
+
+    QList<CWizDocumentListViewSectionItem*> m_sectionItems;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -117,10 +148,11 @@ public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
 
     int documentIndexFromGUID(const QString &strGUID);
-    CWizDocumentListViewItem *documentItemAt(int index);
+    CWizDocumentListViewBaseItem *itemFromIndex(int index) const;
+    CWizDocumentListViewBaseItem* itemFromIndex(const QModelIndex &index) const;
+    CWizDocumentListViewDocumentItem* documentItemAt(int index) const;
+    CWizDocumentListViewDocumentItem *documentItemFromIndex(const QModelIndex &index) const;
 
-    // drawing passthrought methods
-    CWizDocumentListViewItem *documentItemFromIndex(const QModelIndex &index) const;
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;
 
@@ -128,7 +160,6 @@ public:
     // used for smoothly scroll
     void vscrollBeginUpdate(int delta);
     //virtual void updateGeometries();
-    virtual void wheelEvent(QWheelEvent* event);
 //#endif // Q_OS_MAC
 
 public Q_SLOTS:
@@ -139,6 +170,7 @@ public Q_SLOTS:
     void on_document_created(const WIZDOCUMENTDATA& document);
     void on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew);
     void on_document_deleted(const WIZDOCUMENTDATA& document);
+    void on_documentAccessDate_changed(const WIZDOCUMENTDATA& document);
     void on_documentReadCount_changed(const WIZDOCUMENTDATA& document);
 
     // message related signals
@@ -152,6 +184,7 @@ public Q_SLOTS:
     //void on_action_message_delete();
 
     // document context menu
+    void on_action_locate();
     void on_action_selectTags();
     void on_action_deleteDocument();
     void on_action_encryptDocument();
@@ -177,6 +210,7 @@ public Q_SLOTS:
     void onThumbCacheLoaded(const QString& strKbGUID, const QString& strGUID);
 
 
+
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
     void on_vscroll_valueChanged(int value);
@@ -186,13 +220,17 @@ public Q_SLOTS:
     void on_vscrollAnimation_finished();
 //#endif // Q_OS_MAC
 
+    void updateDragOperationImage(Qt::DropAction action);
+
 Q_SIGNALS:
     void documentCountChanged();
     void lastDocumentDeleted();
     void documentsSelectionChanged();
+    void groupDocumentReadCountChanged(const QString& strKbGUID);
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
     void changeUploadRequest(const QString& strKbGUID);
     void addDocumentToShortcutsRequest(const WIZDOCUMENTDATA& doc);
+    void loacteDocumetRequest(const WIZDOCUMENTDATA& doc);
 
 private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);
@@ -203,6 +241,7 @@ private:
 
     bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 
+    void resetSectionData();
     //
     void moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder);
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);
@@ -212,7 +251,17 @@ private:
                                     bool keepDocTime);
 
     //
-    void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);
+    void duplicateDocuments(const CWizDocumentDataArray& arrayDocument);   
+
+    //
+    void addSectionItem(const WizDocumentListViewSectionData& secData, const QString& text, int docCount);
+    void updateSectionItems();
+    bool getDocumentDateSections(QMap<QDate, int>& dateMap);
+    bool getDocumentSizeSections(QMap<QPair<int, int>, int>& sizeMap);
+    bool getDocumentTitleSections(QMap<QString, int>& titleMap);
+    bool getDocumentLocationSections(QMap<QString, int>& locationMap);
+//    bool getDocumentTagSections(QMap<QString, int>& tagMap);
+
 };
 
 

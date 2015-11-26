@@ -108,6 +108,10 @@ private:
     CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
     void waitForDownload();
 
+    //
+    bool isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
+    void updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
+
     // if has item that is downloading waiting for open , would not open another attach that is not exists in local.
     static bool m_bHasItemWaitingForDownload;
 };
@@ -120,6 +124,13 @@ class CWizAttachmentListWidget : public CWizPopupWidget
 public:
     CWizAttachmentListWidget(QWidget* parent);
     bool setDocument(const WIZDOCUMENTDATA& document);
+
+    virtual QSize sizeHint() const;
+signals:
+    void widgetStatusChanged();
+
+protected:
+    void hideEvent(QHideEvent* ev);
 
 private:
     CWizAttachmentListView* m_list;

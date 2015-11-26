@@ -22,6 +22,7 @@ enum documentType {
 
 class QMainWindow;
 class QWidget;
+class QMacCocoaViewContainer;
 
 float qt_mac_get_scalefactor(QWidget *window);
 
@@ -47,6 +48,21 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);
 QString wizConvertYosemiteFilePathToNormalPath(const QString& strYosePath);
+
+void initCrashReporter();
+
+void enableWidgetBehindBlur(QWidget* wgt);
+//void enableWidgetBlendingBlur(QWidget* wgt);
+
+bool systemWidgetBlurAvailable();
+
+int getSystemMajorVersion();
+int getSystemMinorVersion();
+int getSystemPatchVersion();
+
+void adjustSubViews(QWidget* wgt);
+
+QMacCocoaViewContainer* createViewContainer(QWidget* wgt);
 
 #endif // Q_OS_MAC
 

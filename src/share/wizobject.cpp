@@ -3,6 +3,7 @@
 #include "wizxmlrpc.h"
 #include "wizmisc.h"
 #include "utils/logger.h"
+#include "rapidjson/document.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
@@ -43,7 +44,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 
 bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
 {
-    CWizXmlRpcStructValue& data = val;
+    CWizXmlRpcStructValue& data = val;    
     data.GetString("token", strToken);
     data.GetTime("expried_time", tTokenExpried);
 
@@ -762,8 +763,12 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
         structData->ToStringMap(mapAvatarChanges);
     }
 
-    return !bizGUID.isEmpty()
-            && !bizName.isEmpty();
+    if (bizGUID.isEmpty() || bizName.isEmpty())
+    {
+        qWarning() << "Biz data warning, guid : " << bizGUID << " biz name : " << bizName;
+    }
+
+    return true;
 }
 
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */
@@ -819,6 +824,7 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
     , messageBody(data.strMessageText)
     , nVersion(data.nVersion)
     , nLocalChanged(data.nLocalChanged)
+    , note(data.strNote)
 {
 
 }
@@ -854,6 +860,29 @@ bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     return true;
 }
 
+bool WIZMESSAGEDATA::isAd()
+{
+    if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM || note.isEmpty())
+        return false;
+
+    rapidjson::Document d;
+    d.Parse<0>(note.toUtf8().constData());
+
+    if (d.HasParseError())
+    {
+        qWarning() << "parse message note data error : " << d.GetParseError();
+    }
+
+    if (!d.HasMember("type"))
+        return false;
+
+    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
+    QTextDecoder* encoder = codec->makeDecoder();
+    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
+
+    return type == "ad";
+}
+
 /* ---------------------------- WIZKVRETURN ---------------------------- */
 bool WIZKVRETURN::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
@@ -885,5 +914,6 @@ BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
     data.GetStr(_T("receiver_alias"), strReceiver);
     data.GetStr(_T("sender_alias"), strSender);
     data.GetStr(_T("title"), strTitle);
+    data.GetStr(_T("note"), strNote);
     return 	TRUE;
 }

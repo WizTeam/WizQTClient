@@ -8,6 +8,7 @@
 #include <QListView>
 #include <QPainter>
 #include <QItemDelegate>
+#include <QScrollBar>
 #include <QDebug>
 
 #include <coreplugin/icore.h>
@@ -16,6 +17,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "utils/pinyin.h"
+#include "utils/stylehelper.h"
 
 #include "wizDocumentView.h"
 
@@ -46,16 +48,29 @@ public:
             return QVariant();
         }
 
-        if (role == Qt::EditRole) {
+        switch (role) {
+        case Qt::EditRole:
             return m_users[index.row()].strPinyin;
-        } else if (role == Qt::DisplayRole) {
+        case Qt::DisplayRole:
             return m_users[index.row()].strAlias;
-        } else if (role == Qt::DecorationRole) {
+        case Qt::DecorationRole:
+        {
             QPixmap pm;
             AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
-            return pm.scaled(28, 28, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-        } else if (role == Qt::ToolTipRole) {
+            return pm.scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+        }
+        case Qt::ToolTipRole:
             return m_users[index.row()].strUserId;
+        case Qt::FontRole:
+        {
+            QFont font;
+            font.setPixelSize(12);
+            return font;
+        }
+        case Qt::BackgroundRole:
+            return QColor(Qt::white);
+        default:
+            break;
         }
 
         return QVariant();
@@ -119,11 +134,11 @@ MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUs
     }
     if (!m_users.isEmpty())
     {
+        qSort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
         m_users.insert(0, UserItem());
         m_users[0].strUserId = QString();
         m_users[0].strAlias = tr("all");
         m_users[0].strPinyin = "all";
-        qSort(m_users.begin(), m_users.end(), caseInsensitiveLessThan);
     }
 }
 
@@ -134,12 +149,14 @@ public:
 
     void paint(QPainter *painter, const QStyleOptionViewItem &option,
                       const QModelIndex &index) const
-    {
+    {    
+        if (option.state & QStyle::State_Selected)
+        {
+            painter->fillRect(option.rect, QBrush("#5990EF"));
+        }
+
         QColor color(rand() % 255, rand() % 255, rand() % 255, 200);
-        QBrush brush(color);
-        painter->setBackground(brush);
         painter->setPen(color);
-        painter->drawRect(option.rect);
 
         Qt::Alignment alignment = Qt::AlignRight;
         QTextOption textOption(alignment);
@@ -155,7 +172,9 @@ class MessageCompleterPopup : public QListView
 public:
     MessageCompleterPopup(QWidget* parent = 0)
         : QListView(parent)
-    {
+    {        
+        setStyleSheet("QListView::item:selected {background-color:#5990EF;}");
+        verticalScrollBar()->setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet(2));
     }
 
     virtual int sizeHintForRow (int row) const
@@ -166,6 +185,14 @@ public:
     virtual int sizeHintForColumn(int column) const
     {
         return QListView::sizeHintForColumn(column) + spacing() * 2;
+    }
+
+protected:
+    void showEvent(QShowEvent* ev)
+    {
+        QListView::showEvent(ev);
+
+        setMask(Utils::StyleHelper::borderRadiusRegion(rect()));
     }
 };
 

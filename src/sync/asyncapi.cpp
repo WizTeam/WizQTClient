@@ -13,7 +13,7 @@
 #include <rapidjson/document.h>
 #include "share/wizEventLoop.h"
 #include "apientry.h"
-#include "wizkmxmlrpc.h"
+#include "wizKMServer.h"
 #include "token.h"
 
 using namespace WizService;

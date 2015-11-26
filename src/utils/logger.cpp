@@ -8,6 +8,8 @@
 #include <QDebug>
 #include <QBuffer>
 #include <QTextStream>
+#include <iostream>
+#include <fstream>
 #include "misc.h"
 #include "pathresolve.h"
 
@@ -62,16 +64,16 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         return;
 #endif
 
-//    bool saveLog = true;
-//#ifndef QT_DEBUG
-//    if (type == QtDebugMsg)
-//        saveLog = false;
-//#endif
-//    if (saveLog)
-//    {
+    bool saveLog = true;
+#ifndef QT_DEBUG
+    if (type == QtDebugMsg)
+        saveLog = false;
+#endif
+    if (saveLog)
+    {
         logger()->saveToLogFile(msg);
         logger()->addToBuffer(msg);
-//    }
+    }
 
     switch (type) {
     case QtDebugMsg:
@@ -115,22 +117,19 @@ QString Logger::msg2LogMsg(const QString& strMsg)
 
 void Logger::saveToLogFile(const QString& strMsg)
 {
-    QFile f(logFileName());
-    f.open(QIODevice::Append | QIODevice::Text);
-    try
-    {
-        f.write(msg2LogMsg(strMsg).toUtf8());
-    }
-    catch(...)
-    {
-    }
-    f.close();
+//    QMutexLocker locker(&m_mutex);
+//    Q_UNUSED(locker);
+
+    std::ofstream logFile;
+    logFile.open(logFileName().toUtf8().constData(), std::ios::out | std::ios::app);
+    logFile << msg2LogMsg(strMsg).toUtf8().constData() << std::endl;
+    logFile.close();
 }
 
 void Logger::addToBuffer(const QString& strMsg)
 {
-    QMutexLocker locker(&m_mutex);
-    Q_UNUSED(locker);
+//    QMutexLocker locker(&m_mutex);
+//    Q_UNUSED(locker);
     //
     m_buffer->open(QIODevice::Append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());
@@ -157,7 +156,6 @@ Logger* Logger::logger()
 
 void Logger::writeLog(const QString& strMsg)
 {
-//    qDebug() << strMsg;
     logger()->saveToLogFile(strMsg);
     logger()->addToBuffer(strMsg);
 
@@ -177,10 +175,10 @@ CWizInfo::~CWizInfo()
         if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
             stream->buffer.chop(1);
         if (stream->message_output) {
-//            qt_message_output(stream->type,
-//                              stream->context,
-//                              stream->buffer);
-            Utils::Logger::logger()->writeLog(stream->buffer);
+            qt_message_output(stream->type,
+                              stream->context,
+                              stream->buffer);
+//            Utils::Logger::logger()->writeLog(stream->buffer);
         }
         delete stream;
     }

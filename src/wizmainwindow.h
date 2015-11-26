@@ -45,6 +45,7 @@ class CWizObjectDataDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
+class wizImageButton;
 
 class CWizMacToolBar;
 class QNetworkDiskCache;
@@ -111,16 +112,22 @@ public:
 
     static MainWindow* instance();
 
-    QNetworkDiskCache* webViewNetworkCache();   
+    QNetworkDiskCache* webViewNetworkCache();
+    CWizDocumentView* docView();
 
 protected:
-    virtual bool eventFilter(QObject* watched, QEvent* event);
-//    virtual void resizeEvent(QResizeEvent* event);
-    virtual void closeEvent(QCloseEvent* event);
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    virtual void changeEvent(QEvent *event);
+    bool eventFilter(QObject* watched, QEvent* event);
+    void resizeEvent(QResizeEvent* event);
+    void closeEvent(QCloseEvent* event);
+    void mousePressEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void changeEvent(QEvent *event);
+    void moveEvent(QMoveEvent* ev);
+
+#ifdef Q_OS_MAC
+    virtual void paintEvent(QPaintEvent* event);
+#endif
 
 #ifdef USECOCOATOOLBAR
     virtual void showEvent(QShowEvent *event);
@@ -161,6 +168,8 @@ private:
 #endif
     bool m_useSystemBasedStyle;
 
+    QWidget* m_clienWgt;
+
 
 #ifndef Q_OS_MAC
     QLabel* m_labelNotice;
@@ -182,7 +191,8 @@ private:
     CWizSingleDocumentViewDelegate* m_singleViewDelegate;
 
     QLabel* m_labelDocumentsHint;
-    QLabel* m_labelDocumentsCount;
+//    QLabel* m_labelDocumentsCount;
+    wizImageButton* m_btnMarkDocumentsReaded;
 
     CWizDocumentViewHistory* m_history;
     CWizAnimateAction* m_animateSync;
@@ -248,11 +258,7 @@ public:
     void createNoteWithText(const QString& strText);
     void createNoteWithImage(const QString& strImageFile);
 
-signals:
-    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
-    // signal connect to checklist in javascript
-    void clickingTodoCallBack(bool cancel, bool needCallAgain);
-
+signals:    
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
 
@@ -327,34 +333,36 @@ public Q_SLOTS:
     void on_actionSortByTag_triggered();
     void on_actionSortBySize_triggered();
 
-    void on_actionMarkAllMessageRead_triggered();
-    void on_messageSelector_indexChanged(int index);
+    void on_categoryUnreadButton_triggered();
+
+    void on_actionMarkAllMessageRead_triggered(bool removeItems);
+    void on_messageSelector_senderSelected(QString userGUID);
 
     // menu format
-    void on_actionFormatJustifyLeft_triggered();
-    void on_actionFormatJustifyRight_triggered();
-    void on_actionFormatJustifyCenter_triggered();
-    void on_actionFormatJustifyJustify_triggered();
-    void on_actionFormatIndent_triggered();
-    void on_actionFormatOutdent_triggered();
-    void on_actionFormatInsertOrderedList_triggered();
-    void on_actionFormatInsertUnorderedList_triggered();
-    void on_actionFormatInsertTable_triggered();
-    void on_actionFormatInsertLink_triggered();
-    void on_actionFormatBold_triggered();
-    void on_actionFormatItalic_triggered();
-    void on_actionFormatUnderLine_triggered();
-    void on_actionFormatStrikeThrough_triggered();
-    void on_actionFormatInsertHorizontal_triggered();
-    void on_actionFormatInsertDate_triggered();
-    void on_actionFormatInsertTime_triggered();
-    void on_actionFormatRemoveFormat_triggered();
-    void on_actionFormatPlainText_triggered();
-    void on_actionEditorViewSource_triggered();
-    void on_actionFormatInsertCheckList_triggered();
-    void on_actionFormatInsertCode_triggered();
-    void on_actionFormatInsertImage_triggered();
-    void on_actionFormatScreenShot_triggered();
+    void on_actionMenuFormatJustifyLeft_triggered();
+    void on_actionMenuFormatJustifyRight_triggered();
+    void on_actionMenuFormatJustifyCenter_triggered();
+    void on_actionMenuFormatJustifyJustify_triggered();
+    void on_actionMenuFormatIndent_triggered();
+    void on_actionMenuFormatOutdent_triggered();
+    void on_actionMenuFormatInsertOrderedList_triggered();
+    void on_actionMenuFormatInsertUnorderedList_triggered();
+    void on_actionMenuFormatInsertTable_triggered();
+    void on_actionMenuFormatInsertLink_triggered();
+    void on_actionMenuFormatBold_triggered();
+    void on_actionMenuFormatItalic_triggered();
+    void on_actionMenuFormatUnderLine_triggered();
+    void on_actionMenuFormatStrikeThrough_triggered();
+    void on_actionMenuFormatInsertHorizontal_triggered();
+    void on_actionMenuFormatInsertDate_triggered();
+    void on_actionMenuFormatInsertTime_triggered();
+    void on_actionMenuFormatRemoveFormat_triggered();
+    void on_actionMenuFormatPlainText_triggered();
+    void on_actionMenuEditorViewSource_triggered();
+    void on_actionMenuFormatInsertCheckList_triggered();
+    void on_actionMenuFormatInsertCode_triggered();
+    void on_actionMenuFormatInsertImage_triggered();
+    void on_actionMenuFormatScreenShot_triggered();
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
                           bool bStart, bool bEnd);
@@ -365,13 +373,13 @@ public Q_SLOTS:
     void on_category_itemSelectionChanged();
     void on_documents_itemSelectionChanged();
     void on_documents_itemDoubleClicked(QListWidgetItem * item);
-    void on_message_itemSelectionChanged();
-    void on_documents_documentCountChanged();
     void on_documents_lastDocumentDeleted();
-    void on_documents_hintChanged(const QString& strHint);
+//    void on_documents_documentCountChanged();
+//    void on_documents_hintChanged(const QString& strHint);
+    void on_btnMarkDocumentsRead_triggered();
     void on_documents_viewTypeChanged(int type);
     void on_documents_sortingTypeChanged(int type);
-    //void on_document_contentChanged();
+    //void on_document_contentChanged();  
 
     void on_search_doSearch(const QString& keywords);
     void on_options_settingsChanged(WizOptionsType type);
@@ -423,6 +431,7 @@ public Q_SLOTS:
     void showBubbleNotification(const QString& strTitle, const QString& strInfo);
     void showTrayIconMenu();
     void on_viewMessage_request(qint64 messageID);
+    void on_viewMessage_request(const WIZMESSAGEDATA& msg);
     //
     void on_dockMenuAction_triggered();
     //
@@ -439,6 +448,7 @@ public Q_SLOTS:
 
     //
     void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
+    void viewCurrentNoteInSeparateWindow();
 
 public:
     // WizExplorerApp pointer
@@ -465,10 +475,9 @@ public:
     Q_INVOKABLE void SetSavingDocument(bool saving);
     Q_INVOKABLE void ProcessClipboardBeforePaste(const QVariantMap& data);
 
-    Q_INVOKABLE QString TranslateString(const QString& string);
 
-    Q_INVOKABLE bool checkListClickable();
     //NOTE: these functions would called by web page, do not delete
+    Q_INVOKABLE QString TranslateString(const QString& string);
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
@@ -498,6 +507,11 @@ private:
     void resortDocListAfterViewDocument(const WIZDOCUMENTDATA& doc);
 
     //
+    void showCommentWidget();
+
+    //
+    CWizDocumentWebView* getActiveEditor();
+    //
     void showDocumentList();
     void showDocumentList(CWizCategoryBaseView* category);
     void showMessageList(CWizCategoryViewMessageItem* pItem);
@@ -518,6 +532,9 @@ private:
     void resetWindowListMenu(QMenu* menu, bool removeExists);
 
     void changeDocumentsSortTypeByAction(QAction* action);
+
+    //
+    bool processApplicationActiveEvent();
 
 private slots:
     void windowActived();

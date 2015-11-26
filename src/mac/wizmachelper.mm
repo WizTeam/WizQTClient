@@ -1,10 +1,6 @@
 #include "wizmachelper.h"
 #include "wizmachelper_mm.h"
 
-#include "wizmainwindow.h"
-
-#include "share/wizRtfReader.h"
-#include "utils/pathresolve.h"
 
 #include <QLocale>
 #include <QMainWindow>
@@ -16,9 +12,23 @@
 #include <QWebElementCollection>
 #include <QWebFrame>
 #include <QEventLoop>
+#include <QMacCocoaViewContainer>
 #include <QDebug>
 
 #import <WebKit/WebKit.h>
+
+#ifdef UsePLCrashReporter
+#import <CrashReporter/CrashReporter.h>
+#import <CrashReporter/PLCrashReporterConfig.h>
+#import <CrashReporter/PLCrashReportTextFormatter.h>
+#endif
+
+#include "wizmainwindow.h"
+
+#include "share/wizRtfReader.h"
+#include "utils/pathresolve.h"
+#include "widgets/wizCrashReportDialog.h"
+
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
@@ -31,6 +41,85 @@
 //}
 //#endif
 
+
+@interface DBSCustomView: NSView
+
+- (void)drawRect:(NSRect)dirtyRect;
+@end
+
+@implementation DBSCustomView
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+   // Drawing code here.
+    [super drawRect: dirtyRect];  //父类，
+    NSColor* textColor = [NSColor colorWithDeviceRed:0x78/255.0 green:0x78/255.0 blue:0x78/255.0 alpha:0.2];
+    [textColor set];  //设置颜色
+    NSRectFill(dirtyRect);//填充rect区域
+}
+@end
+
+// @interface NSView (Vibrancy)
+
+// //Returns NSVisualEffectView
+// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode;
+
+// @end
+
+// @implementation NSView (Vibrancy)
+
+// - (instancetype)insertVibrancyViewBlendingMode:(NSVisualEffectBlendingMode)mode
+// {
+//     Class vibrantClass=NSClassFromString(@"NSVisualEffectView");
+//     if (vibrantClass)
+//     {
+//         NSLog(@"self bounds %f, %f ", self.bounds.size.width, self.bounds.size.height);
+//         NSVisualEffectView *vibrant=[[vibrantClass alloc] initWithFrame:self.bounds];
+//         [vibrant setAutoresizingMask:NSViewHeightSizable|NSViewWidthSizable|NSViewMaxXMargin | NSViewMinXMargin | NSViewMaxYMargin | NSViewMinYMargin];
+//         [vibrant setBlendingMode:mode];
+
+//         [self addSubview:vibrant positioned:NSWindowBelow relativeTo:nil];
+
+//         return vibrant;
+//     }
+//     return nil;
+// }
+
+// @end
+
+
+// @implementation NSWindow (BackgroundBlur)
+
+// - (void)enableBehindBlur
+// {
+//     [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeBehindWindow];
+
+// //    DBSCustomView *view = [[DBSCustomView alloc] initWithFrame:NSMakeRect(0, 0, 100, 100)];
+// //    [self.contentView addSubview:view];
+// }
+
+
+// //- (void)enableBlendingBlur
+// //{
+// //    [self.contentView insertVibrancyViewBlendingMode:NSVisualEffectBlendingModeWithinWindow];
+// //}
+
+// @end
+
+
+void enableWidgetBehindBlur(QWidget* wgt)
+{
+    // NSView *nsview = (NSView *) wgt->winId();
+    // NSWindow *nswindow = [nsview window];
+    // [nswindow enableBehindBlur];
+}
+
+//void enableWidgetBlendingBlur(QWidget* wgt)
+//{
+//    NSView *nsview = (NSView *) wgt->winId();
+//    NSWindow *nswindow = [nsview window];
+//    [nswindow enableBlendingBlur];
+//}
 
 @interface CreateNoteService : NSObject
 
@@ -660,4 +749,176 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
     }
 
     return true;
+}
+
+
+
+#ifdef UsePLCrashReporter
+//
+// Called to handle a pending crash report.
+//
+void handleCrashReport(PLCrashReporter *crashReporter)
+{
+    NSData *crashData;
+    NSError *error;
+
+    // Try loading the crash report
+    crashData = [crashReporter loadPendingCrashReportDataAndReturnError: &error];
+    if (crashData == nil) {
+        NSLog(@"Could not load crash report: %@", error);
+
+        // Purge the report
+        [crashReporter purgePendingCrashReport];
+        return;
+    }
+
+    // We could send the report from here, but we'll just print out
+    // some debugging info instead
+    PLCrashReport *report = [[[PLCrashReport alloc] initWithData: crashData error: &error] autorelease];
+    if (report == nil) {
+        NSLog(@"Could not parse crash report");
+
+        // Purge the report
+        [crashReporter purgePendingCrashReport];
+        return;
+    }
+
+    NSLog(@"Crashed founded. on %@", report.systemInfo.timestamp);
+    NSLog(@"Crashed with signal %@ (code %@, address=0x%" PRIx64 ")", report.signalInfo.name,
+          report.signalInfo.code, report.signalInfo.address);
+
+
+    ///////// save to local file
+
+//    NSFileManager *fm = [NSFileManager defaultManager];
+
+//    NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+//    NSString *documentsDirectory = [paths objectAtIndex:0];
+//    if (![fm createDirectoryAtPath: documentsDirectory withIntermediateDirectories: YES attributes:nil error: &error]) {
+//        NSLog(@"Could not create documents directory: %@", error);
+//        return;
+//    }
+
+//    QString time = QDateTime::currentDateTime().toString();
+//    NSString* nsTime = WizToNSString(time);
+//    NSString *outputPath = [documentsDirectory stringByAppendingPathComponent: nsTime];
+//    if (![crashData writeToFile: outputPath atomically: YES]) {
+//        NSLog(@"Failed to write crash report");
+//    }
+
+//    NSLog(@"Saved crash report to: %@", outputPath);
+
+
+    //////////
+    /* Verify that the format is supported. Only one is actually supported currently */
+    PLCrashReportTextFormat textFormat = PLCrashReportTextFormatiOS;
+
+    /* Format the report */
+    NSString* reports = [PLCrashReportTextFormatter stringValueForCrashReport: report withTextFormat: textFormat];
+//    fprintf(output, "%s", [reports UTF8String]);
+//    NSLog(@"report : %@", reports);
+    QString strReport = WizToQString(reports);
+    qDebug() << "report size : " << strReport.toUtf8().size();
+
+    //
+    [crashReporter purgePendingCrashReport];
+
+    CWizCrashReportDialog dlg(strReport);
+    dlg.exec();
+}
+
+void initCrashReporter()
+{
+    PLCrashReporterConfig* config = [[[PLCrashReporterConfig alloc] initWithSignalHandlerType: PLCrashReporterSignalHandlerTypeBSD
+    symbolicationStrategy: PLCrashReporterSymbolicationStrategySymbolTable] autorelease];
+    PLCrashReporter *crashReporter = [[[PLCrashReporter alloc] initWithConfiguration: config] autorelease];
+
+
+    // Check if we previously crashed
+    if ([crashReporter hasPendingCrashReport])
+    {
+        handleCrashReport(crashReporter);
+    }
+
+    NSError *error = nil;
+    // Enable the Crash Reporter
+    if (![crashReporter enableCrashReporterAndReturnError: &error])
+        NSLog(@"Warning: Could not enable crash reporter: %@", error);
+
+}
+
+#else
+void initCrashReporter()
+{}
+#endif
+
+
+
+void adjustSubViews(QWidget* wgt)
+{
+    qDebug() << "wgt size : " << wgt->size() << " wgt pos : " << wgt->mapToGlobal(QPoint(0, 0));
+    NSView *nsview = (NSView *) wgt->winId();
+    NSArray* subviewArray = [nsview subviews];
+    for (NSView* subview in subviewArray)
+    {
+        NSLog(@"self bounds %f, %f  ; pos %f %f", subview.frame.size.width, subview.frame.size.height,
+              subview.frame.origin.x, subview.frame.origin.y);
+
+        if (subview.frame.size.width == 640)
+        {
+            NSRect f = subview.frame;
+            f.origin.x = 20;
+            f.origin.y = 40;
+            f.size.width = 300;
+            f.size.height = 100;
+            subview.frame = f;
+        }
+    }
+}
+
+
+
+QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
+{
+    NSView* wgtView = (NSView *) wgt->winId();
+    QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
+    return container;
+}
+
+
+int getSystemMinorVersion()
+{
+    SInt32 minor;
+//    SInt32 major, minor, bugfix;
+//    Gestalt(gestaltSystemVersionMajor, &major);
+    Gestalt(gestaltSystemVersionMinor, &minor);
+//    Gestalt(gestaltSystemVersionBugFix, &bugfix);
+//    NSOperatingSystemVersion systemVersion = [[NSProcessInfo processInfo] operatingSystemVersion];
+//    return systemVersion.minorVersion;
+
+    return minor;
+}
+
+
+bool systemWidgetBlurAvailable()
+{
+    return false;
+    return (getSystemMinorVersion() >= 15) || (getSystemMinorVersion() == 10 && getSystemPatchVersion() >= 4);
+}
+
+
+int getSystemMajorVersion()
+{
+    SInt32 major;
+    Gestalt(gestaltSystemVersionMajor, &major);
+
+    return major;
+}
+
+
+int getSystemPatchVersion()
+{
+    SInt32 bugfix;
+    Gestalt(gestaltSystemVersionBugFix, &bugfix);
+    return bugfix;
 }

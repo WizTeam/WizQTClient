@@ -64,49 +64,49 @@
 #ifndef HEADER_X509_H
 #define HEADER_X509_H
 
-#include <openssl/e_os2.h>
-#include <openssl/symhacks.h>
+#include <openssl/include/e_os2.h>
+#include <openssl/include/symhacks.h>
 #ifndef OPENSSL_NO_BUFFER
-#include <openssl/buffer.h>
+#include <openssl/include/buffer.h>
 #endif
 #ifndef OPENSSL_NO_EVP
-#include <openssl/evp.h>
+#include <openssl/include/evp.h>
 #endif
 #ifndef OPENSSL_NO_BIO
-#include <openssl/bio.h>
+#include <openssl/include/bio.h>
 #endif
-#include <openssl/stack.h>
-#include <openssl/asn1.h>
-#include <openssl/safestack.h>
+#include <openssl/include/stack.h>
+#include <openssl/include/asn1.h>
+#include <openssl/include/safestack.h>
 
 #ifndef OPENSSL_NO_EC
-#include <openssl/ec.h>
+#include <openssl/include/ec.h>
 #endif
 
 #ifndef OPENSSL_NO_ECDSA
-#include <openssl/ecdsa.h>
+#include <openssl/include/ecdsa.h>
 #endif
 
 #ifndef OPENSSL_NO_ECDH
-#include <openssl/ecdh.h>
+#include <openssl/include/ecdh.h>
 #endif
 
 #ifndef OPENSSL_NO_DEPRECATED
 #ifndef OPENSSL_NO_RSA
-#include <openssl/rsa.h>
+#include <openssl/include/rsa.h>
 #endif
 #ifndef OPENSSL_NO_DSA
-#include <openssl/dsa.h>
+#include <openssl/include/dsa.h>
 #endif
 #ifndef OPENSSL_NO_DH
-#include <openssl/dh.h>
+#include <openssl/include/dh.h>
 #endif
 #endif
 
 #ifndef OPENSSL_NO_SHA
-#include <openssl/sha.h>
+#include <openssl/include/sha.h>
 #endif
-#include <openssl/ossl_typ.h>
+#include <openssl/include/ossl_typ.h>
 
 #ifdef  __cplusplus
 extern "C" {
@@ -597,8 +597,8 @@ struct pkcs8_priv_key_info_st
 }
 #endif
 
-#include <openssl/x509_vfy.h>
-#include <openssl/pkcs7.h>
+#include <openssl/include/x509_vfy.h>
+#include <openssl/include/pkcs7.h>
 
 #ifdef  __cplusplus
 extern "C" {

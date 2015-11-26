@@ -4,7 +4,7 @@
 #include <QPainter>
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
-
+#include "utils/stylehelper.h"
 
 
 using namespace WizService;

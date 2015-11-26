@@ -53,11 +53,11 @@ class CWizMacToolBarActionItem : public CWizMacToolBarItem
 {
 public:
     CWizMacToolBarActionItem(CWizMacToolBarDelegate* delegate, QAction* action)
-        : m_delegate(delegate)
+        : m_helper(this, action, NULL)
+        , m_delegate(delegate)
         , m_action(action)
         , m_id(WizGenGUID())
         , m_item(nil)
-        , m_helper(this, action, NULL)
     {
         m_nsImages = [[NSMutableDictionary alloc] init];
         //connect(action, SIGNAL(changed()), SLOT(on_action_changed()));
@@ -256,18 +256,16 @@ private:
     QString m_strTooltip;
 };
 
-
-
 class CWizMacToolBarSearchItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip)
+    CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip, int width)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
         , m_searchField(new CWizSearchWidget())
         , m_strLabel(label)
         , m_strTooltip(tooltip)
-
+        , m_width(width)
     {
     }
 private:
@@ -276,6 +274,7 @@ private:
     CWizSearchWidget* m_searchField;
     QString m_strLabel;
     QString m_strTooltip;
+    int m_width;
 public:
     CWizSearchWidget* widget() const { return m_searchField; }
 
@@ -304,8 +303,10 @@ public:
         NSView* nsview = (NSView *)m_searchField->cocoaView();
 #endif
         [toolbarItem setView: nsview];
-        [toolbarItem setMinSize:NSMakeSize(24, NSHeight([nsview frame]))];
-        [toolbarItem setMaxSize:NSMakeSize(250,NSHeight([nsview frame]))];
+        [toolbarItem setMinSize:NSMakeSize(m_width, NSHeight([nsview frame]))];
+        [toolbarItem setMaxSize:NSMakeSize(m_width, NSHeight([nsview frame]))];
+
+        m_searchField->setSizeHint(QSize(m_width, m_searchField->sizeHint().height()));
 
         return toolbarItem;
     }
@@ -398,8 +399,8 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     NSWindow* window3 = [NSApp mainWindow];
     //NSWindow* window4 = [self window];
 
-    //[[self window] makeFirstResponder:[self window]];
-    //[[NSApp mainWindow] makeFirstResponder:[NSApp mainWindow]];
+//    [[self window] makeFirstResponder:[self window]];
+//    [[NSApp mainWindow] makeFirstResponder:[NSApp mainWindow]];
     return;
 }
 
@@ -411,9 +412,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     if (!m_toolbar)
         return YES;
 
-    //[[NSApp mainWindow] makeFirstResponder:nil];
-    //NSWindow* window1 = [[NSApp windows] objectAtIndex:1];
-    //[window1 makeFirstResponder:window1];
+//    [[NSApp mainWindow] makeFirstResponder:nil];
+//    NSWindow* window1 = [[NSApp windows] objectAtIndex:1];
+//    [window1 makeFirstResponder:window1];
 
 
     //NSWindow* window1 = [[NSApp windows] objectAtIndex:0];
@@ -466,6 +467,19 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     // Noop for now.
 }
 
+- (NSToolbarItem*) getSearchToolBarItem
+{
+    foreach (CWizMacToolBarItem* item, *items)
+    {
+        if (CWizMacToolBarSearchItem* search = dynamic_cast<CWizMacToolBarSearchItem*> (item))
+        {
+            NSString* nsId = search->itemIdentifier();
+            return [self itemIdentifierToItem: nsId];
+        }
+    }
+    return NULL;
+}
+
 - (CWizSearchWidget*) getSearchWidget
 {
     foreach (CWizMacToolBarItem* item, *items)
@@ -476,6 +490,22 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
         }
     }
     //
+    return NULL;
+}
+
+- (NSToolbarItem*) getWidgetToolBarItemByWidget:(QWidget*) widget
+{
+    foreach (CWizMacToolBarItem* item, *items)
+    {
+        if (CWizMacToolBarWidgetItem* widgetItem = dynamic_cast<CWizMacToolBarWidgetItem*> (item))
+        {
+            if (widgetItem->widget() == widget)
+            {
+                NSString* nsId = widgetItem->itemIdentifier();
+                return [self itemIdentifierToItem: nsId];
+            }
+        }
+    }
     return NULL;
 }
 
@@ -490,15 +520,24 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(new CWizMacToolBarStandardItem(standardItem));
 }
 
-- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip
+- (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip width:(int)width
 {
-    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip);
+    CWizMacToolBarSearchItem* pItem = new CWizMacToolBarSearchItem(self, label, tooltip, width);
     items->append(pItem);
 }
 
 - (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip
 {
     items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
+}
+
+- (void)deleteAllToolBarItem
+{
+//    foreach (CWizMacToolBarItem* item, *items)
+//    {
+//        item->deleteLater();
+//    }
+//    items->clear();
 }
 
 - (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier

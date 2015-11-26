@@ -5,12 +5,13 @@
 #include <QFontDialog>
 #include <QColorDialog>
 
+#include "plugins/coreplugin/icore.h"
+#include "utils/pathresolve.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
+#include "widgets/wizMarkdownTemplateDialog.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
-#include "widgets/wizMarkdownTemplateDialog.h"
-#include "plugins/coreplugin/icore.h"
 
 
 CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
@@ -22,6 +23,8 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->setupUi(this);
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
+
+    setFixedSize(430, 290);
 
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
@@ -178,9 +181,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
 
     QString strColor = m_app.userSettings().editorBackgroundColor();
-    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColor));
-    ui->pushButtonClearBackground->setStyleSheet(QString("QPushButton:pressed{background-color: #000000;"));
+    updateEditorBackgroundColor(strColor);
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
@@ -346,10 +347,9 @@ void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
     QString strLocaleName = m_locales[index];
     if (strLocaleName.compare(userSettings().locale())) {
         userSettings().setLocale(strLocaleName);
+
+        CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
     }
-
-
-    CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
 }
 
 void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
@@ -453,14 +453,17 @@ void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 
 void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
 {
-    updateEditorBackgroundColor("#FFFFFF");
+    updateEditorBackgroundColor("");
 }
 
 void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
 {
-    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
-                                                         "{ border: 1px; background: %1; height:20px;  border-radius:5px } ").arg(strColorName));
     m_app.userSettings().setEditorBackgroundColor(strColorName);
+    ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
+                                                             "{ border: 1px; background: %1; height:20px;} ").arg(strColorName));
+    ui->pushButtonBackgroundColor->setText(strColorName.isEmpty() ? tr("Click to select color") : QString());
+    ui->pushButtonClearBackground->setVisible(!strColorName.isEmpty());
+
     Q_EMIT settingsChanged(wizoptionsFont);
 }
 
@@ -494,4 +497,18 @@ void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
     }
 
     Q_EMIT settingsChanged(wizoptionsSync);
+}
+
+void CWizPreferenceWindow::on_tabWidget_currentChanged(int index)
+{
+//    if (index == 1)
+//    {
+//        setFixedHeight(350);
+//        resize(width(), 350);
+//    }
+//    else
+//    {
+//        setFixedHeight(290);
+//        resize(width(), 290);
+//    }
 }

@@ -1,6 +1,38 @@
+//webview的锚点跳转存在问题，通过js来控制跳转
+var WizHref = function() {
+    var _doc;
+    var onClick = function(e) {
+        var a = e.target,
+            href = a.getAttribute('href') || '';
+        if (href && href.indexOf('#') === 0) {
+            var dom = _doc.querySelector(href);
+            if (dom) {
+                dom.scrollIntoView(true);
+                e.stopPropagation();
+                e.preventDefault();
+            }
+        }
+    };
+
+    var wizHref = {
+        on: function(doc) {
+            _doc = doc;
+            _doc.body.addEventListener('click', onClick);
+        },
+        off: function(doc) {
+            _doc = doc;
+            doc.body.removeEventListener('click', onClick);
+        }
+    };
+    return wizHref;
+};
+
+
+
 var
     editor = null,
     m_inited = false,
+    m_wizReaderInited = false;
     objApp = WizExplorerApp,
     m_currentGUID = "",
     m_defaultCss = WizEditor.getDefaultCssFilePath(),
@@ -8,6 +40,7 @@ var
     m_header = "",
     wiz_html = "",
     wiz_head = "";
+    wiz_href = new WizHref();
 
 
 // setup ueditor
@@ -41,13 +74,13 @@ try {
         editor.ui.getDom('scalelayer').style.display = 'none';
         editor.ui.getDom('elementpath').style.display = "none";
         editor.ui.getDom('wordcount').style.display = "none";
-        editor.ui._updateFullScreen();
-
+        editor.ui._updateFullScreen();            
     });
 
     editor.addListener('aftersetcontent', function() {
         updateCss();
-        WizEditor.onNoteLoadFinished();
+        WizEditor.onNoteLoadFinished();   
+
     });
 
     //NOTE: 不能监听contentchange事件，否则仅仅进入编辑状态就会修改笔记为已修改
@@ -57,22 +90,75 @@ try {
 
     editor.addListener('wizcontentchange', function() {
         WizEditor.setContentsChanged(true);
-    });
+    });    
 
 } catch (err) {
     alert(err);
 }
 
+function initWizReader() {                  
+    var f = window.document.getElementById('ueditor_0');
+    if (!f.contentWindow.WizReader) { 
+        console.log("wizReader is null");
+        return;
+    }
+    var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
+    var cssFile = WizEditor.getMarkdownCssFilePath();
+
+    m_wizReaderInited = f.contentWindow.WizReader.init({
+    document: editor.document,
+    lang: 'zh-cn',
+    clientType: 'mac',
+    userInfo: {},
+    // usersData: '',
+    noAmend: false,  //wizReader 专用参数，用于关闭 修订功能,
+    dependencyCss: {
+        github2: cssFile,  //markdown 使用
+        wizToc: dependencyFilePath + 'wizToc.css'     //toc 样式
+    },
+    dependencyJs: {
+        jquery: dependencyFilePath + 'jquery-1.11.3.js', //jquery
+        prettify: dependencyFilePath + 'prettify.js',       //代码高亮
+        raphael: dependencyFilePath + 'raphael.js',     //流程图 & 时序图 依赖
+        underscore: dependencyFilePath + 'underscore.js',   //时序图 依赖
+        flowchart: dependencyFilePath + 'flowchart.js',         //流程图
+        sequence: dependencyFilePath + 'sequence-diagram.js', //时序图
+        //mathJax 如果不传则使用 默认地址
+        mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML'
+    }
+    }) | true;
+}
+
+function renderMarkdown() {    
+    var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
+    var wizReaderDocument = loadSingleJs(editor.document, reader);
+    wizReaderDocument.onload = function() {
+    	initWizReader();
+    	var f = window.document.getElementById('ueditor_0');
+		f.contentWindow.WizReader.markdown();
+    };
+}
+
+function loadSingleJs(doc, path) {
+    var jsId = 'wiz_' + path;
+    if (doc.getElementById(jsId)) {
+    	console.log("js file already exisits");
+        return true;
+    }
+    var s = doc.createElement('script');
+    s.type = 'text/javascript';
+    s.src = path.replace(/\\/g, '/');
+    s.id = jsId;
+    doc.getElementsByTagName('head')[0].insertBefore(s, null);
+    return s;
+}
+
 function setEditorHtml(html, bEditing)
 {
-    editor.reset();
-    editor.document.head.innerHTML = wiz_head;
-    //if (bEditing) {
-    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = wiz_head;
-    //}
+    setWizHrefEnable(bEditing == false);
 
+    editor.reset();
+    editor.document.head.innerHTML = wiz_head;    
     editor.document.body.innerHTML = html;
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');
@@ -81,24 +167,22 @@ function setEditorHtml(html, bEditing)
 
     window.UE.utils.domReady(function() {
         //special process to remove css style added by phone
-        WizSpecialProcessForPhoneCss();
+        WizSpecialProcessForPhoneCss(); 
+        updateCustomCss();  
         WizEditor.initCheckListEnvironment();
         editor.window.scrollTo(0, 0);
     });
 }
 
-function setEditing(bEditing) {
-    editor.document.head.innerHTML = wiz_head;
-    //if (bEditing) {
-    //    editor.document.head.innerHTML = wiz_head + m_header; // restore original header
-    //} else {
-    //    editor.document.head.innerHTML = wiz_head;
-    //}
+function setEditing(bEditing) {    
+    setWizHrefEnable(bEditing == false);
 
+    editor.document.head.innerHTML = wiz_head;
     editor.document.body.innerHTML = wiz_html;
 
     //special process to remove css style added by phone
     WizSpecialProcessForPhoneCss();
+    updateCustomCss();
 
     editor.fireEvent('aftersetcontent');
     editor.fireEvent('contentchange');
@@ -158,7 +242,9 @@ function updateEditorHtml(bEditing)
     window.UE.utils.domReady(function() {
         //special process to remove css style added by phone
         WizSpecialProcessForPhoneCss();
-        WizEditor.initCheckListEnvironment();
+        updateCustomCss();
+        WizEditor.initCheckListEnvironment();		
+        
         editor.window.scrollTo(0, 0);
     });
 }
@@ -204,7 +290,7 @@ function WizGetImgElementByPoint(posX, posY) {
     return '';
 }
 
-//special process to remove css style added by phone.   *** should remove before 2014-10-08
+//special process to remove css style added by phone.   *** should remove before 2016-1-1
 function WizSpecialProcessForPhoneCss() {
     
     var cssElem = editor.document.getElementById("wiz_phone_default_css");
@@ -350,4 +436,32 @@ function WizGetMailSender () {
 			return str.replace("wiz_mail_from/", "");
 		}
 	}
+}
+
+function updateCustomCss() {
+	var WIZ_CUSTOM_STYLE_ID = 'wiz_custom_css';
+	var WIZ_STYLE = 'wiz_style';
+
+	var style = editor.document.getElementById(WIZ_CUSTOM_STYLE_ID);
+	if (style)
+		return;
+	//
+	var strStyle = 'html,body{font-size:15px}body{font-family:Helvetica,"Hiragino Sans GB","Microsoft Yahei",SimSun,SimHei,arial,sans-serif;line-height:1.6;padding:0;margin:20px 36px;margin:1.33rem 2.4rem}h1,h2,h3,h4,h5,h6{margin:20px 0 10px;margin:1.33rem 0 .667rem;padding:0;font-weight:bold}h1{font-size:21px;font-size:1.4rem}h2{font-size:20px;font-size:1.33rem}h3{font-size:18px;font-size:1.2rem}h4{font-size:17px;font-size:1.13rem}h5{font-size:15px;font-size:1rem}h6{font-size:15px;font-size:1rem;color:#777;margin:1rem 0}div,p,blockquote,ul,ol,dl,table,pre{margin:10px 0;margin:.667rem 0}ul,ol{padding-left:32px;padding-left:2.13rem}blockquote{border-left:4px solid #ddd;padding:0 12px;padding:0 .8rem;color:#aaa}blockquote>:first-child{margin-top:0}blockquote>:last-child{margin-bottom:0}img{border:0;max-width:100%;height:auto !important}table{border-collapse:collapse;border:1px solid #bbb}td{border-collapse:collapse;border:1px solid #bbb}@media screen and (max-width:660px){body{margin:20px 18px;margin:1.33rem 1.2rem}}@media only screen and (-webkit-max-device-width:1024px),only screen and (-o-max-device-width:1024px),only screen and (max-device-width:1024px),only screen and (-webkit-min-device-pixel-ratio:3),only screen and (-o-min-device-pixel-ratio:3),only screen and (min-device-pixel-ratio:3){html,body{font-size:17px}body{line-height:1.7;margin:12px 15px;margin:.75rem .9375rem;color:#353c47;text-align:justify;text-justify:inter-word}h1{font-size:34px;font-size:2.125rem}h2{font-size:30px;font-size:1.875rem}h3{font-size:26px;font-size:1.625rem}h4{font-size:22px;font-size:1.375rem}h5{font-size:18px;font-size:1.125rem}h6{color:inherit}div,p,blockquote,ul,ol,dl,table,pre{margin:0}ul,ol{padding-left:40px;padding-left:2.5rem}blockquote{border-left:4px solid #c8d4e8;padding:0 15px;padding:0 .9375rem;color:#b3c2dd}}';	//
+	var objStyle = editor.document.createElement('style');
+	objStyle.type = 'text/css';
+	objStyle.textContent = strStyle;
+	objStyle.id = WIZ_CUSTOM_STYLE_ID;
+	//
+	if (editor.document.head) {
+		editor.document.head.appendChild(objStyle);
+	}	
+}
+
+function setWizHrefEnable (enable) {
+    var iframeDoc = window.document.getElementById('ueditor_0').contentDocument;
+    if (enable) {       
+       wiz_href.on(iframeDoc);
+    } else {
+       wiz_href.off(iframeDoc);
+    }
 }

@@ -1,0 +1,32 @@
+
+.wiz_toc_layer {
+    background: #F9F9F5;
+    padding: 20px 25px;
+}
+
+.wiz_toc {
+    text-decoration: none;
+    display: inline-block;
+    line-height: 27px;
+}
+.wiz_toc:hover{
+    text-decoration: underline;
+}
+.wiz_toc.h1 {
+    margin-left: 0;
+}
+.wiz_toc.h2 {
+    margin-left: 20px;
+}
+.wiz_toc.h3 {
+    margin-left: 40px;
+}
+.wiz_toc.h4 {
+    margin-left: 60px;
+}
+.wiz_toc.h5 {
+    margin-left: 80px;
+}
+.wiz_toc.h6 {
+    margin-left: 100px;
+}

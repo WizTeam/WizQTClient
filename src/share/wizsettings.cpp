@@ -1,6 +1,7 @@
 #include "wizsettings.h"
 #include "utils/pathresolve.h"
 
+#include "wizdef.h"
 #include <QLocale>
 
 CWizSettings::CWizSettings(const QString& strFileName)
@@ -519,10 +520,7 @@ void CWizUserSettings::setRememberNotePasswordForSession(bool remember)
 
 QString CWizUserSettings::editorBackgroundColor()
 {
-    QString strColor = get("EditorBackgroundColor");
-    if (strColor.isEmpty())
-        return "#FFFFFF";
-
+    QString strColor = get("EditorBackgroundColor");    
     return strColor;
 }
 
@@ -651,7 +649,7 @@ int CWizUserSettings::defaultFontSize()
     if (nSize)
         return nSize;
 
-    return 14; // default 14px
+    return 15; // default 15px
 }
 
 void CWizUserSettings::setDefaultFontSize(int nSize)
@@ -710,4 +708,35 @@ int CWizUserSettings::syncGroupMethod() const
 void CWizUserSettings::setSyncGroupMethod(int days)
 {
     set("SyncGroupMethod", QString::number(days));
+}
+
+void CWizUserSettings::appendRecentSearch(const QString& search)
+{
+    if (search.isEmpty())
+        return;
+
+    QStringList recentSearches = getRecentSearches();
+    while (recentSearches.count() >= 5)
+        recentSearches.pop_front();
+
+    recentSearches.append(search);
+    QString searches = recentSearches.join("/");
+    set("RecentSearches", searches);
+}
+
+QStringList CWizUserSettings::getRecentSearches(bool reverseOrder)
+{
+    QStringList recentSearches = get("RecentSearches").split('/', QString::SkipEmptyParts);
+
+    if (reverseOrder)
+    {
+        QStringList reverseList;
+        for (QString str : recentSearches)
+        {
+            reverseList.push_front(str);
+        }
+        return reverseList;
+    }
+
+    return recentSearches;
 }

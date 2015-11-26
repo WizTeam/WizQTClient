@@ -280,7 +280,7 @@ bool CWizIndex::modifyMessageLocalChanged(const WIZMESSAGEDATA& msg)
 int CWizIndex::getUnreadMessageCount()
 {
     CString strSQL;
-    strSQL.Format("select count(*) from WIZ_MESSAGE where READ_STATUS=0");
+    strSQL.Format("select count(*) from WIZ_MESSAGE where READ_STATUS=0 and DELETE_STATUS=0");
 
     CppSQLite3Query query = m_db.execQuery(strSQL);
 
@@ -735,6 +735,7 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 	if (!ExecSQL(strSQL))
         return false;
 
+    emit documentAccessDateModified(data);
     return true;
 }
 
@@ -755,6 +756,20 @@ bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
 
     emit documentReadCountChanged(dataNew);
     return ret;
+}
+
+bool CWizIndex::ModifyDocumentLocation(WIZDOCUMENTDATA& data)
+{
+    if (data.strGUID.isEmpty()) {
+        TOLOG(_T("Failed to modify document: guid is empty!"));
+        return false;
+    }
+
+    data.strInfoMD5 = CalDocumentInfoMD5(data);
+    data.tInfoModified = WizGetCurrentTime();
+    data.nVersion = -1;
+
+    return ModifyDocumentInfoEx(data);
 }
 
 bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
@@ -1022,7 +1037,7 @@ bool CWizIndex::DeleteDocumentsByLocation(const CString& strLocation)
 
 bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 {
-	data.tModified = WizGetCurrentTime();
+//	data.tModified = WizGetCurrentTime();
 	data.tInfoModified = WizGetCurrentTime();
 	data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.nVersion = -1;
@@ -4054,6 +4069,12 @@ void CWizIndex::DeleteExtraFolder(const QString& strLocation)
     SetExtraFolder(arrayLocation);
 }
 
+/**
+ * @brief CWizIndex::UpdateLocation     just modify document location, do not change document modify date
+ * @param strOldLocation
+ * @param strNewLocation
+ * @return
+ */
 bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& strNewLocation)
 {
 //    QString sql = QString("update %1 set DOCUMENT_LOCATION='%2' where "
@@ -4073,7 +4094,8 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
     {
         WIZDOCUMENTDATA doc = *it;
         doc.strLocation.replace(strOldLocation, strNewLocation);
-        ModifyDocumentInfo(doc);
+        doc.nVersion = -1;
+        ModifyDocumentInfoEx(doc);
     }
 
     CWizStdStringArray arrayExtra;

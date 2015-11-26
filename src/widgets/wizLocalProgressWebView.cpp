@@ -25,7 +25,7 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     m_labelProgress->setAlignment(Qt::AlignCenter);
     m_labelProgress->setMovie(m_movie);
 
-    QVBoxLayout* layout = new QVBoxLayout(this);
+    QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
@@ -68,5 +68,21 @@ void CWizLocalProgressWebView::hideLocalProgress()
     m_movie->stop();
     m_labelProgress->hide();
     m_web->show();
+}
+
+void CWizLocalProgressWebView::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
+}
+
+void CWizLocalProgressWebView::showEvent(QShowEvent* ev)
+{
+    emit willShow();
+
+    QWidget::showEvent(ev);
+
+    emit widgetStatusChanged();
 }
 

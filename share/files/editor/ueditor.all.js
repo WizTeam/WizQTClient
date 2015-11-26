@@ -9021,7 +9021,7 @@ var filterWord = UE.filterWord = function () {
  * html字符串转换成uNode节点的静态方法
  * @method htmlparser
  * @param { String } htmlstr 要转换的html代码
- * @param { Boolean } ignoreBlank 若设置为true，转换的时候忽略\n\r\t等空白字符   !keepBlank
+ * @param { Boolean } ignoreBlank 若设置为true，转换的时候忽略\n\r\t等空白字符   !removeBlank
  * @return { uNode } 给定的html片段转换形成的uNode对象
  * @example
  * ```javascript
@@ -9029,7 +9029,7 @@ var filterWord = UE.filterWord = function () {
  * ```
  */
 
-var htmlparser = UE.htmlparser = function (htmlstr,keepBlank) {
+var htmlparser = UE.htmlparser = function (htmlstr,removeBlank) {
     //todo 原来的方式  [^"'<>\/] 有\/就不能配对上 <TD vAlign=top background=../AAA.JPG> 这样的标签了
     //先去掉了，加上的原因忘了，这里先记录
     var re_tag = /<(?:(?:\/([^>]+)>)|(?:!--([\S|\s]*?)-->)|(?:([^\s\/<>]+)\s*((?:(?:"[^"]*")|(?:'[^']*')|[^"'<>])*)\/?>))/g,
@@ -9041,13 +9041,13 @@ var htmlparser = UE.htmlparser = function (htmlstr,keepBlank) {
         sub:1,img:1,sup:1,font:1,big:1,small:1,iframe:1,a:1,br:1,pre:1
     };
     htmlstr = htmlstr.replace(new RegExp(domUtils.fillChar, 'g'), '');
-    if(keepBlank){
-        htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(keepBlank?' ':'')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(keepBlank?' ':'')+']*','g'), function(a,b){
+    if(removeBlank){
+        htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(removeBlank?' ':'')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(removeBlank?' ':'')+']*','g'), function(a,b){
             //br暂时单独处理
             if(b && allowEmptyTags[b.toLowerCase()]){
                 return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
             }
-            return a.replace(new RegExp('^[\\r\\n'+(keepBlank?' ':'')+']+'),'').replace(new RegExp('[\\r\\n'+(keepBlank?' ':'')+']+$'),'');
+            return a.replace(new RegExp('^[\\r\\n'+(removeBlank?' ':'')+']+'),'').replace(new RegExp('[\\r\\n'+(removeBlank?' ':'')+']+$'),'');
         });
     }
 
@@ -14180,7 +14180,7 @@ UE.plugins['paste'] = function () {
         //trace:717 隐藏的span不能得到top
         //bk.start.innerHTML = '&nbsp;';
         bk.start.style.display = '';
-        pastebin.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;left:-1000px;top:" +
+        pastebin.style.cssText = "position:absolute;width:1px;height:1px;overflow:hidden;left:-1000px;white-space:nowrap;top:" +
             //要在现在光标平行的位置加入，否则会出现跳动的问题
             domUtils.getXY(bk.start).y + 'px';
 
@@ -19580,8 +19580,8 @@ UE.plugins['table'] = function () {
         needIEHack = true;
 
     me.setOpt({
-        'maxColNum':20,
-        'maxRowNum':100,
+        'maxColNum':2000,
+        'maxRowNum':10000,
         'defaultCols':5,
         'defaultRows':5,
         'tdvalign':'top',

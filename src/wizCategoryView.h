@@ -2,6 +2,7 @@
 #define WIZCATEGORYCTRL_H
 
 #include <QPointer>
+#include <memory>
 #include <coreplugin/itreeview.h>
 #include "wizCategoryViewItem.h"
 
@@ -55,24 +56,28 @@ public:
     }
 
     CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
-    bool isHelperItemByIndex(const QModelIndex &index) const;
 
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
     bool validateDropDestination(const QPoint& p) const;
     Qt::ItemFlags dragItemFlags() const;
 
-    void drawItem(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+    bool isCursorEntered() const { return m_cursorEntered; }
+
     QPoint hitPoint() const { return m_hitPos; }
 
 protected:
     virtual void mousePressEvent(QMouseEvent* event);
+    virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void mouseMoveEvent(QMouseEvent* event);
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dragLeaveEvent(QDragLeaveEvent* event);
     virtual void dropEvent(QDropEvent* event);
+
+    virtual void enterEvent(QEvent * event);
+    virtual void leaveEvent(QEvent * event);
 
     virtual void resizeEvent(QResizeEvent* event);
     virtual void contextMenuEvent(QContextMenuEvent* e);
@@ -130,6 +135,7 @@ protected Q_SLOTS:
 protected:
     QPoint m_hitPos;
     bool m_bDragHovered;
+    bool m_cursorEntered;
     QPoint m_dragHoveredPos;
     CWizDocumentDataArray m_dragDocArray;
     bool m_dragUrls;
@@ -327,6 +333,8 @@ signals:
     void newDocument();
     void documentsHint(const QString& strHint);
 
+    void unreadButtonClicked();
+
     void categoryItemPositionChanged(const QString& strKbGUID);
 
 
@@ -493,9 +501,6 @@ private:
     //
     void resetCreateGroupLink();
 
-    QString WizGetHtmlBodyContent(QString strHtml);
-
-
     //
     void resetSections();
 
@@ -588,19 +593,19 @@ private:
     bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
 
 private:
-    QPointer<QMenu> m_menuShortcut;
-    QPointer<QMenu> m_menuFolderRoot;
-    QPointer<QMenu> m_menuFolder;
-    QPointer<QMenu> m_menuTagRoot;
-    QPointer<QMenu> m_menuTag;
-    QPointer<QMenu> m_menuNormalGroupRoot;
-    QPointer<QMenu> m_menuAdminGroupRoot;
-    QPointer<QMenu> m_menuOwnerGroupRoot;
-    QPointer<QMenu> m_menuNormalBizGroupRoot;
-    QPointer<QMenu> m_menuAdminBizGroupRoot;
-    QPointer<QMenu> m_menuGroup;
-    QPointer<QMenu> m_menuTrash;
-    QPointer<QMenu> m_menuCustomSearch;
+    std::shared_ptr<QMenu> m_menuShortcut;
+    std::shared_ptr<QMenu> m_menuFolderRoot;
+    std::shared_ptr<QMenu> m_menuFolder;
+    std::shared_ptr<QMenu> m_menuTagRoot;
+    std::shared_ptr<QMenu> m_menuTag;
+    std::shared_ptr<QMenu> m_menuNormalGroupRoot;
+    std::shared_ptr<QMenu> m_menuAdminGroupRoot;
+    std::shared_ptr<QMenu> m_menuOwnerGroupRoot;
+    std::shared_ptr<QMenu> m_menuNormalBizGroupRoot;
+    std::shared_ptr<QMenu> m_menuAdminBizGroupRoot;
+    std::shared_ptr<QMenu> m_menuGroup;
+    std::shared_ptr<QMenu> m_menuTrash;
+    std::shared_ptr<QMenu> m_menuCustomSearch;
     QPointer<QTimer> m_timerUpdateFolderCount;
     QPointer<QTimer> m_timerUpdateTagCount;
     QMap<QString, QTimer*> m_mapTimerUpdateGroupCount;

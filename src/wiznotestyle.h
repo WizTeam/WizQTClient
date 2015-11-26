@@ -48,4 +48,10 @@ public:
         }
     }
 };
+
+//class CWizAppStyle : public QProxyStyle
+//{
+
+//};
+
 #endif // WIZNOTESTYLE_H

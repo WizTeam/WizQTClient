@@ -13,11 +13,11 @@ public:
     ~CWizJSONServerBase();
 
     int returnCode();
-    QString returnMessage();
-    QString jsonResult();
 
-    void getRequest(const QString& strUrl);
-    void deleteRequest(const QString& strUrl);
+    bool get(const QString& strUrl, QString& strResult);
+    bool deleteResource(const QString& strUrl);
+
+    static bool getReturnCodeAndMessageFromJSON(const QString& strJSON, int& returnCode, QString& returnMessage);
 
 protected:
     std::shared_ptr<QNetworkAccessManager> m_net;

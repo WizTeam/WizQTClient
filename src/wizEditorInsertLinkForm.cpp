@@ -8,7 +8,6 @@ CWizEditorInsertLinkForm::CWizEditorInsertLinkForm(QWidget *parent) :
     ui(new Ui::CWizEditorInsertLinkForm)
 {
     ui->setupUi(this);
-    setFixedSize(size());
     setWindowModality(Qt::ApplicationModal);
 }
 

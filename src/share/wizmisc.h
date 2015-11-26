@@ -73,6 +73,7 @@ BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString
 CString WizDateToLocalString(const COleDateTime& t);
 
 void WizGetTranslatedLocales(QStringList& locales);
+bool WizIsChineseLanguage(const QString& local);
 QString WizGetDefaultTranslatedLocal();
 QString WizGetTranslatedLocaleDisplayName(int index);
 
@@ -152,8 +153,7 @@ QIcon WizLoadSkinIcon3(const QString& strIconName, QIcon::Mode mode);
 
 void WizScaleIconSizeForRetina(QSize& size);
 
-bool WizCreateThumbnailForAttachment(QImage& img, const QString& fileName,
-                                  const QString& bgImage, const QSize& iconSize);
+bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName, const QSize& iconSize);
 
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);

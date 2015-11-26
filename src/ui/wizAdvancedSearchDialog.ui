@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>570</width>
+    <width>650</width>
     <height>440</height>
    </rect>
   </property>
@@ -86,6 +86,9 @@
        <property name="text">
         <string>Name:</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
      <item row="2" column="0">
@@ -93,12 +96,18 @@
        <property name="text">
         <string>Scope:</string>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+       </property>
       </widget>
      </item>
      <item row="1" column="0">
       <widget class="QLabel" name="label_3">
        <property name="text">
         <string>Keyword:</string>
+       </property>
+       <property name="alignment">
+        <set>Qt::AlignCenter</set>
        </property>
       </widget>
      </item>
@@ -111,6 +120,9 @@
         <widget class="QLabel" name="label_4">
          <property name="text">
           <string>Param:</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
          </property>
         </widget>
        </item>
@@ -172,7 +184,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QToolButton" name="toolButton_add">
+           <widget class="QPushButton" name="toolButton_add">
             <property name="text">
              <string>Add</string>
             </property>
@@ -231,7 +243,6 @@
   <tabstop>comboBox_first</tabstop>
   <tabstop>comboBox_second</tabstop>
   <tabstop>comboBox_third</tabstop>
-  <tabstop>toolButton_add</tabstop>
   <tabstop>pushButton_ok</tabstop>
   <tabstop>pushButton_cancel</tabstop>
   <tabstop>listWidget</tabstop>

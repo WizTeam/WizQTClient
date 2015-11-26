@@ -194,7 +194,8 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
         return true;
 
     m_data.strLocation = strNewLocation;
-    if (!m_db.ModifyDocumentInfo(m_data))
+    m_data.nVersion = -1;
+    if (!m_db.ModifyDocumentInfoEx(m_data))
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
@@ -582,8 +583,9 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
 
         data.strLocation.remove(0, strOldLocation.length());
         data.strLocation.insert(0, strDestLocation);
+        data.nVersion = -1;
 
-        if (!m_db.ModifyDocumentInfo(data)) {
+        if (!m_db.ModifyDocumentLocation(data)) {
             TOLOG("Failed to move note to new folder!");
             continue;
         }
@@ -1163,17 +1165,6 @@ bool CWizDatabase::HasBiz()
     CWizDatabase* personDb = getPersonalDatabase();
 
     return !personDb->GetMetaDef("Bizs", "Count").IsEmpty();
-}
-
-bool CWizDatabase::IsVip()
-{
-    CWizDatabase* personDb = getPersonalDatabase();
-
-    CString strUserType = personDb->GetMetaDef(g_strAccountSection, "USERTYPE");
-    if (strUserType.IsEmpty() || strUserType == "free")
-        return false;
-
-    return true;
 }
 
 bool CWizDatabase::IsGroupAdmin()
@@ -2757,6 +2748,17 @@ bool CWizDatabase::GetUserInfo(WIZUSERINFO& userInfo)
     return true;
 }
 
+void CWizDatabase::UpdateInvalidData()
+{
+    int nVersion = meta(USER_SETTINGS_SECTION, "AppVersion").toInt();
+    if (nVersion < 202006)
+    {
+        setMeta(USER_SETTINGS_SECTION, "EditorBackgroundColor", "");
+    }
+
+    setMeta(USER_SETTINGS_SECTION, "AppVersion", QString::number(Utils::Misc::getVersionCode()));
+}
+
 bool CWizDatabase::updateBizUser(const WIZBIZUSER& user)
 {
     bool bRet = false;
@@ -3219,6 +3221,27 @@ bool CWizDatabase::DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data,
     return bRet;
 }
 
+bool CWizDatabase::DeleteGroupFolder(const WIZTAGDATA& data, bool bLog)
+{
+    CWizTagDataArray arrayChildTag;
+    GetChildTags(data.strGUID, arrayChildTag);
+    foreach (const WIZTAGDATA& childTag, arrayChildTag)
+    {
+        DeleteGroupFolder(childTag, bLog);
+    }
+
+    CWizDocumentDataArray arrayDocument;
+    GetDocumentsByTag(data, arrayDocument);
+
+    for (WIZDOCUMENTDATAEX doc : arrayDocument)
+    {
+        CWizDocument document(*this, doc);
+        document.deleteToTrash();
+    }
+
+    return DeleteTag(data, bLog);
+}
+
 bool CWizDatabase::IsDocumentModified(const CString& strGUID)
 {
     return CWizIndex::IsObjectDataModified(strGUID, "document");
@@ -3384,6 +3407,46 @@ bool CWizDatabase::IsInDeletedItems(const CString& strLocation)
     return strLocation.startsWith(LOCATION_DELETED_ITEMS);
 }
 
+bool CWizDatabase::GetDocumentTitleStartWith(const QString& titleStart, int nMaxCount, CWizStdStringArray& arrayTitle)
+{
+    QString sql = QString("SELECT DISTINCT DOCUMENT_TITLE FROM WIZ_DOCUMENT WHERE "
+                          "DOCUMENT_TITLE LIKE '" + titleStart + "%' LIMIT " + QString::number(nMaxCount) + ";");
+
+//    CString strSQL;
+//    strSQL.Format(_T("SELECT DISTINCT DOCUMENT_TITLE FROM WIZ_DOCUMENT WHERE "
+//                     "DOCUMENT_TITLE LIKE 's%%' LIMIT s%;"),
+//                  titleStart.utf16(),
+//                  WizIntToStr(nMaxCount).utf16());
+
+    return SQLToStringArray(sql, 0, arrayTitle);
+}
+
+QString CWizDatabase::GetDocumentLocation(const WIZDOCUMENTDATA& doc)
+{
+//    WIZDOCUMENTDATA doc;
+//    if (!DocumentFromGUID(doc.strGUID, doc))
+//        return QString();
+
+    if (!IsGroup())
+        return doc.strLocation;
+
+    CWizTagDataArray arrayTag;
+    if (GetDocumentTags(doc.strGUID, arrayTag))
+    {
+        if (arrayTag.size() > 1) {
+            TOLOG1("Group document should only have one tag: %1", doc.strTitle);
+        }
+
+        QString tagText;
+        if (arrayTag.size()) {
+            tagText = getTagTreeText(arrayTag[0].strGUID);
+        }
+        return "/" + name() + tagText + "/";
+    }
+
+    return QString();
+}
+
 bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                                          const CString& strHtmlUrl, \
                                          int nFlags, \
@@ -3403,7 +3466,25 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
-            bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
+            //add default css
+            QString newHtml = strHtml;
+            QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
+            cssFile.open(QFile::Text | QFile::ReadOnly);
+            QString strCSS = cssFile.readAll();
+            cssFile.close();
+            if (strHtml.contains("<html>", Qt::CaseInsensitive))
+            {
+                QString strHead;
+                Utils::Misc::splitHtmlToHeadAndBody(strHtml, strHead, newHtml);
+                strHead.append(strCSS);
+                newHtml = "<html><head>" + strHead + "</head><body>" + newHtml + "</body></html>";
+            }
+            else
+            {
+                newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
+            }
+
+            bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
 
             Q_EMIT documentCreated(data);
         }
@@ -3469,7 +3550,10 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
         return false;
 
     QString strTitle = Utils::Misc::extractFileTitle(templateZiwFile);
-    newDoc.strTitle = strTitle;
+    if (newDoc.strTitle.isEmpty())
+    {
+        newDoc.strTitle = strTitle;
+    }
 
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }
@@ -3799,7 +3883,7 @@ CString CWizDatabase::GetLocationDisplayName(const CString& strLocation)
             } else if (strLocation == "/My Journals/") {
                 return tr("My Journals");
             } else if (strLocation == "/My Contacts/") {
-                return tr("My Journals");
+                return tr("My Contacts");
             } else if (strLocation == "/My Events/") {
                 return tr("My Events");
             } else if (strLocation == "/My Sticky Notes/") {

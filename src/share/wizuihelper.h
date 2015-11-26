@@ -45,7 +45,7 @@ public:
     CWizSplitter(QWidget* parent = 0);
 
 protected:
-    virtual QSplitterHandle* createHandle();
+    virtual QSplitterHandle* createHandle();    
 };
 
 #endif // WIZMACHELPER_H

@@ -47,16 +47,18 @@ public:
         QPainter painter(this);
 
         // FIXME: hard-coded
-        QColor bgColor = QColor(165, 165, 165);
+        QColor bgColor = QColor("#dbdbdb");
+        painter.setPen(bgColor);
+        painter.setBrush(bgColor);
         painter.fillRect(event->rect(), bgColor);
     }
 
     virtual void resizeEvent(QResizeEvent *event)
     {
-        if (orientation() == Qt::Horizontal)
-            setContentsMargins(2, 0, 2, 0);
-        else
-            setContentsMargins(0, 2, 0, 2);
+//        if (orientation() == Qt::Horizontal)
+//            setContentsMargins(2, 0, 2, 0);
+//        else
+//            setContentsMargins(0, 2, 0, 2);
         setMask(QRegion(contentsRect()));
         QSplitterHandle::resizeEvent(event);
     }
@@ -65,8 +67,19 @@ public:
     {
         return QSize(1, 1);
     }
-};
+protected:
+    void enterEvent(QEvent* ev)
+    {
+        QWidget::enterEvent(ev);
+        setCursor(Qt::SplitHCursor);
+    }
 
+    void leaveEvent(QEvent* ev)
+    {
+        QWidget::leaveEvent(ev);
+        setCursor(Qt::ArrowCursor);
+    }
+};
 
 CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
@@ -77,5 +90,7 @@ CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
 
 QSplitterHandle *CWizSplitter::createHandle()
 {
-    return new CWizSplitterHandle(orientation(), this);
+    CWizSplitterHandle* spliter =  new CWizSplitterHandle(orientation(), this);
+    return spliter;
 }
+

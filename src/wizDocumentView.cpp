@@ -7,12 +7,15 @@
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QStackedWidget>
+#include <QApplication>
+#include <QDesktopWidget>
 
 #include <coreplugin/icore.h>
 
 #include "wizmainwindow.h"
 #include "wizDocumentTransitionView.h"
 #include "wizDocumentWebEngine.h"
+#include "wizEditorToolBar.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
 #include "widgets/wizScrollBar.h"
@@ -28,7 +31,7 @@
 #include "notifybar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "sync/wizkmxmlrpc.h"
+#include "sync/wizKMServer.h"
 
 #include "titlebar.h"
 
@@ -48,8 +51,8 @@ using namespace Core::Internal;
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     : INoteView(parent)
     , m_app(app)
-    , m_userSettings(app.userSettings())
     , m_dbMgr(app.databaseManager())
+    , m_userSettings(app.userSettings())
     #ifdef USEWEBENGINE
     , m_web(new CWizDocumentWebEngine(app, this))
     , m_comments(new QWebEngineView(this))
@@ -67,6 +70,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
     //, m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
     , m_editStatus(0)
+    , m_sizeHint(QSize(200, 1))
 {
     m_title->setEditor(m_web);
 
@@ -93,12 +97,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab->addWidget(m_docView);
     m_tab->addWidget(m_passwordView);
     m_tab->addWidget(m_msgWidget);
-    m_tab->setCurrentWidget(m_docView);
+    m_tab->setCurrentWidget(m_docView);    
 
-    m_splitter = new CWizSplitter(this);
-    m_splitter->addWidget(m_web);
-    m_splitter->addWidget(m_commentWidget);
-    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
+    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_comments = m_commentWidget->web();
     QWebPage *commentPage = new QWebPage(m_comments);
     commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
@@ -113,13 +114,27 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
     connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(on_comment_populateJavaScriptWindowObject()));
+    connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
 
     m_commentWidget->hide();
 
-    layoutDoc->addWidget(m_title);
+    QWidget* wgtEditor = new QWidget(m_docView);
+    QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
+    layoutEditor->setSpacing(0);
+    layoutEditor->setContentsMargins(0, 5, 0, 0);
+    layoutEditor->addWidget(m_title);
+    layoutEditor->addWidget(m_web);
+    layoutEditor->setStretchFactor(m_title, 0);
+    layoutEditor->setStretchFactor(m_web, 1);
+
+    m_splitter = new CWizSplitter(this);
+    m_splitter->addWidget(wgtEditor);
+    m_splitter->addWidget(m_commentWidget);
+    m_splitter->setOrientation(Qt::Horizontal);
+
     layoutDoc->addWidget(m_splitter);
-    layoutDoc->setStretchFactor(m_title, 0);
-    layoutDoc->setStretchFactor(m_splitter, 1);
+//    layoutDoc->setStretchFactor(m_title, 0);
+//    layoutDoc->setStretchFactor(m_splitter, 1);
 
 #ifdef USEWEBENGINE
     QLineEdit *commandLine = new QLineEdit(this);
@@ -208,6 +223,16 @@ CWizDocumentView::~CWizDocumentView()
         delete m_editStatusChecker;
 }
 
+QSize CWizDocumentView::sizeHint() const
+{
+    return m_sizeHint;
+}
+
+void CWizDocumentView::setSizeHint(QSize size)
+{
+    m_sizeHint = size;
+}
+
 void CWizDocumentView::waitForDone()
 {
     m_editStatusChecker->thread()->quit();
@@ -240,9 +265,21 @@ CWizDocumentTransitionView* CWizDocumentView::transitionView()
 {
     return m_transitionView;
 }
+
+TitleBar*CWizDocumentView::titleBar()
+{
+    return m_title;
+}
 void CWizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
+}
+
+void CWizDocumentView::resizeEvent(QResizeEvent* ev)
+{
+    QWidget::resizeEvent(ev);
+
+    m_title->editorToolBar()->adjustButtonPosition();
 }
 
 void CWizDocumentView::showClient(bool visible)
@@ -336,6 +373,11 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     if (NotifyBar::LockForGruop == nLockReason)
     {
         startCheckDocumentEditStatus();
+    }
+
+    if(bEditing)
+    {
+        showCoachingTips();
     }
 }
 
@@ -546,7 +588,13 @@ void CWizDocumentView::setStatusToEditingByCheckList()
     stopCheckDocumentEditStatus();
     sendDocumentEditingStatus();
     m_title->showMessageTips(Qt::PlainText, tr("You have occupied this note by clicking checklist !  " \
-             "Switch to other notes to free this note."));
+                                               "Switch to other notes to free this note."));
+}
+
+void CWizDocumentView::showCoachingTips()
+{
+    m_title->editorToolBar()->showCoachingTips();
+    m_title->showCoachingTips();
 }
 
 void CWizDocumentView::setEditorFocus()
@@ -560,7 +608,8 @@ QWebFrame* CWizDocumentView::noteFrame()
 #ifdef USEWEBENGINE
     return 0;
 #else
-    return m_web->noteFrame();
+//    return m_web->noteFrame();
+    return m_web->page()->mainFrame();
 #endif
 }
 
@@ -847,7 +896,7 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
 //            }
 //            else
 //            {
-                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to down load new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
+                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to download new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
 //            }
                 m_editStatus |= DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }
@@ -925,6 +974,37 @@ void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
 void CWizDocumentView::on_loadComment_request(const QString& url)
 {
     m_comments->load(url);
+}
+
+void CWizDocumentView::on_commentWidget_statusChanged()
+{    
+    if (m_web->isInSeperateWindow())
+    {
+        int commentWidth = 271;
+        int maxWidth = maximumWidth();
+        if (!WizIsHighPixel())
+        {
+            if (qApp->desktop()->availableGeometry().width() < 1440)
+            {
+                maxWidth = 916;
+            }
+            maxWidth = m_commentWidget->isVisible() ? (maxWidth + commentWidth) : (maxWidth - commentWidth);
+        }
+        if (width() > 1000)
+        {
+            m_commentWidget->setFixedWidth(271);
+        }
+        else
+        {
+            m_commentWidget->setMinimumWidth(0);
+            m_commentWidget->setMaximumWidth(500);
+        }
+        setMaximumWidth(maxWidth);
+        setSizeHint(QSize(maxWidth, 1));
+
+    }
+
+    m_title->editorToolBar()->adjustButtonPosition();
 }
 
 

@@ -29,9 +29,12 @@ CWizFileIconProvider::CWizFileIconProvider()
 }
 
 
-QIcon CWizFileIconProvider::icon(const QString& strFileName) const
+QIcon CWizFileIconProvider::icon(const QString& strFilePath) const
 {
-    QFileInfo fi(strFileName);
+    QFileInfo fi(strFilePath);
+    if (!fi.exists())
+        return QFileIconProvider::icon(QFileIconProvider::File);
+
     QIcon retIcon = QFileIconProvider::icon(fi);
     if (!retIcon.isNull())
         return retIcon;
@@ -63,7 +66,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFileName) const
         }
     }
 #elif defined (Q_OS_MAC)
-    QString strTempFileName = Utils::PathResolve::tempPath() + "test" + Utils::Misc::extractFileExt(strFileName);
+    QString strTempFileName = Utils::PathResolve::tempPath() + "test" + Utils::Misc::extractFileExt(strFilePath);
     ::WizSaveDataToFile(strTempFileName, QByteArray());
     retIcon = QFileIconProvider::icon(QFileInfo(strTempFileName));
     ::WizDeleteFile(strTempFileName);

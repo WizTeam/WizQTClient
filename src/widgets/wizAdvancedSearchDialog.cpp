@@ -1,10 +1,5 @@
 #include "wizAdvancedSearchDialog.h"
 #include "ui_wizAdvancedSearchDialog.h"
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizmisc.h"
-#include "wiznotestyle.h"
-#include "utils/stylehelper.h"
 #include <QCursor>
 #include <QLineEdit>
 #include <QGroupBox>
@@ -12,6 +7,11 @@
 #include <QPainter>
 #include <QButtonGroup>
 #include <QDebug>
+#include "share/wizDatabase.h"
+#include "share/wizDatabaseManager.h"
+#include "share/wizmisc.h"
+#include "wiznotestyle.h"
+#include "utils/stylehelper.h"
 
 #define PARAM_SELECT_PARAM    QObject::tr("Select search param")
 #define PARAM_SELECT_FOLDER  QObject::tr("Folder")
@@ -78,6 +78,9 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
     m_radioGroup->addButton(ui->radioButton_groupNotes, 2);
     connect(m_radioGroup, SIGNAL(buttonClicked(QAbstractButton*)),
             SLOT(onRadioButtonClicked(QAbstractButton*)));
+
+    ui->listWidget->setStyleSheet(Utils::StyleHelper::wizCommonListViewStyleSheet());    
+
     //
 //    ui->label_5->setVisible(false);
 //    ui->groupBox->setVisible(false);

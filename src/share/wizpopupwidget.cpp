@@ -3,6 +3,7 @@
 #include <QtGui>
 
 #include "wizmisc.h"
+#include "utils/stylehelper.h"
 
 #ifdef Q_OS_WIN
 //#include "wizwindowshelper.h"
@@ -12,6 +13,9 @@
 CWizPopupWidget::CWizPopupWidget(QWidget* parent)
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
     , m_leftAlign(false)
+    , m_triangleMargin(10)
+    , m_triangleWidth(16)
+    , m_triangleHeight(8)
 {
     setContentsMargins(8, 20, 8, 8);
 
@@ -42,8 +46,8 @@ void CWizPopupWidget::paintEvent(QPaintEvent* event)
 
 void CWizPopupWidget::showAtPoint(const QPoint& pt)
 {
-    int xOffset = m_leftAlign ? 21 : sizeHint().width() - 21;
-    int yOffset = 4;
+    int xOffset = m_leftAlign ? (m_triangleMargin + m_triangleWidth / 2) : sizeHint().width() - (m_triangleMargin + m_triangleWidth / 2);
+    int yOffset = 0;
 
     int left = pt.x() - xOffset;
     int top = pt.y() - yOffset;
@@ -73,84 +77,94 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     show();
 }
 
+void CWizPopupWidget::setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight)
+{
+    m_triangleMargin = triangleMargin;
+    m_triangleWidth = triangleWidth;
+    m_triangleHeight = triangleHeight;
+}
+
 QRegion CWizPopupWidget::maskRegion()
 {
-    QSize sz = size();
+//    QSize sz = size();
 
-    m_pointsRegion.clear();
+    return Utils::StyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size().width(), size().height()), m_leftAlign,
+                                                       m_triangleMargin, m_triangleWidth, m_triangleHeight);
 
-    if (m_leftAlign)
-    {
-        m_pointsRegion.push_back(QPoint(1, 10));
-        m_pointsRegion.push_back(QPoint(11, 10));
-        m_pointsRegion.push_back(QPoint(21, 0));
-        m_pointsRegion.push_back(QPoint(31, 10));
-        m_pointsRegion.push_back(QPoint(sz.width() - 1, 10));
-        m_pointsRegion.push_back(QPoint(sz.width(), 11));
-        m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
-        m_pointsRegion.push_back(QPoint(0, sz.height()));
-        m_pointsRegion.push_back(QPoint(0, 11));
+//    m_pointsRegion.clear();
 
-        m_pointsPolygon.push_back(QPoint(1, 10));
-        m_pointsPolygon.push_back(QPoint(11, 10));
-        for (int i = 0; i < 9; i++)
-        {
-            m_pointsPolygon.push_back(QPoint(11 + i, 10 - i));
-            m_pointsPolygon.push_back(QPoint(11 + i + 1, 10 - i));
-        }
-        m_pointsPolygon.push_back(QPoint(20, 1));
-        m_pointsPolygon.push_back(QPoint(21, 1));
-        for (int i = 0; i < 9; i++)
-        {
-            m_pointsPolygon.push_back(QPoint(21 + i, 2 + i));
-            m_pointsPolygon.push_back(QPoint(21 + i + 1, 2 + i));
-        }
-        m_pointsPolygon.push_back(QPoint(31, 10));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
-        m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
-        m_pointsPolygon.push_back(QPoint(0, 11));
-        m_pointsPolygon.push_back(QPoint(1, 11));
-    }
-    else
-    {
-        m_pointsRegion.push_back(QPoint(1, 10));
-        m_pointsRegion.push_back(QPoint(sz.width() - 31, 10));
-        m_pointsRegion.push_back(QPoint(sz.width() - 21, 0));
-        m_pointsRegion.push_back(QPoint(sz.width() - 11, 10));
-        m_pointsRegion.push_back(QPoint(sz.width() - 1, 10));
-        m_pointsRegion.push_back(QPoint(sz.width(), 11));
-        m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
-        m_pointsRegion.push_back(QPoint(0, sz.height()));
-        m_pointsRegion.push_back(QPoint(0, 11));
+//    if (m_leftAlign)
+//    {
+//        m_pointsRegion.push_back(QPoint(1, 10));
+//        m_pointsRegion.push_back(QPoint(1 + m_triangleMargin, 10));
+//        m_pointsRegion.push_back(QPoint(1 + m_triangleMargin + m_triangleWidth / 2, 0));
+//        m_pointsRegion.push_back(QPoint(31, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width() - 1, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width(), 11));
+//        m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
+//        m_pointsRegion.push_back(QPoint(0, sz.height()));
+//        m_pointsRegion.push_back(QPoint(0, 11));
 
-        m_pointsPolygon.push_back(QPoint(1, 10));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 31, 10));
-        for (int i = 0; i < 9; i++)
-        {
-            m_pointsPolygon.push_back(QPoint(sz.width() - 31 + i, 10 - i));
-            m_pointsPolygon.push_back(QPoint(sz.width() - 31 + i + 1, 10 - i));
-        }
-        m_pointsPolygon.push_back(QPoint(sz.width() - 22, 1));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 21, 1));
-        for (int i = 0; i < 9; i++)
-        {
-            m_pointsPolygon.push_back(QPoint(sz.width() - 21 + i, 2 + i));
-            m_pointsPolygon.push_back(QPoint(sz.width() - 21 + i + 1, 2 + i));
-        }
-        m_pointsPolygon.push_back(QPoint(sz.width() - 12, 10));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 11));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
-        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
-        m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
-        m_pointsPolygon.push_back(QPoint(0, 11));
-        m_pointsPolygon.push_back(QPoint(1, 11));
+////        m_pointsPolygon.push_back(QPoint(1, 10));
+////        m_pointsPolygon.push_back(QPoint(11, 10));
+////        for (int i = 0; i < 9; i++)
+////        {
+////            m_pointsPolygon.push_back(QPoint(11 + i, 10 - i));
+////            m_pointsPolygon.push_back(QPoint(11 + i + 1, 10 - i));
+////        }
+////        m_pointsPolygon.push_back(QPoint(20, 1));
+////        m_pointsPolygon.push_back(QPoint(21, 1));
+////        for (int i = 0; i < 9; i++)
+////        {
+////            m_pointsPolygon.push_back(QPoint(21 + i, 2 + i));
+////            m_pointsPolygon.push_back(QPoint(21 + i + 1, 2 + i));
+////        }
+////        m_pointsPolygon.push_back(QPoint(31, 10));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
+////        m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
+////        m_pointsPolygon.push_back(QPoint(0, 11));
+////        m_pointsPolygon.push_back(QPoint(1, 11));
+//    }
+//    else
+//    {
+//        m_pointsRegion.push_back(QPoint(1, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width() - 31, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width() - 21, 0));
+//        m_pointsRegion.push_back(QPoint(sz.width() - 11, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width() - 1, 10));
+//        m_pointsRegion.push_back(QPoint(sz.width(), 11));
+//        m_pointsRegion.push_back(QPoint(sz.width(), sz.height()));
+//        m_pointsRegion.push_back(QPoint(0, sz.height()));
+//        m_pointsRegion.push_back(QPoint(0, 11));
 
-    }
+////        m_pointsPolygon.push_back(QPoint(1, 10));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 31, 10));
+////        for (int i = 0; i < 9; i++)
+////        {
+////            m_pointsPolygon.push_back(QPoint(sz.width() - 31 + i, 10 - i));
+////            m_pointsPolygon.push_back(QPoint(sz.width() - 31 + i + 1, 10 - i));
+////        }
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 22, 1));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 21, 1));
+////        for (int i = 0; i < 9; i++)
+////        {
+////            m_pointsPolygon.push_back(QPoint(sz.width() - 21 + i, 2 + i));
+////            m_pointsPolygon.push_back(QPoint(sz.width() - 21 + i + 1, 2 + i));
+////        }
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 12, 10));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 10));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 2, 11));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 1, 11));
+////        m_pointsPolygon.push_back(QPoint(sz.width() - 1, sz.height() - 1));
+////        m_pointsPolygon.push_back(QPoint(0, sz.height() - 1));
+////        m_pointsPolygon.push_back(QPoint(0, 11));
+////        m_pointsPolygon.push_back(QPoint(1, 11));
 
-    QPolygon polygon(m_pointsRegion);
+//    }
 
-    return QRegion(polygon);
+//    QPolygon polygon(m_pointsRegion);
+
+//    return QRegion(polygon);
 }

@@ -132,6 +132,9 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
+    void setInSeperateWindow(bool inSeperateWindow);
+    bool isInSeperateWindow() const;
+
     Q_INVOKABLE QString currentNoteGUID();
     Q_INVOKABLE QString currentNoteHtml();
     Q_INVOKABLE QString currentNoteHead();
@@ -143,11 +146,17 @@ public:
     // initialize editor style before render, only invoke once.
     bool resetDefaultCss();
     Q_INVOKABLE QString getDefaultCssFilePath() const;
+    Q_INVOKABLE QString getWizReaderDependencyFilePath() const;
+    Q_INVOKABLE QString getWizReaderFilePath() const;
+    Q_INVOKABLE QString getMarkdownCssFilePath() const;
+    void resetMarkdownCssPath();
 
     /* editor related */
     void editorResetFont();
     void editorFocus();
     void setEditorEnable(bool enalbe);
+
+    void setIgnoreActiveWindowEvent(bool igoreEvent);
 
     bool evaluateJavaScript(const QString& js);
 
@@ -197,7 +206,7 @@ public:
     Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
-
+    Q_INVOKABLE bool checkListClickable();
     //
     QNetworkDiskCache* networkCache();
 
@@ -206,17 +215,14 @@ private:
     void resetEditor();
     void viewDocumentInEditor(bool editing);
     void viewDocumentWithoutEditor();
-    void tryResetTitle();
+    void tryResetTitle();    
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);
     void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
-
-    void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
-
     //
     void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
-    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);    
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -228,13 +234,12 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    virtual void wheelEvent(QWheelEvent* ev);
 
 private:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
-
-    QString m_strDefaultCssFilePath;
 
     QWebFrame* m_noteFrame;
 
@@ -250,6 +255,16 @@ private:
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;
+    //
+    bool m_ignoreActiveWindowEvent;
+
+    // flag : if current webview is in seperate window, editor background-color will
+    //different with webview in mainwindow
+    bool m_bInSeperateWindow;
+    QString m_strDefaultCssFilePath;
+    QString m_strMarkdownCssFilePath;
+
+    int m_nWindowID;
 
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
     CWizDocumentWebViewSaverThread* m_docSaverThread;
@@ -391,6 +406,9 @@ Q_SIGNALS:
     void viewDocumentFinished();
     //
     void shareDocumentByLinkRequest(const QString& strKbGUID, const QString& strGUID);
+
+    // signal connect to checklist in javascript
+    void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);

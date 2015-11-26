@@ -5,27 +5,29 @@
 #include <QFileDialog>
 #include <QDesktopServices>
 #include <QMenu>
-#include <QMessageBox>
 #include <QLabel>
 #include <QDebug>
 #include <QEventLoop>
 
 #include <coreplugin/icore.h>
 
+#include "wizdef.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizFileMonitor.h"
-#include "wiznotestyle.h"
 #include "share/wizmisc.h"
 #include "share/wizuihelper.h"
-#include "wizdef.h"
-#include "wizButton.h"
 #include "share/wizObjectDataDownloader.h"
-
-#include "wizmainwindow.h"
+#include "share/wizMessageBox.h"
 #include "utils/pathresolve.h"
+#include "utils/stylehelper.h"
 #include "utils/misc.h"
+#include "wiznotestyle.h"
+#include "wizButton.h"
+#include "wizmainwindow.h"
 
 using namespace Core::Internal;
+
+const int nAttachmentListViewItemHeight  = 40;
 
 
 #define WIZACTION_ATTACHMENT_ADD    QObject::tr("Add...")
@@ -41,20 +43,13 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     : CWizMultiLineListWidget(2, parent)
     , m_dbMgr(*CWizDatabaseManager::instance())
 {
-    // FIXME
-    QString strTheme = "default";
+    QString strTheme = Utils::StyleHelper::themeName();
     setFrameStyle(QFrame::NoFrame);
     setStyle(WizGetStyle(strTheme));
     setSelectionMode(QAbstractItemView::ExtendedSelection);
     setAttribute(Qt::WA_MacShowFocusRect, false);
-
-    QPalette pal;
-#ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
-#elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
-#endif
-    setPalette(pal);
+    setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    setVerticalScrollBarPolicy(Qt::ScrollBarAsNeeded);
 
     //QVBoxLayout* layout = new QVBoxLayout();
     //setStyleSheet("background-color: #F7F7F7");
@@ -107,7 +102,7 @@ bool CWizAttachmentListView::imageAlignLeft() const
 }
 int CWizAttachmentListView::imageWidth() const
 {
-    return 32;
+    return 28;
 }
 QString CWizAttachmentListView::itemText(const QModelIndex& index, int line) const
 {
@@ -130,8 +125,9 @@ QPixmap CWizAttachmentListView::itemImage(const QModelIndex& index) const
 {
     if (const CWizAttachmentListViewItem* item = attachmentItemFromIndex(index))
     {
-        QString name = item->attachment().strName;
-        return m_iconProvider.icon(name).pixmap(32, 32);
+        QString path = m_dbMgr.db(item->attachment().strKbGUID).GetAttachmentFileName(item->attachment().strGUID);
+        int nIconSize = WizIsHighPixel() ? 64 : 32;
+        return m_iconProvider.icon(path).pixmap(nIconSize, nIconSize);
     }
     //
     return QPixmap();
@@ -148,11 +144,11 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
         strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "downloading@2x.png" : "downloading.png";
+            strIconPath += isRetina ? "document_needDownload@2x.png" : "document_needDownload.png";
         }
         else if (db.IsAttachmentModified(item->attachment().strGUID))
         {
-            strIconPath += isRetina ? "uploading@2x.png" : "uploading.png";
+            strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";
         }
         else
             return false;
@@ -181,6 +177,11 @@ void CWizAttachmentListView::resetAttachments()
 //    CWizDocumentAttachmentDataArray::const_iterator it;
     for (auto it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
         addItem(newAttachmentItem(*it));
+
+        if (isAttachmentModified(*it))
+        {
+            updateAttachmentInfo(*it);
+        }
     }
 }
 
@@ -204,13 +205,26 @@ void CWizAttachmentListView::addAttachments()
                              this,
                              tr("Add attachments"),
                              QDir::home().absolutePath(),
-                             tr("All files(*.*)"));
+                             tr("All files(*)"));
     //
     CWizDatabase& db = m_dbMgr.db(m_document.strKbGUID);
 
     bool ok = false;
     foreach (QString fileName, files)
     {
+        QFileInfo info(fileName);
+        if (info.size() == 0)
+        {
+            CWizMessageBox::warning(nullptr , tr("Info"), tr("Can not add a 0 bit size file as attachment! File name : ' %1 '").arg(fileName));
+            continue;
+        }
+
+        if (info.isBundle())
+        {
+            CWizMessageBox::warning(nullptr, tr("Info"), tr("Can not add a bundle file as attachment! File name : ' %1 '").arg(fileName));
+            continue;
+        }
+
         WIZDOCUMENTATTACHMENTDATA data;
         data.strKbGUID = m_document.strKbGUID; // needed by under layer
         if (db.AddAttachment(m_document, fileName, data))
@@ -224,7 +238,6 @@ void CWizAttachmentListView::addAttachments()
     {
         MainWindow::quickSyncKb(db.IsGroup() ? db.kbGUID() : "");
     }
-
 }
 
 void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
@@ -364,6 +377,7 @@ void CWizAttachmentListView::startDownload(CWizAttachmentListViewItem* item)
 CWizAttachmentListViewItem* CWizAttachmentListView::newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att)
 {
     CWizAttachmentListViewItem* newItem = new CWizAttachmentListViewItem(att, this);
+    newItem->setSizeHint(QSize(width(), nAttachmentListViewItemHeight));
     connect(newItem, SIGNAL(updateRequet()), SLOT(forceRepaint()));
     connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), newItem,
             SLOT(on_downloadFinished(WIZOBJECTDATA,bool)));
@@ -379,6 +393,39 @@ void CWizAttachmentListView::waitForDownload()
     connect(m_downloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)), &loop,
             SLOT(quit()));
     loop.exec();
+}
+
+bool CWizAttachmentListView::isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment)
+{
+    QString fileNmae = m_dbMgr.db(attachment.strKbGUID).GetAttachmentFileName(attachment.strGUID);
+    QFileInfo info(fileNmae);
+    if (info.exists())
+    {
+        return info.lastModified() > attachment.tDataModified;
+    }
+    return false;
+}
+
+void CWizAttachmentListView::updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDATAEX& attachment)
+{
+    QString fileNmae = m_dbMgr.db(attachment.strKbGUID).GetAttachmentFileName(attachment.strGUID);
+    QFileInfo info(fileNmae);
+    if (info.exists())
+    {
+
+        QString strMD5 = WizMd5FileString(fileNmae);
+        if (strMD5 == attachment.strDataMD5)
+        {
+            qDebug() << "file modified, but md5 keep same";
+            return;
+        }
+        //
+
+        WIZDOCUMENTATTACHMENTDATAEX newData = attachment;
+        newData.tDataModified = info.lastModified();
+        m_dbMgr.db(attachment.strKbGUID).onAttachmentModified(attachment.strKbGUID, attachment.strGUID,
+                                                              fileNmae, strMD5, info.lastModified());
+    }
 }
 
 void CWizAttachmentListView::on_action_addAttachment()
@@ -543,18 +590,20 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     : CWizPopupWidget(parent)
     , m_list(new CWizAttachmentListView(this))
 {
-    // FIXME
-    QString strTheme = "default";
-    setContentsMargins(0, 20, 0, 0);
+    QString strTheme = Utils::StyleHelper::themeName();
+    setContentsMargins(0, 13, 0, 0);
+
+    setFixedWidth(sizeHint().width());
 
     QIcon iconAddAttachment = ::WizLoadSkinIcon(strTheme, "document_add_attachment");
     QAction* actionAddAttach = new QAction(iconAddAttachment, tr("Add attachments"), this);
     connect(actionAddAttach, SIGNAL(triggered()), SLOT(on_addAttachment_clicked()));
     m_btnAddAttachment = new CWizButton(this);
+    m_btnAddAttachment->setFixedSize(14, 14);
     m_btnAddAttachment->setAction(actionAddAttach);
 
     QHBoxLayout* layoutHeader = new QHBoxLayout();
-    layoutHeader->setContentsMargins(20, 0, 20, 0);
+    layoutHeader->setContentsMargins(12, 0, 12, 0);
     layoutHeader->addWidget(new QLabel(tr("Attachments"), this));
     layoutHeader->addStretch();
     layoutHeader->addWidget(m_btnAddAttachment);
@@ -568,13 +617,15 @@ CWizAttachmentListWidget::CWizAttachmentListWidget(QWidget* parent)
     layoutMain->addWidget(m_list);
     connect(m_list, SIGNAL(closeRequest()), SLOT(on_attachList_closeRequest()));
 
-    QPalette pal;
+    QPalette pal = palette();
 #ifdef Q_OS_LINUX
-    pal.setBrush(QPalette::Base, QBrush("#D7D7D7"));
+    pal.setBrush(QPalette::Window, QBrush("#D7D7D7"));
 #elif defined(Q_OS_MAC)
-    pal.setBrush(QPalette::Base, QBrush("#F7F7F7"));
+    pal.setBrush(QPalette::Window, QBrush("#F7F7F7"));
 #endif
-    m_list->setPalette(pal);
+    setPalette(pal);
+
+    setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet());
 }
 
 bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
@@ -594,6 +645,18 @@ bool CWizAttachmentListWidget::setDocument(const WIZDOCUMENTDATA& doc)
     }
 
     return true;
+}
+
+QSize CWizAttachmentListWidget::sizeHint() const
+{
+    return QSize(271, 310);
+}
+
+void CWizAttachmentListWidget::hideEvent(QHideEvent* ev)
+{
+    QWidget::hideEvent(ev);
+
+    emit widgetStatusChanged();
 }
 
 void CWizAttachmentListWidget::on_addAttachment_clicked()

@@ -2,6 +2,7 @@
 
 #include <QProxyStyle>
 #include <QPainter>
+#include <QScrollBar>
 #include <QApplication>
 
 #include "wizCategoryView.h"
@@ -14,6 +15,7 @@
 #include "share/wizuihelper.h"
 #include "share/wizui.h"
 #include "share/wizmultilinelistwidget.h"
+#include "share/wizmisc.h"
 //#include "share/wizimagepushbutton.h"
 
 #include "messagelistview.h"
@@ -45,8 +47,8 @@ private:
     QImage m_collapsedImageSelected;
     QImage m_imgDefaultAvatar;
 
-    CWizSkin9GridImage m_multiLineListSelectedItemBackground;
-    CWizSkin9GridImage m_multiLineListSelectedItemBackgroundHot;
+//    CWizSkin9GridImage m_multiLineListSelectedItemBackground;
+//    CWizSkin9GridImage m_multiLineListSelectedItemBackgroundHot;
     CWizSkin9GridImage m_imagePushButton;
     CWizSkin9GridImage m_imagePushButtonHot;
     CWizSkin9GridImage m_imagePushButtonPressed;
@@ -95,8 +97,8 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
         //m_iconDocumentsBadge = ::WizLoadSkinIcon(strSkinName, "document_badge");
         //m_iconDocumentsBadgeEncrypted = ::WizLoadSkinIcon(strSkinName, "document_badge_encrypted");
 
-        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
-        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
+//        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
+//        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
         m_imagePushButton.SetImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
         m_imagePushButtonHot.SetImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
         m_imagePushButtonPressed.SetImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
@@ -136,66 +138,11 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
         p->drawRect(rect);
     }
 
-    CWizCategoryViewItemBase* pItem = view->categoryItemFromIndex(vopt->index);
-
-    if (view->isHelperItemByIndex(vopt->index)) {
-        if (NULL != dynamic_cast<const CWizCategoryViewSectionItem*>(pItem)) {
-            QString str = vopt->text;
-            QRect rc(vopt->rect);
-            rc.setTop(rc.top() + 12);
-            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemCategoryText(), p->font());
-        }
-        else if (NULL != dynamic_cast<const CWizCategoryViewLinkItem*>(pItem)) {
-            QString str = vopt->text;
-            QRect rc(vopt->rect);
-            rc.setLeft(rc.left() + 16);
-            Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewItemLinkText(), m_fontLink);
-        }
-
-        return;
-    }
-
     p->save();
-
-    bool bSelected = vopt->state.testFlag(State_Selected);
-    int nLeftMargin = 4;
-    if (!vopt->icon.isNull()) {
-        QRect iconRect = subElementRect(SE_ItemViewItemDecoration, vopt, view);
-        iconRect.adjust(nLeftMargin, 0, nLeftMargin, 0);
-        Utils::StyleHelper::drawTreeViewItemIcon(p, iconRect, vopt->icon, bSelected && (vopt->state & State_HasFocus));
-    }
-
-    QFont f;
-    Utils::StyleHelper::fontNormal(f);
-
-    QFont fontCount;
-    Utils::StyleHelper::fontExtend(fontCount);
-
-    QRect rcText = subElementRect(SE_ItemViewItemText, vopt, view);
-    rcText.adjust(nLeftMargin * 2, 0, nLeftMargin * 2, 0);
-    QString strCount = pItem->countString();
-
-    QString strText = vopt->text;
-    if (!strText.isEmpty()) {
-        QColor colorText = Utils::StyleHelper::treeViewItemText(bSelected && (vopt->state & State_HasFocus));
-
-        p->setPen(colorText);
-        int right = Utils::StyleHelper::drawSingleLineText(p, rcText, strText, Qt::AlignVCenter, colorText, f);
-        //
-        rcText.setLeft(right + 4);
-    }
-
-    if (!strCount.isEmpty()) {
-        QRect rcCount = rcText;
-        rcCount.setTop(rcCount.top() + 1);  //add extra 1 pixel for vcenter / 2
-        QColor colorCount = Utils::StyleHelper::treeViewItemTextExtend(bSelected && (vopt->state & State_HasFocus));
-        Utils::StyleHelper::drawSingleLineText(p, rcCount, strCount, Qt::AlignVCenter, colorCount, fontCount);
-    }
-
+    view->categoryItemFromIndex(vopt->index)->drawItemBody(p, vopt);
+    view->categoryItemFromIndex(vopt->index)->drawExtraBadge(p, vopt);
     p->restore();
 
-    // FIXME: this is used for drawing additional badge, please merge it.
-    view->categoryItemFromIndex(vopt->index)->draw(p, vopt);
 }
 
 void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizMultiLineListWidget *view) const
@@ -210,7 +157,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     p->setClipRect(vopt->rect);
 
     QRect textLine = vopt->rect;
-    textLine.adjust(4, 0, -4, 0);
+    textLine.adjust(14, 0, 0, 0);
     p->setPen(Utils::StyleHelper::listViewItemSeperator());
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
@@ -225,33 +172,35 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         QRect imageRect = textRect;
         if (imageAlignLeft)
         {
-            imageRect.setRight(imageRect.left() + imageWidth + 16);
-            imageRect.adjust(4, 4, -4, -4);
-            textRect.setLeft(imageRect.right());
+            imageRect.setRight(imageRect.left() + imageWidth + 14);
+            textRect.setLeft(imageRect.right() + 12);
+            imageRect.setRight(imageRect.right() + 14);
         }
         else
         {
-            imageRect.setLeft(imageRect.right() - imageWidth + 16);
-            imageRect.adjust(4, 4, -4, -4);
-            textRect.setRight(imageRect.left());
+            imageRect.setLeft(imageRect.right() - imageWidth - 14);
+            textRect.setRight(imageRect.left() - 12);
+            imageRect.setLeft(imageRect.left() - 12);
         }
 
-        if (img.width() > imageRect.width() || img.height() > imageRect.height())
-        {
-            double fRate = std::min<double>(double(imageRect.width()) / img.width(), double(imageRect.height()) / img.height());
-            int newWidth = int(img.width() * fRate);
-            int newHeight = int(img.height() * fRate);
-            //
-            int adjustX = (imageRect.width() - newWidth) / 2;
-            int adjustY = (imageRect.height() - newHeight) / 2;
+//        int imgWidth = WizIsHighPixel() ? img.width() / 2 : img.width();
+//        int imgHeight = WizIsHighPixel() ? img.height() / 2 : img.height();
+//        if (imgWidth > imageRect.width() || imgHeight > imageRect.height())
+//        {
+//            double fRate = std::min<double>(double(imageRect.width()) / imgWidth, double(imageRect.height()) / imgHeight);
+//            int newWidth = int(imgWidth * fRate);
+//            int newHeight = int(imgHeight * fRate);
+//            //
+//            int adjustX = (imageRect.width() - newWidth) / 2;
+//            int adjustY = (imageRect.height() - newHeight) / 2;
+//            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
+//        }
+//        else
+//        {
+            int adjustX = (imageRect.width() - imageWidth) / 2;
+            int adjustY = (imageRect.height() - imageWidth) / 2;
             imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-        }
-        else
-        {
-            int adjustX = (imageRect.width() - img.width()) / 2;
-            int adjustY = (imageRect.height() - img.height()) / 2;
-            imageRect.adjust(adjustX, adjustY, -adjustX, -adjustY);
-        }
+//        }
         p->drawPixmap(imageRect, img);
     }
 
@@ -271,20 +220,24 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
         p->drawRect(textRect.adjusted(0, 0, -1, -1));
     }
 
-    textRect.adjust(8, 8, -8, -8);
-    bool selected = vopt->state.testFlag(State_Selected);
-    int lineHeight = vopt->fontMetrics.height() + 2;
+    QFont font = p->font();
+    font.setPixelSize(12);
+    p->setFont(font);
+    QFontMetrics fm(font);
 
+    textRect.adjust(0, 3, -8, -8);
+    bool selected = vopt->state.testFlag(State_Selected);
+    int lineHeight = fm.height() + 2;
+
+    QColor color("#535353");
     for (int line = 0; line < wrapTextLineText && line < lineCount; line++)
-    {
-        QColor color = (0 == line) ? Utils::StyleHelper::listViewMultiLineFirstLine(selected)
-            : Utils::StyleHelper::listViewMultiLineOtherLine(selected);
-        //
+    {        
         CString strText = view->itemText(vopt->index, line);
         color = view->itemTextColor(vopt->index, line, selected, color);
         QRect rc = textRect;
         rc.setTop(rc.top() + line * lineHeight);
         rc.setHeight(lineHeight);
+        rc.setWidth(190);
         ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, true);
     }
 
@@ -293,37 +246,41 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     {
         CString strText = view->itemText(vopt->index, line);
         for (; line < lineCount; line++)
-        {
-            QColor color = Utils::StyleHelper::listViewMultiLineOtherLine(selected);
-            //
-            color = view->itemTextColor(vopt->index, line, selected, color);
+        {            
             QRect rc = textRect;
-            rc.setTop(rc.top() + line * lineHeight);
+            rc.setTop(rc.top() - 1 + line * lineHeight);
             rc.setHeight(lineHeight);
             bool elidedText = (line == lineCount - 1);
             ::WizDrawTextSingleLine(p, rc, strText,  Qt::TextSingleLine | Qt::AlignVCenter, color, elidedText);
         }
     }
 
-    // draw the focus rect
-    if (vopt->state & QStyle::State_HasFocus) {
-        QStyleOptionFocusRect o;
-        o.QStyleOption::operator=(*vopt);
-        o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
-        o.state |= QStyle::State_KeyboardFocusChange;
-        o.state |= QStyle::State_Item;
-        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
-                                  ? QPalette::Normal : QPalette::Disabled;
-        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
-                                                ? QPalette::Highlight : QPalette::Window);
-        proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
-    }
+//    // draw the focus rect
+//    if (vopt->state & QStyle::State_HasFocus) {
+//        QStyleOptionFocusRect o;
+//        o.QStyleOption::operator=(*vopt);
+//        o.rect = subElementRect(SE_ItemViewItemFocusRect, vopt, view);
+//        o.state |= QStyle::State_KeyboardFocusChange;
+//        o.state |= QStyle::State_Item;
+//        QPalette::ColorGroup cg = (vopt->state & QStyle::State_Enabled)
+//                                  ? QPalette::Normal : QPalette::Disabled;
+//        o.backgroundColor = vopt->palette.color(cg, (vopt->state & QStyle::State_Selected)
+//                                                ? QPalette::Highlight : QPalette::Window);
+//        proxy()->drawPrimitive(QStyle::PE_FrameFocusRect, &o, p, view);
+//    }
 
     //draw extra image
     QRect rcExtra;
     QPixmap pixExtra;
-    if (view->itemExtraImage(vopt->index, vopt->rect, rcExtra, pixExtra))
+    if (view->itemExtraImage(vopt->index, vopt->rect.adjusted(0, 0, 0, -1), rcExtra, pixExtra))
     {
+//        QScrollBar* scrollBar = view->verticalScrollBar();
+//        if (scrollBar && scrollBar->isVisible())
+//        {
+//            int nMargin = -1;
+//            rcExtra.adjust(nMargin, 0, nMargin, 0);
+//        }
+
         p->drawPixmap(rcExtra, pixExtra);
     }
 
@@ -339,7 +296,7 @@ void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItemV4* vo
         {
             pt->save();
             pt->setPen(Qt::NoPen);
-            pt->setBrush(QColor("#43E16C"));
+            pt->setBrush(QColor("#5990EF"));
             QRect rect = vopt->rect;
             rect.setWidth(rect.width() * item->loadProgress() / 100);
             pt->drawRect(rect);
@@ -351,7 +308,16 @@ void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItemV4* vo
 
     if (vopt->state.testFlag(State_Selected))
     {
-        m_multiLineListSelectedItemBackground.Draw(pt, vopt->rect, 0);
+//        m_multiLineListSelectedItemBackground.Draw(pt, vopt->rect, 0);
+        pt->save();
+
+        QPen pen(QColor("#3177EE"));
+//        pen.setWidth(2);
+        pt->setPen(pen);
+        pt->setBrush(Qt::NoBrush);
+        pt->drawRect(vopt->rect.adjusted(1, 1, -1, -2));
+
+        pt->restore();
     }
 }
 
@@ -371,6 +337,7 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             }
             else if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
             {
+//                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);
             }
@@ -419,8 +386,6 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
     }
 }
 
-
-
 void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, QPainter *p,
                                   const QWidget *w) const
 {
@@ -430,11 +395,12 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         {
             if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
-                Q_UNUSED(view);
+                if (!view->isCursorEntered())
+                    return;
 
                 if (opt->state & QStyle::State_Children) {
                     bool bExpanded = (opt->state & QStyle::State_Open) ? true : false;
-                    if ((opt->state & QStyle::State_Selected) && view->hasFocus()) {        //(opt->state & State_HasFocus)
+                    if ((opt->state & QStyle::State_Selected)) {        //(opt->state & State_HasFocus)
                         drawcenterImage(p, bExpanded ? m_expandedImageSelected : m_collapsedImageSelected, opt->rect.adjusted(8, 0, 0, 0));
                     } else {
                         drawcenterImage(p, bExpanded ? m_expandedImage : m_collapsedImage, opt->rect.adjusted(8, 0, 0, 0));
@@ -480,29 +446,17 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
                 const CWizCategoryViewSectionItem *secItem = dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase);
-                if (NULL != secItem) {
-                    secItem->draw(p,vopt);
+                if (NULL != secItem) {                   
                     return;
                 }
 
                 if (opt->state & State_Selected) {
                     QRect rc(vopt->rect);
                     rc.setWidth(p->window().width());
+                    int nMargin = (opt->rect.height() - 20) / 2;
+                    rc.adjust(0, nMargin, 0, -nMargin);
                     Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
-                }
-
-                //if (opt->state & QStyle::State_Selected)
-                //{
-                //    QRect rect = opt->rect;
-                //    rect.setWidth(p->window().width());
-                //    if (opt->state & QStyle::State_HasFocus) {
-                //        p->fillRect(rect, m_colorCategorySelectedBackground);
-                //    } else {
-                //        p->fillRect(rect, m_colorCategorySelctedBackgroundNoFocus);
-                //        rect.setWidth(5); // FIXME
-                //        p->fillRect(rect, m_colorCategorySelectedBackground);
-                //    }
-                //}
+                }                
             }
 
             return;
@@ -520,8 +474,8 @@ int	CWizNoteStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, c
     {
         case PM_SplitterWidth:
             return 20;
-        case PM_ScrollBarExtent:
-            return 3;
+//        case PM_ScrollBarExtent:
+//            return 4;
         default:
             return CWizNoteBaseStyle::pixelMetric(metric, option, widget);
     }

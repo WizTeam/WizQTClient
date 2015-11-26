@@ -76,7 +76,7 @@ set(wiznote_SOURCES
     share/wizObjectDataDownloader.cpp
     #share/wizUserAvatar.cpp
     sync/avatar.cpp
-    sync/wizkmxmlrpc.cpp
+    sync/wizKMServer.cpp
     sync/wizkmsync.cpp
     sync/asyncapi.cpp
     #sync/wizCloudPool.cpp
@@ -177,13 +177,20 @@ set(wiznote_SOURCES
     share/wizUDPClient.cpp
     share/wizMessageBox.cpp
     wizOEMSettings.cpp
-    core/wizTagBar.cpp
-    core/wizTrayIcon.cpp
+    widgets/wizTagBar.cpp
+    widgets/wizTrayIcon.cpp
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
     share/wizObjectOperator.cpp
     widgets/wizLocalProgressWebView.cpp
-    core/wizSingleDocumentView.cpp
+    widgets/wizCrashReportDialog.cpp
+    widgets/wizCustomToolBar.cpp
+    widgets/wizTipsWidget.cpp
+    widgets/wizSingleDocumentView.cpp
+    mac/wizSearchWidget_mm.cpp
+    core/wizAccountManager.cpp
+    core/wizCommentManager.cpp
+    core/wizNoteManager.cpp
 )
 
 set(wiznote_HEADERS
@@ -223,7 +230,7 @@ set(wiznote_HEADERS
     share/wizziwreader.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
-    sync/wizkmxmlrpc.h
+    sync/wizKMServer.h
     sync/wizkmsync.h
     sync/asyncapi.h
     #sync/wizCloudPool.h
@@ -343,13 +350,20 @@ set(wiznote_HEADERS
     share/wizUDPClient.h
     share/wizMessageBox.h
     wizOEMSettings.h
-    core/wizTagBar.h
-    core/wizTrayIcon.h
+    widgets/wizTagBar.h
+    widgets/wizTrayIcon.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
     share/wizObjectOperator.h
     widgets/wizLocalProgressWebView.h
-    core/wizSingleDocumentView.h
+    widgets/wizCrashReportDialog.h
+    widgets/wizCustomToolBar.h
+    widgets/wizTipsWidget.cpp
+    widgets/wizSingleDocumentView.h
+    wizPositionDelegate.h
+    core/wizAccountManager.h
+    core/wizCommentManager.h
+    core/wizNoteManager.h
 )
 
 set(wiznote_FORMS
@@ -372,6 +386,7 @@ set(wiznote_FORMS
     ui/wizMarkdownTemplateDialog.ui
     ui/wizIAPDialog.ui
     ui/wizAdvancedSearchDialog.ui
+    ui/wizCrashReportDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -419,10 +434,14 @@ if(UNIX)
         find_library(_WEBKIT_LIBRARY WebKit)
         find_library(_STORE_LIBRARY StoreKit)
         find_library(_IO_LIBRARY IOKit)
+        if (PLCrashReporter)
+            find_library(_CRASHREPORTER CrashReporter)
+        endif(PLCrashReporter)
 
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
-        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY} ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY})
+        target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY}
+                ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY} ${_CRASHREPORTER})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")
@@ -484,8 +503,8 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/core
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
+    ${CMAKE_SOURCE_DIR}/lib/openssl/include
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
-    ${CMAKE_SOURCE_DIR}/libopenssl/include
 )
 
 link_directories(

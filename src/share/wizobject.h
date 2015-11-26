@@ -643,6 +643,11 @@ const int WIZ_USER_MSG_TYPE_MODIFIED = 1;
 const int WIZ_USER_MSG_TYPE_COMMENT = 10;
 const int WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT = 20;
 const int WIZ_USER_MSG_TYPE_COMMENT_REPLY = 30;
+const int WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP = 40;
+const int WIZ_USER_MSG_TYPE_ADDED_TO_GROUP = 50;
+const int WIZ_USER_MSG_TYPE_LIKE = 60;
+const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
+const int WIZ_USER_MSG_TYPE_MAX = 100;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
 struct WIZUSERMESSAGEDATA
 {
@@ -663,6 +668,7 @@ struct WIZUSERMESSAGEDATA
     QString strSender;
     QString strReceiver;
     QString strTitle;
+    QString strNote;     //消息携带的数据，用于显示广告等内容
     int nLocalChanged;
 
     WIZUSERMESSAGEDATA()
@@ -690,6 +696,8 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
     static QString ObjectName() { return "messages"; }
+
+    bool isAd();
 
     enum LocalChanged{
         localChanged_None = 0x0000,

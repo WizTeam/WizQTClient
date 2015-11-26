@@ -16,8 +16,8 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
-    setStyleSheet("font-size: 11px; color: #646464;");
-    setContentsMargins(5, 0, 0, 0);
+    setStyleSheet("font-size: 12px; color: #a2a2a2;");
+    setContentsMargins(0, 0, 0, 6);
 
     int nHeight = Utils::StyleHelper::infoBarHeight();
     setFixedHeight(nHeight);
@@ -41,10 +41,10 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
 
 void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
 {
-    QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy-MM-dd");
+    QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy/M/d");
     m_labelCreatedTime->setText(strCreateTime);
 
-    QString strModifiedTime = QObject::tr("Update time: ") + data.tModified.toString("yyyy-MM-dd");
+    QString strModifiedTime = QObject::tr("Update time: ") + data.tDataModified.toString("yyyy/M/d");
     m_labelModifiedTime->setText(strModifiedTime);
 
 

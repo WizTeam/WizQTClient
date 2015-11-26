@@ -1,0 +1,55 @@
+QDialog{background-color:#F4F4F4;} 
+QPushButton, QToolButton {
+	border-width: 1px; 
+    background-color:#FFFFFF;
+    color:#000000; 
+    font:12px; 
+    padding: 5px 14px; 
+    border-style: solid; 
+    border-color: #ECECEC; 
+    border-radius: 4px; 
+    border-bottom-color:#E0E0E0;
+} 
+QPushButton:default, QToolButton:default {
+	border-width: 1px; 
+    background-color:#3177EE;
+    color:#FFFFFF; 
+    font:12px; 
+    padding: 5px 14px; 
+    border-style: solid; 
+    border-color: #ECECEC; 
+    border-radius: 4px; 
+    border-bottom-color:#E0E0E0;
+}
+QPushButton:pressed { 
+	background-color:#C1C1C1; 
+}
+QPushButton:default:pressed { 
+	background-color:#1A58C2; 
+}
+QLineEdit {
+	padding:5px 8px;
+	border:1px solid #E7E7E7;
+	border-radius:4px;
+    min-height:18px;
+}
+QComboBox, QSpinBox, QDoubleSpinBox {
+    border: 1px solid #E7E7E7;
+    border-radius: 4px;
+    padding: 5px 10px 5px 8px;
+}
+QComboBox::drop-down {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border:0px;
+}
+QComboBox::down-arrow {
+    image: url(WizComboBoxDownArrow);
+}
+QToolTip {
+    font: 12px #000000;
+    padding:0px 1px;
+    background-color: #F8F8F8;
+    border:0px;
+}

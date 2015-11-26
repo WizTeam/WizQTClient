@@ -1,7 +1,6 @@
 #ifndef WIZUSERINFOWIDGET_H
 #define WIZUSERINFOWIDGET_H
 
-
 #ifdef USECOCOATOOLBAR
 #include "mac/wizUserInfoWidgetBaseMac_mm.h"
 #define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac
@@ -34,6 +33,7 @@ protected:
     QPixmap getCircleAvatar(int width, int height);
 
     virtual QPixmap getAvatar(int width, int height);
+    virtual QIcon getVipIcon();
     virtual QIcon getArrow() { return m_iconArraw; }
     virtual QSize sizeHint() const;
     virtual QString userId();
