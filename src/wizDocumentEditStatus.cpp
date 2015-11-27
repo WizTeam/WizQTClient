@@ -248,7 +248,7 @@ bool CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAli
     return reply->error() == QNetworkReply::NoError;
 }
 
-
+/*
 CWizDocumentStatusCheckThread::CWizDocumentStatusCheckThread(QObject* parent)
     : QThread(parent)
     , m_stop(false)
@@ -463,6 +463,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKb
     downloadData(strRequestUrl);
     return true;
 }
+*/
 
 
 CWizDocumentStatusChecker::CWizDocumentStatusChecker(QObject* parent)
@@ -487,7 +488,6 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 //    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
     m_timeOutTimer->start(5 * 1000);
-//    m_loopCheckTimer->start(1 * 60 * 1000);
     m_stop = false;
     startCheck();
 }
@@ -611,6 +611,8 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
     {
         return !db.CanEditDocument(doc);
     }
+
+    //TEMP: remove me
 
     WIZUSERINFO userInfo = WizService::Token::info();
     if (db.IsGroup())

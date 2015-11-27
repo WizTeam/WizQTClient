@@ -28,7 +28,6 @@ class QWebFrame;
 class QWebEnginePage;
 class QWebEngineView;
 class CWizDocumentEditStatusSyncThread;
-class CWizDocumentStatusCheckThread;
 class CWizDocumentStatusChecker;
 class CWizDocumentWebEngine;
 class CWizLocalProgressWebView;

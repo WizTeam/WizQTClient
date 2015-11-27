@@ -95,6 +95,7 @@ private:
     QString m_strCurKbGUID;
 };
 
+/*
 class CWizDocumentStatusCheckThread : public QThread
 {
     Q_OBJECT
@@ -139,5 +140,6 @@ private:
     QString m_strCurGUID;
     QString m_strCurKbGUID;
 };
+*/
 
 #endif // WIZDOCUMENTEDITSTATUS_H
