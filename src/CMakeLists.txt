@@ -192,6 +192,7 @@ set(wiznote_SOURCES
     core/wizCommentManager.cpp
     core/wizNoteManager.cpp
     share/wizthreads.cpp
+    wizPositionDelegate.cpp
 )
 
 set(wiznote_HEADERS

@@ -33,7 +33,7 @@ CWizTipsWidget::CWizTipsWidget(const QString id, QWidget *parent)
     pal.setBrush(QPalette::Window, QBrush(QColor("#F6F6F6")));
     containerWidget->setPalette(pal);
 
-    QVBoxLayout* vLayout = new QVBoxLayout(this);
+    QVBoxLayout* vLayout = new QVBoxLayout();
     vLayout->setContentsMargins(16, 16, 16, 0);
     vLayout->setSpacing(6);
     containerWidget->setLayout(vLayout);
@@ -46,7 +46,7 @@ CWizTipsWidget::CWizTipsWidget(const QString id, QWidget *parent)
     vLayout->addWidget(m_labelTitle);
     vLayout->addWidget(m_labelInfo);
 
-    QHBoxLayout* hLayout = new QHBoxLayout(this);
+    QHBoxLayout* hLayout = new QHBoxLayout();
     hLayout->setContentsMargins(0, 0, 0, 0);
     hLayout->setSpacing(0);
     hLayout->addStretch();

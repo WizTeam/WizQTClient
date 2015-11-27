@@ -649,13 +649,6 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
     }
 }
 
-void CWizDocumentWebView::wheelEvent(QWheelEvent* ev)
-{
-    QWebView::wheelEvent(ev);
-
-    repaint();
-}
-
 CWizDocumentView* CWizDocumentWebView::view()
 {
     QWidget* pParent = parentWidget();

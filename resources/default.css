@@ -13,14 +13,14 @@ body {
 }
 
 body, div, p {
-    /*default-font-family*/ !important;
-    /*default-font-size*/ !important;
+    /*default-font-family*/;
+    /*default-font-size*/;
     /*default-line-height*/
 }
 
 html, body {
     /*default-color*/
-    /*default-background-color*/ !important;
+    /*default-background-color*/;
     height: auto !important;
 }
 

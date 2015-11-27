@@ -1255,6 +1255,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     bool showExtraButtons = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
     m_secondLineButtonContainer->setVisible(showExtraButtons);
+    m_btnShowExtra->setChecked(WIZSHOWEXTRABUTTONITEMS);
 
     connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
 }

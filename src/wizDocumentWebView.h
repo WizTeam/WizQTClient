@@ -234,7 +234,6 @@ protected:
     virtual void dragEnterEvent(QDragEnterEvent* event);
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dropEvent(QDropEvent* event);
-    virtual void wheelEvent(QWheelEvent* ev);
 
 private:
     CWizExplorerApp& m_app;
