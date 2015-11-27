@@ -9823,13 +9823,14 @@ UE.plugins['defaultfilter'] = function () {
                             node.parentNode.removeChild(node)
                         }
                         break;
-                    case 'img':
-                        if (val = node.getAttr('_src')) {
-                            node.setAttr({
-                                'src': node.getAttr('_src'),
-                                '_src': ''
-                            })
-                        }
+                    //不能过滤image的属性，有些笔记或者站特某些笔记的时候会带有_src属性，从而导致保存时图片地址错误
+                    // case 'img':
+                    //     if (val = node.getAttr('_src')) {
+                    //         node.setAttr({
+                    //             'src': node.getAttr('_src'),
+                    //             '_src': ''
+                    //         })
+                    //     }
 
 
                 }
