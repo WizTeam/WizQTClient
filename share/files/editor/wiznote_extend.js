@@ -157,7 +157,6 @@ function setEditorHtml(html, bEditing)
 {
     setWizHrefEnable(bEditing == false);
 
-    editor.reset();
     editor.document.head.innerHTML = wiz_head;    
     editor.document.body.innerHTML = html;
     editor.fireEvent('aftersetcontent');
@@ -165,29 +164,20 @@ function setEditorHtml(html, bEditing)
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
 
-    window.UE.utils.domReady(function() {
+    resetEditorBodyClassName();
+
+    window.UE.utils.domReady(function() {        
         //special process to remove css style added by phone
         WizSpecialProcessForPhoneCss(); 
         updateCustomCss();  
-        WizEditor.initCheckListEnvironment();
+        WizEditor.initCheckListEnvironment();        
         editor.window.scrollTo(0, 0);
     });
 }
 
-function setEditing(bEditing) {    
-    setWizHrefEnable(bEditing == false);
-
-    editor.document.head.innerHTML = wiz_head;
-    editor.document.body.innerHTML = wiz_html;
-
-    //special process to remove css style added by phone
-    WizSpecialProcessForPhoneCss();
-    updateCustomCss();
-
-    editor.fireEvent('aftersetcontent');
-    editor.fireEvent('contentchange');
-
-    bEditing ? editor.setEnabled() : editor.setDisabled();
+function setEditing(bEditing) 
+{
+    setEditorHtml(wiz_html, bEditing);
 }
 
 function viewNote(strGUID, bEditing, strHtml, strHead)
@@ -198,12 +188,13 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
         wiz_head = strHead;
 
         if (m_inited) {
+            editor.reset();
             setEditorHtml(wiz_html, bEditing);
         } else {
             editor.ready(function() {
-            m_header = editor.document.head.innerHTML; // save original header
-            setEditorHtml(wiz_html, bEditing);
-            m_inited = true;
+                m_header = editor.document.head.innerHTML; // save original header
+                setEditorHtml(wiz_html, bEditing);
+                m_inited = true;
             });
         }
         
@@ -455,6 +446,10 @@ function updateCustomCss() {
 	if (editor.document.head) {
 		editor.document.head.appendChild(objStyle);
 	}	
+}
+
+function resetEditorBodyClassName () {
+    editor.body.className='view';
 }
 
 function setWizHrefEnable (enable) {
