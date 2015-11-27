@@ -184,6 +184,8 @@ protected:
 
     bool SQLToDocumentDataArray(const CString& strSQL,
                                 CWizDocumentDataArray& arrayDocument);
+    bool SQLToDocumentDataArrayWithExFields(const CString& strSQL,
+                                CWizDocumentDataArray& arrayDocument);
 
     virtual void InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
                                       const CWizStdStringArray& arrayGUID,

@@ -741,9 +741,6 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
 {
-    WIZDOCUMENTDATA dataOld;
-    DocumentFromGUID(data.strGUID, dataOld);
-
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=%d where DOCUMENT_GUID=%s"),
 		data.nReadCount,
@@ -751,10 +748,11 @@ bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
         );
 
     bool ret = ExecSQL(strSQL);
-    WIZDOCUMENTDATA dataNew;
-    DocumentFromGUID(data.strGUID, dataNew);
 
-    emit documentReadCountChanged(dataNew);
+    if (ret)
+    {
+        emit documentReadCountChanged(data);
+    }
     return ret;
 }
 
@@ -1883,7 +1881,7 @@ bool CWizIndex::GetDocumentsByParamName(const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArrayWithExFields(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsByParam(const CString& strLocation,
@@ -1918,7 +1916,7 @@ bool CWizIndex::GetDocumentsByParam(const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArrayWithExFields(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsByTag(const CString& strLocation,
@@ -1947,7 +1945,7 @@ bool CWizIndex::GetDocumentsByTag(const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsSizeByTag(const WIZTAGDATA& data, int& size)
@@ -1997,7 +1995,7 @@ bool CWizIndex::GetDocumentsByStyle(const CString& strLocation, const WIZSTYLEDA
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsByTags(bool bAnd, const CString& strLocation,
@@ -2039,7 +2037,7 @@ bool CWizIndex::GetDocumentsByTags(bool bAnd, const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsCountByLocation(const CString& strLocation,
@@ -2073,7 +2071,7 @@ bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
     }
 
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 //bool CWizIndex::GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument)
@@ -2228,7 +2226,7 @@ bool CWizIndex::GetDocumentsByTime(const QDateTime& t, CWizDocumentDataArray& ar
 		FIELD_DATA_MODIFIED_WIZ_DOCUMENT, 
 		FIELD_PARAM_MODIFIED_WIZ_DOCUMENT, 
 		t); 
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 bool CWizIndex::GetAttachmentsByTime(const COleDateTime& t, CWizDocumentAttachmentDataArray& arrayData)
@@ -2311,7 +2309,7 @@ bool CWizIndex::GetModifiedStyles(CWizStyleDataArray& arrayData)
 bool CWizIndex::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
 {
 	CString strSQL = FormatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 CString CWizIndex::GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation)
@@ -2340,7 +2338,7 @@ bool CWizIndex::GetModifiedDocuments(const CWizStdStringArray& arrayLocation, CW
 
 	strSQL = strSQL + _T(" and ") + strWhere2;
 
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 bool CWizIndex::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
@@ -2992,7 +2990,7 @@ bool CWizIndex::Search(const CString& strKeywords,
 	//
 	DEBUG_TOLOG(strSQL);
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 
 }
 
@@ -3068,7 +3066,7 @@ bool CWizIndex::Search(const CString& strKeywords,
 	//
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3099,7 +3097,7 @@ bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, 
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3126,7 +3124,7 @@ bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nC
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3153,7 +3151,7 @@ bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int n
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)

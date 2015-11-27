@@ -1354,7 +1354,6 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
     if (!acceptDocumentChange(documentNew))
         return;
 
-    // FIXME: if user search on-going, acceptDocument will remove this document from the list.
     if (acceptDocument(documentNew))
     {        
         int index = documentIndexFromGUID(documentNew.strGUID);

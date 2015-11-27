@@ -464,8 +464,6 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
     try
     {
         CppSQLite3Query query = m_db.execQuery(strSQL);
-        CWizStdStringArray arrayGUID;
-        std::map<CString, int> mapDocumentIndex;
         while (!query.eof())
         {
             WIZDOCUMENTDATA data;
@@ -499,13 +497,33 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
             data.strParamMD5 = query.getStringField(documentDOCUMENT_PARAM_MD5);
             data.nVersion = query.getInt64Field(documentVersion);
 
-            arrayGUID.push_back(data.strGUID);
             arrayDocument.push_back(data);
-            mapDocumentIndex[data.strGUID] = int(arrayDocument.size() - 1);
             query.nextRow();
         }
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return LogSQLException(e, strSQL);
+    }
+}
 
-        if (!arrayGUID.empty()) {
+bool CWizIndexBase::SQLToDocumentDataArrayWithExFields(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
+{
+    if (!SQLToDocumentDataArray(strSQL, arrayDocument))
+        return false;
+
+    try
+    {
+        if (!arrayDocument.empty())
+        {
+            std::map<CString, int> mapDocumentIndex;
+            CWizStdStringArray arrayGUID;
+            for(WIZDOCUMENTDATAEX document : arrayDocument)
+            {
+                mapDocumentIndex[document.strGUID] = int(arrayDocument.size() - 1);
+                arrayGUID.push_back(document.strGUID);
+            }
             InitDocumentExFields(arrayDocument, arrayGUID, mapDocumentIndex);
         }
 

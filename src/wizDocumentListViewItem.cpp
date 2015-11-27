@@ -35,10 +35,14 @@ CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerA
     m_data.nReadStatus = data.nReadStatus;
     m_data.strAuthorId = data.strAuthorId;
 
+
+    //load document ex info from db
+    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
+
     setText(data.doc.strTitle);
 
     updateDocumentUnreadCount();
-
     updateDocumentLocationData();
 
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
@@ -68,12 +72,8 @@ bool CWizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFile
 
 bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
 {
-    WIZDOCUMENTDATA docData;
-    if (m_app.databaseManager().db(m_data.doc.strKbGUID).DocumentFromGUID(m_data.doc.strGUID, docData))
-    {
-        return docData.nAttachmentCount > 0;
-    }
-    return false;
+    //NOTE:不应该从数据中读取附件信息，而是根据当前包含的笔记信息来判断。如果发现笔记信息与实际情况不一致，则问题在笔记信息刷新的部分。
+    return m_data.doc.nAttachmentCount > 0;
 }
 
 int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const

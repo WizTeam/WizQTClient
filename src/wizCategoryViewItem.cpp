@@ -876,7 +876,6 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-//    db.GetAllDocuments(arrayDocument);
     db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%'", arrayDocument);
 }
 
