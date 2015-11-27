@@ -194,8 +194,7 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
         return true;
 
     m_data.strLocation = strNewLocation;
-    m_data.nVersion = -1;
-    if (!m_db.ModifyDocumentInfoEx(m_data))
+    if (!m_db.ModifyDocumentLocation(m_data))
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);

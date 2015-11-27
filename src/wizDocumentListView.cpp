@@ -1057,7 +1057,6 @@ QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
     {
         rcNumber.setWidth(textWidth + 8);
     }
-    qDebug() << "rcNumber rect ; " << rcNumber;
     pt.setPen(QColor("#FF6052"));
     pt.setBrush(QColor("#FF6052"));
     pt.setRenderHint(QPainter::Antialiasing);
