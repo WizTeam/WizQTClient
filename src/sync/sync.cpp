@@ -1723,7 +1723,7 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     {
         if (QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
         {
-            _TR("Remove all user avatar.");
+            qInfo() << "Remove all user avatar.";
             CWizStdStringArray arrayUsers;
             pPersonalGroupDatabase->getAllNotesOwners(arrayUsers);
             for (CWizStdStringArray::const_iterator it = arrayUsers.begin();

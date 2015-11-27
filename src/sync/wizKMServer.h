@@ -491,7 +491,6 @@ public:
         {
             std::deque<TData> arrayPageData;
             //
-            //TODO: version
             //QString strProgress = WizFormatString1(::WizTranslationsTranslateString(_T("Start Version: %1")), WizInt64ToStr(nNextVersion));
             //m_pProgress->OnText(wizhttpstatustypeNormal, strProgress);
             //

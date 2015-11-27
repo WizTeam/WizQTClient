@@ -771,6 +771,7 @@ bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     return true;
 }
 
+//TODO: 合并WIZUSERMESSAGEDATA 和WIZMESSAGEDATA
 /* ---------------------------- WIZMESSAGEDATA ---------------------------- */
 WIZMESSAGEDATA::WIZMESSAGEDATA()
     : nId(0)

@@ -741,7 +741,6 @@ struct WIZMESSAGEDATA
     qint32 nMessageType;
 
     // Filed: note
-    // not used currently
     QString note;
 
     // Field: read_status
