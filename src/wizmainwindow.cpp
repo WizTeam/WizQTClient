@@ -3938,7 +3938,9 @@ void MainWindow::showNewFeatureGuide()
 void MainWindow::showMobileFileReceiverUserGuide()
 {
     QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=guidemap_sendimage.html";
+    qInfo() <<"open dialog with url : " << strUrl;
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     connect(dlg, SIGNAL(doNotShowThisAgain(bool)),
