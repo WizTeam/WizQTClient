@@ -1952,11 +1952,13 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
                 pEvents->OnText(wizSyncMeesageError, QString("Sync database error, for reason : %1").arg(strLastError));
                 pEvents->OnMessage(wizSyncMeesageError, "", strLastError);
             }
+            //quit on sync error
+            return false;
         }
         else
         {
             pDatabase->SaveLastSyncTime();
-            pEvents->OnSyncProgress(100);
+            pEvents->OnSyncProgress(100);            
         }
     }
     //
