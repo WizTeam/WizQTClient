@@ -178,7 +178,7 @@ CWizInfo::~CWizInfo()
             qt_message_output(stream->type,
                               stream->context,
                               stream->buffer);
-//            Utils::Logger::logger()->writeLog(stream->buffer);
+            Utils::Logger::logger()->writeLog(stream->buffer);
         }
         delete stream;
     }
