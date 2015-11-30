@@ -24,6 +24,7 @@
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectOperator.h"
 #include "share/wizMessageBox.h"
+#include "share/wizthreads.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
@@ -1630,6 +1631,9 @@ bool CWizCategoryView::isSectionVisible(CategorySection section) const
 void setItemVisible(const QString& strXML, CategorySection section, QTreeWidget* treeWidget,
                     QTreeWidgetItem* item)
 {
+    if (!treeWidget || !item)
+        return;
+
     QDomDocument doc;
     doc.setContent(strXML);
     bool sectionVisible;
@@ -3076,7 +3080,7 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 
 
 void CWizCategoryView::init()
-{
+{    
     initGeneral();
     initFolders();
     initTags();
@@ -4330,6 +4334,9 @@ void CWizCategoryView::initGroup(CWizDatabase& db)
     bool itemCreeated = false;
     initGroup(db, itemCreeated);
 }
+
+typedef std::multimap<CString, WIZTAGDATA>::const_iterator mapTagIterator;
+
 void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
 {
     itemCreeated = false;
@@ -4353,27 +4360,19 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
     //
     setGroupRootItemExtraButton(pGroupItem, group);
 
-    initGroup(db, pGroupItem, "");
+
+    //
+    std::multimap<CString, WIZTAGDATA> mapTag;
+    db.GetAllTags(mapTag);
+    initGroup(db, pGroupItem, "", mapTag);
+
+//    initGroup(db, pGroupItem, "");
 
     CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, db.kbGUID());
     pGroupItem->addChild(pGroupNoTagItem);
 
     CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, db.kbGUID());
     pGroupItem->addChild(pTrashItem);
-
-    //对父文件夹数据出现错误的文件夹进行容错处理，如果有父标签指向，但标签不存在则显示在根目录
-    CWizTagDataArray arrayTag;
-    if (db.GetAllTagsWithErrorParent(arrayTag)) {
-        CWizTagDataArray::const_iterator it;
-        for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-            qWarning() << "group folder with error parent fount, folder name : " << (QString)it->strName << " folder guid : "
-                       << (QString)it->strGUID << "  parent guid : " << (QString)it->strParentGUID;
-            CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
-            pGroupItem->addChild(pTagItem);
-            initGroup(db, pTagItem, it->strGUID);
-        }
-    }
-
 
     // only show trash if permission is enough
     if (db.permission() > WIZ_USERGROUP_SUPER) {
@@ -4396,6 +4395,21 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
         pParent->addChild(pTagItem);
 
         initGroup(db, pTagItem, it->strGUID);
+    }
+    //
+    pParent->sortChildren(0, Qt::AscendingOrder);
+}
+
+void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID,
+                                 const std::multimap<CString, WIZTAGDATA>& mapTag)
+{
+    std::pair<mapTagIterator, mapTagIterator> itPair = mapTag.equal_range(strParentTagGUID);
+    mapTagIterator it;
+    for (it = itPair.first; it != itPair.second; ++it)
+    {
+        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, (*it).second, db.kbGUID());
+        pParent->addChild(pTagItem);
+        initGroup(db, pTagItem, (*it).second.strGUID, mapTag);
     }
     //
     pParent->sortChildren(0, Qt::AscendingOrder);

@@ -44,6 +44,7 @@ public:
 
     /* Tags */
     bool GetAllTags(CWizTagDataArray& arrayTag);
+    bool GetAllTags(std::multimap<CString, WIZTAGDATA>& mapTag);
     bool GetRootTags(CWizTagDataArray& arrayTag);
     bool GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag); // 1 level
     bool GetAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag);

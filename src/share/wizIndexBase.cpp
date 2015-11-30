@@ -1280,6 +1280,36 @@ bool CWizIndexBase::GetAllTags(CWizTagDataArray& arrayTag)
     return SQLToTagDataArray(strSQL, arrayTag);
 }
 
+bool CWizIndexBase::GetAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
+{
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZTAGDATA data;
+            data.strKbGUID = kbGUID();
+            data.strGUID = query.getStringField(tagTAG_GUID);
+            data.strParentGUID = query.getStringField(tagTAG_GROUP_GUID);
+            data.strName = query.getStringField(tagTAG_NAME);
+            data.strDescription = query.getStringField(tagTAG_DESCRIPTION);
+            data.tModified = query.getTimeField(tagDT_MODIFIED);
+            data.nVersion = query.getInt64Field(tagVersion);
+            data.nPostion = query.getInt64Field(tagTAG_POS);
+
+            mapTag.insert(std::make_pair(data.strParentGUID, data));
+            query.nextRow();
+        }
+
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return LogSQLException(e, strSQL);
+    }
+}
+
 bool CWizIndexBase::GetRootTags(CWizTagDataArray& arrayTag)
 {
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG,

@@ -166,7 +166,7 @@ class CWizCategoryView : public CWizCategoryBaseView
 public:
     CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
     virtual ~CWizCategoryView();
-    void init();
+    Q_INVOKABLE void init();
 
     void loadShortcutState();
     Q_INVOKABLE void saveShortcutState();
@@ -496,6 +496,8 @@ private:
     void initGroup(CWizDatabase& db, bool& itemCreeated);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
+    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
+                   const QString& strParentTagGUID, const std::multimap<CString, WIZTAGDATA>& mapTag);
     void initQuickSearches();
     void initShortcut(const QString& shortcut);
     //
