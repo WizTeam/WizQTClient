@@ -134,7 +134,9 @@ void CWizTipsWidget::bindCloseFunction(const std::function<void ()>& f)
 
 void CWizTipsWidget::hide()
 {
-    qDebug() << "hide tip widget";
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.removeListener(this);
+
     m_hideFunction();
 
     QWidget::hide();
@@ -163,12 +165,13 @@ void CWizTipsWidget::showEvent(QShowEvent* ev)
 
 void CWizTipsWidget::closeTip()
 {
+    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    delegate.removeListener(this);
+
     close();
 
     m_closeFunction();
 
-    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
-    delegate.removeListener(this);
 
     CWizTipListManager* manager = CWizTipListManager::instance();
     manager->displayNextTipWidget();
@@ -266,9 +269,9 @@ void CWizTipListManager::on_timerOut()
     else if (!m_tips.first().targetWidget->isVisible())
     {
         m_timer.stop();
-        m_tips.first().widget->hide();
         CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
         delegate.removeListener(m_tips.first().widget);
+        m_tips.first().widget->hide();
         for (TipItem item : m_tips)
         {
             item.widget->deleteLater();
