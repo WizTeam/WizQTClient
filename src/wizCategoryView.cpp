@@ -3528,63 +3528,106 @@ void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 
 bool CWizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZTAGDATA& tag, QString& strLocation)
 {
-    bool bFallback = true;
-    // trash first, because it's inherited
-    if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+    QTreeWidgetItem* item = currentItem();
+    if (!item)
     {
-        // only handle group trash
-        if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
-            CWizCategoryViewGroupRootItem* pRItem =
-                    dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+        strLocation = LOCATION_DEFAULT;
+        return true;
+    }
 
-            Q_ASSERT(pRItem);
+    bool bFallback = true;
 
-            strKbGUID = pRItem->kbGUID();
-            bFallback = false;
+    switch (item->type()) {
+    case Category_FolderItem:
+        if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+        {
+            // only handle group trash
+            if (pItem->kbGUID() != m_dbMgr.db().kbGUID())
+            {
+                CWizCategoryViewGroupRootItem* pRItem =
+                        dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+                Q_ASSERT(pRItem);
 
-            //set noTag item as current item.
-            selectedItems().clear();
-            for (int i = 0; i < pRItem->childCount(); i++) {
-                CWizCategoryViewGroupNoTagItem* pNoTag =
-                        dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
-                if (0 != pNoTag) {
-                    setCurrentItem(pNoTag);
-                    break;
+                strKbGUID = pRItem->kbGUID();
+                bFallback = false;
+
+                //set noTag item as current item.
+                selectedItems().clear();
+                for (int i = 0; i < pRItem->childCount(); i++)
+                {
+                    if (pRItem->child(i)->type() != Category_GroupNoTagItem)
+                        continue;
+
+                    CWizCategoryViewGroupNoTagItem* pNoTag =
+                            dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
+                    if (0 != pNoTag)
+                    {
+                        setCurrentItem(pNoTag);
+                        break;
+                    }
                 }
             }
         }
-    }
-    else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
-    {
-        // only handle individual folders except trash
-        if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
-            strLocation = pItem->location();
+        else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+        {
+            // only handle individual folders except trash
+            if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
+                strLocation = pItem->location();
+                bFallback = false;
+            }
+        }
+        break;
+    case Category_TagItem:
+        if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
+        {
+            tag = pItem->tag();
             bFallback = false;
         }
-    }
-    else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
-    {
-        tag = pItem->tag();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        tag = pItem->tag();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
+        break;
+    case Category_GroupRootItem:
+        if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_GroupNoTagItem:
+        if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_GroupItem:
+        if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            tag = pItem->tag();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_ShortcutItem:
+        if (CWizCategoryViewShortcutItem* pItem = currentCategoryItem<CWizCategoryViewShortcutItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            CWizDatabase& db = m_dbMgr.db(strKbGUID);
+            if (db.IsGroup())
+            {
+                db.TagFromGUID(pItem->guid(), tag);
+                strLocation = db.GetDefaultNoteLocation();
+            }
+            else
+            {
+                strLocation = pItem->location();
+            }
+            bFallback = false;
+        }
+        break;
+    default:
+        break;
     }
 
     if (bFallback) {
