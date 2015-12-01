@@ -801,15 +801,11 @@ void CWizDocumentListView::resetPermission()
     bool bCanEdit = isDocumentsAllCanDelete(arrayDocument);
     bool bAlwaysOnTop = isDocumentsAlwaysOnTop(arrayDocument);
 
-    bool bShareEnable = true;
     // if group documents or deleted documents selected
     if (bGroup || bDeleted) {
         findAction(WIZACTION_LIST_TAGS)->setVisible(false);
-        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
-        bShareEnable = false;
     } else {
-        findAction(WIZACTION_LIST_TAGS)->setVisible(true);
-        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(bShareEnable);
+        findAction(WIZACTION_LIST_TAGS)->setVisible(true);       
     }
 
     // deleted user private documents
@@ -821,6 +817,7 @@ void CWizDocumentListView::resetPermission()
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
 
+    findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(true);
     // disable note history if selection is not only one
     if (m_rightButtonFocusedItems.count() != 1)
     {
@@ -835,7 +832,7 @@ void CWizDocumentListView::resetPermission()
         {
             setEncryptDocumentActionEnable(true);
         }
-        bShareEnable = false;
+        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
     }
     else
     {
@@ -843,13 +840,17 @@ void CWizDocumentListView::resetPermission()
         WIZDOCUMENTDATA document = (*arrayDocument.begin());
         bool encryptEnable = !document.nProtected;
         setEncryptDocumentActionEnable(encryptEnable);
+
+        // hide share link action for personal group
+        if (m_dbMgr.db(document.strKbGUID).IsPersonalGroup())
+        {
+            findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
+        }
     }
 
-    findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setEnabled(bShareEnable);
 
     if (bGroup)
     {
-        findAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK)->setVisible(false);
         findAction(WIZACTION_LIST_ENCRYPT_DOCUMENT)->setVisible(false);
         findAction(WIZACTION_LIST_CANCEL_ENCRYPTION)->setVisible(false);
     }

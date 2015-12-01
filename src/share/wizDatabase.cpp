@@ -1159,6 +1159,18 @@ bool CWizDatabase::IsGroup()
     return true;
 }
 
+bool CWizDatabase::IsPersonalGroup()
+{
+    if (!IsGroup())
+        return false;
+
+    CWizDatabase* personDb = getPersonalDatabase();
+
+    WIZGROUPDATA group;
+    personDb->GetGroupData(kbGUID(), group);
+    return !group.IsBiz();
+}
+
 bool CWizDatabase::HasBiz()
 {
     CWizDatabase* personDb = getPersonalDatabase();

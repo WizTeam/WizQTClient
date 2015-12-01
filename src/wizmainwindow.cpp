@@ -1523,9 +1523,7 @@ void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const 
     CWizDatabase& db = m_dbMgr.db(strKbGUID);
     if (db.IsGroup())
     {
-        WIZGROUPDATA group;
-        m_dbMgr.db().GetGroupData(strKbGUID, group);
-        if (!group.IsBiz())
+        if (db.IsPersonalGroup())
             return;
 
         if (account.isPaidGroup(strKbGUID))

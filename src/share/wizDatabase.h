@@ -215,6 +215,7 @@ public:
     virtual IWizSyncableDatabase* GetPersonalDatabase();
 
     virtual bool IsGroup();
+    bool IsPersonalGroup();
     virtual bool HasBiz();
 
     virtual bool IsGroupAdmin();
