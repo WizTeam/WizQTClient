@@ -1,5 +1,6 @@
 #include "wizAccountManager.h"
 #include "share/wizDatabase.h"
+#include "share/wizMessageBox.h"
 
 const QString g_strAccountSection = "Account";
 
@@ -37,5 +38,30 @@ bool CWizAccountManager::isPaidUser()
     }
 
     return false;
+}
+
+bool CWizAccountManager::isPaidGroup(const QString& kbGUID)
+{
+    WIZGROUPDATA group;
+    if (m_dbMgr.db().GetGroupData(kbGUID, group))
+    {
+        if (group.bizGUID.isEmpty())
+            return false;
+
+        WIZBIZDATA biz;
+        if (m_dbMgr.db().GetBizData(group.bizGUID, biz))
+        {
+            return biz.bizLevel > 0;
+        }
+    }
+
+    return false;
+}
+
+bool CWizAccountManager::isBizGroup(const QString& kbGUID)
+{
+    WIZGROUPDATA group;
+    m_dbMgr.db().GetGroupData(kbGUID, group);
+    return group.IsBiz();
 }
 

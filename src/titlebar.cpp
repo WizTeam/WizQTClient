@@ -622,10 +622,38 @@ void TitleBar::onTagButtonClicked()
     WizGetAnalyzer().LogAction("showTags");
 }
 
+QAction* actionFromMenu(QMenu* menu, const QString& text)
+{
+    QList<QAction*> actionList = menu->actions();
+    for (QAction* action : actionList)
+    {
+        if (action->text() == text)
+            return action;
+    }
+    return nullptr;
+}
+
 void TitleBar::onShareButtonClicked()
 {
     if (m_shareMenu)
     {
+        const WIZDOCUMENTDATA& doc = noteView()->note();
+
+        QAction* actionLink = actionFromMenu(m_shareMenu, WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK);
+        if (actionLink)
+        {
+            actionLink->setVisible(true);
+            if (m_app.databaseManager().db(doc.strKbGUID).IsGroup())
+            {
+                WIZGROUPDATA group;
+                m_app.databaseManager().db().GetGroupData(doc.strKbGUID, group);
+                if (!group.IsBiz())
+                {
+                    actionLink->setVisible(false);
+                }
+            }
+        }
+
         QPoint pos = m_shareBtn->mapToGlobal(m_shareBtn->rect().bottomLeft());
         m_shareMenu->popup(pos);
     }

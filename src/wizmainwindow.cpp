@@ -1520,12 +1520,35 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
 void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
 {
     CWizAccountManager account(m_dbMgr);
-    if (!account.isVip())
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup())
+    {
+        WIZGROUPDATA group;
+        m_dbMgr.db().GetGroupData(strKbGUID, group);
+        if (!group.IsBiz())
+            return;
+
+        if (account.isPaidGroup(strKbGUID))
+        {
+            if (!db.IsGroupSuper())
+            {
+                CWizMessageBox::information(this, tr("Info"), tr("Your permission is insufficient, super member or group administrators can share notes."));
+                return;
+            }
+        }
+        else
+        {
+            CWizMessageBox::information(this, tr("Info"), tr("You are using the free version of the service, upgrade now, you can share notes."));
+            return;
+        }
+    }
+    else if (!account.isVip())
     {
         openVipPageInWebBrowser();
         return;
     }
 
+    //
     WIZDOCUMENTDATA doc;
     if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc))
     {
