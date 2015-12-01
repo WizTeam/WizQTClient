@@ -588,7 +588,7 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count);
 int GetSyncStartProgress(WizKMSyncProgress progress);
 
 
-#define _TR(x) (x)
+#define _TR(x) x
 
 
 
