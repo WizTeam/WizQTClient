@@ -1870,6 +1870,8 @@ void MainWindow::initToolBar()
     #ifdef USECOCOATOOLBAR
     m_toolBar->showInWindow(this);
 
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(false);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
