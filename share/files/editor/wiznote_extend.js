@@ -153,7 +153,7 @@ function loadSingleJs(doc, path) {
     return s;
 }
 
-function setEditorHtml(html, bEditing)
+function setEditorHtml(html, bEditing, scrollToTop)
 {
     setWizHrefEnable(bEditing == false);
 
@@ -170,14 +170,16 @@ function setEditorHtml(html, bEditing)
         //special process to remove css style added by phone
         WizSpecialProcessForPhoneCss(); 
         updateCustomCss();  
-        WizEditor.initCheckListEnvironment();        
-        editor.window.scrollTo(0, 0);
+        WizEditor.initCheckListEnvironment();
+        if (scrollToTop) {
+            editor.window.scrollTo(0, 0);
+        }
     });
 }
 
 function setEditing(bEditing) 
 {
-    setEditorHtml(wiz_html, bEditing);
+    setEditorHtml(wiz_html, bEditing, false);
 }
 
 function viewNote(strGUID, bEditing, strHtml, strHead)
@@ -189,11 +191,11 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 
         if (m_inited) {
             editor.reset();
-            setEditorHtml(wiz_html, bEditing);
+            setEditorHtml(wiz_html, bEditing, true);
         } else {
             editor.ready(function() {
                 m_header = editor.document.head.innerHTML; // save original header
-                setEditorHtml(wiz_html, bEditing);
+                setEditorHtml(wiz_html, bEditing, true);
                 m_inited = true;
             });
         }
