@@ -560,7 +560,7 @@ protected:
         if (opt.arrowType == Qt::RightArrow)
         {
             QRect rcArrow = opt.rect;
-            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
+            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 3);
             rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
             rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
             static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
@@ -587,7 +587,7 @@ private:
     QColor m_colorSunkenBorder;
 };
 
-const int ColorButtonRightArrowWidth = 16;
+const int ColorButtonRightArrowWidth = 18;
 class CWizToolButtonColor : public CWizToolButton
 {
 public:
@@ -650,19 +650,19 @@ protected:
         QRect rcIcon((opt.rect.width() - size.width() - ColorButtonRightArrowWidth) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
-        QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 5, opt.iconSize.width() - 2, 2);
+        QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 6, opt.iconSize.width() - 2, 2);
         p.fillRect(QRect(rectColor), m_color);
 
         if (opt.state & QStyle::State_MouseOver)
         {
-            QPoint top(rcIcon.right() + 5, opt.rect.x() + (opt.rect.height() - 13) / 2);
+            QPoint top(rcIcon.right() + 7, opt.rect.x() + (opt.rect.height() - 13) / 2);
             p.setPen(QPen(QColor("#C4C4C4")));
             p.drawLine(top, QPoint(top.x(), top.y() + 13));
         }
 
         //arrow
         static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
-        QRect rcArrow(rcIcon.right() + 5, (opt.rect.height() - arrow.height()) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
+        QRect rcArrow(rcIcon.right() + 7, (opt.rect.height() - arrow.height()) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
         p.drawPixmap(rcArrow, arrow);
     }
 
