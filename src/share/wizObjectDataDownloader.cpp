@@ -32,6 +32,8 @@ void CWizObjectDataDownloaderHost::downloadData(const WIZOBJECTDATA& data)
 
 void CWizObjectDataDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
 {
+    qDebug() << "download document request : " << data.strDisplayName;
+
     download(data, TypeDocument);
 }
 
@@ -54,6 +56,7 @@ void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadT
     connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
+    qDebug() << "create new runable to start download";
     QThreadPool::globalInstance()->start(downloader);
 }
 void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
@@ -77,6 +80,7 @@ CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMg
     , m_data(data)
     , m_type(type)
 {
+    setAutoDelete(false);
 }
 
 void CWizDownloadObjectRunnable::run()
@@ -92,8 +96,12 @@ void CWizDownloadObjectRunnable::run()
     default:
         break;
     }
+
+    qDebug() << "download object finished : " << ret;
     //
     Q_EMIT downloadDone(m_data.strObjectGUID, ret);
+
+    deleteLater();
 }
 
 bool CWizDownloadObjectRunnable::downloadNormalData()
@@ -121,6 +129,8 @@ bool CWizDownloadObjectRunnable::downloadNormalData()
 
 bool CWizDownloadObjectRunnable::downloadDocument()
 {
+    qDebug() << "start to download document in runalbe";
+
     WIZUSERINFO info;
     if (!getUserInfo(info))
         return false;
@@ -133,12 +143,14 @@ bool CWizDownloadObjectRunnable::downloadDocument()
     if (!db.DocumentFromGUID(m_data.strObjectGUID, document))
         return false;
 
+    qDebug() << "start to get document_getData in runalbe";
     int nPart = WIZKM_XMKRPC_DOCUMENT_PART_INFO | WIZKM_XMKRPC_DOCUMENT_PART_DATA;
     if (!ksServer.document_getData(m_data.strObjectGUID, nPart, document))
     {
         return false;
     }
 
+    qDebug() << "start to get attachment_getList in runalbe";
     // check update of attachment
     WIZOBJECTVERSION versionServer;
     ksServer.wiz_getVersion(versionServer);
@@ -166,6 +178,8 @@ bool CWizDownloadObjectRunnable::downloadDocument()
             }
         }
     }
+
+    qDebug() << "start to get UpdateObjectData in runalbe";
 
     bool ret = false;
     db.blockSignals(true);

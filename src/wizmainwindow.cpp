@@ -2101,6 +2101,7 @@ void MainWindow::initClient()
     m_doc->web()->setInSeperateWindow(false);
     m_doc->commentWidget()->setMinimumWidth(isHighPix ? 170 : 195);
     m_doc->web()->setMinimumWidth(576);
+    m_doc->titleBar()->setMinimumWidth(576);
 
     m_doc->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
                                  "QToolButton {border:0px; padding:0px; border-radius:0px;}"));

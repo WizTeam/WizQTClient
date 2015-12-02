@@ -119,6 +119,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_commentWidget->hide();
 
     QWidget* wgtEditor = new QWidget(m_docView);
+    wgtEditor->setMinimumWidth(576);
     QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
     layoutEditor->setSpacing(0);
     layoutEditor->setContentsMargins(0, 5, 0, 0);
