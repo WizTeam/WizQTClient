@@ -175,9 +175,9 @@ CWizInfo::~CWizInfo()
         if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
             stream->buffer.chop(1);
         if (stream->message_output) {
-            qt_message_output(stream->type,
-                              stream->context,
-                              stream->buffer);
+//            qt_message_output(stream->type,
+//                              stream->context,
+//                              stream->buffer);
             Utils::Logger::logger()->writeLog(stream->buffer);
         }
         delete stream;
