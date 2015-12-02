@@ -2204,7 +2204,24 @@ bool CWizCategoryViewShortcutItem::accept(CWizDatabase& db, const WIZDOCUMENTDAT
 {
     switch (m_type) {
     case Document:
-        return data.strGUID == m_strGuid;
+        //现在笔记列表会显示快捷方式中笔记所在文件夹的所有笔记，所以允许该文件夹下所有笔记
+    {
+        if(db.IsGroup())
+        {
+            CWizStdStringArray arrayTag1;
+            db.GetDocumentTags(data.strGUID, arrayTag1);
+            CWizStdStringArray arrayTag2;
+            m_app.databaseManager().db(m_strKbGUID).GetDocumentTags(m_strGuid, arrayTag2);
+
+            return (arrayTag1.size() == 1 && arrayTag2.size() == 1 && arrayTag1.front() == arrayTag2.front());
+        }
+        else
+        {
+            WIZDOCUMENTDATA doc;
+            m_app.databaseManager().db(m_strKbGUID).DocumentFromGUID(m_strGuid, doc);
+            return doc.strLocation == data.strLocation;
+        }
+    }
         break;
     case PersonalFolder:
         return data.strLocation == m_location;

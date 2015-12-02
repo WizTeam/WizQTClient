@@ -3612,16 +3612,46 @@ bool CWizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZ
     case Category_ShortcutItem:
         if (CWizCategoryViewShortcutItem* pItem = currentCategoryItem<CWizCategoryViewShortcutItem>())
         {
-            strKbGUID = pItem->kbGUID();
-            CWizDatabase& db = m_dbMgr.db(strKbGUID);
-            if (db.IsGroup())
+            switch (pItem->shortcutType())
             {
+            case CWizCategoryViewShortcutItem::PersonalFolder:
+                strLocation = pItem->location();
+                break;
+            case CWizCategoryViewShortcutItem::GroupTag:
+            {
+                strKbGUID = pItem->kbGUID();
+                CWizDatabase& db = m_dbMgr.db(strKbGUID);
                 db.TagFromGUID(pItem->guid(), tag);
                 strLocation = db.GetDefaultNoteLocation();
             }
-            else
+                break;
+            case CWizCategoryViewShortcutItem::PersonalTag:
+                m_dbMgr.db().TagFromGUID(pItem->guid(), tag);
+                strLocation = LOCATION_DEFAULT;
+                break;
+            case CWizCategoryViewShortcutItem::Document:
             {
-                strLocation = pItem->location();
+                strKbGUID = pItem->kbGUID();
+                CWizDatabase& db = m_dbMgr.db(strKbGUID);
+                //如果是群组笔记，则在该笔记目录下创建新笔记
+                if (db.IsGroup())
+                {
+                    CWizTagDataArray arrayTag;
+                    db.GetDocumentTags(pItem->guid(), arrayTag);
+                    if (arrayTag.size() == 1)
+                    {
+                        tag = arrayTag.front();
+                    }
+                    strLocation = db.GetDefaultNoteLocation();
+                }
+                else
+                {
+                    WIZDOCUMENTDATA doc;
+                    db.DocumentFromGUID(pItem->guid(), doc);
+                    strLocation = doc.strLocation;
+                }
+            }
+                break;
             }
             bFallback = false;
         }
