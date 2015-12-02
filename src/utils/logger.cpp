@@ -65,10 +65,10 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
 #endif
 
     bool saveLog = true;
-#ifndef QT_DEBUG
-    if (type == QtDebugMsg)
-        saveLog = false;
-#endif
+//#ifndef QT_DEBUG
+//    if (type == QtDebugMsg)
+//        saveLog = false;
+//#endif
     if (saveLog)
     {
         logger()->saveToLogFile(msg);
