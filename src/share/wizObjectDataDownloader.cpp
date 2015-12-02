@@ -37,24 +37,25 @@ void CWizObjectDataDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
 
 void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
 {
-    Q_ASSERT(!data.strObjectGUID.isEmpty());
-    //
-    if (m_mapObject.contains(data.strObjectGUID))
-    {
-        qDebug() << "\n[downloader host] object already in the pool: "
-                 << data.strDisplayName;
+    return;
+//    Q_ASSERT(!data.strObjectGUID.isEmpty());
+//    //
+//    if (m_mapObject.contains(data.strObjectGUID))
+//    {
+//        qDebug() << "\n[downloader host] object already in the pool: "
+//                 << data.strDisplayName;
 
-        return;
-    }
-    //
-    m_mapObject[data.strObjectGUID] = data;
-    //
-    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data, type);
-    //
-    connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
-    connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
+//        return;
+//    }
+//    //
+//    m_mapObject[data.strObjectGUID] = data;
+//    //
+//    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data, type);
+//    //
+//    connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
+//    connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
-    QThreadPool::globalInstance()->start(downloader);
+//    QThreadPool::globalInstance()->start(downloader);
 }
 void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
 {
@@ -226,7 +227,7 @@ void CWizFileDownloader::run()
 
 void CWizFileDownloader::startDownload()
 {
-    QThreadPool::globalInstance()->start(this);
+//    QThreadPool::globalInstance()->start(this);
 }
 
 bool CWizFileDownloader::download()

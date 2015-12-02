@@ -196,31 +196,31 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_editStatusSyncThread->start(QThread::IdlePriority);
 //    m_editStatusCheckThread->start(QThread::IdlePriority);
 
-    m_editStatusChecker = new CWizDocumentStatusChecker();
-    connect(this, SIGNAL(checkDocumentEditStatusRequest(QString,QString)), m_editStatusChecker,
-            SLOT(checkEditStatus(QString,QString)));
-    connect(this, SIGNAL(stopCheckDocumentEditStatusRequest(QString,QString)),
-            m_editStatusChecker, SLOT(stopCheckStatus(QString,QString)));
-    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), \
-            SLOT(on_checkEditStatus_finished(QString,bool)));
-    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), \
-            SLOT(on_checkEditStatus_timeout(QString)));
-    connect(m_editStatusChecker, SIGNAL(documentEditingByOthers(QString,QStringList)), \
-            SLOT(on_documentEditingByOthers(QString,QStringList)));
-    connect(m_editStatusChecker, SIGNAL(checkDocumentChangedFinished(QString,bool)), \
-            SLOT(on_checkDocumentChanged_finished(QString,bool)));
+//    m_editStatusChecker = new CWizDocumentStatusChecker();
+//    connect(this, SIGNAL(checkDocumentEditStatusRequest(QString,QString)), m_editStatusChecker,
+//            SLOT(checkEditStatus(QString,QString)));
+//    connect(this, SIGNAL(stopCheckDocumentEditStatusRequest(QString,QString)),
+//            m_editStatusChecker, SLOT(stopCheckStatus(QString,QString)));
+//    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), \
+//            SLOT(on_checkEditStatus_finished(QString,bool)));
+//    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), \
+//            SLOT(on_checkEditStatus_timeout(QString)));
+//    connect(m_editStatusChecker, SIGNAL(documentEditingByOthers(QString,QStringList)), \
+//            SLOT(on_documentEditingByOthers(QString,QStringList)));
+//    connect(m_editStatusChecker, SIGNAL(checkDocumentChangedFinished(QString,bool)), \
+//            SLOT(on_checkDocumentChanged_finished(QString,bool)));
 
-    QThread* checkThread = new QThread(this);
-    connect(checkThread, SIGNAL(started()), m_editStatusChecker, SLOT(initialise()));
-    connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
-    m_editStatusChecker->moveToThread(checkThread);
-    checkThread->start();
+//    QThread* checkThread = new QThread(this);
+//    connect(checkThread, SIGNAL(started()), m_editStatusChecker, SLOT(initialise()));
+//    connect(checkThread, SIGNAL(finished()), m_editStatusChecker, SLOT(clearTimers()));
+//    m_editStatusChecker->moveToThread(checkThread);
+//    checkThread->start();
 }
 
 CWizDocumentView::~CWizDocumentView()
 {
-    if (m_editStatusChecker)
-        delete m_editStatusChecker;
+//    if (m_editStatusChecker)
+//        delete m_editStatusChecker;
 }
 
 QSize CWizDocumentView::sizeHint() const
@@ -235,7 +235,7 @@ void CWizDocumentView::setSizeHint(QSize size)
 
 void CWizDocumentView::waitForDone()
 {
-    m_editStatusChecker->thread()->quit();
+//    m_editStatusChecker->thread()->quit();
 
     m_web->saveDocument(m_note, false);
     //
@@ -721,8 +721,8 @@ void CWizDocumentView::stopCheckDocumentEditStatus()
 bool CWizDocumentView::checkDocumentEditable()
 {
     QEventLoop loop;
-    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
-    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), &loop, SLOT(quit()));
+//    connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
+//    connect(m_editStatusChecker, SIGNAL(checkTimeOut(QString)), &loop, SLOT(quit()));
     startCheckDocumentEditStatus();
     m_editStatus = m_editStatus | DOCUMENT_STATUS_ON_EDITREQUEST;
     loop.exec();

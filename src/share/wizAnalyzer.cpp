@@ -193,7 +193,7 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
         IWizSyncableDatabase* m_db;
     };
 
-    QThreadPool::globalInstance()->start(new CPostRunable(db));
+//    QThreadPool::globalInstance()->start(new CPostRunable(db));
 }
 
 

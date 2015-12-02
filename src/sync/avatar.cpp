@@ -125,10 +125,10 @@ AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
     connect(m_downloader, SIGNAL(downloaded(QString, bool)),
             SLOT(on_downloaded(QString, bool)));
 
-    m_thread = new QThread(this);
-    connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
+//    m_thread = new QThread(this);
+//    connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
 
-    m_downloader->moveToThread(m_thread);
+//    m_downloader->moveToThread(m_thread);
 
     loadCacheDefault();
 }
@@ -168,14 +168,14 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID)
 
 void AvatarHostPrivate::addToDownloadList(const QString& strUserID)
 {
-    if (!m_listUser.contains(strUserID))
-    {
-        m_listUser.append(strUserID);
-    }
-    if (!m_thread->isRunning())
-    {
-        m_thread->start(QThread::IdlePriority);
-    }
+//    if (!m_listUser.contains(strUserID))
+//    {
+//        m_listUser.append(strUserID);
+//    }
+//    if (!m_thread->isRunning())
+//    {
+//        m_thread->start(QThread::IdlePriority);
+//    }
 }
 
 bool AvatarHostPrivate::customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath)
@@ -247,13 +247,13 @@ bool AvatarHostPrivate::deleteAvatar(const QString& strUserID)
 void AvatarHostPrivate::waitForDone()
 {
 
-    if (m_thread && m_thread->isFinished())
-    {
-        m_thread->disconnect();
-        m_thread->quit();
-        //
-        ::WizWaitForThread(m_thread);
-    }
+//    if (m_thread && m_thread->isFinished())
+//    {
+//        m_thread->disconnect();
+//        m_thread->quit();
+//        //
+//        ::WizWaitForThread(m_thread);
+//    }
 }
 
 bool AvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
@@ -329,24 +329,24 @@ void AvatarHostPrivate::reload(const QString& strUserID)
 
 void AvatarHostPrivate::download_impl()
 {
-    if (!m_strCurrentDownloadingUser.isEmpty())
-        return;
+//    if (!m_strCurrentDownloadingUser.isEmpty())
+//        return;
 
-    if (m_listUser.isEmpty()) {
-        qDebug() << "[AvatarHost]download pool is clean, thread: "
-                 << QThread::currentThreadId();
+//    if (m_listUser.isEmpty()) {
+//        qDebug() << "[AvatarHost]download pool is clean, thread: "
+//                 << QThread::currentThreadId();
 
-        m_thread->quit();
-        return;
-    }
+//        m_thread->quit();
+//        return;
+//    }
 
-    m_strCurrentDownloadingUser = m_listUser.takeFirst();
+//    m_strCurrentDownloadingUser = m_listUser.takeFirst();
 
 
-    if (!QMetaObject::invokeMethod(m_downloader, "download", Qt::QueuedConnection,
-                                   Q_ARG(QString, m_strCurrentDownloadingUser))) {
-        qDebug() << "[AvatarHost]failed: unable to invoke download!";
-    }
+//    if (!QMetaObject::invokeMethod(m_downloader, "download", Qt::QueuedConnection,
+//                                   Q_ARG(QString, m_strCurrentDownloadingUser))) {
+//        qDebug() << "[AvatarHost]failed: unable to invoke download!";
+//    }
 }
 
 void AvatarHostPrivate::on_thread_started()

@@ -113,12 +113,12 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
     , m_sync(new CWizKMSyncThread(dbMgr.db(), this))
-    , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
-    , m_searcher(new CWizSearcher(m_dbMgr, this))
+//    , m_searchIndexer(new CWizSearchIndexer(m_dbMgr, this))
+//    , m_searcher(new CWizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
 #ifndef BUILD4APPSTORE
-    , m_upgrade(new CWizUpgrade(this))
+//    , m_upgrade(new CWizUpgrade(this))
 #else
     , m_upgrade(0)
 #endif
@@ -185,8 +185,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #endif    
 
     // search and full text search
-    m_searchIndexer->start(QThread::IdlePriority);
-    m_searcher->start(QThread::HighPriority);
+//    m_searchIndexer->start(QThread::IdlePriority);
+//    m_searcher->start(QThread::HighPriority);
 
     // syncing thread
     m_sync->setFullSyncInterval(userSettings().syncInterval());
@@ -201,11 +201,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
     {
-        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
+//        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
     }
 
-    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
-        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
+//    connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
+//        SLOT(on_searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)));
 
     connect(m_documents, SIGNAL(addDocumentToShortcutsRequest(WIZDOCUMENTDATA)),
             m_category, SLOT(addDocumentToShortcuts(WIZDOCUMENTDATA)));
@@ -251,7 +251,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     // upgrade check
 #ifndef BUILD4APPSTORE
-    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+//    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
     if (userSettings().autoCheckUpdate()) {
         checkWizUpdate();
     }
@@ -361,10 +361,10 @@ void MainWindow::cleanOnQuit()
     //
     CWizTipListManager::cleanOnQuit();
     //
-    m_sync->waitForDone();
-    //
-    m_searchIndexer->waitForDone();
-    m_searcher->waitForDone();
+//    m_sync->waitForDone();
+//    //
+//    m_searchIndexer->waitForDone();
+//    m_searcher->waitForDone();
     //
     m_doc->waitForDone();
     //
@@ -379,12 +379,12 @@ void MainWindow::cleanOnQuit()
 
 CWizSearcher*MainWindow::searcher()
 {    
-    return m_searcher;
+    return nullptr; //m_searcher;
 }
 
 void MainWindow::rebuildFTS()
 {
-    m_searchIndexer->rebuild();
+//    m_searchIndexer->rebuild();
 }
 
 MainWindow*MainWindow::instance()
@@ -560,19 +560,19 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     if (!bUpgradeAvaliable)
         return;
 
-    QString strUrl = m_upgrade->getWhatsNewUrl();
-    CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
-    if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::WizApiEntry::standardCommandUrl("link");
-#if defined(Q_OS_MAC)
-        url += "&name=wiznote-mac.html";
-#elif defined(Q_OS_LINUX)
-        url += "&name=wiznote-linux.html";
-#else
-        Q_ASSERT(0);
-#endif
-        QDesktopServices::openUrl(QUrl(url));
-    }
+//    QString strUrl = m_upgrade->getWhatsNewUrl();
+//    CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
+//    if (QDialog::Accepted == notifyDialog.exec()) {
+//        QString url = WizService::WizApiEntry::standardCommandUrl("link");
+//#if defined(Q_OS_MAC)
+//        url += "&name=wiznote-mac.html";
+//#elif defined(Q_OS_LINUX)
+//        url += "&name=wiznote-linux.html";
+//#else
+//        Q_ASSERT(0);
+//#endif
+//        QDesktopServices::openUrl(QUrl(url));
+//    }
 }
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
@@ -1764,7 +1764,7 @@ void MainWindow::windowActived()
     if (!isBizUser || !m_bQuickDownloadMessageEnable)
         return;
 
-    m_sync->quickDownloadMesages();
+//    m_sync->quickDownloadMesages();
     WizGetAnalyzer().LogAction("bizUserQuickDownloadMessage");
 }
 
@@ -3265,7 +3265,7 @@ void MainWindow::on_search_doSearch(const QString& keywords)
     m_msgListWidget->hide();
     //
     m_settings->appendRecentSearch(keywords);
-    m_searcher->search(keywords, 500);
+    //m_searcher->search(keywords, 500);
     startSearchStatus();
 }
 
@@ -3412,7 +3412,7 @@ void MainWindow::on_category_itemSelectionChanged()
         {
             showMessageList(pItem);
             //
-            m_sync->quickDownloadMesages();
+//            m_sync->quickDownloadMesages();
             WizGetAnalyzer().LogAction("categoryMessageRootSelected");
         }
     }
@@ -3670,7 +3670,7 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
-    m_upgrade->startCheck();
+//    m_upgrade->startCheck();
 #endif
 }
 
@@ -4289,7 +4289,7 @@ void MainWindow::searchNotesBySQL(const QString& strSQLWhere)
 {
     if (strSQLWhere.isEmpty())
         return;
-    m_searcher->searchBySQLWhere(strSQLWhere, 500);
+    //m_searcher->searchBySQLWhere(strSQLWhere, 500);
 }
 
 void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword, int searchScope)
@@ -4297,15 +4297,15 @@ void MainWindow::searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QS
     qDebug() << "search by sql and keyword : " << strSQLWhere << strKeyword;
     if (strSQLWhere.isEmpty())
     {
-        m_searcher->search(strKeyword, 500, (SearchScope)searchScope);
+        //m_searcher->search(strKeyword, 500, (SearchScope)searchScope);
     }
     else if (strKeyword.isEmpty())
     {
-        m_searcher->searchBySQLWhere(strSQLWhere, 500, (SearchScope)searchScope);
+        //m_searcher->searchBySQLWhere(strSQLWhere, 500, (SearchScope)searchScope);
     }
     else
     {
-        m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500, (SearchScope)searchScope);
+        //m_searcher->searchByKeywordAndWhere(strKeyword, strSQLWhere, 500, (SearchScope)searchScope);
     }
 }
 

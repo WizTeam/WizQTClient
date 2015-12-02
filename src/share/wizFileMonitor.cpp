@@ -25,6 +25,8 @@ CWizFileMonitor&CWizFileMonitor::instance()
 void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
                               const QString& strFileName, const QString& strMD5, const QDateTime& dtLastModified)
 {
+
+    return;
     Q_ASSERT(!strFileName.isEmpty());
 
     foreach (FMData fmData, m_fileList) {
@@ -43,7 +45,7 @@ void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
 
     if (!isRunning())
     {
-        start();
+//        start();
     }
 }
 
