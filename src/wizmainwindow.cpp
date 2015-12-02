@@ -1520,12 +1520,33 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
 void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
 {
     CWizAccountManager account(m_dbMgr);
-    if (!account.isVip())
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup())
+    {
+        if (db.IsPersonalGroup())
+            return;
+
+        if (account.isPaidGroup(strKbGUID))
+        {
+            if (!db.IsGroupSuper())
+            {
+                CWizMessageBox::information(this, tr("Info"), tr("Your permission is insufficient, super member or group administrators can share notes."));
+                return;
+            }
+        }
+        else
+        {
+            CWizMessageBox::information(this, tr("Info"), tr("You are using the free version of the service, upgrade now, you can share notes."));
+            return;
+        }
+    }
+    else if (!account.isVip())
     {
         openVipPageInWebBrowser();
         return;
     }
 
+    //
     WIZDOCUMENTDATA doc;
     if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc))
     {
@@ -1870,6 +1891,8 @@ void MainWindow::initToolBar()
     #ifdef USECOCOATOOLBAR
     m_toolBar->showInWindow(this);
 
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(false);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
@@ -3938,7 +3961,9 @@ void MainWindow::showNewFeatureGuide()
 void MainWindow::showMobileFileReceiverUserGuide()
 {
     QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=guidemap_sendimage.html";
+    qInfo() <<"open dialog with url : " << strUrl;
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     connect(dlg, SIGNAL(doNotShowThisAgain(bool)),

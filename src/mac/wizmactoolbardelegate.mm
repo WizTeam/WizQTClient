@@ -103,8 +103,8 @@ public:
         QIcon icon = m_action->icon();
         if (!icon.isNull())
         {
-            NSImage* image = WizToNSImage(icon, QSize(32, 32));
-            //[m_view setImage:image];
+            QPixmap pix = icon.pixmap(icon.availableSizes().first(), m_action->isEnabled() ? QIcon::Normal : QIcon::Disabled);
+            NSImage* image = WizToNSImage(pix);
             [item setImage:image];
         }
 
@@ -133,38 +133,16 @@ public:
                 [m_item setEnabled: (newEnabled ? YES : NO)];
             }
             //
-            QIcon icon = m_action->icon();
-            //qDebug() << icon.cacheKey();
+//            QIcon icon = m_action->icon();
+            QPixmap pix = m_action->icon().pixmap(m_action->icon().availableSizes().first(), newEnabled ? QIcon::Normal : QIcon::Disabled);
             //
-            NSImage* img = iconToNSImage(icon);
+            NSImage* img = WizToNSImage(pix);
             if (img)
             {
                 [m_item setImage:img];
-                //[m_view setImage:img];
             }
         }
     }
-    NSImage* iconToNSImage(const QIcon& icon)
-    {
-        qint64 k = icon.cacheKey();
-        NSString* key = [NSString stringWithFormat:@"%qi", k];
-        //
-        NSObject* obj = [m_nsImages objectForKey:key];
-        if (obj)
-        {
-            if ([obj isKindOfClass: [NSImage class]])
-            {
-                return (NSImage *)obj;
-            }
-        }
-        //
-        NSImage* img = WizToNSImage(icon, QSize(32, 32));
-        //
-        [m_nsImages setObject:img forKey:key];
-        //
-        return img;
-    }
-
 private Q_SLOTS:
     void on_action_changed()
     {

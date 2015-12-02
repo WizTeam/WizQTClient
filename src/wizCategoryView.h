@@ -67,22 +67,22 @@ public:
     QPoint hitPoint() const { return m_hitPos; }
 
 protected:
-    virtual void mousePressEvent(QMouseEvent* event);
-    virtual void mouseReleaseEvent(QMouseEvent* event);
-    virtual void mouseMoveEvent(QMouseEvent* event);
-    virtual void startDrag(Qt::DropActions supportedActions);
-    virtual void dragEnterEvent(QDragEnterEvent* event);
-    virtual void dragMoveEvent(QDragMoveEvent* event);
-    virtual void dragLeaveEvent(QDragLeaveEvent* event);
-    virtual void dropEvent(QDropEvent* event);
+    virtual void mousePressEvent(QMouseEvent* event) override;
+    virtual void mouseReleaseEvent(QMouseEvent* event) override;
+    virtual void mouseMoveEvent(QMouseEvent* event) override;
+    virtual void startDrag(Qt::DropActions supportedActions) override;
+    virtual void dragEnterEvent(QDragEnterEvent* event) override;
+    virtual void dragMoveEvent(QDragMoveEvent* event) override;
+    virtual void dragLeaveEvent(QDragLeaveEvent* event) override;
+    virtual void dropEvent(QDropEvent* event) override;
 
-    virtual void enterEvent(QEvent * event);
-    virtual void leaveEvent(QEvent * event);
+    virtual void enterEvent(QEvent * event) override;
+    virtual void leaveEvent(QEvent * event) override;
 
-    virtual void resizeEvent(QResizeEvent* event);
-    virtual void contextMenuEvent(QContextMenuEvent* e);
+    virtual void resizeEvent(QResizeEvent* event) override;
+    virtual void contextMenuEvent(QContextMenuEvent* e) override;
 
-    virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
+    virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers) override;
 
     virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);    
 
@@ -313,9 +313,9 @@ public:
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
 
-    bool createDocumentWithAttachment(const QString& strFileName);
+    bool createDocumentWithAttachment(const QString& strFileName) override;
     bool createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle,
-                                                    const QString& strAttachFile);
+                                                    const QString& strAttachFile) override;
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
 
@@ -339,33 +339,33 @@ signals:
 
 
 protected Q_SLOTS:
-    virtual void on_document_created(const WIZDOCUMENTDATA& doc);
+    virtual void on_document_created(const WIZDOCUMENTDATA& doc) override;
     virtual void on_document_modified(const WIZDOCUMENTDATA& docOld,
-                                      const WIZDOCUMENTDATA& docNew);
-    virtual void on_document_deleted(const WIZDOCUMENTDATA& doc);
-    virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc);
+                                      const WIZDOCUMENTDATA& docNew) override;
+    virtual void on_document_deleted(const WIZDOCUMENTDATA& doc) override;
+    virtual void on_document_tag_modified(const WIZDOCUMENTDATA& doc) override;
 
-    virtual void on_folder_created(const QString& strLocation);
-    virtual void on_folder_deleted(const QString& strLocation);
-    virtual void on_folder_positionChanged();
+    virtual void on_folder_created(const QString& strLocation) override;
+    virtual void on_folder_deleted(const QString& strLocation) override;
+    virtual void on_folder_positionChanged() override;
 
-    virtual void on_tag_created(const WIZTAGDATA& tag);
-    virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew);
-    virtual void on_tag_deleted(const WIZTAGDATA& tag);
-    virtual void on_tags_positionChanged(const QString& strKbGUID);
+    virtual void on_tag_created(const WIZTAGDATA& tag) override;
+    virtual void on_tag_modified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew) override;
+    virtual void on_tag_deleted(const WIZTAGDATA& tag) override;
+    virtual void on_tags_positionChanged(const QString& strKbGUID) override;
 
-    virtual void on_group_opened(const QString& strKbGUID);
-    virtual void on_group_closed(const QString& strKbGUID);
-    virtual void on_group_renamed(const QString& strKbGUID);
-    virtual void on_group_permissionChanged(const QString& strKbGUID);
-    virtual void on_group_bizChanged(const QString& strKbGUID);
-    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
+    virtual void on_group_opened(const QString& strKbGUID) override;
+    virtual void on_group_closed(const QString& strKbGUID) override;
+    virtual void on_group_renamed(const QString& strKbGUID) override;
+    virtual void on_group_permissionChanged(const QString& strKbGUID) override;
+    virtual void on_group_bizChanged(const QString& strKbGUID) override;
+    virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID) override;
 
-    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
+    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) override;
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
+    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) override;
     virtual void createDocumentByHtml(const QString &strFileName, const QString& strHtml,
-                                      const QString& strTitle);
+                                      const QString& strTitle) override;
 
 
 public Q_SLOTS:
@@ -569,9 +569,9 @@ private:
 
     //
     virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                   bool dropAtTop, bool deleteDragSource);
+                                   bool dropAtTop, bool deleteDragSource) override;
     virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                 bool deleteDragSource);
+                                 bool deleteDragSource) override;
 
     //
     QString getUseableItemName(QTreeWidgetItem* parent, \

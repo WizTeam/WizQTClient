@@ -135,6 +135,8 @@ protected Q_SLOTS:
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
     void on_btnRemoveFormat_clicked();
+    void on_btnForeColor_clicked();
+    void on_btnBackColor_clicked();
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
@@ -171,6 +173,8 @@ protected Q_SLOTS:
     void on_showForeColorBoard();
     void on_backColor_changed();
     void on_showBackColorBoard();
+    void applyForeColor(const QColor& color);
+    void applyBackColor(const QColor& color);
 
     void on_fontDailogFontChanged(const QFont & font);    
 
@@ -186,7 +190,6 @@ private:
 
     void moveWidgetFromSecondLineToFirstLine(QWidget* widget);
     void moveWidgetFromFristLineToSecondLine(QWidget* widget);
-
 };
 
 

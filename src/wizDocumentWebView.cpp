@@ -33,7 +33,26 @@
 #include <extensionsystem/pluginmanager.h>
 
 #include "wizdef.h"
+#include "utils/pathresolve.h"
+#include "utils/logger.h"
+#include "utils/misc.h"
+#include "utils/stylehelper.h"
+
 #include "share/wizmisc.h"
+#include "share/wizAnalyzer.h"
+#include "share/wizMessageBox.h"
+#include "sync/avatar.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "core/wizAccountManager.h"
+#include "widgets/WizCodeEditorDialog.h"
+#include "widgets/wizScreenShotWidget.h"
+#include "widgets/wizEmailShareDialog.h"
+#include "widgets/wizShareLinkDialog.h"
+#include "widgets/wizScrollBar.h"
+
+#include "mac/wizmachelper.h"
+
 #include "wizmainwindow.h"
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
@@ -42,23 +61,6 @@
 #include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
-#include "widgets/WizCodeEditorDialog.h"
-#include "widgets/wizScreenShotWidget.h"
-#include "widgets/wizEmailShareDialog.h"
-#include "widgets/wizShareLinkDialog.h"
-#include "widgets/wizScrollBar.h"
-#include "share/wizAnalyzer.h"
-#include "share/wizMessageBox.h"
-
-#include "utils/pathresolve.h"
-#include "utils/logger.h"
-#include "utils/misc.h"
-#include "utils/stylehelper.h"
-#include "sync/avatar.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
-
-#include "mac/wizmachelper.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -1038,14 +1040,6 @@ void CWizDocumentWebView::shareNoteByEmail()
 void CWizDocumentWebView::shareNoteByLink()
 {
     const WIZDOCUMENTDATA& doc = view()->note();
-
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    if (db.IsGroup())
-    {
-        CWizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Share group notes by link will available later"));
-        return;
-    }
-
     emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 

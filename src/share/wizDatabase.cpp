@@ -1159,6 +1159,18 @@ bool CWizDatabase::IsGroup()
     return true;
 }
 
+bool CWizDatabase::IsPersonalGroup()
+{
+    if (!IsGroup())
+        return false;
+
+    CWizDatabase* personDb = getPersonalDatabase();
+
+    WIZGROUPDATA group;
+    personDb->GetGroupData(kbGUID(), group);
+    return !group.IsBiz();
+}
+
 bool CWizDatabase::HasBiz()
 {
     CWizDatabase* personDb = getPersonalDatabase();
@@ -2166,7 +2178,7 @@ bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.strGroupName = GetMetaDef(g_strGroupSection, groupGUID);
 
     group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizGUID");
-    group.bizGUID = GetMetaDef(g_strGroupSection, groupGUID + "_BizName");
+    group.bizName= GetMetaDef(g_strGroupSection, groupGUID + "_BizName");
     group.bOwn = GetMetaDef(g_strGroupSection, groupGUID + "_Own") == "1";
     group.nUserGroup = GetMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
     group.strDatabaseServer = GetMetaDef(g_strGroupSection, group.strGroupGUID + "_DatabaseServer");

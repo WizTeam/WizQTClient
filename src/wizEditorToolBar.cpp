@@ -374,20 +374,30 @@ using namespace Core::Internal;
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
 
-void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight)
+void drawButtonBackground(QPainter* painter, const QRect& rect, bool bDrawLeft, bool bDrawRight, bool hasFocus)
 {
     int nScale = WizIsHighPixel() ? 2 : 1;
 
-    static QPixmap pixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground", true));
-    static QPixmap pixBackgroundMid = pixBackground.copy(6, 0, 2, pixBackground.height());
+    // load file
+    static QPixmap normalPixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground", true));
+    static QPixmap focusPixBackground = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolButtonBackground_on", true));
+    static QPixmap normalPixBackgroundMid = normalPixBackground.copy(6, 0, 2, normalPixBackground.height());
+    static QPixmap focusPixBackgroundMid = focusPixBackground.copy(6, 0, 2, focusPixBackground.height());
     QRect rcLeft(rect.x(), rect.y(), 6, rect.size().height());
-    static QPixmap pixBackgroundLeft = pixBackground.copy(0, 0, 6 * nScale, pixBackground.height());
-    painter->drawPixmap(rcLeft, bDrawLeft ? pixBackgroundLeft : pixBackgroundMid);
+    static QPixmap normalPixBackgroundLeft = normalPixBackground.copy(0, 0, 6 * nScale, normalPixBackground.height());
+    static QPixmap focusPixBackgroundLeft = focusPixBackground.copy(0, 0, 6 * nScale, focusPixBackground.height());
     int rightWidth = 8;
-    static QPixmap pixBackgroundRight = pixBackground.copy(pixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, pixBackground.height());
-    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixBackgroundMid);
+    static QPixmap normalPixBackgroundRight = normalPixBackground.copy(normalPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, normalPixBackground.height());
+    static QPixmap focusPixBackgroundRight = focusPixBackground.copy(focusPixBackground.width() - rightWidth * nScale, 0, rightWidth * nScale, focusPixBackground.height());
     QRect rcRight(rect.size().width() - rightWidth, rect.y(), rightWidth, rect.size().height());
-    painter->drawPixmap(rcRight, bDrawRight ? pixBackgroundRight : pixBackgroundMid);
+
+    const QPixmap& pixLeft = hasFocus ? focusPixBackgroundLeft : normalPixBackgroundLeft;
+    const QPixmap& pixMid = hasFocus ? focusPixBackgroundMid : normalPixBackgroundMid;
+    const QPixmap& pixRight = hasFocus ? focusPixBackgroundRight : normalPixBackgroundRight;
+    //
+    painter->drawPixmap(rcLeft, bDrawLeft ? pixLeft : pixMid);
+    painter->drawPixmap(rect.x() + 5, rect.y(), rect.size().width() - rightWidth, rect.size().height(), pixMid);
+    painter->drawPixmap(rcRight, bDrawRight ? pixRight : pixMid);
 }
 
 void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
@@ -397,7 +407,7 @@ void drawCombo(QComboBox* cm, QStyleOptionComboBox& opt)
     opt.palette.setColor(QPalette::Text, "#646464");
     painter.setPen(cm->palette().color(QPalette::Text));
 
-    drawButtonBackground(&painter, opt.rect, true, true);
+    drawButtonBackground(&painter, opt.rect, true, true, opt.state & QStyle::State_MouseOver);
 
     // draw arrow
     if (opt.subControls & QStyle::SC_ComboBoxArrow) {
@@ -503,8 +513,22 @@ public:
         m_horizontalPadding_rgiht = rightPadding;
     }
 
-protected:    
-    virtual void paintEvent(QPaintEvent *event)
+protected:
+    virtual void leaveEvent(QEvent* event) override
+    {
+        QToolButton::leaveEvent(event);
+
+        update();
+    }
+
+    virtual void enterEvent(QEvent* event) override
+    {
+        QToolButton::enterEvent(event);
+
+        update();
+    }
+
+    virtual void paintEvent(QPaintEvent *event) override
     {
         Q_UNUSED(event);
 
@@ -519,11 +543,11 @@ protected:
             mode = QIcon::Active;
         QIcon::State state = QIcon::Off;
         if (opt.state & QStyle::State_On)
-            state = QIcon::On;        
+            state = QIcon::On;
 
         bool bDrawLeft = (m_position == Left) || (m_position == NoPosition);
         bool bDrawRight = (m_position == Right) || (m_position == NoPosition);
-        drawButtonBackground(&p, opt.rect, bDrawLeft, bDrawRight);
+        drawButtonBackground(&p, opt.rect, bDrawLeft, bDrawRight, opt.state & QStyle::State_MouseOver);
 
         QSize size = iconSize();
         QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
@@ -531,10 +555,12 @@ protected:
             rcIcon.setX((opt.rect.width() - size.width()) / 2 - TOOLBUTTON_MARGIN_WIDTH);
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
+
+
         if (opt.arrowType == Qt::RightArrow)
         {
             QRect rcArrow = opt.rect;
-            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH);
+            rcArrow.setX(opt.rect.right() - TOOLBUTTON_ARRWO_WIDTH - 3);
             rcArrow.setY((opt.rect.height() - TOOLBUTTON_ARRWO_WIDTH) / 2);
             rcArrow.setSize(QSize(TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH));
             static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
@@ -543,7 +569,7 @@ protected:
         }
     }
 
-    virtual QSize sizeHint() const
+    QSize sizeHint() const override
     {
         int width = m_horizontalPadding_left + m_horizontalPadding_rgiht + iconSize().width();
         if (arrowType() == Qt::RightArrow)
@@ -561,11 +587,13 @@ private:
     QColor m_colorSunkenBorder;
 };
 
+const int ColorButtonRightArrowWidth = 18;
 class CWizToolButtonColor : public CWizToolButton
 {
 public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
       , m_menu(menu())
+      , m_color(Qt::transparent)
     {
         setCheckable(false);
         setIconSize(QSize(12, 12));
@@ -596,7 +624,7 @@ public:
     }
 
 protected:
-    virtual void paintEvent(QPaintEvent *event)
+    virtual void paintEvent(QPaintEvent *event) override
     {
         Q_UNUSED(event);
 
@@ -608,8 +636,9 @@ protected:
 
         bool bDrawLeft = (m_position == Left) || (m_position == NoPosition);
         bool bDrawRight = (m_position == Right) || (m_position == NoPosition);
-        drawButtonBackground(&p, opt.rect, bDrawLeft, bDrawRight);
+        drawButtonBackground(&p, opt.rect, bDrawLeft, bDrawRight, opt.state & QStyle::State_MouseOver);
 
+        //
         QIcon::Mode mode = opt.state & QStyle::State_Enabled ? QIcon::Normal : QIcon::Disabled;
         if (mode == QIcon::Normal && (opt.state & QStyle::State_HasFocus || opt.state & QStyle::State_Sunken))
             mode = QIcon::Active;
@@ -618,26 +647,56 @@ protected:
             state = QIcon::On;
 
         QSize size = iconSize();
-        QRect rcIcon((opt.rect.width() - size.width()) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
+        QRect rcIcon((opt.rect.width() - size.width() - ColorButtonRightArrowWidth) / 2, (opt.rect.height() - size.height()) / 2, size.width(), size.height());
         opt.icon.paint(&p, rcIcon, Qt::AlignCenter, mode, state);
 
-        QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 5, opt.iconSize.width() - 2, 2);
+        QRect rectColor(rcIcon.x() + 1, opt.iconSize.height() + 6, opt.iconSize.width() - 2, 2);
         p.fillRect(QRect(rectColor), m_color);
+
+        if (opt.state & QStyle::State_MouseOver)
+        {
+            QPoint top(rcIcon.right() + 7, opt.rect.x() + (opt.rect.height() - 13) / 2);
+            p.setPen(QPen(QColor("#C4C4C4")));
+            p.drawLine(top, QPoint(top.x(), top.y() + 13));
+        }
+
+        //arrow
+        static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
+        QRect rcArrow(rcIcon.right() + 7, (opt.rect.height() - arrow.height()) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
+        p.drawPixmap(rcArrow, arrow);
     }
 
-    void mousePressEvent(QMouseEvent* ev)
+    void mousePressEvent(QMouseEvent* ev) override
     {
         QToolButton::mousePressEvent(ev);
     }
 
-    void mouseReleaseEvent(QMouseEvent* ev)
+    void mouseReleaseEvent(QMouseEvent* ev) override
     {
-        QToolButton::mouseReleaseEvent(ev);
-        if (m_menu)
+        QPoint pos = ev->pos();
+        QRect rcIcon = rect();
+        rcIcon.setWidth(rcIcon.width() - ColorButtonRightArrowWidth);
+        if (rcIcon.contains(pos))
+        {
+            QToolButton::mouseReleaseEvent(ev);
+            return;
+        }
+
+        ev->ignore();
+        QRect rcArrow = rect();
+        rcArrow.setLeft(rcIcon.right());
+        if (m_menu && rcArrow.contains(pos))
         {
             QPoint pt = mapToGlobal(rect().bottomLeft());
             m_menu->popup(pt);
         }
+    }
+
+    QSize sizeHint() const override
+    {
+        QSize size = CWizToolButton::sizeHint();
+        size.setWidth(size.width() + ColorButtonRightArrowWidth);
+        return size;
     }
 
 private:
@@ -697,6 +756,18 @@ public:
     }
 
 protected:
+    virtual void leaveEvent(QEvent* event) {
+        QComboBox::leaveEvent(event);
+
+        update();
+    }
+
+    virtual void enterEvent(QEvent* event) {
+        QComboBox::enterEvent(event);
+
+        update();
+    }
+
     virtual QSize sizeHint() const
     {
         return QSize(65, Utils::StyleHelper::editorButtonHeight());
@@ -770,7 +841,7 @@ public:
         return QComboBox::event(event);
     }
 
-protected:
+protected:    
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -946,20 +1017,24 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
+    m_btnForeColor->setColor(QColor("#ff0000"));
     m_btnForeColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatForeColor")).size());
     m_btnForeColor->setToolTip(tr("ForeColor"));
     m_btnForeColor->setCheckable(false);
     m_btnForeColor->setPosition(CWizToolButton::Left);
+    connect(m_btnForeColor, SIGNAL(released()), SLOT(on_btnForeColor_clicked()));
     QMenu* foreColorMenu = createColorMenu(SLOT(on_foreColor_changed()),
                                            SLOT(on_showForeColorBoard()));
     m_btnForeColor->setMenu(foreColorMenu);
 
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
+    m_btnBackColor->setColor(QColor("#ffff00"));
     m_btnBackColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBackColor")).size());
     m_btnBackColor->setToolTip(tr("BackColor"));
     m_btnBackColor->setCheckable(false);
     m_btnBackColor->setPosition(CWizToolButton::Right);
+    connect(m_btnBackColor, SIGNAL(released()), SLOT(on_btnBackColor_clicked()));
     QMenu* backColorMenu = createColorMenu(SLOT(on_backColor_changed()),
                                            SLOT(on_showBackColorBoard()));
     m_btnBackColor->setMenu(backColorMenu);
@@ -1255,7 +1330,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     bool showExtraButtons = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
     m_secondLineButtonContainer->setVisible(showExtraButtons);
-    m_btnShowExtra->setChecked(WIZSHOWEXTRABUTTONITEMS);
+    m_btnShowExtra->setChecked(showExtraButtons);
 
     connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
 }
@@ -1538,11 +1613,9 @@ void EditorToolBar::resetToolbar()
     }
 
     value = m_editor->editorCommandQueryCommandValue("foreColor");
-    m_btnForeColor->setColor(value.isEmpty() ? QColor(Qt::transparent) : QColor(value));
     m_btnForeColor->setEnabled(!isSourceMode);
 
     value = m_editor->editorCommandQueryCommandValue("backColor");
-    m_btnBackColor->setColor(value.isEmpty() ? QColor(Qt::transparent) : QColor(value));
     m_btnBackColor->setEnabled(!isSourceMode);
 
     state = m_editor->editorCommandQueryCommandState("bold");
@@ -2012,22 +2085,15 @@ void EditorToolBar::on_foreColor_changed()
 
     m_btnForeColor->menu()->close();
     QColor color = qvariant_cast<QColor>(pColorAction->data());
-    if (!color.isValid())
-        return;
-
-    if (m_editor) {
-        m_editor->editorCommandExecuteForeColor(color);
-    }
+    applyForeColor(color);
 }
 
 void EditorToolBar::on_showForeColorBoard()
 {
     m_btnForeColor->menu()->close();
     QColorDialog dlg(m_btnForeColor->color(), this);
-    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
-            SLOT(editorCommandExecuteForeColor(QColor)));
-    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
-            SLOT(editorCommandExecuteForeColor(QColor)));
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), SLOT(applyForeColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), SLOT(applyForeColor(QColor)));
     dlg.exec();
 }
 
@@ -2039,23 +2105,17 @@ void EditorToolBar::on_backColor_changed()
         return;
 
     m_btnBackColor->menu()->close();
-    QColor color = qvariant_cast<QColor>(pColorAction->data());
-    if (!color.isValid())
-        return;
+    QColor color = qvariant_cast<QColor>(pColorAction->data());    
 
-    if (m_editor) {
-        m_editor->editorCommandExecuteBackColor(color);
-    }
+    applyBackColor(color);
 }
 
 void EditorToolBar::on_showBackColorBoard()
 {
     m_btnBackColor->menu()->close();
     QColorDialog dlg(m_btnBackColor->color(), this);
-    connect(&dlg, SIGNAL(currentColorChanged(QColor)), m_editor,
-            SLOT(editorCommandExecuteBackColor(QColor)));
-    connect(&dlg, SIGNAL(colorSelected(QColor)), m_editor,
-            SLOT(editorCommandExecuteBackColor(QColor)));
+    connect(&dlg, SIGNAL(currentColorChanged(QColor)), SLOT(applyBackColor(QColor)));
+    connect(&dlg, SIGNAL(colorSelected(QColor)), SLOT(applyBackColor(QColor)));
     dlg.exec();
 }
 
@@ -2262,6 +2322,30 @@ void EditorToolBar::moveWidgetFromFristLineToSecondLine(QWidget* widget)
     }
 }
 
+void EditorToolBar::applyForeColor(const QColor& color)
+{
+    if (!color.isValid())
+        return;
+
+    m_btnForeColor->setColor(color);
+
+    if (m_editor) {
+        m_editor->editorCommandExecuteForeColor(color);
+    }
+}
+
+void EditorToolBar::applyBackColor(const QColor& color)
+{
+    if (!color.isValid())
+        return;
+
+    m_btnBackColor->setColor(color);
+
+    if (m_editor) {
+        m_editor->editorCommandExecuteBackColor(color);
+    }
+}
+
 void EditorToolBar::adjustButtonPosition()
 {
     //
@@ -2271,6 +2355,7 @@ void EditorToolBar::adjustButtonPosition()
     {
         firstLineWidth += widget->sizeHint().width();
     }
+    //
     if (parentWidgetWidth < RecommendedWidthForTwoLine)
     {
         //  move moveable buttons to second line
@@ -2336,13 +2421,14 @@ void EditorToolBar::adjustButtonPosition()
     m_firstLineButtonContainer->updateGeometry();
     m_secondLineButtonContainer->updateGeometry();
 
+    m_btnShowExtra->setChecked(false);
     if (!m_buttonContainersInSecondLine.isEmpty())
     {
         bool showExtra = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
         m_secondLineButtonContainer->setVisible(showExtra);
+        m_btnShowExtra->setChecked(showExtra);
     }
     m_btnShowExtra->setVisible(!m_buttonContainersInSecondLine.isEmpty());
-    m_btnShowExtra->setChecked(m_secondLineButtonContainer->isVisible());
 }
 
 #define EDITORTOOLBARTIPSCHECKED   "EditorToolBarTipsChecked"
@@ -2819,6 +2905,22 @@ void EditorToolBar::on_btnRemoveFormat_clicked()
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarRemoveFormat");
     if (m_editor) {
         m_editor->editorCommandExecuteRemoveFormat();
+    }
+}
+
+void EditorToolBar::on_btnForeColor_clicked()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarForeColorClicked");
+    if (m_editor) {
+        m_editor->editorCommandExecuteForeColor(m_btnForeColor->color());
+    }
+}
+
+void EditorToolBar::on_btnBackColor_clicked()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarBackColorClicked");
+    if (m_editor) {
+        m_editor->editorCommandExecuteBackColor(m_btnBackColor->color());
     }
 }
 
