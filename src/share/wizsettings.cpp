@@ -197,7 +197,7 @@ QString CWizUserSettings::get(const QString& section, const QString& strKey) con
         return m_db->GetMetaDef(section, strKey);
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
@@ -259,7 +259,7 @@ QString CWizUserSettings::get(const QString& strKey) const
         return m_db->GetMetaDef(USER_SETTINGS_SECTION, strKey);
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizUserSettings::set(const QString& strKey, const QString& strValue)

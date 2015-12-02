@@ -358,7 +358,7 @@ string SegmentInfo::segString(Directory* dir) {
 	   if (delGen == NO) {
 		   // In this case we know there is no deletion filename
 		   // against this segment
-		   return NULL;
+           return string();
 	   } else {
 		   // If delGen is CHECK_DIR, it's the pre-lockless-commit file format
 		   return IndexFileNames::fileNameFromGeneration(name.c_str(), (string(".") + IndexFileNames::DELETES_EXTENSION).c_str(), delGen);

@@ -610,7 +610,7 @@ QString CWizIndex::getTagTreeText(const QString& strTagGUID)
 {
     WIZTAGDATA tag;
     if (!TagFromGUID(strTagGUID, tag)) {
-        return NULL;
+        return QString();
     }
 
     QString strText = "/" + tag.strName;
@@ -1372,7 +1372,7 @@ QString CWizIndex::GetDocumentTagTreeDisplayString(const QString& strDocumentGUI
 {
     CWizTagDataArray arrayTag;
     if (!GetDocumentTags(strDocumentGUID, arrayTag)) {
-        return NULL;
+        return QString();
     }
 
     if (arrayTag.size() == 0)

@@ -3748,7 +3748,7 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
         return commonUI;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void MainWindow::SetSavingDocument(bool saving)

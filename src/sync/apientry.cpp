@@ -86,7 +86,7 @@ QString _requestUrl(const QString& strUrl)
 
     if (loop.error() != QNetworkReply::NoError)
     {
-        return NULL;
+        return QString();
     }
 
     //NOTE: reply has been delete in event loop, should not be deleted here

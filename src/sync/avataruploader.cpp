@@ -24,7 +24,7 @@ QString AvatarUploader::convert2Avatar(const QString& strFileName)
 {
     QImage image(strFileName);
     if (image.isNull())
-        return NULL;
+        return QString();
 
     if (image.width() > 100 || image.height() > 100) {
         image = image.scaled(100, 100, Qt::IgnoreAspectRatio);
@@ -32,7 +32,7 @@ QString AvatarUploader::convert2Avatar(const QString& strFileName)
 
     QString strTempAvatar = QDir::tempPath() + "/" + QString::number(qrand()) + ".png";
     if (!image.save(strTempAvatar))
-        return NULL;
+        return QString();
 
     return strTempAvatar;
 }

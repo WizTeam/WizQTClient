@@ -405,7 +405,7 @@ QString WizGetEmailPrefix(const QString& strMail)
 {
     int n = strMail.indexOf('@');
     if (n == -1) {
-        return NULL;
+        return QString();
     }
 
     return strMail.left(n);

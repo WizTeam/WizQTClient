@@ -116,7 +116,7 @@ QString CWizFolderSelector::selectedFolder()
         return p->location();
     }
 
-    return NULL;
+    return QString();
 }
 
 bool CWizFolderSelector::isSelectPersonalFolder()

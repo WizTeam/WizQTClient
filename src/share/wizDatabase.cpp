@@ -47,7 +47,7 @@ QString CWizDatabase::m_strUserId = QString();
 QString GetResoucePathFromFile(const QString& strHtmlFileName)
 {
     if (!QFile::exists(strHtmlFileName))
-        return NULL;
+        return QString();
 
     QString strTitle = Utils::Misc::extractFileTitle(strHtmlFileName);
     QString strPath = Utils::Misc::extractFilePath(strHtmlFileName);
@@ -58,7 +58,7 @@ QString GetResoucePathFromFile(const QString& strHtmlFileName)
     if (QFile::exists(strPath2))
         return strPath2;
 
-    return NULL;
+    return QString();
 }
 
 CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)

@@ -1418,11 +1418,11 @@ QByteArray CWizKMDatabaseServer::DownloadDocumentData(const QString& strDocument
     if (!document_getData(strDocumentGUID, WIZKM_XMKRPC_DOCUMENT_PART_DATA, ret))
     {
         TOLOG1(_T("Failed to download note data: %1"), strDocumentGUID);
-        return NULL;
+        return QByteArray();
     }
     //
     if (ret.arrayData.isEmpty())
-        return NULL;
+        return QByteArray();
     //
     return ret.arrayData;
 }
@@ -1489,11 +1489,11 @@ QByteArray CWizKMDatabaseServer::DownloadAttachmentData(const QString& strAttach
     if (!attachment_getData(strAttachmentGUID, WIZKM_XMKRPC_ATTACHMENT_PART_DATA, ret))
     {
         TOLOG1(_T("Failed to download attachment data: %1"), strAttachmentGUID);
-        return NULL;
+        return QByteArray();
     }
     //
     if (ret.arrayData.isEmpty())
-        return NULL;
+        return QByteArray();
     //
     return ret.arrayData;
 }

@@ -599,12 +599,12 @@ QString CWizCategoryBaseView::selectedItemKbGUID()
     if (!items.isEmpty()) {
         CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(items.first());
         if (!pItem)
-            return NULL;
+            return QString();
 
         return pItem->kbGUID();
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)

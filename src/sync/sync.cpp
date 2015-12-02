@@ -1812,7 +1812,7 @@ QString downloadFromUrl(const QString& strUrl)
     loop.exec();    
 
     if (loop.error() != QNetworkReply::NoError)
-        return NULL;
+        return QString();
 
     return loop.result();
 }

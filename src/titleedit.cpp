@@ -119,7 +119,7 @@ QString TitleEdit::textUnderCursor()
     }
 
     if (-1 == i) {
-        return NULL;
+        return QString();
     }
 
     return strText;
