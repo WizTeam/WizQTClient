@@ -22,6 +22,7 @@
 #include "share/wizwin32helper.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizSingleApplication.h"
+#include "share/wizthreads.h"
 #include "core/wizNoteManager.h"
 
 #ifdef Q_OS_MAC
@@ -405,6 +406,7 @@ int mainCore(int argc, char *argv[])
     Core::ThumbCache cache;
 
 
+    WizQueuedThreadsInit();
 
     MainWindow w(dbMgr);
 #ifdef Q_OS_LINUX
@@ -441,6 +443,7 @@ int mainCore(int argc, char *argv[])
 #endif
     }
 
+    WizQueuedThreadsShutdown();
 
     return ret;
 

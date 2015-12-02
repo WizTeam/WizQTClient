@@ -64,7 +64,7 @@ public:
     }
     virtual ~CWizTaskWorkThread()
     {
-        qDebug() << "CWizTaskWorkThread destruct";
+//        qDebug() << "CWizTaskWorkThread destruct";
     }
 protected:
     CWizThreadPool* m_pool;
@@ -131,7 +131,7 @@ CWizThreadPool::CWizThreadPool(int poolCount, WizCreateThreadFunction* createThr
 
 CWizThreadPool::~CWizThreadPool()
 {
-    qDebug() << "CWizThreadPool destruct , threads : " << m_threads.size();
+    //qDebug() << "CWizThreadPool destruct , threads : " << m_threads.size();
     for (CWizTaskWorkThread* thread : m_threads)
     {
         QObject::connect(thread, SIGNAL(finished()), thread, SLOT(deleteLater()));
@@ -619,7 +619,7 @@ public:
         QMutexLocker lock(&cs);
         //
         std::map<int, IWizThreadPool*>& threads = GetThreads();
-        qDebug() << "threads count : " << threads.size();
+        qDebug() << "clear thread pool, threads count : " << threads.size();
         std::map<int, IWizThreadPool*>::const_iterator it;
         for (it = threads.begin(); it != threads.end(); it++)
         {

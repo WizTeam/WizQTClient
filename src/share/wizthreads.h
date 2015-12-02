@@ -25,12 +25,12 @@ struct IWizRunableEvents
 struct IWizRunable
 {
     virtual void Destroy() {
-        qDebug() << "IWizRunable Destroy";
+//        qDebug() << "IWizRunable Destroy";
         delete this; }
     virtual void Run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents) = 0;
     virtual QString GetTaskID() { return QString(); }
     virtual ~IWizRunable() {
-        qDebug() << "IWizRunable desstruct";
+//        qDebug() << "IWizRunable desstruct";
     }
 };
 
@@ -51,10 +51,10 @@ struct IWizThreadPool
     virtual void GetTaskCount(int* pnWorking, int* pnWaiting) = 0;
     virtual void SetEventsListener(IWizThreadPoolEvents* pEvents) = 0;
     virtual void Destroy() {
-        qDebug() << "IWizThreadPool Destroy";
+        //qDebug() << "IWizThreadPool Destroy";
         delete this; }
     virtual ~IWizThreadPool() {
-        qDebug() << "IWizThreadPool desstruct";
+        //qDebug() << "IWizThreadPool desstruct";
     }
 };
 
