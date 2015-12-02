@@ -133,6 +133,7 @@ public:
         if (loop.error() != QNetworkReply::NoError)
         {
             setCommentsCount(0);
+            return;
         }
 
         parseReplyData(loop.result());
@@ -168,7 +169,7 @@ void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& G
         QString strUrl = seacher->getUrl();
 
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-            emit commentUrlAcquired(GUID, strUrl);
+            on_commentUrlAcquired(GUID, strUrl);
         });
     });
 }
@@ -229,7 +230,7 @@ void CWizCommentManager::on_timer_timeOut()
         int count = seacher->getCount();
 
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-            emit commentCountAcquired(data.strGUID, count);
+            on_commentCountAcquired(data.strGUID, count);
         });
         //
     });
