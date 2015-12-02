@@ -4092,6 +4092,8 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
     {
         WIZDOCUMENTDATA doc = *it;
         doc.strLocation.replace(strOldLocation, strNewLocation);
+        doc.strInfoMD5 = CalDocumentInfoMD5(doc);
+        doc.tInfoModified = WizGetCurrentTime();
         doc.nVersion = -1;
         ModifyDocumentInfoEx(doc);
     }
