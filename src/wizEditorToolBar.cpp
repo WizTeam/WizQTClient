@@ -2355,6 +2355,7 @@ void EditorToolBar::adjustButtonPosition()
     {
         firstLineWidth += widget->sizeHint().width();
     }
+    //
     if (parentWidgetWidth < RecommendedWidthForTwoLine)
     {
         //  move moveable buttons to second line
@@ -2420,13 +2421,14 @@ void EditorToolBar::adjustButtonPosition()
     m_firstLineButtonContainer->updateGeometry();
     m_secondLineButtonContainer->updateGeometry();
 
+    m_btnShowExtra->setChecked(false);
     if (!m_buttonContainersInSecondLine.isEmpty())
     {
         bool showExtra = m_app.userSettings().get(WIZSHOWEXTRABUTTONITEMS).toInt();
         m_secondLineButtonContainer->setVisible(showExtra);
+        m_btnShowExtra->setChecked(showExtra);
     }
     m_btnShowExtra->setVisible(!m_buttonContainersInSecondLine.isEmpty());
-    m_btnShowExtra->setChecked(m_secondLineButtonContainer->isVisible());
 }
 
 #define EDITORTOOLBARTIPSCHECKED   "EditorToolBarTipsChecked"
