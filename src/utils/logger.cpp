@@ -64,16 +64,8 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         return;
 #endif
 
-    bool saveLog = true;
-#ifndef QT_DEBUG
-    if (type == QtDebugMsg)
-        saveLog = false;
-#endif
-    if (saveLog)
-    {
-        logger()->saveToLogFile(msg);
-        logger()->addToBuffer(msg);
-    }
+    logger()->saveToLogFile(msg);
+    logger()->addToBuffer(msg);
 
     switch (type) {
     case QtDebugMsg:
