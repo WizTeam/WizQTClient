@@ -162,16 +162,16 @@ CWizCommentManager::CWizCommentManager(QObject* parent)
  */
 void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& GUID)
 {
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
-        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, kbGUID, GUID, QueryUrl);
-        seacher->run();
+//    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
+//        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, kbGUID, GUID, QueryUrl);
+//        seacher->run();
 
-        QString strUrl = seacher->getUrl();
+//        QString strUrl = seacher->getUrl();
 
-        WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-            on_commentUrlAcquired(GUID, strUrl);
-        });
-    });
+//        WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+//            on_commentUrlAcquired(GUID, strUrl);
+//        });
+//    });
 }
 
 /*
@@ -179,30 +179,30 @@ void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& G
  */
 void CWizCommentManager::queryCommentCount(const QString& kbGUID, const QString& GUID, bool removeOtherQueryRequest)
 {
-    QMutexLocker locker(&m_mutext);
-    Q_UNUSED(locker)
+//    QMutexLocker locker(&m_mutext);
+//    Q_UNUSED(locker)
 
-    if (removeOtherQueryRequest)
-    {
-        m_timer.stop();
-        m_queryList.clear();
-    }
+//    if (removeOtherQueryRequest)
+//    {
+//        m_timer.stop();
+//        m_queryList.clear();
+//    }
 
-    for (CountQueryData query : m_queryList)
-    {
-        if(query.strGUID == GUID)
-            return;
-    }
+//    for (CountQueryData query : m_queryList)
+//    {
+//        if(query.strGUID == GUID)
+//            return;
+//    }
 
-    CountQueryData query;
-    query.strKBGUID = kbGUID;
-    query.strGUID = GUID;
-    m_queryList.append(query);
+//    CountQueryData query;
+//    query.strKBGUID = kbGUID;
+//    query.strGUID = GUID;
+//    m_queryList.append(query);
 
-    if (!m_timer.isActive())
-    {
-        m_timer.start(QUERY_DELAY * 1000);
-    }
+//    if (!m_timer.isActive())
+//    {
+//        m_timer.start(QUERY_DELAY * 1000);
+//    }
 }
 
 void CWizCommentManager::on_commentUrlAcquired(QString GUID, QString url)
