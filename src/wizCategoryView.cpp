@@ -1121,16 +1121,22 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 
     if (m_dragUrls)
     {
-        CWizCategoryViewItemBase* itemBase = itemAt(p);
-        return itemBase->acceptDrop("");
+        if (CWizCategoryViewItemBase* itemBase = itemAt(p))
+        {
+            return itemBase->acceptDrop("");
+        }
     }
 
     if (m_dragDocArray.empty())
         return false;
 
-    CWizCategoryViewItemBase* itemBase = itemAt(p);
-    WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
-    return (itemBase && itemBase->acceptDrop(data));
+    if (CWizCategoryViewItemBase* itemBase = itemAt(p))
+    {
+        WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
+        return (itemBase && itemBase->acceptDrop(data));
+    }
+
+    return false;
 }
 
 Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
