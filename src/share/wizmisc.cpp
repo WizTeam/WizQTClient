@@ -455,7 +455,7 @@ BOOL WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError)
     int nMin = atoi(lpsz + 14);
     int nSec = atoi(lpsz + 17);
     //
-    if (nYear < 1900 || nYear > 2100)
+    if (nYear < 0)
     {
         strError = _T("Invalid date time format (year)");
         return TRUE;
