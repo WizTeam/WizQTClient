@@ -662,7 +662,8 @@ protected:
 
         //arrow
         static QPixmap arrow = QPixmap(Utils::StyleHelper::skinResourceFileName("editorToolbarDownArrow", true));
-        QRect rcArrow(rcIcon.right() + 7, (opt.rect.height() - arrow.height()) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
+        int arrowHeight = arrow.height() * (WizIsHighPixel() ? 0.5f : 1);
+        QRect rcArrow(rcIcon.right() + 7, (opt.rect.height() - arrowHeight) / 2, TOOLBUTTON_ARRWO_WIDTH, TOOLBUTTON_ARRWO_WIDTH);
         p.drawPixmap(rcArrow, arrow);
     }
 
