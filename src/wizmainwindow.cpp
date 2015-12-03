@@ -1947,29 +1947,6 @@ void MainWindow::initToolBar()
     // align with categoryview's root item.
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(3, 1), m_toolBar));
 
-    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
-    m_toolBar->addWidget(info);
-
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    CWizButton* buttonSync = new CWizButton(m_toolBar);
-    buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
-    m_toolBar->addWidget(buttonSync);
-
-    m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
-    m_toolBar->addWidget(m_spacerForToolButtonAdjust);
-
-    m_searchWidget = new CWizSearchWidget(this);
-
-    m_toolBar->addWidget(m_searchWidget);
-
-    m_toolBar->layout()->setAlignment(m_searchWidget, Qt::AlignBottom);
-    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
-
-    CWizButton* buttonNew = new CWizButton(m_toolBar);
-    buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
-    m_toolBar->addWidget(buttonNew);
-
     CWizButton* buttonBack = new CWizButton(m_toolBar);
     buttonBack->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addWidget(buttonBack);
@@ -1978,9 +1955,34 @@ void MainWindow::initToolBar()
     buttonForward->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addWidget(buttonForward);
 
-    updateHistoryButtonStatus();
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+    CWizButton* buttonSync = new CWizButton(m_toolBar);
+    buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
+    m_toolBar->addWidget(buttonSync);
+
+
+    m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
+    m_toolBar->addWidget(m_spacerForToolButtonAdjust);
+
+    m_searchWidget = new CWizSearchWidget(this);
+
+    m_toolBar->addWidget(m_searchWidget);
+
+    m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
+
+    CWizButton* buttonNew = new CWizButton(m_toolBar);
+    buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    m_toolBar->addWidget(buttonNew);
+
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
+
+
+    CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
+    m_toolBar->addWidget(info);
+
+    updateHistoryButtonStatus();
 
     //
 #endif
@@ -3296,7 +3298,9 @@ void MainWindow::on_menuButtonClicked()
 
 void MainWindow::on_client_splitterMoved(int pos, int index)
 {
-//    adjustToolBarLayout();
+#ifdef Q_OS_LINUX
+    adjustToolBarLayout();
+#endif
 }
 
 void MainWindow::on_actionGoBack_triggered()
@@ -3692,19 +3696,6 @@ void MainWindow:: adjustToolBarLayout()
     //
     m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
 #else
-//    m_toolBar
-//    int nFixedSpacerWidth = m_category->width() - 75;
-////    m_spacerForToolButtonAdjust->setFixedWidth(nFixedSpacerWidth);
-//    m_spacerForToolButtonAdjust->adjustWidth(nFixedSpacerWidth);
-//    m_toolBar->adjustWidgetToolBarItemWidth(m_spacerForToolButtonAdjust, nFixedSpacerWidth);
-//    const int nSearchWgtMargin = 26;
-////    m_searchWidget->setFixedWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
-//    m_toolBar->adjustSearchWidgetWidth(m_docListContainer->width() - nSearchWgtMargin * 2);
-//    m_toolBar->resize(width(), m_toolBar->height());
-//    m_searchWidget->setPopupWgtOffset(m_docListContainer->width() - nSearchWgtMargin * 2,
-//                                      QSize(m_docListContainer->geometry().adjusted(nSearchWgtMargin, 0, 0, 0).topLeft().x(), 0));
-//    m_spacerForToolButtonAdjust->sets
-//    m_searchWidget->setPopupWgtOffset(m_searchWidget->sizeHint().width(), QSize(235, 0));
 #endif
 #endif
 }

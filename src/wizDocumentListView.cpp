@@ -187,14 +187,15 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
                               SLOT(on_action_shareDocumentByLink()));
 
     m_menuDocument->addSeparator();
-    QAction* actionOnTop = m_menuDocument->addAction(WIZACTION_LIST_ALWAYS_ON_TOP,
+    QAction* actionAlwaysOnTop = m_menuDocument->addAction(WIZACTION_LIST_ALWAYS_ON_TOP,
                                                          this, SLOT(on_action_alwaysOnTop()));
-    actionOnTop->setCheckable(true);
-    addAction(actionOnTop);
+    actionAlwaysOnTop->setCheckable(true);
+//    m_menuDocument->addAction(WIZACTION_LIST_CANCEL_ON_TOP,
+//                                                     this, SLOT(on_action_cancelOnTop()));
 
-    QAction* actionAddToShortcuts = m_menuDocument->addAction(QObject::tr("Add to Shortcuts"),
+
+    m_menuDocument->addAction(QObject::tr("Add to Shortcuts"),
                                                               this, SLOT(on_action_addToShortcuts()));
-    addAction(actionAddToShortcuts);
 
     m_menuDocument->addSeparator();
 
@@ -213,10 +214,6 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     // not implement, hide currently.
 //    actionCopyDoc->setVisible(false);
 
-    // Add to widget's actions list
-    addAction(actionMoveDoc);
-    addAction(actionDeleteDoc);
-    addAction(actionCopyDoc);
 
     actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
     actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
@@ -786,11 +783,16 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 
 void CWizDocumentListView::resetPermission()
 {
+#ifdef Q_OS_LINUX
+    qDebug() << "reset context menu permission, action always on top : " << findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
+    qDebug() << "right menu selected item count : " << m_rightButtonFocusedItems.size();
+#endif
+
     CWizDocumentDataArray arrayDocument;
     //QList<QListWidgetItem*> items = selectedItems();
     foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
         arrayDocument.push_back(item->document());
-    }
+    }        
 
     findAction(WIZACTION_LIST_LOCATE)->setVisible(m_accpetAllSearchItems);
 
@@ -816,7 +818,6 @@ void CWizDocumentListView::resetPermission()
     // disable delete if permission is not enough
     findAction(WIZACTION_LIST_DELETE)->setEnabled(bCanEdit);
 
-    findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setCheckable(true);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setEnabled(bCanEdit);
     findAction(WIZACTION_LIST_ALWAYS_ON_TOP)->setChecked(bAlwaysOnTop);
 
@@ -1204,8 +1205,7 @@ void CWizDocumentListView::resetItemsViewType(int type)
         if (item(i)->type() != WizDocumentListType_Document)
             continue;
 
-        int nHeight = Utils::StyleHelper::listViewItemHeight(item(i)->type() == WizDocumentListType_Document ?
-                                                                 m_nViewType : Utils::StyleHelper::ListTypeOneLine);
+        int nHeight = Utils::StyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : Utils::StyleHelper::ListTypeSection);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
 }
@@ -1810,8 +1810,12 @@ void CWizDocumentListView::on_action_cancelEncryption()
 void CWizDocumentListView::on_action_alwaysOnTop()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuAlwaysOnTop");
-    QAction *actionAlwaysOnTop = findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
-    actionAlwaysOnTop->setChecked(actionAlwaysOnTop->isChecked());
+    QAction* actionAlwaysOnTop = findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
+#ifdef Q_OS_LINUX
+    qDebug() << "always on top called, action : " << actionAlwaysOnTop;
+#endif
+
+
     bool bAlwaysOnTop = actionAlwaysOnTop->isChecked();
 
     foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
@@ -1831,7 +1835,7 @@ void CWizDocumentListView::on_action_alwaysOnTop()
         item->reload(db);
     }
 
-    sortItems();
+    resetSectionData();
 }
 
 void CWizDocumentListView::on_action_addToShortcuts()

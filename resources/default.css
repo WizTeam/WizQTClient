@@ -3,7 +3,8 @@
     padding:0;
     word-wrap:break-word;
     cursor:text;
-    height:90%;    
+    height:90%; 
+    overflow: auto !important;
 }
 
 body {    
