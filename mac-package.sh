@@ -8,16 +8,24 @@ package_home="./macos-package"
 package_output_path="$HOME"
 
 # compile
-rm -rf ../WizQTClient-Release-QT5/* && \
+# rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
-make -j5 && \
+# cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release ../WizQTClient && \
+# make -j5 && \
+# cd ../WizQTClient
+
+cp -R -p ~/Library/Frameworks/CrashReporter.framework WizNote.app/Contents/Frameworks
+
+install_name_tool -change @rpath/CrashReporter.framework/Versions/A/CrashReporter \
+ @executable_path/../Frameworks/CrashReporter.framework/Versions/A/CrashReporter WizNote.app/Contents/MacOS/WizNote
+
+
+APPLCERT="Developer ID Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
+INSTCERT="Developer ID Installer: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
+
+codesign --verbose=2 --deep --sign "$APPLCERT"  WizNote.app
+
 cd ../WizQTClient
-
-APPLCERT="Developer ID Application: Wei Shijun"
-INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
-
-codesign --verbose=2 --deep --sign "$APPLCERT"  ../WizQTClient-Release-QT5/WizNote.app
 
 setFile -a V ${package_home}/wiznote-disk-cover.jpg
 

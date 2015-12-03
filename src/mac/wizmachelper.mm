@@ -784,8 +784,7 @@ void handleCrashReport(PLCrashReporter *crashReporter)
     }
 
     NSLog(@"Crashed founded. on %@", report.systemInfo.timestamp);
-    NSLog(@"Crashed with signal %@ (code %@, address=0x%" PRIx64 ")", report.signalInfo.name,
-          report.signalInfo.code, report.signalInfo.address);
+    NSLog(@"Crashed with signal %@ (code %@, address=0x%\" PRIx64 \")", report.signalInfo.name, report.signalInfo.code, report.signalInfo.address);
 
 
     ///////// save to local file
