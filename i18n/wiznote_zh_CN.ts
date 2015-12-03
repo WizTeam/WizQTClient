@@ -115,7 +115,7 @@
     <message>
         <location filename="../src/wizattachmentlistwidget.cpp" line="224"/>
         <source>Can not add a bundle file as attachment! File name : &apos; %1 &apos;</source>
-        <translation type="unfinished">不能添加包文件作为附件！文件名：&apos; %1 &apos;</translation>
+        <translation type="unfinished">不能添加包文件(文件夹)作为附件！文件名：&apos; %1 &apos;</translation>
     </message>
     <message>
         <location filename="../src/wizattachmentlistwidget.cpp" line="474"/>
