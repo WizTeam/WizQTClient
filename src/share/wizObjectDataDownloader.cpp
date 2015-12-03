@@ -54,6 +54,11 @@ void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadT
     connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
+    if (QThreadPool::globalInstance()->maxThreadCount() > 3)
+    {
+        QThreadPool::globalInstance()->setMaxThreadCount(3);
+    }
+
     QThreadPool::globalInstance()->start(downloader);
 }
 void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
