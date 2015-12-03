@@ -1055,6 +1055,18 @@ void CWizLoginDialog::on_btn_login_clicked()
         return;
     }
 
+    if (EnterpriseServer == m_serverType)
+    {
+        if (m_lineEditServer->text().isEmpty())
+        {
+            ui->label_passwordError->setText(tr("Please enter server address"));
+        }
+        else
+        {
+            CommonApiEntry::setEnterpriseServerIP(m_lineEditServer->text());
+        }
+    }
+
     doAccountVerify();
 }
 
@@ -1549,7 +1561,7 @@ void CWizLoginDialog::onWizBoxLogInStateEntered()
             QString strLogoPath = settings.logoPath();
             setLogo(strLogoPath);
         }
-    }    
+    }
 }
 
 void CWizLoginDialog::onWizSignUpStateEntered()
