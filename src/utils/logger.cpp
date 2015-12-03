@@ -128,8 +128,8 @@ void Logger::saveToLogFile(const QString& strMsg)
 
 void Logger::addToBuffer(const QString& strMsg)
 {
-//    QMutexLocker locker(&m_mutex);
-//    Q_UNUSED(locker);
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
     //
     m_buffer->open(QIODevice::Append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());

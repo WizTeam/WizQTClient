@@ -162,16 +162,16 @@ CWizCommentManager::CWizCommentManager(QObject* parent)
  */
 void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& GUID)
 {
-//    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
-//        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, kbGUID, GUID, QueryUrl);
-//        seacher->run();
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
+        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, kbGUID, GUID, QueryUrl);
+        seacher->run();
 
-//        QString strUrl = seacher->getUrl();
+        QString strUrl = seacher->getUrl();
 
-//        WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
-//            on_commentUrlAcquired(GUID, strUrl);
-//        });
-//    });
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+            on_commentUrlAcquired(GUID, strUrl);
+        });
+    });
 }
 
 /*
