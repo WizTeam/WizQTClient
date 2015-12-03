@@ -26,9 +26,8 @@ enum QueryType
 class CWizCommentSearcher
 {
 public:
-    CWizCommentSearcher(CWizCommentManager *manager, const QString& kbGUID, const QString& GUID, QueryType type)
-        : m_manager(manager)
-        , m_kbGUID(kbGUID)
+    CWizCommentSearcher(const QString& kbGUID, const QString& GUID, QueryType type)
+        : m_kbGUID(kbGUID)
         , m_GUID(GUID)
         , m_type(type)
     {
@@ -143,7 +142,6 @@ private:
     QString m_kbGUID;
     QString m_GUID;
     QueryType m_type;
-    CWizCommentManager * m_manager;
 
     QString m_url;
     int m_count;
@@ -163,10 +161,10 @@ CWizCommentManager::CWizCommentManager(QObject* parent)
 void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& GUID)
 {
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
-        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, kbGUID, GUID, QueryUrl);
-        seacher->run();
+        CWizCommentSearcher seacher(kbGUID, GUID, QueryUrl);
+        seacher.run();
 
-        QString strUrl = seacher->getUrl();
+        QString strUrl = seacher.getUrl();
 
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
             on_commentUrlAcquired(GUID, strUrl);
@@ -224,10 +222,10 @@ void CWizCommentManager::on_timer_timeOut()
         return;
 
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
-        CWizCommentSearcher* seacher = new CWizCommentSearcher(this, data.strKBGUID, data.strGUID, QueryCount);
-        seacher->run();
+        CWizCommentSearcher seacher(data.strKBGUID, data.strGUID, QueryCount);
+        seacher.run();
 
-        int count = seacher->getCount();
+        int count = seacher.getCount();
 
         WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
             on_commentCountAcquired(data.strGUID, count);
