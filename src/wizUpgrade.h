@@ -3,6 +3,7 @@
 
 #include <QtNetwork>
 #include <QThread>
+#include <memory>
 
 
 class CWizUpgrade : public QThread
@@ -14,12 +15,10 @@ public:
     ~CWizUpgrade();
     void startCheck();
 
-    QString getWhatsNewUrl();
+    static QString getWhatsNewUrl();
 
 public Q_SLOTS:
     void checkUpgrade();
-    void on_getCheckUrl_finished();
-    void on_checkUpgrade_finished();
     void on_timerCheck_timeout();
 
 Q_SIGNALS:
@@ -29,14 +28,13 @@ protected:
     void run();
 
 private:
-    QPointer<QNetworkAccessManager> m_net;
+    std::shared_ptr<QNetworkAccessManager> m_net;
     QTimer m_timerCheck;
     QUrl m_redirectedUrl;
 
     void _check(const QString& strUrl);
     QUrl redirectUrl(QUrl const &possible_redirect_url,
                      QUrl const &old_redirect_url) const;
-    void beginCheck();
 };
 
 #endif // WIZUPGRADE_H

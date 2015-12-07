@@ -118,7 +118,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
 #ifndef BUILD4APPSTORE
-    , m_upgrade(new CWizUpgrade(this))
+    , m_upgrade(nullptr)
 #else
     , m_upgrade(0)
 #endif
@@ -250,9 +250,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     client()->hide();
 
     // upgrade check
-#ifndef BUILD4APPSTORE
-    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    if (userSettings().autoCheckUpdate()) {
+#ifndef BUILD4APPSTORE    
+    if (userSettings().autoCheckUpdate())
+    {
         checkWizUpdate();
     }
 #endif
@@ -557,10 +557,14 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
+    m_upgrade->quit();
+    m_upgrade->deleteLater();
+    m_upgrade = nullptr;
+
     if (!bUpgradeAvaliable)
         return;
 
-    QString strUrl = m_upgrade->getWhatsNewUrl();
+    QString strUrl = CWizUpgrade::getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
         QString url = WizService::WizApiEntry::standardCommandUrl("link");
@@ -572,7 +576,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
         Q_ASSERT(0);
 #endif
         QDesktopServices::openUrl(QUrl(url));
-    }
+    }    
 }
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
@@ -3670,6 +3674,11 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
+    if (!m_upgrade)
+    {
+        m_upgrade = new CWizUpgrade(this);
+        connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+    }
     m_upgrade->startCheck();
 #endif
 }

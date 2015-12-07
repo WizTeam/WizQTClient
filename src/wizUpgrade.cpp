@@ -3,6 +3,7 @@
 #include "share/wizmisc.h"
 #include "utils/logger.h"
 #include "sync/apientry.h"
+#include "share/wizEventLoop.h"
 
 #if defined(Q_OS_MAC)
 #define strUpgradeUrlParam "/download?product=wiznote&client=macos"
@@ -24,33 +25,26 @@ CWizUpgrade::CWizUpgrade(QObject *parent) :
 
 CWizUpgrade::~CWizUpgrade()
 {
-    quit();
 }
 
 void CWizUpgrade::startCheck()
 {
     m_timerCheck.start(10 * 1000);
-    if (isRunning())
-        start();
 }
 
 void CWizUpgrade::on_timerCheck_timeout()
 {
-    beginCheck();
+    m_timerCheck.stop();
+
+    if (!isRunning())
+    {
+        start();
+    }
 }
 
 void CWizUpgrade::run()
 {
-    exec();
-}
-
-void CWizUpgrade::beginCheck()
-{
-    if (!QMetaObject::invokeMethod(this, "checkUpgrade")) {
-        TOLOG("Invoke check of upgrade failed");
-    }
-
-    m_timerCheck.stop();
+    checkUpgrade();
 }
 
 QString CWizUpgrade::getWhatsNewUrl()
@@ -62,25 +56,21 @@ void CWizUpgrade::checkUpgrade()
 {
     QString strApiUrl = WizService::WizApiEntry::standardCommandUrl("download_server");
 
-    if (!m_net) {
-        m_net = new QNetworkAccessManager(this);
+    if (!m_net.get()) {
+        m_net = std::make_shared<QNetworkAccessManager>();
     }
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(strApiUrl));
-    connect(reply, SIGNAL(finished()), SLOT(on_getCheckUrl_finished()));
-}
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
 
-void CWizUpgrade::on_getCheckUrl_finished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-
-    if (reply->error()) {
+    if (loop.error() != QNetworkReply::NoError)
+    {
         Q_EMIT checkFinished(false);
-        reply->deleteLater();
         return;
     }
 
-    QString strCheckUrl(reply->readAll());
+    QString strCheckUrl(loop.result());
     strCheckUrl += strUpgradeUrlParam;
 
     _check(strCheckUrl);
@@ -89,18 +79,9 @@ void CWizUpgrade::on_getCheckUrl_finished()
 void CWizUpgrade::_check(const QString& strUrl)
 {
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    connect(reply, SIGNAL(finished()), SLOT(on_checkUpgrade_finished()));
-}
-
-void CWizUpgrade::on_checkUpgrade_finished()
-{
-    QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
-
-    if (reply->error()) {
-        Q_EMIT checkFinished(false);
-        reply->deleteLater();
-        return;
-    }
+    QEventLoop loop;
+    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    loop.exec();
 
     QUrl possibleRedirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
     m_redirectedUrl = redirectUrl(possibleRedirectedUrl, m_redirectedUrl);
@@ -139,7 +120,6 @@ void CWizUpgrade::on_checkUpgrade_finished()
     }
 
     reply->deleteLater();
-    quit();
 }
 
 QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
