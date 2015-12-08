@@ -32,7 +32,7 @@ protected:
     bool m_bAutoLogout;
 
 public:
-    WIZUSERINFO m_retLogin;
+    WIZUSERINFO m_userInfo;
 
 public:
     bool Login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
@@ -64,9 +64,8 @@ public:
     QString GetToken();
     QString GetKbGUID();
     //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
-    int GetMaxFileSize() { return m_retLogin.GetMaxFileSize(); }
-    const WIZUSERINFO& GetUserInfo() const { return m_retLogin; }
-    WIZUSERINFO& GetUserInfo() { return m_retLogin; }
+    const WIZUSERINFO& GetUserInfo() const { return m_userInfo; }
+    WIZUSERINFO& GetUserInfo() { return m_userInfo; }
     void SetUserInfo(const WIZUSERINFO& userInfo);
 
 private:
@@ -158,15 +157,19 @@ public:
     virtual ~CWizKMDatabaseServer();
     virtual void OnXmlRpcError();
 
+    const WIZKBINFO& kbInfo();
+    void setKBInfo(const WIZKBINFO& info);
+
 protected:
-    WIZUSERINFOBASE m_kbInfo;
+    WIZUSERINFOBASE m_userInfo;
+    WIZKBINFO m_kbInfo;
 
 public:
-    QString GetToken() const { return m_kbInfo.strToken; }
-    QString GetKbGUID() const { return m_kbInfo.strKbGUID; }
+    QString GetToken() const { return m_userInfo.strToken; }
+    QString GetKbGUID() const { return m_userInfo.strKbGUID; }
     int GetMaxFileSize() const { return m_kbInfo.GetMaxFileSize(); }
 
-    BOOL wiz_getInfo(WIZKBINFO& info);
+    BOOL wiz_getInfo();
     BOOL wiz_getVersion(WIZOBJECTVERSION& version, BOOL bAuto = FALSE);
 
     BOOL document_getData(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret);
@@ -226,7 +229,7 @@ protected:
         if (arrayGUID.empty())
             return TRUE;
         //
-        CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
+        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
         param.AddStringArray(strGUIDArrayValueName, arrayGUID);
         //
         std::deque<TWrapData> arrayWrap;
@@ -284,7 +287,7 @@ protected:
     template <class TData, class TWrapData>
     BOOL getList(const QString& strMethodName, int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
     {
-        CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
+        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
         param.AddInt(_T("count"), nCountPerPage);
         param.AddString(_T("version"), WizInt64ToStr(nVersion));
         //
@@ -331,7 +334,7 @@ protected:
             }
             //
 
-            CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
+            CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
             //
             param.AddArray<TWrapData>(strArrayName, subArray);
             //

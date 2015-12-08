@@ -101,20 +101,16 @@ bool CWizKMSync::SyncCore()
     m_pEvents->OnStatus(QObject::tr("Query server infomation"));
     if (!m_bGroup)
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(_T(""), info);
-            m_kbInfo = info;
+            m_pDatabase->SetKbInfo(_T(""), m_server.kbInfo());
         }
     }
     else
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(m_info.strKbGUID, info);
-            m_kbInfo = info;
+            m_pDatabase->SetKbInfo(m_info.strKbGUID, m_server.kbInfo());
         }
     }
     //
@@ -259,10 +255,9 @@ bool CWizKMSync::SyncCore()
     //
     if (!m_bGroup)
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(_T(""), info);
+            m_pDatabase->SetKbInfo(_T(""), m_server.kbInfo());
         }
     }
     //
@@ -798,7 +793,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
             QString str;
             str = local.strTitle;
 
-            //pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, ::WizInt64ToByteSizeStr(nDataSize)));
+            pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
             return FALSE;
         }
     }
@@ -967,7 +962,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         {
             QString str;
             str = local.strName;
-            //pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, ::WizInt64ToByteSizeStr(nDataSize)));
+            pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
             return FALSE;
         }
     }
@@ -1226,7 +1221,7 @@ bool CWizKMSync::UploadDocumentList()
             return TRUE;
     }
     //
-    return UploadList<WIZDOCUMENTDATAEX, true>(m_kbInfo, m_pEvents, m_pDatabase, m_server, _T("document"), syncUploadDocumentList);
+    return UploadList<WIZDOCUMENTDATAEX, true>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, _T("document"), syncUploadDocumentList);
 }
 bool CWizKMSync::UploadAttachmentList()
 {
@@ -1236,7 +1231,7 @@ bool CWizKMSync::UploadAttachmentList()
             return TRUE;
     }
     //
-    return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_kbInfo, m_pEvents, m_pDatabase, m_server, _T("attachment"), syncUploadAttachmentList);
+    return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, _T("attachment"), syncUploadAttachmentList);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1417,7 +1412,6 @@ bool CWizKMSync::DownloadObjectData()
     return succeeded == nCount;
 }
 
-
 int WizCalDocumentPartForDownloadToLocal(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTDATAEX_XMLRPC_SIMPLE& dataServer)
 {
     int nPart = 0;
@@ -1562,7 +1556,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         //
         if (!group.strDatabaseServer.isEmpty())
         {
@@ -1941,7 +1935,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         pEvents->SetCurrentDatabase(0);
-        CWizKMSync syncPrivate(pDatabase, server.m_retLogin, pEvents, FALSE, FALSE, NULL);
+        CWizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.Sync())
         {
@@ -1988,7 +1982,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
@@ -2021,7 +2015,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         //pEvents->SetCurrentDatabase(0);
-        CWizKMSync syncPrivate(pDatabase, server.m_retLogin, pEvents, FALSE, FALSE, NULL);
+        CWizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.DownloadObjectData())
         {
@@ -2056,7 +2050,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //

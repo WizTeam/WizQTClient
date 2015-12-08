@@ -55,16 +55,14 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
+
+    //NOTE: DEPRECATED
     int nMaxFileSize;
 
     WIZUSERINFOBASE()
         : nMaxFileSize(10 * 1024 * 1024)
     {
-    }
-    int GetMaxFileSize() const
-    {
-        return std::max<int>(20 * 1024 * 1024, nMaxFileSize);;
-    }
+    }    
 };
 
 struct WIZUSERINFO : public WIZUSERINFOBASE
@@ -182,11 +180,21 @@ struct WIZKBINFO
 {
     WIZKBINFO();
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    //
+    int GetMaxFileSize() const
+    {
+        return std::max<int>(30 * 1024 * 1024, nUploadSizeLimit);
+    }
 
     qint64 nStorageLimit;
     qint64 nStorageUsage;
     QString strStorageLimit;
     QString strStorageUsage;
+
+    qint64 nUploadSizeLimit;
+    QString strUploadSizeLimitString;
+    qint64 nNotesCount;
+    qint64 nNotesCountLimit;
 
     qint64 nTrafficLimit;
     qint64 nTrafficUsage;

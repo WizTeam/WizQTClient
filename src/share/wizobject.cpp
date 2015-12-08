@@ -119,6 +119,10 @@ bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetInt64(_T("traffic_usage"), nTrafficUsage);
     data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
     data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
+    data.GetInt64("upload_size_limit", nUploadSizeLimit);
+    data.GetString("upload_size_limit_string", strUploadSizeLimitString);
+    data.GetInt64("notes_count", nNotesCount);
+    data.GetInt64("notes_count_limit", nNotesCountLimit);
 
     return true;
 }

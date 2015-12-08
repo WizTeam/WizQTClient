@@ -12,7 +12,7 @@ public:
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:
     bool Sync();
-    bool DownloadObjectData();
+    bool DownloadObjectData();    
 
 protected:
     bool SyncCore();
@@ -43,7 +43,6 @@ private:
 private:
     IWizSyncableDatabase* m_pDatabase;
     WIZUSERINFOBASE m_info;
-    WIZKBINFO m_kbInfo;
     IWizKMSyncEvents* m_pEvents;
     bool m_bGroup;
     bool m_bUploadOnly;
