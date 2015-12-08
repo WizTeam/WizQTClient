@@ -2,6 +2,7 @@
 #define CWIZPOSITIONDELEGATE_H
 
 #include <QObject>
+#include <QPoint>
 #include <QList>
 
 class QWidget;

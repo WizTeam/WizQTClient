@@ -2,6 +2,7 @@
 #define WIZTHREADS_P_H
 
 #include <deque>
+#include <QMutex>
 #include "wizthreads.h"
 
 class QTimer;

@@ -255,7 +255,23 @@ void CWizThreadPool::Shutdown(int timeout)
         }
         //
         //WizProcessMessages();
+#ifdef Q_OS_LINUX
+        class WaitThread : public QThread
+        {
+         public :
+             static void sleep(long iSleepTime)
+             {
+                  QThread::sleep(iSleepTime);
+             }
+             static void msleep(long iSleepTime)
+             {
+                  QThread::msleep(iSleepTime);
+             }
+        };
+        WaitThread::sleep(1);
+#else
         QThread::sleep(1);
+#endif
     }
 }
 //
