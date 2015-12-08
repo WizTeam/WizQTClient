@@ -4071,7 +4071,7 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
         {
             m_mobileFileReceiver->waitForDone();
             delete m_mobileFileReceiver;
-            m_mobileFileReceiver = 0;
+            m_mobileFileReceiver = nullptr;
         }
     }
 }

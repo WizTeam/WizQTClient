@@ -84,7 +84,7 @@ void CWizCommentQuerier::run()
 
     QString token = WizService::Token::token();
     QString commentsUrl =  WizService::CommonApiEntry::commentUrl(token, m_kbGUID, m_GUID);
-    if (commentsUrl.isEmpty())
+    if (commentsUrl.isEmpty() || token.isEmpty())
     {
         qDebug() << "Can not get comment url by token : " << token;
         errorOccurred();

@@ -607,7 +607,11 @@ QString CommonApiEntry::groupUsersUrl(const QString& strToken, const QString& st
 
 QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
-    Q_ASSERT(!strToken.isEmpty());
+    if (strToken.isEmpty())
+    {
+        qCritical() << "request kb url by empty token";
+        return QString();
+    }
     
     if (m_mapkUrl.contains(strKbGUID))
         return m_mapkUrl.value(strKbGUID);
