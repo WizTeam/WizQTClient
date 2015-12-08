@@ -802,7 +802,8 @@ QString CWizDocumentWebView::getMarkdownCssFilePath() const
 
 bool CWizDocumentWebView::resetDefaultCss()
 {
-    QFile f(":/default.css");
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/default.css";
+    QFile f(strFileName);
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Editor]Failed to get default css code";
         return false;

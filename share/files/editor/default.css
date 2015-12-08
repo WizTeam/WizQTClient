@@ -15,7 +15,7 @@ body {
 body, div, p {
     /*default-font-family*/;
     /*default-font-size*/;
-    /*default-line-height*/
+    /*default-line-height*/    
 }
 
 html, body {
@@ -23,5 +23,3 @@ html, body {
     /*default-background-color*/;
     height: auto !important;
 }
-
-
