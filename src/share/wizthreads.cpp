@@ -420,8 +420,7 @@ public:
         QMutexLocker lock(&m_cs);
         //
         QDateTime now = QDateTime::currentDateTime();
-        QDateTime work = now;
-        work.addSecs(delayedSeconds);
+        QDateTime work = now.addSecs(delayedSeconds);
         //
         m_mapTasksTime[task] = work;
     }
