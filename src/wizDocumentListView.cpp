@@ -783,11 +783,6 @@ void CWizDocumentListView::contextMenuEvent(QContextMenuEvent * e)
 
 void CWizDocumentListView::resetPermission()
 {
-#ifdef Q_OS_LINUX
-    qDebug() << "reset context menu permission, action always on top : " << findAction(WIZACTION_LIST_ALWAYS_ON_TOP);
-    qDebug() << "right menu selected item count : " << m_rightButtonFocusedItems.size();
-#endif
-
     CWizDocumentDataArray arrayDocument;
     //QList<QListWidgetItem*> items = selectedItems();
     foreach (CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems) {
