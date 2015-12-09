@@ -130,157 +130,157 @@ public:
     int permission() const { return m_info.nPermission; }
 
     // IWizSyncableDatabase interface implementations
-    virtual QString GetUserId() override;
-    virtual QString GetUserGUID() override;
-    virtual QString GetPassword() override;
+    virtual QString GetUserId();
+    virtual QString GetUserGUID();
+    virtual QString GetPassword();
 
-    virtual bool SaveLastSyncTime() override;
-    virtual COleDateTime GetLastSyncTime() override;
+    virtual bool SaveLastSyncTime();
+    virtual COleDateTime GetLastSyncTime();
 
     bool WizDayOnce(const QString& strName);
 
     // versions
-    virtual qint64 GetObjectVersion(const QString& strObjectType) override;
-    virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion) override;
+    virtual qint64 GetObjectVersion(const QString& strObjectType);
+    virtual bool SetObjectVersion(const QString& strObjectType, qint64 nVersion);
 
     virtual qint64 GetObjectLocalVersion(const QString& strObjectGUID,
-                                         const QString& strObjectType) override;
+                                         const QString& strObjectType);
     virtual qint64 GetObjectLocalVersionEx(const QString& strObjectGUID,
                                          const QString& strObjectType,
                                            bool& bObjectVersion);
     virtual bool SetObjectLocalServerVersion(const QString& strObjectGUID,
                                              const QString& strObjectType,
-                                             qint64 nVersion) override;
-    virtual void OnObjectUploaded(const QString &strObjectGUID, const QString &strObjectType) override;
+                                             qint64 nVersion);
+    virtual void OnObjectUploaded(const QString &strObjectGUID, const QString &strObjectType);
 
     // query
-    virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData) override;
-    virtual bool GetModifiedTagList(CWizTagDataArray& arrayData) override;
-    virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData) override;
-    virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData) override;
-    virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData) override;
-    virtual bool GetModifiedMessageList(CWizMessageDataArray& arrayData) override;
-    virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject) override;
+    virtual bool GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData);
+    virtual bool GetModifiedTagList(CWizTagDataArray& arrayData);
+    virtual bool GetModifiedStyleList(CWizStyleDataArray& arrayData);
+    virtual bool GetModifiedDocumentList(CWizDocumentDataArray& arrayData);
+    virtual bool GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool GetModifiedMessageList(CWizMessageDataArray& arrayData);
+    virtual bool GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject);
 
     virtual bool DocumentFromGUID(const QString& strGUID,
-                                  WIZDOCUMENTDATA& dataExists) override;
+                                  WIZDOCUMENTDATA& dataExists);
     virtual bool DocumentWithExFieldsFromGUID(const CString& strGUID,
                                               WIZDOCUMENTDATA& dataExists);
 
     // download
-    virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData) override;
-    virtual bool OnDownloadTagList(const CWizTagDataArray& arrayData) override;
-    virtual bool OnDownloadStyleList(const CWizStyleDataArray& arrayData) override;
-    virtual bool OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData) override;
-    virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayData) override;
-    virtual bool OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data) override;
+    virtual bool OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData);
+    virtual bool OnDownloadTagList(const CWizTagDataArray& arrayData);
+    virtual bool OnDownloadStyleList(const CWizStyleDataArray& arrayData);
+    virtual bool OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData);
+    virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayData);
+    virtual bool OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data);
     virtual bool UpdateObjectData(const QString& strObjectGUID,
                                   const QString& strObjectType,
-                                  const QByteArray& stream) override;
+                                  const QByteArray& stream);
 
     virtual bool IsObjectDataDownloaded(const QString& strGUID,
-                                        const QString& strType) override;
+                                        const QString& strType);
     virtual bool SetObjectDataDownloaded(const QString& strGUID,
                                          const QString& strType,
-                                         bool downloaded) override;
+                                         bool downloaded);
 
     virtual bool SetObjectServerDataInfo(const QString& strGUID,
                                          const QString& strType,
                                          COleDateTime& tServerDataModified,
-                                         const QString& strServerMD5) override;
+                                         const QString& strServerMD5);
 
     // upload
     virtual bool InitDocumentData(const QString& strGUID,
                                   WIZDOCUMENTDATAEX& data,
-                                  UINT part) override;
+                                  UINT part);
 
     virtual bool InitAttachmentData(const QString& strGUID,
                                     WIZDOCUMENTATTACHMENTDATAEX& data,
-                                    UINT part) override;
+                                    UINT part);
 
     virtual bool OnUploadObject(const QString& strGUID,
-                                const QString& strObjectType) override;
+                                const QString& strObjectType);
 
     // modify
-    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData) override;
-    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData) override;
+    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
+    virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
 
     // info and groups
-    virtual void SetUserInfo(const WIZUSERINFO& info) override;
-    virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info) override;
-    virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup) override;
-    virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz) override;
-    virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group) override;
-    virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase) override;
-    virtual IWizSyncableDatabase* GetPersonalDatabase() override;
+    virtual void SetUserInfo(const WIZUSERINFO& info);
+    virtual void SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info);
+    virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup);
+    virtual bool OnDownloadBizs(const CWizBizDataArray& arrayBiz);
+    virtual IWizSyncableDatabase* GetGroupDatabase(const WIZGROUPDATA& group);
+    virtual void CloseGroupDatabase(IWizSyncableDatabase* pDatabase);
+    virtual IWizSyncableDatabase* GetPersonalDatabase();
 
-    virtual bool IsGroup() override;
+    virtual bool IsGroup();
     bool IsPersonalGroup();
-    virtual bool HasBiz() override;
+    virtual bool HasBiz();
 
-    virtual bool IsGroupAdmin() override;
-    virtual bool IsGroupSuper() override;
-    virtual bool IsGroupEditor() override;
-    virtual bool IsGroupAuthor() override;
-    virtual bool IsGroupReader() override;
+    virtual bool IsGroupAdmin();
+    virtual bool IsGroupSuper();
+    virtual bool IsGroupEditor();
+    virtual bool IsGroupAuthor();
+    virtual bool IsGroupReader();
     virtual bool IsGroupOwner();
 
-    virtual bool CanEditDocument(const WIZDOCUMENTDATA& data) override;
-    virtual bool CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data) override;
+    virtual bool CanEditDocument(const WIZDOCUMENTDATA& data);
+    virtual bool CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data);
 
     // obsolote
     virtual qint64 GetObjectLocalServerVersion(const QString& strObjectGUID,
-                                               const QString& strObjectType) override;
+                                               const QString& strObjectType);
 
     virtual bool CreateConflictedCopy(const QString& strObjectGUID,
-                                      const QString& strObjectType) override;
+                                      const QString& strObjectType);
 
     virtual long GetLocalFlags(const QString& strObjectGUID,
-                               const QString& strObjectType) override;
+                               const QString& strObjectType);
     virtual bool SetLocalFlags(const QString& strObjectGUID,
                                const QString& strObjectType,
-                               long flags) override;
+                               long flags);
 
     // key-value api based syncing, user config, folders, biz users list etc.
-    virtual void GetAccountKeys(CWizStdStringArray& arrayKey) override;
-    virtual qint64 GetAccountLocalValueVersion(const QString& strKey) override;
+    virtual void GetAccountKeys(CWizStdStringArray& arrayKey);
+    virtual qint64 GetAccountLocalValueVersion(const QString& strKey);
     virtual void SetAccountLocalValue(const QString& strKey,
                                       const QString& strValue,
                                       qint64 nServerVersion,
-                                      bool bSaveVersion) override;
+                                      bool bSaveVersion);
 
-    virtual void GetKBKeys(CWizStdStringArray& arrayKey) override;
-    virtual qint64 GetLocalValueVersion(const QString& strKey) override;
-    virtual QString GetLocalValue(const QString& strKey) override;
+    virtual void GetKBKeys(CWizStdStringArray& arrayKey);
+    virtual qint64 GetLocalValueVersion(const QString& strKey);
+    virtual QString GetLocalValue(const QString& strKey);
     virtual void SetLocalValueVersion(const QString& strKey,
-                                      qint64 nServerVersion) override;
+                                      qint64 nServerVersion);
     virtual void SetLocalValue(const QString& strKey,
                                const QString& strValue,
                                qint64 nServerVersion,
-                               bool bSaveVersion) override;
+                               bool bSaveVersion);
 
-    virtual bool ProcessValue(const QString& strKey) override;
+    virtual bool ProcessValue(const QString& strKey);
 
-    virtual void GetAllBizUserIds(CWizStdStringArray& arrayText) override;
-    virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser) override;
+    virtual void GetAllBizUserIds(CWizStdStringArray& arrayText);
+    virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser);
 
-    virtual void ClearLastSyncError() override;
-    virtual QString GetLastSyncErrorMessage() override;
-    virtual void OnTrafficLimit(const QString& strErrorMessage) override;
-    virtual void OnStorageLimit(const QString& strErrorMessage) override;
-    virtual void OnNoteCountLimit(const QString& strErrorMessage) override;
-    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage) override;
-    virtual bool IsTrafficLimit() override;
-    virtual bool IsStorageLimit() override;
-    virtual bool IsNoteCountLimit() override;
-    virtual bool IsBizServiceExpr(const QString& strBizGUID) override;
-    virtual bool GetStorageLimitMessage(QString& strErrorMessage) override;
-    virtual bool GetTrafficLimitMessage(QString& strErrorMessage) override;
-    virtual bool GetNoteCountLimit(QString& strErrorMessage) override;
+    virtual void ClearLastSyncError();
+    virtual QString GetLastSyncErrorMessage();
+    virtual void OnTrafficLimit(const QString& strErrorMessage);
+    virtual void OnStorageLimit(const QString& strErrorMessage);
+    virtual void OnNoteCountLimit(const QString& strErrorMessage);
+    virtual void OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage);
+    virtual bool IsTrafficLimit();
+    virtual bool IsStorageLimit();
+    virtual bool IsNoteCountLimit();
+    virtual bool IsBizServiceExpr(const QString& strBizGUID);
+    virtual bool GetStorageLimitMessage(QString& strErrorMessage);
+    virtual bool GetTrafficLimitMessage(QString& strErrorMessage);
+    virtual bool GetNoteCountLimit(QString& strErrorMessage);
 
-    virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue) override;
-    virtual QString meta(const QString& strSection, const QString& strKey) override;
-    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson)  override;
+    virtual bool setMeta(const QString& strSection, const QString& strKey, const QString& strValue);
+    virtual QString meta(const QString& strSection, const QString& strKey);
+    virtual void setBizGroupUsers(const QString& strkbGUID, const QString& strJson) ;
 
     // end interface implementations
 
@@ -307,7 +307,7 @@ public:
     void SetGroupTagsPosModified();
 
     //
-    virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners) override;
+    virtual bool getAllNotesOwners(CWizStdStringArray &arrayOwners);
 
 public:
     bool Open(const QString& strAccountFolderName, const QString& strKbGUID = NULL);
@@ -331,7 +331,7 @@ public:
     QString GetDocumentFileName(const QString& strGUID) const;
     QString GetAttachmentFileName(const QString& strGUID);
     QString GetAvatarPath() const;
-    QString GetDefaultNoteLocation() const override;
+    QString GetDefaultNoteLocation() const;
     QString GetDocumentAuthorAlias(const WIZDOCUMENTDATA& doc);
     QString GetDocumentOwnerAlias(const WIZDOCUMENTDATA& doc);
 
@@ -360,7 +360,7 @@ public:
     bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
     bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
-    bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID) override;
+    bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
     //
     static bool IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QString& bizGUID);
@@ -388,13 +388,13 @@ public:
     void ClearUnusedImages(const QString& strHtml, const QString& strFilePath);
     bool UpdateDocumentAbstract(const QString& strDocumentGUID);
 
-    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true) override;
+    virtual bool UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZipFileName, bool notifyDataModify = true);
 
     // delete
     bool DeleteObject(const QString &strGUID, const QString &strType, bool bLog);
     bool DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog);
     bool DeleteAttachment(const WIZDOCUMENTATTACHMENTDATA& data, bool bLog,
-                          bool bResetDocInfo, bool updateAttachList = true) override;
+                          bool bResetDocInfo, bool updateAttachList = true);
     bool DeleteGroupFolder(const WIZTAGDATA& data, bool bLog);
 
     bool IsDocumentModified(const CString& strGUID);

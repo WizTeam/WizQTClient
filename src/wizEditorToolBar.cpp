@@ -514,21 +514,21 @@ public:
     }
 
 protected:
-    virtual void leaveEvent(QEvent* event) override
+    virtual void leaveEvent(QEvent* event)
     {
         QToolButton::leaveEvent(event);
 
         update();
     }
 
-    virtual void enterEvent(QEvent* event) override
+    virtual void enterEvent(QEvent* event)
     {
         QToolButton::enterEvent(event);
 
         update();
     }
 
-    virtual void paintEvent(QPaintEvent *event) override
+    virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
 
@@ -569,7 +569,7 @@ protected:
         }
     }
 
-    QSize sizeHint() const override
+    QSize sizeHint() const
     {
         int width = m_horizontalPadding_left + m_horizontalPadding_rgiht + iconSize().width();
         if (arrowType() == Qt::RightArrow)
@@ -624,7 +624,7 @@ public:
     }
 
 protected:
-    virtual void paintEvent(QPaintEvent *event) override
+    virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
 
@@ -667,12 +667,12 @@ protected:
         p.drawPixmap(rcArrow, arrow);
     }
 
-    void mousePressEvent(QMouseEvent* ev) override
+    void mousePressEvent(QMouseEvent* ev)
     {
         QToolButton::mousePressEvent(ev);
     }
 
-    void mouseReleaseEvent(QMouseEvent* ev) override
+    void mouseReleaseEvent(QMouseEvent* ev)
     {
         QPoint pos = ev->pos();
         QRect rcIcon = rect();
@@ -693,7 +693,7 @@ protected:
         }
     }
 
-    QSize sizeHint() const override
+    QSize sizeHint() const
     {
         QSize size = CWizToolButton::sizeHint();
         size.setWidth(size.width() + ColorButtonRightArrowWidth);
