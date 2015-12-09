@@ -2858,6 +2858,14 @@ void MainWindow::on_actionSortBySize_triggered()
 }
 
 #define MARKDOCUMENTSREADCHECKED       "MarkDocumentsReadedChecked"
+#include <functional>
+
+std::function<void()> tipBindFunction = [](){
+    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    {
+        mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
+    }
+};
 
 void MainWindow::on_categoryUnreadButton_triggered()
 {
@@ -2877,12 +2885,7 @@ void MainWindow::on_categoryUnreadButton_triggered()
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
-        tipWidget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
-            {
-                mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
-            }
-        });
+        tipWidget->bindCloseFunction(tipBindFunction);
         //
         tipWidget->addToTipListManager(m_btnMarkDocumentsReaded, 0, 2);
     }
