@@ -176,10 +176,10 @@ void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
 void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 {
     //
-    class CPostRunable : public QRunnable
+    class CPostRunnable : public QRunnable
     {
     public:
-        CPostRunable(IWizSyncableDatabase* db)
+        CPostRunnable(IWizSyncableDatabase* db)
             : m_db(db)
         {}
 
@@ -193,7 +193,7 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
         IWizSyncableDatabase* m_db;
     };
 
-    QThreadPool::globalInstance()->start(new CPostRunable(db));
+    QThreadPool::globalInstance()->start(new CPostRunnable(db));
 }
 
 

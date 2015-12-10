@@ -1768,6 +1768,7 @@ public:
                 continue;
 
             qDebug() << "update user avatar  : " << it.value();
+            //TODO: 用户头像更新改为覆盖方式，直接删除后下载有可能会造成头像不显示的问题
             WizService::AvatarHost::deleteAvatar(it.value());
             WizURLDownloadToFile(strDownLoadUrl, strFileName, true);
             WizService::AvatarHost::load(it.value());

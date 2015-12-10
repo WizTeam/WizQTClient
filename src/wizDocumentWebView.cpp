@@ -2511,7 +2511,7 @@ void CWizDocumentWebViewLoaderThread::run()
         {
             emit loaded(kbGuid, docGuid, strHtmlFile);
         }
-    };
+    }
 }
 
 void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID)
@@ -2653,6 +2653,6 @@ void CWizDocumentWebViewSaverThread::run()
 
         QString kbGuid = db.IsGroup() ? db.kbGUID() : "";
         emit saved(kbGuid, doc.strGUID, ok);
-    };
+    }
 }
 
