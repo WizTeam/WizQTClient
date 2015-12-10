@@ -3314,7 +3314,7 @@ void CWizCategoryView::importFiles(QStringList& strFileList)
     CWizProgressDialog progressDialog;
     progressDialog.setProgress(100,0);
     progressDialog.setActionString(tr("loading..."));
-    progressDialog.setWindowTitle(tr("%1 files to load.").arg(strFileList.count()));
+    progressDialog.setWindowTitle(tr("%1 files to import.").arg(strFileList.count()));
     connect(fileReader, SIGNAL(importProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
     connect(fileReader,SIGNAL(importFinished(bool,QString)), &progressDialog,SLOT(close()));
     connect(fileReader, SIGNAL(importFinished(bool,QString)), SLOT(on_importFile_finished(bool,QString)));

@@ -120,16 +120,9 @@ bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
 
 AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
     : q(avatarHost)
-{
-    m_downloader = new AvatarDownloader();
-    connect(m_downloader, SIGNAL(downloaded(QString, bool)),
-            SLOT(on_downloaded(QString, bool)));
-
-    m_thread = new QThread(this);
-    connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
-
-    m_downloader->moveToThread(m_thread);
-
+    , m_downloader(nullptr)
+    , m_thread(nullptr)
+{   
     loadCacheDefault();
 }
 
@@ -172,6 +165,19 @@ void AvatarHostPrivate::addToDownloadList(const QString& strUserID)
     {
         m_listUser.append(strUserID);
     }
+
+    if (!m_downloader)
+    {
+        m_downloader = new AvatarDownloader();
+        connect(m_downloader, SIGNAL(downloaded(QString, bool)),
+                SLOT(on_downloaded(QString, bool)));
+
+        m_thread = new QThread(this);
+        connect(m_thread, SIGNAL(started()), SLOT(on_thread_started()));
+
+        m_downloader->moveToThread(m_thread);
+    }
+
     if (!m_thread->isRunning())
     {
         m_thread->start(QThread::IdlePriority);
