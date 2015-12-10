@@ -11,10 +11,6 @@
 #include <extensionsystem/pluginmanager.h>
 
 #include "wizdef.h"
-#include "widgets/wizScrollBar.h"
-#include "wizmainwindow.h"
-#include "wizProgressDialog.h"
-#include "wiznotestyle.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "share/wizdrawtexthelper.h"
@@ -28,12 +24,17 @@
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
+#include "widgets/wizScrollBar.h"
+#include "widgets/wizAdvancedSearchDialog.h"
 #include "mac/wizmachelper.h"
+#include "core/wizNoteManager.h"
+#include "wizmainwindow.h"
+#include "wizProgressDialog.h"
+#include "wiznotestyle.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
 #include "wizFileReader.h"
-#include "widgets/wizAdvancedSearchDialog.h"
 #include "wizOEMSettings.h"
 
 using namespace WizService;
@@ -571,26 +572,9 @@ void CWizCategoryBaseView::leaveEvent(QEvent* event)
     update();
 }
 
-void CWizCategoryBaseView::importFiles(QStringList &strFileList)
+void CWizCategoryBaseView::importFiles(QStringList &/*strFileList*/)
 {
-    CWizFileReader *fileReader = new CWizFileReader();
-    connect(fileReader, SIGNAL(fileLoaded(QString, QString)),
-            SLOT(createDocumentByHtml(QString, QString)));
-    connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
-            SLOT(createDocumentByHtml(QString, QString, QString)));
-    connect(fileReader, SIGNAL(fileLoadFailed(QString)),
-            SLOT(createDocumentWithAttachment(QString)));
-    connect(fileReader, SIGNAL(richTextFileLoaded(QString,QString,QString)),
-            SLOT(createDocumentByHtmlWithAttachment(QString,QString,QString)));
-    MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
-    CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
-    progressDialog->setProgress(100,0);
-    progressDialog->setActionString(tr("loading..."));
-    progressDialog->setWindowTitle(tr("%1 files to load.").arg(strFileList.count()));
-    connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
-    connect(fileReader,SIGNAL(loadFinished()),progressDialog,SLOT(close()));
-    fileReader->loadFiles(strFileList);
-    progressDialog->exec();
+    Q_ASSERT(0);
 }
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
@@ -1148,30 +1132,6 @@ Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
     return Qt::NoItemFlags;
 }
 
-void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, const QString& /*strTitle*/)
-{
-    // do nothing
-    // create document in CWizCategoryView
-
-}
-
-void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
-                                                const QString& /*strHtml*/, const QString& /*strTitle*/)
-{
-}
-
-bool CWizCategoryBaseView::createDocumentWithAttachment(const QString& /*strFileName*/)
-{
-    return true;
-}
-
-bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*strHtml*/,
-                                                              const QString& /*strTitle*/, const QString& /*strAttachFile*/)
-{
-    return true;
-}
-
-
 /* ------------------------------ CWizCategoryView ------------------------------ */
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     : CWizCategoryBaseView(app, parent)
@@ -1376,6 +1336,7 @@ void CWizCategoryView::initMenus()
     // group root menu normal
     m_menuNormalGroupRoot = std::make_shared<QMenu>();
     m_menuNormalGroupRoot->addAction(actionNewDoc);
+    m_menuNormalGroupRoot->addAction(actionImportFile);
     m_menuNormalGroupRoot->addAction(actionNewItem);
     m_menuNormalGroupRoot->addSeparator();
     m_menuNormalGroupRoot->addAction(actionItemAttr);
@@ -1384,6 +1345,7 @@ void CWizCategoryView::initMenus()
     // group root menu admin
     m_menuAdminGroupRoot = std::make_shared<QMenu>();
     m_menuAdminGroupRoot->addAction(actionNewDoc);
+    m_menuAdminGroupRoot->addAction(actionImportFile);
     m_menuAdminGroupRoot->addAction(actionNewItem);
     m_menuAdminGroupRoot->addSeparator();
     m_menuAdminGroupRoot->addAction(actionManageGroup);
@@ -1392,6 +1354,7 @@ void CWizCategoryView::initMenus()
     // group root menu normal
     m_menuOwnerGroupRoot = std::make_shared<QMenu>();
     m_menuOwnerGroupRoot->addAction(actionNewDoc);
+    m_menuOwnerGroupRoot->addAction(actionImportFile);
     m_menuOwnerGroupRoot->addAction(actionNewItem);
     m_menuOwnerGroupRoot->addSeparator();
     m_menuOwnerGroupRoot->addAction(actionManageGroup);
@@ -1408,6 +1371,7 @@ void CWizCategoryView::initMenus()
     // group menu
     m_menuGroup = std::make_shared<QMenu>();
     m_menuGroup->addAction(actionNewDoc);
+    m_menuGroup->addAction(actionImportFile);
     m_menuGroup->addAction(actionNewItem);
     m_menuGroup->addAction(actionRenameItem);
     m_menuGroup->addAction(actionCopyItem);
@@ -1853,35 +1817,6 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
 
     quickSyncNewDocument(data.strKbGUID);
     //
-    return true;
-}
-
-bool CWizCategoryView::createDocumentWithAttachment(const QString& strFileName)
-{
-    if (!QFile::exists(strFileName))
-        return false;
-
-    QStringList fileList(strFileName);
-    WIZDOCUMENTDATA data;
-    return createDocumentByAttachments(data, fileList);
-}
-
-bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle, const QString& strAttachFile)
-{
-    if (!QFile::exists(strAttachFile))
-        return false;
-
-     WIZDOCUMENTDATA data;
-    if (!createDocument(data, strHtml, strTitle))
-        return false;
-
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    WIZDOCUMENTATTACHMENTDATA attach;
-    if (!db.AddAttachment(data, strAttachFile, attach))
-    {
-        qWarning() << "add attachment failed , " << strAttachFile;
-        return false;
-    }
     return true;
 }
 
@@ -3370,6 +3305,33 @@ void CWizCategoryView::updatePersonalTagDocumentCount()
 void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
 {
     Q_UNUSED (strKbGUID)
+}
+
+void CWizCategoryView::importFiles(QStringList& strFileList)
+{
+    CWizFileImporter *fileReader = new CWizFileImporter(m_dbMgr);
+
+    CWizProgressDialog progressDialog;
+    progressDialog.setProgress(100,0);
+    progressDialog.setActionString(tr("loading..."));
+    progressDialog.setWindowTitle(tr("%1 files to load.").arg(strFileList.count()));
+    connect(fileReader, SIGNAL(importProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
+    connect(fileReader,SIGNAL(importFinished(bool,QString)), &progressDialog,SLOT(close()));
+    connect(fileReader, SIGNAL(importFinished(bool,QString)), SLOT(on_importFile_finished(bool,QString)));
+
+    QString strKbGUID;
+    WIZTAGDATA tag;
+    QString strLocation;
+    if (!getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
+        return;
+
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        fileReader->importFiles(strFileList, strKbGUID, strLocation, tag);
+        //
+        fileReader->deleteLater();
+    });
+    //
+    progressDialog.exec();
 }
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
@@ -5562,23 +5524,13 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
 }
 
-
-void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QString& strTitle)
+void CWizCategoryView::on_importFile_finished(bool ok, QString text)
 {
-    WIZDOCUMENTDATA data;
-    createDocument(data, strHtml, strTitle);
+    if (!ok)
+    {
+        CWizMessageBox::information(nullptr, tr("Info"), text);
+    }
 }
-
-void CWizCategoryView::createDocumentByHtml(const QString& strFileName,
-                                            const QString& strHtml, const QString& strTitle)
-{
-    //为了提取和file路径相关联的图片，不直接使用strHtml创建笔记，而是在创建之后更新笔记内容
-    WIZDOCUMENTDATA data;
-    createDocument(data, "<p><br/></p>", strTitle);
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    db.UpdateDocumentData(data, strHtml, strFileName, 0);
-}
-
 
 CWizFolder* CWizCategoryView::SelectedFolder()
 {

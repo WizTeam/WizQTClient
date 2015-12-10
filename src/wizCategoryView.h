@@ -42,7 +42,7 @@ public:
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
 
-    void importFiles(QStringList& strFileList);
+    virtual void importFiles(QStringList& strFileList);
 
     void saveSelection();
     void restoreSelection();
@@ -125,11 +125,6 @@ protected Q_SLOTS:
 
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle) = 0;
-    virtual void createDocumentByHtml(const QString& strFileName, const QString& strHtml, const QString& strTitle);
-    virtual bool createDocumentWithAttachment(const QString& strFileName);
-    virtual bool createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle,
-                                                    const QString& strAttachFile);
     void on_dragHovered_timeOut();
 
 protected:
@@ -310,12 +305,11 @@ public:
 
     void updateGroupTagDocumentCount(const QString &strKbGUID);
 
+    virtual void importFiles(QStringList& strFileList);
+
+    //TODO: 全部移动到notemanager去实现
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
-
-    bool createDocumentWithAttachment(const QString& strFileName);
-    bool createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle,
-                                                    const QString& strAttachFile);
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
     bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
 
@@ -363,10 +357,8 @@ protected Q_SLOTS:
 
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
-    virtual void createDocumentByHtml(const QString& strHtml, const QString& strTitle);
-    virtual void createDocumentByHtml(const QString &strFileName, const QString& strHtml,
-                                      const QString& strTitle);
 
+    void on_importFile_finished(bool ok, QString text);
 
 public Q_SLOTS:
     void on_action_newDocument();
@@ -453,7 +445,6 @@ private Q_SLOTS:
     void on_updatePersonalFolderDocumentCount_timeout();
     void on_updatePersonalTagDocumentCount_timeout();
     void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
-
 
 private:
     void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,

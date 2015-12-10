@@ -237,7 +237,8 @@ public:
     CWizDocumentView* documentView() const;
 
     CWizActions* actions() const { return m_actions; }
-    //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
+
+    //FIXME: why provide download host and dialog by mainwidnow ???
     CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizIAPDialog* iapDialog();

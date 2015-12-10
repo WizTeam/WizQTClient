@@ -5,29 +5,55 @@
 #include <QTextStream>
 #include <QDebug>
 
-#include "share/wizmisc.h"
-#include "share/wizRtfReader.h"
-#include "mac/wizmachelper.h"
-#include "html/wizhtmlcollector.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
+#include "html/wizhtmlcollector.h"
+#include "share/wizmisc.h"
+#include "share/wizRtfReader.h"
+#include "share/wizDatabase.h"
+#include "core/wizNoteManager.h"
+#include "mac/wizmachelper.h"
 
-CWizFileReader::CWizFileReader(QObject *parent) :
-    QThread(parent)
+CWizFileImporter::CWizFileImporter(CWizDatabaseManager& dbMgr, QObject *parent)
+    : QObject(parent)
+    , m_dbMgr(dbMgr)
 {
-    //m_files = new QStringList();
 }
 
-void CWizFileReader::loadFiles(const QStringList& strFiles)
+void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strTargetFolderLocation)
 {
-    m_files = strFiles;
-    if (!isRunning())
+    WIZTAGDATA tag;
+    importFiles(strFiles, "", strTargetFolderLocation, tag);
+}
+
+void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID, const WIZTAGDATA& tag)
+{
+    QString location = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+    importFiles(strFiles, strKbGUID, location, tag);
+}
+
+void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID,
+                                   const QString& strTargetFolderLocation, const WIZTAGDATA& tag)
+{
+    int nTotal = strFiles.count();
+    int nFailed = 0;
+    QString text(tr(" file(s) import failed: \n"));
+    for (int i = 0; i < nTotal; ++i)
     {
-        start();
+        QString strFile = strFiles.at(i);
+        if (!importFile(strFile, strKbGUID, strTargetFolderLocation, tag))
+        {
+            ++nFailed;
+            text.append(strFile).append("\n");
+        }
+
+        emit importProgress(nTotal, i + 1);
     }
+    text = QString::number(nFailed) + text;
+    emit importFinished(nFailed == 0, text);
 }
 
-QString CWizFileReader::loadHtmlFileToHtml(const QString& strFileName)
+QString CWizFileImporter::loadHtmlFileToHtml(const QString& strFileName)
 {
     QFile file(strFileName);
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
@@ -39,7 +65,7 @@ QString CWizFileReader::loadHtmlFileToHtml(const QString& strFileName)
     return ret;
 }
 
-QString CWizFileReader::loadTextFileToHtml(const QString& strFileName)
+QString CWizFileImporter::loadTextFileToHtml(const QString& strFileName)
 {
     QFile file(strFileName);
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
@@ -59,12 +85,12 @@ QString CWizFileReader::loadTextFileToHtml(const QString& strFileName)
     return ret;
 }
 
-QString CWizFileReader::loadImageFileToHtml(const QString& strFileName)
+QString CWizFileImporter::loadImageFileToHtml(const QString& strFileName)
 {
     return QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 }
 
-QString CWizFileReader::loadRtfFileToHtml(const QString& strFileName)
+QString CWizFileImporter::loadRtfFileToHtml(const QString& strFileName)
 {
     QString strHtml;
     if (CWizRtfReader::load(strFileName, strHtml))
@@ -73,81 +99,93 @@ QString CWizFileReader::loadRtfFileToHtml(const QString& strFileName)
     return "";
 }
 
-void CWizFileReader::run()
+bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGUID,
+                                  const QString& strLocation, const WIZTAGDATA& tag)
 {
-    int nTotal = m_files.count();
-    for (int i = 0; i < nTotal; i++)
+    QFileInfo fi(strFile);
+    QString strHtml;
+    QStringList textExtList, imageExtList, rtfExtList, docExtList, htmlExtList;
+    textExtList << "txt" << "md" << "markdown" << "mht" << "cpp" << "h";
+    imageExtList << "jpg" << "png" << "gif" << "tiff" << "jpeg" << "bmp" << "svg";
+    rtfExtList << "rtf";
+    docExtList << "doc" << "docx" << "pages";
+    htmlExtList << "html" << "htm";
+
+#ifdef Q_OS_MAC
+    QStringList webExtList;
+    webExtList << "webarchive";
+#endif
+    bool addAttach = false;
+    bool containsImage = false;
+    QString docType = fi.suffix();
+    if (textExtList.contains(docType,Qt::CaseInsensitive))
     {
-        QString strFile = m_files.at(i);
-        QFileInfo fi(strFile);
-        QString strHtml;
-        QStringList textExtList, imageExtList, rtfExtList, docExtList, htmlExtList;
-        textExtList << "txt" << "md" << "markdown" << "mht" << "cpp" << "h";
-        imageExtList << "jpg" << "png" << "gif" << "tiff" << "jpeg" << "bmp" << "svg";
-        rtfExtList << "rtf";
-        docExtList << "doc" << "docx" << "pages";
-        htmlExtList << "html" << "htm";
-
-#ifdef Q_OS_MAC
-        QStringList webExtList;
-        webExtList << "webarchive";
-#endif
-        bool addAttach = false;
-        QString docType = fi.suffix();
-        if (textExtList.contains(docType,Qt::CaseInsensitive))
-        {
-            strHtml = loadTextFileToHtml(strFile);
-            addAttach = true;
-        }
-        else if (imageExtList.contains(docType,Qt::CaseInsensitive))
-        {
-            strHtml = loadImageFileToHtml(strFile);
-        }
-        else if (htmlExtList.contains(docType, Qt::CaseInsensitive))
-        {
-            strHtml = loadHtmlFileToHtml(strFile);
-            addAttach = true;
-        }
-#ifdef Q_OS_MAC
-        else if (rtfExtList.contains(docType, Qt::CaseInsensitive))
-        {
-            if (!documentToHtml(strFile, RTFTextDocumentType, strHtml))
-                continue;
-            WizGetBodyContentFromHtml(strHtml, true);
-            addAttach = true;
-        }
-        else if (docExtList.contains(docType))
-        {
-            if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
-                continue;
-            WizGetBodyContentFromHtml(strHtml, true);
-            addAttach = true;
-        }
-        else if (webExtList.contains(docType))
-        {
-            if (!documentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
-                continue;
-            WizGetBodyContentFromHtml(strHtml, true);
-            addAttach = true;
-        }
-        else
-        {
-            emit fileLoadFailed(strFile);
-        }
-#endif
-        QString strTitle = Utils::Misc::extractFileName(strFile);
-
-        if (addAttach)
-        {
-            emit richTextFileLoaded(strHtml, strTitle, strFile);
-        }
-        else if (!strHtml.isEmpty())
-        {
-            emit fileLoaded(strHtml, strTitle);
-        }
-
-        emit loadProgress(nTotal, i + 1);
+        strHtml = loadTextFileToHtml(strFile);
+        addAttach = true;
     }
-    emit loadFinished();
-    m_files.clear();
+    else if (imageExtList.contains(docType,Qt::CaseInsensitive))
+    {
+        strHtml = loadImageFileToHtml(strFile);
+        containsImage = true;
+    }
+    else if (htmlExtList.contains(docType, Qt::CaseInsensitive))
+    {
+        strHtml = loadHtmlFileToHtml(strFile);
+        containsImage = true;
+        addAttach = true;
+    }
+#ifdef Q_OS_MAC
+    else if (rtfExtList.contains(docType, Qt::CaseInsensitive))
+    {
+        if (!documentToHtml(strFile, RTFTextDocumentType, strHtml))
+            return false;
+        WizGetBodyContentFromHtml(strHtml, true);
+        addAttach = true;
+    }
+    else if (docExtList.contains(docType))
+    {
+        if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
+            return false;
+        WizGetBodyContentFromHtml(strHtml, true);
+        addAttach = true;
+    }
+    else if (webExtList.contains(docType))
+    {
+        if (!documentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
+            return false;
+        WizGetBodyContentFromHtml(strHtml, true);
+        addAttach = true;
+    }
+    else
+    {
+        addAttach = true;
+    }
+#endif
+    QString strTitle = Utils::Misc::extractFileName(strFile);
+
+    CWizNoteManager manager(m_dbMgr);
+    WIZDOCUMENTDATA doc;
+    bool ret = manager.createNote(doc, strKbGUID, strTitle, strHtml, strLocation, tag);
+    if (!ret)
+    {
+        qCritical() << "create note faile : " << strTitle;
+        return false;
+    }
+
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (addAttach)
+    {
+        WIZDOCUMENTATTACHMENTDATA attach;
+        if (!db.AddAttachment(doc, strFile, attach))
+        {
+            qWarning() << "add attachment failed , " << strFile;
+        }
+    }
+    else if (containsImage)
+    {
+        //为了提取和file路径相关联的图片，在创建之后更新笔记内容
+        db.UpdateDocumentData(doc, strHtml, strFile, 0);
+    }
+
+    return true;
 }

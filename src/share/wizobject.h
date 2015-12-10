@@ -252,7 +252,7 @@ typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
 
 struct WIZTAGDATA : public WIZOBJECTBASE
 {
-    WIZTAGDATA();
+    explicit WIZTAGDATA();
     WIZTAGDATA(const WIZTAGDATA& data);
     virtual ~WIZTAGDATA();
 

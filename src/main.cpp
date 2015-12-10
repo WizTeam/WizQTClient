@@ -420,13 +420,10 @@ int mainCore(int argc, char *argv[])
     w.show();
     w.init();   
 
-    //
-    CWizNoteManager::createSingleton(w);
-
     if (isNewRegisterAccount)
     {
-        CWizNoteManager* noteManager = CWizNoteManager::instance();
-        noteManager->createIntroductionNoteForNewRegisterAccount();
+        CWizNoteManager noteManager(dbMgr);
+        noteManager.createIntroductionNoteForNewRegisterAccount();
     }
 
     int ret = a.exec();
