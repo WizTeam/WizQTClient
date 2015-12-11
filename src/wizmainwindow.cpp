@@ -238,7 +238,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
-//    setWindowTitle(tr("WizNote"));
+    setWindowTitle(tr("WizNote"));
 
     restoreStatus();
 
@@ -3673,7 +3673,6 @@ void MainWindow::checkWizUpdate()
        connect(&m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
        m_upgrade.checkUpgrade();
     });
-
 #endif
 }
 
