@@ -17,42 +17,21 @@
 
 #endif // Q_OS_MAC
 
-CWizUpgrade::CWizUpgrade(QObject *parent) :
-    QThread(parent)
-{
-    connect(&m_timerCheck, SIGNAL(timeout()), SLOT(on_timerCheck_timeout()));
-}
-
-CWizUpgrade::~CWizUpgrade()
+CWizUpgradeChecker::CWizUpgradeChecker(QObject *parent) :
+    QObject(parent)
 {
 }
 
-void CWizUpgrade::startCheck()
+CWizUpgradeChecker::~CWizUpgradeChecker()
 {
-    m_timerCheck.start(10 * 1000);
 }
 
-void CWizUpgrade::on_timerCheck_timeout()
-{
-    m_timerCheck.stop();
-
-    if (!isRunning())
-    {
-        start();
-    }
-}
-
-void CWizUpgrade::run()
-{
-    checkUpgrade();
-}
-
-QString CWizUpgrade::getWhatsNewUrl()
+QString CWizUpgradeChecker::getWhatsNewUrl()
 {
     return WizService::WizApiEntry::standardCommandUrl("changelog");
 }
 
-void CWizUpgrade::checkUpgrade()
+void CWizUpgradeChecker::checkUpgrade()
 {
     QString strApiUrl = WizService::WizApiEntry::standardCommandUrl("download_server");
 
@@ -76,7 +55,7 @@ void CWizUpgrade::checkUpgrade()
     _check(strCheckUrl);
 }
 
-void CWizUpgrade::_check(const QString& strUrl)
+void CWizUpgradeChecker::_check(const QString& strUrl)
 {
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
     QEventLoop loop;
@@ -122,7 +101,7 @@ void CWizUpgrade::_check(const QString& strUrl)
     reply->deleteLater();
 }
 
-QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
+QUrl CWizUpgradeChecker::redirectUrl(QUrl const &possible_redirect_url, \
                               QUrl const &old_redirect_url) const
 {
     QUrl redirect_url;

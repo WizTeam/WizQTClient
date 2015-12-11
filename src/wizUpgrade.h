@@ -2,34 +2,28 @@
 #define WIZUPGRADE_H
 
 #include <QtNetwork>
-#include <QThread>
 #include <memory>
 
 
-class CWizUpgrade : public QThread
+class CWizUpgradeChecker : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CWizUpgrade(QObject *parent = 0);
-    ~CWizUpgrade();
+    explicit CWizUpgradeChecker(QObject *parent = 0);
+    ~CWizUpgradeChecker();
     void startCheck();
 
     static QString getWhatsNewUrl();
 
-public Q_SLOTS:
     void checkUpgrade();
-    void on_timerCheck_timeout();
 
 Q_SIGNALS:
     void checkFinished(bool bUpgradeAvaliable);
 
-protected:
-    void run();
 
 private:
     std::shared_ptr<QNetworkAccessManager> m_net;
-    QTimer m_timerCheck;
     QUrl m_redirectedUrl;
 
     void _check(const QString& strUrl);

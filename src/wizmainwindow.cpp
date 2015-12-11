@@ -91,6 +91,7 @@
 #include "share/wizFileMonitor.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizTranslater.h"
+#include "share/wizthreads.h"
 #include "widgets/wizShareLinkDialog.h"
 #include "widgets/wizSingleDocumentView.h"
 #include "widgets/wizCustomToolBar.h"
@@ -117,12 +118,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searcher(new CWizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
-#ifndef BUILD4APPSTORE
-    , m_upgrade(nullptr)
-#else
-    , m_upgrade(0)
-#endif
-    //, m_certManager(new CWizCertManager(*this))
     , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
@@ -557,14 +552,10 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 
 void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
 {
-    m_upgrade->quit();
-    m_upgrade->deleteLater();
-    m_upgrade = nullptr;
-
     if (!bUpgradeAvaliable)
         return;
 
-    QString strUrl = CWizUpgrade::getWhatsNewUrl();
+    QString strUrl = CWizUpgradeChecker::getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
         QString url = WizService::WizApiEntry::standardCommandUrl("link");
@@ -3677,12 +3668,12 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
-    if (!m_upgrade)
-    {
-        m_upgrade = new CWizUpgrade(this);
-        connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    }
-    m_upgrade->startCheck();
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+       CWizUpgradeChecker m_upgrade;
+       connect(&m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+       m_upgrade.checkUpgrade();
+    });
+
 #endif
 }
 

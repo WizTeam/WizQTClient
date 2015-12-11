@@ -50,7 +50,7 @@ class wizImageButton;
 class CWizMacToolBar;
 class QNetworkDiskCache;
 class CWizConsoleDialog;
-class CWizUpgrade;
+class CWizUpgradeChecker;
 class CWizCategoryView;
 class QListWidgetItem;
 class CWizCategoryViewMessageItem;
@@ -141,7 +141,7 @@ private:
     CWizKMSyncThread* m_sync;
     CWizUserVerifyDialog* m_userVerifyDialog;
     CWizConsoleDialog* m_console;
-    CWizUpgrade* m_upgrade;
+    CWizUpgradeChecker* m_upgrade;
     CWizIAPDialog* m_iapDialog;
 
     CWizObjectDataDownloaderHost* m_objectDownloaderHost;
