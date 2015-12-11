@@ -3026,10 +3026,7 @@ void CWizCategoryView::init()
     initFolders();
     initTags();
     initStyles();
-    initGroups();
-    //
-    resetSections();
-    loadSectionStatus();
+    initGroups();    
 }
 
 void CWizCategoryView::resetSections()
@@ -3358,7 +3355,9 @@ void CWizCategoryView::on_initGroupFolder_finished()
     qDebug() << count << " group init finished, total " << m_dbMgr.count();
     if (count >= m_dbMgr.count())
     {
+        resetSections();
         loadExpandState();
+        loadSectionStatus();
     }
 }
 
