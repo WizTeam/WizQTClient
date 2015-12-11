@@ -364,7 +364,6 @@ void MainWindow::cleanOnQuit()
     m_doc->waitForDone();
     //
     QThreadPool::globalInstance()->waitForDone();
-    WizService::AvatarHost::waitForDone();
 
     if (m_mobileFileReceiver)
     {

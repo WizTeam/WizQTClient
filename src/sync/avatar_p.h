@@ -4,7 +4,9 @@
 #include <QObject>
 #include <QStringList>
 #include <QUrl>
+#include <memory>
 
+class QNetworkReply;
 class QNetworkAccessManager;
 
 namespace WizService {
@@ -22,7 +24,7 @@ public:
     Q_INVOKABLE void download(const QString& strUserGUID);
 
 private:
-    QNetworkAccessManager* m_net;
+    std::shared_ptr<QNetworkAccessManager> m_net;
     QString m_strCurrentUser;
 
     void fetchUserAvatarEnd(bool bSucceed);
@@ -33,9 +35,7 @@ private:
 
     bool saveDefaultUserAvatar();
     bool save(const QString& strUserGUID, const QByteArray& bytes);
-
-private Q_SLOTS:
-    void on_queryUserAvatar_finished();
+    void queryUserAvatar(const QString& strUrl);
 
 Q_SIGNALS:
     void downloaded(QString strUserGUID, bool bSucceed);
@@ -60,7 +60,6 @@ public:
     QString defaultKey() const;
     bool deleteAvatar(const QString& strUserID);
     //
-    void waitForDone();
 
 private:
     QThread* m_thread;
@@ -82,7 +81,6 @@ private:
     AvatarHost* q;
 
 private Q_SLOTS:
-    void on_thread_started();
     void on_downloaded(QString strUserID, bool bSucceed);
 };
 
