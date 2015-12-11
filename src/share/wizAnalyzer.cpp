@@ -373,7 +373,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     }
 
     rapidjson::Document d;
-    d.Parse<0>(loop.result().toUtf8().constData());
+    d.Parse<0>(loop.result().constData());
 
     if (!d.HasMember("return_code"))
     {

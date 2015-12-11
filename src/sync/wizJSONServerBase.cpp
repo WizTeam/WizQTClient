@@ -31,7 +31,7 @@ bool CWizJSONServerBase::get(const QString& strUrl, QString& strResult)
         return false;
     }
 
-    strResult = loop.result();
+    strResult = QString::fromUtf8(loop.result().constData());
     return !strResult.isEmpty();
 }
 
@@ -47,7 +47,7 @@ bool CWizJSONServerBase::deleteResource(const QString& strUrl)
         return false;
     }
 
-    QString result = loop.result();
+    QString result = QString::fromUtf8(loop.result().constData());
 
     int returnCode = 0;
     QString returnMessage;

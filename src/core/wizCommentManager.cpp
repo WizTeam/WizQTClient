@@ -113,7 +113,8 @@ void CWizCommentQuerier::run()
         return;
     }
 
-    parseReplyData(loop.result());
+    QString result = QString::fromUtf8(loop.result().constData());
+    parseReplyData(result);
 }
 
 
@@ -130,7 +131,7 @@ CWizCommentManager::CWizCommentManager(QObject* parent)
  */
 void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& GUID)
 {
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
         CWizCommentQuerier seacher(kbGUID, GUID, CWizCommentQuerier::QueryUrl);
         connect(&seacher, SIGNAL(commentUrlAcquired(const QString&, const QString&)),
                 SLOT(on_commentUrlAcquired(QString,QString)));
@@ -187,7 +188,7 @@ void CWizCommentManager::on_timer_timeOut()
     if (data.strGUID.isEmpty())
         return;
 
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=] {
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
         CWizCommentQuerier seacher(data.strKBGUID, data.strGUID, CWizCommentQuerier::QueryCount);
         connect(&seacher, SIGNAL(commentCountAcquired(QString,int)), SLOT(on_commentCountAcquired(QString,int)));
         seacher.run();

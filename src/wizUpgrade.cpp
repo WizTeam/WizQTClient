@@ -49,7 +49,7 @@ void CWizUpgradeChecker::checkUpgrade()
         return;
     }
 
-    QString strCheckUrl(loop.result());
+    QString strCheckUrl = QString::fromUtf8(loop.result().constData());
     strCheckUrl += strUpgradeUrlParam;
 
     _check(strCheckUrl);
@@ -58,8 +58,7 @@ void CWizUpgradeChecker::checkUpgrade()
 void CWizUpgradeChecker::_check(const QString& strUrl)
 {
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
+    CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     QUrl possibleRedirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -71,7 +70,6 @@ void CWizUpgradeChecker::_check(const QString& strUrl)
         QRegExp regexp("(\\d{4}-\\d{2}-\\d{2})");
         if (regexp.indexIn(m_redirectedUrl.toString()) == -1) {
             Q_EMIT checkFinished(false);
-            reply->deleteLater();
             return;
         }
 
@@ -97,8 +95,6 @@ void CWizUpgradeChecker::_check(const QString& strUrl)
         TOLOG(QObject::tr("ERROR: Check upgrade failed"));
         Q_EMIT checkFinished(false);
     }
-
-    reply->deleteLater();
 }
 
 QUrl CWizUpgradeChecker::redirectUrl(QUrl const &possible_redirect_url, \

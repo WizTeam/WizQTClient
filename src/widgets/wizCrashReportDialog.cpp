@@ -74,7 +74,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
         }
 
         rapidjson::Document d;
-        d.Parse<0>(loop.result().toUtf8().constData());
+        d.Parse<0>(loop.result().constData());
 
         if (!d.HasMember("return_code"))
         {

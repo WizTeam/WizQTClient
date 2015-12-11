@@ -93,7 +93,7 @@ QString _requestUrl(const QString& strUrl)
 //    reply->deleteLater();
 
 
-    return loop.result();
+    return QString::fromUtf8(loop.result().constData());
 }
 
 QString addExtendedInfo(const QString& strUrl, const QString& strExt)

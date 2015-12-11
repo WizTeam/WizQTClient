@@ -1809,7 +1809,7 @@ QString downloadFromUrl(const QString& strUrl)
     if (loop.error() != QNetworkReply::NoError)
         return QString();
 
-    return loop.result();
+    return QString::fromUtf8(loop.result().constData());
 }
 
 void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
