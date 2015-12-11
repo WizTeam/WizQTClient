@@ -3667,7 +3667,7 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
        CWizUpgradeChecker m_upgrade;
        connect(&m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
        m_upgrade.checkUpgrade();
