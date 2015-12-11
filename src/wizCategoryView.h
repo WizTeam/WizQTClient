@@ -446,6 +446,9 @@ private Q_SLOTS:
     void on_updatePersonalTagDocumentCount_timeout();
     void on_updateGroupFolderDocumentCount_mapped_timeout(const QString& strKbGUID);
 
+    //
+    void on_initGroupFolder_finished();
+
 private:
     void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
                                        const std::map<CString, int>& mapDocumentCount, int& allCount);
@@ -485,8 +488,6 @@ private:
     void initBiz(const WIZBIZDATA& biz);
     void initGroup(CWizDatabase& db);
     void initGroup(CWizDatabase& db, bool& itemCreeated);
-    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
-                   const QString& strParentTagGUID);
     void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID, const std::multimap<CString, WIZTAGDATA>& mapTag);
     void initQuickSearches();
