@@ -3,7 +3,7 @@
 #include <QTimer>
 #include <QDebug>
 
-const int TIMEOUT_WAIT_SECONDS = 60;
+const int TIMEOUT_WAIT_SECONDS = 120;
 
 CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
     : QEventLoop(parent)
