@@ -118,7 +118,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searcher(new CWizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
-    , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_iapDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
@@ -2255,6 +2254,11 @@ CWizDocumentView* MainWindow::documentView() const
     return m_doc;
 }
 
+CWizObjectDataDownloaderHost* MainWindow::downloaderHost() const
+{
+    return CWizObjectDataDownloaderHost::instance();
+}
+
 CWizIAPDialog*MainWindow::iapDialog()
 {
 #ifdef Q_OS_MAC
@@ -4342,11 +4346,13 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->setProgress(100,0);
     dlg->setActionString(tr("Downloading attachment file  %1 ...").arg(attachment.strName));
     dlg->setWindowTitle(tr("Downloading"));
-    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+
+    CWizObjectDataDownloaderHost* downloader = CWizObjectDataDownloaderHost::instance();
+    connect(downloader, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
-    connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
+    connect(downloader, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
             dlg, SLOT(accept()));
-    m_objectDownloaderHost->downloadData(attachment);
+    downloader->downloadData(attachment);
     dlg->exec();
 }
 

@@ -14,7 +14,6 @@
 class CWizDatabase;
 class CWizDatabaseManager;
 class CWizProgressDialog;
-class CWizObjectDataDownloaderHost;
 
 #define WIZNOTE_OBSOLETE
 
@@ -189,15 +188,11 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
 
 
 ///  make sure document exist, if not try to download document, show download dialog by default.
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost);
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost);
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
 
 //
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);

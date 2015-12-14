@@ -2510,8 +2510,7 @@ void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocum
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
@@ -2519,6 +2518,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
+        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2539,8 +2539,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                                                    CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
@@ -2548,6 +2547,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
+        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2561,8 +2561,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     return PathFileExists(strFileName);
 }
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
@@ -2570,6 +2569,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
+        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2584,7 +2584,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
 }
 
 
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData, CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
@@ -2592,6 +2592,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
+        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2599,9 +2600,9 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
         dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
+
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
-
         downloaderHost->downloadData(attachData);
         dlg.exec();
         //

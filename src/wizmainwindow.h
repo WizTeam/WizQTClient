@@ -144,7 +144,6 @@ private:
     CWizUpgradeChecker* m_upgrade;
     CWizIAPDialog* m_iapDialog;
 
-    CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //
     CWizTrayIcon* m_tray;
     QMenu* m_trayMenu;
@@ -239,7 +238,7 @@ public:
     CWizActions* actions() const { return m_actions; }
 
     //FIXME: why provide download host and dialog by mainwidnow ???
-    CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
+    CWizObjectDataDownloaderHost* downloaderHost() const;
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizIAPDialog* iapDialog();
 
