@@ -321,14 +321,8 @@ bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
 
 void CWizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
 {    
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());       
-
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);  
-    CWizProgressDialog* progress = mainWindow->progressDialog();
-    progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->moveDocumentsToPersonalFolder(arrayDocument, targetFolder, mainWindow->downloaderHost());
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.moveDocumentsToPersonalFolder(arrayDocument, targetFolder, true);
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
@@ -337,14 +331,8 @@ void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArra
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
-
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    CWizProgressDialog* progress = mainWindow->progressDialog();
-    progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.moveDocumentsToGroupFolder(arrayDocument, targetTag, true);
 
     WizClearUserCipher(db, m_app.userSettings());
 }
@@ -356,15 +344,9 @@ void CWizDocumentListView::copyDocumentsToPersonalFolder(const CWizDocumentDataA
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);   
-    CWizProgressDialog* progress = mainWindow->progressDialog();
-    progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
-                                                    keepTag, mainWindow->downloaderHost());
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyDocumentsToPersonalFolder(arrayDocument, targetFolder, keepDocTime,
+                                                    keepTag, true);
 
     WizClearUserCipher(db, m_app.userSettings());
 }
@@ -376,14 +358,8 @@ void CWizDocumentListView::copyDocumentsToGroupFolder(const CWizDocumentDataArra
     if (!WizAskUserCipherToOperateEncryptedNote(arrayDocument, db))
         return;
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());    
-
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    CWizProgressDialog* progress = mainWindow->progressDialog();
-    progress->setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, mainWindow->downloaderHost());
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyDocumentsToGroupFolder(arrayDocument, targetTag, keepDocTime, true);
 
     WizClearUserCipher(db, m_app.userSettings());
 }

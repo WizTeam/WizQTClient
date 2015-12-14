@@ -517,45 +517,34 @@ private:
 
 
     //
-    void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
-                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector);
 
-    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder,
-                                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder);
 
-    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
-                                      CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
     //
-    void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
-                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
 
-    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder,
-                                            CWizProgressDialog* progress);
+    void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
 
-    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
-                                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
 
     //
-    void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
-                         CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector);
 
     void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
-                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
-                                         CWizObjectDataDownloaderHost* downloader);
+                                         bool keepDocTime, bool combineFolder);
 
     void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
-                                      bool keepDocTime, bool combineFolder, CWizProgressDialog* progress,
-                                      CWizObjectDataDownloaderHost* downloader);
+                                      bool keepDocTime, bool combineFolder);
     //
-    void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
-                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+    void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
 
     void copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
-                                            bool keepDocTime, bool keepTag, bool combineFolder,
-                                            CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                            bool keepDocTime, bool keepTag, bool combineFolder);
 
     void copyPersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
-                                         bool keepDocTime, bool combineFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader);
+                                         bool keepDocTime, bool combineFolder);
     //
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);    
 

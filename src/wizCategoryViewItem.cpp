@@ -1000,21 +1000,14 @@ void CWizCategoryViewFolderItem::drop(const CWizDocumentDataArray& arrayDocument
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(location()));
-        documentOperator->copyDocumentsToPersonalFolder(arrayOp, location(), false, true, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToPersonalFolder(arrayOp, location(), false, true, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(location()));
-        documentOperator->moveDocumentsToPersonalFolder(arrayOp, location(), window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToPersonalFolder(arrayOp, location(), true);
     }    
 }
 
@@ -1679,26 +1672,19 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
 
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
         WIZTAGDATA tag;
         tag.strKbGUID = m_strKbGUID;
-        documentOperator->copyDocumentsToGroupFolder(arrayOp, tag, false, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToGroupFolder(arrayOp, tag, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
         WIZTAGDATA tag;
         tag.strKbGUID = m_strKbGUID;
-        documentOperator->moveDocumentsToGroupFolder(arrayOp, tag, window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToGroupFolder(arrayOp, tag, true);
     }
 }
 
@@ -1986,22 +1972,16 @@ void CWizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument,
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
 
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
-        documentOperator->copyDocumentsToGroupFolder(arrayOp, m_tag, false, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToGroupFolder(arrayOp, m_tag, false, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
-        documentOperator->moveDocumentsToGroupFolder(arrayOp, m_tag, window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToGroupFolder(arrayOp, m_tag, true);
     }
 }
 
@@ -2101,13 +2081,8 @@ void CWizCategoryViewTrashItem::drop(const CWizDocumentDataArray& arrayDocument,
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
-    progress->setWindowTitle(QObject::tr("Delete note"));
-    documentOperator->deleteDocuments(arrayOp);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
+    documentOperator.deleteDocuments(arrayOp);
 }
 
 

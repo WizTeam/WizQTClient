@@ -32,6 +32,10 @@ set(wiznote_HEADERS_MAC
 )
 
 set(wiznote_SOURCES
+    utils/logger.cpp
+    utils/misc.cpp
+    utils/pinyin.cpp
+    utils/notify.cpp
     share/wizzip.cpp
     share/wizqthelper.cpp
     share/wizmisc.cpp
@@ -66,8 +70,7 @@ set(wiznote_SOURCES
     share/wizenc.cpp
     share/wizziwreader.cpp
     html/wizhtmlreader.cpp
-    html/wizhtmlcollector.cpp
-    main.cpp
+    html/wizhtmlcollector.cpp    
     share/wizClucene.cpp
     share/wizSearchIndexer.cpp
     widgets/wizScrollBar.cpp
@@ -88,6 +91,41 @@ set(wiznote_SOURCES
     utils/pathresolve.cpp
     share/wiztitlebar.cpp
     share/wizshadoweffect.cpp
+    widgets/wizTagBar.cpp
+    widgets/wizTrayIcon.cpp
+    share/wizEventLoop.cpp
+    sync/wizJSONServerBase.cpp
+    share/wizObjectOperator.cpp
+    widgets/wizLocalProgressWebView.cpp
+    widgets/wizCrashReportDialog.cpp
+    widgets/wizCustomToolBar.cpp
+    widgets/wizTipsWidget.cpp
+    widgets/wizSingleDocumentView.cpp
+    widgets/wizMarkdownTemplateDialog.cpp
+    widgets/wizShareLinkDialog.cpp
+    share/wizAnalyzer.cpp
+    share/wizTranslater.cpp
+    widgets/wizIAPDialog.cpp
+    widgets/wizAdvancedSearchDialog.cpp
+    share/wizUDPClient.cpp
+    share/wizMessageBox.cpp
+    share/wizFileMonitor.cpp
+    share/wizLockedFile.cpp
+    share/wizLocalPeer.cpp
+    share/wizSingleApplication.cpp
+    share/wizRtfReader.cpp
+    widgets/wizImageButton.cpp
+    widgets/WizCodeEditorDialog.cpp
+    widgets/wizFramelessWebDialog.cpp
+    widgets/wizScreenShotWidget.cpp
+    widgets/wizVerificationCodeDialog.cpp
+    share/rtf2html/fmt_opts.cpp
+    share/rtf2html/rtf_keyword.cpp
+    share/rtf2html/rtf_table.cpp
+    share/rtf2html/rtf2html.cpp
+    widgets/wizEmailShareDialog.cpp
+    share/websocketclientwrapper.cpp
+    share/websockettransport.cpp
 
     #coreplugin.cpp
     wizCategoryView.cpp
@@ -138,61 +176,24 @@ set(wiznote_SOURCES
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
     plugindialog.cpp
-    utils/logger.cpp
-    utils/misc.cpp
-    utils/pinyin.cpp
-    utils/notify.cpp
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
-    widgets/wizImageButton.cpp
     wizDocumentEditStatus.cpp
     wizLoginDialog.cpp
-    share/wizFileMonitor.cpp
     wizSearchReplaceWidget.cpp
-    widgets/WizCodeEditorDialog.cpp
     wizDocTemplateDialog.cpp
     wizMobileFileReceiver.cpp
-    widgets/wizFramelessWebDialog.cpp
-    share/wizLockedFile.cpp
-    share/wizLocalPeer.cpp
-    share/wizSingleApplication.cpp
-    share/wizRtfReader.cpp
-    widgets/wizScreenShotWidget.cpp
-    widgets/wizVerificationCodeDialog.cpp
-    share/rtf2html/fmt_opts.cpp
-    share/rtf2html/rtf_keyword.cpp
-    share/rtf2html/rtf_table.cpp
-    share/rtf2html/rtf2html.cpp
-    widgets/wizEmailShareDialog.cpp
-    share/websocketclientwrapper.cpp
-    share/websockettransport.cpp
     wizWebEngineInjectObject.cpp
-    widgets/wizMarkdownTemplateDialog.cpp
-    widgets/wizShareLinkDialog.cpp
-    share/wizAnalyzer.cpp
-    share/wizTranslater.cpp
-    widgets/wizIAPDialog.cpp
-    widgets/wizAdvancedSearchDialog.cpp
-    share/wizUDPClient.cpp
-    share/wizMessageBox.cpp
-    wizOEMSettings.cpp
-    widgets/wizTagBar.cpp
-    widgets/wizTrayIcon.cpp
-    share/wizEventLoop.cpp
-    sync/wizJSONServerBase.cpp
-    share/wizObjectOperator.cpp
-    widgets/wizLocalProgressWebView.cpp
-    widgets/wizCrashReportDialog.cpp
-    widgets/wizCustomToolBar.cpp
-    widgets/wizTipsWidget.cpp
-    widgets/wizSingleDocumentView.cpp
+
+    wizOEMSettings.cpp    
     mac/wizSearchWidget_mm.cpp
     core/wizAccountManager.cpp
     core/wizCommentManager.cpp
     core/wizNoteManager.cpp
     share/wizthreads.cpp
     wizPositionDelegate.cpp
+    main.cpp
 )
 
 set(wiznote_HEADERS
@@ -356,6 +357,7 @@ set(wiznote_HEADERS
     widgets/wizTrayIcon.h
     share/wizEventLoop.h
     sync/wizJSONServerBase.h
+    share/wizObjectOperator_p.h
     share/wizObjectOperator.h
     widgets/wizLocalProgressWebView.h
     widgets/wizCrashReportDialog.h

@@ -13,7 +13,6 @@
 class CWizDatabase;
 class CWizFolder;
 class CWizDocument;
-class CWizObjectDataDownloaderHost;
 
 class CWizDocument : public QObject
 {
@@ -27,16 +26,16 @@ public:
     bool isProtected() const { return m_data.nProtected; }
     bool encryptDocument() { return false; }
 
-    void makeSureObjectDataExists(CWizObjectDataDownloaderHost* downloader);
+    void makeSureObjectDataExists();
 
     QString GetAttachmentsPath(bool create);
     bool IsInDeletedItemsFolder();
     bool MoveTo(CWizFolder* pFolder);
-    bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader);
-    bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader);
+    bool MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder);
+    bool MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag);
     bool CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
-                bool keepDocTag, QString& newDocGUID, CWizObjectDataDownloaderHost* downloader);
-    bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader);
+                bool keepDocTag, QString& newDocGUID);
+    bool CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, bool keepDocTime);
     bool AddTag(const WIZTAGDATA& dataTag);
     bool RemoveTag(const WIZTAGDATA& dataTag);
     QString GetMetaText();
@@ -54,10 +53,9 @@ public:
 
 private:
     bool copyDocumentTo(const QString &sourceGUID, CWizDatabase &targetDB, const QString &strTargetLocation,
-                        const WIZTAGDATA &targetTag, QString &resultGUID,
-                        CWizObjectDataDownloaderHost *downloaderHost, bool keepDocTime);
+                        const WIZTAGDATA &targetTag, QString &resultGUID, bool keepDocTime);
     bool copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB,
-                                WIZDOCUMENTDATA& targetDoc, CWizObjectDataDownloaderHost* downloaderHost);
+                                WIZDOCUMENTDATA& targetDoc);
 
 private:
     CWizDatabase& m_db;

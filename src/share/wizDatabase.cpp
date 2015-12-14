@@ -67,16 +67,16 @@ CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
 }
 
-void CWizDocument::makeSureObjectDataExists(CWizObjectDataDownloaderHost* downloader)
+void CWizDocument::makeSureObjectDataExists()
 {
-    ::WizMakeSureDocumentExistAndBlockWidthDialog(m_db, m_data, downloader);
+    ::WizMakeSureDocumentExistAndBlockWidthDialog(m_db, m_data);
 
     CWizDocumentAttachmentDataArray arrayAttach;
     if (m_db.GetDocumentAttachments(m_data.strGUID, arrayAttach))
     {
         for (WIZDOCUMENTATTACHMENTDATAEX attach : arrayAttach)
         {
-            ::WizMakeSureAttachmentExistAndBlockWidthDialog(m_db, attach, downloader);
+            ::WizMakeSureAttachmentExistAndBlockWidthDialog(m_db, attach);
         }
     }
 }
@@ -204,14 +204,14 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
     return true;
 }
 
-bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjectDataDownloaderHost* downloader)
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder)
 {
     qDebug() << "wizdocmove  to : " << pFolder->Location();
     if (targetDB.kbGUID() == m_db.kbGUID())
         return MoveTo(pFolder);
 
     QString newDocGUID;
-    if (!CopyTo(targetDB, pFolder, true, true, newDocGUID, downloader))
+    if (!CopyTo(targetDB, pFolder, true, true, newDocGUID))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
@@ -221,7 +221,7 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder, CWizObjec
     return true;
 }
 
-bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
+bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag)
 {
     qDebug() << "wizdoc move to : " << targetTag.strName;
     if (targetDB.kbGUID() == m_db.kbGUID())
@@ -245,7 +245,7 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, C
     }
 
     //
-    if (!CopyTo(targetDB, targetTag, true, downloader))
+    if (!CopyTo(targetDB, targetTag, true))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
@@ -257,12 +257,12 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag, C
 }
 
 bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
-                          bool keepDocTag, QString& newDocGUID, CWizObjectDataDownloaderHost* downloader)
+                          bool keepDocTag, QString& newDocGUID)
 {
     qDebug() << "wizdocu copy to : " << pFolder->Location();
     QString strLocation = pFolder->Location();
     WIZTAGDATA tagEmpty;
-    if (!copyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, newDocGUID, downloader, keepDocTime))
+    if (!copyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, newDocGUID, keepDocTime))
     {
         TOLOG1(_T("Failed to copy document %1."), m_data.strTitle);
         return false;
@@ -287,12 +287,12 @@ bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keep
 }
 
 bool CWizDocument::CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag,
-                          bool keepDocTime, CWizObjectDataDownloaderHost* downloader)
+                          bool keepDocTime)
 {
     qDebug() << "wizdocu copy to : " << targetTag.strName;
     QString strLocation = targetDB.GetDefaultNoteLocation();
     QString strNewDocGUID;
-    return copyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, downloader, keepDocTime);
+    return copyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, keepDocTime);
 }
 
 bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
@@ -369,15 +369,14 @@ QString CWizDocument::GetMetaText()
 }
 
 bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
-                                  const QString& strTargetLocation, const WIZTAGDATA& targetTag, QString& resultGUID,
-                                  CWizObjectDataDownloaderHost* downloaderHost, bool keepDocTime)
+                                  const QString& strTargetLocation, const WIZTAGDATA& targetTag, QString& resultGUID, bool keepDocTime)
 {
     TOLOG("Copy document");
     WIZDOCUMENTDATA sourceDoc;
     if (!m_db.DocumentFromGUID(sourceGUID, sourceDoc))
         return false;
 
-    if (!WizMakeSureDocumentExistAndBlockWidthEventloop(m_db, sourceDoc, downloaderHost))
+    if (!WizMakeSureDocumentExistAndBlockWidthEventloop(m_db, sourceDoc))
         return false;
 
     if (!m_db.tryAccessDocument(sourceDoc))
@@ -396,7 +395,7 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
 
     resultGUID = newDoc.strGUID;
 
-    if (!copyDocumentAttachment(sourceDoc, targetDB, newDoc, downloaderHost))
+    if (!copyDocumentAttachment(sourceDoc, targetDB, newDoc))
         return false;
 
     if (keepDocTime)
@@ -415,8 +414,7 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
 }
 
 bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
-                                          CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc,
-                                          CWizObjectDataDownloaderHost* downloaderHost)
+                                          CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
 {
     CWizDocumentAttachmentDataArray arrayAttachment;
     m_db.GetDocumentAttachments(sourceDoc.strGUID, arrayAttachment);
@@ -425,7 +423,7 @@ bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
          it != arrayAttachment.end(); it++)
     {
         WIZDOCUMENTATTACHMENTDATAEX attachData(*it);
-        if (!WizMakeSureAttachmentExistAndBlockWidthEventloop(m_db, attachData, downloaderHost))
+        if (!WizMakeSureAttachmentExistAndBlockWidthEventloop(m_db, attachData))
             continue;
 
         WIZDOCUMENTATTACHMENTDATAEX newAttach;

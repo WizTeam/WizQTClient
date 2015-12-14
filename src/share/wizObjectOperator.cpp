@@ -1,227 +1,38 @@
+#include "wizObjectOperator_p.h"
 #include "wizObjectOperator.h"
 #include <QThread>
 #include <QDebug>
 #include <QTimer>
 #include <QApplication>
+#include "share/wizMessageBox.h"
+#include "share/wizsettings.h"
+#include "share/wizthreads.h"
 #include "wizProgressDialog.h"
 #include "wizObjectDataDownloader.h"
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
 #include "wizLineInputDialog.h"
-#include "share/wizMessageBox.h"
-#include "share/wizsettings.h"
 
-CWizDocumentOperator::CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* parent)
-    : m_dbMgr(dbMgr)
-    , QObject(parent)
-    , m_downloader(nullptr)
-    , m_keepDocTime(false)
-    , m_keepTag(false)
+CWizDocumentOperatorPrivate::CWizDocumentOperatorPrivate(CWizDatabaseManager& dbMgr, OperatorData* data, QObject* parent)
+    : QObject(parent)
+    , m_dbMgr(dbMgr)
+    , m_data(data)
     , m_stop(false)
-    , m_thread(nullptr)
     , m_totoalCount(0)
     , m_counter(0)
-    , m_combineFolders(false)
 {
 }
 
-CWizDocumentOperator::~CWizDocumentOperator()
+CWizDocumentOperatorPrivate::~CWizDocumentOperatorPrivate()
 {
-    if (m_thread)
+    if (m_data)
     {
-        connect(m_thread, SIGNAL(finished()), m_thread, SLOT(deleteLater()));
-        m_thread->quit();
+        delete m_data;
+        m_data = nullptr;
     }
 }
 
-void CWizDocumentOperator::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
-                                                     const QString& targetFolder, bool keepDocTime, bool keepTag,
-                                                     CWizObjectDataDownloaderHost* downloader)
-{
-    m_arrayDocument = arrayDocument;
-    m_targetFolder = targetFolder;
-    m_keepDocTime = keepDocTime;
-    m_keepTag = keepTag;
-    m_downloader = downloader;
-
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyDocumentToPersonalFolder()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
-                                                      const WIZTAGDATA& targetTag, bool keepDocTime, CWizObjectDataDownloaderHost* downloader)
-{
-    m_arrayDocument = arrayDocument;
-    m_targetTag = targetTag;
-    m_keepDocTime = keepDocTime;
-    m_downloader = downloader;
-
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyDocumentToGroupFolder()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
-                                                         const QString& targetFolder, CWizObjectDataDownloaderHost* downloader)
-{
-    m_arrayDocument = arrayDocument;
-    m_targetFolder = targetFolder;
-    m_downloader = downloader;
-
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(moveDocumentToPersonalFolder()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
-                                                      const WIZTAGDATA& targetTag, CWizObjectDataDownloaderHost* downloader)
-{
-    m_arrayDocument = arrayDocument;
-    m_targetTag = targetTag;
-    m_downloader = downloader;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(moveDocumentToGroupFolder()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::deleteDocuments(const CWizDocumentDataArray& arrayDocument)
-{
-    m_arrayDocument = arrayDocument;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(deleteDocuments()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& sourceFolder,
-                                                          const QString& targetParentFolder, bool keepDocTime,
-                                                          bool keepTag, bool combineFolders, CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceFolder = sourceFolder;
-    m_targetFolder = targetParentFolder;
-    m_keepDocTime = keepDocTime;
-    m_keepTag = keepTag;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyPersonalFolderToPersonalDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& sourceFolder,
-                                                       const WIZTAGDATA& targetParentTag, bool keepDocTime, bool combineFolders,
-                                                       CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceFolder = sourceFolder;
-    m_targetTag = targetParentTag;
-    m_keepDocTime = keepDocTime;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyPersonalFolderToGroupDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::copyGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder,
-                                                       const QString& targetParentFolder, bool keepDocTime, bool combineFolders,
-                                                       CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceTag = groupFolder;
-    m_targetFolder = targetParentFolder;
-    m_keepDocTime = keepDocTime;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyGroupFolderToPersonalDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder,
-                                                    const WIZTAGDATA& targetFolder, bool keepDocTime, bool combineFolders,
-                                                    CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceTag = sourceFolder;
-    m_targetTag = targetFolder;
-    m_keepDocTime = keepDocTime;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(copyGroupFolderToGroupDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder,
-                                                       const QString& targetParentFolder, bool combineFolders,
-                                                       CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceTag = groupFolder;
-    m_targetFolder = targetParentFolder;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(moveGroupFolderToPersonalDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
-                                                     bool combineFolders, CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceTag = sourceFolder;
-    m_targetTag = targetFolder;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(moveGroupFolderToGroupDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder)
-{
-    m_sourceFolder = sourceFolder;
-    m_targetFolder = targetParentFolder;
-    m_combineFolders = combineFolder;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(movePersonalFolderToPersonalDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
-                                                       bool combineFolders, CWizObjectDataDownloaderHost* downloader)
-{
-    m_sourceFolder = sourceFolder;
-    m_targetTag = targetFolder;
-    m_downloader = downloader;
-    m_combineFolders = combineFolders;
-    //
-    m_thread = new QThread();
-    moveToThread(m_thread);
-    connect(m_thread, SIGNAL(started()), SLOT(movePersonalFolderToGroupDB()));
-    m_thread->start();
-}
-
-void CWizDocumentOperator::bindSignalsToProgressDialog(CWizProgressDialog* progress)
+void CWizDocumentOperatorPrivate::bindSignalsToProgressDialog(CWizProgressDialog* progress)
 {
     QObject::connect(this, SIGNAL(progress(int,int)), progress, SLOT(setProgress(int,int)));
     QObject::connect(this, SIGNAL(newAction(QString)), progress, SLOT(setActionString(QString)));
@@ -229,88 +40,80 @@ void CWizDocumentOperator::bindSignalsToProgressDialog(CWizProgressDialog* progr
     QObject::connect(progress, SIGNAL(stopRequest()), this, SLOT(stop()), Qt::DirectConnection);
 }
 
-void CWizDocumentOperator::stop()
+void CWizDocumentOperatorPrivate::stop()
 {
     m_stop = true;
 }
 
-void CWizDocumentOperator::copyDocumentToPersonalFolder()
+void CWizDocumentOperatorPrivate::copyDocumentToPersonalFolder()
 {
     int nCounter = 0;
     CWizDocumentDataArray::iterator it;
-    for (it = m_arrayDocument.begin(); it != m_arrayDocument.end() && !m_stop; it++)
+    for (it = m_data->arrayDocument.begin(); it != m_data->arrayDocument.end() && !m_stop; it++)
     {
         const WIZDOCUMENTDATA& doc = *it;
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToPersonalFolder(doc);
         nCounter ++;
-        emit progress(m_arrayDocument.size(), nCounter);
+        emit progress(m_data->arrayDocument.size(), nCounter);
     }
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyDocumentToGroupFolder()
+void CWizDocumentOperatorPrivate::copyDocumentToGroupFolder()
 {
     int nCounter = 0;
     CWizDocumentDataArray::iterator it;
-    for (it = m_arrayDocument.begin(); it != m_arrayDocument.end() && !m_stop; it++)
+    for (it = m_data->arrayDocument.begin(); it != m_data->arrayDocument.end() && !m_stop; it++)
     {
         const WIZDOCUMENTDATA& doc = *it;
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         copyDocumentToGroupFolder(doc);
         nCounter ++;
-        emit progress(m_arrayDocument.size(), nCounter);
+        emit progress(m_data->arrayDocument.size(), nCounter);
     }
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::moveDocumentToPersonalFolder()
+void CWizDocumentOperatorPrivate::moveDocumentToPersonalFolder()
 {
     int nCounter = 0;
     CWizDocumentDataArray::iterator it;
-    for (it = m_arrayDocument.begin(); it != m_arrayDocument.end() && !m_stop; it++)
+    for (it = m_data->arrayDocument.begin(); it != m_data->arrayDocument.end() && !m_stop; it++)
     {
         const WIZDOCUMENTDATA& doc = *it;
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         moveDocumentToPersonalFolder(doc);
         nCounter ++;
-        emit progress(m_arrayDocument.size(), nCounter);
+        emit progress(m_data->arrayDocument.size(), nCounter);
     }
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::moveDocumentToGroupFolder()
+void CWizDocumentOperatorPrivate::moveDocumentToGroupFolder()
 {
     int nCounter = 0;
     CWizDocumentDataArray::iterator it;
-    for (it = m_arrayDocument.begin(); it != m_arrayDocument.end() && !m_stop; it++)
+    for (it = m_data->arrayDocument.begin(); it != m_data->arrayDocument.end() && !m_stop; it++)
     {
         const WIZDOCUMENTDATA& doc = *it;
         emit newAction(tr("Copy note %1").arg(doc.strTitle));
         moveDocumentToGroupFolder(doc);
         nCounter ++;
-        emit progress(m_arrayDocument.size(), nCounter);
+        emit progress(m_data->arrayDocument.size(), nCounter);
     }
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::deleteDocuments()
+void CWizDocumentOperatorPrivate::deleteDocuments()
 {
-    m_totoalCount = m_arrayDocument.size();
+    m_totoalCount = m_data->arrayDocument.size();
     m_counter = 0;
-    for (WIZDOCUMENTDATA doc : m_arrayDocument)
+    for (WIZDOCUMENTDATA doc : m_data->arrayDocument)
     {
         emit newAction(tr("Delete note %1").arg(doc.strTitle));
         CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
@@ -323,141 +126,123 @@ void CWizDocumentOperator::deleteDocuments()
     }
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyPersonalFolderToPersonalDB()
+void CWizDocumentOperatorPrivate::copyPersonalFolderToPersonalDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
+    m_totoalCount = documentCount(m_dbMgr.db(), m_data->sourceFolder);
 
     //
-    QString sourceFolderName = CWizDatabase::GetLocationName(m_sourceFolder);
-    QString uniqueFolder = getUniqueFolderName(m_targetFolder, sourceFolderName);
-    if (m_combineFolders)
+    QString sourceFolderName = CWizDatabase::GetLocationName(m_data->sourceFolder);
+    QString uniqueFolder = getUniqueFolderName(m_data->targetFolder, sourceFolderName);
+    if (m_data->combineFolders)
     {
         uniqueFolder.clear();
     }
 
-    copyPersonalFolderToPersonalDB(m_sourceFolder, m_targetFolder, uniqueFolder);
+    copyPersonalFolderToPersonalDB(m_data->sourceFolder, m_data->targetFolder, uniqueFolder);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyPersonalFolderToGroupDB()
+void CWizDocumentOperatorPrivate::copyPersonalFolderToGroupDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
+    m_totoalCount = documentCount(m_dbMgr.db(), m_data->sourceFolder);
 
     //    
-    QString targetTagName = getUniqueFolderName(m_targetTag, m_sourceFolder, m_combineFolders);
-    copyPersonalFolderToGroupDB(m_sourceFolder, m_targetTag, targetTagName);
+    QString targetTagName = getUniqueFolderName(m_data->targetTag, m_data->sourceFolder, m_data->combineFolders);
+    copyPersonalFolderToGroupDB(m_data->sourceFolder, m_data->targetTag, targetTagName);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyGroupFolderToPersonalDB()
+void CWizDocumentOperatorPrivate::copyGroupFolderToPersonalDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);
+    m_totoalCount = documentCount(m_dbMgr.db(m_data->sourceTag.strKbGUID), m_data->sourceTag);
     //
-    QString uniqueFolder = getUniqueFolderName(m_targetFolder, m_sourceTag.strName);
-    if (uniqueFolder != m_sourceTag.strName && !m_combineFolders)
+    QString uniqueFolder = getUniqueFolderName(m_data->targetFolder, m_data->sourceTag.strName);
+    if (uniqueFolder != m_data->sourceTag.strName && !m_data->combineFolders)
     {
-        m_sourceTag.strName = uniqueFolder;
+        m_data->sourceTag.strName = uniqueFolder;
     }
 
-    copyGroupFolderToPersonalDB(m_sourceTag, m_targetFolder);
+    copyGroupFolderToPersonalDB(m_data->sourceTag, m_data->targetFolder);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyGroupFolderToGroupDB()
+void CWizDocumentOperatorPrivate::copyGroupFolderToGroupDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);    
+    m_totoalCount = documentCount(m_dbMgr.db(m_data->sourceTag.strKbGUID), m_data->sourceTag);
 
-    m_sourceTag.strName = getUniqueFolderName(m_targetTag, m_sourceTag, m_combineFolders);
-    copyGroupFolderToGroupDB(m_sourceTag, m_targetTag);
+    m_data->sourceTag.strName = getUniqueFolderName(m_data->targetTag, m_data->sourceTag, m_data->combineFolders);
+    copyGroupFolderToGroupDB(m_data->sourceTag, m_data->targetTag);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::moveGroupFolderToPersonalDB()
+void CWizDocumentOperatorPrivate::moveGroupFolderToPersonalDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);
+    m_totoalCount = documentCount(m_dbMgr.db(m_data->sourceTag.strKbGUID), m_data->sourceTag);
 
     //
-    QString uniqueFolder = getUniqueFolderName(m_targetFolder, m_sourceTag.strName);
-    if (uniqueFolder != m_sourceTag.strName && !m_combineFolders)
+    QString uniqueFolder = getUniqueFolderName(m_data->targetFolder, m_data->sourceTag.strName);
+    if (uniqueFolder != m_data->sourceTag.strName && !m_data->combineFolders)
     {
-        m_sourceTag.strName = uniqueFolder;
+        m_data->sourceTag.strName = uniqueFolder;
     }
 
-    moveGroupFolderToPersonalDB(m_sourceTag, m_targetFolder);    
+    moveGroupFolderToPersonalDB(m_data->sourceTag, m_data->targetFolder);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::moveGroupFolderToGroupDB()
+void CWizDocumentOperatorPrivate::moveGroupFolderToGroupDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(m_sourceTag.strKbGUID), m_sourceTag);
+    m_totoalCount = documentCount(m_dbMgr.db(m_data->sourceTag.strKbGUID), m_data->sourceTag);
 
-    m_sourceTag.strName = getUniqueFolderName(m_targetTag, m_sourceTag, m_combineFolders, m_sourceTag.strGUID);
-    moveGroupFolderToGroupDB(m_sourceTag, m_targetTag);
+    m_data->sourceTag.strName = getUniqueFolderName(m_data->targetTag, m_data->sourceTag, m_data->combineFolders, m_data->sourceTag.strGUID);
+    moveGroupFolderToGroupDB(m_data->sourceTag, m_data->targetTag);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::movePersonalFolderToPersonalDB()
+void CWizDocumentOperatorPrivate::movePersonalFolderToPersonalDB()
 {    
-    m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
+    m_totoalCount = documentCount(m_dbMgr.db(), m_data->sourceFolder);
 
     //
-    QString sourceFolderName = CWizDatabase::GetLocationName(m_sourceFolder);
-    QString uniqueFolder = getUniqueFolderName(m_targetFolder, sourceFolderName);
-    if (m_combineFolders)
+    QString sourceFolderName = CWizDatabase::GetLocationName(m_data->sourceFolder);
+    QString uniqueFolder = getUniqueFolderName(m_data->targetFolder, sourceFolderName);
+    if (m_data->combineFolders)
     {
         uniqueFolder.clear();
     }
 
-    _movePersonalFolderToPersonalDB(m_sourceFolder, m_targetFolder, uniqueFolder);
+    _movePersonalFolderToPersonalDB(m_data->sourceFolder, m_data->targetFolder, uniqueFolder);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::movePersonalFolderToGroupDB()
+void CWizDocumentOperatorPrivate::movePersonalFolderToGroupDB()
 {
-    m_totoalCount = documentCount(m_dbMgr.db(), m_sourceFolder);
+    m_totoalCount = documentCount(m_dbMgr.db(), m_data->sourceFolder);
 
     //    
-    QString targetTagName = getUniqueFolderName(m_targetTag, m_sourceFolder, m_combineFolders);
-    movePersonalFolderToGroupDB(m_sourceFolder, m_targetTag, targetTagName);
+    QString targetTagName = getUniqueFolderName(m_data->targetTag, m_data->sourceFolder, m_data->combineFolders);
+    movePersonalFolderToGroupDB(m_data->sourceFolder, m_data->targetTag, targetTagName);
 
     emit finished();
-    //
-    deleteLater();
 }
 
-void CWizDocumentOperator::copyDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc)
+void CWizDocumentOperatorPrivate::copyDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc)
 {
     CWizDatabase& sourceDb = m_dbMgr.db(doc.strKbGUID);
     CWizDatabase& targetDb = m_dbMgr.db();
-    CWizFolder folder(targetDb, m_targetFolder);
+    CWizFolder folder(targetDb, m_data->targetFolder);
     CWizDocument wizDoc(sourceDb, doc);
     QString newDocGUID;
-    if (!wizDoc.CopyTo(targetDb, &folder, m_keepDocTime, m_keepTag, newDocGUID, m_downloader))
+    if (!wizDoc.CopyTo(targetDb, &folder, m_data->keepDocTime, m_data->keepTag, newDocGUID))
         return;
 
     if (!sourceDb.IsGroup() && doc.nProtected == 1)
@@ -470,27 +255,27 @@ void CWizDocumentOperator::copyDocumentToPersonalFolder(const WIZDOCUMENTDATA& d
     }
 }
 
-void CWizDocumentOperator::copyDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)
+void CWizDocumentOperatorPrivate::copyDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)
 {
     CWizDocument wizDoc(m_dbMgr.db(doc.strKbGUID), doc);
-    wizDoc.CopyTo(m_dbMgr.db(m_targetTag.strKbGUID), m_targetTag, m_keepDocTime, m_downloader);
+    wizDoc.CopyTo(m_dbMgr.db(m_data->targetTag.strKbGUID), m_data->targetTag, m_data->keepDocTime);
 }
 
-void CWizDocumentOperator::moveDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc)
+void CWizDocumentOperatorPrivate::moveDocumentToPersonalFolder(const WIZDOCUMENTDATA& doc)
 {
-    CWizFolder folder(m_dbMgr.db(), m_targetFolder);
+    CWizFolder folder(m_dbMgr.db(), m_data->targetFolder);
     CWizDocument wizDoc(m_dbMgr.db(doc.strKbGUID), doc);
-    wizDoc.MoveTo(m_dbMgr.db(), &folder, m_downloader);
+    wizDoc.MoveTo(m_dbMgr.db(), &folder);
 }
 
-void CWizDocumentOperator::moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)
+void CWizDocumentOperatorPrivate::moveDocumentToGroupFolder(const WIZDOCUMENTDATA& doc)
 {
     CWizDocument wizDoc(m_dbMgr.db(doc.strKbGUID), doc);
-    wizDoc.MoveTo(m_dbMgr.db(m_targetTag.strKbGUID), m_targetTag, m_downloader);
+    wizDoc.MoveTo(m_dbMgr.db(m_data->targetTag.strKbGUID), m_data->targetTag);
 }
 
 
-void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& childFolder,
+void CWizDocumentOperatorPrivate::copyPersonalFolderToPersonalDB(const QString& childFolder,
                                                           const QString& targetParentFolder, const QString& targetFolderName)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -499,7 +284,7 @@ void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& childFo
     //
     QString folderName = targetFolderName.isEmpty() ? db.GetLocationName(childFolder) : targetFolderName;
     QString targetFolder = targetParentFolder + folderName + "/";
-    m_targetFolder = targetFolder;
+    m_data->targetFolder = targetFolder;
 
     CWizDocumentDataArray::iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end() && !m_stop; it++)
@@ -528,7 +313,7 @@ void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& childFo
     }
 }
 
-void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& childFolder,
+void CWizDocumentOperatorPrivate::copyPersonalFolderToGroupDB(const QString& childFolder,
                                                        const WIZTAGDATA& targetParentTag, const QString& targetTagName)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -536,7 +321,7 @@ void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& childFolde
     QString tagName = targetTagName.isEmpty() ? db.GetLocationName(childFolder) : targetTagName;
     WIZTAGDATA targetTag;
     targetDB.CreateTag(targetParentTag.strGUID, tagName, "", targetTag);
-    m_targetTag = targetTag;
+    m_data->targetTag = targetTag;
     //
     CWizDocumentDataArray arrayDocument;
     db.GetDocumentsByLocation(childFolder, arrayDocument, false);
@@ -569,13 +354,13 @@ void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& childFolde
     }
 }
 
-void CWizDocumentOperator::copyGroupFolderToPersonalDB(const WIZTAGDATA& childFolder, const QString& targetParentFolder)
+void CWizDocumentOperatorPrivate::copyGroupFolderToPersonalDB(const WIZTAGDATA& childFolder, const QString& targetParentFolder)
 {
     CWizDatabase& groupDB = m_dbMgr.db(childFolder.strKbGUID);
     CWizDocumentDataArray arrayDocument;
     groupDB.GetDocumentsByTag(childFolder, arrayDocument);
     QString targetFolder = targetParentFolder + childFolder.strName + "/";
-    m_targetFolder = targetFolder;
+    m_data->targetFolder = targetFolder;
 
     CWizDocumentDataArray::iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end() && !m_stop; it++)
@@ -599,12 +384,12 @@ void CWizDocumentOperator::copyGroupFolderToPersonalDB(const WIZTAGDATA& childFo
     }
 }
 
-void CWizDocumentOperator::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder)
+void CWizDocumentOperatorPrivate::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder)
 {
     CWizDatabase& targetDB = m_dbMgr.db(targetFolder.strKbGUID);
     WIZTAGDATA targetTag;
     targetDB.CreateTag(targetFolder.strGUID, sourceFolder.strName, sourceFolder.strDescription, targetTag);
-    m_targetTag = targetTag;
+    m_data->targetTag = targetTag;
 
     //
     CWizDatabase& sourceDB = m_dbMgr.db(sourceFolder.strKbGUID);
@@ -633,13 +418,13 @@ void CWizDocumentOperator::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFold
     }
 }
 
-void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& childFolder, const QString& targetParentFolder)
+void CWizDocumentOperatorPrivate::moveGroupFolderToPersonalDB(const WIZTAGDATA& childFolder, const QString& targetParentFolder)
 {
     CWizDatabase& groupDB = m_dbMgr.db(childFolder.strKbGUID);
     CWizDocumentDataArray arrayDocument;
     groupDB.GetDocumentsByTag(childFolder, arrayDocument);
     QString targetFolder = targetParentFolder + childFolder.strName + "/";
-    m_targetFolder = targetFolder;
+    m_data->targetFolder = targetFolder;
     //
     CWizDocumentDataArray::iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end() && !m_stop; it++)
@@ -674,7 +459,7 @@ void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& childFo
     }
 }
 
-void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetParentTag)
+void CWizDocumentOperatorPrivate::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetParentTag)
 {
     CWizDatabase& sourceDB = m_dbMgr.db(sourceFolder.strKbGUID);
     if (sourceFolder.strKbGUID == targetParentTag.strKbGUID)
@@ -689,7 +474,7 @@ void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFold
         CWizDatabase& targetDB = m_dbMgr.db(targetParentTag.strKbGUID);
         WIZTAGDATA targetTag;
         targetDB.CreateTag(targetParentTag.strGUID, sourceFolder.strName, sourceFolder.strDescription, targetTag);
-        m_targetTag = targetTag;
+        m_data->targetTag = targetTag;
         //
         CWizDocumentDataArray arrayDocument;
         sourceDB.GetDocumentsByTag(sourceFolder, arrayDocument);
@@ -727,7 +512,7 @@ void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFold
     }
 }
 
-void CWizDocumentOperator::_movePersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder,
+void CWizDocumentOperatorPrivate::_movePersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder,
                                                            const QString& targetFolderName)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -772,7 +557,7 @@ void CWizDocumentOperator::_movePersonalFolderToPersonalDB(const QString& childF
     }
 }
 
-void CWizDocumentOperator::movePersonalFolderToGroupDB(const QString& sourceFolder,
+void CWizDocumentOperatorPrivate::movePersonalFolderToGroupDB(const QString& sourceFolder,
                                                        const WIZTAGDATA& targetParentTag, const QString& targetTagName)
 {
     CWizDatabase& db = m_dbMgr.db();
@@ -780,7 +565,7 @@ void CWizDocumentOperator::movePersonalFolderToGroupDB(const QString& sourceFold
     QString tagName = targetTagName.isEmpty() ? db.GetLocationName(sourceFolder) : targetTagName;
     WIZTAGDATA targetTag;
     targetDB.CreateTag(targetParentTag.strGUID, tagName, "", targetTag);
-    m_targetTag = targetTag;
+    m_data->targetTag = targetTag;
     //
     CWizDocumentDataArray arrayDocument;
     db.GetDocumentsByLocation(sourceFolder, arrayDocument, false);
@@ -818,16 +603,16 @@ void CWizDocumentOperator::movePersonalFolderToGroupDB(const QString& sourceFold
     }
 }
 
-int CWizDocumentOperator::documentCount(CWizDatabase& db, const QString& personalFolder)
+int CWizDocumentOperatorPrivate::documentCount(CWizDatabase& db, const QString& personalFolder)
 {
-    int count;
+    int count = 0;
     db.GetDocumentsCountByLocation(personalFolder, count, true);
     return count;
 }
 
-int CWizDocumentOperator::documentCount(CWizDatabase& db, const WIZTAGDATA& groupFolder)
+int CWizDocumentOperatorPrivate::documentCount(CWizDatabase& db, const WIZTAGDATA& groupFolder)
 {
-    int count;
+    int count = 0;
     CWizTagDataArray arrayTag;
     db.GetAllChildTags(groupFolder.strGUID, arrayTag);
     arrayTag.push_back(groupFolder);
@@ -845,7 +630,7 @@ int CWizDocumentOperator::documentCount(CWizDatabase& db, const WIZTAGDATA& grou
     return count;
 }
 
-void CWizDocumentOperator::combineSameNameGroupFolder(const WIZTAGDATA& parentTag, const WIZTAGDATA& childTag)
+void CWizDocumentOperatorPrivate::combineSameNameGroupFolder(const WIZTAGDATA& parentTag, const WIZTAGDATA& childTag)
 {
     CWizDatabase& targetDB = m_dbMgr.db(parentTag.strKbGUID);
     CWizTagDataArray arrayTag;
@@ -864,12 +649,12 @@ void CWizDocumentOperator::combineSameNameGroupFolder(const WIZTAGDATA& parentTa
     // combine same name folders
     if (!sameNameBrother.strGUID.IsEmpty())
     {
-        if (m_combineFolders)
+        if (m_data->combineFolders)
         {
             CWizDocumentDataArray arrayDocument;
             targetDB.GetDocumentsByTag(childTag, arrayDocument);
             //
-            m_targetTag = sameNameBrother;
+            m_data->targetTag = sameNameBrother;
             CWizDocumentDataArray::iterator it;
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
             {
@@ -896,7 +681,7 @@ void CWizDocumentOperator::combineSameNameGroupFolder(const WIZTAGDATA& parentTa
     }
 }
 
-QString CWizDocumentOperator::getUniqueTagName(const WIZTAGDATA& parentTag, const WIZTAGDATA& tag)
+QString CWizDocumentOperatorPrivate::getUniqueTagName(const WIZTAGDATA& parentTag, const WIZTAGDATA& tag)
 {
     QString name = tag.strName;
     int nRepeat = 0;
@@ -928,7 +713,7 @@ QString CWizDocumentOperator::getUniqueTagName(const WIZTAGDATA& parentTag, cons
     return name;
 }
 
-QString CWizDocumentOperator::getUniqueFolderName(const QString& parentLocation, const QString& locationName)
+QString CWizDocumentOperatorPrivate::getUniqueFolderName(const QString& parentLocation, const QString& locationName)
 {
     QString name = locationName;
     int nRepeat = 0;
@@ -964,7 +749,7 @@ QString CWizDocumentOperator::getUniqueFolderName(const QString& parentLocation,
     return name;
 }
 
-QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, const WIZTAGDATA& sourceTag, bool combineFolder, const QString& exceptGUID)
+QString CWizDocumentOperatorPrivate::getUniqueFolderName(const WIZTAGDATA& parentTag, const WIZTAGDATA& sourceTag, bool combineFolder, const QString& exceptGUID)
 {
     CWizDatabase& targetDB = m_dbMgr.db(parentTag.strKbGUID);
     CWizTagDataArray arrayTag;
@@ -991,10 +776,10 @@ QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, c
         }
     }
 
-    return m_sourceTag.strName;
+    return m_data->sourceTag.strName;
 }
 
-QString CWizDocumentOperator::getUniqueFolderName(const WIZTAGDATA& parentTag, const QString& sourceFolder, bool combineFolder)
+QString CWizDocumentOperatorPrivate::getUniqueFolderName(const WIZTAGDATA& parentTag, const QString& sourceFolder, bool combineFolder)
 {
     CWizDatabase& targetDB = m_dbMgr.db(parentTag.strKbGUID);
     CWizTagDataArray arrayTag;
@@ -1125,3 +910,360 @@ void WizClearUserCipher(CWizDatabase& db, CWizUserSettings& settings)
         db.setSaveUserCipher(false);
     }
 }
+
+
+CWizDocumentOperator::CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* parent)
+    : QObject(parent)
+    , m_dbMgr(dbMgr)
+{
+}
+
+void CWizDocumentOperator::copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
+                                                         const QString& targetFolder, bool keepDocTime,
+                                                         bool keepTag, bool showProgressDialog)
+{    
+    OperatorData* optData = new OperatorData();
+    optData->arrayDocument =  arrayDocument;
+    optData->targetFolder = targetFolder;
+    optData->keepDocTime = keepDocTime;
+    optData->keepTag = keepTag;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyDocumentToPersonalFolder();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyDocumentToPersonalFolder();
+        });
+    }
+}
+
+void CWizDocumentOperator::copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
+                                                      const WIZTAGDATA& targetTag, bool keepDocTime,
+                                                      bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->arrayDocument =  arrayDocument;
+    optData->targetTag = targetTag;
+    optData->keepDocTime = keepDocTime;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetTag.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyDocumentToGroupFolder();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyDocumentToGroupFolder();
+        });
+    }
+}
+
+void CWizDocumentOperator::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
+                                                         const QString& targetFolder, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->arrayDocument =  arrayDocument;
+    optData->targetFolder = targetFolder;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.moveDocumentToPersonalFolder();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.moveDocumentToPersonalFolder();
+        });
+    }
+}
+
+void CWizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,
+                                                      const WIZTAGDATA& targetTag, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->arrayDocument =  arrayDocument;
+    optData->targetTag = targetTag;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.moveDocumentToGroupFolder();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.moveDocumentToGroupFolder();
+        });
+    }
+}
+
+void CWizDocumentOperator::deleteDocuments(const CWizDocumentDataArray& arrayDocument)
+{
+    OperatorData* optData = new OperatorData();
+    optData->arrayDocument =  arrayDocument;
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+        helper.deleteDocuments();
+    });
+}
+
+void CWizDocumentOperator::copyPersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder,
+                                                          bool keepDocTime, bool keepTag, bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceFolder = sourceFolder;
+    optData->targetFolder = targetParentFolder;
+    optData->keepDocTime = keepDocTime;
+    optData->keepTag = keepTag;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetParentFolder));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyPersonalFolderToPersonalDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyPersonalFolderToPersonalDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::copyPersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetParentTag,
+                                                       bool keepDocTime, bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceFolder = sourceFolder;
+    optData->targetTag = targetParentTag;
+    optData->keepDocTime = keepDocTime;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetParentTag.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyPersonalFolderToGroupDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyPersonalFolderToGroupDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::copyGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+                                                       bool keepDocTime, bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceTag = groupFolder;
+    optData->targetFolder = targetParentFolder;
+    optData->keepDocTime = keepDocTime;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetParentFolder));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyGroupFolderToPersonalDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyGroupFolderToPersonalDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::copyGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                                    bool keepDocTime, bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceTag = sourceFolder;
+    optData->targetTag = targetFolder;
+    optData->keepDocTime = keepDocTime;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Copy notes to %1").arg(targetFolder.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.copyGroupFolderToGroupDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.copyGroupFolderToGroupDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::moveGroupFolderToPersonalDB(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
+                                                       bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceTag = groupFolder;
+    optData->targetFolder = targetParentFolder;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetParentFolder));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.moveGroupFolderToPersonalDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.moveGroupFolderToPersonalDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
+                                                    bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceTag = sourceFolder;
+    optData->targetTag = targetFolder;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.moveGroupFolderToGroupDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.moveGroupFolderToGroupDB();
+        });
+    }
+}
+
+void CWizDocumentOperator::movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder,
+                                                          bool combineFolder)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceFolder = sourceFolder;
+    optData->targetFolder = targetParentFolder;
+    optData->combineFolders = combineFolder;
+
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+        helper.movePersonalFolderToPersonalDB();
+    });
+}
+
+void CWizDocumentOperator::movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder,
+                                                       bool combineFolders, bool showProgressDialog)
+{
+    OperatorData* optData = new OperatorData();
+    optData->sourceFolder = sourceFolder;
+    optData->targetTag = targetFolder;
+    optData->combineFolders = combineFolders;
+    if (showProgressDialog)
+    {
+        CWizProgressDialog dlg(qApp->activeWindow(), true);
+        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder.strName));
+
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.bindSignalsToProgressDialog(&dlg);
+            helper.movePersonalFolderToGroupDB();
+        });
+
+        dlg.exec();
+    }
+    else
+    {
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            CWizDocumentOperatorPrivate helper(m_dbMgr, optData);
+            helper.movePersonalFolderToGroupDB();
+        });
+    }
+}
+
