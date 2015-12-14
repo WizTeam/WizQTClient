@@ -11,6 +11,8 @@ class CWizEmailShareDialog;
 
 class QListWidgetItem;
 class QListWidget;
+class QNetworkReply;
+class QNetworkAccessManager;
 class CWizEmailShareDialog : public QDialog
 {
     Q_OBJECT
@@ -27,6 +29,8 @@ private slots:
     void on_toolButton_contacts_clicked();
 
     void on_contactsListItemClicked(QListWidgetItem *item);
+
+    void on_networkFinished(QNetworkReply* reply);
 
     void on_networkError(const QString& errorMsg);
 
@@ -46,6 +50,7 @@ private:
     CWizExplorerApp& m_app;
     QDialog* m_contactDialog;
     QListWidget* m_contactList;
+    QNetworkAccessManager* m_net;
 };
 
 #endif // WIZEMAILSHAREDIALOG_H

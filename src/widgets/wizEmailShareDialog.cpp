@@ -7,11 +7,6 @@
 #include <QTextCodec>
 #include <QPixmap>
 #include <QVBoxLayout>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 #include <QDebug>
 
 #include "share/wizMessageBox.h"
@@ -35,10 +30,11 @@ enum returnCode {
     codeErrorServer = 500           //:服务器错误
 };
 
-CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent) :
-    m_app(app),
-    QDialog(parent),
-    ui(new Ui::CWizEmailShareDialog)
+CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizEmailShareDialog)
+    , m_app(app)
+    , m_net(nullptr)
 {
     ui->setupUi(this);
     ui->checkBox_saveNotes->setVisible(false);
@@ -106,8 +102,7 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
 {
     switch (nCode) {
     case codeOK:
-        ui->labelInfo->setText(tr("Send success"));
-        accept();
+        ui->labelInfo->setText(tr("Send success"));        
         break;
     case codeErrorParam:
     case codeErrorFile:
@@ -116,12 +111,10 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
     case codeErrorEmail:
     case codeErrorFrequent:
     case codeErrorServer:
-        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                  Q_ARG(QString, returnMessage));
+        on_networkError(returnMessage);
         break;
     default:
-        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                  Q_ARG(QString, tr("Unkown error.")));
+        on_networkError(tr("Unkown error."));
         break;
     }
 }
@@ -176,44 +169,20 @@ void CWizEmailShareDialog::updateContactList()
 
 void CWizEmailShareDialog::sendEmails()
 {
-//    QMessageBox msgBox(this);
-//    msgBox.setText(tr("Sending..."));
-//    msgBox.setWindowTitle(tr("Info"));
-
     ui->labelInfo->setText(tr("Sending..."));
 
-    QtConcurrent::run([this](){
-        QString strToken = WizService::Token::token();
-        QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
-        QString strExInfo = getExInfo();
-        QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    QString strToken = WizService::Token::token();
+    QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+    QString strExInfo = getExInfo();
+    QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    qDebug() << "share url : " << strUrl;
 
-        qDebug() << "share url : " << strUrl;
-
-        QEventLoop loop;
-        QNetworkAccessManager net;
-        QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-        if (reply->error() != QNetworkReply::NoError) {
-            QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                      Q_ARG(QString, reply->errorString()));
-            reply->deleteLater();
-            return;
-        }
-
-        QString strReply = QString::fromUtf8(reply->readAll());
-        reply->deleteLater();
-
-        int nCode;
-        QString returnMessage;
-        processReturnMessage(strReply, nCode, returnMessage);
-
-        QMetaObject::invokeMethod(this, "on_mailShare_finished", Qt::QueuedConnection,
-                                  Q_ARG(int, nCode), Q_ARG(QString, returnMessage));
-    });
+    if(!m_net)
+    {
+        m_net = new QNetworkAccessManager(this);
+        connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(on_networkFinished(QNetworkReply*)));
+    }
+    m_net->get(QNetworkRequest(strUrl));
 }
 
 void CWizEmailShareDialog::on_toolButton_contacts_clicked()
@@ -235,7 +204,28 @@ void CWizEmailShareDialog::on_contactsListItemClicked(QListWidgetItem *item)
     ui->lineEdit_to->setText(strTo);
 }
 
+void CWizEmailShareDialog::on_networkFinished(QNetworkReply* reply)
+{
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        on_networkError(reply->errorString());
+    }
+    else
+    {
+        QString strReply = QString::fromUtf8(reply->readAll());
+
+        int nCode;
+        QString returnMessage;
+        processReturnMessage(strReply, nCode, returnMessage);
+
+        on_mailShare_finished(nCode, returnMessage);
+    }
+
+    reply->deleteLater();
+}
+
 void CWizEmailShareDialog::on_networkError(const QString& errorMsg)
 {
     CWizMessageBox::information(this, tr("Info"), errorMsg);
+    ui->labelInfo->setText(errorMsg);
 }
