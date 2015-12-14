@@ -709,6 +709,17 @@ void CWizDocumentView::stopDocumentEditingStatus()
 
 void CWizDocumentView::startCheckDocumentEditStatus()
 {
+    //首先检查笔记是否是待下载状态，如果一篇笔记一直打开，自动同步会把笔记状态设置为待下载，
+    //但是其版本号是服务器的版本号，检查新版本无效果
+
+    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (!db.IsDocumentDownloaded(m_note.strGUID))
+    {
+        on_checkDocumentChanged_finished(m_note.strGUID, true);
+        m_title->stopEditButtonAnimation();
+        return;
+    }
+
     m_editStatus = DOCUMENT_STATUS_NOSTATUS;
     emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }

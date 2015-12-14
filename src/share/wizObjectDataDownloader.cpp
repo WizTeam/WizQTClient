@@ -34,11 +34,6 @@ CWizObjectDataDownloaderHost* CWizObjectDataDownloaderHost::instance()
     return m_instance.get();
 }
 
-CWizObjectDataDownloaderHost::~CWizObjectDataDownloaderHost()
-{
-
-}
-
 void CWizObjectDataDownloaderHost::downloadData(const WIZOBJECTDATA& data)
 {
     download(data, TypeNomalData);
