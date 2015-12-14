@@ -21,26 +21,27 @@
 #include <QAbstractState>
 #include <QStateMachine>
 
+#include "rapidjson/document.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
-#include "sync/apientry.h"
+#include "share/wizUDPClient.h"
+#include "share/wizMessageBox.h"
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectDataDownloader.h"
+#include "share/wizui.h"
+#include "share/wizthreads.h"
 #include "sync/wizKMServer.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
-#include "wizproxydialog.h"
+#include "sync/apientry.h"
 #include <extensionsystem/pluginmanager.h>
 #include "widgets/wizVerificationCodeDialog.h"
 #include "wizWebSettingsDialog.h"
-#include "share/wizui.h"
+#include "wizproxydialog.h"
 #include "wiznotestyle.h"
-#include "share/wizUDPClient.h"
-#include "rapidjson/document.h"
-#include "share/wizMessageBox.h"
 #include "wizOEMSettings.h"
 
 using namespace WizService;
@@ -96,7 +97,6 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     , m_serverType(WizServer)
     , m_animationWaitingDialog(nullptr)
     , m_oemDownloader(nullptr)
-    , m_oemThread(nullptr)
     , m_userList(localUsers)
     , m_newRegisterAccount(false)
 {
@@ -213,8 +213,6 @@ CWizLoginDialog::~CWizLoginDialog()
     {
         QObject::disconnect(m_oemDownloader, 0, 0, 0);
         m_oemDownloader->deleteLater();
-        connect(m_oemThread, SIGNAL(finished()), m_oemThread, SLOT(deleteLater()));
-        m_oemThread->quit();
     }
 }
 
@@ -886,10 +884,12 @@ void CWizLoginDialog::checkServerLicence()
     m_oemDownloader->setServerIp(serverIp());
     WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
 
-//    downloadOEMSettingsFromWizBox();
     CWizUserSettings userSettings(userId());
     QString strOldLicence = userSettings.serverLicence();
-    emit checkServerLicenceRequest(strOldLicence);
+
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        m_oemDownloader->checkServerLicence(strOldLicence);
+    });
 
     showAnimationWaitingDialog(tr("Connecting...."));
 }
@@ -924,9 +924,10 @@ void CWizLoginDialog::downloadLogoFromWizBox(const QString& strUrl)
     {
         initOEMDownloader();
     }
-    qDebug() << "download logo request in main thread : " << QThread::currentThreadId();
-//    QTimer::singleShot(0, m_oemDownloader, SLOT(downloadOEMLogo()));
-    emit logoDownloadRequest(strUrl);
+
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        m_oemDownloader->downloadOEMLogo(strUrl);
+    });
 }
 
 void CWizLoginDialog::downloadOEMSettingsFromWizBox()
@@ -939,8 +940,10 @@ void CWizLoginDialog::downloadOEMSettingsFromWizBox()
         initOEMDownloader();
     }
     m_oemDownloader->setServerIp(serverIp());
-    qDebug() << "main thread : " << QThread::currentThreadId();
-    QTimer::singleShot(0, m_oemDownloader, SLOT(downloadOEMSettings()));
+
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+       m_oemDownloader->downloadOEMSettings();
+    });
 }
 
 void CWizLoginDialog::setLogo(const QString& logoPath)
@@ -1695,14 +1698,6 @@ void CWizLoginDialog::initOEMDownloader()
             SLOT(showOEMErrorMessage(QString)));
     connect(m_oemDownloader, SIGNAL(checkLicenceFinished(bool, QString)),
             SLOT(onCheckServerLicenceFinished(bool, QString)));
-    connect(this, SIGNAL(logoDownloadRequest(QString)),
-            m_oemDownloader, SLOT(downloadOEMLogo(QString)));
-    connect(this, SIGNAL(checkServerLicenceRequest(QString)),
-            m_oemDownloader, SLOT(onCheckServerLicenceRequest(QString)));
-
-    m_oemThread = new QThread();
-    m_oemThread->start();
-    m_oemDownloader->moveToThread(m_oemThread);
 }
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
@@ -1788,7 +1783,7 @@ void CWizOEMDownloader::downloadOEMSettings()
     emit oemSettingsDownloaded(settings);
 }
 
-void CWizOEMDownloader::onCheckServerLicenceRequest(const QString& licence)
+void CWizOEMDownloader::checkServerLicence(const QString& licence)
 {
     QString settings = _downloadOEMSettings();
     if (settings.isEmpty())
