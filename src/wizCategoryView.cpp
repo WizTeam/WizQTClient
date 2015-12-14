@@ -2518,9 +2518,13 @@ void CWizCategoryView::on_action_deleted_recovery()
     CWizCategoryViewTrashItem* trashItem = currentCategoryItem<CWizCategoryViewTrashItem>();
     if (trashItem)
     {
-        QString strToken = WizService::Token::token();
-        QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
+        WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+            QString strToken = WizService::Token::token();
+            QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
+            });
+        });
     }
 }
 
