@@ -310,7 +310,7 @@ void CWizTagBar::on_lineEditReturnPressed()
         db.TagByName(strTagName, arrayTag);
         for (WIZTAGDATA tagItem : arrayTag)
         {
-            if (tagItem.strParentGUID.IsEmpty())
+            if (!tagItem.strGUID.IsEmpty())
             {
                 tag = tagItem;
                 break;
