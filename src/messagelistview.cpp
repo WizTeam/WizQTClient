@@ -13,11 +13,6 @@
 #include <QDebug>
 #include <QApplication>
 #include <QTextCodec>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 
 #include <extensionsystem/pluginmanager.h>
 
@@ -37,6 +32,7 @@
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
 #include "share/wizsettings.h"
+#include "share/wizthreads.h"
 #include "widgets/wizScrollBar.h"
 #include "widgets/wizImageButton.h"
 #include "widgets/wizTipsWidget.h"
@@ -817,7 +813,7 @@ void MessageListView::on_itemSelectionChanged()
         else if (msgData.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
                  || msgData.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP)
         {
-            QtConcurrent::run([msgData]() {
+            WizExecuteOnThread(WIZ_THREAD_NETWORK, [msgData](){
                 QString command = QString("message_%1").arg(msgData.nMessageType);
                 QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);
                 qDebug() << "message url : " << strUrl;
@@ -853,7 +849,7 @@ void MessageListView::on_itemSelectionChanged()
             QTextDecoder* encoder = codec->makeDecoder();
             const rapidjson::Value& u = d["link"];
             QString str = encoder->toUnicode(u.GetString(), u.GetStringLength());
-            QtConcurrent::run([str]() {
+            WizExecuteOnThread(WIZ_THREAD_NETWORK, [str](){
                 QString link = str;
                 if (link.contains("{token}"))
                 {

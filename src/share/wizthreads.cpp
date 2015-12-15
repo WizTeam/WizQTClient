@@ -246,6 +246,10 @@ void CWizThreadPool::Shutdown(int timeout)
                 m_threads.erase(m_threads.begin() + i);
                 delete thread;
             }
+            else
+            {
+                thread->quit();
+            }
         }
         //
         if (m_threads.empty())
