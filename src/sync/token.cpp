@@ -8,6 +8,7 @@
 #include "wizKMServer.h"
 #include "asyncapi.h"
 #include "apientry.h"
+#include "share/wizthreads.h"
 
 using namespace WizService;
 using namespace WizService::Internal;
@@ -97,7 +98,7 @@ void TokenPrivate::requestToken()
         return;
     }
     //
-    class GetTokenRunnable : public QRunnable
+    class GetTokenRunnable : public QObject
     {
         TokenPrivate* m_p;
     public:
@@ -114,8 +115,10 @@ void TokenPrivate::requestToken()
             Q_EMIT m_p->q->tokenAcquired(token);
         }
     };
-    //
-    QThreadPool::globalInstance()->start(new GetTokenRunnable(this));
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        GetTokenRunnable runnable(this);
+        runnable.run();
+    });
 }
 
 void TokenPrivate::clearToken()
