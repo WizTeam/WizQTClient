@@ -79,6 +79,17 @@ protected:
     void leaveEvent(QEvent* ev);
 };
 
+class CWizSuggestionSeacher : public QObject
+{
+    Q_OBJECT
+public:
+    CWizSuggestionSeacher(QObject* parent = 0);
+
+    void searchSuggestion(const QString& inputText);
+
+signals:
+    void searchFinished(const QStringList &choices, bool isRecentSearches);
+};
 
 class WizSuggestCompletionon : public QObject
 {
@@ -119,6 +130,8 @@ private:
     QSize m_popupOffset;
     int m_popupWgtWidth;
     bool m_usable;
+
+    CWizSuggestionSeacher* m_searcher;
 
     CWizUserSettings* m_settings;
 };

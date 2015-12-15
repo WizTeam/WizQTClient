@@ -3,6 +3,7 @@
 
 #include "wizdef.h"
 #include <QLocale>
+#include <algorithm>
 
 CWizSettings::CWizSettings(const QString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
@@ -716,6 +717,13 @@ void CWizUserSettings::appendRecentSearch(const QString& search)
         return;
 
     QStringList recentSearches = getRecentSearches();
+    QStringList::const_iterator pos = std::find_if(recentSearches.begin(), recentSearches.end(), [search](QString it){
+        return it == search;
+    });
+
+    if (pos != recentSearches.end())
+        return;
+
     while (recentSearches.count() >= 5)
         recentSearches.pop_front();
 

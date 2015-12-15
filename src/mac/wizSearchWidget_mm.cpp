@@ -15,10 +15,10 @@
 #include <QMouseEvent>
 #include <QStyledItemDelegate>
 #include <QPainter>
-#include <QtConcurrent>
+#include "utils/stylehelper.h"
+#include "share/wizthreads.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
-#include "utils/stylehelper.h"
 #include "share/wizsettings.h"
 #include "wizPositionDelegate.h"
 
@@ -65,6 +65,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     , m_editor(parent)
     , m_popupWgtWidth(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH)
     , m_usable(true)
+    , m_searcher(new CWizSuggestionSeacher(this))
 {
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
@@ -144,6 +145,8 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
 
     connect(m_treeWgt, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
             SLOT(doneCompletion()));
+
+    connect(m_searcher, SIGNAL(searchFinished(QStringList,bool)), SLOT(showCompletion(QStringList,bool)));
 
     m_timer = new QTimer(this);
     m_timer->setSingleShot(true);
@@ -344,23 +347,8 @@ void WizSuggestCompletionon::autoSuggest()
     }
     else
     {
-        QtConcurrent::run([this, inputedText](){
-            QStringList suggestions;
-            CWizDatabaseManager* manager = CWizDatabaseManager::instance();
-
-            CWizDatabase& db = manager->db();
-            searchTitleFromDB(db, inputedText, suggestions);
-
-            for (int i = 0; i < manager->count(); i++)
-            {
-                if (suggestions.count() >= 5)
-                    break;
-
-                CWizDatabase& db = manager->at(i);
-                searchTitleFromDB(db, inputedText, suggestions);
-            }
-            QMetaObject::invokeMethod(this, "showCompletion", Qt::QueuedConnection,
-                                      Q_ARG(QStringList, suggestions), Q_ARG(bool, false));
+        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+            m_searcher->searchSuggestion(inputedText);
         });
     }
 }
@@ -399,5 +387,35 @@ void CWizSuggestiongList::leaveEvent(QEvent* ev)
     setCurrentItem(nullptr);
     update();
 }
+
+
+
+CWizSuggestionSeacher::CWizSuggestionSeacher(QObject* parent)
+    : QObject(parent)
+{
+}
+
+void CWizSuggestionSeacher::searchSuggestion(const QString& inputText)
+{
+    QStringList suggestions;
+    CWizDatabaseManager* manager = CWizDatabaseManager::instance();
+
+    CWizDatabase& db = manager->db();
+    searchTitleFromDB(db, inputText, suggestions);
+
+    for (int i = 0; i < manager->count(); i++)
+    {
+        if (suggestions.count() >= 5)
+            break;
+
+        CWizDatabase& db = manager->at(i);
+        searchTitleFromDB(db, inputText, suggestions);
+    }
+
+    emit searchFinished(suggestions, false);
+}
+
+
+
 
 #endif
