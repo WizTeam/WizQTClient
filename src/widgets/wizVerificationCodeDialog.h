@@ -7,6 +7,18 @@ namespace Ui {
 class CWizVerificationCodeDialog;
 }
 
+class CWizVerificationCodeDownloader : public QObject
+{
+    Q_OBJECT
+public:
+    CWizVerificationCodeDownloader(QObject* parent = 0);
+
+    void download(const QString& strCaptchaID);
+
+signals:
+    void downloadFinished(const QByteArray& byData);
+};
+
 class CWizVerificationCodeDialog : public QDialog
 {
     Q_OBJECT
@@ -35,6 +47,7 @@ private:
 
     Ui::CWizVerificationCodeDialog *ui;
     QString m_strCaptchaID;
+    CWizVerificationCodeDownloader* m_downloader;
 };
 
 #endif // WIZVERIFICATIONCODEDIALOG_H
