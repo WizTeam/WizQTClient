@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QImage>
 #include <QTimer>
+#include <QMutexLocker>
 #include <QDebug>
 #include <QNetworkRequest>
 #include <QNetworkReply>
@@ -167,10 +168,7 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID)
 
 void AvatarHostPrivate::addToDownloadList(const QString& strUserID)
 {
-    if (!m_listUser.contains(strUserID))
-    {
-        m_listUser.append(strUserID);
-    }
+    appendUserID(strUserID);
 
     download_impl();
 }
@@ -315,19 +313,41 @@ void AvatarHostPrivate::download_impl()
     if (!m_strCurrentDownloadingUser.isEmpty())
         return;
 
-    if (m_listUser.isEmpty()) {
+    peekUserID(m_strCurrentDownloadingUser);
+
+    if (m_strCurrentDownloadingUser.isEmpty())
+    {
         qDebug() << "[AvatarHost]download pool is clean, thread: "
                  << QThread::currentThreadId();
 
         return;
     }
 
-    m_strCurrentDownloadingUser = m_listUser.takeFirst();
-
-
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         m_downloader->download(m_strCurrentDownloadingUser);
     });
+}
+
+void AvatarHostPrivate::appendUserID(const QString& strUserID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+
+    if (!m_listUser.contains(strUserID))
+    {
+        m_listUser.append(strUserID);
+    }
+}
+
+void AvatarHostPrivate::peekUserID(QString& strUserID)
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+
+    if (!m_listUser.isEmpty())
+    {
+        strUserID = m_listUser.takeFirst();
+    }
 }
 
 void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
@@ -336,7 +356,7 @@ void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
     {
         loadCache(strUserID);
         Q_EMIT q->loaded(strUserID);        
-    }    
+    }
 
     //  下载列表中的下一个头像
     m_strCurrentDownloadingUser.clear();

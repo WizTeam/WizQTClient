@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QStringList>
 #include <QUrl>
+#include <QMutex>
 #include <memory>
 
 class QNetworkReply;
@@ -63,6 +64,7 @@ public:
 
 private:
     QThread* m_thread;
+    QMutex m_mutex;
     AvatarDownloader* m_downloader;
 
     QStringList m_listUser; // download pool
@@ -77,6 +79,9 @@ private:
 
     void addToDownloadList(const QString& strUserID);
     void download_impl();
+
+    void appendUserID(const QString& strUserID);
+    void peekUserID(QString& strUserID);
 
     AvatarHost* q;
 

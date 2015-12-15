@@ -8,7 +8,7 @@
 #include "avatar.h"
 #include "rapidjson/document.h"
 
-#include  "share/wizSyncableDatabase.h"
+#include "share/wizSyncableDatabase.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizEventLoop.h"
 
@@ -1731,10 +1731,10 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
-class CWizDownloadAvatarRunable : public QRunnable
+class CWizAvatarStatusChecker
 {
 public:
-    CWizDownloadAvatarRunable(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
+    CWizAvatarStatusChecker(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
         : m_arrayUser(arrayUser)
         , m_currentUserGUID(currentUserGUID)
     {
@@ -1743,7 +1743,7 @@ private:
     CWizBizUserDataArray m_arrayUser;
     QString m_currentUserGUID;
 public:
-    void	run()
+    void run()
     {
         QMap<QString, QString> mapAllUser;
         for (WIZBIZUSER bizUser : m_arrayUser)
@@ -1763,10 +1763,6 @@ public:
                 }
             }
 
-            QString strDownLoadUrl = WizService::CommonApiEntry::avatarDownloadUrl(it.key());
-            if (!strDownLoadUrl.startsWith("http"))
-                continue;
-
             WizService::AvatarHost::reload(it.value());
         }
     }
@@ -1783,10 +1779,8 @@ bool WizSyncBizGroupAvatar(IWizSyncableDatabase* pPersonalDatabase)
     userSelf.userId = pPersonalDatabase->GetUserId();
     arrayUser.push_back(userSelf);
 
-    CWizDownloadAvatarRunable* downloader = new CWizDownloadAvatarRunable(arrayUser,
-                                                                          userSelf.userGUID);
-    downloader->setAutoDelete(true);
-    QThreadPool::globalInstance()->start(downloader);
+    CWizAvatarStatusChecker checker(arrayUser, userSelf.userGUID);
+    checker.run();
 
     return true;
 }
