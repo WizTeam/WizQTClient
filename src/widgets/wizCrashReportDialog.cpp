@@ -9,13 +9,13 @@
 #include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QPlainTextEdit>
-#include <QtConcurrentRun>
+#include "rapidjson/document.h"
 #include "wizdef.h"
 #include "share/wizEventLoop.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
 #include "share/wizmisc.h"
-#include "rapidjson/document.h"
+#include "share/wizthreads.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
 
 CWizCrashReportDialog::CWizCrashReportDialog(const QString& text, QWidget *parent)
     : QDialog(parent)
@@ -40,7 +40,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
     accept();
 
     QString text = m_reports;
-    QtConcurrent::run([text](){
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [text](){
         QString reportText = text;
         const int maxSize = 1024 * 128 - 100;
         if (reportText.size() > maxSize)
@@ -67,7 +67,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
         CWizAutoTimeOutEventLoop loop(reply);
         loop.exec();
 
-        if (loop.error() != QNetworkReply::NoError)
+        if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
         {
             qDebug() << "[Crash report]Upload failed!";
             return;
