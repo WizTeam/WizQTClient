@@ -1,17 +1,12 @@
 #include "asyncapi.h"
 
 #include <QtGlobal>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
-
 #include <QNetworkAccessManager>
 #include <QEventLoop>
 
 #include <rapidjson/document.h>
 #include "share/wizEventLoop.h"
+#include "share/wizthreads.h"
 #include "apientry.h"
 #include "wizKMServer.h"
 #include "token.h"
@@ -31,7 +26,9 @@ AsyncApi::~AsyncApi()
 
 void AsyncApi::login(const QString& strUserId, const QString& strPasswd)
 {
-    QtConcurrent::run(this, &AsyncApi::login_impl, strUserId, strPasswd);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        login_impl(strUserId, strPasswd);
+    });
 }
 
 bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
@@ -49,7 +46,9 @@ bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
 
 void AsyncApi::getToken(const QString& strUserId, const QString& strPasswd)
 {
-    QtConcurrent::run(this, &AsyncApi::getToken_impl, strUserId, strPasswd);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        getToken_impl(strUserId, strPasswd);
+    });
 }
 
 bool AsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
@@ -69,7 +68,9 @@ bool AsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
 
 void AsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
 {
-    QtConcurrent::run(this, &AsyncApi::keepAlive_impl, strToken, strKbGUID);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        keepAlive_impl(strToken, strKbGUID);
+    });
 }
 
 bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
@@ -94,7 +95,9 @@ bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
 void AsyncApi::registerAccount(const QString& strUserId, const QString& strPasswd,
                                const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    QtConcurrent::run(this, &AsyncApi::registerAccount_impl, strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        registerAccount_impl(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
+    });
 }
 
 bool AsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
@@ -112,77 +115,18 @@ bool AsyncApi::registerAccount_impl(const QString& strUserId, const QString& str
     return ret;
 }
 
-
-//
-//使用QtConcurrent的时候,如果线程没有返回,例如网络阻塞等,会导致应用程序无法退出
-//因此使用异步api处理
-//QtConcurrent::run(this, &AsyncApi::getCommentsCount_impl, strUrl);
-//
-//
-
-void AsyncApi::getCommentsCount(const QString& strUrl)
-{
-    QNetworkReply* reply = m_networkManager->get(QNetworkRequest(strUrl));
-    
-    QEventLoop loop;
-    connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-    connect(reply, SIGNAL(finished()), this, SLOT(on_comments_finished()));
-    loop.exec();
-}
-
-void AsyncApi::on_comments_finished()
-{
-    QNetworkReply* reply = dynamic_cast<QNetworkReply*>(sender());
-    if (!reply)
-        return;
-    //
-
-    int nTotalComments = 0;
-
-    if (reply->error()) {
-        qDebug() << "[AsyncApi]Failed to get comment count: " << reply->errorString();
-        Q_EMIT getCommentsCountFinished(0);
-        return;
-    }
-
-    QString strReply = QString::fromUtf8(reply->readAll().constData());
-
-    // {"comment_count":0,"return_code":200,"return_message":"success"}
-    // {"error":"Token invalid!","error_code":301}
-    rapidjson::Document d;
-    d.Parse<0>(strReply.toUtf8().constData());
-
-    if (d.HasMember("error_code")) {
-        qDebug() << "[AsyncApi]Failed to get comment count: "
-                 << QString::fromUtf8(d.FindMember("error")->value.GetString())
-                 << " code: " << d.FindMember("error_code")->value.GetInt();
-        Q_EMIT getCommentsCountFinished(0);
-        return;
-    }
-
-    if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.GetInt();
-        if (nCode != 200) {
-            qDebug() << "[AsyncApi]Failed to get comment count, need 200, but return "
-                     << d.FindMember("return_code")->value.GetInt();
-            Q_EMIT getCommentsCountFinished(0);
-            return;
-        }
-    }
-
-    nTotalComments = d.FindMember("comment_count")->value.GetInt();
-    Q_EMIT getCommentsCountFinished(nTotalComments);
-}
-
-
 void AsyncApi::setMessageReadStatus(const QString& ids, bool bRead)
 {
-    QtConcurrent::run(this, &AsyncApi::setMessageReadStatus_impl, ids, bRead);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        setMessageReadStatus_impl(ids, bRead);
+    });
 }
 
 void AsyncApi::setMessageDeleteStatus(const QString& ids, bool bDelete)
 {
-    QtConcurrent::run(this, &AsyncApi::setMessageDeleteStatus_impl, ids, bDelete);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        setMessageDeleteStatus_impl(ids, bDelete);
+    });
 }
 
 void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)

@@ -22,7 +22,6 @@ public:
     void keepAlive(const QString& strToken, const QString& strKbGUID);
     void registerAccount(const QString& strUserId, const QString& strPasswd, const QString& strInviteCode,
                          const QString& strCaptchaID = "", const QString& strCaptcha = "");
-    void getCommentsCount(const QString& strUrl);
     void setMessageReadStatus(const QString& ids, bool bRead);
     void setMessageDeleteStatus(const QString& ids, bool bDelete);
 
@@ -41,15 +40,11 @@ private:
     void setMessageReadStatus_impl(const QString& ids, bool bRead);
     void setMessageDeleteStatus_impl(const QString& ids, bool bDelete);
 
-public slots:
-    void on_comments_finished();
-
 Q_SIGNALS:
     void loginFinished(const WIZUSERINFO& info);
     void getTokenFinished(const QString& strToken);
     void keepAliveFinished(bool bOk);
-    void registerAccountFinished(bool bOk);
-    void getCommentsCountFinished(int i);
+    void registerAccountFinished(bool bOk);    
     void uploadMessageReadStatusFinished(const QString& ids);
     void uploadMessageDeleteStatusFinished(const QString& ids);
 };
