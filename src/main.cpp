@@ -231,6 +231,8 @@ int mainCore(int argc, char *argv[])
 
     a.removeTranslator(&translatorSys);
 
+    WizQueuedThreadsInit();
+
     //FIXME: 在Mac osx安全更新之后存在ssl握手问题，此处进行特殊处理
     QSslConfiguration conf = QSslConfiguration::defaultConfiguration();
     conf.setPeerVerifyMode(QSslSocket::VerifyNone);
@@ -403,10 +405,7 @@ int mainCore(int argc, char *argv[])
     WizService::AvatarHost avatarHost;
 
     // FIXME: move to core plugin initialize
-    Core::ThumbCache cache;
-
-
-    WizQueuedThreadsInit();
+    Core::ThumbCache cache;    
 
     MainWindow w(dbMgr);
 #ifdef Q_OS_LINUX

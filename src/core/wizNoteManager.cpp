@@ -3,21 +3,17 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QSettings>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "share/wizobject.h"
 #include "share/wizDatabase.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizthreads.h"
 
 void CWizNoteManager::createIntroductionNoteForNewRegisterAccount()
 {
-    QtConcurrent::run([=](){
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
         //get local note
         QDir dir(Utils::PathResolve::introductionNotePath());
         QStringList introductions = dir.entryList(QDir::Files);
@@ -25,7 +21,6 @@ void CWizNoteManager::createIntroductionNoteForNewRegisterAccount()
             return;
 
         QSettings settings(Utils::PathResolve::introductionNotePath() + "settings.ini", QSettings::IniFormat);
-
         //copy note to new account
         CWizDatabase& db = m_dbMgr.db();
         for (QString fileName : introductions)
