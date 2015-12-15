@@ -5,26 +5,27 @@
 #include <QMenu>
 #include <QSet>
 
-#include "share/wizDatabaseManager.h"
-#include "wizCategoryView.h"
-#include "widgets/wizScrollBar.h"
-#include "wiznotestyle.h"
-#include "wiztaglistwidget.h"
-#include "share/wizsettings.h"
-#include "wizFolderSelector.h"
-#include "wizProgressDialog.h"
-#include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
-#include "sync/apientry.h"
-#include "wizWebSettingsDialog.h"
-#include "wizPopupButton.h"
-#include "wizLineInputDialog.h"
+#include "share/wizDatabaseManager.h"
+#include "share/wizsettings.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectOperator.h"
-
+#include "share/wizthreads.h"
+#include "sync/apientry.h"
 #include "sync/avatar.h"
+#include "widgets/wizScrollBar.h"
+#include "wizLineInputDialog.h"
+#include "wizWebSettingsDialog.h"
+#include "wizPopupButton.h"
+#include "wizFolderSelector.h"
+#include "wizProgressDialog.h"
+#include "wizmainwindow.h"
+#include "wiznotestyle.h"
+#include "wiztaglistwidget.h"
+#include "wizCategoryView.h"
+
 #include "thumbcache.h"
 
 using namespace Core;

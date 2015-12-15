@@ -125,8 +125,10 @@ bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
 
 AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
     : q(avatarHost)
-    , m_downloader(nullptr)
-{   
+    , m_downloader(new AvatarDownloader(this))
+{
+    connect(m_downloader, SIGNAL(downloaded(QString, bool)),
+            SLOT(on_downloaded(QString, bool)));
     loadCacheDefault();
 }
 
@@ -168,13 +170,6 @@ void AvatarHostPrivate::addToDownloadList(const QString& strUserID)
     if (!m_listUser.contains(strUserID))
     {
         m_listUser.append(strUserID);
-    }
-
-    if (!m_downloader)
-    {
-        m_downloader = new AvatarDownloader(this);
-        connect(m_downloader, SIGNAL(downloaded(QString, bool)),
-                SLOT(on_downloaded(QString, bool)));
     }
 
     download_impl();
