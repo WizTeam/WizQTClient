@@ -1,7 +1,5 @@
 #include "wizAnalyzer.h"
 #include <QMutexLocker>
-#include <QRunnable>
-#include <QThreadPool>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -17,10 +15,11 @@
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "sync/apientry.h"
+#include "share/wizEventLoop.h"
+#include "share/wizthreads.h"
 #include "wizmainwindow.h"
 #include "wizDatabase.h"
 #include "wizDatabaseManager.h"
-#include "share/wizEventLoop.h"
 
 CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
@@ -176,7 +175,7 @@ void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
 void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 {
     //
-    class CPostRunnable : public QRunnable
+    class CPostRunnable
     {
     public:
         CPostRunnable(IWizSyncableDatabase* db)
@@ -193,7 +192,10 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
         IWizSyncableDatabase* m_db;
     };
 
-    QThreadPool::globalInstance()->start(new CPostRunnable(db));
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        CPostRunnable runnable(db);
+        runnable.run();
+    });
 }
 
 
@@ -366,7 +368,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     CWizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
-    if (loop.error() != QNetworkReply::NoError)
+    if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
     {
         qDebug() << "[Analyzer]Upload failed!";
         return;

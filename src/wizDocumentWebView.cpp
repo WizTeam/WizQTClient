@@ -1,7 +1,6 @@
 #include "wizDocumentWebView.h"
 
 #include <QRunnable>
-#include <QThreadPool>
 #include <QList>
 #include <QMimeData>
 #include <QUrl>
