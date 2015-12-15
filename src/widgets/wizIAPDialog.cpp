@@ -8,26 +8,21 @@
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QEventLoop>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 #include <QUrl>
 #include <QDebug>
 
 #if defined Q_OS_MAC
-#include "mac/wizIAPHelper.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "rapidjson/document.h"
 #include "utils/stylehelper.h"
+#include "sync/token.h"
 #include "share/wizmisc.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
-#include "wizmainwindow.h"
+#include "sync/apientry.h"
 #include "coreplugin/icore.h"
-#include "rapidjson/document.h"
+#include "mac/wizIAPHelper.h"
+#include "wizmainwindow.h"
 
 #define WIZ_PRODUCT_MONTH "cn.wiz.wiznote.mac.pro.monthly"
 #define WIZ_PRODUCT_YEAR "cn.wiz.wiznote.mac.pro.yearly"
@@ -35,11 +30,12 @@
 #define APPSTORE_IAP "APPSTORE_IAP"
 #define APPSTORE_UNFINISHEDTRANSATION  "UNFINISHED_TRANSATION"
 
-CWizIAPDialog::CWizIAPDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CWizIAPDialog),
-    m_waitingMsgBox(new QMessageBox(this)),
-    m_iAPhelper(0)
+CWizIAPDialog::CWizIAPDialog(QWidget *parent)
+  : QDialog(parent)
+  , ui(new Ui::CWizIAPDialog)
+  , m_waitingMsgBox(new QMessageBox(this))
+  , m_iAPhelper(0)
+  , m_net(new QNetworkAccessManager(this))
 {
     ui->setupUi(this);
     ui->stackedWidget->setCurrentIndex(1);
@@ -49,12 +45,13 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent) :
     initStyles();
 
     connect(&m_timer, SIGNAL(timeout()), SLOT(onWaitingTimeOut()));
-    disconnect(this, SIGNAL(checkReceiptRequest(QByteArray,QString)),
-               this, SLOT(onCheckReceiptRequest(QByteArray,QString)));
-    connect(this, SIGNAL(checkReceiptRequest(QByteArray,QString)),
-            SLOT(onCheckReceiptRequest(QByteArray,QString)), Qt::QueuedConnection);
     connect(ui->webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
             SLOT(onEditorPopulateJavaScriptWindowObject()));
+    connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(checkReceiptFinished(QNetworkReply*)));
+
+    // call check receipt function in main thread
+    connect(this, SIGNAL(checkReceiptRequest(QByteArray,QString)), this,
+            SLOT(onCheckReceiptRequest(QByteArray,QString)), Qt::QueuedConnection);
 }
 
 CWizIAPDialog::~CWizIAPDialog()
@@ -86,7 +83,8 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const
 
     if (ok)
     {
-        saveUnfinishedTransation(strTransationID);
+        saveUnfinishedTransation(strTransationID);   
+        //
         emit checkReceiptRequest(receipt, strTransationID);
     }
     else
@@ -188,75 +186,67 @@ void CWizIAPDialog::hideInfoLabel()
 
 void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID)
 {
-    QtConcurrent::run([this, receipt, strTransationID]() {
-        QString strPlat;
-    #ifdef Q_OS_MAC
-        strPlat = "macosx";
-    #else
-        strPlat = "linux";
-    #endif
-        QString asServerUrl = WizService::CommonApiEntry::asServerUrl();
-        QString checkUrl = asServerUrl + "/a/pay2/ios";
+    m_transationID = strTransationID;
+
+    QString strPlat;
+#ifdef Q_OS_MAC
+    strPlat = "macosx";
+#else
+    strPlat = "linux";
+#endif
+    QString asServerUrl = WizService::CommonApiEntry::asServerUrl();
+    QString checkUrl = asServerUrl + "/a/pay2/ios";
     //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
     //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";
-        CWizDatabase& db = CWizDatabaseManager::instance()->db();
-        QString userID = db.GetUserId();
-        QString userGUID = db.GetUserGUID();
-        QString receiptBase64 = receipt.toBase64();
-        receiptBase64 = QString(QUrl::toPercentEncoding(receiptBase64));
-        QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&receipt=%5")
-                .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(receiptBase64);
+    CWizDatabase& db = CWizDatabaseManager::instance()->db();
+    QString userID = db.GetUserId();
+    QString userGUID = db.GetUserGUID();
+    QString receiptBase64 = receipt.toBase64();
+    receiptBase64 = QString(QUrl::toPercentEncoding(receiptBase64));
+    QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&receipt=%5")
+            .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(receiptBase64);
 
-        qDebug() << "transation id = " << strTransationID;
+    qDebug() << "transation id = " << strTransationID;
     //    qDebug() << "check receipt : " << checkUrl << strExtInfo;
 
-        QNetworkAccessManager net;
-        QNetworkRequest request;
-        request.setUrl(checkUrl);
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
-        QNetworkReply* reply = net.post(request, strExtInfo.toUtf8());
-
-        QEventLoop loop;
-        QObject::connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-
-        if (reply->error() != QNetworkReply::NoError) {
-            reply->deleteLater();
-            return;
-        }
-
-        QString strResult = reply->readAll();
-        reply->deleteLater();
-
-        QMetaObject::invokeMethod(m_waitingMsgBox, "done", Qt::QueuedConnection,
-                                  Q_ARG(int, 0));        
-        parseCheckResult(strResult, strTransationID);
-    });
+    QNetworkRequest request;
+    request.setUrl(checkUrl);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
+    m_net->post(request, strExtInfo.toUtf8());
 }
 
 void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& strTransationID)
 {
+    if (strResult.isEmpty())
+        return;
+
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
-    if (d.FindMember("error_code")) {
-        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
+    if (d.FindMember("error_code"))
+    {
+        QString strError = QString::fromUtf8(d.FindMember("error")->value.GetString());
+        qDebug() << strError;
+        on_purchase_failed(strError);
         return;
     }
 
     if (d.FindMember("return_code")) {
         int nCode = d.FindMember("return_code")->value.GetInt();
-        if (nCode == 200) {
+        if (nCode == 200)
+        {
             qDebug() <<"IAP purchase successed!";
-            QMetaObject::invokeMethod(this, "on_purchase_successed", Qt::QueuedConnection);
+            on_purchase_successed();
             removeTransationFromUnfinishedList(strTransationID);
+            //
+            checkUnfinishedTransation();
             return;
-        } else {
+        }
+        else
+        {
             QString message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
             qDebug() << "check on server failed , code :  " << nCode << "  message : " << message;
-            QMetaObject::invokeMethod(this, "on_purchase_failed", Qt::QueuedConnection,
-                                      Q_ARG(QString, message));
+            on_purchase_failed(message);
             return;
         }
     }
@@ -265,7 +255,7 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
 QStringList CWizIAPDialog::getUnfinishedTransations()
 {
     QString transation = CWizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
-    return transation.split(';');
+    return transation.split(';', QString::SkipEmptyParts);
 }
 
 void CWizIAPDialog::saveUnfinishedTransation(const QString& strTransationID)
@@ -370,7 +360,7 @@ void CWizIAPDialog::checkUnfinishedTransation()
 {
     qDebug() << "Check unfinished transations";
     QStringList idList = getUnfinishedTransations();
-    if (idList.count() == 1 && idList.first().isEmpty())
+    if (idList.size() == 0 || idList.first().isEmpty())
         return;
 
     QByteArray receipt;
@@ -386,11 +376,24 @@ void CWizIAPDialog::checkUnfinishedTransation()
                              QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Ok);
     if (QMessageBox::Ok == result)
     {
-        for (int i = 0; i < idList.count(); i++)
-        {
-            onCheckReceiptRequest(receipt, idList.at(i));
-        }
+        onCheckReceiptRequest(receipt, idList.first());
     }
+}
+
+void CWizIAPDialog::checkReceiptFinished(QNetworkReply* reply)
+{
+    m_waitingMsgBox->done(0);
+
+    if (reply->error() != QNetworkReply::NoError) {
+        reply->deleteLater();
+        on_purchase_failed(tr("Network error : %1").arg(reply->errorString()));
+        return;
+    }
+
+    QString strResult = reply->readAll();
+    reply->deleteLater();
+
+    parseCheckResult(strResult, m_transationID);
 }
 
 void CWizIAPDialog::on_purchase_successed()

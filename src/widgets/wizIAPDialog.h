@@ -13,6 +13,9 @@ class CWizIAPDialog;
 
 class QMessageBox;
 class CWizIAPHelper;
+class QNetworkAccessManager;
+class QNetworkReply;
+
 class CWizIAPDialog : public QDialog, public CWizIAPCaller
 {
     Q_OBJECT
@@ -52,6 +55,8 @@ private slots:
 
     void checkUnfinishedTransation();
 
+    void checkReceiptFinished(QNetworkReply* reply);
+
     void on_purchase_successed();
     void on_purchase_failed(const QString& errorMsg);
 
@@ -73,6 +78,8 @@ private:
     CWizIAPHelper* m_iAPhelper;
     QMessageBox* m_waitingMsgBox;
     QTimer m_timer;
+    QString m_transationID;
+    QNetworkAccessManager* m_net;
 };
 #endif
 
