@@ -1,10 +1,5 @@
 #include <QtGlobal>
 #include "wizUserInfoWidget.h"
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>
@@ -12,14 +7,15 @@
 #include "wizdef.h"
 #include "share/wizsettings.h"
 #include "share/wizDatabaseManager.h"
-#include "../wizmainwindow.h"
+#include "share/wizthreads.h"
 #include "sync/apientry.h"
 #include "sync/wizKMServer.h"
-#include "wizWebSettingsDialog.h"
 #include "sync/avataruploader.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "widgets/wizIAPDialog.h"
+#include "wizWebSettingsDialog.h"
+#include "wizmainwindow.h"
 #include "wizOEMSettings.h"
 
 using namespace WizService;
@@ -183,7 +179,7 @@ void CWizUserInfoWidget::on_action_changeAvatar_triggered()
     }
 
     QString fileName = listFiles[0];
-    QtConcurrent::run([this, fileName](){
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         AvatarUploader* uploader = new AvatarUploader(nullptr);
         connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
         uploader->upload(fileName);

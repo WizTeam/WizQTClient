@@ -27,10 +27,6 @@ private:
     QString convert2Avatar(const QString& strFileName);
     void upload_impl(const QString& strUrl, const QString& strToken, const QString& strFileName);
 
-private Q_SLOTS:
-    void onTokenAcquired(const QString& strToken);
-    void onUploadFinished(QNetworkReply* reply);
-
 Q_SIGNALS:
     void uploaded(bool ok);
 };
