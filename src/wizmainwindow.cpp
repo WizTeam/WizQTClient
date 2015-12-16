@@ -353,9 +353,7 @@ void MainWindow::cleanOnQuit()
     CWizObjectDownloaderHost::instance()->waitForDone();
     //
     m_category->saveExpandState();
-    saveStatus();    
-    //
-    CWizTipListManager::cleanOnQuit();
+    saveStatus();
     //
     m_sync->waitForDone();
     //
@@ -2872,21 +2870,18 @@ void MainWindow::on_categoryUnreadButton_triggered()
     m_labelDocumentsHint->setVisible(true);
 
     bool showTips = userSettings().get(MARKDOCUMENTSREADCHECKED).toInt() == 0;
-    if (showTips)
+    if (showTips && !CWizTipsWidget::isTipsExists(MARKDOCUMENTSREADCHECKED))
     {
-        CWizTipListManager* manager = CWizTipListManager::instance();
-        if (manager->tipsWidgetExists(MARKDOCUMENTSREADCHECKED))
-            return;
-
         CWizTipsWidget* tipWidget = new CWizTipsWidget(MARKDOCUMENTSREADCHECKED, this);
-        connect(m_btnMarkDocumentsReaded, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
+        connect(m_btnMarkDocumentsReaded, SIGNAL(clicked(bool)), tipWidget, SLOT(on_targetWidgetClicked()));
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
         tipWidget->bindCloseFunction(tipBindFunction);
         //
-        tipWidget->addToTipListManager(m_btnMarkDocumentsReaded, 0, 2);
+        tipWidget->bindTargetWidget(m_btnMarkDocumentsReaded, 0, 2);
+        tipWidget->on_showRequest();
     }
 }
 

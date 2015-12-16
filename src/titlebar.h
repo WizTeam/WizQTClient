@@ -59,7 +59,6 @@ public:
     void resetTitle(const QString& strTitle);
     void moveTitileTextToPlaceHolder();
     void clearPlaceHolderText();
-    void showCoachingTips();
 
     void startEditButtonAnimation();
     void stopEditButtonAnimation();
@@ -95,6 +94,7 @@ public Q_SLOTS:
     void updateInfoButtonStatus();
     void updateCommentsButtonStatus();
 
+    void showCoachingTips();
     //
     void onTitleEditFinished();
 

@@ -528,19 +528,15 @@ void TitleBar::showCoachingTips()
         showTips = mainWindow->userSettings().get(TITLEBARTIPSCHECKED).toInt() == 0;
     }
 
-    if (showTips)
+    if (showTips && !CWizTipsWidget::isTipsExists(TITLEBARTIPSCHECKED))
     {
-        CWizTipListManager* manager = CWizTipListManager::instance();
-        if (manager->tipsWidgetExists(TITLEBARTIPSCHECKED))
-            return;
-
         CWizTipsWidget* widget = new CWizTipsWidget(TITLEBARTIPSCHECKED, this);
-        connect(m_editBtn, SIGNAL(clicked(bool)), widget, SLOT(onTargetWidgetClicked()));
+        connect(m_editBtn, SIGNAL(clicked(bool)), widget, SLOT(on_targetWidgetClicked()));
         widget->setAttribute(Qt::WA_DeleteOnClose, true);
         widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
                                                          "edited and markdown note can be redered."));
         widget->setSizeHint(QSize(280, 82));
-        widget->setButtonVisible(false);
+        widget->setButtonVisible(false);       
         widget->bindCloseFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
             {
@@ -548,7 +544,8 @@ void TitleBar::showCoachingTips()
             }
         });
         //
-        widget->addToTipListManager(m_editBtn, 0, -2);
+        widget->bindTargetWidget(m_editBtn, 0, -2);
+        QTimer::singleShot(500, widget, SLOT(on_showRequest()));
     }
 }
 

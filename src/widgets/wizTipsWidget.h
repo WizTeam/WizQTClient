@@ -13,12 +13,13 @@ class CWizTipsWidget : public CWizPopupWidget
 {
     Q_OBJECT
 public:
-    explicit CWizTipsWidget(const QString id,QWidget *parent = 0);
+    explicit CWizTipsWidget(const QString& id,QWidget *parent = 0);
+    ~CWizTipsWidget();
 
     void setSizeHint(const QSize& hintSize);
     virtual QSize sizeHint() const;
 
-    QString id();
+    static bool isTipsExists(const QString& id);
 
     void setAutoAdjustPosition(bool autoAdjust);
     bool isAutoAdjustPosition() const;
@@ -26,7 +27,7 @@ public:
     void setText(const QString& title, const QString& info, const QString& buttonText = tr("OK"));
     void setButtonVisible(bool visible);
 
-    bool addToTipListManager(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
+    bool bindTargetWidget(QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
 
     void bindShowFunction(std::function<void(void)> const& f);
     void bindHideFunction(std::function<void(void)> const& f);
@@ -34,9 +35,12 @@ public:
 
     void hide();
 signals:
+    void finished();
 
 public slots:
-    void onTargetWidgetClicked();
+    void on_targetWidgetClicked();
+    void on_timerOut();
+    void on_showRequest();
 
 protected:
     void mouseReleaseEvent(QMouseEvent* ev);
@@ -50,53 +54,17 @@ private:
     QLabel* m_labelTitle;
     QLabel* m_labelInfo;
     QPushButton* m_btnOK;
+    QWidget* m_targetWidget;
+    int m_xOff;
+    int m_yOff;
     QSize m_hintSize;
     QString m_id;
     bool m_autoAdjustPosition;
+    QTimer m_timer;
     std::function<void(void)> m_showFunction;       //tip显示的时候执行的方法
     std::function<void(void)> m_hideFunction;       //用户没有点击tip，但是其他操作导致tip不应该被显示的时候执行的操作
     std::function<void(void)> m_closeFunction;      //用户点击了tip时候执行的方法
-};
-
-class CWizTipListManager : public QObject
-{
-    Q_OBJECT
-public:
-    static CWizTipListManager* instance();
-    static void cleanOnQuit();
-
-    void addTipsWidget(CWizTipsWidget* widget, QWidget* targetWidget, int nXOff = 0, int nYOff = 0);
-
-    CWizTipsWidget* firstTipWidget();
-
-    bool tipsWidgetExists(const QString id);
-
-
-public slots:
-    void displayNextTipWidget();
-    void displayCurrentTipWidget();    
-
-private slots:
-    void on_timerOut();
-
-private:
-    explicit CWizTipListManager(QObject* parent = 0);
-    ~CWizTipListManager();
-
-    void deleteManager();
-
-    struct TipItem
-    {
-        CWizTipsWidget* widget;
-        QWidget* targetWidget;
-        int nXOff;
-        int nYOff;
-    };
-
-    QList<TipItem> m_tips;
-    QTimer m_timer;
-
-    static CWizTipListManager* m_instance;
+    static QSet<QString> m_tipsList;
 };
 
 #endif // CWIZTIPSWIDGET_H

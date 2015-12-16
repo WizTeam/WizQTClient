@@ -2434,10 +2434,10 @@ void EditorToolBar::adjustButtonPosition()
 
 #define EDITORTOOLBARTIPSCHECKED   "EditorToolBarTipsChecked"
 
-void EditorToolBar::showCoachingTips()
+CWizTipsWidget* EditorToolBar::showCoachingTips()
 {
     if (m_buttonContainersInSecondLine.isEmpty())
-        return;
+        return nullptr;
 
     bool showTips = false;
     if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
@@ -2445,14 +2445,10 @@ void EditorToolBar::showCoachingTips()
         showTips = mainWindow->userSettings().get(EDITORTOOLBARTIPSCHECKED).toInt() == 0;
     }
 
-    if (showTips)
+    if (showTips && !CWizTipsWidget::isTipsExists(EDITORTOOLBARTIPSCHECKED))
     {
-        CWizTipListManager* manager = CWizTipListManager::instance();
-        if (manager->tipsWidgetExists(EDITORTOOLBARTIPSCHECKED))
-            return;
-
         CWizTipsWidget* tipWidget = new CWizTipsWidget(EDITORTOOLBARTIPSCHECKED, this);
-        connect(m_btnShowExtra, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
+        connect(m_btnShowExtra, SIGNAL(clicked(bool)), tipWidget, SLOT(on_targetWidgetClicked()));
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("More tool items"), tr("Use to show or hide extra tool items."));
         tipWidget->setSizeHint(QSize(280, 60));
@@ -2489,8 +2485,11 @@ void EditorToolBar::showCoachingTips()
             }
         });
         //
-        tipWidget->addToTipListManager(m_btnShowExtra, 0, -4);
+        tipWidget->bindTargetWidget(m_btnShowExtra, 0, -4);
+        QTimer::singleShot(1000, tipWidget, SLOT(on_showRequest()));
+        return tipWidget;
     }
+    return nullptr;
 }
 
 QAction* EditorToolBar::actionFromName(const QString& strName)

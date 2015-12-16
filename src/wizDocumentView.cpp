@@ -12,26 +12,27 @@
 
 #include <coreplugin/icore.h>
 
-#include "wizmainwindow.h"
-#include "wizDocumentTransitionView.h"
-#include "wizDocumentWebEngine.h"
-#include "wizEditorToolBar.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
-#include "widgets/wizScrollBar.h"
-#include "widgets/wizLocalProgressWebView.h"
-#include "wizDocumentWebView.h"
-#include "wiznotestyle.h"
-#include "widgets/wizSegmentedButton.h"
-#include "wizButton.h"
 #include "share/wizsettings.h"
 #include "share/wizuihelper.h"
-#include "wizusercipherform.h"
-#include "wizDocumentEditStatus.h"
-#include "notifybar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/wizKMServer.h"
+#include "widgets/wizScrollBar.h"
+#include "widgets/wizLocalProgressWebView.h"
+#include "widgets/wizSegmentedButton.h"
+#include "widgets/wizTipsWidget.h"
+#include "wizDocumentWebView.h"
+#include "wizEditorToolBar.h"
+#include "wiznotestyle.h"
+#include "wizDocumentTransitionView.h"
+#include "wizDocumentWebEngine.h"
+#include "wizButton.h"
+#include "wizusercipherform.h"
+#include "wizDocumentEditStatus.h"
+#include "notifybar.h"
+#include "wizmainwindow.h"
 
 #include "titlebar.h"
 
@@ -595,8 +596,14 @@ void CWizDocumentView::setStatusToEditingByCheckList()
 
 void CWizDocumentView::showCoachingTips()
 {
-    m_title->editorToolBar()->showCoachingTips();
-    m_title->showCoachingTips();
+    if (CWizTipsWidget* tipWidget = m_title->editorToolBar()->showCoachingTips())
+    {
+        connect(tipWidget, SIGNAL(finished()), m_title, SLOT(showCoachingTips()));
+    }
+    else
+    {
+        m_title->showCoachingTips();
+    }
 }
 
 void CWizDocumentView::setEditorFocus()

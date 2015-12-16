@@ -16,6 +16,7 @@ class CWizToolButtonColor;
 class CWizToolComboBox;
 class CWizToolComboBoxFont;
 class CWizExplorerApp;
+class CWizTipsWidget;
 
 struct WizEditorContextMenuItem;
 
@@ -39,7 +40,7 @@ public:
 
     void adjustButtonPosition();
     //
-    void showCoachingTips();
+    CWizTipsWidget* showCoachingTips();
 
 private:
     CWizExplorerApp& m_app;
