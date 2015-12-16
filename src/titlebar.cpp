@@ -535,7 +535,7 @@ void TitleBar::showCoachingTips()
         widget->setAttribute(Qt::WA_DeleteOnClose, true);
         widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
                                                          "edited and markdown note can be redered."));
-        widget->setSizeHint(QSize(280, 82));
+        widget->setSizeHint(QSize(290, 82));
         widget->setButtonVisible(false);       
         widget->bindCloseFunction([](){
             if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
