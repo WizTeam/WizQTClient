@@ -4,47 +4,60 @@
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include "utils/pathresolve.h"
-
+#include "share/wizthreads.h"
+#include "sync/wizKMServer.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "wizmisc.h"
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
-#include "sync/wizKMServer.h"
-
-#include "../sync/token.h"
-#include "../sync/apientry.h"
-#include "wizmisc.h"
 
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1
 
-std::shared_ptr<CWizObjectDataDownloaderHost> CWizObjectDataDownloaderHost::m_instance = nullptr;
+std::shared_ptr<CWizObjectDownloaderHost> CWizObjectDownloaderHost::m_instance = nullptr;
 
 /* --------------------- CWizObjectDataDownloaderHost --------------------- */
-CWizObjectDataDownloaderHost::CWizObjectDataDownloaderHost(QObject* parent /* = 0 */)
+CWizObjectDownloaderHost::CWizObjectDownloaderHost(QObject* parent /* = 0 */)
     : QObject(parent)
+    , m_threadPool(nullptr)
 {
 }
 
-CWizObjectDataDownloaderHost* CWizObjectDataDownloaderHost::instance()
+CWizObjectDownloaderHost::~CWizObjectDownloaderHost()
+{
+}
+
+CWizObjectDownloaderHost* CWizObjectDownloaderHost::instance()
 {
     if (nullptr == m_instance.get())
     {
-        m_instance = std::make_shared<CWizObjectDataDownloaderHost>();
+        m_instance = std::make_shared<CWizObjectDownloaderHost>();
     }
 
     return m_instance.get();
 }
 
-void CWizObjectDataDownloaderHost::downloadData(const WIZOBJECTDATA& data)
+void CWizObjectDownloaderHost::downloadData(const WIZOBJECTDATA& data)
 {
     download(data, TypeNomalData);
 }
 
-void CWizObjectDataDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
+void CWizObjectDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
 {
     download(data, TypeDocument);
 }
 
-void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
+void CWizObjectDownloaderHost::waitForDone()
+{
+    if (m_threadPool)
+    {
+        m_threadPool->Shutdown(0);
+        m_threadPool = nullptr;
+    }
+}
+
+void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
     //
@@ -52,20 +65,29 @@ void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadT
     {
         qDebug() << "\n[downloader host] object already in the pool: "
                  << data.strDisplayName;
-
         return;
     }
     //
     m_mapObject[data.strObjectGUID] = data;
     //
-    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(data, type);
+    CWizObjectDownloader* downloader = new CWizObjectDownloader(data, type);
     //
     connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
-    QThreadPool::globalInstance()->start(downloader);
+    if (!m_threadPool)
+    {
+        m_threadPool = WizCreateThreadPool(2);
+    }
+
+    IWizRunable* action = WizCreateRunable([=](){
+        downloader->run();
+        downloader->deleteLater();
+    });
+    m_threadPool->AddTask(action);
 }
-void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
+
+void CWizObjectDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
 {
     WIZOBJECTDATA data = m_mapObject[objectGUID];
     //
@@ -75,19 +97,18 @@ void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSuc
     Q_EMIT finished();
 }
 
-void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
+void CWizObjectDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
 {
     Q_EMIT downloadProgress(objectGUID, totalSize, loadedSize);
 }
 
-CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(const WIZOBJECTDATA& data,
-                                                       DownloadType type)
+CWizObjectDownloader::CWizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type)
     : m_data(data)
     , m_type(type)
 {
 }
 
-void CWizDownloadObjectRunnable::run()
+void CWizObjectDownloader::run()
 {
     bool ret = false;
     switch (m_type) {
@@ -104,7 +125,7 @@ void CWizDownloadObjectRunnable::run()
     Q_EMIT downloadDone(m_data.strObjectGUID, ret);
 }
 
-bool CWizDownloadObjectRunnable::downloadNormalData()
+bool CWizObjectDownloader::downloadNormalData()
 {
     WIZUSERINFO info;
     if (!getUserInfo(info))
@@ -130,7 +151,7 @@ bool CWizDownloadObjectRunnable::downloadNormalData()
     return false;
 }
 
-bool CWizDownloadObjectRunnable::downloadDocument()
+bool CWizObjectDownloader::downloadDocument()
 {
     WIZUSERINFO info;
     if (!getUserInfo(info))
@@ -194,7 +215,7 @@ bool CWizDownloadObjectRunnable::downloadDocument()
     return ret;
 }
 
-bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
+bool CWizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
 {
     QString token = WizService::Token::token();
     if (token.isEmpty()) {
@@ -207,7 +228,7 @@ bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
 
     return true;
 }
-void CWizDownloadObjectRunnable::on_downloadProgress(int totalSize, int loadedSize)
+void CWizObjectDownloader::on_downloadProgress(int totalSize, int loadedSize)
 {
     emit downloadProgress(m_data.strObjectGUID, totalSize, loadedSize);
 }
@@ -241,10 +262,14 @@ void CWizFileDownloader::run()
 
 void CWizFileDownloader::startDownload()
 {
-    QThreadPool::globalInstance()->start(this);
+    WizExecuteOnThread(WIZ_THREAD_DOWNLOAD, [=](){
+        run();
+        deleteLater();
+    });
 }
 
 bool CWizFileDownloader::download()
 {
      return WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
 }
+

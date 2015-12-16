@@ -15,7 +15,7 @@
 #include "share/wizobject.h"
 
 
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizEditorInsertLinkForm;
 class CWizEditorInsertTableForm;
 class CWizDocumentWebView;

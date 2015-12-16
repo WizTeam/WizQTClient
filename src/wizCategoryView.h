@@ -12,7 +12,7 @@ class CWizDatabaseManager;
 class CWizExplorerApp;
 class QSettings;
 class CWizProgressDialog;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizFolderSelector;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")

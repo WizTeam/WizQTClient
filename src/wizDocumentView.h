@@ -22,7 +22,7 @@ class CWizDocumentWebView;
 class CWizDatabase;
 class CWizSplitter;
 class CWizUserCipherForm;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class QWebEnginePage;
@@ -69,7 +69,7 @@ protected:
     CWizExplorerApp& m_app;
     CWizDatabaseManager& m_dbMgr;
     CWizUserSettings& m_userSettings;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizObjectDownloaderHost* m_downloaderHost;
     CWizDocumentTransitionView* m_transitionView;
 
     QStackedWidget* m_tab;

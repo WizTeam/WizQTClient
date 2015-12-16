@@ -8,7 +8,7 @@ class CWizUserSettings;
 class CWizDatabase;
 class CWizProgressDialog;
 class CWizDatabaseManager;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 
 
 struct OperatorData

@@ -11,7 +11,7 @@ class QMenu;
 class CWizDatabaseManager;
 class CWizAttachmentListViewItem;
 class CWizButton;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizAttachmentListView;
 
 class CWizAttachmentListViewItem : public QObject, public QListWidgetItem
@@ -101,7 +101,7 @@ private:
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
     QMenu* m_menu;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizObjectDownloaderHost* m_downloaderHost;
 
     void resetPermission();
     void startDownload(CWizAttachmentListViewItem* item);

@@ -2518,7 +2518,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
-        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2547,7 +2547,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
-        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2569,7 +2569,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
-        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2592,7 +2592,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
-        CWizObjectDataDownloaderHost* downloaderHost = CWizObjectDataDownloaderHost::instance();
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 

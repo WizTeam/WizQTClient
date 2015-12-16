@@ -11,6 +11,7 @@
 class CWizApi;
 class CWizDatabase;
 class CWizDatabaseManager;
+struct IWizThreadPool;
 
 enum DownloadType
 {
@@ -21,17 +22,20 @@ enum DownloadType
 /* ---------------------- CWizObjectDataDownloaderHost ---------------------- */
 // host running in main thread and manage downloader
 
-class CWizObjectDataDownloaderHost : public QObject
+class CWizObjectDownloaderHost : public QObject
 {
     Q_OBJECT
 
 public:
-    static CWizObjectDataDownloaderHost* instance();
+    static CWizObjectDownloaderHost* instance();
 
     void downloadData(const WIZOBJECTDATA& data);
     void downloadDocument(const WIZOBJECTDATA& data);
 
-    CWizObjectDataDownloaderHost(QObject* parent = 0);
+    void waitForDone();
+
+    CWizObjectDownloaderHost(QObject* parent = 0);
+    ~CWizObjectDownloaderHost();
 Q_SIGNALS:
     void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
     void finished();
@@ -46,17 +50,16 @@ private:
 
 private:
     QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
-    static std::shared_ptr<CWizObjectDataDownloaderHost> m_instance;
+    static std::shared_ptr<CWizObjectDownloaderHost> m_instance;
+    IWizThreadPool* m_threadPool;
 };
 
 
-class CWizDownloadObjectRunnable
-        : public QObject
-        , public QRunnable
+class CWizObjectDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizDownloadObjectRunnable(const WIZOBJECTDATA& data, DownloadType type);
+    CWizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type);
     virtual void run();
 
 private:
@@ -75,13 +78,12 @@ Q_SIGNALS:
     void downloadProgress(QString objectGuid, int totalSize, int loadedSize);
 };
 
-class CWizFileDownloader
-        : public QObject
-        , public QRunnable
+class CWizFileDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizFileDownloader(const QString& strUrl, const QString& strFileName = "", const QString& strPath = "", bool isImage = "false");
+    CWizFileDownloader(const QString& strUrl, const QString& strFileName = "",
+                       const QString& strPath = "", bool isImage = "false");
     virtual void run();
     void startDownload();
 

@@ -41,7 +41,7 @@ class CWizSearcher;
 class CWizSearchIndexer;
 
 class QtSegmentControl;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
@@ -238,7 +238,7 @@ public:
     CWizActions* actions() const { return m_actions; }
 
     //FIXME: why provide download host and dialog by mainwidnow ???
-    CWizObjectDataDownloaderHost* downloaderHost() const;
+    CWizObjectDownloaderHost* downloaderHost() const;
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizIAPDialog* iapDialog();
 

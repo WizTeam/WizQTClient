@@ -8,6 +8,7 @@
 #define WIZ_THREAD_MAIN				0
 #define WIZ_THREAD_DEFAULT			1
 #define WIZ_THREAD_NETWORK          2
+#define WIZ_THREAD_DOWNLOAD         3
 
 
 

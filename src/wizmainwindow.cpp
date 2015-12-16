@@ -350,6 +350,8 @@ void MainWindow::on_application_aboutToQuit()
 
 void MainWindow::cleanOnQuit()
 {
+    CWizObjectDownloaderHost::instance()->waitForDone();
+    //
     m_category->saveExpandState();
     saveStatus();    
     //
@@ -362,7 +364,6 @@ void MainWindow::cleanOnQuit()
     //
     m_doc->waitForDone();
     //
-    QThreadPool::globalInstance()->waitForDone();
 
     if (m_mobileFileReceiver)
     {
@@ -2258,9 +2259,9 @@ CWizDocumentView* MainWindow::documentView() const
     return m_doc;
 }
 
-CWizObjectDataDownloaderHost* MainWindow::downloaderHost() const
+CWizObjectDownloaderHost* MainWindow::downloaderHost() const
 {
-    return CWizObjectDataDownloaderHost::instance();
+    return CWizObjectDownloaderHost::instance();
 }
 
 CWizIAPDialog*MainWindow::iapDialog()
@@ -4351,7 +4352,7 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->setActionString(tr("Downloading attachment file  %1 ...").arg(attachment.strName));
     dlg->setWindowTitle(tr("Downloading"));
 
-    CWizObjectDataDownloaderHost* downloader = CWizObjectDataDownloaderHost::instance();
+    CWizObjectDownloaderHost* downloader = CWizObjectDownloaderHost::instance();
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
     connect(downloader, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
