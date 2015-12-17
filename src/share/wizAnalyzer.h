@@ -43,6 +43,9 @@ public:
     void PostBlocked(IWizSyncableDatabase* db);
     static CWizAnalyzer& GetAnalyzer();
 
+private:
+    QByteArray constructUploadData(IWizSyncableDatabase* db);
+
 };
 
 CWizAnalyzer& WizGetAnalyzer();
