@@ -52,16 +52,21 @@ public:
 
     bool clearCurrentToken();
     //
-    void waitForDone();    
+    void waitForDone();
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe
+
+signals:
+    void startTimer(int interval);
+    void stopTimer();
 
 protected:
     virtual void run();
 
 private slots:
     void syncAfterStart();
+    void on_timerOut();
 
 private:
     bool m_bBackground;
@@ -72,10 +77,12 @@ private:
     bool m_bNeedSyncAll;
     bool m_bNeedDownloadMessages;
     QDateTime m_tLastSyncAll;
-    int m_nfullSyncInterval;
+    int m_nFullSyncSecondsInterval;
 
     //
     QMutex m_mutex;
+    QWaitCondition m_wait;
+    QTimer m_timer;
     std::set<QString> m_setQuickSyncKb;
     QDateTime m_tLastKbModified;
 

@@ -103,7 +103,8 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
-#define DEFAULT_FULL_SYNC_INTERVAL 15 * 60
+#define DEFAULT_FULL_SYNC_SECONDS_INTERVAL 15 * 60
+#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 3000
 
 static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
@@ -113,8 +114,7 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_bNeedDownloadMessages(false)
     , m_pEvents(NULL)
     , m_bBackground(true)
-    , m_mutex(QMutex::Recursive)
-    , m_nfullSyncInterval(DEFAULT_FULL_SYNC_INTERVAL)
+    , m_nFullSyncSecondsInterval(DEFAULT_FULL_SYNC_SECONDS_INTERVAL)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -123,6 +123,11 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
     connect(m_pEvents, SIGNAL(bubbleNotificationRequest(const QVariant&)), SIGNAL(bubbleNotificationRequest(const QVariant&)));
+
+    m_timer.setSingleShot(true);
+    connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
+    connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
     //
     g_pSyncThread = this;
 }
@@ -133,20 +138,18 @@ CWizKMSyncThread::~CWizKMSyncThread()
 
 void CWizKMSyncThread::run()
 {
-    while (1)
+    while (!m_pEvents->IsStop())
     {
+        m_mutex.lock();
+        m_wait.wait(&m_mutex);
+        m_mutex.unlock();
+
         if (m_pEvents->IsStop())
         {
             return;
         }
         //
-        if (doSync())
-        {
-        }
-        else
-        {
-            sleep(1);    //idle
-        }
+        doSync();        
     }
 }
 
@@ -160,10 +163,21 @@ void CWizKMSyncThread::syncAfterStart()
 #endif
 }
 
+void CWizKMSyncThread::on_timerOut()
+{
+    m_mutex.lock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
+}
+
 void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
     m_bNeedSyncAll = true;
     m_bBackground = bBackground;
+
+    m_mutex.lock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 
@@ -190,6 +204,7 @@ bool CWizKMSyncThread::doSync()
         syncAll();
         m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
+        emit startTimer(m_nFullSyncSecondsInterval * 1000 + 1);
         return true;
     }
     else if (needQuickSync())
@@ -235,7 +250,7 @@ bool CWizKMSyncThread::needSyncAll()
 
     QDateTime tNow = QDateTime::currentDateTime();
     int seconds = m_tLastSyncAll.secsTo(tNow);
-    if (m_nfullSyncInterval > 0 && seconds > m_nfullSyncInterval)
+    if (m_nFullSyncSecondsInterval > 0 && seconds > m_nFullSyncSecondsInterval)
     {
         m_bNeedSyncAll = true;
     }
@@ -328,7 +343,6 @@ bool CWizKMSyncThread::quickSync()
                 m_db.CloseGroupDatabase(pGroupDatabase);
             }
         }
-
     }
     //
     //
@@ -370,9 +384,9 @@ bool CWizKMSyncThread::needQuickSync()
         return false;
     //
     QDateTime tNow = QDateTime::currentDateTime();
-    int seconds = m_tLastKbModified.secsTo(tNow);
+    int mseconds = m_tLastKbModified.msecsTo(tNow);
     //
-    if (seconds >= 3)
+    if (mseconds >= DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL)
         return true;
     //
     return false;
@@ -394,15 +408,20 @@ bool CWizKMSyncThread::needDownloadMessage()
 
 void CWizKMSyncThread::stopSync()
 {
-    if (isRunning() && m_pEvents) {
+    if (isRunning() && m_pEvents)
+    {
         m_pEvents->SetStop(true);
+        m_mutex.lock();
+        m_wait.wakeAll();
+        m_mutex.unlock();
     }
 }
 
 void CWizKMSyncThread::setFullSyncInterval(int nMinutes)
 {
-    m_nfullSyncInterval = nMinutes * 60;
+    m_nFullSyncSecondsInterval = nMinutes * 60;
 }
+
 void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
 {
     QMutexLocker locker(&m_mutex);
@@ -411,6 +430,8 @@ void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
     m_setQuickSyncKb.insert(kbGuid);
     //
     m_tLastKbModified = QDateTime::currentDateTime();
+
+    QTimer::singleShot(DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL + 1, this, SLOT(on_timerOut()));
 }
 
 void CWizKMSyncThread::quickDownloadMesages()
@@ -424,6 +445,7 @@ void CWizKMSyncThread::quickDownloadMesages()
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     m_bNeedDownloadMessages = true;
+    m_wait.wakeAll();
 }
 
 bool CWizKMSyncThread::peekQuickSyncKb(QString& kbGuid)
