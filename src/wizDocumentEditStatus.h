@@ -29,6 +29,11 @@ public:
 
 public slots:
     void documentUploaded(const QString& strKbGUID ,const QString& strGUID);
+    void on_timerOut();
+
+signals:
+    void startTimer(int interval);
+    void stopTimer();
 
 protected:
     void run();
@@ -47,8 +52,10 @@ private:
     QMap<QString, QString> m_modifiedMap;
     QMap<QString, QString> m_doneMap;
 
-    QMutex m_mutext;
+    QMutex m_mutex;
+    QWaitCondition m_wait;
     QPointer<QNetworkAccessManager> m_netManager;
+    QTimer m_timer;
 };
 
 class CWizDocumentStatusChecker : public QObject

@@ -24,9 +24,12 @@ QString WizKMGetDocumentEditStatusURL()
 CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* parent)
     : QThread(parent)
     , m_stop(false)
-    , m_mutext(QMutex::Recursive)
     , m_sendNow(false)
 {
+    m_timer.setSingleShot(true);
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
+    connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
+    connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
 }
 
 
@@ -36,15 +39,14 @@ void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUs
     if (strObjID.isEmpty())
         return;
 
-    m_mutext.lock();
+    m_mutex.lock();
     if (m_doneMap.contains(strObjID))
     {
         m_doneMap.remove(strObjID);
     }
     m_editingMap.insert(strObjID, strUserAlias);
-    m_mutext.unlock();
-
-    m_sendNow = true;
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
@@ -55,7 +57,7 @@ void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbG
     if (strObjID.isEmpty())
         return;
 
-    m_mutext.lock();
+    m_mutex.lock();
     if (m_editingMap.contains(strObjID))
     {
         if (bModified)
@@ -65,11 +67,11 @@ void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbG
         else if (!m_modifiedMap.contains(strObjID))
         {
             m_doneMap.insert(strObjID, m_editingMap.value(strObjID));
-            m_sendNow = true;
         }
         m_editingMap.remove(strObjID);
     }
-    m_mutext.unlock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
@@ -79,13 +81,14 @@ void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias
     if (strObjID.isEmpty())
         return;
 
-    m_mutext.lock();
+    m_mutex.lock();
     if (m_doneMap.contains(strObjID))
     {
         m_doneMap.remove(strObjID);
     }
     m_modifiedMap.insert(strObjID, strUserAlias);
-    m_mutext.unlock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID, const QString& strGUID)
@@ -94,17 +97,24 @@ void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID
     if (strObjID.isEmpty())
         return;
 
-    m_mutext.lock();
+    m_mutex.lock();
     if (m_modifiedMap.contains(strObjID))
     {
         if (!m_editingMap.contains(strObjID))
         {
             m_doneMap.insert(strObjID, m_modifiedMap.value(strObjID));
-            m_sendNow = true;
         }
         m_modifiedMap.remove(strObjID);
     }
-    m_mutext.unlock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
+}
+
+void CWizDocumentEditStatusSyncThread::on_timerOut()
+{
+    m_mutex.lock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::stop()
@@ -113,7 +123,10 @@ void CWizDocumentEditStatusSyncThread::stop()
     if (!isRunning())
         return;
 
+    m_mutex.lock();
     m_stop = true;
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 void CWizDocumentEditStatusSyncThread::waitForDone()
@@ -125,25 +138,22 @@ void CWizDocumentEditStatusSyncThread::waitForDone()
 
 void CWizDocumentEditStatusSyncThread::run()
 {
-    int idleCounter = 0;
-    while (1)
+    while (!m_stop)
     {
-        if (idleCounter >= 30 || m_sendNow || m_stop)
+        m_mutex.lock();
+        m_wait.wait(&m_mutex);
+
+        emit stopTimer();
+
+        if (m_stop)
         {
-            sendEditingMessage();
-            sendDoneMessage();
-            //
-            idleCounter = 0;
-            m_sendNow = false;
-            //
-            if (m_stop)
-                return;
+            m_mutex.unlock();
+            return;
         }
-        else
-        {
-            idleCounter++;
-            msleep(1000);
-        }
+        m_mutex.unlock();
+        //
+        sendEditingMessage();
+        sendDoneMessage();
     }
 }
 
@@ -159,14 +169,14 @@ QString CWizDocumentEditStatusSyncThread::combineObjID(const QString& strKbGUID,
 
 void CWizDocumentEditStatusSyncThread::sendEditingMessage()
 {
-    m_mutext.lock();
+    m_mutex.lock();
     QMap<QString, QString> editingMap(m_editingMap);
     QMap<QString, QString>::const_iterator it;
     for ( it = m_modifiedMap.begin(); it != m_modifiedMap.end(); ++it )
     {
         editingMap.insert(it.key(), it.value());
     }
-    m_mutext.unlock();
+    m_mutex.unlock();
 
     for (it = editingMap.begin(); it != editingMap.end(); ++it)
     {
@@ -175,6 +185,12 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage()
         {
             sendEditingMessage(it.value(), it.key());
         }
+    }
+
+    // send again after 30s
+    if (editingMap.size() > 0)
+    {
+        emit startTimer(30 * 1000);
     }
 }
 
@@ -205,9 +221,9 @@ bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
 
 void CWizDocumentEditStatusSyncThread::sendDoneMessage()
 {
-    m_mutext.lock();
+    m_mutex.lock();
     QMap<QString, QString> doneList(m_doneMap);
-    m_mutext.unlock();
+    m_mutex.unlock();
 
     QMap<QString, QString>::const_iterator it;
     for ( it = doneList.begin(); it != doneList.end(); ++it )
@@ -216,9 +232,9 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage()
         {
             if (sendDoneMessage(it.value(), it.key()))
             {
-                m_mutext.lock();
+                m_mutex.lock();
                 m_doneMap.remove(it.key());
-                m_mutext.unlock();
+                m_mutex.unlock();
             }
         }
     }
