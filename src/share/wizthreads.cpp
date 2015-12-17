@@ -73,10 +73,8 @@ protected:
 protected:
     virtual void run()
     {
-        while (1)
-        {
-            if (m_pool->IsShuttingDown())
-                return;
+        while (!m_pool->IsShuttingDown())
+        {            
             //
             IWizRunable* task = m_pool->PeekOne();
             if (task)
@@ -177,14 +175,16 @@ void CWizThreadPool::ClearTasks()
 IWizRunable* CWizThreadPool::PeekOne()    //execute on worker
 {
     if (m_bShuttingDown)
-        return NULL;
+        return nullptr;
     //
-    IWizRunable* task = NULL;
+    IWizRunable* task = nullptr;
     //
     //
     //
     {
         QMutexLocker lock(&m_cs);
+        if (m_bShuttingDown)
+            return nullptr;
         //
         if (!m_tasks.empty())
         {
@@ -192,6 +192,7 @@ IWizRunable* CWizThreadPool::PeekOne()    //execute on worker
             m_tasks.pop_front();
         }
     }
+
     //
     if (task)
         return task;
@@ -199,6 +200,9 @@ IWizRunable* CWizThreadPool::PeekOne()    //execute on worker
     {
         QMutexLocker locker(&m_csEvent);
         m_event.wait(&m_csEvent);
+        //
+        if (m_bShuttingDown)
+            return nullptr;
     }
     //
     //
@@ -244,7 +248,7 @@ void CWizThreadPool::Shutdown(int timeout)
             if (!thread->IsAlive())
             {
                 m_threads.erase(m_threads.begin() + i);
-                delete thread;
+                thread->deleteLater();
             }
             else
             {
@@ -252,6 +256,7 @@ void CWizThreadPool::Shutdown(int timeout)
             }
         }
         //
+
         if (m_threads.empty())
         {
             delete this;
@@ -272,9 +277,9 @@ void CWizThreadPool::Shutdown(int timeout)
                   QThread::msleep(iSleepTime);
              }
         };
-        WaitThread::sleep(1);
+        WaitThread::msleep(100);
 #else
-        QThread::sleep(1);
+        QThread::msleep(100);
 #endif
     }
 }
@@ -446,14 +451,18 @@ public:
     virtual IWizRunable* PeekOne()    //execute on worker
     {
         if (m_bShuttingDown)
-            return NULL;
+            return nullptr;
         //
         QDateTime now = QDateTime::currentDateTime();
         //
         QMutexLocker lock(&m_cs);
+
+        if (m_bShuttingDown)
+            return nullptr;
+
         //
         if (m_tasks.empty())
-            return NULL;
+            return nullptr;
         //
         size_t count = m_tasks.size();
         for (size_t i = 0; i < count; i++)
@@ -469,7 +478,7 @@ public:
             }
         }
         //
-        return NULL;
+        return nullptr;
     }
 };
 

@@ -2484,7 +2484,7 @@ void CWizDocumentWebViewLoaderThread::waitForDone()
 
 void CWizDocumentWebViewLoaderThread::run()
 {
-    while (true)
+    while (!m_stop)
     {
         if (m_stop)
             return;
