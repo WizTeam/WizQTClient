@@ -690,9 +690,10 @@ void CommonApiEntry::getEndPoints()
     if (d.HasParseError())
     {
         qWarning() << "parse endpoints data error : " << d.GetParseError();
+        return;
     }
 
-    for(auto iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
+    for(rapidjson::Document::ConstMemberIterator iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
     {
         QString key = (iter->name).GetString();
         QString url = (iter->value).GetString();
