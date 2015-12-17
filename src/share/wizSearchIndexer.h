@@ -42,6 +42,14 @@ public:
     void waitForDone();
     void rebuild();
 
+signals:
+    void startTimer(int interval);
+    void stopTimer();
+
+public slots:
+    void on_timerOut();
+    void start(Priority priority = InheritPriority);
+
 protected:
     virtual void run();
 
@@ -66,6 +74,9 @@ private:
     QString m_strIndexPath; // working path
     bool m_stop;
     bool m_buldNow;
+    QMutex m_mutex;
+    QTimer m_timer;
+    QWaitCondition m_wait;
 
 private Q_SLOTS:
     void on_document_deleted(const WIZDOCUMENTDATA& doc);
