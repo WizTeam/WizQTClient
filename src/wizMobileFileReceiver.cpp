@@ -303,21 +303,13 @@ void CWizMobileXmlProcesser::addNewSegment(QByteArray* ba)
         return;
     m_mutex.lock();
     m_segmentList.append(ba);
+    m_wait.wakeAll();
     m_mutex.unlock();
 
     if (!isRunning())
     {
         start();
     }
-}
-
-bool CWizMobileXmlProcesser::hasUnprocessedData()
-{
-    bool hasData;
-    m_mutex.lock();
-    hasData = m_segmentList.count() > 0;
-    m_mutex.unlock();
-    return hasData;
 }
 
 void CWizMobileXmlProcesser::processData()
@@ -339,18 +331,24 @@ void CWizMobileXmlProcesser::waitForDone()
 
 void CWizMobileXmlProcesser::stop()
 {
+    QMutexLocker locker(&m_mutex);
     m_stop = true;
+    m_wait.wakeAll();
 }
 
 
 QByteArray *CWizMobileXmlProcesser::peekData()
 {
-    QByteArray *ba = 0;
+    QByteArray *ba = nullptr;
     m_mutex.lock();
     if (m_segmentList.count() > 0)
     {
         ba = m_segmentList.first();
         m_segmentList.removeFirst();
+    }
+    else
+    {
+        m_wait.wait(&m_mutex);
     }
     m_mutex.unlock();
     return ba;
@@ -360,14 +358,7 @@ void CWizMobileXmlProcesser::run()
 {
     while (!m_stop)
     {
-        if (hasUnprocessedData())
-        {
-            processData();
-        }
-        else
-        {
-            sleep(1);
-        }
+        processData();
     }
 }
 
@@ -405,7 +396,6 @@ void CWizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
     {
         start();
     }
-
 }
 
 void CWizMobileTcpContainer::readTcpPendingData()
