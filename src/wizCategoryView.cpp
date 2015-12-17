@@ -103,13 +103,14 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     : ITreeView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
-    , m_bDragHovered(false)
     , m_selectedItem(NULL)
-    , m_dragHoveredTimer(new QTimer())
-    , m_dragHoveredItem(0)
-    , m_dragItem(NULL)
-    , m_dragUrls(false)
+    , m_bDragHovered(false)
     , m_cursorEntered(false)
+    , m_dragUrls(false)
+    , m_dragHoveredTimer(new QTimer())
+    , m_dragItem(NULL)
+
+    , m_dragHoveredItem(0)
 {
     // basic features
     header()->hide();

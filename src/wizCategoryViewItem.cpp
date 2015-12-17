@@ -734,6 +734,10 @@ CWizCategoryViewShortcutItem* CWizCategoryViewShortcutRootItem::addItemToShortcu
         newItem = new CWizCategoryViewShortcutItem(m_app, groupItem->tag().strName, CWizCategoryViewShortcutItem::GroupTag,
                                                     groupItem->tag().strKbGUID, groupItem->tag().strGUID, "");
     }
+    else
+    {
+        return nullptr;
+    }
     //
     for (int i = 0; i < childCount(); i++)
     {
