@@ -337,11 +337,11 @@ function WizTodoReadCheckedWindows (wizApp) {
 	}
 
 	function getCheckedImageFileName() {
-		return this.app.AppPath + "WizTools\\htmleditor\\checked.png";
+		return this.app.AppPath + "WizTools\\htmleditor\\core\\checklist\\checked.png";
 	}
 
 	function getUnCheckedImageFileName() {
-		return this.app.AppPath + "WizTools\\htmleditor\\unchecked.png";
+		return this.app.AppPath + "WizTools\\htmleditor\\core\\checklist\\unchecked.png";
 	}
 
 	function isPersonalDocument() {
@@ -1255,14 +1255,14 @@ var WizTodoReadChecked = (function () {
 		if (state == "checked" && todoText.match(/state[ ]*=[ ]*['\"]unchecked['\"]/ig)) {
 
 			todoText = todoText.replace("wiz-todo-label-unchecked", "wiz-todo-label-checked");
-			todoText = todoText.replace("unchecked.png", "checked.png");
+			todoText = todoText.replace(/unchecked.png/g, "checked.png");
 			todoText = todoText.replace("state='unchecked'", "state='checked'");
 			todoText = todoText.replace("state=\"unchecked\"", "state=\"checked\"");
 		}
 		else if (state == "unchecked" && todoText.match(/state[ ]*=[ ]*['\"]checked['\"]/ig)){
 
 			todoText = todoText.replace("wiz-todo-label-checked", "wiz-todo-label-unchecked");
-			todoText = todoText.replace("checked.png", "unchecked.png");
+			todoText = todoText.replace(/checked.png/g, "unchecked.png");
 			todoText = todoText.replace("state='checked'", "state='unchecked'");
 			todoText = todoText.replace("state=\"checked\"", "state=\"unchecked\"");
 		}
