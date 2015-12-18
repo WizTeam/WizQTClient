@@ -393,7 +393,7 @@
          <item>
           <widget class="QPushButton" name="pushButtonChoseMarkdwonTemplate">
            <property name="text">
-            <string>Chose Markdown template</string>
+            <string>Choose Markdown template</string>
            </property>
           </widget>
          </item>
