@@ -7,7 +7,9 @@
 CWizFileMonitor::CWizFileMonitor(QObject *parent) :
     QThread(parent)
   , m_stop(false)
-{
+{    
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
+    m_timer.start(5 * 1000);
 }
 
 CWizFileMonitor::~CWizFileMonitor()
@@ -27,19 +29,22 @@ void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
 {
     Q_ASSERT(!strFileName.isEmpty());
 
-    foreach (FMData fmData, m_fileList) {
-        if (fmData.strFileName == strFileName)
-            return;
+    {
+        QMutexLocker locker(&m_mutex);
+        foreach (FMData fmData, m_fileList) {
+            if (fmData.strFileName == strFileName)
+                return;
+        }
+
+        FMData fileData;
+        fileData.strKbGUID = strKbGUID;
+        fileData.strGUID = strGUID;
+        fileData.strFileName = strFileName;
+        fileData.strMD5 = strMD5;
+        fileData.dtLastModified = dtLastModified;
+
+        m_fileList.append(fileData);
     }
-
-    FMData fileData;
-    fileData.strKbGUID = strKbGUID;
-    fileData.strGUID = strGUID;
-    fileData.strFileName = strFileName;
-    fileData.strMD5 = strMD5;
-    fileData.dtLastModified = dtLastModified;
-
-    m_fileList.append(fileData);
 
     if (!isRunning())
     {
@@ -49,23 +54,37 @@ void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
 
 void CWizFileMonitor::stop()
 {
+    QMutexLocker locker(&m_mutex);
     m_stop  = true;
+    m_wait.wakeAll();
+}
+
+void CWizFileMonitor::on_timerOut()
+{
+    QMutexLocker locker(&m_mutex);
+    m_wait.wakeAll();
 }
 
 void CWizFileMonitor::run()
 {
     while (!m_stop)
     {
-        sleep(1);
-
         checkFiles();
+        //
+        QMutexLocker locker(&m_mutex);
+        m_wait.wait(&m_mutex);
     }
 }
 
 void CWizFileMonitor::checkFiles()
 {
+    m_mutex.lock();
+    QList<FMData> fileList = m_fileList;
+    m_mutex.unlock();
+
+
     QList<FMData>::iterator fmIter;
-    for (fmIter = m_fileList.begin(); fmIter != m_fileList.end(); fmIter++)
+    for (fmIter = fileList.begin(); fmIter != fileList.end(); fmIter++)
     {
         if (m_stop)
             break;

@@ -4,6 +4,9 @@
 #include <QThread>
 #include <QDateTime>
 #include <QList>
+#include <QTimer>
+#include <QMutex>
+#include <QWaitCondition>
 
 class CWizFileMonitor : public QThread
 {
@@ -21,6 +24,7 @@ signals:
                       QString strMD5, QDateTime dtLastModified);
 
 public slots:
+    void on_timerOut();
 
 protected:
     virtual void run();
@@ -39,6 +43,9 @@ private:
 
     QList<FMData> m_fileList;
     bool m_stop;
+    QTimer m_timer;
+    QMutex m_mutex;
+    QWaitCondition m_wait;
 };
 
 #endif // WIZFILEMONITOR_H
