@@ -3000,6 +3000,69 @@ void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const Q
     }
 }
 
+void CWizCategoryView::initTopLevelItems()
+{
+    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
+    addTopLevelItem(pMsg);
+    pMsg->setUnreadCount(m_dbMgr.db().getUnreadMessageCount());
+
+    CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
+    addTopLevelItem(pShortcutRoot);
+
+    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
+    addTopLevelItem(pSearchRoot);
+
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
+    addTopLevelItem(pAllFoldersItem);
+
+    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
+    addTopLevelItem(pAllTagsItem);
+
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+
+    //
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    //
+    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
+         it != arrayBiz.end();
+         it++)
+    {
+        const WIZBIZDATA& biz = *it;
+        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+
+        addTopLevelItem(pBizGroupItem);
+        pBizGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pBizGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayOwnGroup;
+    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+    if (!arrayOwnGroup.empty())
+    {
+        CWizCategoryViewOwnGroupRootItem* pOwnGroupItem = new CWizCategoryViewOwnGroupRootItem(m_app);
+        addTopLevelItem(pOwnGroupItem);
+        pOwnGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pOwnGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayJionedGroup;
+    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+    if (!arrayJionedGroup.empty())
+    {
+        CWizCategoryViewJionedGroupRootItem* pJionedGroupItem = new CWizCategoryViewJionedGroupRootItem(m_app);
+        addTopLevelItem(pJionedGroupItem);
+        pJionedGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pJionedGroupItem);
+    }
+
+    resetCreateGroupLink();
+}
+
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
     QString extInfo = "biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
@@ -3023,11 +3086,36 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 
 void CWizCategoryView::init()
 {    
-    initGeneral();
-    initFolders();
-    initTags();
-    initStyles();
-    initGroups();    
+    initTopLevelItems();
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        initGeneral();
+        initFolders();
+        initTags();
+        initStyles();
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+            resetSections();
+            sortFolders();
+            sortPersonalTags();
+
+            WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+
+                initGroups();
+
+                WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+//                    for (int i = 0; i < topLevelItemCount(); ++i)
+//                    {
+//                        QTreeWidgetItem* topItem = topLevelItem(i);
+//                        topItem->sortChildren(0, Qt::AscendingOrder);
+//                    }
+
+                    for (int i = 0 ; i < m_dbMgr.count(); i++)
+                    {
+                        sortGroupTags(m_dbMgr.at(i).kbGUID());
+                    }
+                });
+            });
+        });
+    });
 }
 
 void CWizCategoryView::resetSections()
@@ -3353,10 +3441,9 @@ void CWizCategoryView::on_initGroupFolder_finished()
 {
     static int count = 0;
     ++count;
-    qDebug() << count << " group init finished, total " << m_dbMgr.count();
+//    qDebug() << count << " group init finished, total " << m_dbMgr.count();
     if (count >= m_dbMgr.count())
     {
-        resetSections();
         loadExpandState();
         loadSectionStatus();
     }
@@ -3762,21 +3849,6 @@ void CWizCategoryView::updatePersonalTagPosition()
 
 void CWizCategoryView::initGeneral()
 {
-    //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
-    //addTopLevelItem(pCategoryItem);
-
-    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
-    addTopLevelItem(pMsg);
-
-    pMsg->setUnreadCount(m_dbMgr.db().getUnreadMessageCount());
-
-    //QList<QTreeWidgetItem*> pList;
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_TO_ME, CWizCategoryViewMessageItem::SendToMe));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_MODIFY, CWizCategoryViewMessageItem::ModifyNote));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_COMMENTS, CWizCategoryViewMessageItem::Comment));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_FROM_ME, CWizCategoryViewMessageItem::SendFromMe));
-    //pMsg->addChildren(pList);
-
     loadShortcutState();
 
     initQuickSearches();
@@ -3814,6 +3886,26 @@ void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
             return;
 
         sortFolders(pFolder);
+    }
+}
+
+void CWizCategoryView::sortPersonalTags()
+{
+    if (CWizCategoryViewItemBase* allTagsItem = findAllTagsItem())
+    {
+        sortPersonalTags(allTagsItem);
+    }
+}
+
+void CWizCategoryView::sortPersonalTags(QTreeWidgetItem* pItem)
+{
+    if (pItem)
+    {
+        pItem->sortChildren(0, Qt::AscendingOrder);
+        for (int i = 0; i < pItem->childCount(); ++i)
+        {
+            sortPersonalTags(pItem->child(i));
+        }
     }
 }
 
@@ -3977,41 +4069,44 @@ QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pIte
 }
 
 void CWizCategoryView::initFolders()
-{
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
-    addTopLevelItem(pAllFoldersItem);
+{       
+    CWizCategoryViewItemBase* pAllFoldersItem = findAllFolderItem();
+    if (!pAllFoldersItem)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
-        CWizStdStringArray arrayAllLocation;
-        CWizDatabase& newDB = m_dbMgr.db();
-        newDB.GetAllLocationsWithExtra(arrayAllLocation);
-        if (arrayAllLocation.empty()) {
-            arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
+    CWizStdStringArray arrayAllLocation;
+    CWizDatabase& newDB = m_dbMgr.db();
+    newDB.GetAllLocationsWithExtra(arrayAllLocation);
+    if (arrayAllLocation.empty()) {
+        arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
+    }
+
+    doLocationSanityCheck(arrayAllLocation);
+
+    initFolders(pAllFoldersItem, QString(), arrayAllLocation);
+    CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, m_dbMgr.db().kbGUID());
+    pAllFoldersItem->addChild(pTrash);
+
+    // push back folders cache
+    for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
+         it != arrayAllLocation.end();
+         it++) {
+        newDB.AddExtraFolder(*it);
+    }
+
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        pAllFoldersItem->setExpanded(true);
+        updatePersonalFolderDocumentCount();
+        // load expand state
+        if (m_dbMgr.count() == 0)
+        {
+            on_initGroupFolder_finished();
         }
-
-        doLocationSanityCheck(arrayAllLocation);
-
-        initFolders(pAllFoldersItem, QString(), arrayAllLocation);
-        CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, m_dbMgr.db().kbGUID());
-        pAllFoldersItem->addChild(pTrash);
-
-        // push back folders cache
-        for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
-             it != arrayAllLocation.end();
-             it++) {
-            newDB.AddExtraFolder(*it);
-        }
-        
-        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            pAllFoldersItem->setExpanded(true);
-            sortFolders();
-            updatePersonalFolderDocumentCount();
-            // load expand state
-            if (m_dbMgr.count() == 0)
-            {
-                on_initGroupFolder_finished();
-            }
-        });
     });
 }
 
@@ -4107,31 +4202,6 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
 
 void CWizCategoryView::loadShortcutState()
 {   
-    //
-//    QString strData = m_dbMgr.db().meta(CATEGORY_META, CATEGORY_SHORTCUT);
-//    if (!strData.isEmpty())
-//    {
-//        QStringList shortCutList = strData.split(';');
-//        foreach (QString shortCut, shortCutList) {
-//            QStringList shortDataList = shortCut.split(',');
-//            if (shortDataList.count() != 2)
-//                continue;
-
-//            QString strKbGuid = shortDataList.first();
-//            QString strGuid = shortDataList.last();
-//            CWizDatabase &db = m_dbMgr.db(strKbGuid);
-//            WIZDOCUMENTDATA doc;
-//            if (db.DocumentFromGUID(strGuid, doc))
-//            {
-//                bool isEncrypted = doc.nProtected == 1;
-//                CWizCategoryViewShortcutItem *pShortcutItem =
-//                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
-//                pShortcutRoot->addChild(pShortcutItem);
-//            }
-
-//        }
-//    }
-
     QString strData = m_dbMgr.db().GetFavorites();
     initShortcut(strData);
 
@@ -4139,9 +4209,7 @@ void CWizCategoryView::loadShortcutState()
     if (pShortcutRoot->childCount() == 0)
     {
         pShortcutRoot->addPlaceHoldItem();
-    }
-
-    pShortcutRoot->sortChildren(0, Qt::AscendingOrder);
+    }    
 }
 
 void CWizCategoryView::saveShortcutState()
@@ -4210,16 +4278,23 @@ void CWizCategoryView::loadExpandState()
 }
 
 void CWizCategoryView::initTags()
-{
-    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
-    addTopLevelItem(pAllTagsItem);
+{        
+    CWizCategoryViewItemBase* pAllTagsItem = findAllTagsItem();
+
+    if (!pAllTagsItem)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
     initTags(pAllTagsItem, "");
 
-    pAllTagsItem->setExpanded(true);
-    pAllTagsItem->sortChildren(0, Qt::AscendingOrder);
-
-    updatePersonalTagDocumentCount();
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        pAllTagsItem->setExpanded(true);
+        updatePersonalTagDocumentCount();
+    });
 }
 
 void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID)
@@ -4234,8 +4309,6 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strPare
 
         initTags(pTagItem, it->strGUID);
     }
-
-   pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initStyles()
@@ -4246,63 +4319,20 @@ void CWizCategoryView::initStyles()
 }
 
 void CWizCategoryView::initGroups()
-{
-    CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
-
-    //
-    CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
-    //
-    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
-    //
-    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
-         it != arrayBiz.end();
-         it++)
-    {
-        const WIZBIZDATA& biz = *it;
-        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
-        setBizRootItemExtraButton(pBizGroupItem, biz);
-
-        addTopLevelItem(pBizGroupItem);
-        pBizGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pBizGroupItem);
-    }
-    //
-    CWizGroupDataArray arrayOwnGroup;
-    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
-    if (!arrayOwnGroup.empty())
-    {
-        CWizCategoryViewOwnGroupRootItem* pOwnGroupItem = new CWizCategoryViewOwnGroupRootItem(m_app);
-        addTopLevelItem(pOwnGroupItem);
-        pOwnGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pOwnGroupItem);
-    }
-    //
-    CWizGroupDataArray arrayJionedGroup;
-    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
-    if (!arrayJionedGroup.empty())
-    {
-        CWizCategoryViewJionedGroupRootItem* pJionedGroupItem = new CWizCategoryViewJionedGroupRootItem(m_app);
-        addTopLevelItem(pJionedGroupItem);
-        pJionedGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pJionedGroupItem);
-    }
-
+{   
     int nTotal = m_dbMgr.count();
     for (int i = 0; i < nTotal; i++) {
         initGroup(m_dbMgr.at(i));        
     }
     //
-    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
-         it != arrayGroupsItem.end();
-         it++)
-    {
-        CWizCategoryViewItemBase* pItem = *it;
-        pItem->sortChildren(0, Qt::AscendingOrder);
-    }
+//    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
+//         it != arrayGroupsItem.end();
+//         it++)
+//    {
+//        CWizCategoryViewItemBase* pItem = *it;
+//        pItem->sortChildren(0, Qt::AscendingOrder);
+//    }
     //
-    resetCreateGroupLink();
 }
 
 void CWizCategoryView::initBiz(const WIZBIZDATA& biz)
@@ -4397,34 +4427,31 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
 
     //
     QString strKbGUID = db.kbGUID();
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
-        std::multimap<CString, WIZTAGDATA> mapTag;
+    std::multimap<CString, WIZTAGDATA> mapTag;
+    CWizDatabase& newDb = m_dbMgr.db(strKbGUID);
+    newDb.GetAllTags(mapTag);
+    initGroup(newDb, pGroupItem, "", mapTag);
+
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        on_initGroupFolder_finished();
+
+        updateGroupFolderDocumentCount(strKbGUID);
+    });
+
+
+    CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, newDb.kbGUID());
+    pGroupItem->addChild(pGroupNoTagItem);
+
+    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, newDb.kbGUID());
+    pGroupItem->addChild(pTrashItem);
+
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        // only show trash if permission is enough
         CWizDatabase& newDb = m_dbMgr.db(strKbGUID);
-        newDb.GetAllTags(mapTag);
-        initGroup(newDb, pGroupItem, "", mapTag);
-
-        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            on_initGroupFolder_finished();
-
-            updateGroupFolderDocumentCount(strKbGUID);
-        });
-
-
-        CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, newDb.kbGUID());
-        pGroupItem->addChild(pGroupNoTagItem);
-
-        CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, newDb.kbGUID());
-        pGroupItem->addChild(pTrashItem);
-
-        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            // only show trash if permission is enough
-            CWizDatabase& newDb = m_dbMgr.db(strKbGUID);
-            if (newDb.permission() > WIZ_USERGROUP_SUPER) {
-                pTrashItem->setHidden(true);
-            }
-            
-            sortGroupTags(strKbGUID);
-        });
+        if (newDb.permission() > WIZ_USERGROUP_SUPER)
+        {
+            pTrashItem->setHidden(true);
+        }
     });
 }
 
@@ -4442,9 +4469,15 @@ void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, con
 }
 
 void CWizCategoryView::initQuickSearches()
-{
-    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
-    addTopLevelItem(pSearchRoot);
+{   
+    CWizCategoryViewItemBase* pSearchRoot = findAllSearchItem();
+    if (!pSearchRoot)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
 //    CWizCategoryViewSearchItem* pSearchByAttributes = new CWizCategoryViewSearchItem(m_app, tr("Search by Attributes(Personal Notes)"));
     CWizCategoryViewSearchItem* pSearchByDTCreated = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Created"));
@@ -4513,8 +4546,10 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
     CWizCategoryViewItemBase* pShortcutRoot = findAllShortcutItem();
     if (!pShortcutRoot)
     {
-        pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
-        addTopLevelItem(pShortcutRoot);
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
     }
 
     //

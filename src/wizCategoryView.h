@@ -248,6 +248,9 @@ public:
     void sortFolders();
     void sortFolders(CWizCategoryViewFolderItem* pItem);
 
+    void sortPersonalTags();
+    void sortPersonalTags(QTreeWidgetItem* pItem);
+
     void sortGroupTags(const QString& strKbGUID, bool bReloadData = false);
     void sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bReloadData);
 
@@ -477,6 +480,7 @@ private:
     void promptGroupLimitMessage(const QString& groupGUID, const QString& bizGUID);
 
 private:
+    void initTopLevelItems();
     void initGeneral();
     void initFolders();
     void initFolders(QTreeWidgetItem* pParent, const QString& strParentLocation, \
