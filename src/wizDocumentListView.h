@@ -105,7 +105,7 @@ private:
     int m_nSortingType;
     int m_nLeadInfoState;
 
-    std::shared_ptr<QMenu> m_menuDocument;
+    QMenu* m_menuDocument;
     CWizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;

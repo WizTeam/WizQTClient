@@ -169,7 +169,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     //                         SLOT(on_action_message_delete()));
 
     // document context menu
-    m_menuDocument = std::make_shared<QMenu>();
+    m_menuDocument = new QMenu(this);
     m_menuDocument->addAction(WIZACTION_LIST_LOCATE, this,
                               SLOT(on_action_locate()));
 
@@ -216,16 +216,34 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 //    actionCopyDoc->setVisible(false);
 
 
-    actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-    actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
-
-
 
     //m_actionEncryptDocument = new QAction(tr("Encrypt Document"), m_menu);
     //connect(m_actionEncryptDocument, SIGNAL(triggered()), SLOT(on_action_encryptDocument()));
     //m_menu->addAction(m_actionEncryptDocument);
-    connect(m_menuDocument.operator ->(), SIGNAL(aboutToHide()), SLOT(on_menu_aboutToHide()));
+    connect(m_menuDocument, SIGNAL(aboutToHide()), SLOT(on_menu_aboutToHide()));
+
+#ifdef Q_OS_MAC
+    // add action to widget to bind shortcut
+    actionDeleteDoc = new QAction(this);
+    actionDeleteDoc->setShortcut(QKeySequence::Delete);
+    actionDeleteDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actionDeleteDoc, SIGNAL(triggered(bool)), SLOT(on_action_deleteDocument()));
+
+    actionCopyDoc = new QAction(this);
+    actionCopyDoc->setShortcut(QKeySequence("Ctrl+Shift+C"));
+    actionCopyDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actionCopyDoc, SIGNAL(triggered(bool)), SLOT(on_action_copyDocument()));
+
+
+    actionMoveDoc = new QAction(this);
+    actionMoveDoc->setShortcut(QKeySequence("Ctrl+Shift+M"));
+    actionMoveDoc->setShortcutContext(Qt::WidgetWithChildrenShortcut);
+    connect(actionMoveDoc, SIGNAL(triggered(bool)), SLOT(on_action_moveDocument()));
+
+    addAction(actionDeleteDoc);
+    addAction(actionCopyDoc);
+    addAction(actionMoveDoc);
+#endif
 }
 
 CWizDocumentListView::~CWizDocumentListView()
@@ -1569,6 +1587,7 @@ void CWizDocumentListView::on_action_deleteDocument()
     if (m_rightButtonFocusedItems.isEmpty())
         return;
     //
+    m_menuDocument->hide();
     //
     blockSignals(true);
     int index = -1;
@@ -1611,6 +1630,11 @@ void CWizDocumentListView::on_action_deleteDocument()
 
 void CWizDocumentListView::on_action_moveDocument()
 {
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
+    //
+    m_menuDocument->hide();
+
     ::WizGetAnalyzer().LogAction("documentListMenuMoveDocument");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, WIZ_USERGROUP_AUTHOR, this);
     selector->setAcceptRoot(false);
@@ -1668,9 +1692,12 @@ void CWizDocumentListView::on_action_moveDocument_confirmed(int result)
 
 void CWizDocumentListView::on_action_copyDocument()
 {
-    ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
-    Q_ASSERT(!m_rightButtonFocusedItems.isEmpty());
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
     //
+    m_menuDocument->hide();
+    //
+    ::WizGetAnalyzer().LogAction("documentListMenuCopyDocument");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy documents"), m_app, WIZ_USERGROUP_AUTHOR, this);
     bool isGroup = m_dbMgr.db(m_rightButtonFocusedItems.first()->document().strKbGUID).IsGroup();
     selector->setCopyStyle(!isGroup);
