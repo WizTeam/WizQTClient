@@ -44,7 +44,7 @@ public:
                                          bool showProgressDialog = true);
 
 private:
-    CWizDatabaseManager& m_dbMgr;    
+    CWizDatabaseManager* m_dbMgr;
 };
 
 

@@ -27,7 +27,7 @@ class CWizDocumentOperatorPrivate : public QObject
 {
     Q_OBJECT
 public:
-    CWizDocumentOperatorPrivate(CWizDatabaseManager& dbMgr, OperatorData* data, QObject* parent = 0);
+    CWizDocumentOperatorPrivate(OperatorData* data, QObject* parent = 0);
     ~CWizDocumentOperatorPrivate();
 
     void copyDocumentToPersonalFolder();
@@ -78,9 +78,6 @@ private:
     void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetParentTag,
                                      const QString& targetTagName);
 
-    //
-    int documentCount(CWizDatabase& db, const QString& personalFolder);
-    int documentCount(CWizDatabase &db, const WIZTAGDATA &groupFolder);
 
     //
     void combineSameNameGroupFolder(const WIZTAGDATA& parentTag, const WIZTAGDATA& childTag);
@@ -91,12 +88,14 @@ private:
 
 protected:
     OperatorData* m_data;
-    CWizDatabaseManager& m_dbMgr;
     //
     bool m_stop;
     int m_totoalCount;
     int m_counter;
 };
 
+//
+int documentCount(CWizDatabase& db, const QString& personalFolder);
+int documentCount(CWizDatabase &db, const WIZTAGDATA &groupFolder);
 
 #endif // CWIZOBJECTOPERATORPRIVATE_H
