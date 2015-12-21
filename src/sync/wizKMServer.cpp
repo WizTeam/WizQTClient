@@ -549,7 +549,7 @@ BOOL CWizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int
 
 QString getStringFromRapidValue(const rapidjson::Value& u, const QString& memberName)
 {
-    if (!u.FindMember(memberName.toUtf8().constData()))
+    if (!u.HasMember(memberName.toUtf8().constData()))
         return QString();
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
@@ -569,7 +569,7 @@ bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
-    if (d.HasParseError() || !d.FindMember("result")) {
+    if (d.HasParseError() || !d.HasMember("result")) {
         qDebug() << "Error occured when try to parse json of messages";
         qDebug() << strResult;
         return false;

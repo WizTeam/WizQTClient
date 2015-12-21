@@ -679,8 +679,8 @@ QString CommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 
 void CommonApiEntry::getEndPoints()
 {
-    qDebug() << "get end points";
     QString urls = requestUrl("endpoints");
+    qDebug() << "get end points : " << urls;
     if (urls.isEmpty() || !urls.contains("http"))
         return;
 
@@ -695,6 +695,11 @@ void CommonApiEntry::getEndPoints()
 
     for(rapidjson::Document::ConstMemberIterator iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
     {
+        if (!(iter->value).IsString())
+        {
+            continue;
+        }
+
         QString key = (iter->name).GetString();
         QString url = (iter->value).GetString();
         qDebug() << "key: " << key << " url : " << url;

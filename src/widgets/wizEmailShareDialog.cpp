@@ -124,12 +124,12 @@ void CWizEmailShareDialog::processReturnMessage(const QString& returnMessage, in
     rapidjson::Document d;
     d.Parse<0>(returnMessage.toUtf8().constData());
 
-    if (d.FindMember("error_code")) {
+    if (d.HasMember("error_code")) {
         qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
         return;
     }
 
-    if (d.FindMember("return_code")) {
+    if (d.HasMember("return_code")) {
         nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode == 200) {
             qDebug() <<"[EmailShar]:send email successed!";

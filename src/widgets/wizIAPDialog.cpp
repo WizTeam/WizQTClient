@@ -223,7 +223,7 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
     rapidjson::Document d;
     d.Parse<0>(strResult.toUtf8().constData());
 
-    if (d.FindMember("error_code"))
+    if (d.HasMember("error_code"))
     {
         QString strError = QString::fromUtf8(d.FindMember("error")->value.GetString());
         qDebug() << strError;
@@ -231,7 +231,7 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
         return;
     }
 
-    if (d.FindMember("return_code")) {
+    if (d.HasMember("return_code")) {
         int nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode == 200)
         {

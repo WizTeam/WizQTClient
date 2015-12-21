@@ -840,7 +840,7 @@ void MessageListView::on_itemSelectionChanged()
             rapidjson::Document d;
             d.Parse<0>(msgData.note.toUtf8().constData());
 
-            if (d.HasParseError() || !d.FindMember("link")) {
+            if (d.HasParseError() || !d.HasMember("link")) {
                 qDebug() << "Error occured when try to parse json of messages : " << msgData.note;
                 return;
             }

@@ -1386,9 +1386,18 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
 {
     qDebug() << "response from wizbox : " << responseMessage;
 
+    if (responseMessage.isEmpty())
+        return;
+
     m_wizBoxSearchingTimer.stop();
     rapidjson::Document d;
     d.Parse<0>(responseMessage.toUtf8().constData());
+
+    if (!d.HasMember("ip"))
+    {
+        TOLOG(_T("no ip field"));
+        return;
+    }
 
     QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
     QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());
@@ -1439,10 +1448,10 @@ bool CWizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
     rapidjson::Document d;
     d.Parse<0>(settings.toUtf8().constData());
 
-    if (d.FindMember("LogoConfig") && d.FindMember("LogoConfig")->value.FindMember("enable")
+    if (d.HasMember("LogoConfig") && d.FindMember("LogoConfig")->value.HasMember("enable")
             && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
     {
-        QString strUrl = d.FindMember("LogoConfig")->value.FindMember("common") ?
+        QString strUrl = d.FindMember("LogoConfig")->value.HasMember("common") ?
                     d.FindMember("LogoConfig")->value.FindMember("common")->value.GetString() : "";
         if (strUrl.isEmpty())
         {
@@ -1794,7 +1803,7 @@ void CWizOEMDownloader::checkServerLicence(const QString& licence)
     rapidjson::Document d;
     d.Parse<0>(settings.toUtf8().constData());
 
-    if (d.FindMember("licence"))
+    if (d.HasMember("licence"))
     {
         QString newLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
 
