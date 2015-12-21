@@ -1897,6 +1897,37 @@ bool CWizDatabase::getDownloadAttachmentsAtSync()
     return GetMetaDef("QT_WIZNOTE", "SyncDownloadAttachment", "0").toInt() != 0;
 }
 
+class CompareString
+{
+public:
+    CompareString(const QString& text): m_text(text){}
+
+    bool operator() (const QString& folder) const
+    {
+        return folder.compare(m_text, Qt::CaseInsensitive) == 0;
+    }
+private:
+    QString m_text;
+};
+
+bool CWizDatabase::isFolderExists(const QString& folder)
+{
+    CWizStdStringArray arrayFolder;
+    GetAllLocations(arrayFolder);
+
+    CWizStdStringArray::const_iterator pos = std::find_if(arrayFolder.begin(), arrayFolder.end(),
+                                                CompareString(folder));
+
+    if (pos != arrayFolder.end())
+        return true;
+
+    CWizStdStringArray arrayExtra;
+    GetExtraFolder(arrayExtra);
+    pos = std::find_if(arrayExtra.begin(), arrayExtra.end(), CompareString(folder));
+
+    return pos != arrayExtra.end();
+}
+
 void CWizDatabase::SetBizUsers(const QString& strBizGUID, const QString& strJsonUsers)
 {
     CWizBizUserDataArray arrayUser;
@@ -1917,12 +1948,12 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     rapidjson::Document d;
     d.Parse<0>(strJsonRaw.toUtf8().constData());
 
-    if (d.FindMember("error_code")) {
+    if (d.HasMember("error_code")) {
         qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
         return false;
     }
 
-    if (d.FindMember("return_code")) {
+    if (d.HasMember("return_code")) {
         int nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode != 200) {
             qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.GetString()) << ", code = " << nCode;
@@ -1930,7 +1961,7 @@ bool CWizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
         }
     }
 
-    if (!d.FindMember("result")) {
+    if (!d.HasMember("result")) {
         qDebug() << "Error occured when try to parse json of biz users";
         qDebug() << strJsonRaw;
         return false;

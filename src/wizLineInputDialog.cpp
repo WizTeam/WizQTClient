@@ -23,6 +23,7 @@ CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
     ui->buttonBox->button(QDialogButtonBox::Ok)->setText(tr("OK"));
     ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(tr("Cancel"));
 
+    connect(ui->editInput, SIGNAL(textChanged(QString)), SIGNAL(textChanged(QString)));
 }
 
 CWizLineInputDialog::~CWizLineInputDialog()
@@ -41,4 +42,9 @@ QString CWizLineInputDialog::input()
 
 
     return strText;
+}
+
+void CWizLineInputDialog::setOKButtonEnable(bool enable)
+{
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enable);
 }

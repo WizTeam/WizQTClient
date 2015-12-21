@@ -1928,9 +1928,40 @@ void CWizCategoryView::on_action_user_newFolder()
                                                           "", m_app.mainWindow());      //use mainWindow as parent
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newFolder_confirmed(int)));
+    connect(dialog, SIGNAL(textChanged(QString)), SLOT(on_newFolder_inputText_changed(QString)));
 
     dialog->exec();
 
+}
+
+void CWizCategoryView::on_newFolder_inputText_changed(const QString& text)
+{
+    if (CWizLineInputDialog* dialog = qobject_cast<CWizLineInputDialog*>(sender()))
+    {
+        if (!WizIsValidFileNameNoPath(text))
+        {
+            dialog->setOKButtonEnable(false);
+            return;
+        }
+
+        QString strLocation;
+        if (currentCategoryItem<CWizCategoryViewAllFoldersItem>())
+        {
+            strLocation = "/" + text + "/";
+        }
+        else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
+        {
+            strLocation = p->location() + text + "/";
+        }
+
+        if (m_dbMgr.db().isFolderExists(strLocation))
+        {
+            dialog->setOKButtonEnable(false);
+            return;
+        }
+
+        dialog->setOKButtonEnable(true);
+    }
 }
 
 void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
@@ -4612,40 +4643,7 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
         {
             qDebug() << "Invalid shortcut type : " << type;
         }
-    }
-
-    ////FIXME:兼容旧版本的快捷方式
-    ////REMOVEME: 2015-10-1日之后可以删除
-    QString strData = m_dbMgr.db().meta(CATEGORY_META, "CategoryShortcut");
-    if (!strData.isEmpty())
-    {
-        QStringList shortCutList = strData.split(';');
-        foreach (QString str, shortCutList) {
-            QStringList shortDataList = str.split(',');
-            if (shortDataList.count() != 2)
-                continue;
-
-            QString strKbGuid = shortDataList.first();
-            QString strGuid = shortDataList.last();
-            if (shortcut.contains(strGuid))
-                continue;
-            //
-            CWizDatabase &db = m_dbMgr.db(strKbGuid);
-            WIZDOCUMENTDATA doc;
-            if (db.DocumentFromGUID(strGuid, doc))
-            {
-                bool isEncrypted = doc.nProtected == 1;
-                CWizCategoryViewShortcutItem *pShortcutItem =
-                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, CWizCategoryViewShortcutItem::Document,
-                                                         doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
-                pShortcutRoot->addChild(pShortcutItem);
-            }
-        }
-        // clear old value
-        m_dbMgr.db().setMeta(CATEGORY_META, "CategoryShortcut", "");
-        m_dbMgr.db().deleteMetaByKey(CATEGORY_META, "CategoryShortcut");
-        saveShortcutState();
-    }
+    }    
 }
 
 CWizCategoryViewItemBase* CWizCategoryView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate /* = true*/)

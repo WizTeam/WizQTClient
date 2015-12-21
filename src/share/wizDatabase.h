@@ -287,6 +287,7 @@ public:
     int GetObjectSyncTimeline();
     void setDownloadAttachmentsAtSync(bool download);
     bool getDownloadAttachmentsAtSync();
+    bool isFolderExists(const QString& folder);
     QString GetFolders();
     QString GetFoldersPos();
     QString GetGroupTagsPos();
