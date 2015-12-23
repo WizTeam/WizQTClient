@@ -83,5 +83,7 @@
 			<string>120000</string>
 		</dict>
 	</array>
+	<key>NSUserNotificationAlertStyle</key>
+	<string>alert</string>
 </dict>
 </plist>

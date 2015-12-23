@@ -15,6 +15,7 @@ set(wiznote_SOURCES_MAC
 #    mac/rmstore/RMStore.m
     mac/rmstore/RMAppReceipt.mm
     mac/rmstore/RMStoreAppReceiptVerificator.mm
+    mac/wizNotificationCenter.mm
 )
 
 set(wiznote_HEADERS_MAC
@@ -29,6 +30,7 @@ set(wiznote_HEADERS_MAC
 #    mac/rmstore/RMStore.h
     mac/rmstore/RMAppReceipt.h
     mac/rmstore/RMStoreAppReceiptVerificator.h
+    mac/wizNotificationCenter.h
 )
 
 set(wiznote_SOURCES

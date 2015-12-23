@@ -251,7 +251,7 @@ bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName
             }
         }
 
-        QIODevice *device = mainWindow->webViewNetworkCache()->data(url);
+        QIODevice *device = cache->data(url);
         if (device && strImageType.contains("image/"))
         {
             strImageType.remove("image/");
