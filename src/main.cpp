@@ -442,16 +442,59 @@ int mainCore(int argc, char *argv[])
     return ret;
 }
 
+#include "wizProgressDialog.h"
+#include "wizLineInputDialog.h"
 int main(int argc, char *argv[])
 {
-    int ret = mainCore(argc, argv);
+//    int ret = mainCore(argc, argv);
 
-    WizQueuedThreadsShutdown();
-    // clean up
-    QString strTempPath = Utils::PathResolve::tempPath();
-    ::WizDeleteAllFilesInFolder(strTempPath);
+//    WizQueuedThreadsShutdown();
+//    // clean up
+//    QString strTempPath = Utils::PathResolve::tempPath();
+//    ::WizDeleteAllFilesInFolder(strTempPath);
 
-    return ret;
+//    return ret;
+
+    QApplication a(argc, argv);
+
+    CWizLineInputDialog inputDlg("Thread count", "count");
+    inputDlg.exec();
+
+    int nMax = inputDlg.input().toInt();
+
+    if (nMax < 0 || nMax > 1000000)
+        return 0;
+
+    CWizProgressDialog dlg;
+    dlg.show();
+
+    QList<QThread*> threadList;
+
+
+
+    for (int i = 0; i < nMax; ++i)
+    {
+        QThread * thread = new QThread(&dlg);
+        thread->start();
+        threadList.append(thread);
+        sleep(1);
+        a.processEvents();
+        dlg.setProgress(nMax, i);
+
+        qDebug() << "start a new thread : " << i << thread;
+    }
+
+    for(QThread* thread : threadList)
+    {
+        thread->quit();
+        WizWaitForThread(thread);
+    }
+
+    dlg.hide();
+
+    QMessageBox::information(nullptr, "Info", "all threads finished");
+
+    return a.exec();
 }
 
 
