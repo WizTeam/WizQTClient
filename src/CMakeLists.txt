@@ -250,7 +250,6 @@ set(wiznote_HEADERS
     sync/token.h
     sync/token_p.h
     sync/apientry.h
-    sync/apientry_p.h
     share/wizObjectDataDownloader.h
     #share/wizUserAvatar.h
     sync/avatar.h
