@@ -5,6 +5,7 @@
 #include <QMap>
 #include <QRunnable>
 #include <memory>
+#include <functional>
 
 #include "wizobject.h"
 
@@ -30,7 +31,9 @@ public:
     static CWizObjectDownloaderHost* instance();
 
     void downloadData(const WIZOBJECTDATA& data);
+    void downloadData(const WIZOBJECTDATA& data, std::function<void(void)> callback);
     void downloadDocument(const WIZOBJECTDATA& data);
+    void downloadDocument(const WIZOBJECTDATA& data, std::function<void(void)> callback);
 
     void waitForDone();
 
@@ -46,12 +49,13 @@ private Q_SLOTS:
     void on_downloadProgress(QString data, int totalSize, int loadedSize);
 
 private:
-    void download(const WIZOBJECTDATA& data, DownloadType type);
+    void download(const WIZOBJECTDATA& data, DownloadType type, std::function<void(void)> callback = nullptr);
 
 private:
     QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
     static std::shared_ptr<CWizObjectDownloaderHost> m_instance;
     IWizThreadPool* m_threadPool;
+    QMutex m_mutex;
 };
 
 

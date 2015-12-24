@@ -43,9 +43,19 @@ void CWizObjectDownloaderHost::downloadData(const WIZOBJECTDATA& data)
     download(data, TypeNomalData);
 }
 
+void CWizObjectDownloaderHost::downloadData(const WIZOBJECTDATA& data, std::function<void ()> callback)
+{
+    download(data, TypeNomalData, callback);
+}
+
 void CWizObjectDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
 {
     download(data, TypeDocument);
+}
+
+void CWizObjectDownloaderHost::downloadDocument(const WIZOBJECTDATA& data, std::function<void ()> callback)
+{
+    download(data, TypeDocument, callback);
 }
 
 void CWizObjectDownloaderHost::waitForDone()
@@ -57,18 +67,21 @@ void CWizObjectDownloaderHost::waitForDone()
     }
 }
 
-void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
+void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type, std::function<void(void)> callback)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
     //
-    if (m_mapObject.contains(data.strObjectGUID))
     {
-        qDebug() << "\n[downloader host] object already in the pool: "
-                 << data.strDisplayName;
-        return;
+        QMutexLocker locker(&m_mutex);
+        if (m_mapObject.contains(data.strObjectGUID))
+        {
+            qDebug() << "\n[downloader host] object already in the pool: "
+                     << data.strDisplayName;
+            return;
+        }
+        //
+        m_mapObject[data.strObjectGUID] = data;
     }
-    //
-    m_mapObject[data.strObjectGUID] = data;
     //
     CWizObjectDownloader* downloader = new CWizObjectDownloader(data, type);
     //
@@ -83,15 +96,21 @@ void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType 
     IWizRunable* action = WizCreateRunable([=](){
         downloader->run();
         downloader->deleteLater();
+        if (callback)
+        {
+            callback();
+        }
     });
     m_threadPool->AddTask(action);
 }
 
 void CWizObjectDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
 {
+    m_mutex.lock();
     WIZOBJECTDATA data = m_mapObject[objectGUID];
     //
     m_mapObject.remove(objectGUID);
+    m_mutex.unlock();
     //
     Q_EMIT downloadDone(data, bSucceed);
     Q_EMIT finished();
