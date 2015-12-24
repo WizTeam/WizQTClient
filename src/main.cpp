@@ -425,8 +425,10 @@ int mainCore(int argc, char *argv[])
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [strUserId, userInfo](){
         QStringList params;
         params << QString("WizProcess") << strUserId << userInfo.strUserGUID << userInfo.strMywizEmail << userInfo.strDisplayName;
-        QProcess::execute("/Users/lxn/Library/Developer/Xcode/DerivedData/WizNoteSafariExtension-gufldahgvnhnaagyqaooympyxpeo/Build/Products/Debug/WizNoteWebClipper.app/Contents/MacOS/WizNoteWebClipper",
-                          params);
+        QDir dir(Utils::PathResolve::appPath());
+        dir.cdUp();
+        QString strPath = dir.path() + "Library/Helper/WizNoteWebClipper.app/Contents/MacOS/WizNoteWebClipper";
+        QProcess::execute(strPath, params);
     });
 
     //create introduction note for new register users
