@@ -301,8 +301,8 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     rapidjson::Value locale(baLocal.constData(), baLocal.size());
     dd.AddMember("locale", locale, allocator);
 
-    //  only used for phone
-    dd.AddMember("screenSize", 13, allocator);
+//    //  only used for phone
+//    dd.AddMember("screenSize", 13, allocator);
 
 #ifdef Q_OS_MAC
     dd.AddMember("deviceName", "MacOSX", allocator);
