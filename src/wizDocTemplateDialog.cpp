@@ -55,7 +55,7 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
         QStringList dirs = dir.entryList(QDir::AllDirs);
         foreach (QString dirItem , dirs)
         {
-            WizCopyFolder(strOldPath + dirItem, Utils::PathResolve::downloadedTemplatesPath() + dirItem, true);
+            WizCopyFolder(strOldPath + dirItem, Utils::PathResolve::customNoteTemplatesPath() + dirItem, true);
         }
         WizDeleteFolder(strOldPath);
     }
@@ -63,7 +63,7 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 
     QString strFoler = Utils::PathResolve::builtinTemplatePath();
     initFolderTemplateItems(strFoler, BuildInTemplate);
-    strFoler = Utils::PathResolve::downloadedTemplatesPath();
+    strFoler = Utils::PathResolve::customNoteTemplatesPath();
     initFolderTemplateItems(strFoler, CustomTemplate);
 
     ui->treeWidget->expandAll();
@@ -199,7 +199,7 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
             if (QFile::exists(strZiwFile))
             {
                 QString strNewFile = dir.dirName();
-                QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + tr("custom") + "/";
+                QString strDestPath = Utils::PathResolve::customNoteTemplatesPath() + tr("custom") + "/";
                 WizEnsurePathExists(strDestPath);
                 if (!QFile::copy(strZiwFile, strDestPath + strNewFile + ".ziw"))
                 {
@@ -211,7 +211,7 @@ bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
                 QStringList folderList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
                 if (folderList.count() == 1)
                 {
-                    QString strDestPath = Utils::PathResolve::downloadedTemplatesPath() + folderList.first();
+                    QString strDestPath = Utils::PathResolve::customNoteTemplatesPath() + folderList.first();
                     WizEnsurePathExists(strDestPath);
                     dir = QDir(strTempFolder + "/" + folderList.first());
                     QString strfileName = dir.entryList(QDir::Files | QDir::NoDotAndDotDot).first();
@@ -327,7 +327,7 @@ void CWizDocTemplateDialog::on_btn_delete_clicked()
     }
     else
     {
-        QString path = Utils::PathResolve::downloadedTemplatesPath() + item->text(0);
+        QString path = Utils::PathResolve::customNoteTemplatesPath() + item->text(0);
         WizDeleteFolder(path);
         ui->treeWidget->takeTopLevelItem(ui->treeWidget->indexOfTopLevelItem(item));
         delete item;

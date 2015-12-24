@@ -2,6 +2,7 @@
 #include "ui_wizMarkdownTemplateDialog.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
+#include "share/wizmisc.h"
 #include "extensionsystem/pluginmanager.h"
 #include "wiznotestyle.h"
 #include <QSettings>
@@ -10,12 +11,14 @@
 #include <QWebView>
 #include <QTimer>
 #include <QDir>
+#include <QMenu>
 #include <QMessageBox>
 #include <QDebug>
 
-CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CWizMarkdownTemplateDialog)
+CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizMarkdownTemplateDialog)
+    , m_menu(nullptr)
 {
     ui->setupUi(this);
     ui->listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -24,6 +27,10 @@ CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent) :
     ui->listWidget->setStyle(listStyle);
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     QTimer::singleShot(100, this, SLOT(initListWidget()));
+
+    ui->listWidget->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->listWidget, SIGNAL(customContextMenuRequested(QPoint)),
+            SLOT(on_customContextMenuRequested(QPoint)));
 }
 
 CWizMarkdownTemplateDialog::~CWizMarkdownTemplateDialog()
@@ -73,6 +80,8 @@ bool CWizMarkdownTemplateDialog::initListWidget()
     selectItemByLocation(strSelectedFile);
     loadMarkdownHtml(strSelectedFile);
 
+    ui->listWidget->sortItems();
+
     return true;
 }
 
@@ -106,7 +115,7 @@ bool CWizMarkdownTemplateDialog::saveListDataToSettings()
     QSettings* settings = ExtensionSystem::PluginManager::settings();
     settings->beginGroup("MarkdownTemplate");
     settings->remove("");
-    for (int i = 0; i < ui->listWidget->count(); i++)
+    for (int i = 0; i < ui->listWidget->count(); ++i)
     {
         CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->item(i));
         Q_ASSERT(item);
@@ -218,11 +227,10 @@ void CWizTemplateItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) con
     pen.setColor(Qt::lightGray);
     p->setPen(pen);
     QFont font;
-    QFontMetrics fm(font);
     QString text;
     if (m_isCustom)
     {
-        text = fm.elidedText(m_fileName, Qt::ElideMiddle, rcLocation.width());
+        text = QObject::tr("Custom template");
     }
     else
     {
@@ -276,13 +284,27 @@ void CWizTemplateItem::setFileName(const QString& fileName)
     m_fileName = fileName;
 }
 
+bool CWizTemplateItem::operator<(const QListWidgetItem& other) const
+{
+    if (const CWizTemplateItem* pItem = dynamic_cast<const CWizTemplateItem*>(&other))
+    {
+        if (pItem->isCustom() != isCustom())
+            return !isCustom();
+
+        return fileName().localeAwareCompare(pItem->fileName()) < 0;
+    }
+
+    return QListWidgetItem::operator <(other);
+}
+
 void CWizMarkdownTemplateDialog::on_listWidget_itemSelectionChanged()
 {
     if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
     {
         QString strCss = item->fileName();
-//        strCss = Utils::PathResolve::resourcesPath() + "files/markdown/markdown/github2.css";
         loadMarkdownHtml(strCss);
+
+        ui->pushButton_delete->setEnabled(item->isCustom());
     }
 }
 
@@ -295,16 +317,29 @@ void CWizMarkdownTemplateDialog::on_pushButton_Add_clicked()
                             QDir::homePath(),
                             tr("CSS files (*.css)"));
 
+    WizEnsurePathExists(Utils::PathResolve::customMarkdownTemplatesPath());
+
     foreach (QString file, files)
     {
-        CWizTemplateItem* item = new CWizTemplateItem(ui->listWidget);
+        //copy file to template loaction
         QFileInfo info(file);
+        QString newFile = Utils::PathResolve::customMarkdownTemplatesPath() + info.fileName();
+        WizDeleteFile(newFile);
+        if (!QFile::copy(file, newFile))
+        {
+            qDebug() << "copy markdown template failed : " << file << " to : " << newFile;
+            return;
+        }
+
+        CWizTemplateItem* item = new CWizTemplateItem(ui->listWidget);
         item->setTitle(info.baseName());
         item->setIsCustom(true);
-        item->setFileName(file);
+        item->setFileName(newFile);
         item->setSizeHint(QSize(ui->listWidget->width(), 40));
         ui->listWidget->addItem(item);
     }
+
+    ui->listWidget->sortItems();
 }
 
 void CWizMarkdownTemplateDialog::on_pushButton_OK_clicked()
@@ -316,4 +351,37 @@ void CWizMarkdownTemplateDialog::on_pushButton_OK_clicked()
 void CWizMarkdownTemplateDialog::on_pushButton_Cancel_clicked()
 {
     reject();
+}
+
+void CWizMarkdownTemplateDialog::on_pushButton_delete_clicked()
+{
+    if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    {
+        QString strCss = item->fileName();
+        WizDeleteFile(strCss);
+        QListWidgetItem* itemDelete = ui->listWidget->takeItem(ui->listWidget->row(item));
+        delete itemDelete;
+    }
+}
+
+void CWizMarkdownTemplateDialog::on_customContextMenuRequested(const QPoint& pos)
+{
+    if (!m_menu)
+    {
+        m_menu = new QMenu(ui->listWidget);
+        m_menu->addAction(tr("Save as..."), this, SLOT(on_actionSaveAs_clicked()));
+    }
+    m_menu->popup(ui->listWidget->mapToGlobal(pos));
+}
+
+void CWizMarkdownTemplateDialog::on_actionSaveAs_clicked()
+{
+    if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    {
+        QString strCss = item->fileName();
+        QString filePath = QFileDialog::getSaveFileName(this, tr("Save File"),
+                                                        QDir::homePath() + "/untitled.css",
+                                                           tr("CSS file (*.css)"));
+        QFile::copy(strCss, filePath);
+    }
 }

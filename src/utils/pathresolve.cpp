@@ -51,7 +51,7 @@ QString PathResolve::builtinTemplatePath()
     return resourcesPath() + "templates/";
 }
 
-QString PathResolve::downloadedTemplatesPath()
+QString PathResolve::customNoteTemplatesPath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
@@ -62,6 +62,22 @@ QString PathResolve::downloadedTemplatesPath()
     #endif
 #else
     strPath = dataStorePath() + "templates/";
+#endif
+
+    return strPath;
+}
+
+QString PathResolve::customMarkdownTemplatesPath()
+{
+    QString strPath;
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strPath = QDir::homePath() + "/Library/MarkdownTemplates/";
+    #else
+        strPath = dataStorePath() + "markdownTemplates/";
+    #endif
+#else
+    strPath = dataStorePath() + "markdownTemplates/";
 #endif
 
     return strPath;
