@@ -417,8 +417,19 @@ int mainCore(int argc, char *argv[])
     PluginManager::loadPlugins();
 
     w.show();
-    w.init();   
+    w.init();
 
+    //start and set safari extension
+    WIZUSERINFO userInfo;
+    dbMgr.db().GetUserInfo(userInfo);
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [strUserId, userInfo](){
+        QStringList params;
+        params << QString("WizProcess") << strUserId << userInfo.strUserGUID << userInfo.strMywizEmail << userInfo.strDisplayName;
+        QProcess::execute("/Users/lxn/Library/Developer/Xcode/DerivedData/WizNoteSafariExtension-gufldahgvnhnaagyqaooympyxpeo/Build/Products/Debug/WizNoteWebClipper.app/Contents/MacOS/WizNoteWebClipper",
+                          params);
+    });
+
+    //create introduction note for new register users
     if (isNewRegisterAccount)
     {
         CWizNoteManager noteManager(dbMgr);
