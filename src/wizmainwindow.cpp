@@ -4330,14 +4330,14 @@ void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
         qDebug() << "Can not open attachment file : " << strFileName;
     }
 
-    CWizFileMonitor& monitor = CWizFileMonitor::instance();
-    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
-            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+//    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+//    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+//            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
-    QFileInfo info(strFileName);
-    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-                    attachment.strDataMD5, info.lastModified());
+//    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+//    QFileInfo info(strFileName);
+//    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
+//                    attachment.strDataMD5, info.lastModified());
 }
 
 void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)

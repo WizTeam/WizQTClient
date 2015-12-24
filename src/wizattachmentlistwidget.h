@@ -111,9 +111,6 @@ private:
     //
     bool isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
     void updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
-
-    // if has item that is downloading waiting for open , would not open another attach that is not exists in local.
-    static bool m_bHasItemWaitingForDownload;
 };
 
 

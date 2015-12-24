@@ -24,6 +24,7 @@
 #include "wiznotestyle.h"
 #include "wizButton.h"
 #include "wizmainwindow.h"
+#include "share/wizthreads.h"
 
 using namespace Core::Internal;
 
@@ -36,8 +37,6 @@ const int nAttachmentListViewItemHeight  = 40;
 #define WIZACTION_ATTACHMENT_OPEN   QObject::tr("Open...")
 #define WIZACTION_ATTACHMENT_DELETE QObject::tr("Delete")
 #define WIZACTION_ATTACHMENT_HISTORY QObject::tr("History...")
-
-bool CWizAttachmentListView::m_bHasItemWaitingForDownload = false;
 
 CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     : CWizMultiLineListWidget(2, parent)
@@ -251,13 +250,15 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     bool bIsLocal = db.IsObjectDataDownloaded(attachment.strGUID, "attachment");
     QString strFileName = db.GetAttachmentFileName(item->attachment().strGUID);
     bool bExists = PathFileExists(strFileName);
-    if (!bIsLocal || !bExists) {
-        startDownload(item);
-        qDebug() << "start download attach : " << item->attachment().strName;
-        m_bHasItemWaitingForDownload = true;
-        waitForDownload();
-        m_bHasItemWaitingForDownload = false;
-        qDebug() << "attachment download finished : " << item->attachment().strName;
+    if (!bIsLocal || !bExists) {        
+        item->setIsDownloading(true);
+        forceRepaint();
+
+        m_downloaderHost->downloadData(item->attachment(), [=](){
+            qDebug() << "try to open file in lambda function : " << strFileName;
+            QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
+        });
+        return;
     }
 
 #if QT_VERSION > 0x050000
@@ -275,14 +276,14 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
     qDebug() << "try to open file : " << strFileName;
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
 
-    CWizFileMonitor& monitor = CWizFileMonitor::instance();
-    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
-            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+//    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+//    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+//            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
-    QFileInfo info(strFileName);
-    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-                    attachment.strDataMD5, info.lastModified());
+//    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
+//    QFileInfo info(strFileName);
+//    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
+//                    attachment.strDataMD5, info.lastModified());
 }
 
 void CWizAttachmentListView::downloadAttachment(CWizAttachmentListViewItem* item)
@@ -350,7 +351,7 @@ void CWizAttachmentListView::resetPermission()
                 {
                     bDownloadEnable = bDownloadEnable | true;
                 }
-                else if (!bExists && m_bHasItemWaitingForDownload)
+                else if (!bExists)
                 {
                     bOpenOrSaveEnable = false;
                 }
@@ -412,7 +413,6 @@ void CWizAttachmentListView::updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDAT
     QFileInfo info(fileNmae);
     if (info.exists())
     {
-
         QString strMD5 = WizMd5FileString(fileNmae);
         if (strMD5 == attachment.strDataMD5)
         {
@@ -458,21 +458,37 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
             bool bIsLocal = db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
             bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
             if (!bIsLocal || !bExists) {
-                //m_downloadDialog->downloadData(item->attachment());
-                startDownload(item);
-                m_bHasItemWaitingForDownload = true;
-                waitForDownload();
-                m_bHasItemWaitingForDownload = false;
+                item->setIsDownloading(true);
+                forceRepaint();
+
+                QString kbGUID = item->attachment().strKbGUID;
+                QString guid = item->attachment().strGUID;
+                QString attachName = item->attachment().strName;
+                m_downloaderHost->downloadData(item->attachment(), [=](){
+                    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                        QString strFileName = QFileDialog::getSaveFileName(this, QString(), attachName);
+                        if (strFileName.isEmpty())
+                            return;
+
+                        if (!::WizCopyFile(m_dbMgr.db(kbGUID).GetAttachmentFileName(guid), strFileName, FALSE))
+                        {
+                            QMessageBox::critical(nullptr, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
+                            return;
+                        }
+                    });
+                });
             }
-
-            QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
-            if (strFileName.isEmpty())
-                return;
-
-            if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
+            else
             {
-                QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
-                return;
+                QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
+                if (strFileName.isEmpty())
+                    return;
+
+                if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
+                {
+                    QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
+                    return;
+                }
             }
         }
     }
@@ -488,19 +504,39 @@ void CWizAttachmentListView::on_action_saveAttachmentAs()
                 CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
                 bool bIsLocal = db.IsObjectDataDownloaded(item->attachment().strGUID, "attachment");
                 bool bExists = PathFileExists(db.GetAttachmentFileName(item->attachment().strGUID));
-                if (!bIsLocal || !bExists) {
-                    //m_downloadDialog->downloadData(item->attachment());
-                    startDownload(item);
-                    waitForDownload();
-                }
-
-                CString strFileName = strDir + item->attachment().strName;
-                WizGetNextFileName(strFileName);
-                //
-                if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
+                if (!bIsLocal || !bExists)
                 {
-                    QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
-                    continue;
+                    item->setIsDownloading(true);
+                    forceRepaint();
+
+                    // download
+                    QString kbGUID = item->attachment().strKbGUID;
+                    QString guid = item->attachment().strGUID;
+                    QString attachName = item->attachment().strName;
+                    m_downloaderHost->downloadData(item->attachment(), [=](){
+                        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                            QString strFileName = QFileDialog::getSaveFileName(this, QString(), attachName);
+                            if (strFileName.isEmpty())
+                                return;
+
+                            if (!::WizCopyFile(m_dbMgr.db(kbGUID).GetAttachmentFileName(guid), strFileName, FALSE))
+                            {
+                                QMessageBox::critical(nullptr, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
+                                return;
+                            }
+                        });
+                    });
+                }
+                else
+                {
+                    CString strFileName = strDir + item->attachment().strName;
+                    WizGetNextFileName(strFileName);
+                    //
+                    if (!::WizCopyFile(db.GetAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
+                    {
+                        QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
+                        continue;
+                    }
                 }
             }
         }
@@ -673,8 +709,8 @@ void CWizAttachmentListWidget::on_attachList_closeRequest()
 
 CWizAttachmentListViewItem::CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att,
                                                        QListWidget* view)
-    : m_attachment(att)
-    , QListWidgetItem(view, 0)
+    : QListWidgetItem(view, 0)
+    , m_attachment(att)
     , m_loadState(Unkonwn)
     , m_loadProgress(0)
 {
