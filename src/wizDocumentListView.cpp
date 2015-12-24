@@ -1071,8 +1071,10 @@ QPixmap CreateDocumentDragBadget(const CWizDocumentDataArray& arrayDocument)
 
         //
         QRect rcTitle(rcIcon.right() + 4, rcItem.top(), rcItem.right() - rcIcon.right() - 4, rcItem.height());
-        QString text = fm.elidedText(doc.strTitle, Qt::ElideMiddle, rcTitle.width() - 8);
-        rcTitle.setWidth(fm.width(text) + 8);
+        QString text = fm.elidedText(doc.strTitle, Qt::ElideMiddle, rcTitle.width() - 14);
+        rcTitle.setWidth(fm.width(text) + 14);
+        int leftSpace = nImageWidth - rcIcon.width() - 4;
+        rcTitle.setWidth(rcTitle.width() > leftSpace ? leftSpace : rcTitle.width());
         pt.setPen(QColor("#3177EE"));
         pt.setBrush(QColor("#3177EE"));
         pt.drawRoundedRect(rcTitle, 8, 6);
