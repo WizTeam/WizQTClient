@@ -27,6 +27,7 @@ CWizAutoTimeOutEventLoop::~CWizAutoTimeOutEventLoop()
 {
     if (m_reply)
     {
+        m_reply->close();
         m_reply->deleteLater();
     }
 }
