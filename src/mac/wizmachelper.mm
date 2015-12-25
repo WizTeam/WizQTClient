@@ -29,17 +29,15 @@
 #include "utils/pathresolve.h"
 #include "widgets/wizCrashReportDialog.h"
 
-
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>
 #endif
-//#ifndef QT_MAC_USE_COCOA
-//float qt_mac_get_scalefactor(QWidget *window)
-//{
-//    Q_UNUSED(window);
-//    return HIGetScaleFactor();
-//}
-//#endif
+
+
+
+#define WizShareSettingsName    @"cn.wiz.wiznoteextension.shareextension"
+
+
 
 
 @interface DBSCustomView: NSView
@@ -920,4 +918,23 @@ int getSystemPatchVersion()
     SInt32 bugfix;
     Gestalt(gestaltSystemVersionBugFix, &bugfix);
     return bugfix;
+}
+
+void updateShareExtensionAccount(const QString& userId, const QString& userGUID, const QString& myWiz, const QString& displayName)
+{
+    NSUserDefaults* shared = [[NSUserDefaults alloc] initWithSuiteName:WizShareSettingsName];
+    if (!shared)
+        return;
+    //
+    NSString* nsUserId = WizToNSString(userId);
+    NSString* nsUserGUID = WizToNSString(userGUID);
+    NSString* nsMyWiz = WizToNSString(myWiz);
+    NSString* nsDisplayName = WizToNSString(displayName);
+    [shared setObject:nsUserId forKey:@"userId"];
+    [shared setObject:nsUserGUID forKey:@"userGuid"];
+    [shared setObject:nsMyWiz forKey:@"mywizEmail"];
+    [shared setObject:nsDisplayName forKey:@"displayName"];
+    //
+    bool ret = [shared synchronize];
+    qDebug() << "update extension user account : " << ret;
 }

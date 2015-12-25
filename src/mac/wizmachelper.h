@@ -23,6 +23,7 @@ enum documentType {
 class QMainWindow;
 class QWidget;
 class QMacCocoaViewContainer;
+class QStringList;
 
 float qt_mac_get_scalefactor(QWidget *window);
 
@@ -59,6 +60,8 @@ bool systemWidgetBlurAvailable();
 int getSystemMajorVersion();
 int getSystemMinorVersion();
 int getSystemPatchVersion();
+
+void updateShareExtensionAccount(const QString &userId, const QString &userGUID, const QString &myWiz, const QString &displayName);
 
 void adjustSubViews(QWidget* wgt);
 
