@@ -190,7 +190,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
+    connect(m_sync, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
 
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
@@ -2422,7 +2422,7 @@ void MainWindow::on_syncStarted(bool syncAll)
     }
 }
 
-void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
+void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
 {
     Q_UNUSED(strErrorMsg);
 
@@ -2435,25 +2435,15 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
         reconnectServer();
         return;
     }
-    else if (QNetworkReply::ProtocolUnknownError == nErrorCode)
-    {
-//        //network avaliable, show message once
-//        static bool showMessageAgain = true;
-//        if (showMessageAgain) {
-//            QMessageBox messageBox(this);
-//            messageBox.setIcon(QMessageBox::Information);
-//            messageBox.setText(tr("Connection is not available, please check your network connection."));
-//            QAbstractButton *btnDontShowAgain =
-//                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
-//            messageBox.addButton(QMessageBox::Ok);
-//            messageBox.exec();
-//            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
-//        }
-    }
     else if (S_OK == nErrorCode)
     {
         // set quick download message enable
         m_bQuickDownloadMessageEnable = true;
+    }
+    else if (WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR == nErrorCode && !isBackground)
+    {
+        //当用户的企业付费到期并且有待上传的内容的时候，进行弹框提示
+        CWizMessageBox::information(this, tr("Info"), strErrorMsg);
     }
 
     m_documents->viewport()->update();

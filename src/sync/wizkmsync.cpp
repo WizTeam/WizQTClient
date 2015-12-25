@@ -172,12 +172,17 @@ void CWizKMSyncThread::on_timerOut()
 
 void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
+    m_mutex.lock();
     m_bNeedSyncAll = true;
     m_bBackground = bBackground;
 
-    m_mutex.lock();
     m_wait.wakeAll();
     m_mutex.unlock();
+}
+
+bool CWizKMSyncThread::isBackground() const
+{
+    return m_bBackground;
 }
 
 
@@ -186,7 +191,7 @@ bool CWizKMSyncThread::prepareToken()
     QString token = Token::token();
     if (token.isEmpty())
     {
-        Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage());
+        Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage(), isBackground());
         return false;
     }
     //
@@ -270,7 +275,9 @@ public:
     }
     ~CWizKMSyncThreadHelper()
     {
-        Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode(), "");
+        Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode()
+                                       , m_pThread->m_pEvents->GetLastErrorMessage()
+                                       , m_pThread->isBackground());
     }
 };
 

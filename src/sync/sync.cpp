@@ -857,7 +857,6 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
                 case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
                 case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
                 case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
-                    SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
                     return FALSE;
                 }
             }
@@ -1018,43 +1017,10 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
                 succeeded = true;
                 break;
             }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT)
-            {
-                QString strMessage = WizFormatString2("Monthly traffic limit reached! \n\nTraffic Limit %1\nTraffic Using:%2",
-                                                      ::WizInt64ToStr(kbInfo.nTrafficLimit),
-                                                      ::WizInt64ToStr(kbInfo.nTrafficUsage)
-                    );
-                //
-                pDatabase->OnTrafficLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnTrafficLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_STORAGE_LIMIT)
-            {
-                QString strMessage = WizFormatString3("Storage limit reached.\n\n%1\nStorage Limit: %2, Storage Using: %3", _T(""),
-                    ::WizInt64ToStr(kbInfo.nStorageLimit),
-                    ::WizInt64ToStr(kbInfo.nStorageUsage)
-                    );
-                //
-                pDatabase->OnStorageLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnStorageLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
-            {
-                CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
-                //
-                QString strBizGUID;
-                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
-                pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnBizServiceExpr(pDatabase);
+            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT
+                     || server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_STORAGE_LIMIT
+                     || server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
+            {               
                 return FALSE;
             }
         }
@@ -1195,11 +1161,20 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
             //
             switch (server.GetLastErrorCode())
             {
+            case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+            {
+                pEvents->SetLastErrorCode(WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR);
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                WIZBIZDATA bizData;
+                pDatabase->GetBizData(strBizGUID, bizData);
+                QString error = pEvents->GetLastErrorMessage() + QObject::tr("Team service of ' %1 ' has expired, temporarily unable to sync the new and edited notes, please renew on time.").arg(bizData.bizName);
+                pEvents->SetLastErrorMessage(error);
+            }
             case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
             case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
-            case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
             case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
-                SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
+                SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);                
                 return FALSE;
             }
         }

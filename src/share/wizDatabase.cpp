@@ -2169,8 +2169,15 @@ bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray&
 }
 bool CWizDatabase::GetBizData(const QString& bizGUID, WIZBIZDATA& biz)
 {
+    if (bizGUID.isEmpty())
+        return false;
+
+    CWizDatabase* db = getPersonalDatabase();
+    if (!db)
+        return false;
+
     CWizBizDataArray arrayBiz;
-    if (!GetUserBizInfo(true, arrayBiz))
+    if (!db->GetUserBizInfo(true, arrayBiz))
         return false;
     //
     for (CWizBizDataArray::const_iterator it = arrayBiz.begin();

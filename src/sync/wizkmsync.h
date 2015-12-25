@@ -42,6 +42,7 @@ public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
     ~CWizKMSyncThread();
     void startSyncAll(bool bBackground = true);
+    bool isBackground() const;
     void stopSync();
     //
     void setFullSyncInterval(int nMinutes);
@@ -104,7 +105,7 @@ private:
 
 Q_SIGNALS:
     void syncStarted(bool syncAll);
-    void syncFinished(int nErrorCode, const QString& strErrorMesssage);
+    void syncFinished(int nErrorCode, const QString& strErrorMesssage, bool isBackground);
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);

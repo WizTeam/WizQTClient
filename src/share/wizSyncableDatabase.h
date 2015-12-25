@@ -121,6 +121,7 @@ struct IWizSyncableDatabase
     virtual void GetAllBizUserIds(CWizStdStringArray& arrayText) = 0;
     virtual bool GetAllBizUsers(CWizBizUserDataArray& arrayUser) = 0;
     virtual bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID) = 0;
+    virtual bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz) = 0;
 
     //virtual CComPtr<IWizDocument> GetDocumentByGUID(const QString& strDocumentGUID) = 0;
     virtual bool OnDownloadMessages(const CWizUserMessageDataArray& arrayMessage) = 0;
@@ -182,6 +183,8 @@ public:
     virtual bool IsStop() const { return m_bStop; }
     virtual void SetLastErrorCode(int nErrorCode) { m_nLastError = nErrorCode; }
     virtual int GetLastErrorCode() const { return m_nLastError; }
+    virtual void SetLastErrorMessage(const QString& message) { m_strLastErrorMessage = message; }
+    virtual QString GetLastErrorMessage() const { return m_strLastErrorMessage; }
     virtual void SetDatabaseCount(int count) {}
     virtual void SetCurrentDatabase(int index) {}
     virtual void ClearLastSyncError(IWizSyncableDatabase* pDatabase) {}
@@ -201,6 +204,7 @@ public:
 private:
     bool m_bStop;
     int m_nLastError;
+    QString m_strLastErrorMessage;
 };
 
 
