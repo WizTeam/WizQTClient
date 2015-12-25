@@ -94,6 +94,34 @@ QString bodyText(const WIZMESSAGEDATA& msg)
     return msg.title.isEmpty() ? msg.messageBody : msg.title;
 }
 
+void avatarFromMessage(const WIZMESSAGEDATA& msg, QPixmap* pix)
+{
+    if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP)
+    {
+        WizService::AvatarHost::avatar(msg.senderId, pix);
+    }
+    else if (WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP == msg.nMessageType)
+    {
+        WizService::AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP);
+        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
+    }
+    else if (WIZ_USER_MSG_TYPE_ADDED_TO_GROUP == msg.nMessageType)
+    {
+        WizService::AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT);
+        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
+    }
+    else if (WIZ_USER_MSG_TYPE_LIKE == msg.nMessageType
+             || WIZ_USER_MSG_TYPE_SYSTEM == msg.nMessageType)
+    {
+        WizService::AvatarHost::load(SYSTEM_AVATAR_SYSTEM);
+        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
+    }
+    else
+    {
+        WizService::AvatarHost::avatar(msg.senderId, pix);
+    }
+}
+
 namespace WizService {
 namespace Internal {
 
@@ -242,8 +270,9 @@ public:
         //avatar
         int nMargin = 12;
         QRect rcd = vopt->rect.adjusted(nMargin + nUnreadSymSize, 26, -nMargin, 0);
-        QPixmap pmAvatar;
-        WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+        QPixmap pmAvatar;       
+//        WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+        avatarFromMessage(m_data, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         int nAvatarRightMargin = 12;
 

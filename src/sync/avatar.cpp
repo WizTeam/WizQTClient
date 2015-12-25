@@ -33,7 +33,7 @@ AvatarDownloader::AvatarDownloader(QObject* parent)
 {
 }
 
-void AvatarDownloader::download(const QString& strUserGUID)
+void AvatarDownloader::download(const QString& strUserGUID, bool isSystemAvatar)
 {
     if (m_net.get() == nullptr)
     {
@@ -45,7 +45,8 @@ void AvatarDownloader::download(const QString& strUserGUID)
     QString strUrl = CommonApiEntry::avatarDownloadUrl(strUserGUID);
 #else
     QString standGID = QUrl::toPercentEncoding(strUserGUID);
-    QString strUrl = CommonApiEntry::avatarDownloadUrl(standGID);
+    QString strUrl = isSystemAvatar ? CommonApiEntry::systemAvatarUrl(standGID)
+                                    : CommonApiEntry::avatarDownloadUrl(standGID);
 #endif
     if (strUrl.isEmpty()) {
         return;
@@ -166,9 +167,9 @@ QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID)
     return QPixmap(defaultFilePath);
 }
 
-void AvatarHostPrivate::addToDownloadList(const QString& strUserID)
+void AvatarHostPrivate::addToDownloadList(const QString& strUserID, bool isSystem)
 {
-    appendUserID(strUserID);
+    appendUserID(strUserID, isSystem);
 
     download_impl();
 }
@@ -246,7 +247,31 @@ bool AvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
     }
 
     if (!strUserID.isEmpty()) {
-        load(strUserID);
+        load(strUserID, false);
+    }
+
+    if (QPixmapCache::find(defaultKey(), pixmap)) {
+        return true;
+    } else {
+        loadCacheDefault();
+    }
+
+    if (QPixmapCache::find(defaultKey(), pixmap)) {
+        return true;
+    }
+
+    Q_ASSERT(0);
+    return false;
+}
+
+bool AvatarHostPrivate::systemAvatar(const QString& avatarName, QPixmap* pixmap)
+{
+    if (QPixmapCache::find(keyFromUserID(avatarName), pixmap)) {
+        return true;
+    }
+
+    if (!avatarName.isEmpty()) {
+        load(avatarName, true);
     }
 
     if (QPixmapCache::find(defaultKey(), pixmap)) {
@@ -281,7 +306,7 @@ QPixmap AvatarHostPrivate::orgAvatar(const QString& strUserID)
 //    return loadOrg(strUserID);
 //}
 
-void AvatarHostPrivate::load(const QString& strUserID)
+void AvatarHostPrivate::load(const QString& strUserID, bool isSystem)
 {
     //
     QPixmap pm;
@@ -298,24 +323,24 @@ void AvatarHostPrivate::load(const QString& strUserID)
             Q_EMIT q->loaded(strUserID);            
 
             // can find item, download from server
-            addToDownloadList(strUserID);
+            addToDownloadList(strUserID, isSystem);
         }
     }
 }
 
 void AvatarHostPrivate::reload(const QString& strUserID)
 {    
-    addToDownloadList(strUserID);
+    addToDownloadList(strUserID, false);
 }
 
 void AvatarHostPrivate::download_impl()
 {
-    if (!m_strCurrentDownloadingUser.isEmpty())
+    if (!m_currentDownloadingUser.userID.isEmpty())
         return;
 
-    peekUserID(m_strCurrentDownloadingUser);
+    peekUserID(m_currentDownloadingUser);
 
-    if (m_strCurrentDownloadingUser.isEmpty())
+    if (m_currentDownloadingUser.userID.isEmpty())
     {
         qDebug() << "[AvatarHost]download pool is clean, thread: "
                  << QThread::currentThreadId();
@@ -324,29 +349,38 @@ void AvatarHostPrivate::download_impl()
     }
 
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-        m_downloader->download(m_strCurrentDownloadingUser);
+        m_downloader->download(m_currentDownloadingUser.userID, m_currentDownloadingUser.isSystemAvatar);
     });
 }
 
-void AvatarHostPrivate::appendUserID(const QString& strUserID)
+void AvatarHostPrivate::appendUserID(const QString& strUserID, bool isSystem)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
 
-    if (!m_listUser.contains(strUserID))
+    foreach (DownloadingUser user, m_listUser)
     {
-        m_listUser.append(strUserID);
+        if (user.userID == strUserID)
+            return;
     }
+
+
+    DownloadingUser user;
+    user.userID = strUserID;
+    user.isSystemAvatar = isSystem;
+    m_listUser.append(user);
 }
 
-void AvatarHostPrivate::peekUserID(QString& strUserID)
+void AvatarHostPrivate::peekUserID(DownloadingUser& user)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
 
     if (!m_listUser.isEmpty())
     {
-        strUserID = m_listUser.takeFirst();
+        DownloadingUser topUser = m_listUser.takeFirst();
+        user.userID = topUser.userID;
+        user.isSystemAvatar = topUser.isSystemAvatar;
     }
 }
 
@@ -359,7 +393,7 @@ void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
     }
 
     //  下载列表中的下一个头像
-    m_strCurrentDownloadingUser.clear();
+    m_currentDownloadingUser.userID.clear();
     download_impl();
 }
 
@@ -389,7 +423,7 @@ AvatarHost* AvatarHost::instance()
 
 void AvatarHost::load(const QString& strUserID)
 {
-    d->load(strUserID);
+    d->load(strUserID, false);
 }
 
 void AvatarHost::reload(const QString& strUserID)
@@ -401,6 +435,11 @@ void AvatarHost::reload(const QString& strUserID)
 bool AvatarHost::avatar(const QString& strUserID, QPixmap* pixmap)
 {
     return d->avatar(strUserID, pixmap);
+}
+
+bool AvatarHost::systemAvatar(const QString& avatarName, QPixmap* pixmap)
+{
+    return d->systemAvatar(avatarName, pixmap);
 }
 
 bool AvatarHost::deleteAvatar(const QString& strUserID)

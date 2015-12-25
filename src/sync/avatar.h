@@ -11,6 +11,10 @@ namespace Internal {
 class AvatarHostPrivate;
 }
 
+#define SYSTEM_AVATAR_APPLY_GROUP       "message_icons_apply_group"
+#define SYSTEM_AVATAR_ADMIN_PERMIT      "message_icons_admin_permit"
+#define SYSTEM_AVATAR_SYSTEM            "message_icons_system"
+
 class AvatarHost: public QObject
 {
     Q_OBJECT
@@ -25,6 +29,7 @@ public:
     static bool isLoaded(const QString& strUserID);
     static bool isFileExists(const QString& strUserID);
     static bool avatar(const QString& strUserID, QPixmap* pixmap);
+    static bool systemAvatar(const QString& avatarName, QPixmap* pixmap);
     static bool deleteAvatar(const QString& strUserID);
     static QPixmap orgAvatar(const QString& strUserID);
     static QString keyFromUserID(const QString& strUserID);

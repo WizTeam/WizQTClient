@@ -198,8 +198,8 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
 
 bool CWizIndex::getAllMessageSenders(CWizStdStringArray& arraySender)
 {
-    QString strSQL = WizFormatString1("SELECT distinct SENDER_GUID from %1",
-                                      TABLE_NAME_WIZ_MESSAGE);
+    QString strSQL = WizFormatString2("SELECT distinct SENDER_GUID from %1 where MESSAGE_TYPE<%2",
+                                      TABLE_NAME_WIZ_MESSAGE, QString::number(WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP));
     return SQLToStringArray(strSQL, 0, arraySender);
 }
 

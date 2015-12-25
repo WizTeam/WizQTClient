@@ -22,7 +22,7 @@ class AvatarDownloader : public QObject
 
 public:
     AvatarDownloader(QObject* parent = 0);
-    Q_INVOKABLE void download(const QString& strUserGUID);
+    Q_INVOKABLE void download(const QString& strUserGUID, bool isSystemAvatar);
 
 private:
     std::shared_ptr<QNetworkAccessManager> m_net;
@@ -49,9 +49,10 @@ class AvatarHostPrivate: public QObject
 
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
-    void load(const QString& strUserID);
+    void load(const QString& strUserID, bool isSystem);
     void reload(const QString& strUserID);
     bool avatar(const QString& strUserID, QPixmap* pixmap);
+    bool systemAvatar(const QString& avatarName, QPixmap* pixmap);
     QPixmap orgAvatar(const QString& strUserID);
     bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath);
 
@@ -67,8 +68,15 @@ private:
     QMutex m_mutex;
     AvatarDownloader* m_downloader;
 
-    QStringList m_listUser; // download pool
-    QString m_strCurrentDownloadingUser;    // current user's id
+
+    struct DownloadingUser
+    {
+        QString userID;
+        bool isSystemAvatar;
+    };
+
+    QList<DownloadingUser> m_listUser; // download pool
+    DownloadingUser m_currentDownloadingUser;    // current user's id
 
     bool loadCache(const QString& strUserID);
     void loadCacheDefault();
@@ -77,11 +85,11 @@ private:
 //    QPixmap loadOrg(const QString& strUserID, bool bForce);
     QPixmap loadOrg(const QString& strUserID);
 
-    void addToDownloadList(const QString& strUserID);
+    void addToDownloadList(const QString& strUserID, bool isSystem);
     void download_impl();
 
-    void appendUserID(const QString& strUserID);
-    void peekUserID(QString& strUserID);
+    void appendUserID(const QString& strUserID, bool isSystem);
+    void peekUserID(DownloadingUser& user);
 
     AvatarHost* q;
 

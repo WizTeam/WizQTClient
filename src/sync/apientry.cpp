@@ -168,6 +168,11 @@ QString CommonApiEntry::messageServerUrl()
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);
 }
 
+QString CommonApiEntry::systemAvatarUrl(const QString& avatarName)
+{
+    return getUrlFromCache(avatarName);
+}
+
 QString CommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
 {
     QString strUrl = asServerUrl();
