@@ -1,15 +1,9 @@
 /* editor note frame's default */
 .view {
-    padding:0;
     word-wrap:break-word;
     cursor:text;
     height:90%; 
     overflow: auto !important;
-}
-
-body {    
-    /*margin:0px 14px;*/
-    margin: 20px 40px ;
 }
 
 body, div, p {
