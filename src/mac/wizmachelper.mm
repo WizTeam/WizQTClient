@@ -35,7 +35,7 @@
 
 
 
-#define WizShareSettingsName    @"cn.wiz.wiznoteextension.shareextension"
+#define WizShareSettingsName    @"cn.wiz.wiznoteformac.extension"
 
 
 
@@ -922,19 +922,74 @@ int getSystemPatchVersion()
 
 void updateShareExtensionAccount(const QString& userId, const QString& userGUID, const QString& myWiz, const QString& displayName)
 {
-    NSUserDefaults* shared = [[NSUserDefaults alloc] initWithSuiteName:WizShareSettingsName];
-    if (!shared)
+    NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:WizShareSettingsName];
+    NSLog(@"app group:\n%@",containerURL.path);
+
+    NSError *err = nil;
+    containerURL = [containerURL URLByAppendingPathComponent:@"Library/Application Support/UserAccount"];
+
+    QString userAccount = userId + ";" + userGUID + ";" + myWiz + ";" + displayName;
+    NSString *value = WizToNSString(userAccount);
+
+    BOOL result = [value writeToURL:containerURL atomically:YES encoding:NSUTF8StringEncoding error:&err];
+
+    if (!result) {
+        NSLog(@"%@",err);
+    } else {
+        NSLog(@"save value:%@ success.",value);
+    }
+
+
+
+
+//    NSUserDefaults* shared = [[NSUserDefaults alloc] initWithSuiteName:WizShareSettingsName];
+//    if (!shared)
+//        return;
+//    //
+//    NSString* nsUserId = WizToNSString(userId);
+//    NSString* nsUserGUID = WizToNSString(userGUID);
+//    NSString* nsMyWiz = WizToNSString(myWiz);
+//    NSString* nsDisplayName = WizToNSString(displayName);
+//    [shared setObject:nsUserId forKey:@"userId"];
+//    [shared setObject:nsUserGUID forKey:@"userGuid"];
+//    [shared setObject:nsMyWiz forKey:@"mywizEmail"];
+//    [shared setObject:nsDisplayName forKey:@"displayName"];
+//    //
+//    bool ret = [shared synchronize];
+//    qDebug() << "update extension user account : " << ret;
+}
+
+
+void readShareExtensionAccount()
+{
+    NSURL *containerURL = [[NSFileManager defaultManager] containerURLForSecurityApplicationGroupIdentifier:WizShareSettingsName];
+    NSLog(@"app group:\n%@",containerURL.path);
+
+    NSError *err = nil;
+    containerURL = [containerURL URLByAppendingPathComponent:@"Library/Application Support/UserAccount"];
+
+    NSString *value = [NSString stringWithContentsOfURL:containerURL encoding:NSUTF8StringEncoding error:&err];
+    QString userAccount = WizToQString(value);
+    QStringList userDataList = userAccount.split(';');
+    if (userDataList.size() < 4)
         return;
-    //
-    NSString* nsUserId = WizToNSString(userId);
-    NSString* nsUserGUID = WizToNSString(userGUID);
-    NSString* nsMyWiz = WizToNSString(myWiz);
-    NSString* nsDisplayName = WizToNSString(displayName);
-    [shared setObject:nsUserId forKey:@"userId"];
-    [shared setObject:nsUserGUID forKey:@"userGuid"];
-    [shared setObject:nsMyWiz forKey:@"mywizEmail"];
-    [shared setObject:nsDisplayName forKey:@"displayName"];
-    //
-    bool ret = [shared synchronize];
-    qDebug() << "update extension user account : " << ret;
+
+    qDebug() << "user id : " << userDataList.at(0);
+    qDebug() << "user guid : " << userDataList.at(1);
+    qDebug() << "mywiz : " << userDataList.at(2);
+
+
+//    NSUserDefaults* shared = [[NSUserDefaults alloc] initWithSuiteName:WizShareSettingsName];
+//    if (!shared)
+//        return;
+//    //
+//    NSString* nsUserId = [shared objectForKey:@"userId"];
+//    NSString* nsUserGUID = [shared objectForKey:@"userGuid"];
+//    NSString* nsMyWiz = [shared objectForKey:@"mywizEmail"];
+//    NSString* nsDisplayName = [shared objectForKey:@"displayName"];
+
+////    NSLog(@"user account :  %@ %@ %@ %@", nsUserId, nsUserGUID, nsMyWiz, nsDisplayName);
+//    qDebug() << "user id : " << WizToQString(nsUserId);
+//    qDebug() << "user guid : " << WizToQString(nsUserGUID);
+//    qDebug() << "mywiz : " << WizToQString(nsMyWiz);
 }

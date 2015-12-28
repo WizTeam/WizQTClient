@@ -423,18 +423,8 @@ int mainCore(int argc, char *argv[])
     WIZUSERINFO userInfo;
     dbMgr.db().GetUserInfo(userInfo);
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [strUserId, userInfo](){
-        QStringList params;
-        params << QString("WizProcess") << strUserId << userInfo.strUserGUID << userInfo.strMywizEmail << userInfo.strDisplayName;
-        QDir dir(Utils::PathResolve::appPath());
-        dir.cdUp();
-        QString strPath = dir.path() + "/Library/Helper/WizNoteSafariExtension.app/Contents/MacOS/WizNoteWebClipper";
-        qDebug() << "process path : " << strPath << "\nfile exists " << QFile::exists(strPath);
-        QProcess::startDetached(strPath, params);
-
-#ifdef BUILD4APPSTORE
         updateShareExtensionAccount(strUserId, userInfo.strUserGUID, userInfo.strMywizEmail ,userInfo.strDisplayName);
-#endif
-
+        readShareExtensionAccount();
     });
 
     //create introduction note for new register users

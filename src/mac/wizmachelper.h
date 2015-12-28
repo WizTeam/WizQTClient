@@ -62,6 +62,7 @@ int getSystemMinorVersion();
 int getSystemPatchVersion();
 
 void updateShareExtensionAccount(const QString &userId, const QString &userGUID, const QString &myWiz, const QString &displayName);
+void readShareExtensionAccount();
 
 void adjustSubViews(QWidget* wgt);
 
