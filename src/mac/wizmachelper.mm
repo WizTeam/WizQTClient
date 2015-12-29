@@ -35,7 +35,7 @@
 
 
 
-#define WizShareSettingsName    @"cn.wiz.wiznoteformac.extension"
+#define WizShareSettingsName    @"KCS8N3QJ92.cn.wiz.extension"
 
 
 
