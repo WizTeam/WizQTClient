@@ -138,6 +138,7 @@ public:
     Q_INVOKABLE QString currentNoteGUID();
     Q_INVOKABLE QString currentNoteHtml();
     Q_INVOKABLE QString currentNoteHead();
+    Q_INVOKABLE QString currentBodyStyle();
     Q_INVOKABLE bool currentIsEditing();
 
     //only update Html in JS editor, wouldn't refresh WebView display
@@ -252,6 +253,7 @@ private:
     QString m_strCurrentNoteGUID;
     QString m_strCurrentNoteHead;
     QString m_strCurrentNoteHtml;
+    QString m_strCurrentNoteBodyStyle;
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;

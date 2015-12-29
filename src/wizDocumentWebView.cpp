@@ -1258,6 +1258,11 @@ QString CWizDocumentWebView::currentNoteHead()
 {
     return m_strCurrentNoteHead;
 }
+
+QString CWizDocumentWebView::currentBodyStyle()
+{
+    return m_strCurrentNoteBodyStyle;
+}
 bool CWizDocumentWebView::currentIsEditing()
 {
     return m_bCurrentEditing;
@@ -1340,7 +1345,14 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
 
     m_strCurrentNoteHead.clear();
     m_strCurrentNoteHtml.clear();
+    m_strCurrentNoteBodyStyle.clear();
     Utils::Misc::splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
+    QRegExp regh("<body ([^>]*)>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1)
+    {
+        m_strCurrentNoteBodyStyle = regh.cap(1);
+        qDebug() << "current note body style : " << m_strCurrentNoteBodyStyle;
+    }
 
     //
     if (!QFile::exists(m_strDefaultCssFilePath))
@@ -1348,8 +1360,12 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         resetDefaultCss();
     }
 
-    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
+    if (shouldAddCustomCSS())
+    {
+        //模板或浏览器剪辑的笔记不添加自定义css
+        m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+                m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
+    }
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -1926,6 +1942,7 @@ bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
     analyzer.LogAction("removeFormat");
     return editorCommandExecuteCommand("removeFormat");
 }
+
 bool CWizDocumentWebView::editorCommandExecutePlainText()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();

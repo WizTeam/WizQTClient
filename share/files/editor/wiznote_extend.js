@@ -40,6 +40,7 @@ var
     m_header = "",
     wiz_html = "",
     wiz_head = "";
+    wiz_bodyStyle = "";
     wiz_href = new WizHref();
 
 
@@ -182,12 +183,13 @@ function setEditing(bEditing)
     setEditorHtml(wiz_html, bEditing, false);
 }
 
-function viewNote(strGUID, bEditing, strHtml, strHead)
+function viewNote(strGUID, bEditing, strHtml, strHead, strBodyStyle)
 {
     try {
         m_currentGUID = strGUID;
         wiz_html = strHtml;
         wiz_head = strHead;
+        wiz_bodyStyle = strBodyStyle;
 
         if (m_inited) {
             editor.reset();
@@ -210,7 +212,8 @@ function viewNote(strGUID, bEditing, strHtml, strHead)
 function viewCurrentNote()
 {
     return viewNote(WizEditor.currentNoteGUID(), WizEditor.currentIsEditing(),
-                    WizEditor.currentNoteHtml(), WizEditor.currentNoteHead());
+                    WizEditor.currentNoteHtml(), WizEditor.currentNoteHead(),
+                    WizEditor.currentBodyStyle());
 }
 
 function updateCurrentNoteHtml()
@@ -456,7 +459,14 @@ function updateCustomCss() {
 }
 
 function resetEditorBodyClassName () {
-    editor.body.className='view';
+    var attrs=wiz_bodyStyle.split(" ");
+    for (var i = attrs.length - 1; i >= 0; i--) {        
+        var attr = attrs[i].split("=");
+        if (attr[0] === '')
+            return;
+        var attrValue = attr[1].split('"');        
+        editor.body.setAttribute(attr[0], attrValue.join(''));
+    }
 }
 
 function setWizHrefEnable (enable) {

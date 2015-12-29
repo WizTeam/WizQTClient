@@ -1,11 +1,4 @@
 /* editor note frame's default */
-.view {
-    word-wrap:break-word;
-    cursor:text;
-    height:90%; 
-    overflow: auto !important;
-}
-
 body, div, p {
     /*default-font-family*/;
     /*default-font-size*/;
@@ -15,5 +8,4 @@ body, div, p {
 html, body {
     /*default-color*/
     /*default-background-color*/;
-    height: auto !important;
 }
