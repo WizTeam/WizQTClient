@@ -207,6 +207,7 @@ public:
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
+    Q_INVOKABLE bool shouldAddCustomCSS();
     //
     QNetworkDiskCache* networkCache();
 

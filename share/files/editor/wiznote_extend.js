@@ -432,6 +432,9 @@ function WizGetMailSender () {
 }
 
 function updateCustomCss() {
+    if (!WizEditor.shouldAddCustomCSS())
+        return;
+
 	var WIZ_CUSTOM_STYLE_ID = 'wiz_custom_css';
 	var WIZ_STYLE = 'wiz_style';
 

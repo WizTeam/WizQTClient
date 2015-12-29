@@ -415,7 +415,7 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
 {
     return CreateDocument(strTitle, strName, \
                           strLocation, strURL, \
-                          "", "", "", "", "", "", 0, 0, 0, data);
+                          "", "", data.strType, "", "", "", 0, 0, 0, data);
 }
 
 bool CWizIndex::CreateAttachment(const CString& strDocumentGUID, const CString& strName,

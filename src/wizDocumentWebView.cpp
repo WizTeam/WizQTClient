@@ -40,24 +40,24 @@
 #include "share/wizmisc.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizMessageBox.h"
+#include "share/wizObjectDataDownloader.h"
+#include "share/wizDatabaseManager.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "core/wizAccountManager.h"
+#include "core/wizNoteManager.h"
 #include "widgets/WizCodeEditorDialog.h"
 #include "widgets/wizScreenShotWidget.h"
 #include "widgets/wizEmailShareDialog.h"
 #include "widgets/wizShareLinkDialog.h"
 #include "widgets/wizScrollBar.h"
-
 #include "mac/wizmachelper.h"
 
 #include "wizmainwindow.h"
 #include "wizEditorInsertLinkForm.h"
 #include "wizEditorInsertTableForm.h"
-#include "share/wizObjectDataDownloader.h"
 #include "wizDocumentTransitionView.h"
-#include "share/wizDatabaseManager.h"
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
 
@@ -2443,6 +2443,14 @@ bool CWizDocumentWebView::checkListClickable()
     }
     emit clickingTodoCallBack(true, true);
     return false;
+}
+
+bool CWizDocumentWebView::shouldAddCustomCSS()
+{
+    const WIZDOCUMENTDATA& data = view()->note();
+    // 通过模板创建的笔记或者通过网页剪辑的笔记不添加自定义的样式
+    bool styledNote = (data.strType == WIZ_DOCUMENT_TYPE_WEB) || (data.strType == WIZ_DOCUMENT_TYPE_TEMPLATE) || (data.strURL.startsWith("http"));
+    return !styledNote;
 }
 
 QNetworkDiskCache*CWizDocumentWebView::networkCache()

@@ -89,6 +89,11 @@ bool CWizNoteManager::createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID
         location = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
     }
 
+    if (data.strType.isEmpty())
+    {
+        data.strType = WIZ_DOCUMENT_TYPE_NORMAL;
+    }
+
     QString strBody = Utils::Misc::getHtmlBodyContent(strHtml);
     if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", location, "", data))
     {
