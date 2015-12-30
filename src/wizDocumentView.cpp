@@ -366,7 +366,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
     {
         m_editStatus = m_editStatus | DOCUMENT_STATUS_GROUP | DOCUMENT_STATUS_FIRSTTIMEVIEW;
     }
-    if (::WizIsDocumentContainsFrameset(data))
+    if (::WizIsNoteContainsFrameset(data))
     {
         m_bEditingMode = false;
     }
@@ -479,7 +479,7 @@ void CWizDocumentView::setEditNote(bool bEdit)
     if (m_bLocked)
         return;
 
-    if (::WizIsDocumentContainsFrameset(m_note))
+    if (::WizIsNoteContainsFrameset(m_note))
     {
         m_title->showMessageTips(Qt::PlainText, tr("Note type is %1, do not support edit mode.").arg(m_note.strFileType));
         return;

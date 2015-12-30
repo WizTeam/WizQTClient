@@ -198,7 +198,8 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
 
 
-bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
+bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc);
+bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc);
 
 enum WizKMUrlType
 {

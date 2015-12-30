@@ -3513,22 +3513,25 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
-            //add default css
+            //新建的普通笔记添加css样式，模板笔记不添加该样式
             QString newHtml = strHtml;
-            QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
-            cssFile.open(QFile::Text | QFile::ReadOnly);
-            QString strCSS = cssFile.readAll();
-            cssFile.close();
-            if (strHtml.contains("<html>", Qt::CaseInsensitive))
+            if (data.strType != "TemplateNote")
             {
-                QString strHead;
-                Utils::Misc::splitHtmlToHeadAndBody(strHtml, strHead, newHtml);
-                strHead.append(strCSS);
-                newHtml = "<html><head>" + strHead + "</head><body>" + newHtml + "</body></html>";
-            }
-            else
-            {
-                newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
+                QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
+                cssFile.open(QFile::Text | QFile::ReadOnly);
+                QString strCSS = cssFile.readAll();
+                cssFile.close();
+                if (strHtml.contains("<html>", Qt::CaseInsensitive))
+                {
+                    QString strHead;
+                    Utils::Misc::splitHtmlToHeadAndBody(strHtml, strHead, newHtml);
+                    strHead.append(strCSS);
+                    newHtml = "<html><head>" + strHead + "</head><body>" + newHtml + "</body></html>";
+                }
+                else
+                {
+                    newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
+                }
             }
 
             bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
@@ -3601,6 +3604,7 @@ bool CWizDatabase::CreateDocumentByTemplate(const QString& templateZiwFile, cons
     {
         newDoc.strTitle = strTitle;
     }
+    newDoc.strType = "TemplateNote";
 
     return CreateDocumentAndInit(newDoc, ba, strLocation, tag, newDoc);
 }

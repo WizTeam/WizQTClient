@@ -690,7 +690,7 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
         return;
 
     //
-    if (::WizIsDocumentContainsFrameset(doc)) {
+    if (::WizIsNoteContainsFrameset(doc)) {
         viewDocumentWithoutEditor();
     } else {
 
@@ -2467,7 +2467,12 @@ bool CWizDocumentWebView::shouldAddCustomCSS()
     const WIZDOCUMENTDATA& data = view()->note();
     // 通过模板创建的笔记或者通过网页剪辑的笔记不添加自定义的样式
     bool styledNote = (data.strType == WIZ_DOCUMENT_TYPE_WEB) || (data.strType == WIZ_DOCUMENT_TYPE_TEMPLATE) || (data.strURL.startsWith("http"));
-    return !styledNote;
+    if (styledNote)
+        return false;
+
+    bool isMarkdown = WizIsMarkdownNote(data) && !view()->isEditing();
+
+    return !isMarkdown;
 }
 
 QNetworkDiskCache*CWizDocumentWebView::networkCache()

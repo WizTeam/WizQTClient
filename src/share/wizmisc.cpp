@@ -2485,7 +2485,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 }
 
 
-bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
+bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc)
 {
     QStringList fileTypes;
     fileTypes << ".xls" << ".xlsx";
@@ -2705,6 +2705,23 @@ QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString
 bool WizIsChineseLanguage(const QString& local)
 {
     if (local.toUpper() == "ZH_CN" || local.toUpper() == "ZH_TW")
+        return true;
+
+    return false;
+}
+
+
+bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc)
+{
+    if (doc.strTitle.indexOf(".md") == -1 && doc.strTitle.indexOf(".mj") == -1)
+        return false;
+
+    int nPointPos = doc.strTitle.length() - 3;
+    if (doc.strTitle.lastIndexOf(".md") == nPointPos || doc.strTitle.lastIndexOf(".mj") == nPointPos)
+        return true;
+
+    if (doc.strTitle.indexOf(".md ") != -1 || doc.strTitle.indexOf(".md@") != -1 ||
+            doc.strTitle.indexOf(".mj ") != -1|| doc.strTitle.indexOf(".mj@") != -1)
         return true;
 
     return false;
