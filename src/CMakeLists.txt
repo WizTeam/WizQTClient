@@ -1,6 +1,7 @@
 project(WizNote)
 
 add_subdirectory(plugins)
+add_subdirectory(test)
 
 set(wiznote_SOURCES_MAC
     mac/wizSearchWidget.mm
