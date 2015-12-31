@@ -86,9 +86,8 @@ class CWizFileDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizFileDownloader(const QString& strUrl, const QString& strFileName = "",
-                       const QString& strPath = "", bool isImage = "false");
-    virtual void run();
+    CWizFileDownloader(const QString& strUrl, const QString& strFileName,
+                       const QString& strPath, bool isImage);
     void startDownload();
 
 signals:
@@ -99,6 +98,7 @@ private:
     QString m_strFileName;
     bool m_isImage;
 
+    virtual void run();
     bool download();
 };
 

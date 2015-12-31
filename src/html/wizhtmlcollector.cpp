@@ -269,7 +269,7 @@ bool CWizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileNam
     strFileName = ::WizGenGUIDLowerCaseLetterOnly()
             + strUrl.right(strUrl.length() - strUrl.lastIndexOf('.'));
     qDebug() << "[Save] Start to download image : " << strUrl;
-    CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, strFileName, m_strTempPath);
+    CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, strFileName, m_strTempPath, true);
     QEventLoop loop;
     loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
     //  just wait for 15 seconds

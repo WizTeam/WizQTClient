@@ -2524,7 +2524,7 @@ bool EditorToolBar::processImageSrc(bool bUseForCopy, bool& bNeedSubsequent)
     {
         QFileInfo info(m_strImageSrc);
         QString fileName = WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName);
+        CWizFileDownloader* downloader = new CWizFileDownloader(m_strImageSrc, fileName, "", true);
         if (bUseForCopy)
         {
             connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(copyImage(QString)));
