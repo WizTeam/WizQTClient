@@ -1,10 +1,11 @@
 .markdown-body {
-    font-family: Helvetica, SimSun, SimHei, arial, sans-serif;
+    font-family: Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;
     line-height: 1.6;
-    padding: 0px;
-    margin: 20px 36px;
+    background-color: white;
+    margin: 0px;
+    padding: 20px 36px;
 }
-body.markdown-body,
+.markdown-body,
 .markdown-body p,
 .markdown-body div {
     font-size: 15px;
@@ -107,7 +108,7 @@ body.markdown-body,
     margin: 1em 0;
 }
 
-.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
+.markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
     margin: 10px 0;
 }
 
@@ -152,7 +153,7 @@ body.markdown-body,
     display: inline-block;
 }
 
-.markdown-body li {
+.markdown-body pre li {
     margin: 0;
 }
 
@@ -386,7 +387,7 @@ body.markdown-body,
 }
 
 @media screen {
-    .markdown-body pre {
+    .markdown-body pre, .markdown-body code {
         word-wrap: break-word;
     }
 }
@@ -402,43 +403,43 @@ body.markdown-body,
 }
 
 /*wiz todoList*/
-.wiz-todo, .wiz-todo-img {
-    width: 16px;
-    height: 16px;
-    cursor: default;
-    margin: 0 10px 0 2px;
-    vertical-align: -7%;
-    -webkit-user-select: none
-}
+/*.wiz-todo, .wiz-todo-img {*/
+    /*width: 16px;*/
+    /*height: 16px;*/
+    /*cursor: default;*/
+    /*margin: 0 10px 0 2px;*/
+    /*vertical-align: -7%;*/
+    /*-webkit-user-select: none*/
+/*}*/
 
-.wiz-todo-label {
-    line-height: 2.5
-}
+/*.wiz-todo-label {*/
+    /*line-height: 2.5*/
+/*}*/
 
-.wiz-todo-label-checked {
-    color: #666
-}
+/*.wiz-todo-label-checked {*/
+    /*color: #666*/
+/*}*/
 
-.wiz-todo-label-unchecked {
-    text-decoration: initial
-}
+/*.wiz-todo-label-unchecked {*/
+    /*text-decoration: initial*/
+/*}*/
 
-.wiz-todo-completed-info {
-    padding-left: 44px;
-    display: inline-block
-}
+/*.wiz-todo-completed-info {*/
+    /*padding-left: 44px;*/
+    /*display: inline-block*/
+/*}*/
 
-.wiz-todo-avatar {
-    width: 20px;
-    height: 20px;
-    vertical-align: -20%;
-    margin-right: 10px;
-    border-radius: 2px
-}
+/*.wiz-todo-avatar {*/
+    /*width: 20px;*/
+    /*height: 20px;*/
+    /*vertical-align: -20%;*/
+    /*margin-right: 10px;*/
+    /*border-radius: 2px*/
+/*}*/
 
-.wiz-todo-account, .wiz-todo-dt {
-    color: #666
-}
+/*.wiz-todo-account, .wiz-todo-dt {*/
+    /*color: #666*/
+/*}*/
 
 /*wiz code highlight*/
 .markdown-body pre, .markdown-body code {
@@ -545,8 +546,8 @@ body.markdown-body,
 
 
 @media screen and (max-width: 660px) {
-    body.markdown-body {
-        margin: 20px 18px;
+    .markdown-body {
+        padding: 20px 18px;
     }
 }
 
@@ -557,12 +558,12 @@ only screen and (max-device-width: 1024px),
 only screen and (-webkit-min-device-pixel-ratio: 3),
 only screen and (-o-min-device-pixel-ratio: 3),
 only screen and (min-device-pixel-ratio: 3) {
-    body.markdown-body {
-        margin: 12px 15px;
+    .markdown-body {
+        padding: 12px 15px;
         color: #353c47;
     }
 
-    body.markdown-body,
+    .markdown-body,
     .markdown-body p,
     .markdown-body div {
         font-size: 17px;
@@ -593,8 +594,12 @@ only screen and (min-device-pixel-ratio: 3) {
         color: inherit;
     }
 
-    .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body table, .markdown-body pre {
+    .markdown-body p, .markdown-body blockquote, .markdown-body ul, .markdown-body ol, .markdown-body dl, .markdown-body li, .markdown-body table, .markdown-body pre {
         margin: 24px 0;
+    }
+
+    .markdown-body pre li {
+        margin: 0;
     }
 
     .markdown-body ul, .markdown-body ol {
