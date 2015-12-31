@@ -42,6 +42,7 @@ public:
     bool createNoteByTemplate(WIZDOCUMENTDATA& data, const QString& strKbGUID, const QString& strTitle,
                               const QString& strLocation, const WIZTAGDATA& tag, const QString& strZiw);
 
+    void updateTemplateJS(const QString& local);
 
 private:
     CWizDatabaseManager& m_dbMgr;

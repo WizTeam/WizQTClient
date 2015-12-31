@@ -799,6 +799,12 @@ QString CWizDocumentWebView::getMarkdownCssFilePath() const
     return m_strMarkdownCssFilePath;
 }
 
+QString CWizDocumentWebView::getWizTemplateJsFile() const
+{
+    return Utils::PathResolve::wizTemplateJsFilePath();
+//    return "http://192.168.1.215/libs/WizTemplate.js";
+}
+
 bool CWizDocumentWebView::resetDefaultCss()
 {
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/default.css";
@@ -846,7 +852,7 @@ bool CWizDocumentWebView::resetDefaultCss()
 void CWizDocumentWebView::editorResetFont()
 {
     resetDefaultCss();
-    page()->mainFrame()->evaluateJavaScript("updateCss();");
+    page()->mainFrame()->evaluateJavaScript("updateUserDefaultCss();");
 }
 
 void CWizDocumentWebView::editorFocus()
@@ -984,10 +990,9 @@ bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile
 }
 
 void CWizDocumentWebView::closeSourceMode()
-{
-    bool isSourceMode = editorCommandQueryCommandState("source");
-//    qDebug() << "on close SourceMode : " << "  is in source mode : " << isSourceMode;
-    if (isSourceMode)
+{ 
+    int modeState = editorCommandQueryCommandState("source");
+    if (modeState == 1)
     {
         page()->mainFrame()->evaluateJavaScript("editor.execCommand('source')");
     }
@@ -1026,6 +1031,19 @@ QString CWizDocumentWebView::getMailSender()
     }
 
     return mailSender;
+}
+
+/*
+ * 是否添加用户自定义的样式，目前有字体类型、字体大小、背景颜色等信息等信息
+ */
+bool CWizDocumentWebView::shouldAddUserDefaultCSS()
+{
+    if (!shouldAddCustomCSS())
+        return false;
+
+    bool isTemplate = page()->mainFrame()->evaluateJavaScript("wizIsTemplate()").toBool();
+
+    return !isTemplate;
 }
 
 void CWizDocumentWebView::shareNoteByEmail()
@@ -1164,6 +1182,16 @@ void CWizDocumentWebView::viewAttachmentByUrl(const QString& strKbGUID, const QS
     mainWindow->viewAttachmentByWizKMURL(strKbGUID, strUrl);
 }
 
+void getHtmlBodyStyle(const QString& strHtml, QString& strBodyStyle)
+{
+    QRegExp regh("<body ([^>]*)>", Qt::CaseInsensitive);
+    if (regh.indexIn(strHtml) != -1)
+    {
+        strBodyStyle = regh.cap(1);
+        qDebug() << "current note body style : " << strBodyStyle;
+    }
+}
+
 void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
     //FIXME: remove me, just for find a image losses bug.
@@ -1188,16 +1216,28 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
 
     // 此处不能使用editor.document.body.innerHTML;直接获取Html进行保存，会得到很多UEditor的内部元素
     //需要getContent()来过滤。  但是不能过滤换行符和空格。否则会造成一些网页粘贴后看到的样式与实际保存的样式不一致
-    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent(null,null,true,true);").toString();
+//    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent(null,null,true,true);").toString();
 //    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
+    QString strHtml = page()->mainFrame()->evaluateJavaScript("wizEditorGetContentHtml()").toString();
     //
-    m_strCurrentNoteHtml = strHtml;
+    QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
+    if (regex.indexIn(strHtml) != -1) {
+        strHtml = regex.cap(0);
+        m_strCurrentNoteHtml = regex.cap(1);
+    } else {
+        m_strCurrentNoteHtml = strHtml;
+    }
+
+    getHtmlBodyStyle(strHtml, m_strCurrentNoteBodyStyle);
+
+    //
     //
     page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
 
     //
     //QString strPlainTxt = page()->mainFrame()->evaluateJavaScript("editor.getPlainTxt();").toString();
-    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+//    strHtml = "<html><head>" + strHead + "</head><body>" + strHtml + "</body></html>";
+    strHtml = "<html><head>" + strHead + "</head>" + strHtml + "</html>";
 
     m_docSaverThread->save(data, strHtml, strFileName, 0);
 }
@@ -1346,13 +1386,9 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
     m_strCurrentNoteHead.clear();
     m_strCurrentNoteHtml.clear();
     m_strCurrentNoteBodyStyle.clear();
+//    qDebug() << strHtml;
     Utils::Misc::splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
-    QRegExp regh("<body ([^>]*)>", Qt::CaseInsensitive);
-    if (regh.indexIn(strHtml) != -1)
-    {
-        m_strCurrentNoteBodyStyle = regh.cap(1);
-        qDebug() << "current note body style : " << m_strCurrentNoteBodyStyle;
-    }
+    getHtmlBodyStyle(strHtml, m_strCurrentNoteBodyStyle);
 
     //
     if (!QFile::exists(m_strDefaultCssFilePath))
@@ -1360,12 +1396,12 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         resetDefaultCss();
     }
 
-    if (shouldAddCustomCSS())
-    {
-        //模板或浏览器剪辑的笔记不添加自定义css
-        m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-                m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
-    }
+//    if (shouldAddUserDefaultCSS())
+//    {
+//        //模板或浏览器剪辑的笔记不添加自定义css
+//        m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+//                m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
+//    }
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;
@@ -2307,6 +2343,14 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
     return true;
 }
 
+bool CWizDocumentWebView::isContentsChanged()
+{
+//    return m_bContentsChanged;
+    bool isChanged = page()->mainFrame()->evaluateJavaScript(QString("wizIsContentsChanged();")).toBool();
+    qDebug() << "is content changed :" << isChanged;
+    return isChanged;
+}
+
 void CWizDocumentWebView::setContentsChanged(bool b)
 {
     m_bContentsChanged = b;
@@ -2465,14 +2509,46 @@ bool CWizDocumentWebView::checkListClickable()
 bool CWizDocumentWebView::shouldAddCustomCSS()
 {
     const WIZDOCUMENTDATA& data = view()->note();
-    // 通过模板创建的笔记或者通过网页剪辑的笔记不添加自定义的样式
-    bool styledNote = (data.strType == WIZ_DOCUMENT_TYPE_WEB) || (data.strType == WIZ_DOCUMENT_TYPE_TEMPLATE) || (data.strURL.startsWith("http"));
+    // 通过网页剪辑的笔记不添加自定义的样式
+    bool styledNote = (data.strType == WIZ_DOCUMENT_TYPE_WEB) || (data.strURL.startsWith("http"));
     if (styledNote)
         return false;
 
     bool isMarkdown = WizIsMarkdownNote(data) && !view()->isEditing();
 
     return !isMarkdown;
+}
+
+bool CWizDocumentWebView::isWizTemplateNote()
+{
+    const WIZDOCUMENTDATA& data = view()->note();
+    return (data.strType == WIZ_DOCUMENT_TYPE_TEMPLATE);
+}
+
+bool CWizDocumentWebView::canRenderMarkdown()
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+
+    if (view()->isEditing())
+        return false;
+
+    if (doc.strTitle.indexOf(".md") == -1 && doc.strTitle.indexOf(".mj") == -1)
+        return false;
+
+    int nPointPos = doc.strTitle.length() - 3;
+    if (doc.strTitle.lastIndexOf(".md") == nPointPos || doc.strTitle.lastIndexOf(".mj") == nPointPos)
+        return true;
+
+    if (doc.strTitle.indexOf(".md ") != -1 || doc.strTitle.indexOf(".md@") != -1 ||
+            doc.strTitle.indexOf(".mj ") != -1|| doc.strTitle.indexOf(".mj@") != -1)
+        return true;
+
+    return false;
+}
+
+bool CWizDocumentWebView::canEditNote()
+{
+    return view()->isEditing();
 }
 
 QNetworkDiskCache*CWizDocumentWebView::networkCache()

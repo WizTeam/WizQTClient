@@ -67,6 +67,16 @@ QString PathResolve::customNoteTemplatesPath()
     return strPath;
 }
 
+QString PathResolve::wizTemplateJsFilePath()
+{
+    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.js";
+}
+
+QString PathResolve::wizTemplateJsonFilePath()
+{
+    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.json";
+}
+
 QString PathResolve::customMarkdownTemplatesPath()
 {
     QString strPath;

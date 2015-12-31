@@ -428,9 +428,10 @@ int mainCore(int argc, char *argv[])
     });
 
     //create introduction note for new register users
+    CWizNoteManager noteManager(dbMgr);
+    noteManager.updateTemplateJS(userSettings.locale());
     if (isNewRegisterAccount)
     {
-        CWizNoteManager noteManager(dbMgr);
         noteManager.createIntroductionNoteForNewRegisterAccount();
     }
 

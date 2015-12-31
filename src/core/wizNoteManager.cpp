@@ -1,15 +1,22 @@
 #include "wizNoteManager.h"
-#include <QDebug>
-#include <QDir>
 #include <QFileInfo>
 #include <QSettings>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+#include <QNetworkRequest>
+#include <QDir>
+#include <fstream>
+#include <QDebug>
 
+#include "rapidjson/document.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
+#include "sync/apientry.h"
 #include "share/wizobject.h"
 #include "share/wizDatabase.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizthreads.h"
+#include "share/wizEventLoop.h"
 
 void CWizNoteManager::createIntroductionNoteForNewRegisterAccount()
 {
@@ -127,6 +134,59 @@ bool CWizNoteManager::createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID
     }
 
     return true;
+}
+
+void CWizNoteManager::updateTemplateJS(const QString& local)
+{
+    //软件启动之后获取模板信息，检查template.js是否存在、是否是最新版。需要下载时进行下载
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=]() {
+        QNetworkAccessManager manager;
+        QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates?language_type=" + local;
+        qDebug() << "get templates message from url : " << url;
+        //
+        QByteArray ba;
+        {
+            QNetworkReply* reply = manager.get(QNetworkRequest(url));
+            CWizAutoTimeOutEventLoop loop(reply);
+            loop.exec();
+            //
+            if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+                return;
+
+            ba = loop.result();
+            QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+            std::ofstream logFile(jsonFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
+            logFile << ba.constData();
+        }
+
+        //
+        rapidjson::Document d;
+        d.Parse(ba.constData());
+        if (d.HasParseError())
+            return;
+        //
+        QString link;
+        if (d.HasMember("template_js_link"))
+        {
+            link = d.FindMember("template_js_link")->value.GetString();
+        }
+        if (!link.isEmpty())
+        {
+            qDebug() << "get templates js file from url : " << link;
+            QString jsFile = Utils::PathResolve::wizTemplateJsFilePath();
+            QNetworkReply* reply = manager.get(QNetworkRequest(link));
+            //
+            CWizAutoTimeOutEventLoop loop(reply);
+            loop.exec();
+            //
+            if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+                return;
+
+            ba = loop.result();
+            std::ofstream logFile(jsFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
+            logFile << ba.constData();
+        }
+    });
 }
 
 

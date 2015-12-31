@@ -141,7 +141,7 @@ function WizTodoQtHelper() {
     }
 
     function canEdit() {
-        return editor.body.contentEditable == "true";
+        return WizEditor.canEditNote();
     }
 
     function initCss(document) {

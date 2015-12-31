@@ -13,7 +13,7 @@ public:
     static QString themePath(const QString& strThemeName);
     static QString skinResourcesPath(const QString& strSkinName);
     static QString builtinTemplatePath();
-    static QString customNoteTemplatesPath();
+
     static QString customMarkdownTemplatesPath();
     static QString pluginsPath();
     static QString dataStorePath();
@@ -28,6 +28,13 @@ public:
     static QString qtLocaleFileName(const QString& strLocale);
     static QString localeFileName(const QString& strLocale);
     static QString introductionNotePath();
+
+
+    // wiz template
+    static QString customNoteTemplatesPath();
+    static QString wizTemplateJsFilePath();
+    static QString wizTemplateJsonFilePath();
+
 
     // helpers
     static void addBackslash(QString& strPath);

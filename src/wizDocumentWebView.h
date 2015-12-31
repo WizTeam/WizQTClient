@@ -150,6 +150,7 @@ public:
     Q_INVOKABLE QString getWizReaderDependencyFilePath() const;
     Q_INVOKABLE QString getWizReaderFilePath() const;
     Q_INVOKABLE QString getMarkdownCssFilePath() const;
+    Q_INVOKABLE QString getWizTemplateJsFile() const;
     void resetMarkdownCssPath();
 
     /* editor related */
@@ -190,7 +191,7 @@ public:
     void shareNoteByLink();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
-    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE bool isContentsChanged();
     Q_INVOKABLE void setContentsChanged(bool b);
 
     //use undo func provied by editor
@@ -209,8 +210,12 @@ public:
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
     Q_INVOKABLE bool shouldAddCustomCSS();
+    Q_INVOKABLE bool isWizTemplateNote();
+    Q_INVOKABLE bool canRenderMarkdown();
+    Q_INVOKABLE bool canEditNote();
+
     //
-    QNetworkDiskCache* networkCache();
+    QNetworkDiskCache* networkCache();    
 
 private:
     void initEditor();
@@ -420,6 +425,9 @@ private:
     void openVipPageInWebBrowser();
 
     QString getMailSender();
+
+    //
+    bool shouldAddUserDefaultCSS();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H
