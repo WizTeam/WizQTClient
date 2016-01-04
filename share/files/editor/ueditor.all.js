@@ -9043,10 +9043,10 @@ var htmlparser = UE.htmlparser = function (htmlstr,removeBlank) {
     htmlstr = htmlstr.replace(new RegExp(domUtils.fillChar, 'g'), '');
     if(removeBlank){
         htmlstr = htmlstr.replace(new RegExp('[\\r\\t\\n'+(removeBlank?' ':'')+']*<\/?(\\w+)\\s*(?:[^>]*)>[\\r\\t\\n'+(removeBlank?' ':'')+']*','g'), function(a,b){
-            //br暂时单独处理
-            if(b && allowEmptyTags[b.toLowerCase()]){
-                return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
-            }
+            // //br暂时单独处理
+            // if(b && allowEmptyTags[b.toLowerCase()]){
+            //     return a.replace(/(^[\n\r]+)|([\n\r]+$)/g,'');
+            // }
             return a.replace(new RegExp('^[\\r\\n'+(removeBlank?' ':'')+']+'),'').replace(new RegExp('[\\r\\n'+(removeBlank?' ':'')+']+$'),'');
         });
     }
@@ -9660,16 +9660,16 @@ UE.plugins['defaultfilter'] = function () {
                             node.setAttr('_href', val)
                         }
                         break;
-                    case 'img':
-                        //todo base64暂时去掉，后边做远程图片上传后，干掉这个
-                        if (val = node.getAttr('src')) {
-                            if (/^data:/.test(val)) {
-                                node.parentNode.removeChild(node);
-                                break;
-                            }
-                        }
-                        node.setAttr('_src', node.getAttr('src'));
-                        break;
+                    // case 'img':
+                    //     //todo base64暂时去掉，后边做远程图片上传后，干掉这个
+                    //     if (val = node.getAttr('src')) {
+                    //         if (/^data:/.test(val)) {
+                    //             node.parentNode.removeChild(node);
+                    //             break;
+                    //         }
+                    //     }
+                    //     node.setAttr('_src', node.getAttr('src'));
+                    //     break;
                     case 'span':
                         if (browser.webkit && (val = node.getStyle('white-space'))) {
                             if (/nowrap|normal/.test(val)) {
@@ -9715,36 +9715,36 @@ UE.plugins['defaultfilter'] = function () {
                             node.innerHTML(browser.ie ? '&nbsp;' : '<br/>')
                         }
                         break;
-                    case 'div':
-                        if(node.getAttr('cdata_tag')){
-                            break;
-                        }
-                        //针对代码这里不处理插入代码的div
-                        val = node.getAttr('class');
-                        if(val && /^line number\d+/.test(val)){
-                            break;
-                        }
-                        if(!allowDivTransToP){
-                            break;
-                        }
-                        var tmpNode, p = UE.uNode.createElement('p');
-                        while (tmpNode = node.firstChild()) {
-                            if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
-                                p.appendChild(tmpNode);
-                            } else {
-                                if (p.firstChild()) {
-                                    node.parentNode.insertBefore(p, node);
-                                    p = UE.uNode.createElement('p');
-                                } else {
-                                    node.parentNode.insertBefore(tmpNode, node);
-                                }
-                            }
-                        }
-                        if (p.firstChild()) {
-                            node.parentNode.insertBefore(p, node);
-                        }
-                        node.parentNode.removeChild(node);
-                        break;
+                    // case 'div':
+                    //     if(node.getAttr('cdata_tag')){
+                    //         break;
+                    //     }
+                    //     //针对代码这里不处理插入代码的div
+                    //     val = node.getAttr('class');
+                    //     if(val && /^line number\d+/.test(val)){
+                    //         break;
+                    //     }
+                    //     if(!allowDivTransToP){
+                    //         break;
+                    //     }
+                    //     var tmpNode, p = UE.uNode.createElement('p');
+                    //     while (tmpNode = node.firstChild()) {
+                    //         if (tmpNode.type == 'text' || !UE.dom.dtd.$block[tmpNode.tagName]) {
+                    //             p.appendChild(tmpNode);
+                    //         } else {
+                    //             if (p.firstChild()) {
+                    //                 node.parentNode.insertBefore(p, node);
+                    //                 p = UE.uNode.createElement('p');
+                    //             } else {
+                    //                 node.parentNode.insertBefore(tmpNode, node);
+                    //             }
+                    //         }
+                    //     }
+                    //     if (p.firstChild()) {
+                    //         node.parentNode.insertBefore(p, node);
+                    //     }
+                    //     node.parentNode.removeChild(node);
+                    //     break;
                     case 'dl':
                         node.tagName = 'ul';
                         break;
@@ -13899,7 +13899,7 @@ UE.plugins['undo'] = function () {
             var rng = me.selection.getRange(),
                 rngAddress = rng.createAddress(false,true);
             me.fireEvent('beforegetscene');
-            var root = UE.htmlparser(me.body.innerHTML);
+            var root = UE.htmlparser(me.body.innerHTML, true);
             me.options.autoClearEmptyNode = false;
             me.filterOutputRule(root);
             me.options.autoClearEmptyNode = orgState;
@@ -16927,7 +16927,7 @@ UE.plugin.register('autolink',function(){
                             a.href = a.innerHTML = a.innerHTML.replace(/<[^>]+>/g,'');
                             href = a.getAttribute("href").replace(new RegExp(domUtils.fillChar,'g'),'');
                             href = /^(?:https?:\/\/)/ig.test(href) ? href : "http://"+ href;
-                            a.setAttribute('_src',utils.html(href));
+                            //a.setAttribute('_src',utils.html(href));
                             a.href = utils.html(href);
 
                             range.insertNode(a);
@@ -22228,17 +22228,18 @@ UE.plugins['basestyle'] = function(){
     //     "Italic" : "ctrl+73", //^I
     //     "Underline" : "ctrl+85"//^U
     // });
-    me.addInputRule(function(root){
-        utils.each(root.getNodesByTagName('b i'),function(node){
-            switch (node.tagName){
-                case 'b':
-                    node.tagName = 'strong';
-                    break;
-                case 'i':
-                    node.tagName = 'em';
-            }
-        });
-    });
+    //  不对i标签进行过滤，日记模板中有i标签，过滤会导致格式变化
+    // me.addInputRule(function(root){
+        // utils.each(root.getNodesByTagName('b i'),function(node){
+        //     switch (node.tagName){
+        //         case 'b':
+        //             node.tagName = 'strong';
+        //             break;
+        //         case 'i':
+        //             node.tagName = 'em';
+        //     }
+        // });
+    // });
     for ( var style in basestyles ) {
         (function( cmd, tagNames ) {
             me.commands[cmd] = {
