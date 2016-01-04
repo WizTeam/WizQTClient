@@ -4053,14 +4053,15 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
                                           const QString& strPath,
                                           const QString& strHtmlFileName)
 {
+    QMutexLocker locker(&m_mtxTempFile);
+//    m_mtxTempFile.lock();
+    ::WizDeleteAllFilesInFolder(strPath);
     ::WizEnsurePathExists(strPath);
-
     if (!ExtractZiwFileToFolder(document, strPath))
         return false;
 
     QString strTempHtmlFileName = strPath + "index.html";
 
-    m_mtxTempFile.lock();
     QString strText;
     ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
 
@@ -4069,7 +4070,7 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
 
     strTempHtmlFileName = strPath + strHtmlFileName;
     WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
-    m_mtxTempFile.unlock();
+//    m_mtxTempFile.unlock();
 
     return PathFileExists(strTempHtmlFileName);
 }
