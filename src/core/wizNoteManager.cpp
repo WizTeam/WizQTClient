@@ -140,6 +140,14 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
 {
     //软件启动之后获取模板信息，检查template.js是否存在、是否是最新版。需要下载时进行下载
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=]() {
+        //NOTE:现在编辑器依赖template.js文件。需要确保该文件存在。如果文件不存在则拷贝
+        WizEnsurePathExists(Utils::PathResolve::customNoteTemplatesPath());
+        if (!QFile::exists(Utils::PathResolve::wizTemplateJsFilePath()))
+        {
+            QString localJs = Utils::PathResolve::resourcesPath() + "files/editor/wiz_template.js";
+            WizCopyFile(localJs, Utils::PathResolve::wizTemplateJsFilePath(), true);
+        }
+
         QNetworkAccessManager manager;
         QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates?language_type=" + local;
         qDebug() << "get templates message from url : " << url;
