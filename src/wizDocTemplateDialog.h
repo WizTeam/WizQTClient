@@ -10,23 +10,41 @@ class CWizDocTemplateDialog;
 }
 
 class CWizSettings;
-
-class CWizTemplateFileItem : public QTreeWidgetItem
-{
-public:
-    explicit CWizTemplateFileItem(const QString& filePath, QTreeWidgetItem *parent = 0);
-
-    QString filePath() const;
-
-private:
-    QString m_filePath;
-};
+class QNetworkReply;
+class QNetworkAccessManager;
+class CWizDocumentTransitionView;
 
 enum TemplateType
 {
     BuildInTemplate,
-    CustomTemplate
+    CustomTemplate,
+    WizServerTemplate
 };
+
+
+struct TemplateData
+{
+    TemplateType type;
+    int id;
+    QString strName;
+    QString strTitle;
+    bool isFree;
+    QString strFolder;
+    QString strFileName;
+    QString strVersion;
+};
+
+class CWizTemplateFileItem : public QTreeWidgetItem
+{
+public:
+    explicit CWizTemplateFileItem(const TemplateData& data, QTreeWidgetItem *parent = 0);
+
+    const TemplateData& templateData() const;
+
+private:
+    TemplateData m_data;
+};
+
 
 class CWizDocTemplateDialog : public QDialog
 {
@@ -43,8 +61,6 @@ public slots:
     void itemClicked(QTreeWidgetItem*item, int);
 
 private slots:
-    void on_btn_downloadNew_clicked();
-
     void on_btn_ok_clicked();
 
     void on_btn_cancel_clicked();
@@ -52,6 +68,12 @@ private slots:
     void on_pushButton_import_clicked();
 
     void on_btn_delete_clicked();
+
+    void download_templateList_finished(QNetworkReply* reply);
+    void download_purchasedTemplates_finished(QNetworkReply* reply);
+    void download_templateFile_finished(QString fileName,bool ok);
+
+    void load_templateDemo_finished(bool Ok);
 
 private:
     //
@@ -70,9 +92,14 @@ private:
 
     void createSettingsFile(const QString& strFileName);
 
+    void parseTemplateData(const QString& json, QList<TemplateData>& templateData);
+
 private:
     Ui::CWizDocTemplateDialog *ui;
     QString m_selectedTemplate;
+    CWizDocumentTransitionView* m_transitionView;
+    QNetworkAccessManager* m_net;
+    QString m_demoUrl;
 };
 
 #endif // WIZDOCTEMPLATEDIALOG_H

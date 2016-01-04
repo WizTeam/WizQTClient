@@ -1,19 +1,32 @@
 #include "wizDocTemplateDialog.h"
 #include "ui_wizDocTemplateDialog.h"
+
+#include <QFile>
+#include <QTextStream>
+#include <QDir>
+#include <fstream>
+#include <QMessageBox>
+#include <QDesktopServices>
+#include <QFileDialog>
+#include <QNetworkAccessManager>
+#include <QNetworkReply>
+
+#include "rapidjson/document.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "share/wizmisc.h"
 #include "share/wizzip.h"
 #include "share/wizsettings.h"
-#include "wizmainwindow.h"
 #include "sync/apientry.h"
+#include "share/wizObjectDataDownloader.h"
+#include "wizDocumentTransitionView.h"
+#include "wizmainwindow.h"
 
-#include <QFile>
-#include <QTextStream>
-#include <QDir>
-#include <QMessageBox>
-#include <QDesktopServices>
-#include <QFileDialog>
+
+/*
+ * 服务器的模板列表会在本地缓存一份，允许用户离线状况下使用
+ * 每次打开该窗口时都会从服务器获取一次列表
+*/
 
 
 CWizTemplateFileItem* convertToTempalteFileItem(QTreeWidgetItem *item)
@@ -31,6 +44,20 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(QWidget *parent) :
 
     connect(ui->treeWidget, SIGNAL(itemClicked(QTreeWidgetItem*,int)),
             SLOT(itemClicked(QTreeWidgetItem*,int)));
+
+    ui->treeWidget->setAttribute(Qt::WA_MacShowFocusRect,false);
+
+    ui->treeWidget->setMaximumWidth(200);
+    m_transitionView = new CWizDocumentTransitionView(this);
+    ui->horizontalLayout_2->addWidget(m_transitionView);
+    m_transitionView->setStyleSheet(".QWidget{background-color:#FFFFFF;} QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}");
+    m_transitionView->hide();
+    m_transitionView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+
+    connect(ui->webView_preview, SIGNAL(loadFinished(bool)), SLOT(load_templateDemo_finished(bool)));
+
+    m_net = new QNetworkAccessManager(this);
+//    connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(download_templateList_finished(QNetworkReply*)));
 }
 
 CWizDocTemplateDialog::~CWizDocTemplateDialog()
@@ -38,33 +65,43 @@ CWizDocTemplateDialog::~CWizDocTemplateDialog()
     delete ui;
 }
 
-void CWizDocTemplateDialog::on_btn_downloadNew_clicked()
-{
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("gettemplate");
-    QDesktopServices::openUrl(strUrl);
-}
-
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
-{
-    //REMOVEME:  2016年1月10日后可以删除 修复缓存路径中的数据会被自动删除的问题
-    //将数据移动到固定目录，防止用户添加的数据被删除
-    QString strOldPath = Utils::PathResolve::cachePath() + "templates/";
-    QDir dir(strOldPath);
-    if (dir.exists())
+{    
+    //init template list download from server
+    QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+    if (QFile::exists(jsonFile))
     {
-        QStringList dirs = dir.entryList(QDir::AllDirs);
-        foreach (QString dirItem , dirs)
+        QFile file(jsonFile);
+        if (!file.open(QFile::ReadOnly))
+            return;
+
+        QTextStream stream(&file);
+        QString jsonData = stream.readAll();
+        if (jsonData.isEmpty())
+            return;
+        //
+        QList<TemplateData> templateList;
+        parseTemplateData(jsonData, templateList);
+        if (!templateList.isEmpty())
         {
-            WizCopyFolder(strOldPath + dirItem, Utils::PathResolve::customNoteTemplatesPath() + dirItem, true);
+            QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
+            topLevelItem->setData(0, Qt::UserRole, WizServerTemplate);
+            topLevelItem->setText(0, tr("Recommended templates"));
+            for (TemplateData tmpl : templateList)
+            {
+                tmpl.type = WizServerTemplate;
+                CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, topLevelItem);
+                item->setText(0, tmpl.strName);
+                topLevelItem->addChild(item);
+            }
         }
-        WizDeleteFolder(strOldPath);
     }
 
 
-    QString strFoler = Utils::PathResolve::builtinTemplatePath();
-    initFolderTemplateItems(strFoler, BuildInTemplate);
-    strFoler = Utils::PathResolve::customNoteTemplatesPath();
-    initFolderTemplateItems(strFoler, CustomTemplate);
+    QString folerPath = Utils::PathResolve::builtinTemplatePath();
+    initFolderTemplateItems(folerPath, BuildInTemplate);
+    folerPath = Utils::PathResolve::customNoteTemplatesPath();
+    initFolderTemplateItems(folerPath, CustomTemplate);
 
     ui->treeWidget->expandAll();
 }
@@ -169,7 +206,10 @@ void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
             }
 
             ziwFile = strDir + ziwFile;
-            CWizTemplateFileItem *item = new CWizTemplateFileItem(ziwFile, parentItem);
+            TemplateData data;
+            data.strFileName = ziwFile;
+            data.type = type;
+            CWizTemplateFileItem *item = new CWizTemplateFileItem(data, parentItem);
             item->setData(0, Qt::UserRole, type);
             item->setText(0, strTitle);
             parentItem->addChild(item);
@@ -244,6 +284,58 @@ void CWizDocTemplateDialog::createSettingsFile(const QString& strFileName)
     file.close();
 }
 
+void CWizDocTemplateDialog::parseTemplateData(const QString& json, QList<TemplateData>& templateData)
+{
+    rapidjson::Document d;
+    d.Parse(json.toUtf8().constData());
+    if (d.HasParseError() || !d.HasMember("templates"))
+        return;
+
+    const rapidjson::Value& templates = d.FindMember("templates")->value;
+    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
+    {
+        const rapidjson::Value& templateObj = templates[i];
+
+        TemplateData data;
+        if (templateObj.HasMember("fileName"))
+        {
+            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
+            data.strFileName = Utils::PathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
+        }
+        if (templateObj.HasMember("folder"))
+        {
+            data.strFolder = templateObj.FindMember("folder")->value.GetString();
+        }
+        if (templateObj.HasMember("id"))
+        {
+            data.id = templateObj.FindMember("id")->value.GetInt();
+        }
+        if (templateObj.HasMember("name"))
+        {
+            data.strName = templateObj.FindMember("name")->value.GetString();
+        }
+        if (templateObj.HasMember("title"))
+        {
+            data.strTitle = templateObj.FindMember("title")->value.GetString();
+        }
+        if (templateObj.HasMember("version"))
+        {
+            data.strVersion = templateObj.FindMember("version")->value.GetString();
+        }
+        if (templateObj.HasMember("isFree"))
+        {
+            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
+        }
+        templateData.append(data);
+    }
+
+    if (d.HasMember("preview_link"))
+    {
+        //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
+        m_demoUrl = d.FindMember("preview_link")->value.GetString();
+    }
+}
+
 void CWizDocTemplateDialog::on_btn_ok_clicked()
 {
     if (!m_selectedTemplate.isEmpty())
@@ -255,6 +347,9 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
 
 void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
 {
+    m_transitionView->hide();
+    ui->webView_preview->show();
+
     bool bDelAble = item->data(0, Qt::UserRole).toInt() == CustomTemplate;
     ui->btn_delete->setEnabled(bDelAble);
     //
@@ -262,40 +357,70 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
     ui->btn_ok->setEnabled(pItem != nullptr);
     if (pItem)
     {
-        QString strZiwFile = pItem->filePath();
-        QString strTempFolder = Utils::PathResolve::tempPath() +Utils::Misc::extractFileTitle(strZiwFile) + "/";
-        if (CWizUnzipFile::extractZip(strZiwFile, strTempFolder))
+        QString strZiwFile = pItem->templateData().strFileName;
+        m_selectedTemplate = strZiwFile;
+        if (WizServerTemplate == pItem->templateData().type)
         {
-            QString previewFile = strTempFolder + previewFileName();
-            if (!QFile::exists(previewFile))
+            QFileInfo info(strZiwFile);
+
+            // load demo page from server
+            if (!m_demoUrl.isEmpty())
             {
-                previewFile = "file://" + strTempFolder + "index.html";
+                QString url = m_demoUrl;
+                url.replace("{file_name}", info.baseName());
+                qDebug() << "load template demo from url : " << url;
+
+                ui->webView_preview->load(QUrl(url));
+
+            }
+
+            // download template file
+            if (!info.exists())
+            {
+                QString strUrl = WizService::CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(pItem->templateData().id);
+                qDebug() << "download template data form url : " << strUrl;
+
+                CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);
+                connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(download_templateFile_finished(QString,bool)));
+                downloader->startDownload();
+            }
+        }
+        else if (QFile::exists(strZiwFile))
+        {
+            QString strTempFolder = Utils::PathResolve::tempPath() +Utils::Misc::extractFileTitle(strZiwFile) + "/";
+            if (CWizUnzipFile::extractZip(strZiwFile, strTempFolder))
+            {
+                QString previewFile = strTempFolder + previewFileName();
+                if (!QFile::exists(previewFile))
+                {
+                    previewFile = "file://" + strTempFolder + "index.html";
+                }
+                else
+                {
+                    previewFile = "file://" + previewFile;
+                }
+                ui->webView_preview->load(QUrl(previewFile));
             }
             else
             {
-                previewFile = "file://" + previewFile;
+                QMessageBox::information(0, tr("Info"), tr("extract ziw file failed!"));
             }
-            m_selectedTemplate = strZiwFile;
-            ui->webView_preview->load(QUrl(previewFile));
-        }
-        else
-        {
-            QMessageBox::information(0, tr("Info"), tr("extract ziw file failed!"));
+
         }
     }
 }
 
 
-CWizTemplateFileItem::CWizTemplateFileItem(const QString& filePath, QTreeWidgetItem* parent)
+CWizTemplateFileItem::CWizTemplateFileItem(const TemplateData& data, QTreeWidgetItem* parent)
     : QTreeWidgetItem(parent)
-    , m_filePath(filePath)
+    , m_data(data)
 {
-    setText(0, Utils::Misc::extractFileTitle(filePath));
+    setText(0, Utils::Misc::extractFileTitle(data.strFileName));
 }
 
-QString CWizTemplateFileItem::filePath() const
+const TemplateData& CWizTemplateFileItem::templateData() const
 {
-    return m_filePath;
+    return m_data;
 }
 
 void CWizDocTemplateDialog::on_btn_cancel_clicked()
@@ -320,7 +445,7 @@ void CWizDocTemplateDialog::on_btn_delete_clicked()
     CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
     if (pItem)
     {
-        QString strZiwFile = pItem->filePath();
+        QString strZiwFile = pItem->templateData().strFileName;
         WizDeleteFile(strZiwFile);
         pItem->parent()->removeChild(item);
         delete item;
@@ -331,5 +456,50 @@ void CWizDocTemplateDialog::on_btn_delete_clicked()
         WizDeleteFolder(path);
         ui->treeWidget->takeTopLevelItem(ui->treeWidget->indexOfTopLevelItem(item));
         delete item;
+    }
+}
+
+void CWizDocTemplateDialog::download_templateList_finished(QNetworkReply* reply)
+{
+    m_net->disconnect(this);
+
+}
+
+void CWizDocTemplateDialog::download_purchasedTemplates_finished(QNetworkReply* reply)
+{
+    m_net->disconnect(this);
+}
+
+void CWizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)
+{
+    qDebug() << "template file downloaded ; " << fileName;
+    for (int i = 0; i < ui->treeWidget->topLevelItemCount(); ++i)
+    {
+        QTreeWidgetItem* topItem = ui->treeWidget->topLevelItem(i);
+        if (topItem->data(0, Qt::UserRole).toInt() == WizServerTemplate)
+        {
+//            for (int j = 0; j < topItem->childCount(); ++j)
+//            {
+//                if (CWizTemplateFileItem* tmplItem = dynamic_cast<CWizTemplateFileItem*>(topItem->child(j)))
+//                {
+//                    if (tmplItem->templateData().strFileName != fileName)
+//                        continue;
+
+//                    if (ui->treeWidget->currentItem() == tmplItem && tmplItem->templateData().type !)
+//                    {
+//                        itemClicked(tmplItem, 0);
+//                    }
+//                }
+//            }
+        }
+    }
+}
+
+void CWizDocTemplateDialog::load_templateDemo_finished(bool Ok)
+{
+    if (!Ok)
+    {
+        ui->webView_preview->hide();
+        m_transitionView->showAsMode("", CWizDocumentTransitionView::ErrorOccured);
     }
 }

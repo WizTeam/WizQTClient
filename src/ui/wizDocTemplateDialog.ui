@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>703</width>
-    <height>479</height>
+    <width>860</width>
+    <height>607</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -58,6 +58,13 @@
     </layout>
    </item>
    <item>
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>* Vip users could use all templates</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QPushButton" name="btn_delete">
@@ -70,13 +77,6 @@
       <widget class="QPushButton" name="pushButton_import">
        <property name="text">
         <string>Import Templates</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="btn_downloadNew">
-       <property name="text">
-        <string>Download More Templates</string>
        </property>
       </widget>
      </item>
@@ -125,7 +125,6 @@
   <tabstop>webView_preview</tabstop>
   <tabstop>btn_delete</tabstop>
   <tabstop>pushButton_import</tabstop>
-  <tabstop>btn_downloadNew</tabstop>
  </tabstops>
  <resources/>
  <connections/>
