@@ -1188,7 +1188,6 @@ void getHtmlBodyStyle(const QString& strHtml, QString& strBodyStyle)
     if (regh.indexIn(strHtml) != -1)
     {
         strBodyStyle = regh.cap(1);
-        qDebug() << "current note body style : " << strBodyStyle;
     }
 }
 
@@ -2345,9 +2344,10 @@ bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
 
 bool CWizDocumentWebView::isContentsChanged()
 {
-//    return m_bContentsChanged;
+    if (m_bContentsChanged)
+        return true;
+
     bool isChanged = page()->mainFrame()->evaluateJavaScript(QString("wizIsContentsChanged();")).toBool();
-    qDebug() << "is content changed :" << isChanged;
     return isChanged;
 }
 

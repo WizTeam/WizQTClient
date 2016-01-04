@@ -85,10 +85,6 @@ try {
 
     });
 
-    editor.addListener('click', function() {        
-        console.log("editor clicked");
-    });
-
     //NOTE: 不能监听contentchange事件，否则仅仅进入编辑状态就会修改笔记为已修改
     // editor.addListener('contentchange', function() {
     //     WizEditor.setContentsChanged(true);
@@ -150,7 +146,7 @@ function setWebWizEditorStatus (bEditing) {
 function initWebWizEditor (bEditing) {
 	var f = window.document.getElementById('ueditor_0');
 	if (f.contentWindow.WizEditor) {
-		console.log("web wizeditor already exists");
+		//console.log("web wizeditor already exists");
 		setWebWizEditorStatus(bEditing);
 	} else {
 		var webEditor = WizEditor.getWizReaderFilePath() + "wizEditor.js";
@@ -178,7 +174,7 @@ function setWizReaderStatus (bEditing) {
 function initWizReader(bEditing) {
 	var f = window.document.getElementById('ueditor_0');
     if (f.contentWindow.WizReader) { 
-        console.log("wizReader already exisits");
+        //console.log("wizReader already exisits");
 
         setWizReaderStatus(bEditing);
 
