@@ -1033,18 +1033,18 @@ QString CWizDocumentWebView::getMailSender()
     return mailSender;
 }
 
-/*
- * 是否添加用户自定义的样式，目前有字体类型、字体大小、背景颜色等信息等信息
- */
-bool CWizDocumentWebView::shouldAddUserDefaultCSS()
-{
-    if (!shouldAddCustomCSS())
-        return false;
+///*
+// * 是否添加用户自定义的样式，目前有字体类型、字体大小、背景颜色等信息等信息
+// */
+//bool CWizDocumentWebView::shouldAddUserDefaultCSS()
+//{
+//    if (!shouldAddCustomCSS())
+//        return false;
 
-    bool isTemplate = page()->mainFrame()->evaluateJavaScript("wizIsTemplate()").toBool();
+//    bool isTemplate = page()->mainFrame()->evaluateJavaScript("wizIsTemplate()").toBool();
 
-    return !isTemplate;
-}
+//    return !isTemplate;
+//}
 
 void CWizDocumentWebView::shareNoteByEmail()
 {
@@ -1395,12 +1395,8 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         resetDefaultCss();
     }
 
-//    if (shouldAddUserDefaultCSS())
-//    {
-//        //模板或浏览器剪辑的笔记不添加自定义css
-//        m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-//                m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
-//    }
+    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
+            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
 
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = editing;

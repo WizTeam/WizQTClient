@@ -427,7 +427,7 @@ private:
     QString getMailSender();
 
     //
-    bool shouldAddUserDefaultCSS();
+//    bool shouldAddUserDefaultCSS();
 };
 
 #endif // WIZDOCUMENTWEBVIEW_H

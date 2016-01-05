@@ -192,6 +192,7 @@ QString RoundCellButton::text() const
         Q_ASSERT(0);
         break;
     }
+    return "";
 }
 
 int RoundCellButton::iconWidth() const

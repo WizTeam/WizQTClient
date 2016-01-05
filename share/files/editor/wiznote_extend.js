@@ -111,8 +111,7 @@ function setWizTemplateStatus (bEditing) {
 
 function initWizEnvironment (bEditing) {
 	var f = window.document.getElementById('ueditor_0');
-    if (f.contentWindow.WizTemplate) {
-            updateUserDefaultCss();
+    if (f.contentWindow.WizTemplate) {            
 			initWizReader(bEditing);
         	initWebWizEditor(bEditing);
             setWizTemplateStatus(bEditing);            
@@ -126,7 +125,6 @@ function initWizEnvironment (bEditing) {
                 clientType: 'mac'
         	});
 
-            updateUserDefaultCss();
         	initWizReader(bEditing);
         	initWebWizEditor(bEditing);
             setWizTemplateStatus(bEditing);            
@@ -262,6 +260,8 @@ function setEditorHtml(html, bEditing, scrollToTop)
     editor.fireEvent('contentchange');
 
     bEditing ? editor.setEnabled() : editor.setDisabled();
+
+    updateUserDefaultCss();
 
     resetEditorBodyClassName();
 
@@ -514,28 +514,25 @@ function updateCustomCss() {
 }
 
 function updateUserDefaultCss() {    
-    if (wizIsTemplate())
-        return;
+    // var css= editor.document.getElementsByTagName('link');
+    // for (var i = 0; i < css.length; i++) {
+    //     if (css[i].rel != 'stylesheet') return;
+    //     if (css[i].type != 'text/css') return;
+    //     if (css[i].href.match(m_defaultCss)) {
+    //         css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
+    //         m_defaultCssVersion++;
+    //         return;
+    //     }
+    // }
 
-    var css= editor.document.getElementsByTagName('link');
-    for (var i = 0; i < css.length; i++) {
-        if (css[i].rel != 'stylesheet') return;
-        if (css[i].type != 'text/css') return;
-        if (css[i].href.match(m_defaultCss)) {
-            css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
-            m_defaultCssVersion++;
-            return;
-        }
-    }
-
-    var objStyle = editor.document.createElement('link');
-    objStyle.rel = 'stylesheet';
-    objStyle.type = 'text/css';
-    objStyle.href = m_defaultCss + "?v=" + m_defaultCssVersion;
-    if (editor.document.head) {
-        editor.document.head.appendChild(objStyle);
-    }   
-    m_defaultCssVersion++;
+    // var objStyle = editor.document.createElement('link');
+    // objStyle.rel = 'stylesheet';
+    // objStyle.type = 'text/css';
+    // objStyle.href = m_defaultCss + "?v=" + m_defaultCssVersion;
+    // if (editor.document.head) {
+    //     editor.document.head.appendChild(objStyle);
+    // }   
+    // m_defaultCssVersion++;
 }
 
 function resetEditorBodyClassName () {

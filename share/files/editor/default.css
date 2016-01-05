@@ -1,11 +1,8 @@
 /* editor note frame's default */
-body, div, p {
-    /*default-font-family*/;
-    /*default-font-size*/;
-    /*default-line-height*/    
-}
-
 html, body {
+	/*default-font-family*/ !important;
+    /*default-font-size*/ !important;
+    /*default-line-height*/ 
     /*default-color*/
     /*default-background-color*/;
 }
