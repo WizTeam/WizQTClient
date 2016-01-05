@@ -29,7 +29,7 @@ public:
     ~CWizIAPHelper();
 
     void purchaseProduct(const QString& strID);
-    void requestProducts();
+    void requestProducts(const QList<QString>& productIdList);
     void loadLocalReceipt(QByteArray& receipt);
     void onProductsLoaded(const QList<CWizIAPProduct>& productList);
     void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);

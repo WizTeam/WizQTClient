@@ -190,8 +190,8 @@ int mainCore(int argc, char *argv[])
     QApplication a(argc, argv);
 
 #ifdef BUILD4APPSTORE
-    CWizIAPHelper helper;
-    helper.validteReceiptOnLauch();
+//    CWizIAPHelper helper;
+//    helper.validteReceiptOnLauch();
 #endif
 #endif
 

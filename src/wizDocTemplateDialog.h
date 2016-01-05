@@ -12,6 +12,7 @@ class CWizDocTemplateDialog;
 class CWizSettings;
 class CWizDatabaseManager;
 class CWizDocumentTransitionView;
+class CWizTemplatePurchaseDialog;
 
 enum TemplateType
 {
@@ -73,6 +74,10 @@ private slots:
 
     void load_templateDemo_finished(bool Ok);
 
+    void purchaseFinished();
+
+    void checkUnfinishedTransation();
+
 private:
     //
     void initTemplateFileTreeWidget();
@@ -96,11 +101,15 @@ private:
 
     bool isTemplateUsable(int templateId);
 
+    void createPurchaseDialog();
+
 private:
     Ui::CWizDocTemplateDialog *ui;
     CWizDocumentTransitionView* m_transitionView;
     QString m_demoUrl;
+    QString m_thumbUrl;
     CWizDatabaseManager& m_dbMgr;
+    CWizTemplatePurchaseDialog* m_purchaseDialog;
 };
 
 #endif // WIZDOCTEMPLATEDIALOG_H

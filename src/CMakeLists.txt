@@ -127,6 +127,7 @@ set(wiznote_SOURCES
     share/rtf2html/rtf_table.cpp
     share/rtf2html/rtf2html.cpp
     widgets/wizEmailShareDialog.cpp
+    widgets/wizTemplatePurchaseDialog.cpp
     share/websocketclientwrapper.cpp
     share/websockettransport.cpp
 
@@ -366,6 +367,7 @@ set(wiznote_HEADERS
     widgets/wizCustomToolBar.h
     widgets/wizTipsWidget.cpp
     widgets/wizSingleDocumentView.h
+    widgets/wizTemplatePurchaseDialog.h
     wizPositionDelegate.h
     core/wizAccountManager.h
     core/wizCommentManager.h
@@ -395,6 +397,7 @@ set(wiznote_FORMS
     ui/wizIAPDialog.ui
     ui/wizAdvancedSearchDialog.ui
     ui/wizCrashReportDialog.ui
+    ui/wizTemplatePurchaseDialog.ui
 )
 
 set(wiznote_TRANSLATIONS
@@ -471,10 +474,10 @@ if(UNIX)
             add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
         endif()
 
-        if(NOT APPSTORE_BUILD)
+#        if(NOT APPSTORE_BUILD)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
-        endif()
+#        endif()
 
     elseif(NOT APPLE)
         add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})

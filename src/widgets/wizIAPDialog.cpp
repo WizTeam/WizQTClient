@@ -62,6 +62,10 @@ CWizIAPDialog::~CWizIAPDialog()
 void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 {
     QTimer::singleShot(0, this, SLOT(stopWaitTimer()));
+    qDebug() << "load product list finished: " << productList.size();
+    if (productList.isEmpty())
+        return;
+
     setPurchaseAvailable(true);
     foreach (CWizIAPProduct product, productList)
     {
@@ -97,12 +101,12 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const
 void CWizIAPDialog::loadUserInfo()
 {
     setWindowTitle(tr("Account settings"));
-   ui->stackedWidget->setCurrentIndex(0);
-   QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
-   QString strToken = WizService::Token::token();
-   QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
-   qDebug() << "load user info : " << strUrl;
-   ui->webView->load(QUrl(strUrl));
+    ui->stackedWidget->setCurrentIndex(0);
+    QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
+    QString strToken = WizService::Token::token();
+    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
+    qDebug() << "load user info : " << strUrl;
+    ui->webView->load(QUrl(strUrl));
 }
 
 void CWizIAPDialog::loadIAPPage()
@@ -317,7 +321,11 @@ void CWizIAPDialog::loadProducts()
     if (m_iAPhelper == 0)
         m_iAPhelper = new CWizIAPHelper(this);
 
-    m_iAPhelper->requestProducts();
+
+    QList<QString> productList;
+    productList.append(WIZ_PRODUCT_MONTH);
+    productList.append(WIZ_PRODUCT_YEAR);
+    m_iAPhelper->requestProducts(productList);
     m_timer.start(2 * 60 * 1000);
     ui->label_downloading->setVisible(true);
 }

@@ -21,6 +21,7 @@
 #include "share/wizEventLoop.h"
 #include "share/wizMessageBox.h"
 #include "share/wizObjectDataDownloader.h"
+#include "widgets/wizTemplatePurchaseDialog.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "core/wizAccountManager.h"
@@ -44,6 +45,7 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget
     : QDialog(parent)
     , ui(new Ui::CWizDocTemplateDialog)
     , m_dbMgr(dbMgr)
+    , m_purchaseDialog(nullptr)
 {
     ui->setupUi(this);
 
@@ -108,6 +110,10 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
     initFolderTemplateItems(folerPath, CustomTemplate);
 
     ui->treeWidget->expandAll();
+
+#ifdef BUILD4APPSTORE
+    QTimer::singleShot(0, this, SLOT(checkUnfinishedTransation()));
+#endif
 }
 
 void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler, TemplateType type)
@@ -338,6 +344,11 @@ void CWizDocTemplateDialog::parseTemplateData(const QString& json, QList<Templat
         //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
         m_demoUrl = d.FindMember("preview_link")->value.GetString();
     }
+
+    if (d.HasMember("thumb_link"))
+    {
+        m_thumbUrl = d.FindMember("thumb_link")->value.GetString();
+    }
 }
 
 void CWizDocTemplateDialog::getPurchasedTemplates()
@@ -399,6 +410,15 @@ bool CWizDocTemplateDialog::isTemplateUsable(int templateId)
     return false;
 }
 
+void CWizDocTemplateDialog::createPurchaseDialog()
+{
+    if (m_purchaseDialog)
+        return;
+
+    m_purchaseDialog = new CWizTemplatePurchaseDialog(this);
+    connect(m_purchaseDialog, SIGNAL(purchaseSuccess()), SLOT(purchaseFinished()));
+}
+
 void CWizDocTemplateDialog::on_btn_ok_clicked()
 {
     CWizTemplateFileItem * pItem = convertToTempalteFileItem(ui->treeWidget->currentItem());
@@ -434,7 +454,18 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
 #ifdef BUILD4APPSTORE
                 if (msg.clickedButton() == buyButton)
                 {
+                    if (!m_purchaseDialog)
+                    {
+                        createPurchaseDialog();
+                    }
 
+                    m_purchaseDialog->setModal(true);
+                    QString thumbUrl = m_thumbUrl;
+                    QFileInfo info(pItem->templateData().strFileName);
+                    thumbUrl.replace("{file_name}", info.baseName());
+                    m_purchaseDialog->showTemplateInfo(pItem->templateData().id, pItem->templateData().strName, thumbUrl);
+                    m_purchaseDialog->open();
+                    return;
                 }
 #endif
             }
@@ -590,4 +621,31 @@ void CWizDocTemplateDialog::load_templateDemo_finished(bool Ok)
         ui->webView_preview->hide();
         m_transitionView->showAsMode("", CWizDocumentTransitionView::ErrorOccured);
     }
+}
+
+void CWizDocTemplateDialog::purchaseFinished()
+{
+    //TODO: reload purchase record
+}
+
+void CWizDocTemplateDialog::checkUnfinishedTransation()
+{
+    QStringList idList = CWizTemplatePurchaseDialog::getUnfinishedTransations();
+    if (idList.size() == 0 || idList.first().isEmpty())
+        return;
+
+    int result = CWizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
+                             QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Ok);
+    if (QMessageBox::Ok == result)
+    {
+        if (!m_purchaseDialog)
+        {
+            createPurchaseDialog();
+        }
+
+        m_purchaseDialog->setModal(true);
+        m_purchaseDialog->processUnfinishedTransation();
+        m_purchaseDialog->open();
+    }
+
 }
