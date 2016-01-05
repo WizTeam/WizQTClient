@@ -17,11 +17,17 @@
 #include "share/wizmisc.h"
 #include "share/wizzip.h"
 #include "share/wizsettings.h"
-#include "sync/apientry.h"
+#include "share/wizthreads.h"
+#include "share/wizEventLoop.h"
+#include "share/wizMessageBox.h"
 #include "share/wizObjectDataDownloader.h"
+#include "sync/apientry.h"
+#include "sync/token.h"
+#include "core/wizAccountManager.h"
 #include "wizDocumentTransitionView.h"
 #include "wizmainwindow.h"
 
+#define PurchaseRecord "purchaseRecord"
 
 /*
  * 服务器的模板列表会在本地缓存一份，允许用户离线状况下使用
@@ -34,9 +40,10 @@ CWizTemplateFileItem* convertToTempalteFileItem(QTreeWidgetItem *item)
     return dynamic_cast<CWizTemplateFileItem *>(item);
 }
 
-CWizDocTemplateDialog::CWizDocTemplateDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CWizDocTemplateDialog)
+CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizDocTemplateDialog)
+    , m_dbMgr(dbMgr)
 {
     ui->setupUi(this);
 
@@ -55,9 +62,6 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(QWidget *parent) :
     m_transitionView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(ui->webView_preview, SIGNAL(loadFinished(bool)), SLOT(load_templateDemo_finished(bool)));
-
-    m_net = new QNetworkAccessManager(this);
-//    connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(download_templateList_finished(QNetworkReply*)));
 }
 
 CWizDocTemplateDialog::~CWizDocTemplateDialog()
@@ -336,13 +340,109 @@ void CWizDocTemplateDialog::parseTemplateData(const QString& json, QList<Templat
     }
 }
 
+void CWizDocTemplateDialog::getPurchasedTemplates()
+{
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+       QNetworkAccessManager manager;
+       QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizService::Token::token();
+       QNetworkReply* reply = manager.get(QNetworkRequest(url));
+       CWizAutoTimeOutEventLoop loop(reply);
+       loop.exec();
+
+       if (loop.error() != QNetworkReply::NoError)
+           return;
+
+       QByteArray ba = loop.result();
+       QString file = Utils::PathResolve::customNoteTemplatesPath() + PurchaseRecord;
+       std::ofstream recordFile(file.toUtf8().constData(), std::ios::out | std::ios::trunc);
+       recordFile << ba.constData();
+    });
+}
+
+bool CWizDocTemplateDialog::isTemplateUsable(int templateId)
+{
+    CWizAccountManager account(m_dbMgr);
+    if (account.isVip())
+        return true;
+
+    QString record = Utils::PathResolve::customNoteTemplatesPath() + PurchaseRecord;
+    if(!QFile::exists(record))
+        return false;
+
+    QFile file(record);
+    if (!file.open(QFile::ReadOnly))
+        return false;
+
+    QTextStream stream(&file);
+    QString jsonData = stream.readAll();
+    if (jsonData.isEmpty())
+        return false;
+
+    rapidjson::Document d;
+    d.Parse(jsonData.toUtf8().constData());
+
+    if (d.HasParseError() || !d.HasMember("result"))
+        return false;
+
+    const rapidjson::Value& templates = d.FindMember("result")->value;
+    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
+    {
+        const rapidjson::Value& templateObj = templates[i];
+
+        if (!templateObj.HasMember("templateId"))
+            continue;
+
+        if (templateObj.FindMember("templateId")->value.GetInt() == templateId)
+            return true;
+    }
+
+    return false;
+}
+
 void CWizDocTemplateDialog::on_btn_ok_clicked()
 {
-    if (!m_selectedTemplate.isEmpty())
+    CWizTemplateFileItem * pItem = convertToTempalteFileItem(ui->treeWidget->currentItem());
+
+    if (pItem)
     {
-        emit documentTemplateSelected(m_selectedTemplate);
+        if (WizServerTemplate == pItem->templateData().type)
+        {
+            if (!isTemplateUsable(pItem->templateData().id))
+            {
+                CMessageBox msg(this);
+                msg.setIcon(QMessageBox::Information);
+                msg.setWindowTitle(tr("Info"));
+                msg.setText(tr("You can not use this template, upgrade to vip or buy this template"));
+                QPushButton* cancelButton = msg.addButton(tr("Cancel"), QMessageBox::RejectRole);
+#ifdef BUILD4APPSTORE
+                QPushButton* buyButton = msg.addButton(tr("Purchase"), QMessageBox::AcceptRole);
+#endif
+                QPushButton* vipButton = msg.addButton(tr("Upgrade Vip"), QMessageBox::AcceptRole);
+                msg.setDefaultButton(vipButton);
+                msg.exec();
+
+                if (msg.clickedButton() == nullptr || msg.clickedButton() == cancelButton)
+                    return;
+
+                if (msg.clickedButton() == vipButton)
+                {
+                    //
+                    accept();
+                    emit upgradeVipRequest();
+                    return;
+                }
+#ifdef BUILD4APPSTORE
+                if (msg.clickedButton() == buyButton)
+                {
+
+                }
+#endif
+            }
+        }
+
+        emit documentTemplateSelected(pItem->templateData().strFileName);
+        accept();
     }
-    accept();
 }
 
 void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
@@ -358,7 +458,6 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
     if (pItem)
     {
         QString strZiwFile = pItem->templateData().strFileName;
-        m_selectedTemplate = strZiwFile;
         if (WizServerTemplate == pItem->templateData().type)
         {
             QFileInfo info(strZiwFile);
@@ -457,17 +556,6 @@ void CWizDocTemplateDialog::on_btn_delete_clicked()
         ui->treeWidget->takeTopLevelItem(ui->treeWidget->indexOfTopLevelItem(item));
         delete item;
     }
-}
-
-void CWizDocTemplateDialog::download_templateList_finished(QNetworkReply* reply)
-{
-    m_net->disconnect(this);
-
-}
-
-void CWizDocTemplateDialog::download_purchasedTemplates_finished(QNetworkReply* reply)
-{
-    m_net->disconnect(this);
 }
 
 void CWizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)

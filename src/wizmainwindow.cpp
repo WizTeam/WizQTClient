@@ -1570,19 +1570,7 @@ void MainWindow::openVipPageInWebBrowser()
 
     if (msg.clickedButton() == actionBuy)
     {
-#ifndef BUILD4APPSTORE
-        WizExecuteOnThread(WIZ_THREAD_NETWORK, [](){
-            QString strToken = WizService::Token::token();
-            QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
-            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                QDesktopServices::openUrl(QUrl(strUrl));
-            });
-        });
-#else
-    CWizIAPDialog* dlg = iapDialog();
-    dlg->loadIAPPage();
-    dlg->exec();
-#endif
+        showVipUpgradePage();
     }
 }
 
@@ -1752,6 +1740,23 @@ void MainWindow::removeWindowsMenuItem(QString guid)
 
     //
     resetDockMenu();
+}
+
+void MainWindow::showVipUpgradePage()
+{
+#ifndef BUILD4APPSTORE
+        WizExecuteOnThread(WIZ_THREAD_NETWORK, [](){
+            QString strToken = WizService::Token::token();
+            QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
+            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                QDesktopServices::openUrl(QUrl(strUrl));
+            });
+        });
+#else
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
+#endif
 }
 
 void MainWindow::windowActived()
@@ -2508,8 +2513,9 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
     WizGetAnalyzer().LogAction("newNoteByTemplate");
 
     //通过模板创建笔记
-    CWizDocTemplateDialog dlg;
+    CWizDocTemplateDialog dlg(m_dbMgr);
     connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+    connect(&dlg, SIGNAL(upgradeVipRequest()), SLOT(showVipUpgradePage()));
     dlg.exec();
 }
 

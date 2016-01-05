@@ -10,8 +10,7 @@ class CWizDocTemplateDialog;
 }
 
 class CWizSettings;
-class QNetworkReply;
-class QNetworkAccessManager;
+class CWizDatabaseManager;
 class CWizDocumentTransitionView;
 
 enum TemplateType
@@ -51,11 +50,12 @@ class CWizDocTemplateDialog : public QDialog
     Q_OBJECT
 
 public:
-    explicit CWizDocTemplateDialog(QWidget *parent = 0);
+    explicit CWizDocTemplateDialog(CWizDatabaseManager& dbMgr,QWidget *parent = 0);
     ~CWizDocTemplateDialog();
 
 signals:
     void documentTemplateSelected(QString strFile);
+    void upgradeVipRequest();
 
 public slots:
     void itemClicked(QTreeWidgetItem*item, int);
@@ -69,8 +69,6 @@ private slots:
 
     void on_btn_delete_clicked();
 
-    void download_templateList_finished(QNetworkReply* reply);
-    void download_purchasedTemplates_finished(QNetworkReply* reply);
     void download_templateFile_finished(QString fileName,bool ok);
 
     void load_templateDemo_finished(bool Ok);
@@ -94,12 +92,15 @@ private:
 
     void parseTemplateData(const QString& json, QList<TemplateData>& templateData);
 
+    void getPurchasedTemplates();
+
+    bool isTemplateUsable(int templateId);
+
 private:
     Ui::CWizDocTemplateDialog *ui;
-    QString m_selectedTemplate;
     CWizDocumentTransitionView* m_transitionView;
-    QNetworkAccessManager* m_net;
     QString m_demoUrl;
+    CWizDatabaseManager& m_dbMgr;
 };
 
 #endif // WIZDOCTEMPLATEDIALOG_H

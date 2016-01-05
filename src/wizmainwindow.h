@@ -542,6 +542,8 @@ private slots:
     void resetDockMenu();
     void resetWindowMenu();
     void removeWindowsMenuItem(QString guid);
+
+    void showVipUpgradePage();
 };
 
 } // namespace Internal

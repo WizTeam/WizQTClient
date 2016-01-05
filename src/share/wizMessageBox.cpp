@@ -143,7 +143,7 @@ QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QS
     }
     msg.setDefaultButton(defaultButton);
 
-    //FIXME: 在Mac系统下，dialog对话框不会在父窗口中居中显示，此处进行居中对齐处理
+    //NOTE: 在Mac系统下，dialog对话框不会在父窗口中居中显示，此处进行居中对齐处理
 #ifdef Q_OS_MAC
     QObject::connect(&msg, &CMessageBox::resized, [&](){
         if (parent)
