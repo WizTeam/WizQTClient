@@ -13,15 +13,18 @@
 #define APPSTORE_IAP "APPSTORE_IAP"
 #define APPSTORE_UNFINISHED_TEMPLATE_TRANSATION  "UNFINISHED_TEMPLATE_TRANSATION"
 
+const int nWaitingTime = 2 * 60 * 1000;
+
 CWizTemplatePurchaseDialog::CWizTemplatePurchaseDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::CWizTemplatePurchaseDialog),
-    m_net(nullptr),
+    m_net(new QNetworkAccessManager(this)),
     m_tmplId(0),
     m_iapHelper(nullptr)
 {
     ui->setupUi(this);
     ui->btn_quit->setVisible(false);
+    m_waitingTimer.setSingleShot(true);
 }
 
 CWizTemplatePurchaseDialog::~CWizTemplatePurchaseDialog()
@@ -41,21 +44,8 @@ void CWizTemplatePurchaseDialog::onProductsLoaded(const QList<CWizIAPProduct>& p
 
 void CWizTemplatePurchaseDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
 {
-    if (!ok)
-    {
-        changeToStatusPage();
-        showStatusMeesage(tr("Purchase failed, please try again later."));
-        ui->btn_quit->setVisible(true);
-    }
-    else
-    {
-        changeToStatusPage();
-        showStatusMeesage(tr("Waiting for Wiz server..."));
-
-        //
-        saveUnfinishedTransation(strTransationID, m_tmplId);
-        checkRecipt(receipt, strTransationID, m_tmplId);
-    }
+    QMetaObject::invokeMethod(this, "processIAPPurchaseResult", Qt::QueuedConnection, Q_ARG(bool, ok),
+                              Q_ARG(const QByteArray&, receipt), Q_ARG(const QString&, strTransationID));
 }
 
 void CWizTemplatePurchaseDialog::showStatusMeesage(const QString& text)
@@ -88,11 +78,11 @@ void CWizTemplatePurchaseDialog::checkRecipt(const QByteArray& receipt, const QS
     QString userGUID = db.GetUserGUID();
     QString receiptBase64 = receipt.toBase64();
     receiptBase64 = QString(QUrl::toPercentEncoding(receiptBase64));
-    QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&receipt=%5&template_id=%6")
-            .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(receiptBase64).arg(templateId);
+    QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&template_id=%5&receipt=%6")
+            .arg(strPlat).arg(userID).arg(userGUID).arg(strTransationID).arg(QString::number(templateId)).arg(receiptBase64);
 
     qDebug() << "transation id = " << strTransationID;
-    //    qDebug() << "check receipt : " << checkUrl << strExtInfo;
+//    qDebug() << "check receipt : " << checkUrl << strExtInfo;
 
     m_net->disconnect(this);
     connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(checkReciptFinished(QNetworkReply*)));
@@ -101,6 +91,9 @@ void CWizTemplatePurchaseDialog::checkRecipt(const QByteArray& receipt, const QS
     request.setUrl(checkUrl);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/x-www-form-urlencoded"));
     m_net->post(request, strExtInfo.toUtf8());
+
+    // 开始倒计时，倒计时结束则认为处理失败
+    m_waitingTimer.start(nWaitingTime);
 }
 
 void CWizTemplatePurchaseDialog::on_purchase_failed(const QString& error)
@@ -127,11 +120,7 @@ void CWizTemplatePurchaseDialog::showTemplateInfo(int tmplId, const QString& tmp
     ui->label_tmplThumb->setText(tr("Loading thumb image..."));
     ui->label_tmplName->setText(tmplName);
     ui->label_tmplPrice->setText(tr("Loading..."));
-    //
-    if (!m_net)
-    {
-        m_net = new QNetworkAccessManager(this);
-    }
+    //       
     m_net->disconnect(this);
     connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(imageDownloadFinished(QNetworkReply*)));
     m_net->get(QNetworkRequest(thumbUrl));
@@ -170,6 +159,8 @@ void CWizTemplatePurchaseDialog::on_btn_purchase_clicked()
     m_iapHelper->purchaseProduct(WIZ_PRODUCT_TEMPLATE);
     changeToStatusPage();
     showStatusMeesage(tr("Connecting to AppStore..."));
+    //
+    m_waitingTimer.start(nWaitingTime);
 }
 
 void CWizTemplatePurchaseDialog::on_btn_cancel_clicked()
@@ -184,6 +175,9 @@ void CWizTemplatePurchaseDialog::on_btn_quit_clicked()
 
 void CWizTemplatePurchaseDialog::checkReciptFinished(QNetworkReply* reply)
 {
+    //
+    m_waitingTimer.stop();
+
     if (reply->error() != QNetworkReply::NoError) {
         reply->deleteLater();
         on_purchase_failed(tr("Network error : %1").arg(reply->errorString()));
@@ -194,6 +188,34 @@ void CWizTemplatePurchaseDialog::checkReciptFinished(QNetworkReply* reply)
     reply->deleteLater();
 
     parseCheckResult(strResult, m_transationID);
+}
+
+void CWizTemplatePurchaseDialog::processIAPPurchaseResult(bool ok, const QByteArray &receipt, const QString &strTransationID)
+{
+    m_waitingTimer.stop();
+
+    if (!ok)
+    {
+        changeToStatusPage();
+        showStatusMeesage(tr("Purchase failed, please try again later."));
+        ui->btn_quit->setVisible(true);
+    }
+    else
+    {
+        changeToStatusPage();
+        showStatusMeesage(tr("Waiting for Wiz server..."));
+
+        //
+        saveUnfinishedTransation(strTransationID, m_tmplId);
+        checkRecipt(receipt, strTransationID, m_tmplId);
+    }
+}
+
+void CWizTemplatePurchaseDialog::onWaitingTimerOut()
+{
+    changeToStatusPage();
+    showStatusMeesage(tr("Can not connect to Server, please try again later."));
+    ui->btn_quit->setVisible(true);
 }
 
 void CWizTemplatePurchaseDialog::parseCheckResult(const QString& strResult, const QString& strTransationID)
@@ -242,11 +264,17 @@ QStringList CWizTemplatePurchaseDialog::getUnfinishedTransations()
 void CWizTemplatePurchaseDialog::processUnfinishedTransation()
 {
     QStringList idList = getUnfinishedTransations();
+    qDebug() << "process unfinished transation : " << idList;
     if (idList.size() == 0 || idList.first().isEmpty())
         return;
 
     QByteArray receipt;
+    if (!m_iapHelper)
+    {
+        m_iapHelper = new CWizIAPHelper(this);
+    }
     m_iapHelper->loadLocalReceipt(receipt);
+//    qDebug() << "process unfinished transation receipt : " << receipt;
     if (receipt.isEmpty())
     {
         CWizMessageBox::warning(this, tr("Info"), tr("Can not load receipt!"));

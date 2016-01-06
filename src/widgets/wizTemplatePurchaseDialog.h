@@ -2,6 +2,7 @@
 #define WIZTEMPLATEPURCHASEDIALOG_H
 
 #include <QDialog>
+#include <QTimer>
 #include "mac/wizIAPHelper.h"
 
 class QNetworkReply;
@@ -41,6 +42,10 @@ private slots:
 
     void checkReciptFinished(QNetworkReply* reply);
 
+    void processIAPPurchaseResult(bool ok, const QByteArray& receipt, const QString& strTransationID);
+
+    void onWaitingTimerOut();
+
 private:
     void showStatusMeesage(const QString& text);
     void changeToStatusPage();
@@ -61,6 +66,7 @@ private:
     int m_tmplId;
     CWizIAPHelper* m_iapHelper;
     QString m_transationID;
+    QTimer m_waitingTimer;
 };
 
 #endif // WIZTEMPLATEPURCHASEDIALOG_H
