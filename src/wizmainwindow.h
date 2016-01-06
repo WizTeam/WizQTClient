@@ -22,6 +22,7 @@ class QLabel;
 class QSystemTrayIcon;
 class QComboBox;
 class QActionGroup;
+struct TemplateData;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -401,7 +402,7 @@ public Q_SLOTS:
 
     void on_editor_statusChanged();
 
-    void createDocumentByTemplate(const QString& strFile);
+    void createDocumentByTemplate(const TemplateData& tmplData);
 
     void on_mobileFileRecived(const QString& strFile);
 

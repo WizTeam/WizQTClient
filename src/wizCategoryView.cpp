@@ -1843,31 +1843,6 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
     return true;
 }
 
-bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw)
-{
-    QString strKbGUID = m_dbMgr.db().kbGUID();
-    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
-    WIZTAGDATA tag;
-
-    if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
-    {
-        if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiw, strLocation, tag, data))
-        {
-            TOLOG("Failed to new document!");
-            return false;
-        }
-
-        if (!tag.strGUID.IsEmpty()) {
-            CWizDocument doc(m_dbMgr.db(strKbGUID), data);
-            doc.AddTag(tag);
-        }
-    }
-
-    quickSyncNewDocument(data.strKbGUID);
-    //
-    return true;
-}
-
 void CWizCategoryView::on_action_newDocument()
 {
     ::WizGetAnalyzer().LogAction("categoryMenuNewDocument");

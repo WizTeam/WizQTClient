@@ -137,6 +137,16 @@ bool CWizNoteManager::createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID
     return true;
 }
 
+bool CWizNoteManager::createNoteByTemplate(WIZDOCUMENTDATA& data, const WIZTAGDATA& tag, const QString& strZiw)
+{
+    if (!m_dbMgr.db(data.strKbGUID).CreateDocumentByTemplate(strZiw, data.strLocation, tag, data))
+    {
+        qDebug() << "Failed to new document! " << strZiw;
+        return false;
+    }
+    return true;
+}
+
 void CWizNoteManager::updateTemplateJS(const QString& local)
 {
     //软件启动之后获取模板信息，检查template.js是否存在、是否是最新版。需要下载时进行下载

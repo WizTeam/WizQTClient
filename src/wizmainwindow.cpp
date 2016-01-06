@@ -47,7 +47,7 @@
 #include "wizactions.h"
 #include "wizpreferencedialog.h"
 #include "wizupgradenotifydialog.h"
-
+#include "core/wizNoteManager.h"
 #include "share/wizcommonui.h"
 #include "share/wizui.h"
 #include "share/wizmisc.h"
@@ -1419,18 +1419,55 @@ void MainWindow::on_editor_statusChanged()
 
 }
 
-void MainWindow::createDocumentByTemplate(const QString& strFile)
+void MainWindow::createDocumentByTemplate(const TemplateData& tmplData)
 {
-    initVariableBeforCreateNote();
-    WIZDOCUMENTDATA data;
-    if (!m_category->createDocumentByTemplate(data, strFile))
+    QFileInfo info(tmplData.strFileName);
+    if (!info.exists())
     {
-        return;
+        qDebug() << "template file not exists : " << tmplData.strFileName;
     }
 
+    initVariableBeforCreateNote();
 
+    WIZDOCUMENTDATA data;
+    QString kbGUID = m_dbMgr.db().kbGUID();
+    QString location = m_dbMgr.db().GetDefaultNoteLocation();
+    WIZTAGDATA tag;
+    QString title = info.baseName();
+    if (WizServerTemplate == tmplData.type)
+    {
+        if (!tmplData.strFolder.isEmpty())
+        {
+            location = tmplData.strFolder;
+//            location.replace("");
+            data.strLocation = location;
+        }
+        //  Journal {date}({week})
+        if (!tmplData.strTitle.isEmpty())
+        {
+            title = tmplData.strTitle;
+            COleDateTime dt;
+            title.replace("{date}", dt.toLocalLongDate());
+            title.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
+            QLocale local;
+            title.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
+            data.strTitle = title;
+        }
+    }
+    else
+    {
+        m_category->getAvailableNewNoteTagAndLocation(kbGUID, tag, location);
+    }
+    //
+    CWizNoteManager noteManager(m_dbMgr);
+    noteManager.createNoteByTemplate(data, tag, tmplData.strFileName);
+
+    locateDocument(data);
+    //
     setFocusForNewNote(data);
     m_doc->web()->setContentsChanged(true);
+
+    quickSyncKb(kbGUID);
 }
 
 void MainWindow::on_mobileFileRecived(const QString& strFile)
@@ -2514,7 +2551,7 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
     //通过模板创建笔记
     CWizDocTemplateDialog dlg(m_dbMgr);
-    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+    connect(&dlg, SIGNAL(documentTemplateSelected(TemplateData)), SLOT(createDocumentByTemplate(TemplateData)));
     connect(&dlg, SIGNAL(upgradeVipRequest()), SLOT(showVipUpgradePage()));
     dlg.exec();
 }

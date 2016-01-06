@@ -141,6 +141,7 @@ public:
     int GetDayOfWeek() const { return date().dayOfWeek(); }
 
     QString toHumanFriendlyString() const;
+    QString toLocalLongDate() const;
     //
     COleDateTime &operator=(const QDateTime &other);
     COleDateTime &operator=(const COleDateTime &other);

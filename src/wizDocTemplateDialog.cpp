@@ -473,7 +473,7 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
             }
         }
 
-        emit documentTemplateSelected(pItem->templateData().strFileName);
+        emit documentTemplateSelected(pItem->templateData());
         accept();
     }
 }

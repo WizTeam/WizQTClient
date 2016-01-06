@@ -314,7 +314,6 @@ public:
     bool createDocument(WIZDOCUMENTDATA& data);
     bool createDocument(WIZDOCUMENTDATA& data, const QString& strHtml, const QString& strTitle);
     bool createDocumentByAttachments(WIZDOCUMENTDATA& data, const QStringList& attachList);
-    bool createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw);
 
     //
     void createGroup();
@@ -325,6 +324,9 @@ public:
     void viewBizInfo(const QString& bizGUID);
     void manageBiz(const QString& bizGUID, bool bUpgrade);
 
+    //
+    bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
+                                           QString& strLocation);
 
 signals:
     void newDocument();
@@ -465,10 +467,7 @@ private:
     void setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
                                      const WIZGROUPDATA& gData);
 
-    void moveFolderPostionBeforeTrash(const QString& strLocation);
-
-    bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
-                                           QString& strLocation);
+    void moveFolderPostionBeforeTrash(const QString& strLocation);    
 
     void quickSyncNewDocument(const QString& strKbGUID);
 

@@ -55,6 +55,18 @@ QString COleDateTime::toHumanFriendlyString() const
     return QString("Error");
 }
 
+QString COleDateTime::toLocalLongDate() const
+{
+    QLocale local;
+    if (local.language() == QLocale::Chinese)
+    {
+        QDateTime dt = QDateTime::currentDateTime();
+        return local.toString(dt, "yyyy") + QObject::tr("year") + local.toString(dt, "MMMd") + QObject::tr("day");
+    }
+
+    return QDateTime::currentDateTime().toString("ddd M,yyyy");
+}
+
 COleDateTime &COleDateTime::operator=(const QDateTime &other)
 {
     setDate(other.date());

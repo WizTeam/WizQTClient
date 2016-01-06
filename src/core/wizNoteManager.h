@@ -37,10 +37,7 @@ public:
     bool createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID, const QString& strTitle,
                     const QString& strHtml, const QString& strLocation, const WIZTAGDATA& tag);
 
-    bool createNoteByTemplate(WIZDOCUMENTDATA& data, const QString& strKbGUID, const QString& strTitle,
-                              const QString& strLocation, const QString& strZiw);
-    bool createNoteByTemplate(WIZDOCUMENTDATA& data, const QString& strKbGUID, const QString& strTitle,
-                              const QString& strLocation, const WIZTAGDATA& tag, const QString& strZiw);
+    bool createNoteByTemplate(WIZDOCUMENTDATA& data, const WIZTAGDATA& tag, const QString& strZiw);
 
     void updateTemplateJS(const QString& local);
     void downloadTemplatePurchaseRecord();

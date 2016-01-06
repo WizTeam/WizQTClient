@@ -55,7 +55,7 @@ public:
     ~CWizDocTemplateDialog();
 
 signals:
-    void documentTemplateSelected(QString strFile);
+    void documentTemplateSelected(const TemplateData& tmplData);
     void upgradeVipRequest();
 
 public slots:
