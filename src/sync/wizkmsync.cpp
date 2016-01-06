@@ -258,6 +258,7 @@ bool CWizKMSyncThread::needSyncAll()
     if (m_nFullSyncSecondsInterval > 0 && seconds > m_nFullSyncSecondsInterval)
     {
         m_bNeedSyncAll = true;
+        m_bBackground = true;
     }
 
     return m_bNeedSyncAll;
@@ -278,6 +279,7 @@ public:
         Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode()
                                        , m_pThread->m_pEvents->GetLastErrorMessage()
                                        , m_pThread->isBackground());
+        m_pThread->m_pEvents->ClearLastErrorMessage();
     }
 };
 

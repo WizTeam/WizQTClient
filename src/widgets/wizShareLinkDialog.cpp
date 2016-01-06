@@ -126,6 +126,9 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
     data->setText(link);
     clip->setMimeData(data);
 
+    if (callBack.isEmpty())
+        return;
+
     m_view->page()->mainFrame()->evaluateJavaScript(callBack);
 }
 

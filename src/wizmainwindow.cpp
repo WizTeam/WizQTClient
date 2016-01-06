@@ -2428,9 +2428,7 @@ void MainWindow::on_syncStarted(bool syncAll)
 }
 
 void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
-{
-    Q_UNUSED(strErrorMsg);
-
+{    
     m_animateSync->stopPlay();    
 
     //

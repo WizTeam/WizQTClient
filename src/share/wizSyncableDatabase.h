@@ -185,6 +185,7 @@ public:
     virtual int GetLastErrorCode() const { return m_nLastError; }
     virtual void SetLastErrorMessage(const QString& message) { m_strLastErrorMessage = message; }
     virtual QString GetLastErrorMessage() const { return m_strLastErrorMessage; }
+    virtual void ClearLastErrorMessage() { m_strLastErrorMessage.clear(); }
     virtual void SetDatabaseCount(int count) {}
     virtual void SetCurrentDatabase(int index) {}
     virtual void ClearLastSyncError(IWizSyncableDatabase* pDatabase) {}
