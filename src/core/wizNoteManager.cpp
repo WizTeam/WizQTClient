@@ -12,6 +12,7 @@
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "sync/apientry.h"
+#include "sync/token.h"
 #include "share/wizobject.h"
 #include "share/wizDatabase.h"
 #include "share/wizDatabaseManager.h"
@@ -193,6 +194,33 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
             ba = loop.result();
             std::ofstream logFile(jsFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
             logFile << ba.constData();
+        }        
+    });
+}
+
+void CWizNoteManager::downloadTemplatePurchaseRecord()
+{
+    //下载用户购买的模板列表
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=]() {
+        WizEnsurePathExists(Utils::PathResolve::customNoteTemplatesPath());
+        //
+        QNetworkAccessManager manager;
+        QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizService::Token::token();
+        qDebug() << "get templates record from url : " << url;
+        //
+        QByteArray ba;
+        {
+            QNetworkReply* reply = manager.get(QNetworkRequest(url));
+            CWizAutoTimeOutEventLoop loop(reply);
+            loop.exec();
+            //
+            if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+                return;
+
+            ba = loop.result();
+            QString jsonFile = Utils::PathResolve::wizTemplatePurchaseRecordFile();
+            std::ofstream recordFile(jsonFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
+            recordFile << ba.constData();
         }
     });
 }

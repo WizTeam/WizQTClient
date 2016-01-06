@@ -43,6 +43,7 @@ public:
                               const QString& strLocation, const WIZTAGDATA& tag, const QString& strZiw);
 
     void updateTemplateJS(const QString& local);
+    void downloadTemplatePurchaseRecord();
 
 private:
     CWizDatabaseManager& m_dbMgr;

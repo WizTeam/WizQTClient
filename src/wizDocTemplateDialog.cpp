@@ -25,10 +25,9 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "core/wizAccountManager.h"
+#include "core/wizNoteManager.h"
 #include "wizDocumentTransitionView.h"
 #include "wizmainwindow.h"
-
-#define PurchaseRecord "purchaseRecord"
 
 /*
  * 服务器的模板列表会在本地缓存一份，允许用户离线状况下使用
@@ -364,7 +363,7 @@ void CWizDocTemplateDialog::getPurchasedTemplates()
            return;
 
        QByteArray ba = loop.result();
-       QString file = Utils::PathResolve::customNoteTemplatesPath() + PurchaseRecord;
+       QString file = Utils::PathResolve::wizTemplatePurchaseRecordFile();
        std::ofstream recordFile(file.toUtf8().constData(), std::ios::out | std::ios::trunc);
        recordFile << ba.constData();
     });
@@ -376,7 +375,7 @@ bool CWizDocTemplateDialog::isTemplateUsable(int templateId)
     if (account.isVip())
         return true;
 
-    QString record = Utils::PathResolve::customNoteTemplatesPath() + PurchaseRecord;
+    QString record = Utils::PathResolve::wizTemplatePurchaseRecordFile();
     if(!QFile::exists(record))
         return false;
 
@@ -625,7 +624,8 @@ void CWizDocTemplateDialog::load_templateDemo_finished(bool Ok)
 
 void CWizDocTemplateDialog::purchaseFinished()
 {
-    //TODO: reload purchase record
+    CWizNoteManager noteManager(m_dbMgr);
+    noteManager.downloadTemplatePurchaseRecord();
 }
 
 void CWizDocTemplateDialog::checkUnfinishedTransation()
@@ -644,8 +644,8 @@ void CWizDocTemplateDialog::checkUnfinishedTransation()
         }
 
         m_purchaseDialog->setModal(true);
-        m_purchaseDialog->processUnfinishedTransation();
         m_purchaseDialog->open();
+        m_purchaseDialog->processUnfinishedTransation();
     }
 
 }

@@ -34,6 +34,7 @@ public:
     static QString customNoteTemplatesPath();
     static QString wizTemplateJsFilePath();
     static QString wizTemplateJsonFilePath();
+    static QString wizTemplatePurchaseRecordFile();
 
 
     // helpers
