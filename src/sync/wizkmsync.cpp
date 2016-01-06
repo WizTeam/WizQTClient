@@ -216,6 +216,7 @@ bool CWizKMSyncThread::doSync()
     {
         qDebug() << "[Sync] quick syncing started, thread:" << QThread::currentThreadId();
         //
+        m_bBackground = true;
         quickSync();
         return true;
     }
