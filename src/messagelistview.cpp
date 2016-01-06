@@ -844,17 +844,17 @@ void MessageListView::on_itemSelectionChanged()
         {
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [msgData](){
                 QString command = QString("message_%1").arg(msgData.nMessageType);
-                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);
-                qDebug() << "message url : " << strUrl;
+                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);                
                 strUrl.replace("{token}", WizService::Token::token());
                 strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
                 strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
                 strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
                 strUrl.replace("{sender_guid}", msgData.senderGUID.isEmpty() ? "{sender_guid}" : msgData.senderGUID);
                 strUrl.replace("{receiver_guid}", msgData.receiverGUID.isEmpty() ? "{receiver_guid}" : msgData.receiverGUID);
-                strUrl.replace("{sender_id}", msgData.senderGUID.isEmpty() ? "{sender_id}" : msgData.senderGUID);
-                strUrl.replace("{receiver_id}", msgData.receiverGUID.isEmpty() ? "{receiver_id}" : msgData.receiverGUID);
+                strUrl.replace("{sender_id}", msgData.senderId.isEmpty() ? "{sender_id}" : QUrl::toPercentEncoding(msgData.senderId));
+                strUrl.replace("{receiver_id}", msgData.receiverId.isEmpty() ? "{receiver_id}" : QUrl::toPercentEncoding(msgData.receiverId));
 
+                qDebug() << "system message : " << strUrl;
                 QDesktopServices::openUrl(strUrl);
             });
         }
