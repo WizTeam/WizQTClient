@@ -1428,7 +1428,9 @@ void MainWindow::createDocumentByTemplate(const QString& strFile)
         return;
     }
 
+
     setFocusForNewNote(data);
+    m_doc->web()->setContentsChanged(true);
 }
 
 void MainWindow::on_mobileFileRecived(const QString& strFile)
