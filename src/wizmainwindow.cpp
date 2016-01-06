@@ -1464,6 +1464,7 @@ void MainWindow::createDocumentByTemplate(const TemplateData& tmplData)
 
     locateDocument(data);
     //
+    viewDocument(data, true);
     setFocusForNewNote(data);
     m_doc->web()->setContentsChanged(true);
 

@@ -64,7 +64,7 @@ QString COleDateTime::toLocalLongDate() const
         return local.toString(dt, "yyyy") + QObject::tr("year") + local.toString(dt, "MMMd") + QObject::tr("day");
     }
 
-    return QDateTime::currentDateTime().toString("ddd M,yyyy");
+    return QDateTime::currentDateTime().toString("MMM d,yyyy");
 }
 
 COleDateTime &COleDateTime::operator=(const QDateTime &other)
