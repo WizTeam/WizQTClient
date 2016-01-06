@@ -18,6 +18,8 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizthreads.h"
 #include "share/wizEventLoop.h"
+#include "wizDocTemplateDialog.h"
+#include "share/wizObjectDataDownloader.h"
 
 void CWizNoteManager::createIntroductionNoteForNewRegisterAccount()
 {
@@ -173,38 +175,16 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
                 return;
 
             ba = loop.result();
-            QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
-            std::ofstream logFile(jsonFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
-            logFile << ba.constData();
         }
 
-        //
-        rapidjson::Document d;
-        d.Parse(ba.constData());
-        if (d.HasParseError())
+        //根据线上的内容来判断本地的模板文件是否需要更新
+        if (!updateLocalTemplates(ba, manager))
             return;
-        //
-        QString link;
-        if (d.HasMember("template_js_link"))
-        {
-            link = d.FindMember("template_js_link")->value.GetString();
-        }
-        if (!link.isEmpty())
-        {
-            qDebug() << "get templates js file from url : " << link;
-            QString jsFile = Utils::PathResolve::wizTemplateJsFilePath();
-            QNetworkReply* reply = manager.get(QNetworkRequest(link));
-            //
-            CWizAutoTimeOutEventLoop loop(reply);
-            loop.exec();
-            //
-            if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
-                return;
 
-            ba = loop.result();
-            std::ofstream logFile(jsFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
-            logFile << ba.constData();
-        }        
+        //更新成功之后将数据保存到本地
+        QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+        std::ofstream logFile(jsonFile.toUtf8().constData(), std::ios::out | std::ios::trunc);
+        logFile << ba.constData();
     });
 }
 
@@ -233,6 +213,96 @@ void CWizNoteManager::downloadTemplatePurchaseRecord()
             recordFile << ba.constData();
         }
     });
+}
+
+bool CWizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetworkAccessManager& manager)
+{
+    rapidjson::Document d;
+    d.Parse(newJsonData.constData());
+    if (d.HasParseError())
+        return false;
+
+    QString localFile = Utils::PathResolve::wizTemplateJsonFilePath();
+    bool needUpdateJs = true;
+    QMap<int, TemplateData> localTmplMap;
+    QFile file(localFile);
+    if (file.open(QFile::ReadOnly))
+    {
+        QTextStream stream(&file);
+        QString jsonData = stream.readAll();
+        qDebug() << "local json "  << jsonData;
+        rapidjson::Document localD;
+        localD.Parse(jsonData.toUtf8().constData());
+
+        if (!localD.HasParseError())
+        {
+            if (localD.HasMember("template_js_version") && d.HasMember("template_js_version"))
+            {
+                needUpdateJs = (localD.FindMember("template_js_version")->value.GetString() ==
+                        d.FindMember("template_js_version")->value.GetString());
+            }
+        }
+
+        getTemplatesFromJsonData(newJsonData, localTmplMap);
+    }
+
+    //
+    if (needUpdateJs)
+    {
+        QString link;
+        if (d.HasMember("template_js_link"))
+        {
+            link = d.FindMember("template_js_link")->value.GetString();
+        }
+        if (!link.isEmpty())
+        {
+            qDebug() << "get templates js file from url : " << link;
+            QString file = Utils::PathResolve::wizTemplateJsFilePath();
+            QNetworkReply* reply = manager.get(QNetworkRequest(link));
+            //
+            CWizAutoTimeOutEventLoop loop(reply);
+            loop.exec();
+            //
+            if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+                return false;
+
+            QByteArray ba = loop.result();
+            std::ofstream jsFile(file.toUtf8().constData(), std::ios::out | std::ios::trunc);
+            jsFile << ba.constData();
+        }
+    }
+
+    //
+    QMap<int, TemplateData> serverTmplMap;
+    getTemplatesFromJsonData(newJsonData, serverTmplMap);
+
+    //下载服务器上有更新的模板
+    for (auto it = serverTmplMap.begin(); it != serverTmplMap.end(); ++it)
+    {
+        auto iter = localTmplMap.find(it.key());
+        if (iter == localTmplMap.end())
+            continue;
+
+        if (iter.value().strVersion != it.value().strVersion || !QFile::exists(it.value().strFileName))
+        {
+            QString strUrl = WizService::CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(it.value().id);
+            QFileInfo info(it.value().strFileName);
+            CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);
+            downloader->startDownload();
+        }
+    }
+
+    //删除服务器上不存在的模板
+    for (auto it = localTmplMap.begin(); it != localTmplMap.end(); ++it)
+    {
+        auto iter = serverTmplMap.find(it.key());
+        if (iter == localTmplMap.end())
+        {
+            WizDeleteFile(it.value().strFileName);
+        }
+    }
+
+    return true;
 }
 
 

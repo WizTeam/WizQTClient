@@ -88,13 +88,15 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
         if (jsonData.isEmpty())
             return;
         //
-        QList<TemplateData> templateList;
-        parseTemplateData(jsonData, templateList);
+        QMap<int, TemplateData> tmplMap;
+        getTemplatesFromJsonData(jsonData.toUtf8(), tmplMap);
+        parseTemplateData(jsonData);
+        QList<TemplateData> templateList = tmplMap.values();
         if (!templateList.isEmpty())
         {
             QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
             topLevelItem->setData(0, Qt::UserRole, WizServerTemplate);
-            topLevelItem->setText(0, tr("Recommended templates"));
+            topLevelItem->setText(0, tr("Recommended templates"));            
             for (TemplateData tmpl : templateList)
             {
                 tmpl.type = WizServerTemplate;
@@ -296,50 +298,12 @@ void CWizDocTemplateDialog::createSettingsFile(const QString& strFileName)
     file.close();
 }
 
-void CWizDocTemplateDialog::parseTemplateData(const QString& json, QList<TemplateData>& templateData)
+void CWizDocTemplateDialog::parseTemplateData(const QString& json)
 {
     rapidjson::Document d;
     d.Parse(json.toUtf8().constData());
-    if (d.HasParseError() || !d.HasMember("templates"))
+    if (d.HasParseError())
         return;
-
-    const rapidjson::Value& templates = d.FindMember("templates")->value;
-    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
-    {
-        const rapidjson::Value& templateObj = templates[i];
-
-        TemplateData data;
-        if (templateObj.HasMember("fileName"))
-        {
-            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
-            data.strFileName = Utils::PathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
-        }
-        if (templateObj.HasMember("folder"))
-        {
-            data.strFolder = templateObj.FindMember("folder")->value.GetString();
-        }
-        if (templateObj.HasMember("id"))
-        {
-            data.id = templateObj.FindMember("id")->value.GetInt();
-        }
-        if (templateObj.HasMember("name"))
-        {
-            data.strName = templateObj.FindMember("name")->value.GetString();
-        }
-        if (templateObj.HasMember("title"))
-        {
-            data.strTitle = templateObj.FindMember("title")->value.GetString();
-        }
-        if (templateObj.HasMember("version"))
-        {
-            data.strVersion = templateObj.FindMember("version")->value.GetString();
-        }
-        if (templateObj.HasMember("isFree"))
-        {
-            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
-        }
-        templateData.append(data);
-    }
 
     if (d.HasMember("preview_link"))
     {
@@ -650,5 +614,51 @@ void CWizDocTemplateDialog::checkUnfinishedTransation()
         m_purchaseDialog->open();
         m_purchaseDialog->processUnfinishedTransation();
     }
+}
 
+
+void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmplMap)
+{
+    rapidjson::Document d;
+    d.Parse(ba.constData());
+    if (d.HasParseError() || !d.HasMember("templates"))
+        return;
+
+    const rapidjson::Value& templates = d.FindMember("templates")->value;
+    for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
+    {
+        const rapidjson::Value& templateObj = templates[i];
+
+        TemplateData data;
+        if (templateObj.HasMember("fileName"))
+        {
+            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
+            data.strFileName = Utils::PathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
+        }
+        if (templateObj.HasMember("folder"))
+        {
+            data.strFolder = templateObj.FindMember("folder")->value.GetString();
+        }
+        if (templateObj.HasMember("id"))
+        {
+            data.id = templateObj.FindMember("id")->value.GetInt();
+        }
+        if (templateObj.HasMember("name"))
+        {
+            data.strName = templateObj.FindMember("name")->value.GetString();
+        }
+        if (templateObj.HasMember("title"))
+        {
+            data.strTitle = templateObj.FindMember("title")->value.GetString();
+        }
+        if (templateObj.HasMember("version"))
+        {
+            data.strVersion = templateObj.FindMember("version")->value.GetString();
+        }
+        if (templateObj.HasMember("isFree"))
+        {
+            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
+        }
+        tmplMap.insert(data.id, data);
+    }
 }

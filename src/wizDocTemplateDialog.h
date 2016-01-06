@@ -95,7 +95,7 @@ private:
 
     void createSettingsFile(const QString& strFileName);
 
-    void parseTemplateData(const QString& json, QList<TemplateData>& templateData);
+    void parseTemplateData(const QString& json);
 
     void getPurchasedTemplates();
 
@@ -111,5 +111,7 @@ private:
     CWizDatabaseManager& m_dbMgr;
     CWizTemplatePurchaseDialog* m_purchaseDialog;
 };
+
+void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmplMap);
 
 #endif // WIZDOCTEMPLATEDIALOG_H

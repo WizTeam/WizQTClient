@@ -8,6 +8,7 @@
  */
 class WIZDOCUMENTDATA;
 class WIZTAGDATA;
+class QNetworkAccessManager;
 
 
 #define WIZ_DOCUMENT_TYPE_NORMAL    "document"
@@ -41,6 +42,9 @@ public:
 
     void updateTemplateJS(const QString& local);
     void downloadTemplatePurchaseRecord();
+
+private:
+    bool updateLocalTemplates(const QByteArray& newJsonData, QNetworkAccessManager& manager);
 
 private:
     CWizDatabaseManager& m_dbMgr;
