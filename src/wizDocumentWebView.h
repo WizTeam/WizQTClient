@@ -132,6 +132,8 @@ public:
     bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
+    void setNoteTitleInited(bool inited);
+
     void setInSeperateWindow(bool inSeperateWindow);
     bool isInSeperateWindow() const;
 

@@ -1465,6 +1465,9 @@ void MainWindow::createDocumentByTemplate(const TemplateData& tmplData)
     locateDocument(data);
     //
     viewDocument(data, true);
+    // set doc title
+    m_doc->resetTitle(data.strTitle);
+    m_doc->web()->setNoteTitleInited(true);
     setFocusForNewNote(data);
     m_doc->web()->setContentsChanged(true);
 

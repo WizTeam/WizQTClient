@@ -755,6 +755,11 @@ void CWizDocumentWebView::closeDocument(const WIZDOCUMENTDATA& doc)
     closeSourceMode();
 }
 
+void CWizDocumentWebView::setNoteTitleInited(bool inited)
+{
+    m_bNewNoteTitleInited = inited;
+}
+
 void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
 {
     m_bInSeperateWindow = inSeperateWindow;
