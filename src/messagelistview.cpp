@@ -102,18 +102,18 @@ void avatarFromMessage(const WIZMESSAGEDATA& msg, QPixmap* pix)
     }
     else if (WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP);
+        WizService::AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
         WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
     }
     else if (WIZ_USER_MSG_TYPE_ADDED_TO_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT);
+        WizService::AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
         WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
     }
     else if (WIZ_USER_MSG_TYPE_LIKE == msg.nMessageType
              || WIZ_USER_MSG_TYPE_SYSTEM == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_SYSTEM);
+        WizService::AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
         WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
     }
     else
@@ -1370,7 +1370,7 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     QString strText = userList.join(";");
 
     QPixmap pix;
-    WizService::AvatarHost::load(strUserId);
+    WizService::AvatarHost::load(strUserId, false);
     WizService::AvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);

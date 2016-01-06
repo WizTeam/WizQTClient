@@ -24,7 +24,7 @@ public:
     ~AvatarHost();
 
     static AvatarHost* instance();
-    static void load(const QString& strUserID);
+    static void load(const QString& strUserID, bool isSystem);
     static void reload(const QString& strUserID);
     static bool isLoaded(const QString& strUserID);
     static bool isFileExists(const QString& strUserID);

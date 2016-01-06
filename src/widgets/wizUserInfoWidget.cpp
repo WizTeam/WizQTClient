@@ -31,7 +31,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)),
             SLOT(on_userAvatar_loaded(const QString&)));
 
-    AvatarHost::load(m_db.GetUserId());
+    AvatarHost::load(m_db.GetUserId(), false);
 
     resetUserInfo();
 

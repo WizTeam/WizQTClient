@@ -217,8 +217,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
         WizService::AvatarHost::deleteAvatar(oldId);
-        WizService::AvatarHost::load(oldId);
-        WizService::AvatarHost::load(newId);
+        WizService::AvatarHost::load(oldId, false);
+        WizService::AvatarHost::load(newId, false);
     });
 #endif
 

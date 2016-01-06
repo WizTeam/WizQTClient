@@ -421,9 +421,9 @@ AvatarHost* AvatarHost::instance()
     return m_instance;
 }
 
-void AvatarHost::load(const QString& strUserID)
+void AvatarHost::load(const QString& strUserID, bool isSystem)
 {
-    d->load(strUserID, false);
+    d->load(strUserID, isSystem);
 }
 
 void AvatarHost::reload(const QString& strUserID)
