@@ -63,6 +63,9 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget
     m_transitionView->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     connect(ui->webView_preview, SIGNAL(loadFinished(bool)), SLOT(load_templateDemo_finished(bool)));
+
+    CWizNoteManager noteManager(m_dbMgr);
+    noteManager.downloadTemplatePurchaseRecord();
 }
 
 CWizDocTemplateDialog::~CWizDocTemplateDialog()

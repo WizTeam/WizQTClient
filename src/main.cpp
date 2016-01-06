@@ -190,8 +190,8 @@ int mainCore(int argc, char *argv[])
     QApplication a(argc, argv);
 
 #ifdef BUILD4APPSTORE
-//    CWizIAPHelper helper;
-//    helper.validteReceiptOnLauch();
+    CWizIAPHelper helper;
+    helper.validteReceiptOnLauch();
 #endif
 #endif
 
@@ -429,7 +429,7 @@ int mainCore(int argc, char *argv[])
 
     //create introduction note for new register users
     CWizNoteManager noteManager(dbMgr);
-    noteManager.updateTemplateJS(userSettings.locale());
+    noteManager.updateTemplateJS(userSettings.locale()); 
     if (isNewRegisterAccount)
     {
         noteManager.createIntroductionNoteForNewRegisterAccount();
