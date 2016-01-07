@@ -26,6 +26,9 @@ public:
     bool isInsertCommentToNote() const;
     QString getCommentsText() const;
 
+signals:
+    void insertCommentToNoteRequest(const QString& docGUID, const QString& comment);
+
 private slots:
     void on_toolButton_send_clicked();
 
@@ -59,7 +62,6 @@ private:
     QDialog* m_contactDialog;
     QListWidget* m_contactList;
     QNetworkAccessManager* m_net;
-    bool m_insertComment;
 };
 
 #endif // WIZEMAILSHAREDIALOG_H

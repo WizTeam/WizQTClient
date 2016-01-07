@@ -420,6 +420,9 @@ Q_SIGNALS:
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
 
+private slots:
+    void on_insertCommentToNote_request(const QString& docGUID, const QString& comment);
+
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     bool insertImage(const QString& strFileName, bool bCopyFile);

@@ -38,7 +38,6 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     , ui(new Ui::CWizEmailShareDialog)
     , m_app(app)
     , m_net(nullptr)
-    , m_insertComment(false)
 {
     ui->setupUi(this);
 //    ui->checkBox_saveNotes->setVisible(false);
@@ -89,12 +88,11 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& s
         ui->comboBox_replyTo->insertItem(0, group.strMyWiz);
         ui->comboBox_replyTo->setCurrentIndex(0);
     }
-    m_insertComment = false;
 }
 
 bool CWizEmailShareDialog::isInsertCommentToNote() const
 {
-    return m_insertComment;
+    return ui->checkBox_saveNotes->isChecked();
 }
 
 QString CWizEmailShareDialog::getCommentsText() const
@@ -136,7 +134,11 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
     switch (nCode) {
     case codeOK:
         ui->labelInfo->setText(tr("Send success"));
-        m_insertComment = ui->checkBox_saveNotes->isChecked();
+        if (isInsertCommentToNote())
+        {
+            emit insertCommentToNoteRequest(m_note.strGUID, getCommentsText());
+        }
+
         break;
     case codeErrorParam:
     case codeErrorFile:

@@ -976,6 +976,19 @@ void CWizDocumentWebView::initCheckListEnvironment()
     }
 }
 
+void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID, const QString& comment)
+{
+    if (docGUID != view()->note().strGUID)
+        return;
+
+    QString htmlBody = "<div>" + comment + "</div><hr>";
+    htmlBody.replace("\n", "<br>");
+    htmlBody.replace("'", "&#39;");
+    page()->mainFrame()->evaluateJavaScript(QString("var objDiv = editor.document.createElement('div');objDiv.innerHTML= '%1';"
+                                                    "var first=editor.document.body.firstChild;editor.document.body.insertBefore(objDiv,first);").arg(htmlBody));
+    saveEditingViewDocument(view()->note(), true);
+}
+
 void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
@@ -1056,6 +1069,10 @@ void CWizDocumentWebView::shareNoteByEmail()
     CWizEmailShareDialog dlg(m_app);
     QString sendTo = getMailSender();
     dlg.setNote(view()->note(), sendTo);
+
+    //
+    connect(&dlg, SIGNAL(insertCommentToNoteRequest(QString,QString)),
+            SLOT(on_insertCommentToNote_request(QString,QString)));
 
     dlg.exec();
 }
@@ -1212,17 +1229,21 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     setContentsChanged(false);
     //
 
-    QString strFileName = m_mapFile.value(data.strGUID);
-    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
-    m_strCurrentNoteHead = strHead;
-    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
-    strHead.replace(regHead, "");
+    QString strFileName = m_mapFile.value(data.strGUID);    
 
     // 此处不能使用editor.document.body.innerHTML;直接获取Html进行保存，会得到很多UEditor的内部元素
     //需要getContent()来过滤。  但是不能过滤换行符和空格。否则会造成一些网页粘贴后看到的样式与实际保存的样式不一致
 //    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.getContent(null,null,true,true);").toString();
 //    QString strHtml = page()->mainFrame()->evaluateJavaScript("editor.document.body.innerHTML;").toString();
     QString strHtml = page()->mainFrame()->evaluateJavaScript("wizEditorGetContentHtml()").toString();
+    //;
+//    QString strHead = page()->mainFrame()->evaluateJavaScript("editor.document.head.innerHTML;").toString();
+    QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
+    regh.indexIn(strHtml);
+    QString strHead = regh.cap(1);
+    m_strCurrentNoteHead = strHead;
+    QRegExp regHead("<link[^>]*" + m_strDefaultCssFilePath + "[^>]*>", Qt::CaseInsensitive);
+    strHead.replace(regHead, "");
     //
     QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
     if (regex.indexIn(strHtml) != -1) {
@@ -1233,8 +1254,6 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
     }
 
     getHtmlBodyStyle(strHtml, m_strCurrentNoteBodyStyle);
-
-    //
     //
     page()->mainFrame()->evaluateJavaScript(("updateCurrentNoteHtml();"));
 
