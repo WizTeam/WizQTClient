@@ -597,6 +597,8 @@ struct WIZGROUPDATA
 
     // field: kb_type, default is "group", not used
     QString strType;
+    // field: mywiz_email, group mywiz_email
+    QString strMyWiz;
 
     // field: owner_name, default is null, not used
     QString strOwner;

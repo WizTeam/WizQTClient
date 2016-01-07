@@ -693,6 +693,7 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     , strGroupNote(data.strGroupNote)
     , strGroupSEO(data.strGroupSEO)
     , strType(data.strType)
+    , strMyWiz(data.strMyWiz)
     , strOwner(data.strOwner)
     , strRoleNote(data.strRoleNote)
     , strServerUrl(data.strServerUrl)
@@ -705,6 +706,7 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
 
 bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
+    qDebug() << "group data ; " << data.ToString();
     data.GetString("biz_guid", bizGUID);
     data.GetString("biz_name", bizName);
 
@@ -720,6 +722,7 @@ bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetString("kb_note", strGroupNote);
     data.GetString("kb_seo", strGroupSEO);
     data.GetString("kb_type", strType);
+    data.GetString("mywiz_email", strMyWiz);
     data.GetString("owner_name", strOwner);
     data.GetString("role_note", strRoleNote);
     data.GetString("server_url", strServerUrl);
