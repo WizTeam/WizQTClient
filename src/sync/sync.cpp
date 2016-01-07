@@ -1168,7 +1168,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                 pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
                 WIZBIZDATA bizData;
                 pDatabase->GetBizData(strBizGUID, bizData);
-                QString error = pEvents->GetLastErrorMessage() + QObject::tr("Team service of ' %1 ' has expired, temporarily unable to sync the new and edited notes, please renew on time.").arg(bizData.bizName);
+                QString error = pEvents->GetLastErrorMessage() + QObject::tr("Team service of ' %1 ' has expired, temporarily unable to sync the new and edited notes, please renew on time.").arg(bizData.bizName) +"\n";
                 pEvents->SetLastErrorMessage(error);
             }
             case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
