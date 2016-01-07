@@ -1439,7 +1439,8 @@ void MainWindow::createDocumentByTemplate(const TemplateData& tmplData)
         if (!tmplData.strFolder.isEmpty())
         {
             location = tmplData.strFolder;
-//            location.replace("");
+            location.replace("{year}", QDate::currentDate().toString("yyyy"));
+            location.replace("{month}", QDate::currentDate().toString("MM"));
             data.strLocation = location;
         }
         //  Journal {date}({week})

@@ -163,6 +163,11 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
 
         QNetworkAccessManager manager;
         QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates?language_type=" + local;
+#ifdef Q_OS_MAC
+        url.append("&client_type=macosx");
+#else
+        url.append("&client_type=linux");
+#endif
         qDebug() << "get templates message from url : " << url;
         //
         QByteArray ba;
@@ -230,7 +235,6 @@ bool CWizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwo
     {
         QTextStream stream(&file);
         QString jsonData = stream.readAll();
-        qDebug() << "local json "  << jsonData;
         rapidjson::Document localD;
         localD.Parse(jsonData.toUtf8().constData());
 
