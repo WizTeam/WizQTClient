@@ -5361,6 +5361,8 @@ void CWizCategoryView::on_group_opened(const QString& strKbGUID)
                     parent->sortChildren(0, Qt::AscendingOrder);
                 }
             }
+
+            resetCreateGroupLink();
         }
     }
 }
