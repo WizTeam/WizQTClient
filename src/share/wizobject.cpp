@@ -706,7 +706,6 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
 
 bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
 {
-    qDebug() << "group data ; " << data.ToString();
     data.GetString("biz_guid", bizGUID);
     data.GetString("biz_name", bizName);
 
