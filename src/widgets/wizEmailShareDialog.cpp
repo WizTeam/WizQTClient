@@ -19,6 +19,9 @@
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
 
+#define AUTO_INSERT_COMMENT_TO_NOTE  "EmailAutoInsertComment"
+#define Signature_TEXT          "EmailSignatureText"
+
 enum returnCode {
     codeOK = 200,                   //:ok,
     codeErrorParam = 322,      //:参数错误，
@@ -35,9 +38,10 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     , ui(new Ui::CWizEmailShareDialog)
     , m_app(app)
     , m_net(nullptr)
+    , m_insertComment(false)
 {
     ui->setupUi(this);
-    ui->checkBox_saveNotes->setVisible(false);
+//    ui->checkBox_saveNotes->setVisible(false);
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("send_email"));
     QIcon icon(Utils::StyleHelper::skinResourceFileName("send_email"));
     ui->toolButton_send->setIcon(icon);
@@ -53,6 +57,16 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     layout->addWidget(m_contactList);
     connect(m_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_contactsListItemClicked(QListWidgetItem*)));
+
+    //
+    QString stext = m_app.userSettings().get(Signature_TEXT);
+    if (!stext.isEmpty())
+    {
+        ui->textEdit_notes->setPlainText("\n\n"+stext);
+    }
+
+    bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    ui->checkBox_saveNotes->setChecked(autoInsert);
 }
 
 CWizEmailShareDialog::~CWizEmailShareDialog()
@@ -67,6 +81,25 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& s
     ui->lineEdit_to->setText(sendTo);
     ui->comboBox_replyTo->insertItem(0, m_app.userSettings().userId());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
+    if (m_app.databaseManager().db(note.strKbGUID).IsGroup())
+    {
+        WIZGROUPDATA group;
+        m_app.databaseManager().db().GetGroupData(note.strKbGUID, group);
+        qDebug() << "group my wiz : strkbguid " <<  note.strKbGUID << group.strMyWiz;
+        ui->comboBox_replyTo->insertItem(0, group.strMyWiz);
+        ui->comboBox_replyTo->setCurrentIndex(0);
+    }
+    m_insertComment = false;
+}
+
+bool CWizEmailShareDialog::isInsertCommentToNote() const
+{
+    return m_insertComment;
+}
+
+QString CWizEmailShareDialog::getCommentsText() const
+{
+    return ui->textEdit_notes->toPlainText().toHtmlEscaped();
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()
@@ -102,7 +135,8 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
 {
     switch (nCode) {
     case codeOK:
-        ui->labelInfo->setText(tr("Send success"));        
+        ui->labelInfo->setText(tr("Send success"));
+        m_insertComment = ui->checkBox_saveNotes->isChecked();
         break;
     case codeErrorParam:
     case codeErrorFile:
@@ -228,4 +262,55 @@ void CWizEmailShareDialog::on_networkError(const QString& errorMsg)
 {
     CWizMessageBox::information(this, tr("Info"), errorMsg);
     ui->labelInfo->setText(errorMsg);
+}
+
+void CWizEmailShareDialog::on_toolButton_settings_clicked()
+{
+    QDialog dlg;
+    QVBoxLayout* layout = new QVBoxLayout(&dlg);
+    QCheckBox* checkbox = new QCheckBox(&dlg);
+    checkbox->setText(tr("Auto insert comment to note"));
+    QLabel* label = new QLabel(&dlg);
+    label->setText(tr("Signature:"));
+    QTextEdit* textEdit = new QTextEdit(&dlg);
+    layout->addWidget(checkbox);
+    layout->addWidget(label);
+    layout->addWidget(textEdit);
+
+    bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    checkbox->setChecked(autoInsert);
+
+    QString text = m_app.userSettings().get(Signature_TEXT);
+    textEdit->setText(text);
+
+    //
+    connect(textEdit, SIGNAL(textChanged()), SLOT(signature_text_edit_finished()));
+    connect(checkbox, SIGNAL(toggled(bool)), SLOT(autoInsert_state_changed(bool)));
+
+    dlg.exec();
+
+    autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    if (autoInsert)
+    {
+        ui->checkBox_saveNotes->setChecked(true);
+    }
+    text = m_app.userSettings().get(Signature_TEXT);
+    if (!text.isEmpty() && ui->textEdit_notes->toPlainText().isEmpty())
+    {
+        ui->textEdit_notes->setPlainText("\n\n"+text);
+    }
+}
+
+void CWizEmailShareDialog::signature_text_edit_finished()
+{
+    if (QTextEdit* textEdit = qobject_cast<QTextEdit*>(sender()))
+    {
+        QString text = textEdit->toPlainText();
+        m_app.userSettings().set(Signature_TEXT, text);
+    }
+}
+
+void CWizEmailShareDialog::autoInsert_state_changed(bool checked)
+{
+    m_app.userSettings().set(AUTO_INSERT_COMMENT_TO_NOTE, checked ? "1" : "0");
 }

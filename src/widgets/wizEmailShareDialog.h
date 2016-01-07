@@ -23,6 +23,9 @@ public:
 
     void setNote(const WIZDOCUMENTDATA& note, const QString& sendTo = "");
 
+    bool isInsertCommentToNote() const;
+    QString getCommentsText() const;
+
 private slots:
     void on_toolButton_send_clicked();
 
@@ -35,6 +38,11 @@ private slots:
     void on_networkError(const QString& errorMsg);
 
     void on_mailShare_finished(int nCode, const QString& returnMessage);
+
+    void on_toolButton_settings_clicked();
+
+    void signature_text_edit_finished();
+    void autoInsert_state_changed(bool checked);
 
 private:
     QString getExInfo();    
@@ -51,6 +59,7 @@ private:
     QDialog* m_contactDialog;
     QListWidget* m_contactList;
     QNetworkAccessManager* m_net;
+    bool m_insertComment;
 };
 
 #endif // WIZEMAILSHAREDIALOG_H
