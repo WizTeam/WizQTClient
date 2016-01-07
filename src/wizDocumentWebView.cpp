@@ -2552,6 +2552,21 @@ bool CWizDocumentWebView::canEditNote()
     return view()->isEditing();
 }
 
+//编辑器初始化时使用
+QString CWizDocumentWebView::getLocalLanguage()
+{
+    QLocale locale;
+    if (locale.language() == QLocale::Chinese)
+    {
+        if (locale.country() == QLocale::China)
+            return "zh-cn";
+        else if (locale.country() == QLocale::Taiwan)
+            return "zh-tw";
+    }
+
+    return "en";
+}
+
 QNetworkDiskCache*CWizDocumentWebView::networkCache()
 {
     return dynamic_cast<QNetworkDiskCache *>(page()->networkAccessManager()->cache());

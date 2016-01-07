@@ -121,7 +121,7 @@ function initWizEnvironment (bEditing) {
     	wizJsDocument.onload = function() {
         		f.contentWindow.WizTemplate.init({
                 document: editor.document,
-                lang: 'en',  //zh-cn  zh-tw
+                lang: WizEditor.getLocalLanguage(), //'en',  //zh-cn  zh-tw
                 clientType: 'mac'
         	});
 
@@ -152,7 +152,7 @@ function initWebWizEditor (bEditing) {
     	wizEditorDocument.onload = function() {
             f.contentWindow.WizEditor.init({
                 document: editor.document,
-                lang: 'zh-cn',
+                lang: WizEditor.getLocalLanguage(),
                 clientType: 'mac'});
             //
 	    	setWebWizEditorStatus(bEditing);
@@ -194,7 +194,7 @@ function initWizReader(bEditing) {
 
 		    f.contentWindow.WizReader.init({
 		    document: editor.document,
-		    lang: 'zh-cn',
+		    lang: WizEditor.getLocalLanguage(),
 		    clientType: 'mac',
 		    userInfo: {},
 		    // usersData: '',

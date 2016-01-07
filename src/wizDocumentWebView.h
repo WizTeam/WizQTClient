@@ -215,6 +215,7 @@ public:
     Q_INVOKABLE bool isWizTemplateNote();
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
+    Q_INVOKABLE QString getLocalLanguage();
 
     //
     QNetworkDiskCache* networkCache();    
