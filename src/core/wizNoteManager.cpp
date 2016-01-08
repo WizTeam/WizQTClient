@@ -175,7 +175,7 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
 #else
         url.append("&client_type=linux");
 #endif
-        qDebug() << "get templates message from url : " << url;
+//        qDebug() << "get templates message from url : " << url;
         //
         QByteArray ba;
         {
@@ -208,7 +208,7 @@ void CWizNoteManager::downloadTemplatePurchaseRecord()
         //
         QNetworkAccessManager manager;
         QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizService::Token::token();
-        qDebug() << "get templates record from url : " << url;
+//        qDebug() << "get templates record from url : " << url;
         //
         QByteArray ba;
         {

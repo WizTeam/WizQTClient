@@ -1805,13 +1805,19 @@ void MainWindow::showVipUpgradePage()
 
 void MainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
 {
+#ifndef BUILD4APPSTORE
     if (!m_templateIAPDialog)
     {
         m_templateIAPDialog = new CWizTemplatePurchaseDialog(this);
         m_templateIAPDialog->setModal(true);
+        connect(m_templateIAPDialog, &CWizTemplatePurchaseDialog::purchaseSuccess, [=](){
+            CWizNoteManager manager(m_dbMgr);
+            manager.downloadTemplatePurchaseRecord();
+        });
     }
     m_templateIAPDialog->showTemplateInfo(tmpl.id, tmpl.strName, tmpl.strThumbUrl);
     m_templateIAPDialog->open();
+#endif
 }
 
 void MainWindow::on_newNoteButton_extraMenuRequest()

@@ -429,7 +429,8 @@ int mainCore(int argc, char *argv[])
 
     //create introduction note for new register users
     CWizNoteManager noteManager(dbMgr);
-    noteManager.updateTemplateJS(userSettings.locale()); 
+    noteManager.updateTemplateJS(userSettings.locale());
+    noteManager.downloadTemplatePurchaseRecord();
     if (isNewRegisterAccount)
     {
         noteManager.createIntroductionNoteForNewRegisterAccount();

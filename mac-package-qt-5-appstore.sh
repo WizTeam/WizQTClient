@@ -7,6 +7,9 @@ volumn_path="/Volumes/$volumn_name"
 package_home="./macos-package"
 package_output_path="$HOME"
 
+REV=`git rev-list HEAD | wc -l | awk '{print $1}'`
+echo "build version : " $REV
+
 # compile
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
@@ -153,8 +156,8 @@ install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libaggregation.
 
 cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
 
-APPLCERT="3rd Party Mac Developer Application: Wei Shijun"
-INSTCERT="3rd Party Mac Developer Installer: Wei Shijun"
+APPLCERT="3rd Party Mac Developer Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
+INSTCERT="3rd Party Mac Developer Installer: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
  
 for I in $QTLIBS ; do # signing the Qt frameworks
   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
@@ -172,7 +175,6 @@ for I in $DISTPLUGINS2 ; do # signing all *.dylib libs
     $MYAPP.app/Contents/PlugIns/$I
 done
 
-REV=`git rev-list HEAD | wc -l | awk '{print $1}'`
 plutil -replace CFBundleVersion -string $REV $MYAPP.app/Contents/Info.plist
 
 
