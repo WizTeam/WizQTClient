@@ -10,10 +10,7 @@ class WIZDOCUMENTDATA;
 class WIZTAGDATA;
 class QNetworkAccessManager;
 
-
 #define WIZ_DOCUMENT_TYPE_NORMAL    "document"
-#define WIZ_DOCUMENT_TYPE_TEMPLATE  "TemplateNote"
-#define WIZ_DOCUMENT_TYPE_WEB       "webnote"
 
 class CWizNoteManager
 {

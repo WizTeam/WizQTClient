@@ -212,7 +212,6 @@ public:
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
     Q_INVOKABLE bool shouldAddCustomCSS();
-    Q_INVOKABLE bool isWizTemplateNote();
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();

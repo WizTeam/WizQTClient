@@ -2530,19 +2530,13 @@ bool CWizDocumentWebView::shouldAddCustomCSS()
 {
     const WIZDOCUMENTDATA& data = view()->note();
     // 通过网页剪辑的笔记不添加自定义的样式
-    bool styledNote = (data.strType == WIZ_DOCUMENT_TYPE_WEB) || (data.strURL.startsWith("http"));
+    bool styledNote = data.strURL.startsWith("http");
     if (styledNote)
         return false;
 
     bool isMarkdown = WizIsMarkdownNote(data) && !view()->isEditing();
 
     return !isMarkdown;
-}
-
-bool CWizDocumentWebView::isWizTemplateNote()
-{
-    const WIZDOCUMENTDATA& data = view()->note();
-    return (data.strType == WIZ_DOCUMENT_TYPE_TEMPLATE);
 }
 
 bool CWizDocumentWebView::canRenderMarkdown()
