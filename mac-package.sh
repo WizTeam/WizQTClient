@@ -7,7 +7,7 @@ volumn_path="/Volumes/$volumn_name"
 package_home="./macos-package"
 package_output_path="$HOME"
 
-
+mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
 cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -DPLCrashReporter=YES -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.9.sdk ../WizQTClient && \
@@ -17,6 +17,10 @@ cp -R -p ~/Library/Frameworks/CrashReporter.framework WizNote.app/Contents/Frame
 
 install_name_tool -change @rpath/CrashReporter.framework/Versions/A/CrashReporter \
  @executable_path/../Frameworks/CrashReporter.framework/Versions/A/CrashReporter WizNote.app/Contents/MacOS/WizNote
+
+
+REV=`git rev-list HEAD | wc -l | awk '{print $1}'`
+plutil -replace CFBundleVersion -string $REV WizNote.app/Contents/Info.plist
 
 
 APPLCERT="Developer ID Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"

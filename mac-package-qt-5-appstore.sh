@@ -172,6 +172,9 @@ for I in $DISTPLUGINS2 ; do # signing all *.dylib libs
     $MYAPP.app/Contents/PlugIns/$I
 done
 
+REV=`git rev-list HEAD | wc -l | awk '{print $1}'`
+plutil -replace CFBundleVersion -string $REV $MYAPP.app/Contents/Info.plist
+
 
 codesign --verbose=2 --sign "$APPLCERT" --entitlements \
   WizNote-Entitlements.plist  "$MYAPP.app"
