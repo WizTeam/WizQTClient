@@ -252,7 +252,6 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 - (void)buttonPressed
 {
     NSInteger intger = [self selectedSegment];
-    NSLog(@"selected seg : %ld", (long)intger);
 
     if (0 == intger)
     {

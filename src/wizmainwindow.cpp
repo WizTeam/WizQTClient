@@ -1805,7 +1805,7 @@ void MainWindow::showVipUpgradePage()
 
 void MainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
 {
-#ifndef BUILD4APPSTORE
+#ifdef BUILD4APPSTORE
     if (!m_templateIAPDialog)
     {
         m_templateIAPDialog = new CWizTemplatePurchaseDialog(this);

@@ -731,10 +731,10 @@ WizTemplateUpgradeResult showTemplateUnusableDialog(QWidget* parent)
     msg.setWindowTitle(QObject::tr("Info"));
     msg.setText(QObject::tr("You can use this template after upgrading to VIP or buy it."));
     QPushButton* cancelButton = msg.addButton(QObject::tr("Cancel"), QMessageBox::RejectRole);
-    QPushButton* vipButton = msg.addButton(QObject::tr("Upgrade to VIP"), QMessageBox::AcceptRole);
 #ifdef BUILD4APPSTORE
     QPushButton* buyButton = msg.addButton(QObject::tr("Purchase"), QMessageBox::AcceptRole);
 #endif
+    QPushButton* vipButton = msg.addButton(QObject::tr("Upgrade to VIP"), QMessageBox::YesRole);
     msg.setDefaultButton(vipButton);
     msg.exec();
 
