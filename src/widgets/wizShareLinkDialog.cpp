@@ -1,15 +1,13 @@
 #include "wizShareLinkDialog.h"
 #include "sync/token.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "share/wizsettings.h"
 #include <QVBoxLayout>
 #include <QWebFrame>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QDesktopServices>
-#include <QApplication>
-#include <QClipboard>
-#include <QMimeData>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -120,11 +118,7 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
         return;
     }
 
-    QClipboard* clip = QApplication::clipboard();
-    QMimeData* data = new QMimeData();
-    data->setHtml(link);
-    data->setText(link);
-    clip->setMimeData(data);
+    Utils::Misc::copyTextToClipboard(link);
 
     if (callBack.isEmpty())
         return;

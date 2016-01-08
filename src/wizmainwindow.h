@@ -486,6 +486,7 @@ public:
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
     Q_INVOKABLE void AppStoreIAP();
+    Q_INVOKABLE void copyLink(const QString& link);
 
 private:
     void syncAllData();

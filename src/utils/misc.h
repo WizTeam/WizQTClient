@@ -41,6 +41,9 @@ public:
     static void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
 
     //
+    static void copyTextToClipboard(const QString& text);
+
+    //
     static bool isChinese();
     static bool isSimpChinese();
     static bool isTraditionChinese();

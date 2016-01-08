@@ -5,6 +5,9 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QTextStream>
+#include <QApplication>
+#include <QClipboard>
+#include <QMimeData>
 
 #include "wizdef.h"
 
@@ -209,6 +212,15 @@ void Misc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QStr
     } else {
         strBody = strHtml;
     }
+}
+
+void Misc::copyTextToClipboard(const QString& text)
+{
+    QClipboard* clip = QApplication::clipboard();
+    QMimeData* data = new QMimeData();
+    data->setHtml(text);
+    data->setText(text);
+    clip->setMimeData(data);
 }
 
 bool Misc::isChinese()

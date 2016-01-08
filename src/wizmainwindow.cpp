@@ -1933,6 +1933,11 @@ void MainWindow::AppStoreIAP()
 #endif
 }
 
+void MainWindow::copyLink(const QString& link)
+{
+    Utils::Misc::copyTextToClipboard(link);
+}
+
 #ifndef Q_OS_MAC
 void MainWindow::layoutTitleBar()
 {
