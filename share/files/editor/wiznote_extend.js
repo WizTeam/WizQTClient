@@ -169,6 +169,40 @@ function setWizReaderStatus (bEditing) {
 	}
 }
 
+function initWizReader_impl () {
+    var f = window.document.getElementById('ueditor_0');
+    if (!f.contentWindow.WizReader) { 
+        console.log("wizReader is null");
+        return;
+    }
+
+    var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
+    var cssFile = WizEditor.getMarkdownCssFilePath();
+
+    f.contentWindow.WizReader.init({
+    document: editor.document,
+    lang: WizEditor.getLocalLanguage(),
+    clientType: 'mac',
+    userInfo: {},
+    // usersData: '',
+    noAmend: false,  //wizReader 专用参数，用于关闭 修订功能,
+    dependencyCss: {
+        github2: cssFile,  //markdown 使用
+        wizToc: dependencyFilePath + 'wizToc.css'     //toc 样式
+    },
+    dependencyJs: {
+        jquery: dependencyFilePath + 'jquery-1.11.3.js', //jquery
+        prettify: dependencyFilePath + 'prettify.js',       //代码高亮
+        raphael: dependencyFilePath + 'raphael.js',     //流程图 & 时序图 依赖
+        underscore: dependencyFilePath + 'underscore.js',   //时序图 依赖
+        flowchart: dependencyFilePath + 'flowchart.js',         //流程图
+        sequence: dependencyFilePath + 'sequence-diagram.js', //时序图
+        //mathJax 如果不传则使用 默认地址
+        mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML'
+    }
+    });
+}
+
 function initWizReader(bEditing) {
 	var f = window.document.getElementById('ueditor_0');
     if (f.contentWindow.WizReader) { 
@@ -184,36 +218,7 @@ function initWizReader(bEditing) {
     	var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
 	    var wizReaderDocument = loadSingleJs(editor.document, reader);
 	    wizReaderDocument.onload = function() {
-	    	if (!f.contentWindow.WizReader) { 
-		        console.log("wizReader is null");
-		        return;
-		    }		    
-
-	        var dependencyFilePath = WizEditor.getWizReaderDependencyFilePath();
-		    var cssFile = WizEditor.getMarkdownCssFilePath();
-
-		    f.contentWindow.WizReader.init({
-		    document: editor.document,
-		    lang: WizEditor.getLocalLanguage(),
-		    clientType: 'mac',
-		    userInfo: {},
-		    // usersData: '',
-		    noAmend: false,  //wizReader 专用参数，用于关闭 修订功能,
-		    dependencyCss: {
-		        github2: cssFile,  //markdown 使用
-		        wizToc: dependencyFilePath + 'wizToc.css'     //toc 样式
-		    },
-		    dependencyJs: {
-		        jquery: dependencyFilePath + 'jquery-1.11.3.js', //jquery
-		        prettify: dependencyFilePath + 'prettify.js',       //代码高亮
-		        raphael: dependencyFilePath + 'raphael.js',     //流程图 & 时序图 依赖
-		        underscore: dependencyFilePath + 'underscore.js',   //时序图 依赖
-		        flowchart: dependencyFilePath + 'flowchart.js',         //流程图
-		        sequence: dependencyFilePath + 'sequence-diagram.js', //时序图
-		        //mathJax 如果不传则使用 默认地址
-		        mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS_HTML'
-		    }
-		    });
+	    	initWizReader_impl();
 
             setWizReaderStatus(bEditing);
 
@@ -514,25 +519,30 @@ function updateCustomCss() {
 }
 
 function updateUserDefaultCss() {    
-    // var css= editor.document.getElementsByTagName('link');
-    // for (var i = 0; i < css.length; i++) {
-    //     if (css[i].rel != 'stylesheet') return;
-    //     if (css[i].type != 'text/css') return;
-    //     if (css[i].href.match(m_defaultCss)) {
-    //         css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
-    //         m_defaultCssVersion++;
-    //         return;
-    //     }
-    // }
+    var css= editor.document.getElementsByTagName('link');
+    for (var i = 0; i < css.length; i++) {
+        if (css[i].rel != 'stylesheet') return;
+        if (css[i].type != 'text/css') return;
+        if (css[i].href.match(m_defaultCss)) {
+            css[i].href = m_defaultCss + "?v=" + m_defaultCssVersion;
+            m_defaultCssVersion++;
+            return;
+        }
+    }
+}
 
-    // var objStyle = editor.document.createElement('link');
-    // objStyle.rel = 'stylesheet';
-    // objStyle.type = 'text/css';
-    // objStyle.href = m_defaultCss + "?v=" + m_defaultCssVersion;
-    // if (editor.document.head) {
-    //     editor.document.head.appendChild(objStyle);
-    // }   
-    // m_defaultCssVersion++;
+function resetMarkdownCssPath () {
+    var f = window.document.getElementById('ueditor_0');
+    if (f.contentWindow.WizReader) { 
+        initWizReader_impl();
+
+    } else {
+        var reader = WizEditor.getWizReaderFilePath() + "wizReader.js";
+        var wizReaderDocument = loadSingleJs(editor.document, reader);
+        wizReaderDocument.onload = function() {
+            initWizReader_impl();
+        }; 
+    }
 }
 
 function resetEditorBodyClassName () {

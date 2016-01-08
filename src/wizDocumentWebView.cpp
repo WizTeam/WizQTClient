@@ -552,6 +552,8 @@ void CWizDocumentWebView::resetMarkdownCssPath()
         strFile  = defaultMarkdownCSS();
     }
     m_strMarkdownCssFilePath = strFile;
+
+    page()->mainFrame()->evaluateJavaScript("resetMarkdownCssPath()");
 }
 
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
