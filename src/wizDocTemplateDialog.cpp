@@ -693,6 +693,14 @@ void TemplateData::fromQVariant(const QVariant& var)
 bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
 {
     // 内置的markdown模板
+    TemplateData tmpl;
+    tmpl.type = CustomTemplate;
+    tmpl.strFileName = "Markdown.md.ziw";
+    tmpl.strName = "Markdown";
+    tmpl.strTitle = "Markdown.md";
+    tmpl.isFree = true;
+
+    tmplList.append(tmpl);
 
     // 通过服务器下载的笔记模板
     QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();

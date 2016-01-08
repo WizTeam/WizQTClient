@@ -141,6 +141,13 @@ bool CWizNoteManager::createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID
 
 bool CWizNoteManager::createNoteByTemplate(WIZDOCUMENTDATA& data, const WIZTAGDATA& tag, const QString& strZiw)
 {
+    //通过模板创建笔记时，如果模板文件不存在则创建一篇空笔记
+    if (!QFile::exists(strZiw))
+    {
+        qDebug() << "Template file not exists : " << strZiw;
+        return createNote(data, data.strKbGUID, data.strTitle, "<p><br></p>", data.strLocation, tag);
+    }
+
     if (!m_dbMgr.db(data.strKbGUID).CreateDocumentByTemplate(strZiw, data.strLocation, tag, data))
     {
         qDebug() << "Failed to new document! " << strZiw;

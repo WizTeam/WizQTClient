@@ -1436,26 +1436,23 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
     QString kbGUID = m_dbMgr.db().kbGUID();
     QString location = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
-    QString title = info.baseName();
+    data.strTitle = info.completeBaseName();
+    data.strLocation = tmplData.strFolder;
     if (WizServerTemplate == tmplData.type)
     {
         if (!tmplData.strFolder.isEmpty())
         {
-            location = tmplData.strFolder;
-            location.replace("{year}", QDate::currentDate().toString("yyyy"));
-            location.replace("{month}", QDate::currentDate().toString("MM"));
-            data.strLocation = location;
+            data.strLocation.replace("{year}", QDate::currentDate().toString("yyyy"));
+            data.strLocation.replace("{month}", QDate::currentDate().toString("MM"));
         }
         //  Journal {date}({week})
         if (!tmplData.strTitle.isEmpty())
         {
-            title = tmplData.strTitle;
             COleDateTime dt;
-            title.replace("{date}", dt.toLocalLongDate());
-            title.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
+            data.strTitle.replace("{date}", dt.toLocalLongDate());
+            data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
             QLocale local;
-            title.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
-            data.strTitle = title;
+            data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
         }
     }
     else
