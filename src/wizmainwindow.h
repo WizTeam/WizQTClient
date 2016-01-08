@@ -36,6 +36,7 @@ class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
 class CWizIAPDialog;
+class CWizTemplatePurchaseDialog;
 
 class CWizSearchWidget;
 class CWizSearcher;
@@ -144,6 +145,7 @@ private:
     CWizConsoleDialog* m_console;
     CWizUpgradeChecker* m_upgrade;
     CWizIAPDialog* m_iapDialog;
+    CWizTemplatePurchaseDialog* m_templateIAPDialog;
 
     //
     CWizTrayIcon* m_tray;
@@ -160,6 +162,7 @@ private:
     QMenuBar* m_menuBar;
     QMenu* m_dockMenu;
     QMenu* m_windowListMenu;
+    QMenu* m_newNoteExtraMenu;
     QActionGroup* m_viewTypeActions;
     QActionGroup* m_sortTypeActions;
 #ifdef Q_OS_LINUX
@@ -203,7 +206,7 @@ private:
     CWizSearchIndexer* m_searchIndexer;
     CWizSearchWidget* m_searchWidget;
 
-    CWizMobileFileReceiver *m_mobileFileReceiver;
+    CWizMobileFileReceiver *m_mobileFileReceiver;    
 
     bool m_bRestart;
     bool m_bLogoutRestart;
@@ -402,7 +405,7 @@ public Q_SLOTS:
 
     void on_editor_statusChanged();
 
-    void createDocumentByTemplate(const TemplateData& tmplData);
+    void createNoteByTemplate(const TemplateData& tmplData);
 
     void on_mobileFileRecived(const QString& strFile);
 
@@ -545,6 +548,12 @@ private slots:
     void removeWindowsMenuItem(QString guid);
 
     void showVipUpgradePage();
+
+    void on_newNoteButton_extraMenuRequest();
+    void on_newNoteByExtraMenu_request();
+
+private:
+    void showTemplateIAPDlg(const TemplateData& tmpl);
 };
 
 } // namespace Internal

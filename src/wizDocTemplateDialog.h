@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QTreeWidgetItem>
 #include <QMap>
+#include <QVariant>
 
 namespace Ui {
 class CWizDocTemplateDialog;
@@ -32,6 +33,13 @@ struct TemplateData
     QString strFolder;
     QString strFileName;
     QString strVersion;
+
+    //
+    QString strThumbUrl;
+    QString strDemoUrl;
+
+    QVariant toQVariant() const;
+    void fromQVariant(const QVariant& var);
 };
 
 class CWizTemplateFileItem : public QTreeWidgetItem
@@ -95,23 +103,29 @@ private:
 
     void createSettingsFile(const QString& strFileName);
 
-    void parseTemplateData(const QString& json);
-
-    void getPurchasedTemplates();
-
-    bool isTemplateUsable(int templateId);
+    void getPurchasedTemplates();    
 
     void createPurchaseDialog();
 
 private:
     Ui::CWizDocTemplateDialog *ui;
     CWizDocumentTransitionView* m_transitionView;
-    QString m_demoUrl;
-    QString m_thumbUrl;
     CWizDatabaseManager& m_dbMgr;
     CWizTemplatePurchaseDialog* m_purchaseDialog;
 };
 
 void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmplMap);
+
+bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList);
+
+bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr);
+
+enum WizTemplateUpgradeResult {
+    UpgradeResult_None,
+    UpgradeResult_UpgradeVip,
+    UpgradeResult_PurchaseTemplate
+};
+
+WizTemplateUpgradeResult showTemplateUnusableDialog(QWidget* parent);
 
 #endif // WIZDOCTEMPLATEDIALOG_H

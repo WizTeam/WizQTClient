@@ -234,26 +234,78 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 }
 @end
 
+@interface WizSegmentedControl: NSSegmentedControl
+{
+    CWizMacToolBarButtonItem* m_pButtonWidget;
+}
 
-CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
-                                                           int buttonType, int bezelStyle, int width, QWidget* parent)
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget;
+- (void)buttonPressed;
+@end
+
+@implementation WizSegmentedControl
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget
+{
+    m_pButtonWidget = buttonWidget;
+}
+
+- (void)buttonPressed
+{
+    NSInteger intger = [self selectedSegment];
+    NSLog(@"selected seg : %ld", (long)intger);
+
+    if (0 == intger)
+    {
+        m_pButtonWidget->buttonClicked();
+    }
+    else if (1 == intger)
+    {
+        m_pButtonWidget->extraMenuClicked();
+    }
+}
+@end
+
+
+CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent)
     : QMacCocoaViewContainer(nil, parent)
     , m_width(width)
 {
-    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
-    [myButton setTitle: WizToNSString(title)];
-    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
-    [myButton setImagePosition: NSImageLeft];
-    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
-    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
+//    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
+//    [myButton setTitle: WizToNSString(title)];
+//    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+//    [myButton setImagePosition: NSImageLeft];
+//    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
+//    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
 
-    [myButton setButtonWidget: this];
-    [myButton setTarget:myButton];
-    [myButton setAction:@selector(buttonPressed)];
+//    [myButton setButtonWidget: this];
+//    [myButton setTarget:myButton];
+//    [myButton setAction:@selector(buttonPressed)];
 
-    setCocoaView(myButton);   
+//    setCocoaView(myButton);
 
-    [myButton release];
+//    [myButton release];
+
+    WizSegmentedControl* button = [[WizSegmentedControl alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
+    [[button cell] setTrackingMode:NSSegmentSwitchTrackingMomentary];
+    [button setSegmentCount:2];
+
+    [button setLabel:WizToNSString(title) forSegment:0];
+    [button setImage:[NSImage imageNamed: NSImageNameAddTemplate] forSegment:0];
+    [button setWidth:(sizeHint().width() - 24) forSegment:0];
+    //
+    NSImage* image = WizToNSImage(extraMenuIcon);
+    [button setImage:image forSegment:1];
+    [button setLabel:@"" forSegment:1];
+    [button setWidth:17 forSegment:1];
+
+    //
+    [button setButtonWidget: this];
+    [button setTarget:button];
+    [button setAction:@selector(buttonPressed)];
+
+    setCocoaView(button);
+
+    [button release];
 }
 
 QSize CWizMacToolBarButtonItem::sizeHint() const
@@ -264,6 +316,11 @@ QSize CWizMacToolBarButtonItem::sizeHint() const
 void CWizMacToolBarButtonItem::buttonClicked()
 {
     emit triggered(true);
+}
+
+void CWizMacToolBarButtonItem::extraMenuClicked()
+{
+    emit showExtraMenuRequest();
 }
 
 #endif

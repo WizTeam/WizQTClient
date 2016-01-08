@@ -400,7 +400,9 @@ QString CommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 void CommonApiEntry::getEndPoints()
 {
     QString urls = requestUrl("endpoints");
+#ifdef QT_DEBUG
     qDebug() << "get end points : " << urls;
+#endif
     if (urls.isEmpty() || !urls.contains("http"))
         return;
 
@@ -422,7 +424,9 @@ void CommonApiEntry::getEndPoints()
 
         QString key = (iter->name).GetString();
         QString url = (iter->value).GetString();
+#ifdef QT_DEBUG
         qDebug() << "key: " << key << " url : " << url;
+#endif
         m_cacheMap.insert(key, url);
     }
 }

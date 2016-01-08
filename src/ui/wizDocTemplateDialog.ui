@@ -62,7 +62,7 @@
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>* Vip users could use all templates</string>
+        <string>* Recommended templates updating... Upgrade to VIP, all templates can be used.</string>
        </property>
       </widget>
      </item>

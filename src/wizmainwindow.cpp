@@ -64,6 +64,7 @@
 #include "widgets/wizImageButton.h"
 #include "widgets/wizIAPDialog.h"
 #include "widgets/wizLocalProgressWebView.h"
+#include "widgets/wizTemplatePurchaseDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -119,6 +120,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
     , m_iapDialog(nullptr)
+    , m_templateIAPDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -126,6 +128,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_menuBar(nullptr)
     , m_dockMenu(nullptr)
     , m_windowListMenu(nullptr)
+    , m_newNoteExtraMenu(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
@@ -1419,7 +1422,7 @@ void MainWindow::on_editor_statusChanged()
 
 }
 
-void MainWindow::createDocumentByTemplate(const TemplateData& tmplData)
+void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
 {
     QFileInfo info(tmplData.strFileName);
     if (!info.exists())
@@ -1803,6 +1806,72 @@ void MainWindow::showVipUpgradePage()
 #endif
 }
 
+void MainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
+{
+    if (!m_templateIAPDialog)
+    {
+        m_templateIAPDialog = new CWizTemplatePurchaseDialog(this);
+        m_templateIAPDialog->setModal(true);
+    }
+    m_templateIAPDialog->showTemplateInfo(tmpl.id, tmpl.strName, tmpl.strThumbUrl);
+    m_templateIAPDialog->open();
+}
+
+void MainWindow::on_newNoteButton_extraMenuRequest()
+{
+    if (!m_newNoteExtraMenu)
+    {
+        m_newNoteExtraMenu = new QMenu(this);
+
+        QList<TemplateData> tmplList;
+        getTemplateListFroNewNoteMenu(tmplList);
+        for (TemplateData tmpl : tmplList)
+        {
+            QAction* action = m_newNoteExtraMenu->addAction(tmpl.strName, this, SLOT(on_newNoteByExtraMenu_request()));
+            action->setData(tmpl.toQVariant());
+        }
+    }
+
+    QPoint pos = QCursor::pos();
+    pos.setX(pos.x() + 10);
+    m_newNoteExtraMenu->popup(pos);
+}
+
+void MainWindow::on_newNoteByExtraMenu_request()
+{
+    if (QAction* action = qobject_cast<QAction*>(sender()))
+    {
+        TemplateData tmpl;
+        tmpl.fromQVariant(action->data());
+        if (isTemplateUsable(tmpl, m_dbMgr))
+        {
+            createNoteByTemplate(tmpl);
+        }
+        else
+        {
+            WizTemplateUpgradeResult result = showTemplateUnusableDialog(this);
+            switch (result) {
+            case UpgradeResult_None:
+                return;
+                break;
+            case UpgradeResult_UpgradeVip:
+                showVipUpgradePage();
+                return;
+                break;
+            case UpgradeResult_PurchaseTemplate:
+            {
+                showTemplateIAPDlg(tmpl);
+                return;
+            }
+                break;
+            default:
+                Q_ASSERT(0);
+                break;
+            }
+        }
+    }
+}
+
 void MainWindow::windowActived()
 {
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
@@ -1948,11 +2017,14 @@ void MainWindow::initToolBar()
     m_toolBar->addSearch(tr("Search"), "", isHighPix ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH);
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(28, 1), m_toolBar), "", "");
 
-    int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;
+    int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, nullptr);
+    QPixmap pixExtraMenu = Utils::StyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
+    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), pixExtraMenu, buttonWidth, nullptr);
     connect(texturedItem, SIGNAL(triggered(bool)),
-            m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
+            m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool)));
+    connect(texturedItem, SIGNAL(showExtraMenuRequest()), SLOT(on_newNoteButton_extraMenuRequest()));
+
     m_toolBar->addWidget(texturedItem, "", "");
 
 
@@ -2556,7 +2628,7 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
     //通过模板创建笔记
     CWizDocTemplateDialog dlg(m_dbMgr);
-    connect(&dlg, SIGNAL(documentTemplateSelected(TemplateData)), SLOT(createDocumentByTemplate(TemplateData)));
+    connect(&dlg, SIGNAL(documentTemplateSelected(TemplateData)), SLOT(createNoteByTemplate(TemplateData)));
     connect(&dlg, SIGNAL(upgradeVipRequest()), SLOT(showVipUpgradePage()));
     dlg.exec();
 }

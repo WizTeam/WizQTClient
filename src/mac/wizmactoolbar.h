@@ -22,13 +22,15 @@ class CWizMacToolBarButtonItem : public QMacCocoaViewContainer
 {
     Q_OBJECT
 public:
-    CWizMacToolBarButtonItem(const QString& title, int buttonType, int bezelStyle, int width, QWidget* parent = 0);
+    CWizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent = 0);
 
     QSize sizeHint() const;
 
     void buttonClicked();
+    void extraMenuClicked();
 signals:
     void triggered(bool);
+    void showExtraMenuRequest();
 
 private:
     int m_width;

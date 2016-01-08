@@ -90,7 +90,6 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
         //
         QMap<int, TemplateData> tmplMap;
         getTemplatesFromJsonData(jsonData.toUtf8(), tmplMap);
-        parseTemplateData(jsonData);
         QList<TemplateData> templateList = tmplMap.values();
         if (!templateList.isEmpty())
         {
@@ -298,25 +297,6 @@ void CWizDocTemplateDialog::createSettingsFile(const QString& strFileName)
     file.close();
 }
 
-void CWizDocTemplateDialog::parseTemplateData(const QString& json)
-{
-    rapidjson::Document d;
-    d.Parse(json.toUtf8().constData());
-    if (d.HasParseError())
-        return;
-
-    if (d.HasMember("preview_link"))
-    {
-        //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
-        m_demoUrl = d.FindMember("preview_link")->value.GetString();
-    }
-
-    if (d.HasMember("thumb_link"))
-    {
-        m_thumbUrl = d.FindMember("thumb_link")->value.GetString();
-    }
-}
-
 void CWizDocTemplateDialog::getPurchasedTemplates()
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
@@ -336,9 +316,12 @@ void CWizDocTemplateDialog::getPurchasedTemplates()
     });
 }
 
-bool CWizDocTemplateDialog::isTemplateUsable(int templateId)
+bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr)
 {
-    CWizAccountManager account(m_dbMgr);
+    if (WizServerTemplate != tmplData.type || tmplData.isFree)
+        return true;
+
+    CWizAccountManager account(dbMgr);
     if (account.isVip())
         return true;
 
@@ -369,7 +352,7 @@ bool CWizDocTemplateDialog::isTemplateUsable(int templateId)
         if (!templateObj.HasMember("templateId"))
             continue;
 
-        if (templateObj.FindMember("templateId")->value.GetInt() == templateId)
+        if (templateObj.FindMember("templateId")->value.GetInt() == tmplData.id)
             return true;
     }
 
@@ -393,32 +376,20 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
     {
         if (WizServerTemplate == pItem->templateData().type)
         {
-            if (!isTemplateUsable(pItem->templateData().id))
+            if (!isTemplateUsable(pItem->templateData(), m_dbMgr))
             {
-                CMessageBox msg(this);
-                msg.setIcon(QMessageBox::Information);
-                msg.setWindowTitle(tr("Info"));
-                msg.setText(tr("You can not use this template, upgrade to vip or buy this template"));
-                QPushButton* cancelButton = msg.addButton(tr("Cancel"), QMessageBox::RejectRole);
-#ifdef BUILD4APPSTORE
-                QPushButton* buyButton = msg.addButton(tr("Purchase"), QMessageBox::AcceptRole);
-#endif
-                QPushButton* vipButton = msg.addButton(tr("Upgrade Vip"), QMessageBox::AcceptRole);
-                msg.setDefaultButton(vipButton);
-                msg.exec();
 
-                if (msg.clickedButton() == nullptr || msg.clickedButton() == cancelButton)
+                WizTemplateUpgradeResult result = showTemplateUnusableDialog(this);
+                switch (result) {
+                case UpgradeResult_None:
                     return;
-
-                if (msg.clickedButton() == vipButton)
-                {
-                    //
+                    break;
+                case UpgradeResult_UpgradeVip:
                     accept();
                     emit upgradeVipRequest();
                     return;
-                }
-#ifdef BUILD4APPSTORE
-                if (msg.clickedButton() == buyButton)
+                    break;
+                case UpgradeResult_PurchaseTemplate:
                 {
                     if (!m_purchaseDialog)
                     {
@@ -426,14 +397,15 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
                     }
 
                     m_purchaseDialog->setModal(true);
-                    QString thumbUrl = m_thumbUrl;
-                    QFileInfo info(pItem->templateData().strFileName);
-                    thumbUrl.replace("{file_name}", info.baseName());
-                    m_purchaseDialog->showTemplateInfo(pItem->templateData().id, pItem->templateData().strName, thumbUrl);
+                    m_purchaseDialog->showTemplateInfo(pItem->templateData().id, pItem->templateData().strName, pItem->templateData().strThumbUrl);
                     m_purchaseDialog->open();
                     return;
                 }
-#endif
+                    break;
+                default:
+                    Q_ASSERT(0);
+                    break;
+                }
             }
         }
 
@@ -457,19 +429,15 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
         QString strZiwFile = pItem->templateData().strFileName;
         if (WizServerTemplate == pItem->templateData().type)
         {
-            QFileInfo info(strZiwFile);
 
             // load demo page from server
-            if (!m_demoUrl.isEmpty())
+            if (!pItem->templateData().strDemoUrl.isEmpty())
             {
-                QString url = m_demoUrl;
-                url.replace("{file_name}", info.baseName());
-                qDebug() << "load template demo from url : " << url;
-
-                ui->webView_preview->load(QUrl(url));
-
+                qDebug() << "load template demo from url : " << pItem->templateData().strDemoUrl;
+                ui->webView_preview->load(QUrl(pItem->templateData().strDemoUrl));
             }
 
+            QFileInfo info(strZiwFile);
             // download template file
             if (!info.exists())
             {
@@ -597,6 +565,7 @@ void CWizDocTemplateDialog::purchaseFinished()
 
 void CWizDocTemplateDialog::checkUnfinishedTransation()
 {
+#ifdef BUILD4APPSTORE
     QStringList idList = CWizTemplatePurchaseDialog::getUnfinishedTransations();
     if (idList.size() == 0 || idList.first().isEmpty())
         return;
@@ -614,6 +583,7 @@ void CWizDocTemplateDialog::checkUnfinishedTransation()
         m_purchaseDialog->open();
         m_purchaseDialog->processUnfinishedTransation();
     }
+#endif
 }
 
 
@@ -624,15 +594,34 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
     if (d.HasParseError() || !d.HasMember("templates"))
         return;
 
+    QString demoUrl;
+    if (d.HasMember("preview_link"))
+    {
+        //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
+        demoUrl = d.FindMember("preview_link")->value.GetString();
+    }
+
+    QString thumbUrl;
+    if (d.HasMember("thumb_link"))
+    {
+        thumbUrl = d.FindMember("thumb_link")->value.GetString();
+    }
+
     const rapidjson::Value& templates = d.FindMember("templates")->value;
     for(rapidjson::SizeType i = 0; i < templates.Size(); i++)
     {
         const rapidjson::Value& templateObj = templates[i];
 
         TemplateData data;
+        data.strThumbUrl = thumbUrl;
+        data.strDemoUrl = demoUrl;
+        data.type = WizServerTemplate;
+
         if (templateObj.HasMember("fileName"))
         {
             data.strFileName = templateObj.FindMember("fileName")->value.GetString();
+            data.strThumbUrl.replace("{file_name}", data.strFileName);
+            data.strDemoUrl.replace("{file_name}",data.strFileName);
             data.strFileName = Utils::PathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
         }
         if (templateObj.HasMember("folder"))
@@ -658,7 +647,103 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
         if (templateObj.HasMember("isFree"))
         {
             data.isFree = templateObj.FindMember("isFree")->value.GetBool();
-        }
+        }        
+
         tmplMap.insert(data.id, data);
     }
+}
+
+
+QVariant TemplateData::toQVariant() const
+{
+    QMap<QString, QVariant> varMap;
+    varMap.insert("type", (int)type);
+    varMap.insert("fileName", strFileName);
+    varMap.insert("folder", strFolder);
+    varMap.insert("id", id);
+    varMap.insert("name", strName);
+    varMap.insert("title", strTitle);
+    varMap.insert("version", strVersion);
+    varMap.insert("isFree", isFree);
+    varMap.insert("thumb", strThumbUrl);
+    varMap.insert("demo", strDemoUrl);
+
+    QVariant var(varMap);
+    return var;
+}
+
+void TemplateData::fromQVariant(const QVariant& var)
+{
+    Q_ASSERT(var.type() == QVariant::Map);
+
+    QMap<QString, QVariant> varMap = var.toMap();
+    type = (TemplateType)varMap.value("type").toInt();
+    strFileName = varMap.value("fileName").toString();
+    strFolder = varMap.value("folder").toString();
+    id = varMap.value("id").toInt();
+    strName = varMap.value("name").toString();
+    strTitle = varMap.value("title").toString();
+    strVersion = varMap.value("version").toString();
+    isFree = varMap.value("isFree").toBool();
+    strThumbUrl = varMap.value("thumb").toString();
+    strDemoUrl = varMap.value("demo").toString();
+}
+
+//获取模板列表，用于主窗口的新建笔记按钮快速创建笔记
+bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
+{
+    // 内置的markdown模板
+
+    // 通过服务器下载的笔记模板
+    QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+    if (QFile::exists(jsonFile))
+    {
+        QFile file(jsonFile);
+        if (!file.open(QFile::ReadOnly))
+            return false;
+
+        QTextStream stream(&file);
+        QString jsonData = stream.readAll();
+        if (jsonData.isEmpty())
+            return false;
+        //
+        QMap<int, TemplateData> tmplMap;
+        getTemplatesFromJsonData(jsonData.toUtf8(), tmplMap);
+        tmplList.append(tmplMap.values());
+    }
+
+    return true;
+}
+
+
+WizTemplateUpgradeResult showTemplateUnusableDialog(QWidget* parent)
+{
+    CMessageBox msg(parent);
+    msg.setIcon(QMessageBox::Information);
+    msg.setWindowTitle(QObject::tr("Info"));
+    msg.setText(QObject::tr("You can use this template after upgrading to VIP or buy it."));
+    QPushButton* cancelButton = msg.addButton(QObject::tr("Cancel"), QMessageBox::RejectRole);
+#ifdef BUILD4APPSTORE
+    QPushButton* buyButton = msg.addButton(QObject::tr("Purchase"), QMessageBox::AcceptRole);
+#endif
+    QPushButton* vipButton = msg.addButton(QObject::tr("Upgrade to VIP"), QMessageBox::AcceptRole);
+    msg.setDefaultButton(vipButton);
+    msg.exec();
+
+    if (msg.clickedButton() == nullptr || msg.clickedButton() == cancelButton)
+        return UpgradeResult_None;
+
+    if (msg.clickedButton() == vipButton)
+    {
+        return UpgradeResult_UpgradeVip;
+    }
+
+#ifdef BUILD4APPSTORE
+    if (msg.clickedButton() == buyButton)
+    {
+        return UpgradeResult_PurchaseTemplate;
+    }
+#endif
+
+    return UpgradeResult_None;
 }
