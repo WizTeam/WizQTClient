@@ -11,6 +11,7 @@
 #include "sync/apientry.h"
 #include "sync/wizKMServer.h"
 #include "sync/avataruploader.h"
+#include "core/wizAccountManager.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "widgets/wizIAPDialog.h"
@@ -67,7 +68,8 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     CWizOEMSettings oemSettings(m_db.GetAccountPath());
     if (!oemSettings.isHideBuyVip())
     {
-        QAction* actionUpgradeVIP = new QAction(tr("Upgrade VIP..."), m_menuMain);
+        CWizAccountManager manager(m_app.databaseManager());
+        QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renewal Vip...") : tr("Upgrade VIP..."), m_menuMain);
         connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
         m_menuMain->addAction(actionUpgradeVIP);
     }
