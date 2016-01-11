@@ -1533,7 +1533,6 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         editorFocus();
     }
 
-
     Q_EMIT statusChanged();
 }
 

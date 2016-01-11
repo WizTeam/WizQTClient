@@ -273,10 +273,15 @@ function setEditorHtml(html, bEditing, scrollToTop)
     window.UE.utils.domReady(function() {        
         updateCustomCss();        
         WizEditor.initCheckListEnvironment();
-        initWizEnvironment(bEditing);        
+        initWizEnvironment(bEditing);
         if (scrollToTop) {
             editor.window.scrollTo(0, 0);
-        }
+
+            //
+            setTimeout(function () {
+                editor.focus();
+            }, 0);
+        }        
     });
 }
 
