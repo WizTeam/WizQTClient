@@ -457,7 +457,14 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
                 QString previewFile = strTempFolder + previewFileName();
                 if (!QFile::exists(previewFile))
                 {
-                    previewFile = "file://" + strTempFolder + "index.html";
+                    if (QFile::exists(strTempFolder + "preview.html"))
+                    {
+                        previewFile = "file://" + strTempFolder + "preview.html";
+                    }
+                    else
+                    {
+                        previewFile = "file://" + strTempFolder + "index.html";
+                    }
                 }
                 else
                 {
@@ -473,7 +480,6 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
         }
     }
 }
-
 
 CWizTemplateFileItem::CWizTemplateFileItem(const TemplateData& data, QTreeWidgetItem* parent)
     : QTreeWidgetItem(parent)
