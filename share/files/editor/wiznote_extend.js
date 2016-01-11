@@ -585,7 +585,11 @@ function wizEditorGetContentHtml () {
 		return contentHtml;
 	}
 
-	return editor.getContent(null,null,true,true);
+    var head = editor.document.head.innerHTML;
+	var body = editor.getContent(null,null,true,true);
+    var html = '<!DOCTYPE HTML><html xmlns="http://www.w3.org/1999/xhtml"><head>' + head + '</head><body>' + body + '</body><html>';
+    html.replace(/<script.*?>.*?<\/script>/ig, ''); 
+    return html;
 }
 
 function wizIsContentsChanged () {
