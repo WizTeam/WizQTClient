@@ -215,7 +215,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
         //
         QBuffer buffer(&data);
         buffer.open(QIODevice::WriteOnly);
-        if (!img.save(&buffer, "JPG"))
+        if (!img.save(&buffer, "PNG"))
         {
             TOLOG(_T("Failed to save abstract image data to buffer"));
             return false;
