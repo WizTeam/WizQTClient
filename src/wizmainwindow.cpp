@@ -1436,7 +1436,7 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
     QString kbGUID = m_dbMgr.db().kbGUID();
     QString location = m_dbMgr.db().GetDefaultNoteLocation();
     WIZTAGDATA tag;
-    data.strTitle = info.completeBaseName();
+    data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
     data.strLocation = tmplData.strFolder;
     if (WizServerTemplate == tmplData.type)
     {
