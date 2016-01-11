@@ -292,7 +292,12 @@ CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title, const Q
     [button setImage:[NSImage imageNamed: NSImageNameAddTemplate] forSegment:0];
     [button setWidth:(sizeHint().width() - 24) forSegment:0];
     //
+    NSSize imageSize;
+    int pixScale = qApp->devicePixelRatio() >= 2 ? 2 : 1;
+    imageSize.width = (CGFloat)extraMenuIcon.width() / pixScale;
+    imageSize.height = (CGFloat)extraMenuIcon.height() / pixScale;
     NSImage* image = WizToNSImage(extraMenuIcon);
+    [image setSize:imageSize];
     [button setImage:image forSegment:1];
     [button setLabel:@"" forSegment:1];
     [button setWidth:17 forSegment:1];
