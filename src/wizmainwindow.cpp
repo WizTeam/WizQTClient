@@ -3943,7 +3943,7 @@ void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
     m_documentForEditing = doc;
     m_documents->addAndSelectDocument(doc);
     m_documents->clearFocus();
-    m_doc->setFocus(Qt::MouseFocusReason);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
     m_doc->web()->editorFocus();
 }
 
