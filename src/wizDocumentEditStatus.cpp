@@ -503,7 +503,6 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
 {
 //    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
-    m_timeOutTimer->start(5 * 1000);
     m_stop = false;
     startCheck();
 }
@@ -555,6 +554,7 @@ void CWizDocumentStatusChecker::initialise()
 //    qDebug() << "CWizDocumentStatusChecker thread id : ";
     m_timeOutTimer = new QTimer(this);
     connect(m_timeOutTimer, SIGNAL(timeout()), SLOT(onTimeOut()));
+    m_timeOutTimer->setSingleShot(true);
 //    m_loopCheckTimer = new QTimer(this);
 //    connect(m_loopCheckTimer, SIGNAL(timeout()), SLOT(recheck()));
 }
@@ -567,8 +567,7 @@ void CWizDocumentStatusChecker::clearTimers()
 
 void CWizDocumentStatusChecker::startRecheck()
 {
-//    qDebug() << "CWizDocumentStatusChecker  start recheck";
-    m_timeOutTimer->start(5000);
+//    qDebug() << "CWizDocumentStatusChecker  start recheck";    
     startCheck();
 }
 
@@ -577,6 +576,9 @@ void CWizDocumentStatusChecker::startCheck()
 //    qDebug() << "----------    CWizDocumentStatusChecker::startCheck start";
     m_networkError = false;
     peekDocumentGUID(m_strCurKbGUID, m_strCurGUID);
+
+    // start timer
+    m_timeOutTimer->start(5000);
 
     bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
     if (m_stop)
