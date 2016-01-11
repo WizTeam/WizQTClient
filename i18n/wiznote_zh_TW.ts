@@ -596,19 +596,19 @@
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4311"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4249"/>
         <source>Doucment  %1  Password</source>
         <translation>筆記 %1 密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4312"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4250"/>
         <source>Password :</source>
         <translation>密碼：</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="1022"/>
         <location filename="../src/share/wizDatabase.cpp" line="1055"/>
-        <location filename="../src/share/wizDatabase.cpp" line="4322"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4260"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -623,7 +623,7 @@
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4322"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4260"/>
         <source>password error!</source>
         <translation>密碼錯誤！</translation>
     </message>
@@ -700,27 +700,27 @@
 <context>
     <name>CWizDocumentListView</name>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="180"/>
+        <location filename="../src/wizDocumentListView.cpp" line="181"/>
         <source>Open in new Window</source>
         <translation>在新視窗中開啟</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1641"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1646"/>
         <source>Move notes</source>
         <translation>移動筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1703"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1708"/>
         <source>Copy documents</source>
         <translation>複製筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1810"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1832"/>
         <source>Password</source>
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1810"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1832"/>
         <source>Please input document password to cancel encrypt.</source>
         <translation>請輸入筆記密碼。</translation>
     </message>
@@ -814,27 +814,27 @@
         <translation>不能添加包文件作為附件！ 文件名：&apos; %1 &apos;</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1967"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1966"/>
         <source>Image File</source>
         <translation>圖片檔案</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1967"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1966"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2294"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2293"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 檔案 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2339"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2338"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2339"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2338"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未發現可用印表機！請在系統印表機列表中加入印表機。</translation>
     </message>
@@ -3960,36 +3960,41 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="42"/>
-        <source>Copy Note Link</source>
-        <translation>複製筆記連結</translation>
+        <source>Copy Internal Note Link</source>
+        <translation>複製筆記內鏈</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="44"/>
+        <location filename="../src/wizDocumentListView.cpp" line="43"/>
+        <source>Copy Web Client Link</source>
+        <translation>複製網頁版鏈接</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentListView.cpp" line="45"/>
         <source>Encrypt Note</source>
         <translation>加密筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="45"/>
+        <location filename="../src/wizDocumentListView.cpp" line="46"/>
         <source>Cancel Note Encryption</source>
         <translation>取消加密</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="46"/>
+        <location filename="../src/wizDocumentListView.cpp" line="47"/>
         <source>Always On Top</source>
         <translation>筆記置頂</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="198"/>
+        <location filename="../src/wizDocumentListView.cpp" line="201"/>
         <source>Add to Shortcuts</source>
         <translation>添加到捷徑</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="433"/>
+        <location filename="../src/wizDocumentListView.cpp" line="436"/>
         <source>Unknown size</source>
         <translation>未知大小</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="459"/>
+        <location filename="../src/wizDocumentListView.cpp" line="462"/>
         <source>More than 100MB</source>
         <translation>大于100MB</translation>
     </message>
@@ -4013,7 +4018,7 @@ w: %3  h: %4</translation>
         <translation>複製筆記到 %1</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="43"/>
+        <location filename="../src/wizDocumentListView.cpp" line="44"/>
         <source>Share Link...</source>
         <translation>分享連結...</translation>
     </message>
@@ -4645,123 +4650,123 @@ w: %3  h: %4</translation>
         <translation>檔案</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="301"/>
+        <location filename="../src/share/wizmisc.cpp" line="302"/>
         <source>Simplified Chinese</source>
         <translation>簡體中文</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="303"/>
+        <location filename="../src/share/wizmisc.cpp" line="304"/>
         <source>Traditional Chinese</source>
         <translation>繁體中文</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="305"/>
+        <location filename="../src/share/wizmisc.cpp" line="306"/>
         <source>English(US)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="345"/>
+        <location filename="../src/share/wizmisc.cpp" line="346"/>
         <source>/Deleted Items/</source>
         <translation>/已刪除/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="349"/>
+        <location filename="../src/share/wizmisc.cpp" line="350"/>
         <source>/My Notes/</source>
         <translation>/我的筆記/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="353"/>
+        <location filename="../src/share/wizmisc.cpp" line="354"/>
         <source>/My Journals/</source>
         <translation>/我的日記/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="357"/>
+        <location filename="../src/share/wizmisc.cpp" line="358"/>
         <source>/My Contacts/</source>
         <translation>/我的聯絡人/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="361"/>
+        <location filename="../src/share/wizmisc.cpp" line="362"/>
         <source>/My Events/</source>
         <translation>/我的事件/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="365"/>
+        <location filename="../src/share/wizmisc.cpp" line="366"/>
         <source>/My Sticky Notes/</source>
         <translation>/我的自黏便籤/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="369"/>
+        <location filename="../src/share/wizmisc.cpp" line="370"/>
         <source>/My Emails/</source>
         <translation>/我的郵件/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="373"/>
+        <location filename="../src/share/wizmisc.cpp" line="374"/>
         <source>/My Drafts/</source>
         <translation>/我的草稿/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="377"/>
+        <location filename="../src/share/wizmisc.cpp" line="378"/>
         <source>/My Tasks/</source>
         <translation>/我的任務/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="381"/>
+        <location filename="../src/share/wizmisc.cpp" line="382"/>
         <source>/My Tasks/Inbox/</source>
         <translation>/我的任務/收集箱/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="385"/>
+        <location filename="../src/share/wizmisc.cpp" line="386"/>
         <source>/My Tasks/Completed/</source>
         <translation>/我的任務/已完成/</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="727"/>
+        <location filename="../src/share/wizmisc.cpp" line="728"/>
         <source>%1 TB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="729"/>
+        <location filename="../src/share/wizmisc.cpp" line="730"/>
         <source>%1 GB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="731"/>
+        <location filename="../src/share/wizmisc.cpp" line="732"/>
         <source>%1 MB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="733"/>
+        <location filename="../src/share/wizmisc.cpp" line="734"/>
         <source>%1 KB</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="734"/>
+        <location filename="../src/share/wizmisc.cpp" line="735"/>
         <source>%1 byte(s)</source>
         <translation>%1 字節</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="2228"/>
+        <location filename="../src/share/wizmisc.cpp" line="2229"/>
         <source>Note History</source>
         <translation>筆記版本歷史</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="2484"/>
+        <location filename="../src/share/wizmisc.cpp" line="2485"/>
         <source>Attachment History</source>
         <translation>附件版本歷史</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="2526"/>
+        <location filename="../src/share/wizmisc.cpp" line="2527"/>
         <source>Download Note %1 ...</source>
         <translation>下載筆記 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="2527"/>
-        <location filename="../src/share/wizmisc.cpp" line="2601"/>
+        <location filename="../src/share/wizmisc.cpp" line="2528"/>
+        <location filename="../src/share/wizmisc.cpp" line="2602"/>
         <source>Downloading</source>
         <translation>正在下載</translation>
     </message>
     <message>
-        <location filename="../src/share/wizmisc.cpp" line="2600"/>
+        <location filename="../src/share/wizmisc.cpp" line="2601"/>
         <source>Download Attachment %1 ...</source>
         <translation>下載附件 %1 ...</translation>
     </message>
@@ -4776,7 +4781,7 @@ w: %3  h: %4</translation>
         <translation>$分享給朋友的筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2346"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2345"/>
         <source>Print Document</source>
         <translation>列印文件</translation>
     </message>
