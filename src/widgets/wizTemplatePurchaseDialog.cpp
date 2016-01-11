@@ -1,5 +1,8 @@
 #include "wizTemplatePurchaseDialog.h"
 #include "ui_wizTemplatePurchaseDialog.h"
+
+#ifdef Q_OS_MAC
+
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include "rapidjson/document.h"
@@ -317,3 +320,5 @@ void CWizTemplatePurchaseDialog::removeTransationFromUnfinishedList(const QStrin
         CWizDatabaseManager::instance()->db().setMeta(APPSTORE_IAP, APPSTORE_UNFINISHED_TEMPLATE_TRANSATION, transation);
     }
 }
+
+#endif

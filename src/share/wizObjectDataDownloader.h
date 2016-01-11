@@ -4,6 +4,7 @@
 #include <QThread>
 #include <QMap>
 #include <QRunnable>
+#include <QMutex>
 #include <memory>
 #include <functional>
 

@@ -3,6 +3,9 @@
 
 #include <QDialog>
 #include <QTimer>
+
+#ifdef Q_OS_MAC
+
 #include "mac/wizIAPHelper.h"
 
 class QNetworkReply;
@@ -68,5 +71,7 @@ private:
     QString m_transationID;
     QTimer m_waitingTimer;
 };
+
+#endif
 
 #endif // WIZTEMPLATEPURCHASEDIALOG_H

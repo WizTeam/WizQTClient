@@ -361,11 +361,13 @@ bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr)
 
 void CWizDocTemplateDialog::createPurchaseDialog()
 {
+#ifdef Q_OS_MAC
     if (m_purchaseDialog)
         return;
 
     m_purchaseDialog = new CWizTemplatePurchaseDialog(this);
     connect(m_purchaseDialog, SIGNAL(purchaseSuccess()), SLOT(purchaseFinished()));
+#endif
 }
 
 void CWizDocTemplateDialog::on_btn_ok_clicked()
@@ -391,6 +393,8 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
                     break;
                 case UpgradeResult_PurchaseTemplate:
                 {
+
+#ifdef Q_OS_MAC
                     if (!m_purchaseDialog)
                     {
                         createPurchaseDialog();
@@ -400,6 +404,7 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
                     m_purchaseDialog->showTemplateInfo(pItem->templateData().id, pItem->templateData().strName, pItem->templateData().strThumbUrl);
                     m_purchaseDialog->open();
                     return;
+#endif
                 }
                     break;
                 default:

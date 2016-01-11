@@ -419,13 +419,15 @@ int mainCore(int argc, char *argv[])
     w.show();
     w.init();
 
+#ifdef Q_OS_MAC
     //start and set safari extension
     WIZUSERINFO userInfo;
     dbMgr.db().GetUserInfo(userInfo);
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [strUserId, userInfo](){
         updateShareExtensionAccount(strUserId, userInfo.strUserGUID, userInfo.strMywizEmail ,userInfo.strDisplayName);
-        readShareExtensionAccount();
+        //readShareExtensionAccount();
     });
+#endif
 
     //create introduction note for new register users
     CWizNoteManager noteManager(dbMgr);
