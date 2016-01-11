@@ -138,7 +138,7 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
         {
             emit insertCommentToNoteRequest(m_note.strGUID, getCommentsText());
         }
-
+        accept();
         break;
     case codeErrorParam:
     case codeErrorFile:

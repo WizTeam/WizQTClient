@@ -206,6 +206,17 @@
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>textEdit_notes</tabstop>
+  <tabstop>lineEdit_to</tabstop>
+  <tabstop>lineEdit_subject</tabstop>
+  <tabstop>comboBox_replyTo</tabstop>
+  <tabstop>checkBox_sendMeCopy</tabstop>
+  <tabstop>toolButton_contacts</tabstop>
+  <tabstop>checkBox_saveNotes</tabstop>
+  <tabstop>toolButton_settings</tabstop>
+  <tabstop>toolButton_send</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>
