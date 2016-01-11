@@ -200,6 +200,7 @@ public Q_SLOTS:
 
     void on_action_showDocumentInFloatWindow();
     void on_action_copyDocumentLink();
+    void on_action_copyWebClientLink();
     void on_action_documentHistory();
     void on_action_shareDocumentByLink();
 

@@ -39,7 +39,8 @@ using namespace Core::Internal;
 #define WIZACTION_LIST_MOVE_DOCUMENT QObject::tr("Move to...")
 #define WIZACTION_LIST_COPY_DOCUMENT QObject::tr("Copy to...")
 #define WIZACTION_LIST_DOCUMENT_HISTORY QObject::tr("Version History...")
-#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Note Link")
+#define WIZACTION_LIST_COPY_DOCUMENT_LINK QObject::tr("Copy Internal Note Link")
+#define WIZACTION_LIST_COPY_WEB_GROUP_LINK  QObject::tr("Copy Web Client Link")
 #define WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK QObject::tr("Share Link...")
 #define WIZACTION_LIST_ENCRYPT_DOCUMENT QObject::tr("Encrypt Note")
 #define WIZACTION_LIST_CANCEL_ENCRYPTION  QObject::tr("Cancel Note Encryption")
@@ -186,6 +187,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_menuDocument->addAction(WIZACTION_LIST_SHARE_DOCUMENT_BY_LINK, this,
                               SLOT(on_action_shareDocumentByLink()));
+    m_menuDocument->addAction(WIZACTION_LIST_COPY_WEB_GROUP_LINK, this,
+                              SLOT(on_action_copyWebClientLink()));
 
     m_menuDocument->addSeparator();
     QAction* actionAlwaysOnTop = m_menuDocument->addAction(WIZACTION_LIST_ALWAYS_ON_TOP,
@@ -797,6 +800,8 @@ void CWizDocumentListView::resetPermission()
     } else {
         findAction(WIZACTION_LIST_TAGS)->setVisible(true);       
     }
+
+    findAction(WIZACTION_LIST_COPY_WEB_GROUP_LINK)->setVisible(bGroup && !bDeleted);
 
     // deleted user private documents
     findAction(WIZACTION_LIST_MOVE_DOCUMENT)->setEnabled(bCanEdit);
@@ -1769,7 +1774,24 @@ void CWizDocumentListView::on_action_copyDocumentLink()
         const WIZDOCUMENTDATA& document = item->document();
         documents.append(document);
     }
-    m_dbMgr.db().CopyDocumentsLink(documents);
+
+    WizCopyNotesAsInternalLink(documents);
+}
+
+void CWizDocumentListView::on_action_copyWebClientLink()
+{
+    ::WizGetAnalyzer().LogAction("documentListMenuCopyWebClientLink");
+    if (m_rightButtonFocusedItems.isEmpty())
+        return;
+    //
+    QList<WIZDOCUMENTDATA> documents;
+    foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
+    {
+        const WIZDOCUMENTDATA& document = item->document();
+        documents.append(document);
+    }
+
+    WizCopyNotesAsWebClientLink(documents);
 }
 
 void CWizDocumentListView::on_action_showDocumentInFloatWindow()

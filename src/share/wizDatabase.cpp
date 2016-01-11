@@ -3975,68 +3975,6 @@ bool CWizDatabase::loadUserCert()
     return true;
 }
 
-void CWizDatabase::CopyDocumentLink(const WIZDOCUMENTDATA& document)
-{
-    QString strHtml, strLink;
-    DocumentToHtmlLink(document, strHtml, strLink);
-    //
-    QClipboard* clip = QApplication::clipboard();
-
-    QMimeData* data = new QMimeData();
-    data->setHtml(strHtml);
-    data->setText(strLink);
-    clip->setMimeData(data);
-}
-
-void CWizDatabase::CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents)
-{
-    QString strHtml, strLink;
-    DocumentsToHtmlLink(documents, strHtml, strLink);
-
-    QMimeData* data = new QMimeData();
-    data->setHtml(strHtml);
-    data->setText(strLink);
-    QClipboard* clip = QApplication::clipboard();
-    clip->setMimeData(data);
-}
-
-QString CWizDatabase::DocumentToWizKMURL(const WIZDOCUMENTDATA& document)
-{
-    CWizDatabase* dbPrivate = getPersonalDatabase();
-    //
-    if (document.strKbGUID == dbPrivate->kbGUID())
-    {
-        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, "", dbPrivate->kbGUID());
-    }
-    else
-    {
-        return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
-    }
-    return QString();
-}
-
-void CWizDatabase::DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
-{
-    strLink = DocumentToWizKMURL(document);
-    QString strTitle = document.strTitle;
-    strTitle.replace(_T("<"), _T("&lt;"));
-    strTitle.replace(_T(">"), _T("&gt;"));
-    strTitle.replace(_T("&"), _T("&amp;"));
-    //
-    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
-}
-
-void CWizDatabase::DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString& strLink)
-{
-    for (int i = 0; i < documents.count(); i++)
-    {
-        QString strOneHtml, strOneLink;
-        DocumentToHtmlLink(documents.at(i), strOneHtml, strOneLink);
-        strHtml += strOneHtml + "<br>";
-        strLink += strOneLink + "\n";
-    }
-}
-
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
                                           QString& strFullPathFileName, const QString& strTargetFileName)
 {

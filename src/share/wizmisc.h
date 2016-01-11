@@ -197,6 +197,14 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
 //
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
 
+//
+void WizCopyNoteAsInternalLink(const WIZDOCUMENTDATA& document);
+void WizCopyNotesAsInternalLink(const QList<WIZDOCUMENTDATA>& documents);
+void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document);
+void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents);
+QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document);
+void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
+void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
 
 bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc);
 bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc);

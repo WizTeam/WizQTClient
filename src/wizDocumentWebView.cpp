@@ -634,7 +634,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
                     if (db.DocumentFromGUID(docIds.last(), document))
                     {
                         QString strHtml, strLink;
-                        db.DocumentToHtmlLink(document, strHtml, strLink);
+                        WizNoteToHtmlLink(document, strHtml, strLink);
                         strLinkHtml += "<span>&nbsp;" + strHtml + "&nbsp;</span>";
                     }
                 }

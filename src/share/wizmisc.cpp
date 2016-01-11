@@ -1,12 +1,13 @@
 #include "wizsettings.h"
 #include "wizWebSettingsDialog.h"
 
-#include <QApplication>
-#include <stdlib.h>
-#include <QTextDocument>
 #include <algorithm>
-#include <QCursor>
 #include <fstream>
+#include <stdlib.h>
+#include <QApplication>
+#include <QTextDocument>
+#include <QClipboard>
+#include <QCursor>
 #include <QBitmap>
 #include <QPixmap>
 #include <QPainter>
@@ -2725,4 +2726,103 @@ bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc)
         return true;
 
     return false;
+}
+
+void WizCopyNoteAsInternalLink(const WIZDOCUMENTDATA& document)
+{
+    QString strHtml, strLink;
+    WizNoteToHtmlLink(document, strHtml, strLink);
+    //
+    QClipboard* clip = QApplication::clipboard();
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHtml);
+    data->setText(strLink);
+    clip->setMimeData(data);
+}
+
+
+void WizCopyNotesAsInternalLink(const QList<WIZDOCUMENTDATA>& documents)
+{
+    QString strHtml, strLink;
+    WizNotesToHtmlLink(documents, strHtml, strLink);
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHtml);
+    data->setText(strLink);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
+}
+
+
+QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(document.strKbGUID);
+    //
+    if (!db.IsGroup())
+    {
+        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, "", db.kbGUID());
+    }
+    else
+    {
+        return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
+    }
+    return QString();
+}
+
+
+void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
+{
+    strLink = WizNoteToWizKMURL(document);
+    QString strTitle = document.strTitle.toHtmlEscaped();
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+}
+
+
+void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString& strLink)
+{
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString strOneHtml, strOneLink;
+        WizNoteToHtmlLink(documents.at(i), strOneHtml, strOneLink);
+        strHtml += strOneHtml + "<br>";
+        strLink += strOneLink + "\n";
+    }
+}
+
+
+void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
+{
+    // https://note.wiz.cn?dc={document_guid}&kb={kb_guid}&cmd=km%2C"}
+    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    url.replace("{document_guid}", document.strGUID);
+    url.replace("{kb_guid}", document.strKbGUID);
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(url);
+    data->setText(url);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
+}
+
+
+void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents)
+{
+    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    QString link;
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString tmp = url;
+        tmp.replace("{document_guid}", documents.at(i).strGUID);
+        tmp.replace("{kb_guid}", documents.at(i).strKbGUID);
+        link.append((i == 0 ? "" : "\n") + tmp);
+    }
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(link);
+    data->setText(link);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
 }

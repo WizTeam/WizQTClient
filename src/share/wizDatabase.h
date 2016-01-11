@@ -489,13 +489,6 @@ public:
     //
     bool tryAccessDocument(const WIZDOCUMENTDATA &doc);
 
-    //
-    void CopyDocumentLink(const WIZDOCUMENTDATA& document);
-    void CopyDocumentsLink(const QList<WIZDOCUMENTDATA>& documents);
-    QString DocumentToWizKMURL(const WIZDOCUMENTDATA& document);
-    void DocumentToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
-    void DocumentsToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
-
 public:
     Q_INVOKABLE QObject* GetDeletedItemsFolder();
     Q_INVOKABLE QObject* GetFolderByLocation(const QString& strLocation, bool create);
