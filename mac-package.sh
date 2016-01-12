@@ -18,6 +18,9 @@ cp -R -p ~/Library/Frameworks/CrashReporter.framework WizNote.app/Contents/Frame
 install_name_tool -change @rpath/CrashReporter.framework/Versions/A/CrashReporter \
  @executable_path/../Frameworks/CrashReporter.framework/Versions/A/CrashReporter WizNote.app/Contents/MacOS/WizNote
 
+##############
+#如果需要添加Safari插件，则上面的编译部分和下面的打包部分需要分开执行。把Safari插件拷贝到WizNote.app/Contents/PlugIns/之后在进行签名打包
+##############
 
 REV=`git rev-list HEAD | wc -l | awk '{print $1}'`
 plutil -replace CFBundleVersion -string $REV WizNote.app/Contents/Info.plist
