@@ -519,7 +519,9 @@ public:
     //
     virtual bool acceptMousePressedInfo() { return true; }
     virtual void mousePressed(const QPoint& pos);
-    virtual void mouseReleased(const QPoint& pos);
+    virtual void mouseReleased(const QPoint& pos);    
+    //
+    virtual bool operator<(const QTreeWidgetItem &other) const;
     //
     bool isAdmin(CWizDatabase& db);
     bool isOwner(CWizDatabase& db);

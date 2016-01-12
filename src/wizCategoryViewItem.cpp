@@ -1733,6 +1733,15 @@ void CWizCategoryViewGroupRootItem::mouseReleased(const QPoint& pos)
     m_extraButtonIconPressed = false;
 }
 
+bool CWizCategoryViewGroupRootItem::operator<(const QTreeWidgetItem& other) const
+{
+    if (other.type() != Category_GroupRootItem)
+        return QTreeWidgetItem::operator <(other);
+
+    const CWizCategoryViewGroupRootItem* pItem = dynamic_cast<const CWizCategoryViewGroupRootItem*>(&other);
+    return m_group.strGroupName.localeAwareCompare(pItem->m_group.strGroupName) < 0;
+}
+
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
 {
     if (isBizGroup())
