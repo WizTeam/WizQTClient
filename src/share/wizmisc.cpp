@@ -2774,7 +2774,13 @@ QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document)
 void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
 {
     strLink = WizNoteToWizKMURL(document);
+#if QT_VERSION > 0x050000
     QString strTitle = document.strTitle.toHtmlEscaped();
+#else
+    QString strTitle = document.strTitle;
+    strTitle.replace(_T("<"), _T("&lt;"));
+    strTitle.replace(_T(">"), _T("&gt;"));
+#endif
     strTitle.replace(_T("&"), _T("&amp;"));
     //
     strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
