@@ -983,6 +983,12 @@ void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID,
     if (docGUID != view()->note().strGUID)
         return;
 
+    if (!m_bEditingMode && WizIsMarkdownNote(view()->note()))
+    {
+        CWizMessageBox::information(this, tr("Info"), tr("Do not support insert comment into markdown note."));
+        return;
+    }
+
     QString htmlBody = "<div>" + comment + "</div><hr>";
     htmlBody.replace("\n", "<br>");
     htmlBody.replace("'", "&#39;");

@@ -224,9 +224,9 @@
         <location filename="../src/wizCategoryView.cpp" line="1019"/>
         <location filename="../src/wizCategoryView.cpp" line="1045"/>
         <location filename="../src/wizCategoryView.cpp" line="2848"/>
-        <location filename="../src/wizCategoryView.cpp" line="3769"/>
-        <location filename="../src/wizCategoryView.cpp" line="5520"/>
-        <location filename="../src/wizCategoryView.cpp" line="6000"/>
+        <location filename="../src/wizCategoryView.cpp" line="3777"/>
+        <location filename="../src/wizCategoryView.cpp" line="5528"/>
+        <location filename="../src/wizCategoryView.cpp" line="6008"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -235,8 +235,8 @@
         <location filename="../src/wizCategoryView.cpp" line="875"/>
         <location filename="../src/wizCategoryView.cpp" line="1019"/>
         <location filename="../src/wizCategoryView.cpp" line="1045"/>
-        <location filename="../src/wizCategoryView.cpp" line="3769"/>
-        <location filename="../src/wizCategoryView.cpp" line="6000"/>
+        <location filename="../src/wizCategoryView.cpp" line="3777"/>
+        <location filename="../src/wizCategoryView.cpp" line="6008"/>
         <source>Folder &apos;%1&apos; already exists, combine these folders?</source>
         <translation>資料夾 &apos;%1&apos; 已存在，是否合併？</translation>
     </message>
@@ -313,112 +313,112 @@
         <translation>管理團隊資訊</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3400"/>
+        <location filename="../src/wizCategoryView.cpp" line="3408"/>
         <source>loading...</source>
         <translation>正在匯入...</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3401"/>
+        <location filename="../src/wizCategoryView.cpp" line="3409"/>
         <source>%1 files to import.</source>
         <translation>導入 %1 檔案</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="3423"/>
+        <location filename="../src/wizCategoryView.cpp" line="3431"/>
         <source>Untitled</source>
         <translation>無標題</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4391"/>
+        <location filename="../src/wizCategoryView.cpp" line="4399"/>
         <source>Create new group...</source>
         <translation>建立群組...</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4483"/>
+        <location filename="../src/wizCategoryView.cpp" line="4491"/>
         <source>Search by Date Created</source>
         <translation>透過建立日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4484"/>
+        <location filename="../src/wizCategoryView.cpp" line="4492"/>
         <source>Search by Date Modified</source>
         <translation>透過修改日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4485"/>
+        <location filename="../src/wizCategoryView.cpp" line="4493"/>
         <source>Search by Date Accessed</source>
         <translation>透過存取日期</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4492"/>
+        <location filename="../src/wizCategoryView.cpp" line="4500"/>
         <source>Created since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4493"/>
+        <location filename="../src/wizCategoryView.cpp" line="4501"/>
         <source>Created since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4494"/>
+        <location filename="../src/wizCategoryView.cpp" line="4502"/>
         <source>Created since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4495"/>
+        <location filename="../src/wizCategoryView.cpp" line="4503"/>
         <source>Created since one week</source>
         <translation>一週內</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4496"/>
+        <location filename="../src/wizCategoryView.cpp" line="4504"/>
         <source>Created since one month</source>
         <translation>一月內</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4503"/>
+        <location filename="../src/wizCategoryView.cpp" line="4511"/>
         <source>Modified since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4504"/>
+        <location filename="../src/wizCategoryView.cpp" line="4512"/>
         <source>Modified since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4505"/>
+        <location filename="../src/wizCategoryView.cpp" line="4513"/>
         <source>Modified since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4506"/>
+        <location filename="../src/wizCategoryView.cpp" line="4514"/>
         <source>Modified since one week</source>
         <translation>一週內</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4507"/>
+        <location filename="../src/wizCategoryView.cpp" line="4515"/>
         <source>Modified since one month</source>
         <translation>一月內</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4514"/>
+        <location filename="../src/wizCategoryView.cpp" line="4522"/>
         <source>Accessed since Today</source>
         <translation>今日</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4515"/>
+        <location filename="../src/wizCategoryView.cpp" line="4523"/>
         <source>Accessed since Yestoday</source>
         <translation>昨天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4516"/>
+        <location filename="../src/wizCategoryView.cpp" line="4524"/>
         <source>Accessed since the day before yestoday</source>
         <translation>前天至今</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4517"/>
+        <location filename="../src/wizCategoryView.cpp" line="4525"/>
         <source>Accessed since one week</source>
         <translation>一週內</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="4518"/>
+        <location filename="../src/wizCategoryView.cpp" line="4526"/>
         <source>Accessed since one month</source>
         <translation>一月內</translation>
     </message>
@@ -676,23 +676,23 @@
         <translation>自定義</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="470"/>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="573"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="482"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="584"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="470"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="482"/>
         <source>extract ziw file failed!</source>
         <translation>提取 Ziw 檔案失敗！</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="497"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="508"/>
         <source>Select one or more template files</source>
         <translation>選擇範本檔案</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="573"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="584"/>
         <source>You have unfinished transation, continue to process it?</source>
         <translation>您有未完成的購買記錄，繼續處理？</translation>
     </message>
@@ -800,6 +800,7 @@
     <message>
         <location filename="../src/wizDocumentWebView.cpp" line="586"/>
         <location filename="../src/wizDocumentWebView.cpp" line="591"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="988"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -814,27 +815,32 @@
         <translation>不能添加包文件作為附件！ 文件名：&apos; %1 &apos;</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1966"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="988"/>
+        <source>Do not support insert comment into markdown note.</source>
+        <translation>贊不支持插入評論到Markdown筆記中。</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocumentWebView.cpp" line="1972"/>
         <source>Image File</source>
         <translation>圖片檔案</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="1966"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="1972"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation>圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2293"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2299"/>
         <source>PDF Files (*.pdf)</source>
         <translation>PDF 檔案 (*.pdf)</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2338"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2344"/>
         <source>Inof</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2338"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2344"/>
         <source>No available printer founded! Please add printer to system printer list.</source>
         <translation>未發現可用印表機！請在系統印表機列表中加入印表機。</translation>
     </message>
@@ -2198,80 +2204,80 @@ w: %3  h: %4</translation>
         <translation>名稱：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="71"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="74"/>
         <source>name</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="78"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="81"/>
         <source>Price:</source>
         <translation>價格：</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="85"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="91"/>
         <source>???</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="152"/>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="203"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="158"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="209"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="159"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="165"/>
         <source>Purchase</source>
         <translation>購買</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="178"/>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="161"/>
+        <location filename="../src/ui/wizTemplatePurchaseDialog.ui" line="184"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="164"/>
         <source>Connecting to AppStore...</source>
         <translation>正在請求 AppStore 處理，請稍等...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="120"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="123"/>
         <source>Loading thumb image...</source>
         <translation>加載縮略圖...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="122"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="125"/>
         <source>Loading...</source>
         <translation>獲取中...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="145"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="148"/>
         <source>Load thumb image failed.</source>
         <translation>加載縮略圖失敗</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="183"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="186"/>
         <source>Network error : %1</source>
         <translation>網絡錯誤：%1</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="200"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="203"/>
         <source>Purchase failed, please try again later.</source>
         <translation>購買失敗，請稍後重試。</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="206"/>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="286"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="209"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="289"/>
         <source>Waiting for Wiz server...</source>
         <translation>資料正在處理中，請稍等...</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="217"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="220"/>
         <source>Can not connect to Server, please try again later.</source>
         <translation>無法連接到伺服器，請稍後重試。</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="280"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="283"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
     <message>
-        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="280"/>
+        <location filename="../src/widgets/wizTemplatePurchaseDialog.cpp" line="283"/>
         <source>Can not load receipt!</source>
         <translation>無法取得 AppStore 憑證！</translation>
     </message>
@@ -4781,7 +4787,7 @@ w: %3  h: %4</translation>
         <translation>$分享給朋友的筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentWebView.cpp" line="2345"/>
+        <location filename="../src/wizDocumentWebView.cpp" line="2351"/>
         <source>Print Document</source>
         <translation>列印文件</translation>
     </message>
@@ -5166,23 +5172,23 @@ w: %3  h: %4</translation>
         <translation>儲存</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="732"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="743"/>
         <source>You can use this template after upgrading to VIP or buy it.</source>
         <translation>您需要升级 VIP 后才可以使用该模板。</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="733"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="744"/>
         <location filename="../src/share/wizMessageBox.cpp" line="56"/>
         <source>Cancel</source>
         <translation>取消</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="735"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="746"/>
         <source>Purchase</source>
         <translation>購買</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="737"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="748"/>
         <source>Upgrade to VIP</source>
         <translation>现在升级</translation>
     </message>
@@ -5304,7 +5310,7 @@ w: %3  h: %4</translation>
         <translation>完成群組: %1</translation>
     </message>
     <message>
-        <location filename="../src/wizDocTemplateDialog.cpp" line="731"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="742"/>
         <location filename="../src/share/wizObjectOperator.cpp" line="848"/>
         <location filename="../src/share/wizObjectOperator.cpp" line="865"/>
         <location filename="../src/share/wizObjectOperator.cpp" line="895"/>
