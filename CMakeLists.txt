@@ -8,6 +8,7 @@
 # WIZNOTE_USE_QT5   use qt5 to compile project
 # APPSTORE_BUILD  build for Apple Appsotre, would not use qt deploy
 # XCODEBUILD      adjust project params to suit for xcode
+#UPDATE_TRANSLATIONS  update transation files
 # PLCrashReporter   use PLCrashReporter for mac, need PLCrashReporter framework
 
 if (APPLE)

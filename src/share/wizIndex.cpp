@@ -902,11 +902,8 @@ void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
 bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
 {
 
-    CString strExt;
-    strExt.Format("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
-    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_DOCUMENT,
-                                      FIELD_LIST_WIZ_DOCUMENT,
-                                      strExt);
+    QString strSQL = QString("select %1 from %2 %3").arg(FIELD_LIST_WIZ_DOCUMENT)
+            .arg(TABLE_NAME_WIZ_DOCUMENT).arg("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%' limit 1000");
 
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
