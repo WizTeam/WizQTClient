@@ -1739,7 +1739,7 @@ bool CWizCategoryViewGroupRootItem::operator<(const QTreeWidgetItem& other) cons
         return QTreeWidgetItem::operator <(other);
 
     const CWizCategoryViewGroupRootItem* pItem = dynamic_cast<const CWizCategoryViewGroupRootItem*>(&other);
-    return m_group.strGroupName.localeAwareCompare(pItem->m_group.strGroupName) < 0;
+    return Utils::Misc::localeAwareCompare(m_group.strGroupName, pItem->m_group.strGroupName);
 }
 
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)

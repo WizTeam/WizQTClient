@@ -48,6 +48,9 @@ public:
     static bool isSimpChinese();
     static bool isTraditionChinese();
 
+    //
+    static bool localeAwareCompare(const QString &s1, const QString &s2);
+
     static int getVersionCode();
 };
 

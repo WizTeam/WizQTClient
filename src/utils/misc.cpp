@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QClipboard>
 #include <QMimeData>
+#include <QTextCodec>
 
 #include "wizdef.h"
 
@@ -250,6 +251,26 @@ bool Misc::isTraditionChinese()
         return true;
     }
     return false;
+}
+
+bool Misc::localeAwareCompare(const QString& s1, const QString& s2)
+{
+    static bool isCh = isChinese();
+    if (isCh)
+    {
+        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
+        {
+            QByteArray arrThis = pCodec->fromUnicode(s1);
+            QByteArray arrOther = pCodec->fromUnicode(s2);
+            //
+            std::string strThisA(arrThis.data(), arrThis.size());
+            std::string strOtherA(arrOther.data(), arrOther.size());
+            //
+            return strThisA.compare(strOtherA.c_str()) < 0;
+        }
+    }
+    //
+    return s1.compare(s2) < 0;
 }
 
 int Misc::getVersionCode()

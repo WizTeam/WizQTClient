@@ -1227,23 +1227,7 @@ bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelInde
 //    return QString::localeAwareCompare(leftString, rightString) < 0;
 
 
-    static bool isChinese = Utils::Misc::isChinese();
-    if (isChinese)
-    {
-        if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))
-        {
-            QByteArray arrThis = pCodec->fromUnicode(leftString);
-            QByteArray arrOther = pCodec->fromUnicode(rightString);
-            //
-            std::string strThisA(arrThis.data(), arrThis.size());
-            std::string strOtherA(arrOther.data(), arrOther.size());
-            //
-            return strThisA.compare(strOtherA.c_str()) < 0;
-        }
-    }
-    //
-    return leftString.compare(rightString) < 0;
-
+    return Utils::Misc::localeAwareCompare(leftString, rightString);
 }
 
 class WizUserSelectorList : public QListWidget
