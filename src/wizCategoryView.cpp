@@ -3108,8 +3108,16 @@ void CWizCategoryView::init()
                 initGroups();
 
                 WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                    for (int i = 0 ; i < m_dbMgr.count(); i++)
+                    for (int i = 0; i < topLevelItemCount(); ++i)
                     {
+                        if (dynamic_cast<CWizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
+                        {
+                            topLevelItem(i)->sortChildren(0, Qt::AscendingOrder);
+                        }
+                    }
+                    //
+                    for (int i = 0 ; i < m_dbMgr.count(); ++i)
+                    {                                               
                         sortGroupTags(m_dbMgr.at(i).kbGUID());
                     }
                 });
