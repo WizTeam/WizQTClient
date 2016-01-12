@@ -154,10 +154,28 @@ install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libaggregation.
  @executable_path/../PlugIns/libaggregation.dylib WizNote.app/Contents/MacOS/WizNote 
 
 
+
+
+
+##############
+#如果需要添加Safari插件，则上面的编译部分和下面的打包部分需要分开执行。把Safari插件拷贝到WizNote.app/Contents/PlugIns/之后在进行签名打包
+##############
+
+
+
+
 cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
 
 APPLCERT="3rd Party Mac Developer Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
 INSTCERT="3rd Party Mac Developer Installer: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
+
+
+#######对Safari剪辑器插件进行签名
+cp -R -p ../MacShareExtension.entitlements MacShareExtension.entitlements
+codesign --force --verify --deep --verbose=2 --sign "$APPLCERT" --entitlements MacShareExtension.entitlements\
+    $MYAPP.app/Contents/PlugIns/MacShareExtension.appex
+#######
+
  
 for I in $QTLIBS ; do # signing the Qt frameworks
   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
