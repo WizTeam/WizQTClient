@@ -57,6 +57,13 @@ Thanks for mosquito's contribution, [more Fedora/CentOS soft.](https://copr.fedo
     Or
     $ yum install wiznote-beta    # Development version
 
+If it comes with an error that cannot install yum-plugin-copr, you need to add [repo info](https://copr.fedorainfracloud.org/coprs/mosquito/wiznote/repo/epel-7/mosquito-wiznote-epel-7.repo) to your repo list in file `/etc/yum.repos.d/epel.repo`, or download the repo file to repos directory.
+Here is the way of download the repo file:
+
+	$ cd /etc/yum.repos.d/
+	$ sudo wget https://copr.fedorainfracloud.org/coprs/mosquito/wiznote/repo/epel-7/mosquito-wiznote-epel-7.repo
+	$ sudo yum install wiznote
+
 
 ### others
 
