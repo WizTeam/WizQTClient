@@ -10,9 +10,6 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QSplitter>
-#include <QWebPage>
-#include <QWebFrame>
-#include <QWebView>
 #include <QTimer>
 #include <QAction>
 #include <QMenu>
@@ -21,6 +18,7 @@
 #include <QPlainTextEdit>
 #include <QEvent>
 #include <QDebug>
+#include <QWebEnginePage>
 
 #include <extensionsystem/pluginmanager.h>
 #include <extensionsystem/pluginspec.h>
@@ -32,7 +30,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     QDialog(parent)
   , m_app(app)
   , m_external(external)
-  , m_codeBrowser(new QWebView(this))
+  , m_codeBrowser(new QWebEngineView(this))
 {
 
     setAttribute(Qt::WA_DeleteOnClose);
@@ -40,8 +38,8 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
     //
-    connect(m_codeBrowser->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(registerJSObject()));
+    //TODO: webengine
+    //connect(m_codeBrowser->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(registerJSObject()));
 
     //
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
@@ -58,7 +56,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     strHtml.replace("Wiz_Cancel_Replace", tr("Cancel"));
     QUrl url = QUrl::fromLocalFile(strFileName);
 
-    m_codeBrowser->page()->mainFrame()->setHtml(strHtml, url);
+    m_codeBrowser->page()->setHtml(strHtml, url);
 
 }
 
@@ -74,8 +72,9 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
 
 void WizCodeEditorDialog::registerJSObject()
 {
-    m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("codeEditor", this);
-    m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("external", m_external);
+    //TODO: webengine
+    //m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("codeEditor", this);
+    //m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("external", m_external);
 }
 
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)

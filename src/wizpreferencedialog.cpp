@@ -475,11 +475,13 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
 
 void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
 {
+#if 0   //TODO: webengine
     CWizMarkdownTemplateDialog dlg;
     if (dlg.exec() == QDialog::Accepted)
 //        Core::ICore::instance()->emitMarkdownSettingChanged();
         Q_EMIT settingsChanged(wizoptionsMarkdown);
     return;
+#endif
 }
 
 

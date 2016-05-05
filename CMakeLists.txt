@@ -68,6 +68,10 @@ if(APPLE)
 #    add_definitions(-DUSEWEBENGINE=FALSE)
 endif(APPLE)
 
+if (USEWEBENGINE)
+    add_definitions(-DUSEWEBENGINE=TRUE)
+endif(USEWEBENGINE)
+
 if(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
     set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)

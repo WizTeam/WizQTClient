@@ -1,14 +1,14 @@
 #include "wizDocumentView.h"
 
-#include <QWebElement>
-#include <QWebFrame>
-#include <QWebHistory>
 #include <QLineEdit>
 #include <QLabel>
 #include <QHBoxLayout>
 #include <QStackedWidget>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebEngineSettings>
 
 #include <coreplugin/icore.h>
 
@@ -27,7 +27,7 @@
 #include "wizEditorToolBar.h"
 #include "wiznotestyle.h"
 #include "wizDocumentTransitionView.h"
-#include "wizDocumentWebEngine.h"
+#include "wizDocumentWebView.h"
 #include "wizButton.h"
 #include "wizusercipherform.h"
 #include "wizDocumentEditStatus.h"
@@ -54,13 +54,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
-    #ifdef USEWEBENGINE
-    , m_web(new CWizDocumentWebEngine(app, this))
-    , m_comments(new QWebEngineView(this))
-    #else
     , m_web(new CWizDocumentWebView(app, this))
-    , m_commentWidget(new CWizLocalProgressWebView(app.mainWindow()))
-    #endif
+    , m_comments(new QWebEngineView(this))
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
@@ -102,19 +97,18 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_comments = m_commentWidget->web();
-    QWebPage *commentPage = new QWebPage(m_comments);
-    commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    m_comments->setPage(commentPage);
-    m_comments->history()->setMaximumItemCount(0);
-    m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
-    m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_comments->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
-    m_comments->page()->mainFrame()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
+    //TODO: webengine
+    //QWebPage *commentPage = new QWebPage(m_comments);
+    //commentPage->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    //m_comments->setPage(commentPage);
+    //m_comments->history()->setMaximumItemCount(0);
+    //m_comments->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
+    m_comments->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+    //m_comments->page()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
     connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
     connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
-    connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(on_comment_populateJavaScriptWindowObject()));
+    //connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(on_comment_populateJavaScriptWindowObject()));
     connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
 
     m_commentWidget->hide();
@@ -252,7 +246,7 @@ QWidget* CWizDocumentView::client() const
     return m_tab;
 }
 
-QWebView*CWizDocumentView::commentView() const
+QWebEngineView*CWizDocumentView::commentView() const
 {
     return m_commentWidget->web();
 }
@@ -612,23 +606,10 @@ void CWizDocumentView::setEditorFocus()
     m_web->editorFocus();
 }
 
-QWebFrame* CWizDocumentView::noteFrame()
-{
-#ifdef USEWEBENGINE
-    return 0;
-#else
-//    return m_web->noteFrame();
-    return m_web->page()->mainFrame();
-#endif
-}
 
 QWebEnginePage*CWizDocumentView::notePage()
 {
-#ifdef USEWEBENGINE
-    return m_engine->page();
-#else
-    return 0;
-#endif
+    return m_web->page();
 }
 
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
@@ -988,7 +969,8 @@ void CWizDocumentView::on_command_request()
 
 void CWizDocumentView::on_comment_populateJavaScriptWindowObject()
 {
-    m_comments->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+    //TODO: webengine
+    //m_comments->page()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
 }
 
 void CWizDocumentView::on_loadComment_request(const QString& url)

@@ -5,7 +5,7 @@
 #include <QString>
 #include <QList>
 
-class QWebFrame;
+class QWebEnginePage;
 
 class CWizFramelessWebDialog : public QDialog
 {
@@ -30,7 +30,7 @@ public slots:
 
 
 private:
-    QWebFrame *m_frame;
+    QWebEnginePage *m_frame;
     QString m_url;
     QList<int> m_timerIDList;
 };

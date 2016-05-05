@@ -6,7 +6,7 @@
 class QUrl;
 class QLabel;
 class QMovie;
-class QWebView;
+class QWebEngineView;
 class QPushButton;
 class QNetworkReply;
 
@@ -16,7 +16,7 @@ class CWizWebSettingsDialog : public QDialog
 
 public:
     explicit CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent = 0);
-    QWebView* webVew();
+    QWebEngineView* webVew();
 
     void showError();
 protected:
@@ -26,7 +26,7 @@ protected:
     QString m_url;
     QLabel* m_labelProgress;
     QMovie* m_movie;
-    QWebView* m_web;
+    QWebEngineView* m_web;
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);

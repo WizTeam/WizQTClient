@@ -2,9 +2,12 @@
 #define CWIZSHARELINKDIALOG_H
 
 #include <QDialog>
-#include <QWebView>
+#include <QtWebEngine>
 #include <QPropertyAnimation>
 #include "share/wizobject.h"
+#include <QWebEngineView>
+
+
 
 class CWizUserSettings;
 class CWizShareLinkDialog : public QDialog
@@ -46,7 +49,7 @@ signals:
 
 private:
     CWizUserSettings& m_settings;
-    QWebView* m_view;
+    QWebEngineView* m_view;
     WIZDOCUMENTDATA m_doc;
     QPropertyAnimation* m_animation;
 };

@@ -6,8 +6,7 @@
 #include <QStringList>
 #include <QFile>
 #include <QTextStream>
-#include <QWebFrame>
-//#include <QWebEnginePage>
+#include <QtWebEngineWidgets/QtWebEngineWidgets>
 #include <QCoreApplication>
 #include <QApplication>
 #include <QTimer>
@@ -56,13 +55,13 @@ void MarkdownPlugin::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& do
 
 //    if (canRender(view, doc))
 //    {
-//#ifdef USEWEBENGINE
+#ifdef USEWEBENGINE
 //        render(view->notePage());
-//#else
+#else
 ////        render(view->noteFrame());
 //        QWebFrame* frame = view->noteFrame();
 //        frame->evaluateJavaScript("renderMarkdown();");
-//#endif
+#endif
 //    }
 }
 
@@ -113,6 +112,7 @@ void MarkdownPlugin::render(QWebFrame* frame)
 }
 #endif
 
+#if 0
 void MarkdownPlugin::changeCssToInline(QWebFrame* frame)
 {
     if (frame)
@@ -128,6 +128,7 @@ void MarkdownPlugin::changeCssToInline(QWebFrame* frame)
         frame->setHtml(strHtml);
     }
 }
+#endif
 
 // FIXME: about to remove
 QString MarkdownPlugin::cachePath()

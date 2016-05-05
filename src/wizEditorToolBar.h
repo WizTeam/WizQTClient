@@ -30,11 +30,7 @@ class EditorToolBar : public QWidget
 
 public:
     explicit EditorToolBar(CWizExplorerApp& app, QWidget *parent);
-#ifdef USEWEBENGINE
-    void setDelegate(CWizDocumentWebEngine* editor);
-#else
     void setDelegate(CWizDocumentWebView* editor);
-#endif
 
     bool hasFocus();
 
@@ -45,11 +41,7 @@ public:
 private:
     CWizExplorerApp& m_app;
 
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_editor;
-#else
     CWizDocumentWebView* m_editor;
-#endif
     QMap<QString, QAction*> m_actions;
     QPointer<QMenu> m_menuContext;
     CWizToolComboBox* m_comboParagraph;

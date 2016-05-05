@@ -1,7 +1,7 @@
 #ifndef WIZDOCUMENTWEBVIEW_H
 #define WIZDOCUMENTWEBVIEW_H
 
-#include <QWebView>
+#include <QWebEngineView>
 #include <QTimer>
 #include <QPointer>
 #include <QMutex>
@@ -95,6 +95,8 @@ private:
     bool m_stop;
 };
 
+//TODO: webengine
+/*
 class CWizDocumentWebViewPage: public QWebPage
 {
     Q_OBJECT
@@ -109,8 +111,9 @@ public:
 Q_SIGNALS:
     void actionTriggered(QWebPage::WebAction act);
 };
+*/
 
-class CWizDocumentWebView : public QWebView
+class CWizDocumentWebView : public QWebEngineView
 {
     Q_OBJECT
 
@@ -118,7 +121,8 @@ public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
     ~CWizDocumentWebView();
     Core::CWizDocumentView* view();
-    QWebFrame* noteFrame();
+    //
+    QWebEnginePage* notePage();
     //
     void waitForDone();
 
@@ -249,8 +253,6 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
 
-    QWebFrame* m_noteFrame;
-
     QTimer m_timerAutoSave;
     bool m_bEditorInited;
     bool m_bEditingMode;
@@ -287,7 +289,8 @@ public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
 public Q_SLOTS:
-    void onActionTriggered(QWebPage::WebAction act);
+    //TODO: webengine
+    void onActionTriggered(QWebEnginePage::WebAction act);
 
     void onEditorPopulateJavaScriptWindowObject();
     void onEditorLoadFinished(bool ok);
@@ -434,5 +437,6 @@ private:
     //
 //    bool shouldAddUserDefaultCSS();
 };
+
 
 #endif // WIZDOCUMENTWEBVIEW_H

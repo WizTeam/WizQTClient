@@ -41,7 +41,7 @@
       </widget>
      </item>
      <item>
-      <widget class="QWebView" name="webView_preview">
+      <widget class="QWebEngineView" name="webView_preview">
        <property name="url">
         <url>
          <string>about:blank</string>

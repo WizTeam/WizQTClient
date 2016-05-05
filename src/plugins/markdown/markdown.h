@@ -36,7 +36,6 @@ private:
 #else
     void render(QWebFrame* frame);
 #endif
-    void changeCssToInline(QWebFrame* frame);
     QString getExecString();
     void getCustomCssFile();
 

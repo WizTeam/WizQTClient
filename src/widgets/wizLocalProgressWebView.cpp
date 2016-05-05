@@ -1,6 +1,7 @@
 #include "wizLocalProgressWebView.h"
 #include <QMovie>
-#include <QWebView>
+#include <QWebEngineView>
+#include <QWebEngineSettings>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPalette>
@@ -13,9 +14,8 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    m_web = new QWebView(this);
-    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_web->settings()->globalSettings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
+    m_web = new QWebEngineView(this);
+    m_web->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
 
     m_movie = new QMovie(this);
     m_movie->setFileName(":/loading.gif");
@@ -31,8 +31,8 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     setLayout(layout);
 
     layout->addWidget(m_labelProgress);
-    layout->addWidget(m_web);
-    m_web->setVisible(true);
+    //layout->addWidget(m_web);
+    //m_web->setVisible(true);
     m_labelProgress->setVisible(false);
 }
 
@@ -40,8 +40,7 @@ CWizLocalProgressWebView::~CWizLocalProgressWebView()
 {
 
 }
-
-QWebView*CWizLocalProgressWebView::web()
+QWebEngineView*CWizLocalProgressWebView::web()
 {
     return m_web;
 }

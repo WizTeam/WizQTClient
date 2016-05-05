@@ -6,9 +6,12 @@
 #include "wizdef.h"
 
 class WIZDOCUMENTDATA;
+class CWizDocumentWebEngine;
+
 namespace Core {
 
 class CWizDocumentView;
+
 class CWizSingleDocumentViewer : public QWidget
 {
     Q_OBJECT
@@ -34,11 +37,7 @@ private:
     void applyWidgetBackground(bool isFullScreen);
 
 private:
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_webEngine;
-#else
     CWizDocumentView* m_docView;
-#endif
     QString m_guid;
 
     QWidget* m_containerWgt;

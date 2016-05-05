@@ -1,4 +1,4 @@
-#ifdef USEWEBENGINE
+#if 0
 #include "wizDocumentWebEngine.h"
 #include "wizDocumentWebView.h"
 #include <QRunnable>
@@ -127,6 +127,7 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     , m_bCurrentEditing(false)
     , m_bContentsChanged(false)
     , m_searchReplaceWidget(0)
+    , m_bInSeperateWindow(false)
 {
     m_parentView = dynamic_cast<CWizDocumentView*>(parent);
     Q_ASSERT(m_parentView);
@@ -2029,6 +2030,23 @@ void CWizDocumentWebEngine::sendEventToChildWidgets(QEvent* event)
     }
 }
 
+void CWizDocumentWebEngine::setInSeperateWindow(bool inSeperateWindow)
+{
+    m_bInSeperateWindow = inSeperateWindow;
+
+    if (inSeperateWindow)
+    {
+        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+                                       + "webkit_separate_scrollbar.css");
+        settings()->setUserStyleSheetUrl(url);
+    }
+    else
+    {
+        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+                                       + "webkit_scrollbar.css");
+        settings()->setUserStyleSheetUrl(url);
+    }
+}
 
 WebEnginePage::WebEnginePage(QObject* parent)
     : QWebEnginePage(parent)

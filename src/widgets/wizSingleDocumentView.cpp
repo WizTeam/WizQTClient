@@ -12,6 +12,7 @@
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
 #include "wizEditorToolBar.h"
+#include "wizDocumentWebEngine.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
@@ -68,7 +69,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     m_docView->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
                                      "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
     m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"));
-    m_docView->web()->setInSeperateWindow(true);
+    //m_docView->web()->setInSeperateWindow(true);
     if (WizIsHighPixel())
     {
         m_docView->setMaximumWidth(1095);

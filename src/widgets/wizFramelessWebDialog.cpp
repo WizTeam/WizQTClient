@@ -1,9 +1,8 @@
 #include "wizFramelessWebDialog.h"
-#include <QWebFrame>
-#include <QWebView>
-#include <QWebPage>
 #include <QVBoxLayout>
 #include <QDesktopServices>
+#include <QWebEngineView>
+#include <QWebEnginePage>
 
 CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
@@ -12,12 +11,13 @@ CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
-    QWebView *view = new QWebView(this);
-    m_frame = view->page()->mainFrame();
-    connect(m_frame, SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onJavaScriptWindowObjectCleared()));
+    QWebEngineView *view = new QWebEngineView(this);
+    m_frame = view->page();
+    //TODO: webengine
+    //connect(m_frame, SIGNAL(javaScriptWindowObjectCleared()), SLOT(onJavaScriptWindowObjectCleared()));
+    //connect(m_frame, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
+    //
     view->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(m_frame, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -56,7 +56,8 @@ void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1
 
 void CWizFramelessWebDialog::onJavaScriptWindowObjectCleared()
 {
-    m_frame->addToJavaScriptWindowObject("customObject", this);
+    //TODO: webeigne
+    //m_frame->addToJavaScriptWindowObject("customObject", this);
 }
 
 void CWizFramelessWebDialog::onPageLoadFinished(bool ok)

@@ -104,11 +104,11 @@ set(wiznote_SOURCES
     widgets/wizCustomToolBar.cpp
     widgets/wizTipsWidget.cpp
     widgets/wizSingleDocumentView.cpp
-    widgets/wizMarkdownTemplateDialog.cpp
+    #widgets/wizMarkdownTemplateDialog.cpp
     widgets/wizShareLinkDialog.cpp
     share/wizAnalyzer.cpp
     share/wizTranslater.cpp
-    widgets/wizIAPDialog.cpp
+    #widgets/wizIAPDialog.cpp
     widgets/wizAdvancedSearchDialog.cpp
     share/wizUDPClient.cpp
     share/wizMessageBox.cpp
@@ -347,11 +347,11 @@ set(wiznote_HEADERS
     share/websocketclientwrapper.h
     share/websockettransport.h
     wizWebEngineInjectObject.h
-    widgets/wizMarkdownTemplateDialog.h
+    #widgets/wizMarkdownTemplateDialog.h
     widgets/wizShareLinkDialog.h
     share/wizAnalyzer.h
     share/wizTranslater.h
-    widgets/wizIAPDialog.h
+    #widgets/wizIAPDialog.h
     widgets/wizAdvancedSearchDialog.h
     share/wizUDPClient.h
     share/wizMessageBox.h
@@ -393,8 +393,8 @@ set(wiznote_FORMS
     ui/wizDocTemplateDialog.ui
     ui/wizVerificationCodeDialog.ui
     ui/wizEmailShareDialog.ui
-    ui/wizMarkdownTemplateDialog.ui
-    ui/wizIAPDialog.ui
+    #ui/wizMarkdownTemplateDialog.ui
+    #ui/wizIAPDialog.ui
     ui/wizAdvancedSearchDialog.ui
     ui/wizCrashReportDialog.ui
     ui/wizTemplatePurchaseDialog.ui
@@ -442,7 +442,8 @@ if(UNIX)
         cmake_policy(SET CMP0016 OLD)
         find_library(_CARBON_LIBRARY Carbon)
         find_library(_COCOA_LIBRARY Cocoa)
-        find_library(_WEBKIT_LIBRARY WebKit)
+        find_library(_WEBENGINE_LIBRARY WebEngine)
+        find_library(_WEBENGINEWIDGETS_LIBRARY WebEngineWidgets)
         find_library(_STORE_LIBRARY StoreKit)
         find_library(_IO_LIBRARY IOKit)
         if (PLCrashReporter)
@@ -452,7 +453,7 @@ if(UNIX)
         # please set env: MACOSX_DEPLOYMENT_TARGET = 10.8 to ~/.bash_profile if you need NSUserNotification support.
         message("use cocoa library: ${_COCOA_LIBRARY}")
         target_link_libraries(${PROJECT_NAME} ${_CARBON_LIBRARY} ${_COCOA_LIBRARY}
-                ${_WEBKIT_LIBRARY} ${_STORE_LIBRARY} ${_IO_LIBRARY} ${_CRASHREPORTER})
+                  ${_STORE_LIBRARY} ${_IO_LIBRARY} ${_CRASHREPORTER})
 
         # setup plist info and logo
         set_target_properties(${PROJECT_NAME} PROPERTIES MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/build/osx/Info.plist")
@@ -534,7 +535,7 @@ target_link_libraries(${PROJECT_NAME}
     aggregation
     coreplugin
     helloworld
-    markdown
+    #markdown
     ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
     ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
     ${CMAKE_DL_LIBS}
@@ -549,7 +550,7 @@ target_link_libraries(${PROJECT_NAME}
     aggregation
     coreplugin
     helloworld
-    markdown
+    #markdown
     ${CMAKE_DL_LIBS}
 )
 endif(APPSTORE_BUILD)

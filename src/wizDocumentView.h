@@ -6,7 +6,6 @@
 #include "share/wizobject.h"
 #include <QSharedPointer>
 
-class QWebView;
 class QScrollArea;
 class QLineEdit;
 class QLabel;
@@ -29,7 +28,6 @@ class QWebEnginePage;
 class QWebEngineView;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusChecker;
-class CWizDocumentWebEngine;
 class CWizLocalProgressWebView;
 class CWizDocumentTransitionView;
 
@@ -51,12 +49,8 @@ public:
     void setSizeHint(QSize size);
 
     QWidget* client() const;
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* web() const { return m_web; }
-#else
     CWizDocumentWebView* web() const { return m_web; }
-#endif
-    QWebView* commentView() const;
+    QWebEngineView* commentView() const;
     CWizLocalProgressWebView* commentWidget() const;
     //
     CWizDocumentTransitionView* transitionView();
@@ -77,12 +71,8 @@ protected:
     QLabel* m_msgLabel;
 
     QWidget* m_docView;
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_web;
-#else
     CWizDocumentWebView* m_web;
-#endif
-    QWebView* m_comments;
+    QWebEngineView* m_comments;
     CWizLocalProgressWebView* m_commentWidget;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;  
@@ -131,7 +121,6 @@ public:
     //
     void showCoachingTips();
 
-    QWebFrame* noteFrame();
     QWebEnginePage* notePage();
 
 signals:

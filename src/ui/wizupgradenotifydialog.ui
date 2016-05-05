@@ -27,7 +27,7 @@
     <number>5</number>
    </property>
    <item>
-    <widget class="QWebView" name="webView">
+    <widget class="QWebEngineView" name="webView">
      <property name="url">
       <url>
        <string>about:blank</string>

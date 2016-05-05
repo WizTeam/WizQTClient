@@ -15,7 +15,6 @@
 #include <QSystemTrayIcon>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QWebFrame>
 #include <QCheckBox>
 
 #ifdef Q_OS_MAC
@@ -994,11 +993,7 @@ void MainWindow::initDockMenu()
 
 void MainWindow::on_editor_statusChanged()
 {
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* editor = m_doc->web();
-#else
     CWizDocumentWebView* editor = getActiveEditor();
-#endif
 
     if (!editor->isInited() || !editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
@@ -1045,7 +1040,8 @@ void MainWindow::on_editor_statusChanged()
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
 
-#ifdef USEWEBENGINE
+    //todo: webengine
+    /*
     editor->editorCommandQueryCommandState("undo", [this](const QVariant& returnValue) {
         if (-1 == returnValue.toInt()) {
             m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
@@ -1254,172 +1250,7 @@ void MainWindow::on_editor_statusChanged()
         }
     });
 
-#else
-        if (editor->editorCommandQueryCommandState("undo") == -1) {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
-        }
-
-        if (editor->editorCommandQueryCommandState("redo") == -1) {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
-        }
-
-        if (!editor->isEditing()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-
-            if (!editor->page()->selectedHtml().isEmpty()) {
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-            } else {
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-            }
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(true);
-
-            if (!editor->page()->selectedHtml().isEmpty()) {
-                m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(true);
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-                m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(true);
-            } else {
-                m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-                m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-            }
-        }
-
-        if (-1 == editor->editorCommandQueryCommandState("bold")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("italic")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("underline")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("strikethrough")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertUnorderedList")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertOrderedList")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("justify")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("indent")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("outdent")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("inserttable")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("link")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("horizontal")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("date")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("time")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("removeformat")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("plaintext")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("source")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("checklist")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertCode")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertImage")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-        }
-#endif
-
+    */
 }
 
 void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
@@ -1903,7 +1734,7 @@ void MainWindow::GetToken(const QString& strFunctionName)
     QString strToken = WizService::Token::token();
     QString strExec = strFunctionName + QString("('%1')").arg(strToken);
     qDebug() << "cpp get token callled : " << strExec;
-    m_doc->commentView()->page()->mainFrame()->evaluateJavaScript(strExec);
+    m_doc->commentView()->page()->runJavaScript(strExec);
 }
 
 /**   web页面调用该方法，将页面的结果返回
@@ -2655,7 +2486,6 @@ void MainWindow::on_actionEditingRedo_triggered()
     getActiveEditor()->redo();
 }
 
-#ifdef USEWEBENGINE
 void MainWindow::on_actionEditingCut_triggered()
 {
     m_doc->web()->triggerPageAction(QWebEnginePage::Cut);
@@ -2686,66 +2516,31 @@ void MainWindow::on_actionEditingSelectAll_triggered()
 void MainWindow::on_actionMoveToPageStart_triggered()
 {
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageUp , Qt::AltModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
+    //todo: webengine
+    //m_doc->web()->sendEventToChildWidgets(&keyPress);
 }
 
 void MainWindow::on_actionMoveToPageEnd_triggered()
 {
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageDown , Qt::AltModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
+    //todo: webengine
+    //m_doc->web()->sendEventToChildWidgets(&keyPress);
 }
 
 void MainWindow::on_actionMoveToLineStart_triggered()
 {
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Home, Qt::NoModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
+    //todo: webengine
+    //m_doc->web()->sendEventToChildWidgets(&keyPress);
 }
 
 void MainWindow::on_actionMoveToLineEnd_triggered()
 {
     QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_End, Qt::NoModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
+    //todo: webengine
+    //m_doc->web()->sendEventToChildWidgets(&keyPress);
 }
 
-#else
-
-void MainWindow::on_actionEditingCut_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarCut");
-
-    getActiveEditor()->triggerPageAction(QWebPage::Cut);
-}
-
-void MainWindow::on_actionEditingCopy_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarCopy");
-
-    getActiveEditor()->triggerPageAction(QWebPage::Copy);
-}
-
-void MainWindow::on_actionEditingPaste_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPaste");
-
-    getActiveEditor()->setPastePlainTextEnable(false);
-    getActiveEditor()->triggerPageAction(QWebPage::Paste);
-}
-
-void MainWindow::on_actionEditingPastePlain_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPastePlain");
-
-    getActiveEditor()->setPastePlainTextEnable(true);
-    getActiveEditor()->triggerPageAction(QWebPage::Paste);
-}
-
-void MainWindow::on_actionEditingSelectAll_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarSelectAll");
-
-    getActiveEditor()->triggerPageAction(QWebPage::SelectAll);
-}
-#endif
 
 void MainWindow::on_actionEditingDelete_triggered()
 {
@@ -3192,7 +2987,8 @@ void MainWindow::on_actionAbout_triggered()
 
 void MainWindow::on_actionDeveloper_triggered()
 {
-    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
+    //todo: webengine
+    //m_doc->web()->settings()->setAttribute(QWebEngineSettings::DeveloperExtrasEnabled, true);
 
     WizGetAnalyzer().LogAction("MenuBarDeveloperMode");
 }

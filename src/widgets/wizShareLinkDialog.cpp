@@ -4,7 +4,9 @@
 #include "utils/misc.h"
 #include "share/wizsettings.h"
 #include <QVBoxLayout>
-#include <QWebFrame>
+#include <QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebEngineSettings>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QDesktopServices>
@@ -16,18 +18,18 @@
 CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
     , m_settings(settings)
-    , m_view(new QWebView(this))
+    , m_view(new QWebEngineView(this))
 {
     setWindowFlags(Qt::CustomizeWindowHint);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_view);
 
-    m_view->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_view->settings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
-    m_view->settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, true);
-    connect(m_view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onJavaScriptWindowObject()));
+    m_view->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+    m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    //
+    //TODO: webengine
+    //connect(m_view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(onJavaScriptWindowObject()));
 
     m_animation = new QPropertyAnimation(this, "size", this);
 }
@@ -65,7 +67,7 @@ void CWizShareLinkDialog::writeToLog(const QString& strLog)
 void CWizShareLinkDialog::getToken()
 {
     QString strToken = WizService::Token::token();
-    m_view->page()->mainFrame()->evaluateJavaScript(QString("setToken('%1')").arg(strToken));
+    m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken));
     emit tokenObtained();
 }
 
@@ -123,7 +125,7 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
     if (callBack.isEmpty())
         return;
 
-    m_view->page()->mainFrame()->evaluateJavaScript(callBack);
+    m_view->page()->runJavaScript(callBack);
 }
 
 QString CWizShareLinkDialog::getShareLinkFirstTips()
@@ -159,6 +161,9 @@ void CWizShareLinkDialog::loadHtml()
 
 void CWizShareLinkDialog::onJavaScriptWindowObject()
 {
+    //TODO: webengine
+    /*
     m_view->page()->mainFrame()->addToJavaScriptWindowObject("external", this);
     m_view->page()->mainFrame()->addToJavaScriptWindowObject("customObject", this);
+    */
 }

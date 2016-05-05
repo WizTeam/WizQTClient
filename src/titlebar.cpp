@@ -5,7 +5,6 @@
 #include <QMenu>
 #include <QNetworkConfigurationManager>
 #include <QMessageBox>
-#include <QWebHistory>
 #include <QSplitter>
 #include <QList>
 #include <QLabel>
@@ -265,23 +264,6 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
 }
 
-#ifdef USEWEBENGINE
-void TitleBar::setEditor(CWizDocumentWebEngine* editor)
-{
-    Q_ASSERT(!m_editor);
-
-    m_editorBar->setDelegate(editor);
-
-    connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
-    connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
-
-    connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
-
-    connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
-
-    m_editor = editor;
-}
-#else
 void TitleBar::setEditor(CWizDocumentWebView* editor)
 {
     Q_ASSERT(!m_editor);
@@ -312,7 +294,7 @@ void TitleBar::setBackgroundColor(QColor color)
 //    pal.setColor(QPalette::Window, color);
 //    m_infoBar->setPalette(pal);
 }
-#endif
+
 
 void TitleBar::onEditorFocusIn()
 {
@@ -399,9 +381,10 @@ void TitleBar::setTagBarVisible(bool visible)
     m_tagBar->setVisible(visible);
 }
 
-#ifdef USEWEBENGINE
 void TitleBar::initWebChannel()
 {
+    //todo: webengine
+    /*
     QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
     if (!server->listen(QHostAddress::LocalHost, 0)) {
         qFatal("Failed to open web socket server.");
@@ -420,10 +403,13 @@ void TitleBar::initWebChannel()
     webChannel->registerObject(QStringLiteral("externalObject"), exteranl);
 
     m_strWebchannelUrl = server->serverUrl().toString();
+    */
 }
 
 void TitleBar::registerWebChannel()
 {
+    //todo: webengine
+    /*
     QString strFile = Utils::PathResolve::resourcesPath() + "files/editor/qwebchannel.js";
     QFile f(strFile);
     if (!f.open(QIODevice::ReadOnly))
@@ -444,16 +430,20 @@ void TitleBar::registerWebChannel()
     QString strCommand = QString("initWebChannel('%1')").arg(m_strWebchannelUrl);
     strExec.replace("//${INIT_COMMAND}", strCommand);
     noteView()->commentView()->page()->runJavaScript(strExec);
+    */
 }
-#endif
+
 
 void TitleBar::onEditorChanged()
 {
+    //todo: webengine
+    /*
     if (m_editor->isModified() || m_editor->isContentsChanged()) {
         m_editBtn->setState(CellButton::Badge);
     } else {
         m_editBtn->setState(noteView()->isEditing() ? CellButton::Checked : CellButton::Normal);
     }
+    */
 }
 
 void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
@@ -494,11 +484,14 @@ void TitleBar::setEditButtonState(bool enable, bool editing)
 
 void TitleBar::updateEditButton(bool editing)
 {
+    //todo: webengine
+    /*
     if (m_editor->isModified()) {
         m_editBtn->setState(CellButton::Badge);
     } else {
         m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
     }
+    */
 }
 
 void TitleBar::resetTitle(const QString& strTitle)
@@ -722,9 +715,8 @@ bool isNetworkAccessible()
 
 void TitleBar::onCommentsButtonClicked()
 {
-#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-#else
+
     CWizDocumentView* view = noteView();
     if (!view)
         return;
@@ -733,7 +725,7 @@ void TitleBar::onCommentsButtonClicked()
     connect(commentWidget, SIGNAL(widgetStatusChanged()), this,
             SLOT(updateCommentsButtonStatus()), Qt::UniqueConnection);
 
-#endif
+
     if (commentWidget->isVisible()) {
         commentWidget->hide();
 
@@ -764,23 +756,16 @@ void TitleBar::onCommentsButtonClicked()
 
 void TitleBar::onCommentPageLoaded(bool ok)
 {
-#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-#else
+
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
-    commentWidget->web()->history()->clear();
-#endif
+
     if (!ok)
     {
         qDebug() << "Wow, load comment page failed! " << commentWidget->web()->url();
         loadErrorPage();
         commentWidget->show();
     }
-    else
-    {
-        commentWidget->hideLocalProgress();
-    }
-#ifdef USEWEBENGINE
     else
     {
         comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
@@ -791,7 +776,6 @@ void TitleBar::onCommentPageLoaded(bool ok)
             }
         });
     }
-#endif
 }
 
 void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)

@@ -7,10 +7,10 @@
 #include <QSize>
 #include <QXmlStreamReader>
 #include <QStringList>
-#include <QWebPage>
-#include <QWebElement>
-#include <QWebElementCollection>
-#include <QWebFrame>
+//#include <QWebPage>
+//#include <QWebElement>
+//#include <QWebElementCollection>
+//#include <QWebFrame>
 #include <QEventLoop>
 #include <QMacCocoaViewContainer>
 #include <QDebug>
@@ -457,7 +457,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
 @end
 
-
+#if 0
 bool processWebImageUrl(QString& strHtml, const QString& strUrl)
 {
     QWebPage page;
@@ -530,7 +530,6 @@ bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
 }
 
 
-
 QString wizSystemClipboardData(QString& orignUrl)
 {
     NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
@@ -571,6 +570,7 @@ QString wizSystemClipboardData(QString& orignUrl)
 
     return "";
 }
+#endif
 
 
 bool wizIsYosemiteFilePath(const QString& strPath)
@@ -679,7 +679,7 @@ QString wizDocToHtml(NSData *data)
     return wizAttributedStringToHtml(string);
 }
 
-
+#if 0
 QString wizWebarchiveToHtml(NSString *filePath)
 {
     QString webFile = WizToQString(filePath);
@@ -716,6 +716,7 @@ QString wizWebarchiveToHtml(NSString *filePath)
     }
     return "";
 }
+#endif
 
 bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 {
@@ -731,7 +732,8 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
            strHtml = wizUrlToHtml(filePath);
            break;
        case WebArchiveTextDocumentType:
-           strHtml = wizWebarchiveToHtml(filePath);
+           //todo: webengine
+           //strHtml = wizWebarchiveToHtml(filePath);
            break;
        default:
            NSString* docType = getDoucmentType(type);

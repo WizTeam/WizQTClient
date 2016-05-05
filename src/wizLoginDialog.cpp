@@ -8,7 +8,6 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QLabel>
-#include <QWebView>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMovie>
@@ -20,6 +19,7 @@
 #include <QHistoryState>
 #include <QAbstractState>
 #include <QStateMachine>
+#include <QWebEngineView>
 
 #include "rapidjson/document.h"
 #include "utils/stylehelper.h"

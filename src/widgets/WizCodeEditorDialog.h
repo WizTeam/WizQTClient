@@ -2,7 +2,7 @@
 #define WIZCODEEDITORDIALOG_H
 
 #include <QDialog>
-#include <QWebView>
+#include <QWebEngineView>
 #include <QPointer>
 #include "wizdef.h"
 
@@ -36,7 +36,7 @@ protected:
     void changeEvent(QEvent * event);
 
 private:
-    QWebView *m_codeBrowser;
+    QWebEngineView *m_codeBrowser;
     CWizExplorerApp& m_app;
     CWizDocumentWebView *m_external;
 };

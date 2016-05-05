@@ -43,11 +43,7 @@ public:
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
-#ifdef USEWEBENGINE
-    void setEditor(CWizDocumentWebEngine* editor);
-#else
     void setEditor(CWizDocumentWebView* editor);
-#endif
 
     void setBackgroundColor(QColor color);
 
@@ -107,16 +103,11 @@ private:
     void showInfoBar();
     void showEditorBar();
     void setTagBarVisible(bool visible);
-#ifdef USEWEBENGINE
     //
     void initWebChannel();
     void registerWebChannel();
 
-private:
-    CWizDocumentWebEngine* m_editor;
-#else
     CWizDocumentWebView* m_editor;
-#endif
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
