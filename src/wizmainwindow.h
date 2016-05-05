@@ -244,7 +244,8 @@ public:
     //FIXME: why provide download host and dialog by mainwidnow ???
     CWizObjectDownloaderHost* downloaderHost() const;
     CWizProgressDialog* progressDialog() const { return m_progress; }
-    CWizIAPDialog* iapDialog();
+    //todo: webengine
+    //CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  

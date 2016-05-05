@@ -2222,6 +2222,8 @@ CWizObjectDownloaderHost* MainWindow::downloaderHost() const
     return CWizObjectDownloaderHost::instance();
 }
 
+//todo: webengine
+/*
 CWizIAPDialog*MainWindow::iapDialog()
 {
 #ifdef Q_OS_MAC
@@ -2233,6 +2235,7 @@ CWizIAPDialog*MainWindow::iapDialog()
     return 0;
 #endif
 }
+*/
 
 //void MainWindow::on_documents_documentCountChanged()
 //{

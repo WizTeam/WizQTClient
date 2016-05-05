@@ -128,8 +128,8 @@ set(wiznote_SOURCES
     share/rtf2html/rtf2html.cpp
     widgets/wizEmailShareDialog.cpp
     widgets/wizTemplatePurchaseDialog.cpp
-    share/websocketclientwrapper.cpp
-    share/websockettransport.cpp
+    #share/websocketclientwrapper.cpp
+    #share/websockettransport.cpp
 
     #coreplugin.cpp
     wizCategoryView.cpp
@@ -344,8 +344,8 @@ set(wiznote_HEADERS
     share/rtf2html/rtf_table.h
     share/rtf2html/rtf_tools.h
     widgets/wizEmailShareDialog.h
-    share/websocketclientwrapper.h
-    share/websockettransport.h
+    #share/websocketclientwrapper.h
+    #share/websockettransport.h
     wizWebEngineInjectObject.h
     #widgets/wizMarkdownTemplateDialog.h
     widgets/wizShareLinkDialog.h

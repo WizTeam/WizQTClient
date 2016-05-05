@@ -19,7 +19,7 @@
 #include <QMessageBox>
 #include <QWebChannel>
 #include <QWebEngineSettings>
-#include <QtWebSockets/QWebSocketServer>
+//#include <QtWebSockets/QWebSocketServer>
 #include <QSemaphore>
 
 #include <QApplication>

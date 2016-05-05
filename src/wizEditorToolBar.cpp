@@ -2506,38 +2506,23 @@ void EditorToolBar::on_editor_baidu_triggered()
     QDesktopServices::openUrl(url);
 }
 
-#ifdef USEWEBENGINE
+
 void EditorToolBar::on_editor_cut_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCut");
     m_editor->triggerPageAction(QWebEnginePage::Cut);
 }
 
 void EditorToolBar::on_editor_copy_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopy");
     m_editor->triggerPageAction(QWebEnginePage::Copy);
 }
 
 void EditorToolBar::on_editor_paste_triggered()
 {
-    m_editor->triggerPageAction(QWebEnginePage::Paste);
-}
-#else
-void EditorToolBar::on_editor_cut_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCut");
-    m_editor->triggerPageAction(QWebPage::Cut);
-}
-
-void EditorToolBar::on_editor_copy_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopy");
-    m_editor->triggerPageAction(QWebPage::Copy);
-}
-
-void EditorToolBar::on_editor_paste_triggered()
-{
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
-    m_editor->triggerPageAction(QWebPage::Paste);
+    m_editor->triggerPageAction(QWebEnginePage::Paste);
 }
 
 void EditorToolBar::on_editor_bold_triggered()
@@ -2611,7 +2596,7 @@ void EditorToolBar::on_editor_justifyRight_triggered()
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyRight");
     m_editor->editorCommandExecuteJustifyRight();
 }
-#endif
+
 
 void EditorToolBar::on_comboParagraph_indexChanged(int index)
 {

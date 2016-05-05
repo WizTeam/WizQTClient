@@ -11,6 +11,7 @@
 #include <QDesktopServices>
 #include <QSslConfiguration>
 #include <QNetworkProxy>
+#include <QtWebEngine>
 
 #include <sys/stat.h>
 
@@ -188,6 +189,7 @@ int mainCore(int argc, char *argv[])
     }
 #else
     QApplication a(argc, argv);
+    QtWebEngine::initialize();
 
 #ifdef BUILD4APPSTORE
     CWizIAPHelper helper;
