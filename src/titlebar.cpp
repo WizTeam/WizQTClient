@@ -360,13 +360,7 @@ void TitleBar::showEditorBar()
 
 void TitleBar::loadErrorPage()
 {
-#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-#else
-    noteView()->commentWidget()->hideLocalProgress();
-    QWebView* comments = noteView()->commentView();
-    comments->setVisible(true);
-#endif
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);

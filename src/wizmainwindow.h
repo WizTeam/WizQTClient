@@ -305,13 +305,11 @@ public Q_SLOTS:
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
 
-#ifdef USEWEBENGINE
     //move input position
     void on_actionMoveToPageStart_triggered();
     void on_actionMoveToPageEnd_triggered();
     void on_actionMoveToLineStart_triggered();
     void on_actionMoveToLineEnd_triggered();
-#endif
 
     // menu view
     void on_actionViewToggleCategory_triggered();

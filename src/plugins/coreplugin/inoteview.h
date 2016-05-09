@@ -14,11 +14,7 @@ class INoteView : public QWidget
 
 public:
     explicit INoteView(QWidget *parent = 0);
-#ifdef USEWEBENGINE
     virtual QWebEnginePage* notePage() = 0;
-#else
-    virtual QWebFrame* noteFrame() = 0;
-#endif
     virtual bool isEditing() const = 0;
 };
 

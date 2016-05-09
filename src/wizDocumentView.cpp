@@ -131,11 +131,9 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 //    layoutDoc->setStretchFactor(m_title, 0);
 //    layoutDoc->setStretchFactor(m_splitter, 1);
 
-#ifdef USEWEBENGINE
     QLineEdit *commandLine = new QLineEdit(this);
     layoutDoc->addWidget(commandLine);
     connect(commandLine, SIGNAL(returnPressed()), SLOT(on_command_request()));
-#endif
 
     QVBoxLayout* layoutMain = new QVBoxLayout(this);
     layoutMain->setContentsMargins(0, 0, 0, 0);
@@ -959,11 +957,7 @@ void CWizDocumentView::on_command_request()
     QLineEdit* edit = qobject_cast<QLineEdit*>(sender());
     if (edit)
     {
-#ifdef USEWEBENGINE
         m_web->page()->runJavaScript(edit->text());
-#else
-        m_web->page()->mainFrame()->evaluateJavaScript(edit->text());
-#endif
     }
 }
 
