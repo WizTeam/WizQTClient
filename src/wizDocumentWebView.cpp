@@ -276,7 +276,7 @@ void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
     // maybe it's a QT-BUG?
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
-    QWebView::inputMethodEvent(event);
+    //QWebView::inputMethodEvent(event);
     setUpdatesEnabled(true);
 #else
     QWebEngineView::inputMethodEvent(event);
@@ -369,7 +369,7 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
 
 #ifdef Q_OS_LINUX
     setUpdatesEnabled(false);
-    QWebView::keyPressEvent(event);
+    //QWebView::keyPressEvent(event);
     setUpdatesEnabled(true);
 #else
 
@@ -936,8 +936,7 @@ void CWizDocumentWebView::initEditor()
     connect(page(), SIGNAL(contentsChanged()),
             SLOT(onEditorContentChanged()));
 
-    page()->setHtml(strHtml, url);
-
+    setHtml(strHtml, url);
 }
 
 void CWizDocumentWebView::resetEditor()
