@@ -55,7 +55,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
     , m_web(new CWizDocumentWebView(app, this))
-    , m_comments(new QWebEngineView(this))
+    , m_commentWidget(new CWizLocalProgressWebView(app.mainWindow()))
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
     , m_viewMode(app.userSettings().noteViewMode())
@@ -67,6 +67,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     //, m_editStatusCheckThread(new CWizDocumentStatusCheckThread(this))
     , m_editStatus(0)
     , m_sizeHint(QSize(200, 1))
+    , m_comments(NULL)
 {
     m_title->setEditor(m_web);
 
