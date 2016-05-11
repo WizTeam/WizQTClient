@@ -66,6 +66,7 @@ void CWizLocalProgressWebView::hideLocalProgress()
 {
     m_movie->stop();
     m_labelProgress->hide();
+    layout()->addWidget(m_web);
     m_web->show();
 }
 

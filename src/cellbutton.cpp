@@ -287,3 +287,6 @@ void RoundCellButton::applyAnimation()
 
     m_animation->start();
 }
+
+
+

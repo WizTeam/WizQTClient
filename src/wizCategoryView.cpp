@@ -3093,37 +3093,28 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
 void CWizCategoryView::init()
 {    
     initTopLevelItems();
-    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
-        initGeneral();
-        initFolders();
-        initTags();
-        initStyles();
-        WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-            resetSections();
-            sortFolders();
-            sortPersonalTags();
+    initGeneral();
+    initFolders();
+    initTags();
+    initStyles();
+    resetSections();
+    sortFolders();
+    sortPersonalTags();
 
-            WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+    initGroups();
 
-                initGroups();
-
-                WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                    for (int i = 0; i < topLevelItemCount(); ++i)
-                    {
-                        if (dynamic_cast<CWizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
-                        {
-                            topLevelItem(i)->sortChildren(0, Qt::AscendingOrder);
-                        }
-                    }
-                    //
-                    for (int i = 0 ; i < m_dbMgr.count(); ++i)
-                    {                                               
-                        sortGroupTags(m_dbMgr.at(i).kbGUID());
-                    }
-                });
-            });
-        });
-    });
+    for (int i = 0; i < topLevelItemCount(); ++i)
+    {
+        if (dynamic_cast<CWizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
+        {
+            topLevelItem(i)->sortChildren(0, Qt::AscendingOrder);
+        }
+    }
+    //
+    for (int i = 0 ; i < m_dbMgr.count(); ++i)
+    {
+        sortGroupTags(m_dbMgr.at(i).kbGUID());
+    }
 }
 
 void CWizCategoryView::resetSections()

@@ -699,17 +699,7 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
         return;
 
     //
-    if (::WizIsNoteContainsFrameset(doc)) {
-        viewDocumentWithoutEditor();
-    } else {
-
-        if (m_bEditorInited) {
-            resetCheckListEnvironment();
-            viewDocumentInEditor(m_bEditingMode);
-        } else {
-            initEditor();
-        }
-    }
+    viewDocumentWithoutEditor();
 }
 
 void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok)
@@ -1505,7 +1495,7 @@ void CWizDocumentWebView::viewDocumentWithoutEditor()
     m_strCurrentNoteGUID = strGUID;
     m_bCurrentEditing = false;
     //
-    page()->setHtml(strHtml);
+    setHtml(strHtml, QUrl::fromLocalFile(strFileName));
 
     // show client    
     view()->showClient(true);

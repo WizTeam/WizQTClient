@@ -36,6 +36,8 @@
 
 #include "titlebar.h"
 
+#include "share/wizthreads.h"
+
 using namespace Core;
 using namespace Core::Internal;
 
@@ -54,7 +56,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
-    , m_web(new CWizDocumentWebView(app, this))
     , m_commentWidget(new CWizLocalProgressWebView(app.mainWindow()))
     , m_title(new TitleBar(app, this))
     , m_passwordView(new CWizUserCipherForm(app, this))
@@ -69,8 +70,6 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     , m_sizeHint(QSize(200, 1))
     , m_comments(NULL)
 {
-    m_title->setEditor(m_web);
-
     QVBoxLayout* layoutDoc = new QVBoxLayout();
     layoutDoc->setContentsMargins(0, 0, 0, 0);
     layoutDoc->setSpacing(0);
@@ -95,8 +94,8 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_tab->addWidget(m_passwordView);
     m_tab->addWidget(m_msgWidget);
     m_tab->setCurrentWidget(m_docView);    
+    m_tab->setBackgroundRole(QPalette::HighlightedText);
 
-    m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_comments = m_commentWidget->web();
     //TODO: webengine
     //QWebPage *commentPage = new QWebPage(m_comments);
@@ -108,13 +107,18 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     //m_comments->page()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
     connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
-    connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
+    //connect(m_comments, SIGNAL(linkClicked(QUrl)), m_web, SLOT(onEditorLinkClicked(QUrl)));
     //connect(m_comments->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(on_comment_populateJavaScriptWindowObject()));
     connect(m_commentWidget, SIGNAL(widgetStatusChanged()), SLOT(on_commentWidget_statusChanged()));
 
     m_commentWidget->hide();
 
     QWidget* wgtEditor = new QWidget(m_docView);
+    //
+    m_web = new CWizDocumentWebView(app, wgtEditor);
+    //m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    m_title->setEditor(m_web);
+
     QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
     layoutEditor->setSpacing(0);
     layoutEditor->setContentsMargins(0, 5, 0, 0);
@@ -123,6 +127,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layoutEditor->setStretchFactor(m_title, 0);
     layoutEditor->setStretchFactor(m_web, 1);
 
+    //
     m_splitter = new CWizSplitter(this);
     m_splitter->addWidget(wgtEditor);
     m_splitter->addWidget(m_commentWidget);

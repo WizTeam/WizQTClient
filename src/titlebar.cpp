@@ -762,6 +762,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
     }
     else
     {
+        commentWidget->hideLocalProgress();
         comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
             qDebug() << "lcation protocol :  " << returnValue.toString();
             if ("file:" != returnValue.toString())

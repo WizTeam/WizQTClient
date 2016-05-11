@@ -535,6 +535,8 @@ target_link_libraries(${PROJECT_NAME}
     aggregation
     coreplugin
     helloworld
+    Qt5::WebEngine
+    Qt5::WebEngineWidgets
     #markdown
     ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
     ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
@@ -551,6 +553,10 @@ target_link_libraries(${PROJECT_NAME}
     coreplugin
     helloworld
     #markdown
+    Qt5::WebEngine
+    Qt5::WebEngineWidgets
     ${CMAKE_DL_LIBS}
 )
+
+
 endif(APPSTORE_BUILD)

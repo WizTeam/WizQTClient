@@ -180,13 +180,15 @@ int mainCore(int argc, char *argv[])
 
 
 #ifdef Q_OS_LINUX
-   // create single application for linux
+    // create single application for linux
     CWizSingleApplication a(argc, argv, "Special-Message-for-WizNote-SingleApplication");
     if (a.isRunning())
     {
         a.sendMessage(WIZ_SINGLE_APPLICATION);
         return 0;
     }
+    //
+    QtWebEngine::initialize();
 #else
     QApplication a(argc, argv);
     QtWebEngine::initialize();
