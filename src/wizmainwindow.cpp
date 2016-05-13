@@ -995,7 +995,7 @@ void MainWindow::on_editor_statusChanged()
 {
     CWizDocumentWebView* editor = getActiveEditor();
 
-    if (!editor->isInited() || !editor->hasFocus()) {
+    if (!editor->hasFocus()) {
         m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);

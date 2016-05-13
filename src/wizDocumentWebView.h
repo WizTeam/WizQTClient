@@ -37,7 +37,7 @@ class CWizDocumentWebViewLoaderThread : public QThread
 public:
     CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
-    void load(const WIZDOCUMENTDATA& doc);
+    void load(const WIZDOCUMENTDATA& doc, bool editingMode);
     //
     void stop();
     //
@@ -46,14 +46,15 @@ public:
 protected:
     virtual void run();
     //
-    void setCurrentDoc(QString kbGuid, QString docGuid);
-    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID);
+    void setCurrentDoc(QString kbGuid, QString docGuid, bool editingMode);
+    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, bool& editingMode);
 Q_SIGNALS:
-    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName);
+    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, bool editingMode);
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
+    bool m_editingMode;
     QMutex m_mutex;
     QWaitCondition m_waitForData;
     bool m_stop;
@@ -95,23 +96,21 @@ private:
     bool m_stop;
 };
 
-//TODO: webengine
-/*
-class CWizDocumentWebViewPage: public QWebPage
+class CWizDocumentWebViewPage: public QWebEnginePage
 {
     Q_OBJECT
 
 public:
     explicit CWizDocumentWebViewPage(QObject* parent = 0);
-    virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
-    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
+    virtual void triggerAction(WebAction action, bool checked = false);
+    virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
     void on_editorCommandPaste_triggered();
 
 Q_SIGNALS:
-    void actionTriggered(QWebPage::WebAction act);
+    void actionTriggered(WebAction act);
 };
-*/
+
 
 class CWizDocumentWebView : public QWebEngineView
 {
@@ -129,11 +128,10 @@ public:
     // view and save
     void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
     void setEditingDocument(bool editing);
-    void saveDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
     void closeDocument(const WIZDOCUMENTDATA& doc);
 
-    bool isInited() const { return m_bEditorInited; }
     bool isEditing() const { return m_bEditingMode; }
 
     void setNoteTitleInited(bool inited);
@@ -197,7 +195,7 @@ public:
     void shareNoteByLink();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
-    Q_INVOKABLE bool isContentsChanged();
+    void isContentsChanged(std::function<void(const QVariant &)> callback);
     Q_INVOKABLE void setContentsChanged(bool b);
 
     //use undo func provied by editor
@@ -224,17 +222,18 @@ public:
     QNetworkDiskCache* networkCache();    
 
 private:
-    void initEditor();
-    void resetEditor();
-    void viewDocumentInEditor(bool editing);
-    void viewDocumentWithoutEditor();
+    void viewDocument(bool initEditing);
+    //
+    void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
+    void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
+    //
     void tryResetTitle();    
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);
     void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
     //
-    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force, const std::function<void(const QVariant &)> callback);
     void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);    
 
 protected:
@@ -254,7 +253,6 @@ private:
     QMap<QString, QString> m_mapFile;
 
     QTimer m_timerAutoSave;
-    bool m_bEditorInited;
     bool m_bEditingMode;
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
@@ -302,7 +300,7 @@ public Q_SLOTS:
 
     void onTitleEdited(QString strTitle);
 
-    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName);
+    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, bool editingMode);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();

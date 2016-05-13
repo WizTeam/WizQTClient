@@ -236,13 +236,13 @@ void CWizDocumentView::waitForDone()
 {
     m_editStatusChecker->thread()->quit();
 
-    m_web->saveDocument(m_note, false);
-    //
-    m_web->waitForDone();
+    m_web->saveDocument(m_note, false, [=](const QVariant& ret){
+
+        m_web->waitForDone();
+        //
+    });
     //
     m_editStatusSyncThread->waitForDone();
-//    m_editStatusCheckThread->waitForDone();
-
 }
 
 QWidget* CWizDocumentView::client() const
@@ -383,55 +383,59 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool bEditing)
 void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     m_web->closeDocument(m_note);
-    m_web->saveDocument(m_note, false);
-    if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
-    {
-        stopDocumentEditingStatus();
-    }
+    //
+    m_web->saveDocument(m_note, false, [=](const QVariant& ret){
 
-    m_transitionView->hide();
+        if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
+        {
+            stopDocumentEditingStatus();
+        }
 
-    m_noteLoaded = false;
-    m_note = data;
-    initStat(data, forceEdit);
+        m_transitionView->hide();
 
-    if (m_tab->currentWidget() != m_docView) {
-        m_tab->setCurrentWidget(m_docView);
-    }
-    m_tab->setVisible(true);
+        m_noteLoaded = false;
+        m_note = data;
+        initStat(data, forceEdit);
 
-    // download document if not exist
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
-    if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName))
-    {
-        downloadNoteFromServer(data);
+        if (m_tab->currentWidget() != m_docView) {
+            m_tab->setCurrentWidget(m_docView);
+        }
+        m_tab->setVisible(true);
 
-        return;
-    }
+        // download document if not exist
+        CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
+        QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
+        if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
+                !PathFileExists(strDocumentFileName))
+        {
+            downloadNoteFromServer(data);
 
-    // ask user cipher if needed
-    if (data.nProtected) {
-        if(!db.loadUserCert()) {
             return;
         }
 
-        if (db.userCipher().isEmpty()) {
-            m_passwordView->setHint(db.userCipherHint());
-            m_tab->setCurrentWidget(m_passwordView);
-            m_passwordView->setCipherEditorFocus();
+        // ask user cipher if needed
+        if (data.nProtected) {
+            if(!db.loadUserCert()) {
+                return;
+            }
 
-            return;
+            if (db.userCipher().isEmpty()) {
+                m_passwordView->setHint(db.userCipherHint());
+                m_tab->setCurrentWidget(m_passwordView);
+                m_passwordView->setCipherEditorFocus();
+
+                return;
+            }
         }
-    }
 
-    loadNote(data);
-    WIZDOCUMENTDATA docData = data;
-    docData.nReadCount ++;
-    db.ModifyDocumentReadCount(docData);
-    docData.tAccessed = WizGetCurrentTime();
-    db.ModifyDocumentDateAccessed(docData);
+        loadNote(data);
+        WIZDOCUMENTDATA docData = data;
+        docData.nReadCount ++;
+        db.ModifyDocumentReadCount(docData);
+        docData.tAccessed = WizGetCurrentTime();
+        db.ModifyDocumentDateAccessed(docData);
+
+    });
 }
 
 void CWizDocumentView::reviewCurrentNote()
@@ -476,12 +480,6 @@ void CWizDocumentView::setEditNote(bool bEdit)
 {
     if (m_bLocked)
         return;
-
-    if (::WizIsNoteContainsFrameset(m_note))
-    {
-        m_title->showMessageTips(Qt::PlainText, tr("Note type is %1, do not support edit mode.").arg(m_note.strFileType));
-        return;
-    }
 
     bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).IsGroup();
     if (bEdit && isGroupNote)

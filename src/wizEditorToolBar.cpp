@@ -2412,14 +2412,13 @@ void EditorToolBar::buildMenu()
             }
 
             QString strSlot = "1" + item.execute + "()";
-            //todo: webengine
-            /*
+
             if (item.localSlot) {
-                m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8());
+                m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8().constData());
             } else {
-                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
+                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8().constData());
             }
-            */
+
         } else {
             Q_ASSERT(0);
         }
@@ -2467,14 +2466,11 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 
             bSkip = false;
             QString strSlot = "1" + item.execute + "()";
-            //todo: webengine
-            /*
             if (item.localSlot) {
-                m_actions[item.label] = pSubMenu->addAction(item.label, this, strSlot.toUtf8());
+                m_actions[item.label] = pSubMenu->addAction(item.label, this, strSlot.toUtf8().constData());
             } else {
-                m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
+                m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8().constData());
             }
-            */
 
         } else if (item.command.isEmpty() && item.execute.isEmpty()) {
             continue;

@@ -2186,6 +2186,20 @@ bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
 }
 
 
+void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML)
+{
+    ptrdiff_t nPos = strHTML.indexOf("</head", 0, Qt::CaseInsensitive);
+    if (-1 == nPos)
+    {
+        nPos = 0;
+    }
+    //
+    strHTML.insert(int(nPos), strText);
+}
+
+
+
+
 bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
 {
     QDir sourceDir(strSrcDir);
