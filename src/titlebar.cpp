@@ -9,10 +9,6 @@
 #include <QList>
 #include <QLabel>
 
-//#include "share/websocketclientwrapper.h"
-//#include "share/websockettransport.h"
-//#include "wizWebEngineInjectObject.h"
-
 #include <coreplugin/icore.h>
 
 #include "widgets/wizTagBar.h"
@@ -375,69 +371,10 @@ void TitleBar::setTagBarVisible(bool visible)
     m_tagBar->setVisible(visible);
 }
 
-void TitleBar::initWebChannel()
-{
-    //todo: webengine
-    /*
-    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
-    if (!server->listen(QHostAddress::LocalHost, 0)) {
-        qFatal("Failed to open web socket server.");
-        return;
-    }
-
-    // wrap WebSocket clients in QWebChannelAbstractTransport objects
-    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
-
-    // setup the dialog and publish it to the QWebChannel
-    QWebChannel *webChannel = new QWebChannel(this);
-    // setup the channel
-    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
-                     webChannel, &QWebChannel::connectTo);
-    CWizCommentsExternal* exteranl = new CWizCommentsExternal(this);
-    webChannel->registerObject(QStringLiteral("externalObject"), exteranl);
-
-    m_strWebchannelUrl = server->serverUrl().toString();
-    */
-}
-
-void TitleBar::registerWebChannel()
-{
-    //todo: webengine
-    /*
-    QString strFile = Utils::PathResolve::resourcesPath() + "files/editor/qwebchannel.js";
-    QFile f(strFile);
-    if (!f.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[Comments]Failed to get execute code";
-        return;
-    }
-
-    QTextStream ts(&f);
-    QString strExec = ts.readAll();
-    f.close();
-
-    Q_ASSERT(strExec.indexOf("//${INIT_COMMAND}") != -1);
-    if (m_strWebchannelUrl.isEmpty())
-    {
-        initWebChannel();
-    }
-    QString strCommand = QString("initWebChannel('%1')").arg(m_strWebchannelUrl);
-    strExec.replace("//${INIT_COMMAND}", strCommand);
-    noteView()->commentView()->page()->runJavaScript(strExec);
-    */
-}
-
 
 void TitleBar::onEditorChanged()
 {
-    //todo: webengine
-    /*
-    if (m_editor->isModified() || m_editor->isContentsChanged()) {
-        m_editBtn->setState(CellButton::Badge);
-    } else {
-        m_editBtn->setState(noteView()->isEditing() ? CellButton::Checked : CellButton::Normal);
-    }
-    */
+    updateEditButton(noteView()->isEditing());
 }
 
 void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
@@ -478,14 +415,13 @@ void TitleBar::setEditButtonState(bool enable, bool editing)
 
 void TitleBar::updateEditButton(bool editing)
 {
-    //todo: webengine
-    /*
-    if (m_editor->isModified()) {
-        m_editBtn->setState(CellButton::Badge);
-    } else {
-        m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
-    }
-    */
+    m_editor->isContentsChanged([=](const QVariant& vChanged) {
+        if (vChanged.toBool()){
+            m_editBtn->setState(CellButton::Badge);
+        } else {
+            m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
+        }
+    });
 }
 
 void TitleBar::resetTitle(const QString& strTitle)
@@ -763,13 +699,6 @@ void TitleBar::onCommentPageLoaded(bool ok)
     else
     {
         commentWidget->hideLocalProgress();
-        comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
-            qDebug() << "lcation protocol :  " << returnValue.toString();
-            if ("file:" != returnValue.toString())
-            {
-                registerWebChannel();
-            }
-        });
     }
 }
 

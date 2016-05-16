@@ -12,6 +12,7 @@ class QWebView;
 class QMenu;
 class QPlainTextEdit;
 class CWizDocumentWebView;
+class WizWebEngineView;
 
 class WizCodeEditorDialog : public QDialog
 {
@@ -23,20 +24,16 @@ signals:
     void insertHtmlRequest(QString strHtml);
 
 public slots:
-    void registerJSObject();
     void insertHtml(const QString& strResultDiv);
 
     QString getLastCodeType();
     void saveLastCodeType(const QString& codeType);
 
-        // if use webengine
-//    void onHtmlLoaded(bool ok);
-//    void runJs();
 protected:
     void changeEvent(QEvent * event);
 
 private:
-    QWebEngineView *m_codeBrowser;
+    WizWebEngineView *m_codeBrowser;
     CWizExplorerApp& m_app;
     CWizDocumentWebView *m_external;
 };

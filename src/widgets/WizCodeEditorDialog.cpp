@@ -24,23 +24,25 @@
 #include <extensionsystem/pluginspec.h>
 #include <coreplugin/icore.h>
 
+#include "share/wizwebengineview.h"
+
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
 WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView* external, QWidget *parent) :
     QDialog(parent)
   , m_app(app)
   , m_external(external)
-  , m_codeBrowser(new QWebEngineView(this))
+  , m_codeBrowser(new WizWebEngineView(this))
 {
+    m_codeBrowser->addToJavaScriptWindowObject("codeEditor", this);
+    m_codeBrowser->addToJavaScriptWindowObject("external", m_external);
 
+    //
     setAttribute(Qt::WA_DeleteOnClose);
     //setWindowFlags(Qt::WindowStaysOnTopHint);          //could cause fullscreen problem on mac when mainwindow was fullscreen
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
     //
-    //TODO: webengine
-    //connect(m_codeBrowser->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(registerJSObject()));
-
     //
     QVBoxLayout *verticalLayout = new QVBoxLayout(this);
     verticalLayout->setSpacing(6);
@@ -70,12 +72,6 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
 //    }
 }
 
-void WizCodeEditorDialog::registerJSObject()
-{
-    //TODO: webengine
-    //m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("codeEditor", this);
-    //m_codeBrowser->page()->mainFrame()->addToJavaScriptWindowObject("external", m_external);
-}
 
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
@@ -109,38 +105,5 @@ void WizCodeEditorDialog::saveLastCodeType(const QString& codeType)
     m_app.userSettings().set(LASTUSEDCODETYPE, codeType);
 }
 
-/* if use webengine
-void WizCodeEditorDialog::onHtmlLoaded(bool ok)
-{
-    if (!ok)
-        return;
-
-    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
-    if (!server->listen(QHostAddress::LocalHost, 0)) {
-        qFatal("Failed to open web socket server.");
-        return;
-    }
-
-    // wrap WebSocket clients in QWebChannelAbstractTransport objects
-    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
-
-    // setup the dialog and publish it to the QWebChannel
-    QWebChannel *webChannel = new QWebChannel(this);
-    // setup the channel
-    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
-                     webChannel, &QWebChannel::connectTo);
-    webChannel->registerObject(QStringLiteral("codeEditor"), m_external);
-
-    QString strUrl = server->serverUrl().toString();
-    qDebug() << "try to init js in code editor by url : " << strUrl;
-    m_codeBrowser->page()->runJavaScript(QString("initializeJSObject('%1');").arg(strUrl));
-}
-
-void WizCodeEditorDialog::runJs()
-{
-    QString strHtml = m_edit->text();
-    m_codeBrowser->page()->runJavaScript(strHtml);
-}
-*/
 
 

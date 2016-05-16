@@ -104,9 +104,6 @@ private:
     void showEditorBar();
     void setTagBarVisible(bool visible);
     //
-    void initWebChannel();
-    void registerWebChannel();
-
     CWizDocumentWebView* m_editor;
     CWizExplorerApp& m_app;
 

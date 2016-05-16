@@ -1128,6 +1128,19 @@ bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
+
+bool WizLoadTextFromResource(const QString& resourceName, QString& text)
+{
+    QFile data(resourceName);
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        text = in.readAll();
+        return true;
+    }
+    return false;
+}
+
+
 bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
