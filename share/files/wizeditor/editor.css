@@ -1,0 +1,2 @@
+﻿/*dragresize*/
+.wizimgdragresize {position: absolute;z-index: 1000;border: 1px solid black; background-color: white;} .wizimgdragresize-lt { cursor: nw-resize; } .wizimgdragresize-tm { cursor: n-resize;}.wizimgdragresize-rt {cursor: ne-resize;}.wizimgdragresize-lm {cursor: w-resize;}.wizimgdragresize-rm {cursor: e-resize;}.wizimgdragresize-lb {cursor: sw-resize;}.wizimgdragresize-bm {cursor: s-resize;}.wizimgdragresize-rb { cursor: se-resize; }
