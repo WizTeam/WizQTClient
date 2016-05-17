@@ -105,8 +105,6 @@ void WizWebEngineView::innerLoadFinished(bool ret)
                     //
                     jsInit.replace("__port__", port).replace("__objectNames__", m_objectNames);
                     //
-                    qDebug() << jsInit;
-                    //
                     page()->runJavaScript(jsInit);
                 });
             }
