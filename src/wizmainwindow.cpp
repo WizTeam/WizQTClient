@@ -2223,8 +2223,6 @@ CWizObjectDownloaderHost* MainWindow::downloaderHost() const
     return CWizObjectDownloaderHost::instance();
 }
 
-//todo: webengine
-/*
 CWizIAPDialog*MainWindow::iapDialog()
 {
 #ifdef Q_OS_MAC
@@ -2236,7 +2234,6 @@ CWizIAPDialog*MainWindow::iapDialog()
     return 0;
 #endif
 }
-*/
 
 //void MainWindow::on_documents_documentCountChanged()
 //{
@@ -2515,34 +2512,6 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
     m_doc->web()->triggerPageAction(QWebEnginePage::SelectAll);
-}
-
-void MainWindow::on_actionMoveToPageStart_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageUp , Qt::AltModifier, QString());
-    //todo: webengine
-    //m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToPageEnd_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageDown , Qt::AltModifier, QString());
-    //todo: webengine
-    //m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToLineStart_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Home, Qt::NoModifier, QString());
-    //todo: webengine
-    //m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToLineEnd_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_End, Qt::NoModifier, QString());
-    //todo: webengine
-    //m_doc->web()->sendEventToChildWidgets(&keyPress);
 }
 
 
@@ -2988,15 +2957,6 @@ void MainWindow::on_actionAbout_triggered()
     AboutDialog dialog(this);
     dialog.exec();
 }
-
-void MainWindow::on_actionDeveloper_triggered()
-{
-    //todo: webengine
-    //m_doc->web()->settings()->setAttribute(QWebEngineSettings::DeveloperExtrasEnabled, true);
-
-    WizGetAnalyzer().LogAction("MenuBarDeveloperMode");
-}
-
 
 void MainWindow::on_actionPreference_triggered()
 {

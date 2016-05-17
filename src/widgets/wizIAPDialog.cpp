@@ -1,9 +1,7 @@
 #include "wizIAPDialog.h"
 #include "ui_wizIAPDialog.h"
 #include <QMessageBox>
-#include <QWebView>
 #include <QTextBrowser>
-#include <QWebFrame>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>

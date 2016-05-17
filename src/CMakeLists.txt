@@ -108,7 +108,7 @@ set(wiznote_SOURCES
     widgets/wizShareLinkDialog.cpp
     share/wizAnalyzer.cpp
     share/wizTranslater.cpp
-    #widgets/wizIAPDialog.cpp
+    widgets/wizIAPDialog.cpp
     widgets/wizAdvancedSearchDialog.cpp
     share/wizUDPClient.cpp
     share/wizMessageBox.cpp
@@ -353,7 +353,7 @@ set(wiznote_HEADERS
     widgets/wizShareLinkDialog.h
     share/wizAnalyzer.h
     share/wizTranslater.h
-    #widgets/wizIAPDialog.h
+    widgets/wizIAPDialog.h
     widgets/wizAdvancedSearchDialog.h
     share/wizUDPClient.h
     share/wizMessageBox.h
@@ -396,7 +396,7 @@ set(wiznote_FORMS
     ui/wizVerificationCodeDialog.ui
     ui/wizEmailShareDialog.ui
     #ui/wizMarkdownTemplateDialog.ui
-    #ui/wizIAPDialog.ui
+    ui/wizIAPDialog.ui
     ui/wizAdvancedSearchDialog.ui
     ui/wizCrashReportDialog.ui
     ui/wizTemplatePurchaseDialog.ui

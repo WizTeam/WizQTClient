@@ -473,18 +473,6 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
     emit settingsChanged(wizoptionsFolders);
 }
 
-void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
-{
-#if 0   //TODO: webengine
-    CWizMarkdownTemplateDialog dlg;
-    if (dlg.exec() == QDialog::Accepted)
-//        Core::ICore::instance()->emitMarkdownSettingChanged();
-        Q_EMIT settingsChanged(wizoptionsMarkdown);
-    return;
-#endif
-}
-
-
 void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
 {
     switch (index) {

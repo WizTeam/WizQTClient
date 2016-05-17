@@ -96,18 +96,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_EDITOR_DELETE,                QObject::tr("Delete"),    "",          QKeySequence()},
         {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select All"), "",         QKeySequence("Ctrl+A")},
 
-        {"actionMoveToPageStart",          QObject::tr("Move to page start"),     "",     QKeySequence(QKeySequence::MoveToStartOfDocument)},
-        {"actionMoveToPageEnd",           QObject::tr("Move to page end"),      "",     QKeySequence(QKeySequence::MoveToEndOfDocument)},
-    #ifdef Q_OS_MAC
-        {"actionMoveToLineStart",            QObject::tr("Move to line start"),       "",     QKeySequence(QKeySequence::MoveToStartOfLine)},
-        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToEndOfLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextPage)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousPage)},
-
-    #endif
-
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide Sidebar"),   QObject::tr("Show Sidebar"),    QKeySequence("Alt+Ctrl+S")},
         {WIZACTION_GLOBAL_TOGGLE_FULLSCREEN,    QObject::tr("Enter Fullscreen"),       QObject::tr("Leave Fullscreen"),         QKeySequence("Ctrl+Meta+f")},
@@ -160,7 +148,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to Plain Text"), "",           QKeySequence()},
         {WIZACTION_FORMAT_VIEW_SOURCE,             QObject::tr("View Html Source..."),  "",           QKeySequence()},
         {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen Shot..."),           "",           QKeySequence()},
-        {"actionDeveloper",                       QObject::tr("Developer Mode"), "", QKeySequence()},
 
 
         {"", "", "", QKeySequence()}

@@ -63,10 +63,6 @@ private slots:
 
     void on_checkBoxManuallySort_toggled(bool checked);
 
-    void on_pushButtonChoseMarkdwonTemplate_clicked();
-
-
-
     void on_tabWidget_currentChanged(int index);
 
 private:

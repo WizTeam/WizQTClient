@@ -244,8 +244,7 @@ public:
     //FIXME: why provide download host and dialog by mainwidnow ???
     CWizObjectDownloaderHost* downloaderHost() const;
     CWizProgressDialog* progressDialog() const { return m_progress; }
-    //todo: webengine
-    //CWizIAPDialog* iapDialog();
+    CWizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
@@ -277,7 +276,6 @@ public Q_SLOTS:
     void on_actionNewNoteByTemplate_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
-    void on_actionDeveloper_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
@@ -304,12 +302,6 @@ public Q_SLOTS:
     void on_actionEditingPastePlain_triggered();
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
-
-    //move input position
-    void on_actionMoveToPageStart_triggered();
-    void on_actionMoveToPageEnd_triggered();
-    void on_actionMoveToLineStart_triggered();
-    void on_actionMoveToLineEnd_triggered();
 
     // menu view
     void on_actionViewToggleCategory_triggered();
