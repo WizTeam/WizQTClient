@@ -98,6 +98,7 @@
 #include "widgets/wizTipsWidget.h"
 #include "wizPositionDelegate.h"
 #include "core/wizAccountManager.h"
+#include "share/wizwebengineview.h"
 
 #define MAINWINDOW  "MainWindow"
 

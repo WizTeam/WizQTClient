@@ -37,6 +37,7 @@
 #include "titlebar.h"
 
 #include "share/wizthreads.h"
+#include "share/wizwebengineview.h"
 
 using namespace Core;
 using namespace Core::Internal;
@@ -250,7 +251,7 @@ QWidget* CWizDocumentView::client() const
     return m_tab;
 }
 
-QWebEngineView*CWizDocumentView::commentView() const
+WizWebEngineView*CWizDocumentView::commentView() const
 {
     return m_commentWidget->web();
 }

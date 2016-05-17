@@ -10,6 +10,8 @@
 
 
 class CWizUserSettings;
+class WizWebEngineView;
+
 class CWizShareLinkDialog : public QDialog
 {
     Q_OBJECT
@@ -41,15 +43,13 @@ public:
 public slots:
     void loadHtml();
 
-    void onJavaScriptWindowObject();
-
 
 signals:
     void tokenObtained();
 
 private:
     CWizUserSettings& m_settings;
-    QWebEngineView* m_view;
+    WizWebEngineView* m_view;
     WIZDOCUMENTDATA m_doc;
     QPropertyAnimation* m_animation;
 };

@@ -12,13 +12,14 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QDebug>
+#include "share/wizwebengineview.h"
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 
 CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
     , m_settings(settings)
-    , m_view(new QWebEngineView(this))
+    , m_view(new WizWebEngineView(this))
 {
     setWindowFlags(Qt::CustomizeWindowHint);
     QVBoxLayout* layout = new QVBoxLayout(this);
@@ -28,8 +29,8 @@ CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* pa
     m_view->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     //
-    //TODO: webengine
-    //connect(m_view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()), SLOT(onJavaScriptWindowObject()));
+    m_view->addToJavaScriptWindowObject("external", this);
+    m_view->addToJavaScriptWindowObject("customObject", this);
 
     m_animation = new QPropertyAnimation(this, "size", this);
 }
@@ -159,11 +160,3 @@ void CWizShareLinkDialog::loadHtml()
     m_view->load(url);
 }
 
-void CWizShareLinkDialog::onJavaScriptWindowObject()
-{
-    //TODO: webengine
-    /*
-    m_view->page()->mainFrame()->addToJavaScriptWindowObject("external", this);
-    m_view->page()->mainFrame()->addToJavaScriptWindowObject("customObject", this);
-    */
-}

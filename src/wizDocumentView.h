@@ -25,7 +25,7 @@ class CWizObjectDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class QWebEnginePage;
-class QWebEngineView;
+class WizWebEngineView;
 class CWizDocumentEditStatusSyncThread;
 class CWizDocumentStatusChecker;
 class CWizLocalProgressWebView;
@@ -50,7 +50,7 @@ public:
 
     QWidget* client() const;
     CWizDocumentWebView* web() const { return m_web; }
-    QWebEngineView* commentView() const;
+    WizWebEngineView* commentView() const;
     CWizLocalProgressWebView* commentWidget() const;
     //
     CWizDocumentTransitionView* transitionView();
@@ -72,7 +72,7 @@ protected:
 
     QWidget* m_docView;
     CWizDocumentWebView* m_web;
-    QWebEngineView* m_comments;
+    WizWebEngineView* m_comments;
     CWizLocalProgressWebView* m_commentWidget;
     CWizSplitter* m_splitter;
     Core::Internal::TitleBar* m_title;  

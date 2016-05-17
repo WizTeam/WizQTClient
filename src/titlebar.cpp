@@ -37,6 +37,7 @@
 #include "wizOEMSettings.h"
 #include "wizmainwindow.h"
 #include "share/wizsettings.h"
+#include "share/wizwebengineview.h"
 
 #include "core/wizCommentManager.h"
 

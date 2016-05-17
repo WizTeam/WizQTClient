@@ -43,6 +43,7 @@
 #include "wizproxydialog.h"
 #include "wiznotestyle.h"
 #include "wizOEMSettings.h"
+#include "share/wizwebengineview.h"
 
 using namespace WizService;
 
@@ -1713,7 +1714,7 @@ void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
     QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("snspage");
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
-    connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
+    connect(dlg.web(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
     dlg.exec();
 }

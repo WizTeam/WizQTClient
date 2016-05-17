@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPalette>
+#include "share/wizwebengineview.h"
 
 CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(parent)
 {
@@ -14,7 +15,7 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    m_web = new QWebEngineView(this);
+    m_web = new WizWebEngineView(this);
     m_web->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
 
     m_movie = new QMovie(this);
@@ -40,7 +41,7 @@ CWizLocalProgressWebView::~CWizLocalProgressWebView()
 {
 
 }
-QWebEngineView*CWizLocalProgressWebView::web()
+WizWebEngineView* CWizLocalProgressWebView::web()
 {
     return m_web;
 }

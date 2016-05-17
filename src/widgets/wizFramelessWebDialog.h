@@ -24,8 +24,6 @@ protected:
 public slots:
     void Execute(const QString& strFunction, QVariant param1, QVariant param2,
                                   QVariant param3, QVariant param4);
-    void onJavaScriptWindowObjectCleared();
-
     void onPageLoadFinished(bool ok);
 
 
