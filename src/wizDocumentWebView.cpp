@@ -144,6 +144,8 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
 //    }
 
 #ifdef Q_OS_MAC
+    //todo: webengine
+    /*
     QString strOrignUrl;
     QString strText = wizSystemClipboardData(strOrignUrl);
     if (!strText.isEmpty())
@@ -167,6 +169,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
             return;
         }
     }
+    */
 #endif
 
     if (!clip->image().isNull()) {

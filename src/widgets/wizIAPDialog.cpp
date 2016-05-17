@@ -41,10 +41,14 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent)
     setPurchaseAvailable(false);
 
     initStyles();
+    //
+    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
+    if (mainWindow) {
+        ui->webView->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    }
+
 
     connect(&m_timer, SIGNAL(timeout()), SLOT(onWaitingTimeOut()));
-    connect(ui->webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onEditorPopulateJavaScriptWindowObject()));
     connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(checkReceiptFinished(QNetworkReply*)));
 
     // call check receipt function in main thread
@@ -341,14 +345,6 @@ void CWizIAPDialog::onWaitingTimeOut()
     m_waitingMsgBox->setText(tr("Can not connect to Server, please try again later."));
     m_waitingMsgBox->exec();
     accept();
-}
-
-void CWizIAPDialog::onEditorPopulateJavaScriptWindowObject()
-{
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
-    if (mainWindow) {
-        ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
-    }
 }
 
 void CWizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID)
