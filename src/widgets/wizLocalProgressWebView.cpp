@@ -17,6 +17,8 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
 
     m_web = new WizWebEngineView(this);
     m_web->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+    //
+    m_web->setPage(new WizWebEnginePage(this));
 
     m_movie = new QMovie(this);
     m_movie->setFileName(":/loading.gif");

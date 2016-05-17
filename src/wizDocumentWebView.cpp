@@ -103,7 +103,7 @@ enum WizLinkType {
 };
 
 CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent)
-    : QWebEnginePage(parent)
+    : WizWebEnginePage(parent)
 {
     action(QWebEnginePage::Undo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Redo)->setShortcut(QKeySequence());
@@ -197,7 +197,7 @@ void CWizDocumentWebViewPage::javaScriptConsoleMessage(QWebEnginePage::JavaScrip
 static int nWindowIDCounter = 0;
 
 CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
-    : QWebEngineView(parent)
+    : WizWebEngineView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_bNewNote(false)
@@ -215,12 +215,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
 
     //TODO: webengine
     //connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
-
-    QNetworkDiskCache *diskCache = new QNetworkDiskCache(this);
-    QString location = Utils::PathResolve::tempPath();
-    diskCache->setCacheDirectory(location);
-    //TODO: webengine
-    //page->networkAccessManager()->setCache(diskCache);
+    connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
 
     // minimum page size hint
     setMinimumSize(400, 250);
@@ -246,16 +241,13 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //
-    //TODO: webengine
-    //page()->setLinkDelegationPolicy(QWebEnginePage::DelegateAllLinks);
+    addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+    addToJavaScriptWindowObject("WizEditor", this);
 
-    //connect(page(), SIGNAL(javaScriptWindowObjectCleared()),
-    //        SLOT(onEditorPopulateJavaScriptWindowObject()));
 
     connect(this, SIGNAL(loadFinished(bool)), SLOT(onEditorLoadFinished(bool)));
     connect(this, SIGNAL(selectionChanged()), SLOT(onEditorSelectionChanged()));
 
-    //connect(this, SIGNAL(linkClicked(const QUrl&)), SLOT(onEditorLinkClicked(const QUrl&)));
     //connect(this, SIGNAL(contentsChanged()), SLOT(onEditorContentChanged()));
 
 }
@@ -1072,13 +1064,6 @@ QWebFrame* CWizDocumentWebView::noteFrame()
 }
 */
 
-void CWizDocumentWebView::onEditorPopulateJavaScriptWindowObject()
-{
-    //todo: webeigne
-    //page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-    //page()->mainFrame()->addToJavaScriptWindowObject("WizEditor", this);
-}
-
 void CWizDocumentWebView::onEditorContentChanged()
 {
     setContentsChanged(true);
@@ -1098,7 +1083,7 @@ void CWizDocumentWebView::onEditorSelectionChanged()
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
+void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
     if (isInternalUrl(url))
     {
@@ -1106,16 +1091,16 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
         switch (GetWizUrlType(strUrl)) {
         case WizUrl_Document:
             viewDocumentByUrl(strUrl);
-            break;
+            return;
         case WizUrl_Attachment:
             if (!m_bEditingMode)
             {
                 viewAttachmentByUrl(view()->note().strKbGUID, strUrl);
             }
-            break;
+            return;
         default:
             qDebug() << QString("%1 is a wiz internal url , but we can not identify it");
-            break;
+            return;
         }
     }
     else
@@ -1128,7 +1113,10 @@ void CWizDocumentWebView::onEditorLinkClicked(const QUrl& url)
 
         qDebug() << "Open url " << strUrl;
         QDesktopServices::openUrl(strUrl);
+        return;
     }
+    //
+    page->stopCurrentNavigation();
 }
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)

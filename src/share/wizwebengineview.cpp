@@ -5,6 +5,29 @@
 #include "wizmisc.h"
 #include "utils/pathresolve.h"
 
+WizWebEnginePage::WizWebEnginePage(QObject* parent)
+    : QWebEnginePage(parent)
+    , m_continueNavigate(true)
+{
+}
+
+void WizWebEnginePage::javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
+{
+    qDebug() << message;
+}
+
+bool WizWebEnginePage::acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame)
+{
+    if (NavigationTypeLinkClicked != type)
+        return true;
+    //
+    m_continueNavigate = true;
+    emit linkClicked(url, type, isMainFrame, this);
+
+    return m_continueNavigate;
+}
+
+
 WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)
     , m_server(NULL)

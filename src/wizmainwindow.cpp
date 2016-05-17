@@ -1723,7 +1723,7 @@ void MainWindow::windowActived()
  */
 void MainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
 {
-    m_doc->web()->onEditorLinkClicked(strUrl);
+    QDesktopServices::openUrl(strUrl);
 }
 
 /** web页面调用该方法，token失效时重新获取token

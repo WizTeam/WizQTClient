@@ -13,6 +13,7 @@
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizdef.h"
 #include "share/wizobject.h"
+#include "share/wizwebengineview.h"
 
 
 class CWizObjectDownloaderHost;
@@ -96,7 +97,7 @@ private:
     bool m_stop;
 };
 
-class CWizDocumentWebViewPage: public QWebEnginePage
+class CWizDocumentWebViewPage: public WizWebEnginePage
 {
     Q_OBJECT
 
@@ -112,7 +113,7 @@ Q_SIGNALS:
 };
 
 
-class CWizDocumentWebView : public QWebEngineView
+class CWizDocumentWebView : public WizWebEngineView
 {
     Q_OBJECT
 
@@ -290,11 +291,10 @@ public Q_SLOTS:
     //TODO: webengine
     void onActionTriggered(QWebEnginePage::WebAction act);
 
-    void onEditorPopulateJavaScriptWindowObject();
     void onEditorLoadFinished(bool ok);
-    void onEditorLinkClicked(const QUrl& url);
     void onEditorContentChanged();
     void onEditorSelectionChanged();
+    void onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page);
 
     void onTimerAutoSaveTimout();
 
