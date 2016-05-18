@@ -1583,7 +1583,7 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg2 /* = QString() */,
                                                       const QString& arg3 /* = QString() */)
 {
-    QString strExec = QString("editor.execCommand('%1'").arg(strCommand);
+    QString strExec = QString("document.execCommand('%1'").arg(strCommand);
     if (!arg1.isEmpty()) {
         strExec += ", " + arg1;
     }
@@ -1600,18 +1600,11 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
 
     qDebug() << strExec;
 
-    //todo: webengine
-    /*
-    bool ret = page()->runJavaScript(strExec).toBool();
-
+    page()->runJavaScript(strExec);
     //
     setContentsChanged(true);
-    // notify mainwindow to update action status
-    emit statusChanged();
 
-    return ret;
-    */
-    return 0;
+    return true;
 }
 
 bool CWizDocumentWebView::editorCommandQueryLink()
@@ -2426,10 +2419,6 @@ void CWizDocumentWebView::isContentsChanged(std::function<void(const QVariant &)
 void CWizDocumentWebView::setContentsChanged(bool b)
 {
     m_bContentsChanged = b;
-    if (b)
-    {
-        emit contentsChanged();
-    }
 }
 
 void CWizDocumentWebView::undo()

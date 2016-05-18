@@ -880,11 +880,6 @@ void MainWindow::initActions()
     m_animateSync->setSingleIcons("sync");
 
     connect(m_doc->web(), SIGNAL(statusChanged(const QString&)), SLOT(on_editor_statusChanged(const QString&)));
-//#ifndef USEWEBENGINE
-//    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
-//    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
-//#endif
-
 }
 
 void setActionCheckState(const QList<QAction*>& actionList, int type)
@@ -1043,40 +1038,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
     m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
     //
     //
-    rapidjson::Document d;
-    d.Parse(currentStyle.toUtf8().constData());
-    if (d.HasParseError())
-        return;
-    //
-    /*
-    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].GetString());
-    CString strForeColor = QString::fromUtf8(d["foreColor"].GetString());
-    CString strBackColor = QString::fromUtf8(d["backColor"].GetString());
-    //
-    CString strFontName = QString::fromUtf8(d["fontName"].GetString());
-    CString strFontSize = QString::fromUtf8(d["fontSize"].GetString());
-    //
-    bool subscript = QString::fromUtf8(d["subscript"].GetString()) == "1";
-    bool superscript = QString::fromUtf8(d["superscript"].GetString()) == "1";
-    //
-    */
-    //
-    bool bold = QString::fromUtf8(d["bold"].GetString()) == "1";
-    bool italic = QString::fromUtf8(d["italic"].GetString()) == "1";
-    bool underline = QString::fromUtf8(d["underline"].GetString()) == "1";
-    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].GetString()) == "1";
-    //
-    bool justifyleft = QString::fromUtf8(d["justifyleft"].GetString()) == "1";
-    bool justifycenter = QString::fromUtf8(d["justifycenter"].GetString()) == "1";
-    bool justifyright = QString::fromUtf8(d["justifyright"].GetString()) == "1";
-    bool justifyfull = QString::fromUtf8(d["justifyfull"].GetString()) == "1";
-    //
-    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].GetString()) == "1";
-    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
-    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
-
-
-
     if (!editor->isEditing()) {
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
@@ -1102,21 +1063,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
             m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
         }
     }
-
-    m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setChecked(bold);
-    m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setChecked(italic);
-    m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setChecked(underline);
-    m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setChecked(strikeThrough);
-
-    m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setChecked(InsertOrderedList);
-    m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setChecked(InsertUnorderedList);
-
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setChecked(justifyleft);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setChecked(justifyright);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setChecked(justifycenter);
-    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setChecked(justifyfull);
-
-    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(canInsertTable);
 }
 
 void MainWindow::createNoteByTemplate(const TemplateData& tmplData)

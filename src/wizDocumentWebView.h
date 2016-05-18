@@ -411,9 +411,6 @@ Q_SIGNALS:
     void focusIn();
     void focusOut();
     //
-    void contentsChanged();
-
-
     void showContextMenuRequest(const QPoint& pos);
     void updateEditorToolBarRequest();
     //

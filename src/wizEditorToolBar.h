@@ -89,7 +89,7 @@ private:
     int buildMenu(QMenu* pMenu, int indx);
 
     // editor status reflect
-    void resetToolbar();
+    void resetToolbar(const QString& currentStyle);
 
     QAction* actionFromName(const QString& strName);
 
@@ -157,7 +157,7 @@ protected Q_SLOTS:
     void on_editor_copyImageLink_triggered();
 
     void on_delegate_showContextMenuRequest(const QPoint& pos);
-    void on_delegate_selectionChanged();
+    void on_delegate_selectionChanged(const QString&);
 
     void on_updateToolBarStatus_request();
     void on_resetLockTimer_timeOut();
