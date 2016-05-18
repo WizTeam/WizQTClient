@@ -216,8 +216,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     CWizDocumentWebViewPage* page = new CWizDocumentWebViewPage(this);
     setPage(page);
 
-    //TODO: webengine
-    //connect(page, SIGNAL(actionTriggered(QWebPage::WebAction)), SLOT(onActionTriggered(QWebPage::WebAction)));
+    connect(page, SIGNAL(actionTriggered(QWebEnginePage::WebAction)), SLOT(onActionTriggered(QWebEnginePage::WebAction)));
     connect(page, SIGNAL(linkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)), this, SLOT(onEditorLinkClicked(QUrl,QWebEnginePage::NavigationType,bool,WizWebEnginePage*)));
 
     // minimum page size hint
@@ -335,13 +334,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
         return;
     }
 #endif
-    else if (event->key() == Qt::Key_Tab)
-    {
-        //set contentchanged
-        setContentsChanged(true);
-        emit statusChanged();
-        return;
-    }
 #if QT_VERSION < 0x050000
     #ifdef Q_OS_MAC
     else if (event->key() == Qt::Key_Z)
@@ -403,7 +395,6 @@ void CWizDocumentWebView::focusInEvent(QFocusEvent *event)
 {
     if (m_bEditingMode) {
         Q_EMIT focusIn();
-        Q_EMIT statusChanged();
     }
 
     QWebEngineView::focusInEvent(event);
@@ -426,7 +417,6 @@ void CWizDocumentWebView::focusOutEvent(QFocusEvent *event)
     }
 
     Q_EMIT focusOut();
-    Q_EMIT statusChanged();
     QWebEngineView::focusOutEvent(event);
 }
 
@@ -482,12 +472,12 @@ void CWizDocumentWebView::onActionTriggered(QWebEnginePage::WebAction act)
     }
     else if (QWebEnginePage::Undo == act)
     {
-        WizGetAnalyzer().LogAction("Undo");
+        //WizGetAnalyzer().LogAction("Undo");
         undo();
     }
     else if (QWebEnginePage::Redo == act)
     {
-        WizGetAnalyzer().LogAction("Redo");
+        //WizGetAnalyzer().LogAction("Redo");
         redo();
     }
 }
@@ -1546,8 +1536,6 @@ void CWizDocumentWebView::setEditingDocument(bool editing)
         setFocus(Qt::MouseFocusReason);
         editorFocus();
     }
-
-    Q_EMIT statusChanged();
 }
 
 void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback)
@@ -1992,8 +1980,6 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
     QString strExec = "WizTodo.insertOneTodoForQt();";
     page()->runJavaScript(strExec);
-
-    emit statusChanged();
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCheckList");
@@ -2448,14 +2434,12 @@ void CWizDocumentWebView::setContentsChanged(bool b)
 
 void CWizDocumentWebView::undo()
 {
-    page()->runJavaScript("editor.execCommand('undo')");
-    emit statusChanged();
+    page()->runJavaScript("WizEditor.undo()");
 }
 
 void CWizDocumentWebView::redo()
 {
-    page()->runJavaScript("editor.execCommand('redo')");
-    emit statusChanged();
+    page()->runJavaScript("WizEditor.redo()");
 }
 
 QString CWizDocumentWebView::getSkinResourcePath()
@@ -2649,7 +2633,7 @@ QString CWizDocumentWebView::getLocalLanguage()
 
 void CWizDocumentWebView::OnSelectionChange(const QString& currentStyle)
 {
-    Q_EMIT statusChanged();
+    Q_EMIT statusChanged(currentStyle);
 }
 
 QNetworkDiskCache* CWizDocumentWebView::networkCache()

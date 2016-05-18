@@ -394,7 +394,7 @@ public Q_SLOTS:
 
     void on_options_restartForSettings();
 
-    void on_editor_statusChanged();
+    void on_editor_statusChanged(const QString& currentStyle);
 
     void createNoteByTemplate(const TemplateData& tmplData);
 

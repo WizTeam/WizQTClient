@@ -295,7 +295,6 @@ public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
 public Q_SLOTS:
-    //TODO: webengine
     void onActionTriggered(QWebEnginePage::WebAction act);
 
     void onEditorLoadFinished(bool ok);
@@ -406,7 +405,7 @@ public Q_SLOTS:
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
-    void statusChanged();
+    void statusChanged(const QString& currentStyle);
     void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();

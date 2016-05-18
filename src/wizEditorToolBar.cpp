@@ -1747,13 +1747,6 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
     }    
 
-    //todo: webengine
-    /*
-    if (m_editor->page()->settings()->globalSettings()->testAttribute(QWebSettings::DeveloperExtrasEnabled)) {
-        m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
-    }
-    */
-
     m_menuContext->popup(pos);
     m_menuContext->update();
 

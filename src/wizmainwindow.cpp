@@ -100,6 +100,8 @@
 #include "core/wizAccountManager.h"
 #include "share/wizwebengineview.h"
 
+#include "rapidjson/document.h"
+
 #define MAINWINDOW  "MainWindow"
 
 using namespace Core;
@@ -877,13 +879,12 @@ void MainWindow::initActions()
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setSingleIcons("sync");
 
-    connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
+    connect(m_doc->web(), SIGNAL(statusChanged(const QString&)), SLOT(on_editor_statusChanged(const QString&)));
 //#ifndef USEWEBENGINE
 //    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
 //    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
 //#endif
 
-    on_editor_statusChanged();
 }
 
 void setActionCheckState(const QList<QAction*>& actionList, int type)
@@ -992,7 +993,7 @@ void MainWindow::initDockMenu()
 #endif
 }
 
-void MainWindow::on_editor_statusChanged()
+void MainWindow::on_editor_statusChanged(const QString& currentStyle)
 {
     CWizDocumentWebView* editor = getActiveEditor();
 
@@ -1040,24 +1041,41 @@ void MainWindow::on_editor_statusChanged()
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
-
-    //todo: webengine
+    //
+    //
+    rapidjson::Document d;
+    d.Parse(currentStyle.toUtf8().constData());
+    if (d.HasParseError())
+        return;
+    //
     /*
-    editor->editorCommandQueryCommandState("undo", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
-        }
-    });
+    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].GetString());
+    CString strForeColor = QString::fromUtf8(d["foreColor"].GetString());
+    CString strBackColor = QString::fromUtf8(d["backColor"].GetString());
+    //
+    CString strFontName = QString::fromUtf8(d["fontName"].GetString());
+    CString strFontSize = QString::fromUtf8(d["fontSize"].GetString());
+    //
+    bool subscript = QString::fromUtf8(d["subscript"].GetString()) == "1";
+    bool superscript = QString::fromUtf8(d["superscript"].GetString()) == "1";
+    //
+    */
+    //
+    bool bold = QString::fromUtf8(d["bold"].GetString()) == "1";
+    bool italic = QString::fromUtf8(d["italic"].GetString()) == "1";
+    bool underline = QString::fromUtf8(d["underline"].GetString()) == "1";
+    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].GetString()) == "1";
+    //
+    bool justifyleft = QString::fromUtf8(d["justifyleft"].GetString()) == "1";
+    bool justifycenter = QString::fromUtf8(d["justifycenter"].GetString()) == "1";
+    bool justifyright = QString::fromUtf8(d["justifyright"].GetString()) == "1";
+    bool justifyfull = QString::fromUtf8(d["justifyfull"].GetString()) == "1";
+    //
+    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].GetString()) == "1";
+    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
+    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
 
-    editor->editorCommandQueryCommandState("redo", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
-        }
-    });
+
 
     if (!editor->isEditing()) {
         m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
@@ -1085,173 +1103,20 @@ void MainWindow::on_editor_statusChanged()
         }
     }
 
-    editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-        }
-    });
+    m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setChecked(bold);
+    m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setChecked(italic);
+    m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setChecked(underline);
+    m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setChecked(strikeThrough);
 
-    editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-        }
-    });
+    m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setChecked(InsertOrderedList);
+    m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setChecked(InsertUnorderedList);
 
-    editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-        }
-    });
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setChecked(justifyleft);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setChecked(justifyright);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setChecked(justifycenter);
+    m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setChecked(justifyfull);
 
-    editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("indent", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("outdent", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("inserttable", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("link", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("date", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("time", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("removeformat", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("plaintext", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("checklist", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertCode", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertImage", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-        }
-    });
-
-    */
+    m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(canInsertTable);
 }
 
 void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
