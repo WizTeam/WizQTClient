@@ -1987,22 +1987,17 @@ bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 
 bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
-    //todo: webengine
-    /*
     // before insert first checklist, should manual notify editor to save current sence for undo.
     page()->runJavaScript("editor.execCommand('saveScene');");
 
     QString strExec = "WizTodo.insertOneTodoForQt();";
-    page()->runJavaScript(strExec).toString();
-
-    // after insert first checklist, should manual notify editor to save current sence for undo.
-    page()->runJavaScript("editor.execCommand('saveScene');");
+    page()->runJavaScript(strExec);
 
     emit statusChanged();
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCheckList");
-    */
+
     return true;
 }
 
@@ -2468,8 +2463,9 @@ QString CWizDocumentWebView::getSkinResourcePath()
     return ::WizGetSkinResourcePath(m_app.userSettings().skin());
 }
 
-QString CWizDocumentWebView::getUserAvatarFilePath(int size)
+QString CWizDocumentWebView::getUserAvatarFilePath()
 {
+    int size = 24;
     QString strFileName;
     QString strUserID = m_dbMgr.db().GetUserId();
     if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))

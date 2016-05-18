@@ -205,7 +205,7 @@ public:
 
     //js environment func
     Q_INVOKABLE QString getSkinResourcePath();
-    Q_INVOKABLE QString getUserAvatarFilePath(int size);
+    Q_INVOKABLE QString getUserAvatarFilePath();
     Q_INVOKABLE QString getUserAlias();
     Q_INVOKABLE QString getFormatedDateTime();
     Q_INVOKABLE bool isPersonalDocument();
@@ -220,6 +220,12 @@ public:
     Q_INVOKABLE QString getLocalLanguage();
     Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
 
+    Q_PROPERTY(QString userAlias READ getUserAlias)
+    Q_PROPERTY(QString userAvatarFilePath READ getUserAvatarFilePath)
+    Q_PROPERTY(bool isPersonalDocument READ isPersonalDocument)
+    Q_PROPERTY(QString formatedDateTime READ getFormatedDateTime)
+    Q_PROPERTY(QString skinResourcePath READ getSkinResourcePath)
+    Q_PROPERTY(QString canEditNote READ canEditNote)
     //
     QNetworkDiskCache* networkCache();    
 

@@ -113,19 +113,19 @@ function WizTodoQtHelper() {
     this.setDocumentType = setDocumentType;
 
     function getUserAlias() {
-        return WizQtEditor.getUserAlias();
+        return WizQtEditor.userAlias;
     }
 
     function getUserAvatarFileName(size) {
-        return WizQtEditor.getUserAvatarFilePath(size);
+        return WizQtEditor.userAvatarFilePath;
     }
 
     function isPersonalDocument() {
-        return WizQtEditor.isPersonalDocument();
+        return WizQtEditor.isPersonalDocument;
     }
 
     function getLocalDateTime(dt) {
-        return WizQtEditor.getFormatedDateTime();
+        return WizQtEditor.formatedDateTime;
     }
 
     function setDocumentModified() {
@@ -133,15 +133,15 @@ function WizTodoQtHelper() {
     }
 
     function getCheckedImageFileName() {
-        return WizQtEditor.getSkinResourcePath() + "checked.png";
+        return WizQtEditor.skinResourcePath + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return WizQtEditor.getSkinResourcePath() + "unchecked.png";
+        return WizQtEditor.skinResourcePath + "unchecked.png";
     }
 
     function canEdit() {
-        return WizQtEditor.canEditNote();
+        return WizQtEditor.canEditNote;
     }
 
     function initCss(document) {
