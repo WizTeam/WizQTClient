@@ -113,35 +113,35 @@ function WizTodoQtHelper() {
     this.setDocumentType = setDocumentType;
 
     function getUserAlias() {
-        return WizEditor.getUserAlias();
+        return WizQtEditor.getUserAlias();
     }
 
     function getUserAvatarFileName(size) {
-        return WizEditor.getUserAvatarFilePath(size);
+        return WizQtEditor.getUserAvatarFilePath(size);
     }
 
     function isPersonalDocument() {
-        return WizEditor.isPersonalDocument();
+        return WizQtEditor.isPersonalDocument();
     }
 
     function getLocalDateTime(dt) {
-        return WizEditor.getFormatedDateTime();
+        return WizQtEditor.getFormatedDateTime();
     }
 
     function setDocumentModified() {
-        WizEditor.setContentsChanged(true);
+        WizQtEditor.setContentsChanged(true);
     }
 
     function getCheckedImageFileName() {
-        return WizEditor.getSkinResourcePath() + "checked.png";
+        return WizQtEditor.getSkinResourcePath() + "checked.png";
     }
 
     function getUnCheckedImageFileName() {
-        return WizEditor.getSkinResourcePath() + "unchecked.png";
+        return WizQtEditor.getSkinResourcePath() + "unchecked.png";
     }
 
     function canEdit() {
-        return WizEditor.canEditNote();
+        return WizQtEditor.canEditNote();
     }
 
     function initCss(document) {
@@ -172,7 +172,7 @@ function WizTodoQtHelper() {
     }  
 
     function setDocumentType(type) {
-        WizEditor.setCurrentDocumentType(type);
+        WizQtEditor.setCurrentDocumentType(type);
     } 
 }
 

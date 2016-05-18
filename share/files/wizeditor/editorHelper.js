@@ -179,8 +179,7 @@ function WizReaderInit(basePath, browserLang, ignoreTable) {
 function WizOnSelectionChange(style)
 {
     try {
-        //todo: webengine
-        //WizChromeBrowser.OnSelectionChange(JSON.stringify(style));
+        WizQtEditor.OnSelectionChange(JSON.stringify(style));
     } catch (e) {
 
     }

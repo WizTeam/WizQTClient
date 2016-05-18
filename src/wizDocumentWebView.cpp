@@ -245,13 +245,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     //
     //
     addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
+    addToJavaScriptWindowObject("WizQtEditor", this);
 
 
     connect(this, SIGNAL(loadFinished(bool)), SLOT(onEditorLoadFinished(bool)));
-    connect(this, SIGNAL(selectionChanged()), SLOT(onEditorSelectionChanged()));
-
-    //connect(this, SIGNAL(contentsChanged()), SLOT(onEditorContentChanged()));
-
 }
 
 CWizDocumentWebView::~CWizDocumentWebView()
@@ -504,30 +501,16 @@ void CWizDocumentWebView::tryResetTitle()
     if (view()->note().tCreated.secsTo(view()->note().tModified) != 0)
         return;
 
-    //TODO: webengine
-    /*
-    QWebFrame* f = noteFrame();
-    if (!f)
-        return;
+    //
+    page()->toPlainText([=](const QString& text){
+        QString strTitle = WizStr2Title(text.left(128));
+        if (strTitle.isEmpty())
+            return;
 
-    // remove baidu bookmark
-    QWebElement docPElement = f->documentElement().findFirst("body").findFirst("p");
-    QWebElement docSpanElement = docPElement.findFirst("span");
-    QString spanClass = docSpanElement.attribute("id");
-    if (spanClass.indexOf("baidu_bookmark") != -1)
-    {
-        docPElement.removeFromDocument();
-    }
-
-    QString strTitle = page()->runJavaScript("editor.getPlainTxt();").toString();
-    strTitle = WizStr2Title(strTitle.left(255));
-    if (strTitle.isEmpty())
-        return;
-
-    view()->resetTitle(strTitle);
-
-    m_bNewNoteTitleInited = true;
-    */
+        view()->resetTitle(strTitle);
+        //
+        m_bNewNoteTitleInited = true;
+    });
 }
 
 QString defaultMarkdownCSS()
@@ -1067,24 +1050,6 @@ QWebFrame* CWizDocumentWebView::noteFrame()
 }
 */
 
-void CWizDocumentWebView::onEditorContentChanged()
-{
-    setContentsChanged(true);
-    //
-    Q_EMIT statusChanged();
-}
-
-void CWizDocumentWebView::onEditorSelectionChanged()
-{
-#ifdef Q_OS_MAC
-    // FIXME: every time change content should tell webview to clean the canvas
-    if (hasFocus()) {
-        update();
-    }
-#endif // Q_OS_MAAC
-
-    Q_EMIT statusChanged();
-}
 
 void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
@@ -2686,7 +2651,12 @@ QString CWizDocumentWebView::getLocalLanguage()
     return "en";
 }
 
-QNetworkDiskCache*CWizDocumentWebView::networkCache()
+void CWizDocumentWebView::OnSelectionChange(const QString& currentStyle)
+{
+    Q_EMIT statusChanged();
+}
+
+QNetworkDiskCache* CWizDocumentWebView::networkCache()
 {
     return NULL;
     //return dynamic_cast<QNetworkDiskCache *>(page()->networkAccessManager()->cache());

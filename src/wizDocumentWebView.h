@@ -218,6 +218,7 @@ public:
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
+    Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
 
     //
     QNetworkDiskCache* networkCache();    
@@ -292,8 +293,6 @@ public Q_SLOTS:
     void onActionTriggered(QWebEnginePage::WebAction act);
 
     void onEditorLoadFinished(bool ok);
-    void onEditorContentChanged();
-    void onEditorSelectionChanged();
     void onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page);
 
     void onTimerAutoSaveTimout();
