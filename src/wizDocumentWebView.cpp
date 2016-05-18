@@ -245,7 +245,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     //
     //
     addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
-    addToJavaScriptWindowObject("WizEditor", this);
 
 
     connect(this, SIGNAL(loadFinished(bool)), SLOT(onEditorLoadFinished(bool)));
@@ -1045,6 +1044,7 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
     QString userAlias = m_dbMgr.db().GetUserAlias();
     //
     QString strCode = WizFormatString4("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\");", editorPath, lang, userGUID, userAlias);
+    qDebug() << strCode;
     if (m_bEditingMode)
     {
         strCode += "WizEditor.on();";

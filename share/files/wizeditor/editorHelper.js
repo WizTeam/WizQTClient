@@ -72,7 +72,7 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias) {
         //
         //WizEditor.on();
         //
-        WizTodo.init('mac');
+        WizTodo.init('qt');
         //
         WizEditorInitDeleteCommentAction();
         //
