@@ -1844,43 +1844,25 @@ var WizEditor = {
      *   userInfo,  //用户数据 JSON
      *   userData,  //kb内所有用户数据集合 Array[JSON]
      *   maxRedo,   //redo 最大堆栈数（默认100）
-     *   reDoCallback,  //history callback
+     *   callback {
+     *      redo,  //history callback
+     *   },
      *   clientType,  //客户端类型
      * }
      */
     init: function init(options) {
-        _commonEnv2['default'].setDoc(options.document || window.document);
-        (0, _commonLang.initLang)(options.lang);
-        _commonEnv2['default'].client.setType(options.clientType);
+        _commonEnv2['default'].init('editor', options);
+        _commonEnv2['default'].dependency.files.init();
 
-        /**
-         * TODO 与 pc 端联调时，需要删除
-         * 临时为测试pc客户端使用，因为目前pc客户端没有此数据输入
-         */
-        // if (!options.dependencyCss) {
-        //     var s = document.querySelectorAll('script');
-        //     for (var i = 0; i < s.length; i++) {
-        //         if (s[i].src.indexOf('htmleditor') > -1) {
-        //             s = s[i].src;
-        //             options.dependencyCss = {
-        //                 fonts: s.substr(0, s.indexOf('htmleditor')) + 'htmleditor\\dependency\\fonts.css'
-        //             };
-        //             break;
-        //         }
-        //     }
-        // }
-        // console.log(options.dependencyCss);
-
-        _commonEnv2['default'].dependency.files.init(options.dependencyCss, options.dependencyJs);
-        _editorBase2['default'].setOptions(options);
-        _amendAmend2['default'].initUser(options.userInfo);
-        _amendAmend2['default'].setUsersData(options.usersData);
+        _editorBase2['default'].init();
+        _amendAmend2['default'].initUser();
+        _amendAmend2['default'].setUsersData();
 
         if (_commonEnv2['default'].win.WizTemplate) {
             _commonEnv2['default'].win.WizTemplate.init({
                 document: _commonEnv2['default'].doc,
-                lang: options.lang,
-                clientType: options.clientType
+                lang: _commonEnv2['default'].options.lang,
+                clientType: _commonEnv2['default'].options.clientType
             });
         }
         return WizEditor;
@@ -1889,6 +1871,10 @@ var WizEditor = {
      * 启动编辑器
      */
     on: function on() {
+        if (_commonEnv2['default'].win.WizReader) {
+            _commonEnv2['default'].win.WizReader.off();
+        }
+
         _editorBase2['default'].on();
 
         if (_commonEnv2['default'].win.WizTemplate) {
@@ -1900,12 +1886,15 @@ var WizEditor = {
     /**
      * 关闭编辑器
      */
-    off: function off() {
+    off: function off(options) {
         if (_commonEnv2['default'].win.WizTemplate) {
             _commonEnv2['default'].win.WizTemplate.off();
         }
-
         _editorBase2['default'].off();
+
+        if (_commonEnv2['default'].win.WizReader) {
+            _commonEnv2['default'].win.WizReader.on(options);
+        }
 
         return WizEditor;
     },
@@ -1937,14 +1926,14 @@ var WizEditor = {
      * @returns {*}
      */
     getBodyText: function getBodyText() {
-        return _editorBase2['default'].getBodyText();
+        return _domUtilsDomExtend2['default'].getBodyText();
     },
     /**
      * 获取当前页面源码
      * @returns {*}
      */
     getContentHtml: function getContentHtml() {
-        return _editorBase2['default'].getContentHtml();
+        return _domUtilsDomExtend2['default'].getContentHtml();
     },
     insertDefaultStyle: function insertDefaultStyle(onlyReplace, customCss) {
         _editorBase2['default'].insertDefaultStyle(onlyReplace, customCss);
@@ -1970,7 +1959,7 @@ var WizEditor = {
      * @returns {boolean}
      */
     isModified: function isModified() {
-        return _editorBase2['default'].getContentHtml() != _editorBase2['default'].getOriginalHtml();
+        return _domUtilsDomExtend2['default'].getContentHtml() != _editorBase2['default'].getOriginalHtml();
     },
     /**
      * 设置当前文档为 未修改状态
@@ -2167,7 +2156,220 @@ window.WizEditor = WizEditor;
 exports['default'] = WizEditor;
 module.exports = exports['default'];
 
-},{"./amend/amend":6,"./common/Base64":11,"./common/const":12,"./common/env":14,"./common/historyUtils":15,"./common/lang":16,"./common/utils":18,"./domUtils/domExtend":22,"./editor/base":23,"./editor/editorEvent":24,"./imgUtils/imgUtils":27,"./linkUtils/linkUtils":28,"./nightMode/nightModeUtils":29,"./rangeUtils/rangeExtend":31,"./tableUtils/tableCore":32}],6:[function(require,module,exports){
+},{"./amend/amend":7,"./common/Base64":12,"./common/const":13,"./common/env":15,"./common/historyUtils":16,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./editor/base":25,"./editor/editorEvent":26,"./imgUtils/imgUtils":29,"./linkUtils/linkUtils":30,"./nightMode/nightModeUtils":34,"./rangeUtils/rangeExtend":36,"./tableUtils/tableCore":39}],6:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('./common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('./common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonLang = require('./common/lang');
+
+var _commonLang2 = _interopRequireDefault(_commonLang);
+
+var _commonUtils = require('./common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
+
+var _domUtilsDomExtend = require('./domUtils/domExtend');
+
+var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
+
+var _imgUtilsImgUtils = require('./imgUtils/imgUtils');
+
+var _imgUtilsImgUtils2 = _interopRequireDefault(_imgUtilsImgUtils);
+
+var _nightModeNightModeUtils = require('./nightMode/nightModeUtils');
+
+var _nightModeNightModeUtils2 = _interopRequireDefault(_nightModeNightModeUtils);
+
+var _amendAmendInfo = require('./amend/amendInfo');
+
+var _amendAmendInfo2 = _interopRequireDefault(_amendAmendInfo);
+
+var _amendAmendUser = require('./amend/amendUser');
+
+var _amendAmendUser2 = _interopRequireDefault(_amendAmendUser);
+
+var _readerBase = require('./reader/base');
+
+var _readerBase2 = _interopRequireDefault(_readerBase);
+
+var _markdownMarkdownRender = require('./markdown/markdownRender');
+
+var _markdownMarkdownRender2 = _interopRequireDefault(_markdownMarkdownRender);
+
+var WizReader = {
+    /**
+     * 初始化 修订编辑
+     * @param options
+     * {
+     *   document, //document
+     *   lang,      //语言 JSON
+     *   userInfo,  //用户数据 JSON
+     *   userData,  //kb内所有用户数据集合 Array[JSON]
+     *   clientType,  //客户端类型,
+     *   noAmend, //Boolean 是否显示 修订信息
+     *   noteType // 'common' 'markdown' 'mathjax' 笔记类型
+     * }
+     */
+    init: function init(options) {
+        _commonEnv2['default'].init('reader', options);
+        _commonEnv2['default'].dependency.files.init();
+
+        _readerBase2['default'].init();
+        _markdownMarkdownRender2['default'].init();
+
+        if (!_commonEnv2['default'].options.noAmend) {
+            _amendAmendUser2['default'].initUser(_commonEnv2['default'].options.userInfo);
+            _amendAmendUser2['default'].setUsersData(_commonEnv2['default'].options.usersData);
+        }
+
+        if (_commonEnv2['default'].win.WizTemplate) {
+            _commonEnv2['default'].win.WizTemplate.init({
+                document: _commonEnv2['default'].doc,
+                lang: _commonEnv2['default'].options.lang,
+                clientType: _commonEnv2['default'].options.clientType
+            });
+        }
+
+        return WizReader;
+    },
+    /**
+     *
+     * @param options
+     * {
+     *   noteType 笔记类型
+     * }
+     */
+    on: function on(options) {
+        if (options && options.noteType) {
+            _commonEnv2['default'].options.noteType = options.noteType;
+        }
+        _readerBase2['default'].on();
+
+        WizReader.amendInfo.on();
+        if (_commonEnv2['default'].win.WizTemplate) {
+            _commonEnv2['default'].win.WizTemplate.on(true);
+        }
+
+        if (_commonEnv2['default'].options.noteType == _commonConst2['default'].NOTE_TYPE.MARKDOWN) {
+            WizReader.markdown();
+        } else if (_commonEnv2['default'].options.noteType == _commonConst2['default'].NOTE_TYPE.MATHJAX) {
+            WizReader.mathJax();
+        }
+
+        return WizReader;
+    },
+    off: function off() {
+        WizReader.amendInfo.off();
+
+        if (_commonEnv2['default'].win.WizTemplate) {
+            _commonEnv2['default'].win.WizTemplate.off();
+        }
+
+        _readerBase2['default'].off();
+
+        return WizReader;
+    },
+    insertDefaultStyle: function insertDefaultStyle(onlyReplace, customCss) {
+        _readerBase2['default'].insertDefaultStyle(onlyReplace, customCss);
+
+        return WizReader;
+    },
+    markdown: function markdown(callback, timeout) {
+        timeout = timeout ? timeout : _commonEnv2['default'].options.timeout.markdown;
+        callback = callback || _commonEnv2['default'].options.callback.markdown;
+        var hasCalled = false,
+            cb = function cb() {
+            if (callback && /^function$/i.test(typeof callback) && !hasCalled) {
+                callback();
+                hasCalled = true;
+            }
+        };
+        _markdownMarkdownRender2['default'].markdown({
+            markdown: function markdown(isMathjax) {
+                //IOS 处理 todolist 应该可以删除了
+                _commonEnv2['default'].client.sendCmdToWiznote(_commonConst2['default'].CLIENT_EVENT.wizMarkdownRender);
+                if (!isMathjax) {
+                    cb();
+                } else {
+                    setTimeout(cb, timeout);
+                }
+            },
+            mathJax: function mathJax() {
+                cb();
+            }
+        });
+    },
+    mathJax: function mathJax(callback, timeout) {
+        timeout = timeout ? timeout : _commonEnv2['default'].options.timeout.mathJax;
+        callback = callback || _commonEnv2['default'].options.callback.mathJax;
+        var hasCalled = false,
+            cb = function cb() {
+            if (callback && !hasCalled) {
+                callback();
+                hasCalled = true;
+            }
+        };
+
+        setTimeout(cb, timeout);
+        _markdownMarkdownRender2['default'].mathJax(function () {
+            cb();
+        });
+    },
+    amendInfo: {
+        on: function on() {
+            if (_commonEnv2['default'].options.noAmend) {
+                return WizReader;
+            }
+            _amendAmendInfo2['default'].init({
+                readonly: true
+            }, {
+                onAccept: null,
+                onRefuse: null
+            });
+
+            return WizReader;
+        },
+        off: function off() {
+            _amendAmendInfo2['default'].remove();
+
+            return WizReader;
+        }
+    },
+    img: {
+        getAll: function getAll(onlyLocal) {
+            //为了保证客户端使用方便，转换为字符串
+            return _imgUtilsImgUtils2['default'].getAll(onlyLocal).join(',');
+        }
+    },
+    nightMode: {
+        on: function on(color, bgColor, brightness) {
+            _nightModeNightModeUtils2['default'].on(color, bgColor, brightness);
+        },
+        off: function off() {
+            _nightModeNightModeUtils2['default'].off();
+        }
+    }
+};
+
+window.WizReader = WizReader;
+
+exports['default'] = WizReader;
+module.exports = exports['default'];
+
+},{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/const":13,"./common/env":15,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./markdown/markdownRender":33,"./nightMode/nightModeUtils":34,"./reader/base":37}],7:[function(require,module,exports){
 /**
  * 修订功能 专用工具包
  */
@@ -2220,6 +2422,14 @@ var _rangeUtilsRangeExtend = require('../rangeUtils/rangeExtend');
 
 var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
 
+var _tableUtilsTableUtils = require('../tableUtils/tableUtils');
+
+var _tableUtilsTableUtils2 = _interopRequireDefault(_tableUtilsTableUtils);
+
+var _tableUtilsTableZone = require('../tableUtils/tableZone');
+
+var _tableUtilsTableZone2 = _interopRequireDefault(_tableUtilsTableZone);
+
 //为 domUtils 打补丁
 (function () {
     var modifyNodeStyle = _domUtilsDomExtend2['default'].modifyNodeStyle;
@@ -2259,11 +2469,11 @@ var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
 
 var _isAmendEditing = false;
 var amend = {
-    initUser: function initUser(userInfo) {
-        _amendUser2['default'].initUser(userInfo);
+    initUser: function initUser() {
+        _amendUser2['default'].initUser(_commonEnv2['default'].options.userInfo);
     },
-    setUsersData: function setUsersData(usersData) {
-        _amendUser2['default'].setUsersData(usersData);
+    setUsersData: function setUsersData() {
+        _amendUser2['default'].setUsersData(_commonEnv2['default'].options.usersData);
     },
     /**
      * 开启 修订功能
@@ -2553,9 +2763,9 @@ var amend = {
             if (endDom.nodeType == 3) {
                 endDom = endDom.parentNode;
             }
-            _domUtilsDomExtend2['default'].insert(endDom, [nSpanStart, nSpanContent, nSpanEnd], endOffset > 0);
+            _domUtilsDomExtend2['default'].before(endDom, [nSpanStart, nSpanContent, nSpanEnd], endOffset > 0);
         } else if (amendImg) {
-            _domUtilsDomExtend2['default'].insert(amendImg, [nSpanStart, nSpanContent, nSpanEnd], true);
+            _domUtilsDomExtend2['default'].before(amendImg, [nSpanStart, nSpanContent, nSpanEnd], true);
         } else if (endDom.nodeType == 1) {
             // endDom nodeType == 1 时， 光标应该是在 childNodes[endOffset] 元素的前面
             isTd = false;
@@ -2569,29 +2779,29 @@ var amend = {
             }
 
             if (endOffset < endDom.childNodes.length) {
-                _domUtilsDomExtend2['default'].insert(endDom.childNodes[endOffset], [nSpanStart, nSpanContent, nSpanEnd], false);
+                _domUtilsDomExtend2['default'].before(endDom.childNodes[endOffset], [nSpanStart, nSpanContent, nSpanEnd], false);
             } else if (isTd) {
                 endDom.appendChild(nSpanStart);
                 endDom.appendChild(nSpanContent);
                 endDom.appendChild(nSpanEnd);
             } else {
-                _domUtilsDomExtend2['default'].insert(endDom, [nSpanStart, nSpanContent, nSpanEnd], true);
+                _domUtilsDomExtend2['default'].before(endDom, [nSpanStart, nSpanContent, nSpanEnd], true);
             }
         } else if (endDom.nodeType == 3) {
             if (_amendUtilsAmendExtend2['default'].splitDeletedDom(endDom, endOffset)) {
-                _domUtilsDomExtend2['default'].insert(endDom.parentNode, [nSpanStart, nSpanContent, nSpanEnd], true);
+                _domUtilsDomExtend2['default'].before(endDom.parentNode, [nSpanStart, nSpanContent, nSpanEnd], true);
             } else if (endOffset < endDom.nodeValue.length) {
                 tmpSplit = _commonEnv2['default'].doc.createTextNode(endDom.nodeValue.substr(endOffset));
                 endDom.nodeValue = endDom.nodeValue.substr(0, endOffset);
-                _domUtilsDomExtend2['default'].insert(endDom, [nSpanStart, nSpanContent, nSpanEnd, tmpSplit], true);
+                _domUtilsDomExtend2['default'].before(endDom, [nSpanStart, nSpanContent, nSpanEnd, tmpSplit], true);
             } else {
                 nA = _domUtilsDomExtend2['default'].getParentByTagName(endDom, 'a', true, null);
                 nSpanNext = endDom.nextSibling;
                 if (nA) {
                     //光标在 <A> 标签结尾的时候，一定要让光标进入 <A> 下一个Dom
-                    _domUtilsDomExtend2['default'].insert(nA, [nSpanStart, nSpanContent, nSpanEnd], true);
+                    _domUtilsDomExtend2['default'].before(nA, [nSpanStart, nSpanContent, nSpanEnd], true);
                 } else if (nSpanNext) {
-                    _domUtilsDomExtend2['default'].insert(nSpanNext, [nSpanStart, nSpanContent, nSpanEnd], false);
+                    _domUtilsDomExtend2['default'].before(nSpanNext, [nSpanStart, nSpanContent, nSpanEnd], false);
                 } else {
                     p = endDom.parentNode;
                     p.insertBefore(nSpanStart, null);
@@ -2633,6 +2843,8 @@ var amendEvent = {
         if (!(_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid)) {
             _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, amendEvent.onMouseDown);
             _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_UP, amendEvent.onMouseUp);
+        } else {
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_START, amendEvent.onTouchStart);
         }
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_DRAG_START, amendEvent.onDragDrop);
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_DRAG_ENTER, amendEvent.onDragDrop);
@@ -2647,6 +2859,7 @@ var amendEvent = {
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_COMPOSITION_END, amendEvent.onCompositionEnd);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, amendEvent.onMouseDown);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_UP, amendEvent.onMouseUp);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_START, amendEvent.onTouchStart);
 
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_DRAG_START, amendEvent.onDragDrop);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_DRAG_ENTER, amendEvent.onDragDrop);
@@ -2660,7 +2873,7 @@ var amendEvent = {
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_KEY_DOWN, amendEvent.onKeyDownReverse);
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_COMPOSITION_START, amendEvent.onCompositionStart);
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_COMPOSITION_END, amendEvent.onCompositionEnd);
-        if (!(_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid)) {
+        if (!_commonEnv2['default'].client.type.isIOS && _commonEnv2['default'].client.type.isAndroid) {
             _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, amendEvent.onMouseDown);
             _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_UP, amendEvent.onMouseUp);
         }
@@ -2852,7 +3065,7 @@ var amendEvent = {
                 (function () {
                     var s = _domUtilsDomExtend2['default'].createSpan();
                     s.innerHTML = _commonConst2['default'].FILL_CHAR;
-                    _domUtilsDomExtend2['default'].insert(insertDom, s, true);
+                    _domUtilsDomExtend2['default'].before(insertDom, s, true);
                     _rangeUtilsRangeExtend2['default'].setRange(s, 1, s, 1);
                 })();
             } else if (insertDom) {
@@ -2861,10 +3074,10 @@ var amendEvent = {
                     s.innerHTML = _commonConst2['default'].FILL_CHAR;
                     splitInsert = _amendUtilsAmendExtend2['default'].splitInsertDom(endDom, endOffset, true, _amendUser2['default'].getCurUser());
                     if (splitInsert.isInsert && splitInsert.split) {
-                        _domUtilsDomExtend2['default'].insert(insertDom, s, true);
+                        _domUtilsDomExtend2['default'].before(insertDom, s, true);
                         _rangeUtilsRangeExtend2['default'].setRange(s, 1, s, 1);
                     } else if (splitInsert.isInsert) {
-                        _domUtilsDomExtend2['default'].insert(insertDom, s, endOffset > 0);
+                        _domUtilsDomExtend2['default'].before(insertDom, s, endOffset > 0);
                         _rangeUtilsRangeExtend2['default'].setRange(s, 1, s, 1);
                     }
                 })();
@@ -2874,10 +3087,10 @@ var amendEvent = {
                     s.innerHTML = _commonConst2['default'].FILL_CHAR;
                     splitInsert = _amendUtilsAmendExtend2['default'].splitDeletedDom(endDom, endOffset);
                     if (splitInsert) {
-                        _domUtilsDomExtend2['default'].insert(delDom, s, true);
+                        _domUtilsDomExtend2['default'].before(delDom, s, true);
                         _rangeUtilsRangeExtend2['default'].setRange(s, 1, s, 1);
                     } else {
-                        _domUtilsDomExtend2['default'].insert(delDom, s, endOffset > 0);
+                        _domUtilsDomExtend2['default'].before(delDom, s, endOffset > 0);
                         _rangeUtilsRangeExtend2['default'].setRange(s, 1, s, 1);
                     }
                 })();
@@ -2895,7 +3108,7 @@ var amendEvent = {
         if (splitInsert.isInsert && !splitInsert.split && !amendImg) {
             if (endOffset === 0 && splitInsert.insertDom.nodeType === 1) {
                 //添加空字符，避免录入的字符被放到 已删除的后面
-                _domUtilsDomExtend2['default'].insert(splitInsert.insertDom.childNodes[0], _commonEnv2['default'].doc.createTextNode(_commonConst2['default'].FILL_CHAR), false);
+                _domUtilsDomExtend2['default'].before(splitInsert.insertDom.childNodes[0], _commonEnv2['default'].doc.createTextNode(_commonConst2['default'].FILL_CHAR), false);
                 _rangeUtilsRangeExtend2['default'].setRange(splitInsert.insertDom, 1, null, null);
             } else {
                 _rangeUtilsRangeExtend2['default'].setRange(endDom, endOffset, null, null);
@@ -2922,19 +3135,19 @@ var amendEvent = {
             if (endDom.nodeType == 3) {
                 endDom = endDom.parentNode;
             }
-            _domUtilsDomExtend2['default'].insert(endDom, nSpan, endOffset > 0);
+            _domUtilsDomExtend2['default'].before(endDom, nSpan, endOffset > 0);
         } else if (amendImg) {
             //如果 光标处于 已修订的图片内， 则添加在 图片 容器 后面
-            _domUtilsDomExtend2['default'].insert(amendImg, nSpan, true);
+            _domUtilsDomExtend2['default'].before(amendImg, nSpan, true);
         } else if (endDom.nodeType == 1) {
             // endDom nodeType == 1 时， 光标应该是在 childNodes[endOffset] 元素的前面
             if (endOffset < endDom.childNodes.length) {
                 //避免嵌套 span ，如果 endDom 为 wizSpan 并且 内容为空或 br 时，直接删除该span
                 if (endDom.getAttribute(_commonConst2['default'].ATTR.SPAN) && (endDom.childNodes.length === 0 || endDom.childNodes.length === 1 && _domUtilsDomExtend2['default'].isTag(endDom.childNodes[0], 'br'))) {
-                    _domUtilsDomExtend2['default'].insert(endDom, nSpan, false);
+                    _domUtilsDomExtend2['default'].before(endDom, nSpan, false);
                     endDom.parentNode.removeChild(endDom);
                 } else {
-                    _domUtilsDomExtend2['default'].insert(endDom.childNodes[endOffset], nSpan, false);
+                    _domUtilsDomExtend2['default'].before(endDom.childNodes[endOffset], nSpan, false);
                 }
             } else if (_domUtilsDomExtend2['default'].isTag(endDom, ['td', 'th'])) {
                 //如果光标处于 表格内部，不能直接把 nSpan 放到 td 的 后面
@@ -2943,24 +3156,24 @@ var amendEvent = {
                 }
                 endDom.appendChild(nSpan);
             } else {
-                _domUtilsDomExtend2['default'].insert(endDom, nSpan, true);
+                _domUtilsDomExtend2['default'].before(endDom, nSpan, true);
             }
         } else if (endDom.nodeType == 3) {
             if (_amendUtilsAmendExtend2['default'].splitDeletedDom(endDom, endOffset)) {
-                _domUtilsDomExtend2['default'].insert(endDom.parentNode, nSpan, true);
+                _domUtilsDomExtend2['default'].before(endDom.parentNode, nSpan, true);
             } else if (endOffset < endDom.nodeValue.length) {
                 tmpSplitStr = endDom.nodeValue.substr(endOffset);
                 tmpSplit = _commonEnv2['default'].doc.createTextNode(tmpSplitStr);
                 endDom.nodeValue = endDom.nodeValue.substr(0, endOffset);
-                _domUtilsDomExtend2['default'].insert(endDom, [nSpan, tmpSplit], true);
+                _domUtilsDomExtend2['default'].before(endDom, [nSpan, tmpSplit], true);
             } else {
                 nA = _domUtilsDomExtend2['default'].getParentByTagName(endDom, 'a', true, null);
                 nSpanNext = endDom.nextSibling;
                 if (nA) {
                     //光标在 <A> 标签结尾的时候，一定要让光标进入 <A> 下一个Dom
-                    _domUtilsDomExtend2['default'].insert(nA, nSpan, true);
+                    _domUtilsDomExtend2['default'].before(nA, nSpan, true);
                 } else if (nSpanNext) {
-                    _domUtilsDomExtend2['default'].insert(nSpanNext, nSpan, false);
+                    _domUtilsDomExtend2['default'].before(nSpanNext, nSpan, false);
                 } else {
                     endDom.parentNode.insertBefore(nSpan, null);
                 }
@@ -3011,13 +3224,17 @@ var amendEvent = {
             _commonHistoryUtils2['default'].saveSnap(false);
 
             if (sel.isCollapsed && fixed.leftDom) {
-                // 如果前一个是 table，则 delete 键直接移动光标
-                cell = _domUtilsDomExtend2['default'].getParentByTagName(fixed.leftDom, ['td', 'th'], true, null);
-                if (!curCell && cell) {
-                    _rangeUtilsRangeExtend2['default'].setRange(cell, _domUtilsDomExtend2['default'].getDomEndOffset(cell));
-                    _commonUtils2['default'].stopEvent(e);
-                    return;
-                }
+                // // 如果前一个是 table，则 delete 键直接移动光标
+                // cell = domUtils.getParentByTagName(fixed.leftDom, ['td', 'th'], true, null);
+                // console.log(sel.getRangeAt(0).endContainer.outerHTML);
+                // console.log(sel.getRangeAt(0).endOffset);
+                // console.log(fixed.leftDom);
+                // if (!curCell && cell) {
+                //     console.log('prev is table, stop event....')
+                //     rangeUtils.setRange(cell, domUtils.getDomEndOffset(cell));
+                //     utils.stopEvent(e);
+                //     return;
+                // }
                 fixed.startImg = _amendUtilsAmendExtend2['default'].getWizAmendImgParent(fixed.leftDom);
                 if (fixed.startImg) {
                     fixed.startDom = fixed.startImg;
@@ -3027,7 +3244,6 @@ var amendEvent = {
                     fixClearLine(fixed.leftDom, -1);
                 }
             }
-
             return;
         }
         /**
@@ -3036,13 +3252,14 @@ var amendEvent = {
         if (keyCode === 46) {
             _commonHistoryUtils2['default'].saveSnap(false);
             if (sel.isCollapsed && fixed.rightDom) {
-                // 如果下一个是 table，则 delete 键直接移动光标
-                var cell = _domUtilsDomExtend2['default'].getParentByTagName(fixed.rightDom, ['td', 'th'], true, null);
-                if (!curCell && cell) {
-                    _rangeUtilsRangeExtend2['default'].setRange(cell, 0);
-                    _commonUtils2['default'].stopEvent(e);
-                    return;
-                }
+                // // 如果下一个是 table，则 delete 键直接移动光标
+                // var cell = domUtils.getParentByTagName(fixed.rightDom, ['td', 'th'], true, null);
+                // if (!curCell && cell) {
+                //     console.log('next is table, stop event....')
+                //     rangeUtils.setRange(cell, 0);
+                //     utils.stopEvent(e);
+                //     return;
+                // }
                 fixed.endImg = _amendUtilsAmendExtend2['default'].getWizAmendImgParent(fixed.rightDom);
                 if (fixed.endImg) {
                     fixed.endDom = fixed.endImg;
@@ -3067,6 +3284,9 @@ var amendEvent = {
          */
         _commonHistoryUtils2['default'].saveSnap(false);
         amend.splitAmendDomByRange(fixed);
+        //删除 range 选中区域后，必须要避免光标进入 table 容器内
+        var check = _tableUtilsTableUtils2['default'].checkCaretInTableContainer();
+        _tableUtilsTableZone2['default'].insertEmptyLine(check.tableContainer, check.after);
 
         if (keyCode === 13 && h6Patch()) {
             _commonUtils2['default'].stopEvent(e);
@@ -3086,7 +3306,7 @@ var amendEvent = {
             if (wizDom && wizDom.childNodes.length === 1) {
                 tmpDom = _domUtilsDomExtend2['default'].createSpan();
                 tmpDom.innerHTML = _commonConst2['default'].FILL_CHAR + _commonConst2['default'].FILL_CHAR;
-                _domUtilsDomExtend2['default'].insert(wizDom, tmpDom, direct > 0);
+                _domUtilsDomExtend2['default'].before(wizDom, tmpDom, direct > 0);
                 wizDom.parentNode.removeChild(wizDom);
                 _rangeUtilsRangeExtend2['default'].setRange(tmpDom, direct > 0 ? 0 : 2, tmpDom, 1);
             }
@@ -3097,84 +3317,11 @@ var amendEvent = {
      * @param e
      */
     onMouseDown: function onMouseDown(e) {
-
         var isInfo = _amendInfo2['default'].isInfo(e.target);
         if (isInfo) {
             _commonUtils2['default'].stopEvent(e);
         }
         _amendInfo2['default'].stop();
-
-        var dom,
-            offset,
-            tableContainer,
-            addNext = false,
-            addPrev = false;
-        if (e.target === _commonEnv2['default'].doc.body || e.target === _commonEnv2['default'].doc.body.parentNode) {
-            if (e.target === _commonEnv2['default'].doc.body) {
-                dom = _domUtilsDomExtend2['default'].getFirstDeepChild(_commonEnv2['default'].doc.body);
-                while (dom && !_domUtilsDomExtend2['default'].canEdit(dom)) {
-                    dom = _domUtilsDomExtend2['default'].getNextNodeCanEdit(dom, false);
-                }
-                if (dom) {
-                    offset = _domUtilsDomExtend2['default'].getOffset(dom);
-                    tableContainer = _domUtilsDomExtend2['default'].getParentByFilter(dom, function (dom) {
-                        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-                    }, true);
-                    if (e.clientY < offset.top && tableContainer) {
-                        addPrev = true;
-                    } else {
-                        dom = null;
-                    }
-                }
-            }
-
-            if (!dom) {
-                dom = _domUtilsDomExtend2['default'].getLastDeepChild(_commonEnv2['default'].doc.body);
-                while (dom && !_domUtilsDomExtend2['default'].canEdit(dom)) {
-                    dom = _domUtilsDomExtend2['default'].getPreviousNodeCanEdit(dom, false);
-                }
-                if (dom) {
-                    offset = _domUtilsDomExtend2['default'].getOffset(dom);
-                    tableContainer = _domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
-                        return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-                    }, true);
-                    if (e.clientY > offset.top + dom.offsetHeight && tableContainer) {
-                        addNext = true;
-                    }
-                }
-            }
-        } else if (_domUtilsDomExtend2['default'].hasClass(e.target, _commonConst2['default'].CLASS.TABLE_CONTAINER) || _domUtilsDomExtend2['default'].hasClass(e.target, _commonConst2['default'].CLASS.TABLE_BODY)) {
-            tableContainer = _domUtilsDomExtend2['default'].getParentByFilter(e.target, function (obj) {
-                return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-            }, true);
-            if (tableContainer && e.offsetY < 15) {
-                dom = _domUtilsDomExtend2['default'].getPreviousNodeCanEdit(e.target, false);
-                if (!dom || _domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
-                    return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-                }, true)) {
-                    addPrev = true;
-                }
-            } else if (tableContainer && e.target.offsetHeight - e.offsetY < 15) {
-                dom = _domUtilsDomExtend2['default'].getNextNodeCanEdit(e.target, false);
-                if (!dom || _domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
-                    return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-                }, true)) {
-                    addNext = true;
-                }
-            } else {
-                return;
-            }
-        }
-        var newLine;
-        if (tableContainer && (addNext || addPrev)) {
-            newLine = _commonEnv2['default'].doc.createElement('div');
-            dom = _commonEnv2['default'].doc.createElement('br');
-            newLine.appendChild(dom);
-            _domUtilsDomExtend2['default'].insert(tableContainer, newLine, addNext);
-            _rangeUtilsRangeExtend2['default'].setRange(dom, 1);
-        } else {
-            dom = null;
-        }
     },
     /**
      *  鼠标按下后 恢复 amendInfo 显示
@@ -3189,7 +3336,8 @@ var amendEvent = {
         //
         //    //amendInfo.showAmendsInfo(amendDoms);
         //}
-    }
+    },
+    onTouchStart: function onTouchStart(e) {}
 };
 
 exports['default'] = amend;
@@ -3210,7 +3358,7 @@ function h6Patch() {
     if (isLast && hObj) {
         newLine = _commonEnv2['default'].doc.createElement('div');
         newLine.appendChild(_commonEnv2['default'].doc.createElement('br'));
-        _domUtilsDomExtend2['default'].insert(hObj, newLine, true);
+        _domUtilsDomExtend2['default'].before(hObj, newLine, true);
         _rangeUtilsRangeExtend2['default'].setRange(newLine, 0);
         return true;
     }
@@ -3230,7 +3378,7 @@ function h6Patch() {
 }
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/historyUtils":15,"../common/lang":16,"../common/utils":18,"../domUtils/domExtend":22,"../rangeUtils/rangeExtend":31,"./amendInfo":7,"./amendUser":8,"./amendUtils/amendExtend":10}],7:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
 /**
  * 修订信息显示图层 相关对象
  */
@@ -3439,12 +3587,7 @@ var _event = {
             amendInfo.main.removeEventListener('click', _event.handler.onClick);
         }
     },
-    getEventPos: function getEventPos(e) {
-        return {
-            x: e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
-            y: e.changedTouches ? e.changedTouches[0].clientY : e.clientY
-        };
-    },
+
     handler: {
         /**
          * 检测 鼠标移动到的 dom 对象，是否需要显示 或 隐藏 amendInfo
@@ -3452,12 +3595,12 @@ var _event = {
          */
         onMouseMove: function onMouseMove(e) {
             //console.log('onMouseMove....')
-            var curMousePos = _event.getEventPos(e);
+            var eventClient = _commonUtils2['default'].getEventClientPos(e);
             //如果鼠标没有移动， 仅仅输入文字导致触发mousemove事件时，不弹出信息框
-            if (lastMousePos.x === curMousePos.x && lastMousePos.y === curMousePos.y) {
+            if (lastMousePos.x === eventClient.x && lastMousePos.y === eventClient.y) {
                 return;
             }
-            lastMousePos = curMousePos;
+            lastMousePos = eventClient;
             if (pause) {
                 return;
             }
@@ -3506,8 +3649,8 @@ var _event = {
                     fontSize = 14;
                 }
                 scroll = _domUtilsDomBase2['default'].getPageScroll();
-                pos.left = curMousePos.x + scroll.left;
-                pos.top = curMousePos.y + scroll.top - fontSize;
+                pos.left = eventClient.x + scroll.left;
+                pos.top = eventClient.y + scroll.top - fontSize;
                 if (pos.top < targetDom.offsetTop) {
                     pos.top = targetDom.offsetTop;
                 }
@@ -3724,7 +3867,7 @@ function removeAmendInfo() {
 exports['default'] = amendInfo;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/lang":16,"../common/utils":18,"../common/wizUserAction":20,"../domUtils/domBase":21,"./amendUser":8,"./amendUtils/amendBase":9}],8:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/lang":17,"../common/utils":19,"../common/wizUserAction":21,"../domUtils/domBase":23,"./amendUser":9,"./amendUtils/amendBase":10}],9:[function(require,module,exports){
 /**
  * 用于记录 当前操作者的信息
  * @type {{guid: string, hash: string, name: string, color: string, init: Function}}
@@ -3969,7 +4112,7 @@ function saveUser() {
 exports['default'] = amendUserUtils;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/utils":18}],9:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/utils":19}],10:[function(require,module,exports){
 /**
  * amend 中通用的基本方法集合（基础操作，以读取为主）
  *
@@ -4417,7 +4560,7 @@ var amendUtils = {
 exports['default'] = amendUtils;
 module.exports = exports['default'];
 
-},{"../../common/const":12,"../../common/env":14,"../../common/utils":18,"../../domUtils/domBase":21,"../../rangeUtils/rangeBase":30,"./../amendUser":8}],10:[function(require,module,exports){
+},{"../../common/const":13,"../../common/env":15,"../../common/utils":19,"../../domUtils/domBase":23,"../../rangeUtils/rangeBase":35,"./../amendUser":9}],11:[function(require,module,exports){
 /**
  * amend 中通用的基本方法集合（扩展操作）
  *
@@ -5134,11 +5277,11 @@ _amendBase2['default'].splitAmendDomForReverse = function (endDom, endOffset) {
         newDom = _amendBase2['default'].createDomForReverse();
 
     if (imgDom) {
-        _domUtilsDomExtend2['default'].insert(imgDom, newDom, endOffset > 0);
+        _domUtilsDomExtend2['default'].before(imgDom, newDom, endOffset > 0);
     } else if (amendDom) {
         amendDom = _amendBase2['default'].splitWizDomWithTextNode(endDom, endOffset);
         if (amendDom) {
-            _domUtilsDomExtend2['default'].insert(amendDom, newDom, true);
+            _domUtilsDomExtend2['default'].before(amendDom, newDom, true);
         } else {
             return null;
         }
@@ -5276,7 +5419,7 @@ _amendBase2['default'].wizAmendSave = function (domList) {
         }
 
         if (d.getAttribute(_commonConst2['default'].ATTR.IMG)) {
-            _domUtilsDomExtend2['default'].insert(d, d.children[0], false);
+            _domUtilsDomExtend2['default'].before(d, d.children[0], false);
             d.parentNode.removeChild(d);
         } else {
             _domUtilsDomExtend2['default'].css(d, {
@@ -5298,7 +5441,7 @@ _amendBase2['default'].wizAmendSave = function (domList) {
 exports['default'] = _amendBase2['default'];
 module.exports = exports['default'];
 
-},{"../../common/const":12,"../../common/env":14,"../../common/utils":18,"../../domUtils/domExtend":22,"../../rangeUtils/rangeExtend":31,"./../amendUser":8,"./amendBase":9}],11:[function(require,module,exports){
+},{"../../common/const":13,"../../common/env":15,"../../common/utils":19,"../../domUtils/domExtend":24,"../../rangeUtils/rangeExtend":36,"./../amendUser":9,"./amendBase":10}],12:[function(require,module,exports){
 /*
  * $Id: base64.js,v 2.15 2014/04/05 12:58:57 dankogai Exp dankogai $
  *  https://github.com/dankogai/js-base64
@@ -5448,7 +5591,7 @@ if (typeof Object.defineProperty === 'function') {
 exports['default'] = global.Base64;
 module.exports = exports['default'];
 
-},{"buffer":1}],12:[function(require,module,exports){
+},{"buffer":1}],13:[function(require,module,exports){
 /**
  * 内部使用的标准常量.
  */
@@ -5516,6 +5659,11 @@ var CONST = {
         // NO_ABSTRACT_START: 'Document-Abstract-Start',
         // NO_ABSTRACT_END: 'Document-Abstract-End',
         TMP_STYLE: 'wiz_tmp_editor_style'
+    },
+    NOTE_TYPE: {
+        COMMON: 'common',
+        MARKDOWN: 'markdown',
+        MATHJAX: 'mathjax'
     },
     TAG: {
         TMP_TAG: 'wiz_tmp_tag'
@@ -5638,7 +5786,7 @@ var CONST = {
 exports['default'] = CONST;
 module.exports = exports['default'];
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /**
  * 依赖的 css && 非可打包的 js 文件加载控制
  */
@@ -5694,7 +5842,7 @@ var dependLoader = {
 exports['default'] = dependLoader;
 module.exports = exports['default'];
 
-},{"./scriptLoader":17,"./utils":18}],14:[function(require,module,exports){
+},{"./scriptLoader":18,"./utils":19}],15:[function(require,module,exports){
 /**
  * wizEditor 环境参数，保存当前 document 等
  */
@@ -5710,12 +5858,58 @@ var _const = require('./const');
 
 var _const2 = _interopRequireDefault(_const);
 
+var _lang = require('./lang');
+
 var GlobalEvent = {};
 var WizNotCmdInditify = 'wiznotecmd://';
 
 var ENV = {
+    options: {
+        document: null,
+        lang: 'en',
+        userInfo: null,
+        userData: [],
+        clientType: 'windows',
+        noteType: 'common',
+        dependencyCss: null,
+        dependencyJs: null,
+        maxRedo: 100,
+        // redoCallback: null,
+        noAmend: false,
+        timeout: {
+            markdown: 30 * 1000,
+            mathJax: 30 * 1000
+        },
+        callback: {
+            markdown: null,
+            mathJax: null,
+            redo: null
+        }
+    },
+    init: function init(type, _options) {
+        setOptions(ENV.options, _options);
+
+        var doc = ENV.options.document || window.document;
+        ENV.doc = doc;
+        ENV.win = ENV.doc.defaultView;
+        (0, _lang.initLang)(ENV.options.lang);
+        ENV.client.setType(ENV.options.clientType);
+
+        function setOptions(old, newOptions) {
+            if (!newOptions) {
+                return;
+            }
+            var k;
+            for (k in old) {
+                if (old.hasOwnProperty(k) && newOptions[k]) {
+                    old[k] = newOptions[k];
+                }
+            }
+        }
+    },
     win: null,
     doc: null,
+    readonly: true,
     dependency: {
         files: {
             css: {
@@ -5732,7 +5926,10 @@ var ENV = {
                 sequence: '',
                 mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'
             },
-            init: function init(cssFiles, jsFiles) {
+            init: function init() {
+                var cssFiles = ENV.options.dependencyCss;
+                var jsFiles = ENV.options.dependencyJs;
+
                 _append('fonts', cssFiles, ENV.dependency.files.css);
                 _append('github2', cssFiles, ENV.dependency.files.css);
                 _append('wizToc', cssFiles, ENV.dependency.files.css);
@@ -5757,18 +5954,12 @@ var ENV = {
             }
         },
         css: {
-            fons: ['fonts'],
+            fonts: ['fonts'],
             markdown: ['github2', 'wizToc']
         },
         js: {
             markdown: [['jquery'], ['prettify', 'raphael', 'underscore'], ['flowchart', 'sequence']],
             mathJax: [['jquery'], ['mathJax']]
-        }
-    },
-    setDoc: function setDoc(doc) {
-        if (doc) {
-            ENV.doc = doc;
-            ENV.win = ENV.doc.defaultView;
         }
     },
     /**
@@ -5902,7 +6093,7 @@ var ENV = {
 exports['default'] = ENV;
 module.exports = exports['default'];
 
-},{"./const":12}],15:[function(require,module,exports){
+},{"./const":13,"./lang":17}],16:[function(require,module,exports){
 /**
  * undo、redo 工具包
  */
@@ -6235,7 +6426,7 @@ var historyEvent = {
 exports['default'] = historyUtils;
 module.exports = exports['default'];
 
-},{"./../domUtils/domExtend":22,"./../rangeUtils/rangeExtend":31,"./const":12,"./env":14,"./utils":18}],16:[function(require,module,exports){
+},{"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36,"./const":13,"./env":15,"./utils":19}],17:[function(require,module,exports){
 /**
  * Created by ZQG on 2015/3/11.
  */
@@ -6379,7 +6570,7 @@ var initLang = function initLang(type) {
 };
 exports.initLang = initLang;
 
-},{}],17:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*
  *用于加载js
  *options是数组，值有
@@ -6543,7 +6734,7 @@ function save(options) {
 exports['default'] = scriptLoader;
 module.exports = exports['default'];
 
-},{"./const":12,"./utils":18}],18:[function(require,module,exports){
+},{"./const":13,"./utils":19}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -6614,6 +6805,12 @@ var utils = {
         var t1 = utils.getDateForTimeStr(time1),
             t2 = utils.getDateForTimeStr(time2);
         return Math.abs(t1 - t2) <= _const2['default'].AMEND_BATCH_TIME_SPACE;
+    },
+    getEventClientPos: function getEventClientPos(e) {
+        return {
+            x: e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
+            y: e.changedTouches ? e.changedTouches[0].clientY : e.clientY
+        };
     },
     /**
      * 获取字符串 的 hash 值
@@ -6729,6 +6926,7 @@ var utils = {
     },
     //-------------------- 以下内容修改需要 保证与 wizUI 中的 utils 内 对应方法一致 start ----------------------
     //PcCustomTagClass: 'wiz-html-render-unsave', //此 class 专门用于 pc 端将 markdown 笔记选然后发email 或微博等处理
+    WizEditorTmpName: 'wiz_tmp_editor_style', //WizEditor 专用临时 style
     loadSingleCss: function loadSingleCss(doc, path) {
         var cssId = 'wiz_' + path;
         if (doc.getElementById(cssId)) {
@@ -6738,6 +6936,7 @@ var utils = {
         var s = doc.createElement('link');
         s.rel = 'stylesheet';
         s.setAttribute('charset', "utf-8");
+        s.setAttribute('name', this.WizEditorTmpName);
         s.href = path.replace(/\\/g, '/');
         //s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].insertBefore(s, null);
@@ -6747,6 +6946,7 @@ var utils = {
         var s = doc.createElement('style');
         s.type = type;
         s.text = jsStr;
+        s.setAttribute('name', this.WizEditorTmpName);
         //s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].appendChild(s);
     },
@@ -6867,7 +7067,19 @@ var utils = {
         }
 
         var el = $(dom);
+        //处理 table 容器
+        el.find('.' + _const2['default'].CLASS.TABLE_CONTAINER).each(function (index) {
+            var target = $(this);
+            var span = $("<span></span>");
+            span.text(htmlUnEncode(target[0].outerHTML));
+            span.insertAfter(target);
+            var br = $('<br/>');
+            br.insertAfter(target);
+            target.remove();
+        });
+        //处理 todolist
         el.find('label.wiz-todo-label').each(function (index) {
+            var target = $(this);
             //检测如果是遗留的 label 则不进行特殊处理
             var img = $('.wiz-todo-img', this);
             if (img.length === 0) {
@@ -6876,16 +7088,19 @@ var utils = {
 
             var span = $("<span></span>");
             //避免 父节点是 body 时导致笔记阅读异常
-            span.text(htmlUnEncode($(this)[0].outerHTML));
-            span.insertAfter($(this));
-            $(this).remove();
+            span.text(htmlUnEncode(target[0].outerHTML));
+            span.insertAfter(target);
+            target.remove();
         });
+        //处理 img
         el.find('img').each(function (index) {
+            var target = $(this);
             var span = $("<span></span>");
-            span.text(htmlUnEncode($(this)[0].outerHTML));
-            span.insertAfter($(this));
-            $(this).remove();
+            span.text(htmlUnEncode(target[0].outerHTML));
+            span.insertAfter(target);
+            target.remove();
         });
+        //处理 a 超链接
         el.find('a').each(function (index, link) {
             var linkObj = $(link);
             var href = linkObj.attr('href');
@@ -6896,8 +7111,10 @@ var utils = {
                 linkObj.remove();
             }
         });
+        //处理段落 p
         el.find('p').each(function () {
-            $(this).replaceWith($('<div>' + this.innerHTML + '</div>'));
+            var target = $(this);
+            target.replaceWith($('<div>' + this.innerHTML + '</div>'));
         });
     }
     //-------------------- 以上内容修改需要 保证与 wizUI 中的 utils 内 对应方法一致 end ----------------------
@@ -6906,7 +7123,7 @@ var utils = {
 exports['default'] = utils;
 module.exports = exports['default'];
 
-},{"./const":12}],19:[function(require,module,exports){
+},{"./const":13}],20:[function(require,module,exports){
 /**
  * 默认的样式集合
  */
@@ -6927,8 +7144,8 @@ var _const = require('./const');
 var _const2 = _interopRequireDefault(_const);
 
 var TmpEditorStyle = {
-    phone: 'body {' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}',
-    pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}'
+    phone: 'body {' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}',
+    pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}'
 },
     TmpReaderStyle = {
     phone: 'img {' + 'max-width: 100%;' + 'height: auto !important;' + 'margin: 0px auto;' + 'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
@@ -6937,11 +7154,11 @@ var TmpEditorStyle = {
     DefaultStyleId = 'wiz_custom_css',
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
-    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;position: relative;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}'
+    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}'
 },
     ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' + '.wiz-img-resize-handle {width:5px;height:5px;}' + '.wiz-img-resize-handle.lt {cursor: nw-resize;}' + '.wiz-img-resize-handle.tm {cursor: n-resize;}' + '.wiz-img-resize-handle.rt {cursor: ne-resize;}' + '.wiz-img-resize-handle.lm {cursor: w-resize;}' + '.wiz-img-resize-handle.rm {cursor: e-resize;}' + '.wiz-img-resize-handle.lb {cursor: sw-resize;}' + '.wiz-img-resize-handle.bm {cursor: s-resize;}' + '.wiz-img-resize-handle.rb {cursor: se-resize;}',
-    TableContainerStyle = '.' + _const2['default'].CLASS.TABLE_CONTAINER + ' {}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;-webkit-overflow-scrolling:touch;}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;position:relative;outline:none;}',
-    TableEditStyle = '.' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *,' + ' .' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *:before,' + ' .' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' + '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + _const2['default'].CSS.Z_INDEX.tableBorder + '}' + '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + _const2['default'].CSS.Z_INDEX.tableColRowLine + ';}' + '#wiz-table-col-line {width: 1px;cursor:col-resize;}' + '#wiz-table-row-line {height: 1px;cursor:row-resize;}' + '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' + '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_top {height: 1px;}' + '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_right {width: 1px;}' + '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_bottom {height: 1px;}' + '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_left {width: 1px;}' + '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + _const2['default'].CSS.Z_INDEX.tableRangeDot + ';}' + '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + _const2['default'].CSS.Z_INDEX.tableTools + ';}' + '.wiz-table-tools ul {list-style: none;padding: 0;}' + '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {width: 20px;height: 20px;cursor: pointer;position:relative;}' + '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' + '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' + '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + _const2['default'].CSS.Z_INDEX.tableToolsArrow + ';}' + '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' + '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' + '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' + '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' + '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' + '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' + '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' + 'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' + 'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + _const2['default'].CSS.Z_INDEX.tableTDBefore + ';}' + 'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + _const2['default'].CSS.Z_INDEX.tableTDBefore + ';}';
+    TableContainerStyle = '.' + _const2['default'].CLASS.TABLE_CONTAINER + ' {}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
+    TableEditStyle = '.' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *,' + ' .' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *:before,' + ' .' + _const2['default'].CLASS.TABLE_BODY + '.' + _const2['default'].CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' + 'td,th {position:relative;}' + '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + _const2['default'].CSS.Z_INDEX.tableBorder + '}' + '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + _const2['default'].CSS.Z_INDEX.tableColRowLine + ';}' + '#wiz-table-col-line {width: 1px;cursor:col-resize;}' + '#wiz-table-row-line {height: 1px;cursor:row-resize;}' + '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' + '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_top {height: 1px;}' + '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_right {width: 1px;}' + '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_bottom {height: 1px;}' + '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_left {width: 1px;}' + '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + _const2['default'].CSS.Z_INDEX.tableRangeDot + ';}' + '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + _const2['default'].CSS.Z_INDEX.tableTools + ';}' + '.wiz-table-tools ul {list-style: none;padding: 0;}' + '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {width: 20px;height: 20px;cursor: pointer;position:relative;}' + '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' + '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' + '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + _const2['default'].CSS.Z_INDEX.tableToolsArrow + ';}' + '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' + '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' + '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' + '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' + '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' + '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' + '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' + 'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' + 'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + _const2['default'].CSS.Z_INDEX.tableTDBefore + ';}' + 'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + _const2['default'].CSS.Z_INDEX.tableTDBefore + ';}';
 
 function replaceStyleById(id, css, isReplace) {
     //isReplace = true 则 只进行替换， 如无同id 的元素，不进行任何操作
@@ -7021,7 +7238,7 @@ var WizStyle = {
 exports['default'] = WizStyle;
 module.exports = exports['default'];
 
-},{"./const":12,"./env":14}],20:[function(require,module,exports){
+},{"./const":13,"./env":15}],21:[function(require,module,exports){
 /**
  * 专门用于记录用户行为的 log
  */
@@ -7064,7 +7281,1520 @@ var UserAction = {
 exports['default'] = UserAction;
 module.exports = exports['default'];
 
-},{"../common/env":14}],21:[function(require,module,exports){
+},{"../common/env":15}],22:[function(require,module,exports){
+/**
+ * 兼容 ES6 将 require 替换为 _require
+ */
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+(function e(t, n, r) {
+  function s(o, u) {
+    if (!n[o]) {
+      if (!t[o]) {
+        var a = typeof _require == "function" && _require;if (!u && a) return a(o, !0);if (i) return i(o, !0);var f = new Error("Cannot find module '" + o + "'");throw (f.code = "MODULE_NOT_FOUND", f);
+      }var l = n[o] = { exports: {} };t[o][0].call(l.exports, function (e) {
+        var n = t[o][1][e];return s(n ? n : e);
+      }, l, l.exports, e, t, n, r);
+    }return n[o].exports;
+  }var i = typeof _require == "function" && _require;for (var o = 0; o < r.length; o++) s(r[o]);return s;
+})({ 1: [function (_require, module, exports) {
+    /**
+     * 默认配置
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var FilterCSS = _require('cssfilter').FilterCSS;
+    var _ = _require('./util');
+
+    // 默认白名单
+    function getDefaultWhiteList() {
+      return {
+        a: ['target', 'href', 'title'],
+        abbr: ['title'],
+        address: [],
+        area: ['shape', 'coords', 'href', 'alt'],
+        article: [],
+        aside: [],
+        audio: ['autoplay', 'controls', 'loop', 'preload', 'src'],
+        b: [],
+        bdi: ['dir'],
+        bdo: ['dir'],
+        big: [],
+        blockquote: ['cite'],
+        br: [],
+        caption: [],
+        center: [],
+        cite: [],
+        code: [],
+        col: ['align', 'valign', 'span', 'width'],
+        colgroup: ['align', 'valign', 'span', 'width'],
+        dd: [],
+        del: ['datetime'],
+        details: ['open'],
+        div: [],
+        dl: [],
+        dt: [],
+        em: [],
+        font: ['color', 'size', 'face'],
+        footer: [],
+        h1: [],
+        h2: [],
+        h3: [],
+        h4: [],
+        h5: [],
+        h6: [],
+        header: [],
+        hr: [],
+        i: [],
+        img: ['src', 'alt', 'title', 'width', 'height'],
+        ins: ['datetime'],
+        li: [],
+        mark: [],
+        nav: [],
+        ol: [],
+        p: [],
+        pre: [],
+        s: [],
+        section: [],
+        small: [],
+        span: [],
+        sub: [],
+        sup: [],
+        strong: [],
+        table: ['width', 'border', 'align', 'valign'],
+        tbody: ['align', 'valign'],
+        td: ['width', 'rowspan', 'colspan', 'align', 'valign'],
+        tfoot: ['align', 'valign'],
+        th: ['width', 'rowspan', 'colspan', 'align', 'valign'],
+        thead: ['align', 'valign'],
+        tr: ['rowspan', 'align', 'valign'],
+        tt: [],
+        u: [],
+        ul: [],
+        video: ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width']
+      };
+    }
+
+    // 默认CSS Filter
+    var defaultCSSFilter = new FilterCSS();
+
+    /**
+     * 匹配到标签时的处理方法
+     *
+     * @param {String} tag
+     * @param {String} html
+     * @param {Object} options
+     * @return {String}
+     */
+    function onTag(tag, html, options) {}
+    // do nothing
+
+    /**
+     * 匹配到不在白名单上的标签时的处理方法
+     *
+     * @param {String} tag
+     * @param {String} html
+     * @param {Object} options
+     * @return {String}
+     */
+    function onIgnoreTag(tag, html, options) {}
+    // do nothing
+
+    /**
+     * 匹配到标签属性时的处理方法
+     *
+     * @param {String} tag
+     * @param {String} name
+     * @param {String} value
+     * @return {String}
+     */
+    function onTagAttr(tag, name, value) {}
+    // do nothing
+
+    /**
+     * 匹配到不在白名单上的标签属性时的处理方法
+     *
+     * @param {String} tag
+     * @param {String} name
+     * @param {String} value
+     * @return {String}
+     */
+    function onIgnoreTagAttr(tag, name, value) {}
+    // do nothing
+
+    /**
+     * HTML转义
+     *
+     * @param {String} html
+     */
+    function escapeHtml(html) {
+      return html.replace(REGEXP_LT, '&lt;').replace(REGEXP_GT, '&gt;');
+    }
+
+    /**
+     * 安全的标签属性值
+     *
+     * @param {String} tag
+     * @param {String} name
+     * @param {String} value
+     * @param {Object} cssFilter
+     * @return {String}
+     */
+    function safeAttrValue(tag, name, value, cssFilter) {
+      cssFilter = cssFilter || defaultCSSFilter;
+      // 转换为友好的属性值，再做判断
+      value = friendlyAttrValue(value);
+
+      if (name === 'href' || name === 'src') {
+        // 过滤 href 和 src 属性
+        // 仅允许 http:// | https:// | mailto: | / | # 开头的地址
+        value = _.trim(value);
+        if (value === '#') return '#';
+        if (!(value.substr(0, 7) === 'http://' || value.substr(0, 8) === 'https://' || value.substr(0, 7) === 'mailto:' || value[0] === '#' || value[0] === '/')) {
+          return '';
+        }
+      } else if (name === 'background') {
+        // 过滤 background 属性 （这个xss漏洞较老了，可能已经不适用）
+        // javascript:
+        REGEXP_DEFAULT_ON_TAG_ATTR_4.lastIndex = 0;
+        if (REGEXP_DEFAULT_ON_TAG_ATTR_4.test(value)) {
+          return '';
+        }
+      } else if (name === 'style') {
+        // /*注释*/
+        /*REGEXP_DEFAULT_ON_TAG_ATTR_3.lastIndex = 0;
+         if (REGEXP_DEFAULT_ON_TAG_ATTR_3.test(value)) {
+         return '';
+         }*/
+        // expression()
+        REGEXP_DEFAULT_ON_TAG_ATTR_7.lastIndex = 0;
+        if (REGEXP_DEFAULT_ON_TAG_ATTR_7.test(value)) {
+          return '';
+        }
+        // url()
+        REGEXP_DEFAULT_ON_TAG_ATTR_8.lastIndex = 0;
+        if (REGEXP_DEFAULT_ON_TAG_ATTR_8.test(value)) {
+          REGEXP_DEFAULT_ON_TAG_ATTR_4.lastIndex = 0;
+          if (REGEXP_DEFAULT_ON_TAG_ATTR_4.test(value)) {
+            return '';
+          }
+        }
+        value = cssFilter.process(value);
+      }
+
+      // 输出时需要转义<>"
+      value = escapeAttrValue(value);
+      return value;
+    }
+
+    // 正则表达式
+    var REGEXP_LT = /</g;
+    var REGEXP_GT = />/g;
+    var REGEXP_QUOTE = /"/g;
+    var REGEXP_QUOTE_2 = /&quot;/g;
+    var REGEXP_ATTR_VALUE_1 = /&#([a-zA-Z0-9]*);?/img;
+    var REGEXP_ATTR_VALUE_COLON = /&colon;?/img;
+    var REGEXP_ATTR_VALUE_NEWLINE = /&newline;?/img;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_3 = /\/\*|\*\//mg;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_4 = /((j\s*a\s*v\s*a|v\s*b|l\s*i\s*v\s*e)\s*s\s*c\s*r\s*i\s*p\s*t\s*|m\s*o\s*c\s*h\s*a)\:/ig;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_5 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:/ig;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_6 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:\s*image\//ig;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_7 = /e\s*x\s*p\s*r\s*e\s*s\s*s\s*i\s*o\s*n\s*\(.*/ig;
+    var REGEXP_DEFAULT_ON_TAG_ATTR_8 = /u\s*r\s*l\s*\(.*/ig;
+
+    /**
+     * 对双引号进行转义
+     *
+     * @param {String} str
+     * @return {String} str
+     */
+    function escapeQuote(str) {
+      return str.replace(REGEXP_QUOTE, '&quot;');
+    }
+
+    /**
+     * 对双引号进行转义
+     *
+     * @param {String} str
+     * @return {String} str
+     */
+    function unescapeQuote(str) {
+      return str.replace(REGEXP_QUOTE_2, '"');
+    }
+
+    /**
+     * 对html实体编码进行转义
+     *
+     * @param {String} str
+     * @return {String}
+     */
+    function escapeHtmlEntities(str) {
+      return str.replace(REGEXP_ATTR_VALUE_1, function replaceUnicode(str, code) {
+        return code[0] === 'x' || code[0] === 'X' ? String.fromCharCode(parseInt(code.substr(1), 16)) : String.fromCharCode(parseInt(code, 10));
+      });
+    }
+
+    /**
+     * 对html5新增的危险实体编码进行转义
+     *
+     * @param {String} str
+     * @return {String}
+     */
+    function escapeDangerHtml5Entities(str) {
+      return str.replace(REGEXP_ATTR_VALUE_COLON, ':').replace(REGEXP_ATTR_VALUE_NEWLINE, ' ');
+    }
+
+    /**
+     * 清除不可见字符
+     *
+     * @param {String} str
+     * @return {String}
+     */
+    function clearNonPrintableCharacter(str) {
+      var str2 = '';
+      for (var i = 0, len = str.length; i < len; i++) {
+        str2 += str.charCodeAt(i) < 32 ? ' ' : str.charAt(i);
+      }
+      return _.trim(str2);
+    }
+
+    /**
+     * 将标签的属性值转换成一般字符，便于分析
+     *
+     * @param {String} str
+     * @return {String}
+     */
+    function friendlyAttrValue(str) {
+      str = unescapeQuote(str); // 双引号
+      str = escapeHtmlEntities(str); // 转换HTML实体编码
+      str = escapeDangerHtml5Entities(str); // 转换危险的HTML5新增实体编码
+      str = clearNonPrintableCharacter(str); // 清除不可见字符
+      return str;
+    }
+
+    /**
+     * 转义用于输出的标签属性值
+     *
+     * @param {String} str
+     * @return {String}
+     */
+    function escapeAttrValue(str) {
+      str = escapeQuote(str);
+      str = escapeHtml(str);
+      return str;
+    }
+
+    /**
+     * 去掉不在白名单中的标签onIgnoreTag处理方法
+     */
+    function onIgnoreTagStripAll() {
+      return '';
+    }
+
+    /**
+     * 删除标签体
+     *
+     * @param {array} tags 要删除的标签列表
+     * @param {function} next 对不在列表中的标签的处理函数，可选
+     */
+    function StripTagBody(tags, next) {
+      if (typeof next !== 'function') {
+        next = function () {};
+      }
+
+      var isRemoveAllTag = !Array.isArray(tags);
+      function isRemoveTag(tag) {
+        if (isRemoveAllTag) return true;
+        return _.indexOf(tags, tag) !== -1;
+      }
+
+      var removeList = []; // 要删除的位置范围列表
+      var posStart = false; // 当前标签开始位置
+
+      return {
+        onIgnoreTag: function onIgnoreTag(tag, html, options) {
+          if (isRemoveTag(tag)) {
+            if (options.isClosing) {
+              var ret = '[/removed]';
+              var end = options.position + ret.length;
+              removeList.push([posStart !== false ? posStart : options.position, end]);
+              posStart = false;
+              return ret;
+            } else {
+              if (!posStart) {
+                posStart = options.position;
+              }
+              return '[removed]';
+            }
+          } else {
+            return next(tag, html, options);
+          }
+        },
+        remove: function remove(html) {
+          var rethtml = '';
+          var lastPos = 0;
+          _.forEach(removeList, function (pos) {
+            rethtml += html.slice(lastPos, pos[0]);
+            lastPos = pos[1];
+          });
+          rethtml += html.slice(lastPos);
+          return rethtml;
+        }
+      };
+    }
+
+    /**
+     * 去除备注标签
+     *
+     * @param {String} html
+     * @return {String}
+     */
+    function stripCommentTag(html) {
+      return html.replace(STRIP_COMMENT_TAG_REGEXP, '');
+    }
+    var STRIP_COMMENT_TAG_REGEXP = /<!--[\s\S]*?-->/g;
+
+    /**
+     * 去除不可见字符
+     *
+     * @param {String} html
+     * @return {String}
+     */
+    function stripBlankChar(html) {
+      var chars = html.split('');
+      chars = chars.filter(function (char) {
+        var c = char.charCodeAt(0);
+        if (c === 127) return false;
+        if (c <= 31) {
+          if (c === 10 || c === 13) return true;
+          return false;
+        }
+        return true;
+      });
+      return chars.join('');
+    }
+
+    exports.whiteList = getDefaultWhiteList();
+    exports.getDefaultWhiteList = getDefaultWhiteList;
+    exports.onTag = onTag;
+    exports.onIgnoreTag = onIgnoreTag;
+    exports.onTagAttr = onTagAttr;
+    exports.onIgnoreTagAttr = onIgnoreTagAttr;
+    exports.safeAttrValue = safeAttrValue;
+    exports.escapeHtml = escapeHtml;
+    exports.escapeQuote = escapeQuote;
+    exports.unescapeQuote = unescapeQuote;
+    exports.escapeHtmlEntities = escapeHtmlEntities;
+    exports.escapeDangerHtml5Entities = escapeDangerHtml5Entities;
+    exports.clearNonPrintableCharacter = clearNonPrintableCharacter;
+    exports.friendlyAttrValue = friendlyAttrValue;
+    exports.escapeAttrValue = escapeAttrValue;
+    exports.onIgnoreTagStripAll = onIgnoreTagStripAll;
+    exports.StripTagBody = StripTagBody;
+    exports.stripCommentTag = stripCommentTag;
+    exports.stripBlankChar = stripBlankChar;
+    exports.cssFilter = defaultCSSFilter;
+  }, { "./util": 4, "cssfilter": 8 }], 2: [function (_require, module, exports) {
+    /**
+     * 模块入口
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var DEFAULT = _require('./default');
+    var parser = _require('./parser');
+    var FilterXSS = _require('./xss');
+
+    /**
+     * XSS过滤
+     *
+     * @param {String} html 要过滤的HTML代码
+     * @param {Object} options 选项：whiteList, onTag, onTagAttr, onIgnoreTag, onIgnoreTagAttr, safeAttrValue, escapeHtml
+     * @return {String}
+     */
+    function filterXSS(html, options) {
+      var xss = new FilterXSS(options);
+      return xss.process(html);
+    }
+
+    // 输出
+    exports = module.exports = filterXSS;
+    exports.FilterXSS = FilterXSS;
+    for (var i in DEFAULT) exports[i] = DEFAULT[i];
+    for (var i in parser) exports[i] = parser[i];
+
+    // 在浏览器端使用
+    if (typeof window !== 'undefined') {
+      window.filterXSS = module.exports;
+    }
+  }, { "./default": 1, "./parser": 3, "./xss": 5 }], 3: [function (_require, module, exports) {
+    /**
+     * 简单 HTML Parser
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var _ = _require('./util');
+
+    /**
+     * 获取标签的名称
+     *
+     * @param {String} html 如：'<a hef="#">'
+     * @return {String}
+     */
+    function getTagName(html) {
+      var i = html.indexOf(' ');
+      if (i === -1) {
+        var tagName = html.slice(1, -1);
+      } else {
+        var tagName = html.slice(1, i + 1);
+      }
+      tagName = _.trim(tagName).toLowerCase();
+      if (tagName.slice(0, 1) === '/') tagName = tagName.slice(1);
+      if (tagName.slice(-1) === '/') tagName = tagName.slice(0, -1);
+      return tagName;
+    }
+
+    /**
+     * 是否为闭合标签
+     *
+     * @param {String} html 如：'<a hef="#">'
+     * @return {Boolean}
+     */
+    function isClosing(html) {
+      return html.slice(0, 2) === '</';
+    }
+
+    /**
+     * 分析HTML代码，调用相应的函数处理，返回处理后的HTML
+     *
+     * @param {String} html
+     * @param {Function} onTag 处理标签的函数
+     *   参数格式： function (sourcePosition, position, tag, html, isClosing)
+     * @param {Function} escapeHtml 对HTML进行转义的函数
+     * @return {String}
+     */
+    function parseTag(html, onTag, escapeHtml) {
+      'user strict';
+
+      var rethtml = ''; // 待返回的HTML
+      var lastPos = 0; // 上一个标签结束位置
+      var tagStart = false; // 当前标签开始位置
+      var quoteStart = false; // 引号开始位置
+      var currentPos = 0; // 当前位置
+      var len = html.length; // HTML长度
+      var currentHtml = ''; // 当前标签的HTML代码
+      var currentTagName = ''; // 当前标签的名称
+
+      // 逐个分析字符
+      for (currentPos = 0; currentPos < len; currentPos++) {
+        var c = html.charAt(currentPos);
+        if (tagStart === false) {
+          if (c === '<') {
+            tagStart = currentPos;
+            continue;
+          }
+        } else {
+          if (quoteStart === false) {
+            if (c === '<') {
+              rethtml += escapeHtml(html.slice(lastPos, currentPos));
+              tagStart = currentPos;
+              lastPos = currentPos;
+              continue;
+            }
+            if (c === '>') {
+              rethtml += escapeHtml(html.slice(lastPos, tagStart));
+              currentHtml = html.slice(tagStart, currentPos + 1);
+              currentTagName = getTagName(currentHtml);
+              rethtml += onTag(tagStart, rethtml.length, currentTagName, currentHtml, isClosing(currentHtml));
+              lastPos = currentPos + 1;
+              tagStart = false;
+              continue;
+            }
+            // HTML标签内的引号仅当前一个字符是等于号时才有效
+            if ((c === '"' || c === "'") && html.charAt(currentPos - 1) === '=') {
+              quoteStart = c;
+              continue;
+            }
+          } else {
+            if (c === quoteStart) {
+              quoteStart = false;
+              continue;
+            }
+          }
+        }
+      }
+      if (lastPos < html.length) {
+        rethtml += escapeHtml(html.substr(lastPos));
+      }
+
+      return rethtml;
+    }
+
+    // 不符合属性名称规则的正则表达式
+    var REGEXP_ATTR_NAME = /[^a-zA-Z0-9_:\.\-]/img;
+
+    /**
+     * 分析标签HTML代码，调用相应的函数处理，返回HTML
+     *
+     * @param {String} html 如标签'<a href="#" target="_blank">' 则为 'href="#" target="_blank"'
+     * @param {Function} onAttr 处理属性值的函数
+     *   函数格式： function (name, value)
+     * @return {String}
+     */
+    function parseAttr(html, onAttr) {
+      'user strict';
+
+      var lastPos = 0; // 当前位置
+      var retAttrs = []; // 待返回的属性列表
+      var tmpName = false; // 临时属性名称
+      var len = html.length; // HTML代码长度
+
+      function addAttr(name, value) {
+        name = _.trim(name);
+        name = name.replace(REGEXP_ATTR_NAME, '').toLowerCase();
+        if (name.length < 1) return;
+        var ret = onAttr(name, value || '');
+        if (ret) retAttrs.push(ret);
+      };
+
+      // 逐个分析字符
+      for (var i = 0; i < len; i++) {
+        var c = html.charAt(i);
+        var v, j;
+        if (tmpName === false && c === '=') {
+          tmpName = html.slice(lastPos, i);
+          lastPos = i + 1;
+          continue;
+        }
+        if (tmpName !== false) {
+          // HTML标签内的引号仅当前一个字符是等于号时才有效
+          if (i === lastPos && (c === '"' || c === "'") && html.charAt(i - 1) === '=') {
+            j = html.indexOf(c, i + 1);
+            if (j === -1) {
+              break;
+            } else {
+              v = _.trim(html.slice(lastPos + 1, j));
+              addAttr(tmpName, v);
+              tmpName = false;
+              i = j;
+              lastPos = i + 1;
+              continue;
+            }
+          }
+        }
+        if (c === ' ') {
+          if (tmpName === false) {
+            j = findNextEqual(html, i);
+            if (j === -1) {
+              v = _.trim(html.slice(lastPos, i));
+              addAttr(v);
+              tmpName = false;
+              lastPos = i + 1;
+              continue;
+            } else {
+              i = j - 1;
+              continue;
+            }
+          } else {
+            j = findBeforeEqual(html, i - 1);
+            if (j === -1) {
+              v = _.trim(html.slice(lastPos, i));
+              v = stripQuoteWrap(v);
+              addAttr(tmpName, v);
+              tmpName = false;
+              lastPos = i + 1;
+              continue;
+            } else {
+              continue;
+            }
+          }
+        }
+      }
+
+      if (lastPos < html.length) {
+        if (tmpName === false) {
+          addAttr(html.slice(lastPos));
+        } else {
+          addAttr(tmpName, stripQuoteWrap(_.trim(html.slice(lastPos))));
+        }
+      }
+
+      return _.trim(retAttrs.join(' '));
+    }
+
+    function findNextEqual(str, i) {
+      for (; i < str.length; i++) {
+        var c = str[i];
+        if (c === ' ') continue;
+        if (c === '=') return i;
+        return -1;
+      }
+    }
+
+    function findBeforeEqual(str, i) {
+      for (; i > 0; i--) {
+        var c = str[i];
+        if (c === ' ') continue;
+        if (c === '=') return i;
+        return -1;
+      }
+    }
+
+    function isQuoteWrapString(text) {
+      if (text[0] === '"' && text[text.length - 1] === '"' || text[0] === '\'' && text[text.length - 1] === '\'') {
+        return true;
+      } else {
+        return false;
+      }
+    };
+
+    function stripQuoteWrap(text) {
+      if (isQuoteWrapString(text)) {
+        return text.substr(1, text.length - 2);
+      } else {
+        return text;
+      }
+    };
+
+    exports.parseTag = parseTag;
+    exports.parseAttr = parseAttr;
+  }, { "./util": 4 }], 4: [function (_require, module, exports) {
+    module.exports = {
+      indexOf: function indexOf(arr, item) {
+        var i, j;
+        if (Array.prototype.indexOf) {
+          return arr.indexOf(item);
+        }
+        for (i = 0, j = arr.length; i < j; i++) {
+          if (arr[i] === item) {
+            return i;
+          }
+        }
+        return -1;
+      },
+      forEach: function forEach(arr, fn, scope) {
+        var i, j;
+        if (Array.prototype.forEach) {
+          return arr.forEach(fn, scope);
+        }
+        for (i = 0, j = arr.length; i < j; i++) {
+          fn.call(scope, arr[i], i, arr);
+        }
+      },
+      trim: function trim(str) {
+        if (String.prototype.trim) {
+          return str.trim();
+        }
+        return str.replace(/(^\s*)|(\s*$)/g, '');
+      }
+    };
+  }, {}], 5: [function (_require, module, exports) {
+    /**
+     * 过滤XSS
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var FilterCSS = _require('cssfilter').FilterCSS;
+    var DEFAULT = _require('./default');
+    var parser = _require('./parser');
+    var parseTag = parser.parseTag;
+    var parseAttr = parser.parseAttr;
+    var _ = _require('./util');
+
+    /**
+     * 返回值是否为空
+     *
+     * @param {Object} obj
+     * @return {Boolean}
+     */
+    function isNull(obj) {
+      return obj === undefined || obj === null;
+    }
+
+    /**
+     * 取标签内的属性列表字符串
+     *
+     * @param {String} html
+     * @return {Object}
+     *   - {String} html
+     *   - {Boolean} closing
+     */
+    function getAttrs(html) {
+      var i = html.indexOf(' ');
+      if (i === -1) {
+        return {
+          html: '',
+          closing: html[html.length - 2] === '/'
+        };
+      }
+      html = _.trim(html.slice(i + 1, -1));
+      var isClosing = html[html.length - 1] === '/';
+      if (isClosing) html = _.trim(html.slice(0, -1));
+      return {
+        html: html,
+        closing: isClosing
+      };
+    }
+
+    /**
+     * XSS过滤对象
+     *
+     * @param {Object} options
+     *   选项：whiteList, onTag, onTagAttr, onIgnoreTag,
+     *        onIgnoreTagAttr, safeAttrValue, escapeHtml
+     *        stripIgnoreTagBody, allowCommentTag, stripBlankChar
+     *        css{whiteList, onAttr, onIgnoreAttr}
+     */
+    function FilterXSS(options) {
+      options = options || {};
+
+      if (options.stripIgnoreTag) {
+        if (options.onIgnoreTag) {
+          console.error('Notes: cannot use these two options "stripIgnoreTag" and "onIgnoreTag" at the same time');
+        }
+        options.onIgnoreTag = DEFAULT.onIgnoreTagStripAll;
+      }
+
+      options.whiteList = options.whiteList || DEFAULT.whiteList;
+      options.onTag = options.onTag || DEFAULT.onTag;
+      options.onTagAttr = options.onTagAttr || DEFAULT.onTagAttr;
+      options.onIgnoreTag = options.onIgnoreTag || DEFAULT.onIgnoreTag;
+      options.onIgnoreTagAttr = options.onIgnoreTagAttr || DEFAULT.onIgnoreTagAttr;
+      options.safeAttrValue = options.safeAttrValue || DEFAULT.safeAttrValue;
+      options.escapeHtml = options.escapeHtml || DEFAULT.escapeHtml;
+      options.css = options.css || {};
+      this.options = options;
+
+      this.cssFilter = new FilterCSS(options.css);
+    }
+
+    /**
+     * 开始处理
+     *
+     * @param {String} html
+     * @return {String}
+     */
+    FilterXSS.prototype.process = function (html) {
+      // 兼容各种奇葩输入
+      html = html || '';
+      html = html.toString();
+      if (!html) return '';
+
+      var me = this;
+      var options = me.options;
+      var whiteList = options.whiteList;
+      var onTag = options.onTag;
+      var onIgnoreTag = options.onIgnoreTag;
+      var onTagAttr = options.onTagAttr;
+      var onIgnoreTagAttr = options.onIgnoreTagAttr;
+      var safeAttrValue = options.safeAttrValue;
+      var escapeHtml = options.escapeHtml;
+      var cssFilter = me.cssFilter;
+
+      // 是否清除不可见字符
+      if (options.stripBlankChar) {
+        html = DEFAULT.stripBlankChar(html);
+      }
+
+      // 是否禁止备注标签
+      if (!options.allowCommentTag) {
+        html = DEFAULT.stripCommentTag(html);
+      }
+
+      // 如果开启了stripIgnoreTagBody
+      var stripIgnoreTagBody = false;
+      if (options.stripIgnoreTagBody) {
+        var stripIgnoreTagBody = DEFAULT.StripTagBody(options.stripIgnoreTagBody, onIgnoreTag);
+        onIgnoreTag = stripIgnoreTagBody.onIgnoreTag;
+      }
+
+      var retHtml = parseTag(html, function (sourcePosition, position, tag, html, isClosing) {
+        var info = {
+          sourcePosition: sourcePosition,
+          position: position,
+          isClosing: isClosing,
+          isWhite: tag in whiteList
+        };
+
+        // 调用onTag处理
+        var ret = onTag(tag, html, info);
+        if (!isNull(ret)) return ret;
+
+        // 默认标签处理方法
+        if (info.isWhite) {
+          // 白名单标签，解析标签属性
+          // 如果是闭合标签，则不需要解析属性
+          if (info.isClosing) {
+            return '</' + tag + '>';
+          }
+
+          var attrs = getAttrs(html);
+          var whiteAttrList = whiteList[tag];
+          var attrsHtml = parseAttr(attrs.html, function (name, value) {
+
+            // 调用onTagAttr处理
+            var isWhiteAttr = _.indexOf(whiteAttrList, name) !== -1;
+            var ret = onTagAttr(tag, name, value, isWhiteAttr);
+            if (!isNull(ret)) return ret;
+
+            // 默认的属性处理方法
+            if (isWhiteAttr) {
+              // 白名单属性，调用safeAttrValue过滤属性值
+              value = safeAttrValue(tag, name, value, cssFilter);
+              if (value) {
+                return name + '="' + value + '"';
+              } else {
+                return name;
+              }
+            } else {
+              // 非白名单属性，调用onIgnoreTagAttr处理
+              var ret = onIgnoreTagAttr(tag, name, value, isWhiteAttr);
+              if (!isNull(ret)) return ret;
+              return;
+            }
+          });
+
+          // 构造新的标签代码
+          var html = '<' + tag;
+          if (attrsHtml) html += ' ' + attrsHtml;
+          if (attrs.closing) html += ' /';
+          html += '>';
+          return html;
+        } else {
+          // 非白名单标签，调用onIgnoreTag处理
+          var ret = onIgnoreTag(tag, html, info);
+          if (!isNull(ret)) return ret;
+          return escapeHtml(html);
+        }
+      }, escapeHtml);
+
+      // 如果开启了stripIgnoreTagBody，需要对结果再进行处理
+      if (stripIgnoreTagBody) {
+        retHtml = stripIgnoreTagBody.remove(retHtml);
+      }
+
+      return retHtml;
+    };
+
+    module.exports = FilterXSS;
+  }, { "./default": 1, "./parser": 3, "./util": 4, "cssfilter": 8 }], 6: [function (_require, module, exports) {
+    /**
+     * cssfilter
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var DEFAULT = _require('./default');
+    var parseStyle = _require('./parser');
+    var _ = _require('./util');
+
+    /**
+     * 返回值是否为空
+     *
+     * @param {Object} obj
+     * @return {Boolean}
+     */
+    function isNull(obj) {
+      return obj === undefined || obj === null;
+    }
+
+    /**
+     * 创建CSS过滤器
+     *
+     * @param {Object} options
+     *   - {Object} whiteList
+     *   - {Object} onAttr
+     *   - {Object} onIgnoreAttr
+     */
+    function FilterCSS(options) {
+      options = options || {};
+      options.whiteList = options.whiteList || DEFAULT.whiteList;
+      options.onAttr = options.onAttr || DEFAULT.onAttr;
+      options.onIgnoreAttr = options.onIgnoreAttr || DEFAULT.onIgnoreAttr;
+      this.options = options;
+    }
+
+    FilterCSS.prototype.process = function (css) {
+      // 兼容各种奇葩输入
+      css = css || '';
+      css = css.toString();
+      if (!css) return '';
+
+      var me = this;
+      var options = me.options;
+      var whiteList = options.whiteList;
+      var onAttr = options.onAttr;
+      var onIgnoreAttr = options.onIgnoreAttr;
+
+      var retCSS = parseStyle(css, function (sourcePosition, position, name, value, source) {
+
+        var check = whiteList[name];
+        var isWhite = false;
+        if (check === true) isWhite = check;else if (typeof check === 'function') isWhite = check(value);else if (check instanceof RegExp) isWhite = check.test(value);
+        if (isWhite !== true) isWhite = false;
+
+        var opts = {
+          position: position,
+          sourcePosition: sourcePosition,
+          source: source,
+          isWhite: isWhite
+        };
+
+        if (isWhite) {
+
+          var ret = onAttr(name, value, opts);
+          if (isNull(ret)) {
+            return name + ':' + value;
+          } else {
+            return ret;
+          }
+        } else {
+
+          var ret = onIgnoreAttr(name, value, opts);
+          if (!isNull(ret)) {
+            return ret;
+          }
+        }
+      });
+
+      return retCSS;
+    };
+
+    module.exports = FilterCSS;
+  }, { "./default": 7, "./parser": 9, "./util": 10 }], 7: [function (_require, module, exports) {
+    /**
+     * cssfilter
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    function getDefaultWhiteList() {
+      // 白名单值说明：
+      // true: 允许该属性
+      // Function: function (val) { } 返回true表示允许该属性，其他值均表示不允许
+      // RegExp: regexp.test(val) 返回true表示允许该属性，其他值均表示不允许
+      // 除上面列出的值外均表示不允许
+      var whiteList = {};
+
+      whiteList['align-content'] = false; // default: auto
+      whiteList['align-items'] = false; // default: auto
+      whiteList['align-self'] = false; // default: auto
+      whiteList['alignment-adjust'] = false; // default: auto
+      whiteList['alignment-baseline'] = false; // default: baseline
+      whiteList['all'] = false; // default: depending on individual properties
+      whiteList['anchor-point'] = false; // default: none
+      whiteList['animation'] = false; // default: depending on individual properties
+      whiteList['animation-delay'] = false; // default: 0
+      whiteList['animation-direction'] = false; // default: normal
+      whiteList['animation-duration'] = false; // default: 0
+      whiteList['animation-fill-mode'] = false; // default: none
+      whiteList['animation-iteration-count'] = false; // default: 1
+      whiteList['animation-name'] = false; // default: none
+      whiteList['animation-play-state'] = false; // default: running
+      whiteList['animation-timing-function'] = false; // default: ease
+      whiteList['azimuth'] = false; // default: center
+      whiteList['backface-visibility'] = false; // default: visible
+      whiteList['background'] = true; // default: depending on individual properties
+      whiteList['background-attachment'] = true; // default: scroll
+      whiteList['background-clip'] = true; // default: border-box
+      whiteList['background-color'] = true; // default: transparent
+      whiteList['background-image'] = true; // default: none
+      whiteList['background-origin'] = true; // default: padding-box
+      whiteList['background-position'] = true; // default: 0% 0%
+      whiteList['background-repeat'] = true; // default: repeat
+      whiteList['background-size'] = true; // default: auto
+      whiteList['baseline-shift'] = false; // default: baseline
+      whiteList['binding'] = false; // default: none
+      whiteList['bleed'] = false; // default: 6pt
+      whiteList['bookmark-label'] = false; // default: content()
+      whiteList['bookmark-level'] = false; // default: none
+      whiteList['bookmark-state'] = false; // default: open
+      whiteList['border'] = true; // default: depending on individual properties
+      whiteList['border-bottom'] = true; // default: depending on individual properties
+      whiteList['border-bottom-color'] = true; // default: current color
+      whiteList['border-bottom-left-radius'] = true; // default: 0
+      whiteList['border-bottom-right-radius'] = true; // default: 0
+      whiteList['border-bottom-style'] = true; // default: none
+      whiteList['border-bottom-width'] = true; // default: medium
+      whiteList['border-collapse'] = true; // default: separate
+      whiteList['border-color'] = true; // default: depending on individual properties
+      whiteList['border-image'] = true; // default: none
+      whiteList['border-image-outset'] = true; // default: 0
+      whiteList['border-image-repeat'] = true; // default: stretch
+      whiteList['border-image-slice'] = true; // default: 100%
+      whiteList['border-image-source'] = true; // default: none
+      whiteList['border-image-width'] = true; // default: 1
+      whiteList['border-left'] = true; // default: depending on individual properties
+      whiteList['border-left-color'] = true; // default: current color
+      whiteList['border-left-style'] = true; // default: none
+      whiteList['border-left-width'] = true; // default: medium
+      whiteList['border-radius'] = true; // default: 0
+      whiteList['border-right'] = true; // default: depending on individual properties
+      whiteList['border-right-color'] = true; // default: current color
+      whiteList['border-right-style'] = true; // default: none
+      whiteList['border-right-width'] = true; // default: medium
+      whiteList['border-spacing'] = true; // default: 0
+      whiteList['border-style'] = true; // default: depending on individual properties
+      whiteList['border-top'] = true; // default: depending on individual properties
+      whiteList['border-top-color'] = true; // default: current color
+      whiteList['border-top-left-radius'] = true; // default: 0
+      whiteList['border-top-right-radius'] = true; // default: 0
+      whiteList['border-top-style'] = true; // default: none
+      whiteList['border-top-width'] = true; // default: medium
+      whiteList['border-width'] = true; // default: depending on individual properties
+      whiteList['bottom'] = false; // default: auto
+      whiteList['box-decoration-break'] = true; // default: slice
+      whiteList['box-shadow'] = true; // default: none
+      whiteList['box-sizing'] = true; // default: content-box
+      whiteList['box-snap'] = true; // default: none
+      whiteList['box-suppress'] = true; // default: show
+      whiteList['break-after'] = true; // default: auto
+      whiteList['break-before'] = true; // default: auto
+      whiteList['break-inside'] = true; // default: auto
+      whiteList['caption-side'] = false; // default: top
+      whiteList['chains'] = false; // default: none
+      whiteList['clear'] = true; // default: none
+      whiteList['clip'] = false; // default: auto
+      whiteList['clip-path'] = false; // default: none
+      whiteList['clip-rule'] = false; // default: nonzero
+      whiteList['color'] = true; // default: implementation dependent
+      whiteList['color-interpolation-filters'] = true; // default: auto
+      whiteList['column-count'] = false; // default: auto
+      whiteList['column-fill'] = false; // default: balance
+      whiteList['column-gap'] = false; // default: normal
+      whiteList['column-rule'] = false; // default: depending on individual properties
+      whiteList['column-rule-color'] = false; // default: current color
+      whiteList['column-rule-style'] = false; // default: medium
+      whiteList['column-rule-width'] = false; // default: medium
+      whiteList['column-span'] = false; // default: none
+      whiteList['column-width'] = false; // default: auto
+      whiteList['columns'] = false; // default: depending on individual properties
+      whiteList['contain'] = false; // default: none
+      whiteList['content'] = false; // default: normal
+      whiteList['counter-increment'] = false; // default: none
+      whiteList['counter-reset'] = false; // default: none
+      whiteList['counter-set'] = false; // default: none
+      whiteList['crop'] = false; // default: auto
+      whiteList['cue'] = false; // default: depending on individual properties
+      whiteList['cue-after'] = false; // default: none
+      whiteList['cue-before'] = false; // default: none
+      whiteList['cursor'] = false; // default: auto
+      whiteList['direction'] = false; // default: ltr
+      whiteList['display'] = true; // default: depending on individual properties
+      whiteList['display-inside'] = true; // default: auto
+      whiteList['display-list'] = true; // default: none
+      whiteList['display-outside'] = true; // default: inline-level
+      whiteList['dominant-baseline'] = false; // default: auto
+      whiteList['elevation'] = false; // default: level
+      whiteList['empty-cells'] = false; // default: show
+      whiteList['filter'] = false; // default: none
+      whiteList['flex'] = false; // default: depending on individual properties
+      whiteList['flex-basis'] = false; // default: auto
+      whiteList['flex-direction'] = false; // default: row
+      whiteList['flex-flow'] = false; // default: depending on individual properties
+      whiteList['flex-grow'] = false; // default: 0
+      whiteList['flex-shrink'] = false; // default: 1
+      whiteList['flex-wrap'] = false; // default: nowrap
+      whiteList['float'] = false; // default: none
+      whiteList['float-offset'] = false; // default: 0 0
+      whiteList['flood-color'] = false; // default: black
+      whiteList['flood-opacity'] = false; // default: 1
+      whiteList['flow-from'] = false; // default: none
+      whiteList['flow-into'] = false; // default: none
+      whiteList['font'] = true; // default: depending on individual properties
+      whiteList['font-family'] = true; // default: implementation dependent
+      whiteList['font-feature-settings'] = true; // default: normal
+      whiteList['font-kerning'] = true; // default: auto
+      whiteList['font-language-override'] = true; // default: normal
+      whiteList['font-size'] = true; // default: medium
+      whiteList['font-size-adjust'] = true; // default: none
+      whiteList['font-stretch'] = true; // default: normal
+      whiteList['font-style'] = true; // default: normal
+      whiteList['font-synthesis'] = true; // default: weight style
+      whiteList['font-variant'] = true; // default: normal
+      whiteList['font-variant-alternates'] = true; // default: normal
+      whiteList['font-variant-caps'] = true; // default: normal
+      whiteList['font-variant-east-asian'] = true; // default: normal
+      whiteList['font-variant-ligatures'] = true; // default: normal
+      whiteList['font-variant-numeric'] = true; // default: normal
+      whiteList['font-variant-position'] = true; // default: normal
+      whiteList['font-weight'] = true; // default: normal
+      whiteList['grid'] = false; // default: depending on individual properties
+      whiteList['grid-area'] = false; // default: depending on individual properties
+      whiteList['grid-auto-columns'] = false; // default: auto
+      whiteList['grid-auto-flow'] = false; // default: none
+      whiteList['grid-auto-rows'] = false; // default: auto
+      whiteList['grid-column'] = false; // default: depending on individual properties
+      whiteList['grid-column-end'] = false; // default: auto
+      whiteList['grid-column-start'] = false; // default: auto
+      whiteList['grid-row'] = false; // default: depending on individual properties
+      whiteList['grid-row-end'] = false; // default: auto
+      whiteList['grid-row-start'] = false; // default: auto
+      whiteList['grid-template'] = false; // default: depending on individual properties
+      whiteList['grid-template-areas'] = false; // default: none
+      whiteList['grid-template-columns'] = false; // default: none
+      whiteList['grid-template-rows'] = false; // default: none
+      whiteList['hanging-punctuation'] = false; // default: none
+      whiteList['height'] = true; // default: auto
+      whiteList['hyphens'] = false; // default: manual
+      whiteList['icon'] = false; // default: auto
+      whiteList['image-orientation'] = false; // default: auto
+      whiteList['image-resolution'] = false; // default: normal
+      whiteList['ime-mode'] = false; // default: auto
+      whiteList['initial-letters'] = false; // default: normal
+      whiteList['inline-box-align'] = false; // default: last
+      whiteList['justify-content'] = false; // default: auto
+      whiteList['justify-items'] = false; // default: auto
+      whiteList['justify-self'] = false; // default: auto
+      whiteList['left'] = false; // default: auto
+      whiteList['letter-spacing'] = true; // default: normal
+      whiteList['lighting-color'] = true; // default: white
+      whiteList['line-box-contain'] = false; // default: block inline replaced
+      whiteList['line-break'] = false; // default: auto
+      whiteList['line-grid'] = false; // default: match-parent
+      whiteList['line-height'] = false; // default: normal
+      whiteList['line-snap'] = false; // default: none
+      whiteList['line-stacking'] = false; // default: depending on individual properties
+      whiteList['line-stacking-ruby'] = false; // default: exclude-ruby
+      whiteList['line-stacking-shift'] = false; // default: consider-shifts
+      whiteList['line-stacking-strategy'] = false; // default: inline-line-height
+      whiteList['list-style'] = true; // default: depending on individual properties
+      whiteList['list-style-image'] = true; // default: none
+      whiteList['list-style-position'] = true; // default: outside
+      whiteList['list-style-type'] = true; // default: disc
+      whiteList['margin'] = true; // default: depending on individual properties
+      whiteList['margin-bottom'] = true; // default: 0
+      whiteList['margin-left'] = true; // default: 0
+      whiteList['margin-right'] = true; // default: 0
+      whiteList['margin-top'] = true; // default: 0
+      whiteList['marker-offset'] = false; // default: auto
+      whiteList['marker-side'] = false; // default: list-item
+      whiteList['marks'] = false; // default: none
+      whiteList['mask'] = false; // default: border-box
+      whiteList['mask-box'] = false; // default: see individual properties
+      whiteList['mask-box-outset'] = false; // default: 0
+      whiteList['mask-box-repeat'] = false; // default: stretch
+      whiteList['mask-box-slice'] = false; // default: 0 fill
+      whiteList['mask-box-source'] = false; // default: none
+      whiteList['mask-box-width'] = false; // default: auto
+      whiteList['mask-clip'] = false; // default: border-box
+      whiteList['mask-image'] = false; // default: none
+      whiteList['mask-origin'] = false; // default: border-box
+      whiteList['mask-position'] = false; // default: center
+      whiteList['mask-repeat'] = false; // default: no-repeat
+      whiteList['mask-size'] = false; // default: border-box
+      whiteList['mask-source-type'] = false; // default: auto
+      whiteList['mask-type'] = false; // default: luminance
+      whiteList['max-height'] = true; // default: none
+      whiteList['max-lines'] = false; // default: none
+      whiteList['max-width'] = true; // default: none
+      whiteList['min-height'] = true; // default: 0
+      whiteList['min-width'] = true; // default: 0
+      whiteList['move-to'] = false; // default: normal
+      whiteList['nav-down'] = false; // default: auto
+      whiteList['nav-index'] = false; // default: auto
+      whiteList['nav-left'] = false; // default: auto
+      whiteList['nav-right'] = false; // default: auto
+      whiteList['nav-up'] = false; // default: auto
+      whiteList['object-fit'] = false; // default: fill
+      whiteList['object-position'] = false; // default: 50% 50%
+      whiteList['opacity'] = false; // default: 1
+      whiteList['order'] = false; // default: 0
+      whiteList['orphans'] = false; // default: 2
+      whiteList['outline'] = false; // default: depending on individual properties
+      whiteList['outline-color'] = false; // default: invert
+      whiteList['outline-offset'] = false; // default: 0
+      whiteList['outline-style'] = false; // default: none
+      whiteList['outline-width'] = false; // default: medium
+      whiteList['overflow'] = false; // default: depending on individual properties
+      whiteList['overflow-wrap'] = false; // default: normal
+      whiteList['overflow-x'] = false; // default: visible
+      whiteList['overflow-y'] = false; // default: visible
+      whiteList['padding'] = true; // default: depending on individual properties
+      whiteList['padding-bottom'] = true; // default: 0
+      whiteList['padding-left'] = true; // default: 0
+      whiteList['padding-right'] = true; // default: 0
+      whiteList['padding-top'] = true; // default: 0
+      whiteList['page'] = false; // default: auto
+      whiteList['page-break-after'] = false; // default: auto
+      whiteList['page-break-before'] = false; // default: auto
+      whiteList['page-break-inside'] = false; // default: auto
+      whiteList['page-policy'] = false; // default: start
+      whiteList['pause'] = false; // default: implementation dependent
+      whiteList['pause-after'] = false; // default: implementation dependent
+      whiteList['pause-before'] = false; // default: implementation dependent
+      whiteList['perspective'] = false; // default: none
+      whiteList['perspective-origin'] = false; // default: 50% 50%
+      whiteList['pitch'] = false; // default: medium
+      whiteList['pitch-range'] = false; // default: 50
+      whiteList['play-during'] = false; // default: auto
+      whiteList['position'] = false; // default: static
+      whiteList['presentation-level'] = false; // default: 0
+      whiteList['quotes'] = false; // default: text
+      whiteList['region-fragment'] = false; // default: auto
+      whiteList['resize'] = false; // default: none
+      whiteList['rest'] = false; // default: depending on individual properties
+      whiteList['rest-after'] = false; // default: none
+      whiteList['rest-before'] = false; // default: none
+      whiteList['richness'] = false; // default: 50
+      whiteList['right'] = false; // default: auto
+      whiteList['rotation'] = false; // default: 0
+      whiteList['rotation-point'] = false; // default: 50% 50%
+      whiteList['ruby-align'] = false; // default: auto
+      whiteList['ruby-merge'] = false; // default: separate
+      whiteList['ruby-position'] = false; // default: before
+      whiteList['shape-image-threshold'] = false; // default: 0.0
+      whiteList['shape-outside'] = false; // default: none
+      whiteList['shape-margin'] = false; // default: 0
+      whiteList['size'] = false; // default: auto
+      whiteList['speak'] = false; // default: auto
+      whiteList['speak-as'] = false; // default: normal
+      whiteList['speak-header'] = false; // default: once
+      whiteList['speak-numeral'] = false; // default: continuous
+      whiteList['speak-punctuation'] = false; // default: none
+      whiteList['speech-rate'] = false; // default: medium
+      whiteList['stress'] = false; // default: 50
+      whiteList['string-set'] = false; // default: none
+      whiteList['tab-size'] = false; // default: 8
+      whiteList['table-layout'] = false; // default: auto
+      whiteList['text-align'] = true; // default: start
+      whiteList['text-align-last'] = true; // default: auto
+      whiteList['text-combine-upright'] = true; // default: none
+      whiteList['text-decoration'] = true; // default: none
+      whiteList['text-decoration-color'] = true; // default: currentColor
+      whiteList['text-decoration-line'] = true; // default: none
+      whiteList['text-decoration-skip'] = true; // default: objects
+      whiteList['text-decoration-style'] = true; // default: solid
+      whiteList['text-emphasis'] = true; // default: depending on individual properties
+      whiteList['text-emphasis-color'] = true; // default: currentColor
+      whiteList['text-emphasis-position'] = true; // default: over right
+      whiteList['text-emphasis-style'] = true; // default: none
+      whiteList['text-height'] = true; // default: auto
+      whiteList['text-indent'] = true; // default: 0
+      whiteList['text-justify'] = true; // default: auto
+      whiteList['text-orientation'] = true; // default: mixed
+      whiteList['text-overflow'] = true; // default: clip
+      whiteList['text-shadow'] = true; // default: none
+      whiteList['text-space-collapse'] = true; // default: collapse
+      whiteList['text-transform'] = true; // default: none
+      whiteList['text-underline-position'] = true; // default: auto
+      whiteList['text-wrap'] = true; // default: normal
+      whiteList['top'] = false; // default: auto
+      whiteList['transform'] = false; // default: none
+      whiteList['transform-origin'] = false; // default: 50% 50% 0
+      whiteList['transform-style'] = false; // default: flat
+      whiteList['transition'] = false; // default: depending on individual properties
+      whiteList['transition-delay'] = false; // default: 0s
+      whiteList['transition-duration'] = false; // default: 0s
+      whiteList['transition-property'] = false; // default: all
+      whiteList['transition-timing-function'] = false; // default: ease
+      whiteList['unicode-bidi'] = false; // default: normal
+      whiteList['vertical-align'] = false; // default: baseline
+      whiteList['visibility'] = false; // default: visible
+      whiteList['voice-balance'] = false; // default: center
+      whiteList['voice-duration'] = false; // default: auto
+      whiteList['voice-family'] = false; // default: implementation dependent
+      whiteList['voice-pitch'] = false; // default: medium
+      whiteList['voice-range'] = false; // default: medium
+      whiteList['voice-rate'] = false; // default: normal
+      whiteList['voice-stress'] = false; // default: normal
+      whiteList['voice-volume'] = false; // default: medium
+      whiteList['volume'] = false; // default: medium
+      whiteList['white-space'] = false; // default: normal
+      whiteList['widows'] = false; // default: 2
+      whiteList['width'] = true; // default: auto
+      whiteList['will-change'] = false; // default: auto
+      whiteList['word-break'] = true; // default: normal
+      whiteList['word-spacing'] = true; // default: normal
+      whiteList['word-wrap'] = true; // default: normal
+      whiteList['wrap-flow'] = false; // default: auto
+      whiteList['wrap-through'] = false; // default: wrap
+      whiteList['writing-mode'] = false; // default: horizontal-tb
+      whiteList['z-index'] = false; // default: auto
+
+      return whiteList;
+    }
+
+    /**
+     * 匹配到白名单上的一个属性时
+     *
+     * @param {String} name
+     * @param {String} value
+     * @param {Object} options
+     * @return {String}
+     */
+    function onAttr(name, value, options) {}
+    // do nothing
+
+    /**
+     * 匹配到不在白名单上的一个属性时
+     *
+     * @param {String} name
+     * @param {String} value
+     * @param {Object} options
+     * @return {String}
+     */
+    function onIgnoreAttr(name, value, options) {
+      // do nothing
+    }
+
+    exports.whiteList = getDefaultWhiteList();
+    exports.getDefaultWhiteList = getDefaultWhiteList;
+    exports.onAttr = onAttr;
+    exports.onIgnoreAttr = onIgnoreAttr;
+  }, {}], 8: [function (_require, module, exports) {
+    /**
+     * cssfilter
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var DEFAULT = _require('./default');
+    var FilterCSS = _require('./css');
+
+    /**
+     * XSS过滤
+     *
+     * @param {String} css 要过滤的CSS代码
+     * @param {Object} options 选项：whiteList, onAttr, onIgnoreAttr
+     * @return {String}
+     */
+    function filterCSS(html, options) {
+      var xss = new FilterCSS(options);
+      return xss.process(html);
+    }
+
+    // 输出
+    exports = module.exports = filterCSS;
+    exports.FilterCSS = FilterCSS;
+    for (var i in DEFAULT) exports[i] = DEFAULT[i];
+
+    // 在浏览器端使用
+    if (typeof window !== 'undefined') {
+      window.filterCSS = module.exports;
+    }
+  }, { "./css": 6, "./default": 7 }], 9: [function (_require, module, exports) {
+    /**
+     * cssfilter
+     *
+     * @author 老雷<leizongmin@gmail.com>
+     */
+
+    var _ = _require('./util');
+
+    /**
+     * 解析style
+     *
+     * @param {String} css
+     * @param {Function} onAttr 处理属性的函数
+     *   参数格式： function (sourcePosition, position, name, value, source)
+     * @return {String}
+     */
+    function parseStyle(css, onAttr) {
+      css = _.trimRight(css);
+      if (css[css.length - 1] !== ';') css += ';';
+      var cssLength = css.length;
+      var isParenthesisOpen = false;
+      var lastPos = 0;
+      var i = 0;
+      var retCSS = '';
+
+      function addNewAttr() {
+        // 如果没有正常的闭合圆括号，则直接忽略当前属性
+        if (!isParenthesisOpen) {
+          var source = _.trim(css.slice(lastPos, i));
+          var j = source.indexOf(':');
+          if (j !== -1) {
+            var name = _.trim(source.slice(0, j));
+            var value = _.trim(source.slice(j + 1));
+            // 必须有属性名称
+            if (name) {
+              var ret = onAttr(lastPos, retCSS.length, name, value, source);
+              if (ret) retCSS += ret + '; ';
+            }
+          }
+        }
+        lastPos = i + 1;
+      }
+
+      for (; i < cssLength; i++) {
+        var c = css[i];
+        if (c === '/' && css[i + 1] === '*') {
+          // 备注开始
+          var j = css.indexOf('*/', i + 2);
+          // 如果没有正常的备注结束，则后面的部分全部跳过
+          if (j === -1) break;
+          // 直接将当前位置调到备注结尾，并且初始化状态
+          i = j + 1;
+          lastPos = i + 1;
+          isParenthesisOpen = false;
+        } else if (c === '(') {
+          isParenthesisOpen = true;
+        } else if (c === ')') {
+          isParenthesisOpen = false;
+        } else if (c === ';') {
+          if (isParenthesisOpen) {
+            // 在圆括号里面，忽略
+          } else {
+              addNewAttr();
+            }
+        } else if (c === '\n') {
+          addNewAttr();
+        }
+      }
+
+      return _.trim(retCSS);
+    }
+
+    module.exports = parseStyle;
+  }, { "./util": 10 }], 10: [function (_require, module, exports) {
+    module.exports = {
+      indexOf: function indexOf(arr, item) {
+        var i, j;
+        if (Array.prototype.indexOf) {
+          return arr.indexOf(item);
+        }
+        for (i = 0, j = arr.length; i < j; i++) {
+          if (arr[i] === item) {
+            return i;
+          }
+        }
+        return -1;
+      },
+      forEach: function forEach(arr, fn, scope) {
+        var i, j;
+        if (Array.prototype.forEach) {
+          return arr.forEach(fn, scope);
+        }
+        for (i = 0, j = arr.length; i < j; i++) {
+          fn.call(scope, arr[i], i, arr);
+        }
+      },
+      trim: function trim(str) {
+        if (String.prototype.trim) {
+          return str.trim();
+        }
+        return str.replace(/(^\s*)|(\s*$)/g, '');
+      },
+      trimRight: function trimRight(str) {
+        if (String.prototype.trimRight) {
+          return str.trimRight();
+        }
+        return str.replace(/(\s*$)/g, '');
+      }
+    };
+  }, {}] }, {}, [2]);
+
+exports["default"] = filterXSS;
+module.exports = exports["default"];
+
+},{}],23:[function(require,module,exports){
 /**
  * Dom 操作工具包（基础核心包，主要都是 get 等读取操作）
  *
@@ -7201,11 +8931,11 @@ var domUtils = {
             if (!dom.previousSibling && !dom.nextSibling) {
                 dom = parent;
             } else if (!dom.previousSibling) {
-                domUtils.insert(parent, dom, false);
+                domUtils.before(parent, dom, false);
                 domUtils.mergeAtoB(parent, dom, false);
                 dom.style[styleKey] = '';
             } else if (!dom.nextSibling) {
-                domUtils.insert(parent, dom, true);
+                domUtils.before(parent, dom, true);
                 domUtils.mergeAtoB(parent, dom, false);
                 dom.style[styleKey] = '';
             } else {
@@ -7217,8 +8947,8 @@ var domUtils = {
                     nSpan.insertBefore(tmpDom, null);
                     domUtils.mergeAtoB(parent, tmpDom, false);
                 }
-                domUtils.insert(parent, dom, true);
-                domUtils.insert(dom, nSpan, true);
+                domUtils.before(parent, dom, true);
+                domUtils.before(dom, nSpan, true);
                 domUtils.mergeAtoB(parent, dom, false);
                 domUtils.mergeAtoB(parent, nSpan, false);
             }
@@ -7949,7 +9679,7 @@ var domUtils = {
      * @param dom
      * @param isAfter
      */
-    insert: function insert(target, dom, isAfter) {
+    before: function before(target, dom, isAfter) {
         isAfter = !!isAfter;
         if (!target || !dom) {
             return;
@@ -8477,7 +10207,7 @@ var domUtils = {
 exports['default'] = domUtils;
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18}],22:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19}],24:[function(require,module,exports){
 /**
  * DOM 操作工具包（扩展类库）
  */
@@ -8542,6 +10272,101 @@ _domBase2['default'].clearChild = function (dom, excludeList) {
     }
 };
 /**
+ * 获取 body 内的 innerText
+ * @returns {*}
+ */
+_domBase2['default'].getBodyText = function () {
+    var body = _commonEnv2['default'].doc.body;
+    if (!body) return " ";
+    return body.innerText ? body.innerText : '';
+};
+/**
+ * 获取当前页面源码
+ * @returns {*}
+ */
+_domBase2['default'].getContentHtml = function () {
+    _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.BEFORE_GET_DOCHTML, null);
+
+    var docType = _domBase2['default'].getDocType(_commonEnv2['default'].doc);
+
+    //将 input text、textarea 的内容设置到 html 内
+    var i, j, obj, textType;
+    var objList = _commonEnv2['default'].doc.getElementsByTagName('input');
+    for (i = 0, j = objList.length; i < j; i++) {
+        obj = objList[i];
+        if (/^test$/i.test(obj.getAttribute('type')) && obj.value !== obj.getAttribute('value')) {
+            obj.setAttribute('value', obj.value);
+        }
+    }
+    objList = _commonEnv2['default'].doc.getElementsByTagName('textarea');
+    for (i = 0, j = objList.length; i < j; i++) {
+        obj = objList[i];
+        textType = obj.innerText === undefined ? 'textContent' : 'innerText';
+        if (obj.value !== obj[textType]) {
+            obj[textType] = obj.value;
+        }
+    }
+    //处理 table 容器内 table 之外的内容
+    objList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TABLE_CONTAINER);
+    for (i = 0, j = objList.length; i < j; i++) {
+        _domBase2['default'].moveOutFromTableContainer(objList[i]);
+    }
+
+    var content = _domBase2['default'].removeStyleByNameFromHtml(_commonEnv2['default'].doc.documentElement.outerHTML, _commonConst2['default'].NAME.TMP_STYLE);
+    content = _domBase2['default'].removeDomByTagFromHtml(content, _commonConst2['default'].TAG.TMP_TAG);
+
+    //移除 script
+    content = content.replace(/<script[^<>]*\/>/ig, '').replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
+
+    //需要兼容 WizTemplate 中的部分区域可编辑 状态
+    //var bodyReg = /(<body( [^<>]*)*)[ ]+contenteditable[ ]*=[ ]*['"][^'"<>]*['"]/ig;
+    var bodyReg = /(<[\w]*[^<>]*[ ]+)contenteditable([ ]*=[ ]*['"][^'"<>]*['"])?/ig;
+    content = content.replace(bodyReg, '$1');
+
+    content = _domBase2['default'].hideTableFromHtml(content);
+
+    //过滤其他插件
+    if (_commonEnv2['default'].win.WizTemplate) {
+        content = _commonEnv2['default'].win.WizTemplate.hideTemplateFormHtml(content);
+    }
+    return docType + content;
+};
+/**
+ * 针对 html 源码隐藏表格的高亮信息，主要用于保存操作
+ * @param html
+ * @returns {*}
+ */
+_domBase2['default'].hideTableFromHtml = function (html) {
+    //做 RegExp 做 test 的时候 不能使用 g 全局设置， 否则会影响 索引
+    var regexForTest = /(<[^<> ]*[^<>]* class[ ]*=[ ]*['"])([^'"]*)(['"])/i;
+    var regex = /(<[^<> ]*[^<>]* class[ ]*=[ ]*['"])([^'"]*)(['"])/ig;
+    if (!regexForTest.test(html)) {
+        return html;
+    }
+
+    var result = [],
+        m,
+        lastIndex = 0,
+        str,
+        reg;
+    while (m = regex.exec(html)) {
+        str = m[2];
+
+        //先处理 float layer
+        if ((' ' + str + ' ').indexOf(' ' + _commonConst2['default'].CLASS.SELECTED_CELL + ' ') > -1) {
+            reg = new RegExp(' ' + _commonConst2['default'].CLASS.SELECTED_CELL + ' ', 'ig');
+            str = (' ' + str + ' ').replace(reg, '').trim();
+        }
+
+        result.push(html.substr(lastIndex, m.index - lastIndex), m[1], str, m[3]);
+
+        lastIndex = m.index + m[0].length;
+        //console.log(m);
+    }
+    result.push(html.substr(lastIndex));
+    return result.join('');
+};
+/**
  * 合并 子节点中相邻且相同（style & attribute ）的 span
  * merge the same span with parent and child nodes.
  * @param dom
@@ -8583,7 +10408,7 @@ _domBase2['default'].mergeChildToParent = function (parent, child) {
         return;
     }
     while (child.childNodes.length > 0) {
-        _domBase2['default'].insert(child, child.childNodes[0], false);
+        _domBase2['default'].before(child, child.childNodes[0], false);
     }
     _domBase2['default'].mergeAtoB(parent, child, false);
     _domBase2['default'].mergeAtoB(child, parent, true);
@@ -8702,6 +10527,36 @@ _domBase2['default'].modifyStyle = function (dom, style, attr) {
     _domBase2['default'].attr(d, attr);
 };
 /**
+ * 将 table 容器内 非 table 内容移出
+ * @param container
+ */
+_domBase2['default'].moveOutFromTableContainer = function (container) {
+    if (!container) {
+        return;
+    }
+
+    move(container, container);
+    move(container, container.querySelector('.' + _commonConst2['default'].CLASS.TABLE_BODY));
+
+    function move(mainDom, _container) {
+        var childList,
+            dom,
+            i,
+            before = false;
+        childList = _container.childNodes;
+        for (i = childList.length - 1; i >= 0; i--) {
+            dom = childList[i];
+            if (dom.nodeType === 1 && (_domBase2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_BODY) || _domBase2['default'].isTag(dom, ['table', _commonConst2['default'].TAG.TMP_TAG]))) {
+                if (_domBase2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_BODY) || _domBase2['default'].isTag(dom, 'table')) {
+                    before = true;
+                }
+                continue;
+            }
+            _domBase2['default'].before(mainDom, dom, !before);
+        }
+    }
+};
+/**
  * 在删除 当前用户已删除 指定的Dom 后， 判断其 parentNode 是否为空，如果为空，继续删除
  * @param pDom
  */
@@ -8747,7 +10602,7 @@ _domBase2['default'].splitDom = function (mainDom, subDom) {
 exports['default'] = _domBase2['default'];
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./domBase":21}],23:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./domBase":23}],25:[function(require,module,exports){
 /**
  * 编辑器 基础工具包
  */
@@ -8827,24 +10682,21 @@ var _tabKey = require('./tabKey');
 
 var _tabKey2 = _interopRequireDefault(_tabKey);
 
-var editorStatus = false;
 var originalHtml = '';
-var options = {};
 var editor = {
+    init: function init() {},
     on: function on() {
         _commonDependLoader2['default'].loadCss(_commonEnv2['default'].doc, [_commonEnv2['default'].dependency.files.css.fonts]);
         _domUtilsDomExtend2['default'].setContenteditable(null, true);
-        editor.setStatus(true);
+        _commonEnv2['default'].readonly = false;
         _commonWizStyle2['default'].insertTmpEditorStyle();
 
         _editorEvent2['default'].bind();
-
         _imgUtilsImgUtils2['default'].on();
         _tableUtilsTableCore2['default'].on(false);
-
         _tabKey2['default'].on();
         _amendAmend2['default'].startReverse();
-        _commonHistoryUtils2['default'].start(options.maxRedo, options.reDoCallback);
+        _commonHistoryUtils2['default'].start(_commonEnv2['default'].options.maxRedo, _commonEnv2['default'].options.callback.redo);
 
         setTimeout(function () {
             editor.setOriginalHtml();
@@ -8855,70 +10707,17 @@ var editor = {
         _amendAmend2['default'].stopReverse();
         _amendAmend2['default'].stop();
         _tabKey2['default'].off();
-
-        _imgUtilsImgUtils2['default'].off();
         _tableUtilsTableCore2['default'].off();
+        _imgUtilsImgUtils2['default'].off();
         _editorEvent2['default'].unbind();
-        editor.setStatus(false);
+
+        _commonEnv2['default'].readonly = true;
         _domUtilsDomExtend2['default'].setContenteditable(null, false);
         _domUtilsDomExtend2['default'].removeDomByName(_commonConst2['default'].NAME.TMP_STYLE);
         _domUtilsDomExtend2['default'].removeDomByTag(_commonConst2['default'].TAG.TMP_TAG);
     },
-    getBodyText: function getBodyText() {
-        var body = _commonEnv2['default'].doc.body;
-        if (!body) return " ";
-        return body.innerText ? body.innerText : '';
-    },
-    getContentHtml: function getContentHtml() {
-        _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.BEFORE_GET_DOCHTML, null);
-
-        var docType = _domUtilsDomExtend2['default'].getDocType(_commonEnv2['default'].doc);
-
-        //将 input text、textarea 的内容设置到 html 内
-        var i, j, obj, textType;
-        var objList = _commonEnv2['default'].doc.getElementsByTagName('input');
-        for (i = 0, j = objList.length; i < j; i++) {
-            obj = objList[i];
-            if (/^test$/i.test(obj.getAttribute('type')) && obj.value !== obj.getAttribute('value')) {
-                obj.setAttribute('value', obj.value);
-            }
-        }
-        objList = _commonEnv2['default'].doc.getElementsByTagName('textarea');
-        for (i = 0, j = objList.length; i < j; i++) {
-            obj = objList[i];
-            textType = obj.innerText === undefined ? 'textContent' : 'innerText';
-            if (obj.value !== obj[textType]) {
-                obj[textType] = obj.value;
-            }
-        }
-
-        var content = _domUtilsDomExtend2['default'].removeStyleByNameFromHtml(_commonEnv2['default'].doc.documentElement.outerHTML, _commonConst2['default'].NAME.TMP_STYLE);
-        content = _domUtilsDomExtend2['default'].removeDomByTagFromHtml(content, _commonConst2['default'].TAG.TMP_TAG);
-
-        //移除 script
-        content = content.replace(/<script[^<>]*\/>/ig, '').replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
-
-        //需要兼容 WizTemplate 中的部分区域可编辑 状态
-        //var bodyReg = /(<body( [^<>]*)*)[ ]+contenteditable[ ]*=[ ]*['"][^'"<>]*['"]/ig;
-        var bodyReg = /(<[\w]*[^<>]*[ ]+)contenteditable([ ]*=[ ]*['"][^'"<>]*['"])?/ig;
-        content = content.replace(bodyReg, '$1');
-
-        content = _tableUtilsTableUtils2['default'].hideTableFromHtml(content);
-
-        //过滤其他插件
-        if (_commonEnv2['default'].win.WizTemplate) {
-            content = _commonEnv2['default'].win.WizTemplate.hideTemplateFormHtml(content);
-        }
-        return docType + content;
-    },
-    getOption: function getOption(key) {
-        return options[key];
-    },
     getOriginalHtml: function getOriginalHtml() {
         return originalHtml;
-    },
-    getStatus: function getStatus() {
-        return editorStatus;
     },
     insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
         _commonWizStyle2['default'].insertDefaultStyle(isReplace, customCss);
@@ -8987,24 +10786,8 @@ var editor = {
         // 处理普通文本样式
         _rangeUtilsRangeExtend2['default'].modifySelectionDom(style, attr);
     },
-    setOptions: function setOptions(_options) {
-        if (_options.maxRedo) {
-            options.maxRedo = _options.maxRedo;
-        }
-        if (_options.reDoCallback) {
-            options.reDoCallback = _options.reDoCallback;
-        }
-
-        if (_options.table) {
-            _options.table.readonly = false;
-            _tableUtilsTableCore2['default'].setOptions(_options.table);
-        }
-    },
     setOriginalHtml: function setOriginalHtml() {
-        originalHtml = editor.getContentHtml();
-    },
-    setStatus: function setStatus(status) {
-        editorStatus = !!status;
+        originalHtml = _domUtilsDomExtend2['default'].getContentHtml();
     }
 };
 
@@ -9134,7 +10917,7 @@ function afterInsert(lastNode) {
 exports['default'] = editor;
 module.exports = exports['default'];
 
-},{"../amend/amend":6,"../amend/amendUser":8,"../amend/amendUtils/amendExtend":10,"../common/const":12,"../common/dependLoader":13,"../common/env":14,"../common/historyUtils":15,"../common/utils":18,"../common/wizStyle":19,"../domUtils/domExtend":22,"../imgUtils/imgUtils":27,"../rangeUtils/rangeExtend":31,"../tableUtils/tableCore":32,"../tableUtils/tableUtils":34,"../tableUtils/tableZone":35,"./editorEvent":24,"./tabKey":25}],24:[function(require,module,exports){
+},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../common/const":13,"../common/dependLoader":14,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../imgUtils/imgUtils":29,"../rangeUtils/rangeExtend":36,"../tableUtils/tableCore":39,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"./editorEvent":26,"./tabKey":27}],26:[function(require,module,exports){
 /**
  * editor 使用的基本事件处理
  */
@@ -9535,7 +11318,7 @@ function pasteFromClipBoard(e) {
                     }
                 }
                 while (template.pasteDom.firstChild && target) {
-                    _domUtilsDomBase2['default'].insert(target, template.pasteDom.firstChild, !insertBefore);
+                    _domUtilsDomBase2['default'].before(target, template.pasteDom.firstChild, !insertBefore);
                 }
 
                 // console.log(range.startContainer);
@@ -9848,7 +11631,7 @@ var handler = {
 exports['default'] = EditorEvent;
 module.exports = exports['default'];
 
-},{"../amend/amend":6,"../amend/amendUser":8,"../amend/amendUtils/amendExtend":10,"../common/const":12,"../common/env":14,"../common/historyUtils":15,"../common/lang":16,"../common/utils":18,"../domUtils/domBase":21,"../rangeUtils/rangeExtend":31,"../tableUtils/tableCore":32,"../tableUtils/tableUtils":34,"../tableUtils/tableZone":35}],25:[function(require,module,exports){
+},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domBase":23,"../rangeUtils/rangeExtend":36,"../tableUtils/tableCore":39,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42}],27:[function(require,module,exports){
 /**
  * tab 键操作处理
  */
@@ -9958,7 +11741,7 @@ var tabKey = {
 exports['default'] = tabKey;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/historyUtils":15,"../common/utils":18,"../domUtils/domExtend":22,"../rangeUtils/rangeExtend":31}],26:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36}],28:[function(require,module,exports){
 /**
  * img 操作基本方法集合
  */
@@ -10479,7 +12262,7 @@ var imgResize = {
 exports['default'] = imgResize;
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./../domUtils/domExtend":22,"./../rangeUtils/rangeExtend":31}],27:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36}],29:[function(require,module,exports){
 /**
  * img 操作基本方法集合
  */
@@ -10624,7 +12407,7 @@ function imgFilter(img, onlyLocal) {
 exports['default'] = imgUtils;
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./../domUtils/domExtend":22,"./../rangeUtils/rangeExtend":31,"./imgResize":26}],28:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36,"./imgResize":28}],30:[function(require,module,exports){
 /**
  * 超链接操作基本方法集合
  */
@@ -10780,7 +12563,2910 @@ var linkUtils = {
 exports['default'] = linkUtils;
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./../domUtils/domExtend":22,"./../rangeUtils/rangeExtend":31}],29:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36}],31:[function(require,module,exports){
+"use strict";
+Object.defineProperty(exports, "__esModule", {
+            value: true
+});
+var Markdown;
+
+if (typeof exports === "object" && typeof require === "function") // we're in a CommonJS (e.g. Node.js) module
+            Markdown = exports;else Markdown = {};
+
+// The following text is included for historical reasons, but should
+// be taken with a pinch of salt; it's not all true anymore.
+
+//
+// Wherever possible, Showdown is a straight, line-by-line port
+// of the Perl version of Markdown.
+//
+// This is not a normal parser design; it's basically just a
+// series of string substitutions.  It's hard to read and
+// maintain this way,  but keeping Showdown close to the original
+// design makes it easier to port new features.
+//
+// More importantly, Showdown behaves like markdown.pl in most
+// edge cases.  So web applications can do client-side preview
+// in Javascript, and then build identical HTML on the server.
+//
+// This port needs the new RegExp functionality of ECMA 262,
+// 3rd Edition (i.e. Javascript 1.5).  Most modern web browsers
+// should do fine.  Even with the new regular expression features,
+// We do a lot of work to emulate Perl's regex functionality.
+// The tricky changes in this file mostly have the "attacklab:"
+// label.  Major or self-explanatory changes don't.
+//
+// Smart diff tools like Araxis Merge will be able to match up
+// this file with markdown.pl in a useful way.  A little tweaking
+// helps: in a copy of markdown.pl, replace "#" with "//" and
+// replace "$text" with "text".  Be sure to ignore whitespace
+// and line endings.
+//
+
+//
+// Usage:
+//
+//   var text = "Markdown *rocks*.";
+//
+//   var converter = new Markdown.Converter();
+//   var html = converter.makeHtml(text);
+//
+//   alert(html);
+//
+// Note: move the sample code to the bottom of this
+// file before uncommenting it.
+//
+
+(function () {
+
+            function identity(x) {
+                        return x;
+            }
+            function returnFalse(x) {
+                        return false;
+            }
+
+            function HookCollection() {}
+
+            HookCollection.prototype = {
+
+                        chain: function chain(hookname, func) {
+                                    var original = this[hookname];
+                                    if (!original) throw new Error("unknown hook " + hookname);
+
+                                    if (original === identity) this[hookname] = func;else this[hookname] = function (text) {
+                                                var args = Array.prototype.slice.call(arguments, 0);
+                                                args[0] = original.apply(null, args);
+                                                return func.apply(null, args);
+                                    };
+                        },
+                        set: function set(hookname, func) {
+                                    if (!this[hookname]) throw new Error("unknown hook " + hookname);
+                                    this[hookname] = func;
+                        },
+                        addNoop: function addNoop(hookname) {
+                                    this[hookname] = identity;
+                        },
+                        addFalse: function addFalse(hookname) {
+                                    this[hookname] = returnFalse;
+                        }
+            };
+
+            Markdown.HookCollection = HookCollection;
+
+            // g_urls and g_titles allow arbitrary user-entered strings as keys. This
+            // caused an exception (and hence stopped the rendering) when the user entered
+            // e.g. [push] or [__proto__]. Adding a prefix to the actual key prevents this
+            // (since no builtin property starts with "s_"). See
+            // http://meta.stackexchange.com/questions/64655/strange-wmd-bug
+            // (granted, switching from Array() to Object() alone would have left only __proto__
+            // to be a problem)
+            function SaveHash() {}
+            SaveHash.prototype = {
+                        set: function set(key, value) {
+                                    this["s_" + key] = value;
+                        },
+                        get: function get(key) {
+                                    return this["s_" + key];
+                        }
+            };
+
+            Markdown.Converter = function (OPTIONS) {
+                        var pluginHooks = this.hooks = new HookCollection();
+
+                        // given a URL that was encountered by itself (without markup), should return the link text that's to be given to this link
+                        pluginHooks.addNoop("plainLinkText");
+
+                        // called with the orignal text as given to makeHtml. The result of this plugin hook is the actual markdown source that will be cooked
+                        pluginHooks.addNoop("preConversion");
+
+                        // called with the text once all normalizations have been completed (tabs to spaces, line endings, etc.), but before any conversions have
+                        pluginHooks.addNoop("postNormalization");
+
+                        // Called with the text before / after creating block elements like code blocks and lists. Note that this is called recursively
+                        // with inner content, e.g. it's called with the full text, and then only with the content of a blockquote. The inner
+                        // call will receive outdented text.
+                        pluginHooks.addNoop("preBlockGamut");
+                        pluginHooks.addNoop("postBlockGamut");
+
+                        // called with the text of a single block element before / after the span-level conversions (bold, code spans, etc.) have been made
+                        pluginHooks.addNoop("preSpanGamut");
+                        pluginHooks.addNoop("postSpanGamut");
+
+                        // called with the final cooked HTML code. The result of this plugin hook is the actual output of makeHtml
+                        pluginHooks.addNoop("postConversion");
+
+                        //
+                        // Private state of the converter instance:
+                        //
+
+                        // Global hashes, used by various utility routines
+                        var g_urls;
+                        var g_titles;
+                        var g_html_blocks;
+
+                        // Used to track when we're inside an ordered or unordered list
+                        // (see _ProcessListItems() for details):
+                        var g_list_level;
+
+                        OPTIONS = OPTIONS || {};
+                        var asciify = identity,
+                            deasciify = identity;
+                        if (OPTIONS.nonAsciiLetters) {
+
+                                    /* In JavaScript regular expressions, \w only denotes [a-zA-Z0-9_].
+                                     * That's why there's inconsistent handling e.g. with intra-word bolding
+                                     * of Japanese words. That's why we do the following if OPTIONS.nonAsciiLetters
+                                     * is true:
+                                     *
+                                     * Before doing bold and italics, we find every instance
+                                     * of a unicode word character in the Markdown source that is not
+                                     * matched by \w, and the letter "Q". We take the character's code point
+                                     * and encode it in base 51, using the "digits"
+                                     *
+                                     *     A, B, ..., P, R, ..., Y, Z, a, b, ..., y, z
+                                     *
+                                     * delimiting it with "Q" on both sides. For example, the source
+                                     *
+                                     * > In Chinese, the smurfs are called 藍精靈, meaning "blue spirits".
+                                     *
+                                     * turns into
+                                     *
+                                     * > In Chinese, the smurfs are called QNIhQQMOIQQOuUQ, meaning "blue spirits".
+                                     *
+                                     * Since everything that is a letter in Unicode is now a letter (or
+                                     * several letters) in ASCII, \w and \b should always do the right thing.
+                                     *
+                                     * After the bold/italic conversion, we decode again; since "Q" was encoded
+                                     * alongside all non-ascii characters (as "QBfQ"), and the conversion
+                                     * will not generate "Q", the only instances of that letter should be our
+                                     * encoded characters. And since the conversion will not break words, the
+                                     * "Q...Q" should all still be in one piece.
+                                     *
+                                     * We're using "Q" as the delimiter because it's probably one of the
+                                     * rarest characters, and also because I can't think of any special behavior
+                                     * that would ever be triggered by this letter (to use a silly example, if we
+                                     * delimited with "H" on the left and "P" on the right, then "Ψ" would be
+                                     * encoded as "HTTP", which may cause special behavior). The latter would not
+                                     * actually be a huge issue for bold/italic, but may be if we later use it
+                                     * in other places as well.
+                                     * */
+                                    (function () {
+                                                var lettersThatJavaScriptDoesNotKnowAndQ = /[Q\u00aa\u00b5\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376-\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0523\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0621-\u064a\u0660-\u0669\u066e-\u066f\u0671-\u06d3\u06d5\u06e5-\u06e6\u06ee-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07c0-\u07ea\u07f4-\u07f5\u07fa\u0904-\u0939\u093d\u0950\u0958-\u0961\u0966-\u096f\u0971-\u0972\u097b-\u097f\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc-\u09dd\u09df-\u09e1\u09e6-\u09f1\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0-\u0ae1\u0ae6-\u0aef\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b35-\u0b39\u0b3d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0be6-\u0bef\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58-\u0c59\u0c60-\u0c61\u0c66-\u0c6f\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3d\u0d60-\u0d61\u0d66-\u0d6f\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32-\u0e33\u0e40-\u0e46\u0e50-\u0e59\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eb0\u0eb2-\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f20-\u0f29\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8b\u1000-\u102a\u103f-\u1049\u1050-\u1055\u105a-\u105d\u1061\u1065-\u1066\u106e-\u1070\u1075-\u1081\u108e\u1090-\u1099\u10a0-\u10c5\u10d0-\u10fa\u10fc\u1100-\u1159\u115f-\u11a2\u11a8-\u11f9\u1200-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u1676\u1681-\u169a\u16a0-\u16ea\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u17e0-\u17e9\u1810-\u1819\u1820-\u1877\u1880-\u18a8\u18aa\u1900-\u191c\u1946-\u196d\u1970-\u1974\u1980-\u19a9\u19c1-\u19c7\u19d0-\u19d9\u1a00-\u1a16\u1b05-\u1b33\u1b45-\u1b4b\u1b50-\u1b59\u1b83-\u1ba0\u1bae-\u1bb9\u1c00-\u1c23\u1c40-\u1c49\u1c4d-\u1c7d\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u2054\u2071\u207f\u2090-\u2094\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2183-\u2184\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2c6f\u2c71-\u2c7d\u2c80-\u2ce4\u2d00-\u2d25\u2d30-\u2d65\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3006\u3031-\u3035\u303b-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31b7\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fc3\ua000-\ua48c\ua500-\ua60c\ua610-\ua62b\ua640-\ua65f\ua662-\ua66e\ua67f-\ua697\ua717-\ua71f\ua722-\ua788\ua78b-\ua78c\ua7fb-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8d0-\ua8d9\ua900-\ua925\ua930-\ua946\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa50-\uaa59\uac00-\ud7a3\uf900-\ufa2d\ufa30-\ufa6a\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe33-\ufe34\ufe4d-\ufe4f\ufe70-\ufe74\ufe76-\ufefc\uff10-\uff19\uff21-\uff3a\uff3f\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc]/g;
+                                                var cp_Q = "Q".charCodeAt(0);
+                                                var cp_A = "A".charCodeAt(0);
+                                                var cp_Z = "Z".charCodeAt(0);
+                                                var dist_Za = "a".charCodeAt(0) - cp_Z - 1;
+
+                                                asciify = function (text) {
+                                                            return text.replace(lettersThatJavaScriptDoesNotKnowAndQ, function (m) {
+                                                                        var c = m.charCodeAt(0);
+                                                                        var s = "";
+                                                                        var v;
+                                                                        while (c > 0) {
+                                                                                    v = c % 51 + cp_A;
+                                                                                    if (v >= cp_Q) v++;
+                                                                                    if (v > cp_Z) v += dist_Za;
+                                                                                    s = String.fromCharCode(v) + s;
+                                                                                    c = c / 51 | 0;
+                                                                        }
+                                                                        return "Q" + s + "Q";
+                                                            });
+                                                };
+
+                                                deasciify = function (text) {
+                                                            return text.replace(/Q([A-PR-Za-z]{1,3})Q/g, function (m, s) {
+                                                                        var c = 0;
+                                                                        var v;
+                                                                        for (var i = 0; i < s.length; i++) {
+                                                                                    v = s.charCodeAt(i);
+                                                                                    if (v > cp_Z) v -= dist_Za;
+                                                                                    if (v > cp_Q) v--;
+                                                                                    v -= cp_A;
+                                                                                    c = c * 51 + v;
+                                                                        }
+                                                                        return String.fromCharCode(c);
+                                                            });
+                                                };
+                                    })();
+                        }
+
+                        var _DoItalicsAndBold = OPTIONS.asteriskIntraWordEmphasis ? _DoItalicsAndBold_AllowIntrawordWithAsterisk : _DoItalicsAndBoldStrict;
+
+                        this.makeHtml = function (text) {
+
+                                    //
+                                    // Main function. The order in which other subs are called here is
+                                    // essential. Link and image substitutions need to happen before
+                                    // _EscapeSpecialCharsWithinTagAttributes(), so that any *'s or _'s in the <a>
+                                    // and <img> tags get encoded.
+                                    //
+
+                                    // This will only happen if makeHtml on the same converter instance is called from a plugin hook.
+                                    // Don't do that.
+                                    if (g_urls) throw new Error("Recursive call to converter.makeHtml");
+
+                                    // Create the private state objects.
+                                    g_urls = new SaveHash();
+                                    g_titles = new SaveHash();
+                                    g_html_blocks = [];
+                                    g_list_level = 0;
+
+                                    text = pluginHooks.preConversion(text);
+
+                                    // attacklab: Replace ~ with ~T
+                                    // This lets us use tilde as an escape char to avoid md5 hashes
+                                    // The choice of character is arbitray; anything that isn't
+                                    // magic in Markdown will work.
+                                    text = text.replace(/~/g, "~T");
+
+                                    // attacklab: Replace $ with ~D
+                                    // RegExp interprets $ as a special character
+                                    // when it's in a replacement string
+                                    text = text.replace(/\$/g, "~D");
+
+                                    // Standardize line endings
+                                    text = text.replace(/\r\n/g, "\n"); // DOS to Unix
+                                    text = text.replace(/\r/g, "\n"); // Mac to Unix
+
+                                    // Make sure text begins and ends with a couple of newlines:
+                                    text = "\n\n" + text + "\n\n";
+
+                                    // Convert all tabs to spaces.
+                                    text = _Detab(text);
+
+                                    // Strip any lines consisting only of spaces and tabs.
+                                    // This makes subsequent regexen easier to write, because we can
+                                    // match consecutive blank lines with /\n+/ instead of something
+                                    // contorted like /[ \t]*\n+/ .
+                                    text = text.replace(/^[ \t]+$/mg, "");
+
+                                    text = pluginHooks.postNormalization(text);
+
+                                    // Turn block-level HTML blocks into hash entries
+                                    text = _HashHTMLBlocks(text);
+
+                                    // Strip link definitions, store in hashes.
+                                    text = _StripLinkDefinitions(text);
+
+                                    text = _RunBlockGamut(text);
+
+                                    text = _UnescapeSpecialChars(text);
+
+                                    // attacklab: Restore dollar signs
+                                    text = text.replace(/~D/g, "$$");
+
+                                    // attacklab: Restore tildes
+                                    text = text.replace(/~T/g, "~");
+
+                                    text = pluginHooks.postConversion(text);
+
+                                    g_html_blocks = g_titles = g_urls = null;
+
+                                    return text;
+                        };
+
+                        function _StripLinkDefinitions(text) {
+                                    //
+                                    // Strips link definitions from text, stores the URLs and titles in
+                                    // hash references.
+                                    //
+
+                                    // Link defs are in the form: ^[id]: url "optional title"
+
+                                    /*
+                                     text = text.replace(/
+                                     ^[ ]{0,3}\[([^\[\]]+)\]:  // id = $1  attacklab: g_tab_width - 1
+                                     [ \t]*
+                                     \n?                 // maybe *one* newline
+                                     [ \t]*
+                                     <?(\S+?)>?          // url = $2
+                                     (?=\s|$)            // lookahead for whitespace instead of the lookbehind removed below
+                                     [ \t]*
+                                     \n?                 // maybe one newline
+                                     [ \t]*
+                                     (                   // (potential) title = $3
+                                     (\n*)           // any lines skipped = $4 attacklab: lookbehind removed
+                                     [ \t]+
+                                     ["(]
+                                     (.+?)           // title = $5
+                                     [")]
+                                     [ \t]*
+                                     )?                  // title is optional
+                                     (\n+)             // subsequent newlines = $6, capturing because they must be put back if the potential title isn't an actual title
+                                     /gm, function(){...});
+                                     */
+
+                                    text = text.replace(/^[ ]{0,3}\[([^\[\]]+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?(?=\s|$)[ \t]*\n?[ \t]*((\n*)["(](.+?)[")][ \t]*)?(\n+)/gm, function (wholeMatch, m1, m2, m3, m4, m5, m6) {
+                                                m1 = m1.toLowerCase();
+                                                g_urls.set(m1, _EncodeAmpsAndAngles(m2)); // Link IDs are case-insensitive
+                                                if (m4) {
+                                                            // Oops, found blank lines, so it's not a title.
+                                                            // Put back the parenthetical statement we stole.
+                                                            return m3 + m6;
+                                                } else if (m5) {
+                                                            g_titles.set(m1, m5.replace(/"/g, "&quot;"));
+                                                }
+
+                                                // Completely remove the definition from the text
+                                                return "";
+                                    });
+
+                                    return text;
+                        }
+
+                        function _HashHTMLBlocks(text) {
+
+                                    // Hashify HTML blocks:
+                                    // We only want to do this for block-level HTML tags, such as headers,
+                                    // lists, and tables. That's because we still want to wrap <p>s around
+                                    // "paragraphs" that are wrapped in non-block-level tags, such as anchors,
+                                    // phrase emphasis, and spans. The list of tags we're looking for is
+                                    // hard-coded:
+                                    var block_tags_a = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del";
+                                    var block_tags_b = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math";
+
+                                    // First, look for nested blocks, e.g.:
+                                    //   <div>
+                                    //     <div>
+                                    //     tags for inner block must be indented.
+                                    //     </div>
+                                    //   </div>
+                                    //
+                                    // The outermost tags must start at the left margin for this to match, and
+                                    // the inner nested divs must be indented.
+                                    // We need to do this before the next, more liberal match, because the next
+                                    // match will start at the first `<div>` and stop at the first `</div>`.
+
+                                    // attacklab: This regex can be expensive when it fails.
+
+                                    /*
+                                     text = text.replace(/
+                                     (                       // save in $1
+                                     ^                   // start of line  (with /m)
+                                     <($block_tags_a)    // start tag = $2
+                                     \b                  // word break
+                                     // attacklab: hack around khtml/pcre bug...
+                                     [^\r]*?\n           // any number of lines, minimally matching
+                                     </\2>               // the matching end tag
+                                     [ \t]*              // trailing spaces/tabs
+                                     (?=\n+)             // followed by a newline
+                                     )                       // attacklab: there are sentinel newlines at end of document
+                                     /gm,function(){...}};
+                                     */
+                                    text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del)\b[^\r]*?\n<\/\2>[ \t]*(?=\n+))/gm, hashMatch);
+
+                                    //
+                                    // Now match more liberally, simply from `\n<tag>` to `</tag>\n`
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (                       // save in $1
+                                     ^                   // start of line  (with /m)
+                                     <($block_tags_b)    // start tag = $2
+                                     \b                  // word break
+                                     // attacklab: hack around khtml/pcre bug...
+                                     [^\r]*?             // any number of lines, minimally matching
+                                     .*</\2>             // the matching end tag
+                                     [ \t]*              // trailing spaces/tabs
+                                     (?=\n+)             // followed by a newline
+                                     )                       // attacklab: there are sentinel newlines at end of document
+                                     /gm,function(){...}};
+                                     */
+                                    text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math)\b[^\r]*?.*<\/\2>[ \t]*(?=\n+)\n)/gm, hashMatch);
+
+                                    // Special case just for <hr />. It was easier to make a special case than
+                                    // to make the other regex more complicated.
+
+                                    /*
+                                     text = text.replace(/
+                                     \n                  // Starting after a blank line
+                                     [ ]{0,3}
+                                     (                   // save in $1
+                                     (<(hr)          // start tag = $2
+                                     \b          // word break
+                                     ([^<>])*?
+                                     \/?>)           // the matching end tag
+                                     [ \t]*
+                                     (?=\n{2,})      // followed by a blank line
+                                     )
+                                     /g,hashMatch);
+                                     */
+                                    text = text.replace(/\n[ ]{0,3}((<(hr)\b([^<>])*?\/?>)[ \t]*(?=\n{2,}))/g, hashMatch);
+
+                                    // Special case for standalone HTML comments:
+
+                                    /*
+                                     text = text.replace(/
+                                     \n\n                                            // Starting after a blank line
+                                     [ ]{0,3}                                        // attacklab: g_tab_width - 1
+                                     (                                               // save in $1
+                                     <!
+                                     (--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)   // see http://www.w3.org/TR/html-markup/syntax.html#comments and http://meta.stackexchange.com/q/95256
+                                     >
+                                     [ \t]*
+                                     (?=\n{2,})                                  // followed by a blank line
+                                     )
+                                     /g,hashMatch);
+                                     */
+                                    text = text.replace(/\n\n[ ]{0,3}(<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>[ \t]*(?=\n{2,}))/g, hashMatch);
+
+                                    // PHP and ASP-style processor instructions (<?...?> and <%...%>)
+
+                                    /*
+                                     text = text.replace(/
+                                     (?:
+                                     \n\n            // Starting after a blank line
+                                     )
+                                     (                   // save in $1
+                                     [ ]{0,3}        // attacklab: g_tab_width - 1
+                                     (?:
+                                     <([?%])     // $2
+                                     [^\r]*?
+                                     \2>
+                                     )
+                                     [ \t]*
+                                     (?=\n{2,})      // followed by a blank line
+                                     )
+                                     /g,hashMatch);
+                                     */
+                                    text = text.replace(/(?:\n\n)([ ]{0,3}(?:<([?%])[^\r]*?\2>)[ \t]*(?=\n{2,}))/g, hashMatch);
+
+                                    return text;
+                        }
+
+                        function hashBlock(text) {
+                                    text = text.replace(/(^\n+|\n+$)/g, "");
+                                    // Replace the element text with a marker ("~KxK" where x is its key)
+                                    return "\n\n~K" + (g_html_blocks.push(text) - 1) + "K\n\n";
+                        }
+
+                        function hashMatch(wholeMatch, m1) {
+                                    return hashBlock(m1);
+                        }
+
+                        var blockGamutHookCallback = function blockGamutHookCallback(t) {
+                                    return _RunBlockGamut(t);
+                        };
+
+                        function _RunBlockGamut(text, doNotUnhash, doNotCreateParagraphs) {
+                                    //
+                                    // These are all the transformations that form block-level
+                                    // tags like paragraphs, headers, and list items.
+                                    //
+
+                                    text = pluginHooks.preBlockGamut(text, blockGamutHookCallback);
+
+                                    text = _DoHeaders(text);
+
+                                    // Do Horizontal Rules:
+                                    var replacement = "<hr />\n";
+                                    text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, replacement);
+                                    text = text.replace(/^[ ]{0,2}([ ]?-[ ]?){3,}[ \t]*$/gm, replacement);
+                                    text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, replacement);
+
+                                    text = _DoLists(text);
+                                    text = _DoCodeBlocks(text);
+                                    text = _DoBlockQuotes(text);
+
+                                    text = pluginHooks.postBlockGamut(text, blockGamutHookCallback);
+
+                                    // We already ran _HashHTMLBlocks() before, in Markdown(), but that
+                                    // was to escape raw HTML in the original Markdown source. This time,
+                                    // we're escaping the markup we've just created, so that we don't wrap
+                                    // <p> tags around block-level tags.
+                                    text = _HashHTMLBlocks(text);
+
+                                    text = _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs);
+
+                                    return text;
+                        }
+
+                        function _RunSpanGamut(text) {
+                                    //
+                                    // These are all the transformations that occur *within* block-level
+                                    // tags like paragraphs, headers, and list items.
+                                    //
+
+                                    text = pluginHooks.preSpanGamut(text);
+
+                                    text = _DoCodeSpans(text);
+                                    text = _EscapeSpecialCharsWithinTagAttributes(text);
+                                    text = _EncodeBackslashEscapes(text);
+
+                                    // Process anchor and image tags. Images must come first,
+                                    // because ![foo][f] looks like an anchor.
+                                    text = _DoImages(text);
+                                    text = _DoAnchors(text);
+
+                                    // Make links out of things like `<http://example.com/>`
+                                    // Must come after _DoAnchors(), because you can use < and >
+                                    // delimiters in inline links like [this](<url>).
+                                    text = _DoAutoLinks(text);
+
+                                    text = text.replace(/~P/g, "://"); // put in place to prevent autolinking; reset now
+
+                                    text = _EncodeAmpsAndAngles(text);
+                                    text = _DoItalicsAndBold(text);
+
+                                    // Do hard breaks:
+                                    text = text.replace(/  +\n/g, " <br>\n");
+
+                                    text = pluginHooks.postSpanGamut(text);
+
+                                    return text;
+                        }
+
+                        function _EscapeSpecialCharsWithinTagAttributes(text) {
+                                    //
+                                    // Within tags -- meaning between < and > -- encode [\ ` * _] so they
+                                    // don't conflict with their use in Markdown for code, italics and strong.
+                                    //
+
+                                    // Build a regex to find HTML tags and comments.  See Friedl's
+                                    // "Mastering Regular Expressions", 2nd Ed., pp. 200-201.
+
+                                    // SE: changed the comment part of the regex
+
+                                    var regex = /(<[a-z\/!$]("[^"]*"|'[^']*'|[^'">])*>|<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>)/gi;
+
+                                    text = text.replace(regex, function (wholeMatch) {
+                                                var tag = wholeMatch.replace(/(.)<\/?code>(?=.)/g, "$1`");
+                                                tag = escapeCharacters(tag, wholeMatch.charAt(1) == "!" ? "\\`*_/" : "\\`*_"); // also escape slashes in comments to prevent autolinking there -- http://meta.stackexchange.com/questions/95987
+                                                return tag;
+                                    });
+
+                                    return text;
+                        }
+
+                        function _DoAnchors(text) {
+
+                                    if (text.indexOf("[") === -1) return text;
+
+                                    //
+                                    // Turn Markdown link shortcuts into XHTML <a> tags.
+                                    //
+                                    //
+                                    // First, handle reference-style links: [link text] [id]
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (                           // wrap whole match in $1
+                                     \[
+                                     (
+                                     (?:
+                                     \[[^\]]*\]      // allow brackets nested one level
+                                     |
+                                     [^\[]           // or anything else
+                                     )*
+                                     )
+                                     \]
+                                     [ ]?                    // one optional space
+                                     (?:\n[ ]*)?             // one optional newline followed by spaces
+                                     \[
+                                     (.*?)                   // id = $3
+                                     \]
+                                     )
+                                     ()()()()                    // pad remaining backreferences
+                                     /g, writeAnchorTag);
+                                     */
+                                    text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeAnchorTag);
+
+                                    //
+                                    // Next, inline-style links: [link text](url "optional title")
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (                           // wrap whole match in $1
+                                     \[
+                                     (
+                                     (?:
+                                     \[[^\]]*\]      // allow brackets nested one level
+                                     |
+                                     [^\[\]]         // or anything else
+                                     )*
+                                     )
+                                     \]
+                                     \(                      // literal paren
+                                     [ \t]*
+                                     ()                      // no id, so leave $3 empty
+                                     <?(                     // href = $4
+                                     (?:
+                                     \([^)]*\)       // allow one level of (correctly nested) parens (think MSDN)
+                                     |
+                                     [^()\s]
+                                     )*?
+                                     )>?
+                                     [ \t]*
+                                     (                       // $5
+                                     (['"])              // quote char = $6
+                                     (.*?)               // Title = $7
+                                     \6                  // matching quote
+                                     [ \t]*              // ignore any spaces/tabs between closing quote and )
+                                     )?                      // title is optional
+                                     \)
+                                     )
+                                     /g, writeAnchorTag);
+                                     */
+
+                                    text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\]\([ \t]*()<?((?:\([^)]*\)|[^()\s])*?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeAnchorTag);
+
+                                    //
+                                    // Last, handle reference-style shortcuts: [link text]
+                                    // These must come last in case you've also got [link test][1]
+                                    // or [link test](/foo)
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (                   // wrap whole match in $1
+                                     \[
+                                     ([^\[\]]+)      // link text = $2; can't contain '[' or ']'
+                                     \]
+                                     )
+                                     ()()()()()          // pad rest of backreferences
+                                     /g, writeAnchorTag);
+                                     */
+                                    text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
+
+                                    return text;
+                        }
+
+                        function writeAnchorTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
+                                    if (m7 == undefined) m7 = "";
+                                    var whole_match = m1;
+                                    var link_text = m2.replace(/:\/\//g, "~P"); // to prevent auto-linking withing the link. will be converted back after the auto-linker runs
+                                    var link_id = m3.toLowerCase();
+                                    var url = m4;
+                                    var title = m7;
+
+                                    if (url == "") {
+                                                if (link_id == "") {
+                                                            // lower-case and turn embedded newlines into spaces
+                                                            link_id = link_text.toLowerCase().replace(/ ?\n/g, " ");
+                                                }
+                                                url = "#" + link_id;
+
+                                                if (g_urls.get(link_id) != undefined) {
+                                                            url = g_urls.get(link_id);
+                                                            if (g_titles.get(link_id) != undefined) {
+                                                                        title = g_titles.get(link_id);
+                                                            }
+                                                } else {
+                                                            if (whole_match.search(/\(\s*\)$/m) > -1) {
+                                                                        // Special case for explicit empty url
+                                                                        url = "";
+                                                            } else {
+                                                                        return whole_match;
+                                                            }
+                                                }
+                                    }
+                                    url = attributeSafeUrl(url);
+
+                                    var result = "<a href=\"" + url + "\"";
+
+                                    if (title != "") {
+                                                title = attributeEncode(title);
+                                                title = escapeCharacters(title, "*_");
+                                                result += " title=\"" + title + "\"";
+                                    }
+
+                                    result += ">" + link_text + "</a>";
+
+                                    return result;
+                        }
+
+                        function _DoImages(text) {
+
+                                    if (text.indexOf("![") === -1) return text;
+
+                                    //
+                                    // Turn Markdown image shortcuts into <img> tags.
+                                    //
+
+                                    //
+                                    // First, handle reference-style labeled images: ![alt text][id]
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (                   // wrap whole match in $1
+                                     !\[
+                                     (.*?)           // alt text = $2
+                                     \]
+                                     [ ]?            // one optional space
+                                     (?:\n[ ]*)?     // one optional newline followed by spaces
+                                     \[
+                                     (.*?)           // id = $3
+                                     \]
+                                     )
+                                     ()()()()            // pad rest of backreferences
+                                     /g, writeImageTag);
+                                     */
+                                    text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeImageTag);
+
+                                    //
+                                    // Next, handle inline images:  ![alt text](url "optional title")
+                                    // Don't forget: encode * and _
+
+                                    /*
+                                     text = text.replace(/
+                                     (                   // wrap whole match in $1
+                                     !\[
+                                     (.*?)           // alt text = $2
+                                     \]
+                                     \s?             // One optional whitespace character
+                                     \(              // literal paren
+                                     [ \t]*
+                                     ()              // no id, so leave $3 empty
+                                     <?(\S+?)>?      // src url = $4
+                                     [ \t]*
+                                     (               // $5
+                                     (['"])      // quote char = $6
+                                     (.*?)       // title = $7
+                                     \6          // matching quote
+                                     [ \t]*
+                                     )?              // title is optional
+                                     \)
+                                     )
+                                     /g, writeImageTag);
+                                     */
+                                    text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeImageTag);
+
+                                    return text;
+                        }
+
+                        function attributeEncode(text) {
+                                    // unconditionally replace angle brackets here -- what ends up in an attribute (e.g. alt or title)
+                                    // never makes sense to have verbatim HTML in it (and the sanitizer would totally break it)
+                                    return text.replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+                        }
+
+                        function writeImageTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
+                                    var whole_match = m1;
+                                    var alt_text = m2;
+                                    var link_id = m3.toLowerCase();
+                                    var url = m4;
+                                    var title = m7;
+
+                                    if (!title) title = "";
+
+                                    if (url == "") {
+                                                if (link_id == "") {
+                                                            // lower-case and turn embedded newlines into spaces
+                                                            link_id = alt_text.toLowerCase().replace(/ ?\n/g, " ");
+                                                }
+                                                url = "#" + link_id;
+
+                                                if (g_urls.get(link_id) != undefined) {
+                                                            url = g_urls.get(link_id);
+                                                            if (g_titles.get(link_id) != undefined) {
+                                                                        title = g_titles.get(link_id);
+                                                            }
+                                                } else {
+                                                            return whole_match;
+                                                }
+                                    }
+
+                                    alt_text = escapeCharacters(attributeEncode(alt_text), "*_[]()");
+                                    url = escapeCharacters(url, "*_");
+                                    var result = "<img src=\"" + url + "\" alt=\"" + alt_text + "\"";
+
+                                    // attacklab: Markdown.pl adds empty title attributes to images.
+                                    // Replicate this bug.
+
+                                    //if (title != "") {
+                                    title = attributeEncode(title);
+                                    title = escapeCharacters(title, "*_");
+                                    result += " title=\"" + title + "\"";
+                                    //}
+
+                                    result += " />";
+
+                                    return result;
+                        }
+
+                        function _DoHeaders(text) {
+
+                                    // Setext-style headers:
+                                    //  Header 1
+                                    //  ========
+                                    //
+                                    //  Header 2
+                                    //  --------
+                                    //
+                                    text = text.replace(/^(.+)[ \t]*\n=+[ \t]*\n+/gm, function (wholeMatch, m1) {
+                                                return "<h1>" + _RunSpanGamut(m1) + "</h1>\n\n";
+                                    });
+
+                                    text = text.replace(/^(.+)[ \t]*\n-+[ \t]*\n+/gm, function (matchFound, m1) {
+                                                return "<h2>" + _RunSpanGamut(m1) + "</h2>\n\n";
+                                    });
+
+                                    // atx-style headers:
+                                    //  # Header 1
+                                    //  ## Header 2
+                                    //  ## Header 2 with closing hashes ##
+                                    //  ...
+                                    //  ###### Header 6
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     ^(\#{1,6})      // $1 = string of #'s
+                                     [ \t]*
+                                     (.+?)           // $2 = Header text
+                                     [ \t]*
+                                     \#*             // optional closing #'s (not counted)
+                                     \n+
+                                     /gm, function() {...});
+                                     */
+
+                                    text = text.replace(/^(\#{1,6})[ \t]*(.+?)[ \t]*\#*\n+/gm, function (wholeMatch, m1, m2) {
+                                                var h_level = m1.length;
+                                                return "<h" + h_level + ">" + _RunSpanGamut(m2) + "</h" + h_level + ">\n\n";
+                                    });
+
+                                    return text;
+                        }
+
+                        function _DoLists(text, isInsideParagraphlessListItem) {
+                                    //
+                                    // Form HTML ordered (numbered) and unordered (bulleted) lists.
+                                    //
+
+                                    // attacklab: add sentinel to hack around khtml/safari bug:
+                                    // http://bugs.webkit.org/show_bug.cgi?id=11231
+                                    text += "~0";
+
+                                    // Re-usable pattern to match any entirel ul or ol list:
+
+                                    /*
+                                     var whole_list = /
+                                     (                                   // $1 = whole list
+                                     (                               // $2
+                                     [ ]{0,3}                    // attacklab: g_tab_width - 1
+                                     ([*+-]|\d+[.])              // $3 = first list item marker
+                                     [ \t]+
+                                     )
+                                     [^\r]+?
+                                     (                               // $4
+                                     ~0                          // sentinel for workaround; should be $
+                                     |
+                                     \n{2,}
+                                     (?=\S)
+                                     (?!                         // Negative lookahead for another list item marker
+                                     [ \t]*
+                                     (?:[*+-]|\d+[.])[ \t]+
+                                     )
+                                     )
+                                     )
+                                     /g
+                                     */
+                                    var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+                                    var list_type;
+                                    if (g_list_level) {
+                                                text = text.replace(whole_list, function (wholeMatch, m1, m2) {
+                                                            var list = m1;
+                                                            list_type = getListType(m2);
+                                                            //2015-10-22 wiz：删除起始序列号 支持
+                                                            //var first_number;
+                                                            //if (list_type === "ol")
+                                                            //    first_number = parseInt(m2, 10)
+
+                                                            var result = _ProcessListItems(list, list_type, isInsideParagraphlessListItem);
+
+                                                            // Trim any trailing whitespace, to put the closing `</$list_type>`
+                                                            // up on the preceding line, to get it past the current stupid
+                                                            // HTML block parser. This is a hack to work around the terrible
+                                                            // hack that is the HTML block parser.
+                                                            var resultStr = result.list_str.replace(/\s+$/, "");
+                                                            var opening = "<" + list_type;
+                                                            //if (first_number && first_number !== 1)
+                                                            //    opening += " start=\"" + first_number + "\"";
+                                                            resultStr = opening + ">" + resultStr + "</" + result.list_type + ">\n";
+                                                            list_type = result.list_type;
+                                                            return resultStr;
+                                                });
+                                    } else {
+                                                whole_list = /(\n\n|^\n?)(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+                                                text = text.replace(whole_list, function (wholeMatch, m1, m2, m3) {
+                                                            var runup = m1;
+                                                            var list = m2;
+                                                            list_type = getListType(m3);
+                                                            //2015-10-22 wiz：删除起始序列号 支持
+                                                            //var first_number;
+                                                            //if (list_type === "ol")
+                                                            //    first_number = parseInt(m3, 10)
+
+                                                            var result = _ProcessListItems(list, list_type);
+
+                                                            var opening = "<" + list_type;
+                                                            //if (first_number && first_number !== 1)
+                                                            //    opening += " start=\"" + first_number + "\"";
+
+                                                            var resultStr = runup + opening + ">\n" + result.list_str + "</" + result.list_type + ">\n";
+                                                            list_type = result.list_type;
+                                                            return resultStr;
+                                                });
+                                    }
+
+                                    // attacklab: strip sentinel
+                                    text = text.replace(/~0/, "");
+
+                                    return text;
+                        }
+
+                        var _listItemMarkers = { ol: "\\d+[.]", ul: "[*+-]" };
+
+                        function getListType(str) {
+                                    return str.search(/[*+-]/g) > -1 ? "ul" : "ol";
+                        }
+
+                        function _ProcessListItems(list_str, list_type, isInsideParagraphlessListItem) {
+                                    //
+                                    //  Process the contents of a single ordered or unordered list, splitting it
+                                    //  into individual list items.
+                                    //
+                                    //  list_type is either "ul" or "ol".
+
+                                    // The $g_list_level global keeps track of when we're inside a list.
+                                    // Each time we enter a list, we increment it; when we leave a list,
+                                    // we decrement. If it's zero, we're not in a list anymore.
+                                    //
+                                    // We do this because when we're not inside a list, we want to treat
+                                    // something like this:
+                                    //
+                                    //    I recommend upgrading to version
+                                    //    8. Oops, now this line is treated
+                                    //    as a sub-list.
+                                    //
+                                    // As a single paragraph, despite the fact that the second line starts
+                                    // with a digit-period-space sequence.
+                                    //
+                                    // Whereas when we're inside a list (or sub-list), that line will be
+                                    // treated as the start of a sub-list. What a kludge, huh? This is
+                                    // an aspect of Markdown's syntax that's hard to parse perfectly
+                                    // without resorting to mind-reading. Perhaps the solution is to
+                                    // change the syntax rules such that sub-lists must start with a
+                                    // starting cardinal number; e.g. "1." or "a.".
+
+                                    g_list_level++;
+
+                                    // trim trailing blank lines:
+                                    list_str = list_str.replace(/\n{2,}$/, "\n");
+
+                                    // attacklab: add sentinel to emulate \z
+                                    list_str += "~0";
+
+                                    // In the original attacklab showdown, list_type was not given to this function, and anything
+                                    // that matched /[*+-]|\d+[.]/ would just create the next <li>, causing this mismatch:
+                                    //
+                                    //  Markdown          rendered by WMD        rendered by MarkdownSharp
+                                    //  ------------------------------------------------------------------
+                                    //  1. first          1. first               1. first
+                                    //  2. second         2. second              2. second
+                                    //  - third           3. third                   * third
+                                    //
+                                    // We changed this to behave identical to MarkdownSharp. This is the constructed RegEx,
+                                    // with {MARKER} being one of \d+[.] or [*+-], depending on list_type:
+
+                                    /*
+                                     list_str = list_str.replace(/
+                                     (^[ \t]*)                       // leading whitespace = $1
+                                     ({MARKER}) [ \t]+               // list marker = $2
+                                     ([^\r]+?                        // list item text   = $3
+                                     (\n+)
+                                     )
+                                     (?=
+                                     (~0 | \2 ({MARKER}) [ \t]+)
+                                     )
+                                     /gm, function(){...});
+                                     */
+
+                                    //2015-10-22 wiz: 修改 list 的支持规则， 同级的 无序列表 和 有序列表 不会自动处理为 父子关系， 而是生成平级的两个列表；
+                                    //var marker = _listItemMarkers[list_type];
+                                    //var re = new RegExp("(^[ \\t]*)(" + marker + ")[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))", "gm");
+                                    var re = new RegExp("(^[ \\t]*)([*+-]|\\d+[.])[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1([*+-]|\\d+[.])[ \\t]+))", "gm");
+                                    var last_item_had_a_double_newline = false;
+                                    list_str = list_str.replace(re, function (wholeMatch, m1, m2, m3) {
+                                                var item = m3;
+                                                var leading_space = m1;
+                                                var cur_list_type = getListType(m2);
+                                                var ends_with_double_newline = /\n\n$/.test(item);
+                                                var contains_double_newline = ends_with_double_newline || item.search(/\n{2,}/) > -1;
+
+                                                var loose = contains_double_newline || last_item_had_a_double_newline;
+                                                item = _RunBlockGamut(_Outdent(item), /* doNotUnhash = */true, /* doNotCreateParagraphs = */!loose);
+
+                                                var itemHtml = '';
+                                                if (cur_list_type != list_type) {
+                                                            itemHtml = '</' + list_type + '>\n<' + cur_list_type + '>\n';
+                                                            list_type = cur_list_type;
+                                                }
+                                                itemHtml += "<li>" + item + "</li>\n";
+
+                                                last_item_had_a_double_newline = ends_with_double_newline;
+                                                return itemHtml;
+                                    });
+
+                                    // attacklab: strip sentinel
+                                    list_str = list_str.replace(/~0/g, "");
+
+                                    g_list_level--;
+                                    return { list_str: list_str, list_type: list_type };
+                        }
+
+                        function _DoCodeBlocks(text) {
+                                    //
+                                    //  Process Markdown `<pre><code>` blocks.
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (?:\n\n|^)
+                                     (                               // $1 = the code block -- one or more lines, starting with a space/tab
+                                     (?:
+                                     (?:[ ]{4}|\t)           // Lines must start with a tab or a tab-width of spaces - attacklab: g_tab_width
+                                     .*\n+
+                                     )+
+                                     )
+                                     (\n*[ ]{0,3}[^ \t\n]|(?=~0))    // attacklab: g_tab_width
+                                     /g ,function(){...});
+                                     */
+
+                                    // attacklab: sentinel workarounds for lack of \A and \Z, safari\khtml bug
+                                    text += "~0";
+
+                                    text = text.replace(/(?:\n\n|^\n?)((?:(?:[ ]{4}|\t).*\n+)+)(\n*[ ]{0,3}[^ \t\n]|(?=~0))/g, function (wholeMatch, m1, m2) {
+                                                var codeblock = m1;
+                                                var nextChar = m2;
+
+                                                codeblock = _EncodeCode(_Outdent(codeblock));
+                                                codeblock = _Detab(codeblock);
+                                                codeblock = codeblock.replace(/^\n+/g, ""); // trim leading newlines
+                                                codeblock = codeblock.replace(/\n+$/g, ""); // trim trailing whitespace
+
+                                                codeblock = "<pre><code>" + codeblock + "\n</code></pre>";
+
+                                                return "\n\n" + codeblock + "\n\n" + nextChar;
+                                    });
+
+                                    // attacklab: strip sentinel
+                                    text = text.replace(/~0/, "");
+
+                                    return text;
+                        }
+
+                        function _DoCodeSpans(text) {
+                                    //
+                                    // * Backtick quotes are used for <code></code> spans.
+                                    //
+                                    // * You can use multiple backticks as the delimiters if you want to
+                                    //   include literal backticks in the code span. So, this input:
+                                    //
+                                    //      Just type ``foo `bar` baz`` at the prompt.
+                                    //
+                                    //   Will translate to:
+                                    //
+                                    //      <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
+                                    //
+                                    //   There's no arbitrary limit to the number of backticks you
+                                    //   can use as delimters. If you need three consecutive backticks
+                                    //   in your code, use four for delimiters, etc.
+                                    //
+                                    // * You can use spaces to get literal backticks at the edges:
+                                    //
+                                    //      ... type `` `bar` `` ...
+                                    //
+                                    //   Turns to:
+                                    //
+                                    //      ... type <code>`bar`</code> ...
+                                    //
+
+                                    /*
+                                     text = text.replace(/
+                                     (^|[^\\`])      // Character before opening ` can't be a backslash or backtick
+                                     (`+)            // $2 = Opening run of `
+                                     (?!`)           // and no more backticks -- match the full run
+                                     (               // $3 = The code block
+                                     [^\r]*?
+                                     [^`]        // attacklab: work around lack of lookbehind
+                                     )
+                                     \2              // Matching closer
+                                     (?!`)
+                                     /gm, function(){...});
+                                     */
+
+                                    text = text.replace(/(^|[^\\`])(`+)(?!`)([^\r]*?[^`])\2(?!`)/gm, function (wholeMatch, m1, m2, m3, m4) {
+                                                var c = m3;
+                                                c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+                                                c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+                                                c = _EncodeCode(c);
+                                                c = c.replace(/:\/\//g, "~P"); // to prevent auto-linking. Not necessary in code *blocks*, but in code spans. Will be converted back after the auto-linker runs.
+                                                return m1 + "<code>" + c + "</code>";
+                                    });
+
+                                    return text;
+                        }
+
+                        function _EncodeCode(text) {
+                                    //
+                                    // Encode/escape certain characters inside Markdown code runs.
+                                    // The point is that in code, these characters are literals,
+                                    // and lose their special Markdown meanings.
+                                    //
+                                    // Encode all ampersands; HTML entities are not
+                                    // entities within a Markdown code span.
+                                    text = text.replace(/&/g, "&amp;");
+
+                                    // Do the angle bracket song and dance:
+                                    text = text.replace(/</g, "&lt;");
+                                    text = text.replace(/>/g, "&gt;");
+
+                                    // Now, escape characters that are magic in Markdown:
+                                    text = escapeCharacters(text, "\*_{}[]\\", false);
+
+                                    // jj the line above breaks this:
+                                    //---
+
+                                    //* Item
+
+                                    //   1. Subitem
+
+                                    //            special char: *
+                                    //---
+
+                                    return text;
+                        }
+
+                        function _DoItalicsAndBoldStrict(text) {
+
+                                    if (text.indexOf("*") === -1 && text.indexOf("_") === -1) return text;
+
+                                    text = asciify(text);
+
+                                    // <strong> must go first:
+
+                                    // (^|[\W_])           Start with a non-letter or beginning of string. Store in \1.
+                                    // (?:(?!\1)|(?=^))    Either the next character is *not* the same as the previous,
+                                    //                     or we started at the end of the string (in which case the previous
+                                    //                     group had zero width, so we're still there). Because the next
+                                    //                     character is the marker, this means that if there are e.g. multiple
+                                    //                     underscores in a row, we can only match the left-most ones (which
+                                    //                     prevents foo___bar__ from getting bolded)
+                                    // (\*|_)              The marker character itself, asterisk or underscore. Store in \2.
+                                    // \2                  The marker again, since bold needs two.
+                                    // (?=\S)              The first bolded character cannot be a space.
+                                    // ([^\r]*?\S)         The actual bolded string. At least one character, and it cannot *end*
+                                    //                     with a space either. Note that like in many other places, [^\r] is
+                                    //                     just a workaround for JS' lack of single-line regexes; it's equivalent
+                                    //                     to a . in an /s regex, because the string cannot contain any \r (they
+                                    //                     are removed in the normalizing step).
+                                    // \2\2                The marker character, twice -- end of bold.
+                                    // (?!\2)              Not followed by another marker character (ensuring that we match the
+                                    //                     rightmost two in a longer row)...
+                                    // (?=[\W_]|$)         ...but by any other non-word character or the end of string.
+                                    text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)\2(?=\S)([^\r]*?\S)\2\2(?!\2)(?=[\W_]|$)/g, "$1<strong>$3</strong>");
+
+                                    // This is almost identical to the <strong> regex, except 1) there's obviously just one marker
+                                    // character, and 2) the italicized string cannot contain the marker character.
+                                    text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)(?=\S)((?:(?!\2)[^\r])*?\S)\2(?!\2)(?=[\W_]|$)/g, "$1<em>$3</em>");
+
+                                    return deasciify(text);
+                        }
+
+                        function _DoItalicsAndBold_AllowIntrawordWithAsterisk(text) {
+
+                                    if (text.indexOf("*") === -1 && text.indexOf("_") === -1) return text;
+
+                                    text = asciify(text);
+
+                                    // <strong> must go first:
+                                    // (?=[^\r][*_]|[*_])               Optimization only, to find potentially relevant text portions faster. Minimally slower in Chrome, but much faster in IE.
+                                    // (                                Store in \1. This is the last character before the delimiter
+                                    //     ^                            Either we're at the start of the string (i.e. there is no last character)...
+                                    //     |                            ... or we allow one of the following:
+                                    //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
+                                    //         \W__                     If the delimiter is __, then this last character must be non-word non-underscore (extra-word emphasis only)
+                                    //         |
+                                    //         (?!\*)[\W_]\*\*          If the delimiter is **, then this last character can be non-word non-asterisk (extra-word emphasis)...
+                                    //         |
+                                    //         \w\*\*\w                 ...or it can be word/underscore, but only if the first bolded character is such a character as well (intra-word emphasis)
+                                    //     )
+                                    //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
+                                    // )
+                                    // (\*\*|__)                        Store in \2: the actual delimiter
+                                    // (?!\2)                           not followed by the delimiter again (at most one more asterisk/underscore is allowed)
+                                    // (?=\S)                           the first bolded character can't be a space
+                                    // (                                Store in \3: the bolded string
+                                    //
+                                    //     (?:|                         Look at all bolded characters except for the last one. Either that's empty, meaning only a single character was bolded...
+                                    //       [^\r]*?                    ... otherwise take arbitrary characters, minimally matching; that's all bolded characters except for the last *two*
+                                    //       (?!\2)                       the last two characters cannot be the delimiter itself (because that would mean four underscores/asterisks in a row)
+                                    //       [^\r]                        capture the next-to-last bolded character
+                                    //     )
+                                    //     (?=                          lookahead at the very last bolded char and what comes after
+                                    //         \S_                      for underscore-bolding, it can be any non-space
+                                    //         |
+                                    //         \w                       for asterisk-bolding (otherwise the previous alternative would've matched, since \w implies \S), either the last char is word/underscore...
+                                    //         |
+                                    //         \S\*\*(?:[\W_]|$)        ... or it's any other non-space, but in that case the character *after* the delimiter may not be a word character
+                                    //     )
+                                    //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
+                                    // )
+                                    // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
+                                    //     __(?:\W|$)                   for underscore-bolding, the following character (if any) must be non-word non-underscore
+                                    //     |
+                                    //     \*\*(?:[^*]|$)               for asterisk-bolding, any non-asterisk is allowed (note we already ensured above that it's not a word character if the last bolded character wasn't one)
+                                    // )
+                                    // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
+
+                                    //2015-10-26 改善对 xxx**(1)**xxx 的支持
+                                    //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|\S\*\*(?:[\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g,
+                                    //    "$1<strong>$3</strong>");
+                                    text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\w\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|.\*\*(?:[\w\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g, "$1<strong>$3</strong>");
+
+                                    // now <em>:
+                                    // (?=[^\r][*_]|[*_])               Optimization, see above.
+                                    // (                                Store in \1. This is the last character before the delimiter
+                                    //     ^                            Either we're at the start of the string (i.e. there is no last character)...
+                                    //     |                            ... or we allow one of the following:
+                                    //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
+                                    //         \W_                      If the delimiter is _, then this last character must be non-word non-underscore (extra-word emphasis only)
+                                    //         |
+                                    //         (?!\*)                   otherwise, we list two possiblities for * as the delimiter; in either case, the last characters cannot be an asterisk itself
+                                    //         (?:
+                                    //             [\W_]\*              this last character can be non-word (extra-word emphasis)...
+                                    //             |
+                                    //             \D\*(?=\w)\D         ...or it can be word (otherwise the first alternative would've matched), but only if
+                                    //                                      a) the first italicized character is such a character as well (intra-word emphasis), and
+                                    //                                      b) neither character on either side of the asterisk is a digit
+                                    //         )
+                                    //     )
+                                    //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
+                                    // )
+                                    // (\*|_)                           Store in \2: the actual delimiter
+                                    // (?!\2\2\2)                       not followed by more than two more instances of the delimiter
+                                    // (?=\S)                           the first italicized character can't be a space
+                                    // (                                Store in \3: the italicized string
+                                    //     (?:(?!\2)[^\r])*?            arbitrary characters except for the delimiter itself, minimally matching
+                                    //     (?=                          lookahead at the very last italicized char and what comes after
+                                    //         [^\s_]_                  for underscore-italicizing, it can be any non-space non-underscore
+                                    //         |
+                                    //         (?=\w)\D\*\D             for asterisk-italicizing, either the last char is word/underscore *and* neither character on either side of the asterisk is a digit...
+                                    //         |
+                                    //         [^\s*]\*(?:[\W_]|$)      ... or that last char is any other non-space non-asterisk, but then the character after the delimiter (if any) must be non-word
+                                    //     )
+                                    //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
+                                    // )
+                                    // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
+                                    //     _(?:\W|$)                    for underscore-italicizing, the following character (if any) must be non-word non-underscore
+                                    //     |
+                                    //     \*(?:[^*]|$)                 for asterisk-italicizing, any non-asterisk is allowed; all other restrictions have already been ensured in the previous lookahead
+                                    // )
+                                    // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
+
+                                    //2015-10-26 改善对 xxx*(1)*xxx 的支持
+                                    //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=\w)\D\*\D|[^\s*]\*(?:[\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g,
+                                    //    "$1<em>$3</em>");
+                                    text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\w\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=[\w\W])\D\*\D|[^\s*]\*(?:[\w\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g, "$1<em>$3</em>");
+
+                                    return deasciify(text);
+                        }
+
+                        function _DoBlockQuotes(text) {
+
+                                    /*
+                                     text = text.replace(/
+                                     (                           // Wrap whole match in $1
+                                     (
+                                     ^[ \t]*>[ \t]?      // '>' at the start of a line
+                                     .+\n                // rest of the first line
+                                     (.+\n)*             // subsequent consecutive lines
+                                     \n*                 // blanks
+                                     )+
+                                     )
+                                     /gm, function(){...});
+                                     */
+
+                                    text = text.replace(/((^[ \t]*>[ \t]?.+\n(.+\n)*\n*)+)/gm, function (wholeMatch, m1) {
+                                                var bq = m1;
+
+                                                // attacklab: hack around Konqueror 3.5.4 bug:
+                                                // "----------bug".replace(/^-/g,"") == "bug"
+
+                                                bq = bq.replace(/^[ \t]*>[ \t]?/gm, "~0"); // trim one level of quoting
+
+                                                // attacklab: clean up hack
+                                                bq = bq.replace(/~0/g, "");
+
+                                                bq = bq.replace(/^[ \t]+$/gm, ""); // trim whitespace-only lines
+                                                bq = _RunBlockGamut(bq); // recurse
+
+                                                bq = bq.replace(/(^|\n)/g, "$1  ");
+                                                // These leading spaces screw with <pre> content, so we need to fix that:
+                                                bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
+                                                            var pre = m1;
+                                                            // attacklab: hack around Konqueror 3.5.4 bug:
+                                                            pre = pre.replace(/^  /mg, "~0");
+                                                            pre = pre.replace(/~0/g, "");
+                                                            return pre;
+                                                });
+
+                                                return hashBlock("<blockquote>\n" + bq + "\n</blockquote>");
+                                    });
+                                    return text;
+                        }
+
+                        function _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs) {
+                                    //
+                                    //  Params:
+                                    //    $text - string to process with html <p> tags
+                                    //
+
+                                    // Strip leading and trailing lines:
+                                    text = text.replace(/^\n+/g, "");
+                                    text = text.replace(/\n+$/g, "");
+
+                                    var grafs = text.split(/\n{2,}/g);
+                                    var grafsOut = [];
+
+                                    var markerRe = /~K(\d+)K/;
+
+                                    //
+                                    // Wrap <p> tags.
+                                    //
+                                    var end = grafs.length;
+                                    for (var i = 0; i < end; i++) {
+                                                var str = grafs[i];
+
+                                                // if this is an HTML marker, copy it
+                                                if (markerRe.test(str)) {
+                                                            grafsOut.push(str);
+                                                } else if (/\S/.test(str)) {
+                                                            str = _RunSpanGamut(str);
+                                                            str = str.replace(/^([ \t]*)/g, doNotCreateParagraphs ? "" : "<p>");
+                                                            if (!doNotCreateParagraphs) str += "</p>";
+                                                            grafsOut.push(str);
+                                                }
+                                    }
+                                    //
+                                    // Unhashify HTML blocks
+                                    //
+                                    if (!doNotUnhash) {
+                                                end = grafsOut.length;
+                                                for (var i = 0; i < end; i++) {
+                                                            var foundAny = true;
+                                                            while (foundAny) {
+                                                                        // we may need several runs, since the data may be nested
+                                                                        foundAny = false;
+                                                                        grafsOut[i] = grafsOut[i].replace(/~K(\d+)K/g, function (wholeMatch, id) {
+                                                                                    foundAny = true;
+                                                                                    return g_html_blocks[id];
+                                                                        });
+                                                            }
+                                                }
+                                    }
+                                    return grafsOut.join("\n\n");
+                        }
+
+                        function _EncodeAmpsAndAngles(text) {
+                                    // Smart processing for ampersands and angle brackets that need to be encoded.
+
+                                    // Ampersand-encoding based entirely on Nat Irons's Amputator MT plugin:
+                                    //   http://bumppo.net/projects/amputator/
+                                    text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, "&amp;");
+
+                                    // Encode naked <'s
+                                    text = text.replace(/<(?![a-z\/?!]|~D)/gi, "&lt;");
+
+                                    return text;
+                        }
+
+                        function _EncodeBackslashEscapes(text) {
+                                    //
+                                    //   Parameter:  String.
+                                    //   Returns:    The string, with after processing the following backslash
+                                    //               escape sequences.
+                                    //
+
+                                    // attacklab: The polite way to do this is with the new
+                                    // escapeCharacters() function:
+                                    //
+                                    //     text = escapeCharacters(text,"\\",true);
+                                    //     text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
+                                    //
+                                    // ...but we're sidestepping its use of the (slow) RegExp constructor
+                                    // as an optimization for Firefox.  This function gets called a LOT.
+
+                                    text = text.replace(/\\(\\)/g, escapeCharacters_callback);
+                                    text = text.replace(/\\([`*_{}\[\]()>#+-.!])/g, escapeCharacters_callback);
+                                    return text;
+                        }
+
+                        var charInsideUrl = "[-A-Z0-9+&@#/%?=~_|[\\]()!:,.;]",
+                            charEndingUrl = "[-A-Z0-9+&@#/%=~_|[\\])]",
+                            autoLinkRegex = new RegExp("(=\"|<)?\\b(https?|ftp)(://" + charInsideUrl + "*" + charEndingUrl + ")(?=$|\\W)", "gi"),
+                            endCharRegex = new RegExp(charEndingUrl, "i");
+
+                        function handleTrailingParens(wholeMatch, lookbehind, protocol, link, index, str) {
+
+                                    if (/^<[^<>]*(https?|ftp)/.test(str)) {
+                                                //避免 html 标签内 属性值的 超链接被替换为 a 标签（例如 img 的src 属性）
+                                                return wholeMatch;
+                                    }
+                                    if (lookbehind) return wholeMatch;
+                                    if (link.charAt(link.length - 1) !== ")") return "<" + protocol + link + ">";
+                                    var parens = link.match(/[()]/g);
+                                    var level = 0;
+                                    for (var i = 0; i < parens.length; i++) {
+                                                if (parens[i] === "(") {
+                                                            if (level <= 0) level = 1;else level++;
+                                                } else {
+                                                            level--;
+                                                }
+                                    }
+                                    var tail = "";
+                                    if (level < 0) {
+                                                var re = new RegExp("\\){1," + -level + "}$");
+                                                link = link.replace(re, function (trailingParens) {
+                                                            tail = trailingParens;
+                                                            return "";
+                                                });
+                                    }
+                                    if (tail) {
+                                                var lastChar = link.charAt(link.length - 1);
+                                                if (!endCharRegex.test(lastChar)) {
+                                                            tail = lastChar + tail;
+                                                            link = link.substr(0, link.length - 1);
+                                                }
+                                    }
+                                    return "<" + protocol + link + ">" + tail;
+                        }
+
+                        function _DoAutoLinks(text) {
+
+                                    // note that at this point, all other URL in the text are already hyperlinked as <a href=""></a>
+                                    // *except* for the <http://www.foo.com> case
+
+                                    // automatically add < and > around unadorned raw hyperlinks
+                                    // must be preceded by a non-word character (and not by =" or <) and followed by non-word/EOF character
+                                    // simulating the lookbehind in a consuming way is okay here, since a URL can neither and with a " nor
+                                    // with a <, so there is no risk of overlapping matches.
+                                    text = text.replace(autoLinkRegex, handleTrailingParens);
+
+                                    //  autolink anything like <http://example.com>
+
+                                    var replacer = function replacer(wholematch, m1) {
+                                                var url = attributeSafeUrl(m1);
+
+                                                return "<a href=\"" + url + "\">" + pluginHooks.plainLinkText(m1) + "</a>";
+                                    };
+                                    text = text.replace(/<((https?|ftp):[^'">\s]+)>/gi, replacer);
+
+                                    // Email addresses: <address@domain.foo>
+                                    /*
+                                     text = text.replace(/
+                                     <
+                                     (?:mailto:)?
+                                     (
+                                     [-.\w]+
+                                     \@
+                                     [-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+
+                                     )
+                                     >
+                                     /gi, _DoAutoLinks_callback());
+                                     */
+
+                                    /* disabling email autolinking, since we don't do that on the server, either
+                                     text = text.replace(/<(?:mailto:)?([-.\w]+\@[-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+)>/gi,
+                                     function(wholeMatch,m1) {
+                                     return _EncodeEmailAddress( _UnescapeSpecialChars(m1) );
+                                     }
+                                     );
+                                     */
+                                    return text;
+                        }
+
+                        function _UnescapeSpecialChars(text) {
+                                    //
+                                    // Swap back in all the special characters we've hidden.
+                                    //
+                                    text = text.replace(/~E(\d+)E/g, function (wholeMatch, m1) {
+                                                var charCodeToReplace = parseInt(m1);
+                                                return String.fromCharCode(charCodeToReplace);
+                                    });
+                                    return text;
+                        }
+
+                        function _Outdent(text) {
+                                    //
+                                    // Remove one level of line-leading tabs or spaces
+                                    //
+
+                                    // attacklab: hack around Konqueror 3.5.4 bug:
+                                    // "----------bug".replace(/^-/g,"") == "bug"
+
+                                    text = text.replace(/^(\t|[ ]{1,4})/gm, "~0"); // attacklab: g_tab_width
+
+                                    // attacklab: clean up hack
+                                    text = text.replace(/~0/g, "");
+
+                                    return text;
+                        }
+
+                        function _Detab(text) {
+                                    if (!/\t/.test(text)) return text;
+
+                                    var spaces = ["    ", "   ", "  ", " "],
+                                        skew = 0,
+                                        v;
+
+                                    return text.replace(/[\n\t]/g, function (match, offset) {
+                                                if (match === "\n") {
+                                                            skew = offset + 1;
+                                                            return match;
+                                                }
+                                                v = (offset - skew) % 4;
+                                                skew = offset + 1;
+                                                return spaces[v];
+                                    });
+                        }
+
+                        //
+                        //  attacklab: Utility functions
+                        //
+
+                        function attributeSafeUrl(url) {
+                                    url = attributeEncode(url);
+                                    url = escapeCharacters(url, "*_:()[]");
+                                    return url;
+                        }
+
+                        function escapeCharacters(text, charsToEscape, afterBackslash) {
+                                    // First we have to escape the escape characters so that
+                                    // we can build a character class out of them
+                                    var regexString = "([" + charsToEscape.replace(/([\[\]\\])/g, "\\$1") + "])";
+
+                                    if (afterBackslash) {
+                                                regexString = "\\\\" + regexString;
+                                    }
+
+                                    var regex = new RegExp(regexString, "g");
+                                    text = text.replace(regex, escapeCharacters_callback);
+
+                                    return text;
+                        }
+
+                        function escapeCharacters_callback(wholeMatch, m1) {
+                                    var charCodeToEscape = m1.charCodeAt(0);
+                                    return "~E" + charCodeToEscape + "E";
+                        }
+            }; // end of the Markdown.Converter constructor
+})();
+
+exports["default"] = Markdown;
+module.exports = exports["default"];
+
+},{}],32:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+  value: true
+});
+var Markdown = {};
+
+(function () {
+  // A quick way to make sure we're only keeping span-level tags when we need to.
+  // This isn't supposed to be foolproof. It's just a quick way to make sure we
+  // keep all span-level tags returned by a pagedown converter. It should allow
+  // all span-level tags through, with or without attributes.
+  var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|', 'bdo|big|button|cite|code|del|dfn|em|figcaption|', 'font|i|iframe|img|input|ins|kbd|label|map|', 'mark|meter|object|param|progress|q|ruby|rp|rt|s|', 'samp|script|select|small|span|strike|strong|', 'sub|sup|textarea|time|tt|u|var|wbr)[^>]*>|', '<(br)\\s?\\/?>)$'].join(''), 'i');
+
+  /******************************************************************
+   * Utility Functions                                              *
+   *****************************************************************/
+
+  // patch for ie7
+  if (!Array.indexOf) {
+    Array.prototype.indexOf = function (obj) {
+      for (var i = 0; i < this.length; i++) {
+        if (this[i] == obj) {
+          return i;
+        }
+      }
+      return -1;
+    };
+  }
+
+  function trim(str) {
+    return str.replace(/^\s+|\s+$/g, '');
+  }
+
+  function rtrim(str) {
+    return str.replace(/\s+$/g, '');
+  }
+
+  // Remove one level of indentation from text. Indent is 4 spaces.
+  function outdent(text) {
+    return text.replace(new RegExp('^(\\t|[ ]{1,4})', 'gm'), '');
+  }
+
+  function contains(str, substr) {
+    return str.indexOf(substr) != -1;
+  }
+
+  // Sanitize html, removing tags that aren't in the whitelist
+  function sanitizeHtml(html, whitelist) {
+    return html.replace(/<[^>]*>?/gi, function (tag) {
+      return tag.match(whitelist) ? tag : '';
+    });
+  }
+
+  // Merge two arrays, keeping only unique elements.
+  function union(x, y) {
+    var obj = {};
+    for (var i = 0; i < x.length; i++) obj[x[i]] = x[i];
+    for (i = 0; i < y.length; i++) obj[y[i]] = y[i];
+    var res = [];
+    for (var k in obj) {
+      if (obj.hasOwnProperty(k)) res.push(obj[k]);
+    }
+    return res;
+  }
+
+  // JS regexes don't support \A or \Z, so we add sentinels, as Pagedown
+  // does. In this case, we add the ascii codes for start of text (STX) and
+  // end of text (ETX), an idea borrowed from:
+  // https://github.com/tanakahisateru/js-markdown-extra
+  function addAnchors(text) {
+    if (text.charAt(0) != '\x02') text = '\x02' + text;
+    if (text.charAt(text.length - 1) != '\x03') text = text + '\x03';
+    return text;
+  }
+
+  // Remove STX and ETX sentinels.
+  function removeAnchors(text) {
+    if (text.charAt(0) == '\x02') text = text.substr(1);
+    if (text.charAt(text.length - 1) == '\x03') text = text.substr(0, text.length - 1);
+    return text;
+  }
+
+  // Convert markdown within an element, retaining only span-level tags
+  function convertSpans(text, extra) {
+    return sanitizeHtml(convertAll(text, extra), inlineTags);
+  }
+
+  // Convert internal markdown using the stock pagedown converter
+  function convertAll(text, extra) {
+    var result = extra.blockGamutHookCallback(text);
+    // We need to perform these operations since we skip the steps in the converter
+    result = unescapeSpecialChars(result);
+    result = result.replace(/~D/g, "$$").replace(/~T/g, "~");
+    result = extra.previousPostConversion(result);
+    return result;
+  }
+
+  // Convert escaped special characters
+  function processEscapesStep1(text) {
+    // Markdown extra adds two escapable characters, `:` and `|`
+    return text.replace(/\\\|/g, '~I').replace(/\\:/g, '~i');
+  }
+
+  function processEscapesStep2(text) {
+    return text.replace(/~I/g, '|').replace(/~i/g, ':');
+  }
+
+  // Duplicated from PageDown converter
+  function unescapeSpecialChars(text) {
+    // Swap back in all the special characters we've hidden.
+    text = text.replace(/~E(\d+)E/g, function (wholeMatch, m1) {
+      var charCodeToReplace = parseInt(m1);
+      return String.fromCharCode(charCodeToReplace);
+    });
+    return text;
+  }
+
+  function slugify(text) {
+    return text.toLowerCase().replace(/\s+/g, '-') // Replace spaces with -
+    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+    .replace(/\-\-+/g, '-') // Replace multiple - with single -
+    .replace(/^-+/, '') // Trim - from start of text
+    .replace(/-+$/, ''); // Trim - from end of text
+  }
+
+  /*****************************************************************************
+   * Markdown.Extra *
+   ****************************************************************************/
+
+  Markdown.Extra = function () {
+    // For converting internal markdown (in tables for instance).
+    // This is necessary since these methods are meant to be called as
+    // preConversion hooks, and the Markdown converter passed to init()
+    // won't convert any markdown contained in the html tags we return.
+    this.converter = null;
+
+    // Stores html blocks we generate in hooks so that
+    // they're not destroyed if the user is using a sanitizing converter
+    this.hashBlocks = [];
+
+    // Stores footnotes
+    this.footnotes = {};
+    this.usedFootnotes = [];
+
+    // Special attribute blocks for fenced code blocks and headers enabled.
+    this.attributeBlocks = false;
+
+    // Fenced code block options
+    this.googleCodePrettify = false;
+    this.highlightJs = false;
+
+    // Table options
+    this.tableClass = '';
+
+    this.tabWidth = 4;
+  };
+
+  Markdown.Extra.init = function (converter, options) {
+    // Each call to init creates a new instance of Markdown.Extra so it's
+    // safe to have multiple converters, with different options, on a single page
+    var extra = new Markdown.Extra();
+    var postNormalizationTransformations = [];
+    var preBlockGamutTransformations = [];
+    var postSpanGamutTransformations = [];
+    var postConversionTransformations = ["unHashExtraBlocks"];
+
+    options = options || {};
+    options.extensions = options.extensions || ["all"];
+    if (contains(options.extensions, "all")) {
+      options.extensions = ["tables", "fenced_code_gfm", "def_list", "attr_list", "footnotes", "smartypants", "strikethrough", "newlines"];
+    }
+    preBlockGamutTransformations.push("wrapHeaders");
+    if (contains(options.extensions, "attr_list")) {
+      postNormalizationTransformations.push("hashFcbAttributeBlocks");
+      preBlockGamutTransformations.push("hashHeaderAttributeBlocks");
+      postConversionTransformations.push("applyAttributeBlocks");
+      extra.attributeBlocks = true;
+    }
+    if (contains(options.extensions, "fenced_code_gfm")) {
+      // This step will convert fcb inside list items and blockquotes
+      preBlockGamutTransformations.push("fencedCodeBlocks");
+      // This extra step is to prevent html blocks hashing and link definition/footnotes stripping inside fcb
+      postNormalizationTransformations.push("fencedCodeBlocks");
+    }
+    if (contains(options.extensions, "tables")) {
+      preBlockGamutTransformations.push("tables");
+    }
+    if (contains(options.extensions, "def_list")) {
+      preBlockGamutTransformations.push("definitionLists");
+    }
+    if (contains(options.extensions, "footnotes")) {
+      postNormalizationTransformations.push("stripFootnoteDefinitions");
+      preBlockGamutTransformations.push("doFootnotes");
+      postConversionTransformations.push("printFootnotes");
+    }
+    if (contains(options.extensions, "smartypants")) {
+      postConversionTransformations.push("runSmartyPants");
+    }
+    if (contains(options.extensions, "strikethrough")) {
+      postSpanGamutTransformations.push("strikethrough");
+    }
+    if (contains(options.extensions, "newlines")) {
+      postSpanGamutTransformations.push("newlines");
+    }
+
+    converter.hooks.chain("postNormalization", function (text) {
+      return extra.doTransform(postNormalizationTransformations, text) + '\n';
+    });
+
+    converter.hooks.chain("preBlockGamut", function (text, blockGamutHookCallback) {
+      // Keep a reference to the block gamut callback to run recursively
+      extra.blockGamutHookCallback = blockGamutHookCallback;
+      text = processEscapesStep1(text);
+      text = extra.doTransform(preBlockGamutTransformations, text) + '\n';
+      text = processEscapesStep2(text);
+      return text;
+    });
+
+    converter.hooks.chain("postSpanGamut", function (text) {
+      return extra.doTransform(postSpanGamutTransformations, text);
+    });
+
+    // Keep a reference to the hook chain running before doPostConversion to apply on hashed extra blocks
+    extra.previousPostConversion = converter.hooks.postConversion;
+    converter.hooks.chain("postConversion", function (text) {
+      text = extra.doTransform(postConversionTransformations, text);
+      // Clear state vars that may use unnecessary memory
+      extra.hashBlocks = [];
+      extra.footnotes = {};
+      extra.usedFootnotes = [];
+      return text;
+    });
+
+    if ("highlighter" in options) {
+      extra.googleCodePrettify = options.highlighter === 'prettify';
+      extra.highlightJs = options.highlighter === 'highlight';
+    }
+
+    if ("table_class" in options) {
+      extra.tableClass = options.table_class;
+    }
+
+    extra.converter = converter;
+
+    // Caller usually won't need this, but it's handy for testing.
+    return extra;
+  };
+
+  // Do transformations
+  Markdown.Extra.prototype.doTransform = function (transformations, text) {
+    for (var i = 0; i < transformations.length; i++) text = this[transformations[i]](text);
+    return text;
+  };
+
+  // Return a placeholder containing a key, which is the block's index in the
+  // hashBlocks array. We wrap our output in a <p> tag here so Pagedown won't.
+  Markdown.Extra.prototype.hashExtraBlock = function (block) {
+    return '\n<p>~X' + (this.hashBlocks.push(block) - 1) + 'X</p>\n';
+  };
+  Markdown.Extra.prototype.hashExtraInline = function (block) {
+    return '~X' + (this.hashBlocks.push(block) - 1) + 'X';
+  };
+
+  // Replace placeholder blocks in `text` with their corresponding
+  // html blocks in the hashBlocks array.
+  Markdown.Extra.prototype.unHashExtraBlocks = function (text) {
+    var self = this;
+
+    function recursiveUnHash() {
+      var hasHash = false;
+      text = text.replace(/(?:<p>)?~X(\d+)X(?:<\/p>)?/g, function (wholeMatch, m1) {
+        hasHash = true;
+        var key = parseInt(m1, 10);
+        return self.hashBlocks[key];
+      });
+      if (hasHash === true) {
+        recursiveUnHash();
+      }
+    }
+
+    recursiveUnHash();
+    return text;
+  };
+
+  // Wrap headers to make sure they won't be in def lists
+  Markdown.Extra.prototype.wrapHeaders = function (text) {
+    function wrap(text) {
+      return '\n' + text + '\n';
+    }
+
+    text = text.replace(/^.+[ \t]*\n=+[ \t]*\n+/gm, wrap);
+    text = text.replace(/^.+[ \t]*\n-+[ \t]*\n+/gm, wrap);
+    text = text.replace(/^\#{1,6}[ \t]*.+?[ \t]*\#*\n+/gm, wrap);
+    return text;
+  };
+
+  /******************************************************************
+   * Attribute Blocks                                               *
+   *****************************************************************/
+
+  // TODO: use sentinels. Should we just add/remove them in doConversion?
+  // TODO: better matches for id / class attributes
+  var attrBlock = "\\{[ \\t]*((?:[#.][-_:a-zA-Z0-9]+[ \\t]*)+)\\}";
+  var hdrAttributesA = new RegExp("^(#{1,6}.*#{0,6})[ \\t]+" + attrBlock + "[ \\t]*(?:\\n|0x03)", "gm");
+  var hdrAttributesB = new RegExp("^(.*)[ \\t]+" + attrBlock + "[ \\t]*\\n" + "(?=[\\-|=]+\\s*(?:\\n|0x03))", "gm"); // underline lookahead
+  var fcbAttributes = new RegExp("^(```[ \\t]*[^{\\s]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" + "(?=([\\s\\S]*?)\\n```[ \\t]*(\\n|0x03))", "gm");
+
+  // Extract headers attribute blocks, move them above the element they will be
+  // applied to, and hash them for later.
+  Markdown.Extra.prototype.hashHeaderAttributeBlocks = function (text) {
+
+    var self = this;
+
+    function attributeCallback(wholeMatch, pre, attr) {
+      return '<p>~XX' + (self.hashBlocks.push(attr) - 1) + 'XX</p>\n' + pre + "\n";
+    }
+
+    text = text.replace(hdrAttributesA, attributeCallback); // ## headers
+    text = text.replace(hdrAttributesB, attributeCallback); // underline headers
+    return text;
+  };
+
+  // Extract FCB attribute blocks, move them above the element they will be
+  // applied to, and hash them for later.
+  Markdown.Extra.prototype.hashFcbAttributeBlocks = function (text) {
+    // TODO: use sentinels. Should we just add/remove them in doConversion?
+    // TODO: better matches for id / class attributes
+
+    var self = this;
+
+    function attributeCallback(wholeMatch, pre, attr) {
+      return '<p>~XX' + (self.hashBlocks.push(attr) - 1) + 'XX</p>\n' + pre + "\n";
+    }
+
+    return text.replace(fcbAttributes, attributeCallback);
+  };
+
+  Markdown.Extra.prototype.applyAttributeBlocks = function (text) {
+    var self = this;
+    var blockRe = new RegExp('<p>~XX(\\d+)XX</p>[\\s]*' + '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>[\\s\\S]*?</\\2>))', "gm");
+    text = text.replace(blockRe, function (wholeMatch, k, tag, cls, rest) {
+      if (!tag) // no following header or fenced code block.
+        return '';
+
+      // get attributes list from hash
+      var key = parseInt(k, 10);
+      var attributes = self.hashBlocks[key];
+
+      // get id
+      var id = attributes.match(/#[^\s#.]+/g) || [];
+      var idStr = id[0] ? ' id="' + id[0].substr(1, id[0].length - 1) + '"' : '';
+
+      // get classes and merge with existing classes
+      var classes = attributes.match(/\.[^\s#.]+/g) || [];
+      for (var i = 0; i < classes.length; i++) // Remove leading dot
+      classes[i] = classes[i].substr(1, classes[i].length - 1);
+
+      var classStr = '';
+      if (cls) classes = union(classes, [cls]);
+
+      if (classes.length > 0) classStr = ' class="' + classes.join(' ') + '"';
+
+      return "<" + tag + idStr + classStr + rest;
+    });
+
+    return text;
+  };
+
+  /******************************************************************
+   * Tables                                                         *
+   *****************************************************************/
+
+  // Find and convert Markdown Extra tables into html.
+  Markdown.Extra.prototype.tables = function (text) {
+    var self = this;
+
+    var leadingPipe = new RegExp(['^', '[ ]{0,3}', // Allowed whitespace
+    '[|]', // Initial pipe
+    '(.+)\\n', // $1: Header Row
+
+    '[ ]{0,3}', // Allowed whitespace
+    '[|]([ ]*[-:]+[-| :]*)\\n', // $2: Separator
+
+    '(', // $3: Table Body
+    '(?:[ ]*[|].*\\n?)*', // Table rows
+    ')', '(?:\\n|$)' // Stop at final newline
+    ].join(''), 'gm');
+
+    var noLeadingPipe = new RegExp(['^', '[ ]{0,3}', // Allowed whitespace
+    '(\\S.*[|].*)\\n', // $1: Header Row
+
+    '[ ]{0,3}', // Allowed whitespace
+    '([-:]+[ ]*[|][-| :]*)\\n', // $2: Separator
+
+    '(', // $3: Table Body
+    '(?:.*[|].*\\n?)*', // Table rows
+    ')', '(?:\\n|$)' // Stop at final newline
+    ].join(''), 'gm');
+
+    text = text.replace(leadingPipe, doTable);
+    text = text.replace(noLeadingPipe, doTable);
+
+    // $1 = header, $2 = separator, $3 = body
+    function doTable(match, header, separator, body, offset, string) {
+      // remove any leading pipes and whitespace
+      header = header.replace(/^ *[|]/m, '');
+      separator = separator.replace(/^ *[|]/m, '');
+      body = body.replace(/^ *[|]/gm, '');
+
+      // remove trailing pipes and whitespace
+      header = header.replace(/[|] *$/m, '');
+      separator = separator.replace(/[|] *$/m, '');
+      body = body.replace(/[|] *$/gm, '');
+
+      // determine column alignments
+      var alignspecs = separator.split(/ *[|] */);
+      var align = [];
+      for (var i = 0; i < alignspecs.length; i++) {
+        var spec = alignspecs[i];
+        if (spec.match(/^ *-+: *$/m)) align[i] = ' align="right"';else if (spec.match(/^ *:-+: *$/m)) align[i] = ' align="center"';else if (spec.match(/^ *:-+ *$/m)) align[i] = ' align="left"';else align[i] = '';
+      }
+
+      // TODO: parse spans in header and rows before splitting, so that pipes
+      // inside of tags are not interpreted as separators
+      var headers = header.split(/ *[|] */);
+      var colCount = headers.length;
+
+      // build html
+      var cls = self.tableClass ? ' class="' + self.tableClass + '"' : '';
+      var html = ['<table', cls, '>\n', '<thead>\n', '<tr>\n'].join('');
+
+      // build column headers.
+      for (i = 0; i < colCount; i++) {
+        var headerHtml = convertSpans(trim(headers[i]), self);
+        html += ["  <th", align[i], ">", headerHtml, "</th>\n"].join('');
+      }
+      html += "</tr>\n</thead>\n";
+
+      // build rows
+      var rows = body.split('\n');
+      for (i = 0; i < rows.length; i++) {
+        if (rows[i].match(/^\s*$/)) // can apply to final row
+          continue;
+
+        // ensure number of rowCells matches colCount
+        var rowCells = rows[i].split(/ *[|] */);
+        var lenDiff = colCount - rowCells.length;
+        for (var j = 0; j < lenDiff; j++) rowCells.push('');
+
+        html += "<tr>\n";
+        for (j = 0; j < colCount; j++) {
+          var colHtml = convertSpans(trim(rowCells[j]), self);
+          html += ["  <td", align[j], ">", colHtml, "</td>\n"].join('');
+        }
+        html += "</tr>\n";
+      }
+
+      html += "</table>\n";
+
+      // replace html with placeholder until postConversion step
+      return self.hashExtraBlock(html);
+    }
+
+    return text;
+  };
+
+  /******************************************************************
+   * Footnotes                                                      *
+   *****************************************************************/
+
+  // Strip footnote, store in hashes.
+  Markdown.Extra.prototype.stripFootnoteDefinitions = function (text) {
+    var self = this;
+
+    text = text.replace(/\n[ ]{0,3}\[\^(.+?)\]\:[ \t]*\n?([\s\S]*?)\n{1,2}((?=\n[ ]{0,3}\S)|$)/g, function (wholeMatch, m1, m2) {
+      m1 = slugify(m1);
+      m2 += "\n";
+      m2 = m2.replace(/^[ ]{0,3}/g, "");
+      self.footnotes[m1] = m2;
+      return "\n";
+    });
+
+    return text;
+  };
+
+  // Find and convert footnotes references.
+  Markdown.Extra.prototype.doFootnotes = function (text) {
+    var self = this;
+    if (self.isConvertingFootnote === true) {
+      return text;
+    }
+
+    var footnoteCounter = 0;
+    text = text.replace(/\[\^(.+?)\]/g, function (wholeMatch, m1) {
+      var id = slugify(m1);
+      var footnote = self.footnotes[id];
+      if (footnote === undefined) {
+        return wholeMatch;
+      }
+      footnoteCounter++;
+      self.usedFootnotes.push(id);
+      var html = '<a href="#fn_' + id + '" id="fnref_' + id + '" title="See footnote" class="footnote">' + footnoteCounter + '</a>';
+      return self.hashExtraInline(html);
+    });
+
+    return text;
+  };
+
+  // Print footnotes at the end of the document
+  Markdown.Extra.prototype.printFootnotes = function (text) {
+    var self = this;
+
+    if (self.usedFootnotes.length === 0) {
+      return text;
+    }
+
+    text += '\n\n<div class="footnotes">\n<hr>\n<ol>\n\n';
+    for (var i = 0; i < self.usedFootnotes.length; i++) {
+      var id = self.usedFootnotes[i];
+      var footnote = self.footnotes[id];
+      self.isConvertingFootnote = true;
+      var formattedfootnote = convertSpans(footnote, self);
+      delete self.isConvertingFootnote;
+      text += '<li id="fn_' + id + '">' + formattedfootnote + ' <a href="#fnref_' + id + '" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n';
+    }
+    text += '</ol>\n</div>';
+    return text;
+  };
+
+  /******************************************************************
+   * Fenced Code Blocks  (gfm)                                       *
+   ******************************************************************/
+
+  // Find and convert gfm-inspired fenced code blocks into html.
+  Markdown.Extra.prototype.fencedCodeBlocks = function (text) {
+    function encodeCode(code) {
+      code = code.replace(/&/g, "&amp;");
+      code = code.replace(/</g, "&lt;");
+      code = code.replace(/>/g, "&gt;");
+      // These were escaped by PageDown before postNormalization
+      code = code.replace(/~D/g, "$$");
+      code = code.replace(/~T/g, "~");
+      return code;
+    }
+
+    var self = this;
+    text = text.replace(/(?:^|\n)```[ \t]*(\S*)[ \t]*\n([\s\S]*?)\n```[ \t]*(?=\n)/g, function (match, m1, m2) {
+      var language = m1,
+          codeblock = m2;
+
+      // adhere to specified options
+      var preclass = self.googleCodePrettify ? ' class="prettyprint linenums"' : '';
+      var codeclass = '';
+      if (language) {
+        if (self.googleCodePrettify || self.highlightJs) {
+          // use html5 language- class names. supported by both prettify and highlight.js
+          codeclass = ' class="language-' + language + '"';
+        } else {
+          codeclass = ' class="' + language + '"';
+        }
+      }
+
+      var html = ['<pre', preclass, '><code', codeclass, '>', encodeCode(codeblock), '</code></pre>'].join('');
+
+      // replace codeblock with placeholder until postConversion step
+      return self.hashExtraBlock(html);
+    });
+
+    return text;
+  };
+
+  /******************************************************************
+   * SmartyPants                                                     *
+   ******************************************************************/
+
+  Markdown.Extra.prototype.educatePants = function (text) {
+    var self = this;
+    var result = '';
+    var blockOffset = 0;
+    // Here we parse HTML in a very bad manner
+    text.replace(/(?:<!--[\s\S]*?-->)|(<)([a-zA-Z1-6]+)([^\n]*?>)([\s\S]*?)(<\/\2>)/g, function (wholeMatch, m1, m2, m3, m4, m5, offset) {
+      var token = text.substring(blockOffset, offset);
+      result += self.applyPants(token);
+      self.smartyPantsLastChar = result.substring(result.length - 1);
+      blockOffset = offset + wholeMatch.length;
+      if (!m1) {
+        // Skip commentary
+        result += wholeMatch;
+        return;
+      }
+      // Skip special tags
+      if (!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
+        m4 = self.educatePants(m4);
+      } else {
+        self.smartyPantsLastChar = m4.substring(m4.length - 1);
+      }
+      result += m1 + m2 + m3 + m4 + m5;
+    });
+    var lastToken = text.substring(blockOffset);
+    result += self.applyPants(lastToken);
+    self.smartyPantsLastChar = result.substring(result.length - 1);
+    return result;
+  };
+
+  function revertPants(wholeMatch, m1) {
+    var blockText = m1;
+    blockText = blockText.replace(/&\#8220;/g, "\"");
+    blockText = blockText.replace(/&\#8221;/g, "\"");
+    blockText = blockText.replace(/&\#8216;/g, "'");
+    blockText = blockText.replace(/&\#8217;/g, "'");
+    blockText = blockText.replace(/&\#8212;/g, "---");
+    blockText = blockText.replace(/&\#8211;/g, "--");
+    blockText = blockText.replace(/&\#8230;/g, "...");
+    return blockText;
+  }
+
+  Markdown.Extra.prototype.applyPants = function (text) {
+    // Dashes
+    text = text.replace(/---/g, "&#8212;").replace(/--/g, "&#8211;");
+    // Ellipses
+    text = text.replace(/\.\.\./g, "&#8230;").replace(/\.\s\.\s\./g, "&#8230;");
+    // Backticks
+    // text = text.replace(/``/g, "&#8220;").replace(/''/g, "&#8221;");
+
+    // if (/^'$/.test(text)) {
+    //   // Special case: single-character ' token
+    //   if (/\S/.test(this.smartyPantsLastChar)) {
+    //     return "&#8217;";
+    //   }
+    //   return "&#8216;";
+    // }
+    // if (/^"$/.test(text)) {
+    //   // Special case: single-character " token
+    //   if (/\S/.test(this.smartyPantsLastChar)) {
+    //     return "&#8221;";
+    //   }
+    //   return "&#8220;";
+    // }
+
+    // Special case if the very first character is a quote
+    // followed by punctuation at a non-word-break. Close the quotes by brute force:
+    // text = text.replace(/^'(?=[!"#\$\%'()*+,\-.\/:;<=>?\@\[\\]\^_`{|}~]\B)/, "&#8217;");
+    // text = text.replace(/^"(?=[!"#\$\%'()*+,\-.\/:;<=>?\@\[\\]\^_`{|}~]\B)/, "&#8221;");
+
+    // Special case for double sets of quotes, e.g.:
+    //   <p>He said, "'Quoted' words in a larger quote."</p>
+    // text = text.replace(/"'(?=\w)/g, "&#8220;&#8216;");
+    // text = text.replace(/'"(?=\w)/g, "&#8216;&#8220;");
+
+    // Special case for decade abbreviations (the '80s):
+    // text = text.replace(/'(?=\d{2}s)/g, "&#8217;");
+
+    // Get most opening single quotes:
+    // text = text.replace(/(\s|&nbsp;|--|&[mn]dash;|&\#8211;|&\#8212;|&\#x201[34];)'(?=\w)/g, "$1&#8216;");
+
+    // Single closing quotes:
+    // text = text.replace(/([^\s\[\{\(\-])'/g, "$1&#8217;");
+    // text = text.replace(/'(?=\s|s\b)/g, "&#8217;");
+
+    // Any remaining single quotes should be opening ones:
+    // text = text.replace(/'/g, "&#8216;");
+
+    // Get most opening double quotes:
+    // text = text.replace(/(\s|&nbsp;|--|&[mn]dash;|&\#8211;|&\#8212;|&\#x201[34];)"(?=\w)/g, "$1&#8220;");
+
+    // Double closing quotes:
+    // text = text.replace(/([^\s\[\{\(\-])"/g, "$1&#8221;");
+    // text = text.replace(/"(?=\s)/g, "&#8221;");
+
+    // Any remaining quotes should be opening ones.
+    // text = text.replace(/"/ig, "&#8220;");
+    return text;
+  };
+
+  // Find and convert markdown extra definition lists into html.
+  Markdown.Extra.prototype.runSmartyPants = function (text) {
+    this.smartyPantsLastChar = '';
+    text = this.educatePants(text);
+    // Clean everything inside html tags (some of them may have been converted due to our rough html parsing)
+    text = text.replace(/(<([a-zA-Z1-6]+)\b([^\n>]*?)(\/)?>)/g, revertPants);
+    return text;
+  };
+
+  /******************************************************************
+   * Definition Lists                                                *
+   ******************************************************************/
+
+  // Find and convert markdown extra definition lists into html.
+  Markdown.Extra.prototype.definitionLists = function (text) {
+    var wholeList = new RegExp(['(\\x02\\n?|\\n\\n)', '(?:', '(', // $1 = whole list
+    '(', // $2
+    '[ ]{0,3}', '((?:[ \\t]*\\S.*\\n)+)', // $3 = defined term
+    '\\n?', '[ ]{0,3}:[ ]+', // colon starting definition
+    ')', '([\\s\\S]+?)', '(', // $4
+    '(?=\\0x03)', // \z
+    '|', '(?=', '\\n{2,}', '(?=\\S)', '(?!', // Negative lookahead for another term
+    '[ ]{0,3}', '(?:\\S.*\\n)+?', // defined term
+    '\\n?', '[ ]{0,3}:[ ]+', // colon starting definition
+    ')', '(?!', // Negative lookahead for another definition
+    '[ ]{0,3}:[ ]+', // colon starting definition
+    ')', ')', ')', ')', ')'].join(''), 'gm');
+
+    var self = this;
+    text = addAnchors(text);
+
+    text = text.replace(wholeList, function (match, pre, list) {
+      var result = trim(self.processDefListItems(list));
+      result = "<dl>\n" + result + "\n</dl>";
+      return pre + self.hashExtraBlock(result) + "\n\n";
+    });
+
+    return removeAnchors(text);
+  };
+
+  // Process the contents of a single definition list, splitting it
+  // into individual term and definition list items.
+  Markdown.Extra.prototype.processDefListItems = function (listStr) {
+    var self = this;
+
+    var dt = new RegExp(['(\\x02\\n?|\\n\\n+)', // leading line
+    '(', // definition terms = $1
+    '[ ]{0,3}', // leading whitespace
+    '(?![:][ ]|[ ])', // negative lookahead for a definition
+    //   mark (colon) or more whitespace
+    '(?:\\S.*\\n)+?', // actual term (not whitespace)
+    ')', '(?=\\n?[ ]{0,3}:[ ])' // lookahead for following line feed
+    ].join(''), //   with a definition mark
+    'gm');
+
+    var dd = new RegExp(['\\n(\\n+)?', // leading line = $1
+    '(', // marker space = $2
+    '[ ]{0,3}', // whitespace before colon
+    '[:][ ]+', // definition mark (colon)
+    ')', '([\\s\\S]+?)', // definition text = $3
+    '(?=\\n*', // stop at next definition mark,
+    '(?:', // next term or end of text
+    '\\n[ ]{0,3}[:][ ]|', '<dt>|\\x03', // \z
+    ')', ')'].join(''), 'gm');
+
+    listStr = addAnchors(listStr);
+    // trim trailing blank lines:
+    listStr = listStr.replace(/\n{2,}(?=\\x03)/, "\n");
+
+    // Process definition terms.
+    listStr = listStr.replace(dt, function (match, pre, termsStr) {
+      var terms = trim(termsStr).split("\n");
+      var text = '';
+      for (var i = 0; i < terms.length; i++) {
+        var term = terms[i];
+        // process spans inside dt
+        term = convertSpans(trim(term), self);
+        text += "\n<dt>" + term + "</dt>";
+      }
+      return text + "\n";
+    });
+
+    // Process actual definitions.
+    listStr = listStr.replace(dd, function (match, leadingLine, markerSpace, def) {
+      if (leadingLine || def.match(/\n{2,}/)) {
+        // replace marker with the appropriate whitespace indentation
+        def = Array(markerSpace.length + 1).join(' ') + def;
+        // process markdown inside definition
+        // TODO?: currently doesn't apply extensions
+        def = outdent(def) + "\n\n";
+        def = "\n" + convertAll(def, self) + "\n";
+      } else {
+        // convert span-level markdown inside definition
+        def = rtrim(def);
+        def = convertSpans(outdent(def), self);
+      }
+
+      return "\n<dd>" + def + "</dd>\n";
+    });
+
+    return removeAnchors(listStr);
+  };
+
+  /***********************************************************
+   * Strikethrough                                            *
+   ************************************************************/
+
+  Markdown.Extra.prototype.strikethrough = function (text) {
+    // Pretty much duplicated from _DoItalicsAndBold
+    return text.replace(/([\W_]|^)~T~T(?=\S)([^\r]*?\S[\*_]*)~T~T([\W_]|$)/g, "$1<del>$2</del>$3");
+  };
+
+  /***********************************************************
+   * New lines                                                *
+   ************************************************************/
+
+  Markdown.Extra.prototype.newlines = function (text) {
+    // We have to ignore already converted newlines and line breaks in sub-list items
+    return text.replace(/(<(?:br|\/li)>)?\n/g, function (wholeMatch, previousTag) {
+      return previousTag ? wholeMatch : " <br>\n";
+    });
+  };
+})();
+
+exports['default'] = Markdown.Extra;
+module.exports = exports['default'];
+
+},{}],33:[function(require,module,exports){
+/**
+ * markdown & mathjax 渲染处理
+ */
+
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('./../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('./../common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonUtils = require('./../common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
+
+var _commonXss = require('./../common/xss');
+
+var _commonXss2 = _interopRequireDefault(_commonXss);
+
+var _commonDependLoader = require('./../common/dependLoader');
+
+var _commonDependLoader2 = _interopRequireDefault(_commonDependLoader);
+
+var _commonScriptLoader = require('./../common/scriptLoader');
+
+var _commonScriptLoader2 = _interopRequireDefault(_commonScriptLoader);
+
+var _MarkdownConverter = require('./Markdown.Converter');
+
+var _MarkdownConverter2 = _interopRequireDefault(_MarkdownConverter);
+
+var _MarkdownExtra = require('./Markdown.Extra');
+
+var _MarkdownExtra2 = _interopRequireDefault(_MarkdownExtra);
+
+var isMathjax = false;
+var WizToc = '#wizToc';
+
+var defalutCB = {
+    markdown: function markdown() {
+        Render.Win.prettyPrint();
+        Render.tocRender();
+        Render.flowRender();
+        Render.sequenceRender();
+    },
+    mathJax: function mathJax() {}
+};
+
+var MarkdownRender = {
+    init: function init() {
+        Render.Win = _commonEnv2['default'].win;
+        Render.Document = _commonEnv2['default'].doc;
+        Render.Dependency = _commonEnv2['default'].dependency;
+
+        return MarkdownRender;
+    },
+    markdown: function markdown(callback) {
+        if (callback) {
+            Render.callback.markdown = Render.addCb(defalutCB.markdown, callback.markdown);
+            Render.callback.mathJax = Render.addCb(defalutCB.mathJax, callback.mathJax);
+        }
+
+        _commonDependLoader2['default'].loadCss(Render.Document, Render.getDependencyFiles('css', 'markdown'));
+
+        _commonDependLoader2['default'].loadJs(Render.Document, Render.getDependencyFiles('js', 'markdown'), function () {
+            Render.markdownConvert({});
+            if (isMathjax) {
+                Render.mathJaxRender();
+            }
+        });
+    },
+    mathJax: function mathJax(callback) {
+        if (callback) {
+            Render.callback.mathJax = Render.addCb(defalutCB.mathJax, callback);
+        }
+        Render.mathJaxRender();
+    }
+};
+
+var Render = {
+    Utils: _commonUtils2['default'],
+    Win: null,
+    Document: null,
+    Dependency: null,
+    callback: {
+        markdown: null,
+        mathJax: null
+    },
+    getDependencyFiles: function getDependencyFiles(type, id) {
+        var i, j, g, ii, jj, gg, group;
+        var markdownFiles = [];
+        for (i = 0, j = Render.Dependency[type][id].length; i < j; i++) {
+            g = Render.Dependency[type][id][i];
+            if (type == 'css') {
+                markdownFiles.push(Render.Dependency.files[type][g]);
+            } else {
+                group = [];
+                for (ii = 0, jj = g.length; ii < jj; ii++) {
+                    gg = g[ii];
+                    group.push(Render.Dependency.files[type][gg]);
+                }
+                markdownFiles.push(group);
+            }
+        }
+        return markdownFiles;
+    },
+    addCb: function addCb(defaultCb, newCb) {
+        if (newCb) {
+            return function () {
+                defaultCb.apply(this, arguments);
+                newCb.apply(this, arguments);
+            };
+        } else {
+            return defaultCb;
+        }
+    },
+    cb: function cb(callback, params) {
+        if (callback) {
+            callback.apply(this, params ? params : []);
+        }
+    },
+    getBodyTxt: function getBodyTxt(body) {
+        var text = body.innerText;
+        if (!text) {
+            // FF自己解析innerText
+            text = Render.Utils.getInnerText($body[0]);
+        }
+        // 替换unicode160的空格为unicode为32的空格，否则pagedown无法识别
+        return text.replace(/\u00a0/g, " ");
+    },
+    markdownConvert: function markdownConvert(frame) {
+        var start, end, last, blocks, math, braces;
+        var SPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
+
+        var $doc = $(Render.Document);
+        var $body = frame.container ? frame.container : $doc.find('body');
+
+        $body.addClass('markdown-body');
+        var converter = new _MarkdownConverter2['default'].Converter({
+            nonAsciiLetters: true,
+            asteriskIntraWordEmphasis: true
+        });
+        _MarkdownExtra2['default'].init(converter, { extensions: "all", highlighter: "prettify" });
+
+        var text;
+        try {
+            Render.Utils.markdownPreProcess($body[0]);
+            text = Render.tocReady(Render.getBodyTxt($body[0]));
+
+            // 判断是否含有mathjax语法
+            var judgeMathjaxText = text.replace(/\n/g, '\\n').replace(/\r\n?/g, "\n").replace(/```(.*\n)+?```/gm, '');
+            isMathjax = /(\$\$?)[^$\n]+\1/.test(judgeMathjaxText);
+
+            if (isMathjax) {
+                text = removeMath(text);
+            }
+
+            text = converter.makeHtml(text);
+            if (isMathjax) {
+                text = replaceMath(text);
+            }
+            text = Render.xssFilter(text);
+            $body[0].innerHTML = text;
+        } catch (e) {
+            console.error(e);
+        }
+        try {
+            Render.cb(Render.callback.markdown, [isMathjax]);
+        } catch (e) {
+            console.error(e);
+        }
+
+        function replaceMath(text) {
+            text = text.replace(/@@(\d+)@@/g, function (match, n) {
+                return math[n];
+            });
+            math = null;
+            return text;
+        }
+
+        function processMath(i, j) {
+            var block = blocks.slice(i, j + 1).join("").replace(/&/g, "&amp;") // use HTML entity for &
+            .replace(/</g, "&lt;") // use HTML entity for <
+            .replace(/>/g, "&gt;"); // use HTML entity for
+            while (j > i) {
+                blocks[j] = "";
+                j--;
+            }
+            blocks[i] = "@@" + math.length + "@@";
+            math.push(block);
+            start = end = last = null;
+        }
+
+        function removeMath(text) {
+            start = end = last = null; // for tracking math delimiters
+            math = []; // stores math strings for latter
+
+            blocks = text.replace(/\r\n?/g, "\n").split(SPLIT);
+            for (var i = 1, m = blocks.length; i < m; i += 2) {
+                var block = blocks[i];
+                if (block.charAt(0) === "@") {
+
+                    blocks[i] = "@@" + math.length + "@@";
+                    math.push(block);
+                } else if (start) {
+
+                    if (block === end) {
+                        if (braces) {
+                            last = i;
+                        } else {
+                            processMath(start, i);
+                        }
+                    } else if (block.match(/\n.*\n/)) {
+                        if (last) {
+                            i = last;
+                            processMath(start, i);
+                        }
+                        start = end = last = null;
+                        braces = 0;
+                    } else if (block === "{") {
+                        braces++;
+                    } else if (block === "}" && braces) {
+                        braces--;
+                    }
+                } else {
+                    //
+                    // Look for math start delimiters and when
+                    // found, set up the end delimiter.
+                    //
+                    if (block === "$$") {
+                        start = i;
+                        end = block;
+                        braces = 0;
+                    } else if (block.substr(1, 5) === "begin") {
+                        start = i;
+                        end = "\\end" + block.substr(6);
+                        braces = 0;
+                    }
+                }
+            }
+            if (last) {
+                processMath(start, last);
+            }
+            return blocks.join("");
+        }
+    },
+    tocReady: function tocReady(markdownStr) {
+        return markdownStr.replace(/(^[ ]*)\[toc\]([ ]*(\n|$))/igm, '$1[](' + WizToc + ')$2');
+    },
+    tocRender: function tocRender() {
+        var tocHtml = [],
+            min = 6;
+        $('h1,h2,h3,h4,h5,h6', Render.Document.body).each(function (index, item) {
+            var n = parseInt(item.tagName.charAt(1));
+            if (n < min) {
+                min = n;
+            }
+        });
+
+        $('h1,h2,h3,h4,h5,h6', Render.Document.body).each(function (index, item) {
+            var id = 'wiz_toc_' + index;
+            var n = parseInt(item.tagName.charAt(1));
+            var $item = $(item);
+            $item.attr('id', id);
+            tocHtml.push('<a class="wiz_toc ' + 'h' + (n - min + 1) + '" href="#' + id + '">' + $item.text() + '</a>');
+        });
+        tocHtml = '<div class="wiz_toc_layer">' + tocHtml.join('<br/>') + '</div>';
+
+        $('a', Render.Document.body).each(function (index, item) {
+            item = $(item);
+            if (item.attr('href') == WizToc) {
+                item.before(tocHtml);
+            }
+        });
+    },
+    flowRender: function flowRender() {
+        var f = $('.language-flow', Render.Document.body).parents('pre');
+        f.each(function (fIndex, fObj) {
+            var id = 'wiz-flow-' + fIndex;
+            var line = $('li', fObj);
+            var flowStr = '';
+            line.each(function (index, obj) {
+                var s = $(obj).text();
+                if (s.length > 0) {
+                    flowStr += s + '\n';
+                }
+            });
+            if (flowStr.length > 0) {
+                try {
+                    fObj.style.display = 'none';
+                    var diagram = Render.Win.flowchart.parse(flowStr);
+                    var flowLayer = Render.Document.createElement('div');
+                    flowLayer.id = id;
+                    fObj.parentNode.insertBefore(flowLayer, fObj);
+                    diagram.drawSVG(id);
+
+                    //修正 svg 保证手机端自动适应大小
+                    if (_commonEnv2['default'].client.isPhone) {
+                        //pc、mac 客户端 取消height 设置后， 会导致height 变为0，从而不显示
+                        var s = $('svg', flowLayer);
+                        if (s.attr('width')) {
+                            s.css({
+                                'max-width': s.attr('width')
+                            }).attr({
+                                'height': null,
+                                'width': '95%'
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        });
+    },
+    sequenceRender: function sequenceRender() {
+        var f = $('.language-sequence', Render.Document.body).parents('pre');
+        f.each(function (fIndex, fObj) {
+            var id = 'wiz-sequence-' + fIndex;
+            var line = $('li', fObj);
+            var seqStr = '';
+            line.each(function (index, obj) {
+                var s = $(obj).text();
+                if (s.length > 0) {
+                    seqStr += s + '\n';
+                }
+            });
+            if (seqStr.length > 0) {
+                try {
+                    fObj.style.display = 'none';
+                    var diagram = Render.Win.Diagram.parse(seqStr);
+                    var seqLayer = Render.Document.createElement('div');
+                    seqLayer.id = id;
+                    fObj.parentNode.insertBefore(seqLayer, fObj);
+                    diagram.drawSVG(id, { theme: 'simple' });
+
+                    //修正 svg 保证手机端自动适应大小
+                    if (_commonEnv2['default'].client.isPhone) {
+                        //pc、mac 客户端 取消height 设置后， 会导致height 变为0，从而不显示
+                        var s = $('svg', seqLayer);
+                        if (s.attr('width')) {
+                            s.get(0).setAttribute('viewBox', '0 0 ' + s.attr('width') + ' ' + s.attr('height'));
+                            s.css({
+                                'max-width': s.attr('width')
+                            }).attr({
+                                'preserveAspectRatio': 'xMidYMid meet',
+                                'height': null,
+                                'width': '95%'
+                            });
+                        }
+                    }
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+        });
+    },
+    mathJaxRender: function mathJaxRender() {
+        var config = 'MathJax.Hub.Config({\
+                            skipStartupTypeset: true,\
+                            "HTML-CSS": {\
+                                preferredFont: "TeX",\
+                                availableFonts: [\
+                                    "STIX",\
+                                    "TeX"\
+                                ],\
+                                linebreaks: {\
+                                    automatic: true\
+                                },\
+                                EqnChunk: 10,\
+                                imageFont: null\
+                            },\
+                            tex2jax: {\
+                                inlineMath: [["$","$"],["\\\\\\\\(","\\\\\\\\)"]],\
+                                displayMath: [["$$","$$"],["\\\\[","\\\\]"]],\
+                                processEscapes: true },\
+                            TeX: {\
+                                equationNumbers: {\
+                                    autoNumber: "AMS"\
+                                },\
+                                noUndefined: {\
+                                    attributes: {\
+                                        mathcolor: "red",\
+                                        mathbackground: "#FFEEEE",\
+                                        mathsize: "90%"\
+                                    }\
+                                },\
+                                Safe: {\
+                                    allow: {\
+                                        URLs: "safe",\
+                                        classes: "safe",\
+                                        cssIDs: "safe",\
+                                        styles: "safe",\
+                                        fontsize: "all"\
+                                    }\
+                                }\
+                            },\
+                            messageStyle: "none"\
+                        });';
+
+        _commonScriptLoader2['default'].appendJsCode(Render.Document, 'MathJax = null', 'text/javascript');
+        _commonScriptLoader2['default'].appendJsCode(Render.Document, config, 'text/x-mathjax-config');
+        _commonDependLoader2['default'].loadJs(Render.Document, Render.getDependencyFiles('js', 'mathJax'), _render);
+
+        function _render() {
+            Render.Win._wizMathJaxCallback = function () {
+                Render.cb(Render.callback.mathJax);
+            };
+            var runMath = 'MathJax.Hub.Queue(' + '["Typeset", MathJax.Hub, document.body, _wizMathJaxCallback]);';
+            _commonScriptLoader2['default'].appendJsCode(Render.Document, runMath, 'text/javascript');
+        }
+    },
+    xssFilter: (function () {
+        if (typeof _commonXss2['default'] == 'undefined') {
+            return null;
+        }
+        var xss = new _commonXss2['default'].FilterXSS({
+            onIgnoreTag: function onIgnoreTag(tag, html, options) {
+                //针对白名单之外的 tag 处理
+                if (/script/ig.test(tag)) {
+                    return _commonXss2['default'].escapeAttrValue(html);
+                }
+                if (options.isClosing) {
+                    return '</' + tag + '>';
+                }
+
+                var x = _commonXss2['default'].parseAttr(html, function (name, value) {
+                    value = _commonXss2['default'].safeAttrValue(tag, name, value, xss);
+                    if (/^on/i.test(name)) {
+                        return '';
+                    } else if (value) {
+                        return name + '="' + value + '"';
+                    } else {
+                        return name;
+                    }
+                });
+
+                if (/^<!/i.test(html)) {
+                    //<!doctype html>
+                    x = '<!' + x;
+                } else {
+                    x = '<' + x;
+                }
+
+                if (html[html.length - 2] === '/') {
+                    x += '/';
+                }
+                x += '>';
+                return x;
+            },
+            onIgnoreTagAttr: function onIgnoreTagAttr(tag, name, value, isWhiteAttr) {
+                if (!!value && /^(id|class|style|data|width|height)/i.test(name)) {
+                    return name + '="' + value + '"';
+                }
+                return '';
+            },
+            safeAttrValue: function safeAttrValue(tag, name, value) {
+                // 自定义过滤属性值函数，如果为a标签的href属性，则先判断是否以wiz://开头
+                if (tag === 'a' && name === 'href') {
+                    if (/^((file|wiz(note)?):\/\/)/.test(value) || /^(#|index_files\/)/.test(value)) {
+                        return _commonXss2['default'].escapeAttrValue(value);
+                    }
+                } else if (name === 'src') {
+                    if (/^(file:\/\/)/.test(value) || /^(index_files\/|[\.]*\/)/.test(value)) {
+                        return _commonXss2['default'].escapeAttrValue(value);
+                    } else if (!/^(http[s]?|ftp|):\/\//.test(value)) {
+                        return './' + _commonXss2['default'].escapeAttrValue(value);
+                    }
+                }
+                // 其他情况，使用默认的safeAttrValue处理函数
+                return _commonXss2['default'].safeAttrValue(tag, name, value);
+            }
+        });
+        return function (html) {
+            return xss.process(html);
+        };
+    })()
+};
+exports['default'] = MarkdownRender;
+module.exports = exports['default'];
+
+},{"./../common/const":13,"./../common/dependLoader":14,"./../common/env":15,"./../common/scriptLoader":18,"./../common/utils":19,"./../common/xss":22,"./Markdown.Converter":31,"./Markdown.Extra":32}],34:[function(require,module,exports){
 /**
  * 夜间模式的基本方法集合
  */
@@ -10910,7 +15596,7 @@ function addKeyToMap(key, map) {
 exports['default'] = nightModeUtils;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/wizStyle":19}],30:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/wizStyle":20}],35:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
@@ -11189,6 +15875,12 @@ var rangeUtils = {
             start = _commonEnv2['default'].doc.body;
             startOffset = 0;
         }
+        var range;
+        if (sel.rangeCount === 0) {
+            range = document.createRange();
+            range.selectNode(start);
+            sel.addRange(range);
+        }
         sel.collapse(start, startOffset);
         if (end) {
             sel.extend(end, endOffset);
@@ -11199,7 +15891,7 @@ var rangeUtils = {
 exports['default'] = rangeUtils;
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./../domUtils/domBase":21}],31:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domBase":23}],36:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
@@ -11407,7 +16099,174 @@ _rangeBase2['default'].modifySelectionDom = function (style, attr) {
 exports['default'] = _rangeBase2['default'];
 module.exports = exports['default'];
 
-},{"./../common/const":12,"./../common/env":14,"./../common/utils":18,"./../domUtils/domExtend":22,"./rangeBase":30}],32:[function(require,module,exports){
+},{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24,"./rangeBase":35}],37:[function(require,module,exports){
+/**
+ * 阅读器 基础工具包
+ */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('../common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonUtils = require('../common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
+
+var _domUtilsDomExtend = require('../domUtils/domExtend');
+
+var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
+
+var _tableUtilsTableCore = require('../tableUtils/tableCore');
+
+var _tableUtilsTableCore2 = _interopRequireDefault(_tableUtilsTableCore);
+
+var _commonWizStyle = require('../common/wizStyle');
+
+var _commonWizStyle2 = _interopRequireDefault(_commonWizStyle);
+
+var _readerEvent = require('./readerEvent');
+
+var _readerEvent2 = _interopRequireDefault(_readerEvent);
+
+var noteSrc = '';
+var reader = {
+    init: function init() {},
+    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+        _commonWizStyle2['default'].insertDefaultStyle(isReplace, customCss);
+    },
+    on: function on() {
+        noteSrc = _domUtilsDomExtend2['default'].getContentHtml();
+        _commonWizStyle2['default'].insertTmpReaderStyle();
+        _readerEvent2['default'].on();
+        _tableUtilsTableCore2['default'].on();
+
+        //禁用 输入框（主要用于 九宫格 处理）
+        setDomReadOnly('input', true);
+        setDomReadOnly('textarea', true);
+    },
+    off: function off() {
+        _readerEvent2['default'].off();
+        _tableUtilsTableCore2['default'].off();
+
+        if (!noteSrc) {
+            return;
+        }
+        if (_commonEnv2['default'].options.noteType == _commonConst2['default'].NOTE_TYPE.COMMON) {
+            _domUtilsDomExtend2['default'].removeDomByName(_commonConst2['default'].NAME.TMP_STYLE);
+            _domUtilsDomExtend2['default'].removeDomByTag(_commonConst2['default'].TAG.TMP_TAG);
+            setDomReadOnly('input', false);
+            setDomReadOnly('textarea', false);
+        } else {
+            _commonEnv2['default'].doc.open("text/html", "replace");
+            _commonEnv2['default'].doc.write(noteSrc);
+            _commonEnv2['default'].doc.close();
+        }
+    }
+};
+
+function setDomReadOnly(tag, readonly) {
+    var domList = _commonEnv2['default'].doc.getElementsByTagName(tag),
+        i,
+        obj;
+    for (i = 0; i < domList.length; i++) {
+        obj = domList[i];
+        obj.readOnly = readonly;
+    }
+}
+
+exports['default'] = reader;
+module.exports = exports['default'];
+
+},{"../common/const":13,"../common/env":15,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../tableUtils/tableCore":39,"./readerEvent":38}],38:[function(require,module,exports){
+/**
+ * editor 使用的基本事件处理
+ */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('../common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonUtils = require('../common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
+
+var _domUtilsDomExtend = require('../domUtils/domExtend');
+
+var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
+
+var _imgUtilsImgUtils = require('../imgUtils/imgUtils');
+
+var _imgUtilsImgUtils2 = _interopRequireDefault(_imgUtilsImgUtils);
+
+var ReaderEvent = {
+    on: function on() {
+        ReaderEvent.bind();
+    },
+    off: function off() {
+        ReaderEvent.unbind();
+    },
+    bind: function bind() {
+        ReaderEvent.unbind();
+        if (_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid) {
+            _commonEnv2['default'].doc.addEventListener('click', handler.onTouch);
+        }
+    },
+    unbind: function unbind() {
+        _commonEnv2['default'].doc.removeEventListener('click', handler.onTouch);
+    }
+};
+
+var handler = {
+    onTouch: function onTouch(e) {
+        var target = e.target;
+        if (!target || !_domUtilsDomExtend2['default'].isTag(target, 'img') || target.className.indexOf('wiz-todo') > -1) {
+            return;
+        }
+
+        //对于 超链接内的 img 不阻止点击事件，因为响应 超链接 更重要
+        var p = _domUtilsDomExtend2['default'].getParentByFilter(target, function (node) {
+            return node && _domUtilsDomExtend2['default'].isTag(node, 'a') && /^(http|https|wiz|wiznote|wiznotecmd):/.test(node.getAttribute('href'));
+        }, true);
+
+        if (p) {
+            return;
+        }
+
+        _commonEnv2['default'].client.sendCmdToWiznote(_commonConst2['default'].CLIENT_EVENT.wizReaderClickImg, {
+            src: target.src,
+            imgList: _commonEnv2['default'].client.type.isAndroid ? _imgUtilsImgUtils2['default'].getAll(true).join(',') : null
+        });
+        _commonUtils2['default'].stopEvent(e);
+        return false;
+    }
+};
+
+exports['default'] = ReaderEvent;
+module.exports = exports['default'];
+
+},{"../common/const":13,"../common/env":15,"../common/utils":19,"../domUtils/domExtend":24,"../imgUtils/imgUtils":29}],39:[function(require,module,exports){
 /**
  * 表格操作核心包 core
  */
@@ -11456,28 +16315,35 @@ var _commonHistoryUtils = require('../common/historyUtils');
 var _commonHistoryUtils2 = _interopRequireDefault(_commonHistoryUtils);
 
 //TODO 所有配色 要考虑到 夜间模式
-var readonly = false;
 
 var _event = {
     bind: function bind() {
         _event.unbind();
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_DRAG_START, _event.handler.onDragStart);
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
-        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_KEY_UP, _tableUtils2['default'].fixSelection);
-        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
-        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_OVER, _event.handler.onMouseOver);
-        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_UP, _tableUtils2['default'].fixSelection);
-        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
+        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_KEY_UP, _event.handler.onKeyUp);
+
+        if (_commonEnv2['default'].client.type.isPhone || _commonEnv2['default'].client.type.isPad) {
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_START, _event.handler.onMouseDown);
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onMouseUp);
+        } else {
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_OVER, _event.handler.onMouseOver);
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
+        }
+        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
     unbind: function unbind() {
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_DRAG_START, _event.handler.onDragStart);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
-        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_KEY_UP, _tableUtils2['default'].fixSelection);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_KEY_UP, _event.handler.onKeyUp);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_OVER, _event.handler.onMouseOver);
-        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_UP, _tableUtils2['default'].fixSelection);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_START, _event.handler.onMouseDown);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onMouseUp);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
     handler: {
@@ -11538,19 +16404,32 @@ var _event = {
             }
         },
         onKeyDown: function onKeyDown(e) {
+            var sel = _commonEnv2['default'].doc.getSelection();
             var zone = _tableZone2['default'].getZone();
             if (!zone.range) {
                 return;
             }
+
             var code = e.keyCode || e.which,
-                direct;
+                direct,
+                charMove = false,
+                oldCur = sel.focusNode,
+                newCur;
             switch (code) {
                 case 37:
                     //left
+                    if (e.ctrlKey && oldCur) {
+                        charMove = true;
+                        sel.modify('move', 'backward', 'character');
+                    }
                     direct = { x: -1, y: 0 };
                     break;
                 case 38:
                     //up
+                    if (e.ctrlKey && oldCur) {
+                        charMove = true;
+                        sel.modify('move', 'backward', 'line');
+                    }
                     direct = { x: 0, y: -1 };
                     break;
                 case 9:
@@ -11561,33 +16440,87 @@ var _event = {
                     break;
                 case 39:
                     //right
+                    if (e.ctrlKey && oldCur) {
+                        charMove = true;
+                        sel.modify('move', 'forward', 'character');
+                    }
                     direct = { x: 1, y: 0 };
                     break;
+                case 13:
+                    //Enter
+                    if (!e.ctrlKey) {
+                        break;
+                    }
+
                 case 40:
                     //down
+                    if (e.ctrlKey && oldCur) {
+                        charMove = true;
+                        sel.modify('move', 'forward', 'line');
+                    }
                     direct = { x: 0, y: 1 };
                     break;
             }
 
-            var last;
-            if (e.shiftKey) {
-                last = zone.end || zone.start;
-            } else {
-                last = zone.start;
+            var last, cellData;
+
+            if (charMove) {
+                newCur = sel.focusNode;
+                oldCur = _domUtilsDomExtend2['default'].getParentByTagName(oldCur, ['td', 'th'], true, null);
+                newCur = _domUtilsDomExtend2['default'].getParentByTagName(newCur, ['td', 'th'], true, null);
+                if (newCur && newCur != oldCur) {
+                    if (code == 38 || code == 40 || code == 13) {
+                        charMove = false;
+                    } else {
+                        _tableZone2['default'].setStart(newCur).setEnd(newCur);
+                    }
+                }
+                if (charMove) {
+                    _commonUtils2['default'].stopEvent(e);
+                    return;
+                }
             }
 
-            var cellData = _tableZone2['default'].switchCell(last, direct);
-            if (cellData) {
+            if (direct) {
                 if (e.shiftKey) {
-                    _tableZone2['default'].setEnd(cellData.cell, true);
+                    last = zone.end || zone.start;
                 } else {
-                    _tableZone2['default'].setStart(cellData.cell, cellData.x, cellData.y).setEnd(cellData.cell);
+                    last = zone.start;
                 }
-                _commonUtils2['default'].stopEvent(e);
+
+                cellData = _tableZone2['default'].switchCell(last, direct);
+                if (cellData) {
+                    if (_tableZone2['default'].isSingleCell() && cellData == zone.grid[zone.range.minY][zone.range.minX]) {
+                        if (e.ctrlKey && code == 38) {
+                            sel.modify('move', 'forward', 'line');
+                        } else if (e.ctrlKey && (code == 40 || code == 13)) {
+                            sel.modify('move', 'backward', 'line');
+                        }
+                    } else if (e.shiftKey) {
+                        _tableZone2['default'].setEnd(cellData.cell, true);
+                    } else {
+                        _tableZone2['default'].setStart(cellData.cell, cellData.x, cellData.y).setEnd(cellData.cell);
+                    }
+                    _commonUtils2['default'].stopEvent(e);
+                }
             }
         },
+        onKeyUp: function onKeyUp(e) {
+            var zone = _tableZone2['default'].getZone(),
+                range = _rangeUtilsRangeExtend2['default'].getRange(),
+                cell;
+            //从非表格的地方 用键盘移动光标到 单元格内，直接选中该单元格
+            if (!zone.range && range && range.collapsed) {
+                cell = _domUtilsDomExtend2['default'].getParentByTagName(range.startContainer, ['td', 'th'], true, null);
+                if (cell) {
+                    _tableZone2['default'].setStart(cell).setEnd(cell);
+                }
+            }
+
+            _tableUtils2['default'].fixSelection(e);
+        },
         onMouseDown: function onMouseDown(e) {
-            var isLeft = e.button === 0 || e.button === 1;
+            var isLeft = e.type !== 'mousedown' || e.button === 0 || e.button === 1;
             if (!isLeft) {
                 _tableMenu2['default'].hide();
                 return;
@@ -11597,23 +16530,35 @@ var _event = {
             if (isMenu) {
                 return;
             }
+            //如果在表格上下边缘，且无可编辑区域时，自动添加空行
+            _tableZone2['default'].checkAndInsertEmptyLine(e);
 
             var cell = _domUtilsDomExtend2['default'].getParentByTagName(e.target, ['th', 'td'], true, null);
             var table = cell ? _domUtilsDomExtend2['default'].getParentByTagName(cell, 'table', false, null) : null;
-            var pos = _tableUtils2['default'].getEventPosition(e, table);
+            var pos = _tableUtils2['default'].getMousePosition(e, table);
             var isZoneBorder = _tableZone2['default'].isZoneBorder(e);
 
-            if (isZoneBorder.isRight) {
-                _tableZone2['default'].startDragColLine(e.target, pos.x);
+            if (isZoneBorder.isBodyBorder || isZoneBorder.isContainer) {
+                if (!_commonEnv2['default'].client.type.isPhone && !_commonEnv2['default'].client.type.isPad) {
+                    //手机端不能阻止事件，否则会导致点击这些区域无法滚动屏幕
+                    _commonUtils2['default'].stopEvent(e);
+                }
                 return;
             }
-            if (isZoneBorder.isBottom) {
-                _tableZone2['default'].startDragRowLine(e.target, pos.y);
-                return;
-            }
-            if (isZoneBorder.isDot) {
-                console.log('isDot');
-                return;
+
+            if (!_commonEnv2['default'].client.type.isPhone && !_commonEnv2['default'].client.type.isPad) {
+                if (isZoneBorder.isRight) {
+                    _tableZone2['default'].startDragColLine(e.target, pos.x);
+                    return;
+                }
+                if (isZoneBorder.isBottom) {
+                    _tableZone2['default'].startDragRowLine(e.target, pos.y);
+                    return;
+                }
+                if (isZoneBorder.isDot) {
+                    console.log('isDot');
+                    return;
+                }
             }
 
             if (isZoneBorder.isBorder || isZoneBorder.isScroll) {
@@ -11628,7 +16573,9 @@ var _event = {
             _tableZone2['default'].modify(end);
         },
         onMouseUp: function onMouseUp(e) {
-            var isLeft = e.button === 0 || e.button === 1;
+            _tableUtils2['default'].fixSelection(e);
+
+            var isLeft = e.type !== 'mouseup' || e.button === 0 || e.button === 1;
             if (!isLeft) {
                 return;
             }
@@ -11659,24 +16606,34 @@ var _event = {
             var cell = _domUtilsDomExtend2['default'].getParentByTagName(e.target, ['td', 'th'], true, null);
             _tableZone2['default'].setEnd(cell);
             _tableMenu2['default'].show();
+        },
+        onSelectionChange: function onSelectionChange(e) {
+            var check = _tableUtils2['default'].checkCaretInTableContainer(e);
+            var zone = _tableZone2['default'].getZone();
+            var cell;
+            if (check.tableContainer && zone.table !== check.tableContainer.querySelector('table')) {
+                //如果光标定位在 table & table container 之间，则定位到 table 内第一个 td
+                cell = check.tableContainer.querySelectorAll('td');
+                cell = check.after ? cell[cell.length - 1] : check.before ? cell[0] : null;
+                if (cell) {
+                    _tableZone2['default'].setStart(cell).setEnd(cell);
+                }
+            }
         }
     }
 };
 
 var tableCore = {
     on: function on() {
-        if (!readonly) {
+        if (!_commonEnv2['default'].readonly) {
             _event.bind();
             _tableMenu2['default'].init(tableCore);
         }
-        _tableUtils2['default'].checkTableContainer(null, readonly);
+        _tableUtils2['default'].initTableContainer(null);
         _tableZone2['default'].clear();
     },
     off: function off() {
         _tableZone2['default'].clear();
-    },
-    setOptions: function setOptions(options) {
-        readonly = !!options.readonly;
     },
     canCreateTable: function canCreateTable() {
         return _tableUtils2['default'].canCreateTable(_tableZone2['default'].getZone());
@@ -11806,7 +16763,7 @@ var tableCore = {
                 _commonEnv2['default'].doc.body.appendChild(table);
                 _commonEnv2['default'].doc.body.appendChild(br);
             }
-        _tableUtils2['default'].checkTableContainer(null, readonly);
+        _tableUtils2['default'].initTableContainer(null);
 
         //修正 光标
         range = _rangeUtilsRangeExtend2['default'].getRange();
@@ -11863,7 +16820,7 @@ var tableCore = {
 exports['default'] = tableCore;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/historyUtils":15,"../common/utils":18,"../domUtils/domExtend":22,"../rangeUtils/rangeExtend":31,"./tableMenu":33,"./tableUtils":34,"./tableZone":35}],33:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./tableMenu":40,"./tableUtils":41,"./tableZone":42}],40:[function(require,module,exports){
 /*
  表格菜单 控制
  */
@@ -12313,6 +17270,9 @@ var tableMenu = {
             return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
         }, false);
         menuObj = createMenu();
+        _domUtilsDomExtend2['default'].attr(menuObj, {
+            contenteditable: 'false'
+        });
         tableMenu.hideSub();
         container.appendChild(menuObj);
         _domUtilsDomExtend2['default'].css(menuObj, {
@@ -12383,7 +17343,7 @@ var tableMenu = {
 exports['default'] = tableMenu;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/lang":16,"../domUtils/domExtend":22,"./tableUtils":34,"./tableZone":35}],34:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/lang":17,"../domUtils/domExtend":24,"./tableUtils":41,"./tableZone":42}],41:[function(require,module,exports){
 /**
  * 表格操作的基本方法集合
  */
@@ -12403,7 +17363,9 @@ var _commonConst = require('./../common/const');
 
 var _commonConst2 = _interopRequireDefault(_commonConst);
 
-// import utils from './../common/utils';
+var _commonUtils = require('./../common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
 
 var _domUtilsDomExtend = require('./../domUtils/domExtend');
 
@@ -12491,60 +17453,51 @@ var tableUtils = {
         return canSplit ? splitMap : false;
     },
     /**
-     * 检查 并 初始化表格容器
-     * @param _table
+     * 检查 光标是否处于 table & tableContainer 之间
+     * @param e
+     * @returns {{tableContainer: null, before: boolean, after: boolean}}
      */
-    checkTableContainer: function checkTableContainer(_table, readonly) {
-        var tableList = _table ? [_table] : _commonEnv2['default'].doc.querySelectorAll('table'),
-            table,
-            container,
-            tableBody,
-            i,
-            j;
+    checkCaretInTableContainer: function checkCaretInTableContainer(e) {
+        var result = {
+            tableContainer: null,
+            before: false,
+            after: false
+        };
+        var range, tableContainer, table, target, startOffset;
+        var eType = /^(mouse|touch)/i;
 
-        for (i = 0, j = tableList.length; i < j; i++) {
-            table = tableList[i];
-            tableBody = checkParent(table, function (parent) {
-                return _domUtilsDomExtend2['default'].hasClass(parent, _commonConst2['default'].CLASS.TABLE_BODY);
-            });
-            container = checkParent(tableBody, function (parent) {
-                return _domUtilsDomExtend2['default'].hasClass(parent, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-            });
-
-            _domUtilsDomExtend2['default'].addClass(container, _commonConst2['default'].CLASS.TABLE_CONTAINER);
-            //避免 编辑、阅读状态切换时， 表格位置闪动，所以做成 inline 模式
-            _domUtilsDomExtend2['default'].css(container, {
-                position: 'relative',
-                padding: '15px 0 5px'
-            });
-            _domUtilsDomExtend2['default'].addClass(tableBody, _commonConst2['default'].CLASS.TABLE_BODY);
-            _domUtilsDomExtend2['default'].removeClass(tableBody, _commonConst2['default'].CLASS.TABLE_MOVING);
-            if (!readonly) {
-                container.setAttribute('contenteditable', 'false');
-                setTdEditable(table, 'td');
-                setTdEditable(table, 'th');
+        if (e && eType.test(e.type)) {
+            //mouse || touch 事件触发时， selection 并没有被改变，所以不能使用 range 进行判断
+            target = e.target;
+        } else {
+            range = _rangeUtilsRangeExtend2['default'].getRange();
+            if (!range || !range.collapsed) {
+                //选择区域 由 keyUp & mouseUp 中的 tableUtils.fixSelection(e); 进行过滤
+                return result;
             }
-            //直接设置 table contenteditable 会导致 chrome 检查时报错
-            // table.setAttribute('contenteditable', 'true');
-        }
+            target = range.startContainer;
+            startOffset = range.startOffset;
 
-        function setTdEditable(table, tdType) {
-            var tdList = table.querySelectorAll(tdType),
-                i;
-            for (i = tdList.length - 1; i >= 0; i--) {
-                tdList[i].setAttribute('contenteditable', 'true');
+            if (target.nodeType === 1) {
+                target = target.childNodes[startOffset];
+            } else if (target.nodeType === 3 && startOffset == _domUtilsDomExtend2['default'].getDomEndOffset(target)) {
+                target = target.nextSibling;
             }
         }
 
-        function checkParent(obj, filter) {
-            var parent = obj.parentNode;
-            if (!filter(parent)) {
-                parent = _commonEnv2['default'].doc.createElement('div');
-                _domUtilsDomExtend2['default'].insert(obj, parent);
-                parent.appendChild(obj);
+        tableContainer = tableUtils.getContianerExcludeTable(target);
+
+        if (tableContainer) {
+            result.tableContainer = tableContainer;
+            if (e && eType.test(e.type)) {
+                table = tableContainer.querySelector('table');
+            } else if (startOffset > 0) {
+                result.after = true;
+            } else {
+                result.before = true;
             }
-            return parent;
         }
+        return result;
     },
     /**
      * 清空选中区域单元格内的数据
@@ -12762,8 +17715,12 @@ var tableUtils = {
             startOffset = range.startOffset,
             end = range.endContainer,
             endOffset = range.endOffset,
-            startTr = _domUtilsDomExtend2['default'].getParentByTagName(start, 'tr', true, null),
-            endTr = _domUtilsDomExtend2['default'].getParentByTagName(end, 'tr', true, null);
+            startTr = _domUtilsDomExtend2['default'].getParentByFilter(start, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+        }, true),
+            endTr = _domUtilsDomExtend2['default'].getParentByFilter(end, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+        }, true);
         if (!startTr && !endTr || startTr && endTr) {
             return;
         }
@@ -12771,11 +17728,13 @@ var tableUtils = {
         var table,
             target = startTr ? startTr : endTr;
 
-        while (table = _domUtilsDomExtend2['default'].getParentByTagName(target, 'table', true, null)) {
+        while (table = _domUtilsDomExtend2['default'].getParentByFilter(target, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+        }, true)) {
             if (startTr) {
-                target = _domUtilsDomExtend2['default'].getNextNode(target, false, end);
+                target = _domUtilsDomExtend2['default'].getNextNode(table, false, end);
             } else {
-                target = _domUtilsDomExtend2['default'].getPreviousNode(target, false, start);
+                target = _domUtilsDomExtend2['default'].getPreviousNode(table, false, start);
             }
         }
 
@@ -12902,6 +17861,18 @@ var tableUtils = {
         return cellList;
     },
     /**
+     * 根据 target 目标 dom 判断是否处于 table 容器内且 在 table 之外
+     * @param target
+     * @returns {null}
+     */
+    getContianerExcludeTable: function getContianerExcludeTable(target) {
+        var cell = _domUtilsDomExtend2['default'].getParentByTagName(target, ['th', 'td'], true, null);
+        var tableContainer = !cell ? _domUtilsDomExtend2['default'].getParentByFilter(target, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+        }, true) : null;
+        return tableContainer;
+    },
+    /**
      * 从 cell 集合中遍历获取 cell 内的叶子节点集合
      * @param cellList
      * @returns {Array}
@@ -12971,12 +17942,13 @@ var tableUtils = {
      * @param table
      * @returns {{clientX: *, clientY: *}}
      */
-    getEventPosition: function getEventPosition(e, table) {
+    getMousePosition: function getMousePosition(e, table) {
+        var eventClient = _commonUtils2['default'].getEventClientPos(e);
         if (!table) {
             table = e.target ? _domUtilsDomExtend2['default'].getParentByTagName(e.target, 'table', false, null) : null;
         }
-        var clientX = e.clientX + _commonEnv2['default'].doc.body.scrollLeft + (table ? table.parentNode.scrollLeft : 0);
-        var clientY = e.clientY + _commonEnv2['default'].doc.body.scrollTop + (table ? table.parentNode.scrollTop : 0);
+        var clientX = eventClient.x + _commonEnv2['default'].doc.body.scrollLeft + (table ? table.parentNode.scrollLeft : 0);
+        var clientY = eventClient.y + _commonEnv2['default'].doc.body.scrollTop + (table ? table.parentNode.scrollTop : 0);
         return {
             x: clientX,
             y: clientY
@@ -13203,7 +18175,7 @@ var tableUtils = {
             //表格内 禁止粘贴表格，所以需要把表格全部变为 text
             for (i = pasteTables.length - 1; i >= 0; i--) {
                 pasteTable = pasteTables[i];
-                _domUtilsDomExtend2['default'].insert(pasteTable, _commonEnv2['default'].doc.createTextNode(pasteTable.innerText));
+                _domUtilsDomExtend2['default'].before(pasteTable, _commonEnv2['default'].doc.createTextNode(pasteTable.innerText));
                 pasteTable.parentNode.removeChild(pasteTable);
             }
             //清理 template 内的多余 nodeType
@@ -13269,41 +18241,6 @@ var tableUtils = {
         };
     },
     /**
-     * 针对 html 源码隐藏表格的高亮信息，主要用于保存操作
-     * @param html
-     * @returns {*}
-     */
-    hideTableFromHtml: function hideTableFromHtml(html) {
-        //做 RegExp 做 test 的时候 不能使用 g 全局设置， 否则会影响 索引
-        var regexForTest = /(<[^<> ]*[^<>]* class[ ]*=[ ]*['"])([^'"]*)(['"])/i;
-        var regex = /(<[^<> ]*[^<>]* class[ ]*=[ ]*['"])([^'"]*)(['"])/ig;
-        if (!regexForTest.test(html)) {
-            return html;
-        }
-
-        var result = [],
-            m,
-            lastIndex = 0,
-            str,
-            reg;
-        while (m = regex.exec(html)) {
-            str = m[2];
-
-            //先处理 float layer
-            if ((' ' + str + ' ').indexOf(' ' + _commonConst2['default'].CLASS.SELECTED_CELL + ' ') > -1) {
-                reg = new RegExp(' ' + _commonConst2['default'].CLASS.SELECTED_CELL + ' ', 'ig');
-                str = (' ' + str + ' ').replace(reg, '').trim();
-            }
-
-            result.push(html.substr(lastIndex, m.index - lastIndex), m[1], str, m[3]);
-
-            lastIndex = m.index + m[0].length;
-            //console.log(m);
-        }
-        result.push(html.substr(lastIndex));
-        return result.join('');
-    },
-    /**
      * 初始化 表格 样式
      * @param table
      */
@@ -13335,6 +18272,47 @@ var tableUtils = {
             }
         }
         table.style.width = table.offsetWidth + 'px';
+    },
+    /**
+     * 检查 并 初始化表格容器
+     * @param _table
+     */
+    initTableContainer: function initTableContainer(_table) {
+        var tableList = _table ? [_table] : _commonEnv2['default'].doc.querySelectorAll('table'),
+            table,
+            container,
+            tableBody,
+            i,
+            j;
+
+        for (i = 0, j = tableList.length; i < j; i++) {
+            table = tableList[i];
+            tableBody = checkParent(table, function (parent) {
+                return _domUtilsDomExtend2['default'].hasClass(parent, _commonConst2['default'].CLASS.TABLE_BODY);
+            });
+            container = checkParent(tableBody, function (parent) {
+                return _domUtilsDomExtend2['default'].hasClass(parent, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+            });
+
+            _domUtilsDomExtend2['default'].addClass(container, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+            //避免 编辑、阅读状态切换时， 表格位置闪动，所以做成 inline 模式
+            _domUtilsDomExtend2['default'].css(container, {
+                position: 'relative',
+                padding: '15px 0 5px'
+            });
+            _domUtilsDomExtend2['default'].addClass(tableBody, _commonConst2['default'].CLASS.TABLE_BODY);
+            _domUtilsDomExtend2['default'].removeClass(tableBody, _commonConst2['default'].CLASS.TABLE_MOVING);
+        }
+
+        function checkParent(obj, filter) {
+            var parent = obj.parentNode;
+            if (!filter(parent)) {
+                parent = _commonEnv2['default'].doc.createElement('div');
+                _domUtilsDomExtend2['default'].before(obj, parent);
+                parent.appendChild(obj);
+            }
+            return parent;
+        }
     },
     /**
      * 在指定的位置插入列
@@ -13435,11 +18413,23 @@ var tableUtils = {
             dx = range.maxX - range.minX + 1;
 
         var target = grid[range.minY][range.minX].cell;
+        var temp = _commonEnv2['default'].doc.createElement('div');
         tableUtils.eachRange(grid, range, function (cellData) {
             if (!cellData.fake && cellData.cell != target) {
+                if (!_domUtilsDomExtend2['default'].isEmptyDom(cellData.cell)) {
+                    if (temp.lastChild) {
+                        temp.appendChild(_commonEnv2['default'].doc.createElement('br'));
+                    }
+                    while (cellData.cell.firstChild) {
+                        temp.appendChild(cellData.cell.firstChild);
+                    }
+                }
                 cellData.cell.parentNode.removeChild(cellData.cell);
             }
         });
+        while (temp.firstChild) {
+            target.appendChild(temp.firstChild);
+        }
         target.rowSpan = dy;
         target.colSpan = dx;
         return target;
@@ -13645,7 +18635,7 @@ var tableUtils = {
 exports['default'] = tableUtils;
 module.exports = exports['default'];
 
-},{"../rangeUtils/rangeExtend":31,"./../common/const":12,"./../common/env":14,"./../domUtils/domExtend":22}],35:[function(require,module,exports){
+},{"../rangeUtils/rangeExtend":36,"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24}],42:[function(require,module,exports){
 /*
  表格选择区域 控制
  */
@@ -13700,6 +18690,38 @@ var zone = {
 function initZone(table) {
     zone.table = table;
     zone.grid = _tableUtils2['default'].getTableGrid(zone.table);
+}
+
+function checkPageFirst(checkFirst, clientY) {
+    var isFirst = false,
+        isLast = false,
+        offset,
+        tableContainer;
+    var obj = checkFirst ? _domUtilsDomExtend2['default'].getFirstDeepChild(_commonEnv2['default'].doc.body) : _domUtilsDomExtend2['default'].getLastDeepChild(_commonEnv2['default'].doc.body);
+    while (obj && !_domUtilsDomExtend2['default'].canEdit(obj)) {
+        obj = checkFirst ? _domUtilsDomExtend2['default'].getNextNodeCanEdit(obj, false) : _domUtilsDomExtend2['default'].getPreviousNodeCanEdit(obj, false);;
+    }
+    if (obj) {
+        if (obj.nodeType == 3) {
+            obj = obj.parentNode;
+        }
+        offset = _domUtilsDomExtend2['default'].getOffset(obj);
+        tableContainer = _domUtilsDomExtend2['default'].getParentByFilter(obj, function (obj) {
+            return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+        }, true);
+        if (checkFirst && clientY < offset.top && tableContainer) {
+            isFirst = true;
+        } else if (!checkFirst && clientY > offset.top + obj.offsetHeight && tableContainer) {
+            isLast = true;
+        } else {
+            obj = null;
+        }
+    }
+    return {
+        container: tableContainer,
+        isFirst: isFirst,
+        isLast: isLast
+    };
 }
 
 function clearSelectedCell() {
@@ -13757,7 +18779,8 @@ function isSingleCell() {
 function isStartFocus() {
     var range = _rangeUtilsRangeExtend2['default'].getRange();
     if (!range) {
-        return true;
+        //手机端 失去焦点时，不能重新设置焦点，否则会导致无法关闭键盘
+        return _commonEnv2['default'].client.type.isPhone || _commonEnv2['default'].client.type.isPad || !isSingleCell();
     }
     var start, end, endOffset;
     if (zone.grid && zone.start) {
@@ -13832,8 +18855,8 @@ function rowLineRender(y) {
     rangeBorder.container.style.display = 'block';
 }
 
-function checkTableContainer(rangeBorder) {
-    _tableUtils2['default'].checkTableContainer(zone.table, false);
+function initTableContainer(rangeBorder) {
+    _tableUtils2['default'].initTableContainer(zone.table);
     var tableBody = zone.table.parentNode;
     tableBody.appendChild(rangeBorder.container);
 }
@@ -13850,7 +18873,7 @@ function rangeRender() {
         return;
     }
     // console.log(rangeBorder);
-    checkTableContainer(rangeBorder);
+    initTableContainer(rangeBorder);
 
     var topSrc = _commonEnv2['default'].doc.body.clientTop;
     var leftSrc = _commonEnv2['default'].doc.body.clientLeft;
@@ -14045,7 +19068,7 @@ var _event = {
     handler: {
         onDragLineMove: function onDragLineMove(e) {
             var rangeBorder = getRangeBorder();
-            var pos = _tableUtils2['default'].getEventPosition(e, zone.table);
+            var pos = _tableUtils2['default'].getMousePosition(e, zone.table);
             if (rangeBorder.colLine.style.display == 'block') {
                 colLineRender(pos.x - rangeBorder.colLine.startMouse + rangeBorder.colLine.startLine);
             } else {
@@ -14055,7 +19078,7 @@ var _event = {
         onDragLineEnd: function onDragLineEnd(e) {
             _event.unbindDragLine();
             var rangeBorder = getRangeBorder();
-            var pos = _tableUtils2['default'].getEventPosition(e, zone.table);
+            var pos = _tableUtils2['default'].getMousePosition(e, zone.table);
             var cellData;
 
             var isDragCol = rangeBorder.colLine.style.display == 'block';
@@ -14153,6 +19176,61 @@ var tableZone = {
         return tableZone;
     },
     /**
+     * 为防止笔记内只有一个表格时 无法在表格前后 或 多个表格之间输入内容
+     */
+    checkAndInsertEmptyLine: function checkAndInsertEmptyLine(e) {
+        var touch = e.changedTouches ? e.changedTouches[0] : null,
+            target = touch ? touch.target : e.target,
+            eventClient = _commonUtils2['default'].getEventClientPos(e),
+            clientY = _commonEnv2['default'].doc.body.scrollTop + eventClient.y;
+        var dom,
+            tableContainer,
+            checkResult,
+            isAfter = false,
+            isBefore = false;
+
+        if (target === _commonEnv2['default'].doc.body || target === _commonEnv2['default'].doc.body.parentNode) {
+            if (target === _commonEnv2['default'].doc.body) {
+                checkResult = checkPageFirst(true, clientY);
+                isBefore = checkResult.isFirst;
+                tableContainer = checkResult.container;
+            }
+            if (!isBefore) {
+                checkResult = checkPageFirst(false, clientY);
+                isAfter = checkResult.isLast;
+                tableContainer = checkResult.container;
+            }
+        } else if (_domUtilsDomExtend2['default'].hasClass(target, _commonConst2['default'].CLASS.TABLE_CONTAINER) || _domUtilsDomExtend2['default'].hasClass(target, _commonConst2['default'].CLASS.TABLE_BODY)) {
+            tableContainer = _domUtilsDomExtend2['default'].getParentByFilter(target, function (obj) {
+                return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+            }, true);
+            var offsetY = 0;
+            if (tableContainer) {
+                offsetY = clientY - _domUtilsDomExtend2['default'].getOffset(tableContainer).top;
+            }
+            if (tableContainer && offsetY < 15) {
+                dom = _domUtilsDomExtend2['default'].getPreviousNodeCanEdit(target, false);
+                if (!dom || _domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
+                    return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+                }, true)) {
+                    isBefore = true;
+                }
+            } else if (tableContainer && target.offsetHeight - offsetY < 15) {
+                dom = _domUtilsDomExtend2['default'].getNextNodeCanEdit(target, false);
+                if (!dom || _domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
+                    return _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TABLE_CONTAINER);
+                }, true)) {
+                    isAfter = true;
+                }
+            }
+        }
+        if (tableContainer && (isAfter || isBefore)) {
+            tableZone.insertEmptyLine(tableContainer, isAfter);
+        } else {
+            dom = null;
+        }
+    },
+    /**
      * 为 复制/剪切 操作，准备 fragment
      */
     getFragmentForCopy: function getFragmentForCopy() {
@@ -14208,6 +19286,17 @@ var tableZone = {
         };
     },
     hasMergeCell: hasMergeCell,
+    insertEmptyLine: function insertEmptyLine(tableContainer, after) {
+        if (!tableContainer) {
+            return;
+        }
+        var newLine = _commonEnv2['default'].doc.createElement('div');
+        var dom = _commonEnv2['default'].doc.createElement('br');
+        newLine.appendChild(dom);
+        _domUtilsDomExtend2['default'].before(tableContainer, newLine, after);
+        tableZone.clear();
+        _rangeUtilsRangeExtend2['default'].setRange(dom, 0);
+    },
     isRangeActiving: function isRangeActiving() {
         return zone.start && zone.active;
     },
@@ -14215,11 +19304,14 @@ var tableZone = {
     isZoneBorder: function isZoneBorder(e) {
         var obj = e.target,
             x = e.offsetX,
-            y = e.offsetY;
+            y = e.offsetY,
+            eventClient = _commonUtils2['default'].getEventClientPos(e);
         var isScroll,
+            isBodyBorder = false,
             isBorder = false,
             isRight = false,
-            isBottom = false;
+            isBottom = false,
+            isContainer = false;
 
         var isDot = !!_domUtilsDomExtend2['default'].getParentByFilter(obj, function (dom) {
             return dom && dom.nodeType == 1 && (dom.id == _commonConst2['default'].ID.TABLE_RANGE_BORDER + '_start_dot' || dom.id == _commonConst2['default'].ID.TABLE_RANGE_BORDER + '_range_dot');
@@ -14240,7 +19332,7 @@ var tableZone = {
                 return false;
             }, true);
         }
-        if (!isRight) {
+        if (!isDot && !isRight) {
             isBottom = !!_domUtilsDomExtend2['default'].getParentByFilter(obj, function (dom) {
                 if (dom && dom.nodeType == 1 && (dom.id == _commonConst2['default'].ID.TABLE_RANGE_BORDER + '_start_bottom' || dom.id == _commonConst2['default'].ID.TABLE_RANGE_BORDER + '_range_bottom')) {
                     return true;
@@ -14255,18 +19347,31 @@ var tableZone = {
                 return false;
             }, true);
         }
-        if (!isRight && !isBottom && !isDot) {
+        if (!isBottom && !isDot && !isRight) {
             isBorder = !!_domUtilsDomExtend2['default'].getParentByFilter(obj, function (dom) {
                 return dom && dom.nodeType == 1 && dom.id == _commonConst2['default'].ID.TABLE_RANGE_BORDER;
             }, true);
+        }
+
+        var bodyStyle, bodyLeft, bodyRight;
+        if (!isBottom && !isDot && !isRight && !isBorder) {
+            isContainer = !!_tableUtils2['default'].getContianerExcludeTable(obj);
+            if (!isContainer && obj == _commonEnv2['default'].doc.body) {
+                bodyStyle = _commonEnv2['default'].win.getComputedStyle(obj);
+                bodyLeft = parseInt(bodyStyle.paddingLeft);
+                bodyRight = parseInt(bodyStyle.paddingRight);
+                isBodyBorder = eventClient.x <= bodyLeft || eventClient.x >= _commonEnv2['default'].doc.body.offsetWidth - bodyRight;
+            }
         }
 
         //span 等 行级元素 clientWidth / clientHeight 为 0
         isScroll = (e.target.clientWidth > 0 && e.target.clientWidth < e.offsetX || e.target.clientHeight > 0 && e.target.clientHeight < e.offsetY) && (e.target.offsetWidth >= e.offsetX || e.target.offsetHeight >= e.offsetY);
 
         return {
+            isBodyBorder: isBodyBorder,
             isBorder: isBorder,
             isBottom: isBottom,
+            isContainer: isContainer,
             isDot: isDot,
             isRight: isRight,
             isScroll: isScroll
@@ -14400,7 +19505,7 @@ var tableZone = {
 
         var startLeft = cell.offsetLeft + cell.offsetWidth;
         var rangeBorder = getRangeBorder();
-        checkTableContainer(rangeBorder);
+        initTableContainer(rangeBorder);
         rangeBorder.colLine.minLeft = table.offsetLeft;
         rangeBorder.colLine.startLine = startLeft;
         rangeBorder.colLine.startMouse = x;
@@ -14455,7 +19560,7 @@ var tableZone = {
 
         var startTop = cell.offsetTop + cell.offsetHeight;
         var rangeBorder = getRangeBorder();
-        checkTableContainer(rangeBorder);
+        initTableContainer(rangeBorder);
         rangeBorder.rowLine.minTop = table.offsetTop;
         rangeBorder.rowLine.startLine = startTop;
         rangeBorder.rowLine.startMouse = y;
@@ -14529,7 +19634,7 @@ var tableZone = {
 exports['default'] = tableZone;
 module.exports = exports['default'];
 
-},{"../common/const":12,"../common/env":14,"../common/historyUtils":15,"../common/utils":18,"../domUtils/domExtend":22,"../rangeUtils/rangeExtend":31,"./tableUtils":34}],36:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./tableUtils":41}],43:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -14576,140 +19681,16 @@ var _WizEditor = require('./WizEditor');
 
 var _WizEditor2 = _interopRequireDefault(_WizEditor);
 
-function getExternal() {
-    var obj = null;
-    try {
-        obj = _commonEnv2['default'].win.external;
-    } catch (exp) {
-        alert(exp);
-    }
-    return obj;
-}
+var _WizReader = require('./WizReader');
 
-function getDocSrc(doc) {
-    var html = doc.documentElement.outerHTML;
-    var docType = _domUtilsDomExtend2['default'].getDocType(doc);
-    return docType + html;
-}
+var _WizReader2 = _interopRequireDefault(_WizReader);
 
-_WizEditor2['default'].getAllFramesData = function () {
-    var retData = "";
-    var frames = _commonEnv2['default'].doc.getElementsByTagName("iframe"),
-        frame,
-        src,
-        id,
-        name,
-        html,
-        i;
+var editorInit = _WizEditor2['default'].init;
+_WizEditor2['default'].init = function (options) {
+    editorInit(options);
+    _WizReader2['default'].init();
 
-    if (!frames) return null;
-    for (i = 0; i < frames.length; i++) {
-        frame = frames[i];
-        src = frame.getAttribute("src");
-        id = frame.getAttribute("id");
-        name = frame.getAttribute("name");
-        html = getDocSrc(frame.contentDocument);
-        if (!html) continue;
-        //
-        if (!src) src = "";
-        if (!id) id = "";
-        if (!name) name = "";
-        //
-        retData = retData + "<!--WizFrameURLStart-->" + src + "<!--WizFrameURLEnd--><!--WizFrameIdStart-->" + id + "<!--WizFrameIdEnd--><!--WizFrameNameStart-->" + name + "<!--WizFrameNameEnd--><!--WizFrameHtmlStart-->" + html + "<!--WizFrameHtmlEnd-->";
-    }
-    return retData;
+    return _WizEditor2['default'];
 };
 
-_WizEditor2['default'].getFontSizeAtCaret = function () {
-    var node = _commonEnv2['default'].doc.getSelection().focusNode;
-    if (!node) return 0;
-    while (node && 3 == node.nodeType) {
-        node = node.parentNode;
-    }
-    if (!node) return 0;
-    var style = _commonEnv2['default'].win.getComputedStyle(node);
-    if (!style) return 0;
-    return style.fontSize;
-};
-
-_WizEditor2['default'].getFrameSource = function (idOrName) {
-    var f = _commonEnv2['default'].doc.getElementById(idOrName);
-    if (!f) {
-        var fs = _commonEnv2['default'].doc.getElementsByName(idOrName);
-        if (!fs) return null;
-        if (fs.length != 1) return null;
-        f = fs[0];
-        if (!f) return null;
-    }
-    return getDocSrc(f.contentDocument);
-};
-
-_WizEditor2['default'].queryDocState = function () {
-    var undoState = _commonHistoryUtils2['default'].getUndoState(),
-        range = _rangeUtilsRangeExtend2['default'].getRange(),
-        zone = _tableUtilsTableZone2['default'].getZone,
-        hasAmend = _WizEditor2['default'].amend.hasAmendSpanByCursor();
-
-    return {
-        undo: undoState.undoCount === 0 || undoState.undoIndex === 0 ? '0' : '1',
-        redo: undoState.undoCount - 1 <= undoState.undoIndex ? '0' : '1',
-        canPaste: range || zone.range ? '1' : '0',
-        hasAmend: hasAmend ? '1' : '0'
-    };
-};
-
-/**
- * 将页面中引用外部的图片保存为笔记内的图片
- * @param resourcePath
- */
-_WizEditor2['default'].img.saveRemote = function (resourcePath) {
-    var external = getExternal();
-    if (!external) {
-        return;
-    }
-    var objCommon = external.CreateWizObject("WizKMControls.WizCommonUI");
-    //
-    var images = _commonEnv2['default'].doc.images;
-    for (var i = 0; i < images.length; i++) {
-        var img = images[i];
-        //
-        var src = img.src;
-        if (src.indexOf("data:") == 0) continue;
-        if (0 == src.indexOf("http") || !objCommon.PathFileExists(src)) {
-            try {
-                var data = _imgUtilsImgUtils2['default'].getImageData(img);
-                if (data.length <= 0) continue;
-                var imageFileName = resourcePath + Math.random() + ".png";
-                objCommon.SaveBase64DataToFile(imageFileName, data);
-                img.src = "file:///" + imageFileName;
-            } catch (e) {
-                console.log(e);
-            }
-        }
-    }
-};
-
-_WizEditor2['default'].img.saveRemoteToCache = function () {
-    //
-    var external = getExternal();
-    if (!external) {
-        return;
-    };
-
-    var images = doc.images;
-    for (var i = 0; i < images.length; i++) {
-        var img = images[i];
-        //
-        var src = img.src;
-        if (src.indexOf("data:") == 0) continue;
-        if (0 == src.indexOf("http")) {
-            try {
-                var data = _imgUtilsImgUtils2['default'].getImageData(img);
-                //
-                external.SetImageData(src, data);
-            } catch (e) {}
-        }
-    }
-};
-
-},{"./WizEditor":5,"./common/env":14,"./common/historyUtils":15,"./domUtils/domExtend":22,"./imgUtils/imgUtils":27,"./rangeUtils/rangeExtend":31,"./tableUtils/tableZone":35}]},{},[36]);
+},{"./WizEditor":5,"./WizReader":6,"./common/env":15,"./common/historyUtils":16,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./rangeUtils/rangeExtend":36,"./tableUtils/tableZone":42}]},{},[43]);
