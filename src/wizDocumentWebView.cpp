@@ -849,7 +849,10 @@ void CWizDocumentWebView::setEditorEnable(bool enalbe)
     }
     else
     {
-        page()->runJavaScript("WizEditor.off();");
+        QString code = QString("WizEditor.off({noteType:'%1'});").arg(getNoteType());
+        //
+        page()->runJavaScript(code);
+        //
         clearFocus();
     }
 }
@@ -1000,6 +1003,29 @@ void CWizDocumentWebView::shareNoteByLink()
     emit shareDocumentByLinkRequest(doc.strKbGUID, doc.strGUID);
 }
 
+QString CWizDocumentWebView::getNoteType()
+{
+    const WIZDOCUMENTDATA& doc = view()->note();
+    //
+    QString title = doc.strTitle;
+    if (title.endsWith(".md"))
+        return "markdown";
+    if (title.endsWith(".mj"))
+        return "mathjax";
+    //
+    if (title.indexOf(".md@") != -1)
+        return "markdown";
+    if (title.indexOf(".mj@") != -1)
+        return "mathjax";
+    //
+    if (title.indexOf(".md ") != -1)
+        return "markdown";
+    if (title.indexOf(".mj ") != -1)
+        return "mathjax";
+    //
+    return "common";
+}
+
 void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok)
@@ -1011,7 +1037,15 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
     QString userGUID = m_dbMgr.db().GetUserGUID();
     QString userAlias = m_dbMgr.db().GetUserAlias();
     //
-    QString strCode = WizFormatString4("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\");", editorPath, lang, userGUID, userAlias);
+    const WIZDOCUMENTDATA& doc = view()->note();
+    bool ignoreTable = doc.strURL.startsWith("http");
+    //
+    QString noteType = getNoteType();
+    //
+    QString strCode = WizFormatString6("WizEditorInit(\"%1\", \"%2\", \"%3\", \"%4\", %5, \"%6\");",
+                                       editorPath, lang, userGUID, userAlias,
+                                       ignoreTable ? "true" : "false",
+                                       noteType);
     qDebug() << strCode;
     if (m_bEditingMode)
     {
@@ -1917,8 +1951,10 @@ void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
 
     if (!nRows && !nCols)
         return;
-
-    editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
+    //
+    QString code = QString("WizEditor.table.insertTable(%1, %2);").arg(nCols).arg(nRows);
+    //
+    page()->runJavaScript(code);
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
