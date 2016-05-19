@@ -1732,30 +1732,31 @@ void CWizDocumentWebView::findPre(QString strTxt, bool bCasesensitive)
         strOldSearchText = strTxt;
         strOldCase = bCasesensitive;
     }
-    //todo: webengine
-    /*
-    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::HighlightAllOccurrences
-                                     : QWebPage::HighlightAllOccurrences));
-    findText(strTxt, (bCasesensitive ? QWebPage::FindBackward  | QWebPage::FindCaseSensitively | QWebPage::FindWrapsAroundDocument
-                                     : QWebPage::FindBackward | QWebPage::FindWrapsAroundDocument));
-                                     */
+    QWebEnginePage::FindFlags options;
+    options |= QWebEnginePage::FindBackward;
+    if (bCasesensitive)
+    {
+        options |= QWebEnginePage::FindCaseSensitively;
+    }
+    //
+    findText(strTxt, options);
 }
 
 void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
 {
-    //todo: webengine
-    /*
     if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
     {
-        findText("", QWebPage::HighlightAllOccurrences);
+        findText("", 0);
         strOldSearchText = strTxt;
         strOldCase = bCasesensitive;
     }
-    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::HighlightAllOccurrences
-                                     : QWebPage::HighlightAllOccurrences));
-    findText(strTxt, (bCasesensitive ? QWebPage::FindCaseSensitively | QWebPage::FindWrapsAroundDocument
-                                     : QWebPage::FindWrapsAroundDocument));
-                                     */
+    QWebEnginePage::FindFlags options;
+    if (bCasesensitive)
+    {
+        options |= QWebEnginePage::FindCaseSensitively;
+    }
+    //
+    findText(strTxt, options);
 }
 
 void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
@@ -2008,36 +2009,31 @@ void CWizDocumentWebView::editorCommandExecuteRemoveFormat()
 
 void CWizDocumentWebView::editorCommandExecutePlainText()
 {
-    //todo: webengine
-    /*
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("plainText");
 
-    QString strText = page()->runJavaScript("editor.getPlainTxt()").toString();
-    QRegExp exp("<[^>]*>");
-    strText.replace(exp, "");
-#if QT_VERSION > 0x050000
-    strText = "<div>" + strText.toHtmlEscaped() + "</div>";
-#else
-    strText = "<div>" + strText + "</div>";
-#endif
-    strText.replace(" ", "&nbsp;");
-    strText.replace("\n", "<br />");
+    page()->runJavaScript("editor.getPlainTxt()", [=](const QVariant& ret){
+        QString strText = ret.toString();
 
-    setContentsChanged(true);
-    m_strCurrentNoteHtml = strText;
-    return page()->runJavaScript("updateEditorHtml(true);").toBool();
-    */
+        QRegExp exp("<[^>]*>");
+        strText.replace(exp, "");
+    #if QT_VERSION > 0x050000
+        strText = "<div>" + strText.toHtmlEscaped() + "</div>";
+    #else
+        strText = "<div>" + strText + "</div>";
+    #endif
+        strText.replace(" ", "&nbsp;");
+        strText.replace("\n", "<br />");
+
+        setContentsChanged(true);
+        m_strCurrentNoteHtml = strText;
+        page()->runJavaScript("updateEditorHtml(true);");
+        //
+    });
 }
 
 void CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
-    //todo: webengine
-    /*
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("formatMatch");
-    return editorCommandExecuteCommand("formatMatch");
-    */
 }
 
 void CWizDocumentWebView::editorCommandExecuteInsertCode()

@@ -1284,7 +1284,10 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     QWidget*  moveableButtonContainer4 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout4 = qobject_cast<QHBoxLayout*>(moveableButtonContainer4->layout());
-    moveableLayout4->addWidget(m_btnFormatMatch);
+    //
+    //not support in wizeditor
+    //moveableLayout4->addWidget(m_btnFormatMatch);
+    //
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
     moveableLayout4->addSpacing(12);
