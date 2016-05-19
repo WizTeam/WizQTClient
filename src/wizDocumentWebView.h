@@ -227,6 +227,8 @@ public:
     Q_PROPERTY(QString formatedDateTime READ getFormatedDateTime)
     Q_PROPERTY(QString skinResourcePath READ getSkinResourcePath)
     Q_PROPERTY(QString canEditNote READ canEditNote)
+    Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml)
+    Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
     //
     QNetworkDiskCache* networkCache();    
 
