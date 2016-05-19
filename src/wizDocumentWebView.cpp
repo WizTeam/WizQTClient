@@ -762,16 +762,6 @@ QString CWizDocumentWebView::getDefaultCssFilePath() const
     return m_strDefaultCssFilePath;
 }
 
-QString CWizDocumentWebView::getWizReaderDependencyFilePath() const
-{
-     static QString dependencyFilePath = Utils::PathResolve::resourcesPath() + "files/editor/wizReader/dependency/";
-     return dependencyFilePath;
-}
-
-QString CWizDocumentWebView::getWizReaderFilePath() const
-{
-    return Utils::PathResolve::resourcesPath() + "files/editor/wizReader/";
-}
 
 QString CWizDocumentWebView::getMarkdownCssFilePath() const
 {
@@ -786,7 +776,7 @@ QString CWizDocumentWebView::getWizTemplateJsFile() const
 
 bool CWizDocumentWebView::resetDefaultCss()
 {
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/default.css";
+    QString strFileName = Utils::PathResolve::resourcesPath() + "files/wizeditor/default.css";
     QFile f(strFileName);
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Editor]Failed to get default css code";
@@ -809,7 +799,7 @@ bool CWizDocumentWebView::resetDefaultCss()
     }
     strCss.replace("/*default-background-color*/", QString("background-color:%1").arg(backgroundColor));
 
-    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserGUID()+"/";
+    QString strPath = Utils::PathResolve::cachePath() + "wizeditor/"+m_dbMgr.db().GetUserGUID()+"/";
     Utils::PathResolve::ensurePathExists(strPath);
 
     // use to update css in seperate window

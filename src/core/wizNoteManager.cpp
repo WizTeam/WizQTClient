@@ -164,7 +164,7 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
         WizEnsurePathExists(Utils::PathResolve::customNoteTemplatesPath());
         if (!QFile::exists(Utils::PathResolve::wizTemplateJsFilePath()))
         {
-            QString localJs = Utils::PathResolve::resourcesPath() + "files/editor/wiz_template.js";
+            QString localJs = Utils::PathResolve::resourcesPath() + "files/wizeditor/wiz_template.js";
             WizCopyFile(localJs, Utils::PathResolve::wizTemplateJsFilePath(), true);
         }
 

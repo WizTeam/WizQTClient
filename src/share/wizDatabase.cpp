@@ -3519,6 +3519,8 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
             QString newHtml = strHtml;
             if (data.strType != "TemplateNote")
             {
+                /*
+                 * //使用wizeditor默认样式
                 QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
                 cssFile.open(QFile::Text | QFile::ReadOnly);
                 QString strCSS = cssFile.readAll();
@@ -3534,6 +3536,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                 {
                     newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
                 }
+                */
             }
 
             bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
