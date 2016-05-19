@@ -1051,6 +1051,10 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
     {
         strCode += "WizEditor.on();";
     }
+    else
+    {
+        strCode += "WizEditor.off();";
+    }
     //
     page()->runJavaScript(strCode);
 }
