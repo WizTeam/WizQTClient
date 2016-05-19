@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QMap>
 #include <QTimer>
+#include <functional>
 
 class QFontDialog;
 class QString;
@@ -67,7 +68,6 @@ private:
     CWizToolButton* m_btnSearchReplace;
     CWizToolButton* m_btnMobileImage;
     CWizToolButton* m_btnScreenShot;
-    CWizToolButton* m_btnViewSource;
     CWizToolButton* m_btnInsertCode;
     CWizToolButton* m_btnShowExtra;
     QMenu* m_menuJustify;
@@ -117,7 +117,6 @@ protected Q_SLOTS:
     void on_editor_editLink_triggered();
     void on_editor_removeLink_triggered();
     void on_editor_insertTable_triggered();
-    void on_editor_deleteTable_triggered();
     void on_editor_justifyLeft_triggered();
     void on_editor_justifyCenter_triggered();
     void on_editor_justifyRight_triggered();
@@ -149,7 +148,6 @@ protected Q_SLOTS:
     void on_btnInsertDate_clicked();
     void on_btnMobileImage_clicked();
     void on_btnScreenShot_clicked();
-    void on_btnViewSource_clicked();
     void on_btnInsertCode_clicked();
     void on_btnShowExtra_clicked();
     void on_editor_saveImageAs_triggered();
@@ -172,7 +170,7 @@ protected Q_SLOTS:
     void on_fontDailogFontChanged(const QFont & font);    
 
 private:
-    void queryCurrentFont(QFont& font);
+    void queryCurrentFont(std::function<void(const QFont& font)> callback);
     void setCurrentFont(const QFont& font);
     void selectCurrentFontFamily(const QString& strFontFamily);
     void selectCurrentFontFamilyItem(const QString& strFontFamily);

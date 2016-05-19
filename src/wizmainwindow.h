@@ -353,7 +353,6 @@ public Q_SLOTS:
     void on_actionMenuFormatInsertTime_triggered();
     void on_actionMenuFormatRemoveFormat_triggered();
     void on_actionMenuFormatPlainText_triggered();
-    void on_actionMenuEditorViewSource_triggered();
     void on_actionMenuFormatInsertCheckList_triggered();
     void on_actionMenuFormatInsertCode_triggered();
     void on_actionMenuFormatInsertImage_triggered();

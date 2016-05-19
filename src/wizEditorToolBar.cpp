@@ -1190,15 +1190,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnScreenShot = 0;
 #endif
 
-    m_btnViewSource = new CWizToolButton(this);
-    m_btnViewSource->setCheckable(true);
-    m_btnViewSource->setHorizontalPadding(3, 8);
-    m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
-    m_btnViewSource->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatViewSource")).size());
-    m_btnViewSource->setToolTip(tr("View source"));
-    m_btnViewSource->setPosition(CWizToolButton::Center);
-    connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
-
     m_btnInsertCode = new CWizToolButton(this);
     m_btnInsertCode->setCheckable(false);
     m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
@@ -1304,7 +1295,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     QWidget*  moveableButtonContainer5 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout5 = qobject_cast<QHBoxLayout*>(moveableButtonContainer5->layout());
     moveableLayout5->addWidget(m_btnInsertCode);
-    moveableLayout5->addWidget(m_btnViewSource);
 #ifndef Q_OS_MAC
     hLayout->addWidget(m_btnScreenShot);
 #endif
@@ -1498,7 +1488,6 @@ WizEditorContextMenuItem* EditorToolBar::contextMenuData()
 
         {QObject::tr("Table"),                      "+",                "+"},
         {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "on_editor_insertTable_triggered", true},
-        {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",     "on_editor_deleteTable_triggered", true},
         {"-", "-", "-"},
         {QObject::tr("Cell Alignment"),                      "+",                "+"},
         {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop", false},
@@ -1748,70 +1737,82 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
     }
 }
 
-void EditorToolBar::queryCurrentFont(QFont& font)
+void EditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> callback)
 {
-    QString familyName = m_editor->editorCommandQueryCommandValue("fontFamily");
-    familyName.isEmpty() ? void() : font.setFamily(familyName);
+    m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& familyName){
+        //
+        m_editor->editorCommandQueryCommandState("bold", [=](int bold){
 
-    int value = m_editor->editorCommandQueryCommandState("bold");
-//    qDebug() << "query current font bold : " << value;
-    font.setBold(value == 1);
+            m_editor->editorCommandQueryCommandState("italic", [=](int italic){
 
-    value = m_editor->editorCommandQueryCommandState("italic");
-//    qDebug() << "query current font italic : " << value;
-    font.setItalic(value == 1);
+                m_editor->editorCommandQueryCommandState("underline", [=](int underline){
 
-    QString fontSize = m_editor->editorCommandQueryCommandValue("fontSize");
-    fontSize.remove("px");
-    value = fontSize.toInt();
-//    qDebug() << "query current font size : " << value;
-    font.setPointSize(value == 0 ? m_app.userSettings().defaultFontSize() : value);
+                    m_editor->editorCommandQueryCommandValue("fontSize", [=](const QString& fontSize){
 
-    value = m_editor->editorCommandQueryCommandState("underline");
-//    qDebug() << "query current font underline : " << value;
-    font.setUnderline(value == 1);
+                        m_editor->editorCommandQueryCommandState("strikethrough", [=](int strikethrough){
+                            //
+                            QFont font;
 
-    value = m_editor->editorCommandQueryCommandState("strikethrough");
-//    qDebug() << "query current font strikethrough : " << value;
-    font.setStrikeOut(value == 1);
+                            familyName.isEmpty() ? void() : font.setFamily(familyName);
+                            font.setBold(bold == 1);
+                            font.setItalic(italic == 1);
+                            font.setStrikeOut(strikethrough == 1);
+                            font.setUnderline(underline == 1);
+                            //
+                            QString size = fontSize;
+                            size.remove("px");
+                            int sizeValue = size.toInt();
+                            font.setPointSize(sizeValue == 0 ? m_app.userSettings().defaultFontSize() : sizeValue);
+                            //
+                            callback(font);
+                            //
+                        });
+                    });
+                });
+            });
+        });
+    });
 }
 
-void EditorToolBar::setCurrentFont(const QFont& font)
+void EditorToolBar::setCurrentFont(const QFont& fontTemp)
 {
-    QFont currentFont;
-    queryCurrentFont(currentFont);
+    QFont font = fontTemp;
+    //
+    queryCurrentFont([=](const QFont& currentFont){
 
-    if (font.family() != currentFont.family())
-    {
-        QString strFontFamily = font.family();
-        m_editor->editorCommandExecuteFontFamily(strFontFamily);
-        selectCurrentFontFamily(strFontFamily);
-    }
+        if (font.family() != currentFont.family())
+        {
+            QString strFontFamily = font.family();
+            m_editor->editorCommandExecuteFontFamily(strFontFamily);
+            selectCurrentFontFamily(strFontFamily);
+        }
 
-    if (font.pointSize() != currentFont.pointSize())
-    {
-        setFontPointSize(QString::number(font.pointSize()));
-    }
+        if (font.pointSize() != currentFont.pointSize())
+        {
+            setFontPointSize(QString::number(font.pointSize()));
+        }
 
-    if (font.bold() != currentFont.bold())
-    {
-        m_editor->editorCommandExecuteBold();
-    }
+        if (font.bold() != currentFont.bold())
+        {
+            m_editor->editorCommandExecuteBold();
+        }
 
-    if (font.italic() !=  currentFont.italic())
-    {
-        m_editor->editorCommandExecuteItalic();
-    }
+        if (font.italic() !=  currentFont.italic())
+        {
+            m_editor->editorCommandExecuteItalic();
+        }
 
-    if (font.strikeOut() != currentFont.strikeOut())
-    {
-        m_editor->editorCommandExecuteStrikeThrough();
-    }
+        if (font.strikeOut() != currentFont.strikeOut())
+        {
+            m_editor->editorCommandExecuteStrikeThrough();
+        }
 
-    if (font.underline() != currentFont.underline())
-    {
-        m_editor->editorCommandExecuteUnderLine();
-    }
+        if (font.underline() != currentFont.underline())
+        {
+            m_editor->editorCommandExecuteUnderLine();
+        }
+    });
+
 }
 
 void EditorToolBar::selectCurrentFontFamily(const QString& strFontFamily)
@@ -2245,13 +2246,6 @@ void EditorToolBar::buildMenu()
             index = buildMenu(m_menuContext, index);
 
         } else if (item.command != "+") {
-            if (!item.command.isEmpty()) {
-                int value = m_editor->editorCommandQueryCommandState(item.command);
-                if (value == -1) {
-                    index++;
-                    continue;
-                }
-            }
 
             QString strSlot = "1" + item.execute + "()";
 
@@ -2299,12 +2293,6 @@ int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
 //                continue;
 //            }
 
-            if (!item.command.isEmpty()) {
-                int value = m_editor->editorCommandQueryCommandState(item.command);
-                if (value == -1) {
-                    continue;
-                }
-            }
 
             bSkip = false;
             QString strSlot = "1" + item.execute + "()";
@@ -2411,12 +2399,6 @@ void EditorToolBar::on_editor_insertTable_triggered()
     m_editor->editorCommandExecuteTableInsert();
 }
 
-void EditorToolBar::on_editor_deleteTable_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuDeleteTable");
-    m_editor->editorCommandExecuteTableDelete();
-}
-
 void EditorToolBar::on_editor_justifyLeft_triggered()
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyLeft");
@@ -2477,19 +2459,22 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     }
     else if (helperData == WIZFONTPANEL)
     {
-        QFont font;
-        queryCurrentFont(font);
-        //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
-        // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
-        QFontDialog fontDialog;
-        fontDialog.setCurrentFont(font);
-        connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
-        fontDialog.exec();
+        queryCurrentFont([=](const QFont& font){
+            //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
+            // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
+            QFontDialog fontDialog;
+            fontDialog.setCurrentFont(font);
+            connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
+            fontDialog.exec();
+        });
     }
     else if (helperData == WIZSEPARATOR)
     {
-        QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
-        m_comboFontFamily->setText(value);
+        m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& fontFamily){
+            //
+            m_comboFontFamily->setText(fontFamily);
+
+        });
     }
 }
 
@@ -2690,14 +2675,6 @@ void EditorToolBar::on_btnScreenShot_clicked()
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarScreenShot");
     if (m_editor) {
         m_editor->editorCommandExecuteScreenShot();
-    }
-}
-
-void EditorToolBar::on_btnViewSource_clicked()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarViewSource");
-    if (m_editor) {
-        m_editor->editorCommandExecuteViewSource();
     }
 }
 

@@ -1025,7 +1025,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
 
         return;
     }
@@ -2707,12 +2706,6 @@ void MainWindow::on_actionMenuFormatPlainText_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPlainText");
     getActiveEditor()->editorCommandExecutePlainText();
-}
-
-void MainWindow::on_actionMenuEditorViewSource_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarViewSource");
-    getActiveEditor()->editorCommandExecuteViewSource();
 }
 
 void MainWindow::on_actionMenuFormatInsertCheckList_triggered()

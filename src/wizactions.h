@@ -54,7 +54,6 @@ class QShortcut;
 #define WIZACTION_FORMAT_INSERT_TIME        "actionMenuFormatInsertTime"
 #define WIZACTION_FORMAT_REMOVE_FORMAT      "actionMenuFormatRemoveFormat"
 #define WIZACTION_FORMAT_PLAINTEXT          "actionMenuFormatPlainText"
-#define WIZACTION_FORMAT_VIEW_SOURCE        "actionMenuEditorViewSource"
 #define WIZACTION_FORMAT_INSERT_CHECKLIST   "actionMenuFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE        "actionMenuFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE       "actionMenuFormatInsertImage"

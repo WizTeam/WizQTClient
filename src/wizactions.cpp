@@ -146,7 +146,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_IMAGE,             QObject::tr("Insert Image"),            "",           QKeySequence("Shift+Ctrl+I")},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove Format"),       "",           QKeySequence()},
         {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to Plain Text"), "",           QKeySequence()},
-        {WIZACTION_FORMAT_VIEW_SOURCE,             QObject::tr("View Html Source..."),  "",           QKeySequence()},
         {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen Shot..."),           "",           QKeySequence()},
 
 

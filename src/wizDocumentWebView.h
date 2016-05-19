@@ -170,9 +170,10 @@ public:
     // -1: command invalid
     // 0: available
     // 1: executed before
-    int editorCommandQueryCommandState(const QString& strCommand);
-    QString editorCommandQueryCommandValue(const QString& strCommand);
-    bool editorCommandExecuteCommand(const QString& strCommand,
+    void editorCommandQueryCommandState(const QString& strCommand, std::function<void(int state)> callback);
+    void editorCommandQueryCommandValue(const QString& strCommand, std::function<void(const QString& value)> callback);
+    //
+    void editorCommandExecuteCommand(const QString& strCommand,
                                      const QString& arg1 = QString(),
                                      const QString& arg2 = QString(),
                                      const QString& arg3 = QString());
@@ -182,10 +183,10 @@ public:
 
     bool editorCommandQueryMobileFileReceiverState();
 
-    bool editorCommandExecuteParagraph(const QString& strType);
-    bool editorCommandExecuteFontFamily(const QString& strFamily);
-    bool editorCommandExecuteFontSize(const QString& strSize);
-    bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
+    void editorCommandExecuteParagraph(const QString& strType);
+    void editorCommandExecuteFontFamily(const QString& strFamily);
+    void editorCommandExecuteFontSize(const QString& strSize);
+    void editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
     void setPastePlainTextEnable(bool bEnable);
     //
@@ -320,16 +321,16 @@ public Q_SLOTS:
     // font
     void editorCommandExecuteBackColor(const QColor& color);
     void editorCommandExecuteForeColor(const QColor& color);
-    bool editorCommandExecuteBold();
-    bool editorCommandExecuteItalic();
-    bool editorCommandExecuteUnderLine();
-    bool editorCommandExecuteStrikeThrough();
+    void editorCommandExecuteBold();
+    void editorCommandExecuteItalic();
+    void editorCommandExecuteUnderLine();
+    void editorCommandExecuteStrikeThrough();
 
-    bool editorCommandExecuteLinkInsert();
-    bool editorCommandExecuteLinkRemove();
+    void editorCommandExecuteLinkInsert();
+    void editorCommandExecuteLinkRemove();
 
     // search and repalce
-    bool editorCommandExecuteFindReplace();
+    void editorCommandExecuteFindReplace();
     void findPre(QString strTxt, bool bCasesensitive);
     void findNext(QString strTxt, bool bCasesensitive);
     void replaceCurrent(QString strSource, QString strTarget);
@@ -337,66 +338,36 @@ public Q_SLOTS:
     void replaceAll(QString strSource, QString strTarget, bool bCasesensitive);
 
     // format
-    bool editorCommandExecuteIndent();
-    bool editorCommandExecuteOutdent();
+    void editorCommandExecuteIndent();
+    void editorCommandExecuteOutdent();
 
-    bool editorCommandExecuteJustifyLeft();
-    bool editorCommandExecuteJustifyRight();
-    bool editorCommandExecuteJustifyCenter();
-    bool editorCommandExecuteJustifyJustify();
+    void editorCommandExecuteJustifyLeft();
+    void editorCommandExecuteJustifyRight();
+    void editorCommandExecuteJustifyCenter();
+    void editorCommandExecuteJustifyJustify();
 
-    bool editorCommandExecuteInsertOrderedList();
-    bool editorCommandExecuteInsertUnorderedList();
-
-    // table
-    bool editorCommandExecuteTableInsert();
-    bool editorCommandExecuteTableDelete();
-    bool editorCommandExecuteTableDeleteRow();
-    bool editorCommandExecuteTableDeleteCol();
-    bool editorCommandExecuteTableInsertRow();
-    bool editorCommandExecuteTableInsertRowNext();
-    bool editorCommandExecuteTableInsertCol();
-    bool editorCommandExecuteTableInsertColNext();
-    bool editorCommandExecuteTableInsertCaption();
-    bool editorCommandExecuteTableDeleteCaption();
-    bool editorCommandExecuteTableInsertTitle();
-    bool editorCommandExecuteTableDeleteTitle();
-    bool editorCommandExecuteTableMergeCells();
-    bool editorCommandExecuteTalbeMergeRight();
-    bool editorCommandExecuteTableMergeDown();
-    bool editorCommandExecuteTableSplitCells();
-    bool editorCommandExecuteTableSplitRows();
-    bool editorCommandExecuteTableSplitCols();
-    bool editorCommandExecuteTableAverageRows();
-    bool editorCommandExecuteTableAverageCols();
-    bool editorCommandExecuteTableCellAlignLeftTop();
-    bool editorCommandExecuteTableCellAlignTop();
-    bool editorCommandExecuteTableCellAlignRightTop();
-    bool editorCommandExecuteTableCellAlignLeft();
-    bool editorCommandExecuteTableCellAlignCenter();
-    bool editorCommandExecuteTableCellAlignRight();
-    bool editorCommandExecuteTableCellAlignLeftBottom();
-    bool editorCommandExecuteTableCellAlignBottom();
-    bool editorCommandExecuteTableCellAlignRightBottom();
+    void editorCommandExecuteInsertOrderedList();
+    void editorCommandExecuteInsertUnorderedList();
+    //
+    void editorCommandExecuteTableInsert();
 
     // fast operation
-    bool editorCommandExecuteInsertDate();
-    bool editorCommandExecuteInsertTime();
-    bool editorCommandExecuteRemoveFormat();
-    bool editorCommandExecutePlainText();
-    bool editorCommandExecuteFormatMatch();
-    bool editorCommandExecuteInsertHorizontal();
-    bool editorCommandExecuteInsertCheckList();
-    bool editorCommandExecuteInsertImage();
-    bool editorCommandExecuteViewSource();
-    bool editorCommandExecuteInsertCode();
-    bool editorCommandExecuteMobileImage(bool bReceiveImage);
-    bool editorCommandExecuteScreenShot();
+    void editorCommandExecuteInsertDate();
+    void editorCommandExecuteInsertTime();
+    void editorCommandExecuteRemoveFormat();
+    void editorCommandExecutePlainText();
+    void editorCommandExecuteFormatMatch();
+    void editorCommandExecuteInsertHorizontal();
+    void editorCommandExecuteInsertCheckList();
+    void editorCommandExecuteInsertImage();
+    void editorCommandExecuteInsertCode();
+    void editorCommandExecuteMobileImage(bool bReceiveImage);
+    void editorCommandExecuteScreenShot();
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
 
 #ifdef Q_OS_MAC
-    bool editorCommandExecuteRemoveStartOfLine();
+    void editorCommandExecuteRemoveStartOfLine();
 #endif
 
     // js func
@@ -426,7 +397,7 @@ private slots:
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
-    bool insertImage(const QString& strFileName, bool bCopyFile);
+    void insertImage(const QString& strFileName, bool bCopyFile);
     void closeSourceMode();
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();

@@ -735,20 +735,21 @@ void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
 {
     m_bInSeperateWindow = inSeperateWindow;
 
+    //not enabled in web engine
+    /*
     if (inSeperateWindow)
     {
         QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
                                        + "webkit_separate_scrollbar.css");
-        //TODO: webengine
         //settings()->setUserStyleSheetUrl(url);
     }
     else
     {
         QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
                                        + "webkit_scrollbar.css");
-        //TODO: webengine
         //settings()->setUserStyleSheetUrl(url);
     }
+    */
 }
 
 bool CWizDocumentWebView::isInSeperateWindow() const
@@ -916,22 +917,16 @@ void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
     }
 }
 
-bool CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile)
+void CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile)
 {
     QString strHtml;
     if (WizImage2Html(strFileName, strHtml, bCopyFile)) {
-        return editorCommandExecuteInsertHtml(strHtml, true);
+        editorCommandExecuteInsertHtml(strHtml, true);
     }
-    return false;
 }
 
 void CWizDocumentWebView::closeSourceMode()
 { 
-    int modeState = editorCommandQueryCommandState("source");
-    if (modeState == 1)
-    {
-        page()->runJavaScript("editor.execCommand('source')");
-    }
 }
 
 void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QString& strGuid)
@@ -1371,7 +1366,6 @@ void CWizDocumentWebView::viewDocumentInEditor(bool editing)
         view()->showClient(true);
         view()->transitionView()->hide();
 
-        //todo: webengine
         //page()->undoStack()->clear();
         m_timerAutoSave.start();
 
@@ -1446,12 +1440,13 @@ href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
         }
     }
     //
-    //todo: webengine
-    //CString strTemplateJsFileName = ::WizGlobal()->GetDataStorePath() + _T("templates\\WizTemplate.js");
-    //CString strTag = WizFormatString1(_T("<script type=\"text/javascript\" src=\"file:///%1\" wiz_style= \"unsave\" charset=\"utf-8\"></script>"),
-    //                                     strTemplateJsFileName);
-    //
-    //WizHTMLInsertTextAfterBody(strTag, strText);
+    QString strTemplateJsFileName = ::Utils::PathResolve::wizTemplateJsFilePath();
+    if (QFileInfo(strTemplateJsFileName).exists())
+    {
+        QString strTag = QString("<script type=\"text/javascript\" src=\"file:///%1\" wiz_style= \"unsave\" charset=\"utf-8\"></script>").arg(strTemplateJsFileName);
+        //
+        WizHTMLAppendTextInHead(strTag, strHtml);
+    }
 }
 
 void CWizDocumentWebView::viewDocument(bool initEditing)
@@ -1488,13 +1483,9 @@ void CWizDocumentWebView::viewDocument(bool initEditing)
     view()->showClient(true);
     view()->transitionView()->hide();
 
-    //todo: webengine
-    //page()->undoStack()->clear();
-
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
 
-//    emit viewDocumentFinished();
     onNoteLoadFinished();
 }
 
@@ -1557,20 +1548,24 @@ void CWizDocumentWebView::saveDocument(const WIZDOCUMENTDATA& data, bool force, 
     }
 }
 
-QString CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand)
+void CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strCommand, std::function<void(const QString& value)> callback)
 {
-    return QString();
-    //todo: webengine
-    //QString strExec = "editor.queryCommandValue('" + strCommand +"');";
-    //return page()->runJavaScript(strExec).toString();
+    QString script = "document.queryCommandValue('" + strCommand +"');";
+    page()->runJavaScript(script, [=](const QVariant& ret){
+        //
+        callback(ret.toString());
+        //
+    });
 }
 
-int CWizDocumentWebView::editorCommandQueryCommandState(const QString& strCommand)
+void CWizDocumentWebView::editorCommandQueryCommandState(const QString& strCommand, std::function<void(int state)> callback)
 {
-    return 0;
-    //todo: webengine
-    //QString strExec = "editor.queryCommandState('" + strCommand +"');";
-    //return page()->runJavaScript(strExec).toInt();
+    QString script = "editor.queryCommandState('" + strCommand +"');";
+    page()->runJavaScript(script, [=](const QVariant& ret){
+        //
+        callback(ret.toInt());
+        //
+    });
 }
 
 /*
@@ -1578,7 +1573,7 @@ int CWizDocumentWebView::editorCommandQueryCommandState(const QString& strComman
  * All commands execute from client which may modify document MUST invoke this
  * instead of use frame's evaluateJavascript.
  */
-bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
+void CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg1 /* = QString() */,
                                                       const QString& arg2 /* = QString() */,
                                                       const QString& arg3 /* = QString() */)
@@ -1603,8 +1598,6 @@ bool CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
     page()->runJavaScript(strExec);
     //
     setContentsChanged(true);
-
-    return true;
 }
 
 bool CWizDocumentWebView::editorCommandQueryLink()
@@ -1625,42 +1618,45 @@ bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
     return m_app.userSettings().receiveMobileFile();
 }
 
-bool CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
+void CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
 {
     WizGetAnalyzer().LogAction("editorParagraph");
-    return editorCommandExecuteCommand("Paragraph", "'" + strType + "'");
+    editorCommandExecuteCommand("Paragraph", "'" + strType + "'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
+void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
-    return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
+    editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
 void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
 {
-    int nState = editorCommandQueryCommandState("pasteplain");
-    if ((!bEnable && nState == 1) || (bEnable && nState != 1))
-    {
-        editorCommandExecuteCommand("pasteplain");
-    }
+    editorCommandQueryCommandState("pasteplain", [=](int nState){
+
+        if ((!bEnable && nState == 1) || (bEnable && nState != 1))
+        {
+            editorCommandExecuteCommand("pasteplain");
+        }
+        //
+    });
 }
 
-bool CWizDocumentWebView::editorCommandExecuteIndent()
+void CWizDocumentWebView::editorCommandExecuteIndent()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("indent");
-    return editorCommandExecuteCommand("indent");
+    editorCommandExecuteCommand("indent");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteOutdent()
+void CWizDocumentWebView::editorCommandExecuteOutdent()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("outdent");
-    return editorCommandExecuteCommand("outdent");
+    editorCommandExecuteCommand("outdent");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
+void CWizDocumentWebView::editorCommandExecuteLinkInsert()
 {
     if (!m_editorInsertLinkForm) {
         m_editorInsertLinkForm = new CWizEditorInsertLinkForm(window());
@@ -1677,8 +1673,6 @@ bool CWizDocumentWebView::editorCommandExecuteLinkInsert()
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("linkInsert");
     */
-
-    return true;
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
@@ -1698,14 +1692,14 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
     editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
 }
 
-bool CWizDocumentWebView::editorCommandExecuteLinkRemove()
+void CWizDocumentWebView::editorCommandExecuteLinkRemove()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("unlink");
-    return editorCommandExecuteCommand("unlink");
+    editorCommandExecuteCommand("unlink");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteFindReplace()
+void CWizDocumentWebView::editorCommandExecuteFindReplace()
 {
     if (!m_searchReplaceWidget)
     {
@@ -1724,7 +1718,6 @@ bool CWizDocumentWebView::editorCommandExecuteFindReplace()
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("findReplace");
 
-    return true;
 }
 
 static QString strOldSearchText = "";
@@ -1796,16 +1789,16 @@ void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool 
     */
 }
 
-bool CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
+void CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
     WizGetAnalyzer().LogAction(QString("editorSetFontFamily : %1").arg(strFamily));
-    return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
+    editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
+void CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
     WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1px").arg(strSize));
-    return editorCommandExecuteCommand("fontSize", "'" + strSize + "px'");
+    editorCommandExecuteCommand("fontSize", "'" + strSize + "px'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
@@ -1832,77 +1825,77 @@ void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
     analyzer.LogAction("foreColor");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteBold()
+void CWizDocumentWebView::editorCommandExecuteBold()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("bold");
-    return editorCommandExecuteCommand("bold");
+    editorCommandExecuteCommand("bold");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteItalic()
+void CWizDocumentWebView::editorCommandExecuteItalic()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("italic");
-    return editorCommandExecuteCommand("italic");
+    editorCommandExecuteCommand("italic");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteUnderLine()
+void CWizDocumentWebView::editorCommandExecuteUnderLine()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("underline");
-    return editorCommandExecuteCommand("underline");
+    editorCommandExecuteCommand("underline");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteStrikeThrough()
+void CWizDocumentWebView::editorCommandExecuteStrikeThrough()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("strikethrough");
-    return editorCommandExecuteCommand("strikethrough");
+    editorCommandExecuteCommand("strikethrough");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteJustifyLeft()
+void CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyLeft");
-    return editorCommandExecuteCommand("justify", "'left'");
+    editorCommandExecuteCommand("justify", "'left'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteJustifyRight()
+void CWizDocumentWebView::editorCommandExecuteJustifyRight()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyRight");
-    return editorCommandExecuteCommand("justify", "'right'");
+    editorCommandExecuteCommand("justify", "'right'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteJustifyCenter()
+void CWizDocumentWebView::editorCommandExecuteJustifyCenter()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyCenter");
-    return editorCommandExecuteCommand("justify", "'center'");
+    editorCommandExecuteCommand("justify", "'center'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteJustifyJustify()
+void CWizDocumentWebView::editorCommandExecuteJustifyJustify()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyJustify");
-    return editorCommandExecuteCommand("justify", "'justify'");
+    editorCommandExecuteCommand("justify", "'justify'");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertOrderedList()
+void CWizDocumentWebView::editorCommandExecuteInsertOrderedList()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertOrderedList");
-    return editorCommandExecuteCommand("insertOrderedList");
+    editorCommandExecuteCommand("insertOrderedList");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
+void CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertUnorderedList");
-    return editorCommandExecuteCommand("insertUnorderedList");
+    editorCommandExecuteCommand("insertUnorderedList");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteTableInsert()
+void CWizDocumentWebView::editorCommandExecuteTableInsert()
 {
     if (!m_editorInsertTableForm) {
         m_editorInsertTableForm = new CWizEditorInsertTableForm(window());
@@ -1914,8 +1907,6 @@ bool CWizDocumentWebView::editorCommandExecuteTableInsert()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("tableInsert");
-
-    return true;
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
@@ -1959,14 +1950,14 @@ void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
     setWindowVisibleOnScreenShot(true);
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
+void CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertHorizontal");
-    return editorCommandExecuteCommand("horizontal");
+    editorCommandExecuteCommand("horizontal");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
+void CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
     // before insert first checklist, should manual notify editor to save current sence for undo.
     page()->runJavaScript("editor.execCommand('saveScene');");
@@ -1976,15 +1967,13 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCheckList");
-
-    return true;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertImage()
+void CWizDocumentWebView::editorCommandExecuteInsertImage()
 {
     QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFileList.isEmpty())
-        return false;
+        return;
 
     foreach (QString strImgFile, strImgFileList)
     {
@@ -1994,31 +1983,30 @@ bool CWizDocumentWebView::editorCommandExecuteInsertImage()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertImage");
-    return true;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertDate()
+void CWizDocumentWebView::editorCommandExecuteInsertDate()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertDate");
-    return editorCommandExecuteCommand("date");
+    editorCommandExecuteCommand("date");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteInsertTime()
+void CWizDocumentWebView::editorCommandExecuteInsertTime()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertTime");
-    return editorCommandExecuteCommand("time");
+    editorCommandExecuteCommand("time");
 }
 
-bool CWizDocumentWebView::editorCommandExecuteRemoveFormat()
+void CWizDocumentWebView::editorCommandExecuteRemoveFormat()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("removeFormat");
-    return editorCommandExecuteCommand("removeFormat");
+    editorCommandExecuteCommand("removeFormat");
 }
 
-bool CWizDocumentWebView::editorCommandExecutePlainText()
+void CWizDocumentWebView::editorCommandExecutePlainText()
 {
     //todo: webengine
     /*
@@ -2040,10 +2028,9 @@ bool CWizDocumentWebView::editorCommandExecutePlainText()
     m_strCurrentNoteHtml = strText;
     return page()->runJavaScript("updateEditorHtml(true);").toBool();
     */
-    return false;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
+void CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
     //todo: webengine
     /*
@@ -2051,21 +2038,9 @@ bool CWizDocumentWebView::editorCommandExecuteFormatMatch()
     analyzer.LogAction("formatMatch");
     return editorCommandExecuteCommand("formatMatch");
     */
-    return false;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteViewSource()
-{
-    //todo: webengine
-    /*
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("viewSource");
-    editorCommandExecuteCommand("source");
-    */
-    return false;
-}
-
-bool CWizDocumentWebView::editorCommandExecuteInsertCode()
+void CWizDocumentWebView::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
     WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
@@ -2076,10 +2051,9 @@ bool CWizDocumentWebView::editorCommandExecuteInsertCode()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertCode");
-    return true;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
+void CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
 {
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     if (bReceiveImage && m_app.userSettings().needShowMobileFileReceiverUserGuide())
@@ -2092,10 +2066,9 @@ bool CWizDocumentWebView::editorCommandExecuteMobileImage(bool bReceiveImage)
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("mobileImage");
-    return true;
 }
 
-bool CWizDocumentWebView::editorCommandExecuteScreenShot()
+void CWizDocumentWebView::editorCommandExecuteScreenShot()
 {
     CWizScreenShotHelper* helper = new CWizScreenShotHelper();
 
@@ -2108,216 +2081,20 @@ bool CWizDocumentWebView::editorCommandExecuteScreenShot()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("screenShot");
-    return true;
 }
 
 #ifdef Q_OS_MAC
-bool CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
+void CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
 {
     //todo: webengine
     /*
     triggerPageAction(QWebEnginePage::SelectStartOfLine);
     */
     QKeyEvent delKeyPress(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, QString());
-    return QApplication::sendEvent(this, &delKeyPress);
+    QApplication::sendEvent(this, &delKeyPress);
 }
 #endif
 
-bool CWizDocumentWebView::editorCommandExecuteTableDelete()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("deletetable");
-    return editorCommandExecuteCommand("deletetable");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableDeleteRow()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("deleterow");
-    return editorCommandExecuteCommand("deleterow");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableDeleteCol()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("deletecol");
-    return editorCommandExecuteCommand("deletecol");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertRow()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("insertrow");
-    return editorCommandExecuteCommand("insertrow");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertRowNext()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("insertrownext");
-    return editorCommandExecuteCommand("insertrownext");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertCol()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("insertcol");
-    return editorCommandExecuteCommand("insertcol");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertColNext()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("insertcolnext");
-    return editorCommandExecuteCommand("insertcolnext");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertCaption()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("insertcaption");
-    return editorCommandExecuteCommand("insertcaption");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableDeleteCaption()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("deletecaption");
-    return editorCommandExecuteCommand("deletecaption");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableInsertTitle()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("inserttitle");
-    return editorCommandExecuteCommand("inserttitle");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableDeleteTitle()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("deletetitle");
-    return editorCommandExecuteCommand("deletetitle");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableMergeCells()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("mergecells");
-    return editorCommandExecuteCommand("mergecells");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTalbeMergeRight()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("mergeright");
-    return editorCommandExecuteCommand("mergeright");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableMergeDown()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("mergedown");
-    return editorCommandExecuteCommand("mergedown");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableSplitCells()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("splittocells");
-    return editorCommandExecuteCommand("splittocells");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableSplitRows()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("splittorows");
-    return editorCommandExecuteCommand("splittorows");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableSplitCols()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("splittocols");
-    return editorCommandExecuteCommand("splittocols");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableAverageRows()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("averagedistributerow");
-    return editorCommandExecuteCommand("averagedistributerow");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableAverageCols()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("averagedistributecol");
-    return editorCommandExecuteCommand("averagedistributecol");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftTop()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentLeftTop");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'top'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignTop()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentTop");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'top'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightTop()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentRightTop");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'top'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeft()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentLeft");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'middle'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignCenter()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentCenter");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'middle'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRight()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentRight");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'middle'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignLeftBottom()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentLeftBottom");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'left', vAlign: 'bottom'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignBottom()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentBottom");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'center', vAlign: 'bottom'}");
-}
-
-bool CWizDocumentWebView::editorCommandExecuteTableCellAlignRightBottom()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("cellalignmentRightBottom");
-    return editorCommandExecuteCommand("cellalignment", "{align: 'right', vAlign: 'bottom'}");
-}
 
 void CWizDocumentWebView::saveAsPDF()
 {
