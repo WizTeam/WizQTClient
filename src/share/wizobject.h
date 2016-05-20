@@ -946,4 +946,20 @@ inline const CString TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS()
 #define LOCATION_DEFAULT            "/My Notes/"
 
 
+
+enum WizDocumentViewMode
+{
+    viewmodeAlwaysEditing,
+    viewmodeAlwaysReading,
+    viewmodeKeep
+};
+
+enum WizEditorMode
+{
+    modeEditor,
+    modeReader
+};
+
+
+
 #endif // WIZOBJECT_H

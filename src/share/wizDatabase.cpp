@@ -340,34 +340,6 @@ void CWizDocument::Delete()
 }
 
 
-
-static const char* g_lpszZiwMeta = "\
-<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\
-<META>\n\
-    <CLASS>ziw file</CLASS>\n\
-    <VERSION>1.0</VERSION>\n\
-    <DESCRIPTION>Wiz file formate</DESCRIPTION>\n\
-    <TITLE><![CDATA[%title%]]></TITLE>\n\
-    <URL><![CDATA[%url%]]></URL>\n\
-    <TAGS><![CDATA[%tags%]]></TAGS>\n\
-</META>\n\
-";
-
-inline CString WizGetZiwMetaText(const CString& strTitle, const CString& strURL, const CString& strTagsText)
-{
-    CString strText(g_lpszZiwMeta);
-    //
-    strText.Replace("%title%", strTitle);
-    strText.Replace("%url%", strURL);
-    strText.Replace("%tags%", strTagsText);
-    return strText;
-}
-
-QString CWizDocument::GetMetaText()
-{
-    return WizGetZiwMetaText(m_data.strTitle, m_data.strURL, m_db.GetDocumentTagsText(m_data.strGUID));
-}
-
 bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
                                   const QString& strTargetLocation, const WIZTAGDATA& targetTag, QString& resultGUID, bool keepDocTime)
 {
@@ -3129,17 +3101,16 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     m_mtxTempFile.unlock();
 
     CWizDocument doc(*this, data);
-    CString strMetaText = doc.GetMetaText();
 
     CString strZipFileName = GetDocumentFileName(data.strGUID);
     if (!data.nProtected) {
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strZipFileName);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName);
         if (!bZip) {
             return false;
         }
     } else {
         CString strTempFile = Utils::PathResolve::tempPath() + data.strGUID + "-decrypted";
-        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strMetaText, strTempFile);
+        bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strTempFile);
         if (!bZip) {
             return false;
         }
@@ -3515,31 +3486,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
         bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
         if (bRet)
         {
-            //新建的普通笔记添加css样式，模板笔记不添加该样式
-            QString newHtml = strHtml;
-            if (data.strType != "TemplateNote")
-            {
-                /*
-                 * //使用wizeditor默认样式
-                QFile cssFile(Utils::PathResolve::resourcesPath() + "files/editor/cssForNewNote");
-                cssFile.open(QFile::Text | QFile::ReadOnly);
-                QString strCSS = cssFile.readAll();
-                cssFile.close();
-                if (strHtml.contains("<html>", Qt::CaseInsensitive))
-                {
-                    QString strHead;
-                    Utils::Misc::splitHtmlToHeadAndBody(strHtml, strHead, newHtml);
-                    strHead.append(strCSS);
-                    newHtml = "<html><head>" + strHead + "</head><body>" + newHtml + "</body></html>";
-                }
-                else
-                {
-                    newHtml = "<html><head>" + strCSS + "</head><body>" + strHtml + "</body></html>";
-                }
-                */
-            }
-
-            bRet = UpdateDocumentData(data, newHtml, strURL, nFlags);
+            bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
 
             Q_EMIT documentCreated(data);
         }
@@ -4119,19 +4066,17 @@ bool CWizDatabase::CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QStr
     QFile::remove(strZiwFileName);
 
     CWizDocument doc(*this, document);
-    QString strMetaText = doc.GetMetaText();
-
     //
     if (!document.nProtected)
     {
-        bool bZip = ::WizFolder2Zip(strFileFoler, strMetaText, strZiwFileName);
+        bool bZip = ::WizFolder2Zip(strFileFoler, strZiwFileName);
         if (!bZip)
             return false;
     }
     else
     {
         CString strTempFile = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
-        bool bZip = ::WizFolder2Zip(strFileFoler, strMetaText, strTempFile);
+        bool bZip = ::WizFolder2Zip(strFileFoler, strTempFile);
         if (!bZip)
             return false;
 

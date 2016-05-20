@@ -1803,8 +1803,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
 
     if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
     {
-        QString strBody = Utils::Misc::getHtmlBodyContent(strHtml);
-        if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
+        if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strHtml, "", 0, strTitle, "newnote", strLocation, "", data))
         {
             TOLOG("Failed to new document!");
             return false;
@@ -3419,7 +3418,7 @@ void CWizCategoryView::importFiles(QStringList& strFileList)
 
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    return createDocument(data, "<p><br/></p>", tr("Untitled"));
+    return createDocument(data, "<!DOCTYPE html><html><head></head><body><p><br/></p></body></html>", tr("Untitled"));
 }
 
 void CWizCategoryView::on_updatePersonalTagDocumentCount_timeout()

@@ -30,9 +30,9 @@ MainWindow* ICore::mainWindow()
 }
 
 void ICore::emitViewNoteRequested(INoteView* view,
-                                  const WIZDOCUMENTDATA& doc)
+                                  const WIZDOCUMENTDATA& doc, bool forceEditing)
 {
-    Q_EMIT m_instance->viewNoteRequested(view, doc);
+    Q_EMIT m_instance->viewNoteRequested(view, doc, forceEditing);
 }
 
 void ICore::emitViewNoteLoaded(INoteView* view,

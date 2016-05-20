@@ -371,13 +371,13 @@ void TitleBar::setTagBarVisible(bool visible)
 
 void TitleBar::onEditorChanged()
 {
-    updateEditButton(noteView()->isEditing());
+    updateEditButton(noteView()->editorMode());
 }
 
-void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
+void TitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked)
 {
     updateInfo(data);
-    setEditingDocument(editing);
+    setEditorMode(editorMode);
     //
     CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
     bool isGroup = db.IsGroup();
@@ -397,26 +397,24 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
     m_attachBtn->setCount(doc.nAttachmentCount);
 }
 
-void TitleBar::setEditingDocument(bool editing)
+void TitleBar::setEditorMode(WizEditorMode editorMode)
 {
-    //
-    m_editTitle->setReadOnly(!editing);
-    m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
+    m_editTitle->setReadOnly(editorMode == modeReader);
+    m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
 }
 
-void TitleBar::setEditButtonState(bool enable, bool editing)
+void TitleBar::setEditButtonEnabled(bool enable)
 {
     m_editBtn->setEnabled(enable);
-    setEditingDocument(editing);
 }
 
-void TitleBar::updateEditButton(bool editing)
+void TitleBar::updateEditButton(WizEditorMode editorMode)
 {
-    m_editor->isContentsChanged([=](const QVariant& vChanged) {
-        if (vChanged.toBool()){
+    m_editor->isModified([=](bool modified) {
+        if (modified){
             m_editBtn->setState(CellButton::Badge);
         } else {
-            m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
+            m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
         }
     });
 }
@@ -497,10 +495,10 @@ void TitleBar::applyButtonStateForSeparateWindow(bool inSeparateWindow)
 
 void TitleBar::onEditButtonClicked()
 {
-    bool bEdit = !m_editBtn->state();
-    noteView()->setEditNote(bEdit);
+    noteView()->setEditorMode(noteView()->editorMode() == modeEditor ? modeReader: modeEditor);
+    //
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    if (bEdit)
+    if (noteView()->isEditing())
     {
         analyzer.LogAction("editNote");
     }

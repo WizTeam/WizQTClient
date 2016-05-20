@@ -64,12 +64,6 @@ public:
 
 CString WizGetShortcut(const CString& strName, const CString& strDef = "");
 
-enum WizDocumentViewMode
-{
-    viewmodeAlwaysEditing,
-    viewmodeAlwaysReading,
-    viewmodeKeep
-};
 
 enum WizOptionsType
 {

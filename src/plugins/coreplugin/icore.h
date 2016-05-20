@@ -28,13 +28,13 @@ public:
     static ICore* instance();
     static Internal::MainWindow* mainWindow();
 
-    static void emitViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc);
+    static void emitViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
     static void emitViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     static void emitCloseNoteRequested(INoteView* view);
     static void emitMarkdownSettingChanged();
 
 Q_SIGNALS:
-    void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
+    void viewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
     void viewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk);
     void closeNoteRequested(Core::INoteView* view);
     void markdownSettingChanged();

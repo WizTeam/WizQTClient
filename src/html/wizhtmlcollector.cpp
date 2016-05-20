@@ -311,7 +311,6 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
 }
 
 bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
-                                 const QString& strMetaText, \
                                  const QString& strZipFileName)
 {
     std::deque<WIZHTMLFILEDATA> arrayResource;
@@ -342,7 +341,7 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
     CWizStdStringArray arrayAllResource;
     arrayAllResource.assign(files.begin(), files.end());
 
-    return WizHtml2Zip(strRet, arrayAllResource, strMetaText, strZipFileName);
+    return WizHtml2Zip(strRet, arrayAllResource, strZipFileName);
 }
 
 /* -------------------------- CWizHtmlToPlainText -------------------------- */

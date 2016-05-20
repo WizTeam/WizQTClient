@@ -40,8 +40,7 @@ public:
     CWizHtmlCollector();
 
     bool Collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
-    bool Html2Zip(const QString& strExtResourcePath, const QString& strMetaText, \
-                  const QString& strZipFileName);
+    bool Html2Zip(const QString& strExtResourcePath, const QString& strZipFileName);
 
 protected:
     virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);

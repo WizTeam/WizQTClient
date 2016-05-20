@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QIcon>
+#include "share/wizobject.h"
 
 class QString;
 class QMenu;
@@ -47,11 +48,11 @@ public:
 
     void setBackgroundColor(QColor color);
 
-    void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
+    void setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
-    void setEditingDocument(bool editing);
-    void setEditButtonState(bool enable, bool editing);
-    void updateEditButton(bool bEditing);
+    void setEditorMode(WizEditorMode editorMode);
+    void setEditButtonEnabled(bool enable);
+    void updateEditButton(WizEditorMode editorMode);
     void resetTitle(const QString& strTitle);
     void moveTitileTextToPlaceHolder();
     void clearPlaceHolderText();

@@ -127,24 +127,17 @@ public:
     void waitForDone();
 
     // view and save
-    void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
-    void setEditingDocument(bool editing);
-    void saveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
+    void viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode);
+    void setEditorMode(WizEditorMode editorMode);
+    void trySaveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
-    void closeDocument(const WIZDOCUMENTDATA& doc);
 
-    bool isEditing() const { return m_bEditingMode; }
+    bool isEditing() const { return m_currentEditorMode == modeEditor; }
 
     void setNoteTitleInited(bool inited);
 
     void setInSeperateWindow(bool inSeperateWindow);
     bool isInSeperateWindow() const;
-
-    Q_INVOKABLE QString currentNoteGUID();
-    Q_INVOKABLE QString currentNoteHtml();
-    Q_INVOKABLE QString currentNoteHead();
-    Q_INVOKABLE QString currentBodyStyle();
-    Q_INVOKABLE bool currentIsEditing();
 
     //only update Html in JS editor, wouldn't refresh WebView display
     void updateNoteHtml();
@@ -159,7 +152,7 @@ public:
     /* editor related */
     void editorResetFont();
     void editorFocus();
-    void setEditorEnable(bool enalbe);
+    void enableEditor(bool enalbe);
 
     void setIgnoreActiveWindowEvent(bool igoreEvent);
 
@@ -195,8 +188,8 @@ public:
     void shareNoteByLink();
     bool findIMGElementAt(QPoint point, QString& strSrc);
     //
-    void isContentsChanged(std::function<void(const QVariant &)> callback);
-    Q_INVOKABLE void setContentsChanged(bool b);
+    void isModified(std::function<void(bool modified)> callback);
+    Q_INVOKABLE void setModified(bool b);
 
     //use undo func provied by editor
     void undo();
@@ -209,7 +202,6 @@ public:
     Q_INVOKABLE QString getFormatedDateTime();
     Q_INVOKABLE bool isPersonalDocument();
     Q_INVOKABLE QString getCurrentNoteHtml();
-    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
     Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
@@ -231,7 +223,7 @@ public:
     QNetworkDiskCache* networkCache();    
 
 private:
-    void viewDocument(bool initEditing);
+    void loadDocumentInWeb(bool initEditing);
     //
     void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
     void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
@@ -262,15 +254,11 @@ private:
     QMap<QString, QString> m_mapFile;
 
     QTimer m_timerAutoSave;
-    bool m_bEditingMode;
+    WizEditorMode m_currentEditorMode;
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
     //
-    QString m_strCurrentNoteGUID;
-    QString m_strCurrentNoteHead;
-    QString m_strCurrentNoteHtml;
-    QString m_strCurrentNoteBodyStyle;
-    bool m_bCurrentEditing;
+    QString m_currentNoteHtml;
     //
     bool m_bContentsChanged;
     //
@@ -305,7 +293,7 @@ public Q_SLOTS:
 
     void onTitleEdited(QString strTitle);
 
-    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, bool editingMode);
+    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, bool startEditing);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
@@ -398,7 +386,6 @@ private slots:
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
     void insertImage(const QString& strFileName, bool bCopyFile);
-    void closeSourceMode();
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();
     QString getNoteType();

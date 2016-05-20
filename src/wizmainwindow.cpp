@@ -1112,7 +1112,7 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
     m_doc->resetTitle(data.strTitle);
     m_doc->web()->setNoteTitleInited(true);
     setFocusForNewNote(data);
-    m_doc->web()->setContentsChanged(true);
+    m_doc->web()->setModified(true);
 
     quickSyncKb(kbGUID);
 }
@@ -1462,7 +1462,7 @@ void MainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
 #endif
 }
 
-void MainWindow::on_newNoteButton_extraMenuRequest()
+void MainWindow::prepareNewNoteMenu()
 {
     if (!m_newNoteExtraMenu)
     {
@@ -1476,6 +1476,11 @@ void MainWindow::on_newNoteButton_extraMenuRequest()
             action->setData(tmpl.toQVariant());
         }
     }
+}
+
+void MainWindow::on_newNoteButton_extraMenuRequest()
+{
+    prepareNewNoteMenu();
 
     QPoint pos = QCursor::pos();
     pos.setX(pos.x() + 10);
@@ -1670,7 +1675,7 @@ void MainWindow::initToolBar()
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
     QPixmap pixExtraMenu = Utils::StyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), pixExtraMenu, buttonWidth, nullptr);
+    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), pixExtraMenu, buttonWidth, nullptr);
     connect(texturedItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool)));
     connect(texturedItem, SIGNAL(showExtraMenuRequest()), SLOT(on_newNoteButton_extraMenuRequest()));
@@ -1761,9 +1766,19 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
+    prepareNewNoteMenu();
+    //
+    QAction* newNoteAction = m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT);
+    newNoteAction->setSeparator(true);
+    newNoteAction->setMenu(m_newNoteExtraMenu);
+    //
     CWizButton* buttonNew = new CWizButton(m_toolBar);
-    buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    buttonNew->setMenu(m_newNoteExtraMenu);
+    buttonNew->setDefaultAction(m_newNoteExtraMenu->actionAt(QPoint(0 ,0)));
+    buttonNew->setPopupMode(QToolButton::MenuButtonPopup);
+    buttonNew->setAction(newNoteAction);
     m_toolBar->addWidget(buttonNew);
+    //
 
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
@@ -2268,7 +2283,6 @@ void MainWindow::on_actionNewNote_triggered()
     }
 
     setFocusForNewNote(data);
-    m_doc->web()->setEditorEnable(true);
     m_history->addHistory(data);
 }
 
@@ -3277,8 +3291,15 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     }
 
     resetPermission(data.strKbGUID, data.strOwner);
+    //
+    bool forceEditing = false;
+    if (data.strGUID == m_documentForEditing.strGUID)
+    {
+        forceEditing = true;
+        m_documentForEditing = WIZDOCUMENTDATA();
+    }
 
-    ICore::emitViewNoteRequested(m_doc, data);
+    ICore::emitViewNoteRequested(m_doc, data, forceEditing);
 
     if (addToHistory) {
         m_history->addHistory(data);

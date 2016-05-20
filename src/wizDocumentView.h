@@ -88,8 +88,8 @@ protected:
 private:
     WIZDOCUMENTDATA m_note;
     bool m_bLocked; // note is force locked as readonly status
-    bool m_bEditingMode; // true: editing mode, false: reading mode
-    int m_viewMode; // user defined editing mode
+    WizEditorMode m_editorMode;
+    WizDocumentViewMode m_defaultViewMode; // user defined editing mode
     bool m_noteLoaded;
     //
     int m_editStatus;  // document edit or version status
@@ -98,19 +98,19 @@ private:
 public:
     const WIZDOCUMENTDATA& note() const { return m_note; }
     bool isLocked() const { return m_bLocked; }
-    bool isEditing() const { return m_bEditingMode; }
-    bool defaultEditingMode();
+    bool isEditing() const { return m_editorMode == modeEditor; }
+    WizEditorMode editorMode() const { return m_editorMode; }
     bool reload();
     void reloadNote();
     void setEditorFocus();
     bool noteLoaded() const { return m_noteLoaded; }
 
-    void initStat(const WIZDOCUMENTDATA& data, bool bEditing);
+    void initStat(const WIZDOCUMENTDATA& data, bool forceEdit);
     void viewNote(const WIZDOCUMENTDATA& data, bool forceEdit);
     void reviewCurrentNote();
     void showClient(bool visible);
-    void setEditNote(bool bEdit);
-    void setViewMode(int mode);
+    void setEditorMode(WizEditorMode editorMode);
+    void setDefaultViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
     void settingsChanged();
     void sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID);
@@ -129,7 +129,7 @@ signals:
     void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
-    void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc);
+    void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
     void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
     void onCloseNoteRequested(Core::INoteView* view);
 

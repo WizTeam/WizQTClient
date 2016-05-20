@@ -213,7 +213,7 @@ private:
     bool m_bUpdatingSelection;
 
     bool m_bQuickDownloadMessageEnable;
-
+    //
     WIZDOCUMENTDATA m_documentForEditing;
 
 private:
@@ -530,6 +530,8 @@ private:
 
     //
     bool processApplicationActiveEvent();
+    //
+    void prepareNewNoteMenu();
 
 private slots:
     void windowActived();
