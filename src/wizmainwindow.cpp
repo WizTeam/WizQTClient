@@ -1088,7 +1088,11 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
             data.strLocation.replace("{month}", QDate::currentDate().toString("MM"));
         }
         //  Journal {date}({week})
-        if (!tmplData.strTitle.isEmpty())
+        if (tmplData.strTitle.isEmpty())
+        {
+            data.strTitle = tmplData.strName;
+        }
+        else
         {
             COleDateTime dt;
             data.strTitle.replace("{date}", dt.toLocalLongDate());
@@ -1472,8 +1476,15 @@ void MainWindow::prepareNewNoteMenu()
         getTemplateListFroNewNoteMenu(tmplList);
         for (TemplateData tmpl : tmplList)
         {
-            QAction* action = m_newNoteExtraMenu->addAction(tmpl.strName, this, SLOT(on_newNoteByExtraMenu_request()));
-            action->setData(tmpl.toQVariant());
+            if (tmpl.strName == "-")
+            {
+                m_newNoteExtraMenu->addSeparator();
+            }
+            else
+            {
+                QAction* action = m_newNoteExtraMenu->addAction(tmpl.strName, this, SLOT(on_newNoteByExtraMenu_request()));
+                action->setData(tmpl.toQVariant());
+            }
         }
     }
 }
@@ -1769,20 +1780,15 @@ void MainWindow::initToolBar()
     prepareNewNoteMenu();
     //
     QAction* newNoteAction = m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT);
-    newNoteAction->setSeparator(true);
-    newNoteAction->setMenu(m_newNoteExtraMenu);
     //
-    CWizButton* buttonNew = new CWizButton(m_toolBar);
+    QToolButton* buttonNew = new QToolButton(m_toolBar);
     buttonNew->setMenu(m_newNoteExtraMenu);
-    buttonNew->setDefaultAction(m_newNoteExtraMenu->actionAt(QPoint(0 ,0)));
+    buttonNew->setDefaultAction(newNoteAction);//m_newNoteExtraMenu->actionAt(QPoint(0 ,0)));
     buttonNew->setPopupMode(QToolButton::MenuButtonPopup);
-    buttonNew->setAction(newNoteAction);
+    //buttonNew->setAction(newNoteAction);
     m_toolBar->addWidget(buttonNew);
     //
-
-
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);

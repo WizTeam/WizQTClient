@@ -703,6 +703,33 @@ void TemplateData::fromQVariant(const QVariant& var)
 //获取模板列表，用于主窗口的新建笔记按钮快速创建笔记
 bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
 {
+    // 内置的空白模板
+    TemplateData tmplEmpty;
+    tmplEmpty.type = CustomTemplate;
+    tmplEmpty.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/newnote.ziw";
+    tmplEmpty.strName = "Empty Note";
+    tmplEmpty.strTitle = "Untitled";
+    tmplEmpty.isFree = true;
+    tmplList.append(tmplEmpty);
+    //
+    // 内置的markdown模板
+    TemplateData tmplMarkdown;
+    tmplMarkdown.type = CustomTemplate;
+    tmplMarkdown.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
+    tmplMarkdown.strName = "Markdown Note";
+    tmplMarkdown.strTitle = "Markdown Note.md";
+    tmplMarkdown.isFree = true;
+    tmplList.append(tmplMarkdown);
+    //
+    // sep
+    TemplateData tmplSep;
+    tmplSep.type = CustomTemplate;
+    tmplSep.strFileName = "-";
+    tmplSep.strName = "-";
+    tmplSep.strTitle = "-";
+    tmplSep.isFree = true;
+    tmplList.append(tmplSep);
+
     // 通过服务器下载的笔记模板
     QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
     if (QFile::exists(jsonFile))
@@ -720,16 +747,6 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
         getTemplatesFromJsonData(jsonData.toUtf8(), tmplMap);
         tmplList.append(tmplMap.values());
     }
-
-    // 内置的markdown模板
-    TemplateData tmpl;
-    tmpl.type = CustomTemplate;
-    tmpl.strFileName = "Markdown.md.ziw";
-    tmpl.strName = "Markdown";
-    tmpl.strTitle = "Markdown.md";
-    tmpl.isFree = true;
-
-    tmplList.append(tmpl);
 
     return true;
 }

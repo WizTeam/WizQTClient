@@ -1553,6 +1553,18 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 {
     if (!m_editor)
         return;
+    QMenu *menu = m_editor->page()->createStandardContextMenu();
+    for (QAction* action : menu->actions())
+    {
+        qDebug() << "action name: " << action->objectName() << "\n";
+
+        qDebug() << "action text: " << action->text() << "\n";
+    }
+    if (!menu)
+        return;
+    //
+    menu->popup(pos);
+    return;
 
     buildMenu();    
 
