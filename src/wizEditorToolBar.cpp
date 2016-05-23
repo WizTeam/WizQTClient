@@ -1388,152 +1388,13 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnMobileImage->setEnabled(true);
 }
 
-struct WizEditorContextMenuItem
-{
-    QString label;
-    QString command;
-    QString execute;
-    bool localSlot;
-};
+
 
 #define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
 #define WIZEDITOR_ACTION_BAIDU           QObject::tr("Use \"Baidu\" search")
 
-#define WIZEDITOR_ACTION_CUT            QObject::tr("Cut")
-#define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
-#define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
-
-#define WIZEDITOR_ACTION_SAVEIMGAS          QObject::tr("Save Image as...")
-#define WIZEDITOR_ACTION_COPYIMG          QObject::tr("Copy Image")
-#define WIZEDITOR_ACTION_COPYIMGLINK          QObject::tr("Copy Image Link")
-
-#define WIZEDITOR_ACTION_LINK_INSERT    QObject::tr("Insert Link")
-#define WIZEDITOR_ACTION_LINK_EDIT      QObject::tr("Edit Link")
-#define WIZEDITOR_ACTION_LINK_REMOVE    QObject::tr("Remove Link")
-
-#define WIZEDITOR_ACTION_FONT_BOLD          QObject::tr("Bold")
-#define WIZEDITOR_ACTION_FONT_ITALIC        QObject::tr("Italic")
-#define WIZEDITOR_ACTION_FONT_UNDERLINE     QObject::tr("Underline")
-#define WIZEDITOR_ACTION_FONT_STRIKETHROUGH QObject::tr("Strike through")
-#define WIZEDITOR_ACTION_FONT_FORECOLOR     QObject::tr("font color")
-#define WIZEDITOR_ACTION_FONT_BACKCOLOR     QObject::tr("background color")
-
-#define WIZEDITOR_ACTION_JUSTIFY_LEFT       QObject::tr("Justify left")
-#define WIZEDITOR_ACTION_JUSTIFY_CENTER     QObject::tr("Justify center")
-#define WIZEDITOR_ACTION_JUSTIFY_RIGHT      QObject::tr("Justify right")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT       QObject::tr("Insert table")
-#define WIZEDITOR_ACTION_TABLE_DELETE       QObject::tr("Delete table")
-
-#define WIZEDITOR_ACTION_TABLE_DELETE_ROW   QObject::tr("Delete row")
-#define WIZEDITOR_ACTION_TABLE_DELETE_COLUM QObject::tr("Delete colum")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW           QObject::tr("Insert row")
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT      QObject::tr("Insert row next")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM         QObject::tr("Insert colum")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT    QObject::tr("Insert colum next")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT_CAPTION   QObject::tr("Insert caption")
-#define WIZEDITOR_ACTION_TABLE_DELETE_CAPTION   QObject::tr("Delete caption")
-#define WIZEDITOR_ACTION_TABLE_INSERT_TITLE     QObject::tr("Insert title")
-#define WIZEDITOR_ACTION_TABLE_DELETE_TITLE     QObject::tr("Delete title")
-
-#define WIZEDITOR_ACTION_TABLE_MERGE_CELLS  QObject::tr("Merge cells")
-#define WIZEDITOR_ACTION_TABLE_MERGE_RIGHT  QObject::tr("Merge right")
-#define WIZEDITOR_ACTION_TABLE_MERGE_DOWN   QObject::tr("Merge down")
-
-#define WIZEDITOR_ACTION_TABLE_SPLIT_CELLS  QObject::tr("Split cells")
-#define WIZEDITOR_ACTION_TABLE_SPLIT_ROWS   QObject::tr("Split rows")
-#define WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS QObject::tr("Split colums")
-
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS     QObject::tr("Averaged distribute rows")
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS   QObject::tr("Averaged distribute colums")
 
 
-WizEditorContextMenuItem* EditorToolBar::contextMenuData()
-{
-    static WizEditorContextMenuItem arrayData[] =
-    {
-        {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered", true},
-        {WIZEDITOR_ACTION_BAIDU,                   "",                 "on_editor_baidu_triggered", true},
-        {"-", "-", "-"},
-
-        {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered", true},
-        {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered", true},
-        {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered", true},
-        {"-", "-", "-"},
-
-        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered", true},
-        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered", true},
-        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered", true},
-        {"-", "-", "-"},
-
-        {QObject::tr("Link"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_LINK_INSERT,              "link",             "on_editor_insertLink_triggered", true},
-        {WIZEDITOR_ACTION_LINK_EDIT,                "link",             "on_editor_editLink_triggered", true},
-        {WIZEDITOR_ACTION_LINK_REMOVE,              "unlink",           "on_editor_removeLink_triggered", true},
-        {"+", "+", "+"},
-
-        {QObject::tr("Font"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_FONT_BOLD,                "bold",             "on_editor_bold_triggered", true},
-        {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "on_editor_italic_triggered", true},
-        {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "on_editor_underline_triggered", true},
-        {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "on_editor_strikethrough_triggered", true},
-//        {"-", "-", "-"},
-//        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
-//        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
-        {"+", "+", "+"},
-
-        {QObject::tr("Justify"),                    "+",          "+"},
-        {WIZEDITOR_ACTION_JUSTIFY_LEFT,             "justify",          "on_editor_justifyLeft_triggered", true},
-        {WIZEDITOR_ACTION_JUSTIFY_CENTER,           "justify",          "on_editor_justifyCenter_triggered", true},
-        {WIZEDITOR_ACTION_JUSTIFY_RIGHT,            "justify",          "on_editor_justifyRight_triggered", true},
-        {"+", "+", "+"},
-
-        {QObject::tr("Table"),                      "+",                "+"},
-        {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "on_editor_insertTable_triggered", true},
-        {"-", "-", "-"},
-        {QObject::tr("Cell Alignment"),                      "+",                "+"},
-        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop", false},
-        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop", false},
-        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop", false},
-        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft", false},
-        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter", false},
-        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight", false},
-        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom", false},
-        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom", false},
-        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom", false},
-        {"+", "+", "+"},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW,         "insertrow",        "editorCommandExecuteTableInsertRow", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT,    "insertrownext",    "editorCommandExecuteTableInsertRowNext", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM,       "insertcol",        "editorCommandExecuteTableInsertCol", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT,  "insertcolnext",    "editorCommandExecuteTableInsertColNext", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_CAPTION,     "insertcaption",    "editorCommandExecuteTableInsertCaption", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_CAPTION,     "deletecaption",    "editorCommandExecuteTableDeleteCaption", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_TITLE,       "inserttitle",      "editorCommandExecuteTableInsertTitle", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_TITLE,       "deletetitle",      "editorCommandExecuteTableDeleteTitle", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_MERGE_CELLS,        "mergecells",       "editorCommandExecuteTableMergeCells", false},
-        {WIZEDITOR_ACTION_TABLE_MERGE_RIGHT,        "mergeright",       "editorCommandExecuteTalbeMergeRight", false},
-        {WIZEDITOR_ACTION_TABLE_MERGE_DOWN,         "mergedown",        "editorCommandExecuteTableMergeDown", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_CELLS,        "splittocells",     "editorCommandExecuteTableSplitCells", false},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_ROWS,         "splittorows",      "editorCommandExecuteTableSplitRows", false},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS,       "splittocols",      "editorCommandExecuteTableSplitCols", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS,       "averagedistributerow", "editorCommandExecuteTableAverageRows", false},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS,     "averagedistributecol", "editorCommandExecuteTableAverageCols", false},
-        {"+", "+", "+"},
-
-        {"", "", ""}
-    };
-
-    return arrayData;
-}
 
 void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
 {
@@ -1548,62 +1409,81 @@ void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
             SLOT(on_delegate_selectionChanged(const QString&)));
 }
 
+static std::map<QString, QWebEnginePage::WebAction> g_webActions;
+//
+void initWebActions(QWebEnginePage* page)
+{
+    if (!g_webActions.empty())
+        return;
+    //
+    for (int action = QWebEnginePage::NoWebAction + 1;
+         action < QWebEnginePage::WebActionCount;
+         action++)
+    {
+        QWebEnginePage::WebAction a = (QWebEnginePage::WebAction)action;
+        QAction* actionObj = page->action(a);
+        //
+        QString text = actionObj->text();
+        g_webActions[text] = a;
+    }
+}
+//
+QWebEnginePage::WebAction menuText2WebAction(QWebEnginePage* page, QString text)
+{
+    initWebActions(page);
+    //
+    auto it = g_webActions.find(text);
+    if (it == g_webActions.end())
+        return QWebEnginePage::NoWebAction;
+    //
+    return it->second;
+}
+
 
 void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 {
     if (!m_editor)
         return;
-    QMenu *menu = m_editor->page()->createStandardContextMenu();
-    for (QAction* action : menu->actions())
-    {
-        qDebug() << "action name: " << action->objectName() << "\n";
-
-        qDebug() << "action text: " << action->text() << "\n";
-    }
+    //
+    QWebEnginePage* page = m_editor->page();
+    if (!page)
+        return;
+    //
+    QMenu *menu = page->createStandardContextMenu();
     if (!menu)
         return;
     //
+    QList<QAction*> actions = menu->actions();
+    for (QAction* action : actions)
+    {
+        QWebEnginePage::WebAction a = menuText2WebAction(page, action->iconText());
+        switch (a)
+        {
+        case QWebEnginePage::Back:
+        case QWebEnginePage::Forward:
+        case QWebEnginePage::Stop:
+        case QWebEnginePage::Reload:
+            menu->removeAction(action);
+            break;
+        default:
+            break;
+        }
+    }
+    //
+    if (!m_editor->selectedText().isEmpty())
+    {
+        if (!menu->actions().isEmpty())
+        {
+            menu->addSeparator();
+        }
+        menu->addAction(WIZEDITOR_ACTION_GOOGLE, this, SLOT(on_editor_google_triggered()));
+        menu->addAction(WIZEDITOR_ACTION_BAIDU, this, SLOT(on_editor_baidu_triggered()));
+    }
+    //
+    if (menu->actions().isEmpty())
+        return;
+    //
     menu->popup(pos);
-    return;
-
-    buildMenu();    
-
-    m_strImageSrc.clear();
-    if (m_editor->findIMGElementAt(pos, m_strImageSrc))
-    {
-        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(true);
-        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(true);
-        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(true);
-    }
-    else
-    {
-        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(false);
-        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(false);
-        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(false);
-    }
-
-    if (m_editor->selectedText().isEmpty()) {
-        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(true);
-    }
-
-    if (m_editor->selectedText().isEmpty()) {
-        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(false);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(true);
-    }
-
-    if (m_editor->isEditing() && m_editor->hasFocus()) {
-        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(true);
-        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(true);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
-        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
-    }    
-
-    m_menuContext->popup(pos);
-    m_menuContext->update();
 
     WizGetAnalyzer().LogAction("editorContextMenu");
 }
@@ -2239,100 +2119,6 @@ bool EditorToolBar::hasFocus()
     return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping() || m_comboParagraph->isPopuping();
 }
 
-void EditorToolBar::buildMenu()
-{
-    if (!m_menuContext) {
-        m_menuContext = new QMenu(this);
-    }
-
-    m_menuContext->clear();
-    m_actions.clear();
-
-    int index = 0;
-    WizEditorContextMenuItem* arrayData = contextMenuData();
-    while (1) {
-        WizEditorContextMenuItem& item = arrayData[index];
-        if (item.label.isEmpty() && item.command.isEmpty() && item.execute.isEmpty()) {
-            break;
-
-        } else if (item.label == "-") {
-            m_menuContext->addSeparator();
-
-        } else if (item.execute == "+") {
-            index = buildMenu(m_menuContext, index);
-
-        } else if (item.command != "+") {
-
-            QString strSlot = "1" + item.execute + "()";
-
-            if (item.localSlot) {
-                m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8().constData());
-            } else {
-                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8().constData());
-            }
-
-        } else {
-            Q_ASSERT(0);
-        }
-
-        index++;
-    }
-}
-
-int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
-{
-    int index = indx;
-    bool bSkip = true;
-    WizEditorContextMenuItem* arrayData = contextMenuData();
-    WizEditorContextMenuItem& curItem = arrayData[index];
-    QMenu* pSubMenu = new QMenu(curItem.label, pMenu);
-
-    while(1) {
-        index++;
-
-        WizEditorContextMenuItem& item = arrayData[index];
-        if (item.label == "+") {
-            break;
-        } else if (item.execute == "+") {
-            index = buildMenu(pSubMenu, index);
-        } else if (item.label == "-") {
-            pSubMenu->addSeparator();
-
-        } else if (item.command != "+" && !item.execute.isEmpty()) {
-
-//            // special case
-//            if (m_editor->editorCommandQueryLink()
-//                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
-//                continue;
-//            } else if (!m_editor->editorCommandQueryLink()
-//                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
-//                continue;
-//            }
-
-
-            bSkip = false;
-            QString strSlot = "1" + item.execute + "()";
-            if (item.localSlot) {
-                m_actions[item.label] = pSubMenu->addAction(item.label, this, strSlot.toUtf8().constData());
-            } else {
-                m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8().constData());
-            }
-
-        } else if (item.command.isEmpty() && item.execute.isEmpty()) {
-            continue;
-        } else {
-            Q_ASSERT(0);
-        }
-    }
-
-    if (!bSkip) {
-        pMenu->addMenu(pSubMenu);
-    } else {
-        pSubMenu->deleteLater();
-    }
-
-    return index;
-}
 
 void EditorToolBar::on_editor_google_triggered()
 {

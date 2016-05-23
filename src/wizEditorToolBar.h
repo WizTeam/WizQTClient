@@ -19,8 +19,6 @@ class CWizToolComboBoxFont;
 class CWizExplorerApp;
 class CWizTipsWidget;
 
-struct WizEditorContextMenuItem;
-
 namespace Core {
 namespace Internal {
 
@@ -44,7 +42,6 @@ private:
 
     CWizDocumentWebView* m_editor;
     QMap<QString, QAction*> m_actions;
-    QPointer<QMenu> m_menuContext;
     CWizToolComboBox* m_comboParagraph;
     CWizToolComboBox* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
@@ -83,10 +80,6 @@ private:
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     bool m_resetLocked;
     QTimer m_resetLockTimer;
-
-    WizEditorContextMenuItem* contextMenuData();
-    void buildMenu();
-    int buildMenu(QMenu* pMenu, int indx);
 
     // editor status reflect
     void resetToolbar(const QString& currentStyle);
