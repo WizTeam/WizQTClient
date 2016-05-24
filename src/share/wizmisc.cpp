@@ -1876,21 +1876,25 @@ QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgS
             .arg(linkHref).arg(imgSize.width()).arg(imgSize.height()).arg(imageFile);
 }
 
-bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath)
 {
+    Utils::Misc::addBackslash(strDestImagePath);
+    //
+    QString srcPath = Utils::Misc::extractFilePath(strImageFile);
+    //
     QString strDestFile = strImageFile;
-    if (bUseCopyFile)
+    if (srcPath != strDestImagePath)
     {
-        QFileInfo info(strImageFile);
-        strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-
+        strDestFile = strDestImagePath + WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strImageFile);
+        //
         qDebug() << "[Editor] copy to: " << strDestFile;
 
         if (!QFile::copy(strImageFile, strDestFile)) {
+            qDebug() << "[Editor] failed to copy image to: " << strDestFile;
             return false;
         }
     }
-
+    //
     strHtml = getImageHtmlLabelByFile(strDestFile);
     return true;
 }

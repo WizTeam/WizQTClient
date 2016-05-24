@@ -1123,55 +1123,6 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
 
 void MainWindow::on_mobileFileRecived(const QString& strFile)
 {
-    //目前只支持在有编辑状态的笔记时插入图片，其他时候删除掉接受到的图片
-    /*
-    QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("Info"));
-    msgBox.setText(tr("Mobile file received : ") + strFile);
-    QAbstractButton *ignoreButton = msgBox.addButton(tr("Do nothing"), QMessageBox::ActionRole);
-    QAbstractButton *delButton = msgBox.addButton(tr("Delete file"), QMessageBox::ActionRole);
-    QAbstractButton *newNoteButton = msgBox.addButton(tr("Create new note whith the file"), QMessageBox::ActionRole);
-    QAbstractButton *insertButton = msgBox.addButton(tr("Insert into current note"), QMessageBox::ActionRole);
-
-    QImageReader imageReader(strFile);
-    bool isImageFile = imageReader.canRead();
-
-    msgBox.exec();
-   // Q_UNUSED(ignoreButton);
-    if (msgBox.clickedButton() == delButton)
-    {
-        QFile::remove(strFile);
-    }
-    else if (msgBox.clickedButton() == newNoteButton)
-    {
-        if (isImageFile)
-        {
-            createNoteWithImage(strFile);
-        }
-        else
-        {
-            createNoteWithAttachments(QStringList(strFile));
-        }
-    }
-    else if (msgBox.clickedButton() == insertButton && m_doc->web()->isEditing())
-    {
-        if (isImageFile)
-        {
-            QString strHtml;
-            if (WizImage2Html(strFile, strHtml))
-            {
-                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
-            }
-        }
-        else
-        {
-            const WIZDOCUMENTDATA& doc = m_doc->note();
-            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            WIZDOCUMENTATTACHMENTDATA attach;
-            db.AddAttachment(doc, strFile, attach);
-        }
-    }
-    */
     if (m_doc->web()->isEditing())
     {
         QImageReader imageReader(strFile);
@@ -1180,7 +1131,7 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
         if (isImageFile)
         {
             QString strHtml;
-            if (WizImage2Html(strFile, strHtml))
+            if (WizImage2Html(strFile, strHtml, m_doc->web()->noteResourcesPath()))
             {
                 m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
             }
@@ -3637,29 +3588,6 @@ void MainWindow::createNoteWithText(const QString& strText)
         return;
     }
     setFocusForNewNote(data);
-}
-
-void MainWindow::createNoteWithImage(const QString& strImageFile)
-{
-    initVariableBeforCreateNote();
-
-    QString strTitle = Utils::Misc::extractFileTitle(strImageFile);
-    if (strTitle.isEmpty())
-    {
-        strTitle = "New note";
-    }
-
-    QString strHtml;
-    bool bUseCopyFile = true;
-    if (WizImage2Html(strImageFile, strHtml, bUseCopyFile))
-    {
-        WIZDOCUMENTDATA data;
-        if (!m_category->createDocument(data, strHtml, strTitle))
-        {
-            return;
-        }
-        setFocusForNewNote(data);
-    }
 }
 
 void MainWindow::showNewFeatureGuide()

@@ -260,7 +260,6 @@ public:
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
-    void createNoteWithImage(const QString& strImageFile);
 
 signals:    
     void documentsViewTypeChanged(int);

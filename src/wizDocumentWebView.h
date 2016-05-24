@@ -153,6 +153,7 @@ public:
     void editorResetFont();
     void editorFocus();
     void enableEditor(bool enalbe);
+    QString noteResourcesPath();
 
     void setIgnoreActiveWindowEvent(bool igoreEvent);
 
@@ -258,6 +259,7 @@ private:
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
     //
+    QString m_strNoteHtmlFileName;
     QString m_currentNoteHtml;
     //
     bool m_bContentsChanged;
@@ -385,7 +387,7 @@ private slots:
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
-    void insertImage(const QString& strFileName, bool bCopyFile);
+    void insertImage(const QString& strFileName);
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();
     QString getNoteType();

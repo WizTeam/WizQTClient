@@ -172,10 +172,12 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
     */
 #endif
 
+    //todo: webengine
+    /*
     if (!clip->image().isNull()) {
         // save clipboard image to $TMPDIR
-        QString strTempPath = Utils::PathResolve::tempPath();
-        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+        QString strImagePath = noteResourcesPath();
+        CString strFileName = strImagePath + WizIntToStr(GetTickCount()) + ".png";
         if (!clip->image().save(strFileName)) {
             TOLOG("ERROR: Can't save clipboard image to file");
             return;
@@ -187,6 +189,7 @@ void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
         data->setHtml(strHtml);
         clip->setMimeData(data);
     }
+    */
 }
 
 void CWizDocumentWebViewPage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
@@ -571,8 +574,7 @@ void CWizDocumentWebView::dropEvent(QDropEvent* event)
             if (imageFormats.contains(info.suffix().toUtf8()))
             {
                 QString strHtml;
-                bool bUseCopyFile = true;
-                if (WizImage2Html(strFileName, strHtml, bUseCopyFile)) {
+                if (WizImage2Html(strFileName, strHtml, noteResourcesPath())) {
                     editorCommandExecuteInsertHtml(strHtml, true);
                     nAccepted++;
                 }
@@ -902,10 +904,23 @@ void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
     }
 }
 
-void CWizDocumentWebView::insertImage(const QString& strFileName, bool bCopyFile)
+QString CWizDocumentWebView::noteResourcesPath()
+{
+    Q_ASSERT(!m_strNoteHtmlFileName.isEmpty());
+    if (m_strNoteHtmlFileName.isEmpty())
+        return QString();
+    //
+    QString path = Utils::Misc::extractFilePath(m_strNoteHtmlFileName);
+    path += "index_files/";
+    Utils::Misc::ensurePathExists(path);
+    //
+    return path;
+}
+
+void CWizDocumentWebView::insertImage(const QString& strFileName)
 {
     QString strHtml;
-    if (WizImage2Html(strFileName, strHtml, bCopyFile)) {
+    if (WizImage2Html(strFileName, strHtml, noteResourcesPath())) {
         editorCommandExecuteInsertHtml(strHtml, true);
     }
 }
@@ -1452,6 +1467,7 @@ void CWizDocumentWebView::loadDocumentInWeb(bool initEditing)
     //
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
     //
+    m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));
 
     // show client    
@@ -1602,7 +1618,7 @@ void CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
 void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
-    editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
+    editorCommandExecuteCommand("insertHtml", s, "'" + strHtml + "'");
 }
 
 void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
@@ -1909,14 +1925,13 @@ void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixma
     if (pix.isNull())
         return;
 
-    QString strTempPath = Utils::PathResolve::tempPath();
-    CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+    CString strFileName = noteResourcesPath() + WizIntToStr(GetTickCount()) + ".png";
     if (!pix.save(strFileName)) {
         TOLOG("ERROR: Can't save clipboard image to file");
         return;
     }
 
-    insertImage(strFileName, false);
+    insertImage(strFileName);
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteScreenShot_finished()
@@ -1949,14 +1964,16 @@ void CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 
 void CWizDocumentWebView::editorCommandExecuteInsertImage()
 {
-    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
+    static QString initPath = QDir::homePath();
+    QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), initPath, tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFileList.isEmpty())
         return;
 
     foreach (QString strImgFile, strImgFileList)
     {
-        bool bUseCopyFile = true;
-        insertImage(strImgFile, bUseCopyFile);
+        insertImage(strImgFile);
+        //
+        initPath = Utils::Misc::extractFilePath(strImgFile);
     }
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
