@@ -1435,7 +1435,7 @@ href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
     QString strTemplateJsFileName = ::Utils::PathResolve::wizTemplateJsFilePath();
     if (QFileInfo(strTemplateJsFileName).exists())
     {
-        QString strTag = QString("<script type=\"text/javascript\" src=\"file:///%1\" wiz_style= \"unsave\" charset=\"utf-8\"></script>").arg(strTemplateJsFileName);
+        QString strTag = QString("<script type=\"text/javascript\" src=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\"></script>").arg(strTemplateJsFileName);
         //
         WizHTMLAppendTextInHead(strTag, strHtml);
     }
