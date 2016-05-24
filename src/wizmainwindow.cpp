@@ -28,8 +28,7 @@
 #include "share/wizMessageBox.h"
 #include "widgets/wizTrayIcon.h"
 
-#include <extensionsystem/pluginmanager.h>
-#include <coreplugin/icore.h>
+#include "share/icore.h"
 #include <coreplugin/aboutdialog.h>
 
 #include "wizUpgrade.h"
@@ -112,7 +111,6 @@ static MainWindow* windowInstance = 0;
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : _baseClass(parent)
-    , m_core(new ICore(this))
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
@@ -163,6 +161,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_mobileFileReceiver(nullptr)
     , m_bQuickDownloadMessageEnable(false)
 {
+    ICore::setMainWindow(this);
+    //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
     setWindowStyleForLinux(m_useSystemBasedStyle);
@@ -838,14 +838,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::saveStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = ICore::globalSettings();
     settings->setValue("Window/Geometry", saveGeometry());
     settings->setValue("Window/Splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = ICore::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
     QByteArray splitterState = settings->value("Window/Splitter").toByteArray();
     // main window

@@ -27,7 +27,7 @@ private:
     void update(const QString& strKbGUID);
 
 private Q_SLOTS:
-    void onNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool ok);
+    void onNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok);
 };
 
 } // namespace WizService

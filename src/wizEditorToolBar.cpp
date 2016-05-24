@@ -592,7 +592,7 @@ class CWizToolButtonColor : public CWizToolButton
 {
 public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
-      , m_menu(menu())
+      , m_menu(NULL)
       , m_color(Qt::transparent)
     {
         setCheckable(false);
@@ -1575,6 +1575,7 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pVLayout->addWidget(pBtnTransparent);
     pVLayout->addWidget(widget);
     pVLayout->addWidget(pBtnOtherColor);
+
 
     QMenu *colorMenu = new QMenu(this);
     colorMenu->setLayout(pVLayout);

@@ -60,6 +60,7 @@ class CWizCategoryViewShortcutItem;
 class CWizDocumentWebView;
 class CWizTrayIcon;
 class CWizMobileFileReceiver;
+class ICore;
 
 namespace WizService {
 namespace Internal {
@@ -70,7 +71,6 @@ class WizMessageListTitleBar;
 }
 
 namespace Core {
-class ICore;
 class CWizDocumentView;
 class CWizSingleDocumentViewDelegate;
 
@@ -136,7 +136,6 @@ protected:
 #endif
 
 private:
-    ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;

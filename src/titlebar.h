@@ -76,7 +76,7 @@ public Q_SLOTS:
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
-    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
 
     void on_commentUrlAcquired(QString GUID, QString url);
     void on_commentCountAcquired(QString GUID, int count);

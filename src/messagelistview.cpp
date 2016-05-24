@@ -14,8 +14,6 @@
 #include <QApplication>
 #include <QTextCodec>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "rapidjson/document.h"
 
 #include "utils/stylehelper.h"
@@ -33,6 +31,8 @@
 #include "share/wizsettings.h"
 #include "share/wizsettings.h"
 #include "share/wizthreads.h"
+#include "share/icore.h"
+
 #include "widgets/wizScrollBar.h"
 #include "widgets/wizImageButton.h"
 #include "widgets/wizTipsWidget.h"
@@ -702,7 +702,7 @@ void MessageListView::onSyncTimeout()
 
 void MessageListView::updateTreeItem()
 {
-    CWizCategoryView* tree = ExtensionSystem::PluginManager::getObject<CWizCategoryView>();
+    CWizCategoryView* tree = dynamic_cast<CWizCategoryView *>(ICore::mainWindow()->CategoryCtrl());
     if (tree) {
         CWizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
         if (!pBase)

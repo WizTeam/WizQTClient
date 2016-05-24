@@ -3,7 +3,7 @@
 
 #include <QPointer>
 #include <memory>
-#include <coreplugin/itreeview.h>
+#include <QTreeView>
 #include "wizCategoryViewItem.h"
 
 class CWizFolder;
@@ -30,7 +30,7 @@ class CWizFolderSelector;
 //#endif
 #endif
 
-class CWizCategoryBaseView : public Core::ITreeView
+class CWizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
 
@@ -41,6 +41,7 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
+    void updateItem(QTreeWidgetItem* pItem) { update(indexFromItem(pItem, 0)); }
 
     virtual void importFiles(QStringList& strFileList);
 
@@ -327,6 +328,7 @@ public:
     //
     bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
                                            QString& strLocation);
+    //
 
 signals:
     void newDocument();

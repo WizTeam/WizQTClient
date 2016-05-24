@@ -7,7 +7,6 @@
 #include <QStyle>
 #include <QDebug>
 
-#include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
@@ -23,8 +22,10 @@
 #include "widgets/wizTipsWidget.h"
 
 #include "wizdef.h"
-#include "share/wizsettings.h"
 #include "wiznotestyle.h"
+
+#include "share/wizsettings.h"
+#include "share/icore.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizmisc.h"
 
@@ -1048,7 +1049,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     {
         int nThis = 0, nOther = 0;
         if (!pOther->location().isEmpty()) {
-            QSettings* setting = ExtensionSystem::PluginManager::settings();
+            QSettings* setting = ICore::settings();
 //            qDebug() << "pother location : " << pOther->location() << "  this location : " << location();
             nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
             nThis = setting->value("FolderPosition/" + location()).toInt();

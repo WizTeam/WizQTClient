@@ -25,8 +25,7 @@
 #include <QMacPasteboardMime>
 #endif
 
-#include <coreplugin/icore.h>
-#include <extensionsystem/pluginmanager.h>
+#include "share/icore.h"
 
 #include "wizdef.h"
 #include "utils/pathresolve.h"
@@ -513,7 +512,7 @@ QString defaultMarkdownCSS()
 void CWizDocumentWebView::resetMarkdownCssPath()
 {
     const QString strCategory = "MarkdownTemplate/";
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = ICore::settings();
     QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
     QString strFile = QString::fromUtf8(ba);
     if (strFile.isEmpty())

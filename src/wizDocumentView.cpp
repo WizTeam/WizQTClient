@@ -10,7 +10,7 @@
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
 
-#include <coreplugin/icore.h>
+#include "share/icore.h"
 
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
@@ -53,7 +53,7 @@ using namespace Core::Internal;
 #define DOCUMENT_STATUS_ON_EDITREQUEST       0x0040
 
 CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
-    : INoteView(parent)
+    : QWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
@@ -168,14 +168,14 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(documentUploaded(QString,QString)), \
             m_editStatusSyncThread, SLOT(documentUploaded(QString,QString)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteRequested(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+    connect(ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(Core::ICore::instance(), SIGNAL(closeNoteRequested(Core::INoteView*)),
-            SLOT(onCloseNoteRequested(Core::INoteView*)));
+    connect(ICore::instance(), SIGNAL(closeNoteRequested(Core::CWizDocumentView*)),
+            SLOT(onCloseNoteRequested(Core::CWizDocumentView*)));
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
@@ -284,7 +284,7 @@ void CWizDocumentView::showClient(bool visible)
     m_tab->setVisible(visible);
 }
 
-void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
+void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
 {
     if (view != this)
         return;
@@ -298,7 +298,7 @@ void CWizDocumentView::onViewNoteRequested(INoteView* view, const WIZDOCUMENTDAT
     }
 }
 
-void CWizDocumentView::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void CWizDocumentView::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
     if (view != this)
         return;
@@ -745,7 +745,7 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
     reload();
 }
 
-void CWizDocumentView::onCloseNoteRequested(INoteView *view)
+void CWizDocumentView::onCloseNoteRequested(CWizDocumentView *view)
 {
     Q_UNUSED(view)
 

@@ -1,6 +1,6 @@
 project(WizNote)
 
-add_subdirectory(plugins)
+#add_subdirectory(plugins)
 add_subdirectory(test)
 
 set(wiznote_SOURCES_MAC
@@ -48,6 +48,7 @@ set(wiznote_SOURCES
     share/wizkmcore.cpp
     share/wizxml.cpp
     share/wizxmlrpc.cpp
+    share/icore.cpp
     sync/wizXmlRpcServer.cpp
     #share/wizapi.cpp
     share/wizDatabase.cpp
@@ -180,7 +181,7 @@ set(wiznote_SOURCES
     wizPopupButton.cpp
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
-    plugindialog.cpp
+    #plugindialog.cpp
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
@@ -236,6 +237,7 @@ set(wiznote_HEADERS
     share/wizthumbindex.h
     share/wizenc.h
     share/wizziwreader.h
+    share/icore.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
     sync/wizKMServer.h
@@ -313,7 +315,7 @@ set(wiznote_HEADERS
     wizFolderView.h
     wizDocumentSelectionView.h
     wizUserVerifyDialog.h
-    plugindialog.h
+    #plugindialog.h
     utils/logger.h
     utils/misc.h
     utils/pinyin.h
@@ -472,11 +474,6 @@ if(UNIX)
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/build/osx/localize/ ${WIZNOTE_RESOURCE_DIR})
 
 
-        if(CMAKE_BUILD_TYPE STREQUAL "Release")
-            # resovle library dependency if build type is release
-            add_dependencies(WizNote coreplugin_plugin helloworld_plugin)
-        endif()
-
         if(NOT APPSTORE_BUILD)
             add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
                 COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
@@ -533,10 +530,7 @@ target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static
     clucene-shared-static
-    extensionsystem
     aggregation
-    coreplugin
-    helloworld
     Qt5::WebEngine
     Qt5::WebEngineWidgets
     #markdown
@@ -550,10 +544,7 @@ target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static
     clucene-shared-static
-    extensionsystem
     aggregation
-    coreplugin
-    helloworld
     #markdown
     Qt5::WebEngine
     Qt5::WebEngineWidgets

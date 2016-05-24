@@ -9,8 +9,6 @@
 #include <QList>
 #include <QLabel>
 
-#include <coreplugin/icore.h>
-
 #include "widgets/wizTagBar.h"
 #include "titleedit.h"
 #include "cellbutton.h"
@@ -28,6 +26,7 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "share/wizAnalyzer.h"
+#include "share/icore.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
@@ -162,8 +161,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
     m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
@@ -697,7 +696,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
     }
 }
 
-void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
+void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     if (!bOk)
         return;    

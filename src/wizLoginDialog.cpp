@@ -33,11 +33,11 @@
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizui.h"
 #include "share/wizthreads.h"
+#include "share/icore.h"
 #include "sync/wizKMServer.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include <extensionsystem/pluginmanager.h>
 #include "widgets/wizVerificationCodeDialog.h"
 #include "wizWebSettingsDialog.h"
 #include "wizproxydialog.h"
@@ -259,7 +259,7 @@ void CWizLoginDialog::resetUserList()
         }
     }
     //
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = ICore::globalSettings();
     QString strDefault = (WizServer == m_serverType) ? settings->value("Users/DefaultWizUserGuid").toString()
                                                      : settings->value("Users/DefaultWizBoxUserGuid").toString();
 
@@ -379,7 +379,7 @@ void CWizLoginDialog::doOnlineVerify()
 
 bool CWizLoginDialog::updateGlobalProfile()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = ICore::globalSettings();
     settings->setValue("Users/DefaultUserGuid", m_loginUserGuid);
     return true;
 }
@@ -1614,7 +1614,7 @@ void CWizLoginDialog::onSignUpCheckEnd()
 
 void CWizLoginDialog::loadDefaultUser()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = ICore::globalSettings();
     QString strDefaultGuid = settings->value("Users/DefaultUserGuid").toString();
     if (!strDefaultGuid.isEmpty())
     {

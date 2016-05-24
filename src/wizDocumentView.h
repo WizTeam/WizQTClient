@@ -38,7 +38,7 @@ class EditorToolBar;
 class CWizTagBar;
 } // namespace Internal
 
-class CWizDocumentView : public INoteView
+class CWizDocumentView : public QWidget
 {
     Q_OBJECT
 
@@ -129,9 +129,9 @@ signals:
     void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
-    void onViewNoteRequested(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    void onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool);
-    void onCloseNoteRequested(Core::INoteView* view);
+    void onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
+    void onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool);
+    void onCloseNoteRequested(CWizDocumentView* view);
 
     void onCipherCheckRequest();
 

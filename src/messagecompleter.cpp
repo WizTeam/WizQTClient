@@ -11,11 +11,10 @@
 #include <QScrollBar>
 #include <QDebug>
 
-#include <coreplugin/icore.h>
-
 #include "sync/avatar.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "share/icore.h"
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 
@@ -212,8 +211,8 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     setFilterMode(Qt::MatchContains);
 #endif
 
-    connect(Core::ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+    connect(ICore::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 }
 
 CWizDocumentView* MessageCompleter::noteView()
@@ -232,7 +231,7 @@ CWizDocumentView* MessageCompleter::noteView()
     return 0;
 }
 
-void MessageCompleter::onNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& doc, bool ok)
+void MessageCompleter::onNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
 {
     if (view != noteView())
         return;

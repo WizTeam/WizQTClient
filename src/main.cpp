@@ -15,7 +15,6 @@
 
 #include <sys/stat.h>
 
-#include <extensionsystem/pluginmanager.h>
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "utils/stylehelper.h"
@@ -24,6 +23,8 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizSingleApplication.h"
 #include "share/wizthreads.h"
+#include "share/icore.h"
+
 #include "core/wizNoteManager.h"
 
 #ifdef Q_OS_MAC
@@ -39,7 +40,6 @@
 #include "wizDocumentWebEngine.h"
 #include "wizLoginDialog.h"
 
-using namespace ExtensionSystem;
 using namespace Core::Internal;
 
 static inline QStringList getPluginPaths()
@@ -252,22 +252,10 @@ int mainCore(int argc, char *argv[])
 
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
+    //
     QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
-
-//#ifdef Q_OS_WIN
-//    QString strDefaultFontName = settings.GetString("Common", "DefaultFont", "");
-//    QFont f = WizCreateWindowsUIFont(a, strDefaultFontName);
-//    a.setFont(f);
-//#endif
-
-    // setup plugin manager
-    PluginManager pluginManager;
-    PluginManager::setFileExtension(QLatin1String("pluginspec"));
-    PluginManager::setGlobalSettings(globalSettings);
-
-    const QStringList specPaths = getPluginSpecPaths();
-    const QStringList pluginPaths = getPluginPaths();
-    PluginManager::setPluginPaths(specPaths, pluginPaths);
+    ICore::setGlobalSettings(globalSettings);
+    //
 
     // use 3 times(30M) of Qt default usage
     int nCacheSize = globalSettings->value("Common/Cache", 10240*3).toInt();
@@ -281,6 +269,9 @@ int mainCore(int argc, char *argv[])
     QString strPassword;
     CWizUserSettings userSettings(strAccountFolderName);
 
+    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
+    ICore::setSettings(settings);
+    //
     // setup locale for welcome dialog
     QString strLocale = userSettings.locale();
     QLocale::setDefault(strLocale);
@@ -318,8 +309,6 @@ int mainCore(int argc, char *argv[])
     }    
 
     //
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
-    PluginManager::setSettings(settings);
     //set network proxy
     CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
     if (wizSettings.GetProxyStatus())
@@ -353,7 +342,7 @@ int mainCore(int argc, char *argv[])
             }
             qDebug() << "login user id : " << loginDialog.userId();
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
-            PluginManager::setSettings(settings);
+            ICore::setSettings(settings);
         }
         strPassword = loginDialog.password();
         strUserId = loginDialog.userId();
@@ -418,7 +407,6 @@ int mainCore(int argc, char *argv[])
 #endif
 
     //settings->setValue("Users/DefaultUser", strUserId);
-    PluginManager::loadPlugins();
 
     w.show();
     w.init();

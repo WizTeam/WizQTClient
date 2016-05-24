@@ -3,8 +3,6 @@
 
 #include <QDebug>
 
-#include <coreplugin/icore.h>
-
 #include "wizDocumentView.h"
 #include "share/wizobject.h"
 #include "sync/token.h"

@@ -12,10 +12,10 @@
 #include <QClipboard>
 #include <QDateTime>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "wizhtml2zip.h"
 #include "share/wizzip.h"
+#include "share/icore.h"
+
 #include "html/wizhtmlcollector.h"
 #include "rapidjson/document.h"
 
@@ -1637,7 +1637,7 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
     CWizStdStringArray arrPos;
     ::WizSplitTextToArray(str, ',', arrPos);
 
-    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    QSettings* setting = ICore::settings();
     setting->beginGroup("FolderPosition");
     setting->remove("");
     setting->endGroup();

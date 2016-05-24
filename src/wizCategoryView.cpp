@@ -8,8 +8,6 @@
 #include <QTimer>
 #include <QFileDialog>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "wizdef.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
@@ -21,6 +19,7 @@
 #include "share/wizObjectOperator.h"
 #include "share/wizMessageBox.h"
 #include "share/wizthreads.h"
+#include "share/icore.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
@@ -100,7 +99,7 @@ using namespace Core::Internal;
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
 CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent)
-    : ITreeView(parent)
+    : QTreeWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_selectedItem(NULL)
@@ -109,7 +108,6 @@ CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent
     , m_dragUrls(false)
     , m_dragHoveredTimer(new QTimer())
     , m_dragItem(NULL)
-
     , m_dragHoveredItem(0)
 {
     // basic features
@@ -1149,13 +1147,10 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), SLOT(on_itemChanged(QTreeWidgetItem*,int)));
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
-
-    ExtensionSystem::PluginManager::addObject(this);
 }
 
 CWizCategoryView::~CWizCategoryView()
 {
-    ExtensionSystem::PluginManager::removeObject(this);
 }
 
 void CWizCategoryView::initMenus()
@@ -3577,7 +3572,7 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
 void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 {
     const QString strFolderPostion = "FolderPosition/";
-    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    QSettings* setting = ICore::settings();
     int nValue = setting->value(strFolderPostion + "/Deleted Items/").toInt();
     setting->setValue(strFolderPostion + strLocation, nValue);
     //
@@ -4265,7 +4260,7 @@ void CWizCategoryView::saveShortcutState()
 
 void CWizCategoryView::loadExpandState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = ICore::settings();
     settings->beginGroup(TREEVIEW_STATE);
     m_strSelectedId = selectedId(settings);
 
@@ -5580,7 +5575,7 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
 
 void CWizCategoryView::saveExpandState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = ICore::settings();
     settings->beginGroup(TREEVIEW_STATE);
     settings->remove("");
     for (int i = 0 ; i < topLevelItemCount(); i++) {

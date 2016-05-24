@@ -9,8 +9,6 @@
 #include <QFontMetrics>
 #include <QPropertyAnimation>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "utils/stylehelper.h"
 #include "share/wizmisc.h"
 
