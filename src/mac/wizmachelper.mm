@@ -419,7 +419,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
         if (strFileList.count() > 0)
         {
-            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            MainWindow *window = MainWindow::instance();
             if (window)
             {
                 convertYosemiteFileListToNormalList(strFileList);
@@ -437,7 +437,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
         if (!strText.isEmpty())
         {
             qDebug() << "[service] : text string finded : " << strText;
-            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            MainWindow *window = MainWindow::instance();
             if (window)
             {
                 window->createNoteWithText(strText);
