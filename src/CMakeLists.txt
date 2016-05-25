@@ -1,6 +1,5 @@
 project(WizNote)
 
-#add_subdirectory(plugins)
 add_subdirectory(test)
 
 set(wiznote_SOURCES_MAC
@@ -134,7 +133,6 @@ set(wiznote_SOURCES
     share/websockettransport.cpp
     share/wizwebengineview.cpp
 
-    #coreplugin.cpp
     wizCategoryView.cpp
     wizCategoryViewItem.cpp
     wizDocumentListView.cpp
@@ -181,7 +179,6 @@ set(wiznote_SOURCES
     wizPopupButton.cpp
     wizWebSettingsDialog.cpp
     wizUserVerifyDialog.cpp
-    #plugindialog.cpp
     messagelistview.cpp
     thumbcache.cpp
     messagecompleter.cpp
@@ -315,7 +312,6 @@ set(wiznote_HEADERS
     wizFolderView.h
     wizDocumentSelectionView.h
     wizUserVerifyDialog.h
-    #plugindialog.h
     utils/logger.h
     utils/misc.h
     utils/pinyin.h
@@ -508,7 +504,6 @@ qt_use_modules(WizNote)
 qt_suppress_warnings(WizNote)
 
 include_directories(
-    ${plugins_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_BINARY_DIR}
     ${CMAKE_SOURCE_DIR}/lib

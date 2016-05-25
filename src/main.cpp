@@ -41,67 +41,6 @@
 #include "wizLoginDialog.h"
 
 
-static inline QStringList getPluginPaths()
-{
-    QStringList rc;
-    // Figure out root:  Up one from 'bin'
-    QDir rootDir = QApplication::applicationDirPath();
-    rootDir.cdUp();
-    const QString rootDirPath = rootDir.canonicalPath();
-#if !defined(Q_OS_MAC)
-    // 1) "plugins" (Win/Linux)
-    QString pluginPath = rootDirPath;
-    pluginPath += QLatin1Char('/');
-    pluginPath += QLatin1String("/lib/wiznote/plugins");
-    rc.push_back(pluginPath);
-#else
-    // 2) "PlugIns" (OS X)
-    QString pluginPath = rootDirPath;
-    #ifdef XCODEBUILD
-    pluginPath += QLatin1String("/PlugIns/Debug");
-    #else
-    pluginPath += QLatin1String("/PlugIns");
-    #endif
-    rc.push_back(pluginPath);
-#endif
-    // 3) <localappdata>/plugins/<ideversion>
-    //    where <localappdata> is e.g.
-    //    "%LOCALAPPDATA%\QtProject\qtcreator" on Windows Vista and later
-    //    "$XDG_DATA_HOME/data/QtProject/qtcreator" or "~/.local/share/data/QtProject/qtcreator" on Linux
-    //    "~/Library/Application Support/QtProject/Qt Creator" on Mac
-#if QT_VERSION >= 0x050000
-    pluginPath = QStandardPaths::writableLocation(QStandardPaths::DataLocation);
-#else
-    pluginPath = QDesktopServices::storageLocation(QDesktopServices::DataLocation);
-#endif
-    pluginPath += QLatin1Char('/');
-
-#if !defined(Q_OS_MAC)
-    pluginPath += QLatin1String("wiznote");
-#else
-    pluginPath += QLatin1String("WizNote");
-#endif
-    pluginPath += QLatin1String("/plugins/");
-    rc.push_back(pluginPath);
-    return rc;
-}
-
-static inline QStringList getPluginSpecPaths()
-{
-#ifdef Q_OS_MAC
-    QStringList rc;
-    // Figure out root:  Up one from 'bin'
-    QDir rootDir = QApplication::applicationDirPath();
-    rootDir.cdUp();
-    const QString rootDirPath = rootDir.canonicalPath();
-    QString pluginSpecPath = rootDirPath;
-    pluginSpecPath += QLatin1String("/Resources/plugIns");
-    rc.push_back(pluginSpecPath);
-    return rc;
-#endif
-    return getPluginPaths();
-}
-
 #ifdef Q_OS_MAC
 #  define SHARE_PATH "/../Resources"
 #else
@@ -296,7 +235,7 @@ int mainCore(int argc, char *argv[])
     // figure out auto login or manually login
     bool bFallback = true;
 
-    // FIXME: move to WizService plugin initialize
+    // FIXME: move to WizService initialize
     Token token;
 
 

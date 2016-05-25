@@ -83,7 +83,6 @@
 #include "sync/token.h"
 
 #include "wizUserVerifyDialog.h"
-#include "plugindialog.h"
 #include "notecomments.h"
 #include "wizMobileFileReceiver.h"
 #include "wizDocTemplateDialog.h"

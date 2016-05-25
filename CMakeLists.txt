@@ -25,7 +25,7 @@ if(APPLE)
     set(CMAKE_INSTALL_NAME_DIR "@rpath/PlugIns")
     SET(CMAKE_INSTALL_RPATH "@loader_path/..;@executable_path/..")
 else(APPLE)
-    set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/..;$ORIGIN/../lib/wiznote/plugins")
+    set(CMAKE_INSTALL_RPATH "$ORIGIN;$ORIGIN/..")
     set (openssl-linked on)
 endif(APPLE)
 
@@ -65,28 +65,17 @@ if(APPLE)
         add_definitions(-DUsePLCrashReporter=TRUE)
     endif(PLCrashReporter)
     add_definitions(-DUSECOCOATOOLBAR=TRUE)
-#    add_definitions(-DUSEWEBENGINE=FALSE)
 endif(APPLE)
 
-if (USEWEBENGINE)
-    add_definitions(-DUSEWEBENGINE=TRUE)
-endif(USEWEBENGINE)
 
 if(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR}/WizNote.app)
     set(WIZNOTE_CONTENTS_DIR ${WIZNOTE_ROOT_DIR}/Contents)
-    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/Contents/PlugIns)
     set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources)
-    set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_ROOT_DIR}/Contents/Resources/plugIns)
 else(APPLE)
     set(WIZNOTE_ROOT_DIR ${CMAKE_BINARY_DIR})
-    set(WIZNOTE_PLUGIN_DIR ${WIZNOTE_ROOT_DIR}/lib/wiznote/plugins)
-    set(WIZNOTE_PLUGINSPEC_DIR ${WIZNOTE_PLUGIN_DIR})
     set(WIZNOTE_RESOURCE_DIR ${WIZNOTE_ROOT_DIR}/share)
 endif(APPLE)
-
-# must output to "lib" to make macdeployqt work correctly
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${WIZNOTE_PLUGIN_DIR})
 
 
 add_subdirectory(lib)

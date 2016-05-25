@@ -166,10 +166,6 @@ QString PathResolve::logFile()
     return strLogfile;
 }
 
-QString PathResolve::pluginsPath()
-{
-    return resourcesPath() + "plugins/";
-}
 
 QString PathResolve::tempPath()
 {
