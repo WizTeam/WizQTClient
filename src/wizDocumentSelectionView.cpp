@@ -8,7 +8,6 @@
 #include "wizmainwindow.h"
 #include "share/wizDatabaseManager.h"
 
-using namespace Core::Internal;
 
 #define WIZ_SELECTION_ITEM_MAX 5
 #define WIZ_SELECTION_ITEM_MARGIN_Y 200

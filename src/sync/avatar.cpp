@@ -23,9 +23,6 @@
 #include "share/wizthreads.h"
 #include "share/wizEventLoop.h"
 
-using namespace WizService;
-using namespace WizService::Internal;
-
 /* ----------------------- AvatarDownloader ----------------------- */
 AvatarDownloader::AvatarDownloader(QObject* parent)
     : QObject(parent)
@@ -224,12 +221,12 @@ QString AvatarHostPrivate::keyFromUserID(const QString& strUserID) const
     if (strUserID.isEmpty())
         return defaultKey();
 
-    return "WizService::Avatar::" + strUserID;
+    return "Avatar::" + strUserID;
 }
 
 QString AvatarHostPrivate::defaultKey() const
 {
-    return "WizService::Avatar::Default";
+    return "Avatar::Default";
 }
 
 bool AvatarHostPrivate::deleteAvatar(const QString& strUserID)

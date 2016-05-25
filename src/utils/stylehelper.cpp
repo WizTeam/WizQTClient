@@ -13,7 +13,7 @@
 #include "pathresolve.h"
 #include "../share/wizmisc.h"
 #include "../share/wizsettings.h"
-#include "../share/icore.h"
+#include "../share/wizGlobal.h"
 
 
 #ifdef Q_OS_MAC
@@ -61,7 +61,7 @@ QSize StyleHelper::applyScreenScaleFactor(const QSize& sz)
 
 QString StyleHelper::themeName()
 {
-    QSettings* st = ICore::settings();
+    QSettings* st = WizGlobal::settings();
     QString strTheme = st->value("Theme/Name").toString();
     if (strTheme.isEmpty()) {
         st->setValue("Theme/Name", "default");
@@ -933,7 +933,7 @@ int StyleHelper::fontHead(QFont& f)
 {
 
 #ifdef Q_OS_MAC
-//    QSettings* st = ICore::settings();
+//    QSettings* st = WizGlobal::settings();
 //    QString strFont = st->value("Theme/FontFamily").toString();
 //    if (strFont.isEmpty()) {
 //        st->setValue("Theme/FontFamily", f.family());
@@ -951,7 +951,7 @@ int StyleHelper::fontHead(QFont& f)
 int StyleHelper::fontNormal(QFont& f)
 {
 #ifdef Q_OS_MAC
-//    QSettings* st = ICore::settings();
+//    QSettings* st = WizGlobal::settings();
 //    QString strFont = st->value("Theme/FontFamily").toString();
 //    if (strFont.isEmpty()) {
 //        st->setValue("Theme/FontFamily", f.family());
@@ -974,7 +974,7 @@ int StyleHelper::fontThumb(QFont& f)
 
 int StyleHelper::fontExtend(QFont& f)
 {
-    QSettings* st = ICore::settings();
+    QSettings* st = WizGlobal::settings();
     QString strFont = st->value("Theme/FontFamily").toString();
     if (strFont.isEmpty()) {
         st->setValue("Theme/FontFamily", f.family());

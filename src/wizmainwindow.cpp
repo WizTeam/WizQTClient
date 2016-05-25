@@ -28,8 +28,8 @@
 #include "share/wizMessageBox.h"
 #include "widgets/wizTrayIcon.h"
 
-#include "share/icore.h"
-#include <coreplugin/aboutdialog.h>
+#include "share/wizGlobal.h"
+#include "widgets/aboutdialog.h"
 
 #include "wizUpgrade.h"
 #include "wizconsoledialog.h"
@@ -103,9 +103,6 @@
 
 #define MAINWINDOW  "MainWindow"
 
-using namespace Core;
-using namespace Core::Internal;
-using namespace WizService::Internal;
 
 static MainWindow* windowInstance = 0;
 
@@ -161,7 +158,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_mobileFileReceiver(nullptr)
     , m_bQuickDownloadMessageEnable(false)
 {
-    ICore::setMainWindow(this);
+    WizGlobal::setMainWindow(this);
     //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -221,9 +218,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
-        WizService::AvatarHost::deleteAvatar(oldId);
-        WizService::AvatarHost::load(oldId, false);
-        WizService::AvatarHost::load(newId, false);
+        AvatarHost::deleteAvatar(oldId);
+        AvatarHost::load(oldId, false);
+        AvatarHost::load(newId, false);
     });
 #endif
 
@@ -260,7 +257,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setupFullScreenMode(this);
 #endif
 
-    WizService::NoteComments::init();
+    NoteComments::init();
     //
     m_sync->start(QThread::IdlePriority);
     //
@@ -560,7 +557,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     QString strUrl = CWizUpgradeChecker::getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::WizApiEntry::standardCommandUrl("link");
+        QString url = WizApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -581,13 +578,13 @@ bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
 
 void MainWindow::on_TokenAcquired(const QString& strToken)
 {
-    //WizService::Token::instance()->disconnect(this);
-    disconnect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), this,
+    //Token::instance()->disconnect(this);
+    disconnect(Token::instance(), SIGNAL(tokenAcquired(QString)), this,
             SLOT(on_TokenAcquired(QString)));
 
     if (strToken.isEmpty())
     {
-        int nErrorCode = WizService::Token::lastErrorCode();
+        int nErrorCode = Token::lastErrorCode();
         // network unavailable
         if (QNetworkReply::ProtocolUnknownError == nErrorCode)
         {
@@ -838,14 +835,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::saveStatus()
 {
-    QSettings* settings = ICore::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     settings->setValue("Window/Geometry", saveGeometry());
     settings->setValue("Window/Splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
 {
-    QSettings* settings = ICore::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
     QByteArray splitterState = settings->value("Window/Splitter").toByteArray();
     // main window
@@ -1387,8 +1384,8 @@ void MainWindow::showVipUpgradePage()
 {
 #ifndef BUILD4APPSTORE
         WizExecuteOnThread(WIZ_THREAD_NETWORK, [](){
-            QString strToken = WizService::Token::token();
-            QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
+            QString strToken = Token::token();
+            QString strUrl = WizApiEntry::standardCommandUrl("vip", strToken);
             WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
                 QDesktopServices::openUrl(QUrl(strUrl));
             });
@@ -1509,7 +1506,7 @@ void MainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
  */
 void MainWindow::GetToken(const QString& strFunctionName)
 {
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     QString strExec = strFunctionName + QString("('%1')").arg(strToken);
     qDebug() << "cpp get token callled : " << strExec;
     m_doc->commentView()->page()->runJavaScript(strExec);
@@ -2041,7 +2038,7 @@ CWizIAPDialog*MainWindow::iapDialog()
 
 void MainWindow::on_documents_lastDocumentDeleted()
 {
-    ICore::instance()->emitCloseNoteRequested(m_doc);
+    WizGlobal::instance()->emitCloseNoteRequested(m_doc);
 }
 
 void MainWindow::on_btnMarkDocumentsRead_triggered()
@@ -2525,7 +2522,7 @@ void MainWindow::on_actionSortBySize_triggered()
 #include <functional>
 
 std::function<void()> tipBindFunction = [](){
-    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    if (MainWindow* mainWindow = MainWindow::instance())
     {
         mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
     }
@@ -2746,7 +2743,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("feedback");
+    QString strUrl = WizApiEntry::standardCommandUrl("feedback");
 
     if (strUrl.isEmpty())
         return;
@@ -2763,7 +2760,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("support");
+    QString strUrl = WizApiEntry::standardCommandUrl("support");
 
     if (strUrl.isEmpty())
         return;
@@ -2775,7 +2772,7 @@ void MainWindow::on_actionSupport_triggered()
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
 
     if (strUrl.isEmpty())
         return;
@@ -3256,7 +3253,7 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
         m_documentForEditing = WIZDOCUMENTDATA();
     }
 
-    ICore::emitViewNoteRequested(m_doc, data, forceEditing);
+    WizGlobal::emitViewNoteRequested(m_doc, data, forceEditing);
 
     if (addToHistory) {
         m_history->addHistory(data);
@@ -3468,16 +3465,16 @@ void MainWindow::syncAllData()
 void MainWindow::reconnectServer()
 {
     CWizDatabase& db = m_dbMgr.db();
-    WizService::Token::setUserId(db.GetUserId());
+    Token::setUserId(db.GetUserId());
     if (!m_settings->password().isEmpty())
     {
-        WizService::Token::setPasswd(m_settings->password());
+        Token::setPasswd(m_settings->password());
     }
 
     m_sync->clearCurrentToken();
-    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
-    WizService::Token::requestToken();
+    Token::requestToken();
 }
 
 void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
@@ -3592,7 +3589,7 @@ void MainWindow::createNoteWithText(const QString& strText)
 
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
@@ -3602,7 +3599,7 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=guidemap_sendimage.html";
     qInfo() <<"open dialog with url : " << strUrl;

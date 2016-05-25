@@ -10,9 +10,6 @@
 #include "apientry.h"
 #include "share/wizthreads.h"
 
-using namespace WizService;
-using namespace WizService::Internal;
-
 // use 5 minutes locally, server use 20 minutes
 #define TOKEN_TIMEOUT_INTERVAL 60 * 5
 

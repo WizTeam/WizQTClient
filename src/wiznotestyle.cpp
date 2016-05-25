@@ -31,7 +31,6 @@
 class CWizCategoryBaseView;
 class CWizDocumentListView;
 
-using namespace WizService::Internal;
 
 typedef QProxyStyle CWizNoteBaseStyle;
 

@@ -9,11 +9,7 @@
 
 class QNetworkReply;
 class QNetworkAccessManager;
-
-namespace WizService {
 class AvatarHost;
-
-namespace Internal {
 
 
 class AvatarDownloader : public QObject
@@ -97,9 +93,6 @@ private Q_SLOTS:
     void on_downloaded(QString strUserID, bool bSucceed);
 };
 
-
-} // namespace Internal
-} // namespace WizService
 
 
 #endif // WIZSERVICE_AVATAR_P_H

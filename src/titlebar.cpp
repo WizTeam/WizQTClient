@@ -26,7 +26,7 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "share/wizAnalyzer.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
@@ -39,9 +39,6 @@
 #include "share/wizwebengineview.h"
 
 #include "core/wizCommentManager.h"
-
-using namespace Core;
-using namespace Core::Internal;
 
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK QObject::tr("Share by Link")
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
@@ -70,7 +67,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_editButtonAnimation(0)
     , m_commentManager(new CWizCommentManager(this))
 {
-    m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
+    m_editTitle->setCompleter(new MessageCompleter(m_editTitle));
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
     m_editTitle->setFixedHeight(nTitleHeight);
     m_editTitle->setAlignment(Qt::AlignVCenter);
@@ -161,8 +158,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
     m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
@@ -440,7 +437,7 @@ void TitleBar::clearPlaceHolderText()
 void TitleBar::showCoachingTips()
 {
     bool showTips = false;
-    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    if (MainWindow* mainWindow = MainWindow::instance())
     {
         showTips = mainWindow->userSettings().get(TITLEBARTIPSCHECKED).toInt() == 0;
     }
@@ -455,7 +452,7 @@ void TitleBar::showCoachingTips()
         widget->setSizeHint(QSize(290, 82));
         widget->setButtonVisible(false);       
         widget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 mainWindow->userSettings().set(TITLEBARTIPSCHECKED, "1");
             }

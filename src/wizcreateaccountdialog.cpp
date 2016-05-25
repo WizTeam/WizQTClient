@@ -5,7 +5,6 @@
 
 #include "sync/asyncapi.h"
 
-using namespace WizService;
 
 
 CreateAccountDialog::CreateAccountDialog(QWidget *parent)

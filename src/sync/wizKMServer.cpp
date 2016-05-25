@@ -250,7 +250,7 @@ BOOL CWizKMAccountsServer::SetMessageReadStatus(const QString& strMessageIDs, in
 
 bool CWizKMAccountsServer::SetMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
-    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
+    QString strUrl = CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&ids=%2").arg(m_userInfo.strToken).arg(strMessageIDs);
     qDebug() << "set message delete status, strken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
@@ -559,7 +559,7 @@ QString getStringFromRapidValue(const rapidjson::Value& u, const QString& member
 
 bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
-    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
+    QString strUrl = CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&page_size=%2&version=%3&api_version=6").arg(m_userInfo.strToken).arg(nCountPerPage).arg(nVersion);
     //
     QString strResult;

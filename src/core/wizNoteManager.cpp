@@ -169,7 +169,7 @@ void CWizNoteManager::updateTemplateJS(const QString& local)
         }
 
         QNetworkAccessManager manager;
-        QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates?language_type=" + local;
+        QString url = CommonApiEntry::asServerUrl() + "/a/templates?language_type=" + local;
 #ifdef Q_OS_MAC
         url.append("&client_type=macosx");
 #else
@@ -207,7 +207,7 @@ void CWizNoteManager::downloadTemplatePurchaseRecord()
         WizEnsurePathExists(Utils::PathResolve::customNoteTemplatesPath());
         //
         QNetworkAccessManager manager;
-        QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizService::Token::token();
+        QString url = CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + Token::token();
 //        qDebug() << "get templates record from url : " << url;
         //
         QByteArray ba;
@@ -296,7 +296,7 @@ bool CWizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwo
 
         if (iter.value().strVersion != it.value().strVersion || !QFile::exists(it.value().strFileName))
         {
-            QString strUrl = WizService::CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(it.value().id);
+            QString strUrl = CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(it.value().id);
             QFileInfo info(it.value().strFileName);
             CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);
             downloader->startDownload();

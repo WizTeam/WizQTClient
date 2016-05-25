@@ -204,7 +204,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 {
     QByteArray buffer = constructUploadData(db);
 
-    CString strURL = WizService::WizApiEntry::analyzerUploadUrl();
+    CString strURL = WizApiEntry::analyzerUploadUrl();
 
     if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
         && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
@@ -292,7 +292,7 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     dd.AddMember("versionCode", Utils::Misc::getVersionCode(), allocator);
 
     //
-    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    MainWindow *window = MainWindow::instance();
     QByteArray baLocal = QLocale::system().name().toUtf8();
     if (window)
     {

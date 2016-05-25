@@ -33,7 +33,7 @@
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizui.h"
 #include "share/wizthreads.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 #include "sync/wizKMServer.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
@@ -45,7 +45,6 @@
 #include "wizOEMSettings.h"
 #include "share/wizwebengineview.h"
 
-using namespace WizService;
 
 #define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"
 #define WIZ_SERVERACTION_CONNECT_BIZSERVER        "CONNECT_TO_BIZSERVER"
@@ -259,7 +258,7 @@ void CWizLoginDialog::resetUserList()
         }
     }
     //
-    QSettings* settings = ICore::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QString strDefault = (WizServer == m_serverType) ? settings->value("Users/DefaultWizUserGuid").toString()
                                                      : settings->value("Users/DefaultWizBoxUserGuid").toString();
 
@@ -379,7 +378,7 @@ void CWizLoginDialog::doOnlineVerify()
 
 bool CWizLoginDialog::updateGlobalProfile()
 {
-    QSettings* settings = ICore::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     settings->setValue("Users/DefaultUserGuid", m_loginUserGuid);
     return true;
 }
@@ -883,7 +882,7 @@ void CWizLoginDialog::checkServerLicence()
         initOEMDownloader();
     }
     m_oemDownloader->setServerIp(serverIp());
-    WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+    CommonApiEntry::setEnterpriseServerIP(serverIp());
 
     CWizUserSettings userSettings(userId());
     QString strOldLicence = userSettings.serverLicence();
@@ -1007,7 +1006,7 @@ void CWizLoginDialog::checkLocalUser(const QString& strAccountFolder, const QStr
         }
         else
         {
-            WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+            CommonApiEntry::setEnterpriseServerIP(serverIp());
         }
     }
 
@@ -1043,7 +1042,7 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("forgot_password");
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("forgot_password");
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
@@ -1218,7 +1217,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
-            QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+            QString strUrl = WizApiEntry::standardCommandUrl("link");
             strUrl += "&name=wiz-box-search-help.html";
             QDesktopServices::openUrl(strUrl);
         }
@@ -1614,7 +1613,7 @@ void CWizLoginDialog::onSignUpCheckEnd()
 
 void CWizLoginDialog::loadDefaultUser()
 {
-    QSettings* settings = ICore::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QString strDefaultGuid = settings->value("Users/DefaultUserGuid").toString();
     if (!strDefaultGuid.isEmpty())
     {
@@ -1712,7 +1711,7 @@ void CWizLoginDialog::initOEMDownloader()
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("snspage");
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("snspage");
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
     connect(dlg.web(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));

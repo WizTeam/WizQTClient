@@ -12,7 +12,6 @@
 #include "utils/stylehelper.h"
 #include "share/wizmisc.h"
 
-using namespace Core::Internal;
 
 CellButton::CellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)

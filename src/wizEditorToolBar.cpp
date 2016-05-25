@@ -370,7 +370,6 @@ QIcon createColorIcon(QColor color)
 const int TOOLBUTTON_MARGIN_WIDTH = 12;
 const int TOOLBUTTON_ARRWO_WIDTH = 16;
 
-using namespace Core::Internal;
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
 
@@ -1958,7 +1957,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
         return nullptr;
 
     bool showTips = false;
-    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    if (MainWindow* mainWindow = MainWindow::instance())
     {
         showTips = mainWindow->userSettings().get(EDITORTOOLBARTIPSCHECKED).toInt() == 0;
     }
@@ -1975,7 +1974,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
 
         //NOTE：绑定方法来控制webview的焦点问题
         tipWidget->bindShowFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 if (CWizDocumentView* docView = mainWindow->docView())
                 {
@@ -1984,7 +1983,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
             }
         });
         tipWidget->bindHideFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 if (CWizDocumentView* docView = mainWindow->docView())
                 {
@@ -1993,7 +1992,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
             }
         });
         tipWidget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 mainWindow->userSettings().set(EDITORTOOLBARTIPSCHECKED, "1");
                 if (CWizDocumentView* docView = mainWindow->docView())

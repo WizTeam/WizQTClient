@@ -238,7 +238,7 @@ QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
 
 bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
 {
-    Core::Internal::MainWindow *mainWindow = Core::Internal::MainWindow::instance();
+    MainWindow *mainWindow = MainWindow::instance();
     QNetworkDiskCache *cache = mainWindow->webViewNetworkCache();
     if (cache)
     {

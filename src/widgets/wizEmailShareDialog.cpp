@@ -126,7 +126,7 @@ QString CWizEmailShareDialog::getExInfo()
 //    note
 //    api_version        4
 
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     QString cc_to_self = ui->checkBox_sendMeCopy->isChecked() ? "true" : "false";
     QString result = "?kb_guid=" + m_note.strKbGUID + "&document_guid=" + m_note.strGUID + "&token=" + strToken
             + "&mail_to=" + ui->lineEdit_to->text() + "&subject=" + ui->lineEdit_subject->text() + "&cc_to_self=" + cc_to_self
@@ -214,10 +214,10 @@ void CWizEmailShareDialog::sendEmails()
 {
     ui->labelInfo->setText(tr("Sending..."));
 
-    QString strToken = WizService::Token::token();
-    QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+    QString strToken = Token::token();
+    QString strKS = CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
     QString strExInfo = getExInfo();
-    QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    QString strUrl = CommonApiEntry::mailShareUrl(strKS, strExInfo);
     qDebug() << "share url : " << strUrl;
 
     if(!m_net)

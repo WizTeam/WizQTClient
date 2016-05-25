@@ -6,8 +6,6 @@
 #include <QString>
 #include <QMap>
 
-namespace WizService {
-
 class CommonApiEntry
 {
 public:
@@ -75,6 +73,5 @@ private:
     static QString urlFromCommand(const QString& strCommand);
 };
 
-} // namespace WizService
 
 #endif // WIZSERVICE_WIZAPIENTRY_H

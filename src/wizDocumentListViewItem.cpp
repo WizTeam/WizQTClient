@@ -17,7 +17,6 @@
 #include "sync/avatar.h"
 #include "utils/stylehelper.h"
 
-using namespace Core;
 
 CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
@@ -559,7 +558,7 @@ QString CWizDocumentListViewDocumentItem::cacheKey() const
         stat = "Normal";
     }
 
-    return "Core::ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
+    return "ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
 }
 
 const int nTextTopMargin = 6;
@@ -598,7 +597,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
     rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
@@ -630,7 +629,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,10, 0, 0);
     rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);

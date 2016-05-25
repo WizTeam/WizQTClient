@@ -25,7 +25,7 @@
 #include "wiznotestyle.h"
 
 #include "share/wizsettings.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizmisc.h"
 
@@ -46,7 +46,6 @@
 const int nNumberButtonHeight = 14;
 const int nNumberButtonHorizontalMargin = 3;
 
-using namespace Core;
 
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
 
@@ -528,7 +527,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 //void CWizCategoryViewMessageItem::showCoachingTips()
 //{
 //    bool showTips = false;
-//    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//    if (MainWindow* mainWindow = MainWindow::instance())
 //    {
 //        showTips = mainWindow->userSettings().get(CATEGORYMESSAGEITEMTIPSCHECKED).toInt() == 0;
 //    }
@@ -545,7 +544,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 //        tipWidget->setSizeHint(QSize(280, 60));
 //        tipWidget->setButtonVisible(false);
 //        tipWidget->bindFunction([](){
-//            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//            if (MainWindow* mainWindow = MainWindow::instance())
 //            {
 //                mainWindow->userSettings().set(CATEGORYMESSAGEITEMTIPSCHECKED, "1");
 //            }
@@ -1049,7 +1048,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     {
         int nThis = 0, nOther = 0;
         if (!pOther->location().isEmpty()) {
-            QSettings* setting = ICore::settings();
+            QSettings* setting = WizGlobal::settings();
 //            qDebug() << "pother location : " << pOther->location() << "  this location : " << location();
             nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
             nThis = setting->value("FolderPosition/" + location()).toInt();

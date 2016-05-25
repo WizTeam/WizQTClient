@@ -18,7 +18,6 @@
 #include "mac/wizmachelper.h"
 #endif
 
-using namespace Core;
 
 QRegion creteRoundMask(const QRectF& rect)
 {
@@ -206,7 +205,7 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
     }
     else
     {
-        Core::Internal::MainWindow* mainWindow = dynamic_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        MainWindow* mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
         CWizSingleDocumentViewer* wgt = new CWizSingleDocumentViewer(m_app, doc.strGUID);
         CWizDocumentView* docView = wgt->docView();
         connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentChanged(QString,CWizDocumentView*)));

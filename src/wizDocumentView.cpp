@@ -10,7 +10,7 @@
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
 
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
@@ -38,9 +38,6 @@
 
 #include "share/wizthreads.h"
 #include "share/wizwebengineview.h"
-
-using namespace Core;
-using namespace Core::Internal;
 
 
 #define DOCUMENT_STATUS_NOSTATUS            0x0000
@@ -168,14 +165,14 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(documentUploaded(QString,QString)), \
             m_editStatusSyncThread, SLOT(documentUploaded(QString,QString)));
 
-    connect(ICore::instance(), SIGNAL(viewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteRequested(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteRequested(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteRequested(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(ICore::instance(), SIGNAL(closeNoteRequested(Core::CWizDocumentView*)),
-            SLOT(onCloseNoteRequested(Core::CWizDocumentView*)));
+    connect(WizGlobal::instance(), SIGNAL(closeNoteRequested(CWizDocumentView*)),
+            SLOT(onCloseNoteRequested(CWizDocumentView*)));
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
@@ -816,7 +813,7 @@ void CWizDocumentView::on_document_data_changed(const QString& strGUID,
 }
 
 
-void Core::CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
+void CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
 {
     //
     //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();

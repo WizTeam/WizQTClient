@@ -27,9 +27,7 @@ class CWizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
-namespace Core {
 class CWizDocumentView;
-} // namespace Core
 
 
 class CWizDocumentWebViewLoaderThread : public QThread
@@ -120,7 +118,7 @@ class CWizDocumentWebView : public WizWebEngineView
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
     ~CWizDocumentWebView();
-    Core::CWizDocumentView* view();
+    CWizDocumentView* view();
     //
     QWebEnginePage* notePage();
     //

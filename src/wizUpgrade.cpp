@@ -28,12 +28,12 @@ CWizUpgradeChecker::~CWizUpgradeChecker()
 
 QString CWizUpgradeChecker::getWhatsNewUrl()
 {
-    return WizService::WizApiEntry::standardCommandUrl("changelog");
+    return WizApiEntry::standardCommandUrl("changelog");
 }
 
 void CWizUpgradeChecker::checkUpgrade()
 {
-    QString strApiUrl = WizService::WizApiEntry::standardCommandUrl("download_server");
+    QString strApiUrl = WizApiEntry::standardCommandUrl("download_server");
 
     if (!m_net.get()) {
         m_net = std::make_shared<QNetworkAccessManager>();

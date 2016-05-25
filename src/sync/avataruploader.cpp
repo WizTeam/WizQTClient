@@ -12,8 +12,6 @@
 #include "token.h"
 #include "share/wizEventLoop.h"
 
-using namespace WizService;
-
 AvatarUploader::AvatarUploader(QObject* parent)
     : QObject(parent)
     , m_net(new QNetworkAccessManager(this))
@@ -47,7 +45,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    m_strUrl = WizService::CommonApiEntry::avatarUploadUrl();
+    m_strUrl = CommonApiEntry::avatarUploadUrl();
     if (m_strUrl.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get url for uploading avatar!";
         m_strError = "failed to get url for uploading avatar!";

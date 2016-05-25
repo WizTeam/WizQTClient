@@ -236,14 +236,14 @@ bool CWizObjectDownloader::downloadDocument()
 
 bool CWizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
 {
-    QString token = WizService::Token::token();
+    QString token = Token::token();
     if (token.isEmpty()) {
         return false;
     }
 
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
+    info.strDatabaseServer = CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }

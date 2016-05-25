@@ -18,7 +18,7 @@
 
 QString WizKMGetDocumentEditStatusURL()
 {
-    return WizService::CommonApiEntry::editStatusUrl();
+    return CommonApiEntry::editStatusUrl();
 }
 
 CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* parent)
@@ -201,7 +201,7 @@ bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
                                         strObjID,
                                         strUserAlias,
                                         ::WizIntToStr(GetTickCount()),
-                                        WizService::Token::token());
+                                        Token::token());
 
     if (!m_netManager)
     {
@@ -247,7 +247,7 @@ bool CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAli
                                       strObjID,
                                       strUserAlias,
                                       ::WizIntToStr(GetTickCount()),
-                                      WizService::Token::token());
+                                      Token::token());
 
     if (!m_netManager)
     {
@@ -438,7 +438,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
         return !db.CanEditDocument(doc);
     }
 
-    WIZUSERINFO userInfo = WizService::Token::info();
+    WIZUSERINFO userInfo = Token::info();
     if (db.IsGroup())
     {
         WIZGROUPDATA group;
@@ -448,7 +448,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
         userInfo.strDatabaseServer = group.strDatabaseServer;
         if (userInfo.strDatabaseServer.isEmpty())
         {
-            userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+            userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
     CWizKMDatabaseServer server(userInfo, NULL);
@@ -632,7 +632,7 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
 
     //TEMP: remove me
 
-    WIZUSERINFO userInfo = WizService::Token::info();
+    WIZUSERINFO userInfo = Token::info();
     if (db.IsGroup())
     {
         WIZGROUPDATA group;
@@ -642,7 +642,7 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
         userInfo.strDatabaseServer = group.strDatabaseServer;
         if (userInfo.strDatabaseServer.isEmpty())
         {
-            userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+            userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
     CWizKMDatabaseServer server(userInfo, NULL);

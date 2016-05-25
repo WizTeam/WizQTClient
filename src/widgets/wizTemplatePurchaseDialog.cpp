@@ -72,7 +72,7 @@ void CWizTemplatePurchaseDialog::checkRecipt(const QByteArray& receipt, const QS
     m_transationID = strTransationID;
 
     QString strPlat = "macosx";
-    QString asServerUrl = WizService::CommonApiEntry::asServerUrl();
+    QString asServerUrl = CommonApiEntry::asServerUrl();
     QString checkUrl = asServerUrl + "/a/pay2/ios";
     //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
     //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";

@@ -2256,7 +2256,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2512,7 +2512,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2833,7 +2833,7 @@ void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtm
 void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 {
     // https://note.wiz.cn?dc={document_guid}&kb={kb_guid}&cmd=km%2C"}
-    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
     url.replace("{document_guid}", document.strGUID);
     url.replace("{kb_guid}", document.strKbGUID);
 
@@ -2847,7 +2847,7 @@ void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 
 void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents)
 {
-    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
     QString link;
     for (int i = 0; i < documents.count(); i++)
     {

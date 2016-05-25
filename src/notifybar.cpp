@@ -9,7 +9,6 @@
 #include "utils/stylehelper.h"
 
 
-using namespace Core::Internal;
 
 NotifyBar::NotifyBar(QWidget *parent)
     : QWidget(parent)

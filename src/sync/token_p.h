@@ -10,11 +10,9 @@ class QMutex;
 
 struct WIZUSERINFO;
 
-namespace WizService {
 class Token;
 class AsyncApi;
 
-namespace Internal {
 
 class TokenPrivate: QObject
 {
@@ -46,9 +44,6 @@ private:
 
     Token* q;
 };
-
-} // namespace Internal
-} // namespace WizService
 
 
 

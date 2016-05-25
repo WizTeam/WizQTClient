@@ -1,7 +1,7 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/token.h"
 #include "wizmainwindow.h"
-#include "coreplugin/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
 
@@ -14,7 +14,6 @@
 #include <QWebEngineView>
 #include "share/wizwebengineview.h"
 
-using namespace WizService;
 
 CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
     : QDialog(parent)
@@ -37,7 +36,7 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
 
     WizWebEngineView* web = m_progressWebView->web();
     //
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
+    MainWindow* mainWindow = WizGlobal::mainWindow();
     if (mainWindow) {
         web->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
     }

@@ -1,10 +1,9 @@
 #ifndef CORE_WIZDOCUMENTVIEW_H
 #define CORE_WIZDOCUMENTVIEW_H
 
-#include <coreplugin/inoteview.h>
-
 #include "share/wizobject.h"
 #include <QSharedPointer>
+#include <QWidget>
 
 class QScrollArea;
 class QLineEdit;
@@ -31,12 +30,9 @@ class CWizDocumentStatusChecker;
 class CWizLocalProgressWebView;
 class CWizDocumentTransitionView;
 
-namespace Core {
-namespace Internal {
 class TitleBar;
 class EditorToolBar;
 class CWizTagBar;
-} // namespace Internal
 
 class CWizDocumentView : public QWidget
 {
@@ -55,7 +51,7 @@ public:
     //
     CWizDocumentTransitionView* transitionView();
     //
-    Core::Internal::TitleBar* titleBar();
+    TitleBar* titleBar();
     //
     void waitForDone();
 
@@ -75,7 +71,7 @@ protected:
     WizWebEngineView* m_comments;
     CWizLocalProgressWebView* m_commentWidget;
     CWizSplitter* m_splitter;
-    Core::Internal::TitleBar* m_title;  
+    TitleBar* m_title;
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
@@ -173,6 +169,5 @@ private:
     void stopCheckDocumentAnimations();    
 };
 
-} // namespace Core
 
 #endif // CORE_WIZDOCUMENTVIEW_H

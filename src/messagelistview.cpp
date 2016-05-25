@@ -23,15 +23,13 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 
-#include "coreplugin/itreeview.h"
-
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
 #include "share/wizsettings.h"
 #include "share/wizthreads.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "widgets/wizScrollBar.h"
 #include "widgets/wizImageButton.h"
@@ -98,32 +96,29 @@ void avatarFromMessage(const WIZMESSAGEDATA& msg, QPixmap* pix)
 {
     if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP)
     {
-        WizService::AvatarHost::avatar(msg.senderId, pix);
+        AvatarHost::avatar(msg.senderId, pix);
     }
     else if (WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
+        AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
     }
     else if (WIZ_USER_MSG_TYPE_ADDED_TO_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
+        AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
     }
     else if (WIZ_USER_MSG_TYPE_LIKE == msg.nMessageType
              || WIZ_USER_MSG_TYPE_SYSTEM == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
+        AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
     }
     else
     {
-        WizService::AvatarHost::avatar(msg.senderId, pix);
+        AvatarHost::avatar(msg.senderId, pix);
     }
 }
-
-namespace WizService {
-namespace Internal {
 
 
 class MessageListViewItem : public QListWidgetItem
@@ -271,7 +266,7 @@ public:
         int nMargin = 12;
         QRect rcd = vopt->rect.adjusted(nMargin + nUnreadSymSize, 26, -nMargin, 0);
         QPixmap pmAvatar;       
-//        WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+//        AvatarHost::avatar(m_data.senderId, &pmAvatar);
         avatarFromMessage(m_data, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         int nAvatarRightMargin = 12;
@@ -651,7 +646,7 @@ void MessageListView::onReadTimeout()
 void MessageListView::onSyncTimeout()
 {
     if (!m_api) {
-        m_api = new WizService::AsyncApi(this);
+        m_api = new AsyncApi(this);
 
         connect(m_api, SIGNAL(uploadMessageReadStatusFinished(QString)),
                 SLOT(on_uploadReadStatus_finished(QString)));
@@ -702,7 +697,7 @@ void MessageListView::onSyncTimeout()
 
 void MessageListView::updateTreeItem()
 {
-    CWizCategoryView* tree = dynamic_cast<CWizCategoryView *>(ICore::mainWindow()->CategoryCtrl());
+    CWizCategoryView* tree = dynamic_cast<CWizCategoryView *>(WizGlobal::mainWindow()->CategoryCtrl());
     if (tree) {
         CWizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
         if (!pBase)
@@ -844,8 +839,8 @@ void MessageListView::on_itemSelectionChanged()
         {
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [msgData](){
                 QString command = QString("message_%1").arg(msgData.nMessageType);
-                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);                
-                strUrl.replace("{token}", WizService::Token::token());
+                QString strUrl = CommonApiEntry::getUrlByCommand(command);
+                strUrl.replace("{token}", Token::token());
                 strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
                 strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
                 strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
@@ -882,7 +877,7 @@ void MessageListView::on_itemSelectionChanged()
                 QString link = str;
                 if (link.contains("{token}"))
                 {
-                    link.replace("{token}", WizService::Token::token());
+                    link.replace("{token}", Token::token());
                 }
                 QDesktopServices::openUrl(link);
             });
@@ -1152,7 +1147,7 @@ void WizMessageListTitleBar::showTipsWidget()
     tipWidget->setSizeHint(QSize(280, 60));
     tipWidget->setButtonVisible(false);
     tipWidget->bindCloseFunction([](){
-        if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+        if (MainWindow* mainWindow = MainWindow::instance())
         {
             mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");
         }
@@ -1354,8 +1349,8 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     QString strText = userList.join(";");
 
     QPixmap pix;
-    WizService::AvatarHost::load(strUserId, false);
-    WizService::AvatarHost::avatar(strUserId, &pix);
+    AvatarHost::load(strUserId, false);
+    AvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 24));
@@ -1463,5 +1458,3 @@ void WizClickableLabel::mouseReleaseEvent(QMouseEvent* ev)
 }
 
 
-} // namespace Internal
-} // namespace WizService

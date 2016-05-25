@@ -14,7 +14,7 @@
 
 #include "wizhtml2zip.h"
 #include "share/wizzip.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "html/wizhtmlcollector.h"
 #include "rapidjson/document.h"
@@ -1637,7 +1637,7 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
     CWizStdStringArray arrPos;
     ::WizSplitTextToArray(str, ',', arrPos);
 
-    QSettings* setting = ICore::settings();
+    QSettings* setting = WizGlobal::settings();
     setting->beginGroup("FolderPosition");
     setting->remove("");
     setting->endGroup();
@@ -2045,7 +2045,7 @@ bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
                     newVer = std::max<__int64>(v, newVer);
                     //
                     TOLOG1("[Sync] User avatar changed : %1", it->second);
-                    WizService::AvatarHost::reload(it->second);
+                    AvatarHost::reload(it->second);
                 }
             }
             //

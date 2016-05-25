@@ -4,8 +4,6 @@
 #include "share/wizDatabase.h"
 #include "share/wizthreads.h"
 
-using namespace Core;
-using namespace Core::Internal;
 
 #define THUMB_CACHE_MAX 10000
 

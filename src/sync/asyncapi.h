@@ -7,7 +7,6 @@ class QString;
 struct WIZUSERINFO;
 class QNetworkAccessManager;
 
-namespace WizService {
 
 class AsyncApi : public QObject
 {
@@ -48,7 +47,5 @@ Q_SIGNALS:
     void uploadMessageReadStatusFinished(const QString& ids);
     void uploadMessageDeleteStatusFinished(const QString& ids);
 };
-
-} // namespace WizService
 
 #endif // WIZSERVICE_ASYNCAPI_H

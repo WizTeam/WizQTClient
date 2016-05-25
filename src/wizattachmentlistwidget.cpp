@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QEventLoop>
 
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "wizdef.h"
 #include "share/wizDatabaseManager.h"
@@ -26,7 +26,6 @@
 #include "wizmainwindow.h"
 #include "share/wizthreads.h"
 
-using namespace Core::Internal;
 
 const int nAttachmentListViewItemHeight  = 40;
 
@@ -56,7 +55,7 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 
-    MainWindow* mainWindow = ICore::mainWindow();
+    MainWindow* mainWindow = WizGlobal::mainWindow();
     m_downloaderHost = mainWindow->downloaderHost();
 
     // setup context menu
@@ -138,7 +137,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
     {
         QString strIconPath;
         CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
-        MainWindow* mainWindow = ICore::mainWindow();
+        MainWindow* mainWindow = WizGlobal::mainWindow();
         bool isRetina = WizIsHighPixel();
         strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))

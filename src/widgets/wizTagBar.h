@@ -16,9 +16,6 @@ class CWizExplorerApp;
 class CWizDatabaseManager;
 class CWizTagListWidget;
 
-namespace Core {
-namespace Internal {
-
 class CWizStringListCompleter : public QCompleter
 {
     Q_OBJECT
@@ -170,6 +167,5 @@ private:
     CWizDatabaseManager& m_dbMgr;
 };
 
-}}
 
 #endif // CWIZTAGBAR_H

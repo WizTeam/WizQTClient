@@ -32,10 +32,8 @@ typedef std::deque<CString> CWizStdStringArray;
 //#endif
 #endif
 
-namespace WizService {
 class AsyncApi;
 
-namespace Internal {
 
 class MessageListViewItem;
 
@@ -212,7 +210,7 @@ private:
     QList<qint64> m_readList;
     QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
-    WizService::AsyncApi* m_api;
+    AsyncApi* m_api;
     CWizDatabaseManager& m_dbMgr;
 
     void updateTreeItem();
@@ -246,7 +244,5 @@ private Q_SLOTS:
     void clearRightMenuFocus();
 };
 
-} // namespace Internal
-} // namespace WizService
 
 #endif // WIZSERVICE_INTERNAL_MESSAGELISTVIEW_H

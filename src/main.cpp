@@ -23,7 +23,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizSingleApplication.h"
 #include "share/wizthreads.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "core/wizNoteManager.h"
 
@@ -40,7 +40,6 @@
 #include "wizDocumentWebEngine.h"
 #include "wizLoginDialog.h"
 
-using namespace Core::Internal;
 
 static inline QStringList getPluginPaths()
 {
@@ -254,7 +253,7 @@ int mainCore(int argc, char *argv[])
     QSettings::setDefaultFormat(QSettings::IniFormat);
     //
     QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
-    ICore::setGlobalSettings(globalSettings);
+    WizGlobal::setGlobalSettings(globalSettings);
     //
 
     // use 3 times(30M) of Qt default usage
@@ -270,7 +269,7 @@ int mainCore(int argc, char *argv[])
     CWizUserSettings userSettings(strAccountFolderName);
 
     QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
-    ICore::setSettings(settings);
+    WizGlobal::setSettings(settings);
     //
     // setup locale for welcome dialog
     QString strLocale = userSettings.locale();
@@ -298,7 +297,7 @@ int mainCore(int argc, char *argv[])
     bool bFallback = true;
 
     // FIXME: move to WizService plugin initialize
-    WizService::Token token;
+    Token token;
 
 
     bool bAutoLogin = userSettings.autoLogin();
@@ -342,7 +341,7 @@ int mainCore(int argc, char *argv[])
             }
             qDebug() << "login user id : " << loginDialog.userId();
             settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
-            ICore::setSettings(settings);
+            WizGlobal::setSettings(settings);
         }
         strPassword = loginDialog.password();
         strUserId = loginDialog.userId();
@@ -352,12 +351,12 @@ int mainCore(int argc, char *argv[])
     {
         if (userSettings.serverType() == EnterpriseServer)
         {
-            WizService::CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
+            CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
         }
         else if (userSettings.serverType() == WizServer ||
                  (userSettings.serverType() == NoServer && !userSettings.myWizMail().isEmpty()))
         {
-            WizService::CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
+            CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
         }
     }
 
@@ -378,7 +377,7 @@ int mainCore(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
-    WizService::CommonApiEntry::setLanguage(strLocale);
+    CommonApiEntry::setLanguage(strLocale);
 
     CWizDatabaseManager dbMgr(strAccountFolderName);
     if (!dbMgr.openAll()) {
@@ -388,17 +387,17 @@ int mainCore(int argc, char *argv[])
 
 
     qDebug() << "set user id for token ; " << strUserId;
-    WizService::Token::setUserId(strUserId);
-    WizService::Token::setPasswd(strPassword);
+    Token::setUserId(strUserId);
+    Token::setPasswd(strPassword);
 
     dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
     dbMgr.db().UpdateInvalidData();
 
     // FIXME: move to plugins
-    WizService::AvatarHost avatarHost;
+    AvatarHost avatarHost;
 
     // FIXME: move to core plugin initialize
-    Core::ThumbCache cache;    
+    ThumbCache cache;
 
     MainWindow w(dbMgr);
 #ifdef Q_OS_LINUX

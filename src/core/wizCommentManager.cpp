@@ -13,7 +13,6 @@
 
 #define QUERY_DELAY 3
 
-using namespace Core;
 CWizCommentQuerier::CWizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject* parent)
     : QObject(parent)
     , m_kbGUID(kbGUID)
@@ -82,8 +81,8 @@ void CWizCommentQuerier::run()
     if (m_type == QueryNone)
         return;
 
-    QString token = WizService::Token::token();
-    QString commentsUrl =  WizService::CommonApiEntry::commentUrl(token, m_kbGUID, m_GUID);
+    QString token = Token::token();
+    QString commentsUrl =  CommonApiEntry::commentUrl(token, m_kbGUID, m_GUID);
     if (commentsUrl.isEmpty() || token.isEmpty())
     {
         qDebug() << "Can not get comment url by token : " << token;
@@ -98,8 +97,8 @@ void CWizCommentQuerier::run()
     if (QueryCount != m_type && QueryUrlAndCount != m_type)
         return;
 
-    QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(token, m_kbGUID);
-    QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, token, m_kbGUID, m_GUID);
+    QString kUrl = CommonApiEntry::kUrlFromGuid(token, m_kbGUID);
+    QString strCountUrl = CommonApiEntry::commentCountUrl(kUrl, token, m_kbGUID, m_GUID);
 
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strCountUrl));

@@ -150,7 +150,7 @@ void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler, Tem
 
 QString CWizDocTemplateDialog::languangeCode() const
 {
-    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    MainWindow *window = MainWindow::instance();
     if (window)
     {
         //FIXME: hardcode
@@ -174,7 +174,7 @@ QString CWizDocTemplateDialog::languangeCode() const
 
 QString CWizDocTemplateDialog::previewFileName()
 {
-    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    MainWindow *window = MainWindow::instance();
     if (window)
     {
         //FIXME: hardcode
@@ -301,7 +301,7 @@ void CWizDocTemplateDialog::getPurchasedTemplates()
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
        QNetworkAccessManager manager;
-       QString url = WizService::CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizService::Token::token();
+       QString url = CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + Token::token();
        QNetworkReply* reply = manager.get(QNetworkRequest(url));
        CWizAutoTimeOutEventLoop loop(reply);
        loop.exec();
@@ -446,7 +446,7 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
             // download template file
             if (!info.exists())
             {
-                QString strUrl = WizService::CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(pItem->templateData().id);
+                QString strUrl = CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(pItem->templateData().id);
                 qDebug() << "download template data form url : " << strUrl;
 
                 CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);

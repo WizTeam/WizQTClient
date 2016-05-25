@@ -20,7 +20,7 @@
 #include <QDebug>
 #include <QWebEnginePage>
 
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "share/wizwebengineview.h"
 

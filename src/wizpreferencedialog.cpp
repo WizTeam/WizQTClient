@@ -5,7 +5,7 @@
 #include <QFontDialog>
 #include <QColorDialog>
 
-#include "plugins/coreplugin/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/pathresolve.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
@@ -358,7 +358,7 @@ void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
     m_app.userSettings().setAutoCheckUpdate(autoUpdate);
 
     if (autoUpdate) {
-        Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         mainWindow->checkWizUpdate();
     }
 }
@@ -366,7 +366,7 @@ void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
 void CWizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
 {
     m_app.userSettings().setShowSystemTrayIcon(checked);
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     mainWindow->setSystemTrayIconVisible(checked);
 }
 
@@ -427,7 +427,7 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 
         if (QMessageBox::Ok == clickedButton)
         {
-            Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+            MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
             Q_ASSERT(mainWindow);
             mainWindow->rebuildFTS();
         }

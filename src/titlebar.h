@@ -19,12 +19,10 @@ class CWizAnimateAction;
 class CWizExplorerApp;
 class QNetworkReply;
 
-namespace Core {
 class CWizDocumentView;
 class INoteView;
 class CWizCommentManager;
 
-namespace Internal {
 class TitleEdit;
 class InfoBar;
 class NotifyBar;
@@ -137,7 +135,5 @@ private:
     CWizAnimateAction* m_editButtonAnimation;
 };
 
-} //namesapce Internal
-} // namespace Core
 
 #endif // CORE_TITLEBAR_H

@@ -67,7 +67,7 @@ void CWizShareLinkDialog::writeToLog(const QString& strLog)
 
 void CWizShareLinkDialog::getToken()
 {
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken));
     emit tokenObtained();
 }

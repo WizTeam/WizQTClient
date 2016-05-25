@@ -6,7 +6,6 @@
 #include "wizmainwindow.h"
 #include "utils/stylehelper.h"
 
-using namespace Core::Internal;
 
 CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)

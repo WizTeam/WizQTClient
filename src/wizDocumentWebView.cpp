@@ -25,7 +25,7 @@
 #include <QMacPasteboardMime>
 #endif
 
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 
 #include "wizdef.h"
 #include "utils/pathresolve.h"
@@ -57,8 +57,6 @@
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
 
-using namespace Core;
-using namespace Core::Internal;
 
 /*
  * Load and save document
@@ -512,7 +510,7 @@ QString defaultMarkdownCSS()
 void CWizDocumentWebView::resetMarkdownCssPath()
 {
     const QString strCategory = "MarkdownTemplate/";
-    QSettings* settings = ICore::settings();
+    QSettings* settings = WizGlobal::settings();
     QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
     QString strFile = QString::fromUtf8(ba);
     if (strFile.isEmpty())
@@ -1481,7 +1479,7 @@ void CWizDocumentWebView::loadDocumentInWeb(bool initEditing)
 
 void CWizDocumentWebView::onNoteLoadFinished()
 {
-    ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
+    WizGlobal::instance()->emitViewNoteLoaded(view(), view()->note(), true);
 }
 
 void CWizDocumentWebView::setEditorMode(WizEditorMode editorMode)
@@ -2209,7 +2207,7 @@ QString CWizDocumentWebView::getUserAvatarFilePath()
     int size = 24;
     QString strFileName;
     QString strUserID = m_dbMgr.db().GetUserId();
-    if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
+    if (AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
         return strFileName;
 
 

@@ -14,15 +14,11 @@
 #include "sync/avatar.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 
 #include "wizDocumentView.h"
-
-using namespace Core;
-
-namespace WizService {
 
 class MessageCompleterModel : public QAbstractListModel
 {
@@ -211,8 +207,8 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     setFilterMode(Qt::MatchContains);
 #endif
 
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onNoteLoaded(Core::CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 }
 
 CWizDocumentView* MessageCompleter::noteView()
@@ -231,7 +227,7 @@ CWizDocumentView* MessageCompleter::noteView()
     return 0;
 }
 
-void MessageCompleter::onNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
+void MessageCompleter::onNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
 {
     if (view != noteView())
         return;
@@ -259,4 +255,3 @@ void MessageCompleter::update(const QString& strKbGUID)
     }
 }
 
-} // namespace WizService

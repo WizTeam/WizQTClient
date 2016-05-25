@@ -64,9 +64,6 @@
 //    QString strPlatform = "x86";
 //#endif
 
-using namespace WizService;
-using namespace WizService::Internal;
-
 
 static QString LocalLanguage = QLocale::system().name();
 QString CommonApiEntry::m_server = QString();

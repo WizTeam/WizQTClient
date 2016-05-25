@@ -48,7 +48,7 @@ set(wiznote_SOURCES
     share/wizkmcore.cpp
     share/wizxml.cpp
     share/wizxmlrpc.cpp
-    share/icore.cpp
+    share/wizGlobal.cpp
     sync/wizXmlRpcServer.cpp
     #share/wizapi.cpp
     share/wizDatabase.cpp
@@ -100,6 +100,7 @@ set(wiznote_SOURCES
     share/wizEventLoop.cpp
     sync/wizJSONServerBase.cpp
     share/wizObjectOperator.cpp
+    widgets/aboutdialog.cpp
     widgets/wizLocalProgressWebView.cpp
     widgets/wizCrashReportDialog.cpp
     widgets/wizCustomToolBar.cpp
@@ -152,7 +153,6 @@ set(wiznote_SOURCES
     wizproxydialog.cpp
     wizcreateaccountdialog.cpp
     wizmainwindow.cpp
-    #icore.cpp
     notecomments.cpp
     cellbutton.cpp
     titlebar.cpp
@@ -237,7 +237,7 @@ set(wiznote_HEADERS
     share/wizthumbindex.h
     share/wizenc.h
     share/wizziwreader.h
-    share/icore.h
+    share/wizGlobal.h
     html/wizhtmlreader.h
     html/wizhtmlcollector.h
     sync/wizKMServer.h
@@ -248,6 +248,7 @@ set(wiznote_HEADERS
     share/wizSyncableDatabase.h
     share/wizClucene.h
     share/wizSearchIndexer.h
+    widgets/aboutdialog.h
     widgets/wizSegmentedButton.h
     widgets/wizUserInfoWidget.h
     widgets/wizUserInfoWidgetBase.h
@@ -283,7 +284,6 @@ set(wiznote_HEADERS
     wizproxydialog.h
     wizcreateaccountdialog.h
     wizmainwindow.h
-    #icore.h
     notecomments.h
     notecomments_p.h
     cellbutton.h
@@ -530,7 +530,7 @@ target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static
     clucene-shared-static
-    aggregation
+    #aggregation
     Qt5::WebEngine
     Qt5::WebEngineWidgets
     #markdown
@@ -544,7 +544,7 @@ target_link_libraries(${PROJECT_NAME}
     cryptlib
     clucene-core-static
     clucene-shared-static
-    aggregation
+    #aggregation
     #markdown
     Qt5::WebEngine
     Qt5::WebEngineWidgets

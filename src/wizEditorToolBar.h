@@ -19,9 +19,6 @@ class CWizToolComboBoxFont;
 class CWizExplorerApp;
 class CWizTipsWidget;
 
-namespace Core {
-namespace Internal {
-
 
 class EditorToolBar : public QWidget
 {
@@ -177,7 +174,5 @@ private:
 };
 
 
-} // namespace Internal
-} // namespace Core
 
 #endif // WIZEDITORTOOLBAR_H

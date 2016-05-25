@@ -8,8 +8,6 @@
 class WIZDOCUMENTDATA;
 class CWizDocumentWebEngine;
 
-namespace Core {
-
 class CWizDocumentView;
 
 class CWizSingleDocumentViewer : public QWidget
@@ -68,8 +66,6 @@ private:
     QMap<QString, CWizSingleDocumentViewer*> m_viewerMap;
     CWizExplorerApp& m_app;
 };
-
-}
 
 void bindESCToQuitFullScreen(QWidget* wgt);
 void bringWidgetToFront(QWidget* wgt);

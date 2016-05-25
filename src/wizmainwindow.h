@@ -62,19 +62,13 @@ class CWizTrayIcon;
 class CWizMobileFileReceiver;
 class ICore;
 
-namespace WizService {
-namespace Internal {
 class MessageListView;
 class WizMessageSelector;
 class WizMessageListTitleBar;
-}
-}
 
-namespace Core {
 class CWizDocumentView;
 class CWizSingleDocumentViewDelegate;
 
-namespace Internal {
 
 class MainWindow
 #ifdef Q_OS_MAC
@@ -181,10 +175,10 @@ private:
     CWizActions* m_actions;
     CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
-    WizService::Internal::MessageListView* m_msgList;
+    MessageListView* m_msgList;
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
-    WizService::Internal::WizMessageListTitleBar* m_msgListTitleBar;
+    WizMessageListTitleBar* m_msgListTitleBar;
 
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
@@ -547,7 +541,5 @@ private:
     void showTemplateIAPDlg(const TemplateData& tmpl);
 };
 
-} // namespace Internal
-} // namespace Core
 
 #endif // WIZMAINWINDOW_H

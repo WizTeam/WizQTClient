@@ -19,7 +19,7 @@
 #include "share/wizObjectOperator.h"
 #include "share/wizMessageBox.h"
 #include "share/wizthreads.h"
-#include "share/icore.h"
+#include "share/wizGlobal.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
@@ -35,10 +35,6 @@
 #include "wizWebSettingsDialog.h"
 #include "wizFileReader.h"
 #include "wizOEMSettings.h"
-
-using namespace WizService;
-
-using namespace Core::Internal;
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
@@ -2520,8 +2516,8 @@ void CWizCategoryView::on_action_deleted_recovery()
     if (trashItem)
     {
         WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-            QString strToken = WizService::Token::token();
-            QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+            QString strToken = Token::token();
+            QString strUrl = CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
             WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
                 WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
             });
@@ -2949,36 +2945,36 @@ void CWizCategoryView::addDocumentToShortcuts(const WIZDOCUMENTDATA& doc)
 
 void CWizCategoryView::createGroup()
 {
-    QString strExtInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
+    QString strExtInfo = CommonApiEntry::appstoreParam(false);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
     WizShowWebDialogWithToken(tr("Create new group"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
@@ -3065,8 +3061,8 @@ void CWizCategoryView::initTopLevelItems()
 
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
-    QString extInfo = "biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
@@ -3077,8 +3073,8 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     {
         extInfo += _T("&p=payment");
     }
-    extInfo += WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    extInfo += CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage team"), strUrl, window());
 
 }
@@ -3572,7 +3568,7 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
 void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 {
     const QString strFolderPostion = "FolderPosition/";
-    QSettings* setting = ICore::settings();
+    QSettings* setting = WizGlobal::settings();
     int nValue = setting->value(strFolderPostion + "/Deleted Items/").toInt();
     setting->setValue(strFolderPostion + strLocation, nValue);
     //
@@ -4260,7 +4256,7 @@ void CWizCategoryView::saveShortcutState()
 
 void CWizCategoryView::loadExpandState()
 {
-    QSettings* settings = ICore::settings();
+    QSettings* settings = WizGlobal::settings();
     settings->beginGroup(TREEVIEW_STATE);
     m_strSelectedId = selectedId(settings);
 
@@ -5575,7 +5571,7 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
 
 void CWizCategoryView::saveExpandState()
 {
-    QSettings* settings = ICore::settings();
+    QSettings* settings = WizGlobal::settings();
     settings->beginGroup(TREEVIEW_STATE);
     settings->remove("");
     for (int i = 0 ; i < topLevelItemCount(); i++) {
