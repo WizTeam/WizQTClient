@@ -5,7 +5,6 @@
 # default is 10.7 for binary release.
 
 # CMake arguments for WizNote
-# WIZNOTE_USE_QT5   use qt5 to compile project
 # APPSTORE_BUILD  build for Apple Appsotre, would not use qt deploy
 # XCODEBUILD      adjust project params to suit for xcode
 #UPDATE_TRANSLATIONS  update transation files
@@ -49,11 +48,6 @@ elseif(COMPILER_SUPPORTS_CXX0X)
 else()
         message(STATUS "The compiler ${CMAKE_CXX_COMPILER} has no C++11 support. Please use a different C++ compiler.")
 endif()
-
-if(NOT WIZNOTE_USE_QT5)
-    set(WIZNOTE_USE_QT5 OFF CACHE BOOL
-        "Build WizNote use Qt5, default is off.")
-endif(NOT WIZNOTE_USE_QT5)
 
 if(APPLE)
     if(APPSTORE_BUILD)

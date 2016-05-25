@@ -674,16 +674,11 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizDocumentDataArray& arrayDo
 
     if (changed)
     {
-#if QT_VERSION < 0x050400
-        CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
-        QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
-#else
         QTimer::singleShot(200, [this]() {
             CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
             Q_ASSERT(categoryView);
             categoryView->saveShortcutState();
         });
-#endif
     }
 }
 

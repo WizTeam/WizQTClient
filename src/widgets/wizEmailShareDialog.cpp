@@ -97,14 +97,7 @@ bool CWizEmailShareDialog::isInsertCommentToNote() const
 
 QString CWizEmailShareDialog::getCommentsText() const
 {
-#if QT_VERSION > 0x050000
     return ui->textEdit_notes->toPlainText().toHtmlEscaped();
-#else
-    QString strText = ui->textEdit_notes->toPlainText();
-    strText.replace(_T("<"), _T("&lt;"));
-    strText.replace(_T(">"), _T("&gt;"));
-    return strText;
-#endif
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()

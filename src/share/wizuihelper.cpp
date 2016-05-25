@@ -1,8 +1,6 @@
 #include "wizuihelper.h"
 
-#ifdef BUILD_WITH_QT5
 #include <QtWidgets>
-#endif
 
 #include "share/wizmisc.h"
 #include "utils/pathresolve.h"

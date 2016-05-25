@@ -138,13 +138,8 @@ int mainCore(int argc, char *argv[])
 #endif
 
 
-#if QT_VERSION > 0x050000
    qInstallMessageHandler(Utils::Logger::messageHandler);
    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-
-#else
-    qInstallMsgHandler(Utils::Logger::messageHandler);
-#endif
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
     QApplication::setOrganizationName(QObject::tr("cn.wiz.wiznoteformac"));

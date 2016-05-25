@@ -9,13 +9,7 @@
 class CWizExplorerApp;
 class CWizScrollBar;
 
-#ifdef Q_OS_LINUX
 #define WIZNOTE_CUSTOM_SCROLLBAR
-#else
-#if QT_VERSION < 0x050000
-#define WIZNOTE_CUSTOM_SCROLLBAR
-#endif
-#endif
 
 
 class CWizFolderView : public QTreeWidget

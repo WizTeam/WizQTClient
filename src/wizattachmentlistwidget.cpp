@@ -260,7 +260,6 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         return;
     }
 
-#if QT_VERSION > 0x050000
     // try to set the attachement read-only.
     QFile file(strFileName);
     if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
@@ -270,7 +269,6 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
                 & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
         file.setPermissions(permissions);
     }
-#endif
 
     qDebug() << "try to open file : " << strFileName;
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
@@ -611,11 +609,7 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 
 void CWizAttachmentListView::forceRepaint()
 {
-#if QT_VERSION < 0x050000
-    update();
-#else
     viewport()->repaint();
-#endif
 }
 
 

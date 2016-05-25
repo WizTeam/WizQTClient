@@ -3976,11 +3976,7 @@ bool CWizDatabase::ExportToHtmlFile(const WIZDOCUMENTDATA& document, const QStri
     if (!WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText))
         return false;
 
-#if QT_VERSION < 0x050000
-    QString strResFolder = document.strTitle + "_files/";
-#else
     QString strResFolder = document.strTitle.toHtmlEscaped() + "_files/";
-#endif
     strText.replace("index_files/", strResFolder);
 
     QString strIndexFile = strPath + document.strTitle + ".html";

@@ -73,12 +73,7 @@ QString CWizFileImporter::loadTextFileToHtml(const QString& strFileName)
     QTextStream in(&file);
     QString ret = in.readAll();
     file.close();
-#if QT_VERSION > 0x050000
     ret = ret.toHtmlEscaped();
-#else
-    ret.replace("<", "&lt;");
-    ret.replace(">", "&gt;");
-#endif
     ret.replace("\n","<br>");
     ret.replace(" ","&nbsp");
 
