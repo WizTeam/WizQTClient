@@ -17,6 +17,7 @@
 #include <QListWidget>
 #include <QFontDialog>
 #include <QDebug>
+#include <QWidgetAction>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -1566,7 +1567,9 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
         }
     }
 
-    QWidget *widget = new QWidget;
+    QMenu *colorMenu = new QMenu(this);
+    //
+    QWidget *widget = new QWidget(colorMenu);
     widget->setLayout(pGridLayout);
 
     QVBoxLayout *pVLayout = new QVBoxLayout;
@@ -1574,10 +1577,14 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pVLayout->addWidget(pBtnTransparent);
     pVLayout->addWidget(widget);
     pVLayout->addWidget(pBtnOtherColor);
+    //
+    QWidget* itemsWidget = new QWidget(colorMenu);
+    itemsWidget->setLayout(pVLayout);
 
+    QWidgetAction* widgetAction = new QWidgetAction(colorMenu);
+    widgetAction->setDefaultWidget(itemsWidget);
 
-    QMenu *colorMenu = new QMenu(this);
-    colorMenu->setLayout(pVLayout);
+    colorMenu->addAction(widgetAction);
 
     return colorMenu;
 }

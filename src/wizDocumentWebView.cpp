@@ -1781,22 +1781,27 @@ void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool 
 void CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
 {
     WizGetAnalyzer().LogAction(QString("editorSetFontFamily : %1").arg(strFamily));
-    editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
+    editorCommandExecuteCommand("fontName", "false", "'" + strFamily + "'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
     WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1px").arg(strSize));
-    editorCommandExecuteCommand("fontSize", "'" + strSize + "px'");
+    //
+    CString strStyle = WizFormatString1(_T("{\\\"font-size\\\" : \\\"%1pt\\\"}"), strSize);
+    CString strScript = WizFormatString1(_T("WizEditor.modifySelectionDom(JSON.parse(\"%1\"));"), strStyle);
+
+    page()->runJavaScript(strScript);
+    setModified(true);
 }
 
 void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 {
     if (color == QColor(Qt::transparent)) {
-        editorCommandExecuteCommand("backColor", "'default'");
+        editorCommandExecuteCommand("backColor", "false", "'default'");
     }
     else {
-        editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
+        editorCommandExecuteCommand("backColor", "false", "'" + color.name() + "'");
     }
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("backColor");
@@ -1805,10 +1810,10 @@ void CWizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 void CWizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
 {
     if (color == QColor(Qt::transparent)) {
-        editorCommandExecuteCommand("foreColor", "'default'");
+        editorCommandExecuteCommand("foreColor", "false", "'default'");
     }
     else {
-        editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
+        editorCommandExecuteCommand("foreColor", "false", "'" + color.name() + "'");
     }
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("foreColor");
@@ -1944,7 +1949,7 @@ void CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertHorizontal");
-    editorCommandExecuteCommand("horizontal");
+    editorCommandExecuteCommand("InsertHorizontalRule");
 }
 
 void CWizDocumentWebView::editorCommandExecuteInsertCheckList()
@@ -1981,14 +1986,18 @@ void CWizDocumentWebView::editorCommandExecuteInsertDate()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertDate");
-    editorCommandExecuteCommand("date");
+    //
+    QString date = QDate::currentDate().toString(Qt::DefaultLocaleLongDate);
+    editorCommandExecuteInsertHtml(date, false);
 }
 
 void CWizDocumentWebView::editorCommandExecuteInsertTime()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("insertTime");
-    editorCommandExecuteCommand("time");
+    //
+    QString time = QTime::currentTime().toString(Qt::DefaultLocaleLongDate);
+    editorCommandExecuteInsertHtml(time, false);
 }
 
 void CWizDocumentWebView::editorCommandExecuteRemoveFormat()
