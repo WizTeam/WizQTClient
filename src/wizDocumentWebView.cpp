@@ -1615,7 +1615,14 @@ void CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
 void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
-    editorCommandExecuteCommand("insertHtml", s, "'" + strHtml + "'");
+    //
+    QString base64Html = WizStringToBase64(strHtml);
+    base64Html.replace("\r", "");
+    base64Html.replace("\n", "");
+    QString code = QString("WizEditor.insertB64Html('%1')").arg(base64Html);
+    //
+    page()->runJavaScript(code);
+    //editorCommandExecuteCommand("insertHtml", s, "'" + strHtml + "'");
 }
 
 void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)

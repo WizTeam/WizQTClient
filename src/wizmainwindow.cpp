@@ -2109,6 +2109,8 @@ void MainWindow::init()
             SLOT(on_groupDocuments_unreadCount_modified(QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+    //
+    QTimer::singleShot(1000 * 3, this, SLOT(on_actionSync_triggered()));
 
     //ESC键退出全屏
     bindESCToQuitFullScreen(this);
