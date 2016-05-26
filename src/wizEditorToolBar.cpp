@@ -726,6 +726,35 @@ public:
         m_strText = strText;
         repaint();
     }
+    //
+    void setFontName(const QString& strFontName)
+    {
+        CWizStdStringArray arrayFontName;
+        WizSplitTextToArray(strFontName, _T(','), arrayFontName);
+        //
+        QString firstName;
+        //
+        for (auto name : arrayFontName)
+        {
+            QString fontName = name;
+            fontName = fontName.trimmed();
+            fontName.remove("\"");
+            fontName.remove("\'");
+            //
+            if (firstName.isEmpty())
+                firstName = fontName;
+            //
+            int index = findText(fontName);
+            if (index != -1) {
+                setCurrentIndex(index);
+                m_strText = fontName;
+                return;
+            }
+        }
+        //
+        m_strText = firstName;
+        setCurrentIndex(-1);
+    }
 
     QString text() const { return m_strText; }
 
@@ -1363,8 +1392,20 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
     bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
 
-    m_comboFontFamily->setText(strFontName);
-    m_comboFontSize->setText(strFontSize);
+    //
+    m_comboFontFamily->setFontName(strFontName);
+    //
+    strFontSize.remove("px");
+    int fontSizeInPx = _ttoi(strFontSize);
+    if (0 == fontSizeInPx)
+    {
+        CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
+        m_comboFontSize->setText(strsFontsizeInPx);
+    }
+    else
+    {
+        m_comboFontSize->setText("");
+    }
 
     m_btnForeColor->setColor(QColor(strForeColor));
     m_btnBackColor->setColor(QColor(strBackColor));

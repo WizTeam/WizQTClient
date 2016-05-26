@@ -230,14 +230,21 @@ void CWizDocumentView::setSizeHint(QSize size)
 void CWizDocumentView::waitForDone()
 {
     m_editStatusChecker->thread()->quit();
-
-    m_web->trySaveDocument(m_note, false, [=](const QVariant& ret){
+    m_editStatusSyncThread->waitForDone();
+    //
+    //
+    bool done = false;
+    m_web->trySaveDocument(m_note, false, [=, &done](const QVariant& ret){
 
         m_web->waitForDone();
         //
+        done = true;
     });
     //
-    m_editStatusSyncThread->waitForDone();
+    while (!done)
+    {
+        QApplication::processEvents();
+    }
 }
 
 QWidget* CWizDocumentView::client() const

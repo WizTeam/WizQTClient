@@ -258,9 +258,11 @@ void CWizDocumentWebView::waitForDone()
 {
     if (m_docLoadThread) {
         m_docLoadThread->waitForDone();
+        m_docLoadThread = NULL;
     }
     if (m_docSaverThread) {
         m_docSaverThread->waitForDone();
+        m_docSaverThread = NULL;
     }
 }
 
@@ -2399,9 +2401,12 @@ void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc, bool edit
 }
 void CWizDocumentWebViewLoaderThread::stop()
 {
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
     m_stop = true;
     //
-    m_waitForData.wakeAll();
+    m_waitEvent.wakeAll();
 }
 void CWizDocumentWebViewLoaderThread::waitForDone()
 {
@@ -2444,30 +2449,47 @@ void CWizDocumentWebViewLoaderThread::run()
 
 void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID, bool editingMode)
 {
-    QMutexLocker locker(&m_mutex);
-    Q_UNUSED(locker);
     //
-    m_strCurrentKbGUID = kbGUID;
-    m_strCurrentDocGUID = docGUID;
-    m_editingMode = editingMode;
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_strCurrentKbGUID = kbGUID;
+        m_strCurrentDocGUID = docGUID;
+        m_editingMode = editingMode;
+    }
     //
-    m_waitForData.wakeAll();
+    //
+    m_waitEvent.wakeAll();
 }
 
-void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, bool& editingMode)
+bool CWizDocumentWebViewLoaderThread::isEmpty()
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    if (m_strCurrentDocGUID.isEmpty())
-        m_waitForData.wait(&m_mutex);
+    return m_strCurrentDocGUID.isEmpty();
+}
+
+void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, bool& editingMode)
+{
+    if (isEmpty())
+    {
+        m_waitEvent.wait();
+    }
     //
-    kbGUID = m_strCurrentKbGUID;
-    docGUID = m_strCurrentDocGUID;
-    editingMode = m_editingMode;
     //
-    m_strCurrentKbGUID.clear();
-    m_strCurrentDocGUID.clear();
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        kbGUID = m_strCurrentKbGUID;
+        docGUID = m_strCurrentDocGUID;
+        editingMode = m_editingMode;
+        //
+        m_strCurrentKbGUID.clear();
+        m_strCurrentDocGUID.clear();
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -2495,7 +2517,7 @@ void CWizDocumentWebViewSaverThread::save(const WIZDOCUMENTDATA& doc, const QStr
     //
     m_arrayData.push_back(data);
     //
-    m_waitForData.wakeAll();
+    m_waitEvent.wakeAll();
 
     if (!isRunning())
     {
@@ -2512,22 +2534,40 @@ void CWizDocumentWebViewSaverThread::waitForDone()
 void CWizDocumentWebViewSaverThread::stop()
 {
     m_stop = true;
-    m_waitForData.wakeAll();
+    m_waitEvent.wakeAll();
 }
 
-void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
+bool CWizDocumentWebViewSaverThread::isEmpty()
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
+    return m_arrayData.empty();
+}
+
+CWizDocumentWebViewSaverThread::SAVEDATA CWizDocumentWebViewSaverThread::peekFirst()
+{
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
+    //
+    SAVEDATA data = m_arrayData[0];
+    m_arrayData.erase(m_arrayData.begin());
+    return data;
+}
+
+void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
+{
     while (1)
     {
-        if (m_arrayData.empty())
+        if (m_stop)
+            return;
+        //
+        if (isEmpty())
         {
-            m_waitForData.wait(&m_mutex);
+            m_waitEvent.wait();
         }
         //
-        if (m_arrayData.empty())
+        if (isEmpty())
         {
             if (m_stop)
                 return;
@@ -2535,8 +2575,7 @@ void CWizDocumentWebViewSaverThread::PeekData(SAVEDATA& data)
             continue;
         }
         //
-        data = m_arrayData[0];
-        m_arrayData.erase(m_arrayData.begin());
+        data = peekFirst();
         //
         break;
     }

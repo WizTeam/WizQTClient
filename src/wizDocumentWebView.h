@@ -29,6 +29,29 @@ struct WIZODUCMENTDATA;
 
 class CWizDocumentView;
 
+class CWizWaitEvent
+{
+private:
+    QMutex m_mutex;
+    QWaitCondition m_waitForData;
+public:
+    void wait()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_waitForData.wait(&m_mutex);
+    }
+
+    void wakeAll()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_waitForData.wakeAll();
+    }
+};
+
 
 class CWizDocumentWebViewLoaderThread : public QThread
 {
@@ -50,12 +73,14 @@ protected:
 Q_SIGNALS:
     void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, bool editingMode);
 private:
+    bool isEmpty();
+private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
     bool m_editingMode;
     QMutex m_mutex;
-    QWaitCondition m_waitForData;
+    CWizWaitEvent m_waitEvent;
     bool m_stop;
 };
 
@@ -81,6 +106,9 @@ private:
     };
     //
     std::vector<SAVEDATA> m_arrayData;
+    //
+    bool isEmpty();
+    SAVEDATA peekFirst();
 protected:
     virtual void run();
     //
@@ -91,7 +119,7 @@ Q_SIGNALS:
 private:
     CWizDatabaseManager& m_dbMgr;
     QMutex m_mutex;
-    QWaitCondition m_waitForData;
+    CWizWaitEvent m_waitEvent;
     bool m_stop;
 };
 

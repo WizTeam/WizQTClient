@@ -82,7 +82,6 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
         }
     }
     //
-    qDebug() << pTag->getTag() << "\n";
     if (pTag->getValueFromName("wiz_style") == "unsave")
     {
         return;

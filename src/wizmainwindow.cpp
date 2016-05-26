@@ -499,7 +499,7 @@ void MainWindow::showEvent(QShowEvent* event)
 void MainWindow::on_actionExit_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarExit");
-
+    //
     qApp->exit();
 }
 
