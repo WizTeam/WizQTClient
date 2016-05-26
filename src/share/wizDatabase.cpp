@@ -3804,6 +3804,15 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         CWizStdStringArray::const_iterator it;
         for (it = arrayImageFileName.begin(); it != arrayImageFileName.end(); it++) {
             CString strFileName = *it;
+            //
+            QString name = Utils::Misc::extractFileName(strFileName);
+            if (name.startsWith("wizIcon"))
+                continue;
+            if (name.startsWith("checked"))
+                continue;
+            if (name.startsWith("unchecked"))
+                continue;
+            //
             qint64 size = Utils::Misc::getFileSize(strFileName);
             if (size > m)
             {
