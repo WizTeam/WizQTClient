@@ -961,5 +961,4 @@ enum WizEditorMode
 };
 
 
-
 #endif // WIZOBJECT_H

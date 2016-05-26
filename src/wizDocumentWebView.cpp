@@ -229,9 +229,10 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     setAcceptDrops(true);
 
     // refers
+    qRegisterMetaType<WizEditorMode>("WizEditorMode");
     m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
-    connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString, bool)),
-            SLOT(onDocumentReady(const QString&, const QString, const QString, bool)), Qt::QueuedConnection);
+    connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString, WizEditorMode)),
+            SLOT(onDocumentReady(const QString&, const QString, const QString, WizEditorMode)), Qt::QueuedConnection);
     //
     m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr, this);
     connect(m_docSaverThread, SIGNAL(saved(const QString, const QString,bool)),
@@ -662,7 +663,7 @@ void CWizDocumentWebView::onTitleEdited(QString strTitle)
     });
 }
 
-void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, bool startEditing)
+void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode)
 {
     m_mapFile.insert(strGUID, strFileName);
 
@@ -671,7 +672,7 @@ void CWizDocumentWebView::onDocumentReady(const QString kbGUID, const QString st
         return;
 
     //
-    loadDocumentInWeb(startEditing);
+    loadDocumentInWeb(editorMode);
 }
 
 void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok)
@@ -701,8 +702,7 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode
     }
 
     // ask extract and load
-    bool editingMode = editorMode == modeEditor;
-    m_docLoadThread->load(doc, editingMode);
+    m_docLoadThread->load(doc, editorMode);
 }
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
@@ -714,7 +714,7 @@ void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
         return;
 
     // reload may triggered when update from server or locally reflected by modify
-    m_docLoadThread->load(data, isEditing());
+    m_docLoadThread->load(data, m_currentEditorMode);
 }
 
 
@@ -1439,7 +1439,7 @@ href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
     }
 }
 
-void CWizDocumentWebView::loadDocumentInWeb(bool initEditing)
+void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
 {
     //
     QString strGUID = view()->note().strGUID;
@@ -1458,10 +1458,10 @@ void CWizDocumentWebView::loadDocumentInWeb(bool initEditing)
     m_currentNoteHtml = strHtml;
 
     WizEditorMode oldMode = m_currentEditorMode;
-    m_currentEditorMode = initEditing ? modeEditor : modeReader;
+    m_currentEditorMode = editorMode;
     if (oldMode != m_currentEditorMode)
     {
-        if (initEditing) {
+        if (m_currentEditorMode == modeEditor) {
             Q_EMIT focusIn();
         } else {
             Q_EMIT focusOut();
@@ -2394,13 +2394,13 @@ CWizDocumentWebViewLoaderThread::CWizDocumentWebViewLoaderThread(CWizDatabaseMan
     : QThread(parent)
     , m_dbMgr(dbMgr)
     , m_stop(false)
-    , m_editingMode(false)
+    , m_editorMode(modeReader)
 {
 }
 
-void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc, bool editingMode)
+void CWizDocumentWebViewLoaderThread::load(const WIZDOCUMENTDATA &doc, WizEditorMode editorMode)
 {
-    setCurrentDoc(doc.strKbGUID, doc.strGUID, editingMode);
+    setCurrentDoc(doc.strKbGUID, doc.strGUID, editorMode);
 
     if (!isRunning())
     {
@@ -2432,8 +2432,8 @@ void CWizDocumentWebViewLoaderThread::run()
         //
         QString kbGuid;
         QString docGuid;
-        bool editingMode = false;
-        PeekCurrentDocGUID(kbGuid, docGuid, editingMode);
+        WizEditorMode editorMode = modeReader;
+        PeekCurrentDocGUID(kbGuid, docGuid, editorMode);
         if (m_stop)
             return;
         //
@@ -2450,12 +2450,12 @@ void CWizDocumentWebViewLoaderThread::run()
         QString strHtmlFile;
         if (db.DocumentToTempHtmlFile(data, strHtmlFile))
         {
-            emit loaded(kbGuid, docGuid, strHtmlFile, editingMode);
+            emit loaded(kbGuid, docGuid, strHtmlFile, editorMode);
         }
     }
 }
 
-void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID, bool editingMode)
+void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docGUID, WizEditorMode editorMode)
 {
     //
     {
@@ -2464,7 +2464,7 @@ void CWizDocumentWebViewLoaderThread::setCurrentDoc(QString kbGUID, QString docG
         //
         m_strCurrentKbGUID = kbGUID;
         m_strCurrentDocGUID = docGUID;
-        m_editingMode = editingMode;
+        m_editorMode = editorMode;
     }
     //
     //
@@ -2479,7 +2479,7 @@ bool CWizDocumentWebViewLoaderThread::isEmpty()
     return m_strCurrentDocGUID.isEmpty();
 }
 
-void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, bool& editingMode)
+void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, WizEditorMode& editorMode)
 {
     if (isEmpty())
     {
@@ -2493,7 +2493,7 @@ void CWizDocumentWebViewLoaderThread::PeekCurrentDocGUID(QString& kbGUID, QStrin
         //
         kbGUID = m_strCurrentKbGUID;
         docGUID = m_strCurrentDocGUID;
-        editingMode = m_editingMode;
+        editorMode = m_editorMode;
         //
         m_strCurrentKbGUID.clear();
         m_strCurrentDocGUID.clear();

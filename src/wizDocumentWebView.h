@@ -56,10 +56,11 @@ public:
 class CWizDocumentWebViewLoaderThread : public QThread
 {
     Q_OBJECT
+    //
 public:
     CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
-    void load(const WIZDOCUMENTDATA& doc, bool editingMode);
+    void load(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode);
     //
     void stop();
     //
@@ -68,17 +69,17 @@ public:
 protected:
     virtual void run();
     //
-    void setCurrentDoc(QString kbGuid, QString docGuid, bool editingMode);
-    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, bool& editingMode);
+    void setCurrentDoc(QString kbGuid, QString docGuid, WizEditorMode editorMode);
+    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, WizEditorMode& editorMode);
 Q_SIGNALS:
-    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, bool editingMode);
+    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode);
 private:
     bool isEmpty();
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
-    bool m_editingMode;
+    WizEditorMode m_editorMode;
     QMutex m_mutex;
     CWizWaitEvent m_waitEvent;
     bool m_stop;
@@ -250,7 +251,7 @@ public:
     QNetworkDiskCache* networkCache();    
 
 private:
-    void loadDocumentInWeb(bool initEditing);
+    void loadDocumentInWeb(WizEditorMode editorMode);
     //
     void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
     void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
@@ -321,7 +322,7 @@ public Q_SLOTS:
 
     void onTitleEdited(QString strTitle);
 
-    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, bool startEditing);
+    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
