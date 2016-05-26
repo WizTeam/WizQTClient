@@ -1611,7 +1611,7 @@ bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
 void CWizDocumentWebView::editorCommandExecuteParagraph(const QString& strType)
 {
     WizGetAnalyzer().LogAction("editorParagraph");
-    editorCommandExecuteCommand("Paragraph", "'" + strType + "'");
+    editorCommandExecuteCommand("formatBlock", "false", "'" + strType + "'");
 }
 
 void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
