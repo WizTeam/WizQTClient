@@ -690,7 +690,6 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode)
 {
     // set data
-    m_currentEditorMode = editorMode;
     m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1 ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
     //
@@ -698,12 +697,12 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode
 
     if (m_bNewNote)
     {
-        enableEditor(true);
-        setFocus();
+        editorMode = modeEditor;
     }
 
     // ask extract and load
-    m_docLoadThread->load(doc, isEditing());
+    bool editingMode = editorMode == modeEditor;
+    m_docLoadThread->load(doc, editingMode);
 }
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
@@ -1458,7 +1457,16 @@ void CWizDocumentWebView::loadDocumentInWeb(bool initEditing)
     //
     m_currentNoteHtml = strHtml;
 
+    WizEditorMode oldMode = m_currentEditorMode;
     m_currentEditorMode = initEditing ? modeEditor : modeReader;
+    if (oldMode != m_currentEditorMode)
+    {
+        if (initEditing) {
+            Q_EMIT focusIn();
+        } else {
+            Q_EMIT focusOut();
+        }
+    }
     //
     QStringList arrayFiles;
     getAllEditorScriptAndStypeFileName(arrayFiles);
