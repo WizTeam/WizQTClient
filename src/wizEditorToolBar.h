@@ -75,8 +75,9 @@ private:
     QWidget* m_secondLineButtonContainer;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
-    bool m_resetLocked;
-    QTimer m_resetLockTimer;
+    QString m_currentStyle;
+    __int64_t m_lastUpdateUIRequest;
+    QTimer m_delayUpdateUITimer;
 
     // editor status reflect
     void resetToolbar(const QString& currentStyle);
@@ -146,9 +147,7 @@ protected Q_SLOTS:
 
     void on_delegate_showContextMenuRequest(const QPoint& pos);
     void on_delegate_selectionChanged(const QString&);
-
-    void on_updateToolBarStatus_request();
-    void on_resetLockTimer_timeOut();
+    void on_delay_updateToolbar();
 
     void on_foreColor_changed();
     void on_showForeColorBoard();

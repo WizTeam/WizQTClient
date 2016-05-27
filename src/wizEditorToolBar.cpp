@@ -18,6 +18,7 @@
 #include <QFontDialog>
 #include <QDebug>
 #include <QWidgetAction>
+#include <QActionGroup>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -949,7 +950,7 @@ QString shiftKey()
 EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
-    , m_resetLocked(false)
+    , m_lastUpdateUIRequest(0)
 {
     setContentsMargins(0, 4, 0, 0);
 
@@ -1123,7 +1124,12 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
                              tr("Justify Right"), this, SLOT(on_btnJustifyRight_clicked()));
     m_actionJustifyRight->setCheckable(true);
     m_btnJustify->setMenu(m_menuJustify);
-
+    //
+    QActionGroup* alignGroup = new QActionGroup(this);
+    alignGroup->setExclusive(true);
+    alignGroup->addAction(m_actionJustifyLeft);
+    alignGroup->addAction(m_actionJustifyCenter);
+    alignGroup->addAction(m_actionJustifyRight);
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
@@ -1356,7 +1362,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_secondLineButtonContainer->setVisible(showExtraButtons);
     m_btnShowExtra->setChecked(showExtraButtons);
 
-    connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
+    connect(&m_delayUpdateUITimer, SIGNAL(timeout()), SLOT(on_delay_updateToolbar()));
 }
 
 void EditorToolBar::resetToolbar(const QString& currentStyle)
@@ -1397,7 +1403,7 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     //
     strFontSize.remove("px");
     int fontSizeInPx = _ttoi(strFontSize);
-    if (0 == fontSizeInPx)
+    if (0 != fontSizeInPx)
     {
         CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
         m_comboFontSize->setText(strsFontsizeInPx);
@@ -1415,9 +1421,9 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnUnderLine->setChecked(underline);
     m_btnStrikeThrough->setChecked(strikeThrough);
 
-    m_actionJustifyLeft->setEnabled(justifyleft);
-    m_actionJustifyCenter->setEnabled(justifycenter);
-    m_actionJustifyRight->setEnabled(justifyright);
+    m_actionJustifyLeft->setChecked(justifyleft);
+    m_actionJustifyCenter->setChecked(justifycenter);
+    m_actionJustifyRight->setChecked(justifyright);
 
     m_btnOrderedList->setChecked(InsertOrderedList);
     m_btnUnorderedList->setChecked(InsertUnorderedList);
@@ -1534,34 +1540,34 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
  */
 void EditorToolBar::on_delegate_selectionChanged(const QString& currentStyle)
 {
-    static int counter = 0;
-    if (m_resetLocked)
+    m_currentStyle = currentStyle;
+    m_lastUpdateUIRequest = GetTickCount();
+    //
+    if (!m_delayUpdateUITimer.isActive())
     {
-        if (counter == 0)
-        {
-            counter ++;
-            QTimer::singleShot(1600, this,SLOT(on_delegate_selectionChanged()));
-        }
-        return;
+        m_delayUpdateUITimer.start();
     }
-
-    resetToolbar(currentStyle);
-
-    // 锁定更新
-    m_resetLocked = true;
-    m_resetLockTimer.start(1500);
-    counter = 0;
 }
 
-void EditorToolBar::on_updateToolBarStatus_request()
+void EditorToolBar::on_delay_updateToolbar()
 {
+    if (m_currentStyle.isEmpty())
+        return;
+    if (0 == m_lastUpdateUIRequest)
+        return;
+    //
+    int delay = GetTickCount() - m_lastUpdateUIRequest;
+    if (delay < 1000)
+        return;
+    //
+    resetToolbar(m_currentStyle);
+    m_lastUpdateUIRequest = 0;
+    //
+#ifdef QT_DEBUG
+    qDebug() << "update editor toolbar ui";
+#endif
 }
 
-void EditorToolBar::on_resetLockTimer_timeOut()
-{
-    m_resetLockTimer.stop();
-    m_resetLocked = false;
-}
 
 
 QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoard)
@@ -2429,7 +2435,7 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 
 void EditorToolBar::on_btnJustifyRight_clicked()
 {
-    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyLeft");
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyRight");
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyRight();
     }

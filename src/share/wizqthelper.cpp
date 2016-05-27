@@ -85,9 +85,7 @@ COleDateTime &COleDateTime::operator=(const COleDateTime &other)
 int GetTickCount()
 {
     QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
-
-    return qrand();
+    return time.msecsSinceStartOfDay();
 }
 
 

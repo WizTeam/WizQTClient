@@ -1803,7 +1803,7 @@ void CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamil
 
 void CWizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
-    WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1px").arg(strSize));
+    WizGetAnalyzer().LogAction(QString("editorSetFontSize : %1pt").arg(strSize));
     //
     CString strStyle = WizFormatString1(_T("{\\\"font-size\\\" : \\\"%1pt\\\"}"), strSize);
     CString strScript = WizFormatString1(_T("WizEditor.modifySelectionDom(JSON.parse(\"%1\"));"), strStyle);
@@ -1868,21 +1868,21 @@ void CWizDocumentWebView::editorCommandExecuteJustifyLeft()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyLeft");
-    editorCommandExecuteCommand("justify", "'left'");
+    editorCommandExecuteCommand("JustifyLeft");
 }
 
 void CWizDocumentWebView::editorCommandExecuteJustifyRight()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyRight");
-    editorCommandExecuteCommand("justify", "'right'");
+    editorCommandExecuteCommand("JustifyRight");
 }
 
 void CWizDocumentWebView::editorCommandExecuteJustifyCenter()
 {
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("justifyCenter");
-    editorCommandExecuteCommand("justify", "'center'");
+    editorCommandExecuteCommand("JustifyCenter");
 }
 
 void CWizDocumentWebView::editorCommandExecuteJustifyJustify()
