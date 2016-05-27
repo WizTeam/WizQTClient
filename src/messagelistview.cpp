@@ -973,7 +973,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     , m_nUnreadCount(0)
     , m_currentSenderGUID(QString())
 {
-    setFixedHeight(Utils::StyleHelper::titleEditorHeight());
+    setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     setPalette(pal);

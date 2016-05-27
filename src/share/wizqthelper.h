@@ -216,4 +216,6 @@ private: // noncopyable
 
 typedef std::deque<CString> CWizStdStringArray;
 
+int WizSmartScaleUI(int spec);
+
 #endif // WIZQTHELPER_H

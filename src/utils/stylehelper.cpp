@@ -237,12 +237,12 @@ QString StyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 
 QSize StyleHelper::treeViewItemIconSize()
 {
-    return QSize(14, 14);
+    return QSize(WizSmartScaleUI(14), WizSmartScaleUI(14));
 }
 
 int StyleHelper::treeViewItemHeight()
 {
-    return 28;
+    return WizSmartScaleUI(28);
 }
 
 QColor StyleHelper::treeViewBackground()
@@ -400,12 +400,13 @@ void StyleHelper::drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOr
 
 int StyleHelper::listViewSortControlWidgetHeight()
 {    
-    return getValue("Documents/SortControlWidgetHeight", 20).toInt();
+    int val = getValue("Documents/SortControlWidgetHeight", 30).toInt();
+    return WizSmartScaleUI(val);
 }
 
 int StyleHelper::messageViewItemHeight()
 {
-    return 83;
+    return WizSmartScaleUI(83);
 }
 
 int StyleHelper::listViewItemHeight(int nType)
@@ -413,16 +414,16 @@ int StyleHelper::listViewItemHeight(int nType)
 //    QFont f;
     switch (nType) {
     case ListTypeOneLine:
-        return 38;
+        return WizSmartScaleUI(38);
 //        return fontHead(f) + margin() * 4;
     case ListTypeTwoLine:
-        return 68;
+        return WizSmartScaleUI(68);
 //        return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
-        return 122;
+        return WizSmartScaleUI(122);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
-        return 20;
+        return WizSmartScaleUI(20);
     default:
         Q_ASSERT(0);
         return 0;
@@ -437,7 +438,7 @@ QColor StyleHelper::listViewBackground()
 
 int StyleHelper::listViewItemHorizontalPadding()
 {
-    return 6;
+    return WizSmartScaleUI(6);
 }
 
 QColor StyleHelper::listViewItemSeperator()
@@ -654,7 +655,7 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListVi
     QPoint pLeft(rcLine.bottomLeft());
     if (!useFullSeperatorLine)
     {
-        const int nSeperatorLeftMargin = 12;
+        const int nSeperatorLeftMargin = WizSmartScaleUI(12);
         pLeft.setX(pLeft.x() + nSeperatorLeftMargin);
     }
 
@@ -680,7 +681,7 @@ QSize StyleHelper::avatarSize(bool bNoScreenFactor)
 int StyleHelper::avatarHeight(bool bNoScreenFactor)
 {
     QFont f;
-    int nHeight = 36;//fontHead(f) + fontNormal(f) + margin() * 3 ;
+    int nHeight = WizSmartScaleUI(36);//fontHead(f) + fontNormal(f) + margin() * 3 ;
     if (bNoScreenFactor)
         return nHeight;
 
@@ -719,7 +720,7 @@ int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, 
 void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 {
     QRect rcLine = rc;
-    rcLine.adjust(12, 0, 0, 0);
+    rcLine.adjust(WizSmartScaleUI(12), 0, 0, 0);
     p->save();
     p->setPen(listViewItemSeperator());
     p->drawLine(rcLine.bottomLeft(), rcLine.bottomRight());
@@ -804,7 +805,7 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
         return QRect(rc.x(), rc.y(), 0, 0);
     }
 
-    QRect rcd(rc.x() + rc.right() - 66, rc.y() + rc.height() - 60, 50, 50);
+    QRect rcd(rc.x() + rc.right() - WizSmartScaleUI(66), rc.y() + rc.height() - WizSmartScaleUI(60), WizSmartScaleUI(50), WizSmartScaleUI(50));
 
     int nWidth = 0, nHeight = 0;
     if (pm.width() > nThumbnailPixmapMaxWidth || pm.height() > nThumbnailPixmapMaxWidth) {
@@ -821,7 +822,7 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
     rcd.adjust(adjustX, adjustY, -adjustX, -adjustY);
     p->save();
     QPainterPath path;
-    path.addRoundedRect(rcd, 4, 4);
+    path.addRoundedRect(rcd, WizSmartScaleUI(4), WizSmartScaleUI(4));
     p->setClipPath(path);
     p->drawPixmap(rcd, pm);
     p->restore();
@@ -867,17 +868,17 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, 
 
 int StyleHelper::lineSpacing()
 {
-    return 4;
+    return WizSmartScaleUI(4);
 }
 
 int StyleHelper::leading()
 {
-    return 3;
+    return WizSmartScaleUI(3);
 }
 
 int StyleHelper::margin()
 {
-    return 5;
+    return WizSmartScaleUI(5);
 }
 
 int StyleHelper::thumbnailHeight()
@@ -1009,12 +1010,12 @@ int StyleHelper::editorButtonHeight()
 
 QMargins StyleHelper::editorBarMargins()
 {
-    return QMargins(14, 0, 14, 0);
+    return QMargins(WizSmartScaleUI(14), 0, WizSmartScaleUI(14), 0);
 }
 
 int StyleHelper::titleEditorHeight()
 {
-    return 30;
+    return WizSmartScaleUI(30);
 }
 
 int StyleHelper::editToolBarHeight()
@@ -1034,7 +1035,7 @@ int StyleHelper::tagBarHeight()
 
 int StyleHelper::notifyBarHeight()
 {
-    return 32;
+    return WizSmartScaleUI(32);
 }
 
 QVariant StyleHelper::getValue(const QString& key, const QVariant& defaultValue)

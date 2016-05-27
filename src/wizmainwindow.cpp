@@ -1862,7 +1862,7 @@ QWidget* MainWindow::createNoteListView()
     m_noteListWidget->setAutoFillBackground(true);
 
     QWidget* noteButtonsContainer = new QWidget(this);
-    noteButtonsContainer->setFixedHeight(30);
+    noteButtonsContainer->setFixedHeight(::WizSmartScaleUI(30));
     QHBoxLayout* layoutButtonContainer = new QHBoxLayout();
     layoutButtonContainer->setContentsMargins(0, 0, 0, 0);
     layoutButtonContainer->setSpacing(0);
@@ -1918,7 +1918,7 @@ QWidget* MainWindow::createNoteListView()
 
     QWidget* wgtRightBorder = new QWidget(this);
     wgtRightBorder->setFixedWidth(13);
-    wgtRightBorder->setFixedHeight(30);
+    wgtRightBorder->setFixedHeight(::WizSmartScaleUI(30));
     wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
     layoutButtonContainer->addWidget(wgtRightBorder);
 
@@ -1960,7 +1960,7 @@ QWidget*MainWindow::createMessageListView()
     titleBarLayout->addWidget(m_msgListTitleBar);
 
     QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(13, 30);
+    placeHoldWgt->setFixedSize(13, WizSmartScaleUI(20));
     placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
     QHBoxLayout* layout2 = new QHBoxLayout();
     layout2->setContentsMargins(0, 0, 0, 0);

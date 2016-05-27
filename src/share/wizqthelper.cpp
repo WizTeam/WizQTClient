@@ -2,6 +2,7 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QApplication>
 
 bool PathFileExists(const CString& strPath)
 {
@@ -405,4 +406,52 @@ long wiz_strtoul(const unsigned short* nptr, QChar endchar, int base)
     CString ctr(nptr);
     ctr = ctr.left(ctr.indexOf(QChar(endchar)));
     return ctr.toLong(NULL, base);
+}
+
+int WizSmartScaleUI(int spec)
+{
+#ifdef Q_OS_MAC
+    return spec;
+#else
+
+    static double rate = 0;
+    if (0 == (int)rate)
+    {
+        rate = 1.0;
+        //
+        QList<QScreen*> screens = QApplication::screens();
+        if (screens.size() > 0)
+        {
+            QScreen* screen = screens[0];
+            double dpi = screen->logicalDotsPerInch();
+            //
+            rate = dpi / 96.0;
+            //
+
+            if (rate < 1.1)
+            {
+                rate = 1.0;
+            }
+            else if (rate < 1.4)
+            {
+                rate = 1.25;
+            }
+            else if (rate < 1.6)
+            {
+                rate = 1.5;
+            }
+            else if (rate < 1.8)
+            {
+                rate = 1.75;
+            }
+            else
+            {
+                rate = 2.0;
+            }
+        }
+    }
+    //
+    return int(spec * rate);
+    //
+#endif
 }

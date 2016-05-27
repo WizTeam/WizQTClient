@@ -40,7 +40,7 @@
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
 #define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
 
-#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag doucment form document list")
+#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag document form document list")
 
 
 const int nNumberButtonHeight = 14;
@@ -367,7 +367,7 @@ CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, c
 
 int CWizCategoryViewSectionItem::getItemHeight(int /*nHeight*/) const
 {    
-    return 32;
+    return WizSmartScaleUI(32);
 }
 void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
 {
@@ -557,7 +557,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& text, bool isPressed)
 {
     QFont f;
-    f.setPixelSize(10);
+    f.setPixelSize(::WizSmartScaleUI(10));
     p->setFont(f);
     p->setPen("999999");
     //
@@ -2249,7 +2249,7 @@ CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
 
 int CWizCategoryViewShortcutPlaceHoldItem::getItemHeight(int /*hintHeight*/) const
 {
-    return 20;
+    return WizSmartScaleUI(20);
 }
 
 void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
@@ -2265,7 +2265,7 @@ void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QSty
         colorText.setAlpha(240);
         p->setPen(colorText);
         QFont f;
-        f.setPixelSize(10);
+        f.setPixelSize(::WizSmartScaleUI(10));
         f.setStyleStrategy(QFont::PreferBitmap);
         QFontMetrics fm(f);
         strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
@@ -2414,6 +2414,6 @@ void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewI
     rc.setLeft(rc.left() + 16);
     QFont fontLink = p->font();
     fontLink.setItalic(true);
-    fontLink.setPixelSize(12);
+    fontLink.setPixelSize(::WizSmartScaleUI(12));
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::StyleHelper::treeViewItemLinkText(), fontLink);
 }

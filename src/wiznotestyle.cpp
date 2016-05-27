@@ -452,7 +452,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                 if (opt->state & State_Selected) {
                     QRect rc(vopt->rect);
                     rc.setWidth(p->window().width());
-                    int nMargin = (opt->rect.height() - 20) / 2;
+                    int nMargin = (opt->rect.height() - WizSmartScaleUI(20)) / 2;
                     rc.adjust(0, nMargin, 0, -nMargin);
                     Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
                 }                
