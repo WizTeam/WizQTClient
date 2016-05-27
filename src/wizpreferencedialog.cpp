@@ -24,8 +24,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
 
-    setFixedSize(430, 290);
-
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
     // general tab
