@@ -129,14 +129,14 @@ class CWizDocumentWebViewPage: public WizWebEnginePage
     Q_OBJECT
 
 public:
-    explicit CWizDocumentWebViewPage(QObject* parent = 0);
+    explicit CWizDocumentWebViewPage(CWizDocumentWebView* parent);
     virtual void triggerAction(WebAction action, bool checked = false);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
-    void on_editorCommandPaste_triggered();
-
 Q_SIGNALS:
     void actionTriggered(WebAction act);
+private:
+    CWizDocumentWebView* m_engineView;
 };
 
 
@@ -147,9 +147,11 @@ class CWizDocumentWebView : public WizWebEngineView
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
     ~CWizDocumentWebView();
-    CWizDocumentView* view();
     //
+    CWizDocumentView* view();
     QWebEnginePage* notePage();
+    //
+    friend class CWizDocumentWebViewPage;
     //
     void waitForDone();
 
@@ -256,7 +258,8 @@ private:
     void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
     void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
     //
-    void tryResetTitle();    
+    void tryResetTitle();
+    bool onPasteCommand();
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);

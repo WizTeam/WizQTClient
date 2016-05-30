@@ -99,9 +99,12 @@ enum WizLinkType {
     WizLink_Attachment
 };
 
-CWizDocumentWebViewPage::CWizDocumentWebViewPage(QObject *parent)
+CWizDocumentWebViewPage::CWizDocumentWebViewPage(CWizDocumentWebView* parent)
     : WizWebEnginePage(parent)
+    , m_engineView(parent)
 {
+    Q_ASSERT(m_engineView);
+    //
     action(QWebEnginePage::Undo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Redo)->setShortcut(QKeySequence());
     action(QWebEnginePage::Copy)->setShortcut(QKeySequence());
@@ -117,7 +120,8 @@ void CWizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction
     }
 
     if (typeAction == QWebEnginePage::Paste) {
-        on_editorCommandPaste_triggered();
+        if (m_engineView->onPasteCommand())
+            return;
     } else if (typeAction == QWebEnginePage::Undo || typeAction == QWebEnginePage::Redo) {
         //FIXME: 在QT5.4.2之后无法禁止webpage的快捷键，webpage的快捷键会覆盖menubar上的
         Q_EMIT actionTriggered(typeAction);
@@ -127,66 +131,6 @@ void CWizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction
     QWebEnginePage::triggerAction(typeAction, checked);
 
     Q_EMIT actionTriggered(typeAction);
-}
-
-void CWizDocumentWebViewPage::on_editorCommandPaste_triggered()
-{
-    QClipboard* clip = QApplication::clipboard();
-    Q_ASSERT(clip);
-
-    const QMimeData* mime = clip->mimeData();
-//    QStringList formats = mime->formats();
-//    for(int i = 0; i < formats.size(); ++ i) {
-//        qDebug() << "Mime Format: " << formats.at(i) << " Mime data: " << mime->data(formats.at(i));
-//    }
-
-#ifdef Q_OS_MAC
-    //todo: webengine
-    /*
-    QString strOrignUrl;
-    QString strText = wizSystemClipboardData(strOrignUrl);
-    if (!strText.isEmpty())
-    {
-        QMimeData* data = new QMimeData();
-        data->removeFormat("text/html");
-        data->setHtml(strText);
-        data->setText(mime->text());
-        clip->setMimeData(data);
-    }
-    else if (mime->hasHtml())   // special process for xcode
-    {
-//        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
-        QString strHtml = mime->html();
-        if (WizGetBodyContentFromHtml(strHtml, true))
-        {
-            QMimeData* data = new QMimeData();
-            data->setHtml(strHtml);
-            data->setText(mime->text());
-            clip->setMimeData(data);
-            return;
-        }
-    }
-    */
-#endif
-
-    //todo: webengine
-    /*
-    if (!clip->image().isNull()) {
-        // save clipboard image to $TMPDIR
-        QString strImagePath = noteResourcesPath();
-        CString strFileName = strImagePath + WizIntToStr(GetTickCount()) + ".png";
-        if (!clip->image().save(strFileName)) {
-            TOLOG("ERROR: Can't save clipboard image to file");
-            return;
-        }
-
-        QMimeData* data = new QMimeData();
-        QString strHtml;// = getImageHtmlLabelByFile(strFileName);
-        if (WizImage2Html(strFileName, strHtml))
-        data->setHtml(strHtml);
-        clip->setMimeData(data);
-    }
-    */
 }
 
 void CWizDocumentWebViewPage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
@@ -265,6 +209,64 @@ void CWizDocumentWebView::waitForDone()
         m_docSaverThread->waitForDone();
         m_docSaverThread = NULL;
     }
+}
+
+
+bool CWizDocumentWebView::onPasteCommand()
+{
+    QClipboard* clip = QApplication::clipboard();
+    Q_ASSERT(clip);
+
+#ifdef Q_OS_MAC
+    const QMimeData* mime = clip->mimeData();
+
+    //todo: webengine
+    /*
+    QString strOrignUrl;
+    QString strText = wizSystemClipboardData(strOrignUrl);
+    if (!strText.isEmpty())
+    {
+        QMimeData* data = new QMimeData();
+        data->removeFormat("text/html");
+        data->setHtml(strText);
+        data->setText(mime->text());
+        clip->setMimeData(data);
+    }
+    else if (mime->hasHtml())   // special process for xcode
+    {
+//        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
+        QString strHtml = mime->html();
+        if (WizGetBodyContentFromHtml(strHtml, true))
+        {
+            QMimeData* data = new QMimeData();
+            data->setHtml(strHtml);
+            data->setText(mime->text());
+            clip->setMimeData(data);
+            return;
+        }
+    }
+    */
+#endif
+
+    if (!clip->image().isNull()) {
+        // save clipboard image to
+        QString strImagePath = noteResourcesPath();
+        CString strFileName = strImagePath + WizIntToStr(GetTickCount()) + ".png";
+        if (!clip->image().save(strFileName)) {
+            TOLOG("ERROR: Can't save clipboard image to file");
+            return false;
+        }
+
+        QString strHtml;
+        if (!WizImage2Html(strFileName, strHtml, strImagePath))
+            return false;
+        //
+        editorCommandExecuteInsertHtml(strHtml, true);
+        //
+        return true;
+    }
+    //
+    return false;
 }
 
 void CWizDocumentWebView::inputMethodEvent(QInputMethodEvent* event)
