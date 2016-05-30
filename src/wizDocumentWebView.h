@@ -413,7 +413,7 @@ private:
     void openVipPageInWebBrowser();
     QString getNoteType();
 
-    QString getMailSender();
+    void getMailSender(std::function<void(QString)> callback);
 
     //
 //    bool shouldAddUserDefaultCSS();

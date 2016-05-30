@@ -927,27 +927,26 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
     editorCommandExecuteInsertHtml(strHtml, true);
 }
 
-QString CWizDocumentWebView::getMailSender()
+void CWizDocumentWebView::getMailSender(std::function<void(QString)> callback)
 {
-    //todo: webengine
-    return QString();
-    /*
-    QString mailSender = page()->runJavaScript("WizGetMailSender()").toString();
+    page()->runJavaScript("WizGetMailSender()", [=](const QVariant& vRet){
+        //
+        QString mailSender = vRet.toString();
 
-    if (mailSender.isEmpty())
-    {
-        QRegExp rxlen("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
-        rxlen.setCaseSensitivity(Qt::CaseInsensitive);
-        rxlen.setPatternSyntax(QRegExp::RegExp);
-        QString strTitle = view()->note().strTitle;
-        int pos = rxlen.indexIn(strTitle);
-        if (pos > -1) {
-            mailSender = rxlen.cap(0); //
+        if (mailSender.isEmpty())
+        {
+            QRegExp rxlen("\\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\\.[A-Z]{2,4}\\b");
+            rxlen.setCaseSensitivity(Qt::CaseInsensitive);
+            rxlen.setPatternSyntax(QRegExp::RegExp);
+            QString strTitle = view()->note().strTitle;
+            int pos = rxlen.indexIn(strTitle);
+            if (pos > -1) {
+                mailSender = rxlen.cap(0);
+            }
         }
-    }
-
-    return mailSender;
-    */
+        //
+        callback(mailSender);
+    });
 }
 
 ///*
@@ -965,15 +964,19 @@ QString CWizDocumentWebView::getMailSender()
 
 void CWizDocumentWebView::shareNoteByEmail()
 {
-    CWizEmailShareDialog dlg(m_app);
-    QString sendTo = getMailSender();
-    dlg.setNote(view()->note(), sendTo);
+    getMailSender([=](QString sendTo){
+        //
 
-    //
-    connect(&dlg, SIGNAL(insertCommentToNoteRequest(QString,QString)),
-            SLOT(on_insertCommentToNote_request(QString,QString)));
+        CWizEmailShareDialog dlg(m_app);
+        //
+        dlg.setNote(view()->note(), sendTo);
+        //
+        connect(&dlg, SIGNAL(insertCommentToNoteRequest(QString,QString)),
+                SLOT(on_insertCommentToNote_request(QString,QString)));
 
-    dlg.exec();
+        dlg.exec();
+
+    });
 }
 
 void CWizDocumentWebView::shareNoteByLink()
