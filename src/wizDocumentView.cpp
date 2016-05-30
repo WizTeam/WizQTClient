@@ -604,11 +604,6 @@ void CWizDocumentView::setEditorFocus()
 }
 
 
-QWebEnginePage*CWizDocumentView::notePage()
-{
-    return m_web->page();
-}
-
 void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     if (attachment.strDocumentGUID != note().strGUID)

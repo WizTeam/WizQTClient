@@ -117,8 +117,6 @@ public:
     //
     void showCoachingTips();
 
-    QWebEnginePage* notePage();
-
 signals:
     void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
     void checkDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);

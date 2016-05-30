@@ -149,7 +149,6 @@ public:
     ~CWizDocumentWebView();
     //
     CWizDocumentView* view();
-    QWebEnginePage* notePage();
     //
     friend class CWizDocumentWebViewPage;
     //
