@@ -105,7 +105,7 @@ QString WizEncryptPassword(const QString& strPassword);
 QString WizDecryptPassword(const QString& strEncryptedText);
 
 
-bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
+bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText);
 bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText);
 bool WizLoadTextFromResource(const QString& resourceName, QString& text);
 

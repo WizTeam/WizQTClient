@@ -14,6 +14,7 @@
 #include <QEventLoop>
 #include <QMacCocoaViewContainer>
 #include <QDebug>
+#include "html/wizhtmlcollector.h"
 
 #import <WebKit/WebKit.h>
 
@@ -655,38 +656,56 @@ QString wizDocToHtml(NSData *data)
     return wizAttributedStringToHtml(string);
 }
 
-
-bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
+bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, const QString& strResourcePath)
 {
     class CProcessWebarchiveHtmlCollector : public CWizHtmlCollector
     {
     public:
+        CProcessWebarchiveHtmlCollector(const QString& strResourcePath)
+            : m_strResourcePath(strResourcePath)
+        {
+
+        }
+
         virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
         {
-
+            QString tagName = pTag->getTagName();
+            tagName = tagName.toUpper();
+            //
+            if (tagName == "IMG"
+                    || tagName == "SCRIPT"
+                    || tagName == "STYLE")
+            {
+                processTagValue(pTag, "src");
+            }
+            else if (tagName == "LINK")
+            {
+                processTagValue(pTag, "HREF");
+            }
+            //
+            processTagValue(pTag, "background");
         }
-
-    };
-
-
-    QWebPage page;
-    QWebFrame* frame = page.mainFrame();
-    frame->setHtml(strHtml);
-    QWebElement document = frame->documentElement();
-    QWebElementCollection collection = document.findAll("img");
-    foreach (QWebElement paraElement, collection) {
-        QString strSrc = paraElement.attribute("src");
-        qDebug() << "origin image src :  "  << strSrc;
-        if (strSrc.left(8) == "file:///")
+        //
+        void processTagValue(CWizHtmlTag* pTag, const QString& valueName)
         {
-            strSrc.remove(0, 8);
-            strSrc = strFolderPath + strSrc;
+            QString value = pTag->getValueFromName("src");
+            if (value.isEmpty())
+                return;
+            //
+            if (value.startsWith("file:///"))
+            {
+                value.remove(0, 8);
+                value = "file://" + m_strResourcePath + value;
+                pTag->setValueToName("src", value);
+            }
         }
-        paraElement.setAttribute("src", strSrc);
-        strSrc = paraElement.attribute("src");
-        qDebug() << "after change scheme image src :  "  << strSrc;
-    }
-    strHtml = document.toInnerXml();
+    private:
+        QString m_strResourcePath;
+    };
+    //
+    CProcessWebarchiveHtmlCollector collector(strResourcePath);
+    //
+    collector.Collect(strFileName, strHtml, true, strResourcePath);
 
     return true;
 }
@@ -695,38 +714,38 @@ bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
 QString wizWebarchiveToHtml(NSString *filePath)
 {
     QString webFile = WizToQString(filePath);
-    if (QFile::exists(webFile))
-    {
-        QFileInfo info(webFile);
-        QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
-        QString newFile = strFolder + info.fileName();
-        QDir dir;
-        dir.mkdir(strFolder);
-        QFile::copy(webFile, newFile);
+    if (!QFile::exists(webFile))
+        return QString();
+    //
+    QFileInfo info(webFile);
+    QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
+    QString newFile = strFolder + info.fileName();
+    QDir dir;
+    dir.mkdir(strFolder);
+    if (!QFile::copy(webFile, newFile))
+        return QString();
+    //
+    QString htmlFile = strFolder + info.baseName() + ".html";
+    QString commandLine = QString("textutil -convert html \"%1\" -output \"%2\"").arg(newFile).arg(htmlFile);
 
-        // convert webarchive to html
-        QProcess process;
-        QEventLoop loop;
-        QObject::connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-        process.start(QString("textutil -convert html %1").arg(newFile));
-        loop.exec();
-        newFile = strFolder + info.baseName() + ".html";
+    // convert webarchive to html
+    QProcess process;
+    QEventLoop loop;
+    QObject::connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    process.start(commandLine);
+    loop.exec();
 
-        qDebug() << "convert html file finished";
+    qDebug() << "convert html file finished";
 
-        QByteArray ba;
-        WizLoadDataFromFile(newFile, ba);
-        QString strHtml(ba);
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(htmlFile, strHtml);
 
+    if (strHtml.isEmpty())
+        return QString();
+    //
+    processWebarchiveImageUrl(newFile, strHtml, strFolder);
 
-        if (!strHtml.isEmpty())
-        {
-            processWebarchiveImageUrl(strHtml, strFolder);
-
-            return strHtml;
-        }
-    }
-    return "";
+    return strHtml;
 }
 
 bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
@@ -743,8 +762,7 @@ bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
            strHtml = wizUrlToHtml(filePath);
            break;
        case WebArchiveTextDocumentType:
-           //todo: webengine
-           //strHtml = wizWebarchiveToHtml(filePath);
+           strHtml = wizWebarchiveToHtml(filePath);
            break;
        default:
            NSString* docType = getDoucmentType(type);

@@ -308,9 +308,9 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
 
     reader.Read(strHtml);
 
-    CString strHtml2 = strHtml;
-
+    CString strHtml2;
     ::WizStringArrayToText(m_ret, strHtml2, "");
+    strHtml = strHtml2;
 
     return true;
 }
