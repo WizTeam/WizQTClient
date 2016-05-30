@@ -381,10 +381,6 @@ public Q_SLOTS:
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
 
-#ifdef Q_OS_MAC
-    void editorCommandExecuteRemoveStartOfLine();
-#endif
-
     // js func
     void resetCheckListEnvironment();
     void initCheckListEnvironment();

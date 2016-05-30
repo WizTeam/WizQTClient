@@ -365,20 +365,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     setUpdatesEnabled(true);
 #else
 
-    if (event->key() == Qt::Key_Backspace)
-    {
-        if (event->modifiers() == Qt::ControlModifier)
-        {
-            editorCommandExecuteRemoveStartOfLine();
-            return;
-        }
-        else if (isEditing())
-        {
-            //FIXME: would not trigger content change event, when delete row and image by backspace
-            setModified(true);
-        }
-    }
-
     QWebEngineView::keyPressEvent(event);
 #endif
 
@@ -1762,34 +1748,26 @@ void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
 
 void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
 {
-    //todo: webengine
-    QString strExec = QString("WizReplaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
+    QString strExec = QString("WizEditor.replaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
     page()->runJavaScript(strExec);
 }
 
 void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
 {
-    //todo: webengine
-    /*
-    QString strExec = QString("WizReplaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
-    if (!page()->runJavaScript(strExec).toBool())
-    {
-        TOLOG1("[Console] Javascript error : %1", strExec);
-        return;
-    }
-    findNext(strSource, bCasesensitive);
-    setModified(true);
-    */
+    QString strExec = QString("WizEditor.replaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
+    page()->runJavaScript(strExec, [=](const QVariant& vRet){
+
+        findNext(strSource, bCasesensitive);
+        setModified(true);
+        //
+    });
 }
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
-    //todo: webengine
-    /*
-    QString strExec = QString("WizRepalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
+    QString strExec = QString("WizEditor.repalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
     page()->runJavaScript(strExec);
     setModified(true);
-    */
 }
 
 void CWizDocumentWebView::editorCommandExecuteFontFamily(const QString& strFamily)
@@ -2089,18 +2067,6 @@ void CWizDocumentWebView::editorCommandExecuteScreenShot()
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("screenShot");
 }
-
-#ifdef Q_OS_MAC
-void CWizDocumentWebView::editorCommandExecuteRemoveStartOfLine()
-{
-    //todo: webengine
-    /*
-    triggerPageAction(QWebEnginePage::SelectStartOfLine);
-    */
-    QKeyEvent delKeyPress(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, QString());
-    QApplication::sendEvent(this, &delKeyPress);
-}
-#endif
 
 
 void CWizDocumentWebView::saveAsPDF()
