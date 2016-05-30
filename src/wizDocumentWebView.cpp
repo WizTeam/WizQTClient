@@ -149,7 +149,6 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     , m_dbMgr(app.databaseManager())
     , m_bNewNote(false)
     , m_bNewNoteTitleInited(false)
-    //, m_noteFrame(nullptr)
     , m_bContentsChanged(false)
     , m_bInSeperateWindow(false)
     , m_nWindowID(nWindowIDCounter ++)
@@ -930,7 +929,7 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
 
 QString CWizDocumentWebView::getMailSender()
 {
-    //todo: webeigne
+    //todo: webengine
     return QString();
     /*
     QString mailSender = page()->runJavaScript("WizGetMailSender()").toString();
@@ -1038,21 +1037,6 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
     //
     page()->runJavaScript(strCode);
 }
-
-//todo: webeigne
-/*
-QWebFrame* CWizDocumentWebView::noteFrame()
-{
-    QList<QWebFrame*> frames = page()->mainFrame()->childFrames();
-    for (int i = 0; i < frames.size(); i++) {
-        if (frames.at(i)->frameName() == "ueditor_0")
-            return frames.at(i);
-    }
-
-    return 0;
-}
-*/
-
 
 void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
