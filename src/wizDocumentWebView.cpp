@@ -1600,18 +1600,6 @@ void CWizDocumentWebView::editorCommandExecuteCommand(const QString& strCommand,
     setModified(true);
 }
 
-bool CWizDocumentWebView::editorCommandQueryLink()
-{
-    return false;
-    //todo: webengine
-    /*
-    QString strUrl = page()->runJavaScript("WizGetLinkUrl();").toString();
-    if (strUrl.isEmpty())
-        return false;
-
-    return true;
-    */
-}
 
 bool CWizDocumentWebView::editorCommandQueryMobileFileReceiverState()
 {
@@ -1670,16 +1658,20 @@ void CWizDocumentWebView::editorCommandExecuteLinkInsert()
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
 
-    //todo: webengine
-    /*
-    QString strUrl = page()->runJavaScript("WizGetLinkUrl();").toString();
-    m_editorInsertLinkForm->setUrl(strUrl);
+    page()->runJavaScript("WizEditor.link.queryCurrentLink();", [=](const QVariant& vLink){
+        //
+        QString strUrl = vLink.toString();
+        if (strUrl.isEmpty())
+            return;
+        //
+        m_editorInsertLinkForm->setUrl(strUrl);
 
-    m_editorInsertLinkForm->exec();
+        m_editorInsertLinkForm->exec();
 
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("linkInsert");
-    */
+        CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+        analyzer.LogAction("linkInsert");
+        //
+    });
 }
 
 void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
@@ -1695,8 +1687,10 @@ void CWizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
     {
         strUrl = url.toString();
     }
-
-    editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
+    //
+    QString code = QString("WizEditor.link.setCurrentLink('%1');").arg(strUrl);
+    //
+    page()->runJavaScript(code);
 }
 
 void CWizDocumentWebView::editorCommandExecuteLinkRemove()
@@ -1768,6 +1762,7 @@ void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
 
 void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
 {
+    //todo: webengine
     QString strExec = QString("WizReplaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
     page()->runJavaScript(strExec);
 }

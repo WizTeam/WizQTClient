@@ -199,9 +199,6 @@ public:
                                      const QString& arg2 = QString(),
                                      const QString& arg3 = QString());
 
-    // UEditor still miss link discover api
-    bool editorCommandQueryLink();
-
     bool editorCommandQueryMobileFileReceiverState();
 
     void editorCommandExecuteParagraph(const QString& strType);
