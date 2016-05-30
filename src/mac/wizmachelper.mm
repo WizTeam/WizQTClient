@@ -505,30 +505,6 @@ bool processWebImageUrl(QString& strHtml, const QString& strUrl)
     return true;
 }
 
-bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
-{
-    QWebPage page;
-    QWebFrame* frame = page.mainFrame();
-    frame->setHtml(strHtml);
-    QWebElement document = frame->documentElement();
-    QWebElementCollection collection = document.findAll("img");
-    foreach (QWebElement paraElement, collection) {
-        QString strSrc = paraElement.attribute("src");
-        qDebug() << "origin image src :  "  << strSrc;
-        if (strSrc.left(8) == "file:///")
-        {
-            strSrc.remove(0, 8);
-            strSrc = strFolderPath + strSrc;
-        }
-        paraElement.setAttribute("src", strSrc);
-        strSrc = paraElement.attribute("src");
-        qDebug() << "after change scheme image src :  "  << strSrc;
-    }
-    strHtml = document.toInnerXml();
-
-    return true;
-}
-
 
 QString wizSystemClipboardData(QString& orignUrl)
 {
@@ -679,7 +655,43 @@ QString wizDocToHtml(NSData *data)
     return wizAttributedStringToHtml(string);
 }
 
-#if 0
+
+bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
+{
+    class CProcessWebarchiveHtmlCollector : public CWizHtmlCollector
+    {
+    public:
+        virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
+        {
+
+        }
+
+    };
+
+
+    QWebPage page;
+    QWebFrame* frame = page.mainFrame();
+    frame->setHtml(strHtml);
+    QWebElement document = frame->documentElement();
+    QWebElementCollection collection = document.findAll("img");
+    foreach (QWebElement paraElement, collection) {
+        QString strSrc = paraElement.attribute("src");
+        qDebug() << "origin image src :  "  << strSrc;
+        if (strSrc.left(8) == "file:///")
+        {
+            strSrc.remove(0, 8);
+            strSrc = strFolderPath + strSrc;
+        }
+        paraElement.setAttribute("src", strSrc);
+        strSrc = paraElement.attribute("src");
+        qDebug() << "after change scheme image src :  "  << strSrc;
+    }
+    strHtml = document.toInnerXml();
+
+    return true;
+}
+
+
 QString wizWebarchiveToHtml(NSString *filePath)
 {
     QString webFile = WizToQString(filePath);
@@ -716,7 +728,6 @@ QString wizWebarchiveToHtml(NSString *filePath)
     }
     return "";
 }
-#endif
 
 bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
 {
