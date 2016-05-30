@@ -2174,23 +2174,6 @@ void CWizDocumentWebView::printDocument()
     */
 }
 
-bool CWizDocumentWebView::findIMGElementAt(QPoint point, QString& strSrc)
-{
-    //todo: webengine
-    /*
-    QPoint ptPos = mapFromGlobal(point);
-    QString strImgSrc = page()->runJavaScript(QString("WizGetImgElementByPoint(%1, %2)").
-                                                                arg(ptPos.x()).arg(ptPos.y())).toString();
-
-    if (strImgSrc.isEmpty())
-        return false;
-
-    strSrc = strImgSrc;
-    return true;
-    */
-    return false;
-}
-
 void CWizDocumentWebView::isModified(std::function<void(bool modified)> callback)
 {
     if (m_bContentsChanged)

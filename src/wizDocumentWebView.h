@@ -213,7 +213,6 @@ public:
     void printDocument();
     void shareNoteByEmail();
     void shareNoteByLink();
-    bool findIMGElementAt(QPoint point, QString& strSrc);
     //
     void isModified(std::function<void(bool modified)> callback);
     Q_INVOKABLE void setModified(bool b);

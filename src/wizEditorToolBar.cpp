@@ -1510,6 +1510,7 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         case QWebEnginePage::Forward:
         case QWebEnginePage::Stop:
         case QWebEnginePage::Reload:
+        case QWebEnginePage::DownloadImageToDisk:
             menu->removeAction(action);
             break;
         default:
