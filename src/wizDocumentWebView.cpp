@@ -216,37 +216,6 @@ bool CWizDocumentWebView::onPasteCommand()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-#ifdef Q_OS_MAC
-    const QMimeData* mime = clip->mimeData();
-
-    //todo: webengine
-    /*
-    QString strOrignUrl;
-    QString strText = wizSystemClipboardData(strOrignUrl);
-    if (!strText.isEmpty())
-    {
-        QMimeData* data = new QMimeData();
-        data->removeFormat("text/html");
-        data->setHtml(strText);
-        data->setText(mime->text());
-        clip->setMimeData(data);
-    }
-    else if (mime->hasHtml())   // special process for xcode
-    {
-//        qDebug() << "mime url : " << mime->urls() << " orign url : " << strOrignUrl;
-        QString strHtml = mime->html();
-        if (WizGetBodyContentFromHtml(strHtml, true))
-        {
-            QMimeData* data = new QMimeData();
-            data->setHtml(strHtml);
-            data->setText(mime->text());
-            clip->setMimeData(data);
-            return;
-        }
-    }
-    */
-#endif
-
     if (!clip->image().isNull()) {
         // save clipboard image to
         QString strImagePath = noteResourcesPath();
