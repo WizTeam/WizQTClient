@@ -37,7 +37,7 @@ void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& s
 {
     int nTotal = strFiles.count();
     int nFailed = 0;
-    QString text(tr(" file(s) import failed: \n"));
+    QString text(tr("%1 file(s) import failed: \n"));
     for (int i = 0; i < nTotal; ++i)
     {
         QString strFile = strFiles.at(i);
@@ -49,8 +49,8 @@ void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& s
 
         emit importProgress(nTotal, i + 1);
     }
-    text = QString::number(nFailed) + text;
-    emit importFinished(nFailed == 0, text);
+    text = text.arg(nFailed);
+    emit importFinished(nFailed == 0, text, m_strKbGuid);
 }
 
 QString CWizFileImporter::loadHtmlFileToHtml(const QString& strFileName)
@@ -97,6 +97,7 @@ QString CWizFileImporter::loadRtfFileToHtml(const QString& strFileName)
 bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGUID,
                                   const QString& strLocation, const WIZTAGDATA& tag)
 {
+    m_strKbGuid = strKbGUID;
     QFileInfo fi(strFile);
     QString strHtml;
     QStringList textExtList, imageExtList, rtfExtList, docExtList, htmlExtList;
@@ -113,6 +114,9 @@ bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGU
     bool addAttach = false;
     bool containsImage = false;
     QString docType = fi.suffix();
+    //
+    qDebug() << "import file type: " << docType;
+    //
     if (textExtList.contains(docType,Qt::CaseInsensitive))
     {
         strHtml = loadTextFileToHtml(strFile);
@@ -132,24 +136,25 @@ bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGU
 #ifdef Q_OS_MAC
     else if (rtfExtList.contains(docType, Qt::CaseInsensitive))
     {
-        if (!documentToHtml(strFile, RTFTextDocumentType, strHtml))
+        if (!wizDocumentToHtml(strFile, RTFTextDocumentType, strHtml))
             return false;
         WizGetBodyContentFromHtml(strHtml, true);
         addAttach = true;
     }
     else if (docExtList.contains(docType))
     {
-        if (!documentToHtml(strFile, DocFormatTextDocumentType, strHtml))
+        if (!wizDocumentToHtml(strFile, DocFormatTextDocumentType, strHtml))
             return false;
         WizGetBodyContentFromHtml(strHtml, true);
         addAttach = true;
     }
     else if (webExtList.contains(docType))
     {
-        if (!documentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
+        if (!wizDocumentToHtml(strFile, WebArchiveTextDocumentType, strHtml))
             return false;
-        WizGetBodyContentFromHtml(strHtml, true);
-        addAttach = true;
+        //qDebug() << strHtml;
+        containsImage = true;
+        addAttach = false;
     }
     else
     {

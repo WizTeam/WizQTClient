@@ -19,9 +19,9 @@ public:
     QString loadTextFileToHtml(const QString& strFileName);
     QString loadImageFileToHtml(const QString& strFileName);
     QString loadRtfFileToHtml(const QString& strFileName);
-
+    //
 signals:
-    void importFinished(bool ok, const QString& text);
+    void importFinished(bool ok, const QString& text, const QString& kbGuid);
     void importProgress(int total,int loaded);
 
 
@@ -30,6 +30,7 @@ private:
 
 private:
     CWizDatabaseManager& m_dbMgr;
+    QString m_strKbGuid;
 };
 
 #endif // WIZFILEREADER_H

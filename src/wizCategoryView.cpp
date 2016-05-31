@@ -3389,8 +3389,8 @@ void CWizCategoryView::importFiles(QStringList& strFileList)
     progressDialog.setActionString(tr("loading..."));
     progressDialog.setWindowTitle(tr("%1 files to import.").arg(strFileList.count()));
     connect(fileReader, SIGNAL(importProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
-    connect(fileReader,SIGNAL(importFinished(bool,QString)), &progressDialog,SLOT(close()));
-    connect(fileReader, SIGNAL(importFinished(bool,QString)), SLOT(on_importFile_finished(bool,QString)));
+    connect(fileReader,SIGNAL(importFinished(bool,QString,QString)), &progressDialog,SLOT(close()));
+    connect(fileReader, SIGNAL(importFinished(bool,QString,QString)), SLOT(on_importFile_finished(bool,QString,QString)));
 
     QString strKbGUID;
     WIZTAGDATA tag;
@@ -5502,9 +5502,13 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
 }
 
-void CWizCategoryView::on_importFile_finished(bool ok, QString text)
+void CWizCategoryView::on_importFile_finished(bool ok, QString text, QString kbGuid)
 {
-    if (!ok)
+    if (ok)
+    {
+        quickSyncNewDocument(kbGuid);
+    }
+    else
     {
         CWizMessageBox::information(nullptr, tr("Info"), text);
     }

@@ -574,7 +574,7 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
 //    [HIDictionaryWindowShow dictionary:NULL textString:cfString selectionRange:];
 }
 
-NSString* getDoucmentType(documentType type)
+NSString* getDoucmentType(WizMacDocumentType type)
 {
    // NSString* temp = @"NULL";
     switch (type) {
@@ -680,23 +680,32 @@ bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, con
             }
             else if (tagName == "LINK")
             {
-                processTagValue(pTag, "HREF");
+                processTagValue(pTag, "href");
+                //
+                qDebug() << pTag->getTag();
             }
             //
             processTagValue(pTag, "background");
+            //
+            m_ret.push_back(pTag->getTag());
         }
         //
         void processTagValue(CWizHtmlTag* pTag, const QString& valueName)
         {
-            QString value = pTag->getValueFromName("src");
+            QString value = pTag->getValueFromName(valueName);
             if (value.isEmpty())
                 return;
+            //
+            qDebug() << "value before: " << value;
             //
             if (value.startsWith("file:///"))
             {
                 value.remove(0, 8);
                 value = "file://" + m_strResourcePath + value;
-                pTag->setValueToName("src", value);
+                //
+                qDebug() << "value result: " << value;
+                //
+                pTag->setValueToName(valueName, value);
             }
         }
     private:
@@ -743,12 +752,14 @@ QString wizWebarchiveToHtml(NSString *filePath)
     if (strHtml.isEmpty())
         return QString();
     //
+    //qDebug() << strHtml;
+    //
     processWebarchiveImageUrl(newFile, strHtml, strFolder);
 
     return strHtml;
 }
 
-bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
+bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml)
 {
     NSString* filePath = WizToNSString(strFile);
 

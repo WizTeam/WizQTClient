@@ -7,7 +7,7 @@
 #ifdef Q_OS_MAC
 
 
-enum documentType {
+enum WizMacDocumentType {
     RTFTextDocumentType,                            //Rich text format document.
     RTFDTextDocumentType,                         //Rich text format with attachments document.
     MacSimpleTextDocumentType,            //Macintosh SimpleText document.
@@ -44,7 +44,7 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
 QString wizSystemClipboardData(QString& orignUrl);
 
-bool documentToHtml(const QString& strFile, documentType type, QString& strHtml);
+bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml);
 
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);

@@ -359,7 +359,7 @@ protected Q_SLOTS:
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
 
-    void on_importFile_finished(bool ok, QString text);
+    void on_importFile_finished(bool ok, QString text, QString kbGuid);
 
 public Q_SLOTS:
     void on_action_newDocument();

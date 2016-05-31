@@ -104,8 +104,7 @@ bool CWizNoteManager::createNote(WIZDOCUMENTDATA& data, const QString& strKbGUID
         data.strType = WIZ_DOCUMENT_TYPE_NORMAL;
     }
 
-    QString strBody = Utils::Misc::getHtmlBodyContent(strHtml);
-    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", location, "", data))
+    if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strHtml, "", 0, strTitle, "newnote", location, "", data))
     {
         qCritical() << "Failed to new document!";
         return false;

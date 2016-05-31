@@ -48,7 +48,7 @@ protected:
     virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
     virtual void Comment(const CString &rComment, DWORD dwAppData, bool &bAbort);
 
-private:
+protected:
     CWizHtmlFileMap m_files;
     bool m_bMainPage;
     QUrl m_url;
