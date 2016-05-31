@@ -23,7 +23,7 @@ BUILDDIR=$(pwd);
 ICUDIR="/usr/local/icu56.1"
 ICULIBS="libicui18n.56 libicudata.56 libicuuc.56"
 QTDIR="/usr/local/qt/5.4.2"
-QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebKit QtWebKitWidgets \
+QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebEngine QtWebEngineWidgets QtWebChannel QtWebSockets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
 PLUGINS="sqldrivers imageformats  platforms printsupport \
   position" # playlistformats sensors sensorgestures bearer audio iconengines
@@ -140,18 +140,6 @@ install_name_tool -change libicui18n.56.dylib @executable_path/../PlugIns/icu/li
 install_name_tool -change libicuuc.56.dylib @executable_path/../PlugIns/icu/libicuuc.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change ../lib/libicudata.56.1.dylib @executable_path/../PlugIns/icu/libicudata.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change $QTDIR/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore WizNote.app/Contents/Frameworks/QtXml.framework/Versions/5/QtXml
-
-
-install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libHelloWorld.dylib \
- @executable_path/../PlugIns/libHelloWorld.dylib WizNote.app/Contents/MacOS/WizNote
-install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libMarkDown.dylib \
- @executable_path/../PlugIns/libMarkDown.dylib WizNote.app/Contents/MacOS/WizNote
-install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libCore.dylib \
- @executable_path/../PlugIns/libCore.dylib WizNote.app/Contents/MacOS/WizNote
-install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libextensionsystem.dylib \
- @executable_path/../PlugIns/libextensionsystem.dylib WizNote.app/Contents/MacOS/WizNote 
-install_name_tool -change $BUILDDIR/WizNote.app/Contents/PlugIns/libaggregation.dylib \
- @executable_path/../PlugIns/libaggregation.dylib WizNote.app/Contents/MacOS/WizNote 
 
 
 
