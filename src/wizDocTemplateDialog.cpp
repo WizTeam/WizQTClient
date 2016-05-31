@@ -73,8 +73,44 @@ CWizDocTemplateDialog::~CWizDocTemplateDialog()
     delete ui;
 }
 
+bool getGenericTemplateData(QList<TemplateData>& tmplList)
+{
+    // 内置的空白模板
+    TemplateData tmplEmpty;
+    tmplEmpty.type = CustomTemplate;
+    tmplEmpty.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/newnote.ziw";
+    tmplEmpty.strName = "Empty Note";
+    tmplEmpty.strTitle = "Untitled";
+    tmplEmpty.isFree = true;
+    tmplList.append(tmplEmpty);
+    //
+    // 内置的markdown模板
+    TemplateData tmplMarkdown;
+    tmplMarkdown.type = CustomTemplate;
+    tmplMarkdown.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
+    tmplMarkdown.strName = "Markdown Note";
+    tmplMarkdown.strTitle = "Markdown Note.md";
+    tmplMarkdown.isFree = true;
+    tmplList.append(tmplMarkdown);
+}
+
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 {    
+    //
+    QTreeWidgetItem *genericItem = new QTreeWidgetItem(ui->treeWidget);
+    genericItem->setData(0, Qt::UserRole, CustomTemplate);
+    genericItem->setText(0, tr("Generic templates"));
+    //
+    QList<TemplateData> tmplList;
+    getGenericTemplateData(tmplList);
+    for (TemplateData tmpl : tmplList)
+    {
+        CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, genericItem);
+        item->setText(0, tmpl.strName);
+        genericItem->addChild(item);
+    }
+
+    //
     //init template list download from server
     QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
     if (QFile::exists(jsonFile))
@@ -93,24 +129,19 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
         QList<TemplateData> templateList = tmplMap.values();
         if (!templateList.isEmpty())
         {
-            QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
-            topLevelItem->setData(0, Qt::UserRole, WizServerTemplate);
-            topLevelItem->setText(0, tr("Recommended templates"));            
+            QTreeWidgetItem *onlineItem = new QTreeWidgetItem(ui->treeWidget);
+            onlineItem->setData(0, Qt::UserRole, WizServerTemplate);
+            onlineItem->setText(0, tr("Recommended templates"));
             for (TemplateData tmpl : templateList)
             {
                 tmpl.type = WizServerTemplate;
-                CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, topLevelItem);
+                CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, onlineItem);
                 item->setText(0, tmpl.strName);
-                topLevelItem->addChild(item);
+                onlineItem->addChild(item);
             }
         }
     }
-
-
-    QString folerPath = Utils::PathResolve::builtinTemplatePath();
-    initFolderTemplateItems(folerPath, BuildInTemplate);
-    folerPath = Utils::PathResolve::customNoteTemplatesPath();
-    initFolderTemplateItems(folerPath, CustomTemplate);
+    //
 
     ui->treeWidget->expandAll();
 
@@ -119,58 +150,6 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 #endif
 }
 
-void CWizDocTemplateDialog::initFolderTemplateItems(const QString& strFoler, TemplateType type)
-{
-    CWizSettings settings(strFoler + "template.ini");
-
-    QDir dir(strFoler);
-    QStringList dirList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
-
-    foreach (QString strDir, dirList)
-    {
-        QString folderName = strDir;
-        strDir = strFoler + strDir + "/";
-        folderName += languangeCode();
-        QTreeWidgetItem *topLevelItem = new QTreeWidgetItem(ui->treeWidget);
-        topLevelItem->setData(0, Qt::UserRole, type);
-        QString strLocalTitle;
-        if (getLocalization(settings, folderName, strLocalTitle))
-        {
-            folderName = strLocalTitle;
-        }
-        else
-        {
-            folderName.remove(languangeCode());
-        }
-        topLevelItem->setText(0, folderName);
-        ui->treeWidget->addTopLevelItem(topLevelItem);
-        initFolderItems(topLevelItem, strDir, settings, type);
-    }
-}
-
-QString CWizDocTemplateDialog::languangeCode() const
-{
-    MainWindow *window = MainWindow::instance();
-    if (window)
-    {
-        //FIXME: hardcode
-        QString userLocal = window->userSettings().locale();
-        if (userLocal == WizGetDefaultTranslatedLocal())
-        {
-            return "";
-        }
-        else if (userLocal == "zh_CN")
-        {
-            return "_2052";
-        }
-        else if (userLocal == "zh_TW")
-        {
-            return "_1028";
-        }
-    }
-
-    return "";
-}
 
 QString CWizDocTemplateDialog::previewFileName()
 {
@@ -194,107 +173,6 @@ QString CWizDocTemplateDialog::previewFileName()
     }
 
     return "index.html";
-}
-
-void CWizDocTemplateDialog::initFolderItems(QTreeWidgetItem* parentItem,
-                                            const QString& strDir, CWizSettings& settings, TemplateType type)
-{
-    QDir dir(strDir);
-    QStringList files = dir.entryList();
-    foreach (QString ziwFile, files)
-    {
-        if (ziwFile.right(3) == "ziw")
-        {
-            QString strTitle = ziwFile;
-            strTitle = Utils::Misc::extractFileTitle(strTitle);
-            strTitle += languangeCode();
-            QString strLocalTitle;
-            if (getLocalization(settings, strTitle, strLocalTitle))
-            {
-                strTitle = strLocalTitle;
-            }
-            else
-            {
-                strTitle = Utils::Misc::extractFileTitle(ziwFile);
-            }
-
-            ziwFile = strDir + ziwFile;
-            TemplateData data;
-            data.strFileName = ziwFile;
-            data.type = type;
-            CWizTemplateFileItem *item = new CWizTemplateFileItem(data, parentItem);
-            item->setData(0, Qt::UserRole, type);
-            item->setText(0, strTitle);
-            parentItem->addChild(item);
-        }
-    }
-}
-
-bool CWizDocTemplateDialog::getLocalization(CWizSettings& settings, const QString& strKey, QString& strValue)
-{
-    strValue = settings.GetString("Strings", strKey);
-    if (strValue.isEmpty())
-        return false;
-
-    return true;
-}
-
-bool CWizDocTemplateDialog::importTemplateFile(const QString& strFileName)
-{
-    if (QFile::exists(strFileName))
-    {
-        QString strTempFolder = Utils::PathResolve::tempPath() + Utils::Misc::extractFileTitle(strFileName);
-        if (CWizUnzipFile::extractZip(strFileName, strTempFolder))
-        {
-            QDir dir(strTempFolder);
-            QString strfileName = "template.ziw";
-            QString strZiwFile = dir.path() + "/" + strfileName;
-            if (QFile::exists(strZiwFile))
-            {
-                QString strNewFile = dir.dirName();
-                QString strDestPath = Utils::PathResolve::customNoteTemplatesPath() + tr("custom") + "/";
-                WizEnsurePathExists(strDestPath);
-                if (!QFile::copy(strZiwFile, strDestPath + strNewFile + ".ziw"))
-                {
-                    return false;
-                }
-            }
-            else
-            {
-                QStringList folderList = dir.entryList(QDir::AllDirs | QDir::NoDotAndDotDot);
-                if (folderList.count() == 1)
-                {
-                    QString strDestPath = Utils::PathResolve::customNoteTemplatesPath() + folderList.first();
-                    WizEnsurePathExists(strDestPath);
-                    dir = QDir(strTempFolder + "/" + folderList.first());
-                    QString strfileName = dir.entryList(QDir::Files | QDir::NoDotAndDotDot).first();
-                    if (!QFile::copy(dir.path() + "/" + strfileName, strDestPath + "/" + strfileName))
-                    {
-                        return false;
-                    }
-                }
-            }
-            resetTempalteTree();
-        }
-    }
-    return false;
-}
-
-void CWizDocTemplateDialog::resetTempalteTree()
-{
-    ui->treeWidget->clear();
-    initTemplateFileTreeWidget();
-}
-
-void CWizDocTemplateDialog::createSettingsFile(const QString& strFileName)
-{
-    QFile file(strFileName);
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-
-    QTextStream out(&file);
-    out << "[Strings]" << "\n";
-    file.close();
 }
 
 void CWizDocTemplateDialog::getPurchasedTemplates()
@@ -424,9 +302,6 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
     m_transitionView->hide();
     ui->webView_preview->show();
 
-    bool bDelAble = item->data(0, Qt::UserRole).toInt() == CustomTemplate;
-    ui->btn_delete->setEnabled(bDelAble);
-    //
     CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
     ui->btn_ok->setEnabled(pItem != nullptr);
     if (pItem)
@@ -503,36 +378,7 @@ void CWizDocTemplateDialog::on_btn_cancel_clicked()
     reject();
 }
 
-void CWizDocTemplateDialog::on_pushButton_import_clicked()
-{
-    QStringList fileList = QFileDialog::getOpenFileNames(0, tr("Select one or more template files"), QDir::homePath(), "Wiz Template (*.wiztemplate)");
-    foreach (QString strFile, fileList) {
-        importTemplateFile(strFile);
-    }
-}
 
-void CWizDocTemplateDialog::on_btn_delete_clicked()
-{
-    QTreeWidgetItem* item = ui->treeWidget->currentItem();
-    if (!item)
-        return;
-
-    CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
-    if (pItem)
-    {
-        QString strZiwFile = pItem->templateData().strFileName;
-        WizDeleteFile(strZiwFile);
-        pItem->parent()->removeChild(item);
-        delete item;
-    }
-    else
-    {
-        QString path = Utils::PathResolve::customNoteTemplatesPath() + item->text(0);
-        WizDeleteFolder(path);
-        ui->treeWidget->takeTopLevelItem(ui->treeWidget->indexOfTopLevelItem(item));
-        delete item;
-    }
-}
 
 void CWizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)
 {

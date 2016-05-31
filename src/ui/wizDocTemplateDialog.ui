@@ -26,7 +26,7 @@
       <widget class="QTreeWidget" name="treeWidget">
        <property name="minimumSize">
         <size>
-         <width>200</width>
+         <width>300</width>
          <height>0</height>
         </size>
        </property>
@@ -41,8 +41,8 @@
       </widget>
      </item>
      <item>
-      <widget class="QWebEngineView" name="webView_preview">
-       <property name="url">
+      <widget class="QWebEngineView" name="webView_preview" native="true">
+       <property name="url" stdset="0">
         <url>
          <string>about:blank</string>
         </url>
@@ -70,20 +70,6 @@
    </item>
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QPushButton" name="btn_delete">
-       <property name="text">
-        <string>Delete Selected</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_import">
-       <property name="text">
-        <string>Import Templates</string>
-       </property>
-      </widget>
-     </item>
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -127,8 +113,6 @@
   <tabstop>btn_cancel</tabstop>
   <tabstop>treeWidget</tabstop>
   <tabstop>webView_preview</tabstop>
-  <tabstop>btn_delete</tabstop>
-  <tabstop>pushButton_import</tabstop>
  </tabstops>
  <resources/>
  <connections/>

@@ -74,10 +74,6 @@ private slots:
 
     void on_btn_cancel_clicked();
 
-    void on_pushButton_import_clicked();
-
-    void on_btn_delete_clicked();
-
     void download_templateFile_finished(QString fileName,bool ok);
 
     void load_templateDemo_finished(bool Ok);
@@ -89,19 +85,7 @@ private slots:
 private:
     //
     void initTemplateFileTreeWidget();
-    QString languangeCode() const;
     QString previewFileName();
-    void initFolderTemplateItems(const QString& strFoler, TemplateType type);
-    void initFolderItems(QTreeWidgetItem *parentItem, const QString& strDir,
-                         CWizSettings& settings, TemplateType type);
-
-    bool getLocalization(CWizSettings& settings, const QString& strKey, QString& strValue);
-    //
-    bool importTemplateFile(const QString& strFileName);
-    //
-    void resetTempalteTree();
-
-    void createSettingsFile(const QString& strFileName);
 
     void getPurchasedTemplates();    
 
