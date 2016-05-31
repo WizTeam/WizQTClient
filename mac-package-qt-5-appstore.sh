@@ -22,7 +22,7 @@ DEST="$MYAPP.app" # Our final App directory
 BUILDDIR=$(pwd);
 ICUDIR="/usr/local/icu56.1"
 ICULIBS="libicui18n.56 libicudata.56 libicuuc.56"
-QTDIR="/usr/local/qt/5.4.2"
+QTDIR="/Users/weishijun/Qt5.5.1/5.5/clang_64"
 QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebEngine QtWebEngineWidgets QtWebChannel QtWebSockets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
 PLUGINS="sqldrivers imageformats  platforms printsupport \
