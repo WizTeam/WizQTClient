@@ -12,26 +12,24 @@ echo "build version : " $REV
 
 # compile
 mkdir ../WizQTClient-Release-QT5
-rm -rf ../WizQTClient-Release-QT5/* && \
+#rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=~/usr/local/qt/5.4.2/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.10.sdk ../WizQTClient && \
-make -j5 
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=/Users/weishijun/Qt5.5.1/5.5/clang_64/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
+make -j5
 
 MYAPP="WizNote"
 DEST="$MYAPP.app" # Our final App directory
 BUILDDIR=$(pwd);
-ICUDIR="/usr/local/icu56.1"
-ICULIBS="libicui18n.56 libicudata.56 libicuuc.56"
 QTDIR="/Users/weishijun/Qt5.5.1/5.5/clang_64"
 QTLIBS="QtCore QtNetwork QtSql QtGui QtOpenGL QtWidgets QtWebEngine QtWebEngineWidgets QtWebChannel QtWebSockets \
   QtPrintSupport QtXml QtPositioning QtSensors QtConcurrent QtMacExtras QtMultimediaWidgets QtMultimedia" # QtQml QtQuick QtSvg QtScript
 PLUGINS="sqldrivers imageformats  platforms printsupport \
-  position" # playlistformats sensors sensorgestures bearer audio iconengines
+  position iconengines" # playlistformats sensors sensorgestures bearer audio
  
 # make clean & create pathes 
-mkdir -p $DEST/Contents/Frameworks $DEST/Contents/PlugIns/icu $DEST/Contents/SharedSupport
+mkdir -p $DEST/Contents/Frameworks $DEST/Contents/SharedSupport
  
-# copy Qt libs, plug-ins and ICU
+# copy Qt libs, plug-ins
 for L in $QTLIBS ; do
   cp -R -p $QTDIR/lib/$L.framework $MYAPP.app/Contents/Frameworks
   # mkdir $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Resources
@@ -57,18 +55,19 @@ for L in $QTLIBS ; do
   # cd $BUILDDIR
   #rm $MYAPP.app/Contents/Frameworks/$L.framework/Versions/Current/.
 done
+
+##############################################################
+#copy qt plugins
+mkdir $MYAPP.app/Contents/PlugIns
 for P in $PLUGINS ; do
   mkdir $MYAPP.app/Contents/PlugIns/$P
   cp -R -p $QTDIR/plugins/$P/*.dylib $MYAPP.app/Contents/PlugIns/$P/
+  rm $MYAPP.app/Contents/PlugIns/$P/*_debug.dylib
 done
-
+#remove unused plugins
 rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqminimal.dylib
 rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqoffscreen.dylib
 rm -R -f $MYAPP.app/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib
-
-for I in $ICULIBS ; do
-    cp -p $ICUDIR/lib/$I.dylib $MYAPP.app/Contents/PlugIns/icu/
-done
 
 # copy own application libs if necessary to /Contents/PlugIns/myapp/
 DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
@@ -105,15 +104,6 @@ for P in $DISTPLUGINS ; do # change ID for all *.dylib libs
   done
 done
  
-for L in $ICULIBS ; do 
-  install_name_tool -id "@executable_path/../PlugIns/icu/$L.dylib"\
-    "$MYAPP.app/Contents/PlugIns/icu/$L.dylib"
-    for I in $ICULIBS ; do # change all references in ICU libs
-      if [ $I = $L ] ; then continue; fi
-      install_name_tool -change "$I.dylib" "@executable_path/../PlugIns/icu/$I.dylib"\
-        "$MYAPP.app/Contents/PlugIns/icu/$L.dylib"
-    done
-done
 # we do the same for additional own libs in /Contents/PlugIns/myapp
 
 DISTPLUGINS2=`cd $MYAPP.app/Contents/PlugIns; ls *.dylib`
@@ -134,11 +124,6 @@ for P in $DISTPLUGINS2 ; do # change ID for all *.dylib libs
 
 done
 
-
-
-install_name_tool -change libicui18n.56.dylib @executable_path/../PlugIns/icu/libicui18n.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
-install_name_tool -change libicuuc.56.dylib @executable_path/../PlugIns/icu/libicuuc.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
-install_name_tool -change ../lib/libicudata.56.1.dylib @executable_path/../PlugIns/icu/libicudata.56.dylib WizNote.app/Contents/Frameworks/QtWebKit.framework/Versions/5/QtWebKit
 install_name_tool -change $QTDIR/lib/QtCore.framework/Versions/5/QtCore @executable_path/../Frameworks/QtCore.framework/Versions/5/QtCore WizNote.app/Contents/Frameworks/QtXml.framework/Versions/5/QtXml
 
 

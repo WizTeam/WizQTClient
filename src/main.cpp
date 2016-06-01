@@ -107,16 +107,6 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
-#ifdef BUILD4APPSTORE
-   QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
-   dir.cdUp();
-   dir.cdUp();
-   dir.cd("PlugIns");
-   QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-   printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
-#endif
-
-
 #ifdef Q_OS_LINUX
     // create single application for linux
     CWizSingleApplication a(argc, argv, "Special-Message-for-WizNote-SingleApplication");
