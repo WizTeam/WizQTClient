@@ -12,7 +12,7 @@ echo "build version : " $REV
 
 # compile
 mkdir ../WizQTClient-Release-QT5
-#rm -rf ../WizQTClient-Release-QT5/* && \
+rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
 cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=/Users/weishijun/Qt5.5.1/5.5/clang_64/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
 make -j5
@@ -144,9 +144,9 @@ INSTCERT="3rd Party Mac Developer Installer: Beijing Wozhi Technology Co. Ltd (K
 
 
 #######对Safari剪辑器插件进行签名
-cp -R -p ../MacShareExtension.entitlements MacShareExtension.entitlements
-codesign --force --verify --deep --verbose=2 --sign "$APPLCERT" --entitlements MacShareExtension.entitlements\
-    $MYAPP.app/Contents/PlugIns/MacShareExtension.appex
+#cp -R -p ../MacShareExtension.entitlements MacShareExtension.entitlements
+#codesign --force --verify --deep --verbose=2 --sign "$APPLCERT" --entitlements MacShareExtension.entitlements\
+#    $MYAPP.app/Contents/PlugIns/MacShareExtension.appex
 #######
 
  
