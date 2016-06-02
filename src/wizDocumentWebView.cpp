@@ -1314,25 +1314,20 @@ void CWizDocumentWebView::getAllEditorScriptAndStypeFileName(QStringList& arrayF
 {
     QString strResourcePath = Utils::PathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
-    QString strCorePath = strHtmlEditorPath + "core/";
-    CString strChecklistPath = strCorePath + "checklist/";
     //
     //QString strEditorCss = strHtmlEditorPath + _T("editor.css");
     //
-    QString strEditorJS = strCorePath + _T("wizEditorForMac.js");
-    QString strChecklist = strChecklistPath + _T("todo.js");
+    QString strEditorJS = strHtmlEditorPath + _T("wizEditorForMac.js");
     //
     QString strUitlsJS = strHtmlEditorPath + _T("utils.js");
     QString strLocal = strHtmlEditorPath + _T("localize.js");
     QString strInit = strHtmlEditorPath + _T("editorHelper.js");
-    //
     //
     arrayFile.empty();
     //arrayFile.push_back(strEditorCss);
     arrayFile.push_back(strUitlsJS);
     arrayFile.push_back(strLocal);
     arrayFile.push_back(strEditorJS);
-    arrayFile.push_back(strChecklist);
     arrayFile.push_back(strInit);
 }
 

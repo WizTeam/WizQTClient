@@ -1814,6 +1814,10 @@ var _tableUtilsTableCore = require('./tableUtils/tableCore');
 
 var _tableUtilsTableCore2 = _interopRequireDefault(_tableUtilsTableCore);
 
+var _todoUtilsTodoCore = require('./todoUtils/todoCore');
+
+var _todoUtilsTodoCore2 = _interopRequireDefault(_todoUtilsTodoCore);
+
 var _linkUtilsLinkUtils = require('./linkUtils/linkUtils');
 
 var _linkUtilsLinkUtils2 = _interopRequireDefault(_linkUtilsLinkUtils);
@@ -1835,6 +1839,7 @@ var _editorEditorEvent = require('./editor/editorEvent');
 var _editorEditorEvent2 = _interopRequireDefault(_editorEditorEvent);
 
 var WizEditor = {
+    version: '1.0',
     /**
      * 初始化 修订编辑
      * @param options
@@ -1933,6 +1938,7 @@ var WizEditor = {
      * @returns {*}
      */
     getContentHtml: function getContentHtml() {
+        _todoUtilsTodoCore2['default'].checkTodoStyle();
         return _domUtilsDomExtend2['default'].getContentHtml();
     },
     insertDefaultStyle: function insertDefaultStyle(onlyReplace, customCss) {
@@ -1959,7 +1965,7 @@ var WizEditor = {
      * @returns {boolean}
      */
     isModified: function isModified() {
-        return _domUtilsDomExtend2['default'].getContentHtml() != _editorBase2['default'].getOriginalHtml();
+        return !_commonEnv2['default'].readonly && _domUtilsDomExtend2['default'].getContentHtml() != _editorBase2['default'].getOriginalHtml();
     },
     /**
      * 设置当前文档为 未修改状态
@@ -2127,6 +2133,9 @@ var WizEditor = {
         setCellBg: _tableUtilsTableCore2['default'].setCellBg,
         split: _tableUtilsTableCore2['default'].split
     },
+    todo: {
+        setTodo: _todoUtilsTodoCore2['default'].setTodo
+    },
     nightMode: {
         on: function on(color, bgColor, brightness) {
             _nightModeNightModeUtils2['default'].on(color, bgColor, brightness);
@@ -2156,7 +2165,7 @@ window.WizEditor = WizEditor;
 exports['default'] = WizEditor;
 module.exports = exports['default'];
 
-},{"./amend/amend":7,"./common/Base64":12,"./common/const":13,"./common/env":15,"./common/historyUtils":16,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./editor/base":25,"./editor/editorEvent":26,"./imgUtils/imgUtils":29,"./linkUtils/linkUtils":30,"./nightMode/nightModeUtils":34,"./rangeUtils/rangeExtend":36,"./tableUtils/tableCore":39}],6:[function(require,module,exports){
+},{"./amend/amend":7,"./common/Base64":12,"./common/const":13,"./common/env":15,"./common/historyUtils":16,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./editor/base":25,"./editor/editorEvent":26,"./imgUtils/imgUtils":29,"./linkUtils/linkUtils":30,"./nightMode/nightModeUtils":34,"./rangeUtils/rangeExtend":36,"./tableUtils/tableCore":39,"./todoUtils/todoCore":43}],6:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', {
@@ -2200,6 +2209,10 @@ var _amendAmendInfo2 = _interopRequireDefault(_amendAmendInfo);
 var _amendAmendUser = require('./amend/amendUser');
 
 var _amendAmendUser2 = _interopRequireDefault(_amendAmendUser);
+
+var _todoUtilsTodoCore = require('./todoUtils/todoCore');
+
+var _todoUtilsTodoCore2 = _interopRequireDefault(_todoUtilsTodoCore);
 
 var _readerBase = require('./reader/base');
 
@@ -2354,6 +2367,10 @@ var WizReader = {
             return _imgUtilsImgUtils2['default'].getAll(onlyLocal).join(',');
         }
     },
+    todo: {
+        closeDocument: _todoUtilsTodoCore2['default'].closeDocument,
+        onCheckDocLock: _todoUtilsTodoCore2['default'].onCheckDocLock
+    },
     nightMode: {
         on: function on(color, bgColor, brightness) {
             _nightModeNightModeUtils2['default'].on(color, bgColor, brightness);
@@ -2369,7 +2386,7 @@ window.WizReader = WizReader;
 exports['default'] = WizReader;
 module.exports = exports['default'];
 
-},{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/const":13,"./common/env":15,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./markdown/markdownRender":33,"./nightMode/nightModeUtils":34,"./reader/base":37}],7:[function(require,module,exports){
+},{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/const":13,"./common/env":15,"./common/lang":17,"./common/utils":19,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./markdown/markdownRender":33,"./nightMode/nightModeUtils":34,"./reader/base":37,"./todoUtils/todoCore":43}],7:[function(require,module,exports){
 /**
  * 修订功能 专用工具包
  */
@@ -2429,6 +2446,10 @@ var _tableUtilsTableUtils2 = _interopRequireDefault(_tableUtilsTableUtils);
 var _tableUtilsTableZone = require('../tableUtils/tableZone');
 
 var _tableUtilsTableZone2 = _interopRequireDefault(_tableUtilsTableZone);
+
+var _todoUtilsTodoCore = require('../todoUtils/todoCore');
+
+var _todoUtilsTodoCore2 = _interopRequireDefault(_todoUtilsTodoCore);
 
 //为 domUtils 打补丁
 (function () {
@@ -2948,6 +2969,9 @@ var amendEvent = {
      * @param e
      */
     onKeyDown: function onKeyDown(e) {
+        if (!_todoUtilsTodoCore2['default'].onKeyDown(e)) {
+            return;
+        }
         var sel = _commonEnv2['default'].doc.getSelection(),
             range,
             endDom,
@@ -2965,7 +2989,7 @@ var amendEvent = {
         }
 
         var keyCode = e.keyCode || e.which;
-        //            console.info(e);
+        //      console.info(e);
 
         /**
          * Backspace
@@ -3192,15 +3216,18 @@ var amendEvent = {
         }
 
         //不能使用 selectAllChildren ，否则 输入 空格时 浏览器会自动复制前一个 span 的所有样式
-        //        sel.selectAllChildren(nSpan);
+        // sel.selectAllChildren(nSpan);
         //此方法会导致 Mac 的搜狗输入法 第一个字母被吃掉
-        //            rangeUtils.setRange(nSpan.childNodes[0], 0, nSpan.childNodes[0], nSpan.childNodes[0].nodeValue.length);
+        // rangeUtils.setRange(nSpan.childNodes[0], 0, nSpan.childNodes[0], nSpan.childNodes[0].nodeValue.length);
     },
     /**
      * 按下键盘 逆修订
      * @param e
      */
     onKeyDownReverse: function onKeyDownReverse(e) {
+        if (!_todoUtilsTodoCore2['default'].onKeyDown(e)) {
+            return;
+        }
         var sel = _commonEnv2['default'].doc.getSelection();
 
         //无光标时，或输入法开始后 不操作任何内容
@@ -3211,11 +3238,10 @@ var amendEvent = {
         var keyCode = e.keyCode || e.which;
         //            console.info(e);
 
-        var fixed = _amendUtilsAmendExtend2['default'].fixedAmendRange(),
-            cell,
-            curCell;
+        var fixed = _amendUtilsAmendExtend2['default'].fixedAmendRange();
+        // curCell;
 
-        curCell = _domUtilsDomExtend2['default'].getParentByTagName(sel.focusNode, ['td', 'th'], true, null);
+        // curCell = domUtils.getParentByTagName(sel.focusNode, ['td', 'th'], true, null);
 
         /**
          * Backspace
@@ -3378,7 +3404,7 @@ function h6Patch() {
 }
 module.exports = exports['default'];
 
-},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"../todoUtils/todoCore":43,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
 /**
  * 修订信息显示图层 相关对象
  */
@@ -5624,7 +5650,18 @@ var CONST = {
         TABLE_MENU_BUTTON: 'wiz-table-menu-button',
         TABLE_MENU_ITEM: 'wiz-table-menu-item',
         TABLE_MENU_SUB: 'wiz-table-menu-sub',
-        TABLE_MOVING: 'wiz-table-moving'
+        TABLE_MOVING: 'wiz-table-moving',
+        TODO_ACCOUNT: 'wiz-todo-account',
+        TODO_AVATAR: 'wiz-todo-avatar',
+        TODO_CHECK_IMG: 'wiz-todo-img',
+        TODO_DATE: 'wiz-todo-dt',
+        TODO_LAYER: 'wiz-todo-layer',
+        TODO_LABEL: 'wiz-todo-label',
+        TODO_LABEL_CHECK: 'wiz-todo-label-checked',
+        TODO_LABEL_UNCHECK: 'wiz-todo-label-unchecked',
+        TODO_TAIL: 'wiz-todo-tail', //新版本 todoList 取消此元素
+        TODO_USER_AVATAR: 'wiz-todo-avatar-',
+        TODO_USER_INFO: 'wiz-todo-completed-info'
     },
     ATTR: {
         IMG: 'data-wiz-img',
@@ -5637,7 +5674,9 @@ var CONST = {
         SPAN_PASTE: 'data-wiz-paste',
         SPAN_PASTE_TYPE: 'data-wiz-paste-type',
         SPAN_PASTE_ID: 'data-wiz-paste-id',
-        SPAN_TIMESTAMP: 'data-wiz-amend-time'
+        SPAN_TIMESTAMP: 'data-wiz-amend-time',
+        TODO_ID: 'wiz_todo_id',
+        TODO_CHECK: 'data-wiz-check'
     },
     ID: {
         AMEND_INFO: 'wiz-amend-info',
@@ -5651,9 +5690,13 @@ var CONST = {
         AMEND_INFO_ACCEPT: 'wiz-amend-info-accept',
         AMEND_INFO_REFUSE: 'wiz-amend-info-refuse',
         AMEND_USER_INFO: 'wiz-amend-user',
+        IFRAME_FOR_SAVE: 'wiz-iframe-for-save',
         TABLE_RANGE_BORDER: 'wiz-table-range-border',
         TABLE_ROW_LINE: 'wiz-table-row-line',
-        TABLE_COL_LINE: 'wiz-table-col-line'
+        TABLE_COL_LINE: 'wiz-table-col-line',
+        TODO_STYLE: 'wiz_todo_style_id',
+        TODO_AVATAR_STYLE: 'wiz_todo_style_avatar_',
+        WIZ_DEFAULT_STYLE: 'wiz_custom_css'
     },
     NAME: {
         // NO_ABSTRACT_START: 'Document-Abstract-Start',
@@ -5702,7 +5745,8 @@ var CONST = {
             SET_CELL_ALIGN: 'setCellAlign',
             DISTRIBUTE_COLS: 'distributeCols',
             DELETE_TABLE: 'deleteTable'
-        }
+        },
+        TODO: 'tasklist'
     },
     COLOR: ['#CB3C3C', '#0C9460', '#FF3399', '#FF6005', '#8058BD', '#009999', '#8AA725', '#339900', '#CC6600', '#3BBABA', '#D4CA1A', '#2389B0', '#006699', '#FF8300', '#2C6ED5', '#FF0000', '#B07CFF', '#CC3399', '#EB4847', '#3917E6'],
     CSS: {
@@ -5733,6 +5777,9 @@ var CONST = {
             background: '#ccffcc',
             'border-color': '#00AA00'
         },
+        TODO_LIST: {
+            IMG_WIDTH: 40
+        },
         Z_INDEX: {
             amendInfo: 150,
             tableBorder: 105,
@@ -5756,6 +5803,7 @@ var CONST = {
         BEFORE_SAVESNAP: 'BEFORE_SAVESNAP',
         AFTER_RESTORE_HISTORY: 'AFTER_RESTORE_HISTORY',
 
+        ON_CLICK: 'ON_CLICK',
         ON_COMPOSITION_START: 'ON_COMPOSITION_START',
         ON_COMPOSITION_END: 'ON_COMPOSITION_END',
         ON_COPY: 'ON_COPY',
@@ -5867,23 +5915,39 @@ var ENV = {
     options: {
         document: null,
         lang: 'en',
+        clientType: '',
+        noteType: 'common',
         userInfo: null,
         userData: [],
-        clientType: 'windows',
-        noteType: 'common',
-        dependencyCss: null,
-        dependencyJs: null,
-        maxRedo: 100,
-        // redoCallback: null,
-        noAmend: false,
-        timeout: {
+        dependencyCss: {
+            fonts: '',
+            github2: '',
+            wizToc: ''
+        },
+        dependencyJs: {
+            jquery: '',
+            prettify: '',
+            raphael: '',
+            underscore: '',
+            flowchart: '',
+            sequence: '',
+            mathJax: ''
+        },
+        maxRedo: 100, //only for editor
+        noAmend: false, //only for read
+        table: { //only for editor
+            colWidth: 120, //默认列宽
+            colWidthMin: 30, //最小列宽
+            rowHeightMin: 33 //最小行高
+        },
+        timeout: { //only for read
             markdown: 30 * 1000,
             mathJax: 30 * 1000
         },
         callback: {
-            markdown: null,
-            mathJax: null,
-            redo: null
+            markdown: null, //only for read
+            mathJax: null, //only for read
+            redo: null //only for editor
         }
     },
     init: function init(type, _options) {
@@ -5902,7 +5966,11 @@ var ENV = {
             var k;
             for (k in old) {
                 if (old.hasOwnProperty(k) && newOptions[k]) {
-                    old[k] = newOptions[k];
+                    if (/^(table|timeout|callback|dependencyCss|dependencyJs)$/.test(k)) {
+                        setOptions(old[k], newOptions[k]);
+                    } else {
+                        old[k] = newOptions[k];
+                    }
                 }
             }
         }
@@ -7143,6 +7211,11 @@ var _const = require('./const');
 
 var _const2 = _interopRequireDefault(_const);
 
+var ImgFile = {
+    todoChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjY1OTU4MUZCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjY1OTU4MjBCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGNjU5NTgxREJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGNjU5NTgxRUJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqkphX0AAAJZSURBVHjaYvz//z/DQAImhgEGLNu2bYNzCj+7jpgQaAdiUNz/Z4EKqAJxRz/vbhcgzUeBwSBDE4AhuQiPh6cCcQY8CoBYHYhPALEAFXxWiMdyViCeD8TRSGLdIAe0QS3/BcSlQLwEaMg7Kgc5BxCvAmJfJLGlQFwOcoALVKAMaPEkGsQ3LxBvBGJHJLF9QJwESwOwOF9MA8uFgRiUzcyQxM4AcRA0xBlYkCSoHeySQLwbiLWRxO4AsRcQf0ROhLQAikC8B4iVkMReA7EnlCZYDtQDcT+Z5QTIx0fQLP8CTYB3MEpCHJY3QNlyQBwDxN+JtNwEiHdA4x4GQHHtD8QniS0JxZHYoMSyF4hFiLDcAZq6hdEKpiSoONFFcS6aBksgPgbEKngs94Gmdl408SpofiepLvgL9TlyfIGK6uNAbIFFfSQQrwNiTjTxLlDxjiwALOoZia2MPkJT7EckMRFoyAQhiYHK9CXQYpYBrZSrwGJuPym14R2oZX+RxEC+XA3E+aBiFIinYTEDXsqh+b4Vqo9gLkA3LBdqEbKjJ+BQfxq5lMOSHshqD0yHYkIAFGLeaNFGtQZJLr6shKuUo6YDsOUMGPiMq5SjdpMMW84AxXUArlKOFm1C5JxBsJQjqlVMhh5YzuAnVMrRygEMROYKogDj1q1bYQUGI42b4ij2eHl5YaQBIRpaLoQvEX6CsmNp6IAUpIYJhgP2INVeeUAsSEWLBaFmNkP5u7A5oBqIPwAxGxBPhDZO/1MJv4OayQa1oxqbA25A6/l10FKN2uAz1GwLqF0oACDAAGu/mbMal6iXAAAAAElFTkSuQmCC',
+    todoUnChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDcyODY1Q0NCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDcyODY1Q0RCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENzI4NjVDQUJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpENzI4NjVDQkJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXYwTEAAAD5SURBVHjaYvz//z/DQAImhgEGA+4Alm3bttHdUi8vL4wQUAXitUD8EYj/Uxl/hJqtijUEgFgdiE8AsQCNPMwHxEFA7ATEFkB8Ez0NtEEt/wXE+UAsDMSMVMJCUDN/Qe1owxYCLlB2GRBPorLv30PN5ATiDiB2w5YL+KDsxTRMd7OhNA++bPiOhg54N1oQjTpg1AGjDhh1wKgDRh0w6oAh4QAhGtojhM8Bn6DsWBo6IAVKf8HmgD1QdhcQ5wGxIBUtFoSa2Qzl78LmgGog/gDEbEA8EdqApFav6B3UTDaoHdXYHHAD2mNZB8SfaRD8n6FmW0DtQgEAAQYAS2BO8CD/bL4AAAAASUVORK5CYII='
+};
+
 var TmpEditorStyle = {
     phone: 'body {' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}',
     pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}'
@@ -7151,10 +7224,10 @@ var TmpEditorStyle = {
     phone: 'img {' + 'max-width: 100%;' + 'height: auto !important;' + 'margin: 0px auto;' + 'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
     '}' + 'a {' + 'word-wrap: break-word;' + '}' + 'body {' + 'word-wrap: break-word;' + '}'
 },
-    DefaultStyleId = 'wiz_custom_css',
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
-    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}'
+    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}',
+    todoList: '.wiz-todo-label {padding-left: 12px;position: relative;line-height:30px;/*display: inline-block; padding-top: 7px; padding-bottom: 6px;*/}' + '.wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;}' + '.wiz-todo-label-unchecked {text-decoration: initial;}' + '.wiz-todo-label-checked .wiz-todo-img {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-label-unchecked .wiz-todo-img {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-img {border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 44px; display: inline-block;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' + '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
 },
     ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' + '.wiz-img-resize-handle {width:5px;height:5px;}' + '.wiz-img-resize-handle.lt {cursor: nw-resize;}' + '.wiz-img-resize-handle.tm {cursor: n-resize;}' + '.wiz-img-resize-handle.rt {cursor: ne-resize;}' + '.wiz-img-resize-handle.lm {cursor: w-resize;}' + '.wiz-img-resize-handle.rm {cursor: e-resize;}' + '.wiz-img-resize-handle.lb {cursor: sw-resize;}' + '.wiz-img-resize-handle.bm {cursor: s-resize;}' + '.wiz-img-resize-handle.rb {cursor: se-resize;}',
     TableContainerStyle = '.' + _const2['default'].CLASS.TABLE_CONTAINER + ' {}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
@@ -7177,7 +7250,7 @@ function replaceStyleById(id, css, isReplace) {
 
 var WizStyle = {
     insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
-        replaceStyleById(DefaultStyleId, DefaultStyle.common, isReplace);
+        replaceStyleById(_const2['default'].ID.WIZ_DEFAULT_STYLE, DefaultStyle.common, isReplace);
         if (!customCss) {
             return;
         }
@@ -7231,6 +7304,18 @@ var WizStyle = {
         WizStyle.insertStyle({ name: _const2['default'].NAME.TMP_STYLE }, TableContainerStyle);
         if (_env2['default'].client.type.isIOS) {
             WizStyle.insertStyle({ name: _const2['default'].NAME.TMP_STYLE }, TmpReaderStyle.phone);
+        }
+    },
+    insertTodoStyle: function insertTodoStyle(isForced) {
+        var s = _env2['default'].doc.getElementById(_const2['default'].ID.TODO_STYLE);
+        if (isForced || !s) {
+            replaceStyleById(_const2['default'].ID.TODO_STYLE, DefaultStyle.todoList, false);
+        }
+    },
+    removeTodoStyle: function removeTodoStyle() {
+        var style = _env2['default'].doc.getElementById(_const2['default'].ID.TODO_STYLE);
+        if (style) {
+            style.parentNode.removeChild(style);
         }
     }
 };
@@ -8998,6 +9083,44 @@ var domUtils = {
         return a === bup || !!(bup && bup.nodeType === 1 && (adown.contains ? adown.contains(bup) : a.compareDocumentPosition && a.compareDocumentPosition(bup) & 16));
     },
     /**
+     * 根据 src 将 img 转换为 Base64
+     * @param src
+     */
+    convertImageToBase64: function convertImageToBase64(src, width, height, callback) {
+        // var xhr = new XMLHttpRequest();
+        // xhr.open('GET', src, true);
+        // xhr.responseType = 'blob';
+        // xhr.onload = function() {
+        //     var blob, read;
+        //     if (/^file:/i.test(src) || this.status == 200) {
+        //         blob = this.response;
+        //         read= new FileReader();
+        //         read.readAsDataURL(blob);
+        //         read.onload = function(){
+        //             // callback(canvas.toDataURL());
+        //             console.log(this.result);
+        //         }
+        //     } else {console.log(this)}
+        // };
+        // xhr.send();
+        var img = _commonEnv2['default'].doc.createElement('img');
+        img.onload = function () {
+            var canvas = _commonEnv2['default'].doc.createElement("canvas");
+            canvas.width = width;
+            canvas.height = height;
+            var context = canvas.getContext("2d");
+            var dx = width / img.width;
+            var dy = height / img.height;
+            var d = Math.max(dx, dy);
+            context.scale(d, d);
+            context.drawImage(img, 0, 0);
+            callback(canvas.toDataURL());
+            img = null;
+            canvas = null;
+        };
+        img.src = src;
+    },
+    /**
      * 创建 wiz编辑器 自用的 span
      */
     createSpan: function createSpan() {
@@ -9060,6 +9183,14 @@ var domUtils = {
             _commonEnv2['default'].doc.body.focus();
         }
     },
+    getBlockParent: function getBlockParent(dom, includeSelf) {
+        if (!dom) {
+            return null;
+        }
+        return domUtils.getParentByFilter(dom, function (obj) {
+            return domUtils.isBlockDom(obj);
+        }, includeSelf);
+    },
     /**
      * 获取 dom 的 计算样式
      * @param dom
@@ -9068,7 +9199,7 @@ var domUtils = {
      * @returns {*}
      */
     getComputedStyle: function getComputedStyle(dom, name, includeParent) {
-        if (!dom || !name) {
+        if (!dom || dom.nodeType == 3 || !name) {
             return '';
         }
         var value;
@@ -9700,6 +9831,21 @@ var domUtils = {
         }
     },
     /**
+     * 判断 dom 是否为 块级元素
+     * @param dom
+     * @returns {boolean}
+     */
+    isBlockDom: function isBlockDom(dom) {
+        if (!dom) {
+            return false;
+        }
+        // if (dom.nodeType == 9 || dom.nodeType == 11) {
+        //     return true;
+        // }
+        var displayValue = domUtils.getComputedStyle(dom, 'display', false);
+        return !!displayValue && !/^(inline|inline\-block|inline\-table|none)$/i.test(displayValue);
+    },
+    /**
      * 判断 dom 是否为 document.body
      * @param dom
      * @returns {*|boolean|boolean}
@@ -9742,6 +9888,14 @@ var domUtils = {
      */
     isFillChar: function isFillChar(node, isInStart) {
         return node.nodeType == 3 && !node.nodeValue.replace(new RegExp((isInStart ? '^' : '') + _commonConst2['default'].FILL_CHAR), '').length;
+    },
+    /**
+     * 判断 dom 是否为 行级元素
+     * @param dom
+     * @returns {boolean}
+     */
+    isInlineDom: function isInlineDom(dom) {
+        return !domUtils.isBlockDom(dom);
     },
     /**
      * 判断 dom 是否为 自闭和标签 （主要用于清理冗余 dom 使用，避免 dom 被删除）
@@ -10201,6 +10355,35 @@ var domUtils = {
             node.nodeValue = v.substring(0, start);
         }
         return s;
+    },
+    /**
+     * 将 dom 剥壳
+     * @param dom
+     */
+    stripDom: function stripDom(dom, checkFun) {
+        if (!dom) {
+            return;
+        }
+        var result = {
+            start: null,
+            end: null
+        };
+        var childNodes, child, i;
+        childNodes = dom.childNodes;
+        for (i = childNodes.length - 1; i >= 0; i--) {
+            child = childNodes[i];
+            if (!checkFun || checkFun(child)) {
+                domUtils.before(dom, child, true);
+                if (!result.start) {
+                    result.start = child;
+                    result.end = child;
+                } else {
+                    result.end = child;
+                }
+            }
+        }
+        dom.parentNode.removeChild(dom);
+        return result;
     }
 };
 
@@ -10642,6 +10825,10 @@ var _rangeUtilsRangeExtend = require('../rangeUtils/rangeExtend');
 
 var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
 
+var _todoUtilsTodoCore = require('../todoUtils/todoCore');
+
+var _todoUtilsTodoCore2 = _interopRequireDefault(_todoUtilsTodoCore);
+
 var _tableUtilsTableCore = require('../tableUtils/tableCore');
 
 var _tableUtilsTableCore2 = _interopRequireDefault(_tableUtilsTableCore);
@@ -10693,8 +10880,10 @@ var editor = {
 
         _editorEvent2['default'].bind();
         _imgUtilsImgUtils2['default'].on();
-        _tableUtilsTableCore2['default'].on(false);
+        _tableUtilsTableCore2['default'].on();
         _tabKey2['default'].on();
+        _todoUtilsTodoCore2['default'].on();
+
         _amendAmend2['default'].startReverse();
         _commonHistoryUtils2['default'].start(_commonEnv2['default'].options.maxRedo, _commonEnv2['default'].options.callback.redo);
 
@@ -10706,6 +10895,7 @@ var editor = {
         _commonHistoryUtils2['default'].stop();
         _amendAmend2['default'].stopReverse();
         _amendAmend2['default'].stop();
+        _todoUtilsTodoCore2['default'].off();
         _tabKey2['default'].off();
         _tableUtilsTableCore2['default'].off();
         _imgUtilsImgUtils2['default'].off();
@@ -10917,7 +11107,7 @@ function afterInsert(lastNode) {
 exports['default'] = editor;
 module.exports = exports['default'];
 
-},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../common/const":13,"../common/dependLoader":14,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../imgUtils/imgUtils":29,"../rangeUtils/rangeExtend":36,"../tableUtils/tableCore":39,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"./editorEvent":26,"./tabKey":27}],26:[function(require,module,exports){
+},{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../common/const":13,"../common/dependLoader":14,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../imgUtils/imgUtils":29,"../rangeUtils/rangeExtend":36,"../tableUtils/tableCore":39,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"../todoUtils/todoCore":43,"./editorEvent":26,"./tabKey":27}],26:[function(require,module,exports){
 /**
  * editor 使用的基本事件处理
  */
@@ -11446,6 +11636,7 @@ var EditorEvent = {
     TYPE: EditorEventType,
     bind: function bind() {
         EditorEvent.unbind();
+        _commonEnv2['default'].doc.addEventListener('click', handler.onClick);
         _commonEnv2['default'].doc.addEventListener('compositionstart', handler.onCompositionstart);
         _commonEnv2['default'].doc.addEventListener('compositionend', handler.onCompositionend);
         _commonEnv2['default'].doc.addEventListener('copy', handler.onCopy);
@@ -11470,6 +11661,7 @@ var EditorEvent = {
         }
     },
     unbind: function unbind() {
+        _commonEnv2['default'].doc.removeEventListener('click', handler.onClick);
         _commonEnv2['default'].doc.removeEventListener('compositionstart', handler.onCompositionstart);
         _commonEnv2['default'].doc.removeEventListener('compositionend', handler.onCompositionend);
         _commonEnv2['default'].doc.removeEventListener('copy', handler.onCopy);
@@ -11559,6 +11751,9 @@ var EditorEvent = {
 };
 
 var handler = {
+    onClick: function onClick(e) {
+        _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.ON_CLICK, e);
+    },
     onCompositionstart: function onCompositionstart(e) {
         _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.ON_COMPOSITION_START, e);
     },
@@ -11567,7 +11762,6 @@ var handler = {
     },
     onCopy: function onCopy(e) {
         copySelection(e, false);
-
         // ENV.event.call(CONST.EVENT.ON_COPY, e);
     },
     onCut: function onCut(e) {
@@ -16127,6 +16321,10 @@ var _domUtilsDomExtend = require('../domUtils/domExtend');
 
 var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
 
+var _todoUtilsTodoCore = require('../todoUtils/todoCore');
+
+var _todoUtilsTodoCore2 = _interopRequireDefault(_todoUtilsTodoCore);
+
 var _tableUtilsTableCore = require('../tableUtils/tableCore');
 
 var _tableUtilsTableCore2 = _interopRequireDefault(_tableUtilsTableCore);
@@ -16150,6 +16348,7 @@ var reader = {
         _commonWizStyle2['default'].insertTmpReaderStyle();
         _readerEvent2['default'].on();
         _tableUtilsTableCore2['default'].on();
+        _todoUtilsTodoCore2['default'].on();
 
         //禁用 输入框（主要用于 九宫格 处理）
         setDomReadOnly('input', true);
@@ -16157,6 +16356,7 @@ var reader = {
     },
     off: function off() {
         _readerEvent2['default'].off();
+        _todoUtilsTodoCore2['default'].off();
         _tableUtilsTableCore2['default'].off();
 
         if (!noteSrc) {
@@ -16188,7 +16388,7 @@ function setDomReadOnly(tag, readonly) {
 exports['default'] = reader;
 module.exports = exports['default'];
 
-},{"../common/const":13,"../common/env":15,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../tableUtils/tableCore":39,"./readerEvent":38}],38:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../tableUtils/tableCore":39,"../todoUtils/todoCore":43,"./readerEvent":38}],38:[function(require,module,exports){
 /**
  * editor 使用的基本事件处理
  */
@@ -16220,6 +16420,29 @@ var _imgUtilsImgUtils = require('../imgUtils/imgUtils');
 
 var _imgUtilsImgUtils2 = _interopRequireDefault(_imgUtilsImgUtils);
 
+function clickImg(e) {
+    var target = e.target;
+    if (!target || !_domUtilsDomExtend2['default'].isTag(target, 'img') || target.className.indexOf('wiz-todo') > -1) {
+        return;
+    }
+
+    //对于 超链接内的 img 不阻止点击事件，因为响应 超链接 更重要
+    var p = _domUtilsDomExtend2['default'].getParentByFilter(target, function (node) {
+        return node && _domUtilsDomExtend2['default'].isTag(node, 'a') && /^(http|https|wiz|wiznote|wiznotecmd):/.test(node.getAttribute('href'));
+    }, true);
+
+    if (p) {
+        return;
+    }
+
+    _commonEnv2['default'].client.sendCmdToWiznote(_commonConst2['default'].CLIENT_EVENT.wizReaderClickImg, {
+        src: target.src,
+        imgList: _commonEnv2['default'].client.type.isAndroid ? _imgUtilsImgUtils2['default'].getAll(true).join(',') : null
+    });
+    _commonUtils2['default'].stopEvent(e);
+    return false;
+}
+
 var ReaderEvent = {
     on: function on() {
         ReaderEvent.bind();
@@ -16229,37 +16452,33 @@ var ReaderEvent = {
     },
     bind: function bind() {
         ReaderEvent.unbind();
+        _commonEnv2['default'].doc.addEventListener('click', handler.onClick);
+
         if (_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid) {
-            _commonEnv2['default'].doc.addEventListener('click', handler.onTouch);
+            _commonEnv2['default'].doc.addEventListener('touchend', handler.onTouchEnd);
+            _commonEnv2['default'].doc.addEventListener('touchstart', handler.onTouchStart);
         }
     },
     unbind: function unbind() {
-        _commonEnv2['default'].doc.removeEventListener('click', handler.onTouch);
+        _commonEnv2['default'].doc.removeEventListener('click', handler.onClick);
+        _commonEnv2['default'].doc.removeEventListener('touchend', handler.onTouchEnd);
+        _commonEnv2['default'].doc.removeEventListener('touchstart', handler.onTouchStart);
     }
 };
 
 var handler = {
-    onTouch: function onTouch(e) {
-        var target = e.target;
-        if (!target || !_domUtilsDomExtend2['default'].isTag(target, 'img') || target.className.indexOf('wiz-todo') > -1) {
-            return;
+    onClick: function onClick(e) {
+        _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.ON_CLICK, e);
+
+        if (_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid) {
+            clickImg(e);
         }
-
-        //对于 超链接内的 img 不阻止点击事件，因为响应 超链接 更重要
-        var p = _domUtilsDomExtend2['default'].getParentByFilter(target, function (node) {
-            return node && _domUtilsDomExtend2['default'].isTag(node, 'a') && /^(http|https|wiz|wiznote|wiznotecmd):/.test(node.getAttribute('href'));
-        }, true);
-
-        if (p) {
-            return;
-        }
-
-        _commonEnv2['default'].client.sendCmdToWiznote(_commonConst2['default'].CLIENT_EVENT.wizReaderClickImg, {
-            src: target.src,
-            imgList: _commonEnv2['default'].client.type.isAndroid ? _imgUtilsImgUtils2['default'].getAll(true).join(',') : null
-        });
-        _commonUtils2['default'].stopEvent(e);
-        return false;
+    },
+    onTouchEnd: function onTouchEnd(e) {
+        _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.ON_TOUCH_END, e);
+    },
+    onTouchStart: function onTouchStart(e) {
+        _commonEnv2['default'].event.call(_commonConst2['default'].EVENT.ON_TOUCH_START, e);
     }
 };
 
@@ -17377,34 +17596,15 @@ var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
 
 /**
  * table 相关的 默认值
- * @type {{ColWidth: number, ColWidthMin: number, RowHeightMin: number}}
+ *
  */
-var Default = {
-    ColWidth: 120, //默认列宽
-    ColWidthMin: 30, //最小列宽
-    RowHeightMin: 33 //最小行高
-};
 
 var tableUtils = {
-    Default: Default,
     /**
      * 初始化 默认值
      * @param options
      */
-    init: function init(options) {
-        if (!options) {
-            return;
-        }
-        if (options.colWidth) {
-            Default.ColWidth = options.colWidth;
-        }
-        if (options.colWidthMin) {
-            Default.ColWidthMin = options.colWidthMin;
-        }
-        if (options.rowHeightMin) {
-            Default.RowHeightMin = options.rowHeightMin;
-        }
-    },
+    init: function init() {},
     /**
      * 判断当前是否允许新建表格
      * @param zone
@@ -17568,13 +17768,13 @@ var tableUtils = {
         for (r = 0; r < row; r++) {
             tr = _commonEnv2['default'].doc.createElement('tr');
             for (c = 0; c < col; c++) {
-                tr.appendChild(tableUtils.createCell(Default.ColWidth));
+                tr.appendChild(tableUtils.createCell(_commonEnv2['default'].options.table.colWidth));
             }
             tbody.appendChild(tr);
         }
 
         table.appendChild(tbody);
-        table.style.width = Default.ColWidth * col + 'px';
+        table.style.width = _commonEnv2['default'].options.table.colWidth * col + 'px';
         return table;
     },
     /**
@@ -17589,7 +17789,7 @@ var tableUtils = {
         var table = _domUtilsDomExtend2['default'].getParentByTagName(grid[0][0].cell, 'table', false, null);
 
         var tmpCellList = [],
-            width = Default.ColWidth;
+            width = _commonEnv2['default'].options.table.colWidth;
 
         var y, g, cell;
         for (y = 0; y < grid.length; y++) {
@@ -18344,10 +18544,10 @@ var tableUtils = {
                 g.cell.colSpan++;
 
                 // 需要调整 style
-                g.cell.style.width = tableUtils.getCellWidth(g.cell) + Default.ColWidth + 'px';
+                g.cell.style.width = tableUtils.getCellWidth(g.cell) + _commonEnv2['default'].options.table.colWidth + 'px';
             } else if (!cell || cell && g.x_src == col) {
 
-                newCell = tableUtils.createCell(Default.ColWidth);
+                newCell = tableUtils.createCell(_commonEnv2['default'].options.table.colWidth);
                 if (cell && g.y_src < g.y) {
                     //cell.rowSpan > 1
                     nextCellData = tableUtils.getNextCellDataInRow(grid[y], col);
@@ -18531,7 +18731,7 @@ var tableUtils = {
                 tmpDx;
             for (y = 0; y < grid.length; y++) {
                 g = grid[y][col];
-                tmpDx = Default.ColWidthMin - g.cell.offsetWidth;
+                tmpDx = _commonEnv2['default'].options.table.colWidthMin - g.cell.offsetWidth;
                 if (g.cell.colSpan == 1) {
                     maxDx = tmpDx;
                     cell = g.cell;
@@ -18565,7 +18765,7 @@ var tableUtils = {
             tmpDy;
         for (x = 0; x < grid[row].length; x++) {
             g = grid[row][x];
-            tmpDy = Default.RowHeightMin - g.cell.offsetHeight;
+            tmpDy = _commonEnv2['default'].options.table.rowHeightMin - g.cell.offsetHeight;
             if (g.cell.rowSpan == 1) {
                 maxDy = tmpDy;
                 cell = g.cell;
@@ -18579,7 +18779,7 @@ var tableUtils = {
 
         if (cell) {
             if (dy < maxDy) {
-                cell.parentNode.style.height = Default.RowHeightMin + 'px';
+                cell.parentNode.style.height = _commonEnv2['default'].options.table.rowHeightMin + 'px';
             } else {
                 cell.parentNode.style.height = g.cell.offsetHeight + dy + 'px';
             }
@@ -19635,6 +19835,1517 @@ exports['default'] = tableZone;
 module.exports = exports['default'];
 
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./tableUtils":41}],43:[function(require,module,exports){
+/**
+ * todolist 操作核心包 core
+ */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('../common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonWizStyle = require('../common/wizStyle');
+
+var _commonWizStyle2 = _interopRequireDefault(_commonWizStyle);
+
+var _commonUtils = require('../common/utils');
+
+var _commonUtils2 = _interopRequireDefault(_commonUtils);
+
+var _domUtilsDomExtend = require('../domUtils/domExtend');
+
+var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
+
+var _rangeUtilsRangeExtend = require('../rangeUtils/rangeExtend');
+
+var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
+
+var _todoRouteForClient = require('./todoRouteForClient');
+
+var _todoRouteForClient2 = _interopRequireDefault(_todoRouteForClient);
+
+var _todoUtils = require('./todoUtils');
+
+var _todoUtils2 = _interopRequireDefault(_todoUtils);
+
+var todoRoute = null;
+var curTouchTarget = null;
+
+var patchForReader = {
+    curCheckImg: null,
+    docLockChecked: false,
+    modifiedIdList: {},
+    htmlToSave: '',
+    init: function init() {
+        if (_commonEnv2['default'].readonly) {
+            patchForReader.modifiedIdList = {};
+        }
+    },
+    addModifiedId: function addModifiedId(obj) {
+        if (!_commonEnv2['default'].readonly) {
+            return;
+        }
+        var x = patchForReader.modifiedIdList[obj.id];
+        if (x && x !== obj.checked) {
+            delete patchForReader.modifiedIdList[obj.id];
+        } else {
+            patchForReader.modifiedIdList[obj.id] = obj.checked;
+        }
+    },
+    getModifiedIdList: function getModifiedIdList() {
+        var k,
+            idList = [];
+        for (k in patchForReader.modifiedIdList) {
+            if (patchForReader.modifiedIdList.hasOwnProperty(k)) {
+                idList.push({ id: k, checked: patchForReader.modifiedIdList[k] });
+            }
+        }
+        return idList;
+    },
+    modifyDoc: function modifyDoc() {
+        var html = '';
+
+        var idList = patchForReader.getModifiedIdList();
+        if (idList.length === 0) {
+            return html;
+        }
+
+        html = todoRoute.getOriginalDoc();
+
+        var iframe = _commonEnv2['default'].doc.getElementById(_commonConst2['default'].ID.IFRAME_FOR_SAVE);
+        if (!iframe) {
+            iframe = _commonEnv2['default'].doc.createElement('iframe');
+            iframe.id = _commonConst2['default'].ID.IFRAME_FOR_SAVE;
+            _commonEnv2['default'].doc.body.appendChild(iframe);
+        }
+        iframe.style.display = 'none';
+
+        var _document = _commonEnv2['default'].doc,
+            _win = _commonEnv2['default'].win,
+            iframeDocument = iframe.contentDocument,
+            isPersonal = todoRoute.isPersonalDocument(),
+            i,
+            id,
+            checked,
+            checkImg,
+            label;
+
+        iframeDocument.open("text/html", "replace");
+        iframeDocument.write(html);
+        iframeDocument.close();
+
+        _commonEnv2['default'].doc = iframeDocument;
+        _commonEnv2['default'].win = iframe.contentWindow;
+
+        //在 iframe 内处理 html
+        _commonWizStyle2['default'].insertTodoStyle();
+        _todoUtils2['default'].fixOldTodo();
+        for (i = idList.length - 1; i >= 0; i--) {
+            id = idList[i].id;
+            checked = idList[i].checked;
+            checkImg = _commonEnv2['default'].doc.getElementById(id);
+            if (checkImg) {
+                label = _todoUtils2['default'].getLabelFromChild(checkImg);
+                _todoUtils2['default'].check(label, checked);
+                if (!isPersonal) {
+                    _todoUtils2['default'].addUserInfo(label, checked, id, todoRoute);
+                }
+            }
+        }
+
+        //获取处理后的 html
+        html = _domUtilsDomExtend2['default'].getContentHtml();
+        _commonEnv2['default'].doc = _document;
+        _commonEnv2['default'].win = _win;
+
+        _commonEnv2['default'].doc.body.removeChild(iframe);
+        return html;
+    }
+};
+
+function beforeCheckTodo(e) {
+    if (!todoRoute.hasPermission()) {
+        return null;
+    }
+    var checkImg = e.target;
+    if (!_domUtilsDomExtend2['default'].hasClass(checkImg, _commonConst2['default'].CLASS.TODO_CHECK_IMG)) {
+        return null;
+    }
+
+    if (_commonEnv2['default'].readonly && !!patchForReader.curCheckImg) {
+        return;
+    }
+    if (!_commonEnv2['default'].readonly || patchForReader.docLockChecked) {
+        checkTodo(checkImg, e);
+    } else {
+        patchForReader.curCheckImg = checkImg;
+        todoRoute.checkDocLock("onCheckDocLock");
+    }
+}
+
+function checkTodo(checkImg, e) {
+    var result = _todoUtils2['default'].checkTodo(checkImg, todoRoute);
+    if (result) {
+        patchForReader.addModifiedId(result);
+        if (e) {
+            _commonUtils2['default'].stopEvent(e);
+        }
+    }
+}
+
+//TODO 所有配色 要考虑到 夜间模式
+var _event = {
+    bind: function bind() {
+        _event.unbind();
+        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
+
+        if (_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid) {
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onTouchEnd);
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_START, _event.handler.onTouchStart);
+        } else {
+            _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_CLICK, _event.handler.onClick);
+        }
+    },
+    unbind: function unbind() {
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_CLICK, _event.handler.onClick);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onTouchEnd);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_START, _event.handler.onTouchStart);
+    },
+    handler: {
+        onClick: function onClick(e) {
+            beforeCheckTodo(e);
+        },
+        onCheckDocLock: function onCheckDocLock(cancel, needCallAgain) {
+            patchForReader.docLockChecked = !needCallAgain;
+            if (!cancel) {
+                checkTodo(patchForReader.curCheckImg);
+            }
+            patchForReader.curCheckImg = null;
+        },
+        onKeyDown: function onKeyDown(e) {
+            if (!todoRoute.hasPermission()) {
+                return true;
+            }
+            var range = _rangeUtilsRangeExtend2['default'].getRange();
+            if (!range) {
+                return true;
+            }
+
+            var keyCode = e.keyCode || e.which;
+
+            var start, startOffset, end, isAfterCheck, label, container, tmpLabel, labelParentTag, labelParent, childNodes, i, dom;
+
+            isAfterCheck = _todoUtils2['default'].isCaretAfterCheckImg();
+            label = _todoUtils2['default'].getLabelByCaret();
+            container = _domUtilsDomExtend2['default'].getBlockParent(label, false);
+
+            if (!container) {
+                return true;
+            }
+            /**
+             * Backspace
+             */
+            if (keyCode === 8 && isAfterCheck) {
+                _todoUtils2['default'].cancelTodo(container);
+                _commonUtils2['default'].stopEvent(e);
+                return false;
+            }
+
+            /**
+             * Delete
+             */
+            if (keyCode === 46) {
+                if (!range.collapsed) {
+                    return true;
+                }
+                start = range.startContainer;
+                startOffset = range.startOffset;
+                _rangeUtilsRangeExtend2['default'].selectCharIncludeFillChar();
+                range = _rangeUtilsRangeExtend2['default'].getRange();
+                end = range.endContainer;
+                tmpLabel = _todoUtils2['default'].getLabelFromChild(end) || _todoUtils2['default'].getLabelInDom(end);
+                //恢复 range
+                _rangeUtilsRangeExtend2['default'].setRange(start, startOffset);
+                if (tmpLabel && tmpLabel != label) {
+                    _todoUtils2['default'].cancelTodo(tmpLabel.parentNode, true);
+                    return false;
+                }
+            }
+
+            /**
+             * left
+             */
+            if (keyCode === 37 && isAfterCheck) {
+                dom = _domUtilsDomExtend2['default'].getPreviousNode(container);
+                if (dom) {
+                    _rangeUtilsRangeExtend2['default'].setRange(dom, _domUtilsDomExtend2['default'].getDomEndOffset(dom));
+                    _commonUtils2['default'].stopEvent(e);
+                    return false;
+                }
+            }
+            // /**
+            //  * right
+            //  */
+            // if (keyCode === 39) {
+            //     return;
+            // }
+
+            if (keyCode !== 13 || e.shiftKey) {
+                return true;
+            }
+
+            // if (isBefore && container) {
+            //     //如果在 checkbox 前输入回车
+            //     node = ENV.doc.createElement(container.tagName);
+            //     node.insertBefore(ENV.doc.createElement('br'), null);
+            //     container.parentNode.insertBefore(node, container);
+            //     utils.stopEvent(e);
+            //     return;
+            // }
+
+            if (_todoUtils2['default'].isEmptyLabel(label)) {
+                //如果当前 todoList 为空，则 取消 todoList
+                container.innerHTML = '<br>';
+                _rangeUtilsRangeExtend2['default'].setRange(container, 1);
+                _commonUtils2['default'].stopEvent(e);
+                return false;
+            }
+
+            labelParentTag = container == _commonEnv2['default'].doc.body ? 'div' : container.tagName;
+            labelParent = _commonEnv2['default'].doc.createElement(labelParentTag);
+            _domUtilsDomExtend2['default'].before(container, labelParent, true);
+            range.deleteContents();
+            range.setEndAfter(container);
+            var frag = range.extractContents();
+            childNodes = [];
+            for (i = 0; i < frag.childNodes.length; i++) {
+                childNodes.push(frag.childNodes[i]);
+            }
+            label = _todoUtils2['default'].setTodo(labelParent, todoRoute);
+            _todoUtils2['default'].insertToLabel(childNodes, label);
+
+            // 如果换行操作的当前 块元素是 todoList，则 frag 内会自动生成 label
+            // 必须要插入到 document 内才能正常清理 frag 内 label & block 元素
+            for (i = 0; i < childNodes.length; i++) {
+                _todoUtils2['default'].clearBlock(childNodes[i]);
+            }
+
+            _rangeUtilsRangeExtend2['default'].setRange(label, 1);
+            _commonUtils2['default'].stopEvent(e);
+
+            if (label.getBoundingClientRect().top + label.clientHeight > _commonEnv2['default'].doc.documentElement.clientHeight || label.getBoundingClientRect().top + label.clientHeight < 0) {
+                var labelX = label.getBoundingClientRect().left + _commonEnv2['default'].doc.body.scrollLeft;
+                var labelY = _commonEnv2['default'].doc.body.scrollTop + label.clientHeight;
+                window.scrollTo(labelX, labelY);
+            }
+        },
+        onSelectionChange: function onSelectionChange(e) {
+            var range = _rangeUtilsRangeExtend2['default'].getRange();
+            if (!range) {
+                return;
+            }
+            var label, checkImg;
+            if (_todoUtils2['default'].isCaretBeforeLabel()) {
+                label = _todoUtils2['default'].getLabelByCaret();
+                checkImg = _todoUtils2['default'].getCheckImg(label);
+                if (checkImg && checkImg.nextSibling) {
+                    _rangeUtilsRangeExtend2['default'].setRange(checkImg.nextSibling, 0);
+                } else if (label) {
+                    _rangeUtilsRangeExtend2['default'].setRange(label, _domUtilsDomExtend2['default'].getDomEndOffset(label));
+                }
+            }
+        },
+        onTouchStart: function onTouchStart(e) {
+            curTouchTarget = e.target;
+        },
+        onTouchEnd: function onTouchEnd(e) {
+            if (e.target !== curTouchTarget) {
+                return;
+            }
+            curTouchTarget = null;
+            beforeCheckTodo(e);
+        }
+    }
+};
+
+var todoCore = {
+    init: function init() {},
+    on: function on() {
+        _todoUtils2['default'].fixOldTodo();
+        patchForReader.init();
+        _event.bind();
+        todoRoute = _todoRouteForClient2['default'].getRoute();
+        _todoUtils2['default'].checkTodoStyle(true);
+    },
+    off: function off() {
+        _event.unbind();
+    },
+    checkTodoStyle: function checkTodoStyle() {
+        _todoUtils2['default'].checkTodoStyle(false);
+    },
+    closeDocument: function closeDocument() {
+        var html = patchForReader.modifyDoc();
+
+        if (!_commonEnv2['default'].client.type.isIOS) {
+            todoRoute.saveDoc(html, '');
+        }
+
+        if (todoRoute.beforeCloseDoc) {
+            todoRoute.beforeCloseDoc();
+        }
+
+        patchForReader.init();
+        return html;
+    },
+    onCheckDocLock: _event.handler.onCheckDocLock,
+    onKeyDown: _event.handler.onKeyDown,
+    setTodo: function setTodo() {
+        _todoUtils2['default'].setTodo(null, todoRoute);
+    },
+    setTodoInfo: function setTodoInfo(options) {
+        if (todoRoute.setTodoInfo) {
+            todoRoute.setTodoInfo(options);
+        }
+    }
+};
+
+exports['default'] = todoCore;
+module.exports = exports['default'];
+
+},{"../common/const":13,"../common/env":15,"../common/utils":19,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./todoRouteForClient":44,"./todoUtils":45}],44:[function(require,module,exports){
+/**
+ * todolist 客户端适配接口
+ */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+function routeForWindows(external) {
+
+    if (external) {
+        this.WizPcEditor = external;
+    }
+
+    this.getUserAlias = getUserAlias;
+    this.getUserGuid = getUserGuid;
+    this.getUserAvatarFileName = getUserAvatarFileName;
+    this.isPersonalDocument = isPersonalDocument;
+    this.setDocumentModified = setDocumentModified;
+    this.setDocumentType = setDocumentType;
+    this.hasPermission = hasPermission;
+    //for Reader
+    this.getOriginalDoc = getOriginalDoc;
+    this.saveDoc = saveDoc;
+    this.checkDocLock = checkDocLock;
+
+    function getUserAlias() {
+        return this.WizPcEditor.UserAlias;
+    }
+
+    function getUserGuid() {
+        return this.WizPcEditor.GetUserGuid();
+    }
+
+    function getUserAvatarFileName(size) {
+        return this.WizPcEditor.GetUserAvatarFileName(size);
+    }
+
+    function isPersonalDocument() {
+        try {
+            return this.WizPcEditor.WizDocument.IsPersonalDocument();
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function setDocumentModified() {
+        this.WizPcEditor.SetContentModified(true);
+    }
+
+    function setDocumentType(type) {
+        /*
+         var oldType = this.wizDoc.Type;
+         if (oldType) {
+         if (-1 == oldType.indexOf(type)) {
+         this.wizDoc.Type = oldType + ';' + type;
+         }
+         }
+         else {
+         this.wizDoc.Type = type;
+         }*/
+        if (this.WizPcEditor.WizDocument) {
+            this.WizPcEditor.WizDocument.Type = type;
+        }
+    }
+
+    function hasPermission() {
+        return !_commonEnv2['default'].readonly || this.WizPcEditor.Window.CurrentDocument.CanEdit;
+    }
+
+    function getOriginalDoc() {
+        try {
+            return this.WizPcEditor.WizDocument.GetHtml();
+        } catch (e) {
+            return '';
+        }
+    }
+
+    function saveDoc(html, resources) {
+        this.WizPcEditor.WizDocument.SetHtml2(html, resources);
+    }
+
+    function checkDocLock(callback) {
+        if (isPersonalDocument()) {
+            WizReader.todo[callback](false, false);
+            return;
+        }
+        this.WizPcEditor.ExecuteCommand("OnClickingChecklist", "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
+    }
+}
+
+function routeForWeb() {
+
+    this.getUserAlias = getUserAlias;
+    this.getUserGuid = getUserGuid;
+    this.getUserAvatarFileName = getUserAvatarFileName;
+    this.isPersonalDocument = isPersonalDocument;
+    this.setDocumentModified = setDocumentModified;
+    this.setDocumentType = setDocumentType;
+    this.hasPermission = hasPermission;
+    //for Reader
+    this.getOriginalDoc = getOriginalDoc;
+    this.saveDoc = saveDoc;
+    this.checkDocLock = checkDocLock;
+
+    function getUserAlias() {
+        return 'zzz';
+    }
+
+    function getUserGuid() {
+        return '63272832-e387-4d31-85c6-7549555f2231';
+    }
+
+    function getUserAvatarFileName() {
+        return 'http://192.168.1.73/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true';
+    }
+
+    function isPersonalDocument() {
+        return false;
+        // try {
+        // 	return this.wizEditor.WizDocument.IsPersonalDocument();
+        // }
+        // catch (e) {
+        // 	return false;
+        // }
+    }
+
+    function setDocumentModified() {
+        // this.wizEditor.SetContentModified(true);
+    }
+
+    function setDocumentType(type) {
+        /*
+         var oldType = this.wizDoc.Type;
+         if (oldType) {
+         if (-1 == oldType.indexOf(type)) {
+         this.wizDoc.Type = oldType + ';' + type;
+         }
+         }
+         else {
+         this.wizDoc.Type = type;
+         }*/
+        // this.wizEditor.WizDocument.Type = type;
+    }
+
+    function hasPermission() {
+        return true;
+    }
+
+    function getOriginalDoc() {
+        return '<!DOCTYPE HTML>' + '<html><head>\n    <meta http-equiv="content-type" content="text/html;charset=utf-8">    <meta id="wiz-template-info" data-template-name="snow" data-template-version="0.0.1"> <link href="./common.css">   <style>        body {            font-family: sans-serif;        }    </style>    <style>        .wiz-table-tools {            display: block;            position: absolute;            top: 0px;            left: 0px;            border: 1px solid #ddd;            -webkit-border-radius: 5px;            -moz-border-radius: 5px;            border-radius: 5px;            z-index: 130;        }        .wiz-table-tools ul {            list-style: none;            padding: 0;        }        .wiz-table-tools .wiz-table-menu-item {            position: relative;            float: left;            margin: 5px 5px;        }        .wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {            width: 20px;            height: 20px;            cursor: pointer;            position: relative;        }        .wiz-table-tools i.editor-icon {            font-size: 20px;            color: #a6a6a6;        }        .wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo {            position: absolute;            top: 0;            left: 0;        }        .wiz-table-tools .wiz-table-menu-sub {            position: absolute;            display: none;            width: 125px;            padding: 5px 0;            background: #fff;            border-radius: 3px;            border: 1px solid #E0E0E0;        }        .wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {            display: block        }        .wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {            position: absolute;            content: " ";            border-style: solid;            border-color: transparent;            border-bottom-color: #cccccc;            left: 22px;            margin-left: -14px;            top: -8px;            border-width: 0 8px 8px 8px;            z-index: 10;        }        .wiz-table-tools .wiz-table-menu-sub:after {            border-bottom-color: #ffffff;            top: -7px;        }        .wiz-table-tools .wiz-table-menu-sub-item {            position: relative;            padding: 4px 12px;            font-size: 14px;        }        .wiz-table-tools .wiz-table-menu-sub-item.split {            border-top: 1px solid #E0E0E0;        }        .wiz-table-tools .wiz-table-menu-sub-item:hover {            background-color: #ececec;        }        .wiz-table-tools .wiz-table-menu-sub-item.disabled {            color: #bbbbbb;            cursor: default;        }        .wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {            background-color: transparent;        }        .wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {            display: block;        }        .wiz-table-tools .wiz-table-color-pad {            display: none;            padding: 10px;            box-sizing: border-box;            width: 92px;            height: 88px;            border: 0;            background-color: #fff;            box-shadow: 1px 1px 5px #d0d0d0;            cursor: default;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {            display: inline-block;            width: 20px;            height: 20px;            margin-right: 6px;            position: relative;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {            position: absolute;            top: 0;            left: 0;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line {            color: #cc0000;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {            margin-right: 0;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {            color: #448aff;        }        .wiz-table-tools .wiz-table-cell-align {            display: none;            padding: 10px;            box-sizing: border-box;            width: 92px;            height: 88px;            border: 0;            background-color: #fff;            box-shadow: 1px 1px 5px #d0d0d0;            cursor: default;        }        .wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {            display: inline-block;            width: 20px;            height: 20px;            margin-right: 6px;            position: relative;        }        .wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign {            position: absolute;            top: 0;            left: 0;            color: #d2d2d2;        }        .wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {            color: #a1c4ff;        }        .wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,        .wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {            color: #448aff;        }        .wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,        .wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {            margin-right: 0;        }    </style>    <style>.wiz-template-editable {        outline: none;    }    span.h5 {        color: #b3c2dd;        padding-left: 4px;    }    .h5.title {        background-color: #a1c4ff;        color: #fff;        border-radius: 5px;        padding: 1px 4px;    }</style>    <style>html, body {        -webkit-box-sizing: border-box;        -moz-box-sizing: border-box;        box-sizing: border-box;    }    html {        height: 100%;    }    body {        min-height: 100%;    }    .content {        margin-top: 1rem;    }    .weather-animation {        width: 100%;        height: 175px;        position: relative;        border-radius: 5px;    }    .weather-animation.weather-snow {        background-image: url(index_files/wizIcon_snowBg.png) !important;        background-repeat: no-repeat;        background-position: center center;        background-size: cover;    }    img {        filter: brightness(100%) !important;        -webkit-filter: brightness(100%) !important;    }    div.hide {        display: none;    }    </style>    <meta id="wiz-amend-user" name="wiz-amend-user" content="{&quot;b38894c5-e4fa-4b68-9a29-4c941417bae8&quot;:{&quot;color&quot;:&quot;#0C9460&quot;,&quot;name&quot;:&quot;叶文洁&quot;},&quot;ec46024b-c6b2-446c-a5fa-2aa8690337e4&quot;:{&quot;color&quot;:&quot;#FF3399&quot;,&quot;name&quot;:&quot;史强&quot;},&quot;e0376e7b-e6a7-4a5d-bd48-378e9e50b0d0&quot;:{&quot;color&quot;:&quot;#FF6005&quot;,&quot;name&quot;:&quot;杨卫宁&quot;}}"></head><body ryt14262="1">\n<!-- todolist test start-->\n<div><label class="wiz-todo-label wiz-todo-label-checked"><img id="wiz_todo_1464076716986_142758" class="wiz-todo-img wiz-img-cannot-drag" state="checked"><span class="wiz-todo-tail"></span>asdfasdfadsfafsd\n</label><span class="wiz-todo-completed-info" wiz_todo_id="wiz_todo_1464076716986_142758"><span class="wiz-todo-account"><img src="http://note.wiz.cn/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true" class="wiz-img-cannot-drag wiz-todo-avatar">hunter.z, </span><span class="wiz-todo-dt">2016<label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1464076731273_583098" class="wiz-todo-img wiz-img-cannot-drag" state="unchecked">sdfasdffds<span class="wiz-todo-tail"></span>sdfasdf年5月24日 15:58.</label></span></span><label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1464076723648_926833" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png" state="unchecked">dfasdfasdfasdf<span class="wiz-todo-tail"></span></label></div>\n<div><label class="wiz-todo-label wiz-todo-label-checked"><img id="wiz_todo_1463649633995_658524" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/checked.png" state="checked">\n    aaa</label>\n    <span class="wiz-todo-completed-info" wiz_todo_id="wiz_todo_1463649633995_658524"><span class="wiz-todo-account"><img src="http://note.wiz.cn/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true" class="wiz-img-cannot-drag wiz-todo-avatar">zzz, </span><span class="wiz-todo-dt">Tue May 24 2016 10:07:30 GMT+0800 (中国标准时间).</span></span>\n</div>\n<div>\n    <label class="wiz-todo-label wiz-todo-label-unchecked">\n        <img id="wiz_todo_1463649792539_126202" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png" state="unchecked">\n        bbb<span class="wiz-todo-tail"></span>\n    </label>\n    <img id="wiz_todo_1464076716986_142759" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png" state="unchecked">111\n</div>\n<img id="wiz_todo_1464076716986_142754" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png" state="unchecked">222\n<div>\n    <label class="wiz-todo-label wiz-todo-label-checked"><img id="wiz_todo_1461039995611_127748" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/checked.png" state="checked">111111111\n    <div>&nbsp;<label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1461048880649_466877" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/checked.png">222222</label><span class="wiz-todo-completed-info"><span class="wiz-todo-account"><img class="wiz-img-cannot-drag wiz-todo-avatar" src="http://note.wiz.cn/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true">张其纲, </span><span class="wiz-todo-dt">2016年4月21日 15:18.</span></span></div>\n    <div><label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1461049008116_810340" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png">333333333<div><label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1461049124381_436981" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png">4444444444</label></div></label></div><div><label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1461049378843_383647" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png">55555555<a href="http://fromwiz.com/share/s/1D_zxa0Evx7y2-XGX93B8vdw0T7I7g1G4knb25W1X93NIx1Q">http://fromwiz.com/share/s/1D_zxa0Evx7y2-XGX93B8vdw0T7I7g1G4knb25W1X93NIx1Q</a>&nbsp;<span class="wiz-todo-tail"></span></label></div><div><label class="wiz-todo-label wiz-todo-label-unchecked"><img id="wiz_todo_1461049233581_718877" class="wiz-todo-img wiz-img-cannot-drag" src="./checklist/unchecked.png">6666666<span class="wiz-todo-tail"></span></label><a href="wiz://open_document?guid=0fc88d4d-d172-4d39-909e-0b4216c24170&amp;kbguid=66e5c3f6-8482-11e1-a525-00237def97cc" style="line-height: 1.5;">表格测试</a></div><span class="wiz-todo-tail"></span></label><span class="wiz-todo-completed-info"><span class="wiz-todo-account"><img class="wiz-img-cannot-drag wiz-todo-avatar" src="http://note.wiz.cn/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true">张其纲, </span><span class="wiz-todo-dt">2016年4月21日 15:19.</span></span></div>\n<!-- todolist test end-->\n\n<!-- wizTemplate test start-->\n<!--<div class="hide"><img src="index_files/wizIcon_snow0.png" class="snow0"><img src="index_files/wizIcon_snow1.png"-->\n<!--class="snow1"><img-->\n<!--src="index_files/wizIcon_snow2.png" class="snow2"><img src="index_files/wizIcon_snow3.png" class="snow3"></div>-->\n<!--<div class="weather-animation weather-snow"></div>-->\n<!--<div class="content wiz-template-editable wiz-template-focus"><p>-->\n<!--在南国下雪，尚还未下，天就阴沉，或者小雨、或者北风开道，气候是要那么翻来覆去地变幻几次，这才先撒下小米粒一般的雪子儿，然后，才是蚊子般的小雪从天空中钻出来，落了地上，眨眼便不见了踪影。这就跟南国人干什么事都沉不住气极爱大惊小怪一样，下上那么丁点儿的雪罢，何以还要把天气变过来变过去呢？倒是北国的雪来得大度，即是小，也足以让南国人惊讶的了。</p>-->\n<!--<p></p>-->\n<!--<p></p>-->\n<!--<p></p>-->\n<!--<p></p>-->\n<!--<p></p><br><br></div>-->\n<!-- wizTemplate test end-->\n\n\n<!-- input test start-->\n<!--<div><input type="text"></div>-->\n<!--<div><textarea></textarea></div>-->\n<!-- input test end-->\n\n<!-- table test start-->\n<table style="width: 400px;">\n<tbody>\n<tr>\n<td align="left" valign="middle" style="width: 132px;" class=""><br></td>\n<td align="left" valign="middle" style="width: 147px;" class="">asdf&nbsp;</td>\n<td align="left" valign="middle" style="width:120px" class="">asdf&nbsp;</td>\n</tr>\n<tr>\n<td align="left" valign="middle" style="width: 132px;" class=""><br></td>\n<td align="left" valign="middle" style="width: 267px;" class="" rowspan="2" colspan="2"><br>asdfadsf&nbsp;</td>\n</tr>\n<tr>\n<td align="left" valign="middle" style="width: 132px;"><br></td>\n</tr>\n</tbody>\n</table>\n<!-- table test end-->\n\n<!-- markdown test start-->\n<!--<div>$$f(x)=3x+7$$</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;"><br></div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">###流程图 测试</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;"><br></div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;"><br>```flow</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">st=&gt;start: Start:&gt;http://www.google.com[blank]</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">e=&gt;end:&gt;http://www.google.com</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">op1=&gt;operation: My-->\n<!--Operation-->\n<!--</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">sub1=&gt;subroutine: My-->\n<!--Subroutine-->\n<!--</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">cond=&gt;condition: Yes</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">or No?</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">:&gt;http://www.google.com-->\n<!--</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">io=&gt;inputoutput: catch-->\n<!--something...|request-->\n<!--</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">st-&gt;op1-&gt;cond</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">cond(yes)-&gt;io-&gt;e</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">cond(no)-&gt;sub1(right)-&gt;op1</div>-->\n<!--<div style="font-size: medium; line-height: normal; widows: 1; font-family: sans-serif;">```<br></div>-->\n<!--<wiz_tmp_tag id="wiz-table-range-border" contenteditable="false" style="display: none;">-->\n<!--<div id="wiz-table-col-line" style="display: none;"></div>-->\n<!--<div id="wiz-table-row-line" style="display: none;"></div>-->\n<!--<div id="wiz-table-range-border_start" style="display: none;">-->\n<!--<div id="wiz-table-range-border_start_top"></div>-->\n<!--<div id="wiz-table-range-border_start_right"></div>-->\n<!--<div id="wiz-table-range-border_start_bottom"></div>-->\n<!--<div id="wiz-table-range-border_start_left"></div>-->\n<!--<div id="wiz-table-range-border_start_dot"></div>-->\n<!--</div>-->\n<!--<div id="wiz-table-range-border_range" style="display: none;">-->\n<!--<div id="wiz-table-range-border_range_top"></div>-->\n<!--<div id="wiz-table-range-border_range_right"></div>-->\n<!--<div id="wiz-table-range-border_range_bottom"></div>-->\n<!--<div id="wiz-table-range-border_range_left"></div>-->\n<!--<div id="wiz-table-range-border_range_dot"></div>-->\n<!--</div>-->\n<!--</wiz_tmp_tag>-->\n<!-- markdown test end-->\n\n\n\n</body></html>';
+    }
+
+    function saveDoc(html, resources) {
+        console.log('saveDoc');
+    }
+
+    function checkDocLock(callback) {
+        setTimeout(function () {
+            WizReader.todo.onCheckDocLock(false, false);
+        }, 500);
+        // if (isPersonalDocument()) {
+        //     WizReader.todo.onCheckDocLock(false, false);
+        //     return;
+        // }
+        // this.WizPcEditor.ExecuteCommand("OnClickingChecklist",
+        //     "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
+    }
+}
+
+function routeForMac() {
+
+    this.getUserAlias = getUserAlias;
+    this.getUserGuid = getUserGuid;
+    this.getUserAvatarFileName = getUserAvatarFileName;
+    this.isPersonalDocument = isPersonalDocument;
+    this.setDocumentModified = setDocumentModified;
+    this.setDocumentType = setDocumentType;
+    this.hasPermission = hasPermission;
+    //for Reader
+    this.getOriginalDoc = getOriginalDoc;
+    this.saveDoc = saveDoc;
+    this.checkDocLock = checkDocLock;
+
+    function getUserAlias() {
+        return window.WizQtEditor.userAlias;
+    }
+
+    function getUserGuid() {
+        return window.WizQtEditor.userGuid;
+    }
+
+    function getUserAvatarFileName(size) {
+        return window.WizQtEditor.userAvatarFilePath;
+    }
+
+    function isPersonalDocument() {
+        return window.WizQtEditor.isPersonalDocument;
+    }
+
+    function setDocumentModified() {
+        window.WizQtEditor.setContentsChanged(true);
+    }
+
+    function setDocumentType(type) {
+        window.WizQtEditor.setCurrentDocumentType(type);
+    }
+
+    function hasPermission() {
+        return !_commonEnv2['default'].readonly || window.WizQtEditor.hasEditPermissionOnCurrentNote;
+    }
+
+    function getOriginalDoc() {
+        return window.WizQtEditor.currentNoteHtml;
+    }
+    function saveDoc(html, resources) {
+        window.WizQtEditor.saveHtmlToCurrentNote(html, resources);
+    }
+    function checkDocLock(callback) {
+        window.WizQtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);
+        return window.WizQtEditor.checkListClickable();
+    }
+}
+
+function routeForAndroid() {
+
+    this.getUserAlias = getUserAlias;
+    this.getUserGuid = getUserGuid;
+    this.getUserAvatarFileName = getUserAvatarFileName;
+    this.isPersonalDocument = isPersonalDocument;
+    this.setDocumentModified = setDocumentModified;
+    this.setDocumentType = setDocumentType;
+    this.hasPermission = hasPermission;
+    //for Reader
+    this.getOriginalDoc = getOriginalDoc;
+    this.saveDoc = saveDoc;
+    this.checkDocLock = checkDocLock;
+    this.beforeCloseDoc = beforeCloseDoc;
+
+    function getUserAlias() {
+        return window.WizNote.getUserAlias();
+    }
+
+    function getUserGuid() {
+        return window.WizNote.getUserGuid();
+    }
+
+    function getUserAvatarFileName(size) {
+        return window.WizNote.getUserAvatarFileName(size);
+    }
+
+    function isPersonalDocument() {
+        return window.WizNote.isPersonalDocument();
+    }
+
+    function setDocumentModified() {
+        window.WizNote.setDocumentModified();
+    }
+
+    function setDocumentType(type) {
+        window.WizNote.setDocumentType(type);
+    }
+
+    function hasPermission() {
+        return !_commonEnv2['default'].readonly || window.WizNote.hasPermission();
+    }
+
+    function getOriginalDoc() {
+        return window.WizNote.getDocHtml();
+    }
+
+    function saveDoc(html, resources) {
+        window.WizNote.setDocHtml(html, resources);
+    }
+
+    function checkDocLock(callback) {
+        window.WizNote.onClickingTodo();
+    }
+
+    function beforeCloseDoc() {
+        window.WizNote.onWizTodoReadCheckedClose();
+    }
+}
+
+function routeForIOS() {
+
+    this.getUserAlias = getUserAlias;
+    this.getUserGuid = getUserGuid;
+    this.getUserAvatarFileName = getUserAvatarFileName;
+    this.isPersonalDocument = isPersonalDocument;
+    this.setDocumentModified = setDocumentModified;
+    this.setDocumentType = setDocumentType;
+    this.setTodoInfo = setTodoInfo;
+    this.hasPermission = hasPermission;
+
+    //for Reader
+    this.getOriginalDoc = getOriginalDoc;
+    this.checkDocLock = checkDocLock;
+
+    this.userAlias = null;
+    this.userGuid = null;
+    this.avatarFileName = null;
+    this.personalDocument = false;
+    this.hasPermission = false;
+    this.originalHtml = "";
+
+    function setTodoInfo(options) {
+        this.userAlias = options.alias;
+        this.userGuid = options.userGuid;
+        this.avatarFileName = options.avatar;
+        this.personalDocument = options.isPersonal === 'true';
+        this.hasPermission = options.hasPermission === 'true';
+        this.originalHtml = options.docHtml;
+    }
+
+    function getUserAlias() {
+        return this.userAlias;
+    }
+
+    function getUserGuid() {
+        return this.userGuid;
+    }
+
+    function getUserAvatarFileName(size) {
+        return this.avatarFileName;
+    }
+
+    function isPersonalDocument() {
+        return this.personalDocument;
+    }
+
+    function setDocHtml(html, resources) {
+        window.location.href = "wiztodolist://setDocHtml/" + "?html=" + html + "&resource=" + resources;
+    }
+
+    function setDocumentModified() {
+        window.location.href = "wiztodolist://setDocumentModified/";
+    }
+
+    function setDocumentType(type) {
+        window.location.href = "wiztodolist://setDocumentType/" + "?type=" + type;
+    }
+
+    function hasPermission() {
+        return !_commonEnv2['default'].readonly || this.hasPermission;
+    }
+
+    function getOriginalDoc() {
+        return this.originalHtml;
+    }
+
+    function checkDocLock(callback) {
+        window.location.href = "wiztodolist://tryLockDocument/" + "?callback=" + callback;
+    }
+}
+
+var todoClientRoute = {
+    getRoute: function getRoute() {
+        var route = null;
+        if (_commonEnv2['default'].client.type.isWin) {
+            route = new routeForWindows(external);
+        } else if (_commonEnv2['default'].client.type.isMac) {
+            route = new routeForMac();
+        } else if (_commonEnv2['default'].client.type.isIOS) {
+            route = new routeForIOS();
+        } else if (_commonEnv2['default'].client.type.isAndroid) {
+            route = new routeForAndroid();
+        } else {
+            route = new routeForWeb();
+        }
+
+        return route;
+    }
+};
+
+exports['default'] = todoClientRoute;
+module.exports = exports['default'];
+
+},{"../common/env":15}],45:[function(require,module,exports){
+/**
+ * todolist 基本工具包
+ */
+'use strict';
+
+Object.defineProperty(exports, '__esModule', {
+    value: true
+});
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
+
+var _commonEnv = require('../common/env');
+
+var _commonEnv2 = _interopRequireDefault(_commonEnv);
+
+var _commonConst = require('../common/const');
+
+var _commonConst2 = _interopRequireDefault(_commonConst);
+
+var _commonBase64 = require('./../common/Base64');
+
+var _commonBase642 = _interopRequireDefault(_commonBase64);
+
+var _commonWizStyle = require('../common/wizStyle');
+
+var _commonWizStyle2 = _interopRequireDefault(_commonWizStyle);
+
+var _domUtilsDomExtend = require('../domUtils/domExtend');
+
+var _domUtilsDomExtend2 = _interopRequireDefault(_domUtilsDomExtend);
+
+var _rangeUtilsRangeExtend = require('../rangeUtils/rangeExtend');
+
+var _rangeUtilsRangeExtend2 = _interopRequireDefault(_rangeUtilsRangeExtend);
+
+var _commonHistoryUtils = require('../common/historyUtils');
+
+var _commonHistoryUtils2 = _interopRequireDefault(_commonHistoryUtils);
+
+var todoUtils = {
+    addUserInfo: function addUserInfo(label, isChecked, todoId, todoRoute) {
+        if (!label) {
+            return;
+        }
+
+        var userGuid, userName, avatarUrl, dt, userHtml, span, child, next, i;
+
+        userGuid = todoUtils.deleteUserInfo(label);
+        if (!isChecked) {
+            todoUtils.removeUserAvatarStyle(userGuid);
+            return;
+        }
+
+        userGuid = todoRoute.getUserGuid();
+        userName = todoRoute.getUserAlias();
+        avatarUrl = todoRoute.getUserAvatarFileName(_commonConst2['default'].CSS.TODO_LIST.IMG_WIDTH);
+        dt = todoUtils.getTime();
+        todoUtils.setUserAvatarStyle(userGuid, avatarUrl);
+        userHtml = todoUtils.getUserInfoHtml(userGuid, userName, dt);
+
+        span = _commonEnv2['default'].doc.createElement('span');
+        _domUtilsDomExtend2['default'].addClass(span, _commonConst2['default'].CLASS.TODO_USER_INFO);
+        span.innerHTML = userHtml;
+        span.setAttribute(_commonConst2['default'].ATTR.TODO_ID, todoId);
+
+        for (i = label.childNodes.length - 1; i >= 0; i--) {
+            child = label.childNodes[i];
+            if (child.tagName && child.tagName.toLowerCase() == 'br') {
+                label.removeChild(child);
+            }
+        }
+        next = label.nextElementSibling;
+        while (next) {
+            if (todoUtils.isLabel(next)) {
+                label.parentElement.insertBefore(span, next);
+                break;
+            }
+            if (next.tagName.toLowerCase() == 'br') {
+                label.parentElement.insertBefore(span, next);
+                break;
+            }
+            next = next.nextElementSibling;
+        }
+        if (!next) {
+            label.parentElement.appendChild(span);
+        }
+        if (!span.hasChildNodes()) {
+            span.appendChild(_commonEnv2['default'].doc.createElement('br'));
+        }
+        _rangeUtilsRangeExtend2['default'].setRange(span, span.childNodes.length);
+    },
+    /**
+     * 判断 dom 是否可以当作 label 容器
+     * @param dom
+     * @returns {boolean}
+     */
+    canBeContainer: function canBeContainer(dom) {
+        return !_domUtilsDomExtend2['default'].isTag(dom, ['body', 'td', 'th']) && _domUtilsDomExtend2['default'].isBlockDom(dom);
+    },
+    cancelTodo: function cancelTodo(container, noSetRange) {
+        if (!container) {
+            return;
+        }
+        _commonHistoryUtils2['default'].saveSnap(false);
+        var range = _rangeUtilsRangeExtend2['default'].getRange(),
+            start,
+            startOffset,
+            label,
+            labelFirst,
+            userGuid;
+        start = range ? range.startContainer : null;
+        startOffset = range ? range.startOffset : 0;
+        label = todoUtils.getLabelInDom(container);
+        _domUtilsDomExtend2['default'].removeClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
+        userGuid = todoUtils.deleteUserInfo(label);
+        labelFirst = todoUtils.deleteLabel(label).start;
+        todoUtils.removeUserAvatarStyle(userGuid);
+        if (!labelFirst) {
+            labelFirst = _commonEnv2['default'].doc.createElement('br');
+            container.appendChild(labelFirst);
+        }
+        if (!noSetRange) {
+            if (!start || !start.parentNode) {
+                start = labelFirst;
+                startOffset = 0;
+            }
+            _rangeUtilsRangeExtend2['default'].setRange(start, startOffset);
+        }
+        //修正 todoList style
+        todoUtils.checkTodoStyle(false);
+    },
+    check: function check(label, isChecked) {
+        if (isChecked) {
+            _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK);
+            _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_LABEL_CHECK);
+        } else {
+            _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_LABEL_CHECK);
+            _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK);
+        }
+        var check = todoUtils.getCheckImg(label);
+        var state = isChecked ? 'checked' : 'unchecked';
+        check.setAttribute(_commonConst2['default'].ATTR.TODO_CHECK, state);
+    },
+    checkTodo: function checkTodo(checkImg, todoRoute) {
+        var result = {
+            id: '',
+            checked: false
+        };
+
+        _commonHistoryUtils2['default'].saveSnap(false);
+
+        var label = todoUtils.getLabelFromChild(checkImg),
+            isChecked;
+        if (!label || label.children[0] != checkImg) {
+            todoUtils.fixCheckImg(checkImg);
+        }
+
+        isChecked = checkImg.getAttribute(_commonConst2['default'].ATTR.TODO_CHECK) !== 'checked';
+        todoUtils.check(label, isChecked);
+        result.id = checkImg.id;
+        result.checked = isChecked;
+
+        if (!todoRoute.isPersonalDocument()) {
+            todoUtils.addUserInfo(label, isChecked, checkImg.id, todoRoute);
+        }
+
+        if (todoRoute.isPersonalDocument() || !_commonEnv2['default'].client.type.isIOS) {
+            todoRoute.setDocumentModified();
+        }
+
+        return result;
+    },
+    checkTodoStyle: function checkTodoStyle(isForced) {
+        var todoList = _commonEnv2['default'].doc.querySelector('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+        if (todoList) {
+            _commonWizStyle2['default'].insertTodoStyle(isForced);
+        } else {
+            _commonWizStyle2['default'].removeTodoStyle();
+        }
+    },
+    clearBlock: function clearBlock(dom) {
+        if (!dom || dom.nodeType !== 1 && dom.nodeType !== 3 && dom.nodeType !== 11) {
+            return false;
+        }
+        var child, i;
+        for (i = 0; i < dom.childNodes.length; i++) {
+            child = dom.childNodes[i];
+            if (todoUtils.clearBlock(child) && child != dom.childNodes[i]) {
+                i--;
+            }
+        }
+
+        var isFragment = dom.nodeType == 11,
+            isLabel = isFragment ? false : todoUtils.isLabel(dom),
+            isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
+            isBlock = isFragment ? false : _domUtilsDomExtend2['default'].isBlockDom(dom);
+        if ((isBlock || isTodoTag) && _domUtilsDomExtend2['default'].isEmptyDom(dom)) {
+            dom.parentNode.removeChild(dom);
+            return true;
+        } else if (isBlock) {
+            _domUtilsDomExtend2['default'].stripDom(dom);
+        } else if (isLabel) {
+            todoUtils.deleteLabel(dom);
+        }
+        return false;
+    },
+    deleteLabel: function deleteLabel(label) {
+        return _domUtilsDomExtend2['default'].stripDom(label, function (dom) {
+            return !todoUtils.isLabel(dom) && !todoUtils.isCheckImg(dom) && !todoUtils.isTail(dom);
+        });
+    },
+    deleteUserInfo: function deleteUserInfo(label) {
+        var userGuid = '';
+        if (!label) {
+            return userGuid;
+        }
+        var container = label.parentNode,
+            userAvatar = container.querySelector('.' + _commonConst2['default'].CLASS.TODO_AVATAR),
+            userClass = userAvatar ? userAvatar.className : '',
+            guidReg = new RegExp('^(.*' + _commonConst2['default'].CLASS.TODO_USER_AVATAR + ')([^ ]*)(.*)$', 'i');
+
+        if (userClass.indexOf(_commonConst2['default'].CLASS.TODO_USER_AVATAR) > -1) {
+            userGuid = userClass.replace(guidReg, '$2');
+        }
+
+        var nextSib = label.nextElementSibling,
+            tmpNode;
+        while (nextSib) {
+            if (todoUtils.isLabel(nextSib)) break;
+            if (todoUtils.isUserInfo(nextSib)) {
+                tmpNode = nextSib;
+                nextSib = nextSib.nextElementSibling;
+                label.parentElement.removeChild(tmpNode);
+                continue;
+            }
+            nextSib = nextSib.nextElementSibling;
+        }
+        return userGuid;
+    },
+    fixCheckImg: function fixCheckImg(checkImg) {
+        if (!checkImg) {
+            return;
+        }
+        var container = _domUtilsDomExtend2['default'].getBlockParent(checkImg),
+            canBeContainer = todoUtils.canBeContainer(container),
+            label = _commonEnv2['default'].doc.createElement('span'),
+            newContainer,
+            next,
+            tmpNext,
+            stopInsertToLabel = false,
+            dom;
+        label.className = _commonConst2['default'].CLASS.TODO_LABEL + ' ' + _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK;
+
+        newContainer = _commonEnv2['default'].doc.createElement(canBeContainer ? container.tagName : 'div');
+        if (canBeContainer) {
+            _domUtilsDomExtend2['default'].before(container, newContainer, true);
+        } else {
+            _domUtilsDomExtend2['default'].before(checkImg, newContainer);
+        }
+        newContainer.appendChild(label);
+
+        next = checkImg;
+        while (next) {
+            tmpNext = next.nextSibling;
+            if (_domUtilsDomExtend2['default'].isBlockDom(next)) {
+                if (canBeContainer) {
+                    stopInsertToLabel = true;
+                    dom = newContainer.nextSibling;
+                } else {
+                    break;
+                }
+            }
+            if (stopInsertToLabel) {
+                _domUtilsDomExtend2['default'].before(dom, next);
+            } else if (todoUtils.isUserInfo(next)) {
+                _domUtilsDomExtend2['default'].before(label, next, true);
+            } else {
+                label.appendChild(next);
+            }
+            next = tmpNext;
+        }
+    },
+    fixImg: function fixImg(img) {
+        if (!img) {
+            return;
+        }
+        var iObj = _commonEnv2['default'].doc.createElement('input');
+        iObj.className = img.className;
+        iObj.readOnly = true;
+        if (img.id) {
+            iObj.id = img.id;
+        }
+        if (img.getAttribute('state')) {
+            iObj.setAttribute(_commonConst2['default'].ATTR.TODO_CHECK, img.getAttribute('state'));
+        }
+        var parent = img.parentNode;
+        parent.insertBefore(iObj, img);
+        parent.removeChild(img);
+    },
+    fixLabel: function fixLabel(label) {
+        if (!label || _domUtilsDomExtend2['default'].isTag(label, 'span')) {
+            return;
+        }
+        var parent = label.parentNode;
+        if (!parent) {
+            return;
+        }
+        var span = _commonEnv2['default'].doc.createElement('span');
+        span.className = label.className;
+        while (label.firstChild) {
+            span.appendChild(label.firstChild);
+        }
+        parent.insertBefore(span, label);
+        parent.removeChild(label);
+    },
+    /**
+     * 初始化 todoList 主要用于修正旧版本的 todoList 样式
+     * 保证每个 todoItem 占一行
+     */
+    fixOldTodo: function fixOldTodo() {
+        var i, j, subLabelList, subLabel, container, subContainer, checkImgList, checkImg, labelList, label, tailList, tail;
+
+        //修正未被 label 封装的 checkImg
+        checkImgList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG);
+        for (i = checkImgList.length - 1; i >= 0; i--) {
+            checkImg = checkImgList[i];
+            label = todoUtils.getLabelFromChild(checkImg);
+            if (!label || label.children[0] != checkImg) {
+                todoUtils.fixCheckImg(checkImg);
+            }
+            //将 image 转换为 i
+            todoUtils.fixImg(checkImg);
+        }
+
+        //处理那些被嵌套的 todoList（错误的 Dom 结构）
+        labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+        for (i = 0; i < labelList.length; i++) {
+            label = labelList[i];
+            container = todoUtils.packageTodo(label);
+            _domUtilsDomExtend2['default'].addClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
+            subLabelList = container.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+            for (j = subLabelList.length - 1; j > 0; j--) {
+                subLabel = subLabelList[j];
+                subContainer = todoUtils.packageTodo(subLabel);
+                _domUtilsDomExtend2['default'].before(container, subContainer, true);
+            }
+            //修正 用户信息
+            todoUtils.fixUserInfo(label);
+        }
+
+        //将 label 全部替换为 span
+        labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+        for (i = labelList.length - 1; i >= 0; i--) {
+            todoUtils.fixLabel(labelList[i]);
+        }
+
+        //清理 Tail
+        tailList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_TAIL);
+        for (i = tailList.length - 1; i >= 0; i--) {
+            tail = tailList[i];
+            if (_domUtilsDomExtend2['default'].isEmptyDom(tail)) {
+                tail.parentNode.removeChild(tail);
+            } else {
+                _domUtilsDomExtend2['default'].removeClass(_commonConst2['default'].CLASS.TODO_TAIL);
+            }
+        }
+    },
+    fixUserInfo: function fixUserInfo(label) {
+        var parent = label.parentNode,
+            check = todoUtils.getCheckImg(label),
+            id = check ? check.id : '',
+            childNodes = parent.childNodes,
+            child,
+            i,
+            firstUserInfo = false;
+        for (i = 0; i < childNodes.length; i++) {
+            child = childNodes[i];
+            if (_domUtilsDomExtend2['default'].hasClass(child, _commonConst2['default'].CLASS.TODO_USER_INFO)) {
+                if (!firstUserInfo) {
+                    firstUserInfo = true;
+                    child.setAttribute(_commonConst2['default'].ATTR.TODO_ID, id);
+                } else {
+                    parent.removeChild(child);
+                    i--;
+                }
+            }
+        }
+    },
+    getCheckImg: function getCheckImg(label) {
+        if (!label) {
+            return null;
+        }
+        return label.querySelector('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG);
+    },
+    getUserInfoHtml: function getUserInfoHtml(userGuid, userName, dt) {
+        var html = '<span class="' + _commonConst2['default'].CLASS.TODO_ACCOUNT + '">' + '<input readonly class="%1" />' + '%2, ' + '</span>' + '<span class="' + _commonConst2['default'].CLASS.TODO_DATE + '">%3.</span>';
+        var avatarClass = _commonConst2['default'].CLASS.TODO_USER_AVATAR + _commonBase642['default'].encode(userGuid);
+        return html.replace('%1', _commonConst2['default'].CLASS.IMG_NOT_DRAG + ' ' + _commonConst2['default'].CLASS.TODO_AVATAR + ' ' + avatarClass).replace('%2', userName).replace('%3', dt);
+    },
+    getLabelHtml: function getLabelHtml() {
+        var str = '<span class="' + _commonConst2['default'].CLASS.TODO_LABEL + ' ' + _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK + '">' + '<input readonly id="%1" class="' + _commonConst2['default'].CLASS.TODO_CHECK_IMG + ' ' + _commonConst2['default'].CLASS.IMG_NOT_DRAG + '" ' + _commonConst2['default'].ATTR.TODO_CHECK + '="unchecked" />' +
+        // '<span class="' + CONST.CLASS.TODO_TAIL + '"></span>' +
+        '</span>';
+        str = str.replace('%1', 'wiz_todo_' + Date.now() + '_' + Math.floor(Math.random() * 1000000 + 1));
+        return str;
+    },
+    getLabelInDom: function getLabelInDom(dom) {
+        if (!dom || !dom.hasChildNodes()) return null;
+        if (todoUtils.isLabel(dom)) {
+            return dom;
+        }
+        if (_domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER)) {
+            return dom.querySelector('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+        }
+        return null;
+    },
+    getLabelTail: function getLabelTail(label) {
+        if (!label) {
+            return null;
+        }
+        return label.querySelector('.' + _commonConst2['default'].CLASS.TODO_TAIL);
+    },
+    getLabelByCaret: function getLabelByCaret() {
+        var range = _rangeUtilsRangeExtend2['default'].getRange();
+        if (!range) {
+            return null;
+        }
+
+        var start = range.startContainer;
+        if (_domUtilsDomExtend2['default'].isEmptyDom(start) && range.startOffset == _domUtilsDomExtend2['default'].getDomEndOffset(start)) {
+            start = _domUtilsDomExtend2['default'].getNextNode(start, false);
+        }
+        var p = _domUtilsDomExtend2['default'].getParentByFilter(start, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
+        }, true);
+        if (!p || !p.hasChildNodes()) {
+            return null;
+        }
+        return todoUtils.getLabelInDom(p);
+    },
+    getLabelFromChild: function getLabelFromChild(dom) {
+        if (!dom) {
+            return null;
+        }
+        return _domUtilsDomExtend2['default'].getParentByFilter(dom, function (dom) {
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LABEL);
+        }, true);
+    },
+    getTime: function getTime() {
+        var dt = new Date();
+        return dt.getFullYear() + '-' + getNum(dt.getMonth() + 1) + '-' + getNum(dt.getDate()) + ' ' + getNum(dt.getHours()) + ':' + getNum(dt.getMinutes()) + ':' + getNum(dt.getSeconds());
+
+        function getNum(num) {
+            return (num < 10 ? '0' : '') + num;
+        }
+    },
+    insertToLabel: function insertToLabel(doms, label) {
+        if (!doms || !label) {
+            return;
+        }
+        var i,
+            dom,
+            last = null;
+        for (i = doms.length - 1; i >= 0; i--) {
+            dom = doms[i];
+            label.insertBefore(dom, last);
+            last = dom;
+        }
+    },
+    /**
+     * 判断 光标是否处于 checkbox 后面
+     * @returns {*}
+     */
+    isCaretAfterCheckImg: function isCaretAfterCheckImg() {
+        var range = _rangeUtilsRangeExtend2['default'].getRange();
+        if (!range) {
+            return false;
+        }
+        var caretDom, startOffset, prev, label;
+
+        label = todoUtils.getLabelByCaret();
+        if (!label) {
+            return false;
+        }
+        if (range.collapsed) {
+            caretDom = range.startContainer;
+            startOffset = range.startOffset;
+            if (caretDom.nodeType === 1) {
+                caretDom = caretDom.childNodes[range.startOffset];
+            } else if (caretDom.nodeType == 3 && startOffset > 0) {
+                return false;
+            }
+            prev = _domUtilsDomExtend2['default'].getPreviousNode(caretDom, false, label);
+            return todoUtils.isCheckImg(prev);
+        }
+        return false;
+    },
+    /**
+     * 判断 光标是否处于 label最前面
+     * @returns {*}
+     */
+    isCaretBeforeLabel: function isCaretBeforeLabel() {
+        var range = _rangeUtilsRangeExtend2['default'].getRange();
+        if (!range) {
+            return false;
+        }
+        var caretDom;
+
+        if (range.collapsed) {
+            caretDom = range.startContainer;
+            if (caretDom.nodeType === 1) {
+                caretDom = caretDom.childNodes[range.startOffset];
+            } else if (caretDom.nodeType === 3 && _domUtilsDomExtend2['default'].isEmptyDom(caretDom) && range.startOffset == caretDom.nodeValue.length) {
+                caretDom = _domUtilsDomExtend2['default'].getNextNode(caretDom, false);
+                if (caretDom) {
+                    caretDom = _domUtilsDomExtend2['default'].getParentByFilter(caretDom, function (dom) {
+                        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
+                    }, true);
+                }
+            }
+
+            return todoUtils.isLayer(caretDom) || todoUtils.isLabel(caretDom) || todoUtils.isCheckImg(caretDom);
+        }
+        return false;
+    },
+    /**
+     * 判断 dom 是否为 todoList 的 checkbox
+     * @param dom
+     * @returns {*|boolean}
+     */
+    isCheckImg: function isCheckImg(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_CHECK_IMG);
+    },
+    isEmptyLabel: function isEmptyLabel(label) {
+        if (!label) {
+            return true;
+        }
+        var childNodes = label.childNodes,
+            i,
+            child;
+
+        for (i = 0; i < childNodes.length; i++) {
+            child = childNodes[i];
+            if (!todoUtils.isCheckImg(child) && !todoUtils.isTail(child) && !_domUtilsDomExtend2['default'].isEmptyDom(child)) {
+                return false;
+            }
+        }
+        return true;
+    },
+    isFirstLabel: function isFirstLabel(label) {
+        if (!label) {
+            return false;
+        }
+        var parent = label.parentNode,
+            childNodes = parent.childNodes,
+            i,
+            child;
+
+        for (i = 0; i < childNodes.length; i++) {
+            child = childNodes[i];
+            if (child === label) {
+                return true;
+            } else if (!_domUtilsDomExtend2['default'].isEmptyDom(child)) {
+                return false;
+            }
+        }
+        return false;
+    },
+    /**
+     * 判断 dom 是否为 todoList 的 label
+     * @param dom
+     * @returns {*|boolean}
+     */
+    isLabel: function isLabel(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LABEL);
+    },
+    isLayer: function isLayer(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
+    },
+    isTail: function isTail(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_TAIL);
+    },
+    /**
+     * 判断 dom 是否为 todoList 内的有效 dom
+     * @param dom
+     * @returns {boolean}
+     */
+    isTodoTag: function isTodoTag(dom) {
+        if (!dom) {
+            return false;
+        }
+        return !!_domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
+            return todoUtils.isLabel(obj) || todoUtils.isTail(obj) || todoUtils.isUserInfo(obj) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_ACCOUNT) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_DATE);
+        }, true);
+    },
+    /**
+     * 判断 dom 是否为 用户信息
+     * @param dom
+     * @returns {*|boolean}
+     */
+    isUserInfo: function isUserInfo(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_USER_INFO);
+    },
+    /**
+     * 给 todoItem 打包
+     * @param label
+     * @returns {*}
+     */
+    packageTodo: function packageTodo(label) {
+        if (!label) {
+            return null;
+        }
+        var parent = label.parentNode;
+
+        if (parent !== _commonEnv2['default'].doc.body && todoUtils.isFirstLabel(label)) {
+            //如果 label 是首元素，则直接返回 label 的父元素
+            return parent;
+        }
+
+        // 如果 label 不是首元素，则 对齐进行打包
+        var check = todoUtils.getCheckImg(label),
+            id = check ? check.id : '',
+            userInfo = id ? parent.querySelector('span[' + _commonConst2['default'].ATTR.TODO_ID + '=' + id + ']') : null,
+            next = label.nextSibling,
+            tmpNext;
+        var container = _commonEnv2['default'].doc.createElement('div');
+        container.appendChild(label);
+        while (next) {
+            tmpNext = next.nextSibling;
+            container.appendChild(next);
+            next = next == userInfo ? null : tmpNext;
+        }
+        parent.insertBefore(container, tmpNext);
+        return container;
+    },
+    removeUserAvatarStyle: function removeUserAvatarStyle(guid) {
+        if (!guid) {
+            return;
+        }
+        var sId = _commonConst2['default'].ID.TODO_AVATAR_STYLE + guid,
+            sClass = _commonConst2['default'].CLASS.TODO_USER_AVATAR + guid,
+            userAvatar = _commonEnv2['default'].doc.querySelector('.' + sClass),
+            style = _commonEnv2['default'].doc.getElementById(sId);
+        if (style && !userAvatar) {
+            style.parentNode.removeChild(style);
+        }
+    },
+    setTodo: function setTodo(container, todoRoute) {
+        var range = _rangeUtilsRangeExtend2['default'].getRange(),
+            rangeList,
+            start,
+            end,
+            labelHtml,
+            label,
+            tmpDom;
+        if (container) {
+            //允许指定 容器直接设置 todoList
+            start = container;
+        } else {
+            //判断当前光标范围内是否只有一个 块结构，否则不做任何操作
+            if (!range) {
+                return null;
+            }
+            rangeList = _rangeUtilsRangeExtend2['default'].getRangeDomList({
+                noSplit: true
+            });
+            start = _domUtilsDomExtend2['default'].getBlockParent(rangeList.startDom, true);
+            if (!start) {
+                return null;
+            }
+            if (!range.collapsed && rangeList.endDom != rangeList.startDom) {
+                end = _domUtilsDomExtend2['default'].getBlockParent(rangeList.endDom, true);
+                if (end != start) {
+                    return null;
+                }
+            }
+        }
+
+        //判断当前行是否已经是 todoList 结构，如果是，则取消 todoList 结构
+        label = todoUtils.getLabelInDom(start);
+        if (label) {
+            todoUtils.cancelTodo(start);
+            return null;
+        }
+
+        _commonHistoryUtils2['default'].saveSnap(false);
+        labelHtml = todoUtils.getLabelHtml();
+        tmpDom = _commonEnv2['default'].doc.createElement('div');
+        _domUtilsDomExtend2['default'].addClass(tmpDom, _commonConst2['default'].CLASS.TODO_LAYER);
+        if (!todoUtils.canBeContainer(start)) {
+            labelHtml = '<div class="' + _commonConst2['default'].CLASS.TODO_LAYER + '">' + labelHtml + '</div>';
+        } else {
+            _domUtilsDomExtend2['default'].addClass(start, _commonConst2['default'].CLASS.TODO_LAYER);
+        }
+        tmpDom.innerHTML = labelHtml;
+        label = todoUtils.getLabelInDom(tmpDom);
+        end = label.lastChild;
+        todoUtils.insertToLabel(start.childNodes, label);
+
+        while (tmpDom.firstChild) {
+            start.appendChild(tmpDom.firstChild);
+        }
+        _rangeUtilsRangeExtend2['default'].setRange(end, _domUtilsDomExtend2['default'].getDomEndOffset(end));
+
+        //通知客户端笔记被修改
+        todoRoute.setDocumentType(_commonConst2['default'].TYPE.TODO);
+        todoRoute.setDocumentModified();
+
+        //修正 todoList style
+        todoUtils.checkTodoStyle(false);
+
+        return label;
+    },
+    setUserAvatarStyle: function setUserAvatarStyle(userGuid, avatarUrl) {
+        var guid = _commonBase642['default'].encode(userGuid);
+        var sId = _commonConst2['default'].ID.TODO_AVATAR_STYLE + guid;
+        var sClass = _commonConst2['default'].CLASS.TODO_USER_AVATAR + guid;
+        var style = _commonEnv2['default'].doc.getElementById(sId);
+        if (style) {
+            return;
+        }
+        _domUtilsDomExtend2['default'].convertImageToBase64(avatarUrl, 50, 50, function (baseStr) {
+            //有可能同时点击多个 todoList
+            var style = _commonEnv2['default'].doc.getElementById(sId);
+            if (style) {
+                return;
+            }
+            _commonWizStyle2['default'].insertStyle({ id: sId }, '.' + sClass + '{background-image:url(' + baseStr + ');}');
+        });
+    }
+};
+
+exports['default'] = todoUtils;
+module.exports = exports['default'];
+
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./../common/Base64":12}],46:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
@@ -19693,4 +21404,4 @@ _WizEditor2['default'].init = function (options) {
     return _WizEditor2['default'];
 };
 
-},{"./WizEditor":5,"./WizReader":6,"./common/env":15,"./common/historyUtils":16,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./rangeUtils/rangeExtend":36,"./tableUtils/tableZone":42}]},{},[43]);
+},{"./WizEditor":5,"./WizReader":6,"./common/env":15,"./common/historyUtils":16,"./domUtils/domExtend":24,"./imgUtils/imgUtils":29,"./rangeUtils/rangeExtend":36,"./tableUtils/tableZone":42}]},{},[46]);
