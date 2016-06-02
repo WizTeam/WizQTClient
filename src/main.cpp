@@ -124,7 +124,7 @@ int mainCore(int argc, char *argv[])
 #ifdef BUILD4APPSTORE
     QDir dir(QApplication::applicationDirPath());
     dir.cdUp();
-    dir.cd("plugins");
+    dir.cd("PlugIns");
     QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
 #endif
     //
