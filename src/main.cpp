@@ -107,15 +107,6 @@ void installOnLinux()
 
 int mainCore(int argc, char *argv[])
 {
-#ifdef BUILD4APPSTORE
-   QDir dir(argv[0]);  // e.g. appdir/Contents/MacOS/appname
-   dir.cdUp();
-   dir.cdUp();
-   dir.cd("PlugIns");
-   printf("before change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
-   QCoreApplication::setLibraryPaths(QStringList(dir.absolutePath()));
-   printf("after change, libraryPaths=(%s)\n", QCoreApplication::libraryPaths().join(",").toUtf8().data());
-#endif
 
 #ifdef Q_OS_LINUX
     // create single application for linux
@@ -129,6 +120,14 @@ int mainCore(int argc, char *argv[])
     QtWebEngine::initialize();
 #else
     QApplication a(argc, argv);
+    //
+#ifdef BUILD4APPSTORE
+    QDir dir(QApplication::applicationDirPath());
+    dir.cdUp();
+    dir.cd("plugins");
+    QApplication::setLibraryPaths(QStringList(dir.absolutePath()));
+#endif
+    //
     QtWebEngine::initialize();
 
 #ifdef BUILD4APPSTORE
@@ -136,7 +135,6 @@ int mainCore(int argc, char *argv[])
     helper.validteReceiptOnLauch();
 #endif
 #endif
-
 
    qInstallMessageHandler(Utils::Logger::messageHandler);
    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
