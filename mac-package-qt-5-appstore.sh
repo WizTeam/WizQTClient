@@ -3,7 +3,7 @@ echo "build version : " $REV
 
 # compile
 mkdir ../WizQTClient-Release-QT5
-#rm -rf ../WizQTClient-Release-QT5/* && \
+rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
 cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=/Users/weishijun/Qt5.5.1/5.5/clang_64/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
 make -j5
@@ -54,7 +54,7 @@ $QTDIR/bin/macdeployqt $DEST
 
 
 ##store all *.dylib in plugins to DISTPLUGINS
-#DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
+DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
 
 ###############################################################
 ##install_name_tool
@@ -93,12 +93,13 @@ cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlement
 APPLCERT="3rd Party Mac Developer Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
 
 for I in $QTLIBS ; do # signing the Qt frameworks
+echo "code sign framework: "  $I;
   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
     $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5
 done
 
 for I in $DISTPLUGINS ; do # signing all *.dylib libs
-  echo "code sign : "   $I;
+  echo "code sign plugin: "  $I;
   codesign --force --verify --deep --verbose --sign "$APPLCERT" \
     $MYAPP.app/Contents/PlugIns/$I
 done

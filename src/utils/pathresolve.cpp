@@ -112,6 +112,14 @@ QString PathResolve::dataStorePath()
     strPath += "/.wiznote/";
 #endif
     ensurePathExists(strPath);
+    //
+    static bool first = true;
+    if (first)
+    {
+        qDebug() << "DataStore: " << strPath;
+        first = false;
+    }
+    //
     return strPath;
 }
 
