@@ -3154,16 +3154,12 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         QList<CWizSingleDocumentViewer*> singleViewrList = viewerMap.values();
         for (CWizSingleDocumentViewer* viewer : singleViewrList)
         {
-            viewer->docView()->web()->resetDefaultCss();
             viewer->docView()->web()->editorResetFont();
         }
     }
         break;
     case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
-        break;
-    case wizoptionsMarkdown:
-        m_doc->web()->resetMarkdownCssPath();
         break;
     default:
         break;

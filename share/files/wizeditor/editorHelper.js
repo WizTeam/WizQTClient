@@ -121,10 +121,6 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
         //
         WizEditor.init(editorOptions);
         //
-        WizTodo.init('qt');
-        //
-        //WizTodoReaderInit();
-        //
         WizEditorInitDeleteCommentAction();
         //
         WizEditor.addListener(WizEditor.ListenerType.SelectionChange, WizOnSelectionChange)

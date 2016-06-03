@@ -57,42 +57,8 @@
 #include "wizDocumentView.h"
 #include "wizSearchReplaceWidget.h"
 
+#include "html/wizhtmlreader.h"
 
-/*
- * Load and save document
- */
-
-
-/*
- * QWebKit and Editor both have it's own undo stack, when use QWebkit to monitor
- * the modified status and undo/redo stack, QWebPage will ask QUndoStack undoable
- * if require modify status. this means we must push the undo command to undo
- * stack when execute command which will modify the document, otherwise webkit
- * can't be notified.
- * here, we just delegate this action to editor itself.
- */
-
-/*  QWebKit and Editor both have it's own undo stack. Undo method all processed by editor.
-class EditorUndoCommand : public QUndoCommand
-{
-public:
-    EditorUndoCommand(QWebPage* page, const QString & text = "Unknown") :QUndoCommand(text),
-        m_page(page) {}
-
-    virtual void undo()
-    {
-        m_page->mainFrame()->evaluateJavaScript("editor.execCommand('undo')");
-    }
-
-    virtual void redo()
-    {
-        m_page->mainFrame()->evaluateJavaScript("editor.execCommand('redo')");
-    }
-
-private:
-    QWebPage* m_page;
-};
-*/
 
 enum WizLinkType {
     WizLink_Doucment,
@@ -461,35 +427,6 @@ void CWizDocumentWebView::tryResetTitle()
     });
 }
 
-QString defaultMarkdownCSS()
-{
-    return Utils::PathResolve::resourcesPath() + "files/markdown/markdown/github2.css";
-}
-
-void CWizDocumentWebView::resetMarkdownCssPath()
-{
-    const QString strCategory = "MarkdownTemplate/";
-    QSettings* settings = WizGlobal::settings();
-    QByteArray ba = QByteArray::fromBase64(settings->value(strCategory + "SelectedItem").toByteArray());
-    QString strFile = QString::fromUtf8(ba);
-    if (strFile.isEmpty())
-    {
-        strFile = defaultMarkdownCSS();
-    }
-    else if (QFile::exists(strFile))
-    {
-    }
-    else
-    {
-        qDebug() << QString("[Markdown] You have choose %1 as you Markdown style template, but"
-                            "we can not find this file. Please check wether file exists.").arg(strFile);
-        strFile  = defaultMarkdownCSS();
-    }
-    m_strMarkdownCssFilePath = strFile;
-
-    page()->runJavaScript("resetMarkdownCssPath()");
-}
-
 void CWizDocumentWebView::dropEvent(QDropEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
@@ -682,22 +619,6 @@ void CWizDocumentWebView::setNoteTitleInited(bool inited)
 void CWizDocumentWebView::setInSeperateWindow(bool inSeperateWindow)
 {
     m_bInSeperateWindow = inSeperateWindow;
-
-    //not enabled in web engine
-    /*
-    if (inSeperateWindow)
-    {
-        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
-                                       + "webkit_separate_scrollbar.css");
-        //settings()->setUserStyleSheetUrl(url);
-    }
-    else
-    {
-        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
-                                       + "webkit_scrollbar.css");
-        //settings()->setUserStyleSheetUrl(url);
-    }
-    */
 }
 
 bool CWizDocumentWebView::isInSeperateWindow() const
@@ -705,71 +626,44 @@ bool CWizDocumentWebView::isInSeperateWindow() const
     return m_bInSeperateWindow;
 }
 
-QString CWizDocumentWebView::getDefaultCssFilePath() const
-{
-    return m_strDefaultCssFilePath;
-}
-
-
-QString CWizDocumentWebView::getMarkdownCssFilePath() const
-{
-    return m_strMarkdownCssFilePath;
-}
-
-QString CWizDocumentWebView::getWizTemplateJsFile() const
-{
-    return Utils::PathResolve::wizTemplateJsFilePath();
-//    return "http://192.168.1.215/libs/WizTemplate.js";
-}
-
-bool CWizDocumentWebView::resetDefaultCss()
+void CWizDocumentWebView::replaceDefaultCss(QString& strHtml)
 {
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/wizeditor/default.css";
     QFile f(strFileName);
     if (!f.open(QIODevice::ReadOnly)) {
         qDebug() << "[Editor]Failed to get default css code";
-        return false;
+        return;
     }
-
-    QTextStream ts(&f);
-    QString strCss = ts.readAll();
-    f.close();
-
+    //
+    QString strCss;
+    if (!WizLoadUnicodeTextFromFile(strFileName, strCss))
+        return;
+    //
     QString strFont = m_app.userSettings().defaultFontFamily();
     int nSize = m_app.userSettings().defaultFontSize();
 
-    strCss.replace("/*default-font-family*/", QString("font-family:%1").arg(strFont));
-    strCss.replace("/*default-font-size*/", QString("font-size:%1px").arg(nSize));
+    strCss.replace("/*default-font-family*/", QString("font-family:%1;").arg(strFont));
+    strCss.replace("/*default-font-size*/", QString("font-size:%1px;").arg(nSize));
     QString backgroundColor = m_app.userSettings().editorBackgroundColor();
     if (backgroundColor.isEmpty())
     {
         backgroundColor = m_bInSeperateWindow ? "#F5F5F5" : "#FFFFFF";
     }
-    strCss.replace("/*default-background-color*/", QString("background-color:%1").arg(backgroundColor));
+    strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(backgroundColor));
+    //
+    const QString customCssId("wiz_custom_css");
 
-    QString strPath = Utils::PathResolve::cachePath() + "wizeditor/"+m_dbMgr.db().GetUserGUID()+"/";
-    Utils::PathResolve::ensurePathExists(strPath);
-
-    // use to update css in seperate window
-    m_strDefaultCssFilePath = strPath;
-    m_strDefaultCssFilePath.append(m_bInSeperateWindow ? QString("default%1.css").arg(m_nWindowID) : "default.css");
-
-    QFile f2(m_strDefaultCssFilePath);
-    if (!f2.open(QIODevice::Truncate | QIODevice::WriteOnly)) {
-        qDebug() << "[Editor]Fail to setup default css code";
-        return false;
-    }
-
-    f2.write(strCss.toUtf8());
-    f2.close();
-
-    return true;
+    WizHtmlRemoveStyle(strHtml, customCssId);
+    WizHtmlInsertStyle(strHtml, customCssId, strCss);
 }
 
 void CWizDocumentWebView::editorResetFont()
 {
-    resetDefaultCss();
-    page()->runJavaScript("updateUserDefaultCss();");
+    WIZDOCUMENTDATA data = view()->note();
+    trySaveDocument(data, false, [=](const QVariant& vRet){
+        //
+        reloadNoteData(data);
+    });
 }
 
 void CWizDocumentWebView::editorFocus()
@@ -806,29 +700,6 @@ bool CWizDocumentWebView::evaluateJavaScript(const QString& js)
     return true;
 }
 
-
-void CWizDocumentWebView::resetCheckListEnvironment()
-{
-    if (!isEditing())
-    {
-        QString strScript = QString("WizTodoReadChecked.clear();");
-        page()->runJavaScript(strScript);
-    }
-}
-
-void CWizDocumentWebView::initCheckListEnvironment()
-{
-    if (isEditing())
-    {
-        QString strScript = QString("WizTodo.init('qt');");
-        page()->runJavaScript(strScript);
-    }
-    else
-    {
-        QString strScript = QString("WizTodoReadChecked.init('qt');");
-        page()->runJavaScript(strScript);
-    }
-}
 
 void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID, const QString& comment)
 {
@@ -1165,7 +1036,7 @@ void CWizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, b
     Q_UNUSED(data);
     Q_UNUSED(force);
 
-    QString strScript = QString("WizTodoReadChecked.onDocumentClose();");
+    QString strScript = QString("WizReader.todo.closeDocument();");
     page()->runJavaScript(strScript);
 }
 
@@ -1239,94 +1110,15 @@ void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
 }
 
 
-/*
-void CWizDocumentWebView::viewDocumentInEditor(bool editing)
-{
-    Q_ASSERT(m_bEditorInited);
-
-    QString strGUID = view()->note().strGUID;
-    QString strFileName = m_mapFile.value(strGUID);
-    if (strFileName.isEmpty()) {
-        return;
-    }
-
-    QString strHtml;
-    bool ret = WizLoadUnicodeTextFromFile(strFileName, strHtml);
-    if (!ret) {
-        // hide client and show error
-        return;
-    }
-
-    //strHtml = escapeJavascriptString(strHtml);
-
-    m_strCurrentNoteHead.clear();
-    m_strCurrentNoteHtml.clear();
-    m_strCurrentNoteBodyStyle.clear();
-//    qDebug() << strHtml;
-    Utils::Misc::splitHtmlToHeadAndBody(strHtml, m_strCurrentNoteHead, m_strCurrentNoteHtml);
-    getHtmlBodyStyle(strHtml, m_strCurrentNoteBodyStyle);
-
-    //
-    if (!QFile::exists(m_strDefaultCssFilePath))
-    {
-        resetDefaultCss();
-    }
-
-    m_strCurrentNoteHead = "<link rel=\"stylesheet\" type=\"text/css\" href=\"" +
-            m_strDefaultCssFilePath + "\">" + m_strCurrentNoteHead;
-
-    m_strCurrentNoteGUID = strGUID;
-    m_bCurrentEditing = editing;
-    //    
-    QString strExec = QString("viewCurrentNote();");
-
-    page()->runJavaScript(strExec, [=](const QVariant & vRet){
-
-        bool ret = vRet.toBool();
-        //
-        if (!ret) {
-            qDebug() << "[Editor] failed to load note: " << strExec;
-            // hide client and show error
-            return;
-        }
-
-        // show client
-        if (!ret) {
-            view()->showClient(false);
-            view()->transitionView()->showAsMode(strGUID, CWizDocumentTransitionView::ErrorOccured);
-            return;
-        }
-
-        view()->showClient(true);
-        view()->transitionView()->hide();
-
-        //page()->undoStack()->clear();
-        m_timerAutoSave.start();
-
-        //Waiting for the editor initialization complete if it's the first time to load a document.
-        QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
-        emit viewDocumentFinished();
-    });
-}
-*/
-
 void CWizDocumentWebView::getAllEditorScriptAndStypeFileName(QStringList& arrayFile)
 {
     QString strResourcePath = Utils::PathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
-    //QString strEditorCss = strHtmlEditorPath + _T("editor.css");
-    //
     QString strEditorJS = strHtmlEditorPath + _T("wizEditorForMac.js");
-    //
-    QString strUitlsJS = strHtmlEditorPath + _T("utils.js");
-    QString strLocal = strHtmlEditorPath + _T("localize.js");
     QString strInit = strHtmlEditorPath + _T("editorHelper.js");
     //
     arrayFile.empty();
-    //arrayFile.push_back(strEditorCss);
-    arrayFile.push_back(strUitlsJS);
-    arrayFile.push_back(strLocal);
     arrayFile.push_back(strEditorJS);
     arrayFile.push_back(strInit);
 }
@@ -1411,6 +1203,8 @@ void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     getAllEditorScriptAndStypeFileName(arrayFiles);
     insertScriptAndStyleCore(strHtml, arrayFiles);
     //
+    replaceDefaultCss(strHtml);
+    //
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
     //
     m_strNoteHtmlFileName = strFileName;
@@ -1453,13 +1247,10 @@ void CWizDocumentWebView::setEditorMode(WizEditorMode editorMode)
 
     trySaveDocument(docData, false, [=](const QVariant&){});
 
-    resetCheckListEnvironment();
     m_currentEditorMode = editorMode;
     //
     enableEditor(editing);
     //
-    initCheckListEnvironment();
-
     if (editing) {
         setFocus(Qt::MouseFocusReason);
         editorFocus();
@@ -1897,10 +1688,7 @@ void CWizDocumentWebView::editorCommandExecuteInsertHorizontal()
 
 void CWizDocumentWebView::editorCommandExecuteInsertCheckList()
 {
-    // before insert first checklist, should manual notify editor to save current sence for undo.
-    page()->runJavaScript("editor.execCommand('saveScene');");
-
-    QString strExec = "WizTodo.insertOneTodoForQt();";
+    QString strExec = "WizEditor.todo.setTodo();";
     page()->runJavaScript(strExec);
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
@@ -2120,10 +1908,12 @@ void CWizDocumentWebView::redo()
     page()->runJavaScript("WizEditor.redo()");
 }
 
-QString CWizDocumentWebView::getSkinResourcePath()
+QString CWizDocumentWebView::getUserGuid()
 {
-    return ::WizGetSkinResourcePath(m_app.userSettings().skin());
+    QString strKbGUID = view()->note().strKbGUID;
+    return m_dbMgr.db(strKbGUID).GetUserGUID();
 }
+
 
 QString CWizDocumentWebView::getUserAvatarFilePath()
 {
@@ -2143,11 +1933,6 @@ QString CWizDocumentWebView::getUserAlias()
     return m_dbMgr.db(strKbGUID).GetUserAlias();
 }
 
-QString CWizDocumentWebView::getFormatedDateTime()
-{
-    COleDateTime time = QDateTime::currentDateTime();
-    return ::WizDateToLocalString(time);
-}
 
 bool CWizDocumentWebView::isPersonalDocument()
 {

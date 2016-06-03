@@ -167,15 +167,8 @@ public:
     void setInSeperateWindow(bool inSeperateWindow);
     bool isInSeperateWindow() const;
 
-    //only update Html in JS editor, wouldn't refresh WebView display
-    void updateNoteHtml();
-
     // initialize editor style before render, only invoke once.
-    bool resetDefaultCss();
-    Q_INVOKABLE QString getDefaultCssFilePath() const;
-    Q_INVOKABLE QString getMarkdownCssFilePath() const;
-    Q_INVOKABLE QString getWizTemplateJsFile() const;
-    void resetMarkdownCssPath();
+    void replaceDefaultCss(QString& strHtml);
 
     /* editor related */
     void editorResetFont();
@@ -221,10 +214,9 @@ public:
     void redo();
 
     //js environment func
-    Q_INVOKABLE QString getSkinResourcePath();
+    Q_INVOKABLE QString getUserGuid();
     Q_INVOKABLE QString getUserAvatarFilePath();
     Q_INVOKABLE QString getUserAlias();
-    Q_INVOKABLE QString getFormatedDateTime();
     Q_INVOKABLE bool isPersonalDocument();
     Q_INVOKABLE QString getCurrentNoteHtml();
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
@@ -236,11 +228,10 @@ public:
     Q_INVOKABLE QString getLocalLanguage();
     Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
 
+    Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)
     Q_PROPERTY(QString userAvatarFilePath READ getUserAvatarFilePath)
     Q_PROPERTY(bool isPersonalDocument READ isPersonalDocument)
-    Q_PROPERTY(QString formatedDateTime READ getFormatedDateTime)
-    Q_PROPERTY(QString skinResourcePath READ getSkinResourcePath)
     Q_PROPERTY(QString canEditNote READ canEditNote)
     Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml)
     Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
@@ -294,8 +285,6 @@ private:
     // flag : if current webview is in seperate window, editor background-color will
     //different with webview in mainwindow
     bool m_bInSeperateWindow;
-    QString m_strDefaultCssFilePath;
-    QString m_strMarkdownCssFilePath;
 
     int m_nWindowID;
 
@@ -380,10 +369,6 @@ public Q_SLOTS:
     void editorCommandExecuteScreenShot();
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
-
-    // js func
-    void resetCheckListEnvironment();
-    void initCheckListEnvironment();
 
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
