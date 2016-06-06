@@ -81,6 +81,7 @@ public:
     QWidget* rootWidget() const { return m_rootWidget; }
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
+    QWidget* shadowWidget() const { return m_shadowWidget; }
     CWizTitleBar* titleBar() const { return m_titleBar; }
     bool canResize() const { return m_canResize; }
     void setCanResize(bool b) { m_canResize = b; m_titleBar->setCanResize(b); }

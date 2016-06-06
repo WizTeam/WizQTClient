@@ -112,15 +112,13 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
     ui->setupUi(uiWidget);
-    QRect rcUI = uiWidget->geometry();
-    setMinimumSize(rcUI.width() + 20, rcUI.height() + 20);
     //
     //  init style for wizbox
-    ui->btn_selectServer->setMaximumHeight(20);
+    ui->btn_selectServer->setMaximumHeight(::WizSmartScaleUI(20));
     ui->layout_titleBar->setContentsMargins(0, 0, 0, 0);
     ui->widget_titleBar->layout()->setContentsMargins(0, 0, 0, 0);
     ui->widget_titleBar->layout()->setSpacing(0);
-    ui->label_logo->setMinimumHeight(80);
+    ui->label_logo->setMinimumHeight(WizSmartScaleUI(80));
     ui->btn_max->setVisible(false);
     ui->btn_min->setVisible(false);
     ui->btn_close->setVisible(false);
@@ -128,16 +126,9 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     CWizTitleBar* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
-    rootWidget()->setContentsMargins(10, 0, 10, 10);
-    //
-
+    int shadowSize = ::WizSmartScaleUI(10);
+    rootWidget()->setContentsMargins(shadowSize, shadowSize, shadowSize, shadowSize);
 #endif
-    QPainterPath path;
-    QRectF rect = geometry();
-    path.addRoundRect(rect, 4, 1);
-    QPolygon polygon= path.toFillPolygon().toPolygon();
-    QRegion region(polygon);
-    setMask(region);
 
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
@@ -196,6 +187,16 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     loadDefaultUser();
     //
     initSateMachine();
+    //
+#ifndef Q_OS_MAC
+    //
+    QSize totalSizeHint = layout()->totalSizeHint();
+    qDebug() << totalSizeHint;
+    //
+    QRect rc = this->geometry();
+    rc.setSize(QSize(totalSizeHint.width(), totalSizeHint.height()));
+    setGeometry(rc);
+#endif
 }
 
 CWizLoginDialog::~CWizLoginDialog()
@@ -215,6 +216,8 @@ CWizLoginDialog::~CWizLoginDialog()
         m_oemDownloader->deleteLater();
     }
 }
+
+
 
 QString CWizLoginDialog::userId() const
 {
@@ -510,8 +513,8 @@ void CWizLoginDialog::on_btn_close_clicked()
 void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
-    setFixedWidth(354);
-    ui->widget_titleBar->setFixedHeight(40);
+    //setFixedWidth(::WizSmartScaleUI(354));
+    ui->widget_titleBar->setFixedHeight(::WizSmartScaleUI(40));
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
@@ -551,7 +554,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                          "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
                                                          "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
                                                  .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
-        m_titleBar->closeButton()->setFixedSize(16, 16);
+        m_titleBar->closeButton()->setFixedSize(::WizSmartScaleUI(16), ::WizSmartScaleUI(16));
     }
 #endif
 
