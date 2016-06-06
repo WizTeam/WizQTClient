@@ -126,8 +126,6 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     CWizTitleBar* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
-    int shadowSize = ::WizSmartScaleUI(10);
-    rootWidget()->setContentsMargins(shadowSize, shadowSize, shadowSize, shadowSize);
 #endif
 
     m_lineEditUserName = ui->wgt_usercontainer->edit();
@@ -186,17 +184,24 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
 
     loadDefaultUser();
     //
-    initSateMachine();
-    //
 #ifndef Q_OS_MAC
     //
     QSize totalSizeHint = layout()->totalSizeHint();
     qDebug() << totalSizeHint;
     //
-    QRect rc = this->geometry();
-    rc.setSize(QSize(totalSizeHint.width(), totalSizeHint.height()));
+    QRect rc = geometry();
+    rc.setSize(QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10)));
     setGeometry(rc);
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        QSize sz = ui->btn_login->size();
+        ui->btn_singUp->setMinimumSize(sz);
+
+    }, 300, 30000, [=]{});
 #endif
+    //
+    initSateMachine();
 }
 
 CWizLoginDialog::~CWizLoginDialog()

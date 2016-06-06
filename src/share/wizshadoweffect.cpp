@@ -9,7 +9,7 @@
 
 
 CWizShadowEffect::CWizShadowEffect()
-    : m_shadowSize(::WizSmartScaleUI(10))
+    : m_shadowSize(10)
     , m_shadow(new CWizSkin9GridImage())
 {
     QString strShadow = Utils::StyleHelper::skinResourceFileName("shadow");

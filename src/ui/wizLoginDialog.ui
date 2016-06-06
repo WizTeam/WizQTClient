@@ -2,6 +2,14 @@
 <ui version="4.0">
  <class>wizLoginWidget</class>
  <widget class="QWidget" name="wizLoginWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>522</width>
+    <height>522</height>
+   </rect>
+  </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
@@ -333,7 +341,7 @@
                </property>
                <property name="sizeHint" stdset="0">
                 <size>
-                 <width>5</width>
+                 <width>30</width>
                  <height>33</height>
                 </size>
                </property>
@@ -385,12 +393,6 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>300</width>
-                 <height>30</height>
-                </size>
                </property>
                <property name="styleSheet">
                 <string notr="true"/>
@@ -523,12 +525,6 @@
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
-               </property>
-               <property name="minimumSize">
-                <size>
-                 <width>300</width>
-                 <height>30</height>
-                </size>
                </property>
                <property name="text">
                 <string>Create Account</string>
