@@ -187,11 +187,9 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
 #ifndef Q_OS_MAC
     //
     QSize totalSizeHint = layout()->totalSizeHint();
-    qDebug() << totalSizeHint;
     //
-    QRect rc = geometry();
-    rc.setSize(QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10)));
-    setGeometry(rc);
+    QSize minSize = QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10));
+    setMinimumSize(minSize);
     //
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
         //
