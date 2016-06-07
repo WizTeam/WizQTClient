@@ -59,9 +59,9 @@ private:
     QFont m_fontLink;
 
 protected:
-    virtual void drawCategoryViewItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
-    virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
-    virtual void drawMultiLineItemBackground(const QStyleOptionViewItemV4* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const;
+    virtual void drawCategoryViewItem(const QStyleOptionViewItem *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
+    virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItem *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
+    virtual void drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const;
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 
 public:
@@ -120,7 +120,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
 
 
-void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
+void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItem *vopt,
                                          QPainter *p, const CWizCategoryBaseView *view) const
 {
     if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
@@ -144,7 +144,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItemV4 *vopt,
 
 }
 
-void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vopt, QPainter *p, const CWizMultiLineListWidget *view) const
+void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt, QPainter *p, const CWizMultiLineListWidget *view) const
 {
     bool imageAlignLeft = view->imageAlignLeft();
     int imageWidth = view->imageWidth();
@@ -286,7 +286,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItemV4 *vo
     p->restore();
 }
 
-void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItemV4* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const
+void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const
 {
     if (const CWizAttachmentListView *attachView = dynamic_cast<const CWizAttachmentListView *>(view))
     {
@@ -326,7 +326,7 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
     {
     case CE_ItemViewItem:
         {
-            const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
+            const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option);
             Q_ASSERT(vopt);
 
             if (const MessageListView* view = dynamic_cast<const MessageListView*>(widget))
@@ -440,7 +440,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         {
             if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
             {
-                const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(opt);
+                const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(opt);
                 Q_ASSERT(vopt);
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());

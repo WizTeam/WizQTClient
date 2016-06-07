@@ -1221,7 +1221,7 @@ void CWizDocumentListView::resetItemsViewType(int type)
         if (item(i)->type() != WizDocumentListType_Document)
             continue;
 
-        int nHeight = Utils::StyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : Utils::StyleHelper::ListTypeSection);
+        int nHeight = Utils::StyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : (int)Utils::StyleHelper::ListTypeSection);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
 }
@@ -2097,13 +2097,13 @@ void CWizDocumentListView::on_vscroll_actionTriggered(int action)
 }
 //#endif // Q_OS_MAC
 
-void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     if (CWizDocumentListViewBaseItem* pItem = itemFromIndex(vopt->index))
     {
         p->save();
         int nRightMargin = 12;
-        QStyleOptionViewItemV4 newVopt(*vopt);
+        QStyleOptionViewItem newVopt(*vopt);
         newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
         pItem->draw(p, &newVopt, m_nViewType);
 

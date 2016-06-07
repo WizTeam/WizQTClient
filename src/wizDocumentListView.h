@@ -68,7 +68,7 @@ public:
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
-    void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
+    void drawItem(QPainter*p, const QStyleOptionViewItem* vopt) const;
     void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
     bool acceptAllSearchItems() const;

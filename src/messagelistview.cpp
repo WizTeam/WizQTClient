@@ -248,7 +248,7 @@ public:
 
 
 
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt) const
     {     
         //unread
         int nUnreadSymSize = 8;
@@ -529,7 +529,7 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
     return pItem->data();
 }
 
-void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();    
     MessageListViewItem* pItem = messageItem(vopt->index);
@@ -1165,7 +1165,7 @@ WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
 void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 //    QStyleOptionViewItem opt(option);
-    QStyleOptionViewItemV4 opt = option;
+    QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     //NOTE:QCombobox 的项目的背景css颜色样式无效，需要通过绘制实现。
     if (option.state & QStyle::State_Selected)
@@ -1387,7 +1387,7 @@ WizSenderSelectorItem::WizSenderSelectorItem(const QString& text, const QString&
 
 }
 
-void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();
 

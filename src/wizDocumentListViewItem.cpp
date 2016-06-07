@@ -5,7 +5,7 @@
 
 #include <QPixmapCache>
 #include <QPainter>
-#include <QStyleOptionViewItemV4>
+#include <QStyleOptionViewItem>
 
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
@@ -491,7 +491,7 @@ void CWizDocumentListViewDocumentItem::on_thumbnailReloaded()
 //        setNeedUpdate();
 //}
 
-void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     int nItemType = itemType();
     draw_impl(p, vopt, nItemType, nViewType);
@@ -499,7 +499,7 @@ void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewI
     drawSyncStatus(p, vopt, nViewType);
 }
 
-void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
+void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItem* vopt, int nItemType, int nViewType) const
 {
     if (nItemType == CWizDocumentListViewDocumentItem::TypePrivateDocument)
     {
@@ -563,7 +563,7 @@ QString CWizDocumentListViewDocumentItem::cacheKey() const
 
 const int nTextTopMargin = 6;
 
-void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -586,7 +586,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
 }
 
 const int nAvatarRightMargin = 8;
-void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -608,7 +608,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -621,7 +621,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -640,7 +640,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -651,7 +651,7 @@ void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     Q_UNUSED(nViewType);
 
@@ -803,7 +803,7 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
     return true;
 }
 
-void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     p->save();
     p->fillRect(vopt->rect, Utils::StyleHelper::listViewSectionItemBackground());

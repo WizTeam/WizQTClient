@@ -60,7 +60,7 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
-void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     bool bSelected = vopt->state.testFlag(QStyle::State_Selected);
 
@@ -257,7 +257,7 @@ QString CWizCategoryViewItemBase::getExtraButtonToolTip() const
     return "";
 }
 
-void CWizCategoryViewItemBase::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewItemBase::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
 
 
@@ -377,7 +377,7 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QString str = vopt->text;
     QRect rc(vopt->rect);
@@ -387,7 +387,7 @@ void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionVi
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewSectionItemText(), font);
 }
 
-void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
 //    QRect rc = vopt->rect;
 //    rc.setTop(rc.bottom());
@@ -580,7 +580,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     }
 }
 
-void CWizCategoryViewMessageItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewMessageItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem *vopt) const
 {
     if (!m_nUnread)
         return;
@@ -1371,7 +1371,7 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
     }
 }
 
-void CWizCategoryViewBizGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewBizGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     if (isUnreadButtonUseable())
     {
@@ -1687,7 +1687,7 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     }
 }
 
-void CWizCategoryViewGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     //
     if (m_nUnread > 0)
@@ -2252,7 +2252,7 @@ int CWizCategoryViewShortcutPlaceHoldItem::getItemHeight(int /*hintHeight*/) con
     return WizSmartScaleUI(20);
 }
 
-void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
     QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
@@ -2407,7 +2407,7 @@ void CWizCategoryViewCustomSearchItem::setSearchScope(int nSearchScope)
     m_nSearchScope = nSearchScope;
 }
 
-void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QString str = vopt->text;
     QRect rc(vopt->rect);

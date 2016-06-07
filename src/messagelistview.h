@@ -45,7 +45,7 @@ public:
     explicit WizSenderSelectorItem(const QString& text, const QString& id, const QPixmap& avatar,
                                    QListWidget *view = 0, int type = Type);
 
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt) const;
     QString itemID() const;
     QString itemText() const;
 
@@ -179,7 +179,7 @@ public:
     MessageListViewItem* messageItem(const QModelIndex& index) const;
     const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
 
-    void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const;
 
 public slots:
     void markAllMessagesReaded(bool removeItems);
