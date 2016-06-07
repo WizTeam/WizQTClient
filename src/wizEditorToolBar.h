@@ -107,7 +107,6 @@ protected Q_SLOTS:
     void on_editor_insertLink_triggered();
     void on_editor_editLink_triggered();
     void on_editor_removeLink_triggered();
-    void on_editor_insertTable_triggered();
     void on_editor_justifyLeft_triggered();
     void on_editor_justifyCenter_triggered();
     void on_editor_justifyRight_triggered();
@@ -131,7 +130,7 @@ protected Q_SLOTS:
     void on_btnSearchReplace_clicked();
     void on_btnUnorderedList_clicked();
     void on_btnOrderedList_clicked();
-    void on_btnTable_clicked();
+    void on_btnTable_clicked(int row, int col);
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnInsertImage_clicked();

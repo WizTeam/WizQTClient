@@ -47,7 +47,6 @@ class QShortcut;
 #define WIZACTION_FORMAT_JUSTIFYJUSTIFY     "actionMenuFormatJustifyJustify"
 #define WIZACTION_FORMAT_INDENT             "actionMenuFormatIndent"
 #define WIZACTION_FORMAT_OUTDENT            "actionMenuFormatOutdent"
-#define WIZACTION_FORMAT_INSERT_TABLE       "actionMenuFormatInsertTable"
 #define WIZACTION_FORMAT_INSERT_LINK        "actionMenuFormatInsertLink"
 #define WIZACTION_FORMAT_INSERT_HORIZONTAL  "actionMenuFormatInsertHorizontal"
 #define WIZACTION_FORMAT_INSERT_DATE        "actionMenuFormatInsertDate"

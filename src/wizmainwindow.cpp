@@ -1011,7 +1011,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
         m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
@@ -2599,11 +2598,6 @@ void MainWindow::on_actionMenuFormatInsertUnorderedList_triggered()
     getActiveEditor()->editorCommandExecuteInsertUnorderedList();
 }
 
-void MainWindow::on_actionMenuFormatInsertTable_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarUnorderedList");
-    getActiveEditor()->editorCommandExecuteTableInsert();
-}
 
 void MainWindow::on_actionMenuFormatInsertLink_triggered()
 {

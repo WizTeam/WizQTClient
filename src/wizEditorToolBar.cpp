@@ -34,6 +34,7 @@
 #include "wizDocumentView.h"
 #include "widgets/wizTipsWidget.h"
 #include "wizmainwindow.h"
+#include "widgets/wizTableSelector.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
@@ -1145,6 +1146,18 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnOrderedList->setPosition(CWizToolButton::Right);
     connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
+    QWidgetAction* tableAction = new QWidgetAction(this);
+    tableAction->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
+    tableAction->setText(tr("Insert Table"));
+    WizTableSelectorWidget* tableWidget = new WizTableSelectorWidget(this);
+    tableAction->setDefaultWidget(tableWidget);
+    //
+    connect(tableWidget, SIGNAL(itemSelected(int,int)), SLOT(on_btnTable_clicked(int,int)));
+
+    //
+    QMenu* menuTable = new QMenu(this);
+    menuTable->addAction(tableAction);
+    //
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
 //    m_btnTable->setHorizontalPadding(8);
@@ -1152,7 +1165,9 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     //m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
     m_btnTable->setToolTip(tr("Insert Table"));
     m_btnTable->setPosition(CWizToolButton::Center);
-    connect(m_btnTable, SIGNAL(clicked()), SLOT(on_btnTable_clicked()));
+    m_btnTable->setMenu(menuTable);
+    m_btnTable->setPopupMode(QToolButton::MenuButtonPopup);
+    //
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
@@ -2252,11 +2267,6 @@ void EditorToolBar::on_editor_removeLink_triggered()
     m_editor->editorCommandExecuteLinkRemove();
 }
 
-void EditorToolBar::on_editor_insertTable_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuInsertTable");
-    m_editor->editorCommandExecuteTableInsert();
-}
 
 void EditorToolBar::on_editor_justifyLeft_triggered()
 {
@@ -2468,11 +2478,11 @@ void EditorToolBar::on_btnOrderedList_clicked()
     }
 }
 
-void EditorToolBar::on_btnTable_clicked()
+void EditorToolBar::on_btnTable_clicked(int row, int col)
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarTable");
     if (m_editor) {
-        m_editor->editorCommandExecuteTableInsert();
+        m_editor->editorCommandExecuteTableInsert(row + 1, col + 1);
     }
 }
 

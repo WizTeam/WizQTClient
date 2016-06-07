@@ -292,7 +292,6 @@ private:
     CWizDocumentWebViewSaverThread* m_docSaverThread;
 
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
-    QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
 
     CWizSearchReplaceWidget* m_searchReplaceWidget;
 
@@ -313,7 +312,6 @@ public Q_SLOTS:
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
-    void on_editorCommandExecuteTableInsert_accepted();
 
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
@@ -353,7 +351,7 @@ public Q_SLOTS:
     void editorCommandExecuteInsertOrderedList();
     void editorCommandExecuteInsertUnorderedList();
     //
-    void editorCommandExecuteTableInsert();
+    void editorCommandExecuteTableInsert(int row, int col);
 
     // fast operation
     void editorCommandExecuteInsertDate();

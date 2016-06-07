@@ -334,7 +334,6 @@ public Q_SLOTS:
     void on_actionMenuFormatOutdent_triggered();
     void on_actionMenuFormatInsertOrderedList_triggered();
     void on_actionMenuFormatInsertUnorderedList_triggered();
-    void on_actionMenuFormatInsertTable_triggered();
     void on_actionMenuFormatInsertLink_triggered();
     void on_actionMenuFormatBold_triggered();
     void on_actionMenuFormatItalic_triggered();

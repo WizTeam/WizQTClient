@@ -132,7 +132,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_OUTDENT,                      QObject::tr("Outdent"),                   "",           QKeySequence()},
         {WIZACTION_FORMAT_UNORDEREDLIST,         QObject::tr("Convert to Unoredered List"), "", QKeySequence("Ctrl+Alt+U")},
         {WIZACTION_FORMAT_ORDEREDLIST,              QObject::tr("Convert to Ordered List"), "",       QKeySequence("Ctrl+Alt+O")},
-        {WIZACTION_FORMAT_INSERT_TABLE,             QObject::tr("Insert Table"),                "",           QKeySequence()},
         {WIZACTION_FORMAT_INSERT_LINK,                 QObject::tr("Insert Link"),                  "",          QKeySequence("Ctrl+K")},
         {WIZACTION_FORMAT_BOLD,                              QObject::tr("Bold"),                       "",             QKeySequence("Ctrl+B")},
         {WIZACTION_FORMAT_ITALIC,                             QObject::tr("Italic"),                        "",           QKeySequence("Ctrl+I")},

@@ -132,6 +132,7 @@ set(wiznote_SOURCES
     share/websocketclientwrapper.cpp
     share/websockettransport.cpp
     share/wizwebengineview.cpp
+    widgets/wizTableSelector.cpp
 
     wizCategoryView.cpp
     wizCategoryViewItem.cpp
@@ -262,6 +263,7 @@ set(wiznote_HEADERS
     share/wiztitlebar.h
     share/wizshadowwindow.h
     share/wizshadoweffect.h
+    widgets/wizTableSelector.h
 
     wizdef.h
     wizactions.h

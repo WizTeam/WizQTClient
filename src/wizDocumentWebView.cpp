@@ -1623,32 +1623,13 @@ void CWizDocumentWebView::editorCommandExecuteInsertUnorderedList()
     editorCommandExecuteCommand("insertUnorderedList");
 }
 
-void CWizDocumentWebView::editorCommandExecuteTableInsert()
+void CWizDocumentWebView::editorCommandExecuteTableInsert(int row, int col)
 {
-    if (!m_editorInsertTableForm) {
-        m_editorInsertTableForm = new CWizEditorInsertTableForm(window());
-        connect(m_editorInsertTableForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteTableInsert_accepted()));
-    }
-
-    m_editorInsertTableForm->clear();
-    m_editorInsertTableForm->exec();
-
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("tableInsert");
-}
-
-void CWizDocumentWebView::on_editorCommandExecuteTableInsert_accepted()
-{
-    int nRows = m_editorInsertTableForm->getRows();
-    int nCols = m_editorInsertTableForm->getCols();
-
-    if (!nRows && !nCols)
-        return;
-    //
-    QString code = QString("WizEditor.table.insertTable(%1, %2);").arg(nCols).arg(nRows);
+    QString code = QString("WizEditor.table.insertTable(%1, %2);").arg(col).arg(row);
     //
     page()->runJavaScript(code);
 }
+
 
 void CWizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
 {
