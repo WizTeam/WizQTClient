@@ -43,4 +43,5 @@ class CWizChangeCocoaImplementation
 };
 
 
+
 #endif // WIZMACHELPER_MM_H

@@ -12,7 +12,6 @@
 //#include <QWebElementCollection>
 //#include <QWebFrame>
 #include <QEventLoop>
-#include <QMacCocoaViewContainer>
 #include <QDebug>
 #include "html/wizhtmlcollector.h"
 
@@ -917,13 +916,6 @@ void adjustSubViews(QWidget* wgt)
 
 
 
-QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
-{
-    NSView* wgtView = (NSView *) wgt->winId();
-    QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
-    return container;
-}
-
 
 int getSystemMinorVersion()
 {
@@ -1035,3 +1027,16 @@ void readShareExtensionAccount()
 //    qDebug() << "user guid : " << WizToQString(nsUserGUID);
 //    qDebug() << "mywiz : " << WizToQString(nsMyWiz);
 }
+
+
+CWizCocoaViewContainer::CWizCocoaViewContainer()
+    : m_view(nil)
+{
+
+}
+void CWizCocoaViewContainer::setCocoaView(NSView* view)
+{
+    m_view = view;
+    [m_view retain];
+}
+

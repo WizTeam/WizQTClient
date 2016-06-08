@@ -152,9 +152,9 @@ void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip, int
     [d->delegate addSearch:label tooltip:tooltip width: width];
 }
 
-void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
+void CWizMacToolBar::addWidget(CWizCocoaViewContainer* widget, const QString& label, const QString& tooltip)
 {
-    [d->delegate addWidget:widget label:label tooltip:tooltip];
+    [d->delegate addCustomView:widget label:label tooltip:tooltip];
 }
 
 void CWizMacToolBar::deleteAllToolBarItems()
@@ -167,7 +167,7 @@ void CWizMacToolBar::onSearchEndEditing(const QString& str)
     emit doSearch(str);
 }
 
-CWizSearchWidget* CWizMacToolBar::getSearchWidget()
+CWizSearchView* CWizMacToolBar::getSearchWidget()
 {
     return [d->delegate getSearchWidget];
 }
@@ -183,6 +183,7 @@ void CWizMacToolBar::adjustSearchWidgetWidth(int nWidth)
     nsView.frame = f;
 }
 
+/*
 void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
 {
    NSToolbarItem* toolbarItem = [d->delegate getWidgetToolBarItemByWidget: widget];
@@ -196,20 +197,16 @@ void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
        nsView.frame = f;
    }
 }
+*/
 
 CWizMacFixedSpacer::CWizMacFixedSpacer(QSize sz, QWidget* parent)
-    : QMacCocoaViewContainer(nil, parent)
-    , m_sz(sz)
+    : m_sz(sz)
 {
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setSizePolicy(sizePolicy);
 }
 
 void CWizMacFixedSpacer::adjustWidth(int width)
 {
      m_sz.setWidth(width);
-     setFixedWidth(width);
-//     setMinimumWidth(width);
 }
 
 
@@ -266,8 +263,7 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 
 
 CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent)
-    : QMacCocoaViewContainer(nil, parent)
-    , m_width(width)
+    : m_width(width)
 {
 //    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
 //    [myButton setTitle: WizToNSString(title)];

@@ -38,7 +38,7 @@ class CWizOptionsWidget;
 class CWizIAPDialog;
 class CWizTemplatePurchaseDialog;
 
-class CWizSearchWidget;
+class CWizSearchView;
 class CWizSearcher;
 class CWizSearchIndexer;
 
@@ -197,7 +197,7 @@ private:
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    CWizSearchWidget* m_searchWidget;
+    CWizSearchView* m_searchWidget;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;    
 

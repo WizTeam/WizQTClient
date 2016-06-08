@@ -4,20 +4,21 @@
 
 #ifdef USECOCOATOOLBAR
 
-#include <QMacCocoaViewContainer>
 #include <QIcon>
+#include <QtGlobal>
+#include "wizmachelper.h"
 
 class QMenu;
 #ifdef Q_OS_OSX
 Q_FORWARD_DECLARE_OBJC_CLASS(NSMenu);
 #endif
 
-class CWizUserInfoWidgetBaseMac : public QMacCocoaViewContainer
+class CWizUserInfoWidgetBaseMac : public CWizCocoaViewContainer
 {
     Q_OBJECT
 
 public:
-    explicit CWizUserInfoWidgetBaseMac(QWidget *parent = 0);
+    explicit CWizUserInfoWidgetBaseMac(QWidget* parent);
 
 protected:
     QString m_text;

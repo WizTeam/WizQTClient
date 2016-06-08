@@ -10,38 +10,14 @@
 #include "wizmachelper_mm.h"
 #include "wizmactoolbar.h"
 
-
-// NSSearchField delegate
-@interface WizSearchTarget: NSObject
-{
-    CWizSearchWidget* m_pTarget;
-}
-- (id)initWithObject:(CWizSearchWidget*)object;
-- (IBAction)onEditing:(id)sender;
-@end
-
-@implementation WizSearchTarget
-- (id)initWithObject:(CWizSearchWidget*)object
-{
-    self = [super init];
-    m_pTarget = object;
-    return self;
-}
-- (IBAction)onEditing:(id)sender
-{
-    //QString text = WizToQString([sender stringValue]);
-    //m_pTarget->on_search_editFinished(text);
-}
-@end
-
 // WizSearchField
 @interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
 {
-    CWizSearchWidget* m_pSearchWidget;
+    CWizSearchView* m_pSearchWidget;
     BOOL m_isEditing;
 }
 
-- (void)setSearchWidget:(CWizSearchWidget*)widget;
+- (void)setSearchView:(CWizSearchView*)widget;
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent;
 - (BOOL)becomeFirstResponder;
 - (void)textDidBeginEditing:(NSNotification *)aNotification;
@@ -55,7 +31,7 @@
 @end
 
 @implementation WizSearchField
-- (void)setSearchWidget:(CWizSearchWidget*)widget
+- (void)setSearchView:(CWizSearchView*)widget
 {
     m_pSearchWidget = widget;
 }
@@ -230,9 +206,9 @@
 }
 @end
 
-CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
-    : QMacCocoaViewContainer(0, parent)
-    , m_sizeHint(QSize(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
+
+CWizSearchView::CWizSearchView()
+    : m_sizeHint(QSize(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
 {
     // Many Cocoa objects create temporary autorelease objects,
     // so create a pool to catch them.
@@ -240,31 +216,13 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
 
     // Create the NSSearchField, set it on the QCocoaViewContainer.
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
-    [pSearchField setSearchWidget: this];
     [pSearchField setAutoresizesSubviews: YES];
     [pSearchField setAutoresizingMask: NSViewMinYMargin | NSViewWidthSizable];
     [pSearchField setDelegate: pSearchField];
     [pSearchField.window makeFirstResponder:nil];
-//    NSRect f = pSearchField.frame;
-//    pSearchField.frame = f;
+    [pSearchField setSearchView:this];
     setCocoaView(pSearchField);
-
-    WizSearchTarget *bt = [[WizSearchTarget alloc] initWithObject:this];
-    [pSearchField setTarget: bt];
-    [pSearchField setAction: @selector(onEditing:)];
-
-    //NSString* strPlaceHolder = WizToNSString(QObject::tr("Search documents"));
-    //[[pSearchField cell] setPlaceholderString:strPlaceHolder];
-
-    // Use a Qt menu for the search field menu.
-    //QMenu *qtMenu = createMenu(this);
-    //NSMenu *nsMenu = qtMenu->macMenu(0);
-    //[[m_pSearchField cell] setSearchMenuTemplate:nsMenu];
-
-    // Release our reference, since our super class takes ownership and we
-    // don't need it anymore.
-    [pSearchField release];
-
+    //
     // Clean up our pool as we no longer need it.
     [pool release];
 
@@ -272,7 +230,7 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
     m_completer = new WizSuggestCompletionon(this);
 }
 
-void CWizSearchWidget::clear()
+void CWizSearchView::clear()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     QString strText = WizToQString([pSearchField stringValue]);
@@ -283,21 +241,19 @@ void CWizSearchWidget::clear()
     [pSearchField setStringValue:@""];
 }
 
-void CWizSearchWidget::clearFocus()
+void CWizSearchView::clearFocus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
-    QMacCocoaViewContainer::clearFocus();
 }
 
-void CWizSearchWidget::focus()
+void CWizSearchView::focus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
 //    [pSearchField.window makeFirstResponder:pSearchField];
-    [pSearchField selectText:pSearchField];
 }
 
-void CWizSearchWidget::setText(const QString& text)
+void CWizSearchView::setText(const QString& text)
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     NSString* nstring = WizToNSString(text);
@@ -305,55 +261,55 @@ void CWizSearchWidget::setText(const QString& text)
     focus();
 }
 
-QString CWizSearchWidget::currentText()
+QString CWizSearchView::currentText()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     NSString* nstring = [pSearchField stringValue];
     return WizToQString(nstring);
 }
 
-void CWizSearchWidget::setUserSettings(CWizUserSettings* settings)
+void CWizSearchView::setUserSettings(CWizUserSettings* settings)
 {
     m_completer->setUserSettings(settings);
 }
 
-bool CWizSearchWidget::isEditing()
+bool CWizSearchView::isEditing()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     return [pSearchField isEditing];
 }
 
-void CWizSearchWidget::setCompleterUsable(bool usable)
+void CWizSearchView::setCompleterUsable(bool usable)
 {
     m_completer->setUsable(usable);
 }
 
-bool CWizSearchWidget::isCompleterVisible()
+bool CWizSearchView::isCompleterVisible()
 {
     return m_completer->isVisible();
 }
 
-void CWizSearchWidget::showCompleter()
+void CWizSearchView::showCompleter()
 {
     m_completer->autoSuggest();
 }
 
-void CWizSearchWidget::hideCompleter()
+void CWizSearchView::hideCompleter()
 {
     m_completer->hide();
 }
 
-void CWizSearchWidget::moveCompleter(bool up)
+void CWizSearchView::moveCompleter(bool up)
 {
     m_completer->selectSuggestItem(up);
 }
 
-QString CWizSearchWidget::getCurrentCompleterText()
+QString CWizSearchView::getCurrentCompleterText()
 {
     return m_completer->getCurrentText();
 }
 
-void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
+void CWizSearchView::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
 {
     if (m_completer)
     {
@@ -361,31 +317,25 @@ void CWizSearchWidget::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
     }
 }
 
-void CWizSearchWidget::setSizeHint(QSize sizeHint)
+void CWizSearchView::setSizeHint(QSize sizeHint)
 {
     m_sizeHint = sizeHint;
 }
 
-QSize CWizSearchWidget::sizeHint() const
+QSize CWizSearchView::sizeHint() const
 {
     return m_sizeHint;
 }
 
-void CWizSearchWidget::processEvent(QEvent* ev)
-{
-    event(ev);
-}
-
-
 static QString oldSearchText = QString();
 
-void CWizSearchWidget::on_search_editFinished(const QString& strText)
+void CWizSearchView::on_search_editFinished(const QString& strText)
 {
     emit doSearch(strText);
     oldSearchText = strText;
 }
 
-void CWizSearchWidget::on_search_textChanged(const QString& strText)
+void CWizSearchView::on_search_textChanged(const QString& strText)
 {
     if (!oldSearchText.isEmpty() && strText.isEmpty())
     {
@@ -396,19 +346,18 @@ void CWizSearchWidget::on_search_textChanged(const QString& strText)
     emit textEdited(strText);
 }
 
-void CWizSearchWidget::setFocus()
+void CWizSearchView::setFocus()
 {
     focus();
 }
 
-void CWizSearchWidget::clearSearchFocus()
+void CWizSearchView::clearSearchFocus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
-    QMacCocoaViewContainer::clearFocus();
 }
 
-void CWizSearchWidget::on_advanced_buttonClicked()
+void CWizSearchView::on_advanced_buttonClicked()
 {
     clearSearchFocus();
 

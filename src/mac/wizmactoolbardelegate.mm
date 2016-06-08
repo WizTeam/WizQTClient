@@ -2,7 +2,6 @@
 
 #include <QDebug>
 #include <QPixmap>
-#include <QMacCocoaViewContainer>
 
 #include "wizmactoolbardelegate.h"
 #include "wizmachelper_mm.h"
@@ -189,19 +188,19 @@ public:
     }
 };
 
-class CWizMacToolBarWidgetItem : public CWizMacToolBarItem
+class CWizMacToolBarCustomViewItem : public CWizMacToolBarItem
 {
 public:
-    CWizMacToolBarWidgetItem(CWizMacToolBarDelegate* delegate, QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
+    CWizMacToolBarCustomViewItem(CWizMacToolBarDelegate* delegate, CWizCocoaViewContainer* container, const QString& label, const QString& tooltip)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
-        , m_widget(widget)
+        , m_container(container)
         , m_strLabel(label)
         , m_strTooltip(tooltip)
     {
     }
 
-    QMacCocoaViewContainer* widget() const { return m_widget; }
+    NSView* view() { return m_container->cocoaView(); }
 
     virtual NSString* itemIdentifier() const { return m_id; }
 
@@ -215,13 +214,22 @@ public:
         [pItem setPaletteLabel: labelString];
         [pItem setToolTip: tooltipString];
 #if QT_VERSION >= 0x050200
-        NSView *nsview = m_widget->cocoaView();
+        NSView *nsview = m_container->cocoaView();
 #else
-        NSView* nsview = (NSView *)m_widget->cocoaView();
+        NSView* nsview = (NSView *)m_container->cocoaView();
 #endif
+        if (!nsview)
+        {
+            nsview = [NSView new];
+        }
         [pItem setView: nsview];
-        [pItem setMinSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
-        [pItem setMaxSize:NSMakeSize(m_widget->sizeHint().width(), m_widget->sizeHint().height())];
+        //
+        QSize sz = m_container->sizeHint();
+        if (!sz.isEmpty())
+        {
+            [pItem setMinSize:NSMakeSize(m_container->sizeHint().width(), m_container->sizeHint().height())];
+            [pItem setMaxSize:NSMakeSize(m_container->sizeHint().width(), m_container->sizeHint().height())];
+        }
 
         return pItem;
     }
@@ -229,7 +237,7 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    QMacCocoaViewContainer* m_widget;
+    CWizCocoaViewContainer* m_container;
     QString m_strLabel;
     QString m_strTooltip;
 };
@@ -240,7 +248,7 @@ public:
     CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip, int width)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
-        , m_searchField(new CWizSearchWidget())
+        , m_searchField(new CWizSearchView())
         , m_strLabel(label)
         , m_strTooltip(tooltip)
         , m_width(width)
@@ -249,12 +257,12 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    CWizSearchWidget* m_searchField;
+    CWizSearchView* m_searchField;
     QString m_strLabel;
     QString m_strTooltip;
     int m_width;
 public:
-    CWizSearchWidget* widget() const { return m_searchField; }
+    CWizSearchView* widget() const { return m_searchField; }
 
     virtual NSString* itemIdentifier() const
     {
@@ -458,7 +466,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return NULL;
 }
 
-- (CWizSearchWidget*) getSearchWidget
+- (CWizSearchView*) getSearchWidget
 {
     foreach (CWizMacToolBarItem* item, *items)
     {
@@ -468,22 +476,6 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
         }
     }
     //
-    return NULL;
-}
-
-- (NSToolbarItem*) getWidgetToolBarItemByWidget:(QWidget*) widget
-{
-    foreach (CWizMacToolBarItem* item, *items)
-    {
-        if (CWizMacToolBarWidgetItem* widgetItem = dynamic_cast<CWizMacToolBarWidgetItem*> (item))
-        {
-            if (widgetItem->widget() == widget)
-            {
-                NSString* nsId = widgetItem->itemIdentifier();
-                return [self itemIdentifierToItem: nsId];
-            }
-        }
-    }
     return NULL;
 }
 
@@ -504,9 +496,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(pItem);
 }
 
-- (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip
+- (void)addCustomView:(CWizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip
 {
-    items->append(new CWizMacToolBarWidgetItem(self, widget, label, tooltip));
+    items->append(new CWizMacToolBarCustomViewItem(self, container, label, tooltip));
 }
 
 - (void)deleteAllToolBarItem

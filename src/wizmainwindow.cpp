@@ -1680,7 +1680,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
     m_searchWidget->setWidthHint(280);
     m_toolBar->addWidget(m_searchWidget);
 
@@ -1717,7 +1717,7 @@ void MainWindow::initToolBar()
     m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
 
     m_toolBar->addWidget(m_searchWidget);
 

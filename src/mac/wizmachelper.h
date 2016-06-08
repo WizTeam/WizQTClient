@@ -3,6 +3,7 @@
 
 #include <QtGlobal>
 #include <QRect>
+#include <QObject>
 
 #ifdef Q_OS_MAC
 
@@ -22,7 +23,6 @@ enum WizMacDocumentType {
 
 class QMainWindow;
 class QWidget;
-class QMacCocoaViewContainer;
 class QStringList;
 
 float qt_mac_get_scalefactor(QWidget *window);
@@ -66,7 +66,23 @@ void readShareExtensionAccount();
 
 void adjustSubViews(QWidget* wgt);
 
-QMacCocoaViewContainer* createViewContainer(QWidget* wgt);
+
+Q_FORWARD_DECLARE_OBJC_CLASS(NSView);
+
+class CWizCocoaViewContainer : public QObject
+{
+public:
+    CWizCocoaViewContainer();
+    //
+    void setCocoaView(NSView* view);
+    NSView* cocoaView() { return m_view; }
+    //
+    virtual QSize sizeHint() const { return QSize(); }
+private:
+    NSView* m_view;
+};
+
+
 
 #endif // Q_OS_MAC
 
