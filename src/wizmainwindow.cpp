@@ -1029,7 +1029,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
 
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
     //
     //
     if (!editor->isEditing()) {
@@ -2865,12 +2864,6 @@ void MainWindow::on_actionImportFile_triggered()
         m_category->on_action_importFile();
     }
     WizGetAnalyzer().LogAction("MenuBarImportFile");
-}
-
-void MainWindow::on_actionPrint_triggered()
-{
-    getActiveEditor()->printDocument();
-    WizGetAnalyzer().LogAction("MenuBarPrint");
 }
 
 void MainWindow::on_actionPrintMargin_triggered()

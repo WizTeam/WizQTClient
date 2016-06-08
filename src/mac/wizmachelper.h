@@ -42,8 +42,6 @@ void wizMacRegisterSystemService();
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
-QString wizSystemClipboardData(QString& orignUrl);
-
 bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml);
 
 //path for yosemite

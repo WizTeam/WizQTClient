@@ -202,7 +202,6 @@ public:
     //
     void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
-    void printDocument();
     void shareNoteByEmail();
     void shareNoteByLink();
     //
