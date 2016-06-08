@@ -39,7 +39,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_iconArraw.addFile(strIconPath);
 
     // setup menu
-    m_menuMain = new QMenu(this);
+    m_menuMain = new QMenu(NULL);
 
     QAction* actionAccountInfo = new QAction(tr("View account info..."), m_menuMain);
     connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
@@ -92,7 +92,8 @@ void CWizUserInfoWidget::resetUserInfo()
     if (info.strDisplayName.isEmpty()) {
         setText(::WizGetEmailPrefix(m_db.GetUserId()));
     } else {
-        QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
+        QString strName = info.strDisplayName;
+        //QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
         setText(strName);
     }
     //
@@ -130,13 +131,13 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 void CWizUserInfoWidget::on_action_accountSettings_triggered()
 {    
+    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
 #ifndef BUILD4APPSTORE
     QString extInfo = CommonApiEntry::appstoreParam(false);
     QString strUrl = CommonApiEntry::makeUpUrlFromCommand("user_info",
                                                               WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window);
 #else
-    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
     CWizIAPDialog* dlg = window->iapDialog();
     dlg->loadUserInfo();
     dlg->exec();
@@ -191,7 +192,8 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     if (ok) {
         AvatarHost::reload(m_db.GetUserId());
     } else {
-        QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
+        MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+        QMessageBox::warning(window, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
 
     uploader->deleteLater();

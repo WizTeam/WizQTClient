@@ -38,7 +38,7 @@ class CWizOptionsWidget;
 class CWizIAPDialog;
 class CWizTemplatePurchaseDialog;
 
-class CWizSearchWidget;
+class CWizSearchView;
 class CWizSearcher;
 class CWizSearchIndexer;
 
@@ -197,7 +197,7 @@ private:
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    CWizSearchWidget* m_searchWidget;
+    CWizSearchView* m_searchWidget;
 
     CWizMobileFileReceiver *m_mobileFileReceiver;    
 
@@ -281,7 +281,6 @@ public Q_SLOTS:
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
     void on_actionImportFile_triggered();
-    void on_actionPrint_triggered();
     void on_actionPrintMargin_triggered();
 
     // menu editing

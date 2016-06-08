@@ -8,7 +8,7 @@
 namespace Ui {
 class CWizMarkdownTemplateDialog;
 }
-
+/*
 class CWizTemplateItem : public QListWidgetItem
 {
 public:
@@ -35,6 +35,7 @@ private:
     bool m_isCustom;
     QString m_fileName;
 };
+*/
 
 class CWizMarkdownTemplateDialog : public QDialog
 {

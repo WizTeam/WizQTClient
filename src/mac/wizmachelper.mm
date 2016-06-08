@@ -7,12 +7,7 @@
 #include <QSize>
 #include <QXmlStreamReader>
 #include <QStringList>
-//#include <QWebPage>
-//#include <QWebElement>
-//#include <QWebElementCollection>
-//#include <QWebFrame>
 #include <QEventLoop>
-#include <QMacCocoaViewContainer>
 #include <QDebug>
 #include "html/wizhtmlcollector.h"
 
@@ -458,98 +453,6 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
 @end
 
-#if 0
-bool processWebImageUrl(QString& strHtml, const QString& strUrl)
-{
-    QWebPage page;
-    QWebFrame* frame = page.mainFrame();
-    QUrl webUrl(strUrl);
-    frame->setHtml(strHtml, webUrl);
-    QWebElement document = frame->documentElement();
-    QWebElementCollection collection = document.findAll("img");
-    foreach (QWebElement paraElement, collection) {
-        QString strSrc = paraElement.attribute("src");
-        QUrl elemUrl(strSrc);
-//        qDebug() << "origin image src :  "  << strSrc;
-        if (elemUrl.scheme().isEmpty())
-        {
-            if (strSrc.left(2) == "//")
-            {
-                elemUrl.setScheme(webUrl.scheme());
-            }
-            else if (strSrc.left(1) == "/")
-            {
-                elemUrl.setScheme(webUrl.scheme());
-                elemUrl.setHost(webUrl.host());
-            }
-            else if (strSrc.left(3) == "../")
-            {
-                elemUrl.setUrl(webUrl.scheme() + "://"+ webUrl.host() + strSrc.remove(0, 2));
-            }
-            else if (elemUrl.host().isEmpty())
-            {
-                elemUrl.setHost(webUrl.host());
-                elemUrl.setScheme(webUrl.scheme());
-            }
-            else
-            {
-                elemUrl.setScheme(webUrl.scheme());
-            }
-//            qDebug() << "after reset url scheme , url " << elemUrl.toString();
-        }
-        paraElement.setAttribute("src", elemUrl.toString());
-//        strSrc = paraElement.attribute("src");te
-//        qDebug() << "after change scheme image src :  "  << strSrc;
-    }
-    strHtml = document.toInnerXml();
-
-    return true;
-}
-
-
-QString wizSystemClipboardData(QString& orignUrl)
-{
-    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-
-    NSArray *typeArray = [pasteboard types];
-//    NSLog(@"clipboard types : %@", typeArray);
-//    NSString* htmlType = @"public.html";
-//    if ([typeArray containsObject:htmlType])
-//    {
-//        NSData* data = [pasteboard dataForType:htmlType];
-
-//        WebArchive *archive = [[WebArchive alloc] initWithData:data];
-//        WebResource *resource = archive.mainResource;
-//        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
-//        [archive release];
-
-//        NSString* url = [[resource URL] absoluteString];
-//        orignUrl = WizToQString(url);
-//    }
-    NSString *type = @"com.apple.webarchive";
-    if ([typeArray containsObject:type])
-    {
-        NSData* data = [pasteboard dataForType:type];
-
-        WebArchive *archive = [[WebArchive alloc] initWithData:data];
-        WebResource *resource = archive.mainResource;
-        NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
-    //        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
-    //        NSLog(@"%@", string);
-        [archive release];
-
-        QString strHtml = WizToQString(string);
-        NSString* url = [[resource URL] absoluteString];
-        orignUrl = WizToQString(url);
-        processWebImageUrl(strHtml, orignUrl);
-        return strHtml;
-    }
-
-    return "";
-}
-#endif
-
-
 bool wizIsYosemiteFilePath(const QString& strPath)
 {
     return strPath.indexOf("file:///.file/id") == 0 || strPath.indexOf("///.file/id") == 0;
@@ -917,13 +820,6 @@ void adjustSubViews(QWidget* wgt)
 
 
 
-QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
-{
-    NSView* wgtView = (NSView *) wgt->winId();
-    QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
-    return container;
-}
-
 
 int getSystemMinorVersion()
 {
@@ -1035,3 +931,16 @@ void readShareExtensionAccount()
 //    qDebug() << "user guid : " << WizToQString(nsUserGUID);
 //    qDebug() << "mywiz : " << WizToQString(nsMyWiz);
 }
+
+
+CWizCocoaViewContainer::CWizCocoaViewContainer()
+    : m_view(nil)
+{
+
+}
+void CWizCocoaViewContainer::setCocoaView(NSView* view)
+{
+    m_view = view;
+    [m_view retain];
+}
+

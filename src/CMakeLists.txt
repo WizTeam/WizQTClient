@@ -473,8 +473,10 @@ if(UNIX)
 
 
         if(NOT APPSTORE_BUILD)
-            add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+            if (CMAKE_BUILD_TYPE STREQUAL "Release")
+                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+                    COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
+            endif()
         endif()
 
     elseif(NOT APPLE)

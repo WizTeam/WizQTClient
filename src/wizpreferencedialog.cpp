@@ -9,7 +9,6 @@
 #include "utils/pathresolve.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
-#include "widgets/wizMarkdownTemplateDialog.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
 

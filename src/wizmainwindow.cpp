@@ -1029,7 +1029,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
 
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(true);
     m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
     //
     //
     if (!editor->isEditing()) {
@@ -1680,7 +1679,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
     m_searchWidget->setWidthHint(280);
     m_toolBar->addWidget(m_searchWidget);
 
@@ -1717,7 +1716,7 @@ void MainWindow::initToolBar()
     m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
 
     m_toolBar->addWidget(m_searchWidget);
 
@@ -2865,12 +2864,6 @@ void MainWindow::on_actionImportFile_triggered()
         m_category->on_action_importFile();
     }
     WizGetAnalyzer().LogAction("MenuBarImportFile");
-}
-
-void MainWindow::on_actionPrint_triggered()
-{
-    getActiveEditor()->printDocument();
-    WizGetAnalyzer().LogAction("MenuBarPrint");
 }
 
 void MainWindow::on_actionPrintMargin_triggered()
