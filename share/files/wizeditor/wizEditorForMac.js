@@ -19487,7 +19487,7 @@ var todoCore = {
     closeDocument: function closeDocument() {
         var html = patchForReader.modifyDoc();
 
-        if (!ENV.client.type.isIOS) {
+        if (!ENV.client.type.isIOS && !ENV.client.type.isMac) {
             todoRoute.saveDoc(html, '');
         }
 
@@ -19728,9 +19728,7 @@ function routeForMac() {
         return window.WizQtEditor.currentNoteHtml;
     }
 
-    function saveDoc(html, resources) {
-        window.WizQtEditor.saveHtmlToCurrentNote(html, resources);
-    }
+    function saveDoc(html, resources) {}
 
     function checkDocLock(callback) {
         window.WizQtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);

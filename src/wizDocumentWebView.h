@@ -251,7 +251,7 @@ private:
     void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
     //
     void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force, const std::function<void(const QVariant &)> callback);
-    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);    
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -289,7 +289,7 @@ private:
 
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
     CWizDocumentWebViewSaverThread* m_docSaverThread;
-
+    //
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
 
     CWizSearchReplaceWidget* m_searchReplaceWidget;

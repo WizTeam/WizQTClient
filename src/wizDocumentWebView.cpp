@@ -1031,49 +1031,33 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
 
 }
 
-void CWizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
+void CWizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force, std::function<void(const QVariant &)> callback)
 {
-    Q_UNUSED(data);
     Q_UNUSED(force);
+    //
+    const WIZDOCUMENTDATA doc = data;
 
     QString strScript = QString("WizReader.todo.closeDocument();");
-    page()->runJavaScript(strScript);
-}
-
-QString escapeJavascriptString(const QString & str)
-{
-    QString out;
-    QRegExp rx("(\\r|\\n|\\\\|\"|\')");
-    int pos = 0, lastPos = 0;
-
-    while ((pos = rx.indexIn(str, pos)) != -1)
-    {
-        out += str.mid(lastPos, pos - lastPos);
-
-        switch (rx.cap(1).at(0).unicode())
+    page()->runJavaScript(strScript, [=](const QVariant& vRet) {
+        //
+        QString strHtml = vRet.toString();
+        //
+        if (!strHtml.isEmpty())
         {
-        case '\r':
-            out += "\\r";
-            break;
-        case '\n':
-            out += "\\n";
-            break;
-        case '\\':
-            out += "\\\\";
-            break;
-        case '"':
-            out += "\\\"";
-            break;
-        case '\'':
-            out += "\"";
-            break;
+            if (!doc.strGUID.isEmpty())
+            {
+                QString strFileName = m_mapFile.value(doc.strGUID);
+                if (!strFileName.isEmpty())
+                {
+                    m_docSaverThread->save(doc, strHtml, strFileName, 0);
+                }
+            }
         }
-        pos++;
-        lastPos = pos;
-    }
-    out += str.mid(lastPos);
-    return out;
+        //
+        callback(true);
+    });
 }
+
 
 void CWizDocumentWebView::applySearchKeywordHighlight()
 {
@@ -1271,8 +1255,7 @@ void CWizDocumentWebView::trySaveDocument(const WIZDOCUMENTDATA& data, bool forc
     }
     else
     {
-        saveReadingViewDocument(data, force);
-        callback(QVariant(false));
+        saveReadingViewDocument(data, force, callback);
     }
 }
 
@@ -2000,6 +1983,7 @@ void CWizDocumentWebView::OnSelectionChange(const QString& currentStyle)
 {
     Q_EMIT statusChanged(currentStyle);
 }
+
 
 QNetworkDiskCache* CWizDocumentWebView::networkCache()
 {
