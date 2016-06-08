@@ -26,7 +26,7 @@
             //
             try {
                 initForWebEngine();
-            } catch (erro) {
+            } catch (error) {
                 console.error(error);
             }
         });

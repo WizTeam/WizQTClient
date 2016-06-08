@@ -2134,7 +2134,8 @@ var WizEditor = {
         split: _tableUtilsTableCore2['default'].split
     },
     todo: {
-        setTodo: _todoUtilsTodoCore2['default'].setTodo
+        setTodo: _todoUtilsTodoCore2['default'].setTodo,
+        setTodoInfo: _todoUtilsTodoCore2['default'].setTodoInfo
     },
     nightMode: {
         on: function on(color, bgColor, brightness) {
@@ -2368,6 +2369,7 @@ var WizReader = {
         }
     },
     todo: {
+        setTodoInfo: _todoUtilsTodoCore2['default'].setTodoInfo,
         closeDocument: _todoUtilsTodoCore2['default'].closeDocument,
         onCheckDocLock: _todoUtilsTodoCore2['default'].onCheckDocLock
     },
@@ -3044,7 +3046,7 @@ var amendEvent = {
         /**
          * 其他功能键一概忽略
          */
-        if (_amendUtilsAmendExtend2['default'].checkNonTxtKey(e)) {
+        if (_commonUtils2['default'].checkNonTxtKey(e)) {
             return;
         }
 
@@ -3173,8 +3175,9 @@ var amendEvent = {
                 } else {
                     _domUtilsDomExtend2['default'].before(endDom.childNodes[endOffset], nSpan, false);
                 }
-            } else if (_domUtilsDomExtend2['default'].isTag(endDom, ['td', 'th'])) {
+            } else if (_domUtilsDomExtend2['default'].isTag(endDom, ['td', 'th']) || _domUtilsDomExtend2['default'].hasClass(endDom, _commonConst2['default'].CLASS.TODO_MAIN)) {
                 //如果光标处于 表格内部，不能直接把 nSpan 放到 td 的 后面
+                //也不能把 nSpan 放到 todoList Main 的后面
                 if (_domUtilsDomExtend2['default'].isEmptyDom(endDom)) {
                     endDom.innerHTML = '';
                 }
@@ -3301,7 +3304,7 @@ var amendEvent = {
         /**
          * 其他功能键一概忽略
          */
-        if (_amendUtilsAmendExtend2['default'].checkNonTxtKey(e)) {
+        if (_commonUtils2['default'].checkNonTxtKey(e)) {
             return;
         }
 
@@ -4646,27 +4649,6 @@ _amendBase2['default'].add2SelectedAmendDoms = function (amendDoms, dom) {
     }
 };
 /**
- * 检查 是否为有效的键盘输入内容
- * @param e
- * @returns {boolean}
- */
-_amendBase2['default'].checkNonTxtKey = function (e) {
-    var keyCode = e.keyCode || e.which;
-    if (e.ctrlKey || e.metaKey) {
-        return true;
-    }
-    return !(keyCode >= 48 && keyCode <= 57 || //0-9
-    keyCode >= 65 && keyCode <= 90 || //a-z
-    keyCode >= 96 && keyCode <= 107 || //小键盘0-9 * +
-    keyCode >= 109 && keyCode <= 111 || //小键盘 / * -
-    keyCode >= 186 && keyCode <= 192 || //标点符号
-    keyCode >= 219 && keyCode <= 222 || //标点符号
-    keyCode == 229 || keyCode === 0 || //中文
-    keyCode == 13 || //Enter
-    keyCode == 32) //空格
-    ;
-};
-/**
  * 创建用于 修订内容中 封装 img 的 span
  * @param type
  * @param user
@@ -5653,13 +5635,17 @@ var CONST = {
         TABLE_MOVING: 'wiz-table-moving',
         TODO_ACCOUNT: 'wiz-todo-account',
         TODO_AVATAR: 'wiz-todo-avatar',
-        TODO_CHECK_IMG: 'wiz-todo-img',
+        TODO_CHECKBOX: 'wiz-todo-checkbox',
+        TODO_CHECK_IMG_OLD: 'wiz-todo-img',
         TODO_DATE: 'wiz-todo-dt',
         TODO_LAYER: 'wiz-todo-layer',
-        TODO_LABEL: 'wiz-todo-label',
-        TODO_LABEL_CHECK: 'wiz-todo-label-checked',
-        TODO_LABEL_UNCHECK: 'wiz-todo-label-unchecked',
-        TODO_TAIL: 'wiz-todo-tail', //新版本 todoList 取消此元素
+        TODO_MAIN: 'wiz-todo-main',
+        TODO_LABEL_OLD: 'wiz-todo-label',
+        TODO_CHECKED: 'wiz-todo-checked',
+        TODO_UNCHECKED: 'wiz-todo-unchecked',
+        TODO_CHECKED_OLD: 'wiz-todo-label-checked',
+        TODO_UNCHECKED_OLD: 'wiz-todo-label-unchecked',
+        TODO_TAIL_OLD: 'wiz-todo-tail', //新版本 todoList 取消此元素
         TODO_USER_AVATAR: 'wiz-todo-avatar-',
         TODO_USER_INFO: 'wiz-todo-completed-info'
     },
@@ -5694,7 +5680,8 @@ var CONST = {
         TABLE_RANGE_BORDER: 'wiz-table-range-border',
         TABLE_ROW_LINE: 'wiz-table-row-line',
         TABLE_COL_LINE: 'wiz-table-col-line',
-        TODO_STYLE: 'wiz_todo_style_id',
+        TODO_STYLE: 'wiz_todo_style',
+        TODO_STYLE_OLD: 'wiz_todo_style_id',
         TODO_AVATAR_STYLE: 'wiz_todo_style_avatar_',
         WIZ_DEFAULT_STYLE: 'wiz_custom_css'
     },
@@ -6311,7 +6298,7 @@ var historyUtils = {
             }
             //                console.log(snap.content);
             if (canSave.add) {
-                //console.log('save snap.add.... stack: [' + historyUtils.stack.length + ']  index: [' + historyUtils.stackIndex + ']  keepIndex: [' + !!keepIndex + ']');
+                // console.log('save snap.add.... stack: [' + historyUtils.stack.length + ']  index: [' + historyUtils.stackIndex + ']  keepIndex: [' + !!keepIndex + ']');
                 historyUtils.stack.push(snap);
                 if (!keepIndex) {
                     historyUtils.stackIndex++;
@@ -6508,6 +6495,8 @@ var LANG = {},
     userLangType = 'en',
     userLang = {};
 LANG['en'] = {
+    version: 'en',
+    Month: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Agu.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'],
     Amend: {
         Edit: 'Inserted contents',
         Delete: 'Deleted contents',
@@ -6533,7 +6522,7 @@ LANG['en'] = {
         SetCellBg: 'Color Fill',
         CellAlign: 'Arrange',
         DeleteTable: 'Delete Table',
-        DistrbuteCols: 'Average Column Width'
+        DistributeCols: 'Average Column Width'
     },
     Err: {
         Copy_Null: 'Copy of deleted changes not allowed',
@@ -6541,6 +6530,12 @@ LANG['en'] = {
     }
 };
 LANG['zh-cn'] = {
+    version: 'zh-cn',
+    Date: {
+        Year: '年',
+        Month: '月',
+        Day: '日'
+    },
     Amend: {
         Edit: '插入了内容',
         Delete: '删除了内容',
@@ -6566,7 +6561,7 @@ LANG['zh-cn'] = {
         SetCellBg: '单元格底色',
         CellAlign: '单元格对齐方式',
         DeleteTable: '删除表格',
-        DistrbuteCols: '平均分配各列'
+        DistributeCols: '平均分配各列'
     },
     Err: {
         Copy_Null: '无法复制已删除的内容',
@@ -6574,6 +6569,12 @@ LANG['zh-cn'] = {
     }
 };
 LANG['zh-tw'] = {
+    version: 'zh-tw',
+    Date: {
+        Year: '年',
+        Month: '月',
+        Day: '日'
+    },
     Amend: {
         Edit: '插入了內容',
         Delete: '刪除了內容',
@@ -6599,7 +6600,7 @@ LANG['zh-tw'] = {
         SetCellBg: '儲存格底色',
         CellAlign: '儲存格對齊方式',
         DeleteTable: '刪除表格',
-        DistrbuteCols: '平均分配各列'
+        DistributeCols: '平均分配各列'
     },
     Err: {
         Copy_Null: '無法複製已刪除的內容',
@@ -6835,6 +6836,27 @@ if (!Array.prototype.indexOf) {
  * 常用基本工具包
  */
 var utils = {
+    /**
+     * 检查 是否为有效的键盘输入内容
+     * @param e
+     * @returns {boolean}
+     */
+    checkNonTxtKey: function checkNonTxtKey(e) {
+        var keyCode = e.keyCode || e.which;
+        if (e.ctrlKey || e.metaKey) {
+            return true;
+        }
+        return !(keyCode >= 48 && keyCode <= 57 || //0-9
+        keyCode >= 65 && keyCode <= 90 || //a-z
+        keyCode >= 96 && keyCode <= 107 || //小键盘0-9 * +
+        keyCode >= 109 && keyCode <= 111 || //小键盘 / * -
+        keyCode >= 186 && keyCode <= 192 || //标点符号
+        keyCode >= 219 && keyCode <= 222 || //标点符号
+        keyCode == 229 || keyCode === 0 || //中文
+        keyCode == 13 || //Enter
+        keyCode == 32) //空格
+        ;
+    },
     /**
      * 判断 obj 是否为 数组
      * @param obj
@@ -7145,12 +7167,27 @@ var utils = {
             br.insertAfter(target);
             target.remove();
         });
-        //处理 todolist
+        //处理 旧版本 todolist
         el.find('label.wiz-todo-label').each(function (index) {
             var target = $(this);
             //检测如果是遗留的 label 则不进行特殊处理
             var img = $('.wiz-todo-img', this);
             if (img.length === 0) {
+                return;
+            }
+
+            var span = $("<span></span>");
+            //避免 父节点是 body 时导致笔记阅读异常
+            span.text(htmlUnEncode(target[0].outerHTML));
+            span.insertAfter(target);
+            target.remove();
+        });
+        //处理 todolist
+        el.find('.wiz-todo-layer').each(function (index) {
+            var target = $(this);
+            //检测如果是遗留的 todoList 则不进行特殊处理
+            var checkbox = $('.wiz-todo-checkbox', this);
+            if (checkbox.length === 0) {
                 return;
             }
 
@@ -7211,6 +7248,8 @@ var _const = require('./const');
 
 var _const2 = _interopRequireDefault(_const);
 
+var TodoStyleMap = {};
+
 var ImgFile = {
     todoChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RjY1OTU4MUZCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RjY1OTU4MjBCRjk3MTFFM0JENDdFMDk4NDNCMkZDMTQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpGNjU5NTgxREJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpGNjU5NTgxRUJGOTcxMUUzQkQ0N0UwOTg0M0IyRkMxNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqkphX0AAAJZSURBVHjaYvz//z/DQAImhgEGLNu2bYNzCj+7jpgQaAdiUNz/Z4EKqAJxRz/vbhcgzUeBwSBDE4AhuQiPh6cCcQY8CoBYHYhPALEAFXxWiMdyViCeD8TRSGLdIAe0QS3/BcSlQLwEaMg7Kgc5BxCvAmJfJLGlQFwOcoALVKAMaPEkGsQ3LxBvBGJHJLF9QJwESwOwOF9MA8uFgRiUzcyQxM4AcRA0xBlYkCSoHeySQLwbiLWRxO4AsRcQf0ROhLQAikC8B4iVkMReA7EnlCZYDtQDcT+Z5QTIx0fQLP8CTYB3MEpCHJY3QNlyQBwDxN+JtNwEiHdA4x4GQHHtD8QniS0JxZHYoMSyF4hFiLDcAZq6hdEKpiSoONFFcS6aBksgPgbEKngs94Gmdl408SpofiepLvgL9TlyfIGK6uNAbIFFfSQQrwNiTjTxLlDxjiwALOoZia2MPkJT7EckMRFoyAQhiYHK9CXQYpYBrZSrwGJuPym14R2oZX+RxEC+XA3E+aBiFIinYTEDXsqh+b4Vqo9gLkA3LBdqEbKjJ+BQfxq5lMOSHshqD0yHYkIAFGLeaNFGtQZJLr6shKuUo6YDsOUMGPiMq5SjdpMMW84AxXUArlKOFm1C5JxBsJQjqlVMhh5YzuAnVMrRygEMROYKogDj1q1bYQUGI42b4ij2eHl5YaQBIRpaLoQvEX6CsmNp6IAUpIYJhgP2INVeeUAsSEWLBaFmNkP5u7A5oBqIPwAxGxBPhDZO/1MJv4OayQa1oxqbA25A6/l10FKN2uAz1GwLqF0oACDAAGu/mbMal6iXAAAAAElFTkSuQmCC',
     todoUnChecked: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMy1jMDExIDY2LjE0NTY2MSwgMjAxMi8wMi8wNi0xNDo1NjoyNyAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNiAoV2luZG93cykiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6RDcyODY1Q0NCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6RDcyODY1Q0RCRjk2MTFFMzhGNTBEODZBNTIzNzhDQjQiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDpENzI4NjVDQUJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDpENzI4NjVDQkJGOTYxMUUzOEY1MEQ4NkE1MjM3OENCNCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PpXYwTEAAAD5SURBVHjaYvz//z/DQAImhgEGA+4Alm3bttHdUi8vL4wQUAXitUD8EYj/Uxl/hJqtijUEgFgdiE8AsQCNPMwHxEFA7ATEFkB8Ez0NtEEt/wXE+UAsDMSMVMJCUDN/Qe1owxYCLlB2GRBPorLv30PN5ATiDiB2w5YL+KDsxTRMd7OhNA++bPiOhg54N1oQjTpg1AGjDhh1wKgDRh0w6oAh4QAhGtojhM8Bn6DsWBo6IAVKf8HmgD1QdhcQ5wGxIBUtFoSa2Qzl78LmgGog/gDEbEA8EdqApFav6B3UTDaoHdXYHHAD2mNZB8SfaRD8n6FmW0DtQgEAAQYAS2BO8CD/bL4AAAAASUVORK5CYII='
@@ -7227,7 +7266,9 @@ var TmpEditorStyle = {
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
     common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}',
-    todoList: '.wiz-todo-label {padding-left: 12px;position: relative;line-height:30px;/*display: inline-block; padding-top: 7px; padding-bottom: 6px;*/}' + '.wiz-todo-label-checked { /*text-decoration: line-through;*/ color: #666;}' + '.wiz-todo-label-unchecked {text-decoration: initial;}' + '.wiz-todo-label-checked .wiz-todo-img {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-label-unchecked .wiz-todo-img {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-img {border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 44px; display: inline-block;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' + '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
+    todoList: '.wiz-todo-main {padding-left: 12px;position: relative;line-height:30px;/*display: inline-block; padding-top: 7px; padding-bottom: 6px;*/}' + '.wiz-todo-checked { /*text-decoration: line-through;*/ color: #666;}' + '.wiz-todo-unchecked {text-decoration: initial;}' + '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-checkbox {border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 44px;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' +
+    //单独出来主要为了兼容旧的 todoList
+    'input.wiz-todo-avatar {position:relative;top:-4px;}' + '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
 },
     ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' + '.wiz-img-resize-handle {width:5px;height:5px;}' + '.wiz-img-resize-handle.lt {cursor: nw-resize;}' + '.wiz-img-resize-handle.tm {cursor: n-resize;}' + '.wiz-img-resize-handle.rt {cursor: ne-resize;}' + '.wiz-img-resize-handle.lm {cursor: w-resize;}' + '.wiz-img-resize-handle.rm {cursor: e-resize;}' + '.wiz-img-resize-handle.lb {cursor: sw-resize;}' + '.wiz-img-resize-handle.bm {cursor: s-resize;}' + '.wiz-img-resize-handle.rb {cursor: se-resize;}',
     TableContainerStyle = '.' + _const2['default'].CLASS.TABLE_CONTAINER + ' {}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' + '.' + _const2['default'].CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
@@ -7307,18 +7348,90 @@ var WizStyle = {
         }
     },
     insertTodoStyle: function insertTodoStyle(isForced) {
+        WizStyle.removeTodoOldStyle();
         var s = _env2['default'].doc.getElementById(_const2['default'].ID.TODO_STYLE);
         if (isForced || !s) {
             replaceStyleById(_const2['default'].ID.TODO_STYLE, DefaultStyle.todoList, false);
         }
+        WizStyle.removeUnUsedTodoStyle();
+    },
+    removeTodoOldStyle: function removeTodoOldStyle() {
+        var style = _env2['default'].doc.getElementById(_const2['default'].ID.TODO_STYLE_OLD);
+        if (style) {
+            style.parentNode.removeChild(style);
+        }
     },
     removeTodoStyle: function removeTodoStyle() {
+        WizStyle.removeTodoOldStyle();
         var style = _env2['default'].doc.getElementById(_const2['default'].ID.TODO_STYLE);
         if (style) {
             style.parentNode.removeChild(style);
         }
+
+        var styleList = _env2['default'].doc.querySelectorAll('style'),
+            guid,
+            i;
+        for (i = styleList.length - 1; i >= 0; i--) {
+            style = styleList[i];
+            if (style.id && style.id.indexOf(_const2['default'].ID.TODO_AVATAR_STYLE) === 0) {
+                guid = getGuidFromStyleId(style.id);
+                TodoStyleMap[guid] = style.innerHTML;
+                style.parentNode.removeChild(style);
+            }
+        }
+    },
+    removeUnUsedTodoStyle: function removeUnUsedTodoStyle(guid) {
+        var styleList = _env2['default'].doc.querySelectorAll('style'),
+            style,
+            sId,
+            sClass,
+            userAvatar,
+            i;
+
+        if (guid) {
+            sId = _const2['default'].ID.TODO_AVATAR_STYLE + guid;
+            sClass = _const2['default'].CLASS.TODO_USER_AVATAR + guid;
+            userAvatar = _env2['default'].doc.querySelector('.' + sClass);
+            style = _env2['default'].doc.getElementById(sId);
+            if (style && !userAvatar) {
+                TodoStyleMap[guid] = style.innerHTML;
+                style.parentNode.removeChild(style);
+            }
+            return;
+        }
+
+        for (i = styleList.length - 1; i >= 0; i--) {
+            style = styleList[i];
+            sId = style.id;
+            if (sId && sId.indexOf(_const2['default'].ID.TODO_AVATAR_STYLE) === 0) {
+                guid = getGuidFromStyleId(sId);
+                if (!_env2['default'].doc.querySelector('.' + _const2['default'].CLASS.TODO_USER_AVATAR + guid)) {
+                    TodoStyleMap[guid] = style.innerHTML;
+                    style.parentNode.removeChild(style);
+                }
+            }
+        }
+    },
+    /**
+     * 专门用于 redo / undo 操作时，恢复 avatar 样式处理
+     */
+    restoreUserAvatarStyle: function restoreUserAvatarStyle() {
+        var guid, styleId;
+        for (guid in TodoStyleMap) {
+            if (TodoStyleMap.hasOwnProperty(guid)) {
+                styleId = _const2['default'].ID.TODO_AVATAR_STYLE + guid;
+                if (!_env2['default'].doc.querySelector('#' + styleId) && _env2['default'].doc.querySelector('.' + _const2['default'].CLASS.TODO_USER_AVATAR + guid)) {
+                    replaceStyleById(styleId, TodoStyleMap[guid], false);
+                }
+            }
+        }
     }
 };
+
+function getGuidFromStyleId(styleId) {
+    var guidReg = new RegExp('^' + _const2['default'].ID.TODO_AVATAR_STYLE + '(.*)$', 'i');
+    return styleId.replace(guidReg, '$1');
+}
 
 exports['default'] = WizStyle;
 module.exports = exports['default'];
@@ -17225,7 +17338,7 @@ function createMenu() {
             type: _subType.list,
             data: [{
                 type: _commonConst2['default'].TYPE.TABLE.DISTRIBUTE_COLS,
-                name: _commonLang2['default'].Table.DistrbuteCols,
+                name: _commonLang2['default'].Table.DistributeCols,
                 exClass: '',
                 isSplit: false
             }, {
@@ -19882,7 +19995,7 @@ var todoRoute = null;
 var curTouchTarget = null;
 
 var patchForReader = {
-    curCheckImg: null,
+    curCheckbox: null,
     docLockChecked: false,
     modifiedIdList: {},
     htmlToSave: '',
@@ -19937,8 +20050,8 @@ var patchForReader = {
             i,
             id,
             checked,
-            checkImg,
-            label;
+            checkbox,
+            main;
 
         iframeDocument.open("text/html", "replace");
         iframeDocument.write(html);
@@ -19948,20 +20061,20 @@ var patchForReader = {
         _commonEnv2['default'].win = iframe.contentWindow;
 
         //在 iframe 内处理 html
-        _commonWizStyle2['default'].insertTodoStyle();
-        _todoUtils2['default'].fixOldTodo();
+        _todoUtils2['default'].oldPatch.fixOldTodo();
         for (i = idList.length - 1; i >= 0; i--) {
             id = idList[i].id;
             checked = idList[i].checked;
-            checkImg = _commonEnv2['default'].doc.getElementById(id);
-            if (checkImg) {
-                label = _todoUtils2['default'].getLabelFromChild(checkImg);
-                _todoUtils2['default'].check(label, checked);
+            checkbox = _commonEnv2['default'].doc.getElementById(id);
+            if (checkbox) {
+                main = _todoUtils2['default'].getMainFromChild(checkbox);
+                _todoUtils2['default'].check(main, checked);
                 if (!isPersonal) {
-                    _todoUtils2['default'].addUserInfo(label, checked, id, todoRoute);
+                    _todoUtils2['default'].addUserInfo(main, checked, id, todoRoute);
                 }
             }
         }
+        _todoUtils2['default'].checkTodoStyle(true);
 
         //获取处理后的 html
         html = _domUtilsDomExtend2['default'].getContentHtml();
@@ -19977,24 +20090,24 @@ function beforeCheckTodo(e) {
     if (!todoRoute.hasPermission()) {
         return null;
     }
-    var checkImg = e.target;
-    if (!_domUtilsDomExtend2['default'].hasClass(checkImg, _commonConst2['default'].CLASS.TODO_CHECK_IMG)) {
+    var checkbox = e.target;
+    if (!_domUtilsDomExtend2['default'].hasClass(checkbox, _commonConst2['default'].CLASS.TODO_CHECKBOX)) {
         return null;
     }
 
-    if (_commonEnv2['default'].readonly && !!patchForReader.curCheckImg) {
-        return;
+    if (_commonEnv2['default'].readonly && !!patchForReader.curCheckbox) {
+        return null;
     }
     if (!_commonEnv2['default'].readonly || patchForReader.docLockChecked) {
-        checkTodo(checkImg, e);
+        checkTodo(checkbox, e);
     } else {
-        patchForReader.curCheckImg = checkImg;
+        patchForReader.curCheckbox = checkbox;
         todoRoute.checkDocLock("onCheckDocLock");
     }
 }
 
-function checkTodo(checkImg, e) {
-    var result = _todoUtils2['default'].checkTodo(checkImg, todoRoute);
+function checkTodo(checkbox, e) {
+    var result = _todoUtils2['default'].checkTodo(checkbox, todoRoute);
     if (result) {
         patchForReader.addModifiedId(result);
         if (e) {
@@ -20008,6 +20121,7 @@ var _event = {
     bind: function bind() {
         _event.unbind();
         _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
+        _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
 
         if (_commonEnv2['default'].client.type.isIOS || _commonEnv2['default'].client.type.isAndroid) {
             _commonEnv2['default'].event.add(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onTouchEnd);
@@ -20021,17 +20135,23 @@ var _event = {
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_END, _event.handler.onTouchEnd);
         _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.ON_TOUCH_START, _event.handler.onTouchStart);
+        _commonEnv2['default'].event.remove(_commonConst2['default'].EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
     handler: {
+        afterRestoreHistory: function afterRestoreHistory() {
+            //恢复历史后，需要检查 todoList 的 style 样式
+            _todoUtils2['default'].checkTodoStyle(false);
+            _commonWizStyle2['default'].restoreUserAvatarStyle();
+        },
         onClick: function onClick(e) {
             beforeCheckTodo(e);
         },
         onCheckDocLock: function onCheckDocLock(cancel, needCallAgain) {
             patchForReader.docLockChecked = !needCallAgain;
             if (!cancel) {
-                checkTodo(patchForReader.curCheckImg);
+                checkTodo(patchForReader.curCheckbox);
             }
-            patchForReader.curCheckImg = null;
+            patchForReader.curCheckbox = null;
         },
         onKeyDown: function onKeyDown(e) {
             if (!todoRoute.hasPermission()) {
@@ -20044,15 +20164,41 @@ var _event = {
 
             var keyCode = e.keyCode || e.which;
 
-            var start, startOffset, end, isAfterCheck, label, container, tmpLabel, labelParentTag, labelParent, childNodes, i, dom;
+            var start, startOffset, end, isAfterCheck, main, container, tmpMain, mainParentTag, mainParent, childNodes, i, dom;
 
-            isAfterCheck = _todoUtils2['default'].isCaretAfterCheckImg();
-            label = _todoUtils2['default'].getLabelByCaret();
-            container = _domUtilsDomExtend2['default'].getBlockParent(label, false);
+            var rangeList;
+            if (!range.collapsed) {
+                if (keyCode !== 8 && keyCode !== 46 && _commonUtils2['default'].checkNonTxtKey(e)) {
+                    return true;
+                }
+                //将 选中的 checkbox cancelTodo
+                rangeList = _rangeUtilsRangeExtend2['default'].getRangeDomList({
+                    noSplit: true
+                });
+                if (rangeList) {
+                    for (i = rangeList.list.length - 1; i >= 0; i--) {
+                        dom = rangeList.list[i];
+                        if (_todoUtils2['default'].isCheckbox(dom)) {
+                            tmpMain = _todoUtils2['default'].getMainFromChild(dom);
+                            if (tmpMain) {
+                                container = tmpMain.parentNode;
+                                _todoUtils2['default'].cancelTodo(container, true);
+                            }
+                        }
+                    }
+                }
+
+                return true;
+            }
+
+            isAfterCheck = _todoUtils2['default'].isCaretAfterCheckbox();
+            main = _todoUtils2['default'].getMainByCaret();
+            container = _domUtilsDomExtend2['default'].getBlockParent(main, false);
 
             if (!container) {
                 return true;
             }
+
             /**
              * Backspace
              */
@@ -20066,19 +20212,16 @@ var _event = {
              * Delete
              */
             if (keyCode === 46) {
-                if (!range.collapsed) {
-                    return true;
-                }
                 start = range.startContainer;
                 startOffset = range.startOffset;
                 _rangeUtilsRangeExtend2['default'].selectCharIncludeFillChar();
                 range = _rangeUtilsRangeExtend2['default'].getRange();
                 end = range.endContainer;
-                tmpLabel = _todoUtils2['default'].getLabelFromChild(end) || _todoUtils2['default'].getLabelInDom(end);
+                tmpMain = _todoUtils2['default'].getMainFromChild(end) || _todoUtils2['default'].getMainInDom(end);
                 //恢复 range
                 _rangeUtilsRangeExtend2['default'].setRange(start, startOffset);
-                if (tmpLabel && tmpLabel != label) {
-                    _todoUtils2['default'].cancelTodo(tmpLabel.parentNode, true);
+                if (tmpMain && tmpMain != main) {
+                    _todoUtils2['default'].cancelTodo(tmpMain.parentNode, true);
                     return false;
                 }
             }
@@ -20114,17 +20257,18 @@ var _event = {
             //     return;
             // }
 
-            if (_todoUtils2['default'].isEmptyLabel(label)) {
+            if (_todoUtils2['default'].isEmptyMain(main)) {
                 //如果当前 todoList 为空，则 取消 todoList
                 container.innerHTML = '<br>';
+                _domUtilsDomExtend2['default'].removeClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
                 _rangeUtilsRangeExtend2['default'].setRange(container, 1);
                 _commonUtils2['default'].stopEvent(e);
                 return false;
             }
 
-            labelParentTag = container == _commonEnv2['default'].doc.body ? 'div' : container.tagName;
-            labelParent = _commonEnv2['default'].doc.createElement(labelParentTag);
-            _domUtilsDomExtend2['default'].before(container, labelParent, true);
+            mainParentTag = container == _commonEnv2['default'].doc.body ? 'div' : container.tagName;
+            mainParent = _commonEnv2['default'].doc.createElement(mainParentTag);
+            _domUtilsDomExtend2['default'].before(container, mainParent, true);
             range.deleteContents();
             range.setEndAfter(container);
             var frag = range.extractContents();
@@ -20132,22 +20276,22 @@ var _event = {
             for (i = 0; i < frag.childNodes.length; i++) {
                 childNodes.push(frag.childNodes[i]);
             }
-            label = _todoUtils2['default'].setTodo(labelParent, todoRoute);
-            _todoUtils2['default'].insertToLabel(childNodes, label);
+            main = _todoUtils2['default'].setTodo(mainParent, todoRoute);
+            _todoUtils2['default'].insertToMain(childNodes, main);
 
-            // 如果换行操作的当前 块元素是 todoList，则 frag 内会自动生成 label
-            // 必须要插入到 document 内才能正常清理 frag 内 label & block 元素
+            // 如果换行操作的当前 块元素是 todoList，则 frag 内会自动生成 main
+            // 必须要插入到 document 内才能正常清理 frag 内 main & block 元素
             for (i = 0; i < childNodes.length; i++) {
                 _todoUtils2['default'].clearBlock(childNodes[i]);
             }
 
-            _rangeUtilsRangeExtend2['default'].setRange(label, 1);
+            _rangeUtilsRangeExtend2['default'].setRange(main, 1);
             _commonUtils2['default'].stopEvent(e);
 
-            if (label.getBoundingClientRect().top + label.clientHeight > _commonEnv2['default'].doc.documentElement.clientHeight || label.getBoundingClientRect().top + label.clientHeight < 0) {
-                var labelX = label.getBoundingClientRect().left + _commonEnv2['default'].doc.body.scrollLeft;
-                var labelY = _commonEnv2['default'].doc.body.scrollTop + label.clientHeight;
-                window.scrollTo(labelX, labelY);
+            if (main.getBoundingClientRect().top + main.clientHeight > _commonEnv2['default'].doc.documentElement.clientHeight || main.getBoundingClientRect().top + main.clientHeight < 0) {
+                var mainX = main.getBoundingClientRect().left + _commonEnv2['default'].doc.body.scrollLeft;
+                var mainY = _commonEnv2['default'].doc.body.scrollTop + main.clientHeight;
+                window.scrollTo(mainX, mainY);
             }
         },
         onSelectionChange: function onSelectionChange(e) {
@@ -20155,14 +20299,27 @@ var _event = {
             if (!range) {
                 return;
             }
-            var label, checkImg;
-            if (_todoUtils2['default'].isCaretBeforeLabel()) {
-                label = _todoUtils2['default'].getLabelByCaret();
-                checkImg = _todoUtils2['default'].getCheckImg(label);
-                if (checkImg && checkImg.nextSibling) {
-                    _rangeUtilsRangeExtend2['default'].setRange(checkImg.nextSibling, 0);
-                } else if (label) {
-                    _rangeUtilsRangeExtend2['default'].setRange(label, _domUtilsDomExtend2['default'].getDomEndOffset(label));
+            var main, checkbox, start, startOffset, end, endOffset;
+            if (!range.collapsed) {
+                end = range.endContainer;
+                endOffset = range.endOffset;
+            }
+            if (_todoUtils2['default'].isCaretBeforeCheckbox()) {
+                main = _todoUtils2['default'].getMainByCaret();
+                checkbox = _todoUtils2['default'].getCheckbox(main);
+
+                if (checkbox && checkbox.nextSibling) {
+                    start = checkbox.nextSibling;
+                    startOffset = 0;
+                } else if (main) {
+                    start = main;
+                    startOffset = _domUtilsDomExtend2['default'].getDomEndOffset(main);
+                }
+
+                if (start && end) {
+                    _rangeUtilsRangeExtend2['default'].setRange(start, startOffset, end, endOffset);
+                } else if (start) {
+                    _rangeUtilsRangeExtend2['default'].setRange(start, startOffset);
                 }
             }
         },
@@ -20182,7 +20339,7 @@ var _event = {
 var todoCore = {
     init: function init() {},
     on: function on() {
-        _todoUtils2['default'].fixOldTodo();
+        _todoUtils2['default'].oldPatch.fixOldTodo();
         patchForReader.init();
         _event.bind();
         todoRoute = _todoRouteForClient2['default'].getRoute();
@@ -20345,7 +20502,7 @@ function routeForWeb() {
     }
 
     function getUserAvatarFileName() {
-        return 'http://192.168.1.73/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true';
+        return '/wizas/a/users/avatar/63272832-e387-4d31-85c6-7549555f2231?default=true';
     }
 
     function isPersonalDocument() {
@@ -20432,7 +20589,7 @@ function routeForMac() {
     }
 
     function setDocumentModified() {
-        window.WizQtEditor.setContentsChanged(true);
+        // window.WizQtEditor.setContentsChanged(true);
     }
 
     function setDocumentType(type) {
@@ -20446,9 +20603,11 @@ function routeForMac() {
     function getOriginalDoc() {
         return window.WizQtEditor.currentNoteHtml;
     }
+
     function saveDoc(html, resources) {
         window.WizQtEditor.saveHtmlToCurrentNote(html, resources);
     }
+
     function checkDocLock(callback) {
         window.WizQtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);
         return window.WizQtEditor.checkListClickable();
@@ -20530,11 +20689,11 @@ function routeForIOS() {
     this.getOriginalDoc = getOriginalDoc;
     this.checkDocLock = checkDocLock;
 
-    this.userAlias = null;
-    this.userGuid = null;
-    this.avatarFileName = null;
+    this.userAlias = '';
+    this.userGuid = '';
+    this.avatarFileName = '';
     this.personalDocument = false;
-    this.hasPermission = false;
+    this._hasPermission = false;
     this.originalHtml = "";
 
     function setTodoInfo(options) {
@@ -20542,7 +20701,7 @@ function routeForIOS() {
         this.userGuid = options.userGuid;
         this.avatarFileName = options.avatar;
         this.personalDocument = options.isPersonal === 'true';
-        this.hasPermission = options.hasPermission === 'true';
+        this._hasPermission = options.hasPermission === 'true';
         this.originalHtml = options.docHtml;
     }
 
@@ -20575,7 +20734,7 @@ function routeForIOS() {
     }
 
     function hasPermission() {
-        return !_commonEnv2['default'].readonly || this.hasPermission;
+        return !_commonEnv2['default'].readonly || this._hasPermission;
     }
 
     function getOriginalDoc() {
@@ -20629,6 +20788,10 @@ var _commonConst = require('../common/const');
 
 var _commonConst2 = _interopRequireDefault(_commonConst);
 
+var _commonLang = require('../common/lang');
+
+var _commonLang2 = _interopRequireDefault(_commonLang);
+
 var _commonBase64 = require('./../common/Base64');
 
 var _commonBase642 = _interopRequireDefault(_commonBase64);
@@ -20650,16 +20813,16 @@ var _commonHistoryUtils = require('../common/historyUtils');
 var _commonHistoryUtils2 = _interopRequireDefault(_commonHistoryUtils);
 
 var todoUtils = {
-    addUserInfo: function addUserInfo(label, isChecked, todoId, todoRoute) {
-        if (!label) {
+    addUserInfo: function addUserInfo(main, isChecked, todoId, todoRoute) {
+        if (!main) {
             return;
         }
 
         var userGuid, userName, avatarUrl, dt, userHtml, span, child, next, i;
 
-        userGuid = todoUtils.deleteUserInfo(label);
+        userGuid = todoUtils.deleteUserInfo(main.parentNode);
         if (!isChecked) {
-            todoUtils.removeUserAvatarStyle(userGuid);
+            _commonWizStyle2['default'].removeUnUsedTodoStyle(userGuid);
             return;
         }
 
@@ -20675,26 +20838,26 @@ var todoUtils = {
         span.innerHTML = userHtml;
         span.setAttribute(_commonConst2['default'].ATTR.TODO_ID, todoId);
 
-        for (i = label.childNodes.length - 1; i >= 0; i--) {
-            child = label.childNodes[i];
+        for (i = main.childNodes.length - 1; i >= 0; i--) {
+            child = main.childNodes[i];
             if (child.tagName && child.tagName.toLowerCase() == 'br') {
-                label.removeChild(child);
+                main.removeChild(child);
             }
         }
-        next = label.nextElementSibling;
+        next = main.nextElementSibling;
         while (next) {
-            if (todoUtils.isLabel(next)) {
-                label.parentElement.insertBefore(span, next);
+            if (todoUtils.isMain(next)) {
+                main.parentElement.insertBefore(span, next);
                 break;
             }
             if (next.tagName.toLowerCase() == 'br') {
-                label.parentElement.insertBefore(span, next);
+                main.parentElement.insertBefore(span, next);
                 break;
             }
             next = next.nextElementSibling;
         }
         if (!next) {
-            label.parentElement.appendChild(span);
+            main.parentElement.appendChild(span);
         }
         if (!span.hasChildNodes()) {
             span.appendChild(_commonEnv2['default'].doc.createElement('br'));
@@ -20702,7 +20865,7 @@ var todoUtils = {
         _rangeUtilsRangeExtend2['default'].setRange(span, span.childNodes.length);
     },
     /**
-     * 判断 dom 是否可以当作 label 容器
+     * 判断 dom 是否可以当作 main 容器
      * @param dom
      * @returns {boolean}
      */
@@ -20717,23 +20880,24 @@ var todoUtils = {
         var range = _rangeUtilsRangeExtend2['default'].getRange(),
             start,
             startOffset,
-            label,
-            labelFirst,
+            main,
+            todoFirst,
             userGuid;
         start = range ? range.startContainer : null;
         startOffset = range ? range.startOffset : 0;
-        label = todoUtils.getLabelInDom(container);
+        main = todoUtils.getMainInDom(container);
+        userGuid = todoUtils.deleteUserInfo(container);
+        _commonWizStyle2['default'].removeUnUsedTodoStyle(userGuid);
+        todoFirst = todoUtils.deleteMain(main);
+        todoFirst = todoFirst ? todoFirst.start : null;
         _domUtilsDomExtend2['default'].removeClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
-        userGuid = todoUtils.deleteUserInfo(label);
-        labelFirst = todoUtils.deleteLabel(label).start;
-        todoUtils.removeUserAvatarStyle(userGuid);
-        if (!labelFirst) {
-            labelFirst = _commonEnv2['default'].doc.createElement('br');
-            container.appendChild(labelFirst);
+        if (!todoFirst) {
+            todoFirst = _commonEnv2['default'].doc.createElement('br');
+            container.appendChild(todoFirst);
         }
         if (!noSetRange) {
             if (!start || !start.parentNode) {
-                start = labelFirst;
+                start = todoFirst;
                 startOffset = 0;
             }
             _rangeUtilsRangeExtend2['default'].setRange(start, startOffset);
@@ -20741,15 +20905,15 @@ var todoUtils = {
         //修正 todoList style
         todoUtils.checkTodoStyle(false);
     },
-    check: function check(label, isChecked) {
+    check: function check(main, isChecked) {
         if (isChecked) {
-            _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK);
-            _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_LABEL_CHECK);
+            _domUtilsDomExtend2['default'].removeClass(main, _commonConst2['default'].CLASS.TODO_UNCHECKED);
+            _domUtilsDomExtend2['default'].addClass(main, _commonConst2['default'].CLASS.TODO_CHECKED);
         } else {
-            _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_LABEL_CHECK);
-            _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK);
+            _domUtilsDomExtend2['default'].removeClass(main, _commonConst2['default'].CLASS.TODO_CHECKED);
+            _domUtilsDomExtend2['default'].addClass(main, _commonConst2['default'].CLASS.TODO_UNCHECKED);
         }
-        var check = todoUtils.getCheckImg(label);
+        var check = todoUtils.getCheckbox(main);
         var state = isChecked ? 'checked' : 'unchecked';
         check.setAttribute(_commonConst2['default'].ATTR.TODO_CHECK, state);
     },
@@ -20761,19 +20925,19 @@ var todoUtils = {
 
         _commonHistoryUtils2['default'].saveSnap(false);
 
-        var label = todoUtils.getLabelFromChild(checkImg),
+        var main = todoUtils.getMainFromChild(checkImg),
             isChecked;
-        if (!label || label.children[0] != checkImg) {
-            todoUtils.fixCheckImg(checkImg);
+        if (!main || main.children[0] != checkImg) {
+            todoUtils.fixCheckbox(checkImg, false);
         }
 
         isChecked = checkImg.getAttribute(_commonConst2['default'].ATTR.TODO_CHECK) !== 'checked';
-        todoUtils.check(label, isChecked);
+        todoUtils.check(main, isChecked);
         result.id = checkImg.id;
         result.checked = isChecked;
 
         if (!todoRoute.isPersonalDocument()) {
-            todoUtils.addUserInfo(label, isChecked, checkImg.id, todoRoute);
+            todoUtils.addUserInfo(main, isChecked, checkImg.id, todoRoute);
         }
 
         if (todoRoute.isPersonalDocument() || !_commonEnv2['default'].client.type.isIOS) {
@@ -20783,8 +20947,8 @@ var todoUtils = {
         return result;
     },
     checkTodoStyle: function checkTodoStyle(isForced) {
-        var todoList = _commonEnv2['default'].doc.querySelector('.' + _commonConst2['default'].CLASS.TODO_LABEL);
-        if (todoList) {
+        var todoObj = _commonEnv2['default'].doc.querySelector('.' + _commonConst2['default'].CLASS.TODO_MAIN);
+        if (todoObj) {
             _commonWizStyle2['default'].insertTodoStyle(isForced);
         } else {
             _commonWizStyle2['default'].removeTodoStyle();
@@ -20803,7 +20967,7 @@ var todoUtils = {
         }
 
         var isFragment = dom.nodeType == 11,
-            isLabel = isFragment ? false : todoUtils.isLabel(dom),
+            isMain = isFragment ? false : todoUtils.isMain(dom),
             isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
             isBlock = isFragment ? false : _domUtilsDomExtend2['default'].isBlockDom(dom);
         if ((isBlock || isTodoTag) && _domUtilsDomExtend2['default'].isEmptyDom(dom)) {
@@ -20811,23 +20975,21 @@ var todoUtils = {
             return true;
         } else if (isBlock) {
             _domUtilsDomExtend2['default'].stripDom(dom);
-        } else if (isLabel) {
-            todoUtils.deleteLabel(dom);
+        } else if (isMain) {
+            todoUtils.deleteMain(dom);
         }
         return false;
     },
-    deleteLabel: function deleteLabel(label) {
-        return _domUtilsDomExtend2['default'].stripDom(label, function (dom) {
-            return !todoUtils.isLabel(dom) && !todoUtils.isCheckImg(dom) && !todoUtils.isTail(dom);
+    deleteMain: function deleteMain(main) {
+        return _domUtilsDomExtend2['default'].stripDom(main, function (dom) {
+            return !todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom);
         });
     },
-    deleteUserInfo: function deleteUserInfo(label) {
+    deleteUserInfo: function deleteUserInfo(container) {
         var userGuid = '';
-        if (!label) {
-            return userGuid;
-        }
-        var container = label.parentNode,
-            userAvatar = container.querySelector('.' + _commonConst2['default'].CLASS.TODO_AVATAR),
+        var main = todoUtils.getMainInDom(container);
+
+        var userAvatar = container.querySelector('.' + _commonConst2['default'].CLASS.TODO_AVATAR),
             userClass = userAvatar ? userAvatar.className : '',
             guidReg = new RegExp('^(.*' + _commonConst2['default'].CLASS.TODO_USER_AVATAR + ')([^ ]*)(.*)$', 'i');
 
@@ -20835,33 +20997,35 @@ var todoUtils = {
             userGuid = userClass.replace(guidReg, '$2');
         }
 
-        var nextSib = label.nextElementSibling,
+        var nextSib = main ? main.nextElementSibling : container.firstChild,
             tmpNode;
         while (nextSib) {
-            if (todoUtils.isLabel(nextSib)) break;
+            if (todoUtils.isMain(nextSib)) {
+                break;
+            }
             if (todoUtils.isUserInfo(nextSib)) {
                 tmpNode = nextSib;
                 nextSib = nextSib.nextElementSibling;
-                label.parentElement.removeChild(tmpNode);
+                container.removeChild(tmpNode);
                 continue;
             }
             nextSib = nextSib.nextElementSibling;
         }
         return userGuid;
     },
-    fixCheckImg: function fixCheckImg(checkImg) {
+    fixCheckbox: function fixCheckbox(checkImg, isForOld) {
         if (!checkImg) {
             return;
         }
         var container = _domUtilsDomExtend2['default'].getBlockParent(checkImg),
             canBeContainer = todoUtils.canBeContainer(container),
-            label = _commonEnv2['default'].doc.createElement('span'),
+            main = _commonEnv2['default'].doc.createElement('span'),
             newContainer,
             next,
             tmpNext,
-            stopInsertToLabel = false,
+            stopInsert = false,
             dom;
-        label.className = _commonConst2['default'].CLASS.TODO_LABEL + ' ' + _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK;
+        main.className = (isForOld ? _commonConst2['default'].CLASS.TODO_LABEL_OLD : _commonConst2['default'].CLASS.TODO_MAIN) + ' ' + _commonConst2['default'].CLASS.TODO_UNCHECKED;
 
         newContainer = _commonEnv2['default'].doc.createElement(canBeContainer ? container.tagName : 'div');
         if (canBeContainer) {
@@ -20869,170 +21033,59 @@ var todoUtils = {
         } else {
             _domUtilsDomExtend2['default'].before(checkImg, newContainer);
         }
-        newContainer.appendChild(label);
+        newContainer.appendChild(main);
 
         next = checkImg;
         while (next) {
             tmpNext = next.nextSibling;
             if (_domUtilsDomExtend2['default'].isBlockDom(next)) {
                 if (canBeContainer) {
-                    stopInsertToLabel = true;
+                    stopInsert = true;
                     dom = newContainer.nextSibling;
                 } else {
                     break;
                 }
             }
-            if (stopInsertToLabel) {
+            if (stopInsert) {
                 _domUtilsDomExtend2['default'].before(dom, next);
             } else if (todoUtils.isUserInfo(next)) {
-                _domUtilsDomExtend2['default'].before(label, next, true);
+                _domUtilsDomExtend2['default'].before(main, next, true);
             } else {
-                label.appendChild(next);
+                main.appendChild(next);
             }
             next = tmpNext;
         }
     },
-    fixImg: function fixImg(img) {
-        if (!img) {
-            return;
-        }
-        var iObj = _commonEnv2['default'].doc.createElement('input');
-        iObj.className = img.className;
-        iObj.readOnly = true;
-        if (img.id) {
-            iObj.id = img.id;
-        }
-        if (img.getAttribute('state')) {
-            iObj.setAttribute(_commonConst2['default'].ATTR.TODO_CHECK, img.getAttribute('state'));
-        }
-        var parent = img.parentNode;
-        parent.insertBefore(iObj, img);
-        parent.removeChild(img);
-    },
-    fixLabel: function fixLabel(label) {
-        if (!label || _domUtilsDomExtend2['default'].isTag(label, 'span')) {
-            return;
-        }
-        var parent = label.parentNode;
-        if (!parent) {
-            return;
-        }
-        var span = _commonEnv2['default'].doc.createElement('span');
-        span.className = label.className;
-        while (label.firstChild) {
-            span.appendChild(label.firstChild);
-        }
-        parent.insertBefore(span, label);
-        parent.removeChild(label);
-    },
-    /**
-     * 初始化 todoList 主要用于修正旧版本的 todoList 样式
-     * 保证每个 todoItem 占一行
-     */
-    fixOldTodo: function fixOldTodo() {
-        var i, j, subLabelList, subLabel, container, subContainer, checkImgList, checkImg, labelList, label, tailList, tail;
-
-        //修正未被 label 封装的 checkImg
-        checkImgList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG);
-        for (i = checkImgList.length - 1; i >= 0; i--) {
-            checkImg = checkImgList[i];
-            label = todoUtils.getLabelFromChild(checkImg);
-            if (!label || label.children[0] != checkImg) {
-                todoUtils.fixCheckImg(checkImg);
-            }
-            //将 image 转换为 i
-            todoUtils.fixImg(checkImg);
-        }
-
-        //处理那些被嵌套的 todoList（错误的 Dom 结构）
-        labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
-        for (i = 0; i < labelList.length; i++) {
-            label = labelList[i];
-            container = todoUtils.packageTodo(label);
-            _domUtilsDomExtend2['default'].addClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
-            subLabelList = container.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
-            for (j = subLabelList.length - 1; j > 0; j--) {
-                subLabel = subLabelList[j];
-                subContainer = todoUtils.packageTodo(subLabel);
-                _domUtilsDomExtend2['default'].before(container, subContainer, true);
-            }
-            //修正 用户信息
-            todoUtils.fixUserInfo(label);
-        }
-
-        //将 label 全部替换为 span
-        labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL);
-        for (i = labelList.length - 1; i >= 0; i--) {
-            todoUtils.fixLabel(labelList[i]);
-        }
-
-        //清理 Tail
-        tailList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_TAIL);
-        for (i = tailList.length - 1; i >= 0; i--) {
-            tail = tailList[i];
-            if (_domUtilsDomExtend2['default'].isEmptyDom(tail)) {
-                tail.parentNode.removeChild(tail);
-            } else {
-                _domUtilsDomExtend2['default'].removeClass(_commonConst2['default'].CLASS.TODO_TAIL);
-            }
-        }
-    },
-    fixUserInfo: function fixUserInfo(label) {
-        var parent = label.parentNode,
-            check = todoUtils.getCheckImg(label),
-            id = check ? check.id : '',
-            childNodes = parent.childNodes,
-            child,
-            i,
-            firstUserInfo = false;
-        for (i = 0; i < childNodes.length; i++) {
-            child = childNodes[i];
-            if (_domUtilsDomExtend2['default'].hasClass(child, _commonConst2['default'].CLASS.TODO_USER_INFO)) {
-                if (!firstUserInfo) {
-                    firstUserInfo = true;
-                    child.setAttribute(_commonConst2['default'].ATTR.TODO_ID, id);
-                } else {
-                    parent.removeChild(child);
-                    i--;
-                }
-            }
-        }
-    },
-    getCheckImg: function getCheckImg(label) {
-        if (!label) {
+    getCheckbox: function getCheckbox(main) {
+        if (!main) {
             return null;
         }
-        return label.querySelector('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG);
+        return main.querySelector('.' + _commonConst2['default'].CLASS.TODO_CHECKBOX);
     },
     getUserInfoHtml: function getUserInfoHtml(userGuid, userName, dt) {
         var html = '<span class="' + _commonConst2['default'].CLASS.TODO_ACCOUNT + '">' + '<input readonly class="%1" />' + '%2, ' + '</span>' + '<span class="' + _commonConst2['default'].CLASS.TODO_DATE + '">%3.</span>';
         var avatarClass = _commonConst2['default'].CLASS.TODO_USER_AVATAR + _commonBase642['default'].encode(userGuid);
         return html.replace('%1', _commonConst2['default'].CLASS.IMG_NOT_DRAG + ' ' + _commonConst2['default'].CLASS.TODO_AVATAR + ' ' + avatarClass).replace('%2', userName).replace('%3', dt);
     },
-    getLabelHtml: function getLabelHtml() {
-        var str = '<span class="' + _commonConst2['default'].CLASS.TODO_LABEL + ' ' + _commonConst2['default'].CLASS.TODO_LABEL_UNCHECK + '">' + '<input readonly id="%1" class="' + _commonConst2['default'].CLASS.TODO_CHECK_IMG + ' ' + _commonConst2['default'].CLASS.IMG_NOT_DRAG + '" ' + _commonConst2['default'].ATTR.TODO_CHECK + '="unchecked" />' +
-        // '<span class="' + CONST.CLASS.TODO_TAIL + '"></span>' +
-        '</span>';
+    getMainHtml: function getMainHtml() {
+        var str = '<span class="' + _commonConst2['default'].CLASS.TODO_MAIN + ' ' + _commonConst2['default'].CLASS.TODO_UNCHECKED + '">' + '<input readonly id="%1" class="' + _commonConst2['default'].CLASS.TODO_CHECKBOX + ' ' + _commonConst2['default'].CLASS.IMG_NOT_DRAG + '" ' + _commonConst2['default'].ATTR.TODO_CHECK + '="unchecked" />' + '</span>';
         str = str.replace('%1', 'wiz_todo_' + Date.now() + '_' + Math.floor(Math.random() * 1000000 + 1));
         return str;
     },
-    getLabelInDom: function getLabelInDom(dom) {
+    getMainInDom: function getMainInDom(dom) {
         if (!dom || !dom.hasChildNodes()) return null;
-        if (todoUtils.isLabel(dom)) {
+        if (todoUtils.isMain(dom)) {
             return dom;
         }
         if (_domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER)) {
-            return dom.querySelector('.' + _commonConst2['default'].CLASS.TODO_LABEL);
+            return dom.querySelector('.' + _commonConst2['default'].CLASS.TODO_MAIN);
         }
         return null;
     },
-    getLabelTail: function getLabelTail(label) {
-        if (!label) {
-            return null;
-        }
-        return label.querySelector('.' + _commonConst2['default'].CLASS.TODO_TAIL);
+    getUserInfoInDom: function getUserInfoInDom(dom) {
+        return dom.querySelector('.' + _commonConst2['default'].CLASS.TODO_USER_INFO);
     },
-    getLabelByCaret: function getLabelByCaret() {
+    getMainByCaret: function getMainByCaret() {
         var range = _rangeUtilsRangeExtend2['default'].getRange();
         if (!range) {
             return null;
@@ -21048,26 +21101,34 @@ var todoUtils = {
         if (!p || !p.hasChildNodes()) {
             return null;
         }
-        return todoUtils.getLabelInDom(p);
+        return todoUtils.getMainInDom(p);
     },
-    getLabelFromChild: function getLabelFromChild(dom) {
+    getMainFromChild: function getMainFromChild(dom) {
         if (!dom) {
             return null;
         }
         return _domUtilsDomExtend2['default'].getParentByFilter(dom, function (dom) {
-            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LABEL);
+            return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_MAIN);
         }, true);
     },
     getTime: function getTime() {
         var dt = new Date();
-        return dt.getFullYear() + '-' + getNum(dt.getMonth() + 1) + '-' + getNum(dt.getDate()) + ' ' + getNum(dt.getHours()) + ':' + getNum(dt.getMinutes()) + ':' + getNum(dt.getSeconds());
+        var dateStr, timeStr;
+        timeStr = getNum(dt.getHours()) + ':' + getNum(dt.getMinutes());
+
+        if (_commonLang2['default'].version == 'en') {
+            dateStr = _commonLang2['default'].Month[dt.getMonth()] + ' ' + dt.getDate() + ', ' + dt.getFullYear() + ' at ' + timeStr;
+        } else {
+            dateStr = dt.getFullYear() + _commonLang2['default'].Date.Year + (dt.getMonth() + 1) + _commonLang2['default'].Date.Month + dt.getDate() + _commonLang2['default'].Date.Day + ' ' + timeStr;
+        }
+        return dateStr;
 
         function getNum(num) {
             return (num < 10 ? '0' : '') + num;
         }
     },
-    insertToLabel: function insertToLabel(doms, label) {
-        if (!doms || !label) {
+    insertToMain: function insertToMain(doms, main) {
+        if (!doms || !main) {
             return;
         }
         var i,
@@ -21075,7 +21136,10 @@ var todoUtils = {
             last = null;
         for (i = doms.length - 1; i >= 0; i--) {
             dom = doms[i];
-            label.insertBefore(dom, last);
+            _domUtilsDomExtend2['default'].removeClass(dom, _commonConst2['default'].CLASS.TODO_MAIN);
+            _domUtilsDomExtend2['default'].removeClass(dom, _commonConst2['default'].CLASS.TODO_CHECKED);
+            _domUtilsDomExtend2['default'].removeClass(dom, _commonConst2['default'].CLASS.TODO_UNCHECKED);
+            main.insertBefore(dom, last);
             last = dom;
         }
     },
@@ -21083,15 +21147,15 @@ var todoUtils = {
      * 判断 光标是否处于 checkbox 后面
      * @returns {*}
      */
-    isCaretAfterCheckImg: function isCaretAfterCheckImg() {
+    isCaretAfterCheckbox: function isCaretAfterCheckbox() {
         var range = _rangeUtilsRangeExtend2['default'].getRange();
         if (!range) {
             return false;
         }
-        var caretDom, startOffset, prev, label;
+        var caretDom, startOffset, prev, main;
 
-        label = todoUtils.getLabelByCaret();
-        if (!label) {
+        main = todoUtils.getMainByCaret();
+        if (!main) {
             return false;
         }
         if (range.collapsed) {
@@ -21102,95 +21166,68 @@ var todoUtils = {
             } else if (caretDom.nodeType == 3 && startOffset > 0) {
                 return false;
             }
-            prev = _domUtilsDomExtend2['default'].getPreviousNode(caretDom, false, label);
-            return todoUtils.isCheckImg(prev);
+            prev = _domUtilsDomExtend2['default'].getPreviousNode(caretDom, false, main);
+            return todoUtils.isCheckbox(prev);
         }
         return false;
     },
     /**
-     * 判断 光标是否处于 label最前面
+     * 判断 光标是否处于 main 最前面
      * @returns {*}
      */
-    isCaretBeforeLabel: function isCaretBeforeLabel() {
+    isCaretBeforeCheckbox: function isCaretBeforeCheckbox() {
         var range = _rangeUtilsRangeExtend2['default'].getRange();
         if (!range) {
             return false;
         }
-        var caretDom;
-
-        if (range.collapsed) {
-            caretDom = range.startContainer;
-            if (caretDom.nodeType === 1) {
-                caretDom = caretDom.childNodes[range.startOffset];
-            } else if (caretDom.nodeType === 3 && _domUtilsDomExtend2['default'].isEmptyDom(caretDom) && range.startOffset == caretDom.nodeValue.length) {
-                caretDom = _domUtilsDomExtend2['default'].getNextNode(caretDom, false);
-                if (caretDom) {
-                    caretDom = _domUtilsDomExtend2['default'].getParentByFilter(caretDom, function (dom) {
-                        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
-                    }, true);
-                }
+        var caretDom = range.startContainer;
+        if (caretDom.nodeType === 1) {
+            caretDom = caretDom.childNodes[range.startOffset];
+        } else if (caretDom.nodeType === 3 && _domUtilsDomExtend2['default'].isEmptyDom(caretDom) && range.startOffset == caretDom.nodeValue.length) {
+            caretDom = _domUtilsDomExtend2['default'].getNextNode(caretDom, false);
+            if (caretDom) {
+                caretDom = _domUtilsDomExtend2['default'].getParentByFilter(caretDom, function (dom) {
+                    return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
+                }, true);
             }
-
-            return todoUtils.isLayer(caretDom) || todoUtils.isLabel(caretDom) || todoUtils.isCheckImg(caretDom);
         }
-        return false;
+
+        return todoUtils.isLayer(caretDom) || todoUtils.isMain(caretDom) || todoUtils.isCheckbox(caretDom);
     },
     /**
      * 判断 dom 是否为 todoList 的 checkbox
      * @param dom
      * @returns {*|boolean}
      */
-    isCheckImg: function isCheckImg(dom) {
-        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_CHECK_IMG);
+    isCheckbox: function isCheckbox(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_CHECKBOX);
     },
-    isEmptyLabel: function isEmptyLabel(label) {
-        if (!label) {
+    isEmptyMain: function isEmptyMain(main) {
+        if (!main) {
             return true;
         }
-        var childNodes = label.childNodes,
+        var childNodes = main.childNodes,
             i,
             child;
 
         for (i = 0; i < childNodes.length; i++) {
             child = childNodes[i];
-            if (!todoUtils.isCheckImg(child) && !todoUtils.isTail(child) && !_domUtilsDomExtend2['default'].isEmptyDom(child)) {
+            if (!todoUtils.isCheckbox(child) && !_domUtilsDomExtend2['default'].isEmptyDom(child)) {
                 return false;
             }
         }
         return true;
     },
-    isFirstLabel: function isFirstLabel(label) {
-        if (!label) {
-            return false;
-        }
-        var parent = label.parentNode,
-            childNodes = parent.childNodes,
-            i,
-            child;
-
-        for (i = 0; i < childNodes.length; i++) {
-            child = childNodes[i];
-            if (child === label) {
-                return true;
-            } else if (!_domUtilsDomExtend2['default'].isEmptyDom(child)) {
-                return false;
-            }
-        }
-        return false;
-    },
     /**
-     * 判断 dom 是否为 todoList 的 label
+     * 判断 dom 是否为 todoList 的 main
      * @param dom
      * @returns {*|boolean}
      */
-    isLabel: function isLabel(dom) {
-        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LABEL);
+    isMain: function isMain(dom) {
+        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_MAIN);
     },
     isLayer: function isLayer(dom) {
         return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LAYER);
-    },
-    isTail: function isTail(dom) {
-        return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_TAIL);
     },
     /**
      * 判断 dom 是否为 todoList 内的有效 dom
@@ -21202,7 +21239,7 @@ var todoUtils = {
             return false;
         }
         return !!_domUtilsDomExtend2['default'].getParentByFilter(dom, function (obj) {
-            return todoUtils.isLabel(obj) || todoUtils.isTail(obj) || todoUtils.isUserInfo(obj) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_ACCOUNT) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_DATE);
+            return todoUtils.isMain(obj) || todoUtils.isUserInfo(obj) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_ACCOUNT) || _domUtilsDomExtend2['default'].hasClass(obj, _commonConst2['default'].CLASS.TODO_DATE);
         }, true);
     },
     /**
@@ -21213,57 +21250,14 @@ var todoUtils = {
     isUserInfo: function isUserInfo(dom) {
         return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_USER_INFO);
     },
-    /**
-     * 给 todoItem 打包
-     * @param label
-     * @returns {*}
-     */
-    packageTodo: function packageTodo(label) {
-        if (!label) {
-            return null;
-        }
-        var parent = label.parentNode;
-
-        if (parent !== _commonEnv2['default'].doc.body && todoUtils.isFirstLabel(label)) {
-            //如果 label 是首元素，则直接返回 label 的父元素
-            return parent;
-        }
-
-        // 如果 label 不是首元素，则 对齐进行打包
-        var check = todoUtils.getCheckImg(label),
-            id = check ? check.id : '',
-            userInfo = id ? parent.querySelector('span[' + _commonConst2['default'].ATTR.TODO_ID + '=' + id + ']') : null,
-            next = label.nextSibling,
-            tmpNext;
-        var container = _commonEnv2['default'].doc.createElement('div');
-        container.appendChild(label);
-        while (next) {
-            tmpNext = next.nextSibling;
-            container.appendChild(next);
-            next = next == userInfo ? null : tmpNext;
-        }
-        parent.insertBefore(container, tmpNext);
-        return container;
-    },
-    removeUserAvatarStyle: function removeUserAvatarStyle(guid) {
-        if (!guid) {
-            return;
-        }
-        var sId = _commonConst2['default'].ID.TODO_AVATAR_STYLE + guid,
-            sClass = _commonConst2['default'].CLASS.TODO_USER_AVATAR + guid,
-            userAvatar = _commonEnv2['default'].doc.querySelector('.' + sClass),
-            style = _commonEnv2['default'].doc.getElementById(sId);
-        if (style && !userAvatar) {
-            style.parentNode.removeChild(style);
-        }
-    },
     setTodo: function setTodo(container, todoRoute) {
         var range = _rangeUtilsRangeExtend2['default'].getRange(),
             rangeList,
             start,
             end,
-            labelHtml,
-            label,
+            mainHtml,
+            main,
+            userInfo,
             tmpDom;
         if (container) {
             //允许指定 容器直接设置 todoList
@@ -21289,25 +21283,29 @@ var todoUtils = {
         }
 
         //判断当前行是否已经是 todoList 结构，如果是，则取消 todoList 结构
-        label = todoUtils.getLabelInDom(start);
-        if (label) {
+        main = todoUtils.getMainInDom(start);
+        userInfo = todoUtils.getUserInfoInDom(start);
+        _commonHistoryUtils2['default'].saveSnap(false);
+        var hasCheckbox = !!todoUtils.getCheckbox(main);
+        if (main || userInfo) {
             todoUtils.cancelTodo(start);
+        }
+        if (hasCheckbox) {
             return null;
         }
 
-        _commonHistoryUtils2['default'].saveSnap(false);
-        labelHtml = todoUtils.getLabelHtml();
+        mainHtml = todoUtils.getMainHtml();
         tmpDom = _commonEnv2['default'].doc.createElement('div');
         _domUtilsDomExtend2['default'].addClass(tmpDom, _commonConst2['default'].CLASS.TODO_LAYER);
         if (!todoUtils.canBeContainer(start)) {
-            labelHtml = '<div class="' + _commonConst2['default'].CLASS.TODO_LAYER + '">' + labelHtml + '</div>';
+            mainHtml = '<div class="' + _commonConst2['default'].CLASS.TODO_LAYER + '">' + mainHtml + '</div>';
         } else {
             _domUtilsDomExtend2['default'].addClass(start, _commonConst2['default'].CLASS.TODO_LAYER);
         }
-        tmpDom.innerHTML = labelHtml;
-        label = todoUtils.getLabelInDom(tmpDom);
-        end = label.lastChild;
-        todoUtils.insertToLabel(start.childNodes, label);
+        tmpDom.innerHTML = mainHtml;
+        main = todoUtils.getMainInDom(tmpDom);
+        end = main.lastChild;
+        todoUtils.insertToMain(start.childNodes, main);
 
         while (tmpDom.firstChild) {
             start.appendChild(tmpDom.firstChild);
@@ -21321,7 +21319,7 @@ var todoUtils = {
         //修正 todoList style
         todoUtils.checkTodoStyle(false);
 
-        return label;
+        return main;
     },
     setUserAvatarStyle: function setUserAvatarStyle(userGuid, avatarUrl) {
         var guid = _commonBase642['default'].encode(userGuid);
@@ -21339,13 +21337,200 @@ var todoUtils = {
             }
             _commonWizStyle2['default'].insertStyle({ id: sId }, '.' + sClass + '{background-image:url(' + baseStr + ');}');
         });
+    },
+    oldPatch: {
+        fixImg: function fixImg(img) {
+            if (!img) {
+                return;
+            }
+            var iObj = _commonEnv2['default'].doc.createElement('input');
+            iObj.className = img.className;
+            _domUtilsDomExtend2['default'].removeClass(iObj, _commonConst2['default'].CLASS.TODO_CHECK_IMG_OLD);
+            _domUtilsDomExtend2['default'].addClass(iObj, _commonConst2['default'].CLASS.TODO_CHECKBOX);
+            iObj.readOnly = true;
+            if (img.id) {
+                iObj.id = img.id;
+            }
+            if (img.getAttribute('state')) {
+                iObj.setAttribute(_commonConst2['default'].ATTR.TODO_CHECK, img.getAttribute('state'));
+            }
+            var parent = img.parentNode;
+            parent.insertBefore(iObj, img);
+            parent.removeChild(img);
+        },
+        fixLabel: function fixLabel(label) {
+            if (label) {
+                _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_LABEL_OLD);
+                _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_MAIN);
+                if (_domUtilsDomExtend2['default'].hasClass(label, _commonConst2['default'].CLASS.TODO_CHECKED_OLD)) {
+                    _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_CHECKED_OLD);
+                    _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_CHECKED);
+                } else if (_domUtilsDomExtend2['default'].hasClass(label, _commonConst2['default'].CLASS.TODO_UNCHECKED_OLD)) {
+                    _domUtilsDomExtend2['default'].removeClass(label, _commonConst2['default'].CLASS.TODO_UNCHECKED_OLD);
+                    _domUtilsDomExtend2['default'].addClass(label, _commonConst2['default'].CLASS.TODO_UNCHECKED);
+                }
+            }
+
+            if (!label || _domUtilsDomExtend2['default'].isTag(label, 'span')) {
+                return;
+            }
+            var parent = label.parentNode;
+            if (!parent) {
+                return;
+            }
+            var span = _commonEnv2['default'].doc.createElement('span');
+            span.className = label.className;
+            while (label.firstChild) {
+                span.appendChild(label.firstChild);
+            }
+            parent.insertBefore(span, label);
+            parent.removeChild(label);
+        },
+        /**
+         * 初始化 todoList 主要用于修正旧版本的 todoList 样式
+         * 保证每个 todoItem 占一行
+         */
+        fixOldTodo: function fixOldTodo() {
+            var i, j, subLabelList, subLabel, container, subContainer, checkImgList, checkImg, labelList, label, tailList, tail;
+
+            //修正未被 label 封装的 checkImg
+            checkImgList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG_OLD);
+            for (i = checkImgList.length - 1; i >= 0; i--) {
+                checkImg = checkImgList[i];
+                label = todoUtils.oldPatch.getLabelFromChild(checkImg);
+                if (!label || label.children[0] != checkImg) {
+                    todoUtils.fixCheckbox(checkImg, true);
+                }
+                //将 image 转换为 i
+                todoUtils.oldPatch.fixImg(checkImg);
+            }
+
+            //处理那些被嵌套的 todoList（错误的 Dom 结构）
+            labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL_OLD);
+            for (i = 0; i < labelList.length; i++) {
+                label = labelList[i];
+                container = todoUtils.oldPatch.packageTodo(label);
+                _domUtilsDomExtend2['default'].addClass(container, _commonConst2['default'].CLASS.TODO_LAYER);
+                subLabelList = container.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL_OLD);
+                for (j = subLabelList.length - 1; j > 0; j--) {
+                    subLabel = subLabelList[j];
+                    subContainer = todoUtils.oldPatch.packageTodo(subLabel);
+                    _domUtilsDomExtend2['default'].before(container, subContainer, true);
+                }
+                //修正 用户信息
+                todoUtils.oldPatch.fixUserInfo(label);
+            }
+
+            //将 label 全部替换为 span
+            labelList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_LABEL_OLD);
+            for (i = labelList.length - 1; i >= 0; i--) {
+                todoUtils.oldPatch.fixLabel(labelList[i]);
+            }
+
+            //清理 Tail
+            tailList = _commonEnv2['default'].doc.querySelectorAll('.' + _commonConst2['default'].CLASS.TODO_TAIL_OLD);
+            for (i = tailList.length - 1; i >= 0; i--) {
+                tail = tailList[i];
+                if (_domUtilsDomExtend2['default'].isEmptyDom(tail)) {
+                    tail.parentNode.removeChild(tail);
+                } else {
+                    _domUtilsDomExtend2['default'].removeClass(_commonConst2['default'].CLASS.TODO_TAIL_OLD);
+                }
+            }
+        },
+        fixUserInfo: function fixUserInfo(label) {
+            var parent = label.parentNode,
+                check = todoUtils.oldPatch.getCheckImg(label),
+                id = check ? check.id : '',
+                childNodes = parent.childNodes,
+                child,
+                i,
+                firstUserInfo = false;
+            for (i = 0; i < childNodes.length; i++) {
+                child = childNodes[i];
+                if (_domUtilsDomExtend2['default'].hasClass(child, _commonConst2['default'].CLASS.TODO_USER_INFO)) {
+                    if (!firstUserInfo) {
+                        firstUserInfo = true;
+                        child.setAttribute(_commonConst2['default'].ATTR.TODO_ID, id);
+                    } else {
+                        parent.removeChild(child);
+                        i--;
+                    }
+                }
+            }
+        },
+        getCheckImg: function getCheckImg(label) {
+            if (!label) {
+                return null;
+            }
+            return label.querySelector('.' + _commonConst2['default'].CLASS.TODO_CHECK_IMG_OLD);
+        },
+        getLabelFromChild: function getLabelFromChild(dom) {
+            if (!dom) {
+                return null;
+            }
+            return _domUtilsDomExtend2['default'].getParentByFilter(dom, function (dom) {
+                return _domUtilsDomExtend2['default'].hasClass(dom, _commonConst2['default'].CLASS.TODO_LABEL_OLD);
+            }, true);
+        },
+        isFirstLabel: function isFirstLabel(label) {
+            if (!label) {
+                return false;
+            }
+            var parent = label.parentNode,
+                childNodes = parent.childNodes,
+                i,
+                child;
+
+            for (i = 0; i < childNodes.length; i++) {
+                child = childNodes[i];
+                if (child === label) {
+                    return true;
+                } else if (!_domUtilsDomExtend2['default'].isEmptyDom(child)) {
+                    return false;
+                }
+            }
+            return false;
+        },
+        /**
+         * 给 todoItem 打包
+         * @param label
+         * @returns {*}
+         */
+        packageTodo: function packageTodo(label) {
+            if (!label) {
+                return null;
+            }
+            var parent = label.parentNode;
+
+            if (parent !== _commonEnv2['default'].doc.body && todoUtils.oldPatch.isFirstLabel(label)) {
+                //如果 label 是首元素，则直接返回 label 的父元素
+                return parent;
+            }
+
+            // 如果 label 不是首元素，则 对齐进行打包
+            var check = todoUtils.oldPatch.getCheckImg(label),
+                id = check ? check.id : '',
+                userInfo = id ? parent.querySelector('span[' + _commonConst2['default'].ATTR.TODO_ID + '=' + id + ']') : null,
+                next = label.nextSibling,
+                tmpNext;
+            var container = _commonEnv2['default'].doc.createElement('div');
+            container.appendChild(label);
+            while (next) {
+                tmpNext = next.nextSibling;
+                container.appendChild(next);
+                next = next == userInfo ? null : tmpNext;
+            }
+            parent.insertBefore(container, tmpNext);
+            return container;
+        }
     }
 };
 
 exports['default'] = todoUtils;
 module.exports = exports['default'];
 
-},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./../common/Base64":12}],46:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./../common/Base64":12}],46:[function(require,module,exports){
 'use strict';
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { 'default': obj }; }
