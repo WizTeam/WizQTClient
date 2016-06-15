@@ -2,9 +2,11 @@
 #include <QMenuBar>
 #include <QKeySequence>
 #include <QShortcut>
+#include <QWidgetAction>
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+#include "widgets/wizTableSelector.h"
 
 struct WIZACTION
 {
@@ -16,7 +18,8 @@ struct WIZACTION
 
 
 CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
-    : m_parent(parent)
+    : QObject(parent)
+    , m_parent(parent)
     , m_app(app)
 {
 }
@@ -259,13 +262,31 @@ CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionNa
 
 QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection)
 {
-    QMenu* pMenu = new QMenu(parent);
-    QString strLocalText = QObject::tr(strSection.toUtf8());
+    if (strSection == "Table")
+    {
+        QWidgetAction* tableAction = new QWidgetAction(parent);
+        tableAction->setText(QObject::tr("Table"));
+        WizTableSelectorWidget* tableWidget = new WizTableSelectorWidget(parent);
+        tableAction->setDefaultWidget(tableWidget);
+        //
+        connect(tableWidget, SIGNAL(itemSelected(int,int)), SIGNAL(insertTableSelected(int,int)));
+        //
+        QMenu* menuTable = new QMenu(parent);
+        menuTable->setTitle(tableAction->text());
+        menuTable->addAction(tableAction);
+        //
+        return menuTable;
+    }
+    else
+    {
+        QMenu* pMenu = new QMenu(parent);
+        QString strLocalText = QObject::tr(strSection.toUtf8());
 
-    pMenu->setTitle(strLocalText);
-    buildMenu(pMenu, settings, strSection, false);
+        pMenu->setTitle(strLocalText);
+        buildMenu(pMenu, settings, strSection, false);
 
-    return pMenu;
+        return pMenu;
+    }
 }
 
 void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar)

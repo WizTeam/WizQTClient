@@ -471,14 +471,6 @@ if(UNIX)
         add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
             COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/build/osx/localize/ ${WIZNOTE_RESOURCE_DIR})
 
-
-        if(NOT APPSTORE_BUILD)
-            if (CMAKE_BUILD_TYPE STREQUAL "Release")
-                add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-                    COMMAND ${qt_binary_dir}/macdeployqt ${WIZNOTE_ROOT_DIR})
-            endif()
-        endif()
-
     elseif(NOT APPLE)
         add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_LINUX")
@@ -515,6 +507,9 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
     ${CMAKE_SOURCE_DIR}/lib/openssl/include
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
+    if(APPLE)
+        ~/Library/Frameeorks
+    endif()
 )
 
 link_directories(

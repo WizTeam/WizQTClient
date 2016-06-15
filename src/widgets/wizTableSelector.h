@@ -2,6 +2,7 @@
 #define WIZTABLESELECTOR_H
 
 #include <QWidget>
+class QMenu;
 
 class WizTableItemWidget : public QWidget
 {

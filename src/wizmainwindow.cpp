@@ -874,6 +874,8 @@ void MainWindow::initActions()
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setSingleIcons("sync");
+    //
+    connect(m_actions, SIGNAL(insertTableSelected(int,int)), SLOT(on_actionMenuFormatInsertTable(int,int)));
 
     connect(m_doc->web(), SIGNAL(statusChanged(const QString&)), SLOT(on_editor_statusChanged(const QString&)));
 }
@@ -2644,6 +2646,16 @@ void MainWindow::on_actionMenuFormatInsertTime_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarInsertTime");
     getActiveEditor()->editorCommandExecuteInsertTime();
+}
+
+void MainWindow::on_actionMenuFormatInsertTable(int row, int col)
+{
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+        WizGetAnalyzer().LogAction("MenuBarInsertTable");
+        getActiveEditor()->editorCommandExecuteTableInsert(row, col);
+
+    });
 }
 
 void MainWindow::on_actionMenuFormatIndent_triggered()

@@ -94,8 +94,9 @@ private:
 };
 
 
-class CWizActions
+class CWizActions : public QObject
 {
+    Q_OBJECT
 public:
     CWizActions(CWizExplorerApp& app, QObject* parent);
 
@@ -118,6 +119,10 @@ public:
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu);
     void buildMenu(QMenu* menu, const QString& strFileName);
+    //
+Q_SIGNALS:
+    void insertTableSelected(int row, int col);
 };
+
 
 #endif // WIZACTIONS_H

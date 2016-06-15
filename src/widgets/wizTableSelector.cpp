@@ -1,5 +1,8 @@
 #include "wizTableSelector.h"
 #include <QGridLayout>
+#include <QMenu>
+#include <QApplication>
+#include "share/wizthreads.h"
 
 WizTableItemWidget::WizTableItemWidget(int row, int col, QWidget* parent)
     : QWidget(parent)
@@ -42,12 +45,14 @@ void WizTableItemWidget::mouseMoveEvent(QMouseEvent * e)
 }
 void WizTableItemWidget::mousePressEvent(QMouseEvent * e)
 {
-    if (underMouse())
-    {
-        emit mousePressed(m_row, m_col);
-    }
+    bool under = underMouse();
     //
     QWidget::mousePressEvent(e);
+    //
+    if (under)
+    {
+        emit mousePressed(m_row + 1, m_col + 1);
+    }
 }
 
 WizTableSelectorWidget::WizTableSelectorWidget(QWidget* parent)

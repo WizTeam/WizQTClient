@@ -529,7 +529,20 @@ protected:
 
         update();
     }
-
+    void mouseReleaseEvent(QMouseEvent* ev)
+    {
+#ifdef Q_OS_OSX
+        QMenu* m = menu();
+        if (m)
+        {
+            QPoint pt = mapToGlobal(rect().bottomLeft());
+            m->popup(pt);
+            return;
+        }
+#endif
+        //
+        QToolButton::mouseReleaseEvent(ev);
+    }
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -1443,7 +1456,7 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     m_btnOrderedList->setChecked(InsertOrderedList);
     m_btnUnorderedList->setChecked(InsertUnorderedList);
 
-    m_btnTable->setEnabled(canInsertTable);
+    //m_btnTable->setEnabled(canInsertTable);
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);

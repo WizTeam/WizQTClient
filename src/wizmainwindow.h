@@ -347,6 +347,7 @@ public Q_SLOTS:
     void on_actionMenuFormatInsertCode_triggered();
     void on_actionMenuFormatInsertImage_triggered();
     void on_actionMenuFormatScreenShot_triggered();
+    void on_actionMenuFormatInsertTable(int row, int col);
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
                           bool bStart, bool bEnd);

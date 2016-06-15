@@ -5,13 +5,13 @@ echo "build version : " $REV
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=/Users/weishijun/Qt5.5.1/5.5/clang_64/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
+cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DAPPSTORE_BUILD=YES -DCMAKE_PREFIX_PATH=/Users/weishijun/Qt5.7.0/5.7/clang_64/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
 make -j5
 
 ##############################################################
 #defines
 
-QTDIR="/Users/weishijun/Qt5.5.1/5.5/clang_64"
+QTDIR="/Users/weishijun/Qt5.7.0/5.7/clang_64"
 
 MYAPP="WizNote"
 DEST="$MYAPP.app" # Our final App directory
@@ -28,91 +28,66 @@ PLUGINS="sqldrivers imageformats  platforms printsupport \
 ##############################################################
 #macdeployqt
 #使用qt自带的发布工具，否则有问题
-$QTDIR/bin/macdeployqt $DEST
-
-##init dir
-#mkdir -p $DEST/Contents/Frameworks $DEST/Contents/SharedSupport $DEST/Contents/PlugIns
-
-##copy Qt libs
-#for L in $QTLIBS ; do
-#  cp -R -p $QTDIR/lib/$L.framework $MYAPP.app/Contents/Frameworks
-#  rm -f $MYAPP.app/Contents/Frameworks/$L.framework/Headers
-#  rm -R -f $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/Headers
-#  rm $MYAPP.app/Contents/Frameworks/$L.framework/${L}.prl
-#done
-
-##copy Qt plugins
-#for P in $PLUGINS ; do
-#  mkdir $MYAPP.app/Contents/PlugIns/$P
-#  cp -R -p $QTDIR/plugins/$P/*.dylib $MYAPP.app/Contents/PlugIns/$P/
-#  rm $MYAPP.app/Contents/PlugIns/$P/*_debug.dylib
-#done
-##remove unused plugins
-#rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqminimal.dylib
-#rm -R -f $MYAPP.app/Contents/PlugIns/platforms/libqoffscreen.dylib
-#rm -R -f $MYAPP.app/Contents/PlugIns/sqldrivers/libqsqlpsql.dylib
 
 
-##store all *.dylib in plugins to DISTPLUGINS
-DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
+echo "replace version"
+plutil -replace CFBundleVersion -string $REV $MYAPP.app/Contents/Info.plist
 
-###############################################################
-##install_name_tool
+echo "call macdeployqt"
+$QTDIR/bin/macdeployqt $DEST -appstore-compliant
 
-##frameworks
-#for I in $QTLIBS ; do
-#  install_name_tool -id "@executable_path/../Frameworks/$I.framework/Versions/5/$I"\
-#   "$MYAPP.app/Contents/Frameworks/$I.framework/Versions/5/$I"
-#  install_name_tool -change @rpath/$I.framework/Versions/5/$I\
-#    @executable_path/../Frameworks/$I.framework/Versions/5/$I\
-#    $MYAPP.app/Contents/MacOS/$MYAPP # change references to Qt frameworks
-#  for L in $QTLIBS ; do # change all lib references in all Qt frameworks
-#    if [ $L = $I ] ; then continue; fi
-#    install_name_tool -change @rpath/$I.framework/Versions/5/$I\
-#      @executable_path/../Frameworks/$I.framework/Versions/5/$I\
-#      $MYAPP.app/Contents/Frameworks/$L.framework/Versions/5/$L
-#  done
-#done
-
-##plugins
-#for P in $DISTPLUGINS ; do # change ID for all *.dylib libs
-#  install_name_tool -id "@executable_path/../PlugIns/$I" "$MYAPP.app/Contents/PlugIns/$P"
-#  for L in $QTLIBS ; do # change any reference to Qt in our *.dylib libs
-#    install_name_tool -change @rpath/$L.framework/Versions/5/$L\
-#      @executable_path/../Frameworks/$L.framework/Versions/5/$L\
-#      $MYAPP.app/Contents/PlugIns/$P
-#  done
-#done
-
+echo "replace QtWebEngineProcess"
+#plutil -insert CFBundleVersion -string $REV "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app/Contents/Info.plist"
+#plutil -replace CFBundleIdentifier -string "cn.wiz.wiznoteformac.QtWebEngineProcess" "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app/Contents/Info.plist"
 
 ##############################################################
 #sign
-
-cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
+#签名仍然有问题，无法正常使用webengine，原因未知。
 
 APPLCERT="3rd Party Mac Developer Application: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
 
+echo "sign binary"
+cp -R -p ../WizQTClient/build/osx/WizNote-Entitlements.plist WizNote-Entitlements.plist
+cp -R -p ../WizQTClient/build/osx/WebEngineProcess.plist WebEngineProcess.plist
+
+
+#codesign --deep --verbose --force --verify --sign "$APPLCERT" -i "cn.wiz.wiznoteformac.QtWebEngineProcess" "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+#codesign --deep --verbose --force --verify --sign "$APPLCERT" "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+#codesign --deep --verbose --force --verify --sign "$APPLCERT" "$MYAPP.app/Contents/Frameworks/"
+#codesign --deep --verbose --force --verify --sign "$APPLCERT" "$MYAPP.app/Contents/PlugIns/"
+
+echo "sign QtWebEngineProcess with entitlements"
+#codesign --sign "$APPLCERT" -i "cn.wiz.wiznoteformac.QtWebEngineProcess" --entitlements WizNote-Entitlements.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+#codesign --sign "$APPLCERT" --entitlements WizNote-Entitlements.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+
+codesign --force -i "org.qt-project.Qt.QtWebEngineProcess" --sign "$APPLCERT" --entitlements WebEngineProcess.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+
+echo "sign frameworks"
 for I in $QTLIBS ; do # signing the Qt frameworks
-echo "code sign framework: "  $I;
-  codesign --force --verify --deep --verbose --sign "$APPLCERT" \
-    $MYAPP.app/Contents/Frameworks/$I.framework/Versions/5
+    echo "code sign framework: "  $I;
+    codesign --verify --verbose --sign "$APPLCERT" $MYAPP.app/Contents/Frameworks/$I.framework
 done
 
+#codesign --force -i "org.qt-project.Qt.QtWebEngineProcess" --sign "$APPLCERT" --entitlements WebEngineProcess.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+
+echo "sign plugins"
+DISTPLUGINS=`cd $MYAPP.app/Contents/PlugIns; ls -1 */*.dylib` # extract all our *.dylib libs
 for I in $DISTPLUGINS ; do # signing all *.dylib libs
-  echo "code sign plugin: "  $I;
-  codesign --force --verify --deep --verbose --sign "$APPLCERT" \
-    $MYAPP.app/Contents/PlugIns/$I
+    echo "code sign plugin: "  $I;
+    codesign --verify --verbose --sign "$APPLCERT" $MYAPP.app/Contents/PlugIns/$I
 done
 
-plutil -replace CFBundleVersion -string $REV $MYAPP.app/Contents/Info.plist
+codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngine" $MYAPP.app/Contents/Frameworks/QtWebEngine.framework/
+codesign --force -s "$APPLCERT" -i "org.qt-project.Qt.QtWebEngineProcess" --entitlements WebEngineProcess.plist $MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/Current/Helpers/QtWebEngineProcess.app
+codesign --force -s "$APPLCERT" -i "org.qt-project.Qt.QtWebEngineCore" $MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/
+codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngineWidgets" $MYAPP.app/Contents/Frameworks/QtWebEngineWidgets.framework/
 
-codesign --verbose=2 --sign "$APPLCERT" --entitlements \
-  WizNote-Entitlements.plist  "$MYAPP.app"
+echo "sign WizNote.app with entitlements"
+codesign --verbose=3 --sign "$APPLCERT" --entitlements WizNote-Entitlements.plist  "$MYAPP.app"
 
 ##############################################################
 #make pkg
 
+echo "build pkg"
 INSTCERT="3rd Party Mac Developer Installer: Beijing Wozhi Technology Co. Ltd (KCS8N3QJ92)"
-
-productbuild --component "$MYAPP.app" /Applications \
-  --sign "$INSTCERT" "$MYAPP.pkg"
+productbuild --component "$MYAPP.app" /Applications --sign "$INSTCERT" "$MYAPP.pkg"
