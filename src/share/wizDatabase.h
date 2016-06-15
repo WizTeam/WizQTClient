@@ -119,6 +119,10 @@ private:
     QMap<QString, CWizDatabase*> m_mapGroups;
     QMutex m_mtxTempFile;
 
+private:
+    QMutex m_mutexCache;
+    CWizGroupDataArray m_cachedGroups;
+    CWizBizDataArray m_cachedBizs;
 public:
     CWizDatabase();
 
@@ -351,12 +355,12 @@ public:
     bool SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
     bool GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint);
 
-    //bool GetBizGroupInfo(QMap<QString, QString>& bizInfo);
-    bool GetUserGroupInfo(CWizGroupDataArray& arrayGroup);
-    bool SetUserGroupInfo(const CWizGroupDataArray& arrayGroup);
-    bool SetUserBizInfo(const CWizBizDataArray& arrayBiz);
-    bool GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz);
-    bool GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayAllGroup, CWizBizDataArray& arrayBiz);
+    bool GetAllGroupInfo(CWizGroupDataArray& arrayGroup);
+    bool SetAllGroupInfo(const CWizGroupDataArray& arrayGroup);
+    //
+    bool GetAllBizInfo(CWizBizDataArray& arrayBiz);
+    bool SetAllBizInfo(const CWizBizDataArray& arrayBiz);
+    //
     bool GetBizData(const QString& bizGUID, WIZBIZDATA& biz);
     bool GetBizGUID(const QString& strGroupGUID, QString& strBizGUID);
     bool GetGroupData(const QString& groupGUID, WIZGROUPDATA& group);
@@ -525,6 +529,12 @@ private:
 
     //
     bool initZiwReaderForEncryption(const QString& strUserCipher = "");
+    //
+    bool GetAllGroupInfoCore(CWizGroupDataArray& arrayGroup);
+    bool SetAllGroupInfoCore(const CWizGroupDataArray& arrayGroup);
+    //
+    bool GetAllBizInfoCore(const CWizGroupDataArray& arrayGroup, CWizBizDataArray& arrayBiz);
+    bool SetAllBizInfoCore(const CWizBizDataArray& arrayBiz);
 };
 
 

@@ -1672,10 +1672,10 @@ void CWizCategoryView::loadSectionStatus()
     setItemVisible(optionXML, Section_Tags, this, item);
 
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
 
     for (WIZBIZDATA biz : arrayBiz)
     {
@@ -2865,10 +2865,10 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
 void CWizCategoryView::updateGroupsData()
 {
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
     //
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
     //
     for (CWizBizDataArray::const_iterator it = arrayBiz.begin(); it != arrayBiz.end(); it++)
     {
@@ -3015,11 +3015,11 @@ void CWizCategoryView::initTopLevelItems()
     addTopLevelItem(pAllTagsItem);
 
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     //
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
     //
     std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
     //
@@ -4331,7 +4331,7 @@ void CWizCategoryView::initBiz(const WIZBIZDATA& biz)
     addTopLevelItem(pBizGroupItem);
 
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     //
     int nTotal = arrayGroup.size();
@@ -4606,6 +4606,8 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
 
 CWizCategoryViewItemBase* CWizCategoryView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate /* = true*/)
 {
+    qDebug() << "find group root: " << group.strGroupName;
+    //
     if (group.IsBiz())
     {
         WIZBIZDATA biz;

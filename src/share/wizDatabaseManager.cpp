@@ -78,7 +78,7 @@ bool CWizDatabaseManager::openAll()
 
     // second, get groups info
     CWizGroupDataArray arrayGroup;
-    if (!m_dbPrivate->GetUserGroupInfo(arrayGroup)) {
+    if (!m_dbPrivate->GetAllGroupInfo(arrayGroup)) {
         TOLOG("Failed to get user group info");
         return true;
     }

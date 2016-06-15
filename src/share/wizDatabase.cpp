@@ -599,6 +599,7 @@ const QString g_strDatabaseInfoSection = "Database";
 CWizDatabase::CWizDatabase()
     : m_ziwReader(new CWizZiwReader())
     , m_bIsPersonal(true)
+    , m_mutexCache(QMutex::Recursive)
 {
 }
 
@@ -1034,14 +1035,14 @@ bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
 
 bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
 {
-    bool ret = SetUserGroupInfo(arrayGroup);
+    bool ret = SetAllGroupInfo(arrayGroup);
     Q_EMIT groupsInfoDownloaded(arrayGroup);
     return ret;
 }
 
 bool CWizDatabase::OnDownloadBizs(const CWizBizDataArray& arrayBiz)
 {
-    bool ret = SetUserBizInfo(arrayBiz);
+    bool ret = SetAllBizInfo(arrayBiz);
     Q_EMIT bizInfoDownloaded(arrayBiz);
     return ret;
 }
@@ -1275,13 +1276,6 @@ bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
 void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
 {
     Q_ASSERT(!IsGroup());
-
-    //QMap<QString, QString> mapBiz;
-    //GetBizGroupInfo(mapBiz);
-    //for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
-    //     it != mapBiz.end(); it++) {
-    //    arrayKey.push_back("biz_users/" + it.key());
-    //}
 }
 
 qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
@@ -1295,21 +1289,6 @@ void CWizDatabase::SetAccountLocalValue(const QString& strKey,
                                         bool bSaveVersion)
 {
     Q_ASSERT(!IsGroup());
-
-    if (strKey.startsWith("biz_users/", Qt::CaseInsensitive)) {
-        /*
-        QMap<QString, QString> mapBiz;
-        GetBizGroupInfo(mapBiz);
-        for (QMap<QString, QString>::const_iterator it = mapBiz.begin();
-             it != mapBiz.end(); it++) {
-            if (strKey.endsWith(it.key(), Qt::CaseInsensitive)) {
-                SetBizUsers(it.key(), strValue);
-            }
-        }
-        */
-    } else {
-        Q_ASSERT(0);
-    }
 
     if (bSaveVersion) {
         SetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
@@ -2012,7 +1991,7 @@ bool CWizDatabase::UpdateMessages(const CWizMessageDataArray& arrayMsg)
     return !bHasError;
 }
 
-bool CWizDatabase::SetUserBizInfo(const CWizBizDataArray& arrayBiz)
+bool CWizDatabase::SetAllBizInfoCore(const CWizBizDataArray& arrayBiz)
 {
     class CBizUserAvatar
     {
@@ -2089,17 +2068,8 @@ bool CWizDatabase::IsEmptyBiz(const CWizGroupDataArray& arrayGroup, const QStrin
     return true;
 }
 
-bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, CWizBizDataArray& arrayBiz)
+bool CWizDatabase::GetAllBizInfoCore(const CWizGroupDataArray& arrayGroup, CWizBizDataArray& arrayBiz)
 {
-    CWizGroupDataArray arrayGroup;
-    GetUserGroupInfo(arrayGroup);
-    //
-    return GetUserBizInfo(bAllowEmptyBiz, arrayGroup, arrayBiz);
-}
-//
-bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray& arrayGroup, CWizBizDataArray& arrayBiz)
-{
-    BOOL inited = false;
     int count = GetMetaDef("Bizs", "Count").toInt();
     //
     for (int i = 0; i < count; i++)
@@ -2113,28 +2083,10 @@ bool CWizDatabase::GetUserBizInfo(bool bAllowEmptyBiz, const CWizGroupDataArray&
         biz.bizLevel = GetMetaDef(bizSection, "Level").toInt();
         biz.bizIsDue = GetMetaDef(bizSection, "IsDue") == "1";
         //
-        if (bAllowEmptyBiz || !IsEmptyBiz(arrayGroup, biz.bizGUID))
+        if (biz.bizUserRole == WIZ_BIZROLE_OWNER || !IsEmptyBiz(arrayGroup, biz.bizGUID))
         {
             arrayBiz.push_back(biz);
         }
-        //
-        inited = true;
-    }
-    //
-    if (inited)
-        return true;
-    //
-    //init from old data
-    QString section = "BizGroups";
-    //
-    count = GetMetaDef(section, "Count").toInt();
-    for (int i = 0; i < count; i++)
-    {
-        WIZBIZDATA biz;
-        biz.bizGUID = GetMetaDef(section, QString::number(i));
-        biz.bizName = GetMetaDef(section, biz.bizGUID);
-        //
-        arrayBiz.push_back(biz);
     }
     //
     return true;
@@ -2149,7 +2101,7 @@ bool CWizDatabase::GetBizData(const QString& bizGUID, WIZBIZDATA& biz)
         return false;
 
     CWizBizDataArray arrayBiz;
-    if (!db->GetUserBizInfo(true, arrayBiz))
+    if (!db->GetAllBizInfo(arrayBiz))
         return false;
     //
     for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
@@ -2239,7 +2191,7 @@ bool CWizDatabase::GetJionedGroups(const CWizGroupDataArray& arrayAllGroup, CWiz
     return true;
 }
 
-bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
+bool CWizDatabase::SetAllGroupInfoCore(const CWizGroupDataArray& arrayGroup)
 {
     int nTotal = arrayGroup.size();
     // set group info
@@ -2262,7 +2214,7 @@ bool CWizDatabase::SetUserGroupInfo(const CWizGroupDataArray& arrayGroup)
 }
 
 
-bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
+bool CWizDatabase::GetAllGroupInfoCore(CWizGroupDataArray& arrayGroup)
 {
     CString strTotal;
     bool bExist;
@@ -2292,6 +2244,54 @@ bool CWizDatabase::GetUserGroupInfo(CWizGroupDataArray& arrayGroup)
 
     return true;
 }
+
+bool CWizDatabase::GetAllGroupInfo(CWizGroupDataArray& arrayGroup)
+{
+    QMutexLocker locker(&m_mutexCache);
+    bool isEmpty = m_cachedGroups.empty();
+    bool ret = true;
+    if (isEmpty)
+    {
+        ret = GetAllGroupInfoCore(m_cachedGroups);
+    }
+    arrayGroup = m_cachedGroups;
+    return ret;
+}
+
+bool CWizDatabase::SetAllGroupInfo(const CWizGroupDataArray& arrayGroup)
+{
+    QMutexLocker locker(&m_mutexCache);
+    m_cachedGroups = arrayGroup;
+    //
+    return SetAllGroupInfoCore(arrayGroup);
+}
+
+
+bool CWizDatabase::GetAllBizInfo(CWizBizDataArray& arrayBiz)
+{
+    CWizGroupDataArray arrayGroup;
+    GetAllGroupInfo(arrayGroup);
+    //
+    QMutexLocker locker(&m_mutexCache);
+    bool isEmpty = m_cachedBizs.empty();
+    bool ret = true;
+    if (isEmpty)
+    {
+        ret = GetAllBizInfoCore(arrayGroup, m_cachedBizs);
+    }
+    arrayBiz = m_cachedBizs;
+    return ret;
+}
+
+//
+bool CWizDatabase::SetAllBizInfo(const CWizBizDataArray& arrayBiz)
+{
+    QMutexLocker locker(&m_mutexCache);
+    m_cachedBizs = arrayBiz;
+    //
+    return SetAllBizInfoCore(arrayBiz);
+}
+
 
 bool CWizDatabase::UpdateDeletedGUIDs(const CWizDeletedGUIDDataArray& arrayDeletedGUID)
 {

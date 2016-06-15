@@ -1860,7 +1860,11 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (server.GetGroupList(arrayGroup))
     {
         pDatabase->OnDownloadGroups(arrayGroup);
-        syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+        //
+        if (WizIsDayFirstSync(pDatabase))
+        {
+            syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+        }
     }
     else
     {
