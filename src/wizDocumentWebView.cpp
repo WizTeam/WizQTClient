@@ -883,6 +883,9 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 
 void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
+    if (!isMainFrame)
+        return;
+    //
     page->stopCurrentNavigation();
     //
     if (isInternalUrl(url))
