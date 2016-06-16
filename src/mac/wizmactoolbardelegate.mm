@@ -76,6 +76,8 @@ private:
     //CWizToolBarActionItemView* m_view;
 
 public:
+    QAction* action() const { return m_action; }
+    //
     virtual NSString* itemIdentifier() const
     {
         return m_id;

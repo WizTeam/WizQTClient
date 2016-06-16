@@ -2287,7 +2287,10 @@ bool CWizDatabase::GetAllBizInfo(CWizBizDataArray& arrayBiz)
 bool CWizDatabase::SetAllBizInfo(const CWizBizDataArray& arrayBiz)
 {
     QMutexLocker locker(&m_mutexCache);
-    m_cachedBizs = arrayBiz;
+    //
+    //不能直接使用服务器的biz列表，因为有空的。强制失效，从本地重新获取
+    //m_cachedBizs = arrayBiz;
+    m_cachedBizs.clear();
     //
     return SetAllBizInfoCore(arrayBiz);
 }

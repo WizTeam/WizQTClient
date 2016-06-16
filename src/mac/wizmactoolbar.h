@@ -29,6 +29,8 @@ public:
 
     void buttonClicked();
     void extraMenuClicked();
+    //
+    QRect geometry();
 signals:
     void triggered(bool);
     void showExtraMenuRequest();

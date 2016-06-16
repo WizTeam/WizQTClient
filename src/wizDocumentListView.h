@@ -118,6 +118,9 @@ private:
 
     bool m_itemSelectionChanged;
     bool m_accpetAllSearchItems;
+    //
+    int m_nAddedDocumentCount;
+    bool m_bSortDocumentsAfterAdded;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 

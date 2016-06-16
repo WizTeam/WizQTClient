@@ -128,6 +128,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
+    , m_newNoteButton(NULL)
     #else
     , m_toolBar(new QToolBar(this))
 //    , m_toolBar(nullptr)
@@ -1439,10 +1440,12 @@ void MainWindow::prepareNewNoteMenu()
 void MainWindow::on_newNoteButton_extraMenuRequest()
 {
     prepareNewNoteMenu();
-
-    QPoint pos = QCursor::pos();
-    pos.setX(pos.x() + 10);
-    m_newNoteExtraMenu->popup(pos);
+    //
+    QRect rc = m_newNoteButton->geometry();
+    QPoint pt = rc.bottomLeft();
+    pt = mapToGlobal(pt);
+    //
+    m_newNoteExtraMenu->popup(QPoint(pt.x(), pt.y() - 92));
 }
 
 void MainWindow::on_newNoteByExtraMenu_request()
@@ -1633,12 +1636,14 @@ void MainWindow::initToolBar()
     int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
     QPixmap pixExtraMenu = Utils::StyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New Note"), pixExtraMenu, buttonWidth, nullptr);
-    connect(texturedItem, SIGNAL(triggered(bool)),
+    CWizMacToolBarButtonItem* newNoteItem = new CWizMacToolBarButtonItem(tr("New Note"), pixExtraMenu, buttonWidth, nullptr);
+    connect(newNoteItem, SIGNAL(triggered(bool)),
             m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool)));
-    connect(texturedItem, SIGNAL(showExtraMenuRequest()), SLOT(on_newNoteButton_extraMenuRequest()));
+    connect(newNoteItem, SIGNAL(showExtraMenuRequest()), SLOT(on_newNoteButton_extraMenuRequest()));
 
-    m_toolBar->addWidget(texturedItem, "", "");
+    m_toolBar->addWidget(newNoteItem, "", "");
+    //
+    m_newNoteButton = newNoteItem;
 
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);

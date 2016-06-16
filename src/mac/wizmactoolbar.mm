@@ -313,6 +313,22 @@ QSize CWizMacToolBarButtonItem::sizeHint() const
      return  QSize(m_width, TOOLBARITEMHEIGHT);
 }
 
+QRect CWizMacToolBarButtonItem::geometry()
+{
+    WizSegmentedControl* button = (WizSegmentedControl *)cocoaView();
+    //
+    NSRect frame = button.bounds;
+    //
+    frame = [button convertRect:frame toView:nil];
+    //
+    NSWindow* window = button.window;
+    NSRect windowFrame = window.frame;
+    CGFloat y = windowFrame.size.height - frame.origin.y;
+    //
+    return QRect(frame.origin.x, (int)y, frame.size.width, frame.size.height);
+}
+
+
 void CWizMacToolBarButtonItem::buttonClicked()
 {
     emit triggered(true);

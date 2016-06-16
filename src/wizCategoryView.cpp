@@ -38,13 +38,10 @@
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
-#define CATEGORY_PERSONAL   QObject::tr("Personal Notes")
-#define CATEGORY_TEAM_GROUPS QObject::tr("Team & Groups")
-//#define CATEGORY_ENTERPRISE QObject::tr("Enterprise groups")
-#define CATEGORY_INDIVIDUAL QObject::tr("Individual Groups")
+#define CATEGORY_TEAM_GROUPS QObject::tr("Team Notes")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick Search")
-#define CATEGORY_FOLDERS    QObject::tr("Note Folders")
+#define CATEGORY_FOLDERS    QObject::tr("Folders")
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
 
@@ -4738,75 +4735,6 @@ CWizCategoryViewItemBase* CWizCategoryView::findAllMessagesItem()
     //
     return NULL;
 }
-
-/*
-
-CWizCategoryViewItemBase* CWizCategoryView::findCategory(const QString& strName, bool bCreate)
-{
-    for (int i = 0; i < topLevelItemCount(); i++) {
-        CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(topLevelItem(i));
-        if (pItem && pItem->name() == strName) {
-            return pItem;
-        }
-    }
-
-    if (!bCreate)
-        return NULL;
-
-    // create group root if not found
-    if (strName == CATEGORY_ENTERPRISE)
-    {
-        // find style root and insert after it
-        CWizCategoryViewItemBase* pStyle = findCategory(CATEGORY_STYLES, false);
-        if (!pStyle)
-            return NULL;
-
-        int index = indexOfTopLevelItem(pStyle);
-
-        CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
-        insertTopLevelItem(index + 1, pSpacer);
-
-        CWizCategoryViewCategoryItem* pItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_ENTERPRISE);
-        insertTopLevelItem(index + 2, pItem);
-
-        return pItem;
-    }
-    else if (strName == CATEGORY_GROUP)
-    {
-        // always append on the end
-        if (!findCategory(CATEGORY_INDIVIDUAL, false)) {
-            CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
-            addTopLevelItem(pSpacer);
-
-            CWizCategoryViewCategoryItem* pRoot = new CWizCategoryViewCategoryItem(m_app, CATEGORY_INDIVIDUAL);
-            addTopLevelItem(pRoot);
-        }
-
-        // insert individual group root
-        CWizCategoryViewGroupsRootItem* pItem  = new CWizCategoryViewGroupsRootItem(m_app, CATEGORY_GROUP, "");
-        addTopLevelItem(pItem);
-        pItem->setExpanded(true);
-
-        return pItem;
-    }
-    else
-    {
-        // it should be enterprise groups root
-        CWizCategoryViewItemBase* pEnterprise = findCategory(CATEGORY_ENTERPRISE);
-        if (!pEnterprise)
-            return NULL;
-
-        // insert enterprise group root
-        CWizCategoryViewBizGroupRootItem* pItem = new CWizCategoryViewBizGroupRootItem(m_app, strName, "");
-        insertTopLevelItem(indexOfTopLevelItem(pEnterprise) + 1, pItem);
-        pItem->setExpanded(true);
-
-        return pItem;
-    }
-    //
-    return NULL;
-}
-*/
 
 CWizCategoryViewGroupRootItem* CWizCategoryView::findGroup(const QString& strKbGUID)
 {

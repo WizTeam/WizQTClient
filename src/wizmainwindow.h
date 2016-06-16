@@ -69,6 +69,9 @@ class WizMessageListTitleBar;
 class CWizDocumentView;
 class CWizSingleDocumentViewDelegate;
 
+#ifdef Q_OS_MAC
+class CWizMacToolBarButtonItem;
+#endif
 
 class MainWindow
 #ifdef Q_OS_MAC
@@ -147,6 +150,7 @@ private:
 #ifdef USECOCOATOOLBAR
     CWizMacToolBar* m_toolBar;
     CWizMacFixedSpacer* m_spacerForToolButtonAdjust;
+    CWizMacToolBarButtonItem* m_newNoteButton;
 #else
     QToolBar* m_toolBar;
     CWizFixedSpacer* m_spacerForToolButtonAdjust;

@@ -38,7 +38,7 @@
 
 #define WIZ_CATEGORY_SECTION_GENERAL QObject::tr("General")
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
-#define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
+#define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team Notes")
 
 #define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag document form document list")
 
@@ -875,7 +875,7 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%' limit 1000", arrayDocument);
+    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%' order by DT_DATA_MODIFIED desc limit 1000", arrayDocument);
 }
 
 bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)

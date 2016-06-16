@@ -71,6 +71,8 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     , m_itemSelectionChanged(false)
     , m_accpetAllSearchItems(false)
     , m_nLeadInfoState(DocumentLeadInfo_None)
+    , m_nAddedDocumentCount(0)
+    , m_bSortDocumentsAfterAdded(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -293,14 +295,40 @@ void CWizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDoc
 int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
 {
     addDocument(doc);
-
-    updateSectionItems();
-
-    if (sort) {
-        sortItems();
+#ifdef QT_DEBUG
+    qDebug() << "add document: " << doc.strTitle;
+#endif
+    //
+    if (sort)
+    {
+        m_bSortDocumentsAfterAdded = true;
     }
+    //
+    if (0 == m_nAddedDocumentCount)
+    {
+        m_nAddedDocumentCount++;
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            //
+#ifdef QT_DEBUG
+            qDebug() << "sort documents ";
+#endif
+            //
+            m_nAddedDocumentCount = 0;
 
-    Q_EMIT documentCountChanged();
+            updateSectionItems();
+
+            if (m_bSortDocumentsAfterAdded) {
+                sortItems();
+                m_bSortDocumentsAfterAdded = false;
+            }
+
+            Q_EMIT documentCountChanged();
+            //
+        });
+
+    }
+    //
     int nCount = count();
     return nCount;
 }

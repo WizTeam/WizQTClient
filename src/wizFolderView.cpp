@@ -55,7 +55,7 @@ void CWizFolderView::showEvent(QShowEvent *event)
 
 void CWizFolderView::initFolders()
 {
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"), m_dbMgr.db().kbGUID());
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Personal Notes"), m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllFoldersItem);
 
     CWizStdStringArray arrayAllLocation;
