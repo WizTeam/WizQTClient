@@ -883,6 +883,8 @@ void CWizDocumentWebView::onEditorLoadFinished(bool ok)
 
 void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
+    page->stopCurrentNavigation();
+    //
     if (isInternalUrl(url))
     {
         QString strUrl = url.toString();
@@ -913,8 +915,6 @@ void CWizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::Navigati
         QDesktopServices::openUrl(strUrl);
         return;
     }
-    //
-    page->stopCurrentNavigation();
 }
 
 bool CWizDocumentWebView::isInternalUrl(const QUrl& url)

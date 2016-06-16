@@ -792,8 +792,10 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
 
 
     bool onEditRequest = m_editStatus & DOCUMENT_STATUS_ON_EDITREQUEST;
+    //
+    bool forceEdit = onEditRequest ? true : false;
 
-    viewNote(m_note, onEditRequest ? modeEditor : m_editorMode);
+    viewNote(m_note, forceEdit);
 }
 
 void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
