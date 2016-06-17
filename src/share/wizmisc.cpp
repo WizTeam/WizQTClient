@@ -1673,7 +1673,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     };
 
     QStringList suffixList;
-    suffixList << ".png" << ".tiff";
+    suffixList << ".png" << ".tiff" << ".gif";
 
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {

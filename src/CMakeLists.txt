@@ -129,6 +129,7 @@ set(wiznote_SOURCES
     share/rtf2html/rtf2html.cpp
     widgets/wizEmailShareDialog.cpp
     widgets/wizTemplatePurchaseDialog.cpp
+    widgets/wizexecutingactiondialog.cpp
     share/websocketclientwrapper.cpp
     share/websockettransport.cpp
     share/wizwebengineview.cpp
@@ -370,6 +371,7 @@ set(wiznote_HEADERS
     widgets/wizTipsWidget.cpp
     widgets/wizSingleDocumentView.h
     widgets/wizTemplatePurchaseDialog.h
+    widgets/wizexecutingactiondialog.h
     wizPositionDelegate.h
     core/wizAccountManager.h
     core/wizCommentManager.h
@@ -400,6 +402,7 @@ set(wiznote_FORMS
     ui/wizAdvancedSearchDialog.ui
     ui/wizCrashReportDialog.ui
     ui/wizTemplatePurchaseDialog.ui
+    ui/wizexecutingactiondialog.ui
 )
 
 set(wiznote_TRANSLATIONS

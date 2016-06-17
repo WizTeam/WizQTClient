@@ -38,6 +38,7 @@
 #include "share/wizMessageBox.h"
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizDatabaseManager.h"
+#include "share/wizthreads.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
@@ -1988,10 +1989,13 @@ void CWizDocumentWebView::OnSelectionChange(const QString& currentStyle)
 }
 
 
-QNetworkDiskCache* CWizDocumentWebView::networkCache()
+void CWizDocumentWebView::saveCurrentNote()
 {
-    return NULL;
-    //return dynamic_cast<QNetworkDiskCache *>(page()->networkAccessManager()->cache());
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        onTimerAutoSaveTimout();
+        //
+    });
 }
 
 

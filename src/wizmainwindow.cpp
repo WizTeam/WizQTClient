@@ -97,8 +97,8 @@
 #include "wizPositionDelegate.h"
 #include "core/wizAccountManager.h"
 #include "share/wizwebengineview.h"
-
 #include "rapidjson/document.h"
+#include "widgets/wizexecutingactiondialog.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -1066,6 +1066,12 @@ void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
     QFileInfo info(tmplData.strFileName);
     if (!info.exists())
     {
+        WizExecutingActionDialog::executeAction("syncing...", WIZ_THREAD_DEFAULT, [=]{
+            //
+            QThread::sleep(1000 * 6);
+
+        });
+        //
         qDebug() << "template file not exists : " << tmplData.strFileName;
     }
 

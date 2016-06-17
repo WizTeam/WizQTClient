@@ -4,6 +4,7 @@
 #include <QWebEnginePage>
 #include "../share/wizwebengineview.h"
 
+
 CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
 {

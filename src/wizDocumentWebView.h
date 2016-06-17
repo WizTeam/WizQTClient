@@ -226,6 +226,7 @@ public:
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
     Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void saveCurrentNote();
 
     Q_PROPERTY(QString userGuid READ getUserGuid)
     Q_PROPERTY(QString userAlias READ getUserAlias)
@@ -235,8 +236,6 @@ public:
     Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml)
     Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
     //
-    QNetworkDiskCache* networkCache();    
-
 private:
     void loadDocumentInWeb(WizEditorMode editorMode);
     //

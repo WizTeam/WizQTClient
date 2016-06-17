@@ -92,6 +92,8 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     tmplMarkdown.strTitle = "Markdown Note.md";
     tmplMarkdown.isFree = true;
     tmplList.append(tmplMarkdown);
+    //
+    return true;
 }
 
 void CWizDocTemplateDialog::initTemplateFileTreeWidget()
