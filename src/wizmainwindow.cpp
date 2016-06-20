@@ -1104,7 +1104,11 @@ void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     data.strLocation = tmplData.strFolder;
     if (WizServerTemplate == tmplData.type)
     {
-        if (!tmplData.strFolder.isEmpty())
+        if (data.strLocation.isEmpty())
+        {
+            m_category->getAvailableNewNoteTagAndLocation(data.strKbGUID, tag, data.strLocation);
+        }
+        else
         {
             data.strLocation.replace("{year}", QDate::currentDate().toString("yyyy"));
             data.strLocation.replace("{month}", QDate::currentDate().toString("MM"));
