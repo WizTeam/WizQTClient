@@ -31,6 +31,8 @@ private:
     QWebEnginePage *m_frame;
     QString m_url;
     QList<int> m_timerIDList;
+    //
+    static bool m_bVisibling;
 };
 
 #endif // WIZFRAMELESSWEBDIALOG_H

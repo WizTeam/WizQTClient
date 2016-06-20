@@ -3,7 +3,9 @@
 #include <QDesktopServices>
 #include <QWebEnginePage>
 #include "../share/wizwebengineview.h"
+#include "../share/wizthreads.h"
 
+bool CWizFramelessWebDialog::m_bVisibling = false;
 
 CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
@@ -68,7 +70,17 @@ void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
         }
         //avoid QDialog::exec: Recursive call
         disconnect(m_frame, SIGNAL(loadFinished(bool)), this, SLOT(onPageLoadFinished(bool)));
-        exec();
+        //
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            //
+            if (m_bVisibling)
+                return;
+            //
+            m_bVisibling = true;
+            exec();
+            m_bVisibling = false;
+            //
+        });
     }
     else
     {
