@@ -1064,17 +1064,36 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
 void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
 {
     QFileInfo info(tmplData.strFileName);
-    if (!info.exists())
+    if (info.exists())
     {
-        WizExecutingActionDialog::executeAction("syncing...", WIZ_THREAD_DEFAULT, [=]{
-            //
-            QThread::sleep(1000 * 6);
-
-        });
-        //
-        qDebug() << "template file not exists : " << tmplData.strFileName;
+        createNoteByTemplateCore(tmplData);
     }
+    else
+    {
+        qDebug() << "template file not exists : " << tmplData.strFileName;
+        //
+        WizExecutingActionDialog::executeAction(tr("Downloading template..."), WIZ_THREAD_DEFAULT, [=]{
+            //
+            bool ret = CWizNoteManager::downloadTemplateBlocked(tmplData);
+            //
+            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
 
+                if (ret)
+                {
+                    createNoteByTemplateCore(tmplData);
+                }
+                else
+                {
+                    QMessageBox::warning(this, tr("Error"), tr("Can't download template from server. Please try again later."));
+                }
+            });
+        });
+    }
+}
+void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
+{
+    QFileInfo info(tmplData.strFileName);
+    //
     initVariableBeforCreateNote();
 
     WIZDOCUMENTDATA data;

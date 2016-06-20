@@ -321,6 +321,13 @@ int CWizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
             if (m_bSortDocumentsAfterAdded) {
                 sortItems();
                 m_bSortDocumentsAfterAdded = false;
+                //
+                //
+                QList<QListWidgetItem*> ls = selectedItems();
+                if (!ls.empty())
+                {
+                    scrollToItem(ls[0], EnsureVisible);
+                }
             }
 
             Q_EMIT documentCountChanged();

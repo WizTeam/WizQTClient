@@ -315,6 +315,12 @@ bool CWizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwo
     return true;
 }
 
+bool CWizNoteManager::downloadTemplateBlocked(const TemplateData& tempData)
+{
+    QString strUrl = CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(tempData.id);
+    return WizURLDownloadToFile(strUrl, tempData.strFileName, false);
+}
+
 
 CWizNoteManager::CWizNoteManager(CWizDatabaseManager& dbMgr)
     : m_dbMgr(dbMgr)

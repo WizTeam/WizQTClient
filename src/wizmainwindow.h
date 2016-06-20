@@ -258,7 +258,8 @@ public:
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
 
-signals:    
+    void createNoteByTemplateCore(const TemplateData& tmplData);
+signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
 
