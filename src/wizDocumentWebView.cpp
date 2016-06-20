@@ -60,6 +60,8 @@
 
 #include "html/wizhtmlreader.h"
 
+#include "titlebar.h"
+
 
 enum WizLinkType {
     WizLink_Doucment,
@@ -1185,6 +1187,8 @@ void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
         } else {
             Q_EMIT focusOut();
         }
+        //
+        view()->titleBar()->setEditorMode(m_currentEditorMode);
     }
     //
     QStringList arrayFiles;
