@@ -148,7 +148,7 @@ void CString::SetAt(int index, QChar ch)
 }
 
 
-void CString::Format(const CString& strFormat, ...)
+void CString::Format(QString strFormat, ...)
 {
     CString strFormat2 = strFormat;
     strFormat2.replace("%s", "%ls");

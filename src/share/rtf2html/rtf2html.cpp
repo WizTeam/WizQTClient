@@ -750,6 +750,8 @@ int rtf2html(const char *rtfText, std::string& textResult)
                                                 case rtf_keyword::rkw_blue:
                                                     clr.b=kw.parameter();
                                                     break;
+                                                default:
+                                                    break;
                                                 }
                                                 break;
                                             }
@@ -791,8 +793,9 @@ int rtf2html(const char *rtfText, std::string& textResult)
                                                     }
                                                 }
                                                 else
-                                                    switch (kw.keyword())
                                                 {
+                                                    switch (kw.keyword())
+                                                    {
                                                     case rtf_keyword::rkw_f:
                                                         font_num=kw.parameter();
                                                         break;
@@ -820,6 +823,9 @@ int rtf2html(const char *rtfText, std::string& textResult)
                                                     case rtf_keyword::rkw_fdecor:
                                                         fnt.family=font::ff_fantasy;
                                                         break;
+                                                    default:
+                                                        break;
+                                                    }
                                                 }
                                                 break;
                                             }
@@ -1137,6 +1143,8 @@ int rtf2html(const char *rtfText, std::string& textResult)
                                 {
                                     nNumberAfterUnicodeChar = kw.parameter();
                                 }
+                                break;
+                            default:
                                 break;
                             }
                         }
