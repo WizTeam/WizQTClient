@@ -18,7 +18,6 @@ public:
     QString loadHtmlFileToHtml(const QString& strFileName);
     QString loadTextFileToHtml(const QString& strFileName);
     QString loadImageFileToHtml(const QString& strFileName);
-    QString loadRtfFileToHtml(const QString& strFileName);
     //
 signals:
     void importFinished(bool ok, const QString& text, const QString& kbGuid);

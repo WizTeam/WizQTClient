@@ -117,16 +117,16 @@ set(wiznote_SOURCES
     share/wizLockedFile.cpp
     share/wizLocalPeer.cpp
     share/wizSingleApplication.cpp
-    share/wizRtfReader.cpp
+    #share/wizRtfReader.cpp
     widgets/wizImageButton.cpp
     widgets/WizCodeEditorDialog.cpp
     widgets/wizFramelessWebDialog.cpp
     widgets/wizScreenShotWidget.cpp
     widgets/wizVerificationCodeDialog.cpp
-    share/rtf2html/fmt_opts.cpp
-    share/rtf2html/rtf_keyword.cpp
-    share/rtf2html/rtf_table.cpp
-    share/rtf2html/rtf2html.cpp
+    #share/rtf2html/fmt_opts.cpp
+    #share/rtf2html/rtf_keyword.cpp
+    #share/rtf2html/rtf_table.cpp
+    #share/rtf2html/rtf2html.cpp
     widgets/wizEmailShareDialog.cpp
     widgets/wizTemplatePurchaseDialog.cpp
     widgets/wizexecutingactiondialog.cpp
@@ -335,16 +335,16 @@ set(wiznote_HEADERS
     share/wizLockedFile.h
     share/wizLocalPeer.h
     share/wizSingleApplication.h
-    share/wizRtfReader.h
+    #share/wizRtfReader.h
     widgets/wizScreenShotWidget.h
     widgets/wizVerificationCodeDialog.h
-    share/rtf2html/common.h
-    share/rtf2html/config.h
-    share/rtf2html/dbg_iter.h
-    share/rtf2html/fmt_opts.h
-    share/rtf2html/rtf_keyword.h
-    share/rtf2html/rtf_table.h
-    share/rtf2html/rtf_tools.h
+    #share/rtf2html/common.h
+    #share/rtf2html/config.h
+    #share/rtf2html/dbg_iter.h
+    #share/rtf2html/fmt_opts.h
+    #share/rtf2html/rtf_keyword.h
+    #share/rtf2html/rtf_table.h
+    #share/rtf2html/rtf_tools.h
     widgets/wizEmailShareDialog.h
     share/websocketclientwrapper.h
     share/websockettransport.h

@@ -85,14 +85,6 @@ QString CWizFileImporter::loadImageFileToHtml(const QString& strFileName)
     return QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 }
 
-QString CWizFileImporter::loadRtfFileToHtml(const QString& strFileName)
-{
-    QString strHtml;
-    if (CWizRtfReader::load(strFileName, strHtml))
-        return strHtml;
-
-    return "";
-}
 
 bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGUID,
                                   const QString& strLocation, const WIZTAGDATA& tag)

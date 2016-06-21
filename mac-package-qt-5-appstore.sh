@@ -60,7 +60,7 @@ echo "sign QtWebEngineProcess with entitlements"
 #codesign --sign "$APPLCERT" -i "cn.wiz.wiznoteformac.QtWebEngineProcess" --entitlements WizNote-Entitlements.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
 #codesign --sign "$APPLCERT" --entitlements WizNote-Entitlements.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
 
-codesign --force -i "org.qt-project.Qt.QtWebEngineProcess" --sign "$APPLCERT" --entitlements WebEngineProcess.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
+#codesign --force -i "org.qt-project.Qt.QtWebEngineProcess" --sign "$APPLCERT" --entitlements WebEngineProcess.plist  "$MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/5/Helpers/QtWebEngineProcess.app"
 
 echo "sign frameworks"
 for I in $QTLIBS ; do # signing the Qt frameworks
@@ -77,10 +77,10 @@ for I in $DISTPLUGINS ; do # signing all *.dylib libs
     codesign --verify --verbose --sign "$APPLCERT" $MYAPP.app/Contents/PlugIns/$I
 done
 
-codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngine" $MYAPP.app/Contents/Frameworks/QtWebEngine.framework/
+#codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngine" $MYAPP.app/Contents/Frameworks/QtWebEngine.framework/
 codesign --force -s "$APPLCERT" -i "org.qt-project.Qt.QtWebEngineProcess" --entitlements WebEngineProcess.plist $MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/Versions/Current/Helpers/QtWebEngineProcess.app
 codesign --force -s "$APPLCERT" -i "org.qt-project.Qt.QtWebEngineCore" $MYAPP.app/Contents/Frameworks/QtWebEngineCore.framework/
-codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngineWidgets" $MYAPP.app/Contents/Frameworks/QtWebEngineWidgets.framework/
+#codesign --force -s "$APPLCERT" -i "org.qt-project.QtWebEngineWidgets" $MYAPP.app/Contents/Frameworks/QtWebEngineWidgets.framework/
 
 echo "sign WizNote.app with entitlements"
 codesign --verbose=3 --sign "$APPLCERT" --entitlements WizNote-Entitlements.plist  "$MYAPP.app"
