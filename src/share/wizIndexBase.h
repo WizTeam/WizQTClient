@@ -67,7 +67,6 @@ public:
     bool GetAllDocuments(CWizDocumentDataArray& arrayDocument);
     bool GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument);
     bool DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
-    bool DocumentWithExFieldsFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data);
 
     bool GetAllDocumentsSize(int& count, bool bIncludeTrash = false);
 
@@ -180,23 +179,8 @@ protected:
     bool SQLToStringArray(const CString& strSQL, int nFieldIndex,
                           CWizStdStringArray& arrayString);
 
-    bool SQLToDocumentParamDataArray(const CString& strSQL,
-                                     CWizDocumentParamDataArray& arrayParam);
-
     bool SQLToDocumentDataArray(const CString& strSQL,
                                 CWizDocumentDataArray& arrayDocument);
-    bool SQLToDocumentDataArrayWithExFields(const CString& strSQL,
-                                CWizDocumentDataArray& arrayDocument);
-
-    virtual void InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
-                                      const CWizStdStringArray& arrayGUID,
-                                      const std::map<CString, int>& mapDocumentIndex) = 0;
-
-    void InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
-                                const CString& strDocumentGUIDs,
-                                const std::map<CString, int>& mapDocumentIndex,
-                                const CString& strTagName,
-                                int nShareFlags);
 
     bool SQLToDocumentAttachmentDataArray(const CString& strSQL,
                                           CWizDocumentAttachmentDataArray& arrayAttachment);
@@ -347,11 +331,11 @@ DOCUMENT_OWNER, DOCUMENT_FILE_TYPE, STYLE_GUID, DT_CREATED, DT_MODIFIED, \
 DT_ACCESSED, DOCUMENT_ICON_INDEX, DOCUMENT_SYNC, DOCUMENT_PROTECT, \
 DOCUMENT_READ_COUNT, DOCUMENT_ATTACHEMENT_COUNT, DOCUMENT_INDEXED, \
 DT_INFO_MODIFIED, DOCUMENT_INFO_MD5, DT_DATA_MODIFIED, DOCUMENT_DATA_MD5, \
-DT_PARAM_MODIFIED, DOCUMENT_PARAM_MD5, WIZ_VERSION"
+DT_PARAM_MODIFIED, DOCUMENT_PARAM_MD5, WIZ_VERSION, INFO_CHANGED, DATA_CHANGED"
 
 #define PARAM_LIST_WIZ_DOCUMENT "\
 %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %d, %d, %d, %d, \
-%d, %d, %s, %s, %s, %s, %s, %s, %s"
+%d, %d, %s, %s, %s, %s, %s, %s, %s, %d, %d"
 
 #define FIELD_LIST_WIZ_DOCUMENT_INFO_MODIFY "\
 DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, \
@@ -359,7 +343,7 @@ DOCUMENT_URL=%s, DOCUMENT_AUTHOR=%s, DOCUMENT_KEYWORDS=%s, DOCUMENT_TYPE=%s, \
 DOCUMENT_OWNER=%s, DOCUMENT_FILE_TYPE=%s, STYLE_GUID=%s, DT_CREATED=%s, \
 DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, \
 DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, \
-DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, WIZ_VERSION=%s"
+DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, WIZ_VERSION=%s, INFO_CHANGED=%d, DATA_CHANGED=%d"
 
 #define FIELD_LIST_WIZ_DOCUMENT_MODIFY  "\
 DOCUMENT_TITLE=%s, DOCUMENT_LOCATION=%s, DOCUMENT_NAME=%s, DOCUMENT_SEO=%s, \
@@ -369,7 +353,7 @@ DT_MODIFIED=%s, DT_ACCESSED=%s, DOCUMENT_ICON_INDEX=%d, DOCUMENT_SYNC=%d, \
 DOCUMENT_PROTECT=%d, DOCUMENT_READ_COUNT=%d, DOCUMENT_ATTACHEMENT_COUNT=%d, \
 DOCUMENT_INDEXED=%d, DT_INFO_MODIFIED=%s, DOCUMENT_INFO_MD5=%s, \
 DT_DATA_MODIFIED=%s, DOCUMENT_DATA_MD5=%s, DT_PARAM_MODIFIED=%s, \
-DOCUMENT_PARAM_MD5=%s, WIZ_VERSION=%s"
+DOCUMENT_PARAM_MD5=%s, WIZ_VERSION=%s, INFO_CHANGED=%d, DATA_CHANGED=%d"
 
 #define TABLE_KEY_WIZ_DOCUMENT  "DOCUMENT_GUID"
 #define FIELD_INFO_MODIFIED_WIZ_DOCUMENT    "DT_INFO_MODIFIED"
@@ -405,7 +389,9 @@ enum FieldIndex_WizDocument
         documentDOCUMENT_DATA_MD5,
         documentDT_PARAM_MODIFIED,
         documentDOCUMENT_PARAM_MD5,
-        documentVersion
+        documentVersion,
+        documentINFO_CHANGED,
+        documentDATA_CHANGED
 };
 
 /* ------------------------ WIZ_DOCUMENT_ATTACHMENT ------------------------ */

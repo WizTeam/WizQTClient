@@ -1295,7 +1295,7 @@ bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTD
             continue;
 
         if (pGroup->kbGUID() == data.strKbGUID) {
-            if (data.tDataModified > t || data.tInfoModified > t || data.tParamModified > t)
+            if (data.tDataModified > t)
                 return true;
         }
     }
@@ -2056,6 +2056,9 @@ void CWizCategoryViewTrashItem::getDocuments(CWizDatabase& db, CWizDocumentDataA
 
 bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
+    if (kbGUID() != data.strKbGUID)
+        return false;
+    //
     return db.IsInDeletedItems(data.strLocation);
 }
 

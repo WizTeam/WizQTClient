@@ -35,10 +35,6 @@ CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerA
     m_data.strAuthorId = data.strAuthorId;
 
 
-    //load document ex info from db
-    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
-
     setText(data.doc.strTitle);
 
     updateDocumentUnreadCount();
@@ -78,7 +74,6 @@ bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
 int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
     int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInSummary : DocTypeEncrytedInTitle) : DocTypeNormal;
-    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? (DocTypeAlwaysOnTop | nType) : nType;
     nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
     return nType;
 }
@@ -346,7 +341,7 @@ void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 
-    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
+    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
     updateDocumentUnreadCount();
 
@@ -378,27 +373,12 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
 
     if (other.type() == WizDocumentListType_Section)
     {
-        if(document().nFlags & wizDocumentAlwaysOnTop)
-            return true;
-
         const CWizDocumentListViewSectionItem* secItem = dynamic_cast<const CWizDocumentListViewSectionItem*>(&other);
         return compareWithSectionItem(secItem);
     }
 
     const CWizDocumentListViewDocumentItem* pOther = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
-
-    if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop || m_data.doc.nFlags & wizDocumentAlwaysOnTop)
-    {
-        if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop && m_data.doc.nFlags & wizDocumentAlwaysOnTop)
-        {
-        }
-        else
-        {
-               bool bTop = m_data.doc.nFlags & wizDocumentAlwaysOnTop;
-               return bTop;               
-        }
-    }
 
 
     switch (m_nSortingType) {
@@ -737,9 +717,6 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
     if (other.type() == WizDocumentListType_Document)
     {
         const CWizDocumentListViewDocumentItem* docItem = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
-        if(docItem->document().nFlags & wizDocumentAlwaysOnTop)
-            return false;
-
         return compareWithDocumentItem(docItem);
     }
     else

@@ -44,7 +44,9 @@ void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1
 {
     if (strFunction == "close")
     {
-        close();
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            close();
+        });
     }
     else if (strFunction == "openindefaultbrowser")
     {

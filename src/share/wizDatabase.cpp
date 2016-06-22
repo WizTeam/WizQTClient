@@ -376,8 +376,6 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
         newDoc.tAccessed = sourceDoc.tAccessed;
         newDoc.tDataModified = sourceDoc.tDataModified;
         newDoc.tModified = sourceDoc.tModified;
-        newDoc.tInfoModified = sourceDoc.tInfoModified;
-        newDoc.tParamModified = sourceDoc.tParamModified;
     }
     newDoc.nAttachmentCount = targetDB.GetDocumentAttachmentCount(newDoc.strGUID);
     targetDB.ModifyDocumentInfoEx(newDoc);
@@ -731,6 +729,25 @@ bool CWizDatabase::OnDownloadStyleList(const CWizStyleDataArray& arrayData)
     return UpdateStyles(arrayStyle);
 }
 
+bool CWizDatabase::OnDownloadDocumentList(const CWizDocumentDataArray& arrayData)
+{
+    for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayData.begin();
+         itDocument != arrayData.end();
+         itDocument++)
+    {
+        //m_pEvents->OnStatus(WizFormatString1(_TR(_T("Update note information: %1")), itDocument->strTitle));
+        //
+        if (!OnDownloadDocument(*itDocument))
+        {
+            //m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
+            return FALSE;
+        }
+    }
+    return true;
+}
+
+
+
 bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData)
 {
     CWizDocumentAttachmentDataArray arrayAttach;
@@ -743,7 +760,6 @@ bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArra
 
     return UpdateAttachments(arrayAttach);
 }
-
 bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayData)
 {
     CWizMessageDataArray arrayMsg;
@@ -757,10 +773,9 @@ bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayData)
     return UpdateMessages(arrayMsg);
 }
 
-bool CWizDatabase::OnDownloadDocument(int part, const WIZDOCUMENTDATAEX& data)
+bool CWizDatabase::OnDownloadDocument(const WIZDOCUMENTDATAEX& data)
 {
     WIZDOCUMENTDATAEX d(data);
-    d.nObjectPart = part;
     d.strKbGUID = kbGUID();
     return UpdateDocument(d);
 }
@@ -803,12 +818,6 @@ bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
     return CWizIndex::DocumentFromGUID(strGUID, dataExists);
 }
 
-bool CWizDatabase::DocumentWithExFieldsFromGUID(const CString& strGUID,
-                                                WIZDOCUMENTDATA& dataExists)
-{
-    return CWizIndex::DocumentWithExFieldsFromGUID(strGUID, dataExists);
-}
-
 bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
                                           const QString& strType)
 {
@@ -843,11 +852,13 @@ bool CWizDatabase::SetObjectServerDataInfo(const QString& strGUID,
     return false;
 }
 
-bool CWizDatabase::UpdateObjectData(const QString& strObjectGUID,
+bool CWizDatabase::UpdateObjectData(const QString& strDisplayName,
+                                    const QString& strObjectGUID,
                                     const QString& strObjectType,
                                     const QByteArray& stream)
 {   
     WIZOBJECTDATA data;
+    data.strDisplayName = strDisplayName;
     data.strObjectGUID = strObjectGUID;
     data.arrayData = stream;
 
@@ -868,30 +879,24 @@ bool CWizDatabase::UpdateObjectData(const QString& strObjectGUID,
 }
 
 bool CWizDatabase::InitDocumentData(const QString& strGUID,
-                                    WIZDOCUMENTDATAEX& data,
-                                    UINT part)
+                                    WIZDOCUMENTDATAEX& data)
 {
-    bool bInfo = (part & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? true : false;
-    bool bParam = (part & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? true : false;
-    bool bData = (part & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? true : false;
-
-    data.nObjectPart = part;
-
-    if (bInfo) {
-        if (!DocumentFromGUID(strGUID, data)) {
-            return false;
-        }
-
-        GetDocumentTags(strGUID, data.arrayTagGUID);
+    if (!DocumentFromGUID(strGUID, data)) {
+        return false;
     }
-
-    if (bParam) {
-        if (!GetDocumentParams(strGUID, data.arrayParam)) {
-            return false;
+    //
+    GetDocumentTags(strGUID, data.arrayTagGUID);
+    //
+    if (data.nVersion == -1)
+    {
+        if (data.nInfoChanged == 0 && data.nDataChanged == 0)   //old data
+        {
+            data.nInfoChanged = 1;
+            data.nDataChanged = 1;
         }
     }
 
-    if (bData) {
+    if (data.nDataChanged) {
         if (!LoadDocumentData(strGUID, data.arrayData)) {
             return false;
         }
@@ -901,24 +906,13 @@ bool CWizDatabase::InitDocumentData(const QString& strGUID,
 }
 
 bool CWizDatabase::InitAttachmentData(const QString& strGUID,
-                                      WIZDOCUMENTATTACHMENTDATAEX& data,
-                                      UINT part)
+                                      WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    bool bInfo = (part & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? true : false;
-    bool bData = (part & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? true : false;
-
-    data.nObjectPart = part;
-
-    if (bInfo) {
-        if (!AttachmentFromGUID(strGUID, data)) {
-            return false;
-        }
+    if (!AttachmentFromGUID(strGUID, data)) {
+        return false;
     }
-
-    if (bData) {
-        if (!LoadCompressedAttachmentData(strGUID, data.arrayData)) {
-            return false;
-        }
+    if (!LoadCompressedAttachmentData(strGUID, data.arrayData)) {
+        return false;
     }
 
     return true;
@@ -1767,6 +1761,14 @@ void CWizDatabase::SetFolders(const QString& strFolders, qint64 nVersion, bool b
 void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
 {
     SetLocalValueVersion("group_tag_pos", nVersion);
+    //
+    CWizTagDataArray arrayTag;
+    GetAllTags(arrayTag);
+    std::map<QString, WIZTAGDATA> tags;
+    for (const WIZTAGDATA& tag : arrayTag)
+    {
+        tags[tag.strGUID] = tag;
+    }
 
     bool bPositionChanged = false;
 
@@ -1789,13 +1791,13 @@ void CWizDatabase::SetGroupTagsPos(const QString& tagsPos, qint64 nVersion)
 
         QString strGUID = posList.first();
         int nPos = posList.last().toInt();
-        WIZTAGDATA tagData;
-        if (TagFromGUID(strGUID, tagData)) {
-            if (tagData.nPostion != nPos) {
-                tagData.nPostion = nPos;
-                ModifyTag(tagData);
-                bPositionChanged = true;
-            }
+        //
+        WIZTAGDATA tagData = tags[strGUID];
+        if (!tagData.strGUID.isEmpty() && tagData.nPostion != nPos)
+        {
+            tagData.nPostion = nPos;
+            ModifyTagPosition(tagData);
+            bPositionChanged = true;
         }
     }
 
@@ -2904,25 +2906,36 @@ bool CWizDatabase::UpdateStyle(const WIZSTYLEDATA& data)
     return bRet;
 }
 
-bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
+bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& d)
 {
+    WIZDOCUMENTDATAEX data = d;
+    //
     Q_ASSERT(data.nVersion != -1);
 
     bool bRet = false;
 
     WIZDOCUMENTDATAEX dataTemp;
     if (DocumentFromGUID(data.strGUID, dataTemp)) {
-        if (data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO) {
-            bRet = ModifyDocumentInfoEx(data);
-            if (dataTemp.strDataMD5 != data.strDataMD5) {
-                SetObjectDataDownloaded(data.strGUID, "document", false);
-            }
-        } else {
-            bRet = true;
+        if (dataTemp.nDataChanged) //本地数据被修改了，则不覆盖
+        {
+            qDebug() << "local data changed, skip to overwrite: " << data.strTitle;
+            return true;
+        }
+        //
+        if (data.nVersion == dataTemp.nVersion)
+        {
+#ifdef      QT_DEBUG
+            qDebug() << "No changed: " << data.strTitle << ", skip it";
+#endif
+            return true;
+        }
+
+        data.nInfoChanged = dataTemp.nInfoChanged;
+        bRet = ModifyDocumentInfoEx(data);
+        if (dataTemp.strDataMD5 != data.strDataMD5) {
+            SetObjectDataDownloaded(data.strGUID, "document", false);
         }
     } else {
-        Q_ASSERT(data.nObjectPart & WIZKM_XMLRPC_OBJECT_PART_INFO);
-
         bRet = CreateDocumentEx(data);
     }
 
@@ -2931,10 +2944,6 @@ bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& data)
     }
 
     WIZDOCUMENTDATA doc(data);
-
-    if (!data.arrayParam.empty()) {
-        SetDocumentParams(doc, data.arrayParam, false);
-    }
 
     if (!data.arrayTagGUID.empty()) {
         SetDocumentTags(doc, data.arrayTagGUID, false);
@@ -3083,10 +3092,6 @@ bool CWizDatabase::UpdateAttachments(const CWizDocumentAttachmentDataArray& arra
     return !bHasError;
 }
 
-bool CWizDatabase::SetDocumentFlags(WIZDOCUMENTDATA& data, const QString& strFlags, bool bUpdateParamMd5)
-{
-    return SetDocumentParam(data, TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS,strFlags, bUpdateParamMd5);
-}
 
 bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,

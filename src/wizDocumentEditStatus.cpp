@@ -653,10 +653,8 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
     if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
         return false;
 
-    int nPart = 0;
-    nPart |= WIZKM_XMKRPC_DOCUMENT_PART_INFO;
     WIZDOCUMENTDATAEX docOnServer;
-    if (!server.document_getData(strGUID, nPart, docOnServer))
+    if (!server.document_getInfo(strGUID, docOnServer))
         return false;
 
     if ((docOnServer.strGUID == doc.strGUID) && (docOnServer.nVersion > doc.nVersion))

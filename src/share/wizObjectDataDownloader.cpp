@@ -162,7 +162,7 @@ bool CWizObjectDownloader::downloadNormalData()
 
     if (CWizDatabaseManager* dbMgr = CWizDatabaseManager::instance())
     {
-        return dbMgr->db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
+        return dbMgr->db(m_data.strKbGUID).UpdateObjectData(m_data.strDisplayName, m_data.strObjectGUID,
                                                              WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
                                                              m_data.arrayData);
     }
@@ -188,8 +188,7 @@ bool CWizObjectDownloader::downloadDocument()
     if (!db.DocumentFromGUID(m_data.strObjectGUID, document))
         return false;
 
-    int nPart = WIZKM_XMKRPC_DOCUMENT_PART_INFO | WIZKM_XMKRPC_DOCUMENT_PART_DATA;
-    if (!ksServer.document_getData(m_data.strObjectGUID, nPart, document))
+    if (!ksServer.document_downloadData(m_data.strObjectGUID, document))
     {
         return false;
     }
@@ -200,6 +199,8 @@ bool CWizObjectDownloader::downloadDocument()
     __int64 nLocalVersion = db.GetObjectVersion("attachment");
     if (document.nAttachmentCount > 0 && nLocalVersion < versionServer.nAttachmentVersion)
     {
+        //todo: wsj, 奇怪的逻辑，需要修复
+        /*
         std::deque<WIZDOCUMENTATTACHMENTDATAEX> arrayRet;
         ksServer.attachment_getList(50, nLocalVersion, arrayRet);
         //
@@ -211,7 +212,7 @@ bool CWizObjectDownloader::downloadDocument()
             nPart = WIZKM_XMKRPC_ATTACHMENT_PART_INFO;
             WIZDOCUMENTATTACHMENTDATAEX attachRet = attach;
             attachRet.strKbGUID = db.kbGUID();
-            if (ksServer.attachment_getData(attach.strGUID, nPart, attachRet))
+            if (ksServer.attachment_downloadData(attach.strGUID, attachRet))
             {
 //                qDebug() << "get attachment from server : " << attachRet.strName;
                 //
@@ -220,11 +221,12 @@ bool CWizObjectDownloader::downloadDocument()
                 db.blockSignals(false);
             }
         }
+        */
     }
 
     bool ret = false;
     db.blockSignals(true);
-    if (db.UpdateObjectData(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
+    if (db.UpdateObjectData(document.strTitle, document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
                              document.arrayData))
     {
         ret = db.UpdateDocument(document);

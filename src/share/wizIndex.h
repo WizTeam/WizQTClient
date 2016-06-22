@@ -122,49 +122,6 @@ public:
 
     bool GetModifiedStyles(CWizStyleDataArray& arrayData);
 
-    /* Params related operations */
-    bool GetDocumentParams(const CString& strDocumentGUID, \
-                           CWizDocumentParamDataArray& arrayParam);
-
-    bool GetDocumentParam(const CString& strDocumentGUID, \
-                          CString strParamName, \
-                          CString& strParamValue, \
-                          const CString& strDefault = QString(), \
-                          bool* pbParamExists = NULL);
-
-    bool SetDocumentParam(const QString& strDocumentGUID, \
-                          const QString& strParamName, \
-                          const QString& strParamValue, \
-                          bool bUpdateParamMD5);
-
-    bool SetDocumentParam(WIZDOCUMENTDATA& data, \
-                          const QString &strParamName, \
-                          const QString &strParamValue, \
-                          bool bUpdateParamMD5);
-
-    // reset flag inicate need update param md5 or reset nVersion = -1
-    bool SetDocumentParams(WIZDOCUMENTDATA& data,
-                           const CWizDocumentParamDataArray& arrayParam,
-                           bool bReset = true);
-
-    bool SetDocumentParams(WIZDOCUMENTDATA& data,
-                           const CWizStdStringArray& arrayParam,
-                           bool bReset = true);
-
-    bool DeleteDocumentParams(const QString& strDocumentGUID,
-                              bool bReset = true);
-
-    CString CalDocumentParamInfoMD5(const WIZDOCUMENTDATA& data);
-    CString CalDocumentParamInfoMD5(const CWizDocumentParamDataArray& arrayParam);
-    bool UpdateDocumentParamMD5(WIZDOCUMENTDATA& data);
-    bool UpdateDocumentParamMD5(const CString& strDocumentGUID);
-
-    bool DeleteDocumentParam(const CString& strDocumentGUID, CString strParamName, bool bUpdateParamMD5);
-    bool DeleteDocumentParamEx(const CString& strDocumentGUID, CString strParamNamePart);
-
-    static bool StringArrayToDocumentParams(const CString& strDocumentGUID, \
-                                             const CWizStdStringArray& arrayText, \
-                                             std::deque<WIZDOCUMENTPARAMDATA>& arrayParam);
 
     /* Location(Folder) related operations */
     bool ChangeDocumentsLocation(const CString& strOldLocation, const CString& strNewLocation);
@@ -233,16 +190,6 @@ public:
 
     bool SetDocumentVersion(const CString& strDocumentGUID, qint64 nVersion);
 
-    void InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
-                              const CWizStdStringArray& arrayGUID,
-                              const std::map<CString, int>& mapDocumentIndex);
-
-    void InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
-                                const CString& strDocumentGUIDs,
-                                const std::map<CString, int>& mapDocumentIndex,
-                                const CString& strTagName,
-                                int nShareFlags);
-
     bool getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument);
     int getGroupUnreadDocumentCount();
     void setGroupDocumentsReaded();
@@ -299,9 +246,6 @@ public:
 
     int GetNeedToBeDownloadedDocumentCount();
     bool GetNeedToBeDownloadedDocuments(CWizDocumentDataArray& arrayData);
-
-    // Helper
-    CString CalDocumentInfoMD5(const WIZDOCUMENTDATA& data);
 
     /* Attachment related operations */
     void UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
