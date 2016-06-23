@@ -4014,8 +4014,10 @@ bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,
     if (!PathFileExists(strZipFileName)) {
         return false;
     }
+    //
+    bool isProtected = CWizZiwReader::isEncryptedFile(strZipFileName);
 
-    if (document.nProtected) {
+    if (isProtected) {
         if (userCipher().isEmpty()) {
             return false;
         }

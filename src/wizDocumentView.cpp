@@ -369,11 +369,13 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 }
 
-void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& dataTemp, bool forceEdit)
+void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
 {
-    WIZDOCUMENTDATA data = dataTemp;
+    WIZDOCUMENTDATA dataTemp = wizDoc;
     //
     m_web->trySaveDocument(m_note, false, [=](const QVariant& ret){
+        //
+        WIZDOCUMENTDATA data = dataTemp;
 
         if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
         {
@@ -403,6 +405,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& dataTemp, bool forceEdit)
         }
 
         // ask user cipher if needed
+        //
+        data.nProtected = CWizZiwReader::isEncryptedFile(strDocumentFileName) ? 1 : 0;
         if (data.nProtected) {
             if(!db.loadUserCert()) {
                 return;

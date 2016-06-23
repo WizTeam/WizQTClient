@@ -216,7 +216,7 @@ public:
     {
         switch (type) {
         case WIZ_USER_MSG_TYPE_CALLED_IN_TITLE:
-            return QObject::tr("@ you in note title");
+            return QObject::tr("refer you in note title");
             break;
         case WIZ_USER_MSG_TYPE_MODIFIED:
             return QObject::tr("modified your note");
@@ -225,7 +225,7 @@ public:
             return QObject::tr("comment your note");
             break;
         case WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT:
-            return QObject::tr("@ you in note comment");
+            return QObject::tr("refer you in note comment");
             break;
         case WIZ_USER_MSG_TYPE_COMMENT_REPLY:
             return QObject::tr("reply your comment");
@@ -235,6 +235,9 @@ public:
             break;
         case WIZ_USER_MSG_TYPE_ADDED_TO_GROUP:
             return QString();
+            break;
+        case WIZ_USER_MSG_TYPE_REMIND:
+            return QObject::tr("Remind you to view");
             break;
         case WIZ_USER_MSG_TYPE_LIKE:
             return QObject::tr("like you note");

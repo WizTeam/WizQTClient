@@ -508,7 +508,7 @@ BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetString("document_owner", strOwner);
     data.GetString("document_filetype", strFileType);
     data.GetString("document_styleguid", strStyleGUID);
-    data.GetInt("document_protected", nProtected);
+    data.GetInt("document_protect", nProtected);
     data.GetInt("document_attachment_count", nAttachmentCount);
 
     // time
