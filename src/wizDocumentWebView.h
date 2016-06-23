@@ -219,7 +219,7 @@ public:
     Q_INVOKABLE bool isPersonalDocument();
     Q_INVOKABLE QString getCurrentNoteHtml();
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
-    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
+    Q_INVOKABLE void changeCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
     Q_INVOKABLE bool shouldAddCustomCSS();
     Q_INVOKABLE bool canRenderMarkdown();

@@ -1404,6 +1404,9 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
         TOLOG(_T("no ip field"));
         return;
     }
+    //
+    if (d.FindMember("ip")->value.IsNull())
+        return;
 
     QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
     QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());

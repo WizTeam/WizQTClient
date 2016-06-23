@@ -1906,7 +1906,7 @@ bool CWizDocumentWebView::hasEditPermissionOnCurrentNote()
     return db.CanEditDocument(docData) && !CWizDatabase::IsInDeletedItems(docData.strLocation);
 }
 
-void CWizDocumentWebView::setCurrentDocumentType(const QString &strType)
+void CWizDocumentWebView::changeCurrentDocumentType(const QString &strType)
 {
     WIZDOCUMENTDATA docData = view()->note();
     CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);

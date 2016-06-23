@@ -19380,6 +19380,7 @@ var _event = {
              * Backspace
              */
             if (keyCode === 8 && isAfterCheck) {
+                console.log(isAfterCheck);
                 todoUtils.cancelTodo(container);
                 utils.stopEvent(e);
                 return false;
@@ -19763,7 +19764,7 @@ function routeForMac() {
     }
 
     function setDocumentType(type) {
-        wizQtEditor.setCurrentDocumentType(type);
+        wizQtEditor.changeCurrentDocumentType(type);
     }
 
     function hasPermission() {
@@ -20449,7 +20450,12 @@ var todoUtils = {
         while (tmpDom.firstChild) {
             start.appendChild(tmpDom.firstChild);
         }
-        rangeUtils.setRange(end, domUtils.getDomEndOffset(end));
+
+        if (domUtils.isSelfClosingTag(end)) {
+            rangeUtils.setRange(end.parentNode, domUtils.getDomIndex(end) + 1);
+        } else {
+            rangeUtils.setRange(end, domUtils.getDomEndOffset(end));
+        }
 
         //通知客户端笔记被修改
         todoRoute.setDocumentType(CONST.TYPE.TODO);

@@ -766,6 +766,7 @@ struct CWizKMDocumentPostDataParam
         AddInt(_T("document_attachment_count"), infodata.nAttachmentCount);
         AddTime(_T("dt_data_modified"), infodata.tDataModified);
         AddString(_T("data_md5"), infodata.strDataMD5);
+        AddString("document_zip_md5", strObjMd5);
         //
         CString strTagGuids;
         ::WizStringArrayToText(tags, strTagGuids, "*");
