@@ -150,6 +150,8 @@ public:
     //
     CWizDocumentView* view();
     //
+    void clear();
+    //
     friend class CWizDocumentWebViewPage;
     //
     void waitForDone();

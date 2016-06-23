@@ -383,6 +383,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         }
 
         m_transitionView->hide();
+        //
+        //
 
         m_noteLoaded = false;
         m_note = data;
@@ -392,13 +394,15 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
             m_tab->setCurrentWidget(m_docView);
         }
         m_tab->setVisible(true);
-
+        //
         // download document if not exist
         CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
         QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
         if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
                 !PathFileExists(strDocumentFileName))
         {
+            m_web->clear();
+
             downloadNoteFromServer(data);
 
             return;

@@ -539,6 +539,11 @@ CWizDocumentView* CWizDocumentWebView::view()
     return 0;
 }
 
+void CWizDocumentWebView::clear()
+{
+    load(QUrl("about:blank"));
+}
+
 void CWizDocumentWebView::onTimerAutoSaveTimout()
 {
     trySaveDocument(view()->note(), false, [=](const QVariant&){});
@@ -2066,6 +2071,14 @@ void CWizDocumentWebViewLoaderThread::run()
         if (db.DocumentToTempHtmlFile(data, strHtmlFile))
         {
             emit loaded(kbGuid, docGuid, strHtmlFile, editorMode);
+        }
+        else
+        {
+            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+                //
+                QMessageBox::critical(MainWindow::instance(), tr("Error"), tr("Can't view note: (Can't unzip note data)"));
+                //
+            });
         }
     }
 }
