@@ -18,9 +18,6 @@ public:
 signals:
     void doNotShowThisAgain(bool bAgain);
 
-protected:
-    void timerEvent(QTimerEvent *event);
-
 public slots:
     void Execute(const QString& strFunction, QVariant param1, QVariant param2,
                                   QVariant param3, QVariant param4);

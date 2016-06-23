@@ -4,6 +4,7 @@
 #include <QWebEnginePage>
 #include "../share/wizwebengineview.h"
 #include "../share/wizthreads.h"
+#include <QTimer>
 
 bool CWizFramelessWebDialog::m_bVisibling = false;
 
@@ -34,18 +35,16 @@ void CWizFramelessWebDialog::loadAndShow(const QString& strUrl)
     m_frame->load(QUrl(m_url));
 }
 
-void CWizFramelessWebDialog::timerEvent(QTimerEvent* /*event*/)
-{
-    deleteLater();
-}
-
 void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
                                               QVariant param2, QVariant param3, QVariant param4)
 {
     if (strFunction == "close")
     {
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
-            close();
+            hide();
+            QTimer::singleShot(1000, Qt::PreciseTimer, [=]{
+                deleteLater();
+            });
         });
     }
     else if (strFunction == "openindefaultbrowser")
@@ -79,16 +78,16 @@ void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
                 return;
             //
             m_bVisibling = true;
-            exec();
+            show();
             m_bVisibling = false;
             //
         });
     }
     else
     {
-        // start timer to delete my self
-        int nTimerID = startTimer(2 * 60 * 1000);
-        m_timerIDList.append(nTimerID);
+        QTimer::singleShot(2 * 60 * 1000, Qt::PreciseTimer, [=]{
+            deleteLater();
+        });
     }
 }
 
