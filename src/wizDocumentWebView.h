@@ -235,7 +235,7 @@ public:
     Q_PROPERTY(QString userAvatarFilePath READ getUserAvatarFilePath)
     Q_PROPERTY(bool isPersonalDocument READ isPersonalDocument)
     Q_PROPERTY(QString canEditNote READ canEditNote)
-    Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml)
+    Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml NOTIFY currentHtmlChanged STORED false)
     Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
     //
 private:
@@ -385,6 +385,8 @@ Q_SIGNALS:
 
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
+    //
+    void currentHtmlChanged();
 
 private slots:
     void on_insertCommentToNote_request(const QString& docGUID, const QString& comment);

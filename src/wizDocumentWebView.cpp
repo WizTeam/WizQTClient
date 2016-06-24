@@ -592,7 +592,8 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode)
 {
     // set data
-    m_bNewNote = doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1 ? true : false;
+    int seconds = doc.tCreated.secsTo(QDateTime::currentDateTime());
+    m_bNewNote = (seconds >= 0 && seconds <= 1) ? true : false;
     m_bNewNoteTitleInited = m_bNewNote ? false : true;
     //
     setModified(false);
@@ -725,7 +726,7 @@ void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID,
     htmlBody.replace("'", "&#39;");
     page()->runJavaScript(QString("var objDiv = editor.document.createElement('div');objDiv.innerHTML= '%1';"
                                                     "var first=editor.document.body.firstChild;editor.document.body.insertBefore(objDiv,first);").arg(htmlBody));
-    saveEditingViewDocument(view()->note(), true, NULL);
+    saveEditingViewDocument(view()->note(), true, [=](const QVariant &){});
 }
 
 void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
@@ -1031,6 +1032,9 @@ void CWizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, b
                 {
                     succeeded = true;
                     m_currentNoteHtml = html;
+                    emit currentHtmlChanged();
+                    //
+                    qDebug() << m_currentNoteHtml;
                     //
                     m_docSaverThread->save(doc, html, strFileName, 0);
                 }
@@ -1878,6 +1882,9 @@ bool CWizDocumentWebView::isPersonalDocument()
 QString CWizDocumentWebView::getCurrentNoteHtml()
 {
     Q_ASSERT(!m_currentNoteHtml.isEmpty());
+    //
+    qDebug() << m_currentNoteHtml;
+    //
     return m_currentNoteHtml;
 }
 

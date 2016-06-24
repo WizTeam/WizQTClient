@@ -391,7 +391,7 @@ bool CWizKMSyncThread::needQuickSync()
     if (m_setQuickSyncKb.empty())
         return false;
     //
-    return false;
+    return true;
 }
 
 bool CWizKMSyncThread::needDownloadMessage()
