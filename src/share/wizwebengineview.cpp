@@ -105,13 +105,24 @@ void WizWebEngineView::innerLoadFinished(bool ret)
                     //
                     jsInit.replace("__port__", port).replace("__objectNames__", m_objectNames);
                     //
-                    page()->runJavaScript(jsInit);
+                    page()->runJavaScript(jsInit, [=](const QVariant&){
+                        //
+                        emit loadFinishedEx(ret);
+                        //
+                    });
                 });
+            }
+            else
+            {
+                qDebug() << "Can't load wen channel.js";
+                emit loadFinishedEx(ret);
             }
         }
     }
-    //
-    emit loadFinishedEx(ret);
+    else
+    {
+        emit loadFinishedEx(ret);
+    }
 }
 
 

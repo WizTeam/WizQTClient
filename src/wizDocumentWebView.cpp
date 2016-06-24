@@ -159,7 +159,7 @@ CWizDocumentWebView::CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent)
     addToJavaScriptWindowObject("WizQtEditor", this);
 
 
-    connect(this, SIGNAL(loadFinished(bool)), SLOT(onEditorLoadFinished(bool)));
+    connect(this, SIGNAL(loadFinishedEx(bool)), SLOT(onEditorLoadFinished(bool)));
 }
 
 CWizDocumentWebView::~CWizDocumentWebView()

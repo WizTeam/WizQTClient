@@ -198,17 +198,26 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
 {
     int nCount = arrayDocument.size();
     for (intptr_t i = nCount - 1; i >= 0; i--) {
+        //
         bool bFilter = false;
         WIZDOCUMENTDATAEX& doc = arrayDocument.at(i);
 
         if (!searchEncryptedDoc && doc.nProtected)
             bFilter = true;
 
-        QString strFileName = db.GetDocumentFileName(doc.strGUID);
-        if (!QFile::exists(strFileName))
+        if (!bFilter)
         {
-            db.SetDocumentDataDownloaded(doc.strGUID, false);
-            bFilter = true;
+            QString strFileName = db.GetDocumentFileName(doc.strGUID);
+            //
+            if (!QFile::exists(strFileName))
+            {
+                db.SetDocumentDataDownloaded(doc.strGUID, false);
+                bFilter = true;
+            }
+            else if (CWizZiwReader::isEncryptedFile(strFileName))
+            {
+                bFilter = true;
+            }
         }
 
         if (bFilter) {

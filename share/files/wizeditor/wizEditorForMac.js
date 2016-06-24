@@ -6009,6 +6009,8 @@ var historyUtils = {
             return;
         }
 
+        var canCallback = historyUtils.stack.length === 0 || historyUtils.stackIndex < historyUtils.stack.length - 1;
+
         ENV.event.call(CONST.EVENT.BEFORE_SAVESNAP);
 
         var canSave = { add: true, replace: false, direct: 0 },
@@ -6044,7 +6046,10 @@ var historyUtils = {
             historyUtils.stack.shift();
             historyUtils.stackIndex--;
         }
-        historyUtils.applyCallback();
+
+        if (canCallback && historyUtils.stack.length > 0) {
+            historyUtils.applyCallback();
+        }
     },
     /**
      * 根据指定的 快照 恢复页面内容
@@ -10599,9 +10604,14 @@ var editor = {
         amend.startReverse();
         historyUtils.start(ENV.options.maxRedo, ENV.options.callback.redo);
 
-        setTimeout(function () {
+        if (ENV.client.type.isPhone || ENV.client.type.isPad) {
+            //手机端 渲染可能会慢，所以必须要延时处理
+            setTimeout(function () {
+                editor.setOriginalHtml();
+            }, 500);
+        } else {
             editor.setOriginalHtml();
-        }, 1000);
+        }
     },
     off: function off() {
         historyUtils.stop();
@@ -19380,7 +19390,6 @@ var _event = {
              * Backspace
              */
             if (keyCode === 8 && isAfterCheck) {
-                console.log(isAfterCheck);
                 todoUtils.cancelTodo(container);
                 utils.stopEvent(e);
                 return false;
@@ -19566,9 +19575,11 @@ module.exports = todoCore;
 var ENV = require('../common/env'),
     base64 = require('../common/base64');
 
+var winExternal, qtEditor, androidWizNote;
+
 function routeForWindows() {
 
-    var wizExternal = ENV.win.external;
+    winExternal = ENV.win.external;
 
     this.getUserAlias = getUserAlias;
     this.getUserGuid = getUserGuid;
@@ -19583,27 +19594,27 @@ function routeForWindows() {
     this.checkDocLock = checkDocLock;
 
     function getUserAlias() {
-        return wizExternal.UserAlias;
+        return winExternal.UserAlias;
     }
 
     function getUserGuid() {
-        return wizExternal.GetUserGUID();
+        return winExternal.GetUserGUID();
     }
 
     function getUserAvatarFileName(size) {
-        return wizExternal.GetUserAvatarFileName(size);
+        return winExternal.GetUserAvatarFileName(size);
     }
 
     function isPersonalDocument() {
         try {
-            return wizExternal.WizDocument.IsPersonalDocument();
+            return winExternal.WizDocument.IsPersonalDocument();
         } catch (e) {
             return false;
         }
     }
 
     function setDocumentModified() {
-        // wizExternal.SetContentModified(true);
+        // winExternal.SetContentModified(true);
     }
 
     function setDocumentType(type) {
@@ -19617,25 +19628,25 @@ function routeForWindows() {
          else {
          this.wizDoc.Type = type;
          }*/
-        if (wizExternal.WizDocument) {
-            wizExternal.WizDocument.Type = type;
+        if (winExternal.WizDocument) {
+            winExternal.WizDocument.Type = type;
         }
     }
 
     function hasPermission() {
-        return !ENV.readonly || wizExternal.Window.CurrentDocument.CanEdit;
+        return !ENV.readonly || winExternal.Window.CurrentDocument.CanEdit;
     }
 
     function getOriginalDoc() {
         try {
-            return wizExternal.WizDocument.GetHtml();
+            return winExternal.WizDocument.GetHtml();
         } catch (e) {
             return '';
         }
     }
 
     function saveDoc(html, resources) {
-        wizExternal.WizDocument.SetHtml2(html, resources);
+        winExternal.WizDocument.SetHtml2(html, resources);
     }
 
     function checkDocLock(callback) {
@@ -19643,7 +19654,7 @@ function routeForWindows() {
             WizReader.todo[callback](false, false);
             return;
         }
-        wizExternal.ExecuteCommand("OnClickingChecklist", "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
+        winExternal.ExecuteCommand("OnClickingChecklist", "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
     }
 }
 
@@ -19729,7 +19740,7 @@ function routeForWeb() {
 
 function routeForMac() {
 
-    var wizQtEditor = ENV.win.WizQtEditor;
+    qtEditor = ENV.win.WizQtEditor;
 
     this.getUserAlias = getUserAlias;
     this.getUserGuid = getUserGuid;
@@ -19744,48 +19755,48 @@ function routeForMac() {
     this.checkDocLock = checkDocLock;
 
     function getUserAlias() {
-        return wizQtEditor.userAlias;
+        return qtEditor.userAlias;
     }
 
     function getUserGuid() {
-        return wizQtEditor.userGuid;
+        return qtEditor.userGuid;
     }
 
     function getUserAvatarFileName(size) {
-        return wizQtEditor.userAvatarFilePath;
+        return qtEditor.userAvatarFilePath;
     }
 
     function isPersonalDocument() {
-        return wizQtEditor.isPersonalDocument;
+        return qtEditor.isPersonalDocument;
     }
 
     function setDocumentModified() {
-        // wizQtEditor.setContentsChanged(true);
+        // qtEditor.setContentsChanged(true);
     }
 
     function setDocumentType(type) {
-        wizQtEditor.changeCurrentDocumentType(type);
+        qtEditor.changeCurrentDocumentType(type);
     }
 
     function hasPermission() {
-        return !ENV.readonly || wizQtEditor.hasEditPermissionOnCurrentNote;
+        return !ENV.readonly || qtEditor.hasEditPermissionOnCurrentNote;
     }
 
     function getOriginalDoc() {
-        return wizQtEditor.currentNoteHtml;
+        return qtEditor.currentNoteHtml;
     }
 
     function saveDoc(html, resources) {}
 
     function checkDocLock(callback) {
-        wizQtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);
-        return wizQtEditor.checkListClickable();
+        qtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);
+        return qtEditor.checkListClickable();
     }
 }
 
 function routeForAndroid() {
 
-    var wizNote = ENV.win.WizNote;
+    androidWizNote = ENV.win.WizNote;
 
     this.getUserAlias = getUserAlias;
     this.getUserGuid = getUserGuid;
@@ -19801,47 +19812,47 @@ function routeForAndroid() {
     this.beforeCloseDoc = beforeCloseDoc;
 
     function getUserAlias() {
-        return wizNote.getUserAlias();
+        return androidWizNote.getUserAlias();
     }
 
     function getUserGuid() {
-        return wizNote.getUserGuid();
+        return androidWizNote.getUserGuid();
     }
 
     function getUserAvatarFileName(size) {
-        return wizNote.getUserAvatarFileName(size);
+        return androidWizNote.getUserAvatarFileName(size);
     }
 
     function isPersonalDocument() {
-        return wizNote.isPersonalDocument();
+        return androidWizNote.isPersonalDocument();
     }
 
     function setDocumentModified() {
-        // wizNote.setDocumentModified();
+        // androidWizNote.setDocumentModified();
     }
 
     function setDocumentType(type) {
-        wizNote.setDocumentType(type);
+        androidWizNote.setDocumentType(type);
     }
 
     function hasPermission() {
-        return !ENV.readonly || wizNote.hasPermission();
+        return !ENV.readonly || androidWizNote.hasPermission();
     }
 
     function getOriginalDoc() {
-        return wizNote.getDocHtml();
+        return androidWizNote.getDocHtml();
     }
 
     function saveDoc(html, resources) {
-        wizNote.setDocHtml(html, resources);
+        androidWizNote.setDocHtml(html, resources);
     }
 
     function checkDocLock(callback) {
-        wizNote.checkDocLock();
+        androidWizNote.checkDocLock();
     }
 
     function beforeCloseDoc() {
-        wizNote.onWizTodoReadCheckedClose();
+        androidWizNote.onWizTodoReadCheckedClose();
     }
 }
 
@@ -19933,6 +19944,9 @@ var todoClientRoute = {
         }
 
         return route;
+    },
+    setQtEditor: function setQtEditor() {
+        qtEditor = ENV.win.WizQtEditor;
     }
 };
 
@@ -20683,17 +20697,23 @@ module.exports = todoUtils;
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./../common/base64":12}],46:[function(require,module,exports){
 'use strict';
 
-var WizEditor = require('./WizEditor'),
-    WizReader = require('./WizReader');
+var ENV = require('./common/env'),
+    WizEditor = require('./WizEditor'),
+    WizReader = require('./WizReader'),
+    todoClientRoute = require('./todoUtils/todoRouteForClient');
 
 var editorInit = WizEditor.init;
 WizEditor.init = function (options) {
     editorInit(options);
     WizReader.init();
 
+    //捕获 Mac 端初始化结束
+    ENV.win.initForWebEngine = function () {
+        todoClientRoute.setQtEditor();
+    };
     return WizEditor;
 };
 
 module.exports = WizEditor;
 
-},{"./WizEditor":5,"./WizReader":6}]},{},[46]);
+},{"./WizEditor":5,"./WizReader":6,"./common/env":15,"./todoUtils/todoRouteForClient":44}]},{},[46]);

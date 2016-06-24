@@ -98,7 +98,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_comments->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     //m_comments->page()->setScrollBarPolicy(Qt::Horizontal, Qt::ScrollBarAlwaysOff);
     m_comments->setAcceptDrops(false);
-    connect(m_comments, SIGNAL(loadFinished(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
+    connect(m_comments, SIGNAL(loadFinishedEx(bool)), m_title, SLOT(onCommentPageLoaded(bool)));
 
     m_comments->addToJavaScriptWindowObject("WizExplorerApp", m_app.object());
     //
@@ -294,11 +294,11 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
         return;
 
     if (doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1) {
-        viewNote(doc, true);
+        viewNote(doc, forceEditing);
         m_title->moveTitileTextToPlaceHolder();
     } else {
         m_title->clearPlaceHolderText();
-        viewNote(doc, false);
+        viewNote(doc, forceEditing);
     }
 }
 

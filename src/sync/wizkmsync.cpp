@@ -102,7 +102,7 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
 #define DEFAULT_FULL_SYNC_SECONDS_INTERVAL 15 * 60
-#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 3000
+#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 1000
 
 static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
@@ -390,12 +390,6 @@ bool CWizKMSyncThread::needQuickSync()
     //
     if (m_setQuickSyncKb.empty())
         return false;
-    //
-    QDateTime tNow = QDateTime::currentDateTime();
-    int mseconds = m_tLastKbModified.msecsTo(tNow);
-    //
-    if (mseconds >= DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL)
-        return true;
     //
     return false;
 }
