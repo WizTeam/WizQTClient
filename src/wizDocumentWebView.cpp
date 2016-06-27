@@ -1385,12 +1385,10 @@ void CWizDocumentWebView::editorCommandExecuteLinkInsert()
         m_editorInsertLinkForm = new CWizEditorInsertLinkForm(window());
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
-
+    //
     page()->runJavaScript("WizEditor.link.queryCurrentLink();", [=](const QVariant& vLink){
         //
         QString strUrl = vLink.toString();
-        if (strUrl.isEmpty())
-            return;
         //
         m_editorInsertLinkForm->setUrl(strUrl);
 
