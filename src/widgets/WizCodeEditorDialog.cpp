@@ -21,8 +21,8 @@
 #include <QWebEnginePage>
 
 #include "share/wizGlobal.h"
-
 #include "share/wizwebengineview.h"
+#include "share/wizthreads.h"
 
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
@@ -36,7 +36,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     m_codeBrowser->addToJavaScriptWindowObject("external", m_external);
 
     //
-    setAttribute(Qt::WA_DeleteOnClose);
+    //setAttribute(Qt::WA_DeleteOnClose);
     //setWindowFlags(Qt::WindowStaysOnTopHint);          //could cause fullscreen problem on mac when mainwindow was fullscreen
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
@@ -76,7 +76,12 @@ void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
     QString strHtml = strResultDiv;
     strHtml.replace("\\", "\\\\");
     strHtml.replace("'", "\\'");
-    insertHtmlRequest(strHtml);
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+        emit insertHtmlRequest(strHtml);
+        //
+    });
 }
 
 void WizCodeEditorDialog::changeEvent(QEvent* event)
