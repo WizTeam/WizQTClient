@@ -57,7 +57,6 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     QUrl url = QUrl::fromLocalFile(strFileName);
 
     m_codeBrowser->page()->setHtml(strHtml, url);
-
 }
 
 void WizCodeEditorDialog::setCode(const QString& strCode)
