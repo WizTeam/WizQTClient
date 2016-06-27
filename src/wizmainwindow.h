@@ -233,7 +233,6 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
-    void showClient(bool visible) const;
     CWizDocumentView* documentView() const;
 
     CWizActions* actions() const { return m_actions; }

@@ -87,10 +87,14 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_msgLabel->setWordWrap(true);
     layoutMsg->addWidget(m_msgLabel);
     //
+    m_blankView = new QWidget(this);
+    //
     m_tab->addWidget(m_docView);
     m_tab->addWidget(m_passwordView);
     m_tab->addWidget(m_msgWidget);
-    m_tab->setCurrentWidget(m_docView);    
+    m_tab->addWidget(m_transitionView);
+    m_tab->addWidget(m_blankView);
+    m_tab->setCurrentWidget(m_blankView);
     m_tab->setBackgroundRole(QPalette::HighlightedText);
 
     m_comments = m_commentWidget->web();
@@ -132,18 +136,10 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 //    layoutDoc->setStretchFactor(m_title, 0);
 //    layoutDoc->setStretchFactor(m_splitter, 1);
 
-    QLineEdit *commandLine = new QLineEdit(this);
-    layoutDoc->addWidget(commandLine);
-    connect(commandLine, SIGNAL(returnPressed()), SLOT(on_command_request()));
-
     QVBoxLayout* layoutMain = new QVBoxLayout(this);
     layoutMain->setContentsMargins(0, 0, 0, 0);
     setLayout(layoutMain);
     layoutMain->addWidget(m_tab);
-
-    //
-    layoutMain->addWidget(m_transitionView);
-    m_transitionView->hide();
 
     MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
@@ -283,11 +279,6 @@ void CWizDocumentView::resizeEvent(QResizeEvent* ev)
     m_title->editorToolBar()->adjustButtonPosition();
 }
 
-void CWizDocumentView::showClient(bool visible)
-{
-    m_tab->setVisible(visible);
-}
-
 void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
 {
     if (view != this)
@@ -304,10 +295,6 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
 
 void CWizDocumentView::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
-    if (view != this)
-        return;
-
-    showClient(bOk);
 }
 
 bool CWizDocumentView::reload()
@@ -382,19 +369,10 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
             stopDocumentEditingStatus();
         }
 
-        m_transitionView->hide();
-        //
-        //
-
         m_noteLoaded = false;
         m_note = data;
         initStat(data, forceEdit);
 
-        if (m_tab->currentWidget() != m_docView) {
-            m_tab->setCurrentWidget(m_docView);
-        }
-        m_tab->setVisible(true);
-        //
         // download document if not exist
         CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
         QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
@@ -403,6 +381,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         {
             m_web->clear();
 
+            m_tab->setCurrentWidget(m_transitionView);
             downloadNoteFromServer(data);
 
             return;
@@ -424,6 +403,8 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
                 return;
             }
         }
+        //
+        m_tab->setCurrentWidget(m_docView);
 
         loadNote(data);
         WIZDOCUMENTDATA docData = data;
@@ -439,7 +420,6 @@ void CWizDocumentView::reviewCurrentNote()
 {
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
-    m_tab->setVisible(true);
     initStat(m_note, m_editorMode == modeEditor);
 
     // download document if not exist
@@ -568,7 +548,6 @@ void CWizDocumentView::resetTitle(const QString& strTitle)
 void CWizDocumentView::promptMessage(const QString &strMsg)
 {
     m_tab->setCurrentWidget(m_msgWidget);
-    m_tab->setVisible(true);
 
     m_msgLabel->setText(strMsg);
 }
@@ -671,7 +650,6 @@ void CWizDocumentView::downloadNoteFromServer(const WIZDOCUMENTDATA& note)
     connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)),
             m_transitionView, SLOT(onDownloadProgressChanged(QString,int,int)), Qt::UniqueConnection);
     m_downloaderHost->downloadDocument(note);
-    showClient(false);
     m_transitionView->showAsMode(note.strGUID, CWizDocumentTransitionView::Downloading);
 }
 
@@ -756,7 +734,7 @@ void CWizDocumentView::onCloseNoteRequested(CWizDocumentView *view)
 {
     Q_UNUSED(view)
 
-    showClient(false);
+    m_tab->setCurrentWidget(m_blankView);
 }
 
 void CWizDocumentView::onCipherCheckRequest()
@@ -786,8 +764,6 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
     if (m_note.strKbGUID != data.strKbGUID
             || m_note.strGUID != data.strObjectGUID)
         return;
-
-    m_transitionView->setVisible(false);
 
     if (!bSucceed)
     {
@@ -956,14 +932,6 @@ void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
     }
 }
 
-void CWizDocumentView::on_command_request()
-{
-    QLineEdit* edit = qobject_cast<QLineEdit*>(sender());
-    if (edit)
-    {
-        m_web->page()->runJavaScript(edit->text());
-    }
-}
 
 void CWizDocumentView::on_loadComment_request(const QString& url)
 {

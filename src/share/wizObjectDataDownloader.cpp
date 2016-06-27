@@ -90,7 +90,7 @@ void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType 
 
     if (!m_threadPool)
     {
-        m_threadPool = WizCreateThreadPool(2);
+        m_threadPool = WizCreateThreadPool(5);
     }
 
     IWizRunable* action = WizCreateRunable([=](){
@@ -223,7 +223,7 @@ bool CWizObjectDownloader::downloadDocument()
         }
         */
     }
-
+    //
     bool ret = false;
     db.blockSignals(true);
     if (db.UpdateObjectData(document.strTitle, document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),

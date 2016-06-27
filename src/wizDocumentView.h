@@ -72,6 +72,7 @@ protected:
     CWizLocalProgressWebView* m_commentWidget;
     CWizSplitter* m_splitter;
     TitleBar* m_title;
+    QWidget* m_blankView;
 
     CWizUserCipherForm* m_passwordView;
     CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
@@ -104,7 +105,6 @@ public:
     void initStat(const WIZDOCUMENTDATA& data, bool forceEdit);
     void viewNote(const WIZDOCUMENTDATA& data, bool forceEdit);
     void reviewCurrentNote();
-    void showClient(bool visible);
     void setEditorMode(WizEditorMode editorMode);
     void setDefaultViewMode(WizDocumentViewMode mode);
     void setModified(bool modified);
@@ -149,8 +149,6 @@ public Q_SLOTS:
 
     void on_notifyBar_link_clicked(const QString& link);
 
-    void on_command_request();
-    //
     void on_loadComment_request(const QString& url);
 
     void on_commentWidget_statusChanged();

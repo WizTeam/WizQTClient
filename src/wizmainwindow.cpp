@@ -243,8 +243,6 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
     restoreStatus();
 
-    client()->hide();
-
     // upgrade check
 #ifndef BUILD4APPSTORE    
     if (userSettings().autoCheckUpdate())
@@ -2018,11 +2016,6 @@ QWidget*MainWindow::createMessageListView()
 QWidget*MainWindow::client() const
 {
     return m_doc->client();
-}
-
-void MainWindow::showClient(bool visible) const
-{
-    return m_doc->showClient(visible);
 }
 
 CWizDocumentView* MainWindow::documentView() const

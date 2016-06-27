@@ -1171,7 +1171,6 @@ href=\"file:///%1\" wiz_style=\"unsave\" charset=\"utf-8\">", strFileName);
 
 void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
 {
-    //
     QString strGUID = view()->note().strGUID;
     QString strFileName = m_mapFile.value(strGUID);
     if (strFileName.isEmpty()) {
@@ -1186,6 +1185,7 @@ void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     }
     //
     m_currentNoteHtml = strHtml;
+    emit currentHtmlChanged();
 
     WizEditorMode oldMode = m_currentEditorMode;
     m_currentEditorMode = editorMode;
@@ -1210,10 +1210,6 @@ void CWizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     //
     m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));
-
-    // show client    
-    view()->showClient(true);
-    view()->transitionView()->hide();
 
     //Waiting for the editor initialization complete if it's the first time to load a document.
     QTimer::singleShot(100, this, SLOT(applySearchKeywordHighlight()));
@@ -1879,10 +1875,6 @@ bool CWizDocumentWebView::isPersonalDocument()
 
 QString CWizDocumentWebView::getCurrentNoteHtml()
 {
-    Q_ASSERT(!m_currentNoteHtml.isEmpty());
-    //
-    qDebug() << m_currentNoteHtml;
-    //
     return m_currentNoteHtml;
 }
 
