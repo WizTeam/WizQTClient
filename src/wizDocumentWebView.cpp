@@ -1102,8 +1102,24 @@ void CWizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
     QString strHtml = strOldHtml;
     if (WizGetBodyContentFromHtml(strHtml, false))
     {
-        QString strCss = "file://" + Utils::PathResolve::resourcesPath() + "files/code/wiz_code_highlight.css";
-        page()->runJavaScript(QString("WizAddCssForCode('%1');").arg(strCss));
+        QString name("wiz_code_highlight.css");
+        QString strSrcCssFileName = Utils::PathResolve::resourcesPath() + "files/code/" + name;
+        QString strDestCssFileName = noteResourcesPath() + name;
+
+        if (QFile::exists(strDestCssFileName))
+        {
+            QFile::remove(strDestCssFileName);
+        }
+        if (!QFile::copy(strSrcCssFileName, strDestCssFileName))
+        {
+            QMessageBox::critical(this, tr("Error"), tr("Can't copy style files"));
+            return;
+        }
+        //
+        QString link = "index_files/" + name;
+        //
+        page()->runJavaScript(QString("WizAddCssForCode('%1');").arg(link));
+        //
         editorCommandExecuteInsertHtml(strHtml, true);
     }
 }

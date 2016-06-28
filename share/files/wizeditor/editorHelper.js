@@ -47,42 +47,6 @@ function WizEditorInitDeleteCommentAction() {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-function WizChecklistSave() {
-    if (WizTodoReadChecked) {
-        WizTodoReadChecked.onDocumentClose();
-    }
-}
-
-function WizOnBeforeReaderBrowserClose() {
-    WizChecklistSave();
-}
-
-function WizOnBeforeChangeDocument() {
-    WizChecklistSave();
-}
-
-function WizOnBeforeReaderModeToEditor() {
-    WizChecklistSave();
-}
-
-function WizOnBeforeEditorModeToReader() {
-    try {
-        if (WizTodoReadChecked) {
-            WizTodoReadChecked.clear();
-            WizTodoReadChecked.init("mac");
-        }
-    }
-    catch (e) {
-    }
-}
-
-function WizTodoReaderInit() {
-    if (WizTodoReadChecked) {
-        WizTodoReadChecked.clear();
-        WizTodoReadChecked.init('mac');
-    }
-}
-
 /*
   function for C++ execute
 */
@@ -137,6 +101,39 @@ function WizOnSelectionChange(style)
     try {
         WizQtEditor.OnSelectionChange(JSON.stringify(style));
     } catch (e) {
+
+    }
+}
+
+
+function WizAddCssForCode(cssFile) {
+    console.log("WizAddCssForCode called , css file " + cssFile);
+    var doc = document;
+    if (!doc)
+        return;
+    //
+    var oldLink = doc.getElementById('wiz_code_highlight_link');
+    if (oldLink) {
+        console.log("old css link find, try to remove");
+        oldLink.parentNode.removeChild(oldLink);
+    }
+    //
+    var link = doc.createElement('link');
+    if (!link)
+        return;
+    try {
+        link.type = 'text/css';
+        link.rel = 'stylesheet';
+        link.id = 'wiz_code_highlight_link';
+        link.href = cssFile;
+        //
+        if (!doc.head)
+        {
+            doc.insertBefore(doc.createElement('head'), doc.body);
+        }
+        doc.head.appendChild(link);
+    }
+    catch(e) {
 
     }
 }
