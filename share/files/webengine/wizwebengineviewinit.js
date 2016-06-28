@@ -3,6 +3,8 @@
 
     var baseUrl = "ws://localhost:__port__";
     var socket = new WebSocket(baseUrl);
+    //
+    window.wizWebChannelSocket = socket;
 
     socket.onclose = function()
     {

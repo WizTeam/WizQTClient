@@ -6,6 +6,7 @@
 #include <QDebug>
 #include "utils/stylehelper.h"
 #include "share/wizmisc.h"
+#include "share/wizthreads.h"
 #include "widgets/wizLocalProgressWebView.h"
 #include "titlebar.h"
 #include "wizDocumentView.h"
@@ -17,7 +18,6 @@
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
-
 
 QRegion creteRoundMask(const QRectF& rect)
 {
@@ -125,13 +125,24 @@ void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
 
 void CWizSingleDocumentViewer::closeEvent(QCloseEvent *event)
 {
-    QWidget::closeEvent(event);
+    emit documentViewerDeleted(m_guid);
+    m_docView->waitForDone();
     //
-    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+    QCloseEvent e = *event;
+    //
+    m_docView->web()->page()->runJavaScript("window.wizWebChannelSocket.close()", [=](const QVariant& ){
         //
-        deleteLater();
+        QCloseEvent tmp = e;
+        QWidget::closeEvent(&tmp);
+        //
+        QTimer::singleShot(1000 * 3, Qt::PreciseTimer, [=]{
+            //
+            deleteLater();
+            //
+        });
         //
     });
+
 }
 
 
@@ -186,9 +197,6 @@ void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
 
 CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
 {
-    emit documentViewerDeleted(m_guid);
-
-    m_docView->waitForDone();
 }
 
 
