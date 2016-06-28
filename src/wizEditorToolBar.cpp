@@ -1427,6 +1427,23 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
     bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
 
     //
+    bool blockFormatSetted = false;
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    for (int i = 0; i < nParagraphItemCount; i ++)
+    {
+        if (0 == paraItems[i].strUserData.compare(strBlockFormat, Qt::CaseInsensitive))
+        {
+            m_comboParagraph->setText(paraItems[i].strText);
+            blockFormatSetted = true;
+            break;
+        }
+    }
+    if (!blockFormatSetted)
+    {
+        m_comboParagraph->setText("");
+    }
+
+    //
     m_comboFontFamily->setFontName(strFontName);
     //
     strFontSize.remove("px");
