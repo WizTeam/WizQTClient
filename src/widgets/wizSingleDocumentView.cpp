@@ -39,7 +39,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
   , m_docView(nullptr)
   , m_containerWgt(nullptr)
 {
-    setAttribute(Qt::WA_DeleteOnClose);
+    //setAttribute(Qt::WA_DeleteOnClose);
     setContentsMargins(0, 0, 0, 0);
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -122,6 +122,18 @@ void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
 
     m_docView->titleBar()->editorToolBar()->adjustButtonPosition();    
 }
+
+void CWizSingleDocumentViewer::closeEvent(QCloseEvent *event)
+{
+    QWidget::closeEvent(event);
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        deleteLater();
+        //
+    });
+}
+
 
 bool CWizSingleDocumentViewer::event(QEvent* ev)
 {

@@ -270,7 +270,6 @@ void CWizDocumentWebView::keyPressEvent(QKeyEvent* event)
     {
         WizGetAnalyzer().LogAction("paste");
 
-        setPastePlainTextEnable(false);
         triggerPageAction(QWebEnginePage::Paste);
         return;
     }
@@ -1365,16 +1364,29 @@ void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     //editorCommandExecuteCommand("insertHtml", s, "'" + strHtml + "'");
 }
 
-void CWizDocumentWebView::setPastePlainTextEnable(bool bEnable)
+QString WizText2Html(const QString& text)
 {
-    editorCommandQueryCommandState("pasteplain", [=](int nState){
+    QString html = text;
+    html.replace("<", "&lt;");
+    html.replace(">", "&gt;");
+    html.replace("&", "&amp;");
+    //
+    return "<pre>" + html + "</pre>";
+}
 
-        if ((!bEnable && nState == 1) || (bEnable && nState != 1))
-        {
-            editorCommandExecuteCommand("pasteplain");
-        }
-        //
-    });
+void CWizDocumentWebView::editorCommandExecutePastePlainText()
+{
+    QClipboard* clip = QApplication::clipboard();
+    if (!clip)
+        return;
+    const QMimeData* data = clip->mimeData();
+    if (!data)
+        return;
+    QString text = data->text();
+    //
+    QString html = WizText2Html(text);
+
+    editorCommandExecuteInsertHtml(html, false);
 }
 
 void CWizDocumentWebView::editorCommandExecuteIndent()

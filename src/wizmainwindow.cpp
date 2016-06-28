@@ -2281,43 +2281,86 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {    
-    WizGetAnalyzer().LogAction("MenuBarUndo");
-
-    getActiveEditor()->undo();
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Undo);
+    }
+    else
+    {
+        getActiveEditor()->undo();
+    }
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    WizGetAnalyzer().LogAction("MenuBarRedo");
-
-    getActiveEditor()->redo();
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Redo);
+    }
+    else
+    {
+        getActiveEditor()->redo();
+    }
 }
 
 void MainWindow::on_actionEditingCut_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::Cut);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Cut);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Cut);
+    }
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::Copy);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Copy);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Copy);
+    }
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
-    m_doc->web()->setPastePlainTextEnable(false);
-    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Paste);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Paste);
+    }
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    m_doc->web()->setPastePlainTextEnable(true);
-    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Paste);
+    }
+    else
+    {
+        getActiveEditor()->editorCommandExecutePastePlainText();
+    }
 }
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::SelectAll);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::SelectAll);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::SelectAll);
+    }
 }
 
 

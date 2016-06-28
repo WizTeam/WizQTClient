@@ -30,6 +30,7 @@ signals:
 protected:
     void resizeEvent(QResizeEvent* ev);
     bool event(QEvent *ev);
+    virtual void closeEvent(QCloseEvent *event);
 
 private:
     void applyWidgetBackground(bool isFullScreen);

@@ -200,7 +200,7 @@ public:
     void editorCommandExecuteFontSize(const QString& strSize);
     void editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
-    void setPastePlainTextEnable(bool bEnable);
+    void editorCommandExecutePastePlainText();
     //
     void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
