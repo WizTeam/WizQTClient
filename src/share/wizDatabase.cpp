@@ -1293,8 +1293,6 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
 {
     if (IsGroup())
     {
-        arrayKey.push_back("group_tag_oem");
-        arrayKey.push_back("group_tag_config_oem");
         arrayKey.push_back("group_tag_pos");
     }
     else
@@ -1314,11 +1312,6 @@ bool CWizDatabase::ProcessValue(const QString& key)
         || strKey == "folders_pos")
     {
         return !IsGroup();
-    }
-    else if (strKey == "group_tag_oem"
-        || strKey == "group_tag_config_oem")
-    {
-        return IsGroup();
     }
 
     return true;
@@ -1361,18 +1354,6 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     else if (strKey == "favorites")
     {
         return GetFavorites();
-    }
-    else if (strKey == "group_tag_oem")
-    {
-        Q_ASSERT(false);
-        return "";
-        //return GetGroupTagPropertiesOEM();
-    }
-    else if (strKey == "group_tag_config_oem")
-    {
-        Q_ASSERT(false);
-        return "";
-        //return GetGroupTagConfigOEM();
     }
     else
     {
