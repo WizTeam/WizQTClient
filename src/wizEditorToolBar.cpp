@@ -1485,7 +1485,10 @@ void EditorToolBar::resetToolbar(const QString& currentStyle)
 #define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
 #define WIZEDITOR_ACTION_BAIDU           QObject::tr("Use \"Baidu\" search")
 
-
+#define WIZEDITOR_ACTION_CUT            QObject::tr("Cut")
+#define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
+#define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
+#define WIZEDITOR_ACTION_PASTE_PLAIN    QObject::tr("Paste plain text")
 
 
 void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
@@ -1545,6 +1548,10 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
     if (!menu)
         return;
     //
+    bool editing = m_editor->isEditing();
+    //
+    bool hasPasteMenu = false;
+    //
     QList<QAction*> actions = menu->actions();
     for (QAction* action : actions)
     {
@@ -1560,6 +1567,10 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 #endif
             menu->removeAction(action);
             break;
+            //
+        case QWebEnginePage::Paste:
+            hasPasteMenu = true;
+            break;
         default:
             break;
         }
@@ -1573,6 +1584,20 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         }
         menu->addAction(WIZEDITOR_ACTION_GOOGLE, this, SLOT(on_editor_google_triggered()));
         menu->addAction(WIZEDITOR_ACTION_BAIDU, this, SLOT(on_editor_baidu_triggered()));
+    }
+    //
+    if (editing)
+    {
+        if (!hasPasteMenu)
+        {
+            if (!menu->actions().isEmpty())
+            {
+                menu->addSeparator();
+            }
+
+            menu->addAction(WIZEDITOR_ACTION_PASTE, this, SLOT(on_editor_paste_triggered()));
+            menu->addAction(WIZEDITOR_ACTION_PASTE_PLAIN, this, SLOT(on_editor_pastePlain_triggered()));
+        }
     }
     //
     if (menu->actions().isEmpty())
@@ -2253,6 +2278,12 @@ void EditorToolBar::on_editor_paste_triggered()
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
     m_editor->triggerPageAction(QWebEnginePage::Paste);
+}
+
+void EditorToolBar::on_editor_pastePlain_triggered()
+{
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
+    m_editor->editorCommandExecutePastePlainText();
 }
 
 void EditorToolBar::on_editor_bold_triggered()

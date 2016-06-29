@@ -1367,9 +1367,9 @@ void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
 QString WizText2Html(const QString& text)
 {
     QString html = text;
+    html.replace("&", "&amp;");
     html.replace("<", "&lt;");
     html.replace(">", "&gt;");
-    html.replace("&", "&amp;");
     //
     return "<pre>" + html + "</pre>";
 }

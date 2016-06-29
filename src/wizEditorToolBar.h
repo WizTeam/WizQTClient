@@ -100,6 +100,7 @@ protected Q_SLOTS:
     void on_editor_cut_triggered();
     void on_editor_copy_triggered();
     void on_editor_paste_triggered();
+    void on_editor_pastePlain_triggered();
     void on_editor_bold_triggered();
     void on_editor_italic_triggered();
     void on_editor_underline_triggered();
