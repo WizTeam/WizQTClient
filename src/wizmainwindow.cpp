@@ -3940,7 +3940,6 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         WIZDOCUMENTDATA doc;
         if (db.DocumentFromGUID(pShortcut->guid(), doc))
         {
-            viewDocument(doc, true);
             CWizCategoryViewItemBase* baseItem = m_category->findFolder(doc);
             if (baseItem)
             {
@@ -3952,6 +3951,10 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
                 m_documents->setAcceptAllSearchItems(true);
                 m_documents->addAndSelectDocument(doc);
                 m_documents->setAcceptAllSearchItems(false);
+            }
+            else
+            {
+                viewDocument(doc, true);
             }
         }
     }

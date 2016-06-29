@@ -708,13 +708,19 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
     if (commentWidget && commentWidget->isVisible())
     {
-        commentWidget->showLocalProgress();
+        //commentWidget->showLocalProgress();
         m_commentManager->queryCommentUrl(note.strKbGUID, note.strGUID);
     }
 }
 
 void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
 {
+    QUrl commentsUrl(url);
+    QUrlQuery query(commentsUrl.query());
+
+    QString token = query.queryItemValue("token");
+    QString kbGuid = query.queryItemValue("kb_guid");
+    //
     CWizDocumentView* view = noteView();
     if (view && view->note().strGUID == GUID)
     {
@@ -728,7 +734,14 @@ void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
             }
             else
             {
-                commentWidget->web()->load(url);
+
+                QString js = QString("updateCmt('%1','%2','%3')").arg(token).arg(kbGuid).arg(GUID);
+                commentWidget->web()->page()->runJavaScript(js, [=](const QVariant& vRet){
+                    if (!vRet.toBool())
+                    {
+                        commentWidget->web()->load(url);
+                    }
+                });
             }
         }
     }
