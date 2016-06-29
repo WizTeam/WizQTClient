@@ -2897,10 +2897,13 @@ bool CWizDatabase::UpdateDocument(const WIZDOCUMENTDATAEX& d)
 
     WIZDOCUMENTDATAEX dataTemp;
     if (DocumentFromGUID(data.strGUID, dataTemp)) {
-        if (dataTemp.nDataChanged) //本地数据被修改了，则不覆盖
+        if (dataTemp.nVersion == -1)
         {
-            qDebug() << "local data changed, skip to overwrite: " << data.strTitle;
-            return true;
+            if (dataTemp.nDataChanged) //本地数据被修改了，则不覆盖
+            {
+                qDebug() << "local data changed, skip to overwrite: " << data.strTitle;
+                return true;
+            }
         }
         //
         if (data.nVersion == dataTemp.nVersion)
