@@ -97,7 +97,7 @@ bool CWizEmailShareDialog::isInsertCommentToNote() const
 
 QString CWizEmailShareDialog::getCommentsText() const
 {
-    return ui->textEdit_notes->toPlainText().toHtmlEscaped();
+    return QString::fromUtf8(QUrl::toPercentEncoding(ui->textEdit_notes->toPlainText()));
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()
@@ -123,7 +123,7 @@ QString CWizEmailShareDialog::getExInfo()
     QString cc_to_self = ui->checkBox_sendMeCopy->isChecked() ? "true" : "false";
     QString result = "?kb_guid=" + m_note.strKbGUID + "&document_guid=" + m_note.strGUID + "&token=" + strToken
             + "&mail_to=" + ui->lineEdit_to->text() + "&subject=" + ui->lineEdit_subject->text() + "&cc_to_self=" + cc_to_self
-            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + ui->textEdit_notes->toPlainText().toHtmlEscaped()
+            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + ui->textEdit_notes->toPlainText()
             + "&api_version=4";
 
     return result;

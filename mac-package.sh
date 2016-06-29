@@ -15,7 +15,7 @@ QTDIR="/Users/weishijun/Qt5.7.0/5.7/clang_64"
 mkdir ../WizQTClient-Release-QT5
 rm -rf ../WizQTClient-Release-QT5/* && \
 cd ../WizQTClient-Release-QT5 && \
-cmake -DCMAKE_BUILD_TYPE=Release -DPLCrashReporter=YES -UPDATE_TRANSLATIONS=YES -DCMAKE_PREFIX_PATH=$QTDIR/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
+cmake -DCMAKE_BUILD_TYPE=Release -UPDATE_TRANSLATIONS=YES -DCMAKE_PREFIX_PATH=$QTDIR/lib/cmake -DCMAKE_OSX_SYSROOT=/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.11.sdk ../WizQTClient && \
 make -j5
 
 
@@ -27,7 +27,7 @@ echo "replace version"
 plutil -replace CFBundleVersion -string $REV $MYAPP.app/Contents/Info.plist
 
 mkdir WizNote.app/Contents/Frameworks
-cp -R -p ~/Library/Frameworks/CrashReporter.framework WizNote.app/Contents/Frameworks
+#cp -R -p ~/Library/Frameworks/CrashReporter.framework WizNote.app/Contents/Frameworks
 
 echo "call macdeployqt"
 $QTDIR/bin/macdeployqt $DEST
