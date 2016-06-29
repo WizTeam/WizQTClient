@@ -218,4 +218,13 @@ typedef std::deque<CString> CWizStdStringArray;
 
 int WizSmartScaleUI(int spec);
 
+struct WizWindowInfo
+{
+    QString processName;
+    QString windowTitle;
+    long pid;
+};
+
+QList<WizWindowInfo> WizGetActiveWindows();
+
 #endif // WIZQTHELPER_H

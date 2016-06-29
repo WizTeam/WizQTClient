@@ -3,19 +3,16 @@
 #include "../utils/logger.h"
 #include <QFileInfo>
 #include <QDebug>
+#include <QCoreApplication>
+#include "wizthreads.h"
+
+#define WIZ_THREAD_FILE_MONITOR     1024
 
 CWizFileMonitor::CWizFileMonitor(QObject *parent) :
-    QThread(parent)
-  , m_stop(false)
+    QObject(parent)
 {    
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
     m_timer.start(5 * 1000);
-}
-
-CWizFileMonitor::~CWizFileMonitor()
-{
-    stop();
-    WizWaitForThread(this);
 }
 
 CWizFileMonitor&CWizFileMonitor::instance()
@@ -24,73 +21,61 @@ CWizFileMonitor&CWizFileMonitor::instance()
     return instance;
 }
 
-void CWizFileMonitor::addFile(const QString strKbGUID, const QString& strGUID,
-                              const QString& strFileName, const QString& strMD5, const QDateTime& dtLastModified)
+void CWizFileMonitor::addFile(const QString& strKbGUID, const QString& strGUID,
+                              const QString& strFileName, const QString& strMD5)
 {
     Q_ASSERT(!strFileName.isEmpty());
 
-    {
-        QMutexLocker locker(&m_mutex);
-        foreach (FMData fmData, m_fileList) {
-            if (fmData.strFileName == strFileName)
+    QFileInfo fileInfo(strFileName);
+
+    FMData fileData;
+    fileData.strKbGUID = strKbGUID;
+    fileData.strGUID = strGUID;
+    fileData.strFileName = strFileName;
+    fileData.strMD5 = strMD5;
+    fileData.dtLastModified = fileInfo.lastModified();
+
+    ::WizExecuteOnThread(WIZ_THREAD_FILE_MONITOR, [=]{
+
+        for (const FMData& fmData: m_fileList) {
+            if (fmData.strFileName == fileData.strFileName)
                 return;
         }
 
-        FMData fileData;
-        fileData.strKbGUID = strKbGUID;
-        fileData.strGUID = strGUID;
-        fileData.strFileName = strFileName;
-        fileData.strMD5 = strMD5;
-        fileData.dtLastModified = dtLastModified;
-
         m_fileList.append(fileData);
-    }
-
-    if (!isRunning())
-    {
-        start();
-    }
-}
-
-void CWizFileMonitor::stop()
-{
-    QMutexLocker locker(&m_mutex);
-    m_stop  = true;
-    m_wait.wakeAll();
+        //
+    });
 }
 
 void CWizFileMonitor::on_timerOut()
 {
-    QMutexLocker locker(&m_mutex);
-    m_wait.wakeAll();
-}
-
-void CWizFileMonitor::run()
-{
-    while (!m_stop)
+    long pid = (long)QCoreApplication::applicationPid();
+    //
+    bool isForeground = false;
+    QList<WizWindowInfo> windowInfos = WizGetActiveWindows();
+    for (const WizWindowInfo& info : windowInfos)
     {
+        if (info.pid == pid)
+        {
+            isForeground = true;
+            break;
+        }
+    }
+    if (!isForeground)
+        return;
+    //
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_FILE_MONITOR, [=]{
+
         checkFiles();
         //
-        QMutexLocker locker(&m_mutex);
-        m_wait.wait(&m_mutex);
-    }
+    });
 }
 
 void CWizFileMonitor::checkFiles()
 {
-    m_mutex.lock();
-    QList<FMData> fileList = m_fileList;
-    m_mutex.unlock();
-
-
-    QList<FMData>::iterator fmIter;
-    for (fmIter = fileList.begin(); fmIter != fileList.end(); fmIter++)
+    for (FMData& fileData: m_fileList)
     {
-        if (m_stop)
-            break;
-
-        FMData& fileData = *fmIter;
-
         QFileInfo info(fileData.strFileName);
         if (info.lastModified() > fileData.dtLastModified)
         {
@@ -98,6 +83,7 @@ void CWizFileMonitor::checkFiles()
             if (strMD5 == fileData.strMD5)
             {
                 TOLOG("[FileMoniter] file modified, but md5 keep same");
+                continue;
             }
             else
             {
@@ -110,4 +96,5 @@ void CWizFileMonitor::checkFiles()
                               fileData.strMD5, fileData.dtLastModified);
         }
     }
+
 }

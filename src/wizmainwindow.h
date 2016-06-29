@@ -438,6 +438,9 @@ public Q_SLOTS:
     //
     void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
     void viewCurrentNoteInSeparateWindow();
+    //
+    void onAttachmentModified(QString strKbGUID, QString strGUID,QString strFileName,
+                              QString strMD5, QDateTime dtLastModified);
 
 public:
     // WizExplorerApp pointer

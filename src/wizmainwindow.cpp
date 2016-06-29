@@ -4026,19 +4026,25 @@ void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
         qDebug() << "Can not open attachment file : " << strFileName;
     }
     //
-    CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
-    connect(&db, SIGNAL(attachmentModified(const WIZDOCUMENTATTACHMENTDATA&,const WIZDOCUMENTATTACHMENTDATA&)),
-            this, SLOT(onAttachmentModified(const WIZDOCUMENTATTACHMENTDATA&,const WIZDOCUMENTATTACHMENTDATA&)));
+    MainWindow* mainWindow = MainWindow::instance();
+    //
+    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+            mainWindow, SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-//    CWizFileMonitor& monitor = CWizFileMonitor::instance();
-//    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
-//            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
-
-//    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
-//    QFileInfo info(strFileName);
-//    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-//                    attachment.strDataMD5, info.lastModified());
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName, attachment.strDataMD5);
 }
+
+void MainWindow::onAttachmentModified(QString strKbGUID, QString strGUID, QString strFileName,
+                          QString strMD5, QDateTime dtLastModified)
+{
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    //
+    db.onAttachmentModified(strKbGUID, strGUID, strFileName, strMD5, dtLastModified);
+    //
+    quickSyncKb(strKbGUID);
+}
+
 
 void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
