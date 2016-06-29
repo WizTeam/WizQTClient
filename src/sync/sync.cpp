@@ -747,22 +747,19 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
     tLocalModified = local.tDataModified;
     //
     //check data size
-    if (!local.arrayData.isEmpty())
+    if (local.arrayData.isEmpty())
     {
         pEvents->OnError(_TR("No attachment data"));
         return FALSE;
     }
     //
-    if (!local.arrayData.isEmpty())
+    __int64 nDataSize = local.arrayData.size();
+    if (nDataSize > server.GetMaxFileSize())
     {
-        __int64 nDataSize = local.arrayData.size();
-        if (nDataSize > server.GetMaxFileSize())
-        {
-            QString str;
-            str = local.strName;
-            pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
-            return FALSE;
-        }
+        QString str;
+        str = local.strName;
+        pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
+        return FALSE;
     }
     //
     //

@@ -816,6 +816,9 @@ struct CWizKMAttachmentPostDataParam
         AddTime(_T("dt_data_modified"), infodata.tDataModified);
         AddString(_T("data_md5"), infodata.strDataMD5);
         AddString(_T("attachment_zip_md5"), strObjMd5);
+        //
+        AddBool("attachment_info", true);
+        AddBool("attachment_data", true);
     }
 };
 
@@ -1065,9 +1068,6 @@ BOOL CWizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool
 
 BOOL CWizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
 {
-    if (!data.arrayData.isEmpty())
-        return FALSE;
-    //
     if (data.arrayData.size() > m_kbInfo.GetMaxFileSize())
     {
         TOLOG1(_T("%1 is too large, skip it"), data.strName);
@@ -1085,9 +1085,9 @@ BOOL CWizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data
     CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, data, strObjMd5);
     //
     CWizXmlRpcResult ret;
-    if (!Call(_T("attachment.postData"), ret, &param))
+    if (!Call(_T("attachment.postSimpleData"), ret, &param))
     {
-        TOLOG(_T("attachment.postData2 failure!"));
+        TOLOG(_T("attachment.postSimpleData failure!"));
         return FALSE;
     }
     //

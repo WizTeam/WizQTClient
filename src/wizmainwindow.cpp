@@ -4025,6 +4025,10 @@ void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
     {
         qDebug() << "Can not open attachment file : " << strFileName;
     }
+    //
+    CWizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
+    connect(&db, SIGNAL(attachmentModified(const WIZDOCUMENTATTACHMENTDATA&,const WIZDOCUMENTATTACHMENTDATA&)),
+            this, SLOT(onAttachmentModified(const WIZDOCUMENTATTACHMENTDATA&,const WIZDOCUMENTATTACHMENTDATA&)));
 
 //    CWizFileMonitor& monitor = CWizFileMonitor::instance();
 //    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
