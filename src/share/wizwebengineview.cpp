@@ -32,6 +32,7 @@ WizWebEngineView::WizWebEngineView(QWidget* parent)
     : QWebEngineView(parent)
     , m_server(NULL)
     , m_clientWrapper(NULL)
+    , m_channel(NULL)
 {
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
     //
@@ -68,20 +69,32 @@ void WizWebEngineView::addToJavaScriptWindowObject(QString name, QObject* obj)
 
 WizWebEngineView::~WizWebEngineView()
 {
+    closeAll();
+}
+
+void WizWebEngineView::closeAll()
+{
     if (m_server)
     {
+        m_server->disconnect();
         m_server->close();
-        m_server->deleteLater();
+        //m_server->deleteLater();
+        //m_server = NULL;
     }
     if (m_clientWrapper)
     {
-        m_clientWrapper->deleteLater();
+        m_clientWrapper->disconnect();
+        //m_clientWrapper->deleteLater();
+        //m_clientWrapper = NULL;
     }
     if (m_channel)
     {
-        m_channel->deleteLater();
+        m_channel->disconnect();
+        //m_channel->deleteLater();
+        //m_channel = NULL;
     }
 }
+
 
 void WizWebEngineView::innerLoadFinished(bool ret)
 {

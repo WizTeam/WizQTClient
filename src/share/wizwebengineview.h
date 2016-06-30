@@ -36,6 +36,7 @@ public:
     virtual ~WizWebEngineView();
 public:
     void addToJavaScriptWindowObject(QString name, QObject* obj);
+    void closeAll();
 public Q_SLOTS:
     void innerLoadFinished(bool);
 Q_SIGNALS:

@@ -590,6 +590,8 @@ void CWizDocumentWebView::onDocumentSaved(const QString kbGUID, const QString st
 
 void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode)
 {
+    if (!m_docLoadThread)
+        return;
     // set data
     int seconds = doc.tCreated.secsTo(QDateTime::currentDateTime());
     m_bNewNote = (seconds >= 0 && seconds <= 1) ? true : false;
@@ -608,6 +610,9 @@ void CWizDocumentWebView::viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode
 
 void CWizDocumentWebView::reloadNoteData(const WIZDOCUMENTDATA& data)
 {
+    if (!m_docLoadThread)
+        return;
+    //
     Q_ASSERT(!data.strGUID.isEmpty());
 
     // reset only if user not in editing mode

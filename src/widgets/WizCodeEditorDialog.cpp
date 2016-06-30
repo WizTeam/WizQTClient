@@ -36,7 +36,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     m_codeBrowser->addToJavaScriptWindowObject("external", m_external);
 
     //
-    //setAttribute(Qt::WA_DeleteOnClose);
+    setAttribute(Qt::WA_DeleteOnClose);
     //setWindowFlags(Qt::WindowStaysOnTopHint);          //could cause fullscreen problem on mac when mainwindow was fullscreen
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);

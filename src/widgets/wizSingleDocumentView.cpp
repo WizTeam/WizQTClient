@@ -39,19 +39,12 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
   , m_docView(nullptr)
   , m_containerWgt(nullptr)
 {
-    //setAttribute(Qt::WA_DeleteOnClose);
+    setAttribute(Qt::WA_DeleteOnClose);
     setContentsMargins(0, 0, 0, 0);
     QHBoxLayout* layout = new QHBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
 
     applyWidgetBackground(false);
-    //        m_webEngine = new CWizDocumentWebEngine(app, this);
-    //        layout->addWidget(m_webEngine);
-    //        m_edit = new QLineEdit(this);
-    //        layout->addWidget(m_edit);
-    //        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-    //        WIZDOCUMENTDATA doc;
-    //        m_webEngine->viewDocument(doc, true);
 
     m_containerWgt = new QWidget(this);
     m_containerWgt->setStyleSheet(".QWidget{background-color:#F5F5F5;}");
@@ -98,6 +91,13 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //#endif
 }
 
+CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
+{
+    emit documentViewerDeleted(m_guid);
+}
+//
+
+
 CWizDocumentView* CWizSingleDocumentViewer::docView()
 {        
     return m_docView;
@@ -123,28 +123,14 @@ void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
     m_docView->titleBar()->editorToolBar()->adjustButtonPosition();    
 }
 
-void CWizSingleDocumentViewer::closeEvent(QCloseEvent *event)
+void CWizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
 {
-    emit documentViewerDeleted(m_guid);
     m_docView->waitForDone();
     //
-    QCloseEvent e = *event;
+    m_docView->web()->closeAll();
     //
-    m_docView->web()->page()->runJavaScript("window.wizWebChannelSocket.close()", [=](const QVariant& ){
-        //
-        QCloseEvent tmp = e;
-        QWidget::closeEvent(&tmp);
-        //
-        QTimer::singleShot(1000 * 3, Qt::PreciseTimer, [=]{
-            //
-            deleteLater();
-            //
-        });
-        //
-    });
-
+    QWidget::closeEvent(ev);
 }
-
 
 bool CWizSingleDocumentViewer::event(QEvent* ev)
 {
@@ -193,10 +179,6 @@ void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
             m_containerWgt->clearMask();
         }
     }
-}
-
-CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
-{
 }
 
 
