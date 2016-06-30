@@ -201,7 +201,6 @@ public:
                                 const QString& strObjectType);
 
     // modify
-    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData);
     virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData);
 
     // info and groups

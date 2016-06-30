@@ -443,19 +443,6 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
 
 
 template <class TData>
-bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
-{
-    ATLASSERT(FALSE);
-    return FALSE;
-}
-
-template <class TData>
-bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
-{
-    return pDatabase->ModifyDocumentsVersion(arrayData);
-}
-
-template <class TData>
 bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, WizKMSyncProgress progress)
 {
     pEvents->OnSyncProgress(::GetSyncStartProgress(progress));

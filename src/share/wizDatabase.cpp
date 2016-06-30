@@ -928,17 +928,6 @@ bool CWizDatabase::OnUploadObject(const QString& strGUID,
     }
 }
 
-bool CWizDatabase::ModifyDocumentsVersion(CWizDocumentDataArray& arrayData)
-{
-    CWizDocumentDataArray::const_iterator it;
-    for (it = arrayData.begin(); it != arrayData.end(); it++) {
-        WIZDOCUMENTDATA data(*it);
-        SetDocumentVersion(data.strGUID, data.nVersion);
-    }
-
-    return true;
-}
-
 bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 {
     for (WIZMESSAGEDATA msg : arrayData)

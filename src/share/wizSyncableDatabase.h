@@ -61,8 +61,6 @@ struct IWizSyncableDatabase
 
     virtual bool OnUploadObject(const QString& strGUID, const QString& strObjectType) = 0;
 
-    virtual bool ModifyDocumentsVersion(CWizDocumentDataArray& arrayData) = 0;
-
     virtual bool ModifyMessagesLocalChanged(CWizMessageDataArray &arrayData) = 0;
 
     virtual bool OnDownloadGroups(const CWizGroupDataArray& arrayGroup) = 0;
