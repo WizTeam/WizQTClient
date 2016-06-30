@@ -1051,6 +1051,16 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 
         TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
     }
+    //
+    if (data.nVersion >= 0)
+    {
+        if (data.nDataChanged || data.nInfoChanged)
+        {
+            qDebug() << "fault error: data changed or info changed is not false";
+            data.nDataChanged = 0;
+            data.nInfoChanged = 0;
+        }
+    }
 
     CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT);
 
