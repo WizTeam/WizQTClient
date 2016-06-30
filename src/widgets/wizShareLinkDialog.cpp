@@ -30,7 +30,7 @@ CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* pa
     m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
     //
     m_view->addToJavaScriptWindowObject("external", this);
-    m_view->addToJavaScriptWindowObject("customObject", this);
+    //m_view->addToJavaScriptWindowObject("customObject", this);
 
     m_animation = new QPropertyAnimation(this, "size", this);
 }
@@ -68,8 +68,11 @@ void CWizShareLinkDialog::writeToLog(const QString& strLog)
 void CWizShareLinkDialog::getToken()
 {
     QString strToken = Token::token();
-    m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken));
-    emit tokenObtained();
+    m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken), [=](const QVariant& vRet){
+
+        emit tokenObtained();
+
+    });
 }
 
 QString CWizShareLinkDialog::getKbGuid()
@@ -144,11 +147,17 @@ QString CWizShareLinkDialog::getLocalLanguage()
     return m_settings.locale();
 }
 
-QString CWizShareLinkDialog::formateISO8601String(const QString& value)
+void CWizShareLinkDialog::setFormateISO8601StringParam(const QString& param)
 {
-    QDateTime date = QDateTime::fromString(value, Qt::ISODate);
+    m_formateISO8601StringParam = param;
+    emit formateISO8601StringChanged();
+}
+
+QString CWizShareLinkDialog::formateISO8601String()
+{
+    QDateTime date = QDateTime::fromString(m_formateISO8601StringParam, Qt::ISODate);
     if (!date.isValid() || date.isNull())
-        return value;
+        return m_formateISO8601StringParam;
 
     return date.toString(Qt::ISODate);
 }
@@ -159,4 +168,5 @@ void CWizShareLinkDialog::loadHtml()
     QUrl url = QUrl::fromLocalFile(strFile);
     m_view->load(url);
 }
+
 

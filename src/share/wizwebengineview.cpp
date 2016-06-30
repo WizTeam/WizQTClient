@@ -54,7 +54,6 @@ WizWebEngineView::WizWebEngineView(QWidget* parent)
 
 void WizWebEngineView::addToJavaScriptWindowObject(QString name, QObject* obj)
 {
-    m_channel->deregisterObject(obj);
     m_channel->registerObject(name, obj);
     //
     if (m_objectNames.isEmpty())

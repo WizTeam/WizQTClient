@@ -26,10 +26,9 @@
                 window[key] = channel.objects[key];
             }
             //
-            try {
+            if (initForWebEngine)
+            {
                 initForWebEngine();
-            } catch (error) {
-                //console.error(error);
             }
         });
     }
