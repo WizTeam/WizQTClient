@@ -782,7 +782,11 @@ void CWizDocumentWebView::addAttachmentThumbnail(const QString strFile, const QS
 
 void CWizDocumentWebView::getMailSender(std::function<void(QString)> callback)
 {
-    page()->runJavaScript("WizGetMailSender()", [=](const QVariant& vRet){
+    QString scriptFileName = Utils::PathResolve::resourcesPath() + "files/scripts/GetMailSender.js";
+    QString code;
+    ::WizLoadUnicodeTextFromFile(scriptFileName, code);
+    //
+    page()->runJavaScript(code, [=](const QVariant& vRet){
         //
         QString mailSender = vRet.toString();
 
