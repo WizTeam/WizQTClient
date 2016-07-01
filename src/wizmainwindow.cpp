@@ -667,8 +667,14 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
 void MainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
 {
     WIZDOCUMENTDATA doc;
-    if ((msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE) &&
-            !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc))
+    if (
+            (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+             )
+            && !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)
+            )
     {
         m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
         return;
@@ -682,8 +688,11 @@ void MainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
         showCommentWidget();
         viewDocument(doc, true);
     }
-    else if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
-             msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+    else if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+             )
     {
         viewDocument(doc, true);
     }

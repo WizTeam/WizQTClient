@@ -237,6 +237,7 @@ public:
             return QString();
             break;
         case WIZ_USER_MSG_TYPE_REMIND:
+        case WIZ_USER_MSG_TYPE_REMIND_CREATE:
             return QObject::tr("Remind you to view");
             break;
         case WIZ_USER_MSG_TYPE_LIKE:
@@ -832,8 +833,11 @@ void MessageListView::on_itemSelectionChanged()
         WIZMESSAGEDATA msgData;
         m_dbMgr.db().messageFromId(listMsg[0].nId, msgData);
 
-        if (msgData.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
-                msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+        if (msgData.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+                )
         {
             emit viewMessageRequest(msgData);
         }
