@@ -26,11 +26,11 @@ void WizTableItemWidget::setSelected(bool selected)
     m_selected = selected;
     if (m_selected)
     {
-        setPalette(QPalette(QColor(0xff, 0, 0)));
+        setPalette(QPalette(QColor(0x44, 0x8a, 0xff)));
     }
     else
     {
-        setPalette(QPalette(QColor(0, 0xff, 0)));
+        setPalette(QPalette(QColor(0xcc, 0xcc, 0xcc)));
     }
 }
 //
