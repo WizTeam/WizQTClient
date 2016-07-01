@@ -1,7 +1,7 @@
 #include "wizSearchReplaceWidget.h"
 #include "ui_wizSearchReplaceWidget.h"
 
-CWizSearchReplaceWidget::CWizSearchReplaceWidget(QDialog* parent) :
+CWizSearchReplaceWidget::CWizSearchReplaceWidget(QWidget* parent) :
     QDialog(parent),
     ui(new Ui::CWizSearchReplaceWidget)
 {
@@ -23,6 +23,7 @@ void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
     pos.setY(rcEditor.y() + (rcEditor.height() - height()) / 2);
     setGeometry(QRect(pos, size()));
 
+    setParent(parentWidget());
     show();
     setWindowState(windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
     setFixedSize(size());
@@ -65,6 +66,7 @@ void CWizSearchReplaceWidget::on_lineEdit_source_returnPressed()
 
 void CWizSearchReplaceWidget::clearAllText()
 {
+    emit findNext("", false);
     ui->lineEdit_repalce->clear();
     ui->lineEdit_source->clear();
 }

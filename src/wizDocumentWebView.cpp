@@ -1459,13 +1459,14 @@ void CWizDocumentWebView::editorCommandExecuteFindReplace()
 {
     if (!m_searchReplaceWidget)
     {
-        m_searchReplaceWidget = new CWizSearchReplaceWidget();
+        m_searchReplaceWidget = new CWizSearchReplaceWidget(this);
+        //
+        connect(m_searchReplaceWidget, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
+        connect(m_searchReplaceWidget, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
+        connect(m_searchReplaceWidget, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
+        connect(m_searchReplaceWidget, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
+        connect(m_searchReplaceWidget, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
     }
-    connect(m_searchReplaceWidget, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
-    connect(m_searchReplaceWidget, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
-    connect(m_searchReplaceWidget, SIGNAL(replaceCurrent(QString,QString)), SLOT(replaceCurrent(QString,QString)));
-    connect(m_searchReplaceWidget, SIGNAL(replaceAndFindNext(QString,QString,bool)), SLOT(replaceAndFindNext(QString,QString,bool)));
-    connect(m_searchReplaceWidget, SIGNAL(replaceAll(QString,QString,bool)), SLOT(replaceAll(QString,QString,bool)));
 
     QRect rect = geometry();
     rect.moveTo(mapToGlobal(pos()));
@@ -1473,6 +1474,16 @@ void CWizDocumentWebView::editorCommandExecuteFindReplace()
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
     analyzer.LogAction("findReplace");
+
+}
+
+void CWizDocumentWebView::innerFindText(QString text, bool next, bool matchCase)
+{
+    bool back = !next;
+    QString code = QString("find('%1', %2, %3, true)").arg(text)
+            .arg(back ? "true" : "false")
+            .arg(matchCase ? "true" : "false");
+    page()->runJavaScript(code);
 
 }
 
@@ -1484,7 +1495,7 @@ void CWizDocumentWebView::findPre(QString strTxt, bool bCasesensitive)
     if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
     {
         // clear highlight
-        findText("");
+        //findText("");
         strOldSearchText = strTxt;
         strOldCase = bCasesensitive;
     }
@@ -1495,14 +1506,15 @@ void CWizDocumentWebView::findPre(QString strTxt, bool bCasesensitive)
         options |= QWebEnginePage::FindCaseSensitively;
     }
     //
-    findText(strTxt, options);
+    //findText(strTxt, options);
+    innerFindText(strTxt, false, bCasesensitive);
 }
 
 void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
 {
     if (strOldSearchText != strTxt || strOldCase != bCasesensitive)
     {
-        findText("", 0);
+        //findText("", 0);
         strOldSearchText = strTxt;
         strOldCase = bCasesensitive;
     }
@@ -1512,29 +1524,25 @@ void CWizDocumentWebView::findNext(QString strTxt, bool bCasesensitive)
         options |= QWebEnginePage::FindCaseSensitively;
     }
     //
-    findText(strTxt, options);
+    //findText(strTxt, options);
+    innerFindText(strTxt, true, bCasesensitive);
 }
 
 void CWizDocumentWebView::replaceCurrent(QString strSource, QString strTarget)
 {
-    QString strExec = QString("WizEditor.replaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
+    QString strExec = QString("WizEditor.replace('%1', '%2', true)").arg(strSource).arg(strTarget);
     page()->runJavaScript(strExec);
 }
 
 void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
 {
-    QString strExec = QString("WizEditor.replaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
-    page()->runJavaScript(strExec, [=](const QVariant& vRet){
-
-        findNext(strSource, bCasesensitive);
-        setModified(true);
-        //
-    });
+    QString strExec = QString("WizEditor.replace('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive ? "true" : "false");
+    page()->runJavaScript(strExec);
 }
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
-    QString strExec = QString("WizEditor.repalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
+    QString strExec = QString("WizEditor.repalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive ? "true" : "false");
     page()->runJavaScript(strExec);
     setModified(true);
 }

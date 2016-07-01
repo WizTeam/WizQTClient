@@ -401,6 +401,8 @@ private:
     void getMailSender(std::function<void(QString)> callback);
 
     //
+    void innerFindText(QString text, bool next, bool matchCase);
+    //
 //    bool shouldAddUserDefaultCSS();
 };
 

@@ -27,24 +27,6 @@ function WizStopEditorAmend() {
     }
 }
 
-function WizEditorInitDeleteCommentAction() {
-    try {
-        var copiedComment = document.getElementById("wiz-comments-copy");
-        if (copiedComment) {
-            var deleteComment = document.getElementById("deleteComments");
-            if (deleteComment) {
-                deleteComment.addEventListener("click", function () {
-                    copiedComment.parentNode.removeChild(copiedComment);
-                });
-            }
-        }
-    }
-    catch (e) {
-        console.log(e.toString());
-    }
-}
-
-
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
@@ -84,9 +66,7 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
         }
         //
         WizEditor.init(editorOptions);
-        //
-        WizEditorInitDeleteCommentAction();
-        //
+        WizEditor.link.on();
         WizEditor.addListener(WizEditor.ListenerType.SelectionChange, WizOnSelectionChange)
         return true;
     }

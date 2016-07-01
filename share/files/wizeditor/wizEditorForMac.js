@@ -1864,11 +1864,21 @@ var WizEditor = {
         return WizEditor;
     },
     /**
+     * 在编辑时，查找指定文本
+     * @param string
+     * @param matchcase
+     * @param searchBackward
+     * @param loop
+     * @returns {*}
+     */
+    find: function find(str, matchcase, searchBackward, loop) {
+        return editor.find(str, matchcase, searchBackward, loop);
+    },
+    /**
      * 让 body 获取焦点
      */
     focus: function focus() {
         domUtils.focus();
-
         return WizEditor;
     },
     /**
@@ -1894,10 +1904,6 @@ var WizEditor = {
         wizStyle.insertCustomStyle(id, customCss, isTemp);
         return WizEditor;
     },
-    removeStyleById: function removeStyleById(id) {
-        wizStyle.removeStyleById(id);
-        return WizEditor;
-    },
     /**
      * 在光标位置插入 base64 格式的html
      * @param b64Html
@@ -1920,12 +1926,6 @@ var WizEditor = {
         return !ENV.readonly && domUtils.getContentHtml() != editor.getOriginalHtml();
     },
     /**
-     * 设置当前文档为 未修改状态
-     */
-    setUnModified: function setUnModified() {
-        editor.setOriginalHtml();
-    },
-    /**
      * 修改光标选中文本的样式 和 属性
      * @param style (example:{'font-size':'16px', 'color':'red'})
      * @param attr
@@ -1941,6 +1941,16 @@ var WizEditor = {
 
         return WizEditor;
     },
+    removeStyleById: function removeStyleById(id) {
+        wizStyle.removeStyleById(id);
+        return WizEditor;
+    },
+    replace: function replace(from, to, matchcase) {
+        return editor.replace(from, to, matchcase);
+    },
+    replaceAll: function replaceAll(from, to, matchcase) {
+        editor.replaceAll(from, to, matchcase);
+    },
     /**
      * 恢复已备份光标位置
      */
@@ -1954,6 +1964,12 @@ var WizEditor = {
         historyUtils.saveSnap(false);
 
         return WizEditor;
+    },
+    /**
+     * 设置当前文档为 未修改状态
+     */
+    setUnModified: function setUnModified() {
+        editor.setOriginalHtml();
     },
     /**
      * 编辑器 undo
@@ -2068,6 +2084,13 @@ var WizEditor = {
          */
         removeSelectedLink: function removeSelectedLink() {
             linkUtils.removeSelectedLink();
+        },
+        /**
+         * 设置当前选中区域超链接，或在光标处添加超链接
+         * @param url
+         */
+        setCurrentLink: function setCurrentLink(url) {
+            linkUtils.setCurrentLink(url);
         }
     },
     table: {
@@ -6958,13 +6981,13 @@ var TmpEditorStyle = {
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
     common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}',
-    todoList: '.wiz-todo-main {padding-left: 12px;position: relative;line-height:30px;}' + '.wiz-todo-checked {color: #666;}' + '.wiz-todo-unchecked {text-decoration: initial;}' + '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-checkbox {position:relative;top:-3px;border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 44px;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' +
+    todoList: '.wiz-todo-main {padding-left: 12px;position: relative;line-height:30px;}' + '.wiz-todo-checked {color: #666;}' + '.wiz-todo-unchecked {text-decoration: initial;}' + '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-checkbox {border-radius:0;position:relative;top:-3px;border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;box-sizing:initial;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 20px;}' +
     //单独出来主要为了兼容旧的 todoList
     'input.wiz-todo-avatar {position:relative;top:-4px;}' + '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
 },
     ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' + '.wiz-img-resize-handle {width:5px;height:5px;}' + '.wiz-img-resize-handle.lt {cursor: nw-resize;}' + '.wiz-img-resize-handle.tm {cursor: n-resize;}' + '.wiz-img-resize-handle.rt {cursor: ne-resize;}' + '.wiz-img-resize-handle.lm {cursor: w-resize;}' + '.wiz-img-resize-handle.rm {cursor: e-resize;}' + '.wiz-img-resize-handle.lb {cursor: sw-resize;}' + '.wiz-img-resize-handle.bm {cursor: s-resize;}' + '.wiz-img-resize-handle.rb {cursor: se-resize;}',
     TableContainerStyle = '.' + CONST.CLASS.TABLE_CONTAINER + ' {}' + '.' + CONST.CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' + '.' + CONST.CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
-    TableEditStyle = '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:before,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' + 'td,th {position:relative;}' + '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + CONST.CSS.Z_INDEX.tableBorder + '}' + '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableColRowLine + ';}' + '#wiz-table-col-line {width: 1px;cursor:col-resize;}' + '#wiz-table-row-line {height: 1px;cursor:row-resize;}' + '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' + '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_top {height: 1px;}' + '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_right {width: 1px;}' + '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_bottom {height: 1px;}' + '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_left {width: 1px;}' + '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableRangeDot + ';}' + '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + CONST.CSS.Z_INDEX.tableTools + ';}' + '.wiz-table-tools ul {list-style: none;padding: 0;}' + '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {width: 20px;height: 20px;cursor: pointer;position:relative;}' + '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' + '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' + '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + CONST.CSS.Z_INDEX.tableToolsArrow + ';}' + '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' + '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' + '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' + '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' + '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' + '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' + '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' + 'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' + 'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}' + 'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}';
+    TableEditStyle = '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:before,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' + 'td,th {position:relative;}' + '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + CONST.CSS.Z_INDEX.tableBorder + '}' + '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableColRowLine + ';}' + '#wiz-table-col-line {width: 1px;cursor:col-resize;}' + '#wiz-table-row-line {height: 1px;cursor:row-resize;}' + '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' + '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_top {height: 1px;}' + '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_right {width: 1px;}' + '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_bottom {height: 1px;}' + '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_left {width: 1px;}' + '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableRangeDot + ';}' + '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + CONST.CSS.Z_INDEX.tableTools + ';}' + '.wiz-table-tools ul {list-style: none;padding: 0;}' + '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {font-size:15px;width:20px;height:20px;line-height:20px;cursor: pointer;position:relative;}' + '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:1px;left:0;}' + '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' + '.wiz-table-tools .wiz-table-menu-sub > div{font-size:15px;}' + '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' + '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + CONST.CSS.Z_INDEX.tableToolsArrow + ';}' + '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' + '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' + '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' + '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' + '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' + '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-color-pad > div{font-size:15px;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' + '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' + 'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' + 'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}' + 'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}';
 
 function replaceStyleById(id, css, isReplace) {
     //isReplace = true 则 只进行替换， 如无同id 的元素，不进行任何操作
@@ -9882,11 +9905,19 @@ var domUtils = {
         if (!!domList.nodeType) {
             domList = [domList];
         }
-        var i, dom;
+        if (!utils.isArray(className)) {
+            className = [className];
+        }
+        var i, j, dom, css;
         for (i = domList.length - 1; i >= 0; i--) {
             dom = domList[i];
             if (dom.nodeType === 1) {
-                dom.className = (" " + dom.className + " ").replace(' ' + className + ' ', ' ').trim();
+                dom.className = " " + dom.className + " ";
+                for (j = className.length; j >= 0; j--) {
+                    css = className[j];
+                    dom.className = dom.className.replace(' ' + css + ' ', ' ');
+                }
+                dom.className = dom.className.trim();
             }
         }
     },
@@ -10153,7 +10184,7 @@ var domUtils = {
      * @param dom
      */
     stripDom: function stripDom(dom, checkFun) {
-        if (!dom) {
+        if (!dom || dom.nodeType === 3) {
             return;
         }
         var result = {
@@ -10628,6 +10659,17 @@ var editor = {
         domUtils.removeDomByName(CONST.NAME.TMP_STYLE);
         domUtils.removeDomByTag(CONST.TAG.TMP_TAG);
     },
+    find: function find(str, matchcase, searchBackward, loop) {
+        if (!str) {
+            return false;
+        }
+        var result = ENV.win.find(str, matchcase, searchBackward);
+        if (!result && !!loop) {
+            rangeUtils.setRange(ENV.doc.body, searchBackward ? ENV.doc.body.childNodes.length : 0);
+            result = ENV.win.find(str, matchcase, searchBackward);
+        }
+        return result;
+    },
     getOriginalHtml: function getOriginalHtml() {
         return originalHtml;
     },
@@ -10695,10 +10737,46 @@ var editor = {
         // 处理普通文本样式
         rangeUtils.modifySelectionDom(style, attr);
     },
+    replace: function replace(from, to, matchcase) {
+        if (!from) {
+            return false;
+        }
+        var selectedTxt = getSelectedTxt(),
+            span,
+            txt;
+        if (selectedTxt == from) {
+            //替换
+            if (!to) {
+                to = '';
+            } else {
+                txt = ENV.doc.createTextNode(to);
+                span = ENV.doc.createElement('span');
+                span.appendChild(txt);
+                to = span.innerHTML;
+                span = null;
+                txt = null;
+            }
+            ENV.doc.execCommand('insertHTML', false, to);
+        }
+
+        // 查找下一个
+        return editor.find(from, matchcase);
+    },
+    replaceAll: function replaceAll(from, to, matchcase) {
+        if (!from) {
+            return false;
+        }
+        rangeUtils.setRange(ENV.doc.body, 0);
+        while (editor.replace(from, to, matchcase)) {}
+    },
     setOriginalHtml: function setOriginalHtml() {
         originalHtml = domUtils.getContentHtml();
     }
 };
+
+function getSelectedTxt() {
+    return ENV.doc.getSelection().toString();
+}
 
 /**
  * 插入内容前准备工作
@@ -12335,6 +12413,12 @@ var linkUtils = {
         }
         rangeUtils.selectElementContents(currentNode);
         ENV.doc.execCommand("unlink", false, false);
+    },
+    setCurrentLink: function setCurrentLink(url) {
+        if (!url) {
+            return;
+        }
+        ENV.doc.execCommand("createLink", false, url);
     }
 };
 
@@ -15214,7 +15298,8 @@ module.exports = MarkdownRender;
 
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
-    wizStyle = require('../common/wizStyle');
+    wizStyle = require('../common/wizStyle'),
+    domUtils = require('../domUtils/domBase');
 
 var _color = '#7990b6',
     _bk_color = '#1f2126',
@@ -15283,6 +15368,11 @@ function addItemAttrToMap(pId, e, map) {
         return;
     }
 
+    //todo 的图片需要排除
+    if (domUtils.hasClass(e, CONST.CLASS.TODO_CHECKBOX) || domUtils.hasClass(e, CONST.CLASS.TODO_AVATAR)) {
+        return;
+    }
+
     var className = e.className;
     if (className && className.length > 0) {
         var arr = className.split(" ");
@@ -15320,7 +15410,7 @@ function addKeyToMap(key, map) {
 
 module.exports = nightModeUtils;
 
-},{"../common/const":13,"../common/env":15,"../common/wizStyle":20}],35:[function(require,module,exports){
+},{"../common/const":13,"../common/env":15,"../common/wizStyle":20,"../domUtils/domBase":23}],35:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
@@ -19351,7 +19441,7 @@ var _event = {
 
             var keyCode = e.keyCode || e.which;
 
-            var start, startOffset, end, isAfterCheck, main, container, tmpMain, mainParentTag, mainParent, childNodes, i, dom;
+            var start, startOffset, end, isAfterCheck, main, container, tmpMain, isLineEnd, mainParentTag, mainParent, childNodes, i, dom;
 
             var rangeList;
             if (!range.collapsed) {
@@ -19380,9 +19470,11 @@ var _event = {
 
             isAfterCheck = todoUtils.isCaretAfterCheckbox();
             main = todoUtils.getMainByCaret();
-            container = domUtils.getBlockParent(main, false);
+            container = main ? domUtils.getBlockParent(main, false) : todoUtils.getContainerFromChild(range.startContainer);
+            isLineEnd = domUtils.getDomEndOffset(range.endContainer) === range.endOffset;
 
-            if (!container) {
+            //isLineEnd 主要用于处理 在行尾 按下 delete 键
+            if (!container && !isLineEnd) {
                 return true;
             }
 
@@ -19430,8 +19522,7 @@ var _event = {
             // if (keyCode === 39) {
             //     return;
             // }
-
-            if (keyCode !== 13 || e.shiftKey) {
+            if (!container || keyCode !== 13 || e.shiftKey) {
                 return true;
             }
 
@@ -19444,7 +19535,7 @@ var _event = {
             //     return;
             // }
 
-            if (todoUtils.isEmptyMain(main)) {
+            if (todoUtils.isEmptyContainer(container)) {
                 //如果当前 todoList 为空，则 取消 todoList
                 container.innerHTML = '<br>';
                 domUtils.removeClass(container, CONST.CLASS.TODO_LAYER);
@@ -19457,7 +19548,16 @@ var _event = {
             mainParent = ENV.doc.createElement(mainParentTag);
             domUtils.before(container, mainParent, true);
             range.deleteContents();
-            range.setEndAfter(container);
+            //判断光标是否在 main 的 end 位置
+            var isInMain = false;
+            if (main) {
+                if (range.startContainer == main && range.startOffset !== domUtils.getDomEndOffset(main)) {
+                    isInMain = true;
+                } else if (todoUtils.getMainFromChild(range.startContainer) && (range.startOffset !== domUtils.getDomEndOffset(range.startContainer) || range.startContainer.nextSibling)) {
+                    isInMain = true;
+                }
+            }
+            range.setEndAfter(isInMain ? main : container);
             var frag = range.extractContents();
             childNodes = [];
             for (i = 0; i < frag.childNodes.length; i++) {
@@ -19472,7 +19572,11 @@ var _event = {
                 todoUtils.clearBlock(childNodes[i]);
             }
 
-            rangeUtils.setRange(main, 1);
+            var inheritDom = main.childNodes[1];
+            if (inheritDom && inheritDom.nodeType === 1 && domUtils.isEmptyDom(inheritDom)) {
+                inheritDom.innerHTML = CONST.FILL_CHAR;
+            }
+            rangeUtils.setRange(main, main.childNodes.length);
             utils.stopEvent(e);
 
             if (main.getBoundingClientRect().top + main.clientHeight > ENV.doc.documentElement.clientHeight || main.getBoundingClientRect().top + main.clientHeight < 0) {
@@ -20123,18 +20227,32 @@ var todoUtils = {
         }
 
         var isFragment = dom.nodeType == 11,
-            isMain = isFragment ? false : todoUtils.isMain(dom),
-            isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
+
+        // isMain = isFragment ? false : todoUtils.isMain(dom),
+        isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
             isBlock = isFragment ? false : domUtils.isBlockDom(dom);
-        if ((isBlock || isTodoTag) && domUtils.isEmptyDom(dom)) {
-            dom.parentNode.removeChild(dom);
-            return true;
-        } else if (isBlock) {
+        if (isBlock && domUtils.isEmptyDom(dom)) {
+            //为保证 样式 正常传递， 不能随便 removeChild
+            if (dom.children.length > 0) {
+                domUtils.stripDom(dom);
+            } else {
+                dom.parentNode.removeChild(dom);
+                return true;
+            }
+        } else if (isBlock || isTodoTag) {
             domUtils.stripDom(dom);
-        } else if (isMain) {
-            todoUtils.deleteMain(dom);
         }
         return false;
+    },
+    /**
+     * 清理 TodoList 的 class
+     * @param dom
+     */
+    clearTodoClass: function clearTodoClass(dom) {
+        if (!dom) {
+            return;
+        }
+        domUtils.removeClass(dom, [CONST.CLASS.TODO_ACCOUNT, CONST.CLASS.TODO_AVATAR, CONST.CLASS.TODO_DATE, CONST.CLASS.TODO_LAYER, CONST.CLASS.TODO_MAIN, CONST.CLASS.TODO_CHECKED, CONST.CLASS.TODO_UNCHECKED, CONST.CLASS.TODO_USER_INFO]);
     },
     deleteMain: function deleteMain(main) {
         return domUtils.stripDom(main, function (dom) {
@@ -20250,14 +20368,26 @@ var todoUtils = {
         var start = range.startContainer;
         if (domUtils.isEmptyDom(start) && range.startOffset == domUtils.getDomEndOffset(start)) {
             start = domUtils.getNextNode(start, false);
+        } else if (start.nodeType === 1) {
+            start = range.startContainer.childNodes[range.startOffset];
         }
-        var p = domUtils.getParentByFilter(start, function (dom) {
-            return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
-        }, true);
-        if (!p || !p.hasChildNodes()) {
+        return todoUtils.getMainFromChild(start);
+        //
+        // var p = domUtils.getParentByFilter(start, function (dom) {
+        //     return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
+        // }, true);
+        // if (!p || !p.hasChildNodes()) {
+        //     return null;
+        // }
+        // return todoUtils.getMainInDom(p);
+    },
+    getContainerFromChild: function getContainerFromChild(dom) {
+        if (!dom) {
             return null;
         }
-        return todoUtils.getMainInDom(p);
+        return domUtils.getParentByFilter(dom, function (dom) {
+            return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
+        }, true);
     },
     getMainFromChild: function getMainFromChild(dom) {
         if (!dom) {
@@ -20292,9 +20422,7 @@ var todoUtils = {
             last = null;
         for (i = doms.length - 1; i >= 0; i--) {
             dom = doms[i];
-            domUtils.removeClass(dom, CONST.CLASS.TODO_MAIN);
-            domUtils.removeClass(dom, CONST.CLASS.TODO_CHECKED);
-            domUtils.removeClass(dom, CONST.CLASS.TODO_UNCHECKED);
+            todoUtils.clearTodoClass(dom);
             main.insertBefore(dom, last);
             last = dom;
         }
@@ -20358,6 +20486,26 @@ var todoUtils = {
     isCheckbox: function isCheckbox(dom) {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_CHECKBOX);
     },
+    isEmptyContainer: function isEmptyContainer(container) {
+        if (!container) {
+            return true;
+        }
+        var childNodes = container.childNodes,
+            i,
+            child;
+
+        for (i = 0; i < childNodes.length; i++) {
+            child = childNodes[i];
+            if (todoUtils.isMain(child)) {
+                if (!todoUtils.isEmptyMain(child)) {
+                    return false;
+                }
+            } else if (!domUtils.isEmptyDom(child)) {
+                return false;
+            }
+        }
+        return true;
+    },
     isEmptyMain: function isEmptyMain(main) {
         if (!main) {
             return true;
@@ -20386,7 +20534,7 @@ var todoUtils = {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
     },
     /**
-     * 判断 dom 是否为 todoList 内的有效 dom
+     * 判断 dom 是否为 todoList 内特殊 dom
      * @param dom
      * @returns {boolean}
      */
@@ -20394,9 +20542,7 @@ var todoUtils = {
         if (!dom) {
             return false;
         }
-        return !!domUtils.getParentByFilter(dom, function (obj) {
-            return todoUtils.isMain(obj) || todoUtils.isUserInfo(obj) || domUtils.hasClass(obj, CONST.CLASS.TODO_ACCOUNT) || domUtils.hasClass(obj, CONST.CLASS.TODO_DATE);
-        }, true);
+        return todoUtils.isMain(dom) || todoUtils.isUserInfo(dom) || domUtils.hasClass(dom, CONST.CLASS.TODO_ACCOUNT) || domUtils.hasClass(dom, CONST.CLASS.TODO_DATE);
     },
     /**
      * 判断 dom 是否为 用户信息
