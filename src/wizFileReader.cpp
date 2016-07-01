@@ -37,7 +37,8 @@ void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& s
 {
     int nTotal = strFiles.count();
     int nFailed = 0;
-    QString text(tr("%1 file(s) import failed: \n"));
+    QString text(tr("%1 file(s) import failed:"));
+    text += "\n";
     for (int i = 0; i < nTotal; ++i)
     {
         QString strFile = strFiles.at(i);

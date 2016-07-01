@@ -40,7 +40,7 @@
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
 #define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team Notes")
 
-#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag document form document list")
+#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag note form note list")
 
 
 const int nNumberButtonHeight = 14;
