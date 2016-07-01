@@ -1464,6 +1464,7 @@ void MainWindow::prepareNewNoteMenu()
     }
 }
 
+#ifdef Q_OS_MAC
 void MainWindow::on_newNoteButton_extraMenuRequest()
 {
     prepareNewNoteMenu();
@@ -1474,6 +1475,7 @@ void MainWindow::on_newNoteButton_extraMenuRequest()
     //
     m_newNoteExtraMenu->popup(QPoint(pt.x(), pt.y() - 92));
 }
+#endif
 
 void MainWindow::on_newNoteByExtraMenu_request()
 {

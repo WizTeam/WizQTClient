@@ -537,6 +537,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 else(APPSTORE_BUILD)
 target_link_libraries(${PROJECT_NAME}
+    X11
     quazip
     cryptlib
     clucene-core-static

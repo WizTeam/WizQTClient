@@ -540,7 +540,9 @@ private slots:
 
     void showVipUpgradePage();
 
+#ifdef Q_OS_MAC
     void on_newNoteButton_extraMenuRequest();
+#endif
     void on_newNoteByExtraMenu_request();
 
 private:

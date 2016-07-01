@@ -457,18 +457,20 @@ int WizSmartScaleUI(int spec)
 #endif
 }
 
-#ifdef Q_WS_X11
+#ifdef Q_OS_LINUX
 #include <X11/X.h>
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
-#include "windowinfo.h"
+#include <sstream>
+#include <stdlib.h>
+#include <stdio.h>
 
 class linux_x11
 {
 public:
     linux_x11();
-    QList<WindowInfo> getActiveWindows();
+    QList<WizWindowInfo> getActiveWindows();
 
 private:
     Window* active(Display *disp, unsigned long *len);
@@ -477,14 +479,11 @@ private:
     QString processName(long pid);
 };
 
-*
+/*
   Linux/X11 specific code for obtaining information about the frontmost window
 */
 
-#include "linux_x11.h"
-#include <sstream>
-#include <stdlib.h>
-#include <stdio.h>
+
 
 linux_x11::linux_x11()
 {
