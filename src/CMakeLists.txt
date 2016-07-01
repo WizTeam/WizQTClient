@@ -521,33 +521,41 @@ link_directories(
 
 
 
-if(APPSTORE_BUILD)
-target_link_libraries(${PROJECT_NAME}
-    quazip
-    cryptlib
-    clucene-core-static
-    clucene-shared-static
-    #aggregation
-    Qt5::WebEngine
-    Qt5::WebEngineWidgets
-    #markdown
-    ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
-    ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
-    ${CMAKE_DL_LIBS}
-)
-else(APPSTORE_BUILD)
-target_link_libraries(${PROJECT_NAME}
-    X11
-    quazip
-    cryptlib
-    clucene-core-static
-    clucene-shared-static
-    #aggregation
-    #markdown
-    Qt5::WebEngine
-    Qt5::WebEngineWidgets
-    ${CMAKE_DL_LIBS}
-)
-
-
-endif(APPSTORE_BUILD)
+if(APPLE)
+    if(APPSTORE_BUILD)
+        target_link_libraries(${PROJECT_NAME}
+            quazip
+            cryptlib
+            clucene-core-static
+            clucene-shared-static
+            Qt5::WebEngine
+            Qt5::WebEngineWidgets
+            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
+            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
+            ${CMAKE_DL_LIBS}
+        )
+    else(APPSTORE_BUILD)
+        target_link_libraries(${PROJECT_NAME}
+            quazip
+            cryptlib
+            clucene-core-static
+            clucene-shared-static
+            Qt5::WebEngine
+            Qt5::WebEngineWidgets
+            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
+            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
+            ${CMAKE_DL_LIBS}
+        )
+    endif(APPSTORE_BUILD)
+else(APPLE) #linux
+    target_link_libraries(${PROJECT_NAME}
+        X11
+        quazip
+        cryptlib
+        clucene-core-static
+        clucene-shared-static
+        Qt5::WebEngine
+        Qt5::WebEngineWidgets
+        ${CMAKE_DL_LIBS}
+    )
+endif(APPLE)
