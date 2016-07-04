@@ -254,12 +254,12 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
 
     // decompress
     QString strTempFolder = Utils::PathResolve::tempPath() + doc.strGUID + "-update/";
-    if (!db.DocumentToHtmlFile(doc, strTempFolder, "sindex.html")) {
+    if (!db.DocumentToHtmlFile(doc, strTempFolder)) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
         //Q_ASSERT(0);
         return false;
     }
-    QString strDataFile = strTempFolder + "sindex.html";
+    QString strDataFile = strTempFolder + "index.html";
 
     // get plain text content
     QString strHtmlData;

@@ -3775,25 +3775,20 @@ bool CWizDatabase::UpdateDocumentAbstract(const QString& strDocumentGUID)
         }
     }
 
-    QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-update/";
+    QString strTempFolder = Utils::PathResolve::tempPath() + data.strGUID + "-thumb/";
     // delete folder to clear unused images.
     ::WizDeleteAllFilesInFolder(strTempFolder);
-    if (!DocumentToHtmlFile(data, strTempFolder, "uindex.html")) {
+    if (!DocumentToHtmlFile(data, strTempFolder)) {
         qDebug() << "[updateDocumentAbstract]decompress to temp failed, guid: "
                  << strDocumentGUID;
         return false;
     }
-    CString strHtmlFileName = strTempFolder + "uindex.html";
+    CString strHtmlFileName = strTempFolder + "index.html";
 
     CString strHtmlTempPath = Utils::Misc::extractFilePath(strHtmlFileName);
 
     CString strHtml;
-    CString strAbstractFileName = strHtmlTempPath + "wiz_full.html";
-    if (PathFileExists(strAbstractFileName)) {
-        ::WizLoadUnicodeTextFromFile(strAbstractFileName, strHtml);
-    } else {
-        ::WizLoadUnicodeTextFromFile(strHtmlFileName, strHtml);
-    }
+    ::WizLoadUnicodeTextFromFile(strHtmlFileName, strHtml);
 
     WIZABSTRACT abstract;
     abstract.guid = strDocumentGUID;
@@ -3944,22 +3939,20 @@ bool CWizDatabase::loadUserCert()
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,
-                                          QString& strFullPathFileName, const QString& strTargetFileName)
+                                          QString& strFullPathFileName)
 {
     QString strTempFolder = Utils::PathResolve::tempPath() + document.strGUID + "/";
     ::WizEnsurePathExists(strTempFolder);
 
-    if (!DocumentToHtmlFile(document, strTempFolder, strTargetFileName))
+    if (!DocumentToHtmlFile(document, strTempFolder))
         return false;
 
-    strFullPathFileName = strTempFolder + strTargetFileName;
-
+    strFullPathFileName = strTempFolder + "index.html";
     return PathFileExists(strFullPathFileName);
 }
 
 bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
-                                          const QString& strPath,
-                                          const QString& strHtmlFileName)
+                                          const QString& strPath)
 {
     QMutexLocker locker(&m_mtxTempFile);
     ::WizDeleteAllFilesInFolder(strPath);

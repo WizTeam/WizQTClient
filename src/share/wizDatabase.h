@@ -464,11 +464,9 @@ public:
 
 
     bool DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document, \
-                                QString& strFullPathFileName, \
-                                const QString& strTargetFileName = "index.html");
+                                QString& strFullPathFileName);
     bool DocumentToHtmlFile(const WIZDOCUMENTDATA& document, \
-                            const QString& strPath, \
-                            const QString& strHtmlFileName = "index.html");
+                            const QString& strPath);
     bool ExportToHtmlFile(const WIZDOCUMENTDATA& document, \
                             const QString& strPath);
 
