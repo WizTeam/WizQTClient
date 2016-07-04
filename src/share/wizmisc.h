@@ -159,6 +159,7 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);
 void WizHtml2Text(const QString& strHtml, QString& strText);
+QString WizText2Html(const QString& text);
 void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML);
 
 void WizDeleteFolder(const CString& strPath);

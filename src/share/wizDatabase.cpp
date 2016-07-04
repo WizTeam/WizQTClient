@@ -3106,6 +3106,34 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
     return UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
 }
 
+
+bool CWizDatabase::UpdateDocumentDataWithFolder(WIZDOCUMENTDATA& data,
+                                      const QString& strFolder,
+                                      bool notifyDataModify /*= true*/)
+{
+    CString strZipFileName = GetDocumentFileName(data.strGUID);
+    if (!data.nProtected) {
+        bool bZip = ::WizFolder2Zip(strFolder, strZipFileName);
+        if (!bZip) {
+            return false;
+        }
+    } else {
+        CString strTempFile = Utils::PathResolve::tempPath() + data.strGUID + "-decrypted";
+        bool bZip = ::WizFolder2Zip(strFolder, strTempFile);
+        if (!bZip) {
+            return false;
+        }
+
+        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+            return false;
+        }
+    }
+
+    SetObjectDataDownloaded(data.strGUID, "document", true);
+
+    return UpdateDocumentDataMD5(data, strZipFileName, notifyDataModify);
+}
+
 void CWizDatabase::ClearUnusedImages(const QString& strHtml, const QString& strFilePath)
 {
     CWizStdStringArray arrayImageFileName;
@@ -3934,24 +3962,12 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
                                           const QString& strHtmlFileName)
 {
     QMutexLocker locker(&m_mtxTempFile);
-//    m_mtxTempFile.lock();
     ::WizDeleteAllFilesInFolder(strPath);
     ::WizEnsurePathExists(strPath);
     if (!ExtractZiwFileToFolder(document, strPath))
         return false;
 
     QString strTempHtmlFileName = strPath + "index.html";
-
-    QString strText;
-    ::WizLoadUnicodeTextFromFile(strTempHtmlFileName, strText);
-
-    QUrl url = QUrl::fromLocalFile(strPath + "index_files/");
-    strText.replace("index_files/", url.toString());
-
-    strTempHtmlFileName = strPath + strHtmlFileName;
-    WizSaveUnicodeTextToUtf8File(strTempHtmlFileName, strText);
-//    m_mtxTempFile.unlock();
-
     return PathFileExists(strTempHtmlFileName);
 }
 

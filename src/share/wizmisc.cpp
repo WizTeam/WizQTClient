@@ -1865,6 +1865,17 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+QString WizText2Html(const QString& text)
+{
+    QString html = text;
+    html.replace("&", "&amp;");
+    html.replace("<", "&lt;");
+    html.replace(">", "&gt;");
+    //
+    return "<pre>" + html + "</pre>";
+}
+
+
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);

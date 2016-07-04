@@ -139,7 +139,7 @@ void CWizKMSyncThread::run()
     while (!m_pEvents->IsStop())
     {
         m_mutex.lock();
-        m_wait.wait(&m_mutex);
+        m_wait.wait(&m_mutex, 1000 * 3);
         m_mutex.unlock();
 
         if (m_pEvents->IsStop())

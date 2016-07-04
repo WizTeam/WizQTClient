@@ -789,6 +789,8 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
         return;
 
     reloadNote();
+    //
+    MainWindow::quickSyncKb(data.strKbGUID);
 }
 
 void CWizDocumentView::on_document_data_changed(const QString& strGUID,

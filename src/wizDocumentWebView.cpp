@@ -49,6 +49,7 @@
 #include "widgets/wizEmailShareDialog.h"
 #include "widgets/wizShareLinkDialog.h"
 #include "widgets/wizScrollBar.h"
+#include "widgets/wizexecutingactiondialog.h"
 #include "mac/wizmachelper.h"
 
 #include "wizmainwindow.h"
@@ -724,13 +725,60 @@ void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID,
         CWizMessageBox::information(this, tr("Info"), tr("Do not support insert comment into markdown note."));
         return;
     }
+    //
+    //应该优化，对于模版类型的笔记，插入位置不应该是最前面
+    if (isEditing())
+    {
+        QString htmlBody = "<div>" + comment + "</div><hr>";
+        htmlBody.replace("\n", "<br>");
+        htmlBody.replace("'", "&#39;");
+        //
+        QString code = QString("var objDiv = document.createElement('div');objDiv.innerHTML= unescape('%1');"
+                               "var first=document.body.firstChild;document.body.insertBefore(objDiv,first);").arg(htmlBody);
+        //
+        page()->runJavaScript(code);
+        //
+        saveEditingViewDocument(view()->note(), true, [=](const QVariant &){});
 
-    QString htmlBody = "<div>" + comment + "</div><hr>";
-    htmlBody.replace("\n", "<br>");
-    htmlBody.replace("'", "&#39;");
-    page()->runJavaScript(QString("var objDiv = editor.document.createElement('div');objDiv.innerHTML= '%1';"
-                                                    "var first=editor.document.body.firstChild;editor.document.body.insertBefore(objDiv,first);").arg(htmlBody));
-    saveEditingViewDocument(view()->note(), true, [=](const QVariant &){});
+    }
+    else
+    {
+        QString commentsText = QUrl::fromPercentEncoding(comment.toUtf8());
+        QString commentsHtml = ::WizText2Html(commentsText);
+        //
+        QString documentGuid = docGUID;
+        QString kbGuid = view()->note().strKbGUID;
+        //
+        ::WizExecutingActionDialog::executeAction(QObject::tr("Saving comments..."), WIZ_THREAD_DEFAULT, [=]{
+            //
+            CWizDatabase& db = m_dbMgr.db(kbGuid);
+            //
+            WIZDOCUMENTDATA doc;
+            if (!db.DocumentFromGUID(documentGuid, doc))
+                return;
+            //
+            QString strTempPath = ::Utils::PathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly() + "/";
+            ::WizEnsurePathExists(strTempPath);
+            //
+            if (!db.DocumentToHtmlFile(doc, strTempPath))
+                return;
+            //
+            QString htmlFileName = strTempPath + "index.html";
+            if (!QFileInfo::exists(htmlFileName))
+                return;
+            //
+            QString html;
+            if (!WizLoadUnicodeTextFromFile(htmlFileName, html))
+                return;
+            //
+            WizHtmlInsertHtmlBeforeAllBodyChildren(html, commentsHtml);
+            //
+            if (!::WizSaveUnicodeTextToUtf8File(htmlFileName, html, true))
+                return;
+            //
+            db.UpdateDocumentDataWithFolder(doc, strTempPath, true);
+        });
+    }
 }
 
 void CWizDocumentWebView::setWindowVisibleOnScreenShot(bool bVisible)
@@ -1373,15 +1421,6 @@ void CWizDocumentWebView::editorCommandExecuteInsertHtml(const QString& strHtml,
     //editorCommandExecuteCommand("insertHtml", s, "'" + strHtml + "'");
 }
 
-QString WizText2Html(const QString& text)
-{
-    QString html = text;
-    html.replace("&", "&amp;");
-    html.replace("<", "&lt;");
-    html.replace(">", "&gt;");
-    //
-    return "<pre>" + html + "</pre>";
-}
 
 void CWizDocumentWebView::editorCommandExecutePastePlainText()
 {

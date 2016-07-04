@@ -1935,3 +1935,29 @@ void WizHtmlInsertStyle(QString& strHtml, const QString& styleId, const QString&
     strHtml.insert(insertPos, insertHtml);
 }
 
+
+void WizHtmlInsertHtmlBeforeAllBodyChildren(QString& strHtml, const QString& strHtmlPart)
+{
+    int insertPos = 0;
+    //
+    int bodyBegin = strHtml.indexOf("<body", 0, Qt::CaseInsensitive);
+    if (bodyBegin == -1)
+    {
+        insertPos = 0;
+    }
+    else
+    {
+        insertPos = strHtml.indexOf(">", bodyBegin);
+        if (insertPos == -1)
+        {
+            insertPos = 0;
+        }
+        else
+        {
+            insertPos++;
+        }
+    }
+    //
+    strHtml.insert(insertPos, strHtmlPart);
+}
+
