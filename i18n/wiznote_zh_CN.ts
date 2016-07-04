@@ -612,69 +612,69 @@
         <translation>密码错误！</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3898"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3888"/>
         <source>My Notes</source>
         <translation>我的笔记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3900"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3890"/>
         <source>My Journals</source>
         <translation>我的日记</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3902"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3892"/>
         <source>My Contacts</source>
         <translation>我的联系人</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3904"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3894"/>
         <source>My Events</source>
         <translation>我的事件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3906"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3896"/>
         <source>My Sticky Notes</source>
         <translation>我的桌面便笺</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3908"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3898"/>
         <source>My Emails</source>
         <translation>我的邮件</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3910"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3900"/>
         <source>My Drafts</source>
         <translation>我的草稿</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3912"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3902"/>
         <source>My Tasks</source>
         <translation>我的任务</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3916"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3906"/>
         <source>Inbox</source>
         <translation>收集箱</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="3918"/>
+        <location filename="../src/share/wizDatabase.cpp" line="3908"/>
         <source>Completed</source>
         <translation>已完成</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4194"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4184"/>
         <source>Doucment  %1  Password</source>
         <translation>笔记 %1 密码</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4195"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4185"/>
         <source>Password :</source>
         <translation>密码：</translation>
     </message>
     <message>
         <location filename="../src/share/wizDatabase.cpp" line="978"/>
         <location filename="../src/share/wizDatabase.cpp" line="1011"/>
-        <location filename="../src/share/wizDatabase.cpp" line="4205"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4195"/>
         <source>Info</source>
         <translation>提示</translation>
     </message>
@@ -689,7 +689,7 @@
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/share/wizDatabase.cpp" line="4205"/>
+        <location filename="../src/share/wizDatabase.cpp" line="4195"/>
         <source>password error!</source>
         <translation>密码错误！</translation>
     </message>
@@ -4827,13 +4827,21 @@ w: %3  h: %4</translation>
     </message>
     <message>
         <location filename="../src/wizDocTemplateDialog.cpp" line="82"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="558"/>
         <source>Empty Note</source>
         <translation>空白笔记</translation>
     </message>
     <message>
         <location filename="../src/wizDocTemplateDialog.cpp" line="91"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="567"/>
         <source>Markdown Note</source>
-        <translation>Markdown笔记</translation>
+        <translation>Markdown 笔记</translation>
+    </message>
+    <message>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="92"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="568"/>
+        <source>Markdown Note.md</source>
+        <translation>Markdown 笔记.md</translation>
     </message>
     <message>
         <location filename="../src/wizDocTemplateDialog.cpp" line="608"/>
@@ -5028,6 +5036,8 @@ w: %3  h: %4</translation>
         <translation>发送邮件</translation>
     </message>
     <message>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="83"/>
+        <location filename="../src/wizDocTemplateDialog.cpp" line="559"/>
         <location filename="../src/core/wizNoteManager.cpp" line="60"/>
         <location filename="../src/core/wizNoteManager.cpp" line="65"/>
         <location filename="../src/core/wizNoteManager.cpp" line="71"/>
@@ -5119,12 +5129,12 @@ w: %3  h: %4</translation>
         <translation>浏览并添加评论  %1C</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="450"/>
+        <location filename="../src/titlebar.cpp" line="455"/>
         <source>Switch to reading mode</source>
         <translation>切换到阅读模式</translation>
     </message>
     <message>
-        <location filename="../src/titlebar.cpp" line="450"/>
+        <location filename="../src/titlebar.cpp" line="455"/>
         <source>In reading mode, the note can not be edited and markdown note can be redered.</source>
         <translation>在阅读模式下，不能编辑笔记。Markdown笔记会在阅读模式下进行渲染。</translation>
     </message>
@@ -5246,42 +5256,42 @@ w: %3  h: %4</translation>
         <translation>自动登录</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="393"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="399"/>
         <source>Login</source>
         <translation>登录</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="522"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="534"/>
         <source>Create Account</source>
         <translation>创建帐号</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="558"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="570"/>
         <source>!! password error</source>
         <translation>密码错误</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="614"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="626"/>
         <source>No account yet,</source>
         <translation>还没有帐号，</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="633"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="645"/>
         <source>click to sign up</source>
         <translation>点此注册</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="649"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="661"/>
         <source>click to login</source>
         <translation>点此登录</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="744"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="756"/>
         <source>Proxy settings</source>
         <translation>代理设置</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="698"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="710"/>
         <source>Thirdparty</source>
         <translation>第三方登录</translation>
     </message>
@@ -5291,7 +5301,7 @@ w: %3  h: %4</translation>
         <translation>切换服务器</translation>
     </message>
     <message>
-        <location filename="../src/ui/wizLoginDialog.ui" line="721"/>
+        <location filename="../src/ui/wizLoginDialog.ui" line="733"/>
         <source>Reset password</source>
         <translation>重置密码</translation>
     </message>
