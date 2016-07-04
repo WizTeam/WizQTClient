@@ -206,7 +206,13 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
 
     m_menuDocument->addSeparator();
     QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
-                                                         this, SLOT(on_action_deleteDocument()), QKeySequence::Delete);
+                                                         this, SLOT(on_action_deleteDocument()),
+                                                     #ifdef Q_OS_OSX
+                                                         QKeySequence::Backspace
+                                                     #else
+                                                         QKeySequence::Delete
+                                                     #endif
+                                                         );
     // not implement, hide currently.
 //    actionCopyDoc->setVisible(false);
 
