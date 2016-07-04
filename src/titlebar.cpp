@@ -397,6 +397,11 @@ void TitleBar::setEditorMode(WizEditorMode editorMode)
 {
     m_editTitle->setReadOnly(editorMode == modeReader);
     m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
+    //
+    if (editorMode == modeReader)
+    {
+        showInfoBar();
+    }
 }
 
 void TitleBar::setEditButtonEnabled(bool enable)
