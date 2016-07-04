@@ -198,7 +198,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -229,7 +229,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>10</width>
+             <width>30</width>
              <height>20</height>
             </size>
            </property>
@@ -386,6 +386,12 @@
                  <verstretch>0</verstretch>
                 </sizepolicy>
                </property>
+               <property name="minimumSize">
+                <size>
+                 <width>280</width>
+                 <height>0</height>
+                </size>
+               </property>
                <property name="styleSheet">
                 <string notr="true"/>
                </property>
@@ -405,7 +411,7 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>10</width>
+             <width>30</width>
              <height>20</height>
             </size>
            </property>
@@ -444,8 +450,8 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>13</width>
-             <height>10</height>
+             <width>30</width>
+             <height>20</height>
             </size>
            </property>
           </spacer>
@@ -499,7 +505,7 @@
              </property>
              <property name="sizeHint" stdset="0">
               <size>
-               <width>301</width>
+               <width>20</width>
                <height>20</height>
               </size>
              </property>
@@ -513,10 +519,16 @@
              <item>
               <widget class="CWizImageButton" name="btn_singUp">
                <property name="sizePolicy">
-                <sizepolicy hsizetype="Minimum" vsizetype="Maximum">
+                <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
                  <verstretch>0</verstretch>
                 </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>280</width>
+                 <height>0</height>
+                </size>
                </property>
                <property name="text">
                 <string>Create Account</string>
@@ -534,8 +546,8 @@
            </property>
            <property name="sizeHint" stdset="0">
             <size>
-             <width>13</width>
-             <height>10</height>
+             <width>30</width>
+             <height>20</height>
             </size>
            </property>
           </spacer>

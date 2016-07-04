@@ -1378,16 +1378,6 @@ void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
     {
         SetFavorites(value, nServerVersion);
     }
-    else if (strKey == "group_tag_oem")
-    {
-        //SetGroupTagPropertiesOEM(lpszValue, nServerVersion);
-        SetLocalValueVersion(key, nServerVersion);
-    }
-    else if (strKey == "group_tag_config_oem")
-    {
-        //SetGroupTagConfigOEM(lpszValue, nServerVersion);
-        SetLocalValueVersion(key, nServerVersion);
-    }
     else
     {
         SetLocalValueVersion(key, nServerVersion);
