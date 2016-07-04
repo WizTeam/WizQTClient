@@ -79,7 +79,7 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     TemplateData tmplEmpty;
     tmplEmpty.type = CustomTemplate;
     tmplEmpty.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/newnote.ziw";
-    tmplEmpty.strName = "Empty Note";
+    tmplEmpty.strName = QObject::tr("Empty Note");
     tmplEmpty.strTitle = "Untitled";
     tmplEmpty.isFree = true;
     tmplList.append(tmplEmpty);
@@ -88,7 +88,7 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     TemplateData tmplMarkdown;
     tmplMarkdown.type = CustomTemplate;
     tmplMarkdown.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
-    tmplMarkdown.strName = "Markdown Note";
+    tmplMarkdown.strName = QObject::tr("Markdown Note");
     tmplMarkdown.strTitle = "Markdown Note.md";
     tmplMarkdown.isFree = true;
     tmplList.append(tmplMarkdown);
