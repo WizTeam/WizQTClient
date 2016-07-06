@@ -130,6 +130,7 @@ class CWizDocumentWebViewPage: public WizWebEnginePage
 
 public:
     explicit CWizDocumentWebViewPage(CWizDocumentWebView* parent);
+    virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
     virtual void triggerAction(WebAction action, bool checked = false);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 

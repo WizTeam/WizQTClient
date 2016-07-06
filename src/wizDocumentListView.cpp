@@ -208,7 +208,7 @@ CWizDocumentListView::CWizDocumentListView(CWizExplorerApp& app, QWidget *parent
     QAction* actionDeleteDoc = m_menuDocument->addAction(WIZACTION_LIST_DELETE,
                                                          this, SLOT(on_action_deleteDocument()),
                                                      #ifdef Q_OS_OSX
-                                                         QKeySequence(Qt::Key_Backspace)
+                                                         QKeySequence()
                                                      #else
                                                          QKeySequence::Delete
                                                      #endif

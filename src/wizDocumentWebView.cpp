@@ -83,6 +83,14 @@ CWizDocumentWebViewPage::CWizDocumentWebViewPage(CWizDocumentWebView* parent)
     action(QWebEnginePage::SelectAll)->setShortcut(QKeySequence());
 }
 
+bool CWizDocumentWebViewPage::acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame)
+{
+    if (NavigationTypeBackForward == type || NavigationTypeReload == type)
+        return false;
+    //
+    return WizWebEnginePage::acceptNavigationRequest(url, type, isMainFrame);
+}
+
 void CWizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction, bool checked)
 {
     if (typeAction == QWebEnginePage::Back || typeAction == QWebEnginePage::Forward) {
