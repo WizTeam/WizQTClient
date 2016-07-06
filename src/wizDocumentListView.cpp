@@ -581,10 +581,6 @@ void CWizDocumentListView::updateSectionItems()
         }
     }
         break;
-    case SortingByTag:
-    case -SortingByTag:
-        //TODO:
-        break;
     default:
         Q_ASSERT(0);
     }

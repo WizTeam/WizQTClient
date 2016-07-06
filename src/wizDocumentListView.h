@@ -31,7 +31,6 @@ enum DocumentsSortingType {
     SortingByAccessedTime,
     SortingByTitle,
     SortingByLocation,
-    SortingByTag,
     SortingBySize,
     SortingAsAscendingOrder,
     SortingAsDescendingOrder

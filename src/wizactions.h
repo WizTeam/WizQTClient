@@ -51,7 +51,6 @@ class QShortcut;
 #define WIZACTION_FORMAT_INSERT_DATE        "actionMenuFormatInsertDate"
 #define WIZACTION_FORMAT_INSERT_TIME        "actionMenuFormatInsertTime"
 #define WIZACTION_FORMAT_REMOVE_FORMAT      "actionMenuFormatRemoveFormat"
-#define WIZACTION_FORMAT_PLAINTEXT          "actionMenuFormatPlainText"
 #define WIZACTION_FORMAT_INSERT_CHECKLIST   "actionMenuFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE        "actionMenuFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE       "actionMenuFormatInsertImage"
@@ -72,7 +71,6 @@ class QShortcut;
 #define WIZDOCUMENT_SORTBY_ACCESSTIME                 "actionSortByAccessTime"
 #define WIZDOCUMENT_SORTBY_TITLE                              "actionSortByTitle"
 #define WIZDOCUMENT_SORTBY_FOLDER                          "actionSortByFolder"
-#define WIZDOCUMENT_SORTBY_TAG                                 "actionSortByTag"
 #define WIZDOCUMENT_SORTBY_SIZE                                 "actionSortBySize"
 
 /**

@@ -969,9 +969,6 @@ void MainWindow::initMenuBar()
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
     action->setData(SortingByLocation);
     m_sortTypeActions->addAction(action);
-//    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
-//    action->setData(SortingByTag);
-//    m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
     action->setData(SortingBySize);
     m_sortTypeActions->addAction(action);
@@ -1029,7 +1026,6 @@ void MainWindow::on_editor_statusChanged(const QString& currentStyle)
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
         m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
 
         return;
     }
@@ -1102,23 +1098,41 @@ void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     QFileInfo info(tmplData.strFileName);
     //
     initVariableBeforCreateNote();
-
-    WIZDOCUMENTDATA data;
-    QString kbGUID = m_dbMgr.db().kbGUID();
-    QString location = m_dbMgr.db().GetDefaultNoteLocation();
-    WIZTAGDATA tag;
-    data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
-    data.strLocation = tmplData.strFolder;
-    if (WizServerTemplate == tmplData.type)
+    //
+    QString kbGUID;
+    WIZTAGDATA currTag;
+    QString currLocation;
+    m_category->getAvailableNewNoteTagAndLocation(kbGUID, currTag, currLocation);
+    //
+    if (currLocation.isEmpty())
     {
+        currLocation = m_dbMgr.db(kbGUID).GetDefaultNoteLocation();
+    }
+    //
+    WIZDOCUMENTDATA data;
+    data.strKbGUID = kbGUID;
+    //
+    if (kbGUID.isEmpty())   //personal
+    {
+        data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
+        data.strLocation = tmplData.strFolder;
+
         if (data.strLocation.isEmpty())
         {
-            m_category->getAvailableNewNoteTagAndLocation(data.strKbGUID, tag, data.strLocation);
+            data.strLocation = currLocation;
         }
         else
         {
             data.strLocation.replace("{year}", QDate::currentDate().toString("yyyy"));
             data.strLocation.replace("{month}", QDate::currentDate().toString("MM"));
+            //
+            if (CWizCategoryViewFolderItem* folder = m_category->findFolder(data.strLocation, true, false))
+            {
+                if (m_category->currentItem() != folder)
+                {
+                    m_category->setCurrentItem(folder);
+                }
+            }
         }
         //  Journal {date}({week})
         if (tmplData.strTitle.isEmpty())
@@ -1136,20 +1150,26 @@ void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     }
     else
     {
-        m_category->getAvailableNewNoteTagAndLocation(kbGUID, tag, location);
+        data.strLocation = currLocation;
     }
     //
     CWizNoteManager noteManager(m_dbMgr);
-    noteManager.createNoteByTemplate(data, tag, tmplData.strFileName);
-
+    noteManager.createNoteByTemplate(data, currTag, tmplData.strFileName);
+    //
+    setFocusForNewNote(data);
+    //
     locateDocument(data);
     //
-    viewDocument(data, true);
-    // set doc title
-    m_doc->resetTitle(data.strTitle);
-    m_doc->web()->setNoteTitleInited(true);
-    setFocusForNewNote(data);
-    m_doc->web()->setModified(true);
+    CWizDocumentDataArray arrayDocument;
+    m_documents->getSelectedDocuments(arrayDocument);
+    if (arrayDocument.size() == 1 && arrayDocument[0].strGUID == data.strGUID)
+    {
+        //already selected
+    }
+    else
+    {
+        viewDocument(data, true);
+    }
 
     quickSyncKb(kbGUID);
 }
@@ -2588,12 +2608,6 @@ void MainWindow::on_actionSortByFolder_triggered()
     changeDocumentsSortTypeByAction(action);
 }
 
-void MainWindow::on_actionSortByTag_triggered()
-{
-    QAction* action = qobject_cast<QAction*>(sender());
-    changeDocumentsSortTypeByAction(action);
-}
-
 void MainWindow::on_actionSortBySize_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
@@ -2755,12 +2769,6 @@ void MainWindow::on_actionMenuFormatRemoveFormat_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarRemoveFormat");
     getActiveEditor()->editorCommandExecuteRemoveFormat();
-}
-
-void MainWindow::on_actionMenuFormatPlainText_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPlainText");
-    getActiveEditor()->editorCommandExecutePlainText();
 }
 
 void MainWindow::on_actionMenuFormatInsertCheckList_triggered()

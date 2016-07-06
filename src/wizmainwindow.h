@@ -320,7 +320,6 @@ public Q_SLOTS:
     void on_actionSortByAccessTime_triggered();
     void on_actionSortByTitle_triggered();
     void on_actionSortByFolder_triggered();
-    void on_actionSortByTag_triggered();
     void on_actionSortBySize_triggered();
 
     void on_categoryUnreadButton_triggered();
@@ -346,7 +345,6 @@ public Q_SLOTS:
     void on_actionMenuFormatInsertDate_triggered();
     void on_actionMenuFormatInsertTime_triggered();
     void on_actionMenuFormatRemoveFormat_triggered();
-    void on_actionMenuFormatPlainText_triggered();
     void on_actionMenuFormatInsertCheckList_triggered();
     void on_actionMenuFormatInsertCode_triggered();
     void on_actionMenuFormatInsertImage_triggered();

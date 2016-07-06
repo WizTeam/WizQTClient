@@ -122,7 +122,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZDOCUMENT_SORTBY_ACCESSTIME,                                 QObject::tr("Sort by Access Time"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_TITLE,                                               QObject::tr("Sort by Title"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_FOLDER,                                          QObject::tr("Sort by Folder"),    QObject::tr(""), QKeySequence()},
-        {WIZDOCUMENT_SORTBY_TAG,                                                  QObject::tr("Sort by Tag"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_SIZE,                                                 QObject::tr("Sort by Size"),    QObject::tr(""), QKeySequence()},
 
         // format
@@ -146,7 +145,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_CODE,              QObject::tr("Insert Code"),               "",           QKeySequence("Shift+Ctrl+C")},
         {WIZACTION_FORMAT_INSERT_IMAGE,             QObject::tr("Insert Image"),            "",           QKeySequence("Shift+Ctrl+I")},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove Format"),       "",           QKeySequence()},
-        {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to Plain Text"), "",           QKeySequence()},
         {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen Shot..."),           "",           QKeySequence()},
 
 

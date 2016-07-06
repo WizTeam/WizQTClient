@@ -134,9 +134,6 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
 //        qDebug() << "compare doc and sec 2.2, loc : " << m_data.location << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
         return result;
     }
-    case SortingByTag:
-    case -SortingByTag:
-        return false;
     case SortingBySize:
     {
         bool result = m_nSize >= secItem->sectionData().sizePair.second;
@@ -203,10 +200,6 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
         case -SortingByTitle:
             m_data.infoList << strAuthor << m_data.doc.tDataModified.toHumanFriendlyString();
             break;
-        case SortingByTag:
-        case -SortingByTag:
-            m_data.infoList << strAuthor << tagTree();
-            break;
         case SortingByLocation:
         case -SortingByLocation:
         {
@@ -248,10 +241,6 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
-            break;
-        case SortingByTag:
-        case -SortingByTag:
             m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
             break;
         case SortingByLocation:
@@ -309,7 +298,7 @@ void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
 
 const QString& CWizDocumentListViewDocumentItem::tags()
 {
-    if ((qAbs(m_nSortingType) != SortingByTag) && ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
+    if (((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
                                                    (m_nLeadInfoState & DocumentLeadInfo_SearchResult)))
     {
         m_strTags.clear();
@@ -437,10 +426,6 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
 //        qDebug() << "compare doc and doc 2, loc : " << m_data.location << "  other loc : " << pOther->documentLocation() << "result : " << result;
         return result;
     }
-    case SortingByTag:
-        return pOther->m_strTags < m_strTags;
-    case -SortingByTag:
-        return pOther->m_strTags > m_strTags;
     case SortingBySize:
     {
         bool result = pOther->m_nSize < m_nSize;
@@ -759,9 +744,6 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
 //            qDebug() << "compare sec and sec 2 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
             return result;
         }
-        case SortingByTag:
-        case -SortingByTag:
-            return 0;
         case SortingBySize:
         {
             bool result = sectionData().sizePair.second > secItem->sectionData().sizePair.second;
@@ -851,9 +833,6 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
 //        qDebug() << "compare sec and doc 2 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << result;
         return result;
     }
-    case SortingByTag:
-    case -SortingByTag:
-        return true;
     case SortingBySize:
     {
         bool result = docItem->documentSize() <= sectionData().sizePair.second;

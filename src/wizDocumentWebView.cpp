@@ -1364,7 +1364,7 @@ void CWizDocumentWebView::editorCommandQueryCommandValue(const QString& strComma
 
 void CWizDocumentWebView::editorCommandQueryCommandState(const QString& strCommand, std::function<void(int state)> callback)
 {
-    QString script = "editor.queryCommandState('" + strCommand +"');";
+    QString script = "document.queryCommandState('" + strCommand +"');";
     page()->runJavaScript(script, [=](const QVariant& ret){
         //
         callback(ret.toInt());
@@ -1805,27 +1805,6 @@ void CWizDocumentWebView::editorCommandExecuteRemoveFormat()
     editorCommandExecuteCommand("removeFormat");
 }
 
-void CWizDocumentWebView::editorCommandExecutePlainText()
-{
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    analyzer.LogAction("plainText");
-
-    page()->runJavaScript("editor.getPlainTxt()", [=](const QVariant& ret){
-        QString strText = ret.toString();
-
-        QRegExp exp("<[^>]*>");
-        strText.replace(exp, "");
-    #if QT_VERSION > 0x050000
-        strText = "<div>" + strText.toHtmlEscaped() + "</div>";
-    #else
-        strText = "<div>" + strText + "</div>";
-    #endif
-        strText.replace(" ", "&nbsp;");
-        strText.replace("\n", "<br />");
-
-        setModified(true);
-    });
-}
 
 void CWizDocumentWebView::editorCommandExecuteFormatMatch()
 {
