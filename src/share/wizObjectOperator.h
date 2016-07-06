@@ -39,7 +39,6 @@ public:
                                          bool showProgressDialog = true);
     void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                       bool showProgressDialog = true);
-    void movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
     void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                          bool showProgressDialog = true);
 

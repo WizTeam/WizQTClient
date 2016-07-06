@@ -113,6 +113,8 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_pEvents(NULL)
     , m_bBackground(true)
     , m_nFullSyncSecondsInterval(DEFAULT_FULL_SYNC_SECONDS_INTERVAL)
+    , m_bBusy(false)
+    , m_bPause(false)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -147,7 +149,12 @@ void CWizKMSyncThread::run()
             return;
         }
         //
-        doSync();        
+        if (m_bPause)
+            continue;
+        //
+        m_bBusy = true;
+        doSync();
+        m_bBusy = false;
     }
 }
 
@@ -468,4 +475,29 @@ void CWizKMSyncThread::quickSyncKb(const QString& kbGuid)
         return;
     //
     g_pSyncThread->addQuickSyncKb(kbGuid);
+}
+bool CWizKMSyncThread::isBusy()
+{
+    if (!g_pSyncThread)
+        return false;
+    //
+    return g_pSyncThread->m_bBusy;
+}
+
+void CWizKMSyncThread::waitUntilIdleAndPause()
+{
+    while(isBusy())
+    {
+        QThread::sleep(1);
+    }
+    //
+    setPause(true);
+}
+
+void CWizKMSyncThread::setPause(bool pause)
+{
+    if (!g_pSyncThread)
+        return;
+    //
+    g_pSyncThread->m_bPause = pause;
 }

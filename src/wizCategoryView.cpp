@@ -20,11 +20,13 @@
 #include "share/wizMessageBox.h"
 #include "share/wizthreads.h"
 #include "share/wizGlobal.h"
+#include "sync/wizkmsync.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "widgets/wizScrollBar.h"
 #include "widgets/wizAdvancedSearchDialog.h"
+#include "widgets/wizexecutingactiondialog.h"
 #include "mac/wizmachelper.h"
 #include "core/wizNoteManager.h"
 #include "wizmainwindow.h"
@@ -4846,6 +4848,10 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
             return NULL;
 
         CWizCategoryViewFolderItem* pFolderItem = createFolderItem(parent, strCurrentLocation);
+        //
+        CWizStdStringArray arrayAllLocation;
+        m_dbMgr.db().GetAllLocations(arrayAllLocation);
+        initFolders(pFolderItem, pFolderItem->location(), arrayAllLocation);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -5692,9 +5698,10 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
 
 void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder)
 {
-    qDebug() << "move personal folder to personal folder , source : " << sourceFolder << "  target folder : " << targetParentFolder;
-    CWizDocumentOperator documentOperator(m_dbMgr);
-    documentOperator.movePersonalFolderToPersonalDB(sourceFolder, targetParentFolder, combineFolder);
+    QString name = CWizDatabase::GetLocationName(sourceFolder);
+    QString newLocation = targetParentFolder + name + "/";
+    //
+    moveFolder(sourceFolder, newLocation);
 }
 
 void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder)
@@ -5909,76 +5916,53 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
 
 void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
 {
-    CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
-    QTreeWidgetItem* parentItem = item->parent();
-    if (parentItem == 0)
-    {
-        parentItem = folderRoot;
-    }
-
-    QString strName = getUseableItemName(parentItem, item);
-
-    bool combineFolder = false;
-    QString strNewLocation = "/" + strName + "/";
-    if (strName != item->text(0))
-    {
-        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(item->text(0))) == QMessageBox::Yes)
-        {
-            combineFolder = true;
-            // 处理默认文件夹的合并，默认文件夹的显示名称和实际数据不相同
-            QTreeWidgetItem* brother = findSameNameBrother(parentItem, item, item->text(0));
-            if (brother && brother->type() == Category_FolderItem)
-            {
-                CWizCategoryViewFolderItem* brotherFolder = dynamic_cast<CWizCategoryViewFolderItem*>(brother);
-                if (brotherFolder)
-                {
-                    strName = item->text(0);
-                    strNewLocation = "/" + strName + "/";
-                    if (!brotherFolder->location().contains(brotherFolder->text(0)))
-                    {
-                        strNewLocation = brotherFolder->location();
-                    }
-                }
-            }
-        }        
-    }
-
-    item->setText(0,  strName);
-    if (combineFolder)
-    {
-        item->parent()->removeChild(item);
-    }
-
-    if (parentItem != folderRoot)
-    {
-        CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
-        if (!parentBase)
-            return;
-
-//                qDebug() << "parent is not root , parent name : " << parentBase->name();
-        strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
-        parentItem = parentBase->parent();
-    }
-
-    QString strOldLocation = item->location();
-
-//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
-    resetFolderLocation(item, strNewLocation);
-    CWizDatabase& db = m_dbMgr.db();
-    updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
-
+    QString oldLocation = item->location();
+    QString newLocation;
     //
-    if (combineFolder)
-    {        
-        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
-        setCurrentItem(currentItem);
-        if (m_dragItem == item)
-        {
-            m_dragItem = nullptr;
-        }
-        qDebug() << "delete current item : " << item;
-        delete item;
+    QString strName = item->name();
+    //
+    if (CWizCategoryViewFolderItem* parentFolderItem = dynamic_cast<CWizCategoryViewFolderItem*>(item->parent()))
+    {
+        newLocation = parentFolderItem->location() + strName + "/";
     }
+    else
+    {
+        newLocation = "/" + strName + "/";
+    }
+    //
+    item->parent()->removeChild(item);
+    //
+    moveFolder(oldLocation, newLocation);
+}
+
+void CWizCategoryView::moveFolder(QString oldLocation, QString newLocation)
+{
+    ::WizExecutingActionDialog::executeAction(tr("Moving folder..."), WIZ_THREAD_DEFAULT, [=]{
+        //
+        //wait for sync
+        CWizKMSyncThread::waitUntilIdleAndPause();
+        //
+        CWizDatabase& db = m_dbMgr.db();
+        db.blockSignals(true);
+        CWizFolder folder(db, oldLocation);
+        folder.blockSignals(true);
+        folder.MoveToLocation(newLocation);
+        folder.blockSignals(false);
+        db.blockSignals(false);
+        //
+        CWizKMSyncThread::setPause(false);
+        //
+    });
+    //
+    CWizCategoryViewFolderItem* newItem = findFolder(newLocation, true, true);
+    if (newItem)
+    {
+        setCurrentItem(newItem);
+    }
+    //
+    MainWindow::instance()->quickSyncKb("");
+    //
+    updatePersonalFolderDocumentCount();
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)

@@ -18,9 +18,13 @@ public:
     ~WizExecutingActionDialog();
 
     virtual void reject();
+    virtual void showEvent(QShowEvent *);
 
 private:
     Ui::WizExecutingActionDialog *ui;
+    int m_threadId;
+    std::function<void(void)> m_fun;
+    bool m_first;
 public:
     static void executeAction(QString description, int threadId, std::function<void(void)> fun);
 };

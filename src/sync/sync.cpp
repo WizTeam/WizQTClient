@@ -141,9 +141,6 @@ bool CWizKMSync::SyncCore()
         //return FALSE;
     }
     //
-    m_pEvents->OnStatus(QObject::tr("Sync settings"));
-    UploadKeys();
-    //
     if (m_pEvents->IsStop())
         return FALSE;
     //
@@ -175,6 +172,10 @@ bool CWizKMSync::SyncCore()
         m_pEvents->OnError(QObject::tr("Cannot upload notes!"));
         return FALSE;
     }
+    //
+    //上传完笔记之后再上传文件夹等设置
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
+    UploadKeys();
     //
     if (m_pEvents->IsStop())
         return FALSE;
@@ -216,10 +217,6 @@ bool CWizKMSync::SyncCore()
     if (m_pEvents->IsStop())
         return FALSE;
     //
-    //should after download tags for grouo tag positions
-    m_pEvents->OnStatus(QObject::tr("Sync settings"));
-    DownloadKeys();
-    //
     m_pEvents->OnStatus(QObject::tr("Download notes list"));
     if (!DownloadDocumentList(versionServer.nDocumentVersion))
     {
@@ -229,6 +226,10 @@ bool CWizKMSync::SyncCore()
     //
     if (m_pEvents->IsStop())
         return FALSE;
+    //
+    //should after download tags for grouo tag positions
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
+    DownloadKeys();
     //
     /*
     // 重新更新服务器的数据，因为如果pc客户端文件夹被移动后，

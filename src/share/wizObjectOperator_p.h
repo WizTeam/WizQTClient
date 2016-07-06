@@ -44,7 +44,6 @@ public:
     //
     void moveGroupFolderToPersonalDB();
     void moveGroupFolderToGroupDB();
-    void movePersonalFolderToPersonalDB();
     void movePersonalFolderToGroupDB();
 
     void bindSignalsToProgressDialog(CWizProgressDialog* progress);
@@ -73,8 +72,6 @@ private:
     //
     void moveGroupFolderToPersonalDB(const WIZTAGDATA &childFolder, const QString &targetParentFolder);
     void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetParentTag);
-    void _movePersonalFolderToPersonalDB(const QString& childFolder, const QString& targetParentFolder,
-                                         const QString& targetFolderName);
     void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetParentTag,
                                      const QString& targetTagName);
 

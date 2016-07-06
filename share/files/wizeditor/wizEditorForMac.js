@@ -1766,8 +1766,6 @@ module.exports = Array.isArray || function (arr) {
 };
 
 },{}],5:[function(require,module,exports){
-'use strict';
-
 var ENV = require('./common/env'),
     domUtils = require('./domUtils/domExtend'),
     amend = require('./amend/amend'),
@@ -1800,7 +1798,7 @@ var WizEditor = {
      *   clientType,  //客户端类型
      * }
      */
-    init: function init(options) {
+    init: function (options) {
         ENV.init('editor', options);
         ENV.dependency.files.init();
 
@@ -1820,7 +1818,7 @@ var WizEditor = {
     /**
      * 启动编辑器
      */
-    on: function on() {
+    on: function () {
         if (ENV.win.WizReader) {
             ENV.win.WizReader.off();
         }
@@ -1836,7 +1834,7 @@ var WizEditor = {
     /**
      * 关闭编辑器
      */
-    off: function off(options) {
+    off: function (options) {
         if (ENV.win.WizTemplate) {
             ENV.win.WizTemplate.off();
         }
@@ -1851,16 +1849,15 @@ var WizEditor = {
     /**
      * 备份光标位置
      */
-    backupCaret: function backupCaret() {
+    backupCaret: function () {
         return rangeUtils.backupCaret();
     },
     /**
      * 清除 临时 & 冗余的 wiz 标签（主要用于保存笔记前）
      */
-    clearWizDom: function clearWizDom() {
+    clearWizDom: function () {
         domUtils.clearChild(ENV.doc.body, []);
         amend.hideAmendInfo();
-
         return WizEditor;
     },
     /**
@@ -1871,13 +1868,13 @@ var WizEditor = {
      * @param loop
      * @returns {*}
      */
-    find: function find(str, matchcase, searchBackward, loop) {
+    find: function(str, matchcase, searchBackward, loop) {
         return editor.find(str, matchcase, searchBackward, loop);
     },
     /**
      * 让 body 获取焦点
      */
-    focus: function focus() {
+    focus: function () {
         domUtils.focus();
         return WizEditor;
     },
@@ -1885,22 +1882,22 @@ var WizEditor = {
      * 获取 body 内正文，用于生成摘要
      * @returns {*}
      */
-    getBodyText: function getBodyText() {
+    getBodyText: function () {
         return domUtils.getBodyText();
     },
     /**
      * 获取当前页面源码
      * @returns {*}
      */
-    getContentHtml: function getContentHtml() {
+    getContentHtml: function () {
         todoCore.checkTodoStyle();
         return domUtils.getContentHtml();
     },
-    insertDefaultStyle: function insertDefaultStyle(onlyReplace, customCss) {
+    insertDefaultStyle: function (onlyReplace, customCss) {
         wizStyle.insertDefaultStyle(onlyReplace, customCss);
         return WizEditor;
     },
-    insertCustomStyle: function insertCustomStyle(id, customCss, isTemp) {
+    insertCustomStyle: function(id, customCss, isTemp) {
         wizStyle.insertCustomStyle(id, customCss, isTemp);
         return WizEditor;
     },
@@ -1908,21 +1905,21 @@ var WizEditor = {
      * 在光标位置插入 base64 格式的html
      * @param b64Html
      */
-    insertB64Html: function insertB64Html(b64Html) {
+    insertB64Html: function (b64Html) {
         editor.insertHtml(base64.decode(b64Html));
     },
     /**
      * 在光标位置插入 html
      * @param html
      */
-    insertHtml: function insertHtml(html) {
+    insertHtml: function (html) {
         editor.insertHtml(html);
     },
     /**
      * 判断编辑内容是否被修改
      * @returns {boolean}
      */
-    isModified: function isModified() {
+    isModified: function () {
         return !ENV.readonly && domUtils.getContentHtml() != editor.getOriginalHtml();
     },
     /**
@@ -1930,72 +1927,69 @@ var WizEditor = {
      * @param style (example:{'font-size':'16px', 'color':'red'})
      * @param attr
      */
-    modifySelectionDom: function modifySelectionDom(style, attr) {
+    modifySelectionDom: function (style, attr) {
         editor.modifySelectionDom(style, attr);
     },
     /**
      * 编辑器 redo
      */
-    redo: function redo() {
+    redo: function () {
         historyUtils.redo();
-
         return WizEditor;
     },
-    removeStyleById: function removeStyleById(id) {
+    removeStyleById: function(id) {
         wizStyle.removeStyleById(id);
         return WizEditor;
     },
-    replace: function replace(from, to, matchcase) {
+    replace: function (from, to, matchcase) {
         return editor.replace(from, to, matchcase);
     },
-    replaceAll: function replaceAll(from, to, matchcase) {
+    replaceAll: function (from, to, matchcase) {
         editor.replaceAll(from, to, matchcase);
     },
     /**
      * 恢复已备份光标位置
      */
-    restoreCaret: function restoreCaret() {
+    restoreCaret: function () {
         return rangeUtils.restoreCaret();
     },
     /**
      * 编辑器 保存快照
      */
-    saveSnap: function saveSnap() {
+    saveSnap: function () {
         historyUtils.saveSnap(false);
-
         return WizEditor;
     },
     /**
      * 设置当前文档为 未修改状态
      */
-    setUnModified: function setUnModified() {
+    setUnModified: function () {
         editor.setOriginalHtml();
     },
     /**
      * 编辑器 undo
      */
-    undo: function undo() {
+    undo: function () {
         historyUtils.undo();
-
         return WizEditor;
     },
     ListenerType: editorEvent.TYPE,
-    addListener: function addListener(eName, fun) {
+    addListener: function (eName, fun) {
         editorEvent.addListener(eName, fun);
         return WizEditor;
     },
-    removeListener: function removeListener(eName, fun) {
+    removeListener: function (eName, fun) {
         editorEvent.removeListener(eName, fun);
         return WizEditor;
     },
-    triggerListener: function triggerListener(eName, params) {
+    triggerListener: function (eName, params) {
         editorEvent.triggerListener(eName, params);
         return WizEditor;
     },
-    startTrackEvent: function startTrackEvent(eventName, id) {
+    startTrackEvent: function (eventName, id) {
         editorEvent.startTrackEvent(eventName, id);
     },
-    stopTrackEvent: function stopTrackEvent(eventName, id) {
+    stopTrackEvent: function (eventName, id) {
         editorEvent.stopTrackEvent(eventName, id);
     },
     amend: {
@@ -2003,7 +1997,7 @@ var WizEditor = {
          * 开启 修订功能
          * @param status  // true：开启修订； false：关闭修订
          */
-        on: function on() {
+        on: function () {
             amend.start();
 
             return WizEditor;
@@ -2011,7 +2005,7 @@ var WizEditor = {
         /**
          * 关闭 修订功能
          */
-        off: function off() {
+        off: function () {
             //关闭 修订功能 需要同时开启 逆修订功能
             amend.startReverse();
 
@@ -2021,48 +2015,48 @@ var WizEditor = {
          * 获取 笔记是否被进行过 修订编辑
          * @returns {boolean}
          */
-        isEdited: function isEdited() {
+        isEdited: function () {
             return amend.isAmendEdited();
         },
         /**
          * 获取 笔记当前 修订状态
          * @returns {boolean}
          */
-        isEditing: function isEditing() {
+        isEditing: function () {
             return amend.isAmendEditing();
         },
         /**
          * 判断当前光标位置是否处于修订标签内
          * @returns {boolean}
          */
-        hasAmendSpanByCursor: function hasAmendSpanByCursor() {
+        hasAmendSpanByCursor: function () {
             return amend.hasAmendSpanByCursor();
         },
         /**
          * 接受 修订内容， 清理所有修订的标签
          * @params options
          */
-        accept: function accept(options) {
+        accept: function (options) {
             amend.accept(initAmendAcceptOptions(options));
         },
         /**
          * 拒绝 修订内容， 恢复原内容
          * @param options
          */
-        refuse: function refuse(options) {
+        refuse: function (options) {
             amend.refuse(initAmendAcceptOptions(options));
         }
     },
     img: {
-        getAll: function getAll(onlyLocal) {
+        getAll: function (onlyLocal) {
             //为了保证客户端使用方便，转换为字符串
             return imgUtils.getAll(onlyLocal).join(',');
         },
-        insertAsAttachment: function insertAsAttachment(guid, imgPath) {
+        insertAsAttachment: function (guid, imgPath) {
             var imgHtml = imgUtils.makeAttachmentHtml(guid, imgPath);
             editor.insertHtml(imgHtml);
         },
-        insertByPath: function insertByPath(imgPath) {
+        insertByPath: function (imgPath) {
             editor.insertDom(imgUtils.makeDomByPath(imgPath));
         }
     },
@@ -2070,26 +2064,26 @@ var WizEditor = {
         /**
          * 开启 自动设置 超链接功能
          */
-        on: function on() {
+        on: function () {
             linkUtils.on();
         },
         /**
          * 关闭 自动设置 超链接功能
          */
-        off: function off() {
+        off: function () {
             linkUtils.off();
         },
         /**
          * 移除选中的 <a> 标签的超链接
          */
-        removeSelectedLink: function removeSelectedLink() {
+        removeSelectedLink: function () {
             linkUtils.removeSelectedLink();
         },
         /**
          * 设置当前选中区域超链接，或在光标处添加超链接
          * @param url
          */
-        setCurrentLink: function setCurrentLink(url) {
+        setCurrentLink: function(url) {
             linkUtils.setCurrentLink(url);
         }
     },
@@ -2113,10 +2107,10 @@ var WizEditor = {
         setTodoInfo: todoCore.setTodoInfo
     },
     nightMode: {
-        on: function on(color, bgColor, brightness) {
+        on: function (color, bgColor, brightness) {
             nightModeUtils.on(color, bgColor, brightness);
         },
-        off: function off() {
+        off: function () {
             nightModeUtils.off();
         }
     }
@@ -2139,10 +2133,7 @@ function initAmendAcceptOptions(options) {
 window.WizEditor = WizEditor;
 
 module.exports = WizEditor;
-
 },{"./amend/amend":7,"./common/base64":12,"./common/env":15,"./common/historyUtils":16,"./common/wizStyle":20,"./domUtils/domExtend":24,"./editor/base":25,"./editor/editorEvent":26,"./imgUtils/imgUtils":29,"./linkUtils/linkUtils":30,"./nightMode/nightModeUtils":34,"./rangeUtils/rangeExtend":36,"./tableUtils/tableCore":39,"./todoUtils/todoCore":43}],6:[function(require,module,exports){
-'use strict';
-
 var ENV = require('./common/env'),
     CONST = require('./common/const'),
     wizStyle = require('./common/wizStyle'),
@@ -2168,7 +2159,7 @@ var WizReader = {
      *   noteType // 'common' 'markdown' 'mathjax' 笔记类型
      * }
      */
-    init: function init(options) {
+    init: function (options) {
         ENV.init('reader', options);
         ENV.dependency.files.init();
 
@@ -2197,7 +2188,7 @@ var WizReader = {
      *   noteType 笔记类型
      * }
      */
-    on: function on(options) {
+    on: function (options) {
         if (options && options.noteType) {
             ENV.options.noteType = options.noteType;
         }
@@ -2216,7 +2207,7 @@ var WizReader = {
 
         return WizReader;
     },
-    off: function off() {
+    off: function () {
         WizReader.amendInfo.off();
 
         if (ENV.win.WizTemplate) {
@@ -2227,30 +2218,30 @@ var WizReader = {
 
         return WizReader;
     },
-    insertDefaultStyle: function insertDefaultStyle(onlyReplace, customCss) {
+    insertDefaultStyle: function (onlyReplace, customCss) {
         wizStyle.insertDefaultStyle(onlyReplace, customCss);
         return WizReader;
     },
-    insertCustomStyle: function insertCustomStyle(id, customCss, isTemp) {
+    insertCustomStyle: function(id, customCss, isTemp) {
         wizStyle.insertCustomStyle(id, customCss, isTemp);
         return WizReader;
     },
-    removeStyleById: function removeStyleById(id) {
+    removeStyleById: function(id) {
         wizStyle.removeStyleById(id);
         return WizReader;
     },
-    markdown: function markdown(callback, timeout) {
+    markdown: function (callback, timeout) {
         timeout = timeout ? timeout : ENV.options.timeout.markdown;
         callback = callback || ENV.options.callback.markdown;
         var hasCalled = false,
-            cb = function cb() {
-            if (callback && /^function$/i.test(typeof callback) && !hasCalled) {
-                callback();
-                hasCalled = true;
-            }
-        };
+            cb = function () {
+                if (callback && /^function$/i.test(typeof callback) && !hasCalled) {
+                    callback();
+                    hasCalled = true;
+                }
+            };
         markdownRender.markdown({
-            markdown: function markdown(isMathjax) {
+            markdown: function (isMathjax) {
                 //IOS 处理 todolist 应该可以删除了
                 ENV.client.sendCmdToWiznote(CONST.CLIENT_EVENT.wizMarkdownRender);
                 if (!isMathjax) {
@@ -2259,21 +2250,21 @@ var WizReader = {
                     setTimeout(cb, timeout);
                 }
             },
-            mathJax: function mathJax() {
+            mathJax: function () {
                 cb();
             }
         });
     },
-    mathJax: function mathJax(callback, timeout) {
+    mathJax: function (callback, timeout) {
         timeout = timeout ? timeout : ENV.options.timeout.mathJax;
         callback = callback || ENV.options.callback.mathJax;
         var hasCalled = false,
-            cb = function cb() {
-            if (callback && !hasCalled) {
-                callback();
-                hasCalled = true;
-            }
-        };
+            cb = function () {
+                if (callback && !hasCalled) {
+                    callback();
+                    hasCalled = true;
+                }
+            };
 
         setTimeout(cb, timeout);
         markdownRender.mathJax(function () {
@@ -2281,7 +2272,7 @@ var WizReader = {
         });
     },
     amendInfo: {
-        on: function on() {
+        on: function () {
             if (ENV.options.noAmend) {
                 return WizReader;
             }
@@ -2294,14 +2285,14 @@ var WizReader = {
 
             return WizReader;
         },
-        off: function off() {
+        off: function () {
             amendInfo.remove();
 
             return WizReader;
         }
     },
     img: {
-        getAll: function getAll(onlyLocal) {
+        getAll: function (onlyLocal) {
             //为了保证客户端使用方便，转换为字符串
             return imgUtils.getAll(onlyLocal).join(',');
         }
@@ -2312,10 +2303,10 @@ var WizReader = {
         onCheckDocLock: todoCore.onCheckDocLock
     },
     nightMode: {
-        on: function on(color, bgColor, brightness) {
+        on: function (color, bgColor, brightness) {
             nightModeUtils.on(color, bgColor, brightness);
         },
-        off: function off() {
+        off: function () {
             nightModeUtils.off();
         }
     }
@@ -2324,13 +2315,10 @@ var WizReader = {
 window.WizReader = WizReader;
 
 module.exports = WizReader;
-
 },{"./amend/amendInfo":8,"./amend/amendUser":9,"./common/const":13,"./common/env":15,"./common/wizStyle":20,"./imgUtils/imgUtils":29,"./markdown/markdownRender":33,"./nightMode/nightModeUtils":34,"./reader/base":37,"./todoUtils/todoCore":43}],7:[function(require,module,exports){
 /**
  * 修订功能 专用工具包
  */
-
-'use strict';
 
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
@@ -2353,17 +2341,22 @@ var ENV = require('../common/env'),
     //针对 修订特殊处理 image
     domUtils.modifyNodeStyle = function (item, style, attr) {
         var p;
-        if (item.nodeType == 1 && attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isTag(item, 'img')) {
+        if (item.nodeType == 1 &&
+            attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isTag(item, 'img')) {
             amendUtils.deleteImg(item, amendUser.getCurUser());
             return item;
-        } else if (item.nodeType == 1 && attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isEmptyDom(item)) {
+
+        } else if (item.nodeType == 1 &&
+            attr && attr[CONST.ATTR.SPAN_DELETE] &&
+            domUtils.isEmptyDom(item)) {
             //TODO 需要提取 判断br 的方法
             // 只能删除 被父节点内单独存在的 br
             p = item.parentNode;
             p.removeChild(item);
             domUtils.removeEmptyParent(p);
             return item;
-        } else if (item.nodeType == 1 && attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isSelfClosingTag(item)) {
+        } else if (item.nodeType == 1 &&
+            attr && attr[CONST.ATTR.SPAN_DELETE] && domUtils.isSelfClosingTag(item)) {
             return item;
         } else if (attr && attr[CONST.ATTR.SPAN_DELETE] && amendUtils.getWizDeleteParent(item)) {
             return item;
@@ -2376,27 +2369,27 @@ var ENV = require('../common/env'),
     domUtils.addDomForGetDomList = function (main, sub) {
         //忽略 在修订模式下 已经删除的内容
         if (amendUtils.isWizDelete(sub) ||
-        //td tr 之间不能添加 span!!
-        sub.nodeType == 3 && !domUtils.getParentByTagName(sub, ['td', 'th'], false, null) && domUtils.getParentByTagName(sub, 'table', false, null)) {
+            //td tr 之间不能添加 span!!
+            (sub.nodeType == 3 && !domUtils.getParentByTagName(sub, ['td', 'th'], false, null) && domUtils.getParentByTagName(sub, 'table', false, null))) {
             return;
         }
         addDomForGetDomList(main, sub);
     };
 })();
 
-var _isAmendEditing = false;
+var isAmendEditing = false;
 var amend = {
-    initUser: function initUser() {
+    initUser: function () {
         amendUser.initUser(ENV.options.userInfo);
     },
-    setUsersData: function setUsersData() {
+    setUsersData: function () {
         amendUser.setUsersData(ENV.options.usersData);
     },
     /**
      * 开启 修订功能
      */
-    start: function start() {
-        _isAmendEditing = true;
+    start: function () {
+        isAmendEditing = true;
         amend.stopReverse();
         amendEvent.bind();
         amend.startAmendInfo();
@@ -2406,8 +2399,8 @@ var amend = {
     /**
      * 关闭 修订功能
      */
-    stop: function stop() {
-        _isAmendEditing = false;
+    stop: function () {
+        isAmendEditing = false;
         amendEvent.unbind();
         amendInfo.remove();
         if (!amend.isAmendEdited()) {
@@ -2420,7 +2413,7 @@ var amend = {
     /**
      * 开启 反转修订功能
      */
-    startReverse: function startReverse() {
+    startReverse: function () {
         amend.stop();
 
         amendEvent.bindReverse();
@@ -2429,7 +2422,7 @@ var amend = {
     /**
      * 关闭 反转修订功能
      */
-    stopReverse: function stopReverse() {
+    stopReverse: function () {
         amendEvent.unbindReverse();
         amendInfo.remove();
         if (!amend.isAmendEdited()) {
@@ -2440,7 +2433,7 @@ var amend = {
     /**
      * 开启显示 修订信息
      */
-    startAmendInfo: function startAmendInfo(options) {
+    startAmendInfo: function (options) {
         amendInfo.init(options, {
             onAccept: amendEvent.onAccept,
             onRefuse: amendEvent.onRefuse
@@ -2449,48 +2442,51 @@ var amend = {
     /**
      * 关闭显示 修订信息
      */
-    stopAmendInfo: function stopAmendInfo() {
+    stopAmendInfo: function () {
         amendInfo.remove();
     },
     /**
      * 隐藏显示 修订信息（主要用于保存笔记前处理）
      */
-    hideAmendInfo: function hideAmendInfo() {
+    hideAmendInfo: function () {
         amendInfo.hide(true);
     },
     /**
      * 判断笔记是否存在 被修订的痕迹
      * @returns boolean
      */
-    isAmendEdited: function isAmendEdited() {
+    isAmendEdited: function () {
         return amendUtils.isAmendEdited();
     },
-    isAmendEditing: function isAmendEditing() {
-        return _isAmendEditing;
+    isAmendEditing: function () {
+        return isAmendEditing;
     },
-    hasAmendSpanByCursor: function hasAmendSpanByCursor() {
+    hasAmendSpanByCursor: function () {
         var amendDoms = amendUtils.getAmendDoms({
             selection: true,
             selectAll: false
         });
 
-        return amendDoms.insertList.length > 0 || amendDoms.deleteList.length > 0 || amendDoms.deletedInsertList.length > 0;
+        return amendDoms.insertList.length > 0 ||
+            amendDoms.deleteList.length > 0 ||
+            amendDoms.deletedInsertList.length > 0;
     },
     /**
      * 接受 修订内容
      * @param target
      */
-    accept: function accept(target) {
+    accept: function (target) {
         var sel = ENV.doc.getSelection(),
-            options = {},
-            amendDoms;
+            options = {}, amendDoms;
 
         if (target.total) {
             options.selection = true;
             options.selectAll = true;
+
         } else if (target.dom && !target.isSelection) {
             options.domList = amendUtils.getSameTimeStampDom(target.dom);
             options.selection = false;
+
         } else {
             //TODO 无光标焦点时，跳转到下一个修订内容
             if (sel.rangeCount === 0) {
@@ -2527,14 +2523,14 @@ var amend = {
      *  拒绝 修订内容
      *  @param target
      */
-    refuse: function refuse(target) {
+    refuse: function (target) {
         var sel = ENV.doc.getSelection(),
-            options = {},
-            amendDoms;
+            options = {}, amendDoms;
 
         if (target.total) {
             options.selection = true;
             options.selectAll = true;
+
         } else if (target.dom && !target.isSelection) {
             options.domList = amendUtils.getSameTimeStampDom(target.dom);
             options.selection = false;
@@ -2562,7 +2558,9 @@ var amend = {
 
             //对于 用户B 删除了用户A 新增的内容，只有单独选中该 dom 拒绝修订时， 才还原为 用户A 新增的内容，
             //否则拒绝时，一律当作 用户A 新增的内容进行删除操作
-            var saveDeletedInsert = amendDoms.deletedInsertList.length > 0 && amendDoms.deleteList.length == 0 && amendDoms.insertList.length == 0;
+            var saveDeletedInsert = amendDoms.deletedInsertList.length > 0 &&
+                amendDoms.deleteList.length == 0 &&
+                amendDoms.insertList.length == 0;
 
             //保留 已删除的
             amendUtils.wizAmendSave(amendDoms.deleteList);
@@ -2583,16 +2581,15 @@ var amend = {
      * 参考 amendUtils.splitAmendDomByRange
      * @param fixed
      */
-    splitAmendDomByRange: function splitAmendDomByRange(fixed) {
+    splitAmendDomByRange: function (fixed) {
         return amendUtils.splitAmendDomByRange(fixed);
     },
     /**
      * 为 复制/剪切 操作，准备 fragment
      */
-    getFragmentForCopy: function getFragmentForCopy(isCut) {
+    getFragmentForCopy: function (isCut) {
         var range = rangeUtils.getRange(),
-            tmpParent,
-            fragment = null;
+            tmpParent, fragment = null;
         //无光标时， 不操作任何内容
         if (!range || range.collapsed) {
             return fragment;
@@ -2612,7 +2609,7 @@ var amend = {
      * 复制时 根据 fragment 过滤修订内容
      * @param fragment
      */
-    fragmentFilter: function fragmentFilter(fragment) {
+    fragmentFilter: function (fragment) {
         var delDom, i, delDomItem;
 
         if (!fragment) {
@@ -2625,24 +2622,12 @@ var amend = {
             delDomItem.parentNode.removeChild(delDomItem);
         }
     },
-    readyForPaste: function readyForPaste() {
-        var sel = ENV.doc.getSelection(),
-            range,
-            endDomBak,
-            endDom,
-            endOffset,
-            id,
-            newDom,
-            nSpanStart,
-            nSpanContent,
-            nSpanEnd,
-            nSpanNext,
-            nA,
-            p,
-            tmpSplit,
-            splitInsert,
-            amendImg,
-            isTd;
+    readyForPaste: function () {
+        var sel = ENV.doc.getSelection(), range,
+            endDomBak, endDom, endOffset,
+            id, newDom,
+            nSpanStart, nSpanContent, nSpanEnd, nSpanNext,
+            nA, p, tmpSplit, splitInsert, amendImg, isTd;
 
         //无光标时， 不操作任何内容
         if (sel.rangeCount === 0) {
@@ -2668,7 +2653,7 @@ var amend = {
 
         splitInsert = amendUtils.splitInsertDom(endDom, endOffset, true, amendUser.getCurUser());
 
-        id = new Date().valueOf();
+        id = (new Date()).valueOf();
         newDom = amendUtils.createDomForPaste(id);
         nSpanStart = newDom.start;
         nSpanContent = newDom.content;
@@ -2704,13 +2689,16 @@ var amend = {
             } else {
                 domUtils.before(endDom, [nSpanStart, nSpanContent, nSpanEnd], true);
             }
+
         } else if (endDom.nodeType == 3) {
             if (amendUtils.splitDeletedDom(endDom, endOffset)) {
                 domUtils.before(endDom.parentNode, [nSpanStart, nSpanContent, nSpanEnd], true);
+
             } else if (endOffset < endDom.nodeValue.length) {
                 tmpSplit = ENV.doc.createTextNode(endDom.nodeValue.substr(endOffset));
                 endDom.nodeValue = endDom.nodeValue.substr(0, endOffset);
                 domUtils.before(endDom, [nSpanStart, nSpanContent, nSpanEnd, tmpSplit], true);
+
             } else {
                 nA = domUtils.getParentByTagName(endDom, 'a', true, null);
                 nSpanNext = endDom.nextSibling;
@@ -2729,17 +2717,19 @@ var amend = {
         }
 
         //不能使用 selectAllChildren ，否则 输入 空格时 浏览器会自动复制前一个 span 的所有样式
-        //        sel.selectAllChildren(nSpanStart);
+//        sel.selectAllChildren(nSpanStart);
         rangeUtils.setRange(nSpanContent.childNodes[0], 0, nSpanContent.childNodes[0], 1);
 
         setTimeout(function () {
             //有时候 nSpanEnd 的 DOM 在 粘贴操作后会自动变成新的 DOM 导致处理异常，
             //所以必须重新获取 nSpanEnd
-            nSpanEnd = ENV.doc.querySelector('span[' + CONST.ATTR.SPAN_PASTE_TYPE + '="' + CONST.TYPE.PASTE.END + '"][' + CONST.ATTR.SPAN_PASTE_ID + '="' + nSpanEnd.getAttribute(CONST.ATTR.SPAN_PASTE_ID) + '"]');
+            nSpanEnd = ENV.doc.querySelector('span[' +
+                CONST.ATTR.SPAN_PASTE_TYPE + '="' + CONST.TYPE.PASTE.END + '"][' +
+                CONST.ATTR.SPAN_PASTE_ID + '="' + nSpanEnd.getAttribute(CONST.ATTR.SPAN_PASTE_ID) + '"]');
             amend.fixPaste(nSpanStart, nSpanEnd, amendUser.getCurUser());
         }, 200);
     },
-    fixPaste: function fixPaste(start, end, user) {
+    fixPaste: function (start, end, user) {
         amendUtils.modifyDomForPaste(start, end, user);
     }
 };
@@ -2751,7 +2741,7 @@ var amendEvent = {
     /**
      * 初始化时，绑定修订相关的必要事件
      */
-    bind: function bind() {
+    bind: function () {
         amendEvent.unbind();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, amendEvent.onKeyDown);
         ENV.event.add(CONST.EVENT.ON_COMPOSITION_START, amendEvent.onCompositionStart);
@@ -2770,7 +2760,7 @@ var amendEvent = {
     /**
      * 解绑修订相关的必要事件
      */
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, amendEvent.onKeyDown);
         ENV.event.remove(CONST.EVENT.ON_COMPOSITION_START, amendEvent.onCompositionStart);
         ENV.event.remove(CONST.EVENT.ON_COMPOSITION_END, amendEvent.onCompositionEnd);
@@ -2785,7 +2775,7 @@ var amendEvent = {
     /**
      * 绑定反转修订相关的必要事件
      */
-    bindReverse: function bindReverse() {
+    bindReverse: function () {
         amendEvent.unbindReverse();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, amendEvent.onKeyDownReverse);
         ENV.event.add(CONST.EVENT.ON_COMPOSITION_START, amendEvent.onCompositionStart);
@@ -2798,7 +2788,7 @@ var amendEvent = {
     /**
      * 解绑反转修订相关的必要事件
      */
-    unbindReverse: function unbindReverse() {
+    unbindReverse: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, amendEvent.onKeyDownReverse);
         ENV.event.remove(CONST.EVENT.ON_COMPOSITION_START, amendEvent.onCompositionStart);
         ENV.event.remove(CONST.EVENT.ON_COMPOSITION_END, amendEvent.onCompositionEnd);
@@ -2809,53 +2799,54 @@ var amendEvent = {
      * 点击 修订信息图层的 接受修订按钮 回调
      * @param target
      */
-    onAccept: function onAccept(target) {
+    onAccept: function (target) {
         amend.accept(target);
     },
     /**
      * 点击 修订信息图层的 拒绝修订按钮 回调
      * @param target
      */
-    onRefuse: function onRefuse(target) {
+    onRefuse: function (target) {
         amend.refuse(target);
     },
     /**
      * history 控件  beforeSaveSnap 保存快照之前的回调，用于在保存快照前执行必要操作
      */
-    onBeforeSaveSnap: function onBeforeSaveSnap() {
+    onBeforeSaveSnap: function () {
         //隐藏 修订信息浮动图层，避免 undo 保存多余的图层数据
         amendInfo.hide(true);
     },
     /**
      * history 控件  afterRestoreHistory 保存快照之后的回调，用于在保存快照后执行必要操作
      */
-    onAfterRestoreHistory: function onAfterRestoreHistory() {
+    onAfterRestoreHistory: function () {
         //重新设置 amendInfo 的图层对象
         amend.startAmendInfo();
     },
     /**
      * 中文输入开始
      */
-    onCompositionStart: function onCompositionStart() {
-        //            console.log('start....');
+    onCompositionStart: function () {
+//            console.log('start....');
         CONST.COMPOSITION_START = true;
     },
     /**
      * 中文输入结束
      */
-    onCompositionEnd: function onCompositionEnd() {
-        //            console.log('end....');
+    onCompositionEnd: function () {
+//            console.log('end....');
         CONST.COMPOSITION_START = false;
         //必须要延迟处理， 否则输入中文后按下 ESC 执行取消操作，触发此事件时，页面上还存在输入的中文拼音
         setTimeout(function () {
             historyUtils.saveSnap(true);
         }, 0);
+
     },
     /**
      * 拖拽 文件 或 文本
      * @param e
      */
-    onDragDrop: function onDragDrop(e) {
+    onDragDrop: function (e) {
         //修订编辑时 禁用 拖拽操作，否则无法控制输入的内容
         utils.stopEvent(e);
         return false;
@@ -2864,20 +2855,14 @@ var amendEvent = {
      * 按下键盘
      * @param e
      */
-    onKeyDown: function onKeyDown(e) {
+    onKeyDown: function (e) {
         if (!todoCore.onKeyDown(e)) {
             return;
         }
-        var sel = ENV.doc.getSelection(),
-            range,
-            endDom,
-            endOffset,
-            nSpan,
-            nSpanNext,
-            nA,
-            tmpSplitStr,
-            tmpSplit,
-            tmpParentRoot;
+        var sel = ENV.doc.getSelection(), range,
+            endDom, endOffset,
+            nSpan, nSpanNext, nA,
+            tmpSplitStr, tmpSplit, tmpParentRoot;
 
         //无光标时，或输入法开始后 不操作任何内容
         if (sel.rangeCount === 0 || CONST.COMPOSITION_START) {
@@ -2885,7 +2870,7 @@ var amendEvent = {
         }
 
         var keyCode = e.keyCode || e.which;
-        //      console.info(e);
+//      console.info(e);
 
         /**
          * Backspace
@@ -2898,7 +2883,7 @@ var amendEvent = {
                 amendUtils.removeUserDel(null, amendUser.getCurUser());
                 sel.collapseToStart();
             } else {
-                //                  console.log(endDom.nodeValue);
+//                  console.log(endDom.nodeValue);
                 rangeUtils.selectCharIncludeFillChar(true);
                 amendUtils.removeSelection(amendUser.getCurUser());
                 tmpParentRoot = rangeUtils.getRangeParentRoot();
@@ -2971,11 +2956,11 @@ var amendEvent = {
                 insertDom = amendUtils.getWizInsertParent(endDom),
                 isImg = !!insertDom ? amendUtils.getWizAmendImgParent(endDom) : false,
                 aDom = delDom || insertDom;
-            if (aDom && aDom.childNodes.length === 1 && (!domUtils.isUsableTextNode(aDom.childNodes[0]) || aDom.childNodes[0].nodeType === 1 && domUtils.isTag(aDom.childNodes[0], 'br'))) {
+            if (aDom && aDom.childNodes.length === 1 &&
+                (!domUtils.isUsableTextNode(aDom.childNodes[0]) || (aDom.childNodes[0].nodeType === 1 && domUtils.isTag(aDom.childNodes[0], 'br')))) {
                 //如果按下 Enter 键 时， 光标处于空白的 wizspan 标签内时，立刻删除该 span，避免span 的样式被 浏览器默认转换为 font 标签
                 (function () {
-                    var p = aDom.parentNode,
-                        b = ENV.doc.createElement('br');
+                    var p = aDom.parentNode, b = ENV.doc.createElement('br');
                     p.insertBefore(b, aDom);
                     p.removeChild(aDom);
                     rangeUtils.setRange(b, 1, b, 1);
@@ -3063,13 +3048,16 @@ var amendEvent = {
             // endDom nodeType == 1 时， 光标应该是在 childNodes[endOffset] 元素的前面
             if (endOffset < endDom.childNodes.length) {
                 //避免嵌套 span ，如果 endDom 为 wizSpan 并且 内容为空或 br 时，直接删除该span
-                if (endDom.getAttribute(CONST.ATTR.SPAN) && (endDom.childNodes.length === 0 || endDom.childNodes.length === 1 && domUtils.isTag(endDom.childNodes[0], 'br'))) {
+                if (endDom.getAttribute(CONST.ATTR.SPAN) &&
+                    (endDom.childNodes.length === 0 ||
+                    (endDom.childNodes.length === 1 && domUtils.isTag(endDom.childNodes[0], 'br')))) {
                     domUtils.before(endDom, nSpan, false);
                     endDom.parentNode.removeChild(endDom);
                 } else {
                     domUtils.before(endDom.childNodes[endOffset], nSpan, false);
                 }
-            } else if (domUtils.isTag(endDom, ['td', 'th']) || domUtils.hasClass(endDom, CONST.CLASS.TODO_MAIN)) {
+            } else if (domUtils.isTag(endDom, ['td', 'th']) ||
+                domUtils.hasClass(endDom, CONST.CLASS.TODO_MAIN)) {
                 //如果光标处于 表格内部，不能直接把 nSpan 放到 td 的 后面
                 //也不能把 nSpan 放到 todoList Main 的后面
                 if (domUtils.isEmptyDom(endDom)) {
@@ -3079,14 +3067,17 @@ var amendEvent = {
             } else {
                 domUtils.before(endDom, nSpan, true);
             }
+
         } else if (endDom.nodeType == 3) {
             if (amendUtils.splitDeletedDom(endDom, endOffset)) {
                 domUtils.before(endDom.parentNode, nSpan, true);
+
             } else if (endOffset < endDom.nodeValue.length) {
                 tmpSplitStr = endDom.nodeValue.substr(endOffset);
                 tmpSplit = ENV.doc.createTextNode(tmpSplitStr);
                 endDom.nodeValue = endDom.nodeValue.substr(0, endOffset);
                 domUtils.before(endDom, [nSpan, tmpSplit], true);
+
             } else {
                 nA = domUtils.getParentByTagName(endDom, 'a', true, null);
                 nSpanNext = endDom.nextSibling;
@@ -3098,6 +3089,7 @@ var amendEvent = {
                 } else {
                     endDom.parentNode.insertBefore(nSpan, null);
                 }
+
             }
         }
 
@@ -3116,12 +3108,13 @@ var amendEvent = {
         // sel.selectAllChildren(nSpan);
         //此方法会导致 Mac 的搜狗输入法 第一个字母被吃掉
         // rangeUtils.setRange(nSpan.childNodes[0], 0, nSpan.childNodes[0], nSpan.childNodes[0].nodeValue.length);
+
     },
     /**
      * 按下键盘 逆修订
      * @param e
      */
-    onKeyDownReverse: function onKeyDownReverse(e) {
+    onKeyDownReverse: function (e) {
         if (!todoCore.onKeyDown(e)) {
             return;
         }
@@ -3133,7 +3126,7 @@ var amendEvent = {
         }
 
         var keyCode = e.keyCode || e.which;
-        //            console.info(e);
+//            console.info(e);
 
         var fixed = amendUtils.fixedAmendRange();
         // curCell;
@@ -3163,7 +3156,8 @@ var amendEvent = {
                     fixed.startDom = fixed.startImg;
                     fixed.startOffset = 0;
                     rangeUtils.setRange(fixed.startDom, fixed.startOffset, fixed.endDom, fixed.endOffset);
-                } else if (fixed.leftDom.nodeType === 3 && fixed.leftDom.nodeValue.length == 1) {
+                } else if (fixed.leftDom.nodeType === 3 &&
+                    fixed.leftDom.nodeValue.length == 1) {
                     fixClearLine(fixed.leftDom, -1);
                 }
             }
@@ -3188,7 +3182,8 @@ var amendEvent = {
                     fixed.endDom = fixed.endImg;
                     fixed.endOffset = fixed.endImg.childNodes.length;
                     rangeUtils.setRange(fixed.startDom, fixed.startOffset, fixed.endDom, fixed.endOffset);
-                } else if (fixed.rightDom.nodeType === 3 && fixed.rightDom.nodeValue.length == 1) {
+                } else if (fixed.rightDom.nodeType === 3 &&
+                    fixed.rightDom.nodeValue.length == 1) {
                     fixClearLine(fixed.rightDom, 1);
                 }
             }
@@ -3239,7 +3234,7 @@ var amendEvent = {
      * 避免 修订信息图层被编辑  & 鼠标按下后 暂停 amendInfo 显示
      * @param e
      */
-    onMouseDown: function onMouseDown(e) {
+    onMouseDown: function (e) {
         var isInfo = amendInfo.isInfo(e.target);
         if (isInfo) {
             utils.stopEvent(e);
@@ -3250,7 +3245,7 @@ var amendEvent = {
      *  鼠标按下后 恢复 amendInfo 显示
      * @param e
      */
-    onMouseUp: function onMouseUp(e) {
+    onMouseUp: function (e) {
         amendInfo.start();
         //var amendDoms = amendUtils.getSelectedAmendDoms();
         //
@@ -3260,21 +3255,19 @@ var amendEvent = {
         //    //amendInfo.showAmendsInfo(amendDoms);
         //}
     },
-    onTouchStart: function onTouchStart(e) {}
+    onTouchStart: function (e) {
+    }
 };
 
 module.exports = amend;
 
 function h6Patch() {
-    var range,
-        block,
-        hObj,
-        newLine,
-        isLast = false;
+    var range, block, hObj, newLine, isLast = false;
     // 对于 h6 在行尾 换行会导致下一行还是 h6
     range = rangeUtils.getRange();
     block = ENV.doc.queryCommandValue("formatBlock");
-    if (/^h[1-6]+$/i.test(block) && range && range.startOffset == domUtils.getDomEndOffset(range.startContainer)) {
+    if (/^h[1-6]+$/i.test(block) &&
+        range && range.startOffset == domUtils.getDomEndOffset(range.startContainer)) {
         hObj = domUtils.getParentByTagName(range.startContainer, block, true);
         isLast = isLastDom(hObj, range.startContainer);
     }
@@ -3299,13 +3292,10 @@ function h6Patch() {
         return !!p;
     }
 }
-
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42,"../todoUtils/todoCore":43,"./amendInfo":8,"./amendUser":9,"./amendUtils/amendExtend":11}],8:[function(require,module,exports){
 /**
  * 修订信息显示图层 相关对象
  */
-
-'use strict';
 
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
@@ -3323,9 +3313,9 @@ var callback = {
 };
 //暂停显示的标志
 var pause = false,
-
 //记录最后一次鼠标移动的位置
-lastMousePos = { x: null, y: null };
+    lastMousePos = {x: null, y: null};
+
 
 var amendInfo = {
     cur: null,
@@ -3346,7 +3336,7 @@ var amendInfo = {
      * @param options  {readonly: boolean,  cb: {onAccept: function, onRefuse: function}}
      * @param cb
      */
-    init: function init(options, cb) {
+    init: function (options, cb) {
         amendInfo.template = ENV.doc.createElement('div');
         amendInfo.main = createAmendInfo();
         amendInfo.readonly = !!(options && options.readonly);
@@ -3365,7 +3355,7 @@ var amendInfo = {
     /**
      * 删除 修订信息 图层
      */
-    remove: function remove() {
+    remove: function () {
         _event.unbind();
         removeAmendInfo();
         amendInfo.main = null;
@@ -3381,23 +3371,25 @@ var amendInfo = {
      * @param dom
      * @param pos
      */
-    show: function show(dom, pos) {
+    show: function (dom, pos) {
         clearTimeout(amendInfo.showTimer);
         clearTimeout(amendInfo.hideTimer);
 
         var isSelection = utils.isArray(dom),
             isMulti = isSelection && dom.length > 1,
-            cur = !isSelection ? dom : isMulti ? null : dom[0],
+            cur = !isSelection ? dom : (isMulti ? null : dom[0]),
             showFlag = false;
 
         amendInfo.isSelection = isSelection;
-        if (amendInfo.isMulti !== isMulti || cur !== amendInfo.cur) {
+        if ((amendInfo.isMulti !== isMulti) ||
+            (cur !== amendInfo.cur)) {
 
             //移动到不同的 dom 时，立刻隐藏当前标签， 等待固定时间后再显示信息
             amendInfo.hide(true);
 
             showFlag = true;
-        } else if (!amendInfo.curPos || Math.abs(amendInfo.curPos.left - pos.left) > 75 || Math.abs(amendInfo.curPos.top - pos.top) > 24) {
+        } else if (!amendInfo.curPos || Math.abs(amendInfo.curPos.left - pos.left) > 75 ||
+            Math.abs(amendInfo.curPos.top - pos.top) > 24) {
             //在同一个 dom 内移动距离较远后， 更换信息图层位置
             showFlag = true;
         }
@@ -3414,7 +3406,7 @@ var amendInfo = {
      * 隐藏 修订信息
      * @param quick
      */
-    hide: function hide(quick) {
+    hide: function (quick) {
         clearTimeout(amendInfo.showTimer);
         clearTimeout(amendInfo.hideTimer);
         if (!amendInfo.cur && !amendInfo.isMulti) {
@@ -3431,7 +3423,7 @@ var amendInfo = {
      * 判断 dom 是否 amendInfo layer 内的元素（包括layer）
      * @param dom
      */
-    isInfo: function isInfo(dom) {
+    isInfo: function (dom) {
         var amendInfoMain = domUtils.getParentByFilter(dom, function (node) {
             return node == amendInfo.main;
         }, true);
@@ -3440,20 +3432,20 @@ var amendInfo = {
     /**
      * 恢复 info 的显示
      */
-    start: function start() {
+    start: function () {
         pause = false;
     },
     /**
      * 暂停 info 的显示
      */
-    stop: function stop() {
+    stop: function () {
         amendInfo.hide(true);
         pause = true;
     }
 };
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         if (ENV.client.type.isIOS || ENV.client.type.isAndroid) {
             ENV.event.add(CONST.EVENT.ON_TOUCH_START, _event.handler.onTouchstart);
             ENV.event.add(CONST.EVENT.ON_TOUCH_END, _event.handler.onMouseMove);
@@ -3461,20 +3453,21 @@ var _event = {
             ENV.event.add(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onMouseMove);
         }
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_TOUCH_START, _event.handler.onTouchstart);
         ENV.event.remove(CONST.EVENT.ON_TOUCH_END, _event.handler.onMouseMove);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onMouseMove);
     },
-    bindInfoBtn: function bindInfoBtn() {
+    bindInfoBtn: function () {
         _event.unbindInfoBtn();
         if (ENV.client.type.isIOS || ENV.client.type.isAndroid) {
             amendInfo.main.addEventListener('touchend', _event.handler.onClick);
         } else {
             amendInfo.main.addEventListener('click', _event.handler.onClick);
         }
+
     },
-    unbindInfoBtn: function unbindInfoBtn() {
+    unbindInfoBtn: function () {
         if (ENV.client.type.isIOS || ENV.client.type.isAndroid) {
             amendInfo.main.removeEventListener('touchend', _event.handler.onClick);
         } else {
@@ -3487,7 +3480,7 @@ var _event = {
          * 检测 鼠标移动到的 dom 对象，是否需要显示 或 隐藏 amendInfo
          * @param e
          */
-        onMouseMove: function onMouseMove(e) {
+        onMouseMove: function (e) {
             //console.log('onMouseMove....')
             var eventClient = utils.getEventClientPos(e);
             //如果鼠标没有移动， 仅仅输入文字导致触发mousemove事件时，不弹出信息框
@@ -3502,9 +3495,9 @@ var _event = {
                 isInfo = amendInfo.isInfo(target),
                 scroll,
                 pos = {
-                width: 20,
-                height: 20
-            };
+                    width: 20,
+                    height: 20
+                };
 
             //在 修订信息图层内移动， 不进行任何操作
             if (isInfo) {
@@ -3553,7 +3546,7 @@ var _event = {
                 amendInfo.hide(false);
             }
         },
-        onTouchstart: function onTouchstart(e) {
+        onTouchstart: function (e) {
             //console.log('onTouchstart....')
             var target = e.target,
                 isInfo = amendInfo.isInfo(target);
@@ -3563,7 +3556,7 @@ var _event = {
             amendInfo.hide(false);
         },
 
-        onClick: function onClick(e) {
+        onClick: function (e) {
             var target;
             if (e.changedTouches) {
                 target = e.changedTouches[0].target;
@@ -3577,14 +3570,14 @@ var _event = {
             }
             utils.stopEvent(e);
         },
-        onAccept: function onAccept(e) {
+        onAccept: function (e) {
             if (callback.onAccept) {
                 callback.onAccept(getCallbackParams());
             }
             amendInfo.hide(true);
             userAction.save(userAction.ActionId.ClickAcceptFromAmendInfo);
         },
-        onRefuse: function onRefuse(e) {
+        onRefuse: function (e) {
             if (callback.onRefuse) {
                 callback.onRefuse(getCallbackParams());
             }
@@ -3598,8 +3591,7 @@ var _event = {
  * 创建 修订信息 图层
  */
 function createAmendInfo() {
-    var mask = ENV.doc.getElementById(CONST.ID.AMEND_INFO),
-        container;
+    var mask = ENV.doc.getElementById(CONST.ID.AMEND_INFO), container;
     if (!mask) {
         mask = ENV.doc.createElement('div');
         container = ENV.doc.createElement('div');
@@ -3638,12 +3630,46 @@ function createAmendInfo() {
 
 function getInfoTemplate() {
     if (ENV.client.type.isIOS || ENV.client.type.isMac || ENV.client.type.isAndroid) {
-        return '<div id="' + CONST.ID.AMEND_INFO_SINGLE + '" style="display:none; padding: 8px 16px;">' + '<img id="' + CONST.ID.AMEND_INFO_IMG + '" class="' + CONST.CLASS.IMG_NOT_DRAG + '" style="width: 40px; height: 40px !important; position: absolute; -webkit-border-radius: 40px;-moz-border-radius:40px;border-radius:40px;">' + '<ul style="list-style-type: none;margin: 4px 0 0 50px;padding-left: 0;"><li style="line-height: 18px;white-space: nowrap;padding: 2px 0;">' + '<span id="' + CONST.ID.AMEND_INFO_NAME + '" style="color:#000;font-size:12px;font-weight:bold;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;"></span>' + '<span id="' + CONST.ID.AMEND_INFO_CONTENT + '" style="color:#000;font-size:12px;margin-left:.5em;display:inline-block;overflow:hidden;float:right"></span>' + '</li><li style="line-height: 18px;text-align: right;">' + '<span id="' + CONST.ID.AMEND_INFO_TIME + '" style="color:#A3A3A3;font-size:12px;"></span></li></ul>' + '</div>' + '<div id="' + CONST.ID.AMEND_INFO_MULTI + '" style="display:none; padding: 8px 16px;">' + '<p style="margin: 4px 16px;">' + LANG.Amend.MultiInfo + '</p>' + '</div>' + '<div id="' + CONST.ID.AMEND_INFO_TOOLS + '" style="padding:0;margin:0;box-sizing: border-box;">' + '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' + '<a id="' + CONST.ID.AMEND_INFO_REFUSE + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnRefuse + '</a></div>' + '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' + '<a id="' + CONST.ID.AMEND_INFO_ACCEPT + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnAccept + '</a></div>' + '</div>';
+        return '<div id="' + CONST.ID.AMEND_INFO_SINGLE + '" style="display:none; padding: 8px 16px;">' +
+            '<img id="' + CONST.ID.AMEND_INFO_IMG + '" class="' + CONST.CLASS.IMG_NOT_DRAG + '" style="width: 40px; height: 40px !important; position: absolute; -webkit-border-radius: 40px;-moz-border-radius:40px;border-radius:40px;">' +
+            '<ul style="list-style-type: none;margin: 4px 0 0 50px;padding-left: 0;"><li style="line-height: 18px;white-space: nowrap;padding: 2px 0;">' +
+            '<span id="' + CONST.ID.AMEND_INFO_NAME + '" style="color:#000;font-size:12px;font-weight:bold;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;"></span>' +
+            '<span id="' + CONST.ID.AMEND_INFO_CONTENT + '" style="color:#000;font-size:12px;margin-left:.5em;display:inline-block;overflow:hidden;float:right"></span>' +
+            '</li><li style="line-height: 18px;text-align: right;">' +
+            '<span id="' + CONST.ID.AMEND_INFO_TIME + '" style="color:#A3A3A3;font-size:12px;"></span></li></ul>' +
+            '</div>' +
+            '<div id="' + CONST.ID.AMEND_INFO_MULTI + '" style="display:none; padding: 8px 16px;">' +
+            '<p style="margin: 4px 16px;">' + LANG.Amend.MultiInfo + '</p>' +
+            '</div>' +
+            '<div id="' + CONST.ID.AMEND_INFO_TOOLS + '" style="padding:0;margin:0;box-sizing: border-box;">' +
+            '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' +
+            '<a id="' + CONST.ID.AMEND_INFO_REFUSE + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnRefuse + '</a></div>' +
+            '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' +
+            '<a id="' + CONST.ID.AMEND_INFO_ACCEPT + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnAccept + '</a></div>' +
+            '</div>';
     }
 
     //if (ENV.client.type.isWeb || ENV.client.type.isWin) {
-    return '<div id="' + CONST.ID.AMEND_INFO_SINGLE + '" style="display:none; padding: 8px 16px;">' + '<img id="' + CONST.ID.AMEND_INFO_IMG + '" class="' + CONST.CLASS.IMG_NOT_DRAG + '" style="width: 40px; height: 40px !important; position: absolute;">' + '<ul style="list-style-type: none;margin: 4px 0 0 50px;padding-left: 0;"><li style="line-height: 18px;white-space: nowrap;padding: 2px 0;">' + '<span id="' + CONST.ID.AMEND_INFO_NAME + '" style="color:#000;font-size:12px;font-weight:bold;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;"></span>' + '<span id="' + CONST.ID.AMEND_INFO_CONTENT + '" style="color:#000;font-size:12px;margin-left:.5em;display:inline-block;overflow:hidden;float:right"></span>' + '</li><li style="line-height: 18px;text-align: right;">' + '<span id="' + CONST.ID.AMEND_INFO_TIME + '" style="color:#A3A3A3;font-size:12px;"></span></li></ul>' + '</div>' + '<div id="' + CONST.ID.AMEND_INFO_MULTI + '" style="display:none; padding: 8px 16px;">' + '<p style="margin: 4px 16px;">' + LANG.Amend.MultiInfo + '</p>' + '</div>' + '<div id="' + CONST.ID.AMEND_INFO_TOOLS + '" style="padding:0;margin:0;box-sizing:border-box;border-top:1px solid #D8D8D8">' + '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;border-right: 1px solid #D8D8D8">' + '<a id="' + CONST.ID.AMEND_INFO_ACCEPT + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnAccept + '</a></div>' + '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' + '<a id="' + CONST.ID.AMEND_INFO_REFUSE + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnRefuse + '</a></div>' + '</div>';
+    return '<div id="' + CONST.ID.AMEND_INFO_SINGLE + '" style="display:none; padding: 8px 16px;">' +
+        '<img id="' + CONST.ID.AMEND_INFO_IMG + '" class="' + CONST.CLASS.IMG_NOT_DRAG + '" style="width: 40px; height: 40px !important; position: absolute;">' +
+        '<ul style="list-style-type: none;margin: 4px 0 0 50px;padding-left: 0;"><li style="line-height: 18px;white-space: nowrap;padding: 2px 0;">' +
+        '<span id="' + CONST.ID.AMEND_INFO_NAME + '" style="color:#000;font-size:12px;font-weight:bold;max-width:90px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:inline-block;"></span>' +
+        '<span id="' + CONST.ID.AMEND_INFO_CONTENT + '" style="color:#000;font-size:12px;margin-left:.5em;display:inline-block;overflow:hidden;float:right"></span>' +
+        '</li><li style="line-height: 18px;text-align: right;">' +
+        '<span id="' + CONST.ID.AMEND_INFO_TIME + '" style="color:#A3A3A3;font-size:12px;"></span></li></ul>' +
+        '</div>' +
+        '<div id="' + CONST.ID.AMEND_INFO_MULTI + '" style="display:none; padding: 8px 16px;">' +
+        '<p style="margin: 4px 16px;">' + LANG.Amend.MultiInfo + '</p>' +
+        '</div>' +
+        '<div id="' + CONST.ID.AMEND_INFO_TOOLS + '" style="padding:0;margin:0;box-sizing:border-box;border-top:1px solid #D8D8D8">' +
+        '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;border-right: 1px solid #D8D8D8">' +
+        '<a id="' + CONST.ID.AMEND_INFO_ACCEPT + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnAccept + '</a></div>' +
+        '<div style="line-height: 26px;width: 50%;display:inline-block;text-align: center;padding:0 8px;margin:0;box-sizing: border-box;">' +
+        '<a id="' + CONST.ID.AMEND_INFO_REFUSE + '" href="javascript:void(0);" style="font-size:12px;display:block;cursor:pointer;color:#447BD8;text-decoration: blink;">' + LANG.Amend.BtnRefuse + '</a></div>' +
+        '</div>';
     //}
+
+
 }
 
 function getCallbackParams() {
@@ -3759,21 +3785,18 @@ function removeAmendInfo() {
 }
 
 module.exports = amendInfo;
-
 },{"../common/const":13,"../common/env":15,"../common/lang":17,"../common/utils":19,"../common/wizUserAction":21,"../domUtils/domBase":23,"./amendUser":9,"./amendUtils/amendBase":10}],9:[function(require,module,exports){
 /**
  * 用于记录 当前操作者的信息
  * @type {{guid: string, hash: string, name: string, color: string, init: Function}}
  */
 
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const');
 
 var DefaultImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC0AAAAtCAYAAAA6GuKaAAAExUlEQVRYR9WZz08bRxTHvya1CHbUSHXCiZzCIaaBBOUUEveQSORWYwwRxRCpqtIqjZL8XQkEUppAbQMX6hgh5UetRiFV4MABQXoK2AgUx1vNzs7u7Hpmf3m3Vc3Blm2Gz/vOd95784goiqLgf/aIhAVdrVaxu7sLKomC7u7uwKQJBPrFi5eoVvfx6VMdZONOnIhjf78KBQoINQEnrwcuD+DkyS9bhvcNfXR0hFKppEKqWqp8BE0l1N7XgPXvKOjq6kJfX29L4L6hCfDh4aEnYBbQjRuD+PhxD4nEV77gfUEvLy/rXm1S2GIJQ3VtJ9TdoFtDfuKxOK5fv+YJ3jM0BfZmCd4y5tcUPp3+Njzo1dVV1Go1X5Yw+Z1oTOLWVI91HMfg4KBrcE9KLy0tq+mrVUvwwGSxzs5ODAxcDgt6yXWWcLIEVd5QezgzFA704iKBdk5rQmCLJdRzwYEPD2fCgS4WF408LMkSooOmhsl5mBYcTmlFQTY7HA50oVi0LRxeLcHDj4QGXShKK50jsGpfsyWY2uR5dCQbjtL5QsHUSzgVDidL8AcxNOiVlRXUagdccTEfSqGfLVmCt4RRpBTcHB0JR+lS6Tn29va04iIBdsgSvCVoxlMQ/SKKTCYdPPT29jb+qFSEB5HvJbxYgnqctq2958+jpyfpCtx1RVxY+M1eYUsKYyrqAWmf85ZgwAx+bOxm8ND0D4rLOK+wXZbQg+F6bALfQAOj2Syi0agjuGul5+cXTA1+EJbg7UFeZ4bS6OjoCA762fy87udWsoTMHkT43PiYIzD5gmul19bW8OHD36Yy7tUSVg/T8q6VeCjIjX8XLDRZ/OkzojZNdX6zhNUSzOPEGrFYLFhotlpxcQkHBwdaZTS3l7LCYWeJeDyGoTBvLgy8XC5jl1jFppeQZQm/luC3wLWn+V9qNBqYm/u1qb3kewmZDXjVe5JJ9PdfdGWJlqHJAk9+mQOBl1nC6dCRTZrIuTt41qh8Kc0WmZmZ1dXmFbTzMCtOly71I3nunGeVPaU80eo7Ozv4vfRcvzY1WULrK8wBqW7HRG7cF3DL0GSBqenHRk9iKc3WQ8eGka0ABwZtpzADNZ4VTE7kfKscCPSjqWm9vZRnDGoJVv1uTf7H0A8fTen24DOGSGH23q3JiX9f6Xq9jnfv/sKfb954BmbTqYsX+nDmTBcSiYTnAFynvK2tLZDhef3zZ60S0huHLNXxHrZTnXwWiUTQffYsUqkrrgKQQpMLbD6fF+ZhN4WD9zB/cTC/ZsN3YwysN1CZNE6fOiUMwgT99u061tfXjRmb4IrkpnCIgOVBNAObdg/A1z1JfJO6qgegQ5fLqyDFwnqnY/M2L4WD75GZh5nCIqWlFqOyq7sdaWvDnZ9uq+A69Ozsk1AUtt4rhd2fNkpg4wWzULT9JZ/d/uF7tLe3U+iNjU1tPGAMBu1uzbJKZ1W4FUuIhpQX+nqRSl2l0O/fb6BSqZhbTX32xmUJm14iVGCN5VjbMfx850cK/erVa2xuburb4LaBl6U1mSVE6zpZwphhE4s0cP/eXQqdzxewX61Kcy6bS9ComPLm0ixKa34PXXMyoMDkoUNPP56Rt5fcITGUEgMH6mGLPdl/fh/cv4t/ANultPKz243RAAAAAElFTkSuQmCC';
 
-var AmendUser = function AmendUser(userInfo) {
+var AmendUser = function (userInfo) {
     if (!userInfo) {
         userInfo = {};
     }
@@ -3785,12 +3808,11 @@ var AmendUser = function AmendUser(userInfo) {
 };
 var curAmendUser = null;
 var userDom = null;
-var users = null,
-    //用户 AmendUser 对象集合，用于 修订功能
-usersForSave = null; //用户 保存数据，用于保存到 meta 内
+var users = null,       //用户 AmendUser 对象集合，用于 修订功能
+    usersForSave = null;//用户 保存数据，用于保存到 meta 内
 
 var amendUserUtils = {
-    initUser: function initUser(userInfo) {
+    initUser: function (userInfo) {
         //初始化用户信息， 保证第一个修订用户的信息能被正常保存
         loadUsers();
 
@@ -3801,11 +3823,11 @@ var amendUserUtils = {
         curAmendUser = new AmendUser(userInfo);
         addUser(curAmendUser);
     },
-    getCurUser: function getCurUser() {
+    getCurUser: function () {
         saveUser();
         return curAmendUser;
     },
-    getUserByGuid: function getUserByGuid(guid) {
+    getUserByGuid: function (guid) {
         if (curAmendUser && guid === curAmendUser.guid) {
             return curAmendUser;
         }
@@ -3818,7 +3840,7 @@ var amendUserUtils = {
     /**
      * 删除 修订颜色数据（用于确认修订）
      */
-    removeAllUserInfo: function removeAllUserInfo() {
+    removeAllUserInfo: function () {
         var d = ENV.doc.getElementById(CONST.ID.AMEND_USER_INFO);
         if (!!d) {
             d.parentNode.removeChild(d);
@@ -3827,7 +3849,7 @@ var amendUserUtils = {
         users = null;
         usersForSave = null;
     },
-    setUsersData: function setUsersData(_usersData) {
+    setUsersData: function (_usersData) {
         var i, j, u, u1, u2;
         if (!_usersData) {
             return;
@@ -3857,7 +3879,9 @@ function getHash(guid) {
 
 function getImgUrl(guid) {
     if (ENV.client.type.isWeb) {
-        return '/wizas/a/users/avatar/' + guid + '?default=true&_' + new Date().valueOf();
+        return '/wizas/a/users/avatar/' +
+            guid +
+            '?default=true&_' + new Date().valueOf();
     } else if (ENV.client.type.isWin) {
         try {
             var avatarFileName = external.GetAvatarByUserGUID(guid);
@@ -3865,7 +3889,13 @@ function getImgUrl(guid) {
         } catch (e) {
             console.log(e);
         }
-    } else if (ENV.client.type.isMac) {} else if (ENV.client.type.isIOS) {} else if (ENV.client.type.isAndroid) {}
+    } else if (ENV.client.type.isMac) {
+
+    } else if (ENV.client.type.isIOS) {
+
+    } else if (ENV.client.type.isAndroid) {
+
+    }
 
     return DefaultImg;
 }
@@ -3875,14 +3905,23 @@ function getImgUrl(guid) {
  * @returns {*}
  */
 function getUserNameFromClient(guid) {
-    if (ENV.client.type.isWeb) {} else if (ENV.client.type.isWin) {
+    if (ENV.client.type.isWeb) {
+
+    } else if (ENV.client.type.isWin) {
         try {
             var userName = external.GetAliasByUserGUID(guid);
             return userName;
-        } catch (e) {
+        }
+        catch (e) {
             console.log(e);
         }
-    } else if (ENV.client.type.isMac) {} else if (ENV.client.type.isIOS) {} else if (ENV.client.type.isAndroid) {}
+    } else if (ENV.client.type.isMac) {
+
+    } else if (ENV.client.type.isIOS) {
+
+    } else if (ENV.client.type.isAndroid) {
+
+    }
 
     return null;
 }
@@ -3933,7 +3972,8 @@ function loadUsers() {
                 users[i] = new AmendUser(u);
             }
         }
-    } catch (e) {}
+    } catch (e) {
+    }
 }
 
 /**
@@ -3943,9 +3983,7 @@ function loadUsers() {
 function createUserColor(user) {
     var userKey = user.hash,
         colorCount = CONST.COLOR.length,
-        tmpColors = {},
-        i,
-        c;
+        tmpColors = {}, i, c;
 
     loadUsers();
     //如果该用户已有修订记录，直接使用
@@ -3987,15 +4025,13 @@ function saveUser() {
     userDom.content = JSON.stringify(usersForSave);
 }
 
-module.exports = amendUserUtils;
 
+module.exports = amendUserUtils;
 },{"../common/const":13,"../common/env":15}],10:[function(require,module,exports){
 /**
  * amend 中通用的基本方法集合（基础操作，以读取为主）
  *
  */
-
-'use strict';
 
 var ENV = require('../../common/env'),
     CONST = require('../../common/const'),
@@ -4009,33 +4045,31 @@ var amendUtils = {
      * @param options  {{[selection]: Boolean, [domList]: Array, [selectAll]: Boolean}}
      * @returns {{insertList: Array, deleteList: Array, deletedInsertList: Array}}
      */
-    getAmendDoms: function getAmendDoms(options) {
-        var i,
-            j,
-            d,
+    getAmendDoms: function (options) {
+        var i, j, d,
             insertAttr = {},
             deleteAttr = {},
             result = {
-            insertList: [],
-            deleteList: [],
-            deletedInsertList: []
-        },
-            tmp = [];
+                insertList: [],
+                deleteList: [],
+                deletedInsertList: []
+            }, tmp = [];
         if (options.selection) {
             insertAttr[CONST.ATTR.SPAN_INSERT] = '';
             result.insertList = amendUtils.getWizSpanFromRange(options.selectAll, insertAttr);
             //清理出 删除&新增内容
             result.deletedInsertList = domUtils.removeListFilter(result.insertList, function (dom) {
-                return dom.getAttribute(CONST.ATTR.SPAN_DELETE);
+                return (dom.getAttribute(CONST.ATTR.SPAN_DELETE));
             });
             deleteAttr[CONST.ATTR.SPAN_DELETE] = '';
             result.deleteList = amendUtils.getWizSpanFromRange(options.selectAll, deleteAttr);
             //清理出 删除&新增内容
             tmp = domUtils.removeListFilter(result.deleteList, function (dom) {
-                return dom.getAttribute(CONST.ATTR.SPAN_INSERT);
+                return (dom.getAttribute(CONST.ATTR.SPAN_INSERT));
             });
             //合并从 insert & delete 集合中 清理出来的 删除&新增内容
             result.deletedInsertList = utils.removeDup(result.deletedInsertList.concat(tmp));
+
         } else {
             for (i = 0, j = options.domList.length; i < j; i++) {
                 d = options.domList[i];
@@ -4055,7 +4089,7 @@ var amendUtils = {
      * @param dom
      * @returns {Array}
      */
-    getSameTimeStampDom: function getSameTimeStampDom(dom) {
+    getSameTimeStampDom: function (dom) {
         if (!dom || dom.nodeType != 1) {
             return [];
         }
@@ -4067,9 +4101,7 @@ var amendUtils = {
         return result;
 
         function findWizSibling(target, isPrev, result) {
-            var wizAmend,
-                tmp,
-                amendTypeTmp,
+            var wizAmend, tmp, amendTypeTmp,
                 amendType = getAmendType(target),
                 time = target.getAttribute(CONST.ATTR.SPAN_TIMESTAMP),
                 userId = target.getAttribute(CONST.ATTR.SPAN_USERID);
@@ -4115,24 +4147,23 @@ var amendUtils = {
         function getSibling(target, isPrev) {
             return isPrev ? domUtils.getPreviousNode(target, false, null) : domUtils.getNextNode(target, false, null);
         }
+
     },
     /**
      * 获取选择范围内 修订 dom 集合
      * @returns {*}
      */
-    getSelectedAmendDoms: function getSelectedAmendDoms() {
+    getSelectedAmendDoms: function () {
         var sel = ENV.doc.getSelection(),
             range = sel.getRangeAt(0),
-            startDom,
-            endDom,
-            startOffset,
-            endOffset;
+            startDom, endDom, startOffset, endOffset;
 
         var amends = amendUtils.getAmendDoms({
             selection: true,
             selectAll: false
         });
-        if (amends.insertList.length === 0 && amends.deleteList.length === 0 && amends.deletedInsertList.length === 0) {
+        if (amends.insertList.length === 0 && amends.deleteList.length === 0
+            && amends.deletedInsertList.length === 0) {
             return null;
         }
 
@@ -4182,7 +4213,7 @@ var amendUtils = {
                 return {
                     dom: startDom,
                     offset: startOffset
-                };
+                }
             }
             return null;
         }
@@ -4191,7 +4222,7 @@ var amendUtils = {
             if (list.length === 0) {
                 return null;
             }
-            var maxLength = endDom.nodeType === 3 ? endDom.length : endDom.childNodes.length;
+            var maxLength = (endDom.nodeType === 3 ? endDom.length : endDom.childNodes.length);
             if (endOffset === maxLength) {
                 return null;
             }
@@ -4201,7 +4232,7 @@ var amendUtils = {
                 return {
                     dom: endDom,
                     offset: endOffset
-                };
+                }
             }
             return null;
         }
@@ -4211,9 +4242,10 @@ var amendUtils = {
      * @param dom
      * @returns {*}
      */
-    getWizAmendImgParent: function getWizAmendImgParent(dom) {
+    getWizAmendImgParent: function (dom) {
         return domUtils.getParentByFilter(dom, function (node) {
-            return node && node.nodeType === 1 && node.getAttribute(CONST.ATTR.IMG);
+            return (node && node.nodeType === 1 &&
+            node.getAttribute(CONST.ATTR.IMG));
         }, true);
     },
     /**
@@ -4221,9 +4253,10 @@ var amendUtils = {
      * @param dom
      * @returns {*}
      */
-    getWizAmendParent: function getWizAmendParent(dom) {
+    getWizAmendParent: function (dom) {
         return domUtils.getParentByFilter(dom, function (node) {
-            return node && node.nodeType === 1 && (node.getAttribute(CONST.ATTR.SPAN_INSERT) || node.getAttribute(CONST.ATTR.SPAN_DELETE));
+            return (node && node.nodeType === 1 &&
+            (node.getAttribute(CONST.ATTR.SPAN_INSERT) || node.getAttribute(CONST.ATTR.SPAN_DELETE)));
         }, true);
     },
     /**
@@ -4231,9 +4264,9 @@ var amendUtils = {
      * @param dom
      * @returns {*}
      */
-    getWizDeleteParent: function getWizDeleteParent(dom) {
+    getWizDeleteParent: function (dom) {
         return domUtils.getParentByFilter(dom, function (node) {
-            return node && node.nodeType === 1 && node.getAttribute(CONST.ATTR.SPAN_DELETE);
+            return (node && node.nodeType === 1 && node.getAttribute(CONST.ATTR.SPAN_DELETE));
         }, true);
     },
     /**
@@ -4241,10 +4274,10 @@ var amendUtils = {
      * @param dom
      * @returns {*}
      */
-    getWizInsertParent: function getWizInsertParent(dom) {
+    getWizInsertParent: function (dom) {
         return domUtils.getParentByFilter(dom, function (node) {
             //node.childNodes.length == 0 时，键盘敲入的字符加在 span 外面
-            return node && node.nodeType === 1 && node.getAttribute(CONST.ATTR.SPAN_INSERT) && !node.getAttribute(CONST.ATTR.SPAN_DELETE) && node.childNodes.length > 0;
+            return (node && node.nodeType === 1 && node.getAttribute(CONST.ATTR.SPAN_INSERT) && !node.getAttribute(CONST.ATTR.SPAN_DELETE) && node.childNodes.length > 0);
         }, true);
     },
     /**
@@ -4253,11 +4286,8 @@ var amendUtils = {
      * @param options
      * @returns {*}
      */
-    getWizSpanFromRange: function getWizSpanFromRange(isAll, options) {
-        var exp = 'span',
-            i,
-            j,
-            d;
+    getWizSpanFromRange: function (isAll, options) {
+        var exp = 'span', i, j, d;
         if (!options) {
             return [];
         }
@@ -4269,23 +4299,16 @@ var amendUtils = {
                 } else {
                     exp += '[' + i + ']';
                 }
+
             }
         }
 
-        var sel = ENV.doc.getSelection(),
-            range,
-            startDom,
-            startOffset,
-            endDom,
-            endOffset,
-            startSpan,
-            endSpan,
-            parent,
-            domList,
-            startIndex,
-            endIndex,
-            dIdx,
-            result = [];
+        var sel = ENV.doc.getSelection(), range,
+            startDom, startOffset,
+            endDom, endOffset,
+            startSpan, endSpan, parent, domList,
+            startIndex, endIndex,
+            dIdx, result = [];
 
         if (isAll) {
             //在 document.body 内进行查找
@@ -4367,7 +4390,9 @@ var amendUtils = {
             var i;
             for (i in options) {
                 //option[i] == '' 表示 只看某属性是否存在，但不比较具体的value
-                if (options.hasOwnProperty(i) && (!node.getAttribute(i) || options[i] && node.getAttribute(i) != options[i])) {
+                if (options.hasOwnProperty(i) &&
+                    ( !node.getAttribute(i) || (options[i] && node.getAttribute(i) != options[i]))
+                ) {
                     return false;
                 }
             }
@@ -4377,19 +4402,21 @@ var amendUtils = {
     /**
      * 判断 是否为修订编辑的 笔记
      */
-    isAmendEdited: function isAmendEdited() {
+    isAmendEdited: function () {
         var amendDoms = amendUtils.getAmendDoms({
             selection: true,
             selectAll: true
         });
-        return !!amendDoms && (amendDoms.deleteList.length > 0 || amendDoms.insertList.length > 0 || amendDoms.deletedInsertList.length > 0);
+        return !!amendDoms && ((amendDoms.deleteList.length > 0) ||
+            (amendDoms.insertList.length > 0) ||
+            (amendDoms.deletedInsertList.length > 0));
     },
     /**
      * 判断 是否为 修订的 dom
      * @param dom
      * @returns {*|boolean}
      */
-    isWizAmend: function isWizAmend(dom) {
+    isWizAmend: function (dom) {
         return amendUtils.getWizAmendParent(dom);
     },
     /**
@@ -4397,7 +4424,7 @@ var amendUtils = {
      * @param dom
      * @returns {boolean}
      */
-    isWizDelete: function isWizDelete(dom) {
+    isWizDelete: function (dom) {
         return !!amendUtils.getWizDeleteParent(dom);
     },
     /**
@@ -4405,20 +4432,17 @@ var amendUtils = {
      * @param dom
      * @returns {boolean}
      */
-    isWizInsert: function isWizInsert(dom) {
+    isWizInsert: function (dom) {
         return !!amendUtils.getWizInsertParent(dom);
     }
 };
 
 module.exports = amendUtils;
-
 },{"../../common/const":13,"../../common/env":15,"../../common/utils":19,"../../domUtils/domBase":23,"../../rangeUtils/rangeBase":35}],11:[function(require,module,exports){
 /**
  * amend 中通用的基本方法集合（扩展操作）
  *
  */
-
-'use strict';
 
 var ENV = require('../../common/env'),
     CONST = require('../../common/const'),
@@ -4520,8 +4544,7 @@ amendUtils.createDomForPaste = function (id) {
  */
 amendUtils.deleteImg = function (img, user) {
     //必须首先判断 img 是否为已已标记修订的 img span 内
-    var imgSpan = amendUtils.getWizAmendImgParent(img),
-        mask;
+    var imgSpan = amendUtils.getWizAmendImgParent(img), mask;
     if (imgSpan) {
         //如果是已删除的， 则直接忽略
         //如果不是，则直接给 img span 添加 删除标识
@@ -4562,10 +4585,7 @@ amendUtils.deleteImg = function (img, user) {
 amendUtils.fixSelectionByDeleteImg = function () {
     var sel = ENV.doc.getSelection(),
         range = sel.getRangeAt(0),
-        startDom,
-        endDom,
-        startOffset,
-        endOffset,
+        startDom, endDom, startOffset, endOffset,
         isDeleteImgStart = false,
         isDeleteImgEnd = false;
 
@@ -4615,6 +4635,7 @@ amendUtils.fixSelectionByDeleteImg = function () {
         sel.collapse(startDom, startOffset);
         sel.extend(endDom, endOffset);
     }
+
 };
 /**
  * 粘贴后，修改新粘贴的内容样式（设置为当前用户新建内容）
@@ -4639,7 +4660,9 @@ amendUtils.modifyDomForPaste = function (nSpanStart, nSpanEnd, user) {
         return;
     }
 
-    var tmpP, tmpD, tmpWizAmend, i, j, d, domResult, domList;
+    var tmpP, tmpD, tmpWizAmend,
+        i, j, d,
+        domResult, domList;
 
     domResult = domUtils.getDomListA2B({
         startDom: nSpanStart,
@@ -4658,6 +4681,7 @@ amendUtils.modifyDomForPaste = function (nSpanStart, nSpanEnd, user) {
         if (tmpWizAmend) {
             //如果是复制的 修订span ，则直接修改 span 为当前粘贴的用户
             d = tmpWizAmend;
+
         } else if (d.nodeType == 3) {
             if (utils.isEmpty(d.nodeValue)) {
                 continue;
@@ -4707,9 +4731,7 @@ amendUtils.modifyDomForPaste = function (nSpanStart, nSpanEnd, user) {
  */
 amendUtils.packageImg = function (img, type, user) {
     //添加元素的顺序不要随便改动， 会影响 selection 光标的位置
-    var pNode,
-        nextNode,
-        tmpNode,
+    var pNode, nextNode, tmpNode,
         nSpan = amendUtils.createDomForImg(type, user);
     pNode = img.parentNode;
     nextNode = img.nextSibling;
@@ -4752,11 +4774,7 @@ amendUtils.packageImg = function (img, type, user) {
  * @param user
  */
 amendUtils.removeUserDel = function (parentRoot, user) {
-    var deleteDomList = [],
-        i,
-        j,
-        dom,
-        p;
+    var deleteDomList = [], i, j, dom, p;
     if (!parentRoot) {
         parentRoot = rangeUtils.getRangeParentRoot();
     }
@@ -4777,10 +4795,14 @@ amendUtils.removeUserDel = function (parentRoot, user) {
             // 针对 img 特殊处理
             deleteDomList.push(dom);
         } else {
-            domUtils.search(parentRoot, '[' + CONST.ATTR.SPAN_INSERT + '="' + user.hash + '"][' + CONST.ATTR.SPAN_DELETE + '="' + user.hash + '"]', deleteDomList);
+            domUtils.search(parentRoot, '[' +
+                CONST.ATTR.SPAN_INSERT + '="' + user.hash + '"][' +
+                CONST.ATTR.SPAN_DELETE + '="' + user.hash + '"]', deleteDomList);
 
             //TODO 此种情况可能已经不会存在了
-            domUtils.search(parentRoot, '[' + CONST.ATTR.SPAN_USERID + '="' + user.hash + '"] [' + CONST.ATTR.SPAN_DELETE + '="' + user.hash + '"]', deleteDomList);
+            domUtils.search(parentRoot, '[' +
+                CONST.ATTR.SPAN_USERID + '="' + user.hash + '"] [' +
+                CONST.ATTR.SPAN_DELETE + '="' + user.hash + '"]', deleteDomList);
         }
     }
 
@@ -4802,7 +4824,7 @@ amendUtils.getDeletedStyle = function (user) {
     attr[CONST.ATTR.SPAN_USERID] = user.hash;
     attr[CONST.ATTR.SPAN_TIMESTAMP] = utils.getTime();
 
-    var style = { 'color': user.color, 'text-decoration': 'line-through' };
+    var style = {'color': user.color, 'text-decoration': 'line-through'};
 
     return {
         attr: attr,
@@ -4851,7 +4873,10 @@ amendUtils.removeSelection = function (user) {
     }
 
     var style = amendUtils.getDeletedStyle(user);
-    rangeUtils.modifySelectionDom(style.style, style.attr);
+    rangeUtils.modifySelectionDom(
+        style.style,
+        style.attr
+    );
     amendUtils.fixSelectionByDeleteImg();
 };
 /**
@@ -4899,7 +4924,8 @@ amendUtils.fixedAmendRange = function () {
         endOffset = range.endOffset;
 
     //判断光标范围， 光标编辑区边界如果是 修订的 img 必须要把 img 全部选中
-    var leftDom, rightDom, startInnerDom, endInnerDom, startImg, endImg;
+    var leftDom, rightDom, startInnerDom, endInnerDom,
+        startImg, endImg;
     if (sel.isCollapsed) {
         rightDom = rangeUtils.getRangeAnchor(false);
         //如果光标在某个 textNode 中间， 则前后都是当前这个 textNode
@@ -4908,6 +4934,7 @@ amendUtils.fixedAmendRange = function () {
         } else {
             leftDom = domUtils.getPreviousNode(rightDom, false, null);
         }
+
     } else {
         startInnerDom = rangeUtils.getRangeAnchor(true);
         endInnerDom = rangeUtils.getRangeAnchor(false);
@@ -4936,7 +4963,7 @@ amendUtils.fixedAmendRange = function () {
         endOffset: endOffset,
         leftDom: leftDom,
         rightDom: rightDom
-    };
+    }
 };
 /**
  * 根据 range 拆分 amend span （主要用于 普通编辑 & 在 amend span 内添加其他 html）
@@ -4949,8 +4976,7 @@ amendUtils.splitAmendDomByRange = function (fixed) {
         endDom = fixed.endContainer,
         startOffset = fixed.startOffset,
         endOffset = fixed.endOffset,
-        startImg,
-        endImg;
+        startImg, endImg;
 
     if (!sel.isCollapsed) {
         sel.deleteFromDocument();
@@ -5026,9 +5052,7 @@ amendUtils.splitInsertDom = function (endDom, endOffset, forceSplit, user) {
         return result;
     }
     var imgDom = amendUtils.getWizAmendImgParent(endDom),
-        insertDom = amendUtils.getWizInsertParent(endDom),
-        time1,
-        time2;
+        insertDom = amendUtils.getWizInsertParent(endDom), time1, time2;
     result.insertDom = insertDom;
     if (!insertDom && endDom.nodeType == 1) {
         return result;
@@ -5037,7 +5061,8 @@ amendUtils.splitInsertDom = function (endDom, endOffset, forceSplit, user) {
         return result;
     }
 
-    if (insertDom && (forceSplit || insertDom.getAttribute(CONST.ATTR.SPAN_USERID) !== user.hash)) {
+    if (insertDom &&
+        (forceSplit || insertDom.getAttribute(CONST.ATTR.SPAN_USERID) !== user.hash)) {
         //强迫分割（粘贴操作、Enter）时，直接分隔，不考虑时间
         result.split = true;
     } else if (insertDom) {
@@ -5090,6 +5115,7 @@ amendUtils.splitAmendDomForReverse = function (endDom, endOffset) {
         } else {
             return null;
         }
+
     } else {
         return null;
     }
@@ -5101,7 +5127,7 @@ amendUtils.splitAmendDomForReverse = function (endDom, endOffset) {
  * @param amendDoms
  */
 amendUtils.splitSelectedAmendDoms = function (amendDoms) {
-    if (!amendDoms || !amendDoms.start && !amendDoms.end) {
+    if (!amendDoms || (!amendDoms.start && !amendDoms.end)) {
         return;
     }
 
@@ -5144,7 +5170,7 @@ amendUtils.splitSelectedAmendDoms = function (amendDoms) {
     delete amendDoms.start;
     delete amendDoms.end;
     //修正选择范围
-    rangeUtils.setRange(startDom, startOffset, endDom, endOffset);
+    rangeUtils.setRange(startDom, startOffset, endDom, endOffset)
 };
 /**
  * 从 TextNode 的 光标位置 拆分该 TextNode 的 修订 Dom
@@ -5156,10 +5182,7 @@ amendUtils.splitWizDomWithTextNode = function (endDom, endOffset) {
     if (!endDom || endDom.nodeType !== 3) {
         return null;
     }
-    var tmpSplitStr,
-        tmpSplit,
-        tmpParent,
-        tmpDom,
+    var tmpSplitStr, tmpSplit, tmpParent, tmpDom,
         lastSplit = null;
     if (endOffset < endDom.nodeValue.length) {
         tmpSplitStr = endDom.nodeValue.substr(endOffset);
@@ -5177,13 +5200,16 @@ amendUtils.splitWizDomWithTextNode = function (endDom, endOffset) {
     while (!!tmpParent && !domUtils.isBody(tmpParent)) {
         lastSplit = tmpParent;
         domUtils.splitDom(tmpParent, tmpDom);
-        if (tmpParent && tmpParent.nodeType === 1 && (tmpParent.getAttribute(CONST.ATTR.SPAN_DELETE) || tmpParent.getAttribute(CONST.ATTR.SPAN_INSERT))) {
+        if (tmpParent && tmpParent.nodeType === 1 &&
+            (tmpParent.getAttribute(CONST.ATTR.SPAN_DELETE) ||
+            tmpParent.getAttribute(CONST.ATTR.SPAN_INSERT))) {
             break;
         }
         tmpDom = tmpParent.nextSibling;
         tmpParent = tmpParent.parentNode;
+
     }
-    return lastSplit;
+    return lastSplit
 };
 /**
  * 删除 修订内容（接受 已删除的； 拒绝已添加的）
@@ -5207,7 +5233,9 @@ amendUtils.wizAmendSave = function (domList) {
     for (i = 0, j = domList.length; i < j; i++) {
         d = domList[i];
 
-        if (d.getAttribute(CONST.ATTR.SPAN_DELETE) && d.getAttribute(CONST.ATTR.SPAN_INSERT) && d.getAttribute(CONST.ATTR.SPAN_INSERT) !== d.getAttribute(CONST.ATTR.SPAN_USERID)) {
+        if (d.getAttribute(CONST.ATTR.SPAN_DELETE) && d.getAttribute(CONST.ATTR.SPAN_INSERT) &&
+            d.getAttribute(CONST.ATTR.SPAN_INSERT) !== d.getAttribute(CONST.ATTR.SPAN_USERID)
+        ) {
             //如果 是用户B 删除了 用户A 新增的内容， 则拒绝已删除操作时，恢复为用户A 新增的状态
             u = amendUser.getUserByGuid(d.getAttribute(CONST.ATTR.SPAN_INSERT));
             u = u ? u : {};
@@ -5231,7 +5259,7 @@ amendUtils.wizAmendSave = function (domList) {
                 'color': '',
                 'text-decoration': ''
             }, false);
-            //                    d.removeAttribute(CONST.ATTR.SPAN);
+//                    d.removeAttribute(CONST.ATTR.SPAN);
             d.removeAttribute(CONST.ATTR.SPAN_USERID);
             d.removeAttribute(CONST.ATTR.SPAN_INSERT);
             d.removeAttribute(CONST.ATTR.SPAN_DELETE);
@@ -5244,7 +5272,6 @@ amendUtils.wizAmendSave = function (domList) {
 };
 
 module.exports = amendUtils;
-
 },{"../../common/const":13,"../../common/env":15,"../../common/utils":19,"../../domUtils/domExtend":24,"../../rangeUtils/rangeExtend":36,"./../amendUser":9,"./amendBase":10}],12:[function(require,module,exports){
 /*
  * $Id: base64.js,v 2.15 2014/04/05 12:58:57 dankogai Exp dankogai $
@@ -5255,6 +5282,7 @@ module.exports = amendUtils;
  *  References:
  *    http://en.wikipedia.org/wiki/Base64
  */
+
 
 'use strict';
 var global = {};
@@ -5267,31 +5295,49 @@ if (typeof module !== 'undefined' && module.exports) {
     buffer = require('buffer').Buffer;
 }
 // constants
-var b64chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
-var b64tab = (function (bin) {
+var b64chars
+    = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/';
+var b64tab = function (bin) {
     var t = {};
     for (var i = 0, l = bin.length; i < l; i++) t[bin.charAt(i)] = i;
     return t;
-})(b64chars);
+}(b64chars);
 var fromCharCode = String.fromCharCode;
 // encoder stuff
-var cb_utob = function cb_utob(c) {
+var cb_utob = function (c) {
     if (c.length < 2) {
         var cc = c.charCodeAt(0);
-        return cc < 0x80 ? c : cc < 0x800 ? fromCharCode(0xc0 | cc >>> 6) + fromCharCode(0x80 | cc & 0x3f) : fromCharCode(0xe0 | cc >>> 12 & 0x0f) + fromCharCode(0x80 | cc >>> 6 & 0x3f) + fromCharCode(0x80 | cc & 0x3f);
+        return cc < 0x80 ? c
+            : cc < 0x800 ? (fromCharCode(0xc0 | (cc >>> 6))
+        + fromCharCode(0x80 | (cc & 0x3f)))
+            : (fromCharCode(0xe0 | ((cc >>> 12) & 0x0f))
+        + fromCharCode(0x80 | ((cc >>> 6) & 0x3f))
+        + fromCharCode(0x80 | ( cc & 0x3f)));
     } else {
-        var cc = 0x10000 + (c.charCodeAt(0) - 0xD800) * 0x400 + (c.charCodeAt(1) - 0xDC00);
-        return fromCharCode(0xf0 | cc >>> 18 & 0x07) + fromCharCode(0x80 | cc >>> 12 & 0x3f) + fromCharCode(0x80 | cc >>> 6 & 0x3f) + fromCharCode(0x80 | cc & 0x3f);
+        var cc = 0x10000
+            + (c.charCodeAt(0) - 0xD800) * 0x400
+            + (c.charCodeAt(1) - 0xDC00);
+        return (fromCharCode(0xf0 | ((cc >>> 18) & 0x07))
+        + fromCharCode(0x80 | ((cc >>> 12) & 0x3f))
+        + fromCharCode(0x80 | ((cc >>> 6) & 0x3f))
+        + fromCharCode(0x80 | ( cc & 0x3f)));
     }
 };
 var re_utob = /[\uD800-\uDBFF][\uDC00-\uDFFFF]|[^\x00-\x7F]/g;
-var utob = function utob(u) {
+var utob = function (u) {
     return u.replace(re_utob, cb_utob);
 };
-var cb_encode = function cb_encode(ccc) {
+var cb_encode = function (ccc) {
     var padlen = [0, 2, 1][ccc.length % 3],
-        ord = ccc.charCodeAt(0) << 16 | (ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8 | (ccc.length > 2 ? ccc.charCodeAt(2) : 0),
-        chars = [b64chars.charAt(ord >>> 18), b64chars.charAt(ord >>> 12 & 63), padlen >= 2 ? '=' : b64chars.charAt(ord >>> 6 & 63), padlen >= 1 ? '=' : b64chars.charAt(ord & 63)];
+        ord = ccc.charCodeAt(0) << 16
+            | ((ccc.length > 1 ? ccc.charCodeAt(1) : 0) << 8)
+            | ((ccc.length > 2 ? ccc.charCodeAt(2) : 0)),
+        chars = [
+            b64chars.charAt(ord >>> 18),
+            b64chars.charAt((ord >>> 12) & 63),
+            padlen >= 2 ? '=' : b64chars.charAt((ord >>> 6) & 63),
+            padlen >= 1 ? '=' : b64chars.charAt(ord & 63)
+        ];
     return chars.join('');
 };
 var btoa = global.btoa ? function (b) {
@@ -5300,40 +5346,67 @@ var btoa = global.btoa ? function (b) {
     return b.replace(/[\s\S]{1,3}/g, cb_encode);
 };
 var _encode = buffer ? function (u) {
-    return (u.constructor === buffer.constructor ? u : new buffer(u)).toString('base64');
-} : function (u) {
-    return btoa(utob(u));
-};
-var encode = function encode(u, urisafe) {
-    return !urisafe ? _encode(String(u)) : _encode(String(u)).replace(/[+\/]/g, function (m0) {
+        return (u.constructor === buffer.constructor ? u : new buffer(u))
+            .toString('base64')
+    }
+        : function (u) {
+        return btoa(utob(u))
+    }
+    ;
+var encode = function (u, urisafe) {
+    return !urisafe
+        ? _encode(String(u))
+        : _encode(String(u)).replace(/[+\/]/g, function (m0) {
         return m0 == '+' ? '-' : '_';
     }).replace(/=/g, '');
 };
-var encodeURI = function encodeURI(u) {
-    return encode(u, true);
+var encodeURI = function (u) {
+    return encode(u, true)
 };
 // decoder stuff
-var re_btou = new RegExp(['[\xC0-\xDF][\x80-\xBF]', '[\xE0-\xEF][\x80-\xBF]{2}', '[\xF0-\xF7][\x80-\xBF]{3}'].join('|'), 'g');
-var cb_btou = function cb_btou(cccc) {
+var re_btou = new RegExp([
+    '[\xC0-\xDF][\x80-\xBF]',
+    '[\xE0-\xEF][\x80-\xBF]{2}',
+    '[\xF0-\xF7][\x80-\xBF]{3}'
+].join('|'), 'g');
+var cb_btou = function (cccc) {
     switch (cccc.length) {
         case 4:
-            var cp = (0x07 & cccc.charCodeAt(0)) << 18 | (0x3f & cccc.charCodeAt(1)) << 12 | (0x3f & cccc.charCodeAt(2)) << 6 | 0x3f & cccc.charCodeAt(3),
+            var cp = ((0x07 & cccc.charCodeAt(0)) << 18)
+                    | ((0x3f & cccc.charCodeAt(1)) << 12)
+                    | ((0x3f & cccc.charCodeAt(2)) << 6)
+                    | (0x3f & cccc.charCodeAt(3)),
                 offset = cp - 0x10000;
-            return fromCharCode((offset >>> 10) + 0xD800) + fromCharCode((offset & 0x3FF) + 0xDC00);
+            return (fromCharCode((offset >>> 10) + 0xD800)
+            + fromCharCode((offset & 0x3FF) + 0xDC00));
         case 3:
-            return fromCharCode((0x0f & cccc.charCodeAt(0)) << 12 | (0x3f & cccc.charCodeAt(1)) << 6 | 0x3f & cccc.charCodeAt(2));
+            return fromCharCode(
+                ((0x0f & cccc.charCodeAt(0)) << 12)
+                | ((0x3f & cccc.charCodeAt(1)) << 6)
+                | (0x3f & cccc.charCodeAt(2))
+            );
         default:
-            return fromCharCode((0x1f & cccc.charCodeAt(0)) << 6 | 0x3f & cccc.charCodeAt(1));
+            return fromCharCode(
+                ((0x1f & cccc.charCodeAt(0)) << 6)
+                | (0x3f & cccc.charCodeAt(1))
+            );
     }
 };
-var btou = function btou(b) {
+var btou = function (b) {
     return b.replace(re_btou, cb_btou);
 };
-var cb_decode = function cb_decode(cccc) {
+var cb_decode = function (cccc) {
     var len = cccc.length,
         padlen = len % 4,
-        n = (len > 0 ? b64tab[cccc.charAt(0)] << 18 : 0) | (len > 1 ? b64tab[cccc.charAt(1)] << 12 : 0) | (len > 2 ? b64tab[cccc.charAt(2)] << 6 : 0) | (len > 3 ? b64tab[cccc.charAt(3)] : 0),
-        chars = [fromCharCode(n >>> 16), fromCharCode(n >>> 8 & 0xff), fromCharCode(n & 0xff)];
+        n = (len > 0 ? b64tab[cccc.charAt(0)] << 18 : 0)
+            | (len > 1 ? b64tab[cccc.charAt(1)] << 12 : 0)
+            | (len > 2 ? b64tab[cccc.charAt(2)] << 6 : 0)
+            | (len > 3 ? b64tab[cccc.charAt(3)] : 0),
+        chars = [
+            fromCharCode(n >>> 16),
+            fromCharCode((n >>> 8) & 0xff),
+            fromCharCode(n & 0xff)
+        ];
     chars.length -= [0, 0, 2, 1][padlen];
     return chars.join('');
 };
@@ -5343,16 +5416,21 @@ var atob = global.atob ? function (a) {
     return a.replace(/[\s\S]{1,4}/g, cb_decode);
 };
 var _decode = buffer ? function (a) {
-    return (a.constructor === buffer.constructor ? a : new buffer(a, 'base64')).toString();
-} : function (a) {
-    return btou(atob(a));
+    return (a.constructor === buffer.constructor
+        ? a : new buffer(a, 'base64')).toString();
+}
+    : function (a) {
+    return btou(atob(a))
 };
-var decode = function decode(a) {
-    return _decode(String(a).replace(/[-_]/g, function (m0) {
-        return m0 == '-' ? '+' : '/';
-    }).replace(/[^A-Za-z0-9\+\/]/g, ''));
+var decode = function (a) {
+    return _decode(
+        String(a).replace(/[-_]/g, function (m0) {
+                return m0 == '-' ? '+' : '/'
+            })
+            .replace(/[^A-Za-z0-9\+\/]/g, '')
+    );
 };
-var noConflict = function noConflict() {
+var noConflict = function () {
     var Base64 = global.Base64;
     global.Base64 = _Base64;
     return Base64;
@@ -5373,32 +5451,32 @@ global.Base64 = {
 };
 // if ES5 is available, make Base64.extendString() available
 if (typeof Object.defineProperty === 'function') {
-    var noEnum = function noEnum(v) {
-        return { value: v, enumerable: false, writable: true, configurable: true };
+    var noEnum = function (v) {
+        return {value: v, enumerable: false, writable: true, configurable: true};
     };
     global.Base64.extendString = function () {
-        Object.defineProperty(String.prototype, 'fromBase64', noEnum(function () {
-            return decode(this);
-        }));
-        Object.defineProperty(String.prototype, 'toBase64', noEnum(function (urisafe) {
-            return encode(this, urisafe);
-        }));
-        Object.defineProperty(String.prototype, 'toBase64URI', noEnum(function () {
-            return encode(this, true);
-        }));
+        Object.defineProperty(
+            String.prototype, 'fromBase64', noEnum(function () {
+                return decode(this)
+            }));
+        Object.defineProperty(
+            String.prototype, 'toBase64', noEnum(function (urisafe) {
+                return encode(this, urisafe)
+            }));
+        Object.defineProperty(
+            String.prototype, 'toBase64URI', noEnum(function () {
+                return encode(this, true)
+            }));
     };
 }
 
 module.exports = global.Base64;
-
 },{"buffer":1}],13:[function(require,module,exports){
 /**
  * 内部使用的标准常量.
  */
 
-'use strict';
-
-var FILL_CHAR = '​';
+var FILL_CHAR = '\u200B';
 var CONST = {
     //String.fromCharCode(8203)
     FILL_CHAR: FILL_CHAR,
@@ -5524,7 +5602,11 @@ var CONST = {
         },
         TODO: 'tasklist'
     },
-    COLOR: ['#CB3C3C', '#0C9460', '#FF3399', '#FF6005', '#8058BD', '#009999', '#8AA725', '#339900', '#CC6600', '#3BBABA', '#D4CA1A', '#2389B0', '#006699', '#FF8300', '#2C6ED5', '#FF0000', '#B07CFF', '#CC3399', '#EB4847', '#3917E6'],
+    COLOR: [
+        '#CB3C3C', '#0C9460', '#FF3399', '#FF6005', '#8058BD', '#009999', '#8AA725',
+        '#339900', '#CC6600', '#3BBABA', '#D4CA1A', '#2389B0', '#006699', '#FF8300',
+        '#2C6ED5', '#FF0000', '#B07CFF', '#CC3399', '#EB4847', '#3917E6'
+    ],
     CSS: {
         IMG: {
             SPAN: {
@@ -5608,13 +5690,10 @@ var CONST = {
 };
 
 module.exports = CONST;
-
 },{}],14:[function(require,module,exports){
 /**
  * 依赖的 css && 非可打包的 js 文件加载控制
  */
-'use strict';
-
 var utils = require('./utils'),
     scriptLoader = require('./scriptLoader');
 
@@ -5623,10 +5702,9 @@ function loadGroup(doc, group, callback) {
 }
 
 function makeCallback(doc, loadFiles, callback) {
-    var count = 0,
-        max = loadFiles.length;
+    var count = 0, max = loadFiles.length;
 
-    var cb = function cb() {
+    var cb = function () {
         if (count < max) {
             loadGroup(doc, loadFiles[count++], cb);
         } else if (callback) {
@@ -5638,11 +5716,11 @@ function makeCallback(doc, loadFiles, callback) {
 }
 
 var dependLoader = {
-    loadJs: function loadJs(doc, loadFiles, callback) {
+    loadJs: function (doc, loadFiles, callback) {
         var cb = makeCallback(doc, loadFiles, callback);
         cb();
     },
-    loadCss: function loadCss(doc, loadFiles) {
+    loadCss: function (doc, loadFiles) {
         var i, j;
         for (i = 0, j = loadFiles.length; i < j; i++) {
             utils.loadSingleCss(doc, loadFiles[i]);
@@ -5651,13 +5729,10 @@ var dependLoader = {
 };
 
 module.exports = dependLoader;
-
 },{"./scriptLoader":18,"./utils":19}],15:[function(require,module,exports){
 /**
  * wizEditor 环境参数，保存当前 document 等
  */
-'use strict';
-
 var CONST = require('./const'),
     Lang = require('./lang'),
     initLang = Lang.initLang;
@@ -5687,24 +5762,24 @@ var ENV = {
             sequence: '',
             mathJax: ''
         },
-        maxRedo: 100, //only for editor
-        noAmend: false, //only for read
-        table: { //only for editor
-            colWidth: 120, //默认列宽
-            colWidthMin: 30, //最小列宽
-            rowHeightMin: 33 //最小行高
+        maxRedo: 100,    //only for editor
+        noAmend: false,  //only for read
+        table: {         //only for editor
+            colWidth: 120,      //默认列宽
+            colWidthMin: 30,    //最小列宽
+            rowHeightMin: 33    //最小行高
         },
-        timeout: { //only for read
+        timeout: {       //only for read
             markdown: 30 * 1000,
             mathJax: 30 * 1000
         },
         callback: {
             markdown: null, //only for read
-            mathJax: null, //only for read
-            redo: null //only for editor
+            mathJax: null,  //only for read
+            redo: null      //only for editor
         }
     },
-    init: function init(type, _options) {
+    init: function (type, _options) {
         setOptions(ENV.options, _options);
 
         var doc = ENV.options.document || window.document;
@@ -5748,7 +5823,7 @@ var ENV = {
                 sequence: '',
                 mathJax: 'http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML'
             },
-            init: function init() {
+            init: function () {
                 var cssFiles = ENV.options.dependencyCss;
                 var jsFiles = ENV.options.dependencyJs;
 
@@ -5780,8 +5855,15 @@ var ENV = {
             markdown: ['github2', 'wizToc']
         },
         js: {
-            markdown: [['jquery'], ['prettify', 'raphael', 'underscore'], ['flowchart', 'sequence']],
-            mathJax: [['jquery'], ['mathJax']]
+            markdown: [
+                ['jquery'],
+                ['prettify', 'raphael', 'underscore'],
+                ['flowchart', 'sequence']
+            ],
+            mathJax: [
+                ['jquery'],
+                ['mathJax']
+            ]
         }
     },
     /**
@@ -5790,7 +5872,7 @@ var ENV = {
     client: {
         type: {
             isWeb: (function () {
-                return location && location.protocol.indexOf('http') === 0;
+                return (location && location.protocol.indexOf('http') === 0)
             })(),
             isWin: false,
             isMac: false,
@@ -5800,8 +5882,9 @@ var ENV = {
             isPad: false,
             isPhone: false
         },
-        sendCmdToWiznote: function sendCmdToWiznote() {},
-        setType: function setType(type) {
+        sendCmdToWiznote: function () {
+        },
+        setType: function (type) {
             if (!type) {
                 return;
             }
@@ -5825,14 +5908,16 @@ var ENV = {
                     ENV.doc.documentElement.appendChild(iframe);
                     iframe.parentNode.removeChild(iframe);
                     iframe = null;
-                };
+                }
+
             } else if (type.indexOf('android') > -1) {
                 ENV.client.type.isAndroid = true;
                 ENV.client.sendCmdToWiznote = function (cmd, options) {
                     if (cmd == CONST.CLIENT_EVENT.wizReaderClickImg) {
                         ENV.win.WizNote.onClickImg(options.src, options.imgList);
                     }
-                };
+                }
+
             } else if (type.indexOf('mac') > -1) {
                 var ua = ENV.win.navigator.userAgent;
                 if (!/Mac/i.test(ua)) {
@@ -5851,7 +5936,7 @@ var ENV = {
         }
     },
     event: {
-        add: function add(eventId, fun) {
+        add: function (eventId, fun) {
             if (!eventId || !fun || checkFun(eventId, fun)) {
                 return;
             }
@@ -5866,8 +5951,7 @@ var ENV = {
                 if (!eventId || !fun) {
                     return false;
                 }
-                var i,
-                    j,
+                var i, j,
                     eList = GlobalEvent[eventId];
 
                 if (!eList || eList.length === 0) {
@@ -5881,9 +5965,8 @@ var ENV = {
                 return false;
             }
         },
-        call: function call(eventId) {
-            var i,
-                j,
+        call: function (eventId) {
+            var i, j,
                 args = [],
                 eList = GlobalEvent[eventId];
 
@@ -5897,12 +5980,11 @@ var ENV = {
                 eList[i].apply(this, args);
             }
         },
-        remove: function remove(eventId, fun) {
+        remove: function (eventId, fun) {
             if (!eventId || !fun) {
                 return;
             }
-            var i,
-                j,
+            var i, j,
                 eList = GlobalEvent[eventId];
 
             if (!eList || eList.length === 0) {
@@ -5919,18 +6001,17 @@ var ENV = {
 
 module.exports = ENV;
 
+
 },{"./const":13,"./lang":17}],16:[function(require,module,exports){
 /**
  * undo、redo 工具包
  */
 
-'use strict';
-
 var ENV = require('./env'),
-    CONST = require('./const'),
-    utils = require('./utils'),
-    domUtils = require('./../domUtils/domExtend'),
-    rangeUtils = require('./../rangeUtils/rangeExtend');
+CONST = require( './const'),
+utils = require( './utils'),
+domUtils = require( './../domUtils/domExtend'),
+rangeUtils = require( './../rangeUtils/rangeExtend');
 
 var MaxRedo = 100;
 var historyUtils = {
@@ -5950,7 +6031,7 @@ var historyUtils = {
     /**
      * 初始化 historyUtils 工具包
      */
-    init: function init() {
+    init: function () {
         historyUtils.stack = [];
         historyUtils.stackIndex = 0;
     },
@@ -5959,7 +6040,7 @@ var historyUtils = {
      * @param maxRedo
      * @param callback
      */
-    start: function start(maxRedo, callback) {
+    start: function (maxRedo, callback) {
         if (maxRedo && maxRedo > 0) {
             MaxRedo = maxRedo;
         }
@@ -5973,7 +6054,7 @@ var historyUtils = {
     /**
      * 关闭 history 功能
      */
-    stop: function stop() {
+    stop: function () {
         historyUtils.enable = false;
         historyUtils.init();
         historyEvent.unbind();
@@ -5981,12 +6062,12 @@ var historyUtils = {
     /**
      * 触发 callback
      */
-    applyCallback: function applyCallback() {
+    applyCallback: function () {
         if (historyUtils.callback) {
             historyUtils.callback(historyUtils.getUndoState());
         }
     },
-    getUndoState: function getUndoState() {
+    getUndoState: function() {
         return {
             'undoCount': historyUtils.stack.length,
             'undoIndex': historyUtils.stackIndex
@@ -5995,9 +6076,10 @@ var historyUtils = {
     /**
      * undo 操作
      */
-    undo: function undo() {
+    undo: function () {
         //console.log('.....undo....');
-        if (!historyUtils.enable || historyUtils.stackIndex <= 0 || historyUtils.stack.length === 0) {
+        if (!historyUtils.enable ||
+            historyUtils.stackIndex <= 0 || historyUtils.stack.length === 0) {
             historyUtils.stackIndex = 0;
             return;
         }
@@ -6008,35 +6090,37 @@ var historyUtils = {
         historyUtils.restore(historyUtils.stack[--historyUtils.stackIndex]);
         historyUtils.applyCallback();
         domUtils.focus();
-        //            console.log('undo: ' + historyUtils.stackIndex);
+//            console.log('undo: ' + historyUtils.stackIndex);
     },
     /**
      * redo 操作
      */
-    redo: function redo() {
+    redo: function () {
         //console.log('.....redo....');
-        if (!historyUtils.enable || historyUtils.stackIndex >= historyUtils.stack.length - 1) {
+        if (!historyUtils.enable ||
+            historyUtils.stackIndex >= historyUtils.stack.length - 1) {
             return;
         }
         historyUtils.restore(historyUtils.stack[++historyUtils.stackIndex]);
         historyUtils.applyCallback();
         domUtils.focus();
-        //            console.log('redo: ' + historyUtils.stackIndex);
+//            console.log('redo: ' + historyUtils.stackIndex);
     },
     /**
      * 保存当前内容的快照
      * @param keepIndex （是否保存快照时不移动游标， 主要用于 undo 操作时保存最后的快照）
      */
-    saveSnap: function saveSnap(keepIndex) {
-        if (!historyUtils.enable || CONST.COMPOSITION_START) {
+    saveSnap: function (keepIndex) {
+        if (!historyUtils.enable ||
+            CONST.COMPOSITION_START) {
             return;
         }
 
-        var canCallback = historyUtils.stack.length === 0 || historyUtils.stackIndex < historyUtils.stack.length - 1;
+        var canCallback = historyUtils.stack.length === 0 || historyUtils.stackIndex < (historyUtils.stack.length - 1);
 
         ENV.event.call(CONST.EVENT.BEFORE_SAVESNAP);
 
-        var canSave = { add: true, replace: false, direct: 0 },
+        var canSave = {add: true, replace: false, direct: 0},
             snap = historyUtils.snapshot();
         if (!keepIndex && historyUtils.stack.length > 0 && historyUtils.stackIndex > 0) {
             canSave = historyUtils.canSave(snap, historyUtils.stack[historyUtils.stackIndex - 1]);
@@ -6049,7 +6133,7 @@ var historyUtils = {
             if (historyUtils.stackIndex >= 0) {
                 historyUtils.stack.splice(historyUtils.stackIndex, historyUtils.stack.length - historyUtils.stackIndex);
             }
-            //                console.log(snap.content);
+//                console.log(snap.content);
             if (canSave.add) {
                 // console.log('save snap.add.... stack: [' + historyUtils.stack.length + ']  index: [' + historyUtils.stackIndex + ']  keepIndex: [' + !!keepIndex + ']');
                 historyUtils.stack.push(snap);
@@ -6073,18 +6157,17 @@ var historyUtils = {
         if (canCallback && historyUtils.stack.length > 0) {
             historyUtils.applyCallback();
         }
+
     },
     /**
      * 根据指定的 快照 恢复页面内容
      * @param snap
      */
-    restore: function restore(snap) {
+    restore: function (snap) {
         if (!historyUtils.enable || !snap) {
             return;
         }
-        var sel = ENV.doc.getSelection(),
-            start,
-            end;
+        var sel = ENV.doc.getSelection(), start, end;
         ENV.doc.body.innerHTML = snap.content;
         try {
             start = domUtils.getDomByIndexList(snap.focus.start);
@@ -6096,7 +6179,9 @@ var historyUtils = {
                 rangeUtils.setRange(start.dom, start.offset, start.dom, start.offset);
             }
             rangeUtils.caretFocus();
-        } catch (e) {}
+        } catch (e) {
+
+        }
         ENV.event.call(CONST.EVENT.AFTER_RESTORE_HISTORY);
     },
     /**
@@ -6105,11 +6190,12 @@ var historyUtils = {
      * @param s2
      * @returns {{add: boolean, replace: boolean}}
      */
-    canSave: function canSave(s1, s2) {
-        var result = { add: false, replace: false, direct: 0 };
+    canSave: function (s1, s2) {
+        var result = {add: false, replace: false, direct: 0};
         if (s1.content.length != s2.content.length || !!s1.content.localeCompare(s2.content)) {
             result.direct = compareFocus(s1.focus, s2.focus);
-            if (result.direct === 0 || result.direct !== s2.direct) {
+            if (result.direct === 0 ||
+                result.direct !== s2.direct) {
                 result.add = true;
             } else {
                 result.replace = true;
@@ -6125,7 +6211,8 @@ var historyUtils = {
             if (f1.isCollapsed != f2.isCollapsed) {
                 return 0;
             }
-            if (f1.start.length != f2.start.length || f1.end.length != f2.end.length) {
+            if (f1.start.length != f2.start.length ||
+                f1.end.length != f2.end.length) {
                 return 0;
             }
             var result = compareIndexList(f1.start, f2.start);
@@ -6138,8 +6225,7 @@ var historyUtils = {
 
         function compareIndexList(index1, index2) {
             var isSame = 1,
-                i,
-                j;
+                i, j;
             for (i = 0, j = index1.length - 1; i < j; i++) {
                 if (index1[i] != index2[i]) {
                     isSame = 0;
@@ -6155,23 +6241,24 @@ var historyUtils = {
             //console.log(isSame)
             return isSame;
         }
+
     },
     /**
      * 生成快照
      * @returns {{content: string, focus: {isCollapsed: boolean, start: Array, end: Array}}}
      */
-    snapshot: function snapshot() {
+    snapshot: function () {
         var sel = ENV.doc.getSelection(),
             content = ENV.doc.body.innerHTML,
             focus = {
-            isCollapsed: true,
-            start: [],
-            end: []
-        },
+                isCollapsed: true,
+                start: [],
+                end: []
+            },
             snap = {
-            content: content,
-            focus: focus
-        };
+                content: content,
+                focus: focus
+            };
 
         if (sel.rangeCount === 0) {
             focus.start.push(0);
@@ -6197,21 +6284,21 @@ var historyEvent = {
     /**
      * 初始化时， 绑定历史记录相关的必要事件
      */
-    bind: function bind() {
+    bind: function () {
         historyEvent.unbind();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, historyEvent.onKeyDown);
     },
     /**
      * 解绑历史记录相关的必要事件
      */
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, historyEvent.onKeyDown);
     },
     /**
      * 快捷键 监控
      * @param e
      */
-    onKeyDown: function onKeyDown(e) {
+    onKeyDown: function (e) {
 
         var keyCode = e.keyCode || e.which;
         //console.log('history keydown.....' + keyCode);
@@ -6219,7 +6306,8 @@ var historyEvent = {
         /**
          * Ctrl + Z
          */
-        if (e.ctrlKey && keyCode == 90 || e.metaKey && keyCode == 90 && !e.shiftKey) {
+        if ((e.ctrlKey && keyCode == 90) ||
+            (e.metaKey && keyCode == 90 && !e.shiftKey)) {
             historyUtils.undo();
             utils.stopEvent(e);
             return;
@@ -6227,7 +6315,9 @@ var historyEvent = {
         /**
          * Ctrl + Y
          */
-        if (e.ctrlKey && keyCode == 89 || e.metaKey && keyCode == 89 || e.metaKey && keyCode == 90 && e.shiftKey) {
+        if ((e.ctrlKey && keyCode == 89) ||
+            (e.metaKey && keyCode == 89) ||
+            (e.metaKey && keyCode == 90 && e.shiftKey)) {
             historyUtils.redo();
             utils.stopEvent(e);
         }
@@ -6235,17 +6325,12 @@ var historyEvent = {
 };
 
 module.exports = historyUtils;
-
 },{"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36,"./const":13,"./env":15,"./utils":19}],17:[function(require,module,exports){
 /**
  * Created by ZQG on 2015/3/11.
  */
 
-'use strict';
-
-var LANG = {},
-    userLangType = 'en',
-    userLang = {};
+var LANG = {}, userLangType = 'en', userLang = {};
 LANG['en'] = {
     version: 'en',
     Month: ['Jan.', 'Feb.', 'Mar.', 'Apr.', 'May', 'June', 'July', 'Agu.', 'Sep.', 'Oct.', 'Nov.', 'Dec.'],
@@ -6400,37 +6485,29 @@ module.exports.initLang = function (type) {
  *      }
  */
 
-'use strict';
-
 var scriptLoader = {
-    appendJsCode: function appendJsCode(doc, jsStr, type) {
+    appendJsCode: function (doc, jsStr, type) {
         var s = doc.createElement('script');
         s.type = type;
         s.text = jsStr;
         //s.className = this.PcCustomTagClass;
         doc.getElementsByTagName('head')[0].appendChild(s);
     },
-    load: function load(doc, options, callback) {
+    load: function (doc, options, callback) {
         if (!doc || !options) {
             return;
         }
-        var i,
-            j,
-            s,
-            c,
-            id = new Date().valueOf(),
-            allLoaded = true;
+        var i, j, s, c, id = (new Date()).valueOf(), allLoaded = true;
         for (i = 0, j = options.length; i < j; i++) {
-            if (typeof options[i] == "string") {
+            if (typeof (options[i]) == "string") {
                 s = this.loadSingleJs(doc, options[i]);
                 if (s !== true) {
                     s.onload = makeLoadHandle(id, callback);
                     allLoaded = false;
                 }
-            } else {
-                var jsUrl = options[i].link,
-                    jsId = createJsId(options[i].id),
-                    jsVersion = options[i].version;
+            }
+            else {
+                var jsUrl = options[i].link, jsId = createJsId(options[i].id), jsVersion = options[i].version;
                 if (window.localStorage) {
                     var jsInfo = JSON.parse(localStorage.getItem(jsId));
                     if (jsInfo && jsInfo.version == jsVersion) {
@@ -6442,14 +6519,15 @@ var scriptLoader = {
                             }, 10);
                             allLoaded = false;
                         }
-                    } else {
+                    }
+                    else {
                         allLoaded = false;
                         c = makeLoadHandle(id, callback);
                         $.ajax({
                             url: jsUrl,
-                            context: { id: jsId, version: jsVersion },
-                            success: function success(data) {
-                                save({ id: this.id, version: this.version, jsStr: data });
+                            context: {id: jsId, version: jsVersion},
+                            success: function (data) {
+                                save({id: this.id, version: this.version, jsStr: data});
                                 s = wizUI.scriptLoader.inject(doc, data, this.id);
                                 if (s !== true) {
                                     setTimeout(function () {
@@ -6457,12 +6535,13 @@ var scriptLoader = {
                                     }, 10);
                                 }
                             },
-                            error: function error() {
+                            error: function () {
                                 c();
                             }
                         });
                     }
-                } else {
+                }
+                else {
                     s = this.loadSingleJs(doc, options[i].link);
                     if (s !== true) {
                         s.onload = makeLoadHandle(id, callback);
@@ -6470,12 +6549,13 @@ var scriptLoader = {
                     }
                 }
             }
+
         }
         if (allLoaded) {
             callback();
         }
     },
-    loadSingleJs: function loadSingleJs(doc, path) {
+    loadSingleJs: function (doc, path) {
         var jsId = 'wiz_' + path;
         if (doc.getElementById(jsId)) {
             return true;
@@ -6489,7 +6569,7 @@ var scriptLoader = {
         doc.getElementsByTagName('head')[0].insertBefore(s, null);
         return s;
     },
-    inject: function inject(doc, jsStr, jsId) {
+    inject: function (doc, jsStr, jsId) {
         if (!doc || doc.getElementById(jsId)) {
             return true;
         }
@@ -6517,7 +6597,7 @@ function makeLoadHandle(id, loadCallback) {
                 loadCallback();
             }
         }
-    };
+    }
 }
 
 function createJsId(jsId) {
@@ -6536,10 +6616,7 @@ function save(options) {
 }
 
 module.exports = scriptLoader;
-
 },{}],19:[function(require,module,exports){
-'use strict';
-
 var CONST = require('./const');
 
 if (!String.prototype.trim) {
@@ -6555,7 +6632,7 @@ if (!Array.prototype.indexOf) {
             }
         }
         return -1;
-    };
+    }
 }
 
 /**
@@ -6567,28 +6644,28 @@ var utils = {
      * @param e
      * @returns {boolean}
      */
-    checkNonTxtKey: function checkNonTxtKey(e) {
+    checkNonTxtKey: function (e) {
         var keyCode = e.keyCode || e.which;
         if (e.ctrlKey || e.metaKey) {
             return true;
         }
-        return !(keyCode >= 48 && keyCode <= 57 || //0-9
-        keyCode >= 65 && keyCode <= 90 || //a-z
-        keyCode >= 96 && keyCode <= 107 || //小键盘0-9 * +
-        keyCode >= 109 && keyCode <= 111 || //小键盘 / * -
-        keyCode >= 186 && keyCode <= 192 || //标点符号
-        keyCode >= 219 && keyCode <= 222 || //标点符号
-        keyCode == 229 || keyCode === 0 || //中文
-        keyCode == 13 || //Enter
-        keyCode == 32) //空格
-        ;
+        return !( (keyCode >= 48 && keyCode <= 57) || //0-9
+            (keyCode >= 65 && keyCode <= 90) || //a-z
+            (keyCode >= 96 && keyCode <= 107) || //小键盘0-9 * +
+            (keyCode >= 109 && keyCode <= 111) || //小键盘 / * -
+            (keyCode >= 186 && keyCode <= 192) || //标点符号
+            (keyCode >= 219 && keyCode <= 222) || //标点符号
+            keyCode == 229 || keyCode === 0 || //中文
+            keyCode == 13 || //Enter
+            keyCode == 32  //空格
+        );
     },
     /**
      * 判断 obj 是否为 数组
      * @param obj
      * @returns {boolean}
      */
-    isArray: function isArray(obj) {
+    isArray: function (obj) {
         return Object.prototype.toString.apply(obj) === "[object Array]";
     },
     /**
@@ -6596,7 +6673,7 @@ var utils = {
      * @param str
      * @returns {boolean}
      */
-    isEmpty: function isEmpty(str) {
+    isEmpty: function (str) {
         if (!str) {
             return true;
         }
@@ -6606,7 +6683,7 @@ var utils = {
             _str = str.replace(r, ''),
             isNone = str.replace(r, '').trim().length === 0;
         //避免 正常标签只存在 一个空格时，也被误判
-        return _str.length === 0 || hasEnter && isNone;
+        return _str.length === 0 || (hasEnter && isNone);
     },
     /**
      * 判断两个 修订时间是否近似相同
@@ -6614,7 +6691,7 @@ var utils = {
      * @param time2
      * @returns {boolean}
      */
-    isSameAmendTime: function isSameAmendTime(time1, time2) {
+    isSameAmendTime: function (time1, time2) {
         if (!time1 || !time2) {
             return false;
         }
@@ -6622,7 +6699,7 @@ var utils = {
             t2 = utils.getDateForTimeStr(time2);
         return Math.abs(t1 - t2) <= CONST.AMEND_BATCH_TIME_SPACE;
     },
-    getEventClientPos: function getEventClientPos(e) {
+    getEventClientPos: function (e) {
         return {
             x: e.changedTouches ? e.changedTouches[0].clientX : e.clientX,
             y: e.changedTouches ? e.changedTouches[0].clientY : e.clientY
@@ -6633,23 +6710,22 @@ var utils = {
      * @param str
      * @returns {number}
      */
-    getHash: function getHash(str) {
-        var hash = 1315423911,
-            i,
-            ch;
+    getHash: function (str) {
+        var hash = 1315423911, i, ch;
         for (i = str.length - 1; i >= 0; i--) {
             ch = str.charCodeAt(i);
-            hash ^= (hash << 5) + ch + (hash >> 2);
+            hash ^= ((hash << 5) + ch + (hash >> 2));
         }
-        return hash & 0x7FFFFFFF;
+        return (hash & 0x7FFFFFFF);
     },
     /**
      * 生成当前时间戳，用于 修订的时间
      * @returns {string}
      */
-    getTime: function getTime() {
+    getTime: function () {
         var d = new Date();
-        return d.getFullYear() + '-' + to2(d.getMonth() + 1) + '-' + to2(d.getDate()) + ' ' + to2(d.getHours()) + ':' + to2(d.getMinutes()) + ':' + to2(d.getSeconds());
+        return d.getFullYear() + '-' + to2(d.getMonth() + 1) + '-' + to2(d.getDate()) +
+            ' ' + to2(d.getHours()) + ':' + to2(d.getMinutes()) + ':' + to2(d.getSeconds());
 
         function to2(num) {
             var str = num.toString();
@@ -6661,7 +6737,7 @@ var utils = {
      * @param str
      * @returns {Date}
      */
-    getDateForTimeStr: function getDateForTimeStr(str) {
+    getDateForTimeStr: function (str) {
         return new Date(Date.parse(str.replace(/-/g, "/")));
     },
     /**
@@ -6669,22 +6745,19 @@ var utils = {
      * @param list
      * @returns {{}}
      */
-    listToMap: function listToMap(list) {
+    listToMap: function (list) {
         if (!list) {
             return {};
         }
         list = utils.isArray(list) ? list : list.split(',');
-        var i,
-            j,
-            ci,
-            obj = {};
+        var i, j, ci, obj = {};
         for (i = 0, j = list.length; i < j; i++) {
             ci = list[i];
             obj[ci.toUpperCase()] = obj[ci] = 1;
         }
         return obj;
     },
-    rgb2Hex: function rgb2Hex(str) {
+    rgb2Hex: function(str) {
         if (!str) {
             return '';
         }
@@ -6714,11 +6787,8 @@ var utils = {
      * @param arr
      * @returns {Array}
      */
-    removeDup: function removeDup(arr) {
-        var result = [],
-            i,
-            j,
-            a;
+    removeDup: function (arr) {
+        var result = [], i, j, a;
         for (i = 0, j = arr.length; i < j; i++) {
             a = arr[i];
             if (result.indexOf(a) < 0) {
@@ -6731,7 +6801,7 @@ var utils = {
      * 阻止默认事件
      * @param e
      */
-    stopEvent: function stopEvent(e) {
+    stopEvent: function (e) {
         if (!e) {
             return;
         }
@@ -6743,7 +6813,7 @@ var utils = {
     //-------------------- 以下内容修改需要 保证与 wizUI 中的 utils 内 对应方法一致 start ----------------------
     //PcCustomTagClass: 'wiz-html-render-unsave', //此 class 专门用于 pc 端将 markdown 笔记选然后发email 或微博等处理
     WizEditorTmpName: 'wiz_tmp_editor_style', //WizEditor 专用临时 style
-    loadSingleCss: function loadSingleCss(doc, path) {
+    loadSingleCss: function (doc, path) {
         var cssId = 'wiz_' + path;
         if (doc.getElementById(cssId)) {
             return true;
@@ -6758,7 +6828,7 @@ var utils = {
         doc.getElementsByTagName('head')[0].insertBefore(s, null);
         return s;
     },
-    appendCssCode: function appendCssCode(doc, jsStr, type) {
+    appendCssCode: function (doc, jsStr, type) {
         var s = doc.createElement('style');
         s.type = type;
         s.text = jsStr;
@@ -6771,15 +6841,22 @@ var utils = {
      * @param ele 需要解析的节点元素
      * @returns {string}
      */
-    getInnerText: function getInnerText(ele) {
+    getInnerText: function (ele) {
 
         var t = '';
 
-        var normalize = function normalize(a) {
+        var normalize = function (a) {
             if (!a) {
                 return "";
             }
-            return a.replace(/ +/gm, " ").replace(/[\t]+/gm, "").replace(/[ ]+$/gm, "").replace(/^[ ]+/gm, "").replace(/\n+/gm, "\n").replace(/\n+$/, "").replace(/^\n+/, "").replace(/NEWLINE/gm, '\n');
+            return a.replace(/ +/gm, " ")
+                .replace(/[\t]+/gm, "")
+                .replace(/[ ]+$/gm, "")
+                .replace(/^[ ]+/gm, "")
+                .replace(/\n+/gm, "\n")
+                .replace(/\n+$/, "")
+                .replace(/^\n+/, "")
+                .replace(/NEWLINE/gm, '\n')
             //return a.replace(/ +/g, " ")
             //    .replace(/[\t]+/gm, "")
             //    .replace(/[ ]+$/gm, "")
@@ -6788,13 +6865,13 @@ var utils = {
             //    .replace(/\n+$/, "")
             //    .replace(/^\n+/, "")
         };
-        var removeWhiteSpace = function removeWhiteSpace(node) {
+        var removeWhiteSpace = function (node) {
             // 去掉空的文本节点
-            var isWhite = function isWhite(node) {
-                return !/[^\t\n\r ]/.test(node.nodeValue);
+            var isWhite = function (node) {
+                return !(/[^\t\n\r ]/.test(node.nodeValue));
             };
             var ws = [];
-            var findWhite = function findWhite(node) {
+            var findWhite = function (node) {
                 for (var i = 0; i < node.childNodes.length; i++) {
                     var n = node.childNodes[i];
                     if (n.nodeType == 3 && isWhite(n)) {
@@ -6809,7 +6886,7 @@ var utils = {
                 ws[i].parentNode.removeChild(ws[i]);
             }
         };
-        var sty = function sty(n, prop) {
+        var sty = function (n, prop) {
             // 获取节点的style
             if (n.style[prop]) {
                 return n.style[prop];
@@ -6828,16 +6905,18 @@ var utils = {
         };
 
         var blockTypeNodes = "table-row,block,list-item";
-        var isBlock = function isBlock(n) {
+        var isBlock = function (n) {
             // 判断是否为block元素
             var s = sty(n, "display") || "feaux-inline";
             return blockTypeNodes.indexOf(s) > -1;
+
         };
         // 遍历所有子节点，收集文本内容，注意需要空格和换行
-        var recurse = function recurse(n) {
+        var recurse = function (n) {
             // 处理pre元素
             if (/pre/.test(sty(n, "whiteSpace"))) {
-                t += n.innerHTML.replace(/\t/g, " ");
+                t += n.innerHTML
+                    .replace(/\t/g, " ")
                 return "";
             }
             var s = sty(n, "display");
@@ -6877,9 +6956,14 @@ var utils = {
      * 对markdown的html内容进行预处理，已显示图片，todoList等等
      * @param dom 传入的dom对象
      */
-    markdownPreProcess: function markdownPreProcess(dom) {
+    markdownPreProcess: function (dom) {
         function htmlUnEncode(input) {
-            return String(input).replace(/\&amp;/g, '&').replace(/\&gt;/g, '>').replace(/\&lt;/g, '<').replace(/\&quot;/g, '"').replace(/\&&#39;/g, "'");
+            return String(input)
+                .replace(/\&amp;/g, '&')
+                .replace(/\&gt;/g, '>')
+                .replace(/\&lt;/g, '<')
+                .replace(/\&quot;/g, '"')
+                .replace(/\&&#39;/g, "'");
         }
 
         var el = $(dom);
@@ -6952,13 +7036,10 @@ var utils = {
 };
 
 module.exports = utils;
-
 },{"./const":13}],20:[function(require,module,exports){
 /**
  * 默认的样式集合
  */
-'use strict';
-
 var ENV = require('./env'),
     CONST = require('./const'),
     domUtils = require('../domUtils/domBase');
@@ -6971,23 +7052,157 @@ var ImgFile = {
 };
 
 var TmpEditorStyle = {
-    phone: 'body {' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}',
-    pad: 'body {' + 'min-width: 90%;' + 'max-width: 100%;' + 'min-height: 100%;' + 'background: #ffffff;' + 'overflow-y:scroll;' + '-webkit-overflow-scrolling: touch;' + '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' + '}' + 'td,th {position:static;}' + 'th:before,td:before,th:after,td:after {display:none;}'
-},
+        phone: 'body {' +
+        'overflow-y:scroll;' +
+        '-webkit-overflow-scrolling: touch;' +
+        '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' +
+        '}' +
+        'td,th {position:static;}' +
+        'th:before,td:before,th:after,td:after {display:none;}',
+        pad: 'body {' +
+        'min-width: 90%;' +
+        'max-width: 100%;' +
+        'min-height: 100%;' +
+        'background: #ffffff;' +
+        'overflow-y:scroll;' +
+        '-webkit-overflow-scrolling: touch;' +
+        '-webkit-tap-highlight-color: rgba(0, 0, 0, 0);' +
+        '}' +
+        'td,th {position:static;}' +
+        'th:before,td:before,th:after,td:after {display:none;}'
+    },
     TmpReaderStyle = {
-    phone: 'img {' + 'max-width: 100%;' + 'height: auto !important;' + 'margin: 0px auto;' + 'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
-    '}' + 'a {' + 'word-wrap: break-word;' + '}' + 'body {' + 'word-wrap: break-word;' + '}'
-},
+        phone: 'img {' +
+        'max-width: 100%;' +
+        'height: auto !important;' +
+        'margin: 0px auto;' +
+        'cursor: pointer;' + //专门用于 ios 点击 img 触发 click 事件
+        '}' +
+        'a {' +
+        'word-wrap: break-word;' +
+        '}' +
+        'body {' +
+        'word-wrap: break-word;' +
+        '}'
+    },
     DefaultFont = 'Helvetica, "Hiragino Sans GB", "微软雅黑", "Microsoft YaHei UI", SimSun, SimHei, arial, sans-serif;',
     DefaultStyle = {
-    common: 'html, body {' + 'font-size: 15px;' + '}' + 'body {' + 'font-family: ' + DefaultFont + 'line-height: 1.6;' + 'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' + '}' + 'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' + 'h1 {font-size:21px;font-size:1.4rem;}' + 'h2 {font-size:20px;font-size:1.33rem;}' + 'h3 {font-size:18px;font-size:1.2rem;}' + 'h4 {font-size:17px;font-size:1.13rem;}' + 'h5 {font-size:15px;font-size:1rem;}' + 'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' + 'div, p, ul, ol, dl, li {margin:0;}' + 'blockquote, table, pre, code {margin:8px 0;}' + 'ul, ol {padding-left:32px;padding-left:2.13rem;}' + 'blockquote {padding:0 12px;padding:0 0.8rem;}' + 'blockquote > :first-child {margin-top:0;}' + 'blockquote > :last-child {margin-bottom:0;}' + 'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' + 'table {border-collapse:collapse;border:1px solid #bbbbbb;}' + 'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' + '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' + 'html,body {font-size:17px;}' + 'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' + 'h1 {font-size:2.125rem;}' + 'h2 {font-size:1.875rem;}' + 'h3 {font-size:1.625rem;}' + 'h4 {font-size:1.375rem;}' + 'h5 {font-size:1.125rem;}' + 'h6 {color: inherit;}' + 'ul, ol {padding-left:2.5rem;}' + 'blockquote {padding:0 0.9375rem;}' + '}',
-    todoList: '.wiz-todo-main {padding-left: 12px;position: relative;line-height:30px;}' + '.wiz-todo-checked {color: #666;}' + '.wiz-todo-unchecked {text-decoration: initial;}' + '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' + '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' + '.wiz-todo-checkbox {border-radius:0;position:relative;top:-3px;border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;box-sizing:initial;}' + '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' + '.wiz-todo-completed-info {padding-left: 20px;}' +
-    //单独出来主要为了兼容旧的 todoList
-    'input.wiz-todo-avatar {position:relative;top:-4px;}' + '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
-},
-    ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' + '.wiz-img-resize-handle {width:5px;height:5px;}' + '.wiz-img-resize-handle.lt {cursor: nw-resize;}' + '.wiz-img-resize-handle.tm {cursor: n-resize;}' + '.wiz-img-resize-handle.rt {cursor: ne-resize;}' + '.wiz-img-resize-handle.lm {cursor: w-resize;}' + '.wiz-img-resize-handle.rm {cursor: e-resize;}' + '.wiz-img-resize-handle.lb {cursor: sw-resize;}' + '.wiz-img-resize-handle.bm {cursor: s-resize;}' + '.wiz-img-resize-handle.rb {cursor: se-resize;}',
-    TableContainerStyle = '.' + CONST.CLASS.TABLE_CONTAINER + ' {}' + '.' + CONST.CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' + '.' + CONST.CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' + 'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
-    TableEditStyle = '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:before,' + ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' + 'td,th {position:relative;}' + '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + CONST.CSS.Z_INDEX.tableBorder + '}' + '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableColRowLine + ';}' + '#wiz-table-col-line {width: 1px;cursor:col-resize;}' + '#wiz-table-row-line {height: 1px;cursor:row-resize;}' + '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' + '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_top {height: 1px;}' + '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_right {width: 1px;}' + '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' + '#wiz-table-range-border_range_bottom {height: 1px;}' + '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' + '#wiz-table-range-border_range_left {width: 1px;}' + '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableRangeDot + ';}' + '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + CONST.CSS.Z_INDEX.tableTools + ';}' + '.wiz-table-tools ul {list-style: none;padding: 0;}' + '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {font-size:15px;width:20px;height:20px;line-height:20px;cursor: pointer;position:relative;}' + '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' + '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:1px;left:0;}' + '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' + '.wiz-table-tools .wiz-table-menu-sub > div{font-size:15px;}' + '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' + '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + CONST.CSS.Z_INDEX.tableToolsArrow + ';}' + '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' + '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' + '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' + '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' + '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' + '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' + '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-color-pad > div{font-size:15px;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' + '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' + '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' + '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' + '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' + 'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' + 'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}' + 'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}';
+        common: 'html, body {' +
+        'font-size: 15px;' +
+        '}' +
+        'body {' +
+        'font-family: ' + DefaultFont +
+        'line-height: 1.6;' +
+        'margin: 0;padding: 20px 15px;padding: 1.33rem 1rem;' +
+        '}' +
+        'h1, h2, h3, h4, h5, h6 {margin:20px 0 10px;margin:1.33rem 0 0.667rem;padding: 0;font-weight: bold;}' +
+        'h1 {font-size:21px;font-size:1.4rem;}' +
+        'h2 {font-size:20px;font-size:1.33rem;}' +
+        'h3 {font-size:18px;font-size:1.2rem;}' +
+        'h4 {font-size:17px;font-size:1.13rem;}' +
+        'h5 {font-size:15px;font-size:1rem;}' +
+        'h6 {font-size:15px;font-size:1rem;color: #777777;margin: 1rem 0;}' +
+        'div, p, ul, ol, dl, li {margin:0;}' +
+        'blockquote, table, pre, code {margin:8px 0;}' +
+        'ul, ol {padding-left:32px;padding-left:2.13rem;}' +
+        'blockquote {padding:0 12px;padding:0 0.8rem;}' +
+        'blockquote > :first-child {margin-top:0;}' +
+        'blockquote > :last-child {margin-bottom:0;}' +
+        'img {border:0;max-width:100%;height:auto !important;margin:2px 0;}' +
+        'table {border-collapse:collapse;border:1px solid #bbbbbb;}' +
+        'td, th {padding:4px 8px;border-collapse:collapse;border:1px solid #bbbbbb;height:28px;word-break:break-all;box-sizing: border-box;}' +
+        '@media only screen and (-webkit-max-device-width: 1024px), only screen and (-o-max-device-width: 1024px), only screen and (max-device-width: 1024px), only screen and (-webkit-min-device-pixel-ratio: 3), only screen and (-o-min-device-pixel-ratio: 3), only screen and (min-device-pixel-ratio: 3) {' +
+        'html,body {font-size:17px;}' +
+        'body {line-height:1.7;padding:0.75rem 0.9375rem;color:#353c47;}' +
+        'h1 {font-size:2.125rem;}' +
+        'h2 {font-size:1.875rem;}' +
+        'h3 {font-size:1.625rem;}' +
+        'h4 {font-size:1.375rem;}' +
+        'h5 {font-size:1.125rem;}' +
+        'h6 {color: inherit;}' +
+        'ul, ol {padding-left:2.5rem;}' +
+        'blockquote {padding:0 0.9375rem;}' +
+        '}',
+        todoList: '.wiz-todo-main {padding-left: 12px;position: relative;line-height:30px;}' +
+        '.wiz-todo-checked {color: #666;}' +
+        '.wiz-todo-unchecked {text-decoration: initial;}' +
+        '.wiz-todo-checked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoChecked + ')}' +
+        '.wiz-todo-unchecked .wiz-todo-checkbox {background-image:url(' + ImgFile.todoUnChecked + ')}' +
+        '.wiz-todo-checkbox {border-radius:0;position:relative;top:-3px;border:0;background-color:transparent;outline:none;width:16px !important; height:16px !important; cursor:default; padding:0 10px 0 0;-webkit-user-select: none; background-size:16px;background-repeat:no-repeat;box-sizing:initial;}' +
+        '.wiz-todo-avatar {border:0;background-color:transparent;outline:none;width:20px !important; height: 20px !important; vertical-align: -20%; padding:0; margin:0 10px 0 0; border-radius:100%;background-size:20px;background-repeat:no-repeat;}' +
+        '.wiz-todo-completed-info {padding-left: 20px;}' +
+        //单独出来主要为了兼容旧的 todoList
+        'input.wiz-todo-avatar {position:relative;top:-4px;}' +
+        '.wiz-todo-account, .wiz-todo-dt { color: #666; }'
+    },
+    ImageResizeStyle = '.wiz-img-resize-handle {position: absolute;z-index: 1000;border: 1px solid black;background-color: white;}' +
+        '.wiz-img-resize-handle {width:5px;height:5px;}' +
+        '.wiz-img-resize-handle.lt {cursor: nw-resize;}' +
+        '.wiz-img-resize-handle.tm {cursor: n-resize;}' +
+        '.wiz-img-resize-handle.rt {cursor: ne-resize;}' +
+        '.wiz-img-resize-handle.lm {cursor: w-resize;}' +
+        '.wiz-img-resize-handle.rm {cursor: e-resize;}' +
+        '.wiz-img-resize-handle.lb {cursor: sw-resize;}' +
+        '.wiz-img-resize-handle.bm {cursor: s-resize;}' +
+        '.wiz-img-resize-handle.rb {cursor: se-resize;}',
+    TableContainerStyle = '.' + CONST.CLASS.TABLE_CONTAINER + ' {}' +
+        '.' + CONST.CLASS.TABLE_BODY + ' {position:relative;padding:0 0 10px;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;}' +
+        '.' + CONST.CLASS.TABLE_BODY + ' table {margin:0;outline:none;}' +
+        'td,th {height:28px;word-break:break-all;box-sizing:border-box;outline:none;}',
+    TableEditStyle = '.' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *,' +
+        ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:before,' +
+        ' .' + CONST.CLASS.TABLE_BODY + '.' + CONST.CLASS.TABLE_MOVING + ' *:after {cursor:default !important;}' +
+        'td,th {position:relative;}' +
+        '#wiz-table-range-border {display: none;width: 0;height: 0;position: absolute;top: 0;left: 0; z-index:' + CONST.CSS.Z_INDEX.tableBorder + '}' +
+        '#wiz-table-col-line, #wiz-table-row-line {display: none;background-color: #448aff;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableColRowLine + ';}' +
+        '#wiz-table-col-line {width: 1px;cursor:col-resize;}' +
+        '#wiz-table-row-line {height: 1px;cursor:row-resize;}' +
+        '#wiz-table-range-border_start, #wiz-table-range-border_range {display: none;width: 0;height: 0;position: absolute;}' +
+        '#wiz-table-range-border_start_top, #wiz-table-range-border_range_top {height: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' +
+        '#wiz-table-range-border_range_top {height: 1px;}' +
+        '#wiz-table-range-border_start_right, #wiz-table-range-border_range_right {width: 2px;background-color: #448aff;position: absolute;top: 0;}' +
+        '#wiz-table-range-border_range_right {width: 1px;}' +
+        '#wiz-table-range-border_start_bottom, #wiz-table-range-border_range_bottom {height: 2px;background-color: #448aff;position: absolute;top: 0;}' +
+        '#wiz-table-range-border_range_bottom {height: 1px;}' +
+        '#wiz-table-range-border_start_left, #wiz-table-range-border_range_left {width: 2px;background-color: #448aff;position: absolute;top: 0;left: 0;}' +
+        '#wiz-table-range-border_range_left {width: 1px;}' +
+        '#wiz-table-range-border_start_dot, #wiz-table-range-border_range_dot {width: 5px;height: 5px;border: 2px solid rgb(255, 255, 255);background-color: #448aff;cursor: crosshair;position: absolute;z-index:' + CONST.CSS.Z_INDEX.tableRangeDot + ';}' +
+        '.wiz-table-tools {display: block;background-color:#fff;position: absolute;left: 0px;border: 1px solid #ddd;-webkit-border-radius: 5px;-moz-border-radius: 5px;border-radius: 5px;z-index:' + CONST.CSS.Z_INDEX.tableTools + ';}' +
+        '.wiz-table-tools ul {list-style: none;padding: 0;}' +
+        '.wiz-table-tools .wiz-table-menu-item {position: relative;float: left;margin:5px 2px 5px 8px;}' +
+        '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button {font-size:15px;width:20px;height:20px;line-height:20px;cursor: pointer;position:relative;}' +
+        '.wiz-table-tools i.editor-icon{font-size: 15px;color: #455a64;}' +
+        '.wiz-table-tools .wiz-table-menu-item .wiz-table-menu-button i#wiz-menu-bg-demo{position: absolute;top:1px;left:0;}' +
+        '.wiz-table-tools .wiz-table-menu-sub {position: absolute;display: none;width: 125px;padding: 5px 0;background: #fff;border-radius: 3px;border: 1px solid #E0E0E0;top:28px;left:-9px;box-shadow: 1px 1px 5px #d0d0d0;}' +
+        '.wiz-table-tools .wiz-table-menu-sub > div{font-size:15px;}' +
+        '.wiz-table-tools .wiz-table-menu-item.active .wiz-table-menu-sub {display: block}' +
+        '.wiz-table-tools .wiz-table-menu-sub:before, .wiz-table-tools .wiz-table-menu-sub:after {position: absolute;content: " ";border-style: solid;border-color: transparent;border-bottom-color: #cccccc;left: 22px;margin-left: -14px;top: -8px;border-width: 0 8px 8px 8px;z-index:' + CONST.CSS.Z_INDEX.tableToolsArrow + ';}' +
+        '.wiz-table-tools .wiz-table-menu-sub:after {border-bottom-color: #ffffff;top: -7px;}' +
+        '.wiz-table-tools .wiz-table-menu-sub-item {padding: 4px 12px;font-size: 14px;}' +
+        '.wiz-table-tools .wiz-table-menu-sub-item.split {border-top: 1px solid #E0E0E0;}' +
+        '.wiz-table-tools .wiz-table-menu-sub-item:hover {background-color: #ececec;}' +
+        '.wiz-table-tools .wiz-table-menu-sub-item.disabled {color: #bbbbbb;cursor: default;}' +
+        '.wiz-table-tools .wiz-table-menu-sub-item.disabled:hover {background-color: transparent;}' +
+        '.wiz-table-tools .wiz-table-menu-item.wiz-table-cell-bg:hover .wiz-table-color-pad {display: block;}' +
+        '.wiz-table-tools .wiz-table-color-pad {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 88px;background-color: #fff;cursor: default;}' +
+        '.wiz-table-tools .wiz-table-color-pad > div{font-size:15px;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item i.pad-demo {position: absolute;top:3px;left:0;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item .icon-oblique_line{color: #cc0000;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child {margin-right: 0;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item.active i.editor-icon.icon-box {color: #448aff;}' +
+        '.wiz-table-tools .wiz-table-cell-align {display: none;padding: 10px;box-sizing: border-box;width: 85px;height: 65px;background-color: #fff;cursor: default;}' +
+        '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item {display: inline-block;width: 15px;height: 15px;margin-right: 9px;position: relative;}' +
+        '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right:0}' +
+        '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item i.valign{position: absolute;top:3px;left:0;color: #d2d2d2;}' +
+        '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.valign {color: #a1c4ff;}' +
+        '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.icon-box,' +
+        '.wiz-table-tools .wiz-table-cell-align-item.active i.editor-icon.align {color: #448aff;}' +
+        '.wiz-table-tools .wiz-table-color-pad .wiz-table-color-pad-item:last-child,' +
+        '.wiz-table-tools .wiz-table-cell-align .wiz-table-cell-align-item:last-child {margin-right: 0;}' +
+        'th.wiz-selected-cell, td.wiz-selected-cell {background: rgba(0,102,255,.05);}' +
+        'th:before,td:before,#wiz-table-col-line:before,#wiz-table-range-border_start_right:before,#wiz-table-range-border_range_right:before{content: " ";position: absolute;top: 0;bottom: 0;right: -5px;width: 9px;cursor: col-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}' +
+        'th:after,td:after,#wiz-table-row-line:before,#wiz-table-range-border_start_bottom:before,#wiz-table-range-border_range_bottom:before{content: " ";position: absolute;left: 0;right: 0;bottom: -5px;height: 9px;cursor: row-resize;background: transparent;z-index:' + CONST.CSS.Z_INDEX.tableTDBefore + ';}';
 
 function replaceStyleById(id, css, isReplace) {
     //isReplace = true 则 只进行替换， 如无同id 的元素，不进行任何操作
@@ -7005,14 +7220,12 @@ function replaceStyleById(id, css, isReplace) {
 }
 
 var WizStyle = {
-    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+    insertDefaultStyle: function (isReplace, customCss) {
         replaceStyleById(CONST.ID.WIZ_DEFAULT_STYLE, DefaultStyle.common, isReplace);
         if (!customCss) {
             return;
         }
-        var css,
-            k,
-            hasCustomCss = false;
+        var css, k, hasCustomCss = false;
         if (typeof customCss == 'string') {
             css = customCss;
             hasCustomCss = true;
@@ -7021,9 +7234,9 @@ var WizStyle = {
             for (k in customCss) {
                 if (customCss.hasOwnProperty(k)) {
                     if (k.toLowerCase() == 'font-family') {
-                        css += k + ':' + customCss[k] + ',' + DefaultFont + ';';
+                        css += (k + ':' + customCss[k] + ',' + DefaultFont + ';');
                     } else {
-                        css += k + ':' + customCss[k] + ';';
+                        css += (k + ':' + customCss[k] + ';');
                     }
                     hasCustomCss = true;
                 }
@@ -7032,22 +7245,21 @@ var WizStyle = {
         }
 
         if (hasCustomCss) {
-            WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, css);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, css);
         }
     },
-    insertCustomStyle: function insertCustomStyle(id, customCss, isTemp) {
+    insertCustomStyle: function (id, customCss, isTemp) {
         if (!id || !customCss) {
             return;
         }
-        var options = { id: id };
+        var options = {id: id};
         if (isTemp) {
             options.name = CONST.NAME.TMP_STYLE;
         }
         WizStyle.insertStyle(options, customCss);
     },
-    insertStyle: function insertStyle(options, css) {
-        var s = ENV.doc.createElement('style'),
-            tmp;
+    insertStyle: function (options, css) {
+        var s = ENV.doc.createElement('style'), tmp;
         if (options.name) {
             s.setAttribute('name', options.name);
         }
@@ -7059,22 +7271,23 @@ var WizStyle = {
         s.innerHTML = css;
         return s;
     },
-    insertTmpEditorStyle: function insertTmpEditorStyle() {
-        WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, ImageResizeStyle + TableEditStyle + TableContainerStyle);
+    insertTmpEditorStyle: function () {
+        WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE},
+            ImageResizeStyle + TableEditStyle + TableContainerStyle);
 
         if (ENV.client.type.isIOS && ENV.client.type.isPhone) {
-            WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, TmpEditorStyle.phone);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.phone);
         } else if (ENV.client.type.isIOS && ENV.client.type.isPad) {
-            WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, TmpEditorStyle.pad);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpEditorStyle.pad);
         }
     },
-    insertTmpReaderStyle: function insertTmpReaderStyle() {
-        WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, TableContainerStyle);
+    insertTmpReaderStyle: function () {
+        WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TableContainerStyle);
         if (ENV.client.type.isIOS) {
-            WizStyle.insertStyle({ name: CONST.NAME.TMP_STYLE }, TmpReaderStyle.phone);
+            WizStyle.insertStyle({name: CONST.NAME.TMP_STYLE}, TmpReaderStyle.phone);
         }
     },
-    insertTodoStyle: function insertTodoStyle(isForced) {
+    insertTodoStyle: function (isForced) {
         WizStyle.removeTodoOldStyle();
         var s = ENV.doc.getElementById(CONST.ID.TODO_STYLE);
         if (isForced || !s) {
@@ -7082,19 +7295,17 @@ var WizStyle = {
         }
         WizStyle.removeUnUsedTodoStyle();
     },
-    removeTodoOldStyle: function removeTodoOldStyle() {
+    removeTodoOldStyle: function () {
         WizStyle.removeStyleById(CONST.ID.TODO_STYLE_OLD);
     },
-    removeTodoStyle: function removeTodoStyle() {
+    removeTodoStyle: function () {
         WizStyle.removeTodoOldStyle();
         var style = ENV.doc.getElementById(CONST.ID.TODO_STYLE);
         if (style) {
             style.parentNode.removeChild(style);
         }
 
-        var styleList = ENV.doc.querySelectorAll('style'),
-            guid,
-            i;
+        var styleList = ENV.doc.querySelectorAll('style'), guid, i;
         for (i = styleList.length - 1; i >= 0; i--) {
             style = styleList[i];
             if (style.id && style.id.indexOf(CONST.ID.TODO_AVATAR_STYLE) === 0) {
@@ -7104,19 +7315,15 @@ var WizStyle = {
             }
         }
     },
-    removeStyleById: function removeStyleById(id) {
+    removeStyleById: function(id) {
         var s = ENV.doc.getElementById(id);
         if (s && domUtils.isTag(s, 'style')) {
             s.parentNode.removeChild(s);
         }
     },
-    removeUnUsedTodoStyle: function removeUnUsedTodoStyle(guid) {
+    removeUnUsedTodoStyle: function (guid) {
         var styleList = ENV.doc.querySelectorAll('style'),
-            style,
-            sId,
-            sClass,
-            userAvatar,
-            i;
+            style, sId, sClass, userAvatar, i;
 
         if (guid) {
             sId = CONST.ID.TODO_AVATAR_STYLE + guid;
@@ -7145,15 +7352,17 @@ var WizStyle = {
     /**
      * 专门用于 redo / undo 操作时，恢复 avatar 样式处理
      */
-    restoreUserAvatarStyle: function restoreUserAvatarStyle() {
+    restoreUserAvatarStyle: function () {
         var guid, styleId;
         for (guid in TodoStyleMap) {
             if (TodoStyleMap.hasOwnProperty(guid)) {
                 styleId = CONST.ID.TODO_AVATAR_STYLE + guid;
-                if (!ENV.doc.querySelector('#' + styleId) && ENV.doc.querySelector('.' + CONST.CLASS.TODO_USER_AVATAR + guid)) {
+                if (!ENV.doc.querySelector('#' + styleId) &&
+                    ENV.doc.querySelector('.' + CONST.CLASS.TODO_USER_AVATAR + guid)) {
                     replaceStyleById(styleId, TodoStyleMap[guid], false);
                 }
             }
+
         }
     }
 };
@@ -7169,8 +7378,6 @@ module.exports = WizStyle;
 /**
  * 专门用于记录用户行为的 log
  */
-'use strict';
-
 var ENV = require('../common/env');
 
 var ActionId = {
@@ -7179,7 +7386,7 @@ var ActionId = {
 };
 
 var wizUserAction = {
-    save: function save(id) {
+    save: function (id) {
         if (ENV.client.type.isWin) {
             try {
                 if (external && external.LogAction) {
@@ -7198,1523 +7405,1556 @@ var UserAction = {
 };
 
 module.exports = UserAction;
-
 },{"../common/env":15}],22:[function(require,module,exports){
 /**
  * 兼容 ES6 将 require 替换为 _require
  */
-"use strict";
+(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof _require=="function"&&_require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof _require=="function"&&_require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_require,module,exports){
+  /**
+   * 默认配置
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
 
-(function e(t, n, r) {
-  function s(o, u) {
-    if (!n[o]) {
-      if (!t[o]) {
-        var a = typeof _require == "function" && _require;if (!u && a) return a(o, !0);if (i) return i(o, !0);var f = new Error("Cannot find module '" + o + "'");throw (f.code = "MODULE_NOT_FOUND", f);
-      }var l = n[o] = { exports: {} };t[o][0].call(l.exports, function (e) {
-        var n = t[o][1][e];return s(n ? n : e);
-      }, l, l.exports, e, t, n, r);
-    }return n[o].exports;
-  }var i = typeof _require == "function" && _require;for (var o = 0; o < r.length; o++) s(r[o]);return s;
-})({ 1: [function (_require, module, exports) {
-    /**
-     * 默认配置
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
+  var FilterCSS = _require('cssfilter').FilterCSS;
+  var _ = _require('./util');
 
-    var FilterCSS = _require('cssfilter').FilterCSS;
-    var _ = _require('./util');
+// 默认白名单
+  function getDefaultWhiteList () {
+    return {
+      a:      ['target', 'href', 'title'],
+      abbr:   ['title'],
+      address: [],
+      area:   ['shape', 'coords', 'href', 'alt'],
+      article: [],
+      aside:  [],
+      audio:  ['autoplay', 'controls', 'loop', 'preload', 'src'],
+      b:      [],
+      bdi:    ['dir'],
+      bdo:    ['dir'],
+      big:    [],
+      blockquote: ['cite'],
+      br:     [],
+      caption: [],
+      center: [],
+      cite:   [],
+      code:   [],
+      col:    ['align', 'valign', 'span', 'width'],
+      colgroup: ['align', 'valign', 'span', 'width'],
+      dd:     [],
+      del:    ['datetime'],
+      details: ['open'],
+      div:    [],
+      dl:     [],
+      dt:     [],
+      em:     [],
+      font:   ['color', 'size', 'face'],
+      footer: [],
+      h1:     [],
+      h2:     [],
+      h3:     [],
+      h4:     [],
+      h5:     [],
+      h6:     [],
+      header: [],
+      hr:     [],
+      i:      [],
+      img:    ['src', 'alt', 'title', 'width', 'height'],
+      ins:    ['datetime'],
+      li:     [],
+      mark:   [],
+      nav:    [],
+      ol:     [],
+      p:      [],
+      pre:    [],
+      s:      [],
+      section:[],
+      small:  [],
+      span:   [],
+      sub:    [],
+      sup:    [],
+      strong: [],
+      table:  ['width', 'border', 'align', 'valign'],
+      tbody:  ['align', 'valign'],
+      td:     ['width', 'rowspan', 'colspan', 'align', 'valign'],
+      tfoot:  ['align', 'valign'],
+      th:     ['width', 'rowspan', 'colspan', 'align', 'valign'],
+      thead:  ['align', 'valign'],
+      tr:     ['rowspan', 'align', 'valign'],
+      tt:     [],
+      u:      [],
+      ul:     [],
+      video:  ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width']
+    };
+  }
 
-    // 默认白名单
-    function getDefaultWhiteList() {
-      return {
-        a: ['target', 'href', 'title'],
-        abbr: ['title'],
-        address: [],
-        area: ['shape', 'coords', 'href', 'alt'],
-        article: [],
-        aside: [],
-        audio: ['autoplay', 'controls', 'loop', 'preload', 'src'],
-        b: [],
-        bdi: ['dir'],
-        bdo: ['dir'],
-        big: [],
-        blockquote: ['cite'],
-        br: [],
-        caption: [],
-        center: [],
-        cite: [],
-        code: [],
-        col: ['align', 'valign', 'span', 'width'],
-        colgroup: ['align', 'valign', 'span', 'width'],
-        dd: [],
-        del: ['datetime'],
-        details: ['open'],
-        div: [],
-        dl: [],
-        dt: [],
-        em: [],
-        font: ['color', 'size', 'face'],
-        footer: [],
-        h1: [],
-        h2: [],
-        h3: [],
-        h4: [],
-        h5: [],
-        h6: [],
-        header: [],
-        hr: [],
-        i: [],
-        img: ['src', 'alt', 'title', 'width', 'height'],
-        ins: ['datetime'],
-        li: [],
-        mark: [],
-        nav: [],
-        ol: [],
-        p: [],
-        pre: [],
-        s: [],
-        section: [],
-        small: [],
-        span: [],
-        sub: [],
-        sup: [],
-        strong: [],
-        table: ['width', 'border', 'align', 'valign'],
-        tbody: ['align', 'valign'],
-        td: ['width', 'rowspan', 'colspan', 'align', 'valign'],
-        tfoot: ['align', 'valign'],
-        th: ['width', 'rowspan', 'colspan', 'align', 'valign'],
-        thead: ['align', 'valign'],
-        tr: ['rowspan', 'align', 'valign'],
-        tt: [],
-        u: [],
-        ul: [],
-        video: ['autoplay', 'controls', 'loop', 'preload', 'src', 'height', 'width']
-      };
-    }
+// 默认CSS Filter
+  var defaultCSSFilter = new FilterCSS();
 
-    // 默认CSS Filter
-    var defaultCSSFilter = new FilterCSS();
-
-    /**
-     * 匹配到标签时的处理方法
-     *
-     * @param {String} tag
-     * @param {String} html
-     * @param {Object} options
-     * @return {String}
-     */
-    function onTag(tag, html, options) {}
+  /**
+   * 匹配到标签时的处理方法
+   *
+   * @param {String} tag
+   * @param {String} html
+   * @param {Object} options
+   * @return {String}
+   */
+  function onTag (tag, html, options) {
     // do nothing
+  }
 
-    /**
-     * 匹配到不在白名单上的标签时的处理方法
-     *
-     * @param {String} tag
-     * @param {String} html
-     * @param {Object} options
-     * @return {String}
-     */
-    function onIgnoreTag(tag, html, options) {}
+  /**
+   * 匹配到不在白名单上的标签时的处理方法
+   *
+   * @param {String} tag
+   * @param {String} html
+   * @param {Object} options
+   * @return {String}
+   */
+  function onIgnoreTag (tag, html, options) {
     // do nothing
+  }
 
-    /**
-     * 匹配到标签属性时的处理方法
-     *
-     * @param {String} tag
-     * @param {String} name
-     * @param {String} value
-     * @return {String}
-     */
-    function onTagAttr(tag, name, value) {}
+  /**
+   * 匹配到标签属性时的处理方法
+   *
+   * @param {String} tag
+   * @param {String} name
+   * @param {String} value
+   * @return {String}
+   */
+  function onTagAttr (tag, name, value) {
     // do nothing
+  }
 
-    /**
-     * 匹配到不在白名单上的标签属性时的处理方法
-     *
-     * @param {String} tag
-     * @param {String} name
-     * @param {String} value
-     * @return {String}
-     */
-    function onIgnoreTagAttr(tag, name, value) {}
+  /**
+   * 匹配到不在白名单上的标签属性时的处理方法
+   *
+   * @param {String} tag
+   * @param {String} name
+   * @param {String} value
+   * @return {String}
+   */
+  function onIgnoreTagAttr (tag, name, value) {
     // do nothing
+  }
 
-    /**
-     * HTML转义
-     *
-     * @param {String} html
-     */
-    function escapeHtml(html) {
-      return html.replace(REGEXP_LT, '&lt;').replace(REGEXP_GT, '&gt;');
-    }
+  /**
+   * HTML转义
+   *
+   * @param {String} html
+   */
+  function escapeHtml (html) {
+    return html.replace(REGEXP_LT, '&lt;').replace(REGEXP_GT, '&gt;');
+  }
 
-    /**
-     * 安全的标签属性值
-     *
-     * @param {String} tag
-     * @param {String} name
-     * @param {String} value
-     * @param {Object} cssFilter
-     * @return {String}
-     */
-    function safeAttrValue(tag, name, value, cssFilter) {
-      cssFilter = cssFilter || defaultCSSFilter;
-      // 转换为友好的属性值，再做判断
-      value = friendlyAttrValue(value);
+  /**
+   * 安全的标签属性值
+   *
+   * @param {String} tag
+   * @param {String} name
+   * @param {String} value
+   * @param {Object} cssFilter
+   * @return {String}
+   */
+  function safeAttrValue (tag, name, value, cssFilter) {
+    cssFilter = cssFilter || defaultCSSFilter;
+    // 转换为友好的属性值，再做判断
+    value = friendlyAttrValue(value);
 
-      if (name === 'href' || name === 'src') {
-        // 过滤 href 和 src 属性
-        // 仅允许 http:// | https:// | mailto: | / | # 开头的地址
-        value = _.trim(value);
-        if (value === '#') return '#';
-        if (!(value.substr(0, 7) === 'http://' || value.substr(0, 8) === 'https://' || value.substr(0, 7) === 'mailto:' || value[0] === '#' || value[0] === '/')) {
-          return '';
-        }
-      } else if (name === 'background') {
-        // 过滤 background 属性 （这个xss漏洞较老了，可能已经不适用）
-        // javascript:
+    if (name === 'href' || name === 'src') {
+      // 过滤 href 和 src 属性
+      // 仅允许 http:// | https:// | mailto: | / | # 开头的地址
+      value = _.trim(value);
+      if (value === '#') return '#';
+      if (!(value.substr(0, 7) === 'http://' ||
+          value.substr(0, 8) === 'https://' ||
+          value.substr(0, 7) === 'mailto:' ||
+          value[0] === '#' ||
+          value[0] === '/')) {
+        return '';
+      }
+    } else if (name === 'background') {
+      // 过滤 background 属性 （这个xss漏洞较老了，可能已经不适用）
+      // javascript:
+      REGEXP_DEFAULT_ON_TAG_ATTR_4.lastIndex = 0;
+      if (REGEXP_DEFAULT_ON_TAG_ATTR_4.test(value)) {
+        return '';
+      }
+    } else if (name === 'style') {
+      // /*注释*/
+      /*REGEXP_DEFAULT_ON_TAG_ATTR_3.lastIndex = 0;
+       if (REGEXP_DEFAULT_ON_TAG_ATTR_3.test(value)) {
+       return '';
+       }*/
+      // expression()
+      REGEXP_DEFAULT_ON_TAG_ATTR_7.lastIndex = 0;
+      if (REGEXP_DEFAULT_ON_TAG_ATTR_7.test(value)) {
+        return '';
+      }
+      // url()
+      REGEXP_DEFAULT_ON_TAG_ATTR_8.lastIndex = 0;
+      if (REGEXP_DEFAULT_ON_TAG_ATTR_8.test(value)) {
         REGEXP_DEFAULT_ON_TAG_ATTR_4.lastIndex = 0;
         if (REGEXP_DEFAULT_ON_TAG_ATTR_4.test(value)) {
           return '';
         }
-      } else if (name === 'style') {
-        // /*注释*/
-        /*REGEXP_DEFAULT_ON_TAG_ATTR_3.lastIndex = 0;
-         if (REGEXP_DEFAULT_ON_TAG_ATTR_3.test(value)) {
-         return '';
-         }*/
-        // expression()
-        REGEXP_DEFAULT_ON_TAG_ATTR_7.lastIndex = 0;
-        if (REGEXP_DEFAULT_ON_TAG_ATTR_7.test(value)) {
-          return '';
-        }
-        // url()
-        REGEXP_DEFAULT_ON_TAG_ATTR_8.lastIndex = 0;
-        if (REGEXP_DEFAULT_ON_TAG_ATTR_8.test(value)) {
-          REGEXP_DEFAULT_ON_TAG_ATTR_4.lastIndex = 0;
-          if (REGEXP_DEFAULT_ON_TAG_ATTR_4.test(value)) {
-            return '';
-          }
-        }
-        value = cssFilter.process(value);
       }
-
-      // 输出时需要转义<>"
-      value = escapeAttrValue(value);
-      return value;
+      value = cssFilter.process(value);
     }
 
-    // 正则表达式
-    var REGEXP_LT = /</g;
-    var REGEXP_GT = />/g;
-    var REGEXP_QUOTE = /"/g;
-    var REGEXP_QUOTE_2 = /&quot;/g;
-    var REGEXP_ATTR_VALUE_1 = /&#([a-zA-Z0-9]*);?/img;
-    var REGEXP_ATTR_VALUE_COLON = /&colon;?/img;
-    var REGEXP_ATTR_VALUE_NEWLINE = /&newline;?/img;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_3 = /\/\*|\*\//mg;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_4 = /((j\s*a\s*v\s*a|v\s*b|l\s*i\s*v\s*e)\s*s\s*c\s*r\s*i\s*p\s*t\s*|m\s*o\s*c\s*h\s*a)\:/ig;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_5 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:/ig;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_6 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:\s*image\//ig;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_7 = /e\s*x\s*p\s*r\s*e\s*s\s*s\s*i\s*o\s*n\s*\(.*/ig;
-    var REGEXP_DEFAULT_ON_TAG_ATTR_8 = /u\s*r\s*l\s*\(.*/ig;
+    // 输出时需要转义<>"
+    value = escapeAttrValue(value);
+    return value;
+  }
 
-    /**
-     * 对双引号进行转义
-     *
-     * @param {String} str
-     * @return {String} str
-     */
-    function escapeQuote(str) {
-      return str.replace(REGEXP_QUOTE, '&quot;');
+// 正则表达式
+  var REGEXP_LT = /</g;
+  var REGEXP_GT = />/g;
+  var REGEXP_QUOTE = /"/g;
+  var REGEXP_QUOTE_2 = /&quot;/g;
+  var REGEXP_ATTR_VALUE_1 = /&#([a-zA-Z0-9]*);?/img;
+  var REGEXP_ATTR_VALUE_COLON = /&colon;?/img;
+  var REGEXP_ATTR_VALUE_NEWLINE = /&newline;?/img;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_3 = /\/\*|\*\//mg;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_4 = /((j\s*a\s*v\s*a|v\s*b|l\s*i\s*v\s*e)\s*s\s*c\s*r\s*i\s*p\s*t\s*|m\s*o\s*c\s*h\s*a)\:/ig;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_5 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:/ig;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_6 = /^[\s"'`]*(d\s*a\s*t\s*a\s*)\:\s*image\//ig;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_7 = /e\s*x\s*p\s*r\s*e\s*s\s*s\s*i\s*o\s*n\s*\(.*/ig;
+  var REGEXP_DEFAULT_ON_TAG_ATTR_8 = /u\s*r\s*l\s*\(.*/ig;
+
+  /**
+   * 对双引号进行转义
+   *
+   * @param {String} str
+   * @return {String} str
+   */
+  function escapeQuote (str) {
+    return str.replace(REGEXP_QUOTE, '&quot;');
+  }
+
+  /**
+   * 对双引号进行转义
+   *
+   * @param {String} str
+   * @return {String} str
+   */
+  function unescapeQuote (str) {
+    return str.replace(REGEXP_QUOTE_2, '"');
+  }
+
+  /**
+   * 对html实体编码进行转义
+   *
+   * @param {String} str
+   * @return {String}
+   */
+  function escapeHtmlEntities (str) {
+    return str.replace(REGEXP_ATTR_VALUE_1, function replaceUnicode (str, code) {
+      return (code[0] === 'x' || code[0] === 'X')
+          ? String.fromCharCode(parseInt(code.substr(1), 16))
+          : String.fromCharCode(parseInt(code, 10));
+    });
+  }
+
+  /**
+   * 对html5新增的危险实体编码进行转义
+   *
+   * @param {String} str
+   * @return {String}
+   */
+  function escapeDangerHtml5Entities (str) {
+    return str.replace(REGEXP_ATTR_VALUE_COLON, ':')
+        .replace(REGEXP_ATTR_VALUE_NEWLINE, ' ');
+  }
+
+  /**
+   * 清除不可见字符
+   *
+   * @param {String} str
+   * @return {String}
+   */
+  function clearNonPrintableCharacter (str) {
+    var str2 = '';
+    for (var i = 0, len = str.length; i < len; i++) {
+      str2 += str.charCodeAt(i) < 32 ? ' ' : str.charAt(i);
+    }
+    return _.trim(str2);
+  }
+
+  /**
+   * 将标签的属性值转换成一般字符，便于分析
+   *
+   * @param {String} str
+   * @return {String}
+   */
+  function friendlyAttrValue (str) {
+    str = unescapeQuote(str);             // 双引号
+    str = escapeHtmlEntities(str);         // 转换HTML实体编码
+    str = escapeDangerHtml5Entities(str);  // 转换危险的HTML5新增实体编码
+    str = clearNonPrintableCharacter(str); // 清除不可见字符
+    return str;
+  }
+
+  /**
+   * 转义用于输出的标签属性值
+   *
+   * @param {String} str
+   * @return {String}
+   */
+  function escapeAttrValue (str) {
+    str = escapeQuote(str);
+    str = escapeHtml(str);
+    return str;
+  }
+
+  /**
+   * 去掉不在白名单中的标签onIgnoreTag处理方法
+   */
+  function onIgnoreTagStripAll () {
+    return '';
+  }
+
+  /**
+   * 删除标签体
+   *
+   * @param {array} tags 要删除的标签列表
+   * @param {function} next 对不在列表中的标签的处理函数，可选
+   */
+  function StripTagBody (tags, next) {
+    if (typeof(next) !== 'function') {
+      next = function () {};
     }
 
-    /**
-     * 对双引号进行转义
-     *
-     * @param {String} str
-     * @return {String} str
-     */
-    function unescapeQuote(str) {
-      return str.replace(REGEXP_QUOTE_2, '"');
+    var isRemoveAllTag = !Array.isArray(tags);
+    function isRemoveTag (tag) {
+      if (isRemoveAllTag) return true;
+      return (_.indexOf(tags, tag) !== -1);
     }
 
-    /**
-     * 对html实体编码进行转义
-     *
-     * @param {String} str
-     * @return {String}
-     */
-    function escapeHtmlEntities(str) {
-      return str.replace(REGEXP_ATTR_VALUE_1, function replaceUnicode(str, code) {
-        return code[0] === 'x' || code[0] === 'X' ? String.fromCharCode(parseInt(code.substr(1), 16)) : String.fromCharCode(parseInt(code, 10));
-      });
-    }
+    var removeList = [];   // 要删除的位置范围列表
+    var posStart = false;  // 当前标签开始位置
 
-    /**
-     * 对html5新增的危险实体编码进行转义
-     *
-     * @param {String} str
-     * @return {String}
-     */
-    function escapeDangerHtml5Entities(str) {
-      return str.replace(REGEXP_ATTR_VALUE_COLON, ':').replace(REGEXP_ATTR_VALUE_NEWLINE, ' ');
-    }
-
-    /**
-     * 清除不可见字符
-     *
-     * @param {String} str
-     * @return {String}
-     */
-    function clearNonPrintableCharacter(str) {
-      var str2 = '';
-      for (var i = 0, len = str.length; i < len; i++) {
-        str2 += str.charCodeAt(i) < 32 ? ' ' : str.charAt(i);
-      }
-      return _.trim(str2);
-    }
-
-    /**
-     * 将标签的属性值转换成一般字符，便于分析
-     *
-     * @param {String} str
-     * @return {String}
-     */
-    function friendlyAttrValue(str) {
-      str = unescapeQuote(str); // 双引号
-      str = escapeHtmlEntities(str); // 转换HTML实体编码
-      str = escapeDangerHtml5Entities(str); // 转换危险的HTML5新增实体编码
-      str = clearNonPrintableCharacter(str); // 清除不可见字符
-      return str;
-    }
-
-    /**
-     * 转义用于输出的标签属性值
-     *
-     * @param {String} str
-     * @return {String}
-     */
-    function escapeAttrValue(str) {
-      str = escapeQuote(str);
-      str = escapeHtml(str);
-      return str;
-    }
-
-    /**
-     * 去掉不在白名单中的标签onIgnoreTag处理方法
-     */
-    function onIgnoreTagStripAll() {
-      return '';
-    }
-
-    /**
-     * 删除标签体
-     *
-     * @param {array} tags 要删除的标签列表
-     * @param {function} next 对不在列表中的标签的处理函数，可选
-     */
-    function StripTagBody(tags, next) {
-      if (typeof next !== 'function') {
-        next = function () {};
-      }
-
-      var isRemoveAllTag = !Array.isArray(tags);
-      function isRemoveTag(tag) {
-        if (isRemoveAllTag) return true;
-        return _.indexOf(tags, tag) !== -1;
-      }
-
-      var removeList = []; // 要删除的位置范围列表
-      var posStart = false; // 当前标签开始位置
-
-      return {
-        onIgnoreTag: function onIgnoreTag(tag, html, options) {
-          if (isRemoveTag(tag)) {
-            if (options.isClosing) {
-              var ret = '[/removed]';
-              var end = options.position + ret.length;
-              removeList.push([posStart !== false ? posStart : options.position, end]);
-              posStart = false;
-              return ret;
-            } else {
-              if (!posStart) {
-                posStart = options.position;
-              }
-              return '[removed]';
-            }
+    return {
+      onIgnoreTag: function (tag, html, options) {
+        if (isRemoveTag(tag)) {
+          if (options.isClosing) {
+            var ret = '[/removed]';
+            var end = options.position + ret.length;
+            removeList.push([posStart !== false ? posStart : options.position, end]);
+            posStart = false;
+            return ret;
           } else {
-            return next(tag, html, options);
+            if (!posStart) {
+              posStart = options.position;
+            }
+            return '[removed]';
           }
-        },
-        remove: function remove(html) {
-          var rethtml = '';
-          var lastPos = 0;
-          _.forEach(removeList, function (pos) {
-            rethtml += html.slice(lastPos, pos[0]);
-            lastPos = pos[1];
-          });
-          rethtml += html.slice(lastPos);
-          return rethtml;
+        } else {
+          return next(tag, html, options);
         }
-      };
-    }
-
-    /**
-     * 去除备注标签
-     *
-     * @param {String} html
-     * @return {String}
-     */
-    function stripCommentTag(html) {
-      return html.replace(STRIP_COMMENT_TAG_REGEXP, '');
-    }
-    var STRIP_COMMENT_TAG_REGEXP = /<!--[\s\S]*?-->/g;
-
-    /**
-     * 去除不可见字符
-     *
-     * @param {String} html
-     * @return {String}
-     */
-    function stripBlankChar(html) {
-      var chars = html.split('');
-      chars = chars.filter(function (char) {
-        var c = char.charCodeAt(0);
-        if (c === 127) return false;
-        if (c <= 31) {
-          if (c === 10 || c === 13) return true;
-          return false;
-        }
-        return true;
-      });
-      return chars.join('');
-    }
-
-    exports.whiteList = getDefaultWhiteList();
-    exports.getDefaultWhiteList = getDefaultWhiteList;
-    exports.onTag = onTag;
-    exports.onIgnoreTag = onIgnoreTag;
-    exports.onTagAttr = onTagAttr;
-    exports.onIgnoreTagAttr = onIgnoreTagAttr;
-    exports.safeAttrValue = safeAttrValue;
-    exports.escapeHtml = escapeHtml;
-    exports.escapeQuote = escapeQuote;
-    exports.unescapeQuote = unescapeQuote;
-    exports.escapeHtmlEntities = escapeHtmlEntities;
-    exports.escapeDangerHtml5Entities = escapeDangerHtml5Entities;
-    exports.clearNonPrintableCharacter = clearNonPrintableCharacter;
-    exports.friendlyAttrValue = friendlyAttrValue;
-    exports.escapeAttrValue = escapeAttrValue;
-    exports.onIgnoreTagStripAll = onIgnoreTagStripAll;
-    exports.StripTagBody = StripTagBody;
-    exports.stripCommentTag = stripCommentTag;
-    exports.stripBlankChar = stripBlankChar;
-    exports.cssFilter = defaultCSSFilter;
-  }, { "./util": 4, "cssfilter": 8 }], 2: [function (_require, module, exports) {
-    /**
-     * 模块入口
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var DEFAULT = _require('./default');
-    var parser = _require('./parser');
-    var FilterXSS = _require('./xss');
-
-    /**
-     * XSS过滤
-     *
-     * @param {String} html 要过滤的HTML代码
-     * @param {Object} options 选项：whiteList, onTag, onTagAttr, onIgnoreTag, onIgnoreTagAttr, safeAttrValue, escapeHtml
-     * @return {String}
-     */
-    function filterXSS(html, options) {
-      var xss = new FilterXSS(options);
-      return xss.process(html);
-    }
-
-    // 输出
-    exports = module.exports = filterXSS;
-    exports.FilterXSS = FilterXSS;
-    for (var i in DEFAULT) exports[i] = DEFAULT[i];
-    for (var i in parser) exports[i] = parser[i];
-
-    // 在浏览器端使用
-    if (typeof window !== 'undefined') {
-      window.filterXSS = module.exports;
-    }
-  }, { "./default": 1, "./parser": 3, "./xss": 5 }], 3: [function (_require, module, exports) {
-    /**
-     * 简单 HTML Parser
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var _ = _require('./util');
-
-    /**
-     * 获取标签的名称
-     *
-     * @param {String} html 如：'<a hef="#">'
-     * @return {String}
-     */
-    function getTagName(html) {
-      var i = html.indexOf(' ');
-      if (i === -1) {
-        var tagName = html.slice(1, -1);
-      } else {
-        var tagName = html.slice(1, i + 1);
+      },
+      remove: function (html) {
+        var rethtml = '';
+        var lastPos = 0;
+        _.forEach(removeList, function (pos) {
+          rethtml += html.slice(lastPos, pos[0]);
+          lastPos = pos[1];
+        });
+        rethtml += html.slice(lastPos);
+        return rethtml;
       }
-      tagName = _.trim(tagName).toLowerCase();
-      if (tagName.slice(0, 1) === '/') tagName = tagName.slice(1);
-      if (tagName.slice(-1) === '/') tagName = tagName.slice(0, -1);
-      return tagName;
+    };
+  }
+
+  /**
+   * 去除备注标签
+   *
+   * @param {String} html
+   * @return {String}
+   */
+  function stripCommentTag (html) {
+    return html.replace(STRIP_COMMENT_TAG_REGEXP, '');
+  }
+  var STRIP_COMMENT_TAG_REGEXP = /<!--[\s\S]*?-->/g;
+
+  /**
+   * 去除不可见字符
+   *
+   * @param {String} html
+   * @return {String}
+   */
+  function stripBlankChar (html) {
+    var chars = html.split('');
+    chars = chars.filter(function (char) {
+      var c = char.charCodeAt(0);
+      if (c === 127) return false;
+      if (c <= 31) {
+        if (c === 10 || c === 13) return true;
+        return false;
+      }
+      return true;
+    });
+    return chars.join('');
+  }
+
+
+  exports.whiteList = getDefaultWhiteList();
+  exports.getDefaultWhiteList = getDefaultWhiteList;
+  exports.onTag = onTag;
+  exports.onIgnoreTag = onIgnoreTag;
+  exports.onTagAttr = onTagAttr;
+  exports.onIgnoreTagAttr = onIgnoreTagAttr;
+  exports.safeAttrValue = safeAttrValue;
+  exports.escapeHtml = escapeHtml;
+  exports.escapeQuote = escapeQuote;
+  exports.unescapeQuote = unescapeQuote;
+  exports.escapeHtmlEntities = escapeHtmlEntities;
+  exports.escapeDangerHtml5Entities = escapeDangerHtml5Entities;
+  exports.clearNonPrintableCharacter = clearNonPrintableCharacter;
+  exports.friendlyAttrValue = friendlyAttrValue;
+  exports.escapeAttrValue = escapeAttrValue;
+  exports.onIgnoreTagStripAll = onIgnoreTagStripAll;
+  exports.StripTagBody = StripTagBody;
+  exports.stripCommentTag = stripCommentTag;
+  exports.stripBlankChar = stripBlankChar;
+  exports.cssFilter = defaultCSSFilter;
+
+
+},{"./util":4,"cssfilter":8}],2:[function(_require,module,exports){
+  /**
+   * 模块入口
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var DEFAULT = _require('./default');
+  var parser = _require('./parser');
+  var FilterXSS = _require('./xss');
+
+
+  /**
+   * XSS过滤
+   *
+   * @param {String} html 要过滤的HTML代码
+   * @param {Object} options 选项：whiteList, onTag, onTagAttr, onIgnoreTag, onIgnoreTagAttr, safeAttrValue, escapeHtml
+   * @return {String}
+   */
+  function filterXSS (html, options) {
+    var xss = new FilterXSS(options);
+    return xss.process(html);
+  }
+
+
+// 输出
+  exports = module.exports = filterXSS;
+  exports.FilterXSS = FilterXSS;
+  for (var i in DEFAULT) exports[i] = DEFAULT[i];
+  for (var i in parser) exports[i] = parser[i];
+
+
+// 在浏览器端使用
+  if (typeof window !== 'undefined') {
+    window.filterXSS = module.exports;
+  }
+
+},{"./default":1,"./parser":3,"./xss":5}],3:[function(_require,module,exports){
+  /**
+   * 简单 HTML Parser
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var _ = _require('./util');
+
+  /**
+   * 获取标签的名称
+   *
+   * @param {String} html 如：'<a hef="#">'
+   * @return {String}
+   */
+  function getTagName (html) {
+    var i = html.indexOf(' ');
+    if (i === -1) {
+      var tagName = html.slice(1, -1);
+    } else {
+      var tagName = html.slice(1, i + 1);
     }
+    tagName = _.trim(tagName).toLowerCase();
+    if (tagName.slice(0, 1) === '/') tagName = tagName.slice(1);
+    if (tagName.slice(-1) === '/') tagName = tagName.slice(0, -1);
+    return tagName;
+  }
 
-    /**
-     * 是否为闭合标签
-     *
-     * @param {String} html 如：'<a hef="#">'
-     * @return {Boolean}
-     */
-    function isClosing(html) {
-      return html.slice(0, 2) === '</';
-    }
+  /**
+   * 是否为闭合标签
+   *
+   * @param {String} html 如：'<a hef="#">'
+   * @return {Boolean}
+   */
+  function isClosing (html) {
+    return (html.slice(0, 2) === '</');
+  }
 
-    /**
-     * 分析HTML代码，调用相应的函数处理，返回处理后的HTML
-     *
-     * @param {String} html
-     * @param {Function} onTag 处理标签的函数
-     *   参数格式： function (sourcePosition, position, tag, html, isClosing)
-     * @param {Function} escapeHtml 对HTML进行转义的函数
-     * @return {String}
-     */
-    function parseTag(html, onTag, escapeHtml) {
-      'user strict';
+  /**
+   * 分析HTML代码，调用相应的函数处理，返回处理后的HTML
+   *
+   * @param {String} html
+   * @param {Function} onTag 处理标签的函数
+   *   参数格式： function (sourcePosition, position, tag, html, isClosing)
+   * @param {Function} escapeHtml 对HTML进行转义的函数
+   * @return {String}
+   */
+  function parseTag (html, onTag, escapeHtml) {
+    'user strict';
 
-      var rethtml = ''; // 待返回的HTML
-      var lastPos = 0; // 上一个标签结束位置
-      var tagStart = false; // 当前标签开始位置
-      var quoteStart = false; // 引号开始位置
-      var currentPos = 0; // 当前位置
-      var len = html.length; // HTML长度
-      var currentHtml = ''; // 当前标签的HTML代码
-      var currentTagName = ''; // 当前标签的名称
+    var rethtml = '';        // 待返回的HTML
+    var lastPos = 0;         // 上一个标签结束位置
+    var tagStart = false;    // 当前标签开始位置
+    var quoteStart = false;  // 引号开始位置
+    var currentPos = 0;      // 当前位置
+    var len = html.length;   // HTML长度
+    var currentHtml = '';    // 当前标签的HTML代码
+    var currentTagName = ''; // 当前标签的名称
 
-      // 逐个分析字符
-      for (currentPos = 0; currentPos < len; currentPos++) {
-        var c = html.charAt(currentPos);
-        if (tagStart === false) {
+    // 逐个分析字符
+    for (currentPos = 0; currentPos < len; currentPos++) {
+      var c = html.charAt(currentPos);
+      if (tagStart === false) {
+        if (c === '<') {
+          tagStart = currentPos;
+          continue;
+        }
+      } else {
+        if (quoteStart === false) {
           if (c === '<') {
+            rethtml += escapeHtml(html.slice(lastPos, currentPos));
             tagStart = currentPos;
+            lastPos = currentPos;
+            continue;
+          }
+          if (c === '>') {
+            rethtml += escapeHtml(html.slice(lastPos, tagStart));
+            currentHtml = html.slice(tagStart, currentPos + 1);
+            currentTagName = getTagName(currentHtml);
+            rethtml += onTag(tagStart,
+                rethtml.length,
+                currentTagName,
+                currentHtml,
+                isClosing(currentHtml));
+            lastPos = currentPos + 1;
+            tagStart = false;
+            continue;
+          }
+          // HTML标签内的引号仅当前一个字符是等于号时才有效
+          if ((c === '"' || c === "'") && html.charAt(currentPos - 1) === '=') {
+            quoteStart = c;
             continue;
           }
         } else {
-          if (quoteStart === false) {
-            if (c === '<') {
-              rethtml += escapeHtml(html.slice(lastPos, currentPos));
-              tagStart = currentPos;
-              lastPos = currentPos;
-              continue;
-            }
-            if (c === '>') {
-              rethtml += escapeHtml(html.slice(lastPos, tagStart));
-              currentHtml = html.slice(tagStart, currentPos + 1);
-              currentTagName = getTagName(currentHtml);
-              rethtml += onTag(tagStart, rethtml.length, currentTagName, currentHtml, isClosing(currentHtml));
-              lastPos = currentPos + 1;
-              tagStart = false;
-              continue;
-            }
-            // HTML标签内的引号仅当前一个字符是等于号时才有效
-            if ((c === '"' || c === "'") && html.charAt(currentPos - 1) === '=') {
-              quoteStart = c;
-              continue;
-            }
-          } else {
-            if (c === quoteStart) {
-              quoteStart = false;
-              continue;
-            }
+          if (c === quoteStart) {
+            quoteStart = false;
+            continue;
           }
         }
       }
-      if (lastPos < html.length) {
-        rethtml += escapeHtml(html.substr(lastPos));
-      }
-
-      return rethtml;
+    }
+    if (lastPos < html.length) {
+      rethtml += escapeHtml(html.substr(lastPos));
     }
 
-    // 不符合属性名称规则的正则表达式
-    var REGEXP_ATTR_NAME = /[^a-zA-Z0-9_:\.\-]/img;
+    return rethtml;
+  }
 
-    /**
-     * 分析标签HTML代码，调用相应的函数处理，返回HTML
-     *
-     * @param {String} html 如标签'<a href="#" target="_blank">' 则为 'href="#" target="_blank"'
-     * @param {Function} onAttr 处理属性值的函数
-     *   函数格式： function (name, value)
-     * @return {String}
-     */
-    function parseAttr(html, onAttr) {
-      'user strict';
+// 不符合属性名称规则的正则表达式
+  var REGEXP_ATTR_NAME = /[^a-zA-Z0-9_:\.\-]/img;
 
-      var lastPos = 0; // 当前位置
-      var retAttrs = []; // 待返回的属性列表
-      var tmpName = false; // 临时属性名称
-      var len = html.length; // HTML代码长度
+  /**
+   * 分析标签HTML代码，调用相应的函数处理，返回HTML
+   *
+   * @param {String} html 如标签'<a href="#" target="_blank">' 则为 'href="#" target="_blank"'
+   * @param {Function} onAttr 处理属性值的函数
+   *   函数格式： function (name, value)
+   * @return {String}
+   */
+  function parseAttr (html, onAttr) {
+    'user strict';
 
-      function addAttr(name, value) {
-        name = _.trim(name);
-        name = name.replace(REGEXP_ATTR_NAME, '').toLowerCase();
-        if (name.length < 1) return;
-        var ret = onAttr(name, value || '');
-        if (ret) retAttrs.push(ret);
-      };
+    var lastPos = 0;        // 当前位置
+    var retAttrs = [];      // 待返回的属性列表
+    var tmpName = false;    // 临时属性名称
+    var len = html.length;  // HTML代码长度
 
-      // 逐个分析字符
-      for (var i = 0; i < len; i++) {
-        var c = html.charAt(i);
-        var v, j;
-        if (tmpName === false && c === '=') {
-          tmpName = html.slice(lastPos, i);
-          lastPos = i + 1;
-          continue;
-        }
-        if (tmpName !== false) {
-          // HTML标签内的引号仅当前一个字符是等于号时才有效
-          if (i === lastPos && (c === '"' || c === "'") && html.charAt(i - 1) === '=') {
-            j = html.indexOf(c, i + 1);
-            if (j === -1) {
-              break;
-            } else {
-              v = _.trim(html.slice(lastPos + 1, j));
-              addAttr(tmpName, v);
-              tmpName = false;
-              i = j;
-              lastPos = i + 1;
-              continue;
-            }
-          }
-        }
-        if (c === ' ') {
-          if (tmpName === false) {
-            j = findNextEqual(html, i);
-            if (j === -1) {
-              v = _.trim(html.slice(lastPos, i));
-              addAttr(v);
-              tmpName = false;
-              lastPos = i + 1;
-              continue;
-            } else {
-              i = j - 1;
-              continue;
-            }
-          } else {
-            j = findBeforeEqual(html, i - 1);
-            if (j === -1) {
-              v = _.trim(html.slice(lastPos, i));
-              v = stripQuoteWrap(v);
-              addAttr(tmpName, v);
-              tmpName = false;
-              lastPos = i + 1;
-              continue;
-            } else {
-              continue;
-            }
-          }
-        }
-      }
-
-      if (lastPos < html.length) {
-        if (tmpName === false) {
-          addAttr(html.slice(lastPos));
-        } else {
-          addAttr(tmpName, stripQuoteWrap(_.trim(html.slice(lastPos))));
-        }
-      }
-
-      return _.trim(retAttrs.join(' '));
-    }
-
-    function findNextEqual(str, i) {
-      for (; i < str.length; i++) {
-        var c = str[i];
-        if (c === ' ') continue;
-        if (c === '=') return i;
-        return -1;
-      }
-    }
-
-    function findBeforeEqual(str, i) {
-      for (; i > 0; i--) {
-        var c = str[i];
-        if (c === ' ') continue;
-        if (c === '=') return i;
-        return -1;
-      }
-    }
-
-    function isQuoteWrapString(text) {
-      if (text[0] === '"' && text[text.length - 1] === '"' || text[0] === '\'' && text[text.length - 1] === '\'') {
-        return true;
-      } else {
-        return false;
-      }
+    function addAttr (name, value) {
+      name = _.trim(name);
+      name = name.replace(REGEXP_ATTR_NAME, '').toLowerCase();
+      if (name.length < 1) return;
+      var ret = onAttr(name, value || '');
+      if (ret) retAttrs.push(ret);
     };
 
-    function stripQuoteWrap(text) {
-      if (isQuoteWrapString(text)) {
-        return text.substr(1, text.length - 2);
-      } else {
-        return text;
-      }
-    };
-
-    exports.parseTag = parseTag;
-    exports.parseAttr = parseAttr;
-  }, { "./util": 4 }], 4: [function (_require, module, exports) {
-    module.exports = {
-      indexOf: function indexOf(arr, item) {
-        var i, j;
-        if (Array.prototype.indexOf) {
-          return arr.indexOf(item);
-        }
-        for (i = 0, j = arr.length; i < j; i++) {
-          if (arr[i] === item) {
-            return i;
-          }
-        }
-        return -1;
-      },
-      forEach: function forEach(arr, fn, scope) {
-        var i, j;
-        if (Array.prototype.forEach) {
-          return arr.forEach(fn, scope);
-        }
-        for (i = 0, j = arr.length; i < j; i++) {
-          fn.call(scope, arr[i], i, arr);
-        }
-      },
-      trim: function trim(str) {
-        if (String.prototype.trim) {
-          return str.trim();
-        }
-        return str.replace(/(^\s*)|(\s*$)/g, '');
-      }
-    };
-  }, {}], 5: [function (_require, module, exports) {
-    /**
-     * 过滤XSS
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var FilterCSS = _require('cssfilter').FilterCSS;
-    var DEFAULT = _require('./default');
-    var parser = _require('./parser');
-    var parseTag = parser.parseTag;
-    var parseAttr = parser.parseAttr;
-    var _ = _require('./util');
-
-    /**
-     * 返回值是否为空
-     *
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    function isNull(obj) {
-      return obj === undefined || obj === null;
-    }
-
-    /**
-     * 取标签内的属性列表字符串
-     *
-     * @param {String} html
-     * @return {Object}
-     *   - {String} html
-     *   - {Boolean} closing
-     */
-    function getAttrs(html) {
-      var i = html.indexOf(' ');
-      if (i === -1) {
-        return {
-          html: '',
-          closing: html[html.length - 2] === '/'
-        };
-      }
-      html = _.trim(html.slice(i + 1, -1));
-      var isClosing = html[html.length - 1] === '/';
-      if (isClosing) html = _.trim(html.slice(0, -1));
-      return {
-        html: html,
-        closing: isClosing
-      };
-    }
-
-    /**
-     * XSS过滤对象
-     *
-     * @param {Object} options
-     *   选项：whiteList, onTag, onTagAttr, onIgnoreTag,
-     *        onIgnoreTagAttr, safeAttrValue, escapeHtml
-     *        stripIgnoreTagBody, allowCommentTag, stripBlankChar
-     *        css{whiteList, onAttr, onIgnoreAttr}
-     */
-    function FilterXSS(options) {
-      options = options || {};
-
-      if (options.stripIgnoreTag) {
-        if (options.onIgnoreTag) {
-          console.error('Notes: cannot use these two options "stripIgnoreTag" and "onIgnoreTag" at the same time');
-        }
-        options.onIgnoreTag = DEFAULT.onIgnoreTagStripAll;
-      }
-
-      options.whiteList = options.whiteList || DEFAULT.whiteList;
-      options.onTag = options.onTag || DEFAULT.onTag;
-      options.onTagAttr = options.onTagAttr || DEFAULT.onTagAttr;
-      options.onIgnoreTag = options.onIgnoreTag || DEFAULT.onIgnoreTag;
-      options.onIgnoreTagAttr = options.onIgnoreTagAttr || DEFAULT.onIgnoreTagAttr;
-      options.safeAttrValue = options.safeAttrValue || DEFAULT.safeAttrValue;
-      options.escapeHtml = options.escapeHtml || DEFAULT.escapeHtml;
-      options.css = options.css || {};
-      this.options = options;
-
-      this.cssFilter = new FilterCSS(options.css);
-    }
-
-    /**
-     * 开始处理
-     *
-     * @param {String} html
-     * @return {String}
-     */
-    FilterXSS.prototype.process = function (html) {
-      // 兼容各种奇葩输入
-      html = html || '';
-      html = html.toString();
-      if (!html) return '';
-
-      var me = this;
-      var options = me.options;
-      var whiteList = options.whiteList;
-      var onTag = options.onTag;
-      var onIgnoreTag = options.onIgnoreTag;
-      var onTagAttr = options.onTagAttr;
-      var onIgnoreTagAttr = options.onIgnoreTagAttr;
-      var safeAttrValue = options.safeAttrValue;
-      var escapeHtml = options.escapeHtml;
-      var cssFilter = me.cssFilter;
-
-      // 是否清除不可见字符
-      if (options.stripBlankChar) {
-        html = DEFAULT.stripBlankChar(html);
-      }
-
-      // 是否禁止备注标签
-      if (!options.allowCommentTag) {
-        html = DEFAULT.stripCommentTag(html);
-      }
-
-      // 如果开启了stripIgnoreTagBody
-      var stripIgnoreTagBody = false;
-      if (options.stripIgnoreTagBody) {
-        var stripIgnoreTagBody = DEFAULT.StripTagBody(options.stripIgnoreTagBody, onIgnoreTag);
-        onIgnoreTag = stripIgnoreTagBody.onIgnoreTag;
-      }
-
-      var retHtml = parseTag(html, function (sourcePosition, position, tag, html, isClosing) {
-        var info = {
-          sourcePosition: sourcePosition,
-          position: position,
-          isClosing: isClosing,
-          isWhite: tag in whiteList
-        };
-
-        // 调用onTag处理
-        var ret = onTag(tag, html, info);
-        if (!isNull(ret)) return ret;
-
-        // 默认标签处理方法
-        if (info.isWhite) {
-          // 白名单标签，解析标签属性
-          // 如果是闭合标签，则不需要解析属性
-          if (info.isClosing) {
-            return '</' + tag + '>';
-          }
-
-          var attrs = getAttrs(html);
-          var whiteAttrList = whiteList[tag];
-          var attrsHtml = parseAttr(attrs.html, function (name, value) {
-
-            // 调用onTagAttr处理
-            var isWhiteAttr = _.indexOf(whiteAttrList, name) !== -1;
-            var ret = onTagAttr(tag, name, value, isWhiteAttr);
-            if (!isNull(ret)) return ret;
-
-            // 默认的属性处理方法
-            if (isWhiteAttr) {
-              // 白名单属性，调用safeAttrValue过滤属性值
-              value = safeAttrValue(tag, name, value, cssFilter);
-              if (value) {
-                return name + '="' + value + '"';
-              } else {
-                return name;
-              }
-            } else {
-              // 非白名单属性，调用onIgnoreTagAttr处理
-              var ret = onIgnoreTagAttr(tag, name, value, isWhiteAttr);
-              if (!isNull(ret)) return ret;
-              return;
-            }
-          });
-
-          // 构造新的标签代码
-          var html = '<' + tag;
-          if (attrsHtml) html += ' ' + attrsHtml;
-          if (attrs.closing) html += ' /';
-          html += '>';
-          return html;
-        } else {
-          // 非白名单标签，调用onIgnoreTag处理
-          var ret = onIgnoreTag(tag, html, info);
-          if (!isNull(ret)) return ret;
-          return escapeHtml(html);
-        }
-      }, escapeHtml);
-
-      // 如果开启了stripIgnoreTagBody，需要对结果再进行处理
-      if (stripIgnoreTagBody) {
-        retHtml = stripIgnoreTagBody.remove(retHtml);
-      }
-
-      return retHtml;
-    };
-
-    module.exports = FilterXSS;
-  }, { "./default": 1, "./parser": 3, "./util": 4, "cssfilter": 8 }], 6: [function (_require, module, exports) {
-    /**
-     * cssfilter
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var DEFAULT = _require('./default');
-    var parseStyle = _require('./parser');
-    var _ = _require('./util');
-
-    /**
-     * 返回值是否为空
-     *
-     * @param {Object} obj
-     * @return {Boolean}
-     */
-    function isNull(obj) {
-      return obj === undefined || obj === null;
-    }
-
-    /**
-     * 创建CSS过滤器
-     *
-     * @param {Object} options
-     *   - {Object} whiteList
-     *   - {Object} onAttr
-     *   - {Object} onIgnoreAttr
-     */
-    function FilterCSS(options) {
-      options = options || {};
-      options.whiteList = options.whiteList || DEFAULT.whiteList;
-      options.onAttr = options.onAttr || DEFAULT.onAttr;
-      options.onIgnoreAttr = options.onIgnoreAttr || DEFAULT.onIgnoreAttr;
-      this.options = options;
-    }
-
-    FilterCSS.prototype.process = function (css) {
-      // 兼容各种奇葩输入
-      css = css || '';
-      css = css.toString();
-      if (!css) return '';
-
-      var me = this;
-      var options = me.options;
-      var whiteList = options.whiteList;
-      var onAttr = options.onAttr;
-      var onIgnoreAttr = options.onIgnoreAttr;
-
-      var retCSS = parseStyle(css, function (sourcePosition, position, name, value, source) {
-
-        var check = whiteList[name];
-        var isWhite = false;
-        if (check === true) isWhite = check;else if (typeof check === 'function') isWhite = check(value);else if (check instanceof RegExp) isWhite = check.test(value);
-        if (isWhite !== true) isWhite = false;
-
-        var opts = {
-          position: position,
-          sourcePosition: sourcePosition,
-          source: source,
-          isWhite: isWhite
-        };
-
-        if (isWhite) {
-
-          var ret = onAttr(name, value, opts);
-          if (isNull(ret)) {
-            return name + ':' + value;
-          } else {
-            return ret;
-          }
-        } else {
-
-          var ret = onIgnoreAttr(name, value, opts);
-          if (!isNull(ret)) {
-            return ret;
-          }
-        }
-      });
-
-      return retCSS;
-    };
-
-    module.exports = FilterCSS;
-  }, { "./default": 7, "./parser": 9, "./util": 10 }], 7: [function (_require, module, exports) {
-    /**
-     * cssfilter
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    function getDefaultWhiteList() {
-      // 白名单值说明：
-      // true: 允许该属性
-      // Function: function (val) { } 返回true表示允许该属性，其他值均表示不允许
-      // RegExp: regexp.test(val) 返回true表示允许该属性，其他值均表示不允许
-      // 除上面列出的值外均表示不允许
-      var whiteList = {};
-
-      whiteList['align-content'] = false; // default: auto
-      whiteList['align-items'] = false; // default: auto
-      whiteList['align-self'] = false; // default: auto
-      whiteList['alignment-adjust'] = false; // default: auto
-      whiteList['alignment-baseline'] = false; // default: baseline
-      whiteList['all'] = false; // default: depending on individual properties
-      whiteList['anchor-point'] = false; // default: none
-      whiteList['animation'] = false; // default: depending on individual properties
-      whiteList['animation-delay'] = false; // default: 0
-      whiteList['animation-direction'] = false; // default: normal
-      whiteList['animation-duration'] = false; // default: 0
-      whiteList['animation-fill-mode'] = false; // default: none
-      whiteList['animation-iteration-count'] = false; // default: 1
-      whiteList['animation-name'] = false; // default: none
-      whiteList['animation-play-state'] = false; // default: running
-      whiteList['animation-timing-function'] = false; // default: ease
-      whiteList['azimuth'] = false; // default: center
-      whiteList['backface-visibility'] = false; // default: visible
-      whiteList['background'] = true; // default: depending on individual properties
-      whiteList['background-attachment'] = true; // default: scroll
-      whiteList['background-clip'] = true; // default: border-box
-      whiteList['background-color'] = true; // default: transparent
-      whiteList['background-image'] = true; // default: none
-      whiteList['background-origin'] = true; // default: padding-box
-      whiteList['background-position'] = true; // default: 0% 0%
-      whiteList['background-repeat'] = true; // default: repeat
-      whiteList['background-size'] = true; // default: auto
-      whiteList['baseline-shift'] = false; // default: baseline
-      whiteList['binding'] = false; // default: none
-      whiteList['bleed'] = false; // default: 6pt
-      whiteList['bookmark-label'] = false; // default: content()
-      whiteList['bookmark-level'] = false; // default: none
-      whiteList['bookmark-state'] = false; // default: open
-      whiteList['border'] = true; // default: depending on individual properties
-      whiteList['border-bottom'] = true; // default: depending on individual properties
-      whiteList['border-bottom-color'] = true; // default: current color
-      whiteList['border-bottom-left-radius'] = true; // default: 0
-      whiteList['border-bottom-right-radius'] = true; // default: 0
-      whiteList['border-bottom-style'] = true; // default: none
-      whiteList['border-bottom-width'] = true; // default: medium
-      whiteList['border-collapse'] = true; // default: separate
-      whiteList['border-color'] = true; // default: depending on individual properties
-      whiteList['border-image'] = true; // default: none
-      whiteList['border-image-outset'] = true; // default: 0
-      whiteList['border-image-repeat'] = true; // default: stretch
-      whiteList['border-image-slice'] = true; // default: 100%
-      whiteList['border-image-source'] = true; // default: none
-      whiteList['border-image-width'] = true; // default: 1
-      whiteList['border-left'] = true; // default: depending on individual properties
-      whiteList['border-left-color'] = true; // default: current color
-      whiteList['border-left-style'] = true; // default: none
-      whiteList['border-left-width'] = true; // default: medium
-      whiteList['border-radius'] = true; // default: 0
-      whiteList['border-right'] = true; // default: depending on individual properties
-      whiteList['border-right-color'] = true; // default: current color
-      whiteList['border-right-style'] = true; // default: none
-      whiteList['border-right-width'] = true; // default: medium
-      whiteList['border-spacing'] = true; // default: 0
-      whiteList['border-style'] = true; // default: depending on individual properties
-      whiteList['border-top'] = true; // default: depending on individual properties
-      whiteList['border-top-color'] = true; // default: current color
-      whiteList['border-top-left-radius'] = true; // default: 0
-      whiteList['border-top-right-radius'] = true; // default: 0
-      whiteList['border-top-style'] = true; // default: none
-      whiteList['border-top-width'] = true; // default: medium
-      whiteList['border-width'] = true; // default: depending on individual properties
-      whiteList['bottom'] = false; // default: auto
-      whiteList['box-decoration-break'] = true; // default: slice
-      whiteList['box-shadow'] = true; // default: none
-      whiteList['box-sizing'] = true; // default: content-box
-      whiteList['box-snap'] = true; // default: none
-      whiteList['box-suppress'] = true; // default: show
-      whiteList['break-after'] = true; // default: auto
-      whiteList['break-before'] = true; // default: auto
-      whiteList['break-inside'] = true; // default: auto
-      whiteList['caption-side'] = false; // default: top
-      whiteList['chains'] = false; // default: none
-      whiteList['clear'] = true; // default: none
-      whiteList['clip'] = false; // default: auto
-      whiteList['clip-path'] = false; // default: none
-      whiteList['clip-rule'] = false; // default: nonzero
-      whiteList['color'] = true; // default: implementation dependent
-      whiteList['color-interpolation-filters'] = true; // default: auto
-      whiteList['column-count'] = false; // default: auto
-      whiteList['column-fill'] = false; // default: balance
-      whiteList['column-gap'] = false; // default: normal
-      whiteList['column-rule'] = false; // default: depending on individual properties
-      whiteList['column-rule-color'] = false; // default: current color
-      whiteList['column-rule-style'] = false; // default: medium
-      whiteList['column-rule-width'] = false; // default: medium
-      whiteList['column-span'] = false; // default: none
-      whiteList['column-width'] = false; // default: auto
-      whiteList['columns'] = false; // default: depending on individual properties
-      whiteList['contain'] = false; // default: none
-      whiteList['content'] = false; // default: normal
-      whiteList['counter-increment'] = false; // default: none
-      whiteList['counter-reset'] = false; // default: none
-      whiteList['counter-set'] = false; // default: none
-      whiteList['crop'] = false; // default: auto
-      whiteList['cue'] = false; // default: depending on individual properties
-      whiteList['cue-after'] = false; // default: none
-      whiteList['cue-before'] = false; // default: none
-      whiteList['cursor'] = false; // default: auto
-      whiteList['direction'] = false; // default: ltr
-      whiteList['display'] = true; // default: depending on individual properties
-      whiteList['display-inside'] = true; // default: auto
-      whiteList['display-list'] = true; // default: none
-      whiteList['display-outside'] = true; // default: inline-level
-      whiteList['dominant-baseline'] = false; // default: auto
-      whiteList['elevation'] = false; // default: level
-      whiteList['empty-cells'] = false; // default: show
-      whiteList['filter'] = false; // default: none
-      whiteList['flex'] = false; // default: depending on individual properties
-      whiteList['flex-basis'] = false; // default: auto
-      whiteList['flex-direction'] = false; // default: row
-      whiteList['flex-flow'] = false; // default: depending on individual properties
-      whiteList['flex-grow'] = false; // default: 0
-      whiteList['flex-shrink'] = false; // default: 1
-      whiteList['flex-wrap'] = false; // default: nowrap
-      whiteList['float'] = false; // default: none
-      whiteList['float-offset'] = false; // default: 0 0
-      whiteList['flood-color'] = false; // default: black
-      whiteList['flood-opacity'] = false; // default: 1
-      whiteList['flow-from'] = false; // default: none
-      whiteList['flow-into'] = false; // default: none
-      whiteList['font'] = true; // default: depending on individual properties
-      whiteList['font-family'] = true; // default: implementation dependent
-      whiteList['font-feature-settings'] = true; // default: normal
-      whiteList['font-kerning'] = true; // default: auto
-      whiteList['font-language-override'] = true; // default: normal
-      whiteList['font-size'] = true; // default: medium
-      whiteList['font-size-adjust'] = true; // default: none
-      whiteList['font-stretch'] = true; // default: normal
-      whiteList['font-style'] = true; // default: normal
-      whiteList['font-synthesis'] = true; // default: weight style
-      whiteList['font-variant'] = true; // default: normal
-      whiteList['font-variant-alternates'] = true; // default: normal
-      whiteList['font-variant-caps'] = true; // default: normal
-      whiteList['font-variant-east-asian'] = true; // default: normal
-      whiteList['font-variant-ligatures'] = true; // default: normal
-      whiteList['font-variant-numeric'] = true; // default: normal
-      whiteList['font-variant-position'] = true; // default: normal
-      whiteList['font-weight'] = true; // default: normal
-      whiteList['grid'] = false; // default: depending on individual properties
-      whiteList['grid-area'] = false; // default: depending on individual properties
-      whiteList['grid-auto-columns'] = false; // default: auto
-      whiteList['grid-auto-flow'] = false; // default: none
-      whiteList['grid-auto-rows'] = false; // default: auto
-      whiteList['grid-column'] = false; // default: depending on individual properties
-      whiteList['grid-column-end'] = false; // default: auto
-      whiteList['grid-column-start'] = false; // default: auto
-      whiteList['grid-row'] = false; // default: depending on individual properties
-      whiteList['grid-row-end'] = false; // default: auto
-      whiteList['grid-row-start'] = false; // default: auto
-      whiteList['grid-template'] = false; // default: depending on individual properties
-      whiteList['grid-template-areas'] = false; // default: none
-      whiteList['grid-template-columns'] = false; // default: none
-      whiteList['grid-template-rows'] = false; // default: none
-      whiteList['hanging-punctuation'] = false; // default: none
-      whiteList['height'] = true; // default: auto
-      whiteList['hyphens'] = false; // default: manual
-      whiteList['icon'] = false; // default: auto
-      whiteList['image-orientation'] = false; // default: auto
-      whiteList['image-resolution'] = false; // default: normal
-      whiteList['ime-mode'] = false; // default: auto
-      whiteList['initial-letters'] = false; // default: normal
-      whiteList['inline-box-align'] = false; // default: last
-      whiteList['justify-content'] = false; // default: auto
-      whiteList['justify-items'] = false; // default: auto
-      whiteList['justify-self'] = false; // default: auto
-      whiteList['left'] = false; // default: auto
-      whiteList['letter-spacing'] = true; // default: normal
-      whiteList['lighting-color'] = true; // default: white
-      whiteList['line-box-contain'] = false; // default: block inline replaced
-      whiteList['line-break'] = false; // default: auto
-      whiteList['line-grid'] = false; // default: match-parent
-      whiteList['line-height'] = false; // default: normal
-      whiteList['line-snap'] = false; // default: none
-      whiteList['line-stacking'] = false; // default: depending on individual properties
-      whiteList['line-stacking-ruby'] = false; // default: exclude-ruby
-      whiteList['line-stacking-shift'] = false; // default: consider-shifts
-      whiteList['line-stacking-strategy'] = false; // default: inline-line-height
-      whiteList['list-style'] = true; // default: depending on individual properties
-      whiteList['list-style-image'] = true; // default: none
-      whiteList['list-style-position'] = true; // default: outside
-      whiteList['list-style-type'] = true; // default: disc
-      whiteList['margin'] = true; // default: depending on individual properties
-      whiteList['margin-bottom'] = true; // default: 0
-      whiteList['margin-left'] = true; // default: 0
-      whiteList['margin-right'] = true; // default: 0
-      whiteList['margin-top'] = true; // default: 0
-      whiteList['marker-offset'] = false; // default: auto
-      whiteList['marker-side'] = false; // default: list-item
-      whiteList['marks'] = false; // default: none
-      whiteList['mask'] = false; // default: border-box
-      whiteList['mask-box'] = false; // default: see individual properties
-      whiteList['mask-box-outset'] = false; // default: 0
-      whiteList['mask-box-repeat'] = false; // default: stretch
-      whiteList['mask-box-slice'] = false; // default: 0 fill
-      whiteList['mask-box-source'] = false; // default: none
-      whiteList['mask-box-width'] = false; // default: auto
-      whiteList['mask-clip'] = false; // default: border-box
-      whiteList['mask-image'] = false; // default: none
-      whiteList['mask-origin'] = false; // default: border-box
-      whiteList['mask-position'] = false; // default: center
-      whiteList['mask-repeat'] = false; // default: no-repeat
-      whiteList['mask-size'] = false; // default: border-box
-      whiteList['mask-source-type'] = false; // default: auto
-      whiteList['mask-type'] = false; // default: luminance
-      whiteList['max-height'] = true; // default: none
-      whiteList['max-lines'] = false; // default: none
-      whiteList['max-width'] = true; // default: none
-      whiteList['min-height'] = true; // default: 0
-      whiteList['min-width'] = true; // default: 0
-      whiteList['move-to'] = false; // default: normal
-      whiteList['nav-down'] = false; // default: auto
-      whiteList['nav-index'] = false; // default: auto
-      whiteList['nav-left'] = false; // default: auto
-      whiteList['nav-right'] = false; // default: auto
-      whiteList['nav-up'] = false; // default: auto
-      whiteList['object-fit'] = false; // default: fill
-      whiteList['object-position'] = false; // default: 50% 50%
-      whiteList['opacity'] = false; // default: 1
-      whiteList['order'] = false; // default: 0
-      whiteList['orphans'] = false; // default: 2
-      whiteList['outline'] = false; // default: depending on individual properties
-      whiteList['outline-color'] = false; // default: invert
-      whiteList['outline-offset'] = false; // default: 0
-      whiteList['outline-style'] = false; // default: none
-      whiteList['outline-width'] = false; // default: medium
-      whiteList['overflow'] = false; // default: depending on individual properties
-      whiteList['overflow-wrap'] = false; // default: normal
-      whiteList['overflow-x'] = false; // default: visible
-      whiteList['overflow-y'] = false; // default: visible
-      whiteList['padding'] = true; // default: depending on individual properties
-      whiteList['padding-bottom'] = true; // default: 0
-      whiteList['padding-left'] = true; // default: 0
-      whiteList['padding-right'] = true; // default: 0
-      whiteList['padding-top'] = true; // default: 0
-      whiteList['page'] = false; // default: auto
-      whiteList['page-break-after'] = false; // default: auto
-      whiteList['page-break-before'] = false; // default: auto
-      whiteList['page-break-inside'] = false; // default: auto
-      whiteList['page-policy'] = false; // default: start
-      whiteList['pause'] = false; // default: implementation dependent
-      whiteList['pause-after'] = false; // default: implementation dependent
-      whiteList['pause-before'] = false; // default: implementation dependent
-      whiteList['perspective'] = false; // default: none
-      whiteList['perspective-origin'] = false; // default: 50% 50%
-      whiteList['pitch'] = false; // default: medium
-      whiteList['pitch-range'] = false; // default: 50
-      whiteList['play-during'] = false; // default: auto
-      whiteList['position'] = false; // default: static
-      whiteList['presentation-level'] = false; // default: 0
-      whiteList['quotes'] = false; // default: text
-      whiteList['region-fragment'] = false; // default: auto
-      whiteList['resize'] = false; // default: none
-      whiteList['rest'] = false; // default: depending on individual properties
-      whiteList['rest-after'] = false; // default: none
-      whiteList['rest-before'] = false; // default: none
-      whiteList['richness'] = false; // default: 50
-      whiteList['right'] = false; // default: auto
-      whiteList['rotation'] = false; // default: 0
-      whiteList['rotation-point'] = false; // default: 50% 50%
-      whiteList['ruby-align'] = false; // default: auto
-      whiteList['ruby-merge'] = false; // default: separate
-      whiteList['ruby-position'] = false; // default: before
-      whiteList['shape-image-threshold'] = false; // default: 0.0
-      whiteList['shape-outside'] = false; // default: none
-      whiteList['shape-margin'] = false; // default: 0
-      whiteList['size'] = false; // default: auto
-      whiteList['speak'] = false; // default: auto
-      whiteList['speak-as'] = false; // default: normal
-      whiteList['speak-header'] = false; // default: once
-      whiteList['speak-numeral'] = false; // default: continuous
-      whiteList['speak-punctuation'] = false; // default: none
-      whiteList['speech-rate'] = false; // default: medium
-      whiteList['stress'] = false; // default: 50
-      whiteList['string-set'] = false; // default: none
-      whiteList['tab-size'] = false; // default: 8
-      whiteList['table-layout'] = false; // default: auto
-      whiteList['text-align'] = true; // default: start
-      whiteList['text-align-last'] = true; // default: auto
-      whiteList['text-combine-upright'] = true; // default: none
-      whiteList['text-decoration'] = true; // default: none
-      whiteList['text-decoration-color'] = true; // default: currentColor
-      whiteList['text-decoration-line'] = true; // default: none
-      whiteList['text-decoration-skip'] = true; // default: objects
-      whiteList['text-decoration-style'] = true; // default: solid
-      whiteList['text-emphasis'] = true; // default: depending on individual properties
-      whiteList['text-emphasis-color'] = true; // default: currentColor
-      whiteList['text-emphasis-position'] = true; // default: over right
-      whiteList['text-emphasis-style'] = true; // default: none
-      whiteList['text-height'] = true; // default: auto
-      whiteList['text-indent'] = true; // default: 0
-      whiteList['text-justify'] = true; // default: auto
-      whiteList['text-orientation'] = true; // default: mixed
-      whiteList['text-overflow'] = true; // default: clip
-      whiteList['text-shadow'] = true; // default: none
-      whiteList['text-space-collapse'] = true; // default: collapse
-      whiteList['text-transform'] = true; // default: none
-      whiteList['text-underline-position'] = true; // default: auto
-      whiteList['text-wrap'] = true; // default: normal
-      whiteList['top'] = false; // default: auto
-      whiteList['transform'] = false; // default: none
-      whiteList['transform-origin'] = false; // default: 50% 50% 0
-      whiteList['transform-style'] = false; // default: flat
-      whiteList['transition'] = false; // default: depending on individual properties
-      whiteList['transition-delay'] = false; // default: 0s
-      whiteList['transition-duration'] = false; // default: 0s
-      whiteList['transition-property'] = false; // default: all
-      whiteList['transition-timing-function'] = false; // default: ease
-      whiteList['unicode-bidi'] = false; // default: normal
-      whiteList['vertical-align'] = false; // default: baseline
-      whiteList['visibility'] = false; // default: visible
-      whiteList['voice-balance'] = false; // default: center
-      whiteList['voice-duration'] = false; // default: auto
-      whiteList['voice-family'] = false; // default: implementation dependent
-      whiteList['voice-pitch'] = false; // default: medium
-      whiteList['voice-range'] = false; // default: medium
-      whiteList['voice-rate'] = false; // default: normal
-      whiteList['voice-stress'] = false; // default: normal
-      whiteList['voice-volume'] = false; // default: medium
-      whiteList['volume'] = false; // default: medium
-      whiteList['white-space'] = false; // default: normal
-      whiteList['widows'] = false; // default: 2
-      whiteList['width'] = true; // default: auto
-      whiteList['will-change'] = false; // default: auto
-      whiteList['word-break'] = true; // default: normal
-      whiteList['word-spacing'] = true; // default: normal
-      whiteList['word-wrap'] = true; // default: normal
-      whiteList['wrap-flow'] = false; // default: auto
-      whiteList['wrap-through'] = false; // default: wrap
-      whiteList['writing-mode'] = false; // default: horizontal-tb
-      whiteList['z-index'] = false; // default: auto
-
-      return whiteList;
-    }
-
-    /**
-     * 匹配到白名单上的一个属性时
-     *
-     * @param {String} name
-     * @param {String} value
-     * @param {Object} options
-     * @return {String}
-     */
-    function onAttr(name, value, options) {}
-    // do nothing
-
-    /**
-     * 匹配到不在白名单上的一个属性时
-     *
-     * @param {String} name
-     * @param {String} value
-     * @param {Object} options
-     * @return {String}
-     */
-    function onIgnoreAttr(name, value, options) {
-      // do nothing
-    }
-
-    exports.whiteList = getDefaultWhiteList();
-    exports.getDefaultWhiteList = getDefaultWhiteList;
-    exports.onAttr = onAttr;
-    exports.onIgnoreAttr = onIgnoreAttr;
-  }, {}], 8: [function (_require, module, exports) {
-    /**
-     * cssfilter
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var DEFAULT = _require('./default');
-    var FilterCSS = _require('./css');
-
-    /**
-     * XSS过滤
-     *
-     * @param {String} css 要过滤的CSS代码
-     * @param {Object} options 选项：whiteList, onAttr, onIgnoreAttr
-     * @return {String}
-     */
-    function filterCSS(html, options) {
-      var xss = new FilterCSS(options);
-      return xss.process(html);
-    }
-
-    // 输出
-    exports = module.exports = filterCSS;
-    exports.FilterCSS = FilterCSS;
-    for (var i in DEFAULT) exports[i] = DEFAULT[i];
-
-    // 在浏览器端使用
-    if (typeof window !== 'undefined') {
-      window.filterCSS = module.exports;
-    }
-  }, { "./css": 6, "./default": 7 }], 9: [function (_require, module, exports) {
-    /**
-     * cssfilter
-     *
-     * @author 老雷<leizongmin@gmail.com>
-     */
-
-    var _ = _require('./util');
-
-    /**
-     * 解析style
-     *
-     * @param {String} css
-     * @param {Function} onAttr 处理属性的函数
-     *   参数格式： function (sourcePosition, position, name, value, source)
-     * @return {String}
-     */
-    function parseStyle(css, onAttr) {
-      css = _.trimRight(css);
-      if (css[css.length - 1] !== ';') css += ';';
-      var cssLength = css.length;
-      var isParenthesisOpen = false;
-      var lastPos = 0;
-      var i = 0;
-      var retCSS = '';
-
-      function addNewAttr() {
-        // 如果没有正常的闭合圆括号，则直接忽略当前属性
-        if (!isParenthesisOpen) {
-          var source = _.trim(css.slice(lastPos, i));
-          var j = source.indexOf(':');
-          if (j !== -1) {
-            var name = _.trim(source.slice(0, j));
-            var value = _.trim(source.slice(j + 1));
-            // 必须有属性名称
-            if (name) {
-              var ret = onAttr(lastPos, retCSS.length, name, value, source);
-              if (ret) retCSS += ret + '; ';
-            }
-          }
-        }
+    // 逐个分析字符
+    for (var i = 0; i < len; i++) {
+      var c = html.charAt(i);
+      var v, j;
+      if (tmpName === false && c === '=') {
+        tmpName = html.slice(lastPos, i);
         lastPos = i + 1;
+        continue;
+      }
+      if (tmpName !== false) {
+        // HTML标签内的引号仅当前一个字符是等于号时才有效
+        if (i === lastPos && (c === '"' || c === "'") && html.charAt(i - 1) === '=') {
+          j = html.indexOf(c, i + 1);
+          if (j === -1) {
+            break;
+          } else {
+            v = _.trim(html.slice(lastPos + 1, j));
+            addAttr(tmpName, v);
+            tmpName = false;
+            i = j;
+            lastPos = i + 1;
+            continue;
+          }
+        }
+      }
+      if (c === ' ') {
+        if (tmpName === false) {
+          j = findNextEqual(html, i);
+          if (j === -1) {
+            v = _.trim(html.slice(lastPos, i));
+            addAttr(v);
+            tmpName = false;
+            lastPos = i + 1;
+            continue;
+          } else {
+            i = j - 1;
+            continue;
+          }
+        } else {
+          j = findBeforeEqual(html, i - 1);
+          if (j === -1) {
+            v = _.trim(html.slice(lastPos, i));
+            v = stripQuoteWrap(v);
+            addAttr(tmpName, v);
+            tmpName = false;
+            lastPos = i + 1;
+            continue;
+          } else {
+            continue;
+          }
+        }
+      }
+    }
+
+    if (lastPos < html.length) {
+      if (tmpName === false) {
+        addAttr(html.slice(lastPos));
+      } else {
+        addAttr(tmpName, stripQuoteWrap(_.trim(html.slice(lastPos))));
+      }
+    }
+
+    return _.trim(retAttrs.join(' '));
+  }
+
+  function findNextEqual (str, i) {
+    for (; i < str.length; i++) {
+      var c = str[i];
+      if (c === ' ') continue;
+      if (c === '=') return i;
+      return -1;
+    }
+  }
+
+  function findBeforeEqual (str, i) {
+    for (; i > 0; i--) {
+      var c = str[i];
+      if (c === ' ') continue;
+      if (c === '=') return i;
+      return -1;
+    }
+  }
+
+  function isQuoteWrapString (text) {
+    if ((text[0] === '"' && text[text.length - 1] === '"') ||
+        (text[0] === '\'' && text[text.length - 1] === '\'')) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  function stripQuoteWrap (text) {
+    if (isQuoteWrapString(text)) {
+      return text.substr(1, text.length - 2);
+    } else {
+      return text;
+    }
+  };
+
+
+  exports.parseTag = parseTag;
+  exports.parseAttr = parseAttr;
+
+},{"./util":4}],4:[function(_require,module,exports){
+  module.exports = {
+    indexOf: function (arr, item) {
+      var i, j;
+      if (Array.prototype.indexOf) {
+        return arr.indexOf(item);
+      }
+      for (i = 0, j = arr.length; i < j; i++) {
+        if (arr[i] === item) {
+          return i;
+        }
+      }
+      return -1;
+    },
+    forEach: function (arr, fn, scope) {
+      var i, j;
+      if (Array.prototype.forEach) {
+        return arr.forEach(fn, scope);
+      }
+      for (i = 0, j = arr.length; i < j; i++) {
+        fn.call(scope, arr[i], i, arr);
+      }
+    },
+    trim: function (str) {
+      if (String.prototype.trim) {
+        return str.trim();
+      }
+      return str.replace(/(^\s*)|(\s*$)/g, '');
+    }
+  };
+
+},{}],5:[function(_require,module,exports){
+  /**
+   * 过滤XSS
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var FilterCSS = _require('cssfilter').FilterCSS;
+  var DEFAULT = _require('./default');
+  var parser = _require('./parser');
+  var parseTag = parser.parseTag;
+  var parseAttr = parser.parseAttr;
+  var _ = _require('./util');
+
+
+  /**
+   * 返回值是否为空
+   *
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  function isNull (obj) {
+    return (obj === undefined || obj === null);
+  }
+
+  /**
+   * 取标签内的属性列表字符串
+   *
+   * @param {String} html
+   * @return {Object}
+   *   - {String} html
+   *   - {Boolean} closing
+   */
+  function getAttrs (html) {
+    var i = html.indexOf(' ');
+    if (i === -1) {
+      return {
+        html:    '',
+        closing: (html[html.length - 2] === '/')
+      };
+    }
+    html = _.trim(html.slice(i + 1, -1));
+    var isClosing = (html[html.length - 1] === '/');
+    if (isClosing) html = _.trim(html.slice(0, -1));
+    return {
+      html:    html,
+      closing: isClosing
+    };
+  }
+
+  /**
+   * XSS过滤对象
+   *
+   * @param {Object} options
+   *   选项：whiteList, onTag, onTagAttr, onIgnoreTag,
+   *        onIgnoreTagAttr, safeAttrValue, escapeHtml
+   *        stripIgnoreTagBody, allowCommentTag, stripBlankChar
+   *        css{whiteList, onAttr, onIgnoreAttr}
+   */
+  function FilterXSS (options) {
+    options = options || {};
+
+    if (options.stripIgnoreTag) {
+      if (options.onIgnoreTag) {
+        console.error('Notes: cannot use these two options "stripIgnoreTag" and "onIgnoreTag" at the same time');
+      }
+      options.onIgnoreTag = DEFAULT.onIgnoreTagStripAll;
+    }
+
+    options.whiteList = options.whiteList || DEFAULT.whiteList;
+    options.onTag = options.onTag || DEFAULT.onTag;
+    options.onTagAttr = options.onTagAttr || DEFAULT.onTagAttr;
+    options.onIgnoreTag = options.onIgnoreTag || DEFAULT.onIgnoreTag;
+    options.onIgnoreTagAttr = options.onIgnoreTagAttr || DEFAULT.onIgnoreTagAttr;
+    options.safeAttrValue = options.safeAttrValue || DEFAULT.safeAttrValue;
+    options.escapeHtml = options.escapeHtml || DEFAULT.escapeHtml;
+    options.css = options.css || {};
+    this.options = options;
+
+    this.cssFilter = new FilterCSS(options.css);
+  }
+
+  /**
+   * 开始处理
+   *
+   * @param {String} html
+   * @return {String}
+   */
+  FilterXSS.prototype.process = function (html) {
+    // 兼容各种奇葩输入
+    html = html || '';
+    html = html.toString();
+    if (!html) return '';
+
+    var me = this;
+    var options = me.options;
+    var whiteList = options.whiteList;
+    var onTag = options.onTag;
+    var onIgnoreTag = options.onIgnoreTag;
+    var onTagAttr = options.onTagAttr;
+    var onIgnoreTagAttr = options.onIgnoreTagAttr;
+    var safeAttrValue = options.safeAttrValue;
+    var escapeHtml = options.escapeHtml;
+    var cssFilter = me.cssFilter;
+
+    // 是否清除不可见字符
+    if (options.stripBlankChar) {
+      html = DEFAULT.stripBlankChar(html);
+    }
+
+    // 是否禁止备注标签
+    if (!options.allowCommentTag) {
+      html = DEFAULT.stripCommentTag(html);
+    }
+
+    // 如果开启了stripIgnoreTagBody
+    var stripIgnoreTagBody = false;
+    if (options.stripIgnoreTagBody) {
+      var stripIgnoreTagBody = DEFAULT.StripTagBody(options.stripIgnoreTagBody, onIgnoreTag);
+      onIgnoreTag = stripIgnoreTagBody.onIgnoreTag;
+    }
+
+    var retHtml = parseTag(html, function (sourcePosition, position, tag, html, isClosing) {
+      var info = {
+        sourcePosition: sourcePosition,
+        position:       position,
+        isClosing:      isClosing,
+        isWhite:        (tag in whiteList)
+      };
+
+      // 调用onTag处理
+      var ret = onTag(tag, html, info);
+      if (!isNull(ret)) return ret;
+
+      // 默认标签处理方法
+      if (info.isWhite) {
+        // 白名单标签，解析标签属性
+        // 如果是闭合标签，则不需要解析属性
+        if (info.isClosing) {
+          return '</' + tag + '>';
+        }
+
+        var attrs = getAttrs(html);
+        var whiteAttrList = whiteList[tag];
+        var attrsHtml = parseAttr(attrs.html, function (name, value) {
+
+          // 调用onTagAttr处理
+          var isWhiteAttr = (_.indexOf(whiteAttrList, name) !== -1);
+          var ret = onTagAttr(tag, name, value, isWhiteAttr);
+          if (!isNull(ret)) return ret;
+
+          // 默认的属性处理方法
+          if (isWhiteAttr) {
+            // 白名单属性，调用safeAttrValue过滤属性值
+            value = safeAttrValue(tag, name, value, cssFilter);
+            if (value) {
+              return name + '="' + value + '"';
+            } else {
+              return name;
+            }
+          } else {
+            // 非白名单属性，调用onIgnoreTagAttr处理
+            var ret = onIgnoreTagAttr(tag, name, value, isWhiteAttr);
+            if (!isNull(ret)) return ret;
+            return;
+          }
+        });
+
+        // 构造新的标签代码
+        var html = '<' + tag;
+        if (attrsHtml) html += ' ' + attrsHtml;
+        if (attrs.closing) html += ' /';
+        html += '>';
+        return html;
+
+      } else {
+        // 非白名单标签，调用onIgnoreTag处理
+        var ret = onIgnoreTag(tag, html, info);
+        if (!isNull(ret)) return ret;
+        return escapeHtml(html);
       }
 
-      for (; i < cssLength; i++) {
-        var c = css[i];
-        if (c === '/' && css[i + 1] === '*') {
-          // 备注开始
-          var j = css.indexOf('*/', i + 2);
-          // 如果没有正常的备注结束，则后面的部分全部跳过
-          if (j === -1) break;
-          // 直接将当前位置调到备注结尾，并且初始化状态
-          i = j + 1;
-          lastPos = i + 1;
-          isParenthesisOpen = false;
-        } else if (c === '(') {
-          isParenthesisOpen = true;
-        } else if (c === ')') {
-          isParenthesisOpen = false;
-        } else if (c === ';') {
-          if (isParenthesisOpen) {
-            // 在圆括号里面，忽略
-          } else {
-              addNewAttr();
-            }
-        } else if (c === '\n') {
+    }, escapeHtml);
+
+    // 如果开启了stripIgnoreTagBody，需要对结果再进行处理
+    if (stripIgnoreTagBody) {
+      retHtml = stripIgnoreTagBody.remove(retHtml);
+    }
+
+    return retHtml;
+  };
+
+
+  module.exports = FilterXSS;
+
+},{"./default":1,"./parser":3,"./util":4,"cssfilter":8}],6:[function(_require,module,exports){
+  /**
+   * cssfilter
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var DEFAULT = _require('./default');
+  var parseStyle = _require('./parser');
+  var _ = _require('./util');
+
+
+  /**
+   * 返回值是否为空
+   *
+   * @param {Object} obj
+   * @return {Boolean}
+   */
+  function isNull (obj) {
+    return (obj === undefined || obj === null);
+  }
+
+
+  /**
+   * 创建CSS过滤器
+   *
+   * @param {Object} options
+   *   - {Object} whiteList
+   *   - {Object} onAttr
+   *   - {Object} onIgnoreAttr
+   */
+  function FilterCSS (options) {
+    options = options || {};
+    options.whiteList = options.whiteList || DEFAULT.whiteList;
+    options.onAttr = options.onAttr || DEFAULT.onAttr;
+    options.onIgnoreAttr = options.onIgnoreAttr || DEFAULT.onIgnoreAttr;
+    this.options = options;
+  }
+
+  FilterCSS.prototype.process = function (css) {
+    // 兼容各种奇葩输入
+    css = css || '';
+    css = css.toString();
+    if (!css) return '';
+
+    var me = this;
+    var options = me.options;
+    var whiteList = options.whiteList;
+    var onAttr = options.onAttr;
+    var onIgnoreAttr = options.onIgnoreAttr;
+
+    var retCSS = parseStyle(css, function (sourcePosition, position, name, value, source) {
+
+      var check = whiteList[name];
+      var isWhite = false;
+      if (check === true) isWhite = check;
+      else if (typeof check === 'function') isWhite = check(value);
+      else if (check instanceof RegExp) isWhite = check.test(value);
+      if (isWhite !== true) isWhite = false;
+
+      var opts = {
+        position: position,
+        sourcePosition: sourcePosition,
+        source: source,
+        isWhite: isWhite
+      };
+
+      if (isWhite) {
+
+        var ret = onAttr(name, value, opts);
+        if (isNull(ret)) {
+          return name + ':' + value;
+        } else {
+          return ret;
+        }
+
+      } else {
+
+        var ret = onIgnoreAttr(name, value, opts);
+        if (!isNull(ret)) {
+          return ret;
+        }
+
+      }
+    });
+
+    return retCSS;
+  };
+
+
+  module.exports = FilterCSS;
+
+},{"./default":7,"./parser":9,"./util":10}],7:[function(_require,module,exports){
+  /**
+   * cssfilter
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  function getDefaultWhiteList () {
+    // 白名单值说明：
+    // true: 允许该属性
+    // Function: function (val) { } 返回true表示允许该属性，其他值均表示不允许
+    // RegExp: regexp.test(val) 返回true表示允许该属性，其他值均表示不允许
+    // 除上面列出的值外均表示不允许
+    var whiteList = {};
+
+    whiteList['align-content'] = false; // default: auto
+    whiteList['align-items'] = false; // default: auto
+    whiteList['align-self'] = false; // default: auto
+    whiteList['alignment-adjust'] = false; // default: auto
+    whiteList['alignment-baseline'] = false; // default: baseline
+    whiteList['all'] = false; // default: depending on individual properties
+    whiteList['anchor-point'] = false; // default: none
+    whiteList['animation'] = false; // default: depending on individual properties
+    whiteList['animation-delay'] = false; // default: 0
+    whiteList['animation-direction'] = false; // default: normal
+    whiteList['animation-duration'] = false; // default: 0
+    whiteList['animation-fill-mode'] = false; // default: none
+    whiteList['animation-iteration-count'] = false; // default: 1
+    whiteList['animation-name'] = false; // default: none
+    whiteList['animation-play-state'] = false; // default: running
+    whiteList['animation-timing-function'] = false; // default: ease
+    whiteList['azimuth'] = false; // default: center
+    whiteList['backface-visibility'] = false; // default: visible
+    whiteList['background'] = true; // default: depending on individual properties
+    whiteList['background-attachment'] = true; // default: scroll
+    whiteList['background-clip'] = true; // default: border-box
+    whiteList['background-color'] = true; // default: transparent
+    whiteList['background-image'] = true; // default: none
+    whiteList['background-origin'] = true; // default: padding-box
+    whiteList['background-position'] = true; // default: 0% 0%
+    whiteList['background-repeat'] = true; // default: repeat
+    whiteList['background-size'] = true; // default: auto
+    whiteList['baseline-shift'] = false; // default: baseline
+    whiteList['binding'] = false; // default: none
+    whiteList['bleed'] = false; // default: 6pt
+    whiteList['bookmark-label'] = false; // default: content()
+    whiteList['bookmark-level'] = false; // default: none
+    whiteList['bookmark-state'] = false; // default: open
+    whiteList['border'] = true; // default: depending on individual properties
+    whiteList['border-bottom'] = true; // default: depending on individual properties
+    whiteList['border-bottom-color'] = true; // default: current color
+    whiteList['border-bottom-left-radius'] = true; // default: 0
+    whiteList['border-bottom-right-radius'] = true; // default: 0
+    whiteList['border-bottom-style'] = true; // default: none
+    whiteList['border-bottom-width'] = true; // default: medium
+    whiteList['border-collapse'] = true; // default: separate
+    whiteList['border-color'] = true; // default: depending on individual properties
+    whiteList['border-image'] = true; // default: none
+    whiteList['border-image-outset'] = true; // default: 0
+    whiteList['border-image-repeat'] = true; // default: stretch
+    whiteList['border-image-slice'] = true; // default: 100%
+    whiteList['border-image-source'] = true; // default: none
+    whiteList['border-image-width'] = true; // default: 1
+    whiteList['border-left'] = true; // default: depending on individual properties
+    whiteList['border-left-color'] = true; // default: current color
+    whiteList['border-left-style'] = true; // default: none
+    whiteList['border-left-width'] = true; // default: medium
+    whiteList['border-radius'] = true; // default: 0
+    whiteList['border-right'] = true; // default: depending on individual properties
+    whiteList['border-right-color'] = true; // default: current color
+    whiteList['border-right-style'] = true; // default: none
+    whiteList['border-right-width'] = true; // default: medium
+    whiteList['border-spacing'] = true; // default: 0
+    whiteList['border-style'] = true; // default: depending on individual properties
+    whiteList['border-top'] = true; // default: depending on individual properties
+    whiteList['border-top-color'] = true; // default: current color
+    whiteList['border-top-left-radius'] = true; // default: 0
+    whiteList['border-top-right-radius'] = true; // default: 0
+    whiteList['border-top-style'] = true; // default: none
+    whiteList['border-top-width'] = true; // default: medium
+    whiteList['border-width'] = true; // default: depending on individual properties
+    whiteList['bottom'] = false; // default: auto
+    whiteList['box-decoration-break'] = true; // default: slice
+    whiteList['box-shadow'] = true; // default: none
+    whiteList['box-sizing'] = true; // default: content-box
+    whiteList['box-snap'] = true; // default: none
+    whiteList['box-suppress'] = true; // default: show
+    whiteList['break-after'] = true; // default: auto
+    whiteList['break-before'] = true; // default: auto
+    whiteList['break-inside'] = true; // default: auto
+    whiteList['caption-side'] = false; // default: top
+    whiteList['chains'] = false; // default: none
+    whiteList['clear'] = true; // default: none
+    whiteList['clip'] = false; // default: auto
+    whiteList['clip-path'] = false; // default: none
+    whiteList['clip-rule'] = false; // default: nonzero
+    whiteList['color'] = true; // default: implementation dependent
+    whiteList['color-interpolation-filters'] = true; // default: auto
+    whiteList['column-count'] = false; // default: auto
+    whiteList['column-fill'] = false; // default: balance
+    whiteList['column-gap'] = false; // default: normal
+    whiteList['column-rule'] = false; // default: depending on individual properties
+    whiteList['column-rule-color'] = false; // default: current color
+    whiteList['column-rule-style'] = false; // default: medium
+    whiteList['column-rule-width'] = false; // default: medium
+    whiteList['column-span'] = false; // default: none
+    whiteList['column-width'] = false; // default: auto
+    whiteList['columns'] = false; // default: depending on individual properties
+    whiteList['contain'] = false; // default: none
+    whiteList['content'] = false; // default: normal
+    whiteList['counter-increment'] = false; // default: none
+    whiteList['counter-reset'] = false; // default: none
+    whiteList['counter-set'] = false; // default: none
+    whiteList['crop'] = false; // default: auto
+    whiteList['cue'] = false; // default: depending on individual properties
+    whiteList['cue-after'] = false; // default: none
+    whiteList['cue-before'] = false; // default: none
+    whiteList['cursor'] = false; // default: auto
+    whiteList['direction'] = false; // default: ltr
+    whiteList['display'] = true; // default: depending on individual properties
+    whiteList['display-inside'] = true; // default: auto
+    whiteList['display-list'] = true; // default: none
+    whiteList['display-outside'] = true; // default: inline-level
+    whiteList['dominant-baseline'] = false; // default: auto
+    whiteList['elevation'] = false; // default: level
+    whiteList['empty-cells'] = false; // default: show
+    whiteList['filter'] = false; // default: none
+    whiteList['flex'] = false; // default: depending on individual properties
+    whiteList['flex-basis'] = false; // default: auto
+    whiteList['flex-direction'] = false; // default: row
+    whiteList['flex-flow'] = false; // default: depending on individual properties
+    whiteList['flex-grow'] = false; // default: 0
+    whiteList['flex-shrink'] = false; // default: 1
+    whiteList['flex-wrap'] = false; // default: nowrap
+    whiteList['float'] = false; // default: none
+    whiteList['float-offset'] = false; // default: 0 0
+    whiteList['flood-color'] = false; // default: black
+    whiteList['flood-opacity'] = false; // default: 1
+    whiteList['flow-from'] = false; // default: none
+    whiteList['flow-into'] = false; // default: none
+    whiteList['font'] = true; // default: depending on individual properties
+    whiteList['font-family'] = true; // default: implementation dependent
+    whiteList['font-feature-settings'] = true; // default: normal
+    whiteList['font-kerning'] = true; // default: auto
+    whiteList['font-language-override'] = true; // default: normal
+    whiteList['font-size'] = true; // default: medium
+    whiteList['font-size-adjust'] = true; // default: none
+    whiteList['font-stretch'] = true; // default: normal
+    whiteList['font-style'] = true; // default: normal
+    whiteList['font-synthesis'] = true; // default: weight style
+    whiteList['font-variant'] = true; // default: normal
+    whiteList['font-variant-alternates'] = true; // default: normal
+    whiteList['font-variant-caps'] = true; // default: normal
+    whiteList['font-variant-east-asian'] = true; // default: normal
+    whiteList['font-variant-ligatures'] = true; // default: normal
+    whiteList['font-variant-numeric'] = true; // default: normal
+    whiteList['font-variant-position'] = true; // default: normal
+    whiteList['font-weight'] = true; // default: normal
+    whiteList['grid'] = false; // default: depending on individual properties
+    whiteList['grid-area'] = false; // default: depending on individual properties
+    whiteList['grid-auto-columns'] = false; // default: auto
+    whiteList['grid-auto-flow'] = false; // default: none
+    whiteList['grid-auto-rows'] = false; // default: auto
+    whiteList['grid-column'] = false; // default: depending on individual properties
+    whiteList['grid-column-end'] = false; // default: auto
+    whiteList['grid-column-start'] = false; // default: auto
+    whiteList['grid-row'] = false; // default: depending on individual properties
+    whiteList['grid-row-end'] = false; // default: auto
+    whiteList['grid-row-start'] = false; // default: auto
+    whiteList['grid-template'] = false; // default: depending on individual properties
+    whiteList['grid-template-areas'] = false; // default: none
+    whiteList['grid-template-columns'] = false; // default: none
+    whiteList['grid-template-rows'] = false; // default: none
+    whiteList['hanging-punctuation'] = false; // default: none
+    whiteList['height'] = true; // default: auto
+    whiteList['hyphens'] = false; // default: manual
+    whiteList['icon'] = false; // default: auto
+    whiteList['image-orientation'] = false; // default: auto
+    whiteList['image-resolution'] = false; // default: normal
+    whiteList['ime-mode'] = false; // default: auto
+    whiteList['initial-letters'] = false; // default: normal
+    whiteList['inline-box-align'] = false; // default: last
+    whiteList['justify-content'] = false; // default: auto
+    whiteList['justify-items'] = false; // default: auto
+    whiteList['justify-self'] = false; // default: auto
+    whiteList['left'] = false; // default: auto
+    whiteList['letter-spacing'] = true; // default: normal
+    whiteList['lighting-color'] = true; // default: white
+    whiteList['line-box-contain'] = false; // default: block inline replaced
+    whiteList['line-break'] = false; // default: auto
+    whiteList['line-grid'] = false; // default: match-parent
+    whiteList['line-height'] = false; // default: normal
+    whiteList['line-snap'] = false; // default: none
+    whiteList['line-stacking'] = false; // default: depending on individual properties
+    whiteList['line-stacking-ruby'] = false; // default: exclude-ruby
+    whiteList['line-stacking-shift'] = false; // default: consider-shifts
+    whiteList['line-stacking-strategy'] = false; // default: inline-line-height
+    whiteList['list-style'] = true; // default: depending on individual properties
+    whiteList['list-style-image'] = true; // default: none
+    whiteList['list-style-position'] = true; // default: outside
+    whiteList['list-style-type'] = true; // default: disc
+    whiteList['margin'] = true; // default: depending on individual properties
+    whiteList['margin-bottom'] = true; // default: 0
+    whiteList['margin-left'] = true; // default: 0
+    whiteList['margin-right'] = true; // default: 0
+    whiteList['margin-top'] = true; // default: 0
+    whiteList['marker-offset'] = false; // default: auto
+    whiteList['marker-side'] = false; // default: list-item
+    whiteList['marks'] = false; // default: none
+    whiteList['mask'] = false; // default: border-box
+    whiteList['mask-box'] = false; // default: see individual properties
+    whiteList['mask-box-outset'] = false; // default: 0
+    whiteList['mask-box-repeat'] = false; // default: stretch
+    whiteList['mask-box-slice'] = false; // default: 0 fill
+    whiteList['mask-box-source'] = false; // default: none
+    whiteList['mask-box-width'] = false; // default: auto
+    whiteList['mask-clip'] = false; // default: border-box
+    whiteList['mask-image'] = false; // default: none
+    whiteList['mask-origin'] = false; // default: border-box
+    whiteList['mask-position'] = false; // default: center
+    whiteList['mask-repeat'] = false; // default: no-repeat
+    whiteList['mask-size'] = false; // default: border-box
+    whiteList['mask-source-type'] = false; // default: auto
+    whiteList['mask-type'] = false; // default: luminance
+    whiteList['max-height'] = true; // default: none
+    whiteList['max-lines'] = false; // default: none
+    whiteList['max-width'] = true; // default: none
+    whiteList['min-height'] = true; // default: 0
+    whiteList['min-width'] = true; // default: 0
+    whiteList['move-to'] = false; // default: normal
+    whiteList['nav-down'] = false; // default: auto
+    whiteList['nav-index'] = false; // default: auto
+    whiteList['nav-left'] = false; // default: auto
+    whiteList['nav-right'] = false; // default: auto
+    whiteList['nav-up'] = false; // default: auto
+    whiteList['object-fit'] = false; // default: fill
+    whiteList['object-position'] = false; // default: 50% 50%
+    whiteList['opacity'] = false; // default: 1
+    whiteList['order'] = false; // default: 0
+    whiteList['orphans'] = false; // default: 2
+    whiteList['outline'] = false; // default: depending on individual properties
+    whiteList['outline-color'] = false; // default: invert
+    whiteList['outline-offset'] = false; // default: 0
+    whiteList['outline-style'] = false; // default: none
+    whiteList['outline-width'] = false; // default: medium
+    whiteList['overflow'] = false; // default: depending on individual properties
+    whiteList['overflow-wrap'] = false; // default: normal
+    whiteList['overflow-x'] = false; // default: visible
+    whiteList['overflow-y'] = false; // default: visible
+    whiteList['padding'] = true; // default: depending on individual properties
+    whiteList['padding-bottom'] = true; // default: 0
+    whiteList['padding-left'] = true; // default: 0
+    whiteList['padding-right'] = true; // default: 0
+    whiteList['padding-top'] = true; // default: 0
+    whiteList['page'] = false; // default: auto
+    whiteList['page-break-after'] = false; // default: auto
+    whiteList['page-break-before'] = false; // default: auto
+    whiteList['page-break-inside'] = false; // default: auto
+    whiteList['page-policy'] = false; // default: start
+    whiteList['pause'] = false; // default: implementation dependent
+    whiteList['pause-after'] = false; // default: implementation dependent
+    whiteList['pause-before'] = false; // default: implementation dependent
+    whiteList['perspective'] = false; // default: none
+    whiteList['perspective-origin'] = false; // default: 50% 50%
+    whiteList['pitch'] = false; // default: medium
+    whiteList['pitch-range'] = false; // default: 50
+    whiteList['play-during'] = false; // default: auto
+    whiteList['position'] = false; // default: static
+    whiteList['presentation-level'] = false; // default: 0
+    whiteList['quotes'] = false; // default: text
+    whiteList['region-fragment'] = false; // default: auto
+    whiteList['resize'] = false; // default: none
+    whiteList['rest'] = false; // default: depending on individual properties
+    whiteList['rest-after'] = false; // default: none
+    whiteList['rest-before'] = false; // default: none
+    whiteList['richness'] = false; // default: 50
+    whiteList['right'] = false; // default: auto
+    whiteList['rotation'] = false; // default: 0
+    whiteList['rotation-point'] = false; // default: 50% 50%
+    whiteList['ruby-align'] = false; // default: auto
+    whiteList['ruby-merge'] = false; // default: separate
+    whiteList['ruby-position'] = false; // default: before
+    whiteList['shape-image-threshold'] = false; // default: 0.0
+    whiteList['shape-outside'] = false; // default: none
+    whiteList['shape-margin'] = false; // default: 0
+    whiteList['size'] = false; // default: auto
+    whiteList['speak'] = false; // default: auto
+    whiteList['speak-as'] = false; // default: normal
+    whiteList['speak-header'] = false; // default: once
+    whiteList['speak-numeral'] = false; // default: continuous
+    whiteList['speak-punctuation'] = false; // default: none
+    whiteList['speech-rate'] = false; // default: medium
+    whiteList['stress'] = false; // default: 50
+    whiteList['string-set'] = false; // default: none
+    whiteList['tab-size'] = false; // default: 8
+    whiteList['table-layout'] = false; // default: auto
+    whiteList['text-align'] = true; // default: start
+    whiteList['text-align-last'] = true; // default: auto
+    whiteList['text-combine-upright'] = true; // default: none
+    whiteList['text-decoration'] = true; // default: none
+    whiteList['text-decoration-color'] = true; // default: currentColor
+    whiteList['text-decoration-line'] = true; // default: none
+    whiteList['text-decoration-skip'] = true; // default: objects
+    whiteList['text-decoration-style'] = true; // default: solid
+    whiteList['text-emphasis'] = true; // default: depending on individual properties
+    whiteList['text-emphasis-color'] = true; // default: currentColor
+    whiteList['text-emphasis-position'] = true; // default: over right
+    whiteList['text-emphasis-style'] = true; // default: none
+    whiteList['text-height'] = true; // default: auto
+    whiteList['text-indent'] = true; // default: 0
+    whiteList['text-justify'] = true; // default: auto
+    whiteList['text-orientation'] = true; // default: mixed
+    whiteList['text-overflow'] = true; // default: clip
+    whiteList['text-shadow'] = true; // default: none
+    whiteList['text-space-collapse'] = true; // default: collapse
+    whiteList['text-transform'] = true; // default: none
+    whiteList['text-underline-position'] = true; // default: auto
+    whiteList['text-wrap'] = true; // default: normal
+    whiteList['top'] = false; // default: auto
+    whiteList['transform'] = false; // default: none
+    whiteList['transform-origin'] = false; // default: 50% 50% 0
+    whiteList['transform-style'] = false; // default: flat
+    whiteList['transition'] = false; // default: depending on individual properties
+    whiteList['transition-delay'] = false; // default: 0s
+    whiteList['transition-duration'] = false; // default: 0s
+    whiteList['transition-property'] = false; // default: all
+    whiteList['transition-timing-function'] = false; // default: ease
+    whiteList['unicode-bidi'] = false; // default: normal
+    whiteList['vertical-align'] = false; // default: baseline
+    whiteList['visibility'] = false; // default: visible
+    whiteList['voice-balance'] = false; // default: center
+    whiteList['voice-duration'] = false; // default: auto
+    whiteList['voice-family'] = false; // default: implementation dependent
+    whiteList['voice-pitch'] = false; // default: medium
+    whiteList['voice-range'] = false; // default: medium
+    whiteList['voice-rate'] = false; // default: normal
+    whiteList['voice-stress'] = false; // default: normal
+    whiteList['voice-volume'] = false; // default: medium
+    whiteList['volume'] = false; // default: medium
+    whiteList['white-space'] = false; // default: normal
+    whiteList['widows'] = false; // default: 2
+    whiteList['width'] = true; // default: auto
+    whiteList['will-change'] = false; // default: auto
+    whiteList['word-break'] = true; // default: normal
+    whiteList['word-spacing'] = true; // default: normal
+    whiteList['word-wrap'] = true; // default: normal
+    whiteList['wrap-flow'] = false; // default: auto
+    whiteList['wrap-through'] = false; // default: wrap
+    whiteList['writing-mode'] = false; // default: horizontal-tb
+    whiteList['z-index'] = false; // default: auto
+
+    return whiteList;
+  }
+
+
+  /**
+   * 匹配到白名单上的一个属性时
+   *
+   * @param {String} name
+   * @param {String} value
+   * @param {Object} options
+   * @return {String}
+   */
+  function onAttr (name, value, options) {
+    // do nothing
+  }
+
+  /**
+   * 匹配到不在白名单上的一个属性时
+   *
+   * @param {String} name
+   * @param {String} value
+   * @param {Object} options
+   * @return {String}
+   */
+  function onIgnoreAttr (name, value, options) {
+    // do nothing
+  }
+
+
+  exports.whiteList = getDefaultWhiteList();
+  exports.getDefaultWhiteList = getDefaultWhiteList;
+  exports.onAttr = onAttr;
+  exports.onIgnoreAttr = onIgnoreAttr;
+
+},{}],8:[function(_require,module,exports){
+  /**
+   * cssfilter
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var DEFAULT = _require('./default');
+  var FilterCSS = _require('./css');
+
+
+  /**
+   * XSS过滤
+   *
+   * @param {String} css 要过滤的CSS代码
+   * @param {Object} options 选项：whiteList, onAttr, onIgnoreAttr
+   * @return {String}
+   */
+  function filterCSS (html, options) {
+    var xss = new FilterCSS(options);
+    return xss.process(html);
+  }
+
+
+// 输出
+  exports = module.exports = filterCSS;
+  exports.FilterCSS = FilterCSS;
+  for (var i in DEFAULT) exports[i] = DEFAULT[i];
+
+// 在浏览器端使用
+  if (typeof window !== 'undefined') {
+    window.filterCSS = module.exports;
+  }
+
+},{"./css":6,"./default":7}],9:[function(_require,module,exports){
+  /**
+   * cssfilter
+   *
+   * @author 老雷<leizongmin@gmail.com>
+   */
+
+  var _ = _require('./util');
+
+
+  /**
+   * 解析style
+   *
+   * @param {String} css
+   * @param {Function} onAttr 处理属性的函数
+   *   参数格式： function (sourcePosition, position, name, value, source)
+   * @return {String}
+   */
+  function parseStyle (css, onAttr) {
+    css = _.trimRight(css);
+    if (css[css.length - 1] !== ';') css += ';';
+    var cssLength = css.length;
+    var isParenthesisOpen = false;
+    var lastPos = 0;
+    var i = 0;
+    var retCSS = '';
+
+    function addNewAttr () {
+      // 如果没有正常的闭合圆括号，则直接忽略当前属性
+      if (!isParenthesisOpen) {
+        var source = _.trim(css.slice(lastPos, i));
+        var j = source.indexOf(':');
+        if (j !== -1) {
+          var name = _.trim(source.slice(0, j));
+          var value = _.trim(source.slice(j + 1));
+          // 必须有属性名称
+          if (name) {
+            var ret = onAttr(lastPos, retCSS.length, name, value, source);
+            if (ret) retCSS += ret + '; ';
+          }
+        }
+      }
+      lastPos = i + 1;
+    }
+
+    for (; i < cssLength; i++) {
+      var c = css[i];
+      if (c === '/' && css[i + 1] === '*') {
+        // 备注开始
+        var j = css.indexOf('*/', i + 2);
+        // 如果没有正常的备注结束，则后面的部分全部跳过
+        if (j === -1) break;
+        // 直接将当前位置调到备注结尾，并且初始化状态
+        i = j + 1;
+        lastPos = i + 1;
+        isParenthesisOpen = false;
+      } else if (c === '(') {
+        isParenthesisOpen = true;
+      } else if (c === ')') {
+        isParenthesisOpen = false;
+      } else if (c === ';') {
+        if (isParenthesisOpen) {
+          // 在圆括号里面，忽略
+        } else {
           addNewAttr();
         }
+      } else if (c === '\n') {
+        addNewAttr();
       }
-
-      return _.trim(retCSS);
     }
 
-    module.exports = parseStyle;
-  }, { "./util": 10 }], 10: [function (_require, module, exports) {
-    module.exports = {
-      indexOf: function indexOf(arr, item) {
-        var i, j;
-        if (Array.prototype.indexOf) {
-          return arr.indexOf(item);
-        }
-        for (i = 0, j = arr.length; i < j; i++) {
-          if (arr[i] === item) {
-            return i;
-          }
-        }
-        return -1;
-      },
-      forEach: function forEach(arr, fn, scope) {
-        var i, j;
-        if (Array.prototype.forEach) {
-          return arr.forEach(fn, scope);
-        }
-        for (i = 0, j = arr.length; i < j; i++) {
-          fn.call(scope, arr[i], i, arr);
-        }
-      },
-      trim: function trim(str) {
-        if (String.prototype.trim) {
-          return str.trim();
-        }
-        return str.replace(/(^\s*)|(\s*$)/g, '');
-      },
-      trimRight: function trimRight(str) {
-        if (String.prototype.trimRight) {
-          return str.trimRight();
-        }
-        return str.replace(/(\s*$)/g, '');
+    return _.trim(retCSS);
+  }
+
+  module.exports = parseStyle;
+
+},{"./util":10}],10:[function(_require,module,exports){
+  module.exports = {
+    indexOf: function (arr, item) {
+      var i, j;
+      if (Array.prototype.indexOf) {
+        return arr.indexOf(item);
       }
-    };
-  }, {}] }, {}, [2]);
+      for (i = 0, j = arr.length; i < j; i++) {
+        if (arr[i] === item) {
+          return i;
+        }
+      }
+      return -1;
+    },
+    forEach: function (arr, fn, scope) {
+      var i, j;
+      if (Array.prototype.forEach) {
+        return arr.forEach(fn, scope);
+      }
+      for (i = 0, j = arr.length; i < j; i++) {
+        fn.call(scope, arr[i], i, arr);
+      }
+    },
+    trim: function (str) {
+      if (String.prototype.trim) {
+        return str.trim();
+      }
+      return str.replace(/(^\s*)|(\s*$)/g, '');
+    },
+    trimRight: function (str) {
+      if (String.prototype.trimRight) {
+        return str.trimRight();
+      }
+      return str.replace(/(\s*$)/g, '');
+    }
+  };
+
+},{}]},{},[2]);
 
 module.exports = filterXSS;
-
 },{}],23:[function(require,module,exports){
 /**
  * Dom 操作工具包（基础核心包，主要都是 get 等读取操作）
  *
  */
-
-'use strict';
 
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
@@ -8726,7 +8966,7 @@ var domUtils = {
      * @param domList
      * @param className
      */
-    addClass: function addClass(domList, className) {
+    addClass: function (domList, className) {
         if (!domList) {
             return;
         }
@@ -8746,14 +8986,11 @@ var domUtils = {
      * @param styleStr
      * @param styleObj
      */
-    appendStyle: function appendStyle(styleStr, styleObj) {
+    appendStyle: function (styleStr, styleObj) {
         if (!styleStr) {
             return;
         }
-        var styleList = styleStr.split(';'),
-            i,
-            j,
-            t;
+        var styleList = styleStr.split(';'), i, j, t;
         for (i = 0, j = styleList.length; i < j; i++) {
             if (styleList[i].indexOf(':') > 0) {
                 t = styleList[i].split(':');
@@ -8766,14 +9003,14 @@ var domUtils = {
      * @param dom
      * @param attr
      */
-    attr: function attr(dom, _attr) {
+    attr: function (dom, attr) {
         var key, value;
-        if (!dom || !_attr || dom.nodeType !== 1) {
+        if (!dom || !attr || dom.nodeType !== 1) {
             return;
         }
-        for (key in _attr) {
-            if (_attr.hasOwnProperty(key) && typeof key == 'string') {
-                value = _attr[key];
+        for (key in attr) {
+            if (attr.hasOwnProperty(key) && typeof key == 'string') {
+                value = attr[key];
                 if (!value) {
                     dom.removeAttribute(key);
                 } else {
@@ -8787,17 +9024,19 @@ var domUtils = {
      * @param dom
      * @returns {*|boolean}
      */
-    canEdit: function canEdit(dom) {
+    canEdit: function (dom) {
         //过滤 script、style等标签
         var filterTag = ['script', 'style'];
 
-        return dom && (dom.nodeType == 1 || dom.nodeType == 3) && (domUtils.isTag(dom, 'br') || !domUtils.isEmptyDom(dom)) && !domUtils.getParentByTagName(dom, CONST.TAG.TMP_TAG, true, null) && !(dom.nodeType === 1 && domUtils.isTag(dom, filterTag) || dom.nodeType === 3 && dom.parentNode && domUtils.isTag(dom.parentNode, filterTag));
+        return dom && (dom.nodeType == 1 || dom.nodeType == 3) &&
+            (domUtils.isTag(dom, 'br') || !domUtils.isEmptyDom(dom)) && !(domUtils.getParentByTagName(dom, CONST.TAG.TMP_TAG, true, null)) && !((dom.nodeType === 1 && domUtils.isTag(dom, filterTag)) ||
+            (dom.nodeType === 3 && dom.parentNode && domUtils.isTag(dom.parentNode, filterTag)));
     },
     /**
      * 清理 dom 内无用的 childNodes（主要用于 处理 剪切板的 html）
      * @param dom
      */
-    childNodesFilter: function childNodesFilter(dom) {
+    childNodesFilter: function (dom) {
         if (!dom || dom.nodeType !== 1) {
             return;
         }
@@ -8819,7 +9058,7 @@ var domUtils = {
      * @param dom
      * @param styleKey
      */
-    clearStyle: function clearStyle(dom, styleKey) {
+    clearStyle: function (dom, styleKey) {
         var parent;
         while (dom.getAttribute(CONST.ATTR.SPAN) === CONST.ATTR.SPAN) {
             dom.style[styleKey] = '';
@@ -8839,8 +9078,7 @@ var domUtils = {
                 domUtils.mergeAtoB(parent, dom, false);
                 dom.style[styleKey] = '';
             } else {
-                var nSpan = domUtils.createSpan(),
-                    tmpDom;
+                var nSpan = domUtils.createSpan(), tmpDom;
                 nSpan.setAttribute('style', parent.getAttribute('style'));
                 while (dom.nextSibling) {
                     tmpDom = dom.nextSibling;
@@ -8855,16 +9093,52 @@ var domUtils = {
         }
     },
     /**
+     * 复制 dom
+     * @param dom
+     * @param excludeInner
+     */
+    clone: function(dom, excludeInner) {
+        var result, tmp, attList, atts, i, j, k, v;
+        if (!dom) {
+            return null;
+        }
+        if (excludeInner) {
+            if (dom.nodeType === 3) {
+                result = ENV.doc.createTextNode('');
+            } else {
+                result = ENV.doc.createElement(dom.tagName);
+                attList = dom.attributes;
+                atts = {};
+                for (i=0, j=attList.length; i<j; i++) {
+                    k = attList[i];
+                    if (/^id$/i.test(k.nodeName)) {
+                        continue;
+                    }
+                    atts[k.nodeName] = k.nodeValue;
+                }
+                domUtils.attr(result, atts);
+            }
+
+        } else {
+            if (dom.nodeType === 3) {
+                result = ENV.doc.createTextNode(dom.nodeValue);
+            } else {
+                tmp = ENV.doc.createElement('div');
+                tmp.innerHTML = dom.outerHTML;
+                result = tmp.childNodes[0];
+            }
+        }
+
+        return result;
+    },
+    /**
      * 比较 IndexList
      * @param a
      * @param b
      * @returns {number}
      */
-    compareIndexList: function compareIndexList(a, b) {
-        var i,
-            j = Math.min(a.length, b.length),
-            x,
-            y;
+    compareIndexList: function (a, b) {
+        var i, j = Math.min(a.length, b.length), x, y;
         for (i = 0; i < j; i++) {
             x = a[i];
             y = b[i];
@@ -8892,16 +9166,20 @@ var domUtils = {
      * @param b
      * @returns {boolean}
      */
-    contains: function contains(a, b) {
+    contains: function (a, b) {
         var adown = a.nodeType === 9 ? a.documentElement : a,
             bup = b && b.parentNode;
-        return a === bup || !!(bup && bup.nodeType === 1 && (adown.contains ? adown.contains(bup) : a.compareDocumentPosition && a.compareDocumentPosition(bup) & 16));
+        return a === bup || !!( bup && bup.nodeType === 1 && (
+                adown.contains ?
+                    adown.contains(bup) :
+                a.compareDocumentPosition && a.compareDocumentPosition(bup) & 16
+            ));
     },
     /**
      * 根据 src 将 img 转换为 Base64
      * @param src
      */
-    convertImageToBase64: function convertImageToBase64(src, width, height, callback) {
+    convertImageToBase64: function (src, width, height, callback) {
         // var xhr = new XMLHttpRequest();
         // xhr.open('GET', src, true);
         // xhr.responseType = 'blob';
@@ -8938,7 +9216,7 @@ var domUtils = {
     /**
      * 创建 wiz编辑器 自用的 span
      */
-    createSpan: function createSpan() {
+    createSpan: function () {
         var s = ENV.doc.createElement('span');
         s.setAttribute(CONST.ATTR.SPAN, CONST.ATTR.SPAN);
         return s;
@@ -8949,7 +9227,7 @@ var domUtils = {
      * @param style {{}}
      * @param onlyWizSpan
      */
-    css: function css(dom, style, onlyWizSpan) {
+    css: function (dom, style, onlyWizSpan) {
         if (!dom || !style || domUtils.isTag(dom, 'br')) {
             //禁止给 br 添加任何样式
             return;
@@ -8964,13 +9242,13 @@ var domUtils = {
                 } else if (v.toString().indexOf('!important') > 0) {
                     //对于 具有 !important 的样式需要特殊添加
                     domUtils.clearStyle(dom, k);
-                    dom.style.cssText += k + ':' + v;
+                    dom.style.cssText += ( k + ':' + v );
                 } else if (k.toLowerCase() == 'font-size') {
                     //如果设置的字体与 body 默认字体 同样大小， 则扩展设置 rem
                     domUtils.clearStyle(dom, k);
                     v = getRem(v);
                     if (v) {
-                        dom.style.cssText += k + ':' + v;
+                        dom.style.cssText += ( k + ':' + v );
                     }
                 } else {
                     dom.style[k] = v;
@@ -8985,20 +9263,20 @@ var domUtils = {
             if (isNaN(rSize) || isNaN(size) || rSize == 0) {
                 return null;
             }
-            return Math.round(size / rSize * 1000) / 1000 + 'rem';
+            return (Math.round((size / rSize) * 1000)) / 1000 + 'rem';
         }
     },
     /**
      * 设置 焦点
      */
-    focus: function focus() {
+    focus: function () {
         if (ENV.win.WizTemplate) {
             ENV.win.WizTemplate.focus();
         } else {
             ENV.doc.body.focus();
         }
     },
-    getBlockParent: function getBlockParent(dom, includeSelf) {
+    getBlockParent: function (dom, includeSelf) {
         if (!dom) {
             return null;
         }
@@ -9013,7 +9291,7 @@ var domUtils = {
      * @param includeParent  （Boolean 如果当前Dom 不存在指定的样式，是否递归到父节点）
      * @returns {*}
      */
-    getComputedStyle: function getComputedStyle(dom, name, includeParent) {
+    getComputedStyle: function (dom, name, includeParent) {
         if (!dom || dom.nodeType == 3 || !name) {
             return '';
         }
@@ -9036,7 +9314,7 @@ var domUtils = {
         }
         return value;
     },
-    getDocType: function getDocType(doc) {
+    getDocType: function (doc) {
         var docType = doc.doctype;
         if (!!docType && !docType.systemId && !docType.publicId) {
             docType = '<!DOCTYPE HTML>';
@@ -9052,7 +9330,7 @@ var domUtils = {
      * @param indexList
      * @returns {*}
      */
-    getDomByIndexList: function getDomByIndexList(indexList) {
+    getDomByIndexList: function (indexList) {
         if (!indexList || indexList.length === 0) {
             return null;
         }
@@ -9063,7 +9341,7 @@ var domUtils = {
                 d = d.childNodes[indexList[i]];
             }
             offset = indexList[i];
-            return { dom: d, offset: offset };
+            return {dom: d, offset: offset};
         } catch (e) {
             return null;
         }
@@ -9073,7 +9351,7 @@ var domUtils = {
      * @param dom
      * @returns {*}
      */
-    getDomEndOffset: function getDomEndOffset(dom) {
+    getDomEndOffset: function (dom) {
         if (!dom) {
             return 0;
         }
@@ -9084,13 +9362,12 @@ var domUtils = {
      * @param dom
      * @returns {number}
      */
-    getDomIndex: function getDomIndex(dom) {
+    getDomIndex: function (dom) {
         if (!dom || !dom.parentNode) {
             return -1;
         }
-        var k = 0,
-            e = dom;
-        while (e = e.previousSibling) {
+        var k = 0, e = dom;
+        while ((e = e.previousSibling)) {
             ++k;
         }
         return k;
@@ -9100,15 +9377,13 @@ var domUtils = {
      * @param options
      * @returns {{}}
      */
-    getDomListA2B: function getDomListA2B(options) {
+    getDomListA2B: function (options) {
         var startDom = options.startDom,
             startOffset = options.startOffset,
             endDom = options.endDom,
             endOffset = options.endOffset,
             noSplit = !!options.noSplit,
-            isText,
-            changeStart = false,
-            changeEnd = false;
+            isText, changeStart = false, changeEnd = false;
 
         //修正 start & end 位置
         if (startDom.nodeType == 1 && startOffset > 0 && startOffset < startDom.childNodes.length) {
@@ -9132,13 +9407,14 @@ var domUtils = {
 
         // get dom which is start and end
         if (startDom == endDom && startOffset != endOffset) {
-            isText = startDom.nodeType == 3;
+            isText = (startDom.nodeType == 3);
             if (isText && !startDom.parentNode.getAttribute(CONST.ATTR.SPAN_DELETE)) {
                 startDom = noSplit ? startDom : domUtils.splitRangeText(startDom, startOffset, endOffset);
                 endDom = startDom;
                 changeStart = true;
                 changeEnd = true;
-            } else if (startDom.nodeType == 1 && startDom.childNodes.length > 0 && !domUtils.isSelfClosingTag(startDom)) {
+            } else if (startDom.nodeType == 1 &&
+                startDom.childNodes.length > 0 && !domUtils.isSelfClosingTag(startDom)) {
                 startDom = startDom.childNodes[startOffset];
                 endDom = endDom.childNodes[endOffset - 1];
                 changeStart = true;
@@ -9168,8 +9444,7 @@ var domUtils = {
         }
 
         //make the array
-        var curDom = startDom,
-            result = [];
+        var curDom = startDom, result = [];
         if (startOffset == startDom.length) {
             curDom = domUtils.getNextNode(curDom, false, endDom);
         }
@@ -9220,7 +9495,7 @@ var domUtils = {
      * @param obj
      * @returns {*}
      */
-    getDomPosition: function getDomPosition(obj) {
+    getDomPosition: function (obj) {
         if (!obj) {
             return null;
         }
@@ -9236,7 +9511,7 @@ var domUtils = {
      * @param obj
      * @returns {*}
      */
-    getFirstDeepChild: function getFirstDeepChild(obj) {
+    getFirstDeepChild: function (obj) {
         if (!obj) {
             return null;
         }
@@ -9250,7 +9525,7 @@ var domUtils = {
      * @param obj
      * @returns {*}
      */
-    getLastDeepChild: function getLastDeepChild(obj) {
+    getLastDeepChild: function (obj) {
         if (!obj) {
             return null;
         }
@@ -9264,7 +9539,7 @@ var domUtils = {
      * @param img
      * @returns {*}
      */
-    getImageData: function getImageData(img) {
+    getImageData: function (img) {
         var size = domUtils.getImageSize(img.src);
         // Create an empty canvas element
         var canvas = ENV.doc.createElement("canvas");
@@ -9288,21 +9563,20 @@ var domUtils = {
      * @param imgSrc
      * @returns {{width: Number, height: Number}}
      */
-    getImageSize: function getImageSize(imgSrc) {
+    getImageSize: function (imgSrc) {
         var newImg = new Image();
         newImg.src = imgSrc;
         var height = newImg.height;
         var width = newImg.width;
-        return { width: width, height: height };
+        return {width: width, height: height};
     },
     /**
      * 获取 dom 在 dom 树内的 索引集合
      * @param dom
      * @returns {Array}
      */
-    getIndexListByDom: function getIndexListByDom(dom) {
-        var e = dom,
-            indexList = [];
+    getIndexListByDom: function (dom) {
+        var e = dom, indexList = [];
         while (e && !domUtils.isBody(e)) {
             indexList.splice(0, 0, domUtils.getDomIndex(e));
             e = e.parentNode;
@@ -9316,7 +9590,7 @@ var domUtils = {
      * @param endDom
      * @returns {*}
      */
-    getNextNodeCanEdit: function getNextNodeCanEdit(dom, onlyElement, endDom) {
+    getNextNodeCanEdit: function (dom, onlyElement, endDom) {
         dom = domUtils.getNextNode(dom, onlyElement, endDom);
         while (dom && !domUtils.canEdit(dom)) {
             dom = domUtils.getNextNode(dom, onlyElement, endDom);
@@ -9330,7 +9604,7 @@ var domUtils = {
      * @param endDom
      * @returns {*}
      */
-    getNextNode: function getNextNode(dom, onlyElement, endDom) {
+    getNextNode: function (dom, onlyElement, endDom) {
         if (!dom || dom == endDom) {
             return null;
         }
@@ -9393,7 +9667,7 @@ var domUtils = {
      * 获取 页面滚动条位置
      * @returns {{}}
      */
-    getPageScroll: function getPageScroll() {
+    getPageScroll: function () {
         var scroll = {};
         if (typeof ENV.win.pageYOffset != 'undefined') {
             scroll.left = ENV.win.pageXOffset;
@@ -9414,7 +9688,7 @@ var domUtils = {
      * @param includeSelf
      * @returns {*}
      */
-    getParentByFilter: function getParentByFilter(node, filterFn, includeSelf) {
+    getParentByFilter: function (node, filterFn, includeSelf) {
         if (node && !domUtils.isBody(node)) {
             node = includeSelf ? node : node.parentNode;
             while (node) {
@@ -9437,7 +9711,7 @@ var domUtils = {
      * @param excludeFn
      * @returns {*}
      */
-    getParentByTagName: function getParentByTagName(node, tagNames, includeSelf, excludeFn) {
+    getParentByTagName: function (node, tagNames, includeSelf, excludeFn) {
         if (!node) {
             return null;
         }
@@ -9450,15 +9724,11 @@ var domUtils = {
      * 获取多个 dom 共同的父节点
      * @param domList
      */
-    getParentRoot: function getParentRoot(domList) {
+    getParentRoot: function (domList) {
         if (!domList || domList.length === 0) {
             return null;
         }
-        var i,
-            j,
-            tmpIdx,
-            pNode,
-            parentList = [];
+        var i, j, tmpIdx, pNode, parentList = [];
         pNode = domList[0].nodeType == 1 ? domList[0] : domList[0].parentNode;
         while (pNode && !domUtils.isBody(pNode)) {
             parentList.push(pNode);
@@ -9491,7 +9761,7 @@ var domUtils = {
      * @param endDom
      * @returns {*}
      */
-    getPreviousNodeCanEdit: function getPreviousNodeCanEdit(dom, onlyElement, endDom) {
+    getPreviousNodeCanEdit: function (dom, onlyElement, endDom) {
         dom = domUtils.getPreviousNode(dom, onlyElement, endDom);
         while (dom && !domUtils.canEdit(dom)) {
             dom = domUtils.getPreviousNode(dom, onlyElement, endDom);
@@ -9505,7 +9775,7 @@ var domUtils = {
      * @param startDom
      * @returns {*}
      */
-    getPreviousNode: function getPreviousNode(dom, onlyElement, startDom) {
+    getPreviousNode: function (dom, onlyElement, startDom) {
         if (!dom || dom == startDom) {
             return null;
         }
@@ -9543,7 +9813,9 @@ var domUtils = {
         }
         //对于查找前一个dom节点的算法 与 查找 下一个dom的算法略有不同
         //如果 dom 与 startDom 相同， 但 dom 有子元素的时候， 不能直接返回 dom
-        if (dom == startDom && (dom.nodeType === 3 || dom.nodeType === 1 && dom.childNodes.length === 0)) {
+        if (dom == startDom &&
+            ((dom.nodeType === 3) ||
+            dom.nodeType === 1 && dom.childNodes.length === 0)) {
             return dom;
         }
 
@@ -9553,7 +9825,9 @@ var domUtils = {
         if (!!dom && tmpD) {
             while (tmpD) {
                 dom = tmpD;
-                if (dom == startDom && (dom.nodeType === 3 || dom.nodeType === 1 && dom.childNodes.length === 0)) {
+                if (dom == startDom &&
+                    ((dom.nodeType === 3) ||
+                    dom.nodeType === 1 && dom.childNodes.length === 0)) {
                     break;
                 }
                 tmpD = last(tmpD);
@@ -9565,16 +9839,16 @@ var domUtils = {
     /**
      * 给 dom 内添加 Tab 时 获取 4 个 ' '
      */
-    getTab: function getTab() {
+    getTab: function () {
         var x = ENV.doc.createElement('span');
         x.innerHTML = '&nbsp;&nbsp;&nbsp;&nbsp;';
-        return x.childNodes[0];
+        return (x.childNodes[0]);
     },
     /**
      * 获取 td,th 单元格 在 table 中的 行列坐标
      * @param td
      */
-    getTdIndex: function getTdIndex(td) {
+    getTdIndex: function (td) {
         return {
             x: td.cellIndex,
             y: td.parentNode.rowIndex,
@@ -9582,8 +9856,8 @@ var domUtils = {
             maxY: td.parentNode.parentNode.rows.length
         };
     },
-    getOffset: function getOffset(dom) {
-        var offset = { top: 0, left: 0 };
+    getOffset: function (dom) {
+        var offset = {top: 0, left: 0};
         if (dom.offsetParent) {
             while (dom.offsetParent) {
                 offset.top += dom.offsetTop;
@@ -9601,10 +9875,11 @@ var domUtils = {
      * @param dom
      * @returns {*}
      */
-    getWizAmendParent: function getWizAmendParent(dom) {
+    getWizAmendParent: function (dom) {
         return domUtils.getParentByFilter(dom, function (node) {
             //node.childNodes.length == 0 时，键盘敲入的字符加在 span 外面
-            return node && node.nodeType === 1 && (node.getAttribute(CONST.ATTR.SPAN_INSERT) || node.getAttribute(CONST.ATTR.SPAN_DELETE));
+            return ( node && node.nodeType === 1 && (node.getAttribute(CONST.ATTR.SPAN_INSERT) ||
+            node.getAttribute(CONST.ATTR.SPAN_DELETE)) );
         }, true);
     },
     /**
@@ -9613,9 +9888,9 @@ var domUtils = {
      * @param className
      * @returns {boolean}
      */
-    hasClass: function hasClass(obj, className) {
+    hasClass: function (obj, className) {
         if (obj && obj.nodeType === 1) {
-            return (' ' + obj.className + ' ').indexOf(' ' + className + ' ') > -1;
+            return ((' ' + obj.className + ' ').indexOf(' ' + className + ' ') > -1);
         }
         return false;
     },
@@ -9625,14 +9900,14 @@ var domUtils = {
      * @param dom
      * @param isAfter
      */
-    before: function before(target, dom, isAfter) {
+    before: function (target, dom, isAfter) {
         isAfter = !!isAfter;
         if (!target || !dom) {
             return;
         }
         var isBody = target === ENV.doc.body,
             parent = isBody ? target : target.parentNode,
-            nextDom = isBody ? isAfter ? null : ENV.doc.body.childNodes[0] : isAfter ? target.nextSibling : target;
+            nextDom = isBody ? (isAfter ? null : ENV.doc.body.childNodes[0]) : (isAfter ? target.nextSibling : target);
         var i, d, last;
         if (!utils.isArray(dom)) {
             parent.insertBefore(dom, nextDom);
@@ -9650,7 +9925,7 @@ var domUtils = {
      * @param dom
      * @returns {boolean}
      */
-    isBlockDom: function isBlockDom(dom) {
+    isBlockDom: function (dom) {
         if (!dom) {
             return false;
         }
@@ -9665,7 +9940,7 @@ var domUtils = {
      * @param dom
      * @returns {*|boolean|boolean}
      */
-    isBody: function isBody(dom) {
+    isBody: function (dom) {
         return dom && dom == ENV.doc.body;
     },
     /**
@@ -9673,7 +9948,7 @@ var domUtils = {
      * @param dom
      * @returns {*}
      */
-    isEmptyDom: function isEmptyDom(dom) {
+    isEmptyDom: function (dom) {
         var i, j, v;
         if (dom.nodeType === 3) {
             v = dom.nodeValue;
@@ -9701,7 +9976,7 @@ var domUtils = {
      * @param isInStart
      * @returns {boolean}
      */
-    isFillChar: function isFillChar(node, isInStart) {
+    isFillChar: function (node, isInStart) {
         return node.nodeType == 3 && !node.nodeValue.replace(new RegExp((isInStart ? '^' : '') + CONST.FILL_CHAR), '').length;
     },
     /**
@@ -9709,7 +9984,7 @@ var domUtils = {
      * @param dom
      * @returns {boolean}
      */
-    isInlineDom: function isInlineDom(dom) {
+    isInlineDom: function (dom) {
         return !domUtils.isBlockDom(dom);
     },
     /**
@@ -9717,9 +9992,9 @@ var domUtils = {
      * @param node
      * @returns {boolean}
      */
-    isSelfClosingTag: function isSelfClosingTag(node) {
+    isSelfClosingTag: function (node) {
         var selfLib = /^(area|base|br|col|command|embed|hr|img|input|keygen|link|meta|param|source|track|wbr)$/i;
-        return node.nodeType === 1 && selfLib.test(node.tagName);
+        return (node.nodeType === 1 && selfLib.test(node.tagName));
     },
     /**
      * 判断两个 span 属性（style & attribute）是否相同（属性相同且相邻的两个 span 才可以合并）
@@ -9727,8 +10002,11 @@ var domUtils = {
      * @param m
      * @returns {boolean}
      */
-    isSameSpan: function isSameSpan(n, m) {
-        return !!n && !!m && n.nodeType == 1 && m.nodeType == 1 && domUtils.isTag(n, 'span') && n.tagName == m.tagName && n.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN && domUtils.isSameStyle(n, m) && domUtils.isSameAttr(n, m);
+    isSameSpan: function (n, m) {
+        return !!n && !!m && n.nodeType == 1 && m.nodeType == 1 &&
+            domUtils.isTag(n, 'span') && n.tagName == m.tagName &&
+            n.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN &&
+            domUtils.isSameStyle(n, m) && domUtils.isSameAttr(n, m);
     },
     /**
      * 判断两个 dom 的 attribute 是否相同
@@ -9736,7 +10014,7 @@ var domUtils = {
      * @param m
      * @returns {boolean}
      */
-    isSameAttr: function isSameAttr(n, m) {
+    isSameAttr: function (n, m) {
         var attrA = n.attributes,
             attrB = m.attributes;
         if (attrA.length != attrB.length) {
@@ -9764,7 +10042,7 @@ var domUtils = {
      * @param n
      * @param m
      */
-    isSameStyle: function isSameStyle(n, m) {
+    isSameStyle: function (n, m) {
         var styleA = {};
         var styleB = {};
         domUtils.appendStyle(n.getAttribute('style'), styleA);
@@ -9792,16 +10070,14 @@ var domUtils = {
      * @param tagNames
      * @returns {boolean}
      */
-    isTag: function isTag(dom, tagNames) {
+    isTag: function (dom, tagNames) {
         if (!utils.isArray(tagNames)) {
             tagNames = [tagNames];
         }
         if (!dom || dom.nodeType !== 1) {
             return false;
         }
-        var i,
-            j,
-            tag = dom.tagName.toLowerCase();
+        var i, j, tag = dom.tagName.toLowerCase();
         for (i = 0, j = tagNames.length; i < j; i++) {
             if (tag === tagNames[i].toLowerCase()) {
                 return true;
@@ -9814,15 +10090,15 @@ var domUtils = {
      * @param node
      * @returns {boolean}
      */
-    isUsableTextNode: function isUsableTextNode(node) {
-        return node.nodeType == 3 && !utils.isEmpty(node.nodeValue);
+    isUsableTextNode: function (node) {
+        return node.nodeType == 3 && (!utils.isEmpty(node.nodeValue));
     },
     /**
      * 判断 dom 是否为 wiz 编辑器 的 span
      * @param dom
      * @returns {boolean}
      */
-    isWizSpan: function isWizSpan(dom) {
+    isWizSpan: function (dom) {
         return !!dom && !!dom.getAttribute(CONST.ATTR.SPAN);
     },
     /**
@@ -9831,7 +10107,7 @@ var domUtils = {
      * @param objB
      * @param isOverlay
      */
-    mergeAtoB: function mergeAtoB(objA, objB, isOverlay) {
+    mergeAtoB: function (objA, objB, isOverlay) {
         domUtils.mergeStyleAToB(objA, objB, isOverlay);
         domUtils.mergeAttrAtoB(objA, objB, isOverlay);
     },
@@ -9841,15 +10117,13 @@ var domUtils = {
      * @param objB
      * @param isOverlay
      */
-    mergeAttrAtoB: function mergeAttrAtoB(objA, objB, isOverlay) {
+    mergeAttrAtoB: function (objA, objB, isOverlay) {
         if (objA.nodeType != 1 || objB.nodeType != 1) {
             return;
         }
         var attrA = objA.attributes,
             attrB = objB.attributes,
-            i,
-            j,
-            a;
+            i, j, a;
         for (i = 0, j = attrA.length; i < j; i++) {
             a = attrA[i];
             if (a.name == 'style') {
@@ -9867,7 +10141,7 @@ var domUtils = {
      * @param objB
      * @param isOverlay
      */
-    mergeStyleAToB: function mergeStyleAToB(objA, objB, isOverlay) {
+    mergeStyleAToB: function (objA, objB, isOverlay) {
         if (objA.nodeType != 1 || objB.nodeType != 1) {
             return;
         }
@@ -9898,7 +10172,7 @@ var domUtils = {
      * @param domList
      * @param className
      */
-    removeClass: function removeClass(domList, className) {
+    removeClass: function (domList, className) {
         if (!domList) {
             return;
         }
@@ -9912,8 +10186,8 @@ var domUtils = {
         for (i = domList.length - 1; i >= 0; i--) {
             dom = domList[i];
             if (dom.nodeType === 1) {
-                dom.className = " " + dom.className + " ";
-                for (j = className.length; j >= 0; j--) {
+                dom.className = (" " + dom.className + " ");
+                for (j=className.length; j>=0; j--) {
                     css = className[j];
                     dom.className = dom.className.replace(' ' + css + ' ', ' ');
                 }
@@ -9925,7 +10199,7 @@ var domUtils = {
      * 从 Dom 中清除指定 name 的 tag
      * @param name
      */
-    removeDomByName: function removeDomByName(name) {
+    removeDomByName: function (name) {
         var s = ENV.doc.getElementsByName(name);
         var i, dom;
         for (i = s.length - 1; i >= 0; i--) {
@@ -9937,7 +10211,7 @@ var domUtils = {
      * 从 Dom 中清除指定 的 tag
      * @param tag
      */
-    removeDomByTag: function removeDomByTag(tag) {
+    removeDomByTag: function (tag) {
         var s = ENV.doc.getElementsByTagName(tag);
         var i, dom;
         for (i = s.length - 1; i >= 0; i--) {
@@ -9952,7 +10226,7 @@ var domUtils = {
      * @param name
      * @returns {string}
      */
-    removeStyleByNameFromHtml: function removeStyleByNameFromHtml(html, name) {
+    removeStyleByNameFromHtml: function (html, name) {
         var reg = new RegExp('<style( ([^<>])+[ ]+|[ ]+)name *= *[\'"]' + name + '[\'"][^<>]*>[^<]*<\/style>', 'ig');
         return html.replace(reg, '');
     },
@@ -9962,7 +10236,7 @@ var domUtils = {
      * @param tag
      * @returns {string}
      */
-    removeDomByTagFromHtml: function removeDomByTagFromHtml(html, tag) {
+    removeDomByTagFromHtml: function (html, tag) {
         var reg = new RegExp('<' + tag + '([ ][^>]*)*>.*<\/' + tag + '>', 'ig');
         return html.replace(reg, '');
     },
@@ -9972,10 +10246,8 @@ var domUtils = {
      * @param filter
      * @returns {Array} 返回被删除的集合列表
      */
-    removeListFilter: function removeListFilter(domList, filter) {
-        var removeList = [],
-            i,
-            dom;
+    removeListFilter: function (domList, filter) {
+        var removeList = [], i, dom;
 
         if (!domList || !filter) {
             return removeList;
@@ -9995,12 +10267,10 @@ var domUtils = {
      * @param expStr
      * @param list
      */
-    search: function search(dom, expStr, list) {
+    search: function (dom, expStr, list) {
         //TODO 兼容问题
         var tmpList = dom.querySelectorAll(expStr),
-            i,
-            j,
-            d;
+            i, j, d;
         list = list ? list : [];
         for (i = 0, j = tmpList.length; i < j; i++) {
             d = tmpList[i];
@@ -10012,7 +10282,7 @@ var domUtils = {
      * @param content
      * @param enable
      */
-    setContenteditable: function setContenteditable(content, enable) {
+    setContenteditable: function (content, enable) {
         if (!content && ENV.win.WizTemplate) {
             ENV.win.WizTemplate.setContenteditable(enable);
         } else {
@@ -10027,7 +10297,7 @@ var domUtils = {
      * @param options
      * {layerObj, target, layout, fixed, noSpace, reverse}
      */
-    setLayout: function setLayout(options) {
+    setLayout: function (options) {
         var layerObj = options.layerObj,
             target = options.target,
             layout = options.layout,
@@ -10041,14 +10311,12 @@ var domUtils = {
             winWidth = ENV.doc.documentElement.clientWidth,
             winHeight = ENV.doc.documentElement.clientHeight,
             bodyTop = window.getComputedStyle ? ENV.win.getComputedStyle(ENV.doc.body, null)['margin-top'] : 0,
-            left = '50%',
-            top = '30%',
+            left = '50%', top = '30%',
             mTop = 0,
-            mLeft = -confirmPos.width / 2,
-            minWidth,
-            maxWidth,
-            minHeight,
-            maxHeight;
+            mLeft = -(confirmPos.width) / 2,
+            minWidth, maxWidth,
+            minHeight, maxHeight;
+
 
         //iphone 客户端 编辑时 window 窗口顶端有其他 window 遮罩， 所以必须要计算 body 的 margin-top
         if (!!bodyTop) {
@@ -10098,6 +10366,7 @@ var domUtils = {
                 if (fixed) {
                     top -= scrollPos.top;
                 }
+
             } else if (layout == CONST.TYPE.POS.leftDown || layout == CONST.TYPE.POS.rightDown) {
                 top = targetPos.top + targetPos.height - confirmPos.height;
                 if (fixed) {
@@ -10120,6 +10389,7 @@ var domUtils = {
             if (top < minHeight || top + confirmPos.height > maxHeight) {
                 top = minHeight;
             }
+
         }
         domUtils.css(layerObj, {
             left: left + 'px',
@@ -10137,19 +10407,16 @@ var domUtils = {
      * @param end
      * @returns {*}
      */
-    splitRangeText: function splitRangeText(node, start, end) {
+    splitRangeText: function (node, start, end) {
         if (!domUtils.isUsableTextNode(node)) {
             return node;
         }
-        var p,
-            s,
-            t,
-            v = node.nodeValue;
+        var p, s, t, v = node.nodeValue;
         p = node.parentNode;
-        //            var isWizSpan = domUtils.isWizSpan(p);
+//            var isWizSpan = domUtils.isWizSpan(p);
         s = domUtils.createSpan();
 
-        if (!start && !end || start === 0 && end === node.nodeValue.length) {
+        if (!start && !end || (start === 0 && end === node.nodeValue.length)) {
             //the range is all text in this node
             // td,th 必须特殊处理，否则会导致 td 被添加 修订样式
             if (p.childNodes.length > 1 || domUtils.isTag(p, ['td', 'th'])) {
@@ -10183,7 +10450,7 @@ var domUtils = {
      * 将 dom 剥壳
      * @param dom
      */
-    stripDom: function stripDom(dom, checkFun) {
+    stripDom: function (dom, checkFun) {
         if (!dom || dom.nodeType === 3) {
             return;
         }
@@ -10211,13 +10478,10 @@ var domUtils = {
 };
 
 module.exports = domUtils;
-
 },{"./../common/const":13,"./../common/env":15,"./../common/utils":19}],24:[function(require,module,exports){
 /**
  * DOM 操作工具包（扩展类库）
  */
-
-'use strict';
 
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
@@ -10242,20 +10506,20 @@ domUtils.clearChild = function (dom, excludeList) {
     }
 
     if (!isExclude && dom.nodeType == 1) {
-        var ns = dom.childNodes,
-            i,
-            item;
+        var ns = dom.childNodes, i, item;
         for (i = ns.length - 1; i >= 0; i--) {
             item = ns[i];
             domUtils.clearChild(item, excludeList);
         }
         domUtils.mergeChildSpan(dom, excludeList);
 
-        if (excludeList.indexOf(dom) < 0 && dom.childNodes.length === 0 && dom.nodeType == 1 && !domUtils.isSelfClosingTag(dom) &&
-        //                    dom.tagName.toLowerCase() == 'span' && !!dom.getAttribute(CONST.ATTR.SPAN)) {
-        !!dom.getAttribute(CONST.ATTR.SPAN)) {
+        if (excludeList.indexOf(dom) < 0 &&
+            dom.childNodes.length === 0 && dom.nodeType == 1 && !domUtils.isSelfClosingTag(dom) &&
+//                    dom.tagName.toLowerCase() == 'span' && !!dom.getAttribute(CONST.ATTR.SPAN)) {
+            !!dom.getAttribute(CONST.ATTR.SPAN)) {
             dom.parentNode.removeChild(dom);
         }
+
     }
 };
 /**
@@ -10288,7 +10552,7 @@ domUtils.getContentHtml = function () {
     objList = ENV.doc.getElementsByTagName('textarea');
     for (i = 0, j = objList.length; i < j; i++) {
         obj = objList[i];
-        textType = obj.innerText === undefined ? 'textContent' : 'innerText';
+        textType = (obj.innerText === undefined ? 'textContent' : 'innerText');
         if (obj.value !== obj[textType]) {
             obj[textType] = obj.value;
         }
@@ -10303,7 +10567,8 @@ domUtils.getContentHtml = function () {
     content = domUtils.removeDomByTagFromHtml(content, CONST.TAG.TMP_TAG);
 
     //移除 script
-    content = content.replace(/<script[^<>]*\/>/ig, '').replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
+    content = content.replace(/<script[^<>]*\/>/ig, '')
+        .replace(/<script[^<>]*>(((?!<\/script>).)|(\r?\n))*<\/script>/ig, '');
 
     // 需要兼容 WizTemplate 中的部分区域可编辑 状态
     //var bodyReg = /(<body( [^<>]*)*)[ ]+contenteditable[ ]*=[ ]*['"][^'"<>]*['"]/ig;
@@ -10335,11 +10600,8 @@ domUtils.hideTableFromHtml = function (html) {
         return html;
     }
 
-    var result = [],
-        m,
-        lastIndex = 0,
-        str,
-        reg;
+    var result = [], m, lastIndex = 0,
+        str, reg;
     while (m = regex.exec(html)) {
         str = m[2];
 
@@ -10373,9 +10635,10 @@ domUtils.mergeChildSpan = function (dom, excludeList) {
     }
     domUtils.mergeSiblingSpan(dom, excludeList);
 
-    var n = dom.children[0],
-        tmp;
-    if (!!n && excludeList.indexOf(n) < 0 && dom.childNodes.length == 1 && dom.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN && n.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN) {
+    var n = dom.children[0], tmp;
+    if (!!n && excludeList.indexOf(n) < 0 && dom.childNodes.length == 1 &&
+        dom.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN &&
+        n.getAttribute(CONST.ATTR.SPAN) == CONST.ATTR.SPAN) {
         domUtils.mergeChildToParent(dom, n);
     } else {
         while (!!n) {
@@ -10411,9 +10674,7 @@ domUtils.mergeChildToParent = function (parent, child) {
  * @param excludeList
  */
 domUtils.mergeSiblingSpan = function (parentDom, excludeList) {
-    var n = parentDom.childNodes[0],
-        m,
-        tmp;
+    var n = parentDom.childNodes[0], m, tmp;
     if (!n) {
         return;
     }
@@ -10422,7 +10683,7 @@ domUtils.mergeSiblingSpan = function (parentDom, excludeList) {
         if (m && excludeList.indexOf(m) < 0 && excludeList.indexOf(n) < 0 && domUtils.isSameSpan(n, m)) {
             while (m.childNodes.length) {
                 tmp = m.childNodes[0];
-                if (tmp && (tmp.innerHTML || tmp.nodeValue && tmp.nodeValue != CONST.FILL_CHAR)) {
+                if (tmp && (tmp.innerHTML || (tmp.nodeValue && tmp.nodeValue != CONST.FILL_CHAR))) {
                     n.appendChild(tmp);
                 } else {
                     m.removeChild(tmp);
@@ -10438,10 +10699,7 @@ domUtils.modifyChildNodesStyle = function (dom, style, attr) {
     if (!dom) {
         return;
     }
-    var ns = dom.childNodes,
-        done = false,
-        i,
-        item;
+    var ns = dom.childNodes, done = false, i, item;
     for (i = 0; i < ns.length; i++) {
         item = ns[i];
         if (!done && domUtils.isUsableTextNode(item)) {
@@ -10459,6 +10717,7 @@ domUtils.modifyNodeStyle = function (item, style, attr) {
         } else {
             domUtils.modifyChildNodesStyle(item, style, attr);
         }
+
     } else if (domUtils.isUsableTextNode(item)) {
         item = domUtils.splitRangeText(item, null, null);
         domUtils.modifyStyle(item, style, attr);
@@ -10507,7 +10766,8 @@ domUtils.modifyStyle = function (dom, style, attr) {
         }
     }
 
-    if (!!dom && !isSelfClosingTag && (!domUtils.isTag(dom, 'span') || dom.getAttribute(CONST.ATTR.SPAN) !== CONST.ATTR.SPAN)) {
+    if (!!dom && !isSelfClosingTag &&
+        (!domUtils.isTag(dom, 'span') || dom.getAttribute(CONST.ATTR.SPAN) !== CONST.ATTR.SPAN)) {
         d = domUtils.createSpan();
         dom.insertBefore(d, null);
         while (dom.childNodes.length > 1) {
@@ -10530,14 +10790,13 @@ domUtils.moveOutFromTableContainer = function (container) {
     move(container, container.querySelector('.' + CONST.CLASS.TABLE_BODY));
 
     function move(mainDom, _container) {
-        var childList,
-            dom,
-            i,
+        var childList, dom, i,
             before = false;
         childList = _container.childNodes;
         for (i = childList.length - 1; i >= 0; i--) {
             dom = childList[i];
-            if (dom.nodeType === 1 && (domUtils.hasClass(dom, CONST.CLASS.TABLE_BODY) || domUtils.isTag(dom, ['table', CONST.TAG.TMP_TAG]))) {
+            if (dom.nodeType === 1 &&
+                (domUtils.hasClass(dom, CONST.CLASS.TABLE_BODY) || domUtils.isTag(dom, ['table', CONST.TAG.TMP_TAG]))) {
                 if (domUtils.hasClass(dom, CONST.CLASS.TABLE_BODY) || domUtils.isTag(dom, 'table')) {
                     before = true;
                 }
@@ -10591,13 +10850,10 @@ domUtils.splitDom = function (mainDom, subDom) {
 };
 
 module.exports = domUtils;
-
 },{"./../common/const":13,"./../common/env":15,"./domBase":23}],25:[function(require,module,exports){
 /**
  * 编辑器 基础工具包
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
@@ -10619,8 +10875,10 @@ var ENV = require('../common/env'),
 
 var originalHtml = '';
 var editor = {
-    init: function init() {},
-    on: function on() {
+    init: function () {
+
+    },
+    on: function () {
         dependLoader.loadCss(ENV.doc, [ENV.dependency.files.css.fonts]);
         domUtils.setContenteditable(null, true);
         ENV.readonly = false;
@@ -10643,8 +10901,9 @@ var editor = {
         } else {
             editor.setOriginalHtml();
         }
+
     },
-    off: function off() {
+    off: function () {
         historyUtils.stop();
         amend.stopReverse();
         amend.stop();
@@ -10659,7 +10918,7 @@ var editor = {
         domUtils.removeDomByName(CONST.NAME.TMP_STYLE);
         domUtils.removeDomByTag(CONST.TAG.TMP_TAG);
     },
-    find: function find(str, matchcase, searchBackward, loop) {
+    find: function (str, matchcase, searchBackward, loop) {
         if (!str) {
             return false;
         }
@@ -10670,16 +10929,14 @@ var editor = {
         }
         return result;
     },
-    getOriginalHtml: function getOriginalHtml() {
+    getOriginalHtml: function () {
         return originalHtml;
     },
-    insertDom: function insertDom(dom) {
+    insertDom: function (dom) {
         if (!dom) {
             return;
         }
-        var tmpDom = readyForInsert(),
-            i,
-            j,
+        var tmpDom = readyForInsert(), i, j,
             lastDom;
         //console.log(tmpDom);
 
@@ -10694,14 +10951,12 @@ var editor = {
         }
         afterInsert(lastDom);
     },
-    insertHtml: function insertHtml(html) {
+    insertHtml: function (html) {
         if (!html) {
             return;
         }
         var template = ENV.doc.createElement('div'),
-            i,
-            j,
-            doms = [];
+            i, j, doms = [];
         template.innerHTML = html;
         for (i = 0, j = template.childNodes.length; i < j; i++) {
             doms.push(template.childNodes[i]);
@@ -10709,7 +10964,7 @@ var editor = {
         editor.insertDom(doms);
         template = null;
     },
-    modifySelectionDom: function modifySelectionDom(style, attr) {
+    modifySelectionDom: function (style, attr) {
         var range = rangeUtils.getRange(),
             zone = tableZone.getZone();
 
@@ -10737,13 +10992,11 @@ var editor = {
         // 处理普通文本样式
         rangeUtils.modifySelectionDom(style, attr);
     },
-    replace: function replace(from, to, matchcase) {
+    replace: function (from, to, matchcase) {
         if (!from) {
             return false;
         }
-        var selectedTxt = getSelectedTxt(),
-            span,
-            txt;
+        var selectedTxt = getSelectedTxt(), span, txt;
         if (selectedTxt == from) {
             //替换
             if (!to) {
@@ -10762,14 +11015,14 @@ var editor = {
         // 查找下一个
         return editor.find(from, matchcase);
     },
-    replaceAll: function replaceAll(from, to, matchcase) {
+    replaceAll: function (from, to, matchcase) {
         if (!from) {
             return false;
         }
         rangeUtils.setRange(ENV.doc.body, 0);
-        while (editor.replace(from, to, matchcase)) {}
+        while(editor.replace(from, to, matchcase)) {}
     },
-    setOriginalHtml: function setOriginalHtml() {
+    setOriginalHtml: function () {
         originalHtml = domUtils.getContentHtml();
     }
 };
@@ -10784,12 +11037,11 @@ function getSelectedTxt() {
 function readyForInsert() {
     var sel = ENV.doc.getSelection(),
         range = rangeUtils.getRange(),
-        startDom,
-        startOffset,
+        startDom, startOffset,
         result = {
-        parent: null,
-        target: null
-    };
+            parent: null,
+            target: null
+        };
 
     if (!range) {
         //如果页面没有焦点， 则尝试恢复光标位置， 失败后自动让 body 获取焦点
@@ -10819,11 +11071,13 @@ function readyForInsert() {
         //直接找到新节点位置
         result.target = newDom;
         result.parent = newDom.parentNode;
-    } else if (startDom.nodeType == 3 && startOffset > 0 && startOffset < startDom.nodeValue.length) {
+    } else if (startDom.nodeType == 3 &&
+        startOffset > 0 && startOffset < startDom.nodeValue.length) {
         //处于 textNode 的中间
         result.target = domUtils.splitRangeText(startDom, startOffset, null);
         result.parent = result.target.parentNode;
-    } else if (startDom.nodeType == 1 && startOffset > 0 && startOffset < startDom.childNodes.length) {
+    } else if (startDom.nodeType == 1 &&
+        startOffset > 0 && startOffset < startDom.childNodes.length) {
         //处于 element 节点中间
         result.target = startDom.childNodes[startOffset];
         result.parent = startDom;
@@ -10847,7 +11101,8 @@ function readyForInsert() {
 
     //如果下一个是 element 节点，并且为空， 则直接将内容写入到 该 element 内
     //主要针对 <div><br/></div>
-    if (result.target && result.target.nodeType === 1 && !domUtils.isSelfClosingTag(result.target) && domUtils.isEmptyDom(result.target)) {
+    if (result.target && result.target.nodeType === 1 && !domUtils.isSelfClosingTag(result.target) &&
+        domUtils.isEmptyDom(result.target)) {
         result.parent = result.target;
         result.target = result.parent.childNodes[0];
     }
@@ -10877,8 +11132,7 @@ function afterInsert(lastNode) {
     //}
 
     afterInsertTimer = setTimeout(function () {
-        var start,
-            target = lastNode;
+        var start, target = lastNode;
         if (domUtils.isSelfClosingTag(lastNode)) {
             target = target.parentNode;
             start = domUtils.getDomIndex(lastNode) + 1;
@@ -10907,8 +11161,6 @@ module.exports = editor;
 /**
  * editor 使用的基本事件处理
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     Lang = require('../common/lang'),
@@ -10926,8 +11178,7 @@ var ENV = require('../common/env'),
 
 var EditorEventType = {
     SelectionChange: 'selectionchange'
-},
-    editorListener = {
+}, editorListener = {
     selectionchange: []
 };
 
@@ -10945,7 +11196,7 @@ function getCaretStyle() {
     var range = rangeUtils.getRange(),
         zone = tableZone.getZone();
 
-    if (!range && !zone.range || zone.active) {
+    if ((!range && !zone.range) || zone.active) {
         return;
     }
     selectTimer = setTimeout(_getCaretStyle, 300);
@@ -10970,12 +11221,10 @@ function _getCaretStyle() {
         'justifyfull': '0',
         'InsertOrderedList': '0',
         'InsertUnorderedList': '0'
-    },
-        style;
+    }, style;
     var range = rangeUtils.getRange(),
         zone = tableZone.getZone(),
-        cells,
-        cellsAlign,
+        cells, cellsAlign,
         rangeList = [];
 
     if (!range && (!zone.range || zone.active)) {
@@ -11014,6 +11263,7 @@ function _getCaretStyle() {
         if (rangeList) {
             rangeList = rangeList.list.length > 0 ? rangeList.list : [rangeList.startDom];
         }
+
     } else {
         cellsAlign = tableUtils.getAlign(zone.grid, zone.range);
         cells = tableZone.getSelectedCells();
@@ -11100,16 +11350,12 @@ function _getCaretStyle() {
 function copySelection(e, isCut) {
     var zone = tableZone.getZone(),
         range = rangeUtils.getRange(),
-        fragment,
-        oldHtml,
-        newHtml,
-        canSetData = true,
-        user,
-        style,
-        domList = [];
+        fragment, oldHtml, newHtml, canSetData = true,
+        user, style, domList = [];
     isCut = !!isCut;
 
-    if (!zone.range && (!range || range.collapsed || !amend.isAmendEditing())) {
+    if (!zone.range &&
+        (!range || range.collapsed || !amend.isAmendEditing())) {
         return;
     }
 
@@ -11170,27 +11416,17 @@ function copySelection(e, isCut) {
  * @param e
  */
 function pasteFromClipBoard(e) {
-    var fixed,
-        template,
+    var fixed, template,
         html = e.clipboardData.getData('text/html'),
         txt = e.clipboardData.getData('text/plain'),
         range = rangeUtils.getRange(),
         zone = tableZone.getZone(),
-        target,
-        insertBefore,
+        target, insertBefore,
         gridPaste,
-        pasteCell,
-        pasteColCount,
-        pasteRowCount,
-        addColCount,
-        addRowCount,
-        maxCol,
-        maxRow,
-        x,
-        y,
-        cell;
+        pasteCell, pasteColCount, pasteRowCount, addColCount, addRowCount, maxCol, maxRow,
+        x, y, cell;
 
-    if (!range && !zone.table && !zone.range || !html && !txt) {
+    if ((!range && !zone.table && !zone.range) || (!html && !txt)) {
         return;
     }
 
@@ -11237,14 +11473,15 @@ function pasteFromClipBoard(e) {
             }
             range = rangeUtils.getRange();
             if (range) {
-                if (range.startContainer.nodeType === 3 && range.startOffset > 0 && range.startOffset < range.startContainer.nodeValue.length) {
+                if (range.startContainer.nodeType === 3 &&
+                    range.startOffset > 0 && range.startOffset < range.startContainer.nodeValue.length) {
                     //如果不符合预处理的条件，并且还处于 TextNode 中间时，需要拆分
                     target = domUtils.splitRangeText(range.startContainer, range.startOffset, range.startOffset);
                     insertBefore = false;
                 } else {
                     target = range.startContainer;
                     if (target.nodeType === 3) {
-                        insertBefore = range.startOffset === 0;
+                        insertBefore = (range.startOffset === 0);
                     } else if (range.startOffset > 0 && !domUtils.isEmptyDom(target)) {
                         target = target.childNodes[range.startOffset - 1];
                         insertBefore = false;
@@ -11271,78 +11508,82 @@ function pasteFromClipBoard(e) {
                 // range.startContainer.parentNode.removeChild(target);
             }
         } else {
-                // 粘贴表格
+            // 粘贴表格
 
-                //分析剪切板内的表格范围
-                gridPaste = tableUtils.getTableGrid(template.pasteDom);
-                pasteRowCount = gridPaste.length;
-                pasteColCount = gridPaste[0] ? gridPaste[0].length : 0;
+            //分析剪切板内的表格范围
+            gridPaste = tableUtils.getTableGrid(template.pasteDom);
+            pasteRowCount = gridPaste.length;
+            pasteColCount = gridPaste[0] ? gridPaste[0].length : 0;
 
-                //从起始点 cellData 根据 剪切板内表格范围 判断是否需要增加 表格的列、行
-                addRowCount = zone.grid.length - zone.range.minY - pasteRowCount;
-                addColCount = zone.grid[0].length - zone.range.minX - pasteColCount;
+            //从起始点 cellData 根据 剪切板内表格范围 判断是否需要增加 表格的列、行
+            addRowCount = zone.grid.length - zone.range.minY - pasteRowCount;
+            addColCount = zone.grid[0].length - zone.range.minX - pasteColCount;
 
-                for (y = addRowCount; y < 0; y++) {
-                    tableCore.insertRow(false);
-                }
-                for (x = addColCount; x < 0; x++) {
-                    tableCore.insertCol(false);
-                }
-
-                //分析已选择的表格范围
-                zone = tableZone.getZone();
-                if (!html) {
-                    //从文本转义的 table 只复制一次，不允许反复被粘贴
-                    maxRow = zone.range.minY + pasteRowCount - 1;
-                    maxCol = zone.range.minX + pasteColCount - 1;
-                } else {
-                    maxRow = Math.max(zone.range.minY + pasteRowCount - 1, zone.range.maxY);
-                    maxCol = Math.max(zone.range.minX + pasteColCount - 1, zone.range.maxX);
-                }
-
-                //从起始点 cellData 开始 循环粘贴剪切板单元格
-                tableUtils.eachRange(zone.grid, {
-                    minY: zone.range.minY,
-                    maxY: maxRow,
-                    minX: zone.range.minX,
-                    maxX: maxCol
-                }, function (cellData) {
-                    if (!cellData.fake) {
-                        cell = cellData.cell;
-                        pasteCell = gridPaste[(cellData.y - zone.range.minY) % pasteRowCount][(cellData.x - zone.range.minX) % pasteColCount];
-
-                        if (amend.isAmendEditing()) {
-                            //修订模式 预处理
-                            rangeUtils.setRange(cell, 0, cell.lastChild, domUtils.getDomEndOffset(cell.lastChild));
-                            amendUtils.removeSelection(amendUser.getCurUser());
-                            amendUtils.removeUserDel(cell, amendUser.getCurUser());
-
-                            if (pasteCell.fake) {
-                                return;
-                            }
-
-                            if (domUtils.isEmptyDom(cell)) {
-                                cell.innerHTML = pasteCell.cell.innerHTML;
-                            } else {
-                                while (pasteCell.cell.firstChild) {
-                                    cell.appendChild(pasteCell.cell.firstChild);
-                                }
-                            }
-
-                            amend.fixPaste(cell.firstChild, cell.lastChild, amendUser.getCurUser());
-                        } else {
-                            cell.innerHTML = pasteCell.fake ? '' : pasteCell.cell.innerHTML;
-                        }
-                    }
-                });
-                //粘贴后，需要修订 range
-                tableZone.setStart(zone.grid[zone.range.minY][zone.range.minX].cell).setEnd(zone.grid[maxRow][maxCol].cell);
+            for (y = addRowCount; y < 0; y++) {
+                tableCore.insertRow(false);
+            }
+            for (x = addColCount; x < 0; x++) {
+                tableCore.insertCol(false);
             }
 
+            //分析已选择的表格范围
+            zone = tableZone.getZone();
+            if (!html) {
+                //从文本转义的 table 只复制一次，不允许反复被粘贴
+                maxRow = zone.range.minY + pasteRowCount - 1;
+                maxCol = zone.range.minX + pasteColCount - 1;
+            } else {
+                maxRow = Math.max(zone.range.minY + pasteRowCount - 1, zone.range.maxY);
+                maxCol = Math.max(zone.range.minX + pasteColCount - 1, zone.range.maxX);
+            }
+
+            //从起始点 cellData 开始 循环粘贴剪切板单元格
+            tableUtils.eachRange(zone.grid, {
+                minY: zone.range.minY,
+                maxY: maxRow,
+                minX: zone.range.minX,
+                maxX: maxCol
+            }, function (cellData) {
+                if (!cellData.fake) {
+                    cell = cellData.cell;
+                    pasteCell = gridPaste[(cellData.y - zone.range.minY) % pasteRowCount][(cellData.x - zone.range.minX) % pasteColCount];
+
+                    if (amend.isAmendEditing()) {
+                        //修订模式 预处理
+                        rangeUtils.setRange(cell, 0, cell.lastChild, domUtils.getDomEndOffset(cell.lastChild));
+                        amendUtils.removeSelection(amendUser.getCurUser());
+                        amendUtils.removeUserDel(cell, amendUser.getCurUser());
+
+                        if (pasteCell.fake) {
+                            return;
+                        }
+
+                        if (domUtils.isEmptyDom(cell)) {
+                            cell.innerHTML = pasteCell.cell.innerHTML;
+                        } else {
+                            while (pasteCell.cell.firstChild) {
+                                cell.appendChild(pasteCell.cell.firstChild);
+                            }
+                        }
+
+                        amend.fixPaste(cell.firstChild, cell.lastChild, amendUser.getCurUser());
+
+                    } else {
+                        cell.innerHTML = pasteCell.fake ? '' : pasteCell.cell.innerHTML;
+                    }
+                }
+            });
+            //粘贴后，需要修订 range
+            tableZone.setStart(zone.grid[zone.range.minY][zone.range.minX].cell)
+                .setEnd(zone.grid[maxRow][maxCol].cell);
+        }
+
         utils.stopEvent(e);
+
     } else if (amend.isAmendEditing()) {
         //修订模式下， 表格外 粘贴
         amend.readyForPaste();
+
     } else {
         //非修订模式下， 表格外 粘贴
         fixed = amendUtils.fixedAmendRange();
@@ -11368,10 +11609,7 @@ function pasteForIOS(e) {
 }
 
 function eventStringify(event) {
-    var k,
-        v,
-        t,
-        s = [];
+    var k, v, t, s = [];
     for (k in event) {
         v = event[k];
         t = (typeof v).toLowerCase();
@@ -11387,7 +11625,7 @@ function eventStringify(event) {
 
 var EditorEvent = {
     TYPE: EditorEventType,
-    bind: function bind() {
+    bind: function () {
         EditorEvent.unbind();
         ENV.doc.addEventListener('click', handler.onClick);
         ENV.doc.addEventListener('compositionstart', handler.onCompositionstart);
@@ -11413,7 +11651,7 @@ var EditorEvent = {
             ENV.doc.addEventListener('touchstart', handler.onTouchStart);
         }
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.doc.removeEventListener('click', handler.onClick);
         ENV.doc.removeEventListener('compositionstart', handler.onCompositionstart);
         ENV.doc.removeEventListener('compositionend', handler.onCompositionend);
@@ -11435,7 +11673,7 @@ var EditorEvent = {
         ENV.doc.removeEventListener('touchend', handler.onTouchEnd);
         ENV.doc.removeEventListener('touchstart', handler.onTouchStart);
     },
-    startTrackEvent: function startTrackEvent(eventName, id) {
+    startTrackEvent: function (eventName, id) {
         if (!eventTrackHandler[id]) {
             eventTrackHandler[id] = function (event) {
                 ENV.client.sendCmdToWiznote(CONST.CLIENT_EVENT.wizEditorTrackEvent, {
@@ -11446,13 +11684,13 @@ var EditorEvent = {
             ENV.doc.addEventListener(eventName, eventTrackHandler[id]);
         }
     },
-    stopTrackEvent: function stopTrackEvent(eventName, id) {
+    stopTrackEvent: function (eventName, id) {
         if (eventTrackHandler[id]) {
             ENV.doc.removeEventListener(eventName, eventTrackHandler[id]);
             delete eventTrackHandler[id];
         }
     },
-    addListener: function addListener(eName, fun) {
+    addListener: function (eName, fun) {
         if (!fun || typeof fun !== 'function') {
             return;
         }
@@ -11471,7 +11709,7 @@ var EditorEvent = {
             ENV.event.add(CONST.EVENT.ON_SELECT_CHANGE, getCaretStyle);
         }
     },
-    removeListener: function removeListener(eName, fun) {
+    removeListener: function (eName, fun) {
         if (fun && typeof fun !== 'function') {
             return;
         }
@@ -11490,7 +11728,7 @@ var EditorEvent = {
             ENV.event.remove(CONST.EVENT.ON_SELECT_CHANGE, getCaretStyle);
         }
     },
-    triggerListener: function triggerListener(eName, params) {
+    triggerListener: function (eName, params) {
         var h = editorListener[eName];
         if (!h) {
             return;
@@ -11504,57 +11742,58 @@ var EditorEvent = {
 };
 
 var handler = {
-    onClick: function onClick(e) {
+    onClick: function (e) {
         ENV.event.call(CONST.EVENT.ON_CLICK, e);
     },
-    onCompositionstart: function onCompositionstart(e) {
+    onCompositionstart: function (e) {
         ENV.event.call(CONST.EVENT.ON_COMPOSITION_START, e);
     },
-    onCompositionend: function onCompositionend(e) {
+    onCompositionend: function (e) {
         ENV.event.call(CONST.EVENT.ON_COMPOSITION_END, e);
     },
-    onCopy: function onCopy(e) {
+    onCopy: function (e) {
         copySelection(e, false);
         // ENV.event.call(CONST.EVENT.ON_COPY, e);
     },
-    onCut: function onCut(e) {
+    onCut: function (e) {
         copySelection(e, true);
 
         // ENV.event.call(CONST.EVENT.ON_COPY, e);
     },
-    onDragStart: function onDragStart(e) {
+    onDragStart: function (e) {
         ENV.event.call(CONST.EVENT.ON_DRAG_START, e);
     },
-    onDragEnter: function onDragEnter(e) {
+    onDragEnter: function (e) {
         ENV.event.call(CONST.EVENT.ON_DRAG_ENTER, e);
     },
-    onDrop: function onDrop(e) {
+    onDrop: function (e) {
         ENV.event.call(CONST.EVENT.ON_DROP, e);
     },
-    onKeydown: function onKeydown(e) {
+    onKeydown: function (e) {
         var keyCode = e.keyCode || e.which;
         // mac 端 ctrl + s 触发保存操作
-        if (ENV.win.WizQtEditor && ENV.client.type.isMac && keyCode === 83 && (ENV.client.type.isLinux && e.ctrlKey || !ENV.client.type.isLinux && e.metaKey)) {
+        if (ENV.win.WizQtEditor && ENV.client.type.isMac && keyCode === 83 &&
+            ((ENV.client.type.isLinux && e.ctrlKey) || (!ENV.client.type.isLinux && e.metaKey))) {
             ENV.win.WizQtEditor.saveCurrentNote();
         }
         ENV.event.call(CONST.EVENT.ON_KEY_DOWN, e);
     },
-    onKeyup: function onKeyup(e) {
+    onKeyup: function (e) {
         ENV.event.call(CONST.EVENT.ON_KEY_UP, e);
     },
-    onMousedown: function onMousedown(e) {
+    onMousedown: function (e) {
         ENV.event.call(CONST.EVENT.ON_MOUSE_DOWN, e);
     },
-    onMousemove: function onMousemove(e) {
+    onMousemove: function (e) {
         ENV.event.call(CONST.EVENT.ON_MOUSE_MOVE, e);
     },
-    onMouseover: function onMouseover(e) {
+    onMouseover: function (e) {
         ENV.event.call(CONST.EVENT.ON_MOUSE_OVER, e);
     },
-    onMouseup: function onMouseup(e) {
+    onMouseup: function (e) {
         ENV.event.call(CONST.EVENT.ON_MOUSE_UP, e);
     },
-    onPaste: function onPaste(e) {
+    onPaste: function (e) {
         if (ENV.client.type.isIOS) {
             pasteForIOS(e);
             return;
@@ -11563,37 +11802,34 @@ var handler = {
 
         ENV.event.call(CONST.EVENT.ON_PASTE, e);
     },
-    onScroll: function onScroll(e) {
+    onScroll: function (e) {
         ENV.event.call(CONST.EVENT.ON_SCROLL, e);
     },
-    onSelectionStart: function onSelectionStart(e) {
+    onSelectionStart: function (e) {
         ENV.event.call(CONST.EVENT.ON_SELECT_START, e);
     },
-    onSelectionChange: function onSelectionChange(e) {
+    onSelectionChange: function (e) {
         ENV.event.call(CONST.EVENT.ON_SELECT_CHANGE, e);
     },
-    onTouchEnd: function onTouchEnd(e) {
+    onTouchEnd: function (e) {
         ENV.event.call(CONST.EVENT.ON_TOUCH_END, e);
     },
-    onTouchStart: function onTouchStart(e) {
+    onTouchStart: function (e) {
         ENV.event.call(CONST.EVENT.ON_TOUCH_START, e);
     }
 };
 
 module.exports = EditorEvent;
-
 },{"../amend/amend":7,"../amend/amendUser":9,"../amend/amendUtils/amendExtend":11,"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/utils":19,"../domUtils/domBase":23,"../rangeUtils/rangeExtend":36,"../tableUtils/tableCore":39,"../tableUtils/tableUtils":41,"../tableUtils/tableZone":42}],27:[function(require,module,exports){
 /**
  * tab 键操作处理
  */
-'use strict';
-
 var ENV = require('../common/env'),
-    CONST = require('../common/const'),
-    utils = require('../common/utils'),
-    domUtils = require('../domUtils/domExtend'),
-    rangeUtils = require('../rangeUtils/rangeExtend'),
-    historyUtils = require('../common/historyUtils');
+CONST = require('../common/const'),
+utils = require('../common/utils'),
+domUtils = require('../domUtils/domExtend'),
+rangeUtils = require('../rangeUtils/rangeExtend'),
+historyUtils = require('../common/historyUtils');
 
 var tabHtml = ' &nbsp; &nbsp;';
 
@@ -11633,15 +11869,15 @@ function processTab(prev) {
 }
 
 var _event = {
-    bind: function bind() {
+    bind: function() {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
-    unbind: function unbind() {
+    unbind: function() {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
     handler: {
-        onKeyDown: function onKeyDown(e) {
+        onKeyDown: function(e) {
             var keyCode = e.keyCode || e.which;
             if (keyCode !== 9) {
                 return;
@@ -11655,25 +11891,22 @@ var _event = {
 };
 
 var tabKey = {
-    init: function init(html) {
+    init: function(html) {
         tabHtml = html;
     },
-    on: function on() {
+    on: function() {
         _event.bind();
     },
-    off: function off() {
+    off: function() {
         _event.unbind();
     }
 };
 
 module.exports = tabKey;
-
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36}],28:[function(require,module,exports){
 /**
  * img 操作基本方法集合
  */
-
-'use strict';
 
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
@@ -11699,12 +11932,15 @@ function init() {
     cursorOri = ENV.doc.body.style.cursor || '';
 
     // TODO 临时为 pc端处理，pc端整合后， 直接删除
-    ENV.win.WizImgResizeOnGetHTML = function () {};
+    ENV.win.WizImgResizeOnGetHTML = function () {
+    };
 }
 
 function initImageDragResize(img) {
-    if (!img || !img.tagName || img.tagName.toLowerCase() != 'img') return;
-    if (!canDragResize(img)) return;
+    if (!img || !img.tagName || img.tagName.toLowerCase() != 'img')
+        return;
+    if (!canDragResize(img))
+        return;
     //
     var container = createHandles();
     if (!container) {
@@ -11754,16 +11990,14 @@ function getHandleContainer() {
 }
 
 function setHandleSize(imgOptions, handle) {
-    if (!imgOptions || !handle) return;
+    if (!imgOptions || !handle)
+        return;
     var offset = imgOptions.offset;
-    var x = offset.left,
-        y = offset.top,
-        width = imgOptions.width,
-        height = imgOptions.height;
+    var x = offset.left, y = offset.top,
+        width = imgOptions.width, height = imgOptions.height;
 
     var handleName = handle.getAttribute('data-type');
-    var left = 0,
-        top = 0;
+    var left = 0, top = 0;
     switch (handleName) {
         case 'lt':
             left = x - 7;
@@ -11856,10 +12090,12 @@ function initImage(img) {
 }
 
 function canDragResize(img) {
-    if (!img) return false;
+    if (!img)
+        return false;
     //
     var className = img.getAttribute('class');
-    if (className && -1 != className.indexOf(CONST.CLASS.IMG_NOT_DRAG)) return false;
+    if (className && -1 != className.indexOf(CONST.CLASS.IMG_NOT_DRAG))
+        return false;
     //
     return true;
 }
@@ -11876,19 +12112,23 @@ function showHandles(show) {
     }
 }
 function scaleImgSize(rate, widthDraged, heightDraged, img) {
-    if (!img) return;
+    if (!img)
+        return;
     //
     var widthSized = heightDraged * rate;
     var heightSized = widthDraged / rate;
     //
-    if (widthSized < widthDraged) widthSized = widthDraged;else heightSized = heightDraged;
+    if (widthSized < widthDraged)
+        widthSized = widthDraged;
+    else
+        heightSized = heightDraged;
     //
     img.width = widthSized;
     img.height = heightSized;
 }
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.BEFORE_GET_DOCHTML, _event.handler.beforeGetDocHtml);
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
@@ -11896,27 +12136,27 @@ var _event = {
         ENV.event.add(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onMouseMove);
         ENV.event.add(CONST.EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
     },
-    bindContainer: function bindContainer(container) {
+    bindContainer: function (container) {
         _event.unbindContainer(container);
         container.addEventListener('mousedown', _event.handler.onContainerMouseDown);
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_DOWN, _event.handler.onMouseDown);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onMouseMove);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_UP, _event.handler.onMouseUp);
     },
-    unbindContainer: function unbindContainer(container) {
+    unbindContainer: function (container) {
         container.removeEventListener('mousedown', _event.handler.onContainerMouseDown);
     },
     handler: {
-        beforeGetDocHtml: function beforeGetDocHtml() {
+        beforeGetDocHtml: function () {
             clearHandles();
         },
-        onKeyDown: function onKeyDown() {
+        onKeyDown: function () {
             showHandles(false);
         },
-        onContainerMouseDown: function onContainerMouseDown(e) {
+        onContainerMouseDown: function (e) {
             var elm = e.target || e.srcElement;
             resizingHanlde = elm.getAttribute('data-type');
             var img = ENV.doc.querySelector('.' + CONST.CLASS.IMG_RESIZE_ACTIVE);
@@ -11994,11 +12234,11 @@ var _event = {
             }
             utils.stopEvent(e);
         },
-        onMouseDown: function onMouseDown() {
+        onMouseDown: function () {
             showHandles(false);
             removeImgAttributes();
         },
-        onMouseMove: function onMouseMove(e) {
+        onMouseMove: function (e) {
             var img = ENV.doc.querySelector('.' + CONST.CLASS.IMG_RESIZE_ACTIVE);
             var offset, mousex, mousey;
             if (!img) {
@@ -12119,7 +12359,8 @@ var _event = {
                 //
                 if (img.style.cssText) {
                     var cssText = img.style.cssText;
-                    cssText = cssText.replace(/width:\s*\d+.?\d+px;?/ig, 'width: ' + img.width + 'px').replace(/height:\s*\d+.?\d+px;?/ig, 'height: ' + img.height + 'px');
+                    cssText = cssText.replace(/width:\s*\d+.?\d+px;?/ig, 'width: ' + img.width + 'px')
+                        .replace(/height:\s*\d+.?\d+px;?/ig, 'height: ' + img.height + 'px');
                     //
                     img.style.cssText = cssText;
                 }
@@ -12136,7 +12377,7 @@ var _event = {
                 }
             }
         },
-        onMouseUp: function onMouseUp(e) {
+        onMouseUp: function (e) {
             var elm = e.target || e.srcElement;
             if (elm && elm.tagName && elm.tagName.toLowerCase() == 'img') {
                 initImageDragResize(elm);
@@ -12167,30 +12408,27 @@ var imgResize = {
 
 module.exports = imgResize;
 
+
 },{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24}],29:[function(require,module,exports){
 /**
  * img 操作基本方法集合
  */
 
-'use strict';
-
 var ENV = require('./../common/env'),
     imgResize = require('./imgResize');
 
 var imgUtils = {
-    on: function on() {
+    on: function () {
         imgResize.init();
         imgResize.bind();
     },
-    off: function off() {
+    off: function () {
         imgResize.unbind();
     },
-    getAll: function getAll(onlyLocal) {
+    getAll: function (onlyLocal) {
         var images = ENV.doc.images,
-            img,
-            imageSrcs = [],
-            tmp = {},
-            src;
+            img, imageSrcs = [],
+            tmp = {}, src;
         for (img in images) {
             if (images.hasOwnProperty(img)) {
                 //有特殊字符的文件名， 得到src 时是被转义后的名字，所以必须 decode 处理
@@ -12203,14 +12441,14 @@ var imgUtils = {
         }
         return imageSrcs;
     },
-    getImageSize: function getImageSize(imgSrc) {
+    getImageSize: function (imgSrc) {
         var newImg = new Image();
         newImg.src = imgSrc;
         var height = newImg.height;
         var width = newImg.width;
-        return { width: width, height: height };
+        return {width: width, height: height};
     },
-    getImageData: function getImageData(img) {
+    getImageData: function (img) {
         var size = imgUtils.getImageSize(img.src);
         // Create an empty canvas element
         var canvas = ENV.doc.createElement("canvas");
@@ -12229,16 +12467,12 @@ var imgUtils = {
 
         return dataURL.replace(/^data:image\/(png|jpg);base64,/, "");
     },
-    makeAttachmentHtml: function makeAttachmentHtml(guid, imgPath) {
+    makeAttachmentHtml: function (guid, imgPath) {
         return '<div style="margin: 15px auto;"><a href="wiz:open_attachment?guid=' + guid + '"><img src="' + imgPath + '" style="width: 280px; height:auto;"></a></div><div><br/></div>';
     },
-    makeDomByPath: function makeDomByPath(imgPath) {
-        var result = [],
-            paths = [],
-            main,
-            img,
-            i,
-            j;
+    makeDomByPath: function (imgPath) {
+        var result = [], paths = [],
+            main, img, i, j;
         if (imgPath.indexOf('*')) {
             paths = imgPath.split("*");
         } else {
@@ -12263,7 +12497,7 @@ var imgUtils = {
 };
 
 function imgFilter(img, onlyLocal) {
-    if (!img || img.className && img.className.indexOf('wiz-todo') > -1) {
+    if (!img || (img.className && img.className.indexOf('wiz-todo') > -1)) {
         //checklist 的图片不进行获取
         return false;
     }
@@ -12288,23 +12522,21 @@ module.exports = imgUtils;
 /**
  * 超链接操作基本方法集合
  */
-'use strict';
-
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
     domUtils = require('./../domUtils/domExtend'),
     rangeUtils = require('./../rangeUtils/rangeExtend');
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
     },
     handler: {
-        onKeyDown: function onKeyDown(e) {
+        onKeyDown: function (e) {
             var keyCode = e.keyCode || e.which;
             var start, next;
             var sel, range, offset, charCode;
@@ -12358,21 +12590,21 @@ var _event = {
                                 start = start.parentNode;
                             }
                             range.setStart(next, 0);
+
                         }
+
                     }
                     //if is <a>, then return;
                     if (domUtils.getParentByTagName(range.startContainer, 'a', true, null)) {
                         return;
                     }
-                    var a = ENV.doc.createElement('a'),
-                        text = ENV.doc.createTextNode(' '),
-                        href;
+                    var a = ENV.doc.createElement('a'), text = ENV.doc.createTextNode(' '), href;
 
                     var rangeText = range.extractContents();
                     a.innerHTML = a.href = rangeText.textContent.replace(/<[^>]+>/g, '');
                     href = a.getAttribute("href").replace(CONST.FILL_CHAR_REG, '');
                     href = /^(?:https?:\/\/)/ig.test(href) ? href : "http://" + href;
-                    //                    a.setAttribute('_src', href);
+//                    a.setAttribute('_src', href);
                     a.href = href;
 
                     range.insertNode(a);
@@ -12390,16 +12622,16 @@ var _event = {
  * 根据输入内容 自动匹配并生成 超链接 <a>
  */
 var linkUtils = {
-    on: function on() {
+    on: function () {
         _event.bind();
     },
-    off: function off() {
+    off: function () {
         _event.unbind();
     },
     /**
      * 移除选中的 <a> 标签的超链接
      */
-    removeSelectedLink: function removeSelectedLink() {
+    removeSelectedLink: function () {
         var sel = ENV.doc.getSelection();
         var currentNode = sel.focusNode;
         while (currentNode && !domUtils.isTag(currentNode, 'a')) {
@@ -12414,7 +12646,7 @@ var linkUtils = {
         rangeUtils.selectElementContents(currentNode);
         ENV.doc.execCommand("unlink", false, false);
     },
-    setCurrentLink: function setCurrentLink(url) {
+    setCurrentLink: function (url) {
         if (!url) {
             return;
         }
@@ -12423,13 +12655,14 @@ var linkUtils = {
 };
 
 module.exports = linkUtils;
-
 },{"./../common/const":13,"./../common/env":15,"./../domUtils/domExtend":24,"./../rangeUtils/rangeExtend":36}],31:[function(require,module,exports){
 "use strict";
 var Markdown;
 
 if (typeof exports === "object" && typeof require === "function") // we're in a CommonJS (e.g. Node.js) module
-            Markdown = exports;else Markdown = {};
+    Markdown = exports;
+else
+    Markdown = {};
 
 // The following text is included for historical reasons, but should
 // be taken with a pinch of salt; it's not all true anymore.
@@ -12461,6 +12694,7 @@ if (typeof exports === "object" && typeof require === "function") // we're in a 
 // and line endings.
 //
 
+
 //
 // Usage:
 //
@@ -12477,1561 +12711,1614 @@ if (typeof exports === "object" && typeof require === "function") // we're in a 
 
 (function () {
 
-            function identity(x) {
-                        return x;
+    function identity(x) {
+        return x;
+    }
+    function returnFalse(x) {
+        return false;
+    }
+
+    function HookCollection() {
+    }
+
+    HookCollection.prototype = {
+
+        chain: function (hookname, func) {
+            var original = this[hookname];
+            if (!original)
+                throw new Error("unknown hook " + hookname);
+
+            if (original === identity)
+                this[hookname] = func;
+            else
+                this[hookname] = function (text) {
+                    var args = Array.prototype.slice.call(arguments, 0);
+                    args[0] = original.apply(null, args);
+                    return func.apply(null, args);
+                };
+        },
+        set: function (hookname, func) {
+            if (!this[hookname])
+                throw new Error("unknown hook " + hookname);
+            this[hookname] = func;
+        },
+        addNoop: function (hookname) {
+            this[hookname] = identity;
+        },
+        addFalse: function (hookname) {
+            this[hookname] = returnFalse;
+        }
+    };
+
+    Markdown.HookCollection = HookCollection;
+
+    // g_urls and g_titles allow arbitrary user-entered strings as keys. This
+    // caused an exception (and hence stopped the rendering) when the user entered
+    // e.g. [push] or [__proto__]. Adding a prefix to the actual key prevents this
+    // (since no builtin property starts with "s_"). See
+    // http://meta.stackexchange.com/questions/64655/strange-wmd-bug
+    // (granted, switching from Array() to Object() alone would have left only __proto__
+    // to be a problem)
+    function SaveHash() {
+    }
+    SaveHash.prototype = {
+        set: function (key, value) {
+            this["s_" + key] = value;
+        },
+        get: function (key) {
+            return this["s_" + key];
+        }
+    };
+
+    Markdown.Converter = function (OPTIONS) {
+        var pluginHooks = this.hooks = new HookCollection();
+
+        // given a URL that was encountered by itself (without markup), should return the link text that's to be given to this link
+        pluginHooks.addNoop("plainLinkText");
+
+        // called with the orignal text as given to makeHtml. The result of this plugin hook is the actual markdown source that will be cooked
+        pluginHooks.addNoop("preConversion");
+
+        // called with the text once all normalizations have been completed (tabs to spaces, line endings, etc.), but before any conversions have
+        pluginHooks.addNoop("postNormalization");
+
+        // Called with the text before / after creating block elements like code blocks and lists. Note that this is called recursively
+        // with inner content, e.g. it's called with the full text, and then only with the content of a blockquote. The inner
+        // call will receive outdented text.
+        pluginHooks.addNoop("preBlockGamut");
+        pluginHooks.addNoop("postBlockGamut");
+
+        // called with the text of a single block element before / after the span-level conversions (bold, code spans, etc.) have been made
+        pluginHooks.addNoop("preSpanGamut");
+        pluginHooks.addNoop("postSpanGamut");
+
+        // called with the final cooked HTML code. The result of this plugin hook is the actual output of makeHtml
+        pluginHooks.addNoop("postConversion");
+
+        //
+        // Private state of the converter instance:
+        //
+
+        // Global hashes, used by various utility routines
+        var g_urls;
+        var g_titles;
+        var g_html_blocks;
+
+        // Used to track when we're inside an ordered or unordered list
+        // (see _ProcessListItems() for details):
+        var g_list_level;
+
+        OPTIONS = OPTIONS || {};
+        var asciify = identity, deasciify = identity;
+        if (OPTIONS.nonAsciiLetters) {
+
+            /* In JavaScript regular expressions, \w only denotes [a-zA-Z0-9_].
+             * That's why there's inconsistent handling e.g. with intra-word bolding
+             * of Japanese words. That's why we do the following if OPTIONS.nonAsciiLetters
+             * is true:
+             *
+             * Before doing bold and italics, we find every instance
+             * of a unicode word character in the Markdown source that is not
+             * matched by \w, and the letter "Q". We take the character's code point
+             * and encode it in base 51, using the "digits"
+             *
+             *     A, B, ..., P, R, ..., Y, Z, a, b, ..., y, z
+             *
+             * delimiting it with "Q" on both sides. For example, the source
+             *
+             * > In Chinese, the smurfs are called 藍精靈, meaning "blue spirits".
+             *
+             * turns into
+             *
+             * > In Chinese, the smurfs are called QNIhQQMOIQQOuUQ, meaning "blue spirits".
+             *
+             * Since everything that is a letter in Unicode is now a letter (or
+             * several letters) in ASCII, \w and \b should always do the right thing.
+             *
+             * After the bold/italic conversion, we decode again; since "Q" was encoded
+             * alongside all non-ascii characters (as "QBfQ"), and the conversion
+             * will not generate "Q", the only instances of that letter should be our
+             * encoded characters. And since the conversion will not break words, the
+             * "Q...Q" should all still be in one piece.
+             *
+             * We're using "Q" as the delimiter because it's probably one of the
+             * rarest characters, and also because I can't think of any special behavior
+             * that would ever be triggered by this letter (to use a silly example, if we
+             * delimited with "H" on the left and "P" on the right, then "Ψ" would be
+             * encoded as "HTTP", which may cause special behavior). The latter would not
+             * actually be a huge issue for bold/italic, but may be if we later use it
+             * in other places as well.
+             * */
+            (function () {
+                var lettersThatJavaScriptDoesNotKnowAndQ = /[Q\u00aa\u00b5\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376-\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0523\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0621-\u064a\u0660-\u0669\u066e-\u066f\u0671-\u06d3\u06d5\u06e5-\u06e6\u06ee-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07c0-\u07ea\u07f4-\u07f5\u07fa\u0904-\u0939\u093d\u0950\u0958-\u0961\u0966-\u096f\u0971-\u0972\u097b-\u097f\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc-\u09dd\u09df-\u09e1\u09e6-\u09f1\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0-\u0ae1\u0ae6-\u0aef\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b35-\u0b39\u0b3d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0be6-\u0bef\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58-\u0c59\u0c60-\u0c61\u0c66-\u0c6f\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3d\u0d60-\u0d61\u0d66-\u0d6f\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32-\u0e33\u0e40-\u0e46\u0e50-\u0e59\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eb0\u0eb2-\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f20-\u0f29\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8b\u1000-\u102a\u103f-\u1049\u1050-\u1055\u105a-\u105d\u1061\u1065-\u1066\u106e-\u1070\u1075-\u1081\u108e\u1090-\u1099\u10a0-\u10c5\u10d0-\u10fa\u10fc\u1100-\u1159\u115f-\u11a2\u11a8-\u11f9\u1200-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u1676\u1681-\u169a\u16a0-\u16ea\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u17e0-\u17e9\u1810-\u1819\u1820-\u1877\u1880-\u18a8\u18aa\u1900-\u191c\u1946-\u196d\u1970-\u1974\u1980-\u19a9\u19c1-\u19c7\u19d0-\u19d9\u1a00-\u1a16\u1b05-\u1b33\u1b45-\u1b4b\u1b50-\u1b59\u1b83-\u1ba0\u1bae-\u1bb9\u1c00-\u1c23\u1c40-\u1c49\u1c4d-\u1c7d\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u2054\u2071\u207f\u2090-\u2094\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2183-\u2184\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2c6f\u2c71-\u2c7d\u2c80-\u2ce4\u2d00-\u2d25\u2d30-\u2d65\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3006\u3031-\u3035\u303b-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31b7\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fc3\ua000-\ua48c\ua500-\ua60c\ua610-\ua62b\ua640-\ua65f\ua662-\ua66e\ua67f-\ua697\ua717-\ua71f\ua722-\ua788\ua78b-\ua78c\ua7fb-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8d0-\ua8d9\ua900-\ua925\ua930-\ua946\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa50-\uaa59\uac00-\ud7a3\uf900-\ufa2d\ufa30-\ufa6a\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe33-\ufe34\ufe4d-\ufe4f\ufe70-\ufe74\ufe76-\ufefc\uff10-\uff19\uff21-\uff3a\uff3f\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc]/g;
+                var cp_Q = "Q".charCodeAt(0);
+                var cp_A = "A".charCodeAt(0);
+                var cp_Z = "Z".charCodeAt(0);
+                var dist_Za = "a".charCodeAt(0) - cp_Z - 1;
+
+                asciify = function (text) {
+                    return text.replace(lettersThatJavaScriptDoesNotKnowAndQ, function (m) {
+                        var c = m.charCodeAt(0);
+                        var s = "";
+                        var v;
+                        while (c > 0) {
+                            v = (c % 51) + cp_A;
+                            if (v >= cp_Q)
+                                v++;
+                            if (v > cp_Z)
+                                v += dist_Za;
+                            s = String.fromCharCode(v) + s;
+                            c = c / 51 | 0;
+                        }
+                        return "Q" + s + "Q";
+                    })
+                };
+
+                deasciify = function (text) {
+                    return text.replace(/Q([A-PR-Za-z]{1,3})Q/g, function (m, s) {
+                        var c = 0;
+                        var v;
+                        for (var i = 0; i < s.length; i++) {
+                            v = s.charCodeAt(i);
+                            if (v > cp_Z)
+                                v -= dist_Za;
+                            if (v > cp_Q)
+                                v--;
+                            v -= cp_A;
+                            c = (c * 51) + v;
+                        }
+                        return String.fromCharCode(c);
+                    })
+                }
+            })();
+        }
+
+        var _DoItalicsAndBold = OPTIONS.asteriskIntraWordEmphasis ? _DoItalicsAndBold_AllowIntrawordWithAsterisk : _DoItalicsAndBoldStrict;
+
+        this.makeHtml = function (text) {
+
+            //
+            // Main function. The order in which other subs are called here is
+            // essential. Link and image substitutions need to happen before
+            // _EscapeSpecialCharsWithinTagAttributes(), so that any *'s or _'s in the <a>
+            // and <img> tags get encoded.
+            //
+
+            // This will only happen if makeHtml on the same converter instance is called from a plugin hook.
+            // Don't do that.
+            if (g_urls)
+                throw new Error("Recursive call to converter.makeHtml");
+
+            // Create the private state objects.
+            g_urls = new SaveHash();
+            g_titles = new SaveHash();
+            g_html_blocks = [];
+            g_list_level = 0;
+
+            text = pluginHooks.preConversion(text);
+
+            // attacklab: Replace ~ with ~T
+            // This lets us use tilde as an escape char to avoid md5 hashes
+            // The choice of character is arbitray; anything that isn't
+            // magic in Markdown will work.
+            text = text.replace(/~/g, "~T");
+
+            // attacklab: Replace $ with ~D
+            // RegExp interprets $ as a special character
+            // when it's in a replacement string
+            text = text.replace(/\$/g, "~D");
+
+            // Standardize line endings
+            text = text.replace(/\r\n/g, "\n"); // DOS to Unix
+            text = text.replace(/\r/g, "\n"); // Mac to Unix
+
+            // Make sure text begins and ends with a couple of newlines:
+            text = "\n\n" + text + "\n\n";
+
+            // Convert all tabs to spaces.
+            text = _Detab(text);
+
+            // Strip any lines consisting only of spaces and tabs.
+            // This makes subsequent regexen easier to write, because we can
+            // match consecutive blank lines with /\n+/ instead of something
+            // contorted like /[ \t]*\n+/ .
+            text = text.replace(/^[ \t]+$/mg, "");
+
+            text = pluginHooks.postNormalization(text);
+
+            // Turn block-level HTML blocks into hash entries
+            text = _HashHTMLBlocks(text);
+
+            // Strip link definitions, store in hashes.
+            text = _StripLinkDefinitions(text);
+
+            text = _RunBlockGamut(text);
+
+            text = _UnescapeSpecialChars(text);
+
+            // attacklab: Restore dollar signs
+            text = text.replace(/~D/g, "$$");
+
+            // attacklab: Restore tildes
+            text = text.replace(/~T/g, "~");
+
+            text = pluginHooks.postConversion(text);
+
+            g_html_blocks = g_titles = g_urls = null;
+
+            return text;
+        };
+
+        function _StripLinkDefinitions(text) {
+            //
+            // Strips link definitions from text, stores the URLs and titles in
+            // hash references.
+            //
+
+            // Link defs are in the form: ^[id]: url "optional title"
+
+            /*
+             text = text.replace(/
+             ^[ ]{0,3}\[([^\[\]]+)\]:  // id = $1  attacklab: g_tab_width - 1
+             [ \t]*
+             \n?                 // maybe *one* newline
+             [ \t]*
+             <?(\S+?)>?          // url = $2
+             (?=\s|$)            // lookahead for whitespace instead of the lookbehind removed below
+             [ \t]*
+             \n?                 // maybe one newline
+             [ \t]*
+             (                   // (potential) title = $3
+             (\n*)           // any lines skipped = $4 attacklab: lookbehind removed
+             [ \t]+
+             ["(]
+             (.+?)           // title = $5
+             [")]
+             [ \t]*
+             )?                  // title is optional
+             (\n+)             // subsequent newlines = $6, capturing because they must be put back if the potential title isn't an actual title
+             /gm, function(){...});
+             */
+
+            text = text.replace(/^[ ]{0,3}\[([^\[\]]+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?(?=\s|$)[ \t]*\n?[ \t]*((\n*)["(](.+?)[")][ \t]*)?(\n+)/gm,
+                function (wholeMatch, m1, m2, m3, m4, m5, m6) {
+                    m1 = m1.toLowerCase();
+                    g_urls.set(m1, _EncodeAmpsAndAngles(m2));  // Link IDs are case-insensitive
+                    if (m4) {
+                        // Oops, found blank lines, so it's not a title.
+                        // Put back the parenthetical statement we stole.
+                        return m3 + m6;
+                    } else if (m5) {
+                        g_titles.set(m1, m5.replace(/"/g, "&quot;"));
+                    }
+
+                    // Completely remove the definition from the text
+                    return "";
+                }
+            );
+
+            return text;
+        }
+
+        function _HashHTMLBlocks(text) {
+
+            // Hashify HTML blocks:
+            // We only want to do this for block-level HTML tags, such as headers,
+            // lists, and tables. That's because we still want to wrap <p>s around
+            // "paragraphs" that are wrapped in non-block-level tags, such as anchors,
+            // phrase emphasis, and spans. The list of tags we're looking for is
+            // hard-coded:
+            var block_tags_a = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del"
+            var block_tags_b = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math"
+
+            // First, look for nested blocks, e.g.:
+            //   <div>
+            //     <div>
+            //     tags for inner block must be indented.
+            //     </div>
+            //   </div>
+            //
+            // The outermost tags must start at the left margin for this to match, and
+            // the inner nested divs must be indented.
+            // We need to do this before the next, more liberal match, because the next
+            // match will start at the first `<div>` and stop at the first `</div>`.
+
+            // attacklab: This regex can be expensive when it fails.
+
+            /*
+             text = text.replace(/
+             (                       // save in $1
+             ^                   // start of line  (with /m)
+             <($block_tags_a)    // start tag = $2
+             \b                  // word break
+             // attacklab: hack around khtml/pcre bug...
+             [^\r]*?\n           // any number of lines, minimally matching
+             </\2>               // the matching end tag
+             [ \t]*              // trailing spaces/tabs
+             (?=\n+)             // followed by a newline
+             )                       // attacklab: there are sentinel newlines at end of document
+             /gm,function(){...}};
+             */
+            text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del)\b[^\r]*?\n<\/\2>[ \t]*(?=\n+))/gm, hashMatch);
+
+            //
+            // Now match more liberally, simply from `\n<tag>` to `</tag>\n`
+            //
+
+            /*
+             text = text.replace(/
+             (                       // save in $1
+             ^                   // start of line  (with /m)
+             <($block_tags_b)    // start tag = $2
+             \b                  // word break
+             // attacklab: hack around khtml/pcre bug...
+             [^\r]*?             // any number of lines, minimally matching
+             .*</\2>             // the matching end tag
+             [ \t]*              // trailing spaces/tabs
+             (?=\n+)             // followed by a newline
+             )                       // attacklab: there are sentinel newlines at end of document
+             /gm,function(){...}};
+             */
+            text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math)\b[^\r]*?.*<\/\2>[ \t]*(?=\n+)\n)/gm, hashMatch);
+
+            // Special case just for <hr />. It was easier to make a special case than
+            // to make the other regex more complicated.
+
+            /*
+             text = text.replace(/
+             \n                  // Starting after a blank line
+             [ ]{0,3}
+             (                   // save in $1
+             (<(hr)          // start tag = $2
+             \b          // word break
+             ([^<>])*?
+             \/?>)           // the matching end tag
+             [ \t]*
+             (?=\n{2,})      // followed by a blank line
+             )
+             /g,hashMatch);
+             */
+            text = text.replace(/\n[ ]{0,3}((<(hr)\b([^<>])*?\/?>)[ \t]*(?=\n{2,}))/g, hashMatch);
+
+            // Special case for standalone HTML comments:
+
+            /*
+             text = text.replace(/
+             \n\n                                            // Starting after a blank line
+             [ ]{0,3}                                        // attacklab: g_tab_width - 1
+             (                                               // save in $1
+             <!
+             (--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)   // see http://www.w3.org/TR/html-markup/syntax.html#comments and http://meta.stackexchange.com/q/95256
+             >
+             [ \t]*
+             (?=\n{2,})                                  // followed by a blank line
+             )
+             /g,hashMatch);
+             */
+            text = text.replace(/\n\n[ ]{0,3}(<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>[ \t]*(?=\n{2,}))/g, hashMatch);
+
+            // PHP and ASP-style processor instructions (<?...?> and <%...%>)
+
+            /*
+             text = text.replace(/
+             (?:
+             \n\n            // Starting after a blank line
+             )
+             (                   // save in $1
+             [ ]{0,3}        // attacklab: g_tab_width - 1
+             (?:
+             <([?%])     // $2
+             [^\r]*?
+             \2>
+             )
+             [ \t]*
+             (?=\n{2,})      // followed by a blank line
+             )
+             /g,hashMatch);
+             */
+            text = text.replace(/(?:\n\n)([ ]{0,3}(?:<([?%])[^\r]*?\2>)[ \t]*(?=\n{2,}))/g, hashMatch);
+
+            return text;
+        }
+
+        function hashBlock(text) {
+            text = text.replace(/(^\n+|\n+$)/g, "");
+            // Replace the element text with a marker ("~KxK" where x is its key)
+            return "\n\n~K" + (g_html_blocks.push(text) - 1) + "K\n\n";
+        }
+
+        function hashMatch(wholeMatch, m1) {
+            return hashBlock(m1);
+        }
+
+        var blockGamutHookCallback = function (t) {
+            return _RunBlockGamut(t);
+        }
+
+        function _RunBlockGamut(text, doNotUnhash, doNotCreateParagraphs) {
+            //
+            // These are all the transformations that form block-level
+            // tags like paragraphs, headers, and list items.
+            //
+
+            text = pluginHooks.preBlockGamut(text, blockGamutHookCallback);
+
+            text = _DoHeaders(text);
+
+            // Do Horizontal Rules:
+            var replacement = "<hr />\n";
+            text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, replacement);
+            text = text.replace(/^[ ]{0,2}([ ]?-[ ]?){3,}[ \t]*$/gm, replacement);
+            text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, replacement);
+
+            text = _DoLists(text);
+            text = _DoCodeBlocks(text);
+            text = _DoBlockQuotes(text);
+
+            text = pluginHooks.postBlockGamut(text, blockGamutHookCallback);
+
+            // We already ran _HashHTMLBlocks() before, in Markdown(), but that
+            // was to escape raw HTML in the original Markdown source. This time,
+            // we're escaping the markup we've just created, so that we don't wrap
+            // <p> tags around block-level tags.
+            text = _HashHTMLBlocks(text);
+
+            text = _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs);
+
+            return text;
+        }
+
+        function _RunSpanGamut(text) {
+            //
+            // These are all the transformations that occur *within* block-level
+            // tags like paragraphs, headers, and list items.
+            //
+
+            text = pluginHooks.preSpanGamut(text);
+
+            text = _DoCodeSpans(text);
+            text = _EscapeSpecialCharsWithinTagAttributes(text);
+            text = _EncodeBackslashEscapes(text);
+
+            // Process anchor and image tags. Images must come first,
+            // because ![foo][f] looks like an anchor.
+            text = _DoImages(text);
+            text = _DoAnchors(text);
+
+            // Make links out of things like `<http://example.com/>`
+            // Must come after _DoAnchors(), because you can use < and >
+            // delimiters in inline links like [this](<url>).
+            text = _DoAutoLinks(text);
+
+            text = text.replace(/~P/g, "://"); // put in place to prevent autolinking; reset now
+
+            text = _EncodeAmpsAndAngles(text);
+            text = _DoItalicsAndBold(text);
+
+            // Do hard breaks:
+            text = text.replace(/  +\n/g, " <br>\n");
+
+            text = pluginHooks.postSpanGamut(text);
+
+            return text;
+        }
+
+        function _EscapeSpecialCharsWithinTagAttributes(text) {
+            //
+            // Within tags -- meaning between < and > -- encode [\ ` * _] so they
+            // don't conflict with their use in Markdown for code, italics and strong.
+            //
+
+            // Build a regex to find HTML tags and comments.  See Friedl's
+            // "Mastering Regular Expressions", 2nd Ed., pp. 200-201.
+
+            // SE: changed the comment part of the regex
+
+            var regex = /(<[a-z\/!$]("[^"]*"|'[^']*'|[^'">])*>|<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>)/gi;
+
+            text = text.replace(regex, function (wholeMatch) {
+                var tag = wholeMatch.replace(/(.)<\/?code>(?=.)/g, "$1`");
+                tag = escapeCharacters(tag, wholeMatch.charAt(1) == "!" ? "\\`*_/" : "\\`*_"); // also escape slashes in comments to prevent autolinking there -- http://meta.stackexchange.com/questions/95987
+                return tag;
+            });
+
+            return text;
+        }
+
+        function _DoAnchors(text) {
+
+            if (text.indexOf("[") === -1)
+                return text;
+
+            //
+            // Turn Markdown link shortcuts into XHTML <a> tags.
+            //
+            //
+            // First, handle reference-style links: [link text] [id]
+            //
+
+            /*
+             text = text.replace(/
+             (                           // wrap whole match in $1
+             \[
+             (
+             (?:
+             \[[^\]]*\]      // allow brackets nested one level
+             |
+             [^\[]           // or anything else
+             )*
+             )
+             \]
+             [ ]?                    // one optional space
+             (?:\n[ ]*)?             // one optional newline followed by spaces
+             \[
+             (.*?)                   // id = $3
+             \]
+             )
+             ()()()()                    // pad remaining backreferences
+             /g, writeAnchorTag);
+             */
+            text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeAnchorTag);
+
+            //
+            // Next, inline-style links: [link text](url "optional title")
+            //
+
+            /*
+             text = text.replace(/
+             (                           // wrap whole match in $1
+             \[
+             (
+             (?:
+             \[[^\]]*\]      // allow brackets nested one level
+             |
+             [^\[\]]         // or anything else
+             )*
+             )
+             \]
+             \(                      // literal paren
+             [ \t]*
+             ()                      // no id, so leave $3 empty
+             <?(                     // href = $4
+             (?:
+             \([^)]*\)       // allow one level of (correctly nested) parens (think MSDN)
+             |
+             [^()\s]
+             )*?
+             )>?
+             [ \t]*
+             (                       // $5
+             (['"])              // quote char = $6
+             (.*?)               // Title = $7
+             \6                  // matching quote
+             [ \t]*              // ignore any spaces/tabs between closing quote and )
+             )?                      // title is optional
+             \)
+             )
+             /g, writeAnchorTag);
+             */
+
+            text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\]\([ \t]*()<?((?:\([^)]*\)|[^()\s])*?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeAnchorTag);
+
+            //
+            // Last, handle reference-style shortcuts: [link text]
+            // These must come last in case you've also got [link test][1]
+            // or [link test](/foo)
+            //
+
+            /*
+             text = text.replace(/
+             (                   // wrap whole match in $1
+             \[
+             ([^\[\]]+)      // link text = $2; can't contain '[' or ']'
+             \]
+             )
+             ()()()()()          // pad rest of backreferences
+             /g, writeAnchorTag);
+             */
+            text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
+
+            return text;
+        }
+
+        function writeAnchorTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
+            if (m7 == undefined) m7 = "";
+            var whole_match = m1;
+            var link_text = m2.replace(/:\/\//g, "~P"); // to prevent auto-linking withing the link. will be converted back after the auto-linker runs
+            var link_id = m3.toLowerCase();
+            var url = m4;
+            var title = m7;
+
+            if (url == "") {
+                if (link_id == "") {
+                    // lower-case and turn embedded newlines into spaces
+                    link_id = link_text.toLowerCase().replace(/ ?\n/g, " ");
+                }
+                url = "#" + link_id;
+
+                if (g_urls.get(link_id) != undefined) {
+                    url = g_urls.get(link_id);
+                    if (g_titles.get(link_id) != undefined) {
+                        title = g_titles.get(link_id);
+                    }
+                }
+                else {
+                    if (whole_match.search(/\(\s*\)$/m) > -1) {
+                        // Special case for explicit empty url
+                        url = "";
+                    } else {
+                        return whole_match;
+                    }
+                }
             }
-            function returnFalse(x) {
-                        return false;
+            url = attributeSafeUrl(url);
+
+            var result = "<a href=\"" + url + "\"";
+
+            if (title != "") {
+                title = attributeEncode(title);
+                title = escapeCharacters(title, "*_");
+                result += " title=\"" + title + "\"";
             }
 
-            function HookCollection() {}
+            result += ">" + link_text + "</a>";
 
-            HookCollection.prototype = {
+            return result;
+        }
 
-                        chain: function chain(hookname, func) {
-                                    var original = this[hookname];
-                                    if (!original) throw new Error("unknown hook " + hookname);
+        function _DoImages(text) {
 
-                                    if (original === identity) this[hookname] = func;else this[hookname] = function (text) {
-                                                var args = Array.prototype.slice.call(arguments, 0);
-                                                args[0] = original.apply(null, args);
-                                                return func.apply(null, args);
-                                    };
-                        },
-                        set: function set(hookname, func) {
-                                    if (!this[hookname]) throw new Error("unknown hook " + hookname);
-                                    this[hookname] = func;
-                        },
-                        addNoop: function addNoop(hookname) {
-                                    this[hookname] = identity;
-                        },
-                        addFalse: function addFalse(hookname) {
-                                    this[hookname] = returnFalse;
-                        }
+            if (text.indexOf("![") === -1)
+                return text;
+
+            //
+            // Turn Markdown image shortcuts into <img> tags.
+            //
+
+            //
+            // First, handle reference-style labeled images: ![alt text][id]
+            //
+
+            /*
+             text = text.replace(/
+             (                   // wrap whole match in $1
+             !\[
+             (.*?)           // alt text = $2
+             \]
+             [ ]?            // one optional space
+             (?:\n[ ]*)?     // one optional newline followed by spaces
+             \[
+             (.*?)           // id = $3
+             \]
+             )
+             ()()()()            // pad rest of backreferences
+             /g, writeImageTag);
+             */
+            text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeImageTag);
+
+            //
+            // Next, handle inline images:  ![alt text](url "optional title")
+            // Don't forget: encode * and _
+
+            /*
+             text = text.replace(/
+             (                   // wrap whole match in $1
+             !\[
+             (.*?)           // alt text = $2
+             \]
+             \s?             // One optional whitespace character
+             \(              // literal paren
+             [ \t]*
+             ()              // no id, so leave $3 empty
+             <?(\S+?)>?      // src url = $4
+             [ \t]*
+             (               // $5
+             (['"])      // quote char = $6
+             (.*?)       // title = $7
+             \6          // matching quote
+             [ \t]*
+             )?              // title is optional
+             \)
+             )
+             /g, writeImageTag);
+             */
+            text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeImageTag);
+
+            return text;
+        }
+
+        function attributeEncode(text) {
+            // unconditionally replace angle brackets here -- what ends up in an attribute (e.g. alt or title)
+            // never makes sense to have verbatim HTML in it (and the sanitizer would totally break it)
+            return text.replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+        }
+
+        function writeImageTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
+            var whole_match = m1;
+            var alt_text = m2;
+            var link_id = m3.toLowerCase();
+            var url = m4;
+            var title = m7;
+
+            if (!title) title = "";
+
+            if (url == "") {
+                if (link_id == "") {
+                    // lower-case and turn embedded newlines into spaces
+                    link_id = alt_text.toLowerCase().replace(/ ?\n/g, " ");
+                }
+                url = "#" + link_id;
+
+                if (g_urls.get(link_id) != undefined) {
+                    url = g_urls.get(link_id);
+                    if (g_titles.get(link_id) != undefined) {
+                        title = g_titles.get(link_id);
+                    }
+                }
+                else {
+                    return whole_match;
+                }
+            }
+
+            alt_text = escapeCharacters(attributeEncode(alt_text), "*_[]()");
+            url = escapeCharacters(url, "*_");
+            var result = "<img src=\"" + url + "\" alt=\"" + alt_text + "\"";
+
+            // attacklab: Markdown.pl adds empty title attributes to images.
+            // Replicate this bug.
+
+            //if (title != "") {
+            title = attributeEncode(title);
+            title = escapeCharacters(title, "*_");
+            result += " title=\"" + title + "\"";
+            //}
+
+            result += " />";
+
+            return result;
+        }
+
+        function _DoHeaders(text) {
+
+            // Setext-style headers:
+            //  Header 1
+            //  ========
+            //
+            //  Header 2
+            //  --------
+            //
+            text = text.replace(/^(.+)[ \t]*\n=+[ \t]*\n+/gm,
+                function (wholeMatch, m1) {
+                    return "<h1>" + _RunSpanGamut(m1) + "</h1>\n\n";
+                }
+            );
+
+            text = text.replace(/^(.+)[ \t]*\n-+[ \t]*\n+/gm,
+                function (matchFound, m1) {
+                    return "<h2>" + _RunSpanGamut(m1) + "</h2>\n\n";
+                }
+            );
+
+            // atx-style headers:
+            //  # Header 1
+            //  ## Header 2
+            //  ## Header 2 with closing hashes ##
+            //  ...
+            //  ###### Header 6
+            //
+
+            /*
+             text = text.replace(/
+             ^(\#{1,6})      // $1 = string of #'s
+             [ \t]*
+             (.+?)           // $2 = Header text
+             [ \t]*
+             \#*             // optional closing #'s (not counted)
+             \n+
+             /gm, function() {...});
+             */
+
+            text = text.replace(/^(\#{1,6})[ \t]*(.+?)[ \t]*\#*\n+/gm,
+                function (wholeMatch, m1, m2) {
+                    var h_level = m1.length;
+                    return "<h" + h_level + ">" + _RunSpanGamut(m2) + "</h" + h_level + ">\n\n";
+                }
+            );
+
+            return text;
+        }
+
+        function _DoLists(text, isInsideParagraphlessListItem) {
+            //
+            // Form HTML ordered (numbered) and unordered (bulleted) lists.
+            //
+
+            // attacklab: add sentinel to hack around khtml/safari bug:
+            // http://bugs.webkit.org/show_bug.cgi?id=11231
+            text += "~0";
+
+            // Re-usable pattern to match any entirel ul or ol list:
+
+            /*
+             var whole_list = /
+             (                                   // $1 = whole list
+             (                               // $2
+             [ ]{0,3}                    // attacklab: g_tab_width - 1
+             ([*+-]|\d+[.])              // $3 = first list item marker
+             [ \t]+
+             )
+             [^\r]+?
+             (                               // $4
+             ~0                          // sentinel for workaround; should be $
+             |
+             \n{2,}
+             (?=\S)
+             (?!                         // Negative lookahead for another list item marker
+             [ \t]*
+             (?:[*+-]|\d+[.])[ \t]+
+             )
+             )
+             )
+             /g
+             */
+            var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+            var list_type;
+            if (g_list_level) {
+                text = text.replace(whole_list, function (wholeMatch, m1, m2) {
+                    var list = m1;
+                    list_type = getListType(m2);
+                    //2015-10-22 wiz：删除起始序列号 支持
+                    //var first_number;
+                    //if (list_type === "ol")
+                    //    first_number = parseInt(m2, 10)
+
+                    var result = _ProcessListItems(list, list_type, isInsideParagraphlessListItem);
+
+                    // Trim any trailing whitespace, to put the closing `</$list_type>`
+                    // up on the preceding line, to get it past the current stupid
+                    // HTML block parser. This is a hack to work around the terrible
+                    // hack that is the HTML block parser.
+                    var resultStr = result.list_str.replace(/\s+$/, "");
+                    var opening = "<" + list_type;
+                    //if (first_number && first_number !== 1)
+                    //    opening += " start=\"" + first_number + "\"";
+                    resultStr = opening + ">" + resultStr + "</" + result.list_type + ">\n";
+                    list_type = result.list_type;
+                    return resultStr;
+                });
+            } else {
+                whole_list = /(\n\n|^\n?)(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
+                text = text.replace(whole_list, function (wholeMatch, m1, m2, m3) {
+                    var runup = m1;
+                    var list = m2;
+                    list_type = getListType(m3);
+                    //2015-10-22 wiz：删除起始序列号 支持
+                    //var first_number;
+                    //if (list_type === "ol")
+                    //    first_number = parseInt(m3, 10)
+
+                    var result = _ProcessListItems(list, list_type);
+
+                    var opening = "<" + list_type;
+                    //if (first_number && first_number !== 1)
+                    //    opening += " start=\"" + first_number + "\"";
+
+                    var resultStr = runup + opening + ">\n" + result.list_str + "</" + result.list_type + ">\n";
+                    list_type = result.list_type;
+                    return resultStr;
+                });
+            }
+
+            // attacklab: strip sentinel
+            text = text.replace(/~0/, "");
+
+            return text;
+        }
+
+        var _listItemMarkers = {ol: "\\d+[.]", ul: "[*+-]"};
+
+        function getListType(str) {
+            return (str.search(/[*+-]/g) > -1) ? "ul" : "ol";
+        }
+
+        function _ProcessListItems(list_str, list_type, isInsideParagraphlessListItem) {
+            //
+            //  Process the contents of a single ordered or unordered list, splitting it
+            //  into individual list items.
+            //
+            //  list_type is either "ul" or "ol".
+
+            // The $g_list_level global keeps track of when we're inside a list.
+            // Each time we enter a list, we increment it; when we leave a list,
+            // we decrement. If it's zero, we're not in a list anymore.
+            //
+            // We do this because when we're not inside a list, we want to treat
+            // something like this:
+            //
+            //    I recommend upgrading to version
+            //    8. Oops, now this line is treated
+            //    as a sub-list.
+            //
+            // As a single paragraph, despite the fact that the second line starts
+            // with a digit-period-space sequence.
+            //
+            // Whereas when we're inside a list (or sub-list), that line will be
+            // treated as the start of a sub-list. What a kludge, huh? This is
+            // an aspect of Markdown's syntax that's hard to parse perfectly
+            // without resorting to mind-reading. Perhaps the solution is to
+            // change the syntax rules such that sub-lists must start with a
+            // starting cardinal number; e.g. "1." or "a.".
+
+            g_list_level++;
+
+            // trim trailing blank lines:
+            list_str = list_str.replace(/\n{2,}$/, "\n");
+
+            // attacklab: add sentinel to emulate \z
+            list_str += "~0";
+
+            // In the original attacklab showdown, list_type was not given to this function, and anything
+            // that matched /[*+-]|\d+[.]/ would just create the next <li>, causing this mismatch:
+            //
+            //  Markdown          rendered by WMD        rendered by MarkdownSharp
+            //  ------------------------------------------------------------------
+            //  1. first          1. first               1. first
+            //  2. second         2. second              2. second
+            //  - third           3. third                   * third
+            //
+            // We changed this to behave identical to MarkdownSharp. This is the constructed RegEx,
+            // with {MARKER} being one of \d+[.] or [*+-], depending on list_type:
+
+            /*
+             list_str = list_str.replace(/
+             (^[ \t]*)                       // leading whitespace = $1
+             ({MARKER}) [ \t]+               // list marker = $2
+             ([^\r]+?                        // list item text   = $3
+             (\n+)
+             )
+             (?=
+             (~0 | \2 ({MARKER}) [ \t]+)
+             )
+             /gm, function(){...});
+             */
+
+            //2015-10-22 wiz: 修改 list 的支持规则， 同级的 无序列表 和 有序列表 不会自动处理为 父子关系， 而是生成平级的两个列表；
+            //var marker = _listItemMarkers[list_type];
+            //var re = new RegExp("(^[ \\t]*)(" + marker + ")[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))", "gm");
+            var re = new RegExp("(^[ \\t]*)([*+-]|\\d+[.])[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1([*+-]|\\d+[.])[ \\t]+))", "gm");
+            var last_item_had_a_double_newline = false;
+            list_str = list_str.replace(re,
+                function (wholeMatch, m1, m2, m3) {
+                    var item = m3;
+                    var leading_space = m1;
+                    var cur_list_type = getListType(m2);
+                    var ends_with_double_newline = /\n\n$/.test(item);
+                    var contains_double_newline = ends_with_double_newline || item.search(/\n{2,}/) > -1;
+
+                    var loose = contains_double_newline || last_item_had_a_double_newline;
+                    item = _RunBlockGamut(_Outdent(item), /* doNotUnhash = */true, /* doNotCreateParagraphs = */ !loose);
+
+                    var itemHtml = '';
+                    if (cur_list_type != list_type) {
+                        itemHtml = '</' + list_type + '>\n<' + cur_list_type + '>\n';
+                        list_type = cur_list_type;
+                    }
+                    itemHtml += ("<li>" + item + "</li>\n");
+
+                    last_item_had_a_double_newline = ends_with_double_newline;
+                    return itemHtml;
+                }
+            );
+
+            // attacklab: strip sentinel
+            list_str = list_str.replace(/~0/g, "");
+
+            g_list_level--;
+            return {list_str: list_str, list_type: list_type};
+        }
+
+        function _DoCodeBlocks(text) {
+            //
+            //  Process Markdown `<pre><code>` blocks.
+            //
+
+            /*
+             text = text.replace(/
+             (?:\n\n|^)
+             (                               // $1 = the code block -- one or more lines, starting with a space/tab
+             (?:
+             (?:[ ]{4}|\t)           // Lines must start with a tab or a tab-width of spaces - attacklab: g_tab_width
+             .*\n+
+             )+
+             )
+             (\n*[ ]{0,3}[^ \t\n]|(?=~0))    // attacklab: g_tab_width
+             /g ,function(){...});
+             */
+
+            // attacklab: sentinel workarounds for lack of \A and \Z, safari\khtml bug
+            text += "~0";
+
+            text = text.replace(/(?:\n\n|^\n?)((?:(?:[ ]{4}|\t).*\n+)+)(\n*[ ]{0,3}[^ \t\n]|(?=~0))/g,
+                function (wholeMatch, m1, m2) {
+                    var codeblock = m1;
+                    var nextChar = m2;
+
+                    codeblock = _EncodeCode(_Outdent(codeblock));
+                    codeblock = _Detab(codeblock);
+                    codeblock = codeblock.replace(/^\n+/g, ""); // trim leading newlines
+                    codeblock = codeblock.replace(/\n+$/g, ""); // trim trailing whitespace
+
+                    codeblock = "<pre><code>" + codeblock + "\n</code></pre>";
+
+                    return "\n\n" + codeblock + "\n\n" + nextChar;
+                }
+            );
+
+            // attacklab: strip sentinel
+            text = text.replace(/~0/, "");
+
+            return text;
+        }
+
+        function _DoCodeSpans(text) {
+            //
+            // * Backtick quotes are used for <code></code> spans.
+            //
+            // * You can use multiple backticks as the delimiters if you want to
+            //   include literal backticks in the code span. So, this input:
+            //
+            //      Just type ``foo `bar` baz`` at the prompt.
+            //
+            //   Will translate to:
+            //
+            //      <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
+            //
+            //   There's no arbitrary limit to the number of backticks you
+            //   can use as delimters. If you need three consecutive backticks
+            //   in your code, use four for delimiters, etc.
+            //
+            // * You can use spaces to get literal backticks at the edges:
+            //
+            //      ... type `` `bar` `` ...
+            //
+            //   Turns to:
+            //
+            //      ... type <code>`bar`</code> ...
+            //
+
+            /*
+             text = text.replace(/
+             (^|[^\\`])      // Character before opening ` can't be a backslash or backtick
+             (`+)            // $2 = Opening run of `
+             (?!`)           // and no more backticks -- match the full run
+             (               // $3 = The code block
+             [^\r]*?
+             [^`]        // attacklab: work around lack of lookbehind
+             )
+             \2              // Matching closer
+             (?!`)
+             /gm, function(){...});
+             */
+
+            text = text.replace(/(^|[^\\`])(`+)(?!`)([^\r]*?[^`])\2(?!`)/gm,
+                function (wholeMatch, m1, m2, m3, m4) {
+                    var c = m3;
+                    c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
+                    c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
+                    c = _EncodeCode(c);
+                    c = c.replace(/:\/\//g, "~P"); // to prevent auto-linking. Not necessary in code *blocks*, but in code spans. Will be converted back after the auto-linker runs.
+                    return m1 + "<code>" + c + "</code>";
+                }
+            );
+
+            return text;
+        }
+
+        function _EncodeCode(text) {
+            //
+            // Encode/escape certain characters inside Markdown code runs.
+            // The point is that in code, these characters are literals,
+            // and lose their special Markdown meanings.
+            //
+            // Encode all ampersands; HTML entities are not
+            // entities within a Markdown code span.
+            text = text.replace(/&/g, "&amp;");
+
+            // Do the angle bracket song and dance:
+            text = text.replace(/</g, "&lt;");
+            text = text.replace(/>/g, "&gt;");
+
+            // Now, escape characters that are magic in Markdown:
+            text = escapeCharacters(text, "\*_{}[]\\", false);
+
+            // jj the line above breaks this:
+            //---
+
+            //* Item
+
+            //   1. Subitem
+
+            //            special char: *
+            //---
+
+            return text;
+        }
+
+        function _DoItalicsAndBoldStrict(text) {
+
+            if (text.indexOf("*") === -1 && text.indexOf("_") === -1)
+                return text;
+
+            text = asciify(text);
+
+            // <strong> must go first:
+
+            // (^|[\W_])           Start with a non-letter or beginning of string. Store in \1.
+            // (?:(?!\1)|(?=^))    Either the next character is *not* the same as the previous,
+            //                     or we started at the end of the string (in which case the previous
+            //                     group had zero width, so we're still there). Because the next
+            //                     character is the marker, this means that if there are e.g. multiple
+            //                     underscores in a row, we can only match the left-most ones (which
+            //                     prevents foo___bar__ from getting bolded)
+            // (\*|_)              The marker character itself, asterisk or underscore. Store in \2.
+            // \2                  The marker again, since bold needs two.
+            // (?=\S)              The first bolded character cannot be a space.
+            // ([^\r]*?\S)         The actual bolded string. At least one character, and it cannot *end*
+            //                     with a space either. Note that like in many other places, [^\r] is
+            //                     just a workaround for JS' lack of single-line regexes; it's equivalent
+            //                     to a . in an /s regex, because the string cannot contain any \r (they
+            //                     are removed in the normalizing step).
+            // \2\2                The marker character, twice -- end of bold.
+            // (?!\2)              Not followed by another marker character (ensuring that we match the
+            //                     rightmost two in a longer row)...
+            // (?=[\W_]|$)         ...but by any other non-word character or the end of string.
+            text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)\2(?=\S)([^\r]*?\S)\2\2(?!\2)(?=[\W_]|$)/g,
+                "$1<strong>$3</strong>");
+
+            // This is almost identical to the <strong> regex, except 1) there's obviously just one marker
+            // character, and 2) the italicized string cannot contain the marker character.
+            text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)(?=\S)((?:(?!\2)[^\r])*?\S)\2(?!\2)(?=[\W_]|$)/g,
+                "$1<em>$3</em>");
+
+            return deasciify(text);
+        }
+
+        function _DoItalicsAndBold_AllowIntrawordWithAsterisk(text) {
+
+            if (text.indexOf("*") === -1 && text.indexOf("_") === -1)
+                return text;
+
+            text = asciify(text);
+
+            // <strong> must go first:
+            // (?=[^\r][*_]|[*_])               Optimization only, to find potentially relevant text portions faster. Minimally slower in Chrome, but much faster in IE.
+            // (                                Store in \1. This is the last character before the delimiter
+            //     ^                            Either we're at the start of the string (i.e. there is no last character)...
+            //     |                            ... or we allow one of the following:
+            //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
+            //         \W__                     If the delimiter is __, then this last character must be non-word non-underscore (extra-word emphasis only)
+            //         |
+            //         (?!\*)[\W_]\*\*          If the delimiter is **, then this last character can be non-word non-asterisk (extra-word emphasis)...
+            //         |
+            //         \w\*\*\w                 ...or it can be word/underscore, but only if the first bolded character is such a character as well (intra-word emphasis)
+            //     )
+            //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
+            // )
+            // (\*\*|__)                        Store in \2: the actual delimiter
+            // (?!\2)                           not followed by the delimiter again (at most one more asterisk/underscore is allowed)
+            // (?=\S)                           the first bolded character can't be a space
+            // (                                Store in \3: the bolded string
+            //
+            //     (?:|                         Look at all bolded characters except for the last one. Either that's empty, meaning only a single character was bolded...
+            //       [^\r]*?                    ... otherwise take arbitrary characters, minimally matching; that's all bolded characters except for the last *two*
+            //       (?!\2)                       the last two characters cannot be the delimiter itself (because that would mean four underscores/asterisks in a row)
+            //       [^\r]                        capture the next-to-last bolded character
+            //     )
+            //     (?=                          lookahead at the very last bolded char and what comes after
+            //         \S_                      for underscore-bolding, it can be any non-space
+            //         |
+            //         \w                       for asterisk-bolding (otherwise the previous alternative would've matched, since \w implies \S), either the last char is word/underscore...
+            //         |
+            //         \S\*\*(?:[\W_]|$)        ... or it's any other non-space, but in that case the character *after* the delimiter may not be a word character
+            //     )
+            //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
+            // )
+            // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
+            //     __(?:\W|$)                   for underscore-bolding, the following character (if any) must be non-word non-underscore
+            //     |
+            //     \*\*(?:[^*]|$)               for asterisk-bolding, any non-asterisk is allowed (note we already ensured above that it's not a word character if the last bolded character wasn't one)
+            // )
+            // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
+
+
+            //2015-10-26 改善对 xxx**(1)**xxx 的支持
+            //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|\S\*\*(?:[\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g,
+            //    "$1<strong>$3</strong>");
+            text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\w\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|.\*\*(?:[\w\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g,
+                "$1<strong>$3</strong>");
+
+            // now <em>:
+            // (?=[^\r][*_]|[*_])               Optimization, see above.
+            // (                                Store in \1. This is the last character before the delimiter
+            //     ^                            Either we're at the start of the string (i.e. there is no last character)...
+            //     |                            ... or we allow one of the following:
+            //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
+            //         \W_                      If the delimiter is _, then this last character must be non-word non-underscore (extra-word emphasis only)
+            //         |
+            //         (?!\*)                   otherwise, we list two possiblities for * as the delimiter; in either case, the last characters cannot be an asterisk itself
+            //         (?:
+            //             [\W_]\*              this last character can be non-word (extra-word emphasis)...
+            //             |
+            //             \D\*(?=\w)\D         ...or it can be word (otherwise the first alternative would've matched), but only if
+            //                                      a) the first italicized character is such a character as well (intra-word emphasis), and
+            //                                      b) neither character on either side of the asterisk is a digit
+            //         )
+            //     )
+            //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
+            // )
+            // (\*|_)                           Store in \2: the actual delimiter
+            // (?!\2\2\2)                       not followed by more than two more instances of the delimiter
+            // (?=\S)                           the first italicized character can't be a space
+            // (                                Store in \3: the italicized string
+            //     (?:(?!\2)[^\r])*?            arbitrary characters except for the delimiter itself, minimally matching
+            //     (?=                          lookahead at the very last italicized char and what comes after
+            //         [^\s_]_                  for underscore-italicizing, it can be any non-space non-underscore
+            //         |
+            //         (?=\w)\D\*\D             for asterisk-italicizing, either the last char is word/underscore *and* neither character on either side of the asterisk is a digit...
+            //         |
+            //         [^\s*]\*(?:[\W_]|$)      ... or that last char is any other non-space non-asterisk, but then the character after the delimiter (if any) must be non-word
+            //     )
+            //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
+            // )
+            // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
+            //     _(?:\W|$)                    for underscore-italicizing, the following character (if any) must be non-word non-underscore
+            //     |
+            //     \*(?:[^*]|$)                 for asterisk-italicizing, any non-asterisk is allowed; all other restrictions have already been ensured in the previous lookahead
+            // )
+            // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
+
+            //2015-10-26 改善对 xxx*(1)*xxx 的支持
+            //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=\w)\D\*\D|[^\s*]\*(?:[\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g,
+            //    "$1<em>$3</em>");
+            text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\w\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=[\w\W])\D\*\D|[^\s*]\*(?:[\w\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g,
+                "$1<em>$3</em>");
+
+            return deasciify(text);
+        }
+
+
+        function _DoBlockQuotes(text) {
+
+            /*
+             text = text.replace(/
+             (                           // Wrap whole match in $1
+             (
+             ^[ \t]*>[ \t]?      // '>' at the start of a line
+             .+\n                // rest of the first line
+             (.+\n)*             // subsequent consecutive lines
+             \n*                 // blanks
+             )+
+             )
+             /gm, function(){...});
+             */
+
+            text = text.replace(/((^[ \t]*>[ \t]?.+\n(.+\n)*\n*)+)/gm,
+                function (wholeMatch, m1) {
+                    var bq = m1;
+
+                    // attacklab: hack around Konqueror 3.5.4 bug:
+                    // "----------bug".replace(/^-/g,"") == "bug"
+
+                    bq = bq.replace(/^[ \t]*>[ \t]?/gm, "~0"); // trim one level of quoting
+
+                    // attacklab: clean up hack
+                    bq = bq.replace(/~0/g, "");
+
+                    bq = bq.replace(/^[ \t]+$/gm, "");     // trim whitespace-only lines
+                    bq = _RunBlockGamut(bq);             // recurse
+
+                    bq = bq.replace(/(^|\n)/g, "$1  ");
+                    // These leading spaces screw with <pre> content, so we need to fix that:
+                    bq = bq.replace(
+                        /(\s*<pre>[^\r]+?<\/pre>)/gm,
+                        function (wholeMatch, m1) {
+                            var pre = m1;
+                            // attacklab: hack around Konqueror 3.5.4 bug:
+                            pre = pre.replace(/^  /mg, "~0");
+                            pre = pre.replace(/~0/g, "");
+                            return pre;
+                        });
+
+                    return hashBlock("<blockquote>\n" + bq + "\n</blockquote>");
+                }
+            );
+            return text;
+        }
+
+        function _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs) {
+            //
+            //  Params:
+            //    $text - string to process with html <p> tags
+            //
+
+            // Strip leading and trailing lines:
+            text = text.replace(/^\n+/g, "");
+            text = text.replace(/\n+$/g, "");
+
+            var grafs = text.split(/\n{2,}/g);
+            var grafsOut = [];
+
+            var markerRe = /~K(\d+)K/;
+
+            //
+            // Wrap <p> tags.
+            //
+            var end = grafs.length;
+            for (var i = 0; i < end; i++) {
+                var str = grafs[i];
+
+                // if this is an HTML marker, copy it
+                if (markerRe.test(str)) {
+                    grafsOut.push(str);
+                }
+                else if (/\S/.test(str)) {
+                    str = _RunSpanGamut(str);
+                    str = str.replace(/^([ \t]*)/g, doNotCreateParagraphs ? "" : "<p>");
+                    if (!doNotCreateParagraphs)
+                        str += "</p>"
+                    grafsOut.push(str);
+                }
+
+            }
+            //
+            // Unhashify HTML blocks
+            //
+            if (!doNotUnhash) {
+                end = grafsOut.length;
+                for (var i = 0; i < end; i++) {
+                    var foundAny = true;
+                    while (foundAny) { // we may need several runs, since the data may be nested
+                        foundAny = false;
+                        grafsOut[i] = grafsOut[i].replace(/~K(\d+)K/g, function (wholeMatch, id) {
+                            foundAny = true;
+                            return g_html_blocks[id];
+                        });
+                    }
+                }
+            }
+            return grafsOut.join("\n\n");
+        }
+
+        function _EncodeAmpsAndAngles(text) {
+            // Smart processing for ampersands and angle brackets that need to be encoded.
+
+            // Ampersand-encoding based entirely on Nat Irons's Amputator MT plugin:
+            //   http://bumppo.net/projects/amputator/
+            text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, "&amp;");
+
+            // Encode naked <'s
+            text = text.replace(/<(?![a-z\/?!]|~D)/gi, "&lt;");
+
+            return text;
+        }
+
+        function _EncodeBackslashEscapes(text) {
+            //
+            //   Parameter:  String.
+            //   Returns:    The string, with after processing the following backslash
+            //               escape sequences.
+            //
+
+            // attacklab: The polite way to do this is with the new
+            // escapeCharacters() function:
+            //
+            //     text = escapeCharacters(text,"\\",true);
+            //     text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
+            //
+            // ...but we're sidestepping its use of the (slow) RegExp constructor
+            // as an optimization for Firefox.  This function gets called a LOT.
+
+            text = text.replace(/\\(\\)/g, escapeCharacters_callback);
+            text = text.replace(/\\([`*_{}\[\]()>#+-.!])/g, escapeCharacters_callback);
+            return text;
+        }
+
+        var charInsideUrl = "[-A-Z0-9+&@#/%?=~_|[\\]()!:,.;]",
+            charEndingUrl = "[-A-Z0-9+&@#/%=~_|[\\])]",
+            autoLinkRegex = new RegExp("(=\"|<)?\\b(https?|ftp)(://" + charInsideUrl + "*" + charEndingUrl + ")(?=$|\\W)", "gi"),
+            endCharRegex = new RegExp(charEndingUrl, "i");
+
+        function handleTrailingParens(wholeMatch, lookbehind, protocol, link, index, str) {
+
+            if (/^<[^<>]*(https?|ftp)/.test(str)) {
+                //避免 html 标签内 属性值的 超链接被替换为 a 标签（例如 img 的src 属性）
+                return wholeMatch;
+            }
+            if (lookbehind)
+                return wholeMatch;
+            if (link.charAt(link.length - 1) !== ")")
+                return "<" + protocol + link + ">";
+            var parens = link.match(/[()]/g);
+            var level = 0;
+            for (var i = 0; i < parens.length; i++) {
+                if (parens[i] === "(") {
+                    if (level <= 0)
+                        level = 1;
+                    else
+                        level++;
+                }
+                else {
+                    level--;
+                }
+            }
+            var tail = "";
+            if (level < 0) {
+                var re = new RegExp("\\){1," + (-level) + "}$");
+                link = link.replace(re, function (trailingParens) {
+                    tail = trailingParens;
+                    return "";
+                });
+            }
+            if (tail) {
+                var lastChar = link.charAt(link.length - 1);
+                if (!endCharRegex.test(lastChar)) {
+                    tail = lastChar + tail;
+                    link = link.substr(0, link.length - 1);
+                }
+            }
+            return "<" + protocol + link + ">" + tail;
+        }
+
+        function _DoAutoLinks(text) {
+
+            // note that at this point, all other URL in the text are already hyperlinked as <a href=""></a>
+            // *except* for the <http://www.foo.com> case
+
+            // automatically add < and > around unadorned raw hyperlinks
+            // must be preceded by a non-word character (and not by =" or <) and followed by non-word/EOF character
+            // simulating the lookbehind in a consuming way is okay here, since a URL can neither and with a " nor
+            // with a <, so there is no risk of overlapping matches.
+            text = text.replace(autoLinkRegex, handleTrailingParens);
+
+            //  autolink anything like <http://example.com>
+
+
+            var replacer = function (wholematch, m1) {
+                var url = attributeSafeUrl(m1);
+
+                return "<a href=\"" + url + "\">" + pluginHooks.plainLinkText(m1) + "</a>";
             };
+            text = text.replace(/<((https?|ftp):[^'">\s]+)>/gi, replacer);
+
+            // Email addresses: <address@domain.foo>
+            /*
+             text = text.replace(/
+             <
+             (?:mailto:)?
+             (
+             [-.\w]+
+             \@
+             [-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+
+             )
+             >
+             /gi, _DoAutoLinks_callback());
+             */
+
+            /* disabling email autolinking, since we don't do that on the server, either
+             text = text.replace(/<(?:mailto:)?([-.\w]+\@[-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+)>/gi,
+             function(wholeMatch,m1) {
+             return _EncodeEmailAddress( _UnescapeSpecialChars(m1) );
+             }
+             );
+             */
+            return text;
+        }
+
+        function _UnescapeSpecialChars(text) {
+            //
+            // Swap back in all the special characters we've hidden.
+            //
+            text = text.replace(/~E(\d+)E/g,
+                function (wholeMatch, m1) {
+                    var charCodeToReplace = parseInt(m1);
+                    return String.fromCharCode(charCodeToReplace);
+                }
+            );
+            return text;
+        }
+
+        function _Outdent(text) {
+            //
+            // Remove one level of line-leading tabs or spaces
+            //
+
+            // attacklab: hack around Konqueror 3.5.4 bug:
+            // "----------bug".replace(/^-/g,"") == "bug"
+
+            text = text.replace(/^(\t|[ ]{1,4})/gm, "~0"); // attacklab: g_tab_width
+
+            // attacklab: clean up hack
+            text = text.replace(/~0/g, "")
+
+            return text;
+        }
+
+        function _Detab(text) {
+            if (!/\t/.test(text))
+                return text;
+
+            var spaces = ["    ", "   ", "  ", " "],
+                skew = 0,
+                v;
+
+            return text.replace(/[\n\t]/g, function (match, offset) {
+                if (match === "\n") {
+                    skew = offset + 1;
+                    return match;
+                }
+                v = (offset - skew) % 4;
+                skew = offset + 1;
+                return spaces[v];
+            });
+        }
+
+        //
+        //  attacklab: Utility functions
+        //
+
+        function attributeSafeUrl(url) {
+            url = attributeEncode(url);
+            url = escapeCharacters(url, "*_:()[]")
+            return url;
+        }
+
+        function escapeCharacters(text, charsToEscape, afterBackslash) {
+            // First we have to escape the escape characters so that
+            // we can build a character class out of them
+            var regexString = "([" + charsToEscape.replace(/([\[\]\\])/g, "\\$1") + "])";
+
+            if (afterBackslash) {
+                regexString = "\\\\" + regexString;
+            }
+
+            var regex = new RegExp(regexString, "g");
+            text = text.replace(regex, escapeCharacters_callback);
+
+            return text;
+        }
+
+
+        function escapeCharacters_callback(wholeMatch, m1) {
+            var charCodeToEscape = m1.charCodeAt(0);
+            return "~E" + charCodeToEscape + "E";
+        }
 
-            Markdown.HookCollection = HookCollection;
+    }; // end of the Markdown.Converter constructor
 
-            // g_urls and g_titles allow arbitrary user-entered strings as keys. This
-            // caused an exception (and hence stopped the rendering) when the user entered
-            // e.g. [push] or [__proto__]. Adding a prefix to the actual key prevents this
-            // (since no builtin property starts with "s_"). See
-            // http://meta.stackexchange.com/questions/64655/strange-wmd-bug
-            // (granted, switching from Array() to Object() alone would have left only __proto__
-            // to be a problem)
-            function SaveHash() {}
-            SaveHash.prototype = {
-                        set: function set(key, value) {
-                                    this["s_" + key] = value;
-                        },
-                        get: function get(key) {
-                                    return this["s_" + key];
-                        }
-            };
-
-            Markdown.Converter = function (OPTIONS) {
-                        var pluginHooks = this.hooks = new HookCollection();
-
-                        // given a URL that was encountered by itself (without markup), should return the link text that's to be given to this link
-                        pluginHooks.addNoop("plainLinkText");
-
-                        // called with the orignal text as given to makeHtml. The result of this plugin hook is the actual markdown source that will be cooked
-                        pluginHooks.addNoop("preConversion");
-
-                        // called with the text once all normalizations have been completed (tabs to spaces, line endings, etc.), but before any conversions have
-                        pluginHooks.addNoop("postNormalization");
-
-                        // Called with the text before / after creating block elements like code blocks and lists. Note that this is called recursively
-                        // with inner content, e.g. it's called with the full text, and then only with the content of a blockquote. The inner
-                        // call will receive outdented text.
-                        pluginHooks.addNoop("preBlockGamut");
-                        pluginHooks.addNoop("postBlockGamut");
-
-                        // called with the text of a single block element before / after the span-level conversions (bold, code spans, etc.) have been made
-                        pluginHooks.addNoop("preSpanGamut");
-                        pluginHooks.addNoop("postSpanGamut");
-
-                        // called with the final cooked HTML code. The result of this plugin hook is the actual output of makeHtml
-                        pluginHooks.addNoop("postConversion");
-
-                        //
-                        // Private state of the converter instance:
-                        //
-
-                        // Global hashes, used by various utility routines
-                        var g_urls;
-                        var g_titles;
-                        var g_html_blocks;
-
-                        // Used to track when we're inside an ordered or unordered list
-                        // (see _ProcessListItems() for details):
-                        var g_list_level;
-
-                        OPTIONS = OPTIONS || {};
-                        var asciify = identity,
-                            deasciify = identity;
-                        if (OPTIONS.nonAsciiLetters) {
-
-                                    /* In JavaScript regular expressions, \w only denotes [a-zA-Z0-9_].
-                                     * That's why there's inconsistent handling e.g. with intra-word bolding
-                                     * of Japanese words. That's why we do the following if OPTIONS.nonAsciiLetters
-                                     * is true:
-                                     *
-                                     * Before doing bold and italics, we find every instance
-                                     * of a unicode word character in the Markdown source that is not
-                                     * matched by \w, and the letter "Q". We take the character's code point
-                                     * and encode it in base 51, using the "digits"
-                                     *
-                                     *     A, B, ..., P, R, ..., Y, Z, a, b, ..., y, z
-                                     *
-                                     * delimiting it with "Q" on both sides. For example, the source
-                                     *
-                                     * > In Chinese, the smurfs are called 藍精靈, meaning "blue spirits".
-                                     *
-                                     * turns into
-                                     *
-                                     * > In Chinese, the smurfs are called QNIhQQMOIQQOuUQ, meaning "blue spirits".
-                                     *
-                                     * Since everything that is a letter in Unicode is now a letter (or
-                                     * several letters) in ASCII, \w and \b should always do the right thing.
-                                     *
-                                     * After the bold/italic conversion, we decode again; since "Q" was encoded
-                                     * alongside all non-ascii characters (as "QBfQ"), and the conversion
-                                     * will not generate "Q", the only instances of that letter should be our
-                                     * encoded characters. And since the conversion will not break words, the
-                                     * "Q...Q" should all still be in one piece.
-                                     *
-                                     * We're using "Q" as the delimiter because it's probably one of the
-                                     * rarest characters, and also because I can't think of any special behavior
-                                     * that would ever be triggered by this letter (to use a silly example, if we
-                                     * delimited with "H" on the left and "P" on the right, then "Ψ" would be
-                                     * encoded as "HTTP", which may cause special behavior). The latter would not
-                                     * actually be a huge issue for bold/italic, but may be if we later use it
-                                     * in other places as well.
-                                     * */
-                                    (function () {
-                                                var lettersThatJavaScriptDoesNotKnowAndQ = /[Q\u00aa\u00b5\u00ba\u00c0-\u00d6\u00d8-\u00f6\u00f8-\u02c1\u02c6-\u02d1\u02e0-\u02e4\u02ec\u02ee\u0370-\u0374\u0376-\u0377\u037a-\u037d\u0386\u0388-\u038a\u038c\u038e-\u03a1\u03a3-\u03f5\u03f7-\u0481\u048a-\u0523\u0531-\u0556\u0559\u0561-\u0587\u05d0-\u05ea\u05f0-\u05f2\u0621-\u064a\u0660-\u0669\u066e-\u066f\u0671-\u06d3\u06d5\u06e5-\u06e6\u06ee-\u06fc\u06ff\u0710\u0712-\u072f\u074d-\u07a5\u07b1\u07c0-\u07ea\u07f4-\u07f5\u07fa\u0904-\u0939\u093d\u0950\u0958-\u0961\u0966-\u096f\u0971-\u0972\u097b-\u097f\u0985-\u098c\u098f-\u0990\u0993-\u09a8\u09aa-\u09b0\u09b2\u09b6-\u09b9\u09bd\u09ce\u09dc-\u09dd\u09df-\u09e1\u09e6-\u09f1\u0a05-\u0a0a\u0a0f-\u0a10\u0a13-\u0a28\u0a2a-\u0a30\u0a32-\u0a33\u0a35-\u0a36\u0a38-\u0a39\u0a59-\u0a5c\u0a5e\u0a66-\u0a6f\u0a72-\u0a74\u0a85-\u0a8d\u0a8f-\u0a91\u0a93-\u0aa8\u0aaa-\u0ab0\u0ab2-\u0ab3\u0ab5-\u0ab9\u0abd\u0ad0\u0ae0-\u0ae1\u0ae6-\u0aef\u0b05-\u0b0c\u0b0f-\u0b10\u0b13-\u0b28\u0b2a-\u0b30\u0b32-\u0b33\u0b35-\u0b39\u0b3d\u0b5c-\u0b5d\u0b5f-\u0b61\u0b66-\u0b6f\u0b71\u0b83\u0b85-\u0b8a\u0b8e-\u0b90\u0b92-\u0b95\u0b99-\u0b9a\u0b9c\u0b9e-\u0b9f\u0ba3-\u0ba4\u0ba8-\u0baa\u0bae-\u0bb9\u0bd0\u0be6-\u0bef\u0c05-\u0c0c\u0c0e-\u0c10\u0c12-\u0c28\u0c2a-\u0c33\u0c35-\u0c39\u0c3d\u0c58-\u0c59\u0c60-\u0c61\u0c66-\u0c6f\u0c85-\u0c8c\u0c8e-\u0c90\u0c92-\u0ca8\u0caa-\u0cb3\u0cb5-\u0cb9\u0cbd\u0cde\u0ce0-\u0ce1\u0ce6-\u0cef\u0d05-\u0d0c\u0d0e-\u0d10\u0d12-\u0d28\u0d2a-\u0d39\u0d3d\u0d60-\u0d61\u0d66-\u0d6f\u0d7a-\u0d7f\u0d85-\u0d96\u0d9a-\u0db1\u0db3-\u0dbb\u0dbd\u0dc0-\u0dc6\u0e01-\u0e30\u0e32-\u0e33\u0e40-\u0e46\u0e50-\u0e59\u0e81-\u0e82\u0e84\u0e87-\u0e88\u0e8a\u0e8d\u0e94-\u0e97\u0e99-\u0e9f\u0ea1-\u0ea3\u0ea5\u0ea7\u0eaa-\u0eab\u0ead-\u0eb0\u0eb2-\u0eb3\u0ebd\u0ec0-\u0ec4\u0ec6\u0ed0-\u0ed9\u0edc-\u0edd\u0f00\u0f20-\u0f29\u0f40-\u0f47\u0f49-\u0f6c\u0f88-\u0f8b\u1000-\u102a\u103f-\u1049\u1050-\u1055\u105a-\u105d\u1061\u1065-\u1066\u106e-\u1070\u1075-\u1081\u108e\u1090-\u1099\u10a0-\u10c5\u10d0-\u10fa\u10fc\u1100-\u1159\u115f-\u11a2\u11a8-\u11f9\u1200-\u1248\u124a-\u124d\u1250-\u1256\u1258\u125a-\u125d\u1260-\u1288\u128a-\u128d\u1290-\u12b0\u12b2-\u12b5\u12b8-\u12be\u12c0\u12c2-\u12c5\u12c8-\u12d6\u12d8-\u1310\u1312-\u1315\u1318-\u135a\u1380-\u138f\u13a0-\u13f4\u1401-\u166c\u166f-\u1676\u1681-\u169a\u16a0-\u16ea\u1700-\u170c\u170e-\u1711\u1720-\u1731\u1740-\u1751\u1760-\u176c\u176e-\u1770\u1780-\u17b3\u17d7\u17dc\u17e0-\u17e9\u1810-\u1819\u1820-\u1877\u1880-\u18a8\u18aa\u1900-\u191c\u1946-\u196d\u1970-\u1974\u1980-\u19a9\u19c1-\u19c7\u19d0-\u19d9\u1a00-\u1a16\u1b05-\u1b33\u1b45-\u1b4b\u1b50-\u1b59\u1b83-\u1ba0\u1bae-\u1bb9\u1c00-\u1c23\u1c40-\u1c49\u1c4d-\u1c7d\u1d00-\u1dbf\u1e00-\u1f15\u1f18-\u1f1d\u1f20-\u1f45\u1f48-\u1f4d\u1f50-\u1f57\u1f59\u1f5b\u1f5d\u1f5f-\u1f7d\u1f80-\u1fb4\u1fb6-\u1fbc\u1fbe\u1fc2-\u1fc4\u1fc6-\u1fcc\u1fd0-\u1fd3\u1fd6-\u1fdb\u1fe0-\u1fec\u1ff2-\u1ff4\u1ff6-\u1ffc\u203f-\u2040\u2054\u2071\u207f\u2090-\u2094\u2102\u2107\u210a-\u2113\u2115\u2119-\u211d\u2124\u2126\u2128\u212a-\u212d\u212f-\u2139\u213c-\u213f\u2145-\u2149\u214e\u2183-\u2184\u2c00-\u2c2e\u2c30-\u2c5e\u2c60-\u2c6f\u2c71-\u2c7d\u2c80-\u2ce4\u2d00-\u2d25\u2d30-\u2d65\u2d6f\u2d80-\u2d96\u2da0-\u2da6\u2da8-\u2dae\u2db0-\u2db6\u2db8-\u2dbe\u2dc0-\u2dc6\u2dc8-\u2dce\u2dd0-\u2dd6\u2dd8-\u2dde\u2e2f\u3005-\u3006\u3031-\u3035\u303b-\u303c\u3041-\u3096\u309d-\u309f\u30a1-\u30fa\u30fc-\u30ff\u3105-\u312d\u3131-\u318e\u31a0-\u31b7\u31f0-\u31ff\u3400-\u4db5\u4e00-\u9fc3\ua000-\ua48c\ua500-\ua60c\ua610-\ua62b\ua640-\ua65f\ua662-\ua66e\ua67f-\ua697\ua717-\ua71f\ua722-\ua788\ua78b-\ua78c\ua7fb-\ua801\ua803-\ua805\ua807-\ua80a\ua80c-\ua822\ua840-\ua873\ua882-\ua8b3\ua8d0-\ua8d9\ua900-\ua925\ua930-\ua946\uaa00-\uaa28\uaa40-\uaa42\uaa44-\uaa4b\uaa50-\uaa59\uac00-\ud7a3\uf900-\ufa2d\ufa30-\ufa6a\ufa70-\ufad9\ufb00-\ufb06\ufb13-\ufb17\ufb1d\ufb1f-\ufb28\ufb2a-\ufb36\ufb38-\ufb3c\ufb3e\ufb40-\ufb41\ufb43-\ufb44\ufb46-\ufbb1\ufbd3-\ufd3d\ufd50-\ufd8f\ufd92-\ufdc7\ufdf0-\ufdfb\ufe33-\ufe34\ufe4d-\ufe4f\ufe70-\ufe74\ufe76-\ufefc\uff10-\uff19\uff21-\uff3a\uff3f\uff41-\uff5a\uff66-\uffbe\uffc2-\uffc7\uffca-\uffcf\uffd2-\uffd7\uffda-\uffdc]/g;
-                                                var cp_Q = "Q".charCodeAt(0);
-                                                var cp_A = "A".charCodeAt(0);
-                                                var cp_Z = "Z".charCodeAt(0);
-                                                var dist_Za = "a".charCodeAt(0) - cp_Z - 1;
-
-                                                asciify = function (text) {
-                                                            return text.replace(lettersThatJavaScriptDoesNotKnowAndQ, function (m) {
-                                                                        var c = m.charCodeAt(0);
-                                                                        var s = "";
-                                                                        var v;
-                                                                        while (c > 0) {
-                                                                                    v = c % 51 + cp_A;
-                                                                                    if (v >= cp_Q) v++;
-                                                                                    if (v > cp_Z) v += dist_Za;
-                                                                                    s = String.fromCharCode(v) + s;
-                                                                                    c = c / 51 | 0;
-                                                                        }
-                                                                        return "Q" + s + "Q";
-                                                            });
-                                                };
-
-                                                deasciify = function (text) {
-                                                            return text.replace(/Q([A-PR-Za-z]{1,3})Q/g, function (m, s) {
-                                                                        var c = 0;
-                                                                        var v;
-                                                                        for (var i = 0; i < s.length; i++) {
-                                                                                    v = s.charCodeAt(i);
-                                                                                    if (v > cp_Z) v -= dist_Za;
-                                                                                    if (v > cp_Q) v--;
-                                                                                    v -= cp_A;
-                                                                                    c = c * 51 + v;
-                                                                        }
-                                                                        return String.fromCharCode(c);
-                                                            });
-                                                };
-                                    })();
-                        }
-
-                        var _DoItalicsAndBold = OPTIONS.asteriskIntraWordEmphasis ? _DoItalicsAndBold_AllowIntrawordWithAsterisk : _DoItalicsAndBoldStrict;
-
-                        this.makeHtml = function (text) {
-
-                                    //
-                                    // Main function. The order in which other subs are called here is
-                                    // essential. Link and image substitutions need to happen before
-                                    // _EscapeSpecialCharsWithinTagAttributes(), so that any *'s or _'s in the <a>
-                                    // and <img> tags get encoded.
-                                    //
-
-                                    // This will only happen if makeHtml on the same converter instance is called from a plugin hook.
-                                    // Don't do that.
-                                    if (g_urls) throw new Error("Recursive call to converter.makeHtml");
-
-                                    // Create the private state objects.
-                                    g_urls = new SaveHash();
-                                    g_titles = new SaveHash();
-                                    g_html_blocks = [];
-                                    g_list_level = 0;
-
-                                    text = pluginHooks.preConversion(text);
-
-                                    // attacklab: Replace ~ with ~T
-                                    // This lets us use tilde as an escape char to avoid md5 hashes
-                                    // The choice of character is arbitray; anything that isn't
-                                    // magic in Markdown will work.
-                                    text = text.replace(/~/g, "~T");
-
-                                    // attacklab: Replace $ with ~D
-                                    // RegExp interprets $ as a special character
-                                    // when it's in a replacement string
-                                    text = text.replace(/\$/g, "~D");
-
-                                    // Standardize line endings
-                                    text = text.replace(/\r\n/g, "\n"); // DOS to Unix
-                                    text = text.replace(/\r/g, "\n"); // Mac to Unix
-
-                                    // Make sure text begins and ends with a couple of newlines:
-                                    text = "\n\n" + text + "\n\n";
-
-                                    // Convert all tabs to spaces.
-                                    text = _Detab(text);
-
-                                    // Strip any lines consisting only of spaces and tabs.
-                                    // This makes subsequent regexen easier to write, because we can
-                                    // match consecutive blank lines with /\n+/ instead of something
-                                    // contorted like /[ \t]*\n+/ .
-                                    text = text.replace(/^[ \t]+$/mg, "");
-
-                                    text = pluginHooks.postNormalization(text);
-
-                                    // Turn block-level HTML blocks into hash entries
-                                    text = _HashHTMLBlocks(text);
-
-                                    // Strip link definitions, store in hashes.
-                                    text = _StripLinkDefinitions(text);
-
-                                    text = _RunBlockGamut(text);
-
-                                    text = _UnescapeSpecialChars(text);
-
-                                    // attacklab: Restore dollar signs
-                                    text = text.replace(/~D/g, "$$");
-
-                                    // attacklab: Restore tildes
-                                    text = text.replace(/~T/g, "~");
-
-                                    text = pluginHooks.postConversion(text);
-
-                                    g_html_blocks = g_titles = g_urls = null;
-
-                                    return text;
-                        };
-
-                        function _StripLinkDefinitions(text) {
-                                    //
-                                    // Strips link definitions from text, stores the URLs and titles in
-                                    // hash references.
-                                    //
-
-                                    // Link defs are in the form: ^[id]: url "optional title"
-
-                                    /*
-                                     text = text.replace(/
-                                     ^[ ]{0,3}\[([^\[\]]+)\]:  // id = $1  attacklab: g_tab_width - 1
-                                     [ \t]*
-                                     \n?                 // maybe *one* newline
-                                     [ \t]*
-                                     <?(\S+?)>?          // url = $2
-                                     (?=\s|$)            // lookahead for whitespace instead of the lookbehind removed below
-                                     [ \t]*
-                                     \n?                 // maybe one newline
-                                     [ \t]*
-                                     (                   // (potential) title = $3
-                                     (\n*)           // any lines skipped = $4 attacklab: lookbehind removed
-                                     [ \t]+
-                                     ["(]
-                                     (.+?)           // title = $5
-                                     [")]
-                                     [ \t]*
-                                     )?                  // title is optional
-                                     (\n+)             // subsequent newlines = $6, capturing because they must be put back if the potential title isn't an actual title
-                                     /gm, function(){...});
-                                     */
-
-                                    text = text.replace(/^[ ]{0,3}\[([^\[\]]+)\]:[ \t]*\n?[ \t]*<?(\S+?)>?(?=\s|$)[ \t]*\n?[ \t]*((\n*)["(](.+?)[")][ \t]*)?(\n+)/gm, function (wholeMatch, m1, m2, m3, m4, m5, m6) {
-                                                m1 = m1.toLowerCase();
-                                                g_urls.set(m1, _EncodeAmpsAndAngles(m2)); // Link IDs are case-insensitive
-                                                if (m4) {
-                                                            // Oops, found blank lines, so it's not a title.
-                                                            // Put back the parenthetical statement we stole.
-                                                            return m3 + m6;
-                                                } else if (m5) {
-                                                            g_titles.set(m1, m5.replace(/"/g, "&quot;"));
-                                                }
-
-                                                // Completely remove the definition from the text
-                                                return "";
-                                    });
-
-                                    return text;
-                        }
-
-                        function _HashHTMLBlocks(text) {
-
-                                    // Hashify HTML blocks:
-                                    // We only want to do this for block-level HTML tags, such as headers,
-                                    // lists, and tables. That's because we still want to wrap <p>s around
-                                    // "paragraphs" that are wrapped in non-block-level tags, such as anchors,
-                                    // phrase emphasis, and spans. The list of tags we're looking for is
-                                    // hard-coded:
-                                    var block_tags_a = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del";
-                                    var block_tags_b = "p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math";
-
-                                    // First, look for nested blocks, e.g.:
-                                    //   <div>
-                                    //     <div>
-                                    //     tags for inner block must be indented.
-                                    //     </div>
-                                    //   </div>
-                                    //
-                                    // The outermost tags must start at the left margin for this to match, and
-                                    // the inner nested divs must be indented.
-                                    // We need to do this before the next, more liberal match, because the next
-                                    // match will start at the first `<div>` and stop at the first `</div>`.
-
-                                    // attacklab: This regex can be expensive when it fails.
-
-                                    /*
-                                     text = text.replace(/
-                                     (                       // save in $1
-                                     ^                   // start of line  (with /m)
-                                     <($block_tags_a)    // start tag = $2
-                                     \b                  // word break
-                                     // attacklab: hack around khtml/pcre bug...
-                                     [^\r]*?\n           // any number of lines, minimally matching
-                                     </\2>               // the matching end tag
-                                     [ \t]*              // trailing spaces/tabs
-                                     (?=\n+)             // followed by a newline
-                                     )                       // attacklab: there are sentinel newlines at end of document
-                                     /gm,function(){...}};
-                                     */
-                                    text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math|ins|del)\b[^\r]*?\n<\/\2>[ \t]*(?=\n+))/gm, hashMatch);
-
-                                    //
-                                    // Now match more liberally, simply from `\n<tag>` to `</tag>\n`
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (                       // save in $1
-                                     ^                   // start of line  (with /m)
-                                     <($block_tags_b)    // start tag = $2
-                                     \b                  // word break
-                                     // attacklab: hack around khtml/pcre bug...
-                                     [^\r]*?             // any number of lines, minimally matching
-                                     .*</\2>             // the matching end tag
-                                     [ \t]*              // trailing spaces/tabs
-                                     (?=\n+)             // followed by a newline
-                                     )                       // attacklab: there are sentinel newlines at end of document
-                                     /gm,function(){...}};
-                                     */
-                                    text = text.replace(/^(<(p|div|h[1-6]|blockquote|pre|table|dl|ol|ul|script|noscript|form|fieldset|iframe|math)\b[^\r]*?.*<\/\2>[ \t]*(?=\n+)\n)/gm, hashMatch);
-
-                                    // Special case just for <hr />. It was easier to make a special case than
-                                    // to make the other regex more complicated.
-
-                                    /*
-                                     text = text.replace(/
-                                     \n                  // Starting after a blank line
-                                     [ ]{0,3}
-                                     (                   // save in $1
-                                     (<(hr)          // start tag = $2
-                                     \b          // word break
-                                     ([^<>])*?
-                                     \/?>)           // the matching end tag
-                                     [ \t]*
-                                     (?=\n{2,})      // followed by a blank line
-                                     )
-                                     /g,hashMatch);
-                                     */
-                                    text = text.replace(/\n[ ]{0,3}((<(hr)\b([^<>])*?\/?>)[ \t]*(?=\n{2,}))/g, hashMatch);
-
-                                    // Special case for standalone HTML comments:
-
-                                    /*
-                                     text = text.replace(/
-                                     \n\n                                            // Starting after a blank line
-                                     [ ]{0,3}                                        // attacklab: g_tab_width - 1
-                                     (                                               // save in $1
-                                     <!
-                                     (--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)   // see http://www.w3.org/TR/html-markup/syntax.html#comments and http://meta.stackexchange.com/q/95256
-                                     >
-                                     [ \t]*
-                                     (?=\n{2,})                                  // followed by a blank line
-                                     )
-                                     /g,hashMatch);
-                                     */
-                                    text = text.replace(/\n\n[ ]{0,3}(<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>[ \t]*(?=\n{2,}))/g, hashMatch);
-
-                                    // PHP and ASP-style processor instructions (<?...?> and <%...%>)
-
-                                    /*
-                                     text = text.replace(/
-                                     (?:
-                                     \n\n            // Starting after a blank line
-                                     )
-                                     (                   // save in $1
-                                     [ ]{0,3}        // attacklab: g_tab_width - 1
-                                     (?:
-                                     <([?%])     // $2
-                                     [^\r]*?
-                                     \2>
-                                     )
-                                     [ \t]*
-                                     (?=\n{2,})      // followed by a blank line
-                                     )
-                                     /g,hashMatch);
-                                     */
-                                    text = text.replace(/(?:\n\n)([ ]{0,3}(?:<([?%])[^\r]*?\2>)[ \t]*(?=\n{2,}))/g, hashMatch);
-
-                                    return text;
-                        }
-
-                        function hashBlock(text) {
-                                    text = text.replace(/(^\n+|\n+$)/g, "");
-                                    // Replace the element text with a marker ("~KxK" where x is its key)
-                                    return "\n\n~K" + (g_html_blocks.push(text) - 1) + "K\n\n";
-                        }
-
-                        function hashMatch(wholeMatch, m1) {
-                                    return hashBlock(m1);
-                        }
-
-                        var blockGamutHookCallback = function blockGamutHookCallback(t) {
-                                    return _RunBlockGamut(t);
-                        };
-
-                        function _RunBlockGamut(text, doNotUnhash, doNotCreateParagraphs) {
-                                    //
-                                    // These are all the transformations that form block-level
-                                    // tags like paragraphs, headers, and list items.
-                                    //
-
-                                    text = pluginHooks.preBlockGamut(text, blockGamutHookCallback);
-
-                                    text = _DoHeaders(text);
-
-                                    // Do Horizontal Rules:
-                                    var replacement = "<hr />\n";
-                                    text = text.replace(/^[ ]{0,2}([ ]?\*[ ]?){3,}[ \t]*$/gm, replacement);
-                                    text = text.replace(/^[ ]{0,2}([ ]?-[ ]?){3,}[ \t]*$/gm, replacement);
-                                    text = text.replace(/^[ ]{0,2}([ ]?_[ ]?){3,}[ \t]*$/gm, replacement);
-
-                                    text = _DoLists(text);
-                                    text = _DoCodeBlocks(text);
-                                    text = _DoBlockQuotes(text);
-
-                                    text = pluginHooks.postBlockGamut(text, blockGamutHookCallback);
-
-                                    // We already ran _HashHTMLBlocks() before, in Markdown(), but that
-                                    // was to escape raw HTML in the original Markdown source. This time,
-                                    // we're escaping the markup we've just created, so that we don't wrap
-                                    // <p> tags around block-level tags.
-                                    text = _HashHTMLBlocks(text);
-
-                                    text = _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs);
-
-                                    return text;
-                        }
-
-                        function _RunSpanGamut(text) {
-                                    //
-                                    // These are all the transformations that occur *within* block-level
-                                    // tags like paragraphs, headers, and list items.
-                                    //
-
-                                    text = pluginHooks.preSpanGamut(text);
-
-                                    text = _DoCodeSpans(text);
-                                    text = _EscapeSpecialCharsWithinTagAttributes(text);
-                                    text = _EncodeBackslashEscapes(text);
-
-                                    // Process anchor and image tags. Images must come first,
-                                    // because ![foo][f] looks like an anchor.
-                                    text = _DoImages(text);
-                                    text = _DoAnchors(text);
-
-                                    // Make links out of things like `<http://example.com/>`
-                                    // Must come after _DoAnchors(), because you can use < and >
-                                    // delimiters in inline links like [this](<url>).
-                                    text = _DoAutoLinks(text);
-
-                                    text = text.replace(/~P/g, "://"); // put in place to prevent autolinking; reset now
-
-                                    text = _EncodeAmpsAndAngles(text);
-                                    text = _DoItalicsAndBold(text);
-
-                                    // Do hard breaks:
-                                    text = text.replace(/  +\n/g, " <br>\n");
-
-                                    text = pluginHooks.postSpanGamut(text);
-
-                                    return text;
-                        }
-
-                        function _EscapeSpecialCharsWithinTagAttributes(text) {
-                                    //
-                                    // Within tags -- meaning between < and > -- encode [\ ` * _] so they
-                                    // don't conflict with their use in Markdown for code, italics and strong.
-                                    //
-
-                                    // Build a regex to find HTML tags and comments.  See Friedl's
-                                    // "Mastering Regular Expressions", 2nd Ed., pp. 200-201.
-
-                                    // SE: changed the comment part of the regex
-
-                                    var regex = /(<[a-z\/!$]("[^"]*"|'[^']*'|[^'">])*>|<!(--(?:|(?:[^>-]|-[^>])(?:[^-]|-[^-])*)--)>)/gi;
-
-                                    text = text.replace(regex, function (wholeMatch) {
-                                                var tag = wholeMatch.replace(/(.)<\/?code>(?=.)/g, "$1`");
-                                                tag = escapeCharacters(tag, wholeMatch.charAt(1) == "!" ? "\\`*_/" : "\\`*_"); // also escape slashes in comments to prevent autolinking there -- http://meta.stackexchange.com/questions/95987
-                                                return tag;
-                                    });
-
-                                    return text;
-                        }
-
-                        function _DoAnchors(text) {
-
-                                    if (text.indexOf("[") === -1) return text;
-
-                                    //
-                                    // Turn Markdown link shortcuts into XHTML <a> tags.
-                                    //
-                                    //
-                                    // First, handle reference-style links: [link text] [id]
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (                           // wrap whole match in $1
-                                     \[
-                                     (
-                                     (?:
-                                     \[[^\]]*\]      // allow brackets nested one level
-                                     |
-                                     [^\[]           // or anything else
-                                     )*
-                                     )
-                                     \]
-                                     [ ]?                    // one optional space
-                                     (?:\n[ ]*)?             // one optional newline followed by spaces
-                                     \[
-                                     (.*?)                   // id = $3
-                                     \]
-                                     )
-                                     ()()()()                    // pad remaining backreferences
-                                     /g, writeAnchorTag);
-                                     */
-                                    text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeAnchorTag);
-
-                                    //
-                                    // Next, inline-style links: [link text](url "optional title")
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (                           // wrap whole match in $1
-                                     \[
-                                     (
-                                     (?:
-                                     \[[^\]]*\]      // allow brackets nested one level
-                                     |
-                                     [^\[\]]         // or anything else
-                                     )*
-                                     )
-                                     \]
-                                     \(                      // literal paren
-                                     [ \t]*
-                                     ()                      // no id, so leave $3 empty
-                                     <?(                     // href = $4
-                                     (?:
-                                     \([^)]*\)       // allow one level of (correctly nested) parens (think MSDN)
-                                     |
-                                     [^()\s]
-                                     )*?
-                                     )>?
-                                     [ \t]*
-                                     (                       // $5
-                                     (['"])              // quote char = $6
-                                     (.*?)               // Title = $7
-                                     \6                  // matching quote
-                                     [ \t]*              // ignore any spaces/tabs between closing quote and )
-                                     )?                      // title is optional
-                                     \)
-                                     )
-                                     /g, writeAnchorTag);
-                                     */
-
-                                    text = text.replace(/(\[((?:\[[^\]]*\]|[^\[\]])*)\]\([ \t]*()<?((?:\([^)]*\)|[^()\s])*?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeAnchorTag);
-
-                                    //
-                                    // Last, handle reference-style shortcuts: [link text]
-                                    // These must come last in case you've also got [link test][1]
-                                    // or [link test](/foo)
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (                   // wrap whole match in $1
-                                     \[
-                                     ([^\[\]]+)      // link text = $2; can't contain '[' or ']'
-                                     \]
-                                     )
-                                     ()()()()()          // pad rest of backreferences
-                                     /g, writeAnchorTag);
-                                     */
-                                    text = text.replace(/(\[([^\[\]]+)\])()()()()()/g, writeAnchorTag);
-
-                                    return text;
-                        }
-
-                        function writeAnchorTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
-                                    if (m7 == undefined) m7 = "";
-                                    var whole_match = m1;
-                                    var link_text = m2.replace(/:\/\//g, "~P"); // to prevent auto-linking withing the link. will be converted back after the auto-linker runs
-                                    var link_id = m3.toLowerCase();
-                                    var url = m4;
-                                    var title = m7;
-
-                                    if (url == "") {
-                                                if (link_id == "") {
-                                                            // lower-case and turn embedded newlines into spaces
-                                                            link_id = link_text.toLowerCase().replace(/ ?\n/g, " ");
-                                                }
-                                                url = "#" + link_id;
-
-                                                if (g_urls.get(link_id) != undefined) {
-                                                            url = g_urls.get(link_id);
-                                                            if (g_titles.get(link_id) != undefined) {
-                                                                        title = g_titles.get(link_id);
-                                                            }
-                                                } else {
-                                                            if (whole_match.search(/\(\s*\)$/m) > -1) {
-                                                                        // Special case for explicit empty url
-                                                                        url = "";
-                                                            } else {
-                                                                        return whole_match;
-                                                            }
-                                                }
-                                    }
-                                    url = attributeSafeUrl(url);
-
-                                    var result = "<a href=\"" + url + "\"";
-
-                                    if (title != "") {
-                                                title = attributeEncode(title);
-                                                title = escapeCharacters(title, "*_");
-                                                result += " title=\"" + title + "\"";
-                                    }
-
-                                    result += ">" + link_text + "</a>";
-
-                                    return result;
-                        }
-
-                        function _DoImages(text) {
-
-                                    if (text.indexOf("![") === -1) return text;
-
-                                    //
-                                    // Turn Markdown image shortcuts into <img> tags.
-                                    //
-
-                                    //
-                                    // First, handle reference-style labeled images: ![alt text][id]
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (                   // wrap whole match in $1
-                                     !\[
-                                     (.*?)           // alt text = $2
-                                     \]
-                                     [ ]?            // one optional space
-                                     (?:\n[ ]*)?     // one optional newline followed by spaces
-                                     \[
-                                     (.*?)           // id = $3
-                                     \]
-                                     )
-                                     ()()()()            // pad rest of backreferences
-                                     /g, writeImageTag);
-                                     */
-                                    text = text.replace(/(!\[(.*?)\][ ]?(?:\n[ ]*)?\[(.*?)\])()()()()/g, writeImageTag);
-
-                                    //
-                                    // Next, handle inline images:  ![alt text](url "optional title")
-                                    // Don't forget: encode * and _
-
-                                    /*
-                                     text = text.replace(/
-                                     (                   // wrap whole match in $1
-                                     !\[
-                                     (.*?)           // alt text = $2
-                                     \]
-                                     \s?             // One optional whitespace character
-                                     \(              // literal paren
-                                     [ \t]*
-                                     ()              // no id, so leave $3 empty
-                                     <?(\S+?)>?      // src url = $4
-                                     [ \t]*
-                                     (               // $5
-                                     (['"])      // quote char = $6
-                                     (.*?)       // title = $7
-                                     \6          // matching quote
-                                     [ \t]*
-                                     )?              // title is optional
-                                     \)
-                                     )
-                                     /g, writeImageTag);
-                                     */
-                                    text = text.replace(/(!\[(.*?)\]\s?\([ \t]*()<?(\S+?)>?[ \t]*((['"])(.*?)\6[ \t]*)?\))/g, writeImageTag);
-
-                                    return text;
-                        }
-
-                        function attributeEncode(text) {
-                                    // unconditionally replace angle brackets here -- what ends up in an attribute (e.g. alt or title)
-                                    // never makes sense to have verbatim HTML in it (and the sanitizer would totally break it)
-                                    return text.replace(/>/g, "&gt;").replace(/</g, "&lt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
-                        }
-
-                        function writeImageTag(wholeMatch, m1, m2, m3, m4, m5, m6, m7) {
-                                    var whole_match = m1;
-                                    var alt_text = m2;
-                                    var link_id = m3.toLowerCase();
-                                    var url = m4;
-                                    var title = m7;
-
-                                    if (!title) title = "";
-
-                                    if (url == "") {
-                                                if (link_id == "") {
-                                                            // lower-case and turn embedded newlines into spaces
-                                                            link_id = alt_text.toLowerCase().replace(/ ?\n/g, " ");
-                                                }
-                                                url = "#" + link_id;
-
-                                                if (g_urls.get(link_id) != undefined) {
-                                                            url = g_urls.get(link_id);
-                                                            if (g_titles.get(link_id) != undefined) {
-                                                                        title = g_titles.get(link_id);
-                                                            }
-                                                } else {
-                                                            return whole_match;
-                                                }
-                                    }
-
-                                    alt_text = escapeCharacters(attributeEncode(alt_text), "*_[]()");
-                                    url = escapeCharacters(url, "*_");
-                                    var result = "<img src=\"" + url + "\" alt=\"" + alt_text + "\"";
-
-                                    // attacklab: Markdown.pl adds empty title attributes to images.
-                                    // Replicate this bug.
-
-                                    //if (title != "") {
-                                    title = attributeEncode(title);
-                                    title = escapeCharacters(title, "*_");
-                                    result += " title=\"" + title + "\"";
-                                    //}
-
-                                    result += " />";
-
-                                    return result;
-                        }
-
-                        function _DoHeaders(text) {
-
-                                    // Setext-style headers:
-                                    //  Header 1
-                                    //  ========
-                                    //
-                                    //  Header 2
-                                    //  --------
-                                    //
-                                    text = text.replace(/^(.+)[ \t]*\n=+[ \t]*\n+/gm, function (wholeMatch, m1) {
-                                                return "<h1>" + _RunSpanGamut(m1) + "</h1>\n\n";
-                                    });
-
-                                    text = text.replace(/^(.+)[ \t]*\n-+[ \t]*\n+/gm, function (matchFound, m1) {
-                                                return "<h2>" + _RunSpanGamut(m1) + "</h2>\n\n";
-                                    });
-
-                                    // atx-style headers:
-                                    //  # Header 1
-                                    //  ## Header 2
-                                    //  ## Header 2 with closing hashes ##
-                                    //  ...
-                                    //  ###### Header 6
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     ^(\#{1,6})      // $1 = string of #'s
-                                     [ \t]*
-                                     (.+?)           // $2 = Header text
-                                     [ \t]*
-                                     \#*             // optional closing #'s (not counted)
-                                     \n+
-                                     /gm, function() {...});
-                                     */
-
-                                    text = text.replace(/^(\#{1,6})[ \t]*(.+?)[ \t]*\#*\n+/gm, function (wholeMatch, m1, m2) {
-                                                var h_level = m1.length;
-                                                return "<h" + h_level + ">" + _RunSpanGamut(m2) + "</h" + h_level + ">\n\n";
-                                    });
-
-                                    return text;
-                        }
-
-                        function _DoLists(text, isInsideParagraphlessListItem) {
-                                    //
-                                    // Form HTML ordered (numbered) and unordered (bulleted) lists.
-                                    //
-
-                                    // attacklab: add sentinel to hack around khtml/safari bug:
-                                    // http://bugs.webkit.org/show_bug.cgi?id=11231
-                                    text += "~0";
-
-                                    // Re-usable pattern to match any entirel ul or ol list:
-
-                                    /*
-                                     var whole_list = /
-                                     (                                   // $1 = whole list
-                                     (                               // $2
-                                     [ ]{0,3}                    // attacklab: g_tab_width - 1
-                                     ([*+-]|\d+[.])              // $3 = first list item marker
-                                     [ \t]+
-                                     )
-                                     [^\r]+?
-                                     (                               // $4
-                                     ~0                          // sentinel for workaround; should be $
-                                     |
-                                     \n{2,}
-                                     (?=\S)
-                                     (?!                         // Negative lookahead for another list item marker
-                                     [ \t]*
-                                     (?:[*+-]|\d+[.])[ \t]+
-                                     )
-                                     )
-                                     )
-                                     /g
-                                     */
-                                    var whole_list = /^(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
-                                    var list_type;
-                                    if (g_list_level) {
-                                                text = text.replace(whole_list, function (wholeMatch, m1, m2) {
-                                                            var list = m1;
-                                                            list_type = getListType(m2);
-                                                            //2015-10-22 wiz：删除起始序列号 支持
-                                                            //var first_number;
-                                                            //if (list_type === "ol")
-                                                            //    first_number = parseInt(m2, 10)
-
-                                                            var result = _ProcessListItems(list, list_type, isInsideParagraphlessListItem);
-
-                                                            // Trim any trailing whitespace, to put the closing `</$list_type>`
-                                                            // up on the preceding line, to get it past the current stupid
-                                                            // HTML block parser. This is a hack to work around the terrible
-                                                            // hack that is the HTML block parser.
-                                                            var resultStr = result.list_str.replace(/\s+$/, "");
-                                                            var opening = "<" + list_type;
-                                                            //if (first_number && first_number !== 1)
-                                                            //    opening += " start=\"" + first_number + "\"";
-                                                            resultStr = opening + ">" + resultStr + "</" + result.list_type + ">\n";
-                                                            list_type = result.list_type;
-                                                            return resultStr;
-                                                });
-                                    } else {
-                                                whole_list = /(\n\n|^\n?)(([ ]{0,3}([*+-]|\d+[.])[ \t]+)[^\r]+?(~0|\n{2,}(?=\S)(?![ \t]*(?:[*+-]|\d+[.])[ \t]+)))/gm;
-                                                text = text.replace(whole_list, function (wholeMatch, m1, m2, m3) {
-                                                            var runup = m1;
-                                                            var list = m2;
-                                                            list_type = getListType(m3);
-                                                            //2015-10-22 wiz：删除起始序列号 支持
-                                                            //var first_number;
-                                                            //if (list_type === "ol")
-                                                            //    first_number = parseInt(m3, 10)
-
-                                                            var result = _ProcessListItems(list, list_type);
-
-                                                            var opening = "<" + list_type;
-                                                            //if (first_number && first_number !== 1)
-                                                            //    opening += " start=\"" + first_number + "\"";
-
-                                                            var resultStr = runup + opening + ">\n" + result.list_str + "</" + result.list_type + ">\n";
-                                                            list_type = result.list_type;
-                                                            return resultStr;
-                                                });
-                                    }
-
-                                    // attacklab: strip sentinel
-                                    text = text.replace(/~0/, "");
-
-                                    return text;
-                        }
-
-                        var _listItemMarkers = { ol: "\\d+[.]", ul: "[*+-]" };
-
-                        function getListType(str) {
-                                    return str.search(/[*+-]/g) > -1 ? "ul" : "ol";
-                        }
-
-                        function _ProcessListItems(list_str, list_type, isInsideParagraphlessListItem) {
-                                    //
-                                    //  Process the contents of a single ordered or unordered list, splitting it
-                                    //  into individual list items.
-                                    //
-                                    //  list_type is either "ul" or "ol".
-
-                                    // The $g_list_level global keeps track of when we're inside a list.
-                                    // Each time we enter a list, we increment it; when we leave a list,
-                                    // we decrement. If it's zero, we're not in a list anymore.
-                                    //
-                                    // We do this because when we're not inside a list, we want to treat
-                                    // something like this:
-                                    //
-                                    //    I recommend upgrading to version
-                                    //    8. Oops, now this line is treated
-                                    //    as a sub-list.
-                                    //
-                                    // As a single paragraph, despite the fact that the second line starts
-                                    // with a digit-period-space sequence.
-                                    //
-                                    // Whereas when we're inside a list (or sub-list), that line will be
-                                    // treated as the start of a sub-list. What a kludge, huh? This is
-                                    // an aspect of Markdown's syntax that's hard to parse perfectly
-                                    // without resorting to mind-reading. Perhaps the solution is to
-                                    // change the syntax rules such that sub-lists must start with a
-                                    // starting cardinal number; e.g. "1." or "a.".
-
-                                    g_list_level++;
-
-                                    // trim trailing blank lines:
-                                    list_str = list_str.replace(/\n{2,}$/, "\n");
-
-                                    // attacklab: add sentinel to emulate \z
-                                    list_str += "~0";
-
-                                    // In the original attacklab showdown, list_type was not given to this function, and anything
-                                    // that matched /[*+-]|\d+[.]/ would just create the next <li>, causing this mismatch:
-                                    //
-                                    //  Markdown          rendered by WMD        rendered by MarkdownSharp
-                                    //  ------------------------------------------------------------------
-                                    //  1. first          1. first               1. first
-                                    //  2. second         2. second              2. second
-                                    //  - third           3. third                   * third
-                                    //
-                                    // We changed this to behave identical to MarkdownSharp. This is the constructed RegEx,
-                                    // with {MARKER} being one of \d+[.] or [*+-], depending on list_type:
-
-                                    /*
-                                     list_str = list_str.replace(/
-                                     (^[ \t]*)                       // leading whitespace = $1
-                                     ({MARKER}) [ \t]+               // list marker = $2
-                                     ([^\r]+?                        // list item text   = $3
-                                     (\n+)
-                                     )
-                                     (?=
-                                     (~0 | \2 ({MARKER}) [ \t]+)
-                                     )
-                                     /gm, function(){...});
-                                     */
-
-                                    //2015-10-22 wiz: 修改 list 的支持规则， 同级的 无序列表 和 有序列表 不会自动处理为 父子关系， 而是生成平级的两个列表；
-                                    //var marker = _listItemMarkers[list_type];
-                                    //var re = new RegExp("(^[ \\t]*)(" + marker + ")[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1(" + marker + ")[ \\t]+))", "gm");
-                                    var re = new RegExp("(^[ \\t]*)([*+-]|\\d+[.])[ \\t]+([^\\r]+?(\\n+))(?=(~0|\\1([*+-]|\\d+[.])[ \\t]+))", "gm");
-                                    var last_item_had_a_double_newline = false;
-                                    list_str = list_str.replace(re, function (wholeMatch, m1, m2, m3) {
-                                                var item = m3;
-                                                var leading_space = m1;
-                                                var cur_list_type = getListType(m2);
-                                                var ends_with_double_newline = /\n\n$/.test(item);
-                                                var contains_double_newline = ends_with_double_newline || item.search(/\n{2,}/) > -1;
-
-                                                var loose = contains_double_newline || last_item_had_a_double_newline;
-                                                item = _RunBlockGamut(_Outdent(item), /* doNotUnhash = */true, /* doNotCreateParagraphs = */!loose);
-
-                                                var itemHtml = '';
-                                                if (cur_list_type != list_type) {
-                                                            itemHtml = '</' + list_type + '>\n<' + cur_list_type + '>\n';
-                                                            list_type = cur_list_type;
-                                                }
-                                                itemHtml += "<li>" + item + "</li>\n";
-
-                                                last_item_had_a_double_newline = ends_with_double_newline;
-                                                return itemHtml;
-                                    });
-
-                                    // attacklab: strip sentinel
-                                    list_str = list_str.replace(/~0/g, "");
-
-                                    g_list_level--;
-                                    return { list_str: list_str, list_type: list_type };
-                        }
-
-                        function _DoCodeBlocks(text) {
-                                    //
-                                    //  Process Markdown `<pre><code>` blocks.
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (?:\n\n|^)
-                                     (                               // $1 = the code block -- one or more lines, starting with a space/tab
-                                     (?:
-                                     (?:[ ]{4}|\t)           // Lines must start with a tab or a tab-width of spaces - attacklab: g_tab_width
-                                     .*\n+
-                                     )+
-                                     )
-                                     (\n*[ ]{0,3}[^ \t\n]|(?=~0))    // attacklab: g_tab_width
-                                     /g ,function(){...});
-                                     */
-
-                                    // attacklab: sentinel workarounds for lack of \A and \Z, safari\khtml bug
-                                    text += "~0";
-
-                                    text = text.replace(/(?:\n\n|^\n?)((?:(?:[ ]{4}|\t).*\n+)+)(\n*[ ]{0,3}[^ \t\n]|(?=~0))/g, function (wholeMatch, m1, m2) {
-                                                var codeblock = m1;
-                                                var nextChar = m2;
-
-                                                codeblock = _EncodeCode(_Outdent(codeblock));
-                                                codeblock = _Detab(codeblock);
-                                                codeblock = codeblock.replace(/^\n+/g, ""); // trim leading newlines
-                                                codeblock = codeblock.replace(/\n+$/g, ""); // trim trailing whitespace
-
-                                                codeblock = "<pre><code>" + codeblock + "\n</code></pre>";
-
-                                                return "\n\n" + codeblock + "\n\n" + nextChar;
-                                    });
-
-                                    // attacklab: strip sentinel
-                                    text = text.replace(/~0/, "");
-
-                                    return text;
-                        }
-
-                        function _DoCodeSpans(text) {
-                                    //
-                                    // * Backtick quotes are used for <code></code> spans.
-                                    //
-                                    // * You can use multiple backticks as the delimiters if you want to
-                                    //   include literal backticks in the code span. So, this input:
-                                    //
-                                    //      Just type ``foo `bar` baz`` at the prompt.
-                                    //
-                                    //   Will translate to:
-                                    //
-                                    //      <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
-                                    //
-                                    //   There's no arbitrary limit to the number of backticks you
-                                    //   can use as delimters. If you need three consecutive backticks
-                                    //   in your code, use four for delimiters, etc.
-                                    //
-                                    // * You can use spaces to get literal backticks at the edges:
-                                    //
-                                    //      ... type `` `bar` `` ...
-                                    //
-                                    //   Turns to:
-                                    //
-                                    //      ... type <code>`bar`</code> ...
-                                    //
-
-                                    /*
-                                     text = text.replace(/
-                                     (^|[^\\`])      // Character before opening ` can't be a backslash or backtick
-                                     (`+)            // $2 = Opening run of `
-                                     (?!`)           // and no more backticks -- match the full run
-                                     (               // $3 = The code block
-                                     [^\r]*?
-                                     [^`]        // attacklab: work around lack of lookbehind
-                                     )
-                                     \2              // Matching closer
-                                     (?!`)
-                                     /gm, function(){...});
-                                     */
-
-                                    text = text.replace(/(^|[^\\`])(`+)(?!`)([^\r]*?[^`])\2(?!`)/gm, function (wholeMatch, m1, m2, m3, m4) {
-                                                var c = m3;
-                                                c = c.replace(/^([ \t]*)/g, ""); // leading whitespace
-                                                c = c.replace(/[ \t]*$/g, ""); // trailing whitespace
-                                                c = _EncodeCode(c);
-                                                c = c.replace(/:\/\//g, "~P"); // to prevent auto-linking. Not necessary in code *blocks*, but in code spans. Will be converted back after the auto-linker runs.
-                                                return m1 + "<code>" + c + "</code>";
-                                    });
-
-                                    return text;
-                        }
-
-                        function _EncodeCode(text) {
-                                    //
-                                    // Encode/escape certain characters inside Markdown code runs.
-                                    // The point is that in code, these characters are literals,
-                                    // and lose their special Markdown meanings.
-                                    //
-                                    // Encode all ampersands; HTML entities are not
-                                    // entities within a Markdown code span.
-                                    text = text.replace(/&/g, "&amp;");
-
-                                    // Do the angle bracket song and dance:
-                                    text = text.replace(/</g, "&lt;");
-                                    text = text.replace(/>/g, "&gt;");
-
-                                    // Now, escape characters that are magic in Markdown:
-                                    text = escapeCharacters(text, "\*_{}[]\\", false);
-
-                                    // jj the line above breaks this:
-                                    //---
-
-                                    //* Item
-
-                                    //   1. Subitem
-
-                                    //            special char: *
-                                    //---
-
-                                    return text;
-                        }
-
-                        function _DoItalicsAndBoldStrict(text) {
-
-                                    if (text.indexOf("*") === -1 && text.indexOf("_") === -1) return text;
-
-                                    text = asciify(text);
-
-                                    // <strong> must go first:
-
-                                    // (^|[\W_])           Start with a non-letter or beginning of string. Store in \1.
-                                    // (?:(?!\1)|(?=^))    Either the next character is *not* the same as the previous,
-                                    //                     or we started at the end of the string (in which case the previous
-                                    //                     group had zero width, so we're still there). Because the next
-                                    //                     character is the marker, this means that if there are e.g. multiple
-                                    //                     underscores in a row, we can only match the left-most ones (which
-                                    //                     prevents foo___bar__ from getting bolded)
-                                    // (\*|_)              The marker character itself, asterisk or underscore. Store in \2.
-                                    // \2                  The marker again, since bold needs two.
-                                    // (?=\S)              The first bolded character cannot be a space.
-                                    // ([^\r]*?\S)         The actual bolded string. At least one character, and it cannot *end*
-                                    //                     with a space either. Note that like in many other places, [^\r] is
-                                    //                     just a workaround for JS' lack of single-line regexes; it's equivalent
-                                    //                     to a . in an /s regex, because the string cannot contain any \r (they
-                                    //                     are removed in the normalizing step).
-                                    // \2\2                The marker character, twice -- end of bold.
-                                    // (?!\2)              Not followed by another marker character (ensuring that we match the
-                                    //                     rightmost two in a longer row)...
-                                    // (?=[\W_]|$)         ...but by any other non-word character or the end of string.
-                                    text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)\2(?=\S)([^\r]*?\S)\2\2(?!\2)(?=[\W_]|$)/g, "$1<strong>$3</strong>");
-
-                                    // This is almost identical to the <strong> regex, except 1) there's obviously just one marker
-                                    // character, and 2) the italicized string cannot contain the marker character.
-                                    text = text.replace(/(^|[\W_])(?:(?!\1)|(?=^))(\*|_)(?=\S)((?:(?!\2)[^\r])*?\S)\2(?!\2)(?=[\W_]|$)/g, "$1<em>$3</em>");
-
-                                    return deasciify(text);
-                        }
-
-                        function _DoItalicsAndBold_AllowIntrawordWithAsterisk(text) {
-
-                                    if (text.indexOf("*") === -1 && text.indexOf("_") === -1) return text;
-
-                                    text = asciify(text);
-
-                                    // <strong> must go first:
-                                    // (?=[^\r][*_]|[*_])               Optimization only, to find potentially relevant text portions faster. Minimally slower in Chrome, but much faster in IE.
-                                    // (                                Store in \1. This is the last character before the delimiter
-                                    //     ^                            Either we're at the start of the string (i.e. there is no last character)...
-                                    //     |                            ... or we allow one of the following:
-                                    //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
-                                    //         \W__                     If the delimiter is __, then this last character must be non-word non-underscore (extra-word emphasis only)
-                                    //         |
-                                    //         (?!\*)[\W_]\*\*          If the delimiter is **, then this last character can be non-word non-asterisk (extra-word emphasis)...
-                                    //         |
-                                    //         \w\*\*\w                 ...or it can be word/underscore, but only if the first bolded character is such a character as well (intra-word emphasis)
-                                    //     )
-                                    //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
-                                    // )
-                                    // (\*\*|__)                        Store in \2: the actual delimiter
-                                    // (?!\2)                           not followed by the delimiter again (at most one more asterisk/underscore is allowed)
-                                    // (?=\S)                           the first bolded character can't be a space
-                                    // (                                Store in \3: the bolded string
-                                    //
-                                    //     (?:|                         Look at all bolded characters except for the last one. Either that's empty, meaning only a single character was bolded...
-                                    //       [^\r]*?                    ... otherwise take arbitrary characters, minimally matching; that's all bolded characters except for the last *two*
-                                    //       (?!\2)                       the last two characters cannot be the delimiter itself (because that would mean four underscores/asterisks in a row)
-                                    //       [^\r]                        capture the next-to-last bolded character
-                                    //     )
-                                    //     (?=                          lookahead at the very last bolded char and what comes after
-                                    //         \S_                      for underscore-bolding, it can be any non-space
-                                    //         |
-                                    //         \w                       for asterisk-bolding (otherwise the previous alternative would've matched, since \w implies \S), either the last char is word/underscore...
-                                    //         |
-                                    //         \S\*\*(?:[\W_]|$)        ... or it's any other non-space, but in that case the character *after* the delimiter may not be a word character
-                                    //     )
-                                    //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
-                                    // )
-                                    // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
-                                    //     __(?:\W|$)                   for underscore-bolding, the following character (if any) must be non-word non-underscore
-                                    //     |
-                                    //     \*\*(?:[^*]|$)               for asterisk-bolding, any non-asterisk is allowed (note we already ensured above that it's not a word character if the last bolded character wasn't one)
-                                    // )
-                                    // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
-
-                                    //2015-10-26 改善对 xxx**(1)**xxx 的支持
-                                    //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|\S\*\*(?:[\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g,
-                                    //    "$1<strong>$3</strong>");
-                                    text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W__|(?!\*)[\w\W_]\*\*|\w\*\*\w)[^\r])(\*\*|__)(?!\2)(?=\S)((?:|[^\r]*?(?!\2)[^\r])(?=\S_|\w|.\*\*(?:[\w\W_]|$)).)(?=__(?:\W|$)|\*\*(?:[^*]|$))\2/g, "$1<strong>$3</strong>");
-
-                                    // now <em>:
-                                    // (?=[^\r][*_]|[*_])               Optimization, see above.
-                                    // (                                Store in \1. This is the last character before the delimiter
-                                    //     ^                            Either we're at the start of the string (i.e. there is no last character)...
-                                    //     |                            ... or we allow one of the following:
-                                    //     (?=                          (lookahead; we're not capturing this, just listing legal possibilities)
-                                    //         \W_                      If the delimiter is _, then this last character must be non-word non-underscore (extra-word emphasis only)
-                                    //         |
-                                    //         (?!\*)                   otherwise, we list two possiblities for * as the delimiter; in either case, the last characters cannot be an asterisk itself
-                                    //         (?:
-                                    //             [\W_]\*              this last character can be non-word (extra-word emphasis)...
-                                    //             |
-                                    //             \D\*(?=\w)\D         ...or it can be word (otherwise the first alternative would've matched), but only if
-                                    //                                      a) the first italicized character is such a character as well (intra-word emphasis), and
-                                    //                                      b) neither character on either side of the asterisk is a digit
-                                    //         )
-                                    //     )
-                                    //     [^\r]                        actually capture the character (can't use `.` since it could be \n)
-                                    // )
-                                    // (\*|_)                           Store in \2: the actual delimiter
-                                    // (?!\2\2\2)                       not followed by more than two more instances of the delimiter
-                                    // (?=\S)                           the first italicized character can't be a space
-                                    // (                                Store in \3: the italicized string
-                                    //     (?:(?!\2)[^\r])*?            arbitrary characters except for the delimiter itself, minimally matching
-                                    //     (?=                          lookahead at the very last italicized char and what comes after
-                                    //         [^\s_]_                  for underscore-italicizing, it can be any non-space non-underscore
-                                    //         |
-                                    //         (?=\w)\D\*\D             for asterisk-italicizing, either the last char is word/underscore *and* neither character on either side of the asterisk is a digit...
-                                    //         |
-                                    //         [^\s*]\*(?:[\W_]|$)      ... or that last char is any other non-space non-asterisk, but then the character after the delimiter (if any) must be non-word
-                                    //     )
-                                    //     .                            actually capture the last character (can use `.` this time because the lookahead ensures \S in all cases)
-                                    // )
-                                    // (?=                              lookahead; list the legal possibilities for the closing delimiter and its following character
-                                    //     _(?:\W|$)                    for underscore-italicizing, the following character (if any) must be non-word non-underscore
-                                    //     |
-                                    //     \*(?:[^*]|$)                 for asterisk-italicizing, any non-asterisk is allowed; all other restrictions have already been ensured in the previous lookahead
-                                    // )
-                                    // \2                               actually capture the closing delimiter (and make sure that it matches the opening one)
-
-                                    //2015-10-26 改善对 xxx*(1)*xxx 的支持
-                                    //text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=\w)\D\*\D|[^\s*]\*(?:[\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g,
-                                    //    "$1<em>$3</em>");
-                                    text = text.replace(/(?=[^\r][*_]|[*_])(^|(?=\W_|(?!\*)(?:[\w\W_]\*|\D\*(?=\w)\D))[^\r])(\*|_)(?!\2\2\2)(?=\S)((?:(?!\2)[^\r])*?(?=[^\s_]_|(?=[\w\W])\D\*\D|[^\s*]\*(?:[\w\W_]|$)).)(?=_(?:\W|$)|\*(?:[^*]|$))\2/g, "$1<em>$3</em>");
-
-                                    return deasciify(text);
-                        }
-
-                        function _DoBlockQuotes(text) {
-
-                                    /*
-                                     text = text.replace(/
-                                     (                           // Wrap whole match in $1
-                                     (
-                                     ^[ \t]*>[ \t]?      // '>' at the start of a line
-                                     .+\n                // rest of the first line
-                                     (.+\n)*             // subsequent consecutive lines
-                                     \n*                 // blanks
-                                     )+
-                                     )
-                                     /gm, function(){...});
-                                     */
-
-                                    text = text.replace(/((^[ \t]*>[ \t]?.+\n(.+\n)*\n*)+)/gm, function (wholeMatch, m1) {
-                                                var bq = m1;
-
-                                                // attacklab: hack around Konqueror 3.5.4 bug:
-                                                // "----------bug".replace(/^-/g,"") == "bug"
-
-                                                bq = bq.replace(/^[ \t]*>[ \t]?/gm, "~0"); // trim one level of quoting
-
-                                                // attacklab: clean up hack
-                                                bq = bq.replace(/~0/g, "");
-
-                                                bq = bq.replace(/^[ \t]+$/gm, ""); // trim whitespace-only lines
-                                                bq = _RunBlockGamut(bq); // recurse
-
-                                                bq = bq.replace(/(^|\n)/g, "$1  ");
-                                                // These leading spaces screw with <pre> content, so we need to fix that:
-                                                bq = bq.replace(/(\s*<pre>[^\r]+?<\/pre>)/gm, function (wholeMatch, m1) {
-                                                            var pre = m1;
-                                                            // attacklab: hack around Konqueror 3.5.4 bug:
-                                                            pre = pre.replace(/^  /mg, "~0");
-                                                            pre = pre.replace(/~0/g, "");
-                                                            return pre;
-                                                });
-
-                                                return hashBlock("<blockquote>\n" + bq + "\n</blockquote>");
-                                    });
-                                    return text;
-                        }
-
-                        function _FormParagraphs(text, doNotUnhash, doNotCreateParagraphs) {
-                                    //
-                                    //  Params:
-                                    //    $text - string to process with html <p> tags
-                                    //
-
-                                    // Strip leading and trailing lines:
-                                    text = text.replace(/^\n+/g, "");
-                                    text = text.replace(/\n+$/g, "");
-
-                                    var grafs = text.split(/\n{2,}/g);
-                                    var grafsOut = [];
-
-                                    var markerRe = /~K(\d+)K/;
-
-                                    //
-                                    // Wrap <p> tags.
-                                    //
-                                    var end = grafs.length;
-                                    for (var i = 0; i < end; i++) {
-                                                var str = grafs[i];
-
-                                                // if this is an HTML marker, copy it
-                                                if (markerRe.test(str)) {
-                                                            grafsOut.push(str);
-                                                } else if (/\S/.test(str)) {
-                                                            str = _RunSpanGamut(str);
-                                                            str = str.replace(/^([ \t]*)/g, doNotCreateParagraphs ? "" : "<p>");
-                                                            if (!doNotCreateParagraphs) str += "</p>";
-                                                            grafsOut.push(str);
-                                                }
-                                    }
-                                    //
-                                    // Unhashify HTML blocks
-                                    //
-                                    if (!doNotUnhash) {
-                                                end = grafsOut.length;
-                                                for (var i = 0; i < end; i++) {
-                                                            var foundAny = true;
-                                                            while (foundAny) {
-                                                                        // we may need several runs, since the data may be nested
-                                                                        foundAny = false;
-                                                                        grafsOut[i] = grafsOut[i].replace(/~K(\d+)K/g, function (wholeMatch, id) {
-                                                                                    foundAny = true;
-                                                                                    return g_html_blocks[id];
-                                                                        });
-                                                            }
-                                                }
-                                    }
-                                    return grafsOut.join("\n\n");
-                        }
-
-                        function _EncodeAmpsAndAngles(text) {
-                                    // Smart processing for ampersands and angle brackets that need to be encoded.
-
-                                    // Ampersand-encoding based entirely on Nat Irons's Amputator MT plugin:
-                                    //   http://bumppo.net/projects/amputator/
-                                    text = text.replace(/&(?!#?[xX]?(?:[0-9a-fA-F]+|\w+);)/g, "&amp;");
-
-                                    // Encode naked <'s
-                                    text = text.replace(/<(?![a-z\/?!]|~D)/gi, "&lt;");
-
-                                    return text;
-                        }
-
-                        function _EncodeBackslashEscapes(text) {
-                                    //
-                                    //   Parameter:  String.
-                                    //   Returns:    The string, with after processing the following backslash
-                                    //               escape sequences.
-                                    //
-
-                                    // attacklab: The polite way to do this is with the new
-                                    // escapeCharacters() function:
-                                    //
-                                    //     text = escapeCharacters(text,"\\",true);
-                                    //     text = escapeCharacters(text,"`*_{}[]()>#+-.!",true);
-                                    //
-                                    // ...but we're sidestepping its use of the (slow) RegExp constructor
-                                    // as an optimization for Firefox.  This function gets called a LOT.
-
-                                    text = text.replace(/\\(\\)/g, escapeCharacters_callback);
-                                    text = text.replace(/\\([`*_{}\[\]()>#+-.!])/g, escapeCharacters_callback);
-                                    return text;
-                        }
-
-                        var charInsideUrl = "[-A-Z0-9+&@#/%?=~_|[\\]()!:,.;]",
-                            charEndingUrl = "[-A-Z0-9+&@#/%=~_|[\\])]",
-                            autoLinkRegex = new RegExp("(=\"|<)?\\b(https?|ftp)(://" + charInsideUrl + "*" + charEndingUrl + ")(?=$|\\W)", "gi"),
-                            endCharRegex = new RegExp(charEndingUrl, "i");
-
-                        function handleTrailingParens(wholeMatch, lookbehind, protocol, link, index, str) {
-
-                                    if (/^<[^<>]*(https?|ftp)/.test(str)) {
-                                                //避免 html 标签内 属性值的 超链接被替换为 a 标签（例如 img 的src 属性）
-                                                return wholeMatch;
-                                    }
-                                    if (lookbehind) return wholeMatch;
-                                    if (link.charAt(link.length - 1) !== ")") return "<" + protocol + link + ">";
-                                    var parens = link.match(/[()]/g);
-                                    var level = 0;
-                                    for (var i = 0; i < parens.length; i++) {
-                                                if (parens[i] === "(") {
-                                                            if (level <= 0) level = 1;else level++;
-                                                } else {
-                                                            level--;
-                                                }
-                                    }
-                                    var tail = "";
-                                    if (level < 0) {
-                                                var re = new RegExp("\\){1," + -level + "}$");
-                                                link = link.replace(re, function (trailingParens) {
-                                                            tail = trailingParens;
-                                                            return "";
-                                                });
-                                    }
-                                    if (tail) {
-                                                var lastChar = link.charAt(link.length - 1);
-                                                if (!endCharRegex.test(lastChar)) {
-                                                            tail = lastChar + tail;
-                                                            link = link.substr(0, link.length - 1);
-                                                }
-                                    }
-                                    return "<" + protocol + link + ">" + tail;
-                        }
-
-                        function _DoAutoLinks(text) {
-
-                                    // note that at this point, all other URL in the text are already hyperlinked as <a href=""></a>
-                                    // *except* for the <http://www.foo.com> case
-
-                                    // automatically add < and > around unadorned raw hyperlinks
-                                    // must be preceded by a non-word character (and not by =" or <) and followed by non-word/EOF character
-                                    // simulating the lookbehind in a consuming way is okay here, since a URL can neither and with a " nor
-                                    // with a <, so there is no risk of overlapping matches.
-                                    text = text.replace(autoLinkRegex, handleTrailingParens);
-
-                                    //  autolink anything like <http://example.com>
-
-                                    var replacer = function replacer(wholematch, m1) {
-                                                var url = attributeSafeUrl(m1);
-
-                                                return "<a href=\"" + url + "\">" + pluginHooks.plainLinkText(m1) + "</a>";
-                                    };
-                                    text = text.replace(/<((https?|ftp):[^'">\s]+)>/gi, replacer);
-
-                                    // Email addresses: <address@domain.foo>
-                                    /*
-                                     text = text.replace(/
-                                     <
-                                     (?:mailto:)?
-                                     (
-                                     [-.\w]+
-                                     \@
-                                     [-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+
-                                     )
-                                     >
-                                     /gi, _DoAutoLinks_callback());
-                                     */
-
-                                    /* disabling email autolinking, since we don't do that on the server, either
-                                     text = text.replace(/<(?:mailto:)?([-.\w]+\@[-a-z0-9]+(\.[-a-z0-9]+)*\.[a-z]+)>/gi,
-                                     function(wholeMatch,m1) {
-                                     return _EncodeEmailAddress( _UnescapeSpecialChars(m1) );
-                                     }
-                                     );
-                                     */
-                                    return text;
-                        }
-
-                        function _UnescapeSpecialChars(text) {
-                                    //
-                                    // Swap back in all the special characters we've hidden.
-                                    //
-                                    text = text.replace(/~E(\d+)E/g, function (wholeMatch, m1) {
-                                                var charCodeToReplace = parseInt(m1);
-                                                return String.fromCharCode(charCodeToReplace);
-                                    });
-                                    return text;
-                        }
-
-                        function _Outdent(text) {
-                                    //
-                                    // Remove one level of line-leading tabs or spaces
-                                    //
-
-                                    // attacklab: hack around Konqueror 3.5.4 bug:
-                                    // "----------bug".replace(/^-/g,"") == "bug"
-
-                                    text = text.replace(/^(\t|[ ]{1,4})/gm, "~0"); // attacklab: g_tab_width
-
-                                    // attacklab: clean up hack
-                                    text = text.replace(/~0/g, "");
-
-                                    return text;
-                        }
-
-                        function _Detab(text) {
-                                    if (!/\t/.test(text)) return text;
-
-                                    var spaces = ["    ", "   ", "  ", " "],
-                                        skew = 0,
-                                        v;
-
-                                    return text.replace(/[\n\t]/g, function (match, offset) {
-                                                if (match === "\n") {
-                                                            skew = offset + 1;
-                                                            return match;
-                                                }
-                                                v = (offset - skew) % 4;
-                                                skew = offset + 1;
-                                                return spaces[v];
-                                    });
-                        }
-
-                        //
-                        //  attacklab: Utility functions
-                        //
-
-                        function attributeSafeUrl(url) {
-                                    url = attributeEncode(url);
-                                    url = escapeCharacters(url, "*_:()[]");
-                                    return url;
-                        }
-
-                        function escapeCharacters(text, charsToEscape, afterBackslash) {
-                                    // First we have to escape the escape characters so that
-                                    // we can build a character class out of them
-                                    var regexString = "([" + charsToEscape.replace(/([\[\]\\])/g, "\\$1") + "])";
-
-                                    if (afterBackslash) {
-                                                regexString = "\\\\" + regexString;
-                                    }
-
-                                    var regex = new RegExp(regexString, "g");
-                                    text = text.replace(regex, escapeCharacters_callback);
-
-                                    return text;
-                        }
-
-                        function escapeCharacters_callback(wholeMatch, m1) {
-                                    var charCodeToEscape = m1.charCodeAt(0);
-                                    return "~E" + charCodeToEscape + "E";
-                        }
-            }; // end of the Markdown.Converter constructor
 })();
 
 module.exports = Markdown;
-
 },{}],32:[function(require,module,exports){
-'use strict';
-
 var Markdown = {};
 
 (function () {
@@ -14039,7 +14326,13 @@ var Markdown = {};
   // This isn't supposed to be foolproof. It's just a quick way to make sure we
   // keep all span-level tags returned by a pagedown converter. It should allow
   // all span-level tags through, with or without attributes.
-  var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|', 'bdo|big|button|cite|code|del|dfn|em|figcaption|', 'font|i|iframe|img|input|ins|kbd|label|map|', 'mark|meter|object|param|progress|q|ruby|rp|rt|s|', 'samp|script|select|small|span|strike|strong|', 'sub|sup|textarea|time|tt|u|var|wbr)[^>]*>|', '<(br)\\s?\\/?>)$'].join(''), 'i');
+  var inlineTags = new RegExp(['^(<\\/?(a|abbr|acronym|applet|area|b|basefont|',
+    'bdo|big|button|cite|code|del|dfn|em|figcaption|',
+    'font|i|iframe|img|input|ins|kbd|label|map|',
+    'mark|meter|object|param|progress|q|ruby|rp|rt|s|',
+    'samp|script|select|small|span|strike|strong|',
+    'sub|sup|textarea|time|tt|u|var|wbr)[^>]*>|',
+    '<(br)\\s?\\/?>)$'].join(''), 'i');
 
   /******************************************************************
    * Utility Functions                                              *
@@ -14084,11 +14377,14 @@ var Markdown = {};
   // Merge two arrays, keeping only unique elements.
   function union(x, y) {
     var obj = {};
-    for (var i = 0; i < x.length; i++) obj[x[i]] = x[i];
-    for (i = 0; i < y.length; i++) obj[y[i]] = y[i];
+    for (var i = 0; i < x.length; i++)
+      obj[x[i]] = x[i];
+    for (i = 0; i < y.length; i++)
+      obj[y[i]] = y[i];
     var res = [];
     for (var k in obj) {
-      if (obj.hasOwnProperty(k)) res.push(obj[k]);
+      if (obj.hasOwnProperty(k))
+        res.push(obj[k]);
     }
     return res;
   }
@@ -14098,15 +14394,19 @@ var Markdown = {};
   // end of text (ETX), an idea borrowed from:
   // https://github.com/tanakahisateru/js-markdown-extra
   function addAnchors(text) {
-    if (text.charAt(0) != '\x02') text = '\x02' + text;
-    if (text.charAt(text.length - 1) != '\x03') text = text + '\x03';
+    if (text.charAt(0) != '\x02')
+      text = '\x02' + text;
+    if (text.charAt(text.length - 1) != '\x03')
+      text = text + '\x03';
     return text;
   }
 
   // Remove STX and ETX sentinels.
   function removeAnchors(text) {
-    if (text.charAt(0) == '\x02') text = text.substr(1);
-    if (text.charAt(text.length - 1) == '\x03') text = text.substr(0, text.length - 1);
+    if (text.charAt(0) == '\x02')
+      text = text.substr(1);
+    if (text.charAt(text.length - 1) == '\x03')
+      text = text.substr(0, text.length - 1);
     return text;
   }
 
@@ -14146,11 +14446,12 @@ var Markdown = {};
   }
 
   function slugify(text) {
-    return text.toLowerCase().replace(/\s+/g, '-') // Replace spaces with -
-    .replace(/[^\w\-]+/g, '') // Remove all non-word chars
-    .replace(/\-\-+/g, '-') // Replace multiple - with single -
-    .replace(/^-+/, '') // Trim - from start of text
-    .replace(/-+$/, ''); // Trim - from end of text
+    return text.toLowerCase()
+        .replace(/\s+/g, '-') // Replace spaces with -
+        .replace(/[^\w\-]+/g, '') // Remove all non-word chars
+        .replace(/\-\-+/g, '-') // Replace multiple - with single -
+        .replace(/^-+/, '') // Trim - from start of text
+        .replace(/-+$/, ''); // Trim - from end of text
   }
 
   /*****************************************************************************
@@ -14278,7 +14579,8 @@ var Markdown = {};
 
   // Do transformations
   Markdown.Extra.prototype.doTransform = function (transformations, text) {
-    for (var i = 0; i < transformations.length; i++) text = this[transformations[i]](text);
+    for (var i = 0; i < transformations.length; i++)
+      text = this[transformations[i]](text);
     return text;
   };
 
@@ -14324,6 +14626,7 @@ var Markdown = {};
     return text;
   };
 
+
   /******************************************************************
    * Attribute Blocks                                               *
    *****************************************************************/
@@ -14332,8 +14635,10 @@ var Markdown = {};
   // TODO: better matches for id / class attributes
   var attrBlock = "\\{[ \\t]*((?:[#.][-_:a-zA-Z0-9]+[ \\t]*)+)\\}";
   var hdrAttributesA = new RegExp("^(#{1,6}.*#{0,6})[ \\t]+" + attrBlock + "[ \\t]*(?:\\n|0x03)", "gm");
-  var hdrAttributesB = new RegExp("^(.*)[ \\t]+" + attrBlock + "[ \\t]*\\n" + "(?=[\\-|=]+\\s*(?:\\n|0x03))", "gm"); // underline lookahead
-  var fcbAttributes = new RegExp("^(```[ \\t]*[^{\\s]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" + "(?=([\\s\\S]*?)\\n```[ \\t]*(\\n|0x03))", "gm");
+  var hdrAttributesB = new RegExp("^(.*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
+      "(?=[\\-|=]+\\s*(?:\\n|0x03))", "gm"); // underline lookahead
+  var fcbAttributes = new RegExp("^(```[ \\t]*[^{\\s]*)[ \\t]+" + attrBlock + "[ \\t]*\\n" +
+      "(?=([\\s\\S]*?)\\n```[ \\t]*(\\n|0x03))", "gm");
 
   // Extract headers attribute blocks, move them above the element they will be
   // applied to, and hash them for later.
@@ -14345,8 +14650,8 @@ var Markdown = {};
       return '<p>~XX' + (self.hashBlocks.push(attr) - 1) + 'XX</p>\n' + pre + "\n";
     }
 
-    text = text.replace(hdrAttributesA, attributeCallback); // ## headers
-    text = text.replace(hdrAttributesB, attributeCallback); // underline headers
+    text = text.replace(hdrAttributesA, attributeCallback);  // ## headers
+    text = text.replace(hdrAttributesB, attributeCallback);  // underline headers
     return text;
   };
 
@@ -14367,7 +14672,8 @@ var Markdown = {};
 
   Markdown.Extra.prototype.applyAttributeBlocks = function (text) {
     var self = this;
-    var blockRe = new RegExp('<p>~XX(\\d+)XX</p>[\\s]*' + '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>[\\s\\S]*?</\\2>))', "gm");
+    var blockRe = new RegExp('<p>~XX(\\d+)XX</p>[\\s]*' +
+        '(?:<(h[1-6]|pre)(?: +class="(\\S+)")?(>[\\s\\S]*?</\\2>))', "gm");
     text = text.replace(blockRe, function (wholeMatch, k, tag, cls, rest) {
       if (!tag) // no following header or fenced code block.
         return '';
@@ -14383,12 +14689,14 @@ var Markdown = {};
       // get classes and merge with existing classes
       var classes = attributes.match(/\.[^\s#.]+/g) || [];
       for (var i = 0; i < classes.length; i++) // Remove leading dot
-      classes[i] = classes[i].substr(1, classes[i].length - 1);
+        classes[i] = classes[i].substr(1, classes[i].length - 1);
 
       var classStr = '';
-      if (cls) classes = union(classes, [cls]);
+      if (cls)
+        classes = union(classes, [cls]);
 
-      if (classes.length > 0) classStr = ' class="' + classes.join(' ') + '"';
+      if (classes.length > 0)
+        classStr = ' class="' + classes.join(' ') + '"';
 
       return "<" + tag + idStr + classStr + rest;
     });
@@ -14404,28 +14712,38 @@ var Markdown = {};
   Markdown.Extra.prototype.tables = function (text) {
     var self = this;
 
-    var leadingPipe = new RegExp(['^', '[ ]{0,3}', // Allowed whitespace
-    '[|]', // Initial pipe
-    '(.+)\\n', // $1: Header Row
+    var leadingPipe = new RegExp(
+        ['^',
+          '[ ]{0,3}', // Allowed whitespace
+          '[|]', // Initial pipe
+          '(.+)\\n', // $1: Header Row
 
-    '[ ]{0,3}', // Allowed whitespace
-    '[|]([ ]*[-:]+[-| :]*)\\n', // $2: Separator
+          '[ ]{0,3}', // Allowed whitespace
+          '[|]([ ]*[-:]+[-| :]*)\\n', // $2: Separator
 
-    '(', // $3: Table Body
-    '(?:[ ]*[|].*\\n?)*', // Table rows
-    ')', '(?:\\n|$)' // Stop at final newline
-    ].join(''), 'gm');
+          '(', // $3: Table Body
+          '(?:[ ]*[|].*\\n?)*', // Table rows
+          ')',
+          '(?:\\n|$)'                   // Stop at final newline
+        ].join(''),
+        'gm'
+    );
 
-    var noLeadingPipe = new RegExp(['^', '[ ]{0,3}', // Allowed whitespace
-    '(\\S.*[|].*)\\n', // $1: Header Row
+    var noLeadingPipe = new RegExp(
+        ['^',
+          '[ ]{0,3}', // Allowed whitespace
+          '(\\S.*[|].*)\\n', // $1: Header Row
 
-    '[ ]{0,3}', // Allowed whitespace
-    '([-:]+[ ]*[|][-| :]*)\\n', // $2: Separator
+          '[ ]{0,3}', // Allowed whitespace
+          '([-:]+[ ]*[|][-| :]*)\\n', // $2: Separator
 
-    '(', // $3: Table Body
-    '(?:.*[|].*\\n?)*', // Table rows
-    ')', '(?:\\n|$)' // Stop at final newline
-    ].join(''), 'gm');
+          '(', // $3: Table Body
+          '(?:.*[|].*\\n?)*', // Table rows
+          ')',
+          '(?:\\n|$)'                   // Stop at final newline
+        ].join(''),
+        'gm'
+    );
 
     text = text.replace(leadingPipe, doTable);
     text = text.replace(noLeadingPipe, doTable);
@@ -14447,7 +14765,13 @@ var Markdown = {};
       var align = [];
       for (var i = 0; i < alignspecs.length; i++) {
         var spec = alignspecs[i];
-        if (spec.match(/^ *-+: *$/m)) align[i] = ' align="right"';else if (spec.match(/^ *:-+: *$/m)) align[i] = ' align="center"';else if (spec.match(/^ *:-+ *$/m)) align[i] = ' align="left"';else align[i] = '';
+        if (spec.match(/^ *-+: *$/m))
+          align[i] = ' align="right"';
+        else if (spec.match(/^ *:-+: *$/m))
+          align[i] = ' align="center"';
+        else if (spec.match(/^ *:-+ *$/m))
+          align[i] = ' align="left"';
+        else align[i] = '';
       }
 
       // TODO: parse spans in header and rows before splitting, so that pipes
@@ -14475,7 +14799,8 @@ var Markdown = {};
         // ensure number of rowCells matches colCount
         var rowCells = rows[i].split(/ *[|] */);
         var lenDiff = colCount - rowCells.length;
-        for (var j = 0; j < lenDiff; j++) rowCells.push('');
+        for (var j = 0; j < lenDiff; j++)
+          rowCells.push('');
 
         html += "<tr>\n";
         for (j = 0; j < colCount; j++) {
@@ -14494,6 +14819,7 @@ var Markdown = {};
     return text;
   };
 
+
   /******************************************************************
    * Footnotes                                                      *
    *****************************************************************/
@@ -14502,16 +14828,19 @@ var Markdown = {};
   Markdown.Extra.prototype.stripFootnoteDefinitions = function (text) {
     var self = this;
 
-    text = text.replace(/\n[ ]{0,3}\[\^(.+?)\]\:[ \t]*\n?([\s\S]*?)\n{1,2}((?=\n[ ]{0,3}\S)|$)/g, function (wholeMatch, m1, m2) {
-      m1 = slugify(m1);
-      m2 += "\n";
-      m2 = m2.replace(/^[ ]{0,3}/g, "");
-      self.footnotes[m1] = m2;
-      return "\n";
-    });
+    text = text.replace(
+        /\n[ ]{0,3}\[\^(.+?)\]\:[ \t]*\n?([\s\S]*?)\n{1,2}((?=\n[ ]{0,3}\S)|$)/g,
+        function (wholeMatch, m1, m2) {
+          m1 = slugify(m1);
+          m2 += "\n";
+          m2 = m2.replace(/^[ ]{0,3}/g, "");
+          self.footnotes[m1] = m2;
+          return "\n";
+        });
 
     return text;
   };
+
 
   // Find and convert footnotes references.
   Markdown.Extra.prototype.doFootnotes = function (text) {
@@ -14529,7 +14858,9 @@ var Markdown = {};
       }
       footnoteCounter++;
       self.usedFootnotes.push(id);
-      var html = '<a href="#fn_' + id + '" id="fnref_' + id + '" title="See footnote" class="footnote">' + footnoteCounter + '</a>';
+      var html = '<a href="#fn_' + id + '" id="fnref_' + id
+          + '" title="See footnote" class="footnote">' + footnoteCounter
+          + '</a>';
       return self.hashExtraInline(html);
     });
 
@@ -14551,11 +14882,18 @@ var Markdown = {};
       self.isConvertingFootnote = true;
       var formattedfootnote = convertSpans(footnote, self);
       delete self.isConvertingFootnote;
-      text += '<li id="fn_' + id + '">' + formattedfootnote + ' <a href="#fnref_' + id + '" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n';
+      text += '<li id="fn_'
+          + id
+          + '">'
+          + formattedfootnote
+          + ' <a href="#fnref_'
+          + id
+          + '" title="Return to article" class="reversefootnote">&#8617;</a></li>\n\n';
     }
     text += '</ol>\n</div>';
     return text;
   };
+
 
   /******************************************************************
    * Fenced Code Blocks  (gfm)                                       *
@@ -14575,8 +14913,7 @@ var Markdown = {};
 
     var self = this;
     text = text.replace(/(?:^|\n)```[ \t]*(\S*)[ \t]*\n([\s\S]*?)\n```[ \t]*(?=\n)/g, function (match, m1, m2) {
-      var language = m1,
-          codeblock = m2;
+      var language = m1, codeblock = m2;
 
       // adhere to specified options
       var preclass = self.googleCodePrettify ? ' class="prettyprint linenums"' : '';
@@ -14590,7 +14927,8 @@ var Markdown = {};
         }
       }
 
-      var html = ['<pre', preclass, '><code', codeclass, '>', encodeCode(codeblock), '</code></pre>'].join('');
+      var html = ['<pre', preclass, '><code', codeclass, '>',
+        encodeCode(codeblock), '</code></pre>'].join('');
 
       // replace codeblock with placeholder until postConversion step
       return self.hashExtraBlock(html);
@@ -14598,6 +14936,7 @@ var Markdown = {};
 
     return text;
   };
+
 
   /******************************************************************
    * SmartyPants                                                     *
@@ -14621,7 +14960,8 @@ var Markdown = {};
       // Skip special tags
       if (!/code|kbd|pre|script|noscript|iframe|math|ins|del|pre/i.test(m2)) {
         m4 = self.educatePants(m4);
-      } else {
+      }
+      else {
         self.smartyPantsLastChar = m4.substring(m4.length - 1);
       }
       result += m1 + m2 + m3 + m4 + m5;
@@ -14717,18 +15057,39 @@ var Markdown = {};
 
   // Find and convert markdown extra definition lists into html.
   Markdown.Extra.prototype.definitionLists = function (text) {
-    var wholeList = new RegExp(['(\\x02\\n?|\\n\\n)', '(?:', '(', // $1 = whole list
-    '(', // $2
-    '[ ]{0,3}', '((?:[ \\t]*\\S.*\\n)+)', // $3 = defined term
-    '\\n?', '[ ]{0,3}:[ ]+', // colon starting definition
-    ')', '([\\s\\S]+?)', '(', // $4
-    '(?=\\0x03)', // \z
-    '|', '(?=', '\\n{2,}', '(?=\\S)', '(?!', // Negative lookahead for another term
-    '[ ]{0,3}', '(?:\\S.*\\n)+?', // defined term
-    '\\n?', '[ ]{0,3}:[ ]+', // colon starting definition
-    ')', '(?!', // Negative lookahead for another definition
-    '[ ]{0,3}:[ ]+', // colon starting definition
-    ')', ')', ')', ')', ')'].join(''), 'gm');
+    var wholeList = new RegExp(
+        ['(\\x02\\n?|\\n\\n)',
+          '(?:',
+          '(', // $1 = whole list
+          '(', // $2
+          '[ ]{0,3}',
+          '((?:[ \\t]*\\S.*\\n)+)', // $3 = defined term
+          '\\n?',
+          '[ ]{0,3}:[ ]+', // colon starting definition
+          ')',
+          '([\\s\\S]+?)',
+          '(', // $4
+          '(?=\\0x03)', // \z
+          '|',
+          '(?=',
+          '\\n{2,}',
+          '(?=\\S)',
+          '(?!', // Negative lookahead for another term
+          '[ ]{0,3}',
+          '(?:\\S.*\\n)+?', // defined term
+          '\\n?',
+          '[ ]{0,3}:[ ]+', // colon starting definition
+          ')',
+          '(?!', // Negative lookahead for another definition
+          '[ ]{0,3}:[ ]+', // colon starting definition
+          ')',
+          ')',
+          ')',
+          ')',
+          ')'
+        ].join(''),
+        'gm'
+    );
 
     var self = this;
     text = addAnchors(text);
@@ -14747,25 +15108,35 @@ var Markdown = {};
   Markdown.Extra.prototype.processDefListItems = function (listStr) {
     var self = this;
 
-    var dt = new RegExp(['(\\x02\\n?|\\n\\n+)', // leading line
-    '(', // definition terms = $1
-    '[ ]{0,3}', // leading whitespace
-    '(?![:][ ]|[ ])', // negative lookahead for a definition
-    //   mark (colon) or more whitespace
-    '(?:\\S.*\\n)+?', // actual term (not whitespace)
-    ')', '(?=\\n?[ ]{0,3}:[ ])' // lookahead for following line feed
-    ].join(''), //   with a definition mark
-    'gm');
+    var dt = new RegExp(
+        ['(\\x02\\n?|\\n\\n+)', // leading line
+          '(', // definition terms = $1
+          '[ ]{0,3}', // leading whitespace
+          '(?![:][ ]|[ ])', // negative lookahead for a definition
+                            //   mark (colon) or more whitespace
+          '(?:\\S.*\\n)+?', // actual term (not whitespace)
+          ')',
+          '(?=\\n?[ ]{0,3}:[ ])'     // lookahead for following line feed
+        ].join(''),                 //   with a definition mark
+        'gm'
+    );
 
-    var dd = new RegExp(['\\n(\\n+)?', // leading line = $1
-    '(', // marker space = $2
-    '[ ]{0,3}', // whitespace before colon
-    '[:][ ]+', // definition mark (colon)
-    ')', '([\\s\\S]+?)', // definition text = $3
-    '(?=\\n*', // stop at next definition mark,
-    '(?:', // next term or end of text
-    '\\n[ ]{0,3}[:][ ]|', '<dt>|\\x03', // \z
-    ')', ')'].join(''), 'gm');
+    var dd = new RegExp(
+        ['\\n(\\n+)?', // leading line = $1
+          '(', // marker space = $2
+          '[ ]{0,3}', // whitespace before colon
+          '[:][ ]+', // definition mark (colon)
+          ')',
+          '([\\s\\S]+?)', // definition text = $3
+          '(?=\\n*', // stop at next definition mark,
+          '(?:', // next term or end of text
+          '\\n[ ]{0,3}[:][ ]|',
+          '<dt>|\\x03', // \z
+          ')',
+          ')'
+        ].join(''),
+        'gm'
+    );
 
     listStr = addAnchors(listStr);
     // trim trailing blank lines:
@@ -14805,14 +15176,17 @@ var Markdown = {};
     return removeAnchors(listStr);
   };
 
+
   /***********************************************************
    * Strikethrough                                            *
    ************************************************************/
 
   Markdown.Extra.prototype.strikethrough = function (text) {
     // Pretty much duplicated from _DoItalicsAndBold
-    return text.replace(/([\W_]|^)~T~T(?=\S)([^\r]*?\S[\*_]*)~T~T([\W_]|$)/g, "$1<del>$2</del>$3");
+    return text.replace(/([\W_]|^)~T~T(?=\S)([^\r]*?\S[\*_]*)~T~T([\W_]|$)/g,
+        "$1<del>$2</del>$3");
   };
+
 
   /***********************************************************
    * New lines                                                *
@@ -14824,6 +15198,7 @@ var Markdown = {};
       return previousTag ? wholeMatch : " <br>\n";
     });
   };
+
 })();
 
 module.exports = Markdown.Extra;
@@ -14832,8 +15207,6 @@ module.exports = Markdown.Extra;
 /**
  * markdown & mathjax 渲染处理
  */
-
-'use strict';
 
 var ENV = require('./../common/env'),
     utils = require('./../common/utils'),
@@ -14847,24 +15220,26 @@ var isMathjax = false;
 var WizToc = '#wizToc';
 
 var defalutCB = {
-    markdown: function markdown() {
+    markdown: function () {
         Render.Win.prettyPrint();
         Render.tocRender();
         Render.flowRender();
         Render.sequenceRender();
     },
-    mathJax: function mathJax() {}
+    mathJax: function () {
+
+    }
 };
 
 var MarkdownRender = {
-    init: function init() {
+    init: function () {
         Render.Win = ENV.win;
         Render.Document = ENV.doc;
         Render.Dependency = ENV.dependency;
 
         return MarkdownRender;
     },
-    markdown: function markdown(callback) {
+    markdown: function (callback) {
         if (callback) {
             Render.callback.markdown = Render.addCb(defalutCB.markdown, callback.markdown);
             Render.callback.mathJax = Render.addCb(defalutCB.mathJax, callback.mathJax);
@@ -14879,7 +15254,7 @@ var MarkdownRender = {
             }
         });
     },
-    mathJax: function mathJax(callback) {
+    mathJax: function (callback) {
         if (callback) {
             Render.callback.mathJax = Render.addCb(defalutCB.mathJax, callback);
         }
@@ -14896,7 +15271,7 @@ var Render = {
         markdown: null,
         mathJax: null
     },
-    getDependencyFiles: function getDependencyFiles(type, id) {
+    getDependencyFiles: function (type, id) {
         var i, j, g, ii, jj, gg, group;
         var markdownFiles = [];
         for (i = 0, j = Render.Dependency[type][id].length; i < j; i++) {
@@ -14914,7 +15289,7 @@ var Render = {
         }
         return markdownFiles;
     },
-    addCb: function addCb(defaultCb, newCb) {
+    addCb: function (defaultCb, newCb) {
         if (newCb) {
             return function () {
                 defaultCb.apply(this, arguments);
@@ -14924,12 +15299,12 @@ var Render = {
             return defaultCb;
         }
     },
-    cb: function cb(callback, params) {
+    cb: function (callback, params) {
         if (callback) {
             callback.apply(this, params ? params : []);
         }
     },
-    getBodyTxt: function getBodyTxt(body) {
+    getBodyTxt: function (body) {
         var text = body.innerText;
         if (!text) {
             // FF自己解析innerText
@@ -14941,19 +15316,19 @@ var Render = {
         // 替换unicode160的空格为unicode为32的空格，否则pagedown无法识别
         return text.replace(/\u00a0/g, " ");
     },
-    markdownConvert: function markdownConvert(frame) {
+    markdownConvert: function (frame) {
         var start, end, last, blocks, math, braces;
         var SPLIT = /(\$\$?|\\(?:begin|end)\{[a-z]*\*?\}|\\[\\{}$]|[{}]|(?:\n\s*)+|@@\d+@@)/i;
 
         var $doc = $(Render.Document);
-        var $body = frame.container ? frame.container : $doc.find('body');
+        var $body = (frame.container) ? frame.container : $doc.find('body');
 
         $body.addClass('markdown-body');
         var converter = new markdownBase.Converter({
             nonAsciiLetters: true,
             asteriskIntraWordEmphasis: true
         });
-        markdownExtra.init(converter, { extensions: "all", highlighter: "prettify" });
+        markdownExtra.init(converter, {extensions: "all", highlighter: "prettify"});
 
         var text;
         try {
@@ -14974,6 +15349,7 @@ var Render = {
             }
             text = Render.xssFilter(text);
             $body[0].innerHTML = text;
+
         } catch (e) {
             console.error(e);
         }
@@ -14982,6 +15358,7 @@ var Render = {
         } catch (e) {
             console.error(e);
         }
+
 
         function replaceMath(text) {
             text = text.replace(/@@(\d+)@@/g, function (match, n) {
@@ -14992,9 +15369,10 @@ var Render = {
         }
 
         function processMath(i, j) {
-            var block = blocks.slice(i, j + 1).join("").replace(/&/g, "&amp;") // use HTML entity for &
-            .replace(/</g, "&lt;") // use HTML entity for <
-            .replace(/>/g, "&gt;"); // use HTML entity for
+            var block = blocks.slice(i, j + 1).join("")
+                .replace(/&/g, "&amp;") // use HTML entity for &
+                .replace(/</g, "&lt;")  // use HTML entity for <
+                .replace(/>/g, "&gt;"); // use HTML entity for
             while (j > i) {
                 blocks[j] = "";
                 j--;
@@ -15057,12 +15435,11 @@ var Render = {
             return blocks.join("");
         }
     },
-    tocReady: function tocReady(markdownStr) {
+    tocReady: function (markdownStr) {
         return markdownStr.replace(/(^[ ]*)\[toc\]([ ]*(\n|$))/igm, '$1[](' + WizToc + ')$2');
     },
-    tocRender: function tocRender() {
-        var tocHtml = [],
-            min = 6;
+    tocRender: function () {
+        var tocHtml = [], min = 6;
         $('h1,h2,h3,h4,h5,h6', Render.Document.body).each(function (index, item) {
             var n = parseInt(item.tagName.charAt(1));
             if (n < min) {
@@ -15086,7 +15463,7 @@ var Render = {
             }
         });
     },
-    flowRender: function flowRender() {
+    flowRender: function () {
         var f = $('.language-flow', Render.Document.body).parents('pre');
         f.each(function (fIndex, fObj) {
             var id = 'wiz-flow-' + fIndex;
@@ -15126,7 +15503,7 @@ var Render = {
             }
         });
     },
-    sequenceRender: function sequenceRender() {
+    sequenceRender: function () {
         var f = $('.language-sequence', Render.Document.body).parents('pre');
         f.each(function (fIndex, fObj) {
             var id = 'wiz-sequence-' + fIndex;
@@ -15145,7 +15522,7 @@ var Render = {
                     var seqLayer = Render.Document.createElement('div');
                     seqLayer.id = id;
                     fObj.parentNode.insertBefore(seqLayer, fObj);
-                    diagram.drawSVG(id, { theme: 'simple' });
+                    diagram.drawSVG(id, {theme: 'simple'});
 
                     //修正 svg 保证手机端自动适应大小
                     if (ENV.client.isPhone) {
@@ -15168,7 +15545,7 @@ var Render = {
             }
         });
     },
-    mathJaxRender: function mathJaxRender() {
+    mathJaxRender: function () {
         var config = 'MathJax.Hub.Config({\
                             skipStartupTypeset: true,\
                             "HTML-CSS": {\
@@ -15219,7 +15596,8 @@ var Render = {
             Render.Win._wizMathJaxCallback = function () {
                 Render.cb(Render.callback.mathJax);
             };
-            var runMath = 'MathJax.Hub.Queue(' + '["Typeset", MathJax.Hub, document.body, _wizMathJaxCallback]);';
+            var runMath = 'MathJax.Hub.Queue(' +
+                '["Typeset", MathJax.Hub, document.body, _wizMathJaxCallback]);';
             scriptLoader.appendJsCode(Render.Document, runMath, 'text/javascript');
         }
     },
@@ -15228,7 +15606,7 @@ var Render = {
             return null;
         }
         var xss = new filterXSS.FilterXSS({
-            onIgnoreTag: function onIgnoreTag(tag, html, options) {
+            onIgnoreTag: function (tag, html, options) {
                 //针对白名单之外的 tag 处理
                 if (/script/ig.test(tag)) {
                     return filterXSS.escapeAttrValue(html);
@@ -15261,19 +15639,19 @@ var Render = {
                 x += '>';
                 return x;
             },
-            onIgnoreTagAttr: function onIgnoreTagAttr(tag, name, value, isWhiteAttr) {
+            onIgnoreTagAttr: function (tag, name, value, isWhiteAttr) {
                 if (!!value && /^(id|class|style|data|width|height)/i.test(name)) {
                     return name + '="' + value + '"';
                 }
                 return '';
             },
-            safeAttrValue: function safeAttrValue(tag, name, value) {
+            safeAttrValue: function (tag, name, value) {
                 // 自定义过滤属性值函数，如果为a标签的href属性，则先判断是否以wiz://开头
                 if (tag === 'a' && name === 'href') {
                     if (/^((file|wiz(note)?):\/\/)/.test(value) || /^(#|index_files\/)/.test(value)) {
                         return filterXSS.escapeAttrValue(value);
                     }
-                } else if (name === 'src') {
+                } else if (name==='src') {
                     if (/^(file:\/\/|index_files\/|data:image\/)/.test(value)) {
                         return filterXSS.escapeAttrValue(value);
                     }
@@ -15285,16 +15663,16 @@ var Render = {
         return function (html) {
             return xss.process(html);
         };
+
     })()
 };
 module.exports = MarkdownRender;
+
 
 },{"./../common/dependLoader":14,"./../common/env":15,"./../common/scriptLoader":18,"./../common/utils":19,"./../common/xss":22,"./Markdown.Converter":31,"./Markdown.Extra":32}],34:[function(require,module,exports){
 /**
  * 夜间模式的基本方法集合
  */
-
-'use strict';
 
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
@@ -15307,7 +15685,7 @@ var _color = '#7990b6',
     _style_id = 'wiz_night_mode_style';
 
 var nightModeUtils = {
-    on: function on(color, bgColor, brightness) {
+    on: function (color, bgColor, brightness) {
         if (color) {
             _color = color;
         }
@@ -15325,7 +15703,13 @@ var nightModeUtils = {
 
         checkElement('', ENV.doc.body, map);
 
-        var baseStyle = '{' + 'color:' + _color + ' !important; ' + 'background-color:' + _bk_color + ' !important; ' + 'background-image: none !important; ' + 'box-shadow: none !important; ' + 'border-color:' + _color + ' !important; ' + '}';
+        var baseStyle = '{' +
+            'color:' + _color + ' !important; ' +
+            'background-color:' + _bk_color + ' !important; ' +
+            'background-image: none !important; ' +
+            'box-shadow: none !important; ' +
+            'border-color:' + _color + ' !important; ' +
+            '}';
 
         for (var key in map) {
             if (map.hasOwnProperty(key)) {
@@ -15342,8 +15726,9 @@ var nightModeUtils = {
             id: _style_id,
             name: CONST.NAME.TMP_STYLE
         }, cssText);
+
     },
-    off: function off() {
+    off: function () {
         var style = ENV.doc.getElementById(_style_id);
         if (style) {
             style.remove();
@@ -15356,12 +15741,13 @@ function checkElement(pId, e, map) {
     var elements = e.children;
     for (var i = 0; i < elements.length; i++) {
         var child = elements[i];
-        checkElement(e.id ? e.id : pId, child, map);
+        checkElement((e.id ? e.id : pId), child, map);
     }
 }
 
 function addItemAttrToMap(pId, e, map) {
-    if (!e) return;
+    if (!e)
+        return;
     var tagName = e.tagName;
 
     if (/^(style|script|link|meta|img)$/ig.test(tagName)) {
@@ -15372,6 +15758,7 @@ function addItemAttrToMap(pId, e, map) {
     if (domUtils.hasClass(e, CONST.CLASS.TODO_CHECKBOX) || domUtils.hasClass(e, CONST.CLASS.TODO_AVATAR)) {
         return;
     }
+    
 
     var className = e.className;
     if (className && className.length > 0) {
@@ -15409,44 +15796,41 @@ function addKeyToMap(key, map) {
 }
 
 module.exports = nightModeUtils;
-
 },{"../common/const":13,"../common/env":15,"../common/wizStyle":20,"../domUtils/domBase":23}],35:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
 
-'use strict';
-
 var ENV = require('./../common/env'),
-    CONST = require('./../common/const'),
-    domUtils = require('./../domUtils/domBase');
+CONST = require('./../common/const'),
+domUtils = require('./../domUtils/domBase');
 
 //通用方法集合
 var rangeUtils = {
     /**
      * 设置 光标到可视范围内（移动滚动条）
      */
-    caretFocus: function caretFocus() {
+    caretFocus: function () {
         //getClientRects 方法 在 ios 的 safari 上 还有问题
         var range = rangeUtils.getRange(),
             rectList = range ? range.getClientRects() : null,
-            rect = rectList && rectList.length > 0 ? rectList[0] : null,
+            rect = (rectList && rectList.length > 0) ? rectList[0] : null,
             cH = ENV.doc.documentElement.clientHeight,
             cW = ENV.doc.documentElement.clientWidth;
 
         if (rect && rect.top < 0) {
             ENV.doc.body.scrollTop += rect.top;
-        } else if (rect && rect.top + rect.height > cH) {
-            ENV.doc.body.scrollTop += rect.top + rect.height - cH;
+        } else if (rect && (rect.top + rect.height) > cH) {
+            ENV.doc.body.scrollTop += (rect.top + rect.height - cH);
         }
 
         if (rect && rect.left < 0) {
             ENV.doc.body.scrollLeft += rect.left;
-        } else if (rect && rect.left + rect.width > cW) {
-            ENV.doc.body.scrollLeft += rect.left + rect.width - cW;
+        } else if (rect && (rect.left + rect.width) > cW) {
+            ENV.doc.body.scrollLeft += (rect.left + rect.width - cW);
         }
     },
-    getRange: function getRange() {
+    getRange: function () {
         var sel = ENV.doc.getSelection();
         return sel.rangeCount > 0 ? sel.getRangeAt(0) : null;
     },
@@ -15458,7 +15842,7 @@ var rangeUtils = {
      * @param isBackward
      * @returns {*}
      */
-    getRangeAnchor: function getRangeAnchor(isBackward) {
+    getRangeAnchor: function (isBackward) {
         var range = rangeUtils.getRange();
         if (!range) {
             return null;
@@ -15493,21 +15877,20 @@ var rangeUtils = {
         } else {
             return domUtils.getFirstDeepChild(rangeContainer.childNodes[rangeOffset]);
         }
+
     },
     /**
      * 根据 获取 光标选中范围内的 dom 集合
      * @param options {noSplit: Boolean}
      * @returns {*}
      */
-    getRangeDomList: function getRangeDomList(options) {
+    getRangeDomList: function (options) {
         var range = rangeUtils.getRange();
         if (!range) {
             return null;
         }
-        var startDom = range.startContainer,
-            startOffset = range.startOffset,
-            endDom = range.endContainer,
-            endOffset = range.endOffset;
+        var startDom = range.startContainer, startOffset = range.startOffset,
+            endDom = range.endContainer, endOffset = range.endOffset;
         return domUtils.getDomListA2B({
             startDom: startDom,
             startOffset: startOffset,
@@ -15520,10 +15903,8 @@ var rangeUtils = {
      * 获取 光标范围内 Dom 共同的父节点
      * @returns {*}
      */
-    getRangeParentRoot: function getRangeParentRoot() {
-        var range = rangeUtils.getRange(),
-            startDom,
-            endDom;
+    getRangeParentRoot: function () {
+        var range = rangeUtils.getRange(), startDom, endDom;
         if (!range) {
             return null;
         }
@@ -15535,7 +15916,7 @@ var rangeUtils = {
      * 检验 dom 是否为 selection 的 边缘
      * @param dom
      */
-    isRangeEdge: function isRangeEdge(dom) {
+    isRangeEdge: function (dom) {
         var result = {
             isStart: false,
             isEnd: false
@@ -15562,9 +15943,9 @@ var rangeUtils = {
         } else if (result.endDom.nodeType == 1) {
             tmpEndDom = domUtils.getPreviousNode(result.endDom, false, null);
         }
-        result.isStart = result.startDom == dom || result.startDom == tmpStartDom;
+        result.isStart = (result.startDom == dom || result.startDom == tmpStartDom);
 
-        result.isEnd = result.endDom == dom || result.endDom == tmpEndDom;
+        result.isEnd = (result.endDom == dom || result.endDom == tmpEndDom);
 
         return result;
     },
@@ -15572,7 +15953,7 @@ var rangeUtils = {
      * 选中指定的 dom 元素
      * @param el
      */
-    selectElementContents: function selectElementContents(el) {
+    selectElementContents: function (el) {
         var range = ENV.doc.createRange();
         range.selectNodeContents(el);
         var sel = ENV.doc.getSelection();
@@ -15583,7 +15964,7 @@ var rangeUtils = {
      * 在光标位置选中单个字符，遇到 Fill-Char 特殊字符需要一直选取
      * @param isBackward
      */
-    selectCharIncludeFillChar: function selectCharIncludeFillChar(isBackward) {
+    selectCharIncludeFillChar: function (isBackward) {
         var sel = ENV.doc.getSelection(),
             range = sel.getRangeAt(0),
             direction = isBackward ? 'backward' : 'forward';
@@ -15635,13 +16016,16 @@ var rangeUtils = {
 
         if (s.length === 0) {
             //如果当前未选中 自闭合标签（br）且下一个字符是 自闭合标签 则 扩展选中区域
-            if (tmpCurDom && !domUtils.isSelfClosingTag(tmpCurDom) && tmpNextDom && (tmpNextDom.nodeType !== 1 || tmpNextDom.nodeType === 1 && domUtils.isSelfClosingTag(tmpNextDom))) {
+            if (tmpCurDom && !domUtils.isSelfClosingTag(tmpCurDom) && tmpNextDom &&
+                (tmpNextDom.nodeType !== 1 ||
+                (tmpNextDom.nodeType === 1 && domUtils.isSelfClosingTag(tmpNextDom)))) {
                 sel.modify('extend', direction, 'character');
             }
         } else if (s.indexOf(CONST.FILL_CHAR) > -1 && s.replace(CONST.FILL_CHAR_REG, '') === '') {
             //如果当前选中了 文本 但文本未占位字符，则扩展选中区域
             sel.modify('extend', direction, 'character');
         }
+
     },
     /**
      * 根据 起始 Dom 位置设定 光标选择范围
@@ -15650,7 +16034,7 @@ var rangeUtils = {
      * @param end
      * @param endOffset
      */
-    setRange: function setRange(start, startOffset, end, endOffset) {
+    setRange: function (start, startOffset, end, endOffset) {
         if (!start && !end) {
             return;
         }
@@ -15685,13 +16069,10 @@ var rangeUtils = {
 };
 
 module.exports = rangeUtils;
-
 },{"./../common/const":13,"./../common/env":15,"./../domUtils/domBase":23}],36:[function(require,module,exports){
 /**
  * 范围操作的基本方法集合
  */
-
-'use strict';
 
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
@@ -15742,10 +16123,7 @@ rangeUtils.restoreCaret = function () {
 rangeUtils.modifyCaretStyle = function (style, attr) {
     var sel = ENV.doc.getSelection();
     var focusNode = sel.focusNode;
-    var range,
-        key,
-        value,
-        hasSameStyle = true,
+    var range, key, value, hasSameStyle = true,
         n;
 
     //get the focus's element.
@@ -15766,7 +16144,7 @@ rangeUtils.modifyCaretStyle = function (style, attr) {
     }
 
     //if current dom is empty, so don't create span.
-    if (domUtils.isTag(focusNode, 'span') && utils.isEmpty(focusNode.innerHTML)) {
+    if (domUtils.isTag(focusNode, 'span') && (utils.isEmpty(focusNode.innerHTML))) {
         domUtils.modifyStyle(focusNode, style, attr);
         n = focusNode;
     } else {
@@ -15797,11 +16175,7 @@ rangeUtils.modifyDomsStyle = function (domList, style, attr, excludeList) {
     //modify style
     domUtils.modifyNodesStyle(domList, style, attr);
     //clear redundant span & TextNode
-    var ps = [],
-        i,
-        j,
-        t,
-        tempAmend;
+    var ps = [], i, j, t, tempAmend;
     for (i = 0, j = domList.length; i < j; i++) {
         t = domList[i].parentNode;
         if (!t) {
@@ -15840,7 +16214,8 @@ rangeUtils.modifyRangeStyle = function (style, attr) {
     }
 
     //modify style
-    rangeUtils.modifyDomsStyle(rangeList, style, attr, [rangeResult.startDomBak, rangeResult.endDomBak]);
+    rangeUtils.modifyDomsStyle(rangeList, style, attr,
+        [rangeResult.startDomBak, rangeResult.endDomBak]);
 
     //reset the selection's range
     //自闭合标签 需要特殊处理
@@ -15852,7 +16227,10 @@ rangeUtils.modifyRangeStyle = function (style, attr) {
         rangeResult.startDomBak = domUtils.getNextNode(rangeResult.startDomBak, false, rangeResult.endDomBak);
         rangeResult.startOffsetBak = 0;
     }
-    rangeUtils.setRange(isStartBak ? rangeResult.startDomBak : rangeResult.startDom, isStartBak ? rangeResult.startOffsetBak : rangeResult.startOffset, isEndBak || isSelfCloseEnd ? rangeResult.endDomBak : rangeResult.endDom, isEndBak || isSelfCloseEnd ? rangeResult.endOffsetBak : rangeResult.endOffset);
+    rangeUtils.setRange(isStartBak ? rangeResult.startDomBak : rangeResult.startDom,
+        isStartBak ? rangeResult.startOffsetBak : rangeResult.startOffset,
+        (isEndBak || isSelfCloseEnd) ? rangeResult.endDomBak : rangeResult.endDom,
+        (isEndBak || isSelfCloseEnd) ? rangeResult.endOffsetBak : rangeResult.endOffset);
 };
 /**
  * 修改 光标范围内的 Dom 样式 & 属性
@@ -15872,13 +16250,10 @@ rangeUtils.modifySelectionDom = function (style, attr) {
 };
 
 module.exports = rangeUtils;
-
 },{"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24,"./rangeBase":35}],37:[function(require,module,exports){
 /**
  * 阅读器 基础工具包
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     domUtils = require('../domUtils/domExtend'),
@@ -15889,11 +16264,13 @@ var ENV = require('../common/env'),
 
 var noteSrc = '';
 var reader = {
-    init: function init() {},
-    insertDefaultStyle: function insertDefaultStyle(isReplace, customCss) {
+    init: function () {
+
+    },
+    insertDefaultStyle: function (isReplace, customCss) {
         wizStyle.insertDefaultStyle(isReplace, customCss);
     },
-    on: function on() {
+    on: function () {
         noteSrc = domUtils.getContentHtml();
         wizStyle.insertTmpReaderStyle();
         readerEvent.on();
@@ -15904,7 +16281,7 @@ var reader = {
         setDomReadOnly('input', true);
         setDomReadOnly('textarea', true);
     },
-    off: function off() {
+    off: function () {
         readerEvent.off();
         todoCore.off();
         tableCore.off();
@@ -15927,8 +16304,7 @@ var reader = {
 
 function setDomReadOnly(tag, readonly) {
     var domList = ENV.doc.getElementsByTagName(tag),
-        i,
-        obj;
+        i, obj;
     for (i = 0; i < domList.length; i++) {
         obj = domList[i];
         obj.readOnly = readonly;
@@ -15941,8 +16317,6 @@ module.exports = reader;
 /**
  * editor 使用的基本事件处理
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
@@ -15957,7 +16331,7 @@ function clickImg(e) {
 
     //对于 超链接内的 img 不阻止点击事件，因为响应 超链接 更重要
     var p = domUtils.getParentByFilter(target, function (node) {
-        return node && domUtils.isTag(node, 'a') && /^(http|https|wiz|wiznote|wiznotecmd):/.test(node.getAttribute('href'));
+        return (node && domUtils.isTag(node, 'a') && (/^(http|https|wiz|wiznote|wiznotecmd):/.test(node.getAttribute('href'))));
     }, true);
 
     if (p) {
@@ -15973,13 +16347,13 @@ function clickImg(e) {
 }
 
 var ReaderEvent = {
-    on: function on() {
+    on: function () {
         ReaderEvent.bind();
     },
-    off: function off() {
+    off: function () {
         ReaderEvent.unbind();
     },
-    bind: function bind() {
+    bind: function () {
         ReaderEvent.unbind();
         ENV.doc.addEventListener('click', handler.onClick);
 
@@ -15988,7 +16362,7 @@ var ReaderEvent = {
             ENV.doc.addEventListener('touchstart', handler.onTouchStart);
         }
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.doc.removeEventListener('click', handler.onClick);
         ENV.doc.removeEventListener('touchend', handler.onTouchEnd);
         ENV.doc.removeEventListener('touchstart', handler.onTouchStart);
@@ -15996,29 +16370,26 @@ var ReaderEvent = {
 };
 
 var handler = {
-    onClick: function onClick(e) {
+    onClick: function (e) {
         ENV.event.call(CONST.EVENT.ON_CLICK, e);
 
         if (ENV.client.type.isIOS || ENV.client.type.isAndroid) {
             clickImg(e);
         }
     },
-    onTouchEnd: function onTouchEnd(e) {
+    onTouchEnd: function (e) {
         ENV.event.call(CONST.EVENT.ON_TOUCH_END, e);
     },
-    onTouchStart: function onTouchStart(e) {
+    onTouchStart: function (e) {
         ENV.event.call(CONST.EVENT.ON_TOUCH_START, e);
     }
 };
 
 module.exports = ReaderEvent;
-
 },{"../common/const":13,"../common/env":15,"../common/utils":19,"../domUtils/domExtend":24,"../imgUtils/imgUtils":29}],39:[function(require,module,exports){
 /**
  * 表格操作核心包 core
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
@@ -16032,7 +16403,7 @@ var ENV = require('../common/env'),
 //TODO 所有配色 要考虑到 夜间模式
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_DRAG_START, _event.handler.onDragStart);
         ENV.event.add(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
@@ -16049,7 +16420,7 @@ var _event = {
         ENV.event.add(CONST.EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         ENV.event.add(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_DRAG_START, _event.handler.onDragStart);
         ENV.event.remove(CONST.EVENT.ON_KEY_DOWN, _event.handler.onKeyDown);
         ENV.event.remove(CONST.EVENT.ON_KEY_UP, _event.handler.onKeyUp);
@@ -16062,13 +16433,10 @@ var _event = {
         ENV.event.remove(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
     handler: {
-        afterRestoreHistory: function afterRestoreHistory() {
+        afterRestoreHistory: function () {
             //恢复历史后，需要修正 zone
-            var tmpCells,
-                cells = [],
-                cell,
-                i,
-                j;
+            var tmpCells, cells = [], cell,
+                i, j;
 
             tmpCells = ENV.doc.getElementsByClassName(CONST.CLASS.SELECTED_CELL);
 
@@ -16111,14 +16479,14 @@ var _event = {
             //修正 Menu
             tableMenu.show();
         },
-        onDragStart: function onDragStart(e) {
+        onDragStart: function (e) {
             //表格内禁止拖拽操作
             var table = domUtils.getParentByTagName(e.target, 'table', true, null);
             if (table) {
                 utils.stopEvent(e);
             }
         },
-        onKeyDown: function onKeyDown(e) {
+        onKeyDown: function (e) {
             var sel = ENV.doc.getSelection();
             var zone = tableZone.getZone();
             if (!zone.range) {
@@ -16137,7 +16505,7 @@ var _event = {
                         charMove = true;
                         sel.modify('move', 'backward', 'character');
                     }
-                    direct = { x: -1, y: 0 };
+                    direct = {x: -1, y: 0};
                     break;
                 case 38:
                     //up
@@ -16145,12 +16513,12 @@ var _event = {
                         charMove = true;
                         sel.modify('move', 'backward', 'line');
                     }
-                    direct = { x: 0, y: -1 };
+                    direct = {x: 0, y: -1};
                     break;
                 case 9:
                     //Tab
                     if (!e.shiftKey) {
-                        direct = { x: 1, y: 0, canChangeRow: true };
+                        direct = {x: 1, y: 0, canChangeRow: true};
                     }
                     break;
                 case 39:
@@ -16159,7 +16527,7 @@ var _event = {
                         charMove = true;
                         sel.modify('move', 'forward', 'character');
                     }
-                    direct = { x: 1, y: 0 };
+                    direct = {x: 1, y: 0};
                     break;
                 case 13:
                     //Enter
@@ -16173,7 +16541,7 @@ var _event = {
                         charMove = true;
                         sel.modify('move', 'forward', 'line');
                     }
-                    direct = { x: 0, y: 1 };
+                    direct = {x: 0, y: 1};
                     break;
             }
 
@@ -16220,7 +16588,7 @@ var _event = {
                 }
             }
         },
-        onKeyUp: function onKeyUp(e) {
+        onKeyUp: function (e) {
             var zone = tableZone.getZone(),
                 range = rangeUtils.getRange(),
                 cell;
@@ -16234,8 +16602,8 @@ var _event = {
 
             tableUtils.fixSelection(e);
         },
-        onMouseDown: function onMouseDown(e) {
-            var isLeft = e.type !== 'mousedown' || e.button === 0 || e.button === 1;
+        onMouseDown: function (e) {
+            var isLeft = (e.type !== 'mousedown' || e.button === 0 || e.button === 1);
             if (!isLeft) {
                 tableMenu.hide();
                 return;
@@ -16283,14 +16651,14 @@ var _event = {
             tableZone.setStart(cell);
             tableMenu.show();
         },
-        onMouseOver: function onMouseOver(e) {
+        onMouseOver: function (e) {
             var end = domUtils.getParentByTagName(e.target, ['td', 'th'], true, null);
             tableZone.modify(end);
         },
-        onMouseUp: function onMouseUp(e) {
+        onMouseUp: function (e) {
             tableUtils.fixSelection(e);
 
-            var isLeft = e.type !== 'mouseup' || e.button === 0 || e.button === 1;
+            var isLeft = (e.type !== 'mouseup' || e.button === 0 || e.button === 1);
             if (!isLeft) {
                 return;
             }
@@ -16322,14 +16690,14 @@ var _event = {
             tableZone.setEnd(cell);
             tableMenu.show();
         },
-        onSelectionChange: function onSelectionChange(e) {
+        onSelectionChange: function (e) {
             var check = tableUtils.checkCaretInTableContainer(e);
             var zone = tableZone.getZone();
             var cell;
             if (check.tableContainer && zone.table !== check.tableContainer.querySelector('table')) {
                 //如果光标定位在 table & table container 之间，则定位到 table 内第一个 td
                 cell = check.tableContainer.querySelectorAll('td');
-                cell = check.after ? cell[cell.length - 1] : check.before ? cell[0] : null;
+                cell = check.after ? cell[cell.length - 1] : (check.before ? cell[0] : null);
                 if (cell) {
                     tableZone.setStart(cell).setEnd(cell);
                 }
@@ -16339,7 +16707,7 @@ var _event = {
 };
 
 var tableCore = {
-    on: function on() {
+    on: function () {
         if (!ENV.readonly) {
             _event.bind();
             tableMenu.init(tableCore);
@@ -16347,13 +16715,13 @@ var tableCore = {
         tableUtils.initTableContainer(null);
         tableZone.clear();
     },
-    off: function off() {
+    off: function () {
         tableZone.clear();
     },
-    canCreateTable: function canCreateTable() {
+    canCreateTable: function () {
         return tableUtils.canCreateTable(tableZone.getZone());
     },
-    clearCellValue: function clearCellValue() {
+    clearCellValue: function () {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16361,7 +16729,7 @@ var tableCore = {
         historyUtils.saveSnap(false);
         tableUtils.clearCellValue(zone.grid, zone.range);
     },
-    deleteCols: function deleteCols() {
+    deleteCols: function () {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16378,7 +16746,7 @@ var tableCore = {
         }
         tableZone.clear();
     },
-    deleteRows: function deleteRows() {
+    deleteRows: function () {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16395,7 +16763,7 @@ var tableCore = {
         }
         tableZone.clear();
     },
-    deleteTable: function deleteTable() {
+    deleteTable: function () {
         var zone = tableZone.getZone();
         if (!zone.table) {
             return;
@@ -16420,7 +16788,7 @@ var tableCore = {
             rangeUtils.setRange(enter, 0);
         }
     },
-    distributeCols: function distributeCols() {
+    distributeCols: function () {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16429,7 +16797,7 @@ var tableCore = {
         tableUtils.distributeCols(zone.table, zone.grid);
         tableZone.updateGrid();
     },
-    insertCol: function insertCol(before) {
+    insertCol: function (before) {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16438,7 +16806,7 @@ var tableCore = {
         tableUtils.insertCol(zone.grid, before ? zone.range.minX : zone.range.maxX + 1);
         tableZone.updateGrid();
     },
-    insertRow: function insertRow(before) {
+    insertRow: function (before) {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16447,7 +16815,7 @@ var tableCore = {
         tableUtils.insertRow(zone.grid, before ? zone.range.minY : zone.range.maxY + 1);
         tableZone.updateGrid();
     },
-    insertTable: function insertTable(col, row) {
+    insertTable: function (col, row) {
         historyUtils.saveSnap(false);
         var range = rangeUtils.getRange();
         var tmpCell;
@@ -16475,9 +16843,9 @@ var tableCore = {
             range.insertNode(br);
             // }
         } else {
-                ENV.doc.body.appendChild(table);
-                ENV.doc.body.appendChild(br);
-            }
+            ENV.doc.body.appendChild(table);
+            ENV.doc.body.appendChild(br);
+        }
         tableUtils.initTableContainer(null);
 
         //修正 光标
@@ -16487,7 +16855,7 @@ var tableCore = {
             rangeUtils.setRange(domUtils.getFirstDeepChild(tmpCell), 0);
         }
     },
-    merge: function merge() {
+    merge: function () {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16499,7 +16867,7 @@ var tableCore = {
             tableZone.setStart(cell).setEnd(cell);
         }
     },
-    setCellAlign: function setCellAlign(align, valign) {
+    setCellAlign: function (align, valign) {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16511,7 +16879,7 @@ var tableCore = {
         });
         tableZone.setStartRange();
     },
-    setCellBg: function setCellBg(bgColor) {
+    setCellBg: function (bgColor) {
         var zone = tableZone.getZone();
         if (!zone.range) {
             return;
@@ -16520,26 +16888,24 @@ var tableCore = {
         tableUtils.setCellBg(zone.grid, zone.range, bgColor);
         tableZone.setStartRange();
     },
-    split: function split() {
+    split: function () {
         var zone = tableZone.getZone();
         var range = tableUtils.splitCell(zone.table, zone.grid, zone.range);
         if (range) {
             historyUtils.saveSnap(false);
             tableZone.updateGrid();
             zone = tableZone.getZone();
-            tableZone.setStart(zone.grid[range.minY][range.minX].cell).setEnd(zone.grid[range.maxY][range.maxX].cell);
+            tableZone.setStart(zone.grid[range.minY][range.minX].cell)
+                .setEnd(zone.grid[range.maxY][range.maxX].cell);
         }
     }
 };
 
 module.exports = tableCore;
-
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/utils":19,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./tableMenu":40,"./tableUtils":41,"./tableZone":42}],40:[function(require,module,exports){
 /*
  表格菜单 控制
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     Lang = require('../common/lang'),
@@ -16578,133 +16944,163 @@ function createMenu() {
         return menu;
     }
 
-    var menuData = [{
-        id: _id.col,
-        exClass: 'icon-insert editor-icon',
-        subMenu: {
-            type: _subType.list,
-            data: [{
-                type: CONST.TYPE.TABLE.INSERT_ROW_UP,
-                name: LANG.Table.InsertRowUp,
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.INSERT_ROW_DOWN,
-                name: LANG.Table.InsertRowDown,
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.INSERT_COL_LEFT,
-                name: LANG.Table.InsertColLeft,
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.INSERT_COL_RIGHT,
-                name: LANG.Table.InsertColRight,
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.DELETE_ROW,
-                name: LANG.Table.DeleteRow,
-                isSplit: true
-            }, {
-                type: CONST.TYPE.TABLE.DELETE_COL,
-                name: LANG.Table.DeleteCol,
-                isSplit: false
-            }]
-        }
-    }, {
-        id: _id.align,
-        exClass: 'icon-align editor-icon',
-        subMenu: {
-            type: _subType.custom,
-            make: function make() {
-                var typeList = [['top', 'middle', 'bottom'], ['left', 'center', 'right']];
-                var i, j, dataAlignType;
-                var str = '<div class="wiz-table-menu-sub wiz-table-cell-align">';
-                for (i = 0; i < typeList.length; i++) {
-                    str += '<div>';
-                    for (j = 0; j < typeList[i].length; j++) {
-                        dataAlignType = i === 0 ? 'valign' : 'align';
-                        str += '<div class="' + _class.alignItem + ' ' + _class.clickItem + '" data-type="' + CONST.TYPE.TABLE.SET_CELL_ALIGN + '" data-align-type="' + dataAlignType + '" data-align-value="' + typeList[i][j] + '">';
-                        if (i === 0) {
+    var menuData = [
+        {
+            id: _id.col,
+            exClass: 'icon-insert editor-icon',
+            subMenu: {
+                type: _subType.list,
+                data: [
+                    {
+                        type: CONST.TYPE.TABLE.INSERT_ROW_UP,
+                        name: LANG.Table.InsertRowUp,
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.INSERT_ROW_DOWN,
+                        name: LANG.Table.InsertRowDown,
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.INSERT_COL_LEFT,
+                        name: LANG.Table.InsertColLeft,
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.INSERT_COL_RIGHT,
+                        name: LANG.Table.InsertColRight,
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.DELETE_ROW,
+                        name: LANG.Table.DeleteRow,
+                        isSplit: true
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.DELETE_COL,
+                        name: LANG.Table.DeleteCol,
+                        isSplit: false
+                    }
+                ]
+            }
+        },
+        {
+            id: _id.align,
+            exClass: 'icon-align editor-icon',
+            subMenu: {
+                type: _subType.custom,
+                make: function () {
+                    var typeList = [
+                        ['top', 'middle', 'bottom'], ['left', 'center', 'right']
+                    ];
+                    var i, j, dataAlignType;
+                    var str = '<div class="wiz-table-menu-sub wiz-table-cell-align">';
+                    for (i = 0; i < typeList.length; i++) {
+                        str += '<div>';
+                        for (j = 0; j < typeList[i].length; j++) {
+                            dataAlignType = (i === 0) ? 'valign' : 'align';
+                            str += '<div class="' + _class.alignItem + ' ' + _class.clickItem +
+                                '" data-type="' + CONST.TYPE.TABLE.SET_CELL_ALIGN +
+                                '" data-align-type="' + dataAlignType +
+                                '" data-align-value="' + typeList[i][j] +
+                                '">';
+                            if (i === 0) {
+                                str += '<i class="editor-icon icon-box"></i>';
+                                str += '<i class="editor-icon valign icon-valign_' + typeList[i][j] + '"></i>';
+                            } else {
+                                str += '<i class="editor-icon align icon-align_' + typeList[i][j] + '"></i>';
+                            }
+
+                            str += '</div>';
+                        }
+                        str += '</div>';
+                    }
+                    str += '</div>';
+
+                    return str;
+                }
+            }
+        },
+        {
+            id: _id.bg,
+            exClass: 'icon-box editor-icon',
+            subMenu: {
+                type: _subType.custom,
+                make: function () {
+                    var colors = [
+                        ['', '#f7b6ff', '#fecf9c'],
+                        ['#acf3fe', '#b2ffa1', '#b6caff'],
+                        ['#ffc7c8', '#eeeeee', '#fef49c']
+                    ];
+                    var i, j;
+                    var str = '<div class="wiz-table-menu-sub wiz-table-color-pad">';
+                    for (i = 0; i < colors.length; i++) {
+                        str += '<div>';
+                        for (j = 0; j < colors[i].length; j++) {
+                            str += '<div class="' + _class.colorPadItem + ' ' + _class.clickItem + '" data-color="' + colors[i][j] + '" data-type="' + CONST.TYPE.TABLE.SET_CELL_BG + '">';
                             str += '<i class="editor-icon icon-box"></i>';
-                            str += '<i class="editor-icon valign icon-valign_' + typeList[i][j] + '"></i>';
-                        } else {
-                            str += '<i class="editor-icon align icon-align_' + typeList[i][j] + '"></i>';
-                        }
-
-                        str += '</div>';
-                    }
-                    str += '</div>';
-                }
-                str += '</div>';
-
-                return str;
-            }
-        }
-    }, {
-        id: _id.bg,
-        exClass: 'icon-box editor-icon',
-        subMenu: {
-            type: _subType.custom,
-            make: function make() {
-                var colors = [['', '#f7b6ff', '#fecf9c'], ['#acf3fe', '#b2ffa1', '#b6caff'], ['#ffc7c8', '#eeeeee', '#fef49c']];
-                var i, j;
-                var str = '<div class="wiz-table-menu-sub wiz-table-color-pad">';
-                for (i = 0; i < colors.length; i++) {
-                    str += '<div>';
-                    for (j = 0; j < colors[i].length; j++) {
-                        str += '<div class="' + _class.colorPadItem + ' ' + _class.clickItem + '" data-color="' + colors[i][j] + '" data-type="' + CONST.TYPE.TABLE.SET_CELL_BG + '">';
-                        str += '<i class="editor-icon icon-box"></i>';
-                        if (i === 0 && j === 0) {
-                            str += '<i class="pad-demo editor-icon icon-oblique_line"></i>';
-                        } else {
-                            str += '<i class="pad-demo editor-icon icon-inner_box" style="color:' + colors[i][j] + ';"></i>';
+                            if (i === 0 && j === 0) {
+                                str += '<i class="pad-demo editor-icon icon-oblique_line"></i>';
+                            } else {
+                                str += '<i class="pad-demo editor-icon icon-inner_box" style="color:' + colors[i][j] + ';"></i>';
+                            }
+                            str += '</div>';
                         }
                         str += '</div>';
                     }
                     str += '</div>';
+                    return str;
                 }
-                str += '</div>';
-                return str;
+            }
+        },
+        {
+            id: _id.cells,
+            exClass: 'icon-merge editor-icon',
+            subMenu: {
+                type: _subType.list,
+                data: [
+                    {
+                        type: CONST.TYPE.TABLE.MERGE_CELL,
+                        name: LANG.Table.MergeCell,
+                        // exClass: tableZone.isSingleCell() ? 'disabled' : '',
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.SPLIT_CELL,
+                        name: LANG.Table.SplitCell,
+                        // exClass: tableZone.hasMergeCell() ? '' : 'disabled',
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.CLEAR_CELL,
+                        name: LANG.Table.ClearCell,
+                        isSplit: false
+                    }
+                ]
+            }
+        },
+        {
+            id: _id.more,
+            exClass: 'icon-more editor-icon',
+            subMenu: {
+                type: _subType.list,
+                data: [
+                    {
+                        type: CONST.TYPE.TABLE.DISTRIBUTE_COLS,
+                        name: LANG.Table.DistributeCols,
+                        exClass: '',
+                        isSplit: false
+                    },
+                    {
+                        type: CONST.TYPE.TABLE.DELETE_TABLE,
+                        name: LANG.Table.DeleteTable,
+                        exClass: '',
+                        isSplit: true
+                    }
+                ]
             }
         }
-    }, {
-        id: _id.cells,
-        exClass: 'icon-merge editor-icon',
-        subMenu: {
-            type: _subType.list,
-            data: [{
-                type: CONST.TYPE.TABLE.MERGE_CELL,
-                name: LANG.Table.MergeCell,
-                // exClass: tableZone.isSingleCell() ? 'disabled' : '',
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.SPLIT_CELL,
-                name: LANG.Table.SplitCell,
-                // exClass: tableZone.hasMergeCell() ? '' : 'disabled',
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.CLEAR_CELL,
-                name: LANG.Table.ClearCell,
-                isSplit: false
-            }]
-        }
-    }, {
-        id: _id.more,
-        exClass: 'icon-more editor-icon',
-        subMenu: {
-            type: _subType.list,
-            data: [{
-                type: CONST.TYPE.TABLE.DISTRIBUTE_COLS,
-                name: LANG.Table.DistributeCols,
-                exClass: '',
-                isSplit: false
-            }, {
-                type: CONST.TYPE.TABLE.DELETE_TABLE,
-                name: LANG.Table.DeleteTable,
-                exClass: '',
-                isSplit: true
-            }]
-        }
-    }];
+    ];
 
     var i, m;
 
@@ -16714,9 +17110,11 @@ function createMenu() {
     var menuHtml = '<ul>';
     for (i = 0; i < menuData.length; i++) {
         m = menuData[i];
-        menuHtml += '<li id="' + m.id + '" class="' + CONST.CLASS.TABLE_MENU_ITEM + '">' + '<div class="' + CONST.CLASS.TABLE_MENU_BUTTON + '">' + '<i class="' + m.exClass + '"></i>';
+        menuHtml += '<li id="' + m.id + '" class="' + CONST.CLASS.TABLE_MENU_ITEM + '">' +
+            '<div class="' + CONST.CLASS.TABLE_MENU_BUTTON + '">' +
+            '<i class="' + m.exClass + '"></i>';
         if (m.id === _id.bg) {
-            menuHtml += '<i id="' + _id.bgDemo + '" class="editor-icon icon-inner_box"></i>';
+            menuHtml += '<i id="' + _id.bgDemo + '" class="editor-icon icon-inner_box"></i>'
         }
         menuHtml += '</div>';
         if (m.subMenu.type === _subType.list) {
@@ -16738,8 +17136,7 @@ function createMenu() {
 }
 
 function createSubMenuForList(data) {
-    var i,
-        m,
+    var i, m,
         html = '<ul class="wiz-table-menu-sub">';
     for (i = 0; i < data.length; i++) {
         m = data[i];
@@ -16755,8 +17152,7 @@ function createSubMenuForList(data) {
 }
 
 function getMenuTop() {
-    var top,
-        tableBody = menuObj.parentNode.querySelector('.' + CONST.CLASS.TABLE_BODY),
+    var top, tableBody = menuObj.parentNode.querySelector('.' + CONST.CLASS.TABLE_BODY),
         tableBodyTop = tableBody ? tableBody.offsetTop : 0;
     top = tableBodyTop - menuObj.offsetHeight - 5;
     return top + 'px';
@@ -16782,7 +17178,7 @@ function fixMenuPos() {
 }
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         if (menuObj) {
             menuObj.addEventListener('click', _event.handler.onClick);
@@ -16791,7 +17187,7 @@ var _event = {
         ENV.event.add(CONST.EVENT.BEFORE_SAVESNAP, _event.handler.onBeforeSaveSnap);
         ENV.event.add(CONST.EVENT.ON_SCROLL, _event.handler.onScroll);
     },
-    unbind: function unbind() {
+    unbind: function () {
         if (menuObj) {
             menuObj.removeEventListener('click', _event.handler.onClick);
             menuObj.removeEventListener('mouseover', _event.handler.onMouseOver);
@@ -16800,11 +17196,11 @@ var _event = {
         ENV.event.remove(CONST.EVENT.ON_SCROLL, _event.handler.onScroll);
     },
     handler: {
-        onBeforeSaveSnap: function onBeforeSaveSnap() {
+        onBeforeSaveSnap: function () {
             // 目前不在保存快照前处理
             // tableMenu.hideSub();
         },
-        onClick: function onClick(e) {
+        onClick: function (e) {
             //点击 一级菜单
             var item = domUtils.getParentByFilter(e.target, function (dom) {
                 return domUtils.hasClass(dom, CONST.CLASS.TABLE_MENU_BUTTON);
@@ -16864,8 +17260,7 @@ var _event = {
                     break;
                 case CONST.TYPE.TABLE.SET_CELL_ALIGN:
                     //设置 对齐方式 时，不自动隐藏二级菜单
-                    var align = null,
-                        valign = null;
+                    var align = null, valign = null;
                     if (item.getAttribute('data-align-type') == 'align') {
                         align = item.getAttribute('data-align-value');
                     } else {
@@ -16891,8 +17286,9 @@ var _event = {
             if (todo) {
                 tableMenu.hideSub();
             }
+
         },
-        onMouseOver: function onMouseOver(e) {
+        onMouseOver: function (e) {
             var colorItem = domUtils.getParentByFilter(e.target, function (dom) {
                 return domUtils.hasClass(dom, _class.colorPadItem);
             }, true);
@@ -16900,7 +17296,7 @@ var _event = {
                 colorPadDemo.style.color = colorItem.getAttribute('data-color') || '#fff';
             }
         },
-        onScroll: function onScroll(e) {
+        onScroll: function (e) {
             if (!menuObj || menuObj.style.display == 'none') {
                 return;
             }
@@ -16910,16 +17306,16 @@ var _event = {
 };
 
 var tableMenu = {
-    init: function init(_tableCore) {
+    init: function (_tableCore) {
         tableCore = _tableCore;
     },
-    hide: function hide() {
+    hide: function () {
         if (menuObj) {
             menuObj.style.display = 'none';
         }
         _event.unbind();
     },
-    hideSub: function hideSub() {
+    hideSub: function () {
         if (!menuObj) {
             return;
         }
@@ -16929,8 +17325,9 @@ var tableMenu = {
         if (colorPadDemo) {
             colorPadDemo.style.color = colorPadDemo.getAttribute('data-last-color') || '#fff';
         }
+
     },
-    isMenu: function isMenu(dom) {
+    isMenu: function (dom) {
         if (!dom) {
             return false;
         }
@@ -16938,13 +17335,13 @@ var tableMenu = {
             return domUtils.hasClass(p, CONST.CLASS.TABLE_TOOLS);
         }, true);
     },
-    remove: function remove() {
+    remove: function () {
         if (menuObj) {
             menuObj.parentNode.removeChild(menuObj);
             menuObj = null;
         }
     },
-    show: function show() {
+    show: function () {
         if (ENV.client.type.isPhone || ENV.client.type.isPad) {
             return;
         }
@@ -16971,18 +17368,15 @@ var tableMenu = {
         fixMenuPos();
         _event.bind();
     },
-    showSub: function showSub(item) {
+    showSub: function (item) {
         if (domUtils.hasClass(item, _class.active)) {
             domUtils.removeClass(item, _class.active);
             return;
         }
 
         //控制二级菜单 默认值
-        var canMerge,
-            canSplit,
-            cellAlign,
-            subItem,
-            zone = tableZone.getZone();
+        var canMerge, canSplit, cellAlign,
+            subItem, zone = tableZone.getZone();
         if (item.id === _id.cells) {
             canMerge = tableUtils.canMerge(zone.grid, zone.range);
             canSplit = tableUtils.canSplit(zone.grid, zone.range);
@@ -17029,13 +17423,10 @@ var tableMenu = {
 };
 
 module.exports = tableMenu;
-
 },{"../common/const":13,"../common/env":15,"../common/lang":17,"../domUtils/domExtend":24,"./tableUtils":41,"./tableZone":42}],41:[function(require,module,exports){
 /**
  * 表格操作的基本方法集合
  */
-'use strict';
-
 var ENV = require('./../common/env'),
     CONST = require('./../common/const'),
     utils = require('./../common/utils'),
@@ -17052,17 +17443,18 @@ var tableUtils = {
      * 初始化 默认值
      * @param options
      */
-    init: function init() {},
+    init: function () {
+    },
     /**
      * 判断当前是否允许新建表格
      * @param zone
      * @returns {boolean}
      */
-    canCreateTable: function canCreateTable(zone) {
-        var range = rangeUtils.getRange(),
-            tmpCell;
+    canCreateTable: function (zone) {
+        var range = rangeUtils.getRange(), tmpCell;
         if (range) {
-            tmpCell = domUtils.getParentByTagName(range.startContainer, ['table'], true, null) || domUtils.getParentByTagName(range.endContainer, ['table'], true, null);
+            tmpCell = domUtils.getParentByTagName(range.startContainer, ['table'], true, null) ||
+                domUtils.getParentByTagName(range.endContainer, ['table'], true, null);
             if (tmpCell) {
                 return false;
             }
@@ -17075,8 +17467,9 @@ var tableUtils = {
      * @param range
      * @returns {*|boolean}
      */
-    canMerge: function canMerge(grid, range) {
-        return grid && range && grid[range.minY][range.minX].cell !== grid[range.maxY][range.maxX].cell;
+    canMerge: function (grid, range) {
+        return (grid && range &&
+        grid[range.minY][range.minX].cell !== grid[range.maxY][range.maxX].cell);
     },
     /**
      * 判断选择的单元格是否能被拆分
@@ -17084,13 +17477,12 @@ var tableUtils = {
      * @param range
      * @returns {*}
      */
-    canSplit: function canSplit(grid, range) {
+    canSplit: function (grid, range) {
         if (!grid || !range) {
             return false;
         }
         var key;
-        var splitMap = {},
-            canSplit = false;
+        var splitMap = {}, canSplit = false;
         tableUtils.eachRange(grid, range, function (cellData) {
             key = cellData.x_src + '_' + cellData.y_src;
             if (cellData.fake && !splitMap[key]) {
@@ -17105,18 +17497,20 @@ var tableUtils = {
      * @param e
      * @returns {{tableContainer: null, before: boolean, after: boolean}}
      */
-    checkCaretInTableContainer: function checkCaretInTableContainer(e) {
+    checkCaretInTableContainer: function (e) {
         var result = {
             tableContainer: null,
             before: false,
             after: false
         };
-        var range, tableContainer, table, target, startOffset;
+        var range, tableContainer, table,
+            target, startOffset;
         var eType = /^(mouse|touch)/i;
 
         if (e && eType.test(e.type)) {
             //mouse || touch 事件触发时， selection 并没有被改变，所以不能使用 range 进行判断
             target = e.target;
+
         } else {
             range = rangeUtils.getRange();
             if (!range || !range.collapsed) {
@@ -17152,7 +17546,7 @@ var tableUtils = {
      * @param grid
      * @param range
      */
-    clearCellValue: function clearCellValue(grid, range) {
+    clearCellValue: function (grid, range) {
         if (!grid || !range) {
             return;
         }
@@ -17168,7 +17562,7 @@ var tableUtils = {
      * @param isClear
      * @returns {Element}
      */
-    cloneCell: function cloneCell(cell, isClear) {
+    cloneCell: function (cell, isClear) {
         var newCell = ENV.doc.createElement(cell.tagName);
         newCell.style.cssText = cell.style.cssText;
         if (isClear) {
@@ -17186,7 +17580,7 @@ var tableUtils = {
      * @param width
      * @returns {Element}
      */
-    createCell: function createCell(width) {
+    createCell: function (width) {
         var td = ENV.doc.createElement('td');
         td.setAttribute('align', 'left');
         td.setAttribute('valign', 'middle');
@@ -17202,16 +17596,14 @@ var tableUtils = {
      * @param row
      * @returns {Element}
      */
-    createTable: function createTable(col, row) {
+    createTable: function (col, row) {
         if (!col || !row) {
             return;
         }
 
         var table = ENV.doc.createElement('table'),
             tbody = ENV.doc.createElement('tbody'),
-            tr,
-            c,
-            r;
+            tr, c, r;
 
         for (r = 0; r < row; r++) {
             tr = ENV.doc.createElement('tr');
@@ -17222,7 +17614,7 @@ var tableUtils = {
         }
 
         table.appendChild(tbody);
-        table.style.width = ENV.options.table.colWidth * col + 'px';
+        table.style.width = (ENV.options.table.colWidth * col) + 'px';
         return table;
     },
     /**
@@ -17230,14 +17622,13 @@ var tableUtils = {
      * @param grid
      * @param col
      */
-    deleteCols: function deleteCols(grid, col) {
+    deleteCols: function (grid, col) {
         if (!grid || grid.length === 0 || col > grid[0].length) {
             return;
         }
         var table = domUtils.getParentByTagName(grid[0][0].cell, 'table', false, null);
 
-        var tmpCellList = [],
-            width = ENV.options.table.colWidth;
+        var tmpCellList = [], width = ENV.options.table.colWidth;
 
         var y, g, cell;
         for (y = 0; y < grid.length; y++) {
@@ -17254,7 +17645,7 @@ var tableUtils = {
 
         for (y = 0; y < tmpCellList.length; y++) {
             cell = tmpCellList[y];
-            cell.style.width = tableUtils.getCellWidth(cell) - width + 'px';
+            cell.style.width = (tableUtils.getCellWidth(cell) - width) + 'px';
         }
 
         //如果所有单元格都删除了，则删除表格
@@ -17263,13 +17654,14 @@ var tableUtils = {
         } else {
             tableUtils.fixTableWidth(table);
         }
+
     },
     /**
      * 删除指定的行
      * @param grid
      * @param row
      */
-    deleteRows: function deleteRows(grid, row) {
+    deleteRows: function (grid, row) {
         if (!grid || grid.length === 0 || row > grid.length) {
             return;
         }
@@ -17282,7 +17674,8 @@ var tableUtils = {
             g = grid[row][x];
             if (g.x_src == x && g.y_src < g.y) {
                 g.cell.rowSpan--;
-            } else if (g.x_src == x && g.y_src == g.y && g.cell.rowSpan > 1 && row + 1 < grid.length) {
+            } else if (g.x_src == x && g.y_src == g.y && g.cell.rowSpan > 1 &&
+                (row + 1) < grid.length) {
                 //row+1 防止表格异常的 rowSpan 设置
 
                 g.cell.rowSpan--;
@@ -17300,13 +17693,14 @@ var tableUtils = {
         } else {
             tableUtils.fixTableWidth(table);
         }
+
     },
     /**
      * 平均分配每列
      * @param table
      * @param grid
      */
-    distributeCols: function distributeCols(table, grid) {
+    distributeCols: function (table, grid) {
         if (!table || !grid) {
             return;
         }
@@ -17317,9 +17711,7 @@ var tableUtils = {
 
         var rows = table.rows,
             w = table.offsetWidth / colCount,
-            y,
-            x,
-            cell;
+            y, x, cell;
 
         for (y = rows.length - 1; y >= 0; y--) {
             for (x = rows[y].cells.length - 1; x >= 0; x--) {
@@ -17335,14 +17727,12 @@ var tableUtils = {
      * @param range
      * @param callback
      */
-    eachRange: function eachRange(grid, range, callback) {
+    eachRange: function (grid, range, callback) {
         if (!grid || !range || !callback || typeof callback !== 'function') {
             return;
         }
 
-        var x,
-            y,
-            cbBreak = true;
+        var x, y, cbBreak = true;
         for (y = range.minY; cbBreak !== false && y < grid.length && y <= range.maxY; y++) {
             for (x = range.minX; cbBreak !== false && x < grid[y].length && x <= range.maxX; x++) {
                 cbBreak = callback(grid[y][x]);
@@ -17352,7 +17742,7 @@ var tableUtils = {
     /**
      * 修正选中区域的 selection
      */
-    fixSelection: function fixSelection() {
+    fixSelection: function () {
         //避免选择文本时， 选中到 表格内部
         var range = rangeUtils.getRange();
         if (!range || range.collapsed) {
@@ -17364,12 +17754,12 @@ var tableUtils = {
             end = range.endContainer,
             endOffset = range.endOffset,
             startTr = domUtils.getParentByFilter(start, function (dom) {
-            return domUtils.hasClass(dom, CONST.CLASS.TABLE_CONTAINER);
-        }, true),
+                return domUtils.hasClass(dom, CONST.CLASS.TABLE_CONTAINER);
+            }, true),
             endTr = domUtils.getParentByFilter(end, function (dom) {
-            return domUtils.hasClass(dom, CONST.CLASS.TABLE_CONTAINER);
-        }, true);
-        if (!startTr && !endTr || startTr && endTr) {
+                return domUtils.hasClass(dom, CONST.CLASS.TABLE_CONTAINER);
+            }, true);
+        if ((!startTr && !endTr) || (startTr && endTr)) {
             return;
         }
 
@@ -17404,15 +17794,11 @@ var tableUtils = {
      * 修正 table 宽度
      * @param table
      */
-    fixTableWidth: function fixTableWidth(table) {
+    fixTableWidth: function (table) {
         if (!table) {
             return;
         }
-        var rows = table.rows,
-            i,
-            cell,
-            w,
-            tableWidth = 0;
+        var rows = table.rows, i, cell, w, tableWidth = 0;
         for (i = 0; i < rows[0].cells.length; i++) {
             cell = rows[0].cells[i];
             w = tableUtils.getCellWidth(cell);
@@ -17426,17 +17812,15 @@ var tableUtils = {
      * @param range
      * @returns {*}
      */
-    getAlign: function getAlign(grid, range) {
+    getAlign: function (grid, range) {
         if (!grid || !range) {
             return false;
         }
-        var align,
-            valign,
-            cell,
+        var align, valign, cell,
             result = {
-            align: '',
-            valign: ''
-        };
+                align: '',
+                valign: ''
+            };
         tableUtils.eachRange(grid, range, function (cellData) {
             cell = cellData.cell;
             if (!cellData.fake) {
@@ -17450,10 +17834,10 @@ var tableUtils = {
             }
 
             if (result.align !== null) {
-                result.align = result.align === align ? align : null;
+                result.align = (result.align === align) ? align : null;
             }
             if (result.valign !== null) {
-                result.valign = result.valign === valign ? valign : null;
+                result.valign = (result.valign === valign) ? valign : null;
             }
 
             return result.align !== null || result.valign !== null;
@@ -17466,7 +17850,7 @@ var tableUtils = {
      * @param cell
      * @returns {Number}
      */
-    getCellWidth: function getCellWidth(cell) {
+    getCellWidth: function (cell) {
         return parseInt(cell.style.width || cell.offsetWidth, 10);
     },
     /**
@@ -17475,7 +17859,7 @@ var tableUtils = {
      * @param cell
      * @returns {*}
      */
-    getCellData: function getCellData(grid, cell) {
+    getCellData: function (grid, cell) {
         if (!grid || !cell) {
             return null;
         }
@@ -17496,7 +17880,7 @@ var tableUtils = {
      * @param range
      * @returns {Array}
      */
-    getCellsByRange: function getCellsByRange(grid, range) {
+    getCellsByRange: function (grid, range) {
         var cellList = [];
         if (!grid || !range) {
             return cellList;
@@ -17513,7 +17897,7 @@ var tableUtils = {
      * @param target
      * @returns {null}
      */
-    getContianerExcludeTable: function getContianerExcludeTable(target) {
+    getContianerExcludeTable: function (target) {
         var cell = domUtils.getParentByTagName(target, ['th', 'td'], true, null);
         var tableContainer = !cell ? domUtils.getParentByFilter(target, function (dom) {
             return domUtils.hasClass(dom, CONST.CLASS.TABLE_CONTAINER);
@@ -17525,12 +17909,8 @@ var tableUtils = {
      * @param cellList
      * @returns {Array}
      */
-    getDomsByCellList: function getDomsByCellList(cellList) {
-        var i,
-            j,
-            cell,
-            tmpList,
-            domList = [];
+    getDomsByCellList: function (cellList) {
+        var i, j, cell, tmpList, domList = [];
         if (!cellList) {
             return domList;
         }
@@ -17552,7 +17932,7 @@ var tableUtils = {
      * @param cell
      * @returns {*}
      */
-    getNextCellInTable: function getNextCellInTable(cell) {
+    getNextCellInTable: function (cell) {
         var nextCell = cell.nextElementSibling;
         if (nextCell) {
             return nextCell;
@@ -17572,7 +17952,7 @@ var tableUtils = {
      * @param col
      * @returns {*}
      */
-    getNextCellDataInRow: function getNextCellDataInRow(gridRow, col) {
+    getNextCellDataInRow: function (gridRow, col) {
         if (!gridRow) {
             return null;
         }
@@ -17590,7 +17970,7 @@ var tableUtils = {
      * @param table
      * @returns {{clientX: *, clientY: *}}
      */
-    getMousePosition: function getMousePosition(e, table) {
+    getMousePosition: function (e, table) {
         var eventClient = utils.getEventClientPos(e);
         if (!table) {
             table = e.target ? domUtils.getParentByTagName(e.target, 'table', false, null) : null;
@@ -17608,7 +17988,7 @@ var tableUtils = {
      * @param col
      * @returns {*}
      */
-    getPreviousCellDataInRow: function getPreviousCellDataInRow(gridRow, col) {
+    getPreviousCellDataInRow: function (gridRow, col) {
         if (!gridRow) {
             return null;
         }
@@ -17625,7 +18005,7 @@ var tableUtils = {
      * @param cellData
      * @returns {*}
      */
-    getRangeByCellData: function getRangeByCellData(cellData) {
+    getRangeByCellData: function (cellData) {
         if (!cellData) {
             return {
                 minX: 0,
@@ -17648,7 +18028,7 @@ var tableUtils = {
      * @param endData
      * @returns {*}
      */
-    getRangeByCellsData: function getRangeByCellsData(grid, startData, endData) {
+    getRangeByCellsData: function (grid, startData, endData) {
         if (!grid || !startData || !endData) {
             return null;
         }
@@ -17663,18 +18043,9 @@ var tableUtils = {
             minY = Math.min(startRange.minY, endRange.minY),
             maxX = Math.max(startRange.maxX, endRange.maxX),
             maxY = Math.max(startRange.maxY, endRange.maxY),
-            _minX,
-            _minY,
-            _maxX,
-            _maxY;
+            _minX, _minY, _maxX, _maxY;
 
-        var x,
-            y,
-            g,
-            gRange,
-            k,
-            cellMap = {},
-            changeRange = true;
+        var x, y, g, gRange, k, cellMap = {}, changeRange = true;
 
         // console.log(minX + ',' + minY + ' - ' + maxX + ',' + maxY);
         while (changeRange) {
@@ -17705,7 +18076,8 @@ var tableUtils = {
                     maxX = Math.max(maxX, gRange.maxX);
                     maxY = Math.max(maxY, gRange.maxY);
 
-                    if (minX !== _minX || minY !== _minY || maxX !== _maxX || maxY !== _maxY) {
+                    if (minX !== _minX || minY !== _minY ||
+                        maxX !== _maxX || maxY !== _maxY) {
                         changeRange = true;
                         break;
                     }
@@ -17721,19 +18093,21 @@ var tableUtils = {
             minY: minY,
             maxX: maxX,
             maxY: maxY
-        };
+        }
     },
     /**
      * 根据 表格 获取 grid
      * @param table
      * @returns {*}
      */
-    getTableGrid: function getTableGrid(table) {
+    getTableGrid: function (table) {
         if (!table || !domUtils.isTag(table, 'table')) {
             return null;
         }
         var grid = [];
-        var c, r, rows, row, cells, cell, colSpan, rowSpan, i, j, x, y, x_src, y_src, startX;
+        var c, r, rows, row, cells, cell,
+            colSpan, rowSpan, i, j, x, y, x_src, y_src,
+            startX;
 
         rows = table.rows;
         for (r = 0; r < rows.length; r++) {
@@ -17767,7 +18141,7 @@ var tableUtils = {
                             x_src: x_src,
                             y_src: y_src,
                             fake: i > 0 || j > 0
-                        };
+                        }
                     }
                 }
             }
@@ -17787,13 +18161,10 @@ var tableUtils = {
      * @param html
      * @returns {{isTable: boolean, pasteDom: *}}
      */
-    getTemplateByHtmlForPaste: function getTemplateByHtmlForPaste(html) {
-        var pasteTables,
-            pasteTable,
-            pasteIsTable = false,
-            pasteDom,
-            i,
-            j,
+    getTemplateByHtmlForPaste: function (html) {
+        var pasteTables, pasteTable,
+            pasteIsTable = false, pasteDom,
+            i, j,
             template = ENV.doc.createElement('div');
 
         //excel 复制时， </html>后面有乱码，需要过滤
@@ -17838,28 +18209,24 @@ var tableUtils = {
         return {
             isTable: pasteIsTable,
             pasteDom: pasteDom
-        };
+        }
     },
     /**
      * 分析 并处理 剪切板内得到的 text 代码
      * @param txt
      * @returns {{isTable: boolean, pasteDom: Element}}
      */
-    getTemplateByTxtForPaste: function getTemplateByTxtForPaste(txt) {
+    getTemplateByTxtForPaste: function (txt) {
         txt = (txt || '').trim();
         var rows = txt.split('\n'),
-            x,
-            y,
-            cols,
+            x, y, cols,
             table = ENV.doc.createElement('table'),
             tbody = ENV.doc.createElement('tbody'),
-            tr,
-            td,
-            maxX = 0;
+            tr, td, maxX = 0;
 
         table.appendChild(tbody);
         for (y = 0; y < rows.length; y++) {
-            cols = rows[y].split('\t');
+            cols = rows[y].split('\u0009');
             tr = ENV.doc.createElement('tr');
             for (x = 0; x < cols.length; x++) {
                 td = tableUtils.createCell();
@@ -17886,17 +18253,14 @@ var tableUtils = {
         return {
             isTable: true,
             pasteDom: table
-        };
+        }
     },
     /**
      * 初始化 表格 样式
      * @param table
      */
-    initTable: function initTable(table) {
-        var i,
-            j,
-            cell,
-            needInit = false;
+    initTable: function (table) {
+        var i, j, cell, needInit = false;
         if (table.style.width.indexOf('%') > -1) {
             needInit = true;
         } else {
@@ -17925,13 +18289,9 @@ var tableUtils = {
      * 检查 并 初始化表格容器
      * @param _table
      */
-    initTableContainer: function initTableContainer(_table) {
+    initTableContainer: function (_table) {
         var tableList = _table ? [_table] : ENV.doc.querySelectorAll('table'),
-            table,
-            container,
-            tableBody,
-            i,
-            j;
+            table, container, tableBody, i, j;
 
         for (i = 0, j = tableList.length; i < j; i++) {
             table = tableList[i];
@@ -17967,15 +18327,14 @@ var tableUtils = {
      * @param grid
      * @param col
      */
-    insertCol: function insertCol(grid, col) {
+    insertCol: function (grid, col) {
         if (!grid) {
             return;
         }
         col = col || 0;
         var y, gRow, g, cell, newCell, nextCellData;
         var table = domUtils.getParentByTagName(grid[0][0].cell, 'table', false, null),
-            rows = table.rows,
-            lastCell = null;
+            rows = table.rows, lastCell = null;
         for (y = 0; y < grid.length; y++) {
             gRow = grid[y];
 
@@ -17992,14 +18351,15 @@ var tableUtils = {
                 g.cell.colSpan++;
 
                 // 需要调整 style
-                g.cell.style.width = tableUtils.getCellWidth(g.cell) + ENV.options.table.colWidth + 'px';
-            } else if (!cell || cell && g.x_src == col) {
+                g.cell.style.width = (tableUtils.getCellWidth(g.cell) + ENV.options.table.colWidth) + 'px';
+
+            } else if (!cell || (cell && g.x_src == col)) {
 
                 newCell = tableUtils.createCell(ENV.options.table.colWidth);
                 if (cell && g.y_src < g.y) {
                     //cell.rowSpan > 1
                     nextCellData = tableUtils.getNextCellDataInRow(grid[y], col);
-                    rows[y].insertBefore(newCell, nextCellData ? nextCellData.cell : null);
+                    rows[y].insertBefore(newCell, (nextCellData ? nextCellData.cell : null));
                 } else {
                     rows[y].insertBefore(newCell, cell);
                 }
@@ -18014,7 +18374,7 @@ var tableUtils = {
      * @param grid
      * @param row
      */
-    insertRow: function insertRow(grid, row) {
+    insertRow: function (grid, row) {
         if (!grid) {
             return;
         }
@@ -18030,13 +18390,14 @@ var tableUtils = {
                 //cell.rowSpan > 1
                 g.cell.rowSpan++;
                 // TODO 需要调整 style( height)
-            } else if (grid.length <= row || g.y_src == g.y) {
-                    newCell = tableUtils.cloneCell(g.cell, true);
-                    if (g.cell.colSpan > 1) {
-                        newCell.style.width = g.cell.offsetWidth / g.cell.colSpan + 'px';
-                    }
-                    tr.appendChild(newCell);
+
+            } else if (grid.length <= row || (g.y_src == g.y)) {
+                newCell = tableUtils.cloneCell(g.cell, true);
+                if (g.cell.colSpan > 1) {
+                    newCell.style.width = g.cell.offsetWidth / g.cell.colSpan + 'px';
                 }
+                tr.appendChild(newCell);
+            }
         }
 
         var target = gRow[0].cell.parentElement,
@@ -18052,7 +18413,7 @@ var tableUtils = {
      * @param range
      * @returns {*}
      */
-    mergeCell: function mergeCell(grid, range) {
+    mergeCell: function (grid, range) {
         if (!tableUtils.canMerge(grid, range)) {
             return null;
         }
@@ -18088,7 +18449,7 @@ var tableUtils = {
      * @param range
      * @param _alignType
      */
-    setCellAlign: function setCellAlign(grid, range, _alignType) {
+    setCellAlign: function (grid, range, _alignType) {
         if (!grid || !range) {
             return;
         }
@@ -18104,10 +18465,10 @@ var tableUtils = {
         tableUtils.eachRange(grid, range, function (cellData) {
             if (!cellData.fake) {
                 if (alignType.align) {
-                    domUtils.css(cellData.cell, { 'text-align': '' });
+                    domUtils.css(cellData.cell, {'text-align': ''});
                 }
                 if (alignType.valign) {
-                    domUtils.css(cellData.cell, { 'text-valign': '' });
+                    domUtils.css(cellData.cell, {'text-valign': ''});
                 }
                 domUtils.attr(cellData.cell, alignType);
             }
@@ -18119,7 +18480,7 @@ var tableUtils = {
      * @param range
      * @param bgColor
      */
-    setCellBg: function setCellBg(grid, range, bgColor) {
+    setCellBg: function (grid, range, bgColor) {
         if (!grid || !range) {
             return;
         }
@@ -18133,7 +18494,7 @@ var tableUtils = {
             if (!cellData.fake) {
                 domUtils.css(cellData.cell, {
                     'background-color': bgColor
-                });
+                })
             }
         });
     },
@@ -18144,15 +18505,10 @@ var tableUtils = {
      * @param col
      * @param dx
      */
-    setColWidth: function setColWidth(table, grid, col, dx) {
+    setColWidth: function (table, grid, col, dx) {
         dx = fixDx();
         var tableWidth = table.offsetWidth + dx;
-        var i,
-            j,
-            g,
-            key,
-            cells = [],
-            cellMap = {};
+        var i, j, g, key, cells = [], cellMap = {};
         for (i = 0, j = grid.length; i < j; i++) {
             g = grid[i][col];
             key = getKey(g);
@@ -18172,11 +18528,7 @@ var tableUtils = {
         }
 
         function fixDx() {
-            var y,
-                g,
-                cell,
-                maxDx = dx,
-                tmpDx;
+            var y, g, cell, maxDx = dx, tmpDx;
             for (y = 0; y < grid.length; y++) {
                 g = grid[y][col];
                 tmpDx = ENV.options.table.colWidthMin - g.cell.offsetWidth;
@@ -18205,12 +18557,8 @@ var tableUtils = {
      * @param row
      * @param dy
      */
-    setRowHeight: function setRowHeight(table, grid, row, dy) {
-        var x,
-            g,
-            cell,
-            maxDy = dy,
-            tmpDy;
+    setRowHeight: function (table, grid, row, dy) {
+        var x, g, cell, maxDy = dy, tmpDy;
         for (x = 0; x < grid[row].length; x++) {
             g = grid[row][x];
             tmpDy = ENV.options.table.rowHeightMin - g.cell.offsetHeight;
@@ -18240,7 +18588,7 @@ var tableUtils = {
      * @param range
      * @returns {*}
      */
-    splitCell: function splitCell(table, grid, range) {
+    splitCell: function (table, grid, range) {
         var x, y, g, key, dx, dy;
         var splitMap = tableUtils.canSplit(grid, range);
 
@@ -18281,13 +18629,10 @@ var tableUtils = {
 };
 
 module.exports = tableUtils;
-
 },{"../rangeUtils/rangeExtend":36,"./../common/const":13,"./../common/env":15,"./../common/utils":19,"./../domUtils/domExtend":24}],42:[function(require,module,exports){
 /*
  表格选择区域 控制
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     utils = require('../common/utils'),
@@ -18296,7 +18641,8 @@ var ENV = require('../common/env'),
     domUtils = require('../domUtils/domExtend'),
     rangeUtils = require('../rangeUtils/rangeExtend');
 
-var updateRenderTimer, updateRenderTimes, domModifiedTimer;
+var updateRenderTimer, updateRenderTimes,
+    domModifiedTimer;
 
 var zone = {
     active: false,
@@ -18312,10 +18658,8 @@ function initZone(table) {
 }
 
 function checkPageFirst(checkFirst, clientY) {
-    var isFirst = false,
-        isLast = false,
-        offset,
-        tableContainer;
+    var isFirst = false, isLast = false,
+        offset, tableContainer;
     var obj = checkFirst ? domUtils.getFirstDeepChild(ENV.doc.body) : domUtils.getLastDeepChild(ENV.doc.body);
     while (obj && !domUtils.canEdit(obj)) {
         obj = checkFirst ? domUtils.getNextNodeCanEdit(obj, false) : domUtils.getPreviousNodeCanEdit(obj, false);
@@ -18327,7 +18671,7 @@ function checkPageFirst(checkFirst, clientY) {
         }
         offset = domUtils.getOffset(obj);
         tableContainer = domUtils.getParentByFilter(obj, function (obj) {
-            return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER);
+            return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER)
         }, true);
         if (checkFirst && clientY < offset.top && tableContainer) {
             isFirst = true;
@@ -18341,7 +18685,7 @@ function checkPageFirst(checkFirst, clientY) {
         container: tableContainer,
         isFirst: isFirst,
         isLast: isLast
-    };
+    }
 }
 
 function clearSelectedCell() {
@@ -18394,7 +18738,7 @@ function isSingleCell() {
     var cellA = zone.grid[zone.range.minY][zone.range.minX],
         cellB = zone.grid[zone.range.maxY][zone.range.maxX],
         start = zone.start;
-    return cellA.cell == cellB.cell && cellB.cell == start.cell;
+    return (cellA.cell == cellB.cell && cellB.cell == start.cell);
 }
 function isStartFocus() {
     var range = rangeUtils.getRange();
@@ -18409,10 +18753,11 @@ function isStartFocus() {
     }
 
     //当前没有选中单元格  或  当前已选中该单元格时 true
-    if (!zone.start || zone.start.cell == start && start == end) {
+    if (!zone.start || (zone.start.cell == start && start == end)) {
         return true;
     }
-    if (!range.collapsed && zone.start.cell == start && start != end && range.endOffset === 0 && end == tableUtils.getNextCellInTable(start)) {
+    if (!range.collapsed && zone.start.cell == start && start != end &&
+        range.endOffset === 0 && end == tableUtils.getNextCellInTable(start)) {
         //如果单元格不是该行最后一个，全选时，endContainer 为下一个 td，且 endOffset 为 0
         //如果单元格是该行最后一个，全选时，endContainer 为下一行的第一个 td
         //这时候必须修正 range， 否则由于 amendUtils.splitAmendDomByRange 的修正，会导致输入的 第1个字符进入到下一个 td 内
@@ -18537,16 +18882,16 @@ function rangeRender() {
         height: sHeight + 'px'
     }, false);
     domUtils.css(rangeBorder.start.bottom, {
-        top: sHeight - 1 + 'px',
+        top: (sHeight - 1) + 'px',
         width: sWidth + 'px'
     }, false);
     domUtils.css(rangeBorder.start.right, {
-        left: sWidth - 1 + 'px',
+        left: (sWidth - 1) + 'px',
         height: sHeight + 'px'
     }, false);
     domUtils.css(rangeBorder.start.dot, {
-        top: sHeight - 1 - 4 + 'px',
-        left: sWidth - 1 - 4 + 'px'
+        top: (sHeight - 1 - 4) + 'px',
+        left: (sWidth - 1 - 4) + 'px'
     }, false);
 
     domUtils.css(rangeBorder.range.dom, {
@@ -18560,16 +18905,16 @@ function rangeRender() {
         height: rHeight + 'px'
     }, false);
     domUtils.css(rangeBorder.range.bottom, {
-        top: rHeight + 'px',
+        top: (rHeight) + 'px',
         width: rWidth + 'px'
     }, false);
     domUtils.css(rangeBorder.range.right, {
-        left: rWidth + 'px',
+        left: (rWidth) + 'px',
         height: rHeight + 'px'
     }, false);
     domUtils.css(rangeBorder.range.dot, {
-        top: rHeight - 4 + 'px',
-        left: rWidth - 4 + 'px'
+        top: (rHeight - 4) + 'px',
+        left: (rWidth - 4) + 'px'
     }, false);
 
     rangeBorder.start.dom.style.display = 'block';
@@ -18632,6 +18977,7 @@ function getRangeBorder() {
     rangeBorder.range.left = getDomById(rangeBorder.range.dom, CONST.ID.TABLE_RANGE_BORDER + '_range_left', 'div');
     rangeBorder.range.dot = getDomById(rangeBorder.range.dom, CONST.ID.TABLE_RANGE_BORDER + '_range_dot', 'div');
     return rangeBorder;
+
 }
 function setStartRange() {
     var sel;
@@ -18647,7 +18993,7 @@ function setStartRange() {
 }
 
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         ENV.event.add(CONST.EVENT.UPDATE_RENDER, _event.handler.updateRender);
@@ -18658,7 +19004,7 @@ var _event = {
             ENV.doc.body.addEventListener('resize', _event.handler.onDomModified);
         }
     },
-    unbind: function unbind() {
+    unbind: function () {
         var zone = tableZone.getZone();
         ENV.event.remove(CONST.EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         ENV.event.remove(CONST.EVENT.UPDATE_RENDER, _event.handler.updateRender);
@@ -18667,26 +19013,26 @@ var _event = {
             ENV.doc.body.removeEventListener('resize', _event.handler.onDomModified);
         }
     },
-    bindStopSelectStart: function bindStopSelectStart() {
+    bindStopSelectStart: function () {
         _event.unbindStopSelectStart();
         ENV.event.add(CONST.EVENT.ON_SELECT_START, _event.handler.onStopSelectStart);
     },
-    unbindStopSelectStart: function unbindStopSelectStart() {
+    unbindStopSelectStart: function () {
         ENV.event.remove(CONST.EVENT.ON_SELECT_START, _event.handler.onStopSelectStart);
     },
-    bindDragLine: function bindDragLine() {
+    bindDragLine: function () {
         _event.unbindDragLine();
         _event.bindStopSelectStart();
         ENV.event.add(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onDragLineMove);
         ENV.event.add(CONST.EVENT.ON_MOUSE_UP, _event.handler.onDragLineEnd);
     },
-    unbindDragLine: function unbindDragLine() {
+    unbindDragLine: function () {
         _event.unbindStopSelectStart();
         ENV.event.remove(CONST.EVENT.ON_MOUSE_MOVE, _event.handler.onDragLineMove);
         ENV.event.remove(CONST.EVENT.ON_MOUSE_UP, _event.handler.onDragLineEnd);
     },
     handler: {
-        onDragLineMove: function onDragLineMove(e) {
+        onDragLineMove: function (e) {
             var rangeBorder = getRangeBorder();
             var pos = tableUtils.getMousePosition(e, zone.table);
             if (rangeBorder.colLine.style.display == 'block') {
@@ -18695,7 +19041,7 @@ var _event = {
                 rowLineRender(pos.y - rangeBorder.rowLine.startMouse + rangeBorder.rowLine.startLine);
             }
         },
-        onDragLineEnd: function onDragLineEnd(e) {
+        onDragLineEnd: function (e) {
             _event.unbindDragLine();
             var rangeBorder = getRangeBorder();
             var pos = tableUtils.getMousePosition(e, zone.table);
@@ -18711,13 +19057,15 @@ var _event = {
                 cellData = rangeBorder.colLine.cellData;
                 if (cellData) {
                     tableUtils.initTable(zone.table);
-                    tableUtils.setColWidth(zone.table, zone.grid, cellData.x, pos.x - rangeBorder.colLine.startMouse);
+                    tableUtils.setColWidth(zone.table, zone.grid,
+                        cellData.x, pos.x - rangeBorder.colLine.startMouse);
                 }
             } else if (isDragRow && rangeBorder.rowLine.startMouse !== pos.y) {
                 cellData = rangeBorder.rowLine.cellData;
                 if (cellData) {
                     tableUtils.initTable(zone.table);
-                    tableUtils.setRowHeight(zone.table, zone.grid, cellData.y, pos.y - rangeBorder.rowLine.startMouse);
+                    tableUtils.setRowHeight(zone.table, zone.grid,
+                        cellData.y, pos.y - rangeBorder.rowLine.startMouse);
                 }
             }
 
@@ -18732,7 +19080,7 @@ var _event = {
 
             rangeRender();
         },
-        onSelectionChange: function onSelectionChange(e) {
+        onSelectionChange: function (e) {
             //当选中单元格时，不允许 选中 start 单元格以外的任何内容
             var sel = ENV.doc.getSelection();
             if (!isStartFocus()) {
@@ -18741,8 +19089,8 @@ var _event = {
                 utils.stopEvent(e);
             }
         },
-        onDomModified: function onDomModified(e) {
-            var needAutoRetry = e && e.type == 'DOMSubtreeModified' && e.target.nodeType === 1 && e.target.querySelector('img');
+        onDomModified: function (e) {
+            var needAutoRetry = (e && e.type == 'DOMSubtreeModified' && e.target.nodeType === 1 && e.target.querySelector('img'));
             if (domModifiedTimer) {
                 clearTimeout(domModifiedTimer);
             }
@@ -18750,11 +19098,11 @@ var _event = {
                 _event.handler.updateRender(e, needAutoRetry);
             }, 100);
         },
-        onStopSelectStart: function onStopSelectStart(e) {
+        onStopSelectStart: function (e) {
             utils.stopEvent(e);
             return false;
         },
-        updateRender: function updateRender(e, needAutoRetry) {
+        updateRender: function (e, needAutoRetry) {
             updateRenderTimes = 0;
             autoUpdate(needAutoRetry);
 
@@ -18777,7 +19125,7 @@ var _event = {
 };
 
 var tableZone = {
-    clear: function clear() {
+    clear: function () {
         zone.active = false;
         zone.start = null;
         zone.end = null;
@@ -18798,16 +19146,13 @@ var tableZone = {
     /**
      * 为防止笔记内只有一个表格时 无法在表格前后 或 多个表格之间输入内容
      */
-    checkAndInsertEmptyLine: function checkAndInsertEmptyLine(e) {
+    checkAndInsertEmptyLine: function (e) {
         var touch = e.changedTouches ? e.changedTouches[0] : null,
             target = touch ? touch.target : e.target,
             eventClient = utils.getEventClientPos(e),
             clientY = ENV.doc.body.scrollTop + eventClient.y;
-        var dom,
-            tableContainer,
-            checkResult,
-            isAfter = false,
-            isBefore = false;
+        var dom, tableContainer,
+            checkResult, isAfter = false, isBefore = false;
 
         if (target === ENV.doc.body || target === ENV.doc.body.parentNode) {
             if (target === ENV.doc.body) {
@@ -18820,9 +19165,11 @@ var tableZone = {
                 isAfter = checkResult.isLast;
                 tableContainer = checkResult.container;
             }
-        } else if (domUtils.hasClass(target, CONST.CLASS.TABLE_CONTAINER) || domUtils.hasClass(target, CONST.CLASS.TABLE_BODY)) {
+
+        } else if (domUtils.hasClass(target, CONST.CLASS.TABLE_CONTAINER) ||
+            domUtils.hasClass(target, CONST.CLASS.TABLE_BODY)) {
             tableContainer = domUtils.getParentByFilter(target, function (obj) {
-                return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER);
+                return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER)
             }, true);
             var offsetY = 0;
             if (tableContainer) {
@@ -18831,15 +19178,15 @@ var tableZone = {
             if (tableContainer && offsetY < 15) {
                 dom = domUtils.getPreviousNodeCanEdit(target, false);
                 if (!dom || domUtils.getParentByFilter(dom, function (obj) {
-                    return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER);
-                }, true)) {
+                        return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER)
+                    }, true)) {
                     isBefore = true;
                 }
-            } else if (tableContainer && target.offsetHeight - offsetY < 15) {
+            } else if (tableContainer && (target.offsetHeight - offsetY) < 15) {
                 dom = domUtils.getNextNodeCanEdit(target, false);
                 if (!dom || domUtils.getParentByFilter(dom, function (obj) {
-                    return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER);
-                }, true)) {
+                        return domUtils.hasClass(obj, CONST.CLASS.TABLE_CONTAINER)
+                    }, true)) {
                     isAfter = true;
                 }
             }
@@ -18853,20 +19200,17 @@ var tableZone = {
     /**
      * 为 复制/剪切 操作，准备 fragment
      */
-    getFragmentForCopy: function getFragmentForCopy() {
+    getFragmentForCopy: function () {
         var fragment = null;
         //无选中单元格时，不进行任何操作
         if (!zone.range) {
             return fragment;
         }
 
-        var x,
-            y,
-            g,
+        var x, y, g,
             table = ENV.doc.createElement('table'),
             tbody = ENV.doc.createElement('tbody'),
-            tr,
-            td;
+            tr, td;
 
         table.appendChild(tbody);
         for (y = zone.range.minY; y <= zone.range.maxY; y++) {
@@ -18877,7 +19221,7 @@ var tableZone = {
                     td = tableUtils.cloneCell(g.cell, false);
                     if (tr.children.length > 0) {
                         //保证 复制的纯文本 有 列间隔
-                        tr.appendChild(ENV.doc.createTextNode('\t'));
+                        tr.appendChild(ENV.doc.createTextNode('\u0009'));
                     }
                     tr.appendChild(td);
                 }
@@ -18892,10 +19236,10 @@ var tableZone = {
         return fragment;
     },
     getRangeBorder: getRangeBorder,
-    getSelectedCells: function getSelectedCells() {
+    getSelectedCells: function () {
         return tableUtils.getCellsByRange(zone.grid, zone.range);
     },
-    getZone: function getZone() {
+    getZone: function () {
         return {
             active: zone.active,
             table: zone.table,
@@ -18906,7 +19250,7 @@ var tableZone = {
         };
     },
     hasMergeCell: hasMergeCell,
-    insertEmptyLine: function insertEmptyLine(tableContainer, after) {
+    insertEmptyLine: function (tableContainer, after) {
         if (!tableContainer) {
             return;
         }
@@ -18917,14 +19261,12 @@ var tableZone = {
         tableZone.clear();
         rangeUtils.setRange(dom, 0);
     },
-    isRangeActiving: function isRangeActiving() {
+    isRangeActiving: function () {
         return zone.start && zone.active;
     },
     isSingleCell: isSingleCell,
-    isZoneBorder: function isZoneBorder(e) {
-        var obj = e.target,
-            x = e.offsetX,
-            y = e.offsetY,
+    isZoneBorder: function (e) {
+        var obj = e.target, x = e.offsetX, y = e.offsetY,
             eventClient = utils.getEventClientPos(e);
         var isScroll,
             isBodyBorder = false,
@@ -18934,12 +19276,14 @@ var tableZone = {
             isContainer = false;
 
         var isDot = !!domUtils.getParentByFilter(obj, function (dom) {
-            return dom && dom.nodeType == 1 && (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_dot' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_dot');
+            return dom && dom.nodeType == 1 &&
+                (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_dot' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_dot');
         }, true);
 
         if (!isDot) {
             isRight = !!domUtils.getParentByFilter(obj, function (dom) {
-                if (dom && dom.nodeType == 1 && (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_right' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_right')) {
+                if (dom && dom.nodeType == 1 &&
+                    (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_right' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_right')) {
                     return true;
                 }
 
@@ -18947,14 +19291,15 @@ var tableZone = {
                 if (dom && dom.nodeType == 1 && domUtils.isTag(dom, ['td', 'th'])) {
                     minX = dom.offsetWidth - 4;
                     maxX = dom.offsetWidth + 4;
-                    return x >= minX && x <= maxX;
+                    return (x >= minX && x <= maxX);
                 }
                 return false;
             }, true);
         }
         if (!isDot && !isRight) {
             isBottom = !!domUtils.getParentByFilter(obj, function (dom) {
-                if (dom && dom.nodeType == 1 && (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_bottom' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_bottom')) {
+                if (dom && dom.nodeType == 1 &&
+                    (dom.id == CONST.ID.TABLE_RANGE_BORDER + '_start_bottom' || dom.id == CONST.ID.TABLE_RANGE_BORDER + '_range_bottom')) {
                     return true;
                 }
 
@@ -18962,7 +19307,7 @@ var tableZone = {
                 if (dom && dom.nodeType == 1 && domUtils.isTag(dom, ['td', 'th'])) {
                     minY = dom.offsetHeight - 4;
                     maxY = dom.offsetHeight + 4;
-                    return y >= minY && y <= maxY;
+                    return (y >= minY && y <= maxY);
                 }
                 return false;
             }, true);
@@ -18980,12 +19325,14 @@ var tableZone = {
                 bodyStyle = ENV.win.getComputedStyle(obj);
                 bodyLeft = parseInt(bodyStyle.paddingLeft);
                 bodyRight = parseInt(bodyStyle.paddingRight);
-                isBodyBorder = eventClient.x <= bodyLeft || eventClient.x >= ENV.doc.body.offsetWidth - bodyRight;
+                isBodyBorder = eventClient.x <= bodyLeft || eventClient.x >= (ENV.doc.body.offsetWidth - bodyRight);
             }
         }
 
         //span 等 行级元素 clientWidth / clientHeight 为 0
-        isScroll = (e.target.clientWidth > 0 && e.target.clientWidth < e.offsetX || e.target.clientHeight > 0 && e.target.clientHeight < e.offsetY) && (e.target.offsetWidth >= e.offsetX || e.target.offsetHeight >= e.offsetY);
+        isScroll = ((e.target.clientWidth > 0 && e.target.clientWidth < e.offsetX) ||
+            (e.target.clientHeight > 0 && e.target.clientHeight < e.offsetY)) &&
+            (e.target.offsetWidth >= e.offsetX || e.target.offsetHeight >= e.offsetY);
 
         return {
             isBodyBorder: isBodyBorder,
@@ -18997,7 +19344,7 @@ var tableZone = {
             isScroll: isScroll
         };
     },
-    modify: function modify(endCell) {
+    modify: function (endCell) {
         if (!zone.active || !endCell) {
             return tableZone;
         }
@@ -19018,10 +19365,9 @@ var tableZone = {
 
         return tableZone;
     },
-    remove: function remove() {
+    remove: function () {
         tableZone.clear();
-        var rangeBorder = getRangeBorder(),
-            parent;
+        var rangeBorder = getRangeBorder(), parent;
         if (rangeBorder) {
             parent = rangeBorder.container.parentNode;
             if (parent) {
@@ -19029,7 +19375,7 @@ var tableZone = {
             }
         }
     },
-    setEnd: function setEnd(endCell, isForced) {
+    setEnd: function (endCell, isForced) {
         // console.log('setEnd');
         if (isForced) {
             zone.active = true;
@@ -19048,7 +19394,7 @@ var tableZone = {
 
         // console.log(zone);
     },
-    setStart: function setStart(startCell, curX, curY) {
+    setStart: function (startCell, curX, curY) {
         // console.log('setStart');
         if (!startCell) {
             tableZone.clear();
@@ -19073,7 +19419,8 @@ var tableZone = {
                 if (tmp && tmp.cell == zone.start.cell) {
                     zone.start = tmp;
                 }
-            } catch (e) {}
+            } catch (e) {
+            }
         }
         zone.range = tableUtils.getRangeByCellsData(zone.grid, zone.start, zone.start);
         rangeRender();
@@ -19081,7 +19428,7 @@ var tableZone = {
         return tableZone;
     },
     setStartRange: setStartRange,
-    startDragColLine: function startDragColLine(cell, x) {
+    startDragColLine: function (cell, x) {
         var table, cellData;
         if (cell && cell.nodeType == 1 && cell.id == CONST.ID.TABLE_RANGE_BORDER + '_start_right') {
             cellData = zone.start;
@@ -19112,8 +19459,7 @@ var tableZone = {
         }
 
         //如果 cell 是合并的单元格，需要找到 cell 所占的最后一列
-        var col = cellData.x,
-            nextCellData;
+        var col = cellData.x, nextCellData;
         while (col + 1 < zone.grid[cellData.y].length) {
             col++;
             nextCellData = zone.grid[cellData.y][col];
@@ -19135,8 +19481,9 @@ var tableZone = {
         var sel = ENV.doc.getSelection();
         sel.empty();
         _event.bindDragLine();
+
     },
-    startDragRowLine: function startDragRowLine(cell, y) {
+    startDragRowLine: function (cell, y) {
         var table, cellData;
         if (cell && cell.nodeType == 1 && cell.id == CONST.ID.TABLE_RANGE_BORDER + '_start_bottom') {
             cellData = zone.start;
@@ -19167,8 +19514,7 @@ var tableZone = {
         }
 
         //如果 cell 是合并的单元格，需要找到 cell 所占的最后一行
-        var row = cellData.y,
-            nextCellData;
+        var row = cellData.y, nextCellData;
         while (row + 1 < zone.grid.length) {
             row++;
             nextCellData = zone.grid[row][cellData.x];
@@ -19190,21 +19536,24 @@ var tableZone = {
         var sel = ENV.doc.getSelection();
         sel.empty();
         _event.bindDragLine();
+
     },
-    switchCell: function switchCell(target, direct) {
+    switchCell: function (target, direct) {
         if (!direct || !zone.start) {
             return null;
         }
         //目前不考虑 x、y 为任意值的情况， 只考虑移动一个单元格
-        direct.x = !direct.x ? 0 : direct.x > 0 ? 1 : -1;
-        direct.y = !direct.y ? 0 : direct.y > 0 ? 1 : -1;
+        direct.x = !direct.x ? 0 : (direct.x > 0 ? 1 : -1);
+        direct.y = !direct.y ? 0 : (direct.y > 0 ? 1 : -1);
         var x = target.x + direct.x;
         var y = target.y + direct.y;
 
         changeRowCheck();
 
         var cellData = target;
-        while (y >= 0 && y < zone.grid.length && x >= 0 && x < zone.grid[y].length && cellData.cell == target.cell) {
+        while (y >= 0 && y < zone.grid.length &&
+        x >= 0 && x < zone.grid[y].length &&
+        cellData.cell == target.cell) {
 
             cellData = zone.grid[y][x];
             x += direct.x;
@@ -19228,7 +19577,7 @@ var tableZone = {
             }
         }
     },
-    updateGrid: function updateGrid() {
+    updateGrid: function () {
         var rangeA, rangeB;
         if (zone.table) {
             if (zone.grid) {
@@ -19257,8 +19606,6 @@ module.exports = tableZone;
 /**
  * todolist 操作核心包 core
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     wizStyle = require('../common/wizStyle'),
@@ -19276,12 +19623,12 @@ var patchForReader = {
     docLockChecked: false,
     modifiedIdList: {},
     htmlToSave: '',
-    init: function init() {
+    init: function () {
         if (ENV.readonly) {
             patchForReader.modifiedIdList = {};
         }
     },
-    addModifiedId: function addModifiedId(obj) {
+    addModifiedId: function (obj) {
         if (!ENV.readonly) {
             return;
         }
@@ -19292,17 +19639,16 @@ var patchForReader = {
             patchForReader.modifiedIdList[obj.id] = obj.checked;
         }
     },
-    getModifiedIdList: function getModifiedIdList() {
-        var k,
-            idList = [];
+    getModifiedIdList: function () {
+        var k, idList = [];
         for (k in patchForReader.modifiedIdList) {
             if (patchForReader.modifiedIdList.hasOwnProperty(k)) {
-                idList.push({ id: k, checked: patchForReader.modifiedIdList[k] });
+                idList.push({id: k, checked: patchForReader.modifiedIdList[k]});
             }
         }
         return idList;
     },
-    modifyDoc: function modifyDoc() {
+    modifyDoc: function () {
         var html = '';
 
         var idList = patchForReader.getModifiedIdList();
@@ -19324,11 +19670,7 @@ var patchForReader = {
             _win = ENV.win,
             iframeDocument = iframe.contentDocument,
             isPersonal = todoRoute.isPersonalDocument(),
-            i,
-            id,
-            checked,
-            checkbox,
-            main;
+            i, id, checked, checkbox, main;
 
         iframeDocument.open("text/html", "replace");
         iframeDocument.write(html);
@@ -19395,7 +19737,7 @@ function checkTodo(checkbox, e) {
 
 //TODO 所有配色 要考虑到 夜间模式
 var _event = {
-    bind: function bind() {
+    bind: function () {
         _event.unbind();
         ENV.event.add(CONST.EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         ENV.event.add(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
@@ -19407,7 +19749,7 @@ var _event = {
             ENV.event.add(CONST.EVENT.ON_CLICK, _event.handler.onClick);
         }
     },
-    unbind: function unbind() {
+    unbind: function () {
         ENV.event.remove(CONST.EVENT.ON_CLICK, _event.handler.onClick);
         ENV.event.remove(CONST.EVENT.ON_SELECT_CHANGE, _event.handler.onSelectionChange);
         ENV.event.remove(CONST.EVENT.ON_TOUCH_END, _event.handler.onTouchEnd);
@@ -19415,22 +19757,22 @@ var _event = {
         ENV.event.remove(CONST.EVENT.AFTER_RESTORE_HISTORY, _event.handler.afterRestoreHistory);
     },
     handler: {
-        afterRestoreHistory: function afterRestoreHistory() {
+        afterRestoreHistory: function () {
             //恢复历史后，需要检查 todoList 的 style 样式
             todoUtils.checkTodoStyle(false);
             wizStyle.restoreUserAvatarStyle();
         },
-        onClick: function onClick(e) {
+        onClick: function (e) {
             beforeCheckTodo(e);
         },
-        onCheckDocLock: function onCheckDocLock(cancel, needCallAgain) {
+        onCheckDocLock: function (cancel, needCallAgain) {
             patchForReader.docLockChecked = !needCallAgain;
             if (!cancel) {
                 checkTodo(patchForReader.curCheckbox);
             }
             patchForReader.curCheckbox = null;
         },
-        onKeyDown: function onKeyDown(e) {
+        onKeyDown: function (e) {
             if (!todoRoute.hasPermission()) {
                 return true;
             }
@@ -19441,7 +19783,11 @@ var _event = {
 
             var keyCode = e.keyCode || e.which;
 
-            var start, startOffset, end, isAfterCheck, main, container, tmpMain, isLineEnd, mainParentTag, mainParent, childNodes, i, dom;
+            var start, startOffset, end, endOffset,
+                isAfterCheck, main, container, tmpMain,
+                isLineEnd, isEmpty,
+                mainParentTag, mainParent,
+                childNodes, i, dom;
 
             var rangeList;
             if (!range.collapsed) {
@@ -19460,6 +19806,19 @@ var _event = {
                             if (tmpMain) {
                                 container = tmpMain.parentNode;
                                 todoUtils.cancelTodo(container, true);
+                            }
+                            //如果 todoList 是 光标范围最后一行，则需要修正 range
+                            end = range.endContainer;
+                            if (end.nodeType !== 3) {
+                                end = end.childNodes[range.endOffset];
+                                endOffset = 0;
+                            }
+                            if (todoUtils.getContainerFromChild(dom) == todoUtils.getContainerFromChild(end)) {
+                                if (!end.parentNode) {
+                                    end = container;
+                                    endOffset = 0;
+                                }
+                                rangeUtils.setRange(range.startContainer, range.startOffset, end, endOffset);
                             }
                         }
                     }
@@ -19526,15 +19885,6 @@ var _event = {
                 return true;
             }
 
-            // if (isBefore && container) {
-            //     //如果在 checkbox 前输入回车
-            //     node = ENV.doc.createElement(container.tagName);
-            //     node.insertBefore(ENV.doc.createElement('br'), null);
-            //     container.parentNode.insertBefore(node, container);
-            //     utils.stopEvent(e);
-            //     return;
-            // }
-
             if (todoUtils.isEmptyContainer(container)) {
                 //如果当前 todoList 为空，则 取消 todoList
                 container.innerHTML = '<br>';
@@ -19544,53 +19894,70 @@ var _event = {
                 return false;
             }
 
-            mainParentTag = container == ENV.doc.body ? 'div' : container.tagName;
-            mainParent = ENV.doc.createElement(mainParentTag);
-            domUtils.before(container, mainParent, true);
             range.deleteContents();
-            //判断光标是否在 main 的 end 位置
+            todoUtils.clearMain(main);
+            //判断光标是否在 main 内
             var isInMain = false;
             if (main) {
                 if (range.startContainer == main && range.startOffset !== domUtils.getDomEndOffset(main)) {
                     isInMain = true;
-                } else if (todoUtils.getMainFromChild(range.startContainer) && (range.startOffset !== domUtils.getDomEndOffset(range.startContainer) || range.startContainer.nextSibling)) {
+                } else if (todoUtils.getMainFromChild(range.startContainer) &&
+                    (range.startOffset !== domUtils.getDomEndOffset(range.startContainer) || range.startContainer.nextSibling)) {
                     isInMain = true;
                 }
             }
             range.setEndAfter(isInMain ? main : container);
-            var frag = range.extractContents();
-            childNodes = [];
-            for (i = 0; i < frag.childNodes.length; i++) {
-                childNodes.push(frag.childNodes[i]);
-            }
-            main = todoUtils.setTodo(mainParent, todoRoute);
-            todoUtils.insertToMain(childNodes, main);
+            isEmpty = !(range.toString().replace(CONST.FILL_CHAR_REG, '').length);
+            var frag;
+            if (!isEmpty) {
+                frag = range.extractContents();
+                childNodes = [];
+                for (i = 0; i < frag.childNodes.length; i++) {
+                    childNodes.push(frag.childNodes[i]);
+                }
+                mainParentTag = container == ENV.doc.body ? 'div' : container.tagName;
+                mainParent = ENV.doc.createElement(mainParentTag);
+                domUtils.before(container, mainParent, true);
+                main = todoUtils.setTodo(mainParent, todoRoute);
+                todoUtils.insertToMain(childNodes, main);
 
-            // 如果换行操作的当前 块元素是 todoList，则 frag 内会自动生成 main
-            // 必须要插入到 document 内才能正常清理 frag 内 main & block 元素
-            for (i = 0; i < childNodes.length; i++) {
-                todoUtils.clearBlock(childNodes[i]);
+                // 如果换行操作的当前 块元素是 todoList，则 frag 内会自动生成 main
+                // 必须要插入到 document 内才能正常清理 frag 内 main & block 元素
+                for (i = 0; i < childNodes.length; i++) {
+                    todoUtils.clearBlock(childNodes[i]);
+                }
+
+                rangeUtils.setRange(main, main.childNodes.length);
+            } else {
+                mainParent = todoUtils.cloneTodo(container);
+                main = todoUtils.getMainInDom(mainParent);
+                domUtils.before(container, mainParent, true);
+                dom = domUtils.getLastDeepChild(mainParent);
+                if (dom.nodeType === 3) {
+                    dom.nodeValue = CONST.FILL_CHAR + CONST.FILL_CHAR;
+                } else {
+                    dom.appendChild(ENV.doc.createTextNode(CONST.FILL_CHAR + CONST.FILL_CHAR));
+                    dom = dom.childNodes[0];
+                }
+                rangeUtils.setRange(dom, 1);
             }
 
-            var inheritDom = main.childNodes[1];
-            if (inheritDom && inheritDom.nodeType === 1 && domUtils.isEmptyDom(inheritDom)) {
-                inheritDom.innerHTML = CONST.FILL_CHAR;
-            }
-            rangeUtils.setRange(main, main.childNodes.length);
             utils.stopEvent(e);
 
-            if (main.getBoundingClientRect().top + main.clientHeight > ENV.doc.documentElement.clientHeight || main.getBoundingClientRect().top + main.clientHeight < 0) {
+            if (main.getBoundingClientRect().top + main.clientHeight > ENV.doc.documentElement.clientHeight
+                || main.getBoundingClientRect().top + main.clientHeight < 0) {
                 var mainX = main.getBoundingClientRect().left + ENV.doc.body.scrollLeft;
                 var mainY = ENV.doc.body.scrollTop + main.clientHeight;
                 window.scrollTo(mainX, mainY);
             }
         },
-        onSelectionChange: function onSelectionChange(e) {
+        onSelectionChange: function (e) {
             var range = rangeUtils.getRange();
             if (!range) {
                 return;
             }
-            var main, checkbox, start, startOffset, end, endOffset;
+            var main, checkbox,
+                end, endOffset;
             if (!range.collapsed) {
                 end = range.endContainer;
                 endOffset = range.endOffset;
@@ -19598,26 +19965,22 @@ var _event = {
             if (todoUtils.isCaretBeforeCheckbox()) {
                 main = todoUtils.getMainByCaret();
                 checkbox = todoUtils.getCheckbox(main);
-
                 if (checkbox && checkbox.nextSibling) {
-                    start = checkbox.nextSibling;
-                    startOffset = 0;
-                } else if (main) {
-                    start = main;
-                    startOffset = domUtils.getDomEndOffset(main);
+                    end = checkbox.nextSibling;
+                    endOffset = 0;
                 }
 
-                if (start && end) {
-                    rangeUtils.setRange(start, startOffset, end, endOffset);
-                } else if (start) {
-                    rangeUtils.setRange(start, startOffset);
+                if (!range.collapsed) {
+                    rangeUtils.setRange(range.startContainer, range.startOffset, end, endOffset);
+                } else {
+                    rangeUtils.setRange(end, endOffset);
                 }
             }
         },
-        onTouchStart: function onTouchStart(e) {
+        onTouchStart: function (e) {
             curTouchTarget = e.target;
         },
-        onTouchEnd: function onTouchEnd(e) {
+        onTouchEnd: function (e) {
             if (e.target !== curTouchTarget) {
                 return;
             }
@@ -19628,21 +19991,22 @@ var _event = {
 };
 
 var todoCore = {
-    init: function init() {},
-    on: function on() {
+    init: function () {
+    },
+    on: function () {
         todoUtils.oldPatch.fixOldTodo();
         patchForReader.init();
         _event.bind();
         todoRoute = todoRouteForClient.getRoute();
         todoUtils.checkTodoStyle(true);
     },
-    off: function off() {
+    off: function () {
         _event.unbind();
     },
-    checkTodoStyle: function checkTodoStyle() {
+    checkTodoStyle: function () {
         todoUtils.checkTodoStyle(false);
     },
-    closeDocument: function closeDocument() {
+    closeDocument: function () {
         var html = patchForReader.modifyDoc();
 
         if (!!html && !ENV.client.type.isIOS && !ENV.client.type.isMac) {
@@ -19658,10 +20022,10 @@ var todoCore = {
     },
     onCheckDocLock: _event.handler.onCheckDocLock,
     onKeyDown: _event.handler.onKeyDown,
-    setTodo: function setTodo() {
+    setTodo: function () {
         todoUtils.setTodo(null, todoRoute);
     },
-    setTodoInfo: function setTodoInfo(options) {
+    setTodoInfo: function (options) {
         if (todoRoute.setTodoInfo) {
             todoRoute.setTodoInfo(options);
         }
@@ -19674,8 +20038,6 @@ module.exports = todoCore;
 /**
  * todolist 客户端适配接口
  */
-'use strict';
-
 var ENV = require('../common/env'),
     base64 = require('../common/base64');
 
@@ -19689,7 +20051,6 @@ function routeForWindows() {
     this.getUserGuid = getUserGuid;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
-    this.setDocumentModified = setDocumentModified;
     this.setDocumentType = setDocumentType;
     this.hasPermission = hasPermission;
     //for Reader
@@ -19715,10 +20076,6 @@ function routeForWindows() {
         } catch (e) {
             return false;
         }
-    }
-
-    function setDocumentModified() {
-        // winExternal.SetContentModified(true);
     }
 
     function setDocumentType(type) {
@@ -19758,7 +20115,8 @@ function routeForWindows() {
             WizReader.todo[callback](false, false);
             return;
         }
-        winExternal.ExecuteCommand("OnClickingChecklist", "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
+        winExternal.ExecuteCommand("OnClickingChecklist",
+            "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
     }
 }
 
@@ -19768,7 +20126,6 @@ function routeForWeb() {
     this.getUserGuid = getUserGuid;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
-    this.setDocumentModified = setDocumentModified;
     this.setDocumentType = setDocumentType;
     this.hasPermission = hasPermission;
     //for Reader
@@ -19796,10 +20153,6 @@ function routeForWeb() {
         // catch (e) {
         // 	return false;
         // }
-    }
-
-    function setDocumentModified() {
-        // this.wizEditor.SetContentModified(true);
     }
 
     function setDocumentType(type) {
@@ -19840,6 +20193,7 @@ function routeForWeb() {
         // this.WizPcEditor.ExecuteCommand("OnClickingChecklist",
         //     "WizReader.todo." + callback + "({cancel}, {needCallAgain});", "readingnote");
     }
+
 }
 
 function routeForMac() {
@@ -19850,7 +20204,6 @@ function routeForMac() {
     this.getUserGuid = getUserGuid;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
-    this.setDocumentModified = setDocumentModified;
     this.setDocumentType = setDocumentType;
     this.hasPermission = hasPermission;
     //for Reader
@@ -19874,10 +20227,6 @@ function routeForMac() {
         return qtEditor.isPersonalDocument;
     }
 
-    function setDocumentModified() {
-        // qtEditor.setContentsChanged(true);
-    }
-
     function setDocumentType(type) {
         qtEditor.changeCurrentDocumentType(type);
     }
@@ -19890,7 +20239,9 @@ function routeForMac() {
         return qtEditor.currentNoteHtml;
     }
 
-    function saveDoc(html, resources) {}
+    function saveDoc(html, resources) {
+
+    }
 
     function checkDocLock(callback) {
         qtEditor.clickingTodoCallBack.connect(WizReader.todo[callback]);
@@ -19906,7 +20257,6 @@ function routeForAndroid() {
     this.getUserGuid = getUserGuid;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
-    this.setDocumentModified = setDocumentModified;
     this.setDocumentType = setDocumentType;
     this.hasPermission = hasPermission;
     //for Reader
@@ -19929,10 +20279,6 @@ function routeForAndroid() {
 
     function isPersonalDocument() {
         return androidWizNote.isPersonalDocument();
-    }
-
-    function setDocumentModified() {
-        // androidWizNote.setDocumentModified();
     }
 
     function setDocumentType(type) {
@@ -19966,7 +20312,6 @@ function routeForIOS() {
     this.getUserGuid = getUserGuid;
     this.getUserAvatarFileName = getUserAvatarFileName;
     this.isPersonalDocument = isPersonalDocument;
-    this.setDocumentModified = setDocumentModified;
     this.setDocumentType = setDocumentType;
     this.setTodoInfo = setTodoInfo;
     this.hasPermission = hasPermission;
@@ -20011,10 +20356,6 @@ function routeForIOS() {
         ENV.win.location.href = "wiztodolist://setDocHtml/" + "?html=" + html + "&resource=" + resources;
     }
 
-    function setDocumentModified() {
-        ENV.win.location.href = "wiztodolist://setDocumentModified/";
-    }
-
     function setDocumentType(type) {
         ENV.win.location.href = "wiztodolist://setDocumentType/" + "?type=" + type;
     }
@@ -20033,7 +20374,7 @@ function routeForIOS() {
 }
 
 var todoClientRoute = {
-    getRoute: function getRoute() {
+    getRoute: function () {
         var route = null;
         if (ENV.client.type.isWin) {
             route = new routeForWindows();
@@ -20049,19 +20390,16 @@ var todoClientRoute = {
 
         return route;
     },
-    setQtEditor: function setQtEditor() {
+    setQtEditor: function() {
         qtEditor = ENV.win.WizQtEditor;
     }
 };
 
 module.exports = todoClientRoute;
-
 },{"../common/base64":12,"../common/env":15}],45:[function(require,module,exports){
 /**
  * todolist 基本工具包
  */
-'use strict';
-
 var ENV = require('../common/env'),
     CONST = require('../common/const'),
     Lang = require('../common/lang'),
@@ -20073,12 +20411,13 @@ var ENV = require('../common/env'),
     historyUtils = require('../common/historyUtils');
 
 var todoUtils = {
-    addUserInfo: function addUserInfo(main, isChecked, todoId, todoRoute) {
+    addUserInfo: function (main, isChecked, todoId, todoRoute) {
         if (!main) {
             return;
         }
 
-        var userGuid, userName, avatarUrl, dt, userHtml, span, child, next, i;
+        var userGuid, userName, avatarUrl, dt,
+            userHtml, span, child, next, i;
 
         userGuid = todoUtils.deleteUserInfo(main.parentNode);
         if (!isChecked) {
@@ -20129,20 +20468,16 @@ var todoUtils = {
      * @param dom
      * @returns {boolean}
      */
-    canBeContainer: function canBeContainer(dom) {
+    canBeContainer: function (dom) {
         return !domUtils.isTag(dom, ['body', 'td', 'th']) && domUtils.isBlockDom(dom);
     },
-    cancelTodo: function cancelTodo(container, noSetRange) {
+    cancelTodo: function (container, noSetRange) {
         if (!container) {
             return;
         }
         historyUtils.saveSnap(false);
-        var range = rangeUtils.getRange(),
-            start,
-            startOffset,
-            main,
-            todoFirst,
-            userGuid;
+        var range = rangeUtils.getRange(), start, startOffset,
+            main, todoFirst, userGuid;
         start = range ? range.startContainer : null;
         startOffset = range ? range.startOffset : 0;
         main = todoUtils.getMainInDom(container);
@@ -20165,7 +20500,7 @@ var todoUtils = {
         //修正 todoList style
         todoUtils.checkTodoStyle(false);
     },
-    check: function check(main, isChecked) {
+    check: function (main, isChecked) {
         if (isChecked) {
             domUtils.removeClass(main, CONST.CLASS.TODO_UNCHECKED);
             domUtils.addClass(main, CONST.CLASS.TODO_CHECKED);
@@ -20177,7 +20512,7 @@ var todoUtils = {
         var state = isChecked ? 'checked' : 'unchecked';
         check.setAttribute(CONST.ATTR.TODO_CHECK, state);
     },
-    checkTodo: function checkTodo(checkImg, todoRoute) {
+    checkTodo: function (checkImg, todoRoute) {
         var result = {
             id: '',
             checked: false
@@ -20200,13 +20535,9 @@ var todoUtils = {
             todoUtils.addUserInfo(main, isChecked, checkImg.id, todoRoute);
         }
 
-        if (todoRoute.isPersonalDocument() || !ENV.client.type.isIOS) {
-            todoRoute.setDocumentModified();
-        }
-
         return result;
     },
-    checkTodoStyle: function checkTodoStyle(isForced) {
+    checkTodoStyle: function (isForced) {
         var todoObj = ENV.doc.querySelector('.' + CONST.CLASS.TODO_MAIN);
         if (todoObj) {
             wizStyle.insertTodoStyle(isForced);
@@ -20214,8 +20545,8 @@ var todoUtils = {
             wizStyle.removeTodoStyle();
         }
     },
-    clearBlock: function clearBlock(dom) {
-        if (!dom || dom.nodeType !== 1 && dom.nodeType !== 3 && dom.nodeType !== 11) {
+    clearBlock: function (dom) {
+        if (!dom || (dom.nodeType !== 1 && dom.nodeType !== 3 && dom.nodeType !== 11)) {
             return false;
         }
         var child, i;
@@ -20227,9 +20558,8 @@ var todoUtils = {
         }
 
         var isFragment = dom.nodeType == 11,
-
         // isMain = isFragment ? false : todoUtils.isMain(dom),
-        isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
+            isTodoTag = isFragment ? false : todoUtils.isTodoTag(dom),
             isBlock = isFragment ? false : domUtils.isBlockDom(dom);
         if (isBlock && domUtils.isEmptyDom(dom)) {
             //为保证 样式 正常传递， 不能随便 removeChild
@@ -20245,21 +20575,101 @@ var todoUtils = {
         return false;
     },
     /**
+     * 清理 main 内多余 dom （主要针对 特殊字符 or <br> 结尾的dom）
+     * @param main
+     */
+    clearMain: function (main) {
+        if (!main) {
+            return;
+        }
+        var last = domUtils.getLastDeepChild(main),
+            check = todoUtils.getCheckbox(main),
+            parent;
+
+        if (last == check) {
+            return;
+        }
+        if ((last.nodeType !== 1 && last.nodeType !== 3) ||
+            (last.nodeType == 1 && domUtils.isTag(last, 'br')) ||
+            (last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0)) {
+            parent = last.parentNode;
+            while (parent != main && parent.childNodes.length == 1) {
+                last = parent;
+                parent = parent.parentNode;
+            }
+            main.removeChild(last);
+
+            //避免 br & 特殊符号等元素同时存在，所以需要逐一过滤
+            todoUtils.clearMain(main);
+        }
+    },
+    /**
      * 清理 TodoList 的 class
      * @param dom
      */
-    clearTodoClass: function clearTodoClass(dom) {
+    clearTodoClass: function (dom) {
         if (!dom) {
             return;
         }
-        domUtils.removeClass(dom, [CONST.CLASS.TODO_ACCOUNT, CONST.CLASS.TODO_AVATAR, CONST.CLASS.TODO_DATE, CONST.CLASS.TODO_LAYER, CONST.CLASS.TODO_MAIN, CONST.CLASS.TODO_CHECKED, CONST.CLASS.TODO_UNCHECKED, CONST.CLASS.TODO_USER_INFO]);
+        domUtils.removeClass(dom,
+            [CONST.CLASS.TODO_ACCOUNT, CONST.CLASS.TODO_AVATAR,
+                CONST.CLASS.TODO_DATE, CONST.CLASS.TODO_LAYER,
+                CONST.CLASS.TODO_MAIN, CONST.CLASS.TODO_CHECKED,
+                CONST.CLASS.TODO_UNCHECKED, CONST.CLASS.TODO_USER_INFO]);
     },
-    deleteMain: function deleteMain(main) {
+    /**
+     * 复制 todo
+     * @param container
+     * @returns {*}
+     */
+    cloneTodo: function (container) {
+        if (!container) {
+            return null;
+        }
+        var _container, _main, _check, _last,
+            main, check, last, params;
+        _container = domUtils.clone(container, true);
+        main = todoUtils.getMainInDom(container);
+        if (!main) {
+            return null;
+        }
+        _main = domUtils.clone(main, true);
+        domUtils.removeClass(_main, CONST.CLASS.TODO_CHECKED);
+        domUtils.addClass(_main, CONST.CLASS.TODO_UNCHECKED);
+
+        check = todoUtils.getCheckbox(main);
+        _check = domUtils.clone(check, true);
+        if (_check) {
+            _main.appendChild(_check);
+            params = {};
+            params[CONST.ATTR.TODO_CHECK] = 'unchecked';
+            domUtils.attr(_check, params);
+        }
+        var tmp = main, _tmp = _main;
+        while (tmp && tmp.childNodes && tmp.childNodes.length) {
+            last = tmp.childNodes[tmp.childNodes.length - 1];
+            if (last.nodeType === 3 && last.nodeValue.replace(CONST.FILL_CHAR_REG, '').length === 0) {
+                last = last.previousSibling;
+            }
+            if (!last || last == check) {
+                _last = ENV.doc.createTextNode('');
+                last = null;
+            } else {
+                _last = domUtils.clone(last, true);
+            }
+            _tmp.appendChild(_last);
+            _tmp = _last;
+            tmp = last;
+        }
+        _container.appendChild(_main);
+        return _container;
+    },
+    deleteMain: function (main) {
         return domUtils.stripDom(main, function (dom) {
-            return !todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom);
+            return (!todoUtils.isMain(dom) && !todoUtils.isCheckbox(dom))
         });
     },
-    deleteUserInfo: function deleteUserInfo(container) {
+    deleteUserInfo: function (container) {
         var userGuid = '';
         var main = todoUtils.getMainInDom(container);
 
@@ -20287,18 +20697,15 @@ var todoUtils = {
         }
         return userGuid;
     },
-    fixCheckbox: function fixCheckbox(checkImg, isForOld) {
+    fixCheckbox: function (checkImg, isForOld) {
         if (!checkImg) {
             return;
         }
         var container = domUtils.getBlockParent(checkImg),
             canBeContainer = todoUtils.canBeContainer(container),
             main = ENV.doc.createElement('span'),
-            newContainer,
-            next,
-            tmpNext,
-            stopInsert = false,
-            dom;
+            newContainer, next, tmpNext,
+            stopInsert = false, dom;
         main.className = (isForOld ? CONST.CLASS.TODO_LABEL_OLD : CONST.CLASS.TODO_MAIN) + ' ' + CONST.CLASS.TODO_UNCHECKED;
 
         newContainer = ENV.doc.createElement(canBeContainer ? container.tagName : 'div');
@@ -20330,24 +20737,34 @@ var todoUtils = {
             next = tmpNext;
         }
     },
-    getCheckbox: function getCheckbox(main) {
+    getCheckbox: function (main) {
         if (!main) {
             return null;
         }
         return main.querySelector('.' + CONST.CLASS.TODO_CHECKBOX);
     },
-    getUserInfoHtml: function getUserInfoHtml(userGuid, userName, dt) {
-        var html = '<span class="' + CONST.CLASS.TODO_ACCOUNT + '">' + '<input readonly class="%1" />' + '%2, ' + '</span>' + '<span class="' + CONST.CLASS.TODO_DATE + '">%3.</span>';
+    getUserInfoHtml: function (userGuid, userName, dt) {
+        var html = '<span class="' + CONST.CLASS.TODO_ACCOUNT + '">' +
+            '<input readonly class="%1" />' +
+            '%2, ' +
+            '</span>' +
+            '<span class="' + CONST.CLASS.TODO_DATE + '">%3.</span>';
         var avatarClass = CONST.CLASS.TODO_USER_AVATAR + base64.encode(userGuid);
-        return html.replace('%1', CONST.CLASS.IMG_NOT_DRAG + ' ' + CONST.CLASS.TODO_AVATAR + ' ' + avatarClass).replace('%2', userName).replace('%3', dt);
+        return html.replace('%1', CONST.CLASS.IMG_NOT_DRAG + ' ' + CONST.CLASS.TODO_AVATAR + ' ' + avatarClass)
+            .replace('%2', userName)
+            .replace('%3', dt);
     },
-    getMainHtml: function getMainHtml() {
-        var str = '<span class="' + CONST.CLASS.TODO_MAIN + ' ' + CONST.CLASS.TODO_UNCHECKED + '">' + '<input readonly id="%1" class="' + CONST.CLASS.TODO_CHECKBOX + ' ' + CONST.CLASS.IMG_NOT_DRAG + '" ' + CONST.ATTR.TODO_CHECK + '="unchecked" />' + '</span>';
-        str = str.replace('%1', 'wiz_todo_' + Date.now() + '_' + Math.floor(Math.random() * 1000000 + 1));
+    getMainHtml: function () {
+        var str = '<span class="' + CONST.CLASS.TODO_MAIN + ' ' + CONST.CLASS.TODO_UNCHECKED + '">' +
+            '<input readonly id="%1" class="' + CONST.CLASS.TODO_CHECKBOX + ' ' + CONST.CLASS.IMG_NOT_DRAG + '" ' +
+            CONST.ATTR.TODO_CHECK + '="unchecked" />' +
+            '</span>';
+        str = str.replace('%1', 'wiz_todo_' + Date.now() + '_' + Math.floor((Math.random() * 1000000) + 1));
         return str;
     },
-    getMainInDom: function getMainInDom(dom) {
-        if (!dom || !dom.hasChildNodes()) return null;
+    getMainInDom: function (dom) {
+        if (!dom || !dom.hasChildNodes())
+            return null;
         if (todoUtils.isMain(dom)) {
             return dom;
         }
@@ -20356,22 +20773,22 @@ var todoUtils = {
         }
         return null;
     },
-    getUserInfoInDom: function getUserInfoInDom(dom) {
+    getUserInfoInDom: function (dom) {
         return dom.querySelector('.' + CONST.CLASS.TODO_USER_INFO);
     },
-    getMainByCaret: function getMainByCaret() {
+    getMainByCaret: function () {
         var range = rangeUtils.getRange();
         if (!range) {
             return null;
         }
 
-        var start = range.startContainer;
-        if (domUtils.isEmptyDom(start) && range.startOffset == domUtils.getDomEndOffset(start)) {
-            start = domUtils.getNextNode(start, false);
-        } else if (start.nodeType === 1) {
-            start = range.startContainer.childNodes[range.startOffset];
+        var end = range.endContainer;
+        if (domUtils.isEmptyDom(end) && range.endOffset == domUtils.getDomEndOffset(end)) {
+            end = domUtils.getNextNode(end, false);
+        } else if (end.nodeType === 1) {
+            end = range.endContainer.childNodes[range.endOffset];
         }
-        return todoUtils.getMainFromChild(start);
+        return todoUtils.getMainFromChild(end);
         //
         // var p = domUtils.getParentByFilter(start, function (dom) {
         //     return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
@@ -20381,7 +20798,7 @@ var todoUtils = {
         // }
         // return todoUtils.getMainInDom(p);
     },
-    getContainerFromChild: function getContainerFromChild(dom) {
+    getContainerFromChild: function (dom) {
         if (!dom) {
             return null;
         }
@@ -20389,7 +20806,7 @@ var todoUtils = {
             return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
         }, true);
     },
-    getMainFromChild: function getMainFromChild(dom) {
+    getMainFromChild: function (dom) {
         if (!dom) {
             return null;
         }
@@ -20397,7 +20814,7 @@ var todoUtils = {
             return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
         }, true);
     },
-    getTime: function getTime() {
+    getTime: function () {
         var dt = new Date();
         var dateStr, timeStr;
         timeStr = getNum(dt.getHours()) + ':' + getNum(dt.getMinutes());
@@ -20413,13 +20830,11 @@ var todoUtils = {
             return (num < 10 ? '0' : '') + num;
         }
     },
-    insertToMain: function insertToMain(doms, main) {
+    insertToMain: function (doms, main) {
         if (!doms || !main) {
             return;
         }
-        var i,
-            dom,
-            last = null;
+        var i, dom, last = null;
         for (i = doms.length - 1; i >= 0; i--) {
             dom = doms[i];
             todoUtils.clearTodoClass(dom);
@@ -20431,7 +20846,7 @@ var todoUtils = {
      * 判断 光标是否处于 checkbox 后面
      * @returns {*}
      */
-    isCaretAfterCheckbox: function isCaretAfterCheckbox() {
+    isCaretAfterCheckbox: function () {
         var range = rangeUtils.getRange();
         if (!range) {
             return false;
@@ -20457,17 +20872,19 @@ var todoUtils = {
     },
     /**
      * 判断 光标是否处于 main 最前面
+     * （collapsed = false 时，以 end 为准）
      * @returns {*}
      */
-    isCaretBeforeCheckbox: function isCaretBeforeCheckbox() {
+    isCaretBeforeCheckbox: function () {
         var range = rangeUtils.getRange();
         if (!range) {
             return false;
         }
-        var caretDom = range.startContainer;
+        var caretDom = range.endContainer;
         if (caretDom.nodeType === 1) {
-            caretDom = caretDom.childNodes[range.startOffset];
-        } else if (caretDom.nodeType === 3 && domUtils.isEmptyDom(caretDom) && range.startOffset == caretDom.nodeValue.length) {
+            caretDom = caretDom.childNodes[range.endOffset];
+        } else if (caretDom.nodeType === 3 && domUtils.isEmptyDom(caretDom)
+            && range.endOffset == caretDom.nodeValue.length) {
             caretDom = domUtils.getNextNode(caretDom, false);
             if (caretDom) {
                 caretDom = domUtils.getParentByFilter(caretDom, function (dom) {
@@ -20476,23 +20893,22 @@ var todoUtils = {
             }
         }
 
-        return todoUtils.isLayer(caretDom) || todoUtils.isMain(caretDom) || todoUtils.isCheckbox(caretDom);
+        return (todoUtils.isLayer(caretDom) || todoUtils.isMain(caretDom) || todoUtils.isCheckbox(caretDom));
     },
     /**
      * 判断 dom 是否为 todoList 的 checkbox
      * @param dom
      * @returns {*|boolean}
      */
-    isCheckbox: function isCheckbox(dom) {
+    isCheckbox: function (dom) {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_CHECKBOX);
     },
-    isEmptyContainer: function isEmptyContainer(container) {
+    isEmptyContainer: function (container) {
         if (!container) {
             return true;
         }
         var childNodes = container.childNodes,
-            i,
-            child;
+            i, child;
 
         for (i = 0; i < childNodes.length; i++) {
             child = childNodes[i];
@@ -20506,13 +20922,12 @@ var todoUtils = {
         }
         return true;
     },
-    isEmptyMain: function isEmptyMain(main) {
+    isEmptyMain: function (main) {
         if (!main) {
             return true;
         }
         var childNodes = main.childNodes,
-            i,
-            child;
+            i, child;
 
         for (i = 0; i < childNodes.length; i++) {
             child = childNodes[i];
@@ -20527,10 +20942,10 @@ var todoUtils = {
      * @param dom
      * @returns {*|boolean}
      */
-    isMain: function isMain(dom) {
+    isMain: function (dom) {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_MAIN);
     },
-    isLayer: function isLayer(dom) {
+    isLayer: function (dom) {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_LAYER);
     },
     /**
@@ -20538,29 +20953,26 @@ var todoUtils = {
      * @param dom
      * @returns {boolean}
      */
-    isTodoTag: function isTodoTag(dom) {
+    isTodoTag: function (dom) {
         if (!dom) {
             return false;
         }
-        return todoUtils.isMain(dom) || todoUtils.isUserInfo(dom) || domUtils.hasClass(dom, CONST.CLASS.TODO_ACCOUNT) || domUtils.hasClass(dom, CONST.CLASS.TODO_DATE);
+        return todoUtils.isMain(dom) ||
+            todoUtils.isUserInfo(dom) ||
+            domUtils.hasClass(dom, CONST.CLASS.TODO_ACCOUNT) ||
+            domUtils.hasClass(dom, CONST.CLASS.TODO_DATE);
     },
     /**
      * 判断 dom 是否为 用户信息
      * @param dom
      * @returns {*|boolean}
      */
-    isUserInfo: function isUserInfo(dom) {
+    isUserInfo: function (dom) {
         return domUtils.hasClass(dom, CONST.CLASS.TODO_USER_INFO);
     },
-    setTodo: function setTodo(container, todoRoute) {
-        var range = rangeUtils.getRange(),
-            rangeList,
-            start,
-            end,
-            mainHtml,
-            main,
-            userInfo,
-            tmpDom;
+    setTodo: function (container, todoRoute) {
+        var range = rangeUtils.getRange(), rangeList, start, end,
+            mainHtml, main, userInfo, tmpDom;
         if (container) {
             //允许指定 容器直接设置 todoList
             start = container;
@@ -20619,14 +21031,13 @@ var todoUtils = {
 
         //通知客户端笔记被修改
         todoRoute.setDocumentType(CONST.TYPE.TODO);
-        todoRoute.setDocumentModified();
 
         //修正 todoList style
         todoUtils.checkTodoStyle(false);
 
         return main;
     },
-    setUserAvatarStyle: function setUserAvatarStyle(userGuid, avatarUrl) {
+    setUserAvatarStyle: function (userGuid, avatarUrl) {
         var guid = base64.encode(userGuid);
         var sId = CONST.ID.TODO_AVATAR_STYLE + guid;
         var sClass = CONST.CLASS.TODO_USER_AVATAR + guid;
@@ -20636,7 +21047,7 @@ var todoUtils = {
         } else {
             style = ENV.win.parent.document.getElementById(sId);
             if (style) {
-                wizStyle.insertStyle({ id: sId }, style.innerHTML);
+                wizStyle.insertStyle({id: sId}, style.innerHTML);
                 return;
             }
         }
@@ -20646,11 +21057,11 @@ var todoUtils = {
             if (style) {
                 return;
             }
-            wizStyle.insertStyle({ id: sId }, '.' + sClass + '{background-image:url(' + baseStr + ');}');
+            wizStyle.insertStyle({id: sId}, '.' + sClass + '{background-image:url(' + baseStr + ');}');
         });
     },
     oldPatch: {
-        fixImg: function fixImg(img) {
+        fixImg: function (img) {
             if (!img) {
                 return;
             }
@@ -20663,13 +21074,13 @@ var todoUtils = {
                 iObj.id = img.id;
             }
             if (img.getAttribute('state')) {
-                iObj.setAttribute(CONST.ATTR.TODO_CHECK, img.getAttribute('state'));
+                iObj.setAttribute(CONST.ATTR.TODO_CHECK, img.getAttribute('state'))
             }
             var parent = img.parentNode;
             parent.insertBefore(iObj, img);
             parent.removeChild(img);
         },
-        fixLabel: function fixLabel(label) {
+        fixLabel: function (label) {
             if (label) {
                 domUtils.removeClass(label, CONST.CLASS.TODO_LABEL_OLD);
                 domUtils.addClass(label, CONST.CLASS.TODO_MAIN);
@@ -20701,8 +21112,9 @@ var todoUtils = {
          * 初始化 todoList 主要用于修正旧版本的 todoList 样式
          * 保证每个 todoItem 占一行
          */
-        fixOldTodo: function fixOldTodo() {
-            var i, j, subLabelList, subLabel, container, subContainer, checkImgList, checkImg, labelList, label, tailList, tail;
+        fixOldTodo: function () {
+            var i, j, subLabelList, subLabel, container, subContainer,
+                checkImgList, checkImg, labelList, label, tailList, tail;
 
             //修正未被 label 封装的 checkImg
             checkImgList = ENV.doc.querySelectorAll('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
@@ -20749,14 +21161,12 @@ var todoUtils = {
                 }
             }
         },
-        fixUserInfo: function fixUserInfo(label) {
+        fixUserInfo: function (label) {
             var parent = label.parentNode,
                 check = todoUtils.oldPatch.getCheckImg(label),
                 id = check ? check.id : '',
                 childNodes = parent.childNodes,
-                child,
-                i,
-                firstUserInfo = false;
+                child, i, firstUserInfo = false;
             for (i = 0; i < childNodes.length; i++) {
                 child = childNodes[i];
                 if (domUtils.hasClass(child, CONST.CLASS.TODO_USER_INFO)) {
@@ -20770,13 +21180,13 @@ var todoUtils = {
                 }
             }
         },
-        getCheckImg: function getCheckImg(label) {
+        getCheckImg: function (label) {
             if (!label) {
                 return null;
             }
             return label.querySelector('.' + CONST.CLASS.TODO_CHECK_IMG_OLD);
         },
-        getLabelFromChild: function getLabelFromChild(dom) {
+        getLabelFromChild: function (dom) {
             if (!dom) {
                 return null;
             }
@@ -20784,14 +21194,13 @@ var todoUtils = {
                 return domUtils.hasClass(dom, CONST.CLASS.TODO_LABEL_OLD);
             }, true);
         },
-        isFirstLabel: function isFirstLabel(label) {
+        isFirstLabel: function (label) {
             if (!label) {
                 return false;
             }
             var parent = label.parentNode,
                 childNodes = parent.childNodes,
-                i,
-                child;
+                i, child;
 
             for (i = 0; i < childNodes.length; i++) {
                 child = childNodes[i];
@@ -20808,7 +21217,7 @@ var todoUtils = {
          * @param label
          * @returns {*}
          */
-        packageTodo: function packageTodo(label) {
+        packageTodo: function (label) {
             if (!label) {
                 return null;
             }
@@ -20823,14 +21232,13 @@ var todoUtils = {
             var check = todoUtils.oldPatch.getCheckImg(label),
                 id = check ? check.id : '',
                 userInfo = id ? parent.querySelector('span[' + CONST.ATTR.TODO_ID + '=' + id + ']') : null,
-                next = label.nextSibling,
-                tmpNext;
+                next = label.nextSibling, tmpNext;
             var container = ENV.doc.createElement('div');
             container.appendChild(label);
             while (next) {
                 tmpNext = next.nextSibling;
                 container.appendChild(next);
-                next = next == userInfo ? null : tmpNext;
+                next = (next == userInfo) ? null : tmpNext;
             }
             parent.insertBefore(container, tmpNext);
             return container;
@@ -20841,8 +21249,6 @@ var todoUtils = {
 module.exports = todoUtils;
 
 },{"../common/const":13,"../common/env":15,"../common/historyUtils":16,"../common/lang":17,"../common/wizStyle":20,"../domUtils/domExtend":24,"../rangeUtils/rangeExtend":36,"./../common/base64":12}],46:[function(require,module,exports){
-'use strict';
-
 var ENV = require('./common/env'),
     WizEditor = require('./WizEditor'),
     WizReader = require('./WizReader'),
@@ -20854,12 +21260,12 @@ WizEditor.init = function (options) {
     WizReader.init();
 
     //捕获 Mac 端初始化结束
-    ENV.win.initForWebEngine = function () {
+    ENV.win.initForWebEngine = function() {
         todoClientRoute.setQtEditor();
     };
     return WizEditor;
 };
 
-module.exports = WizEditor;
 
+module.exports = WizEditor;
 },{"./WizEditor":5,"./WizReader":6,"./common/env":15,"./todoUtils/todoRouteForClient":44}]},{},[46]);

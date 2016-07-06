@@ -11,6 +11,9 @@
 WizExecutingActionDialog::WizExecutingActionDialog(QString description, int threadId, std::function<void(void)> fun, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::WizExecutingActionDialog)
+    , m_threadId(threadId)
+    , m_fun(fun)
+    , m_first(true)
 {
     setWindowFlags(Qt::FramelessWindowHint);
     setPalette(QPalette(QColor(0, 0, 0)));
@@ -33,17 +36,6 @@ WizExecutingActionDialog::WizExecutingActionDialog(QString description, int thre
         ui->actionDescription->setText(description);
         ui->actionDescription->setStyleSheet("QLabel{color:#ffffff}");
     }
-    //
-    ::WizExecuteOnThread(threadId, [=]{
-        //
-        fun();
-        //
-        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
-            //
-            QDialog::reject();
-            //
-        });
-    });
 }
 
 WizExecutingActionDialog::~WizExecutingActionDialog()
@@ -54,6 +46,26 @@ WizExecutingActionDialog::~WizExecutingActionDialog()
 void WizExecutingActionDialog::reject()
 {
 
+}
+
+void WizExecutingActionDialog::showEvent(QShowEvent *e)
+{
+    QDialog::showEvent(e);
+    if (!m_first)
+        return;
+    m_first = false;
+    //
+    //
+    ::WizExecuteOnThread(m_threadId, [=]{
+        //
+        m_fun();
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            //
+            QDialog::reject();
+            //
+        });
+    });
 }
 
 void WizExecutingActionDialog::executeAction(QString description, int threadId, std::function<void(void)> fun)
