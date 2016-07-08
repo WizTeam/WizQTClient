@@ -11,32 +11,17 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
 {
     setContentsMargins(0, 0, 0, 0);
 
-    QPalette pal = palette();
-    pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
-    setPalette(pal);
-
     m_web = new WizWebEngineView(this);
     m_web->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     //
     m_web->setPage(new WizWebEnginePage());
-
-    m_movie = new QMovie(this);
-    m_movie->setFileName(":/loading.gif");
-
-    m_labelProgress = new QLabel(this);
-    m_labelProgress->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
-    m_labelProgress->setAlignment(Qt::AlignCenter);
-    m_labelProgress->setMovie(m_movie);
 
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
     setLayout(layout);
 
-    layout->addWidget(m_labelProgress);
-    //layout->addWidget(m_web);
-    //m_web->setVisible(true);
-    m_labelProgress->setVisible(false);
+    layout->addWidget(m_web);
 }
 
 CWizLocalProgressWebView::~CWizLocalProgressWebView()
@@ -48,30 +33,6 @@ WizWebEngineView* CWizLocalProgressWebView::web()
     return m_web;
 }
 
-QMovie*CWizLocalProgressWebView::movie()
-{
-    return m_movie;
-}
-
-QLabel*CWizLocalProgressWebView::labelProgress()
-{
-    return m_labelProgress;
-}
-
-void CWizLocalProgressWebView::showLocalProgress()
-{
-    m_web->hide();
-    m_labelProgress->show();
-    m_movie->start();
-}
-
-void CWizLocalProgressWebView::hideLocalProgress()
-{
-    m_movie->stop();
-    m_labelProgress->hide();
-    layout()->addWidget(m_web);
-    m_web->show();
-}
 
 void CWizLocalProgressWebView::hideEvent(QHideEvent* ev)
 {

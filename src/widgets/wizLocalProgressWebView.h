@@ -15,11 +15,6 @@ public:
     ~CWizLocalProgressWebView();
 
     WizWebEngineView* web();
-    QMovie* movie();
-    QLabel* labelProgress();
-
-    void showLocalProgress();
-    void hideLocalProgress();
 
 signals:
     void widgetStatusChanged();
@@ -33,8 +28,6 @@ protected:
 
 private:
     WizWebEngineView* m_web;
-    QMovie* m_movie;
-    QLabel* m_labelProgress;
 };
 
 #endif // CWIZLOCALPROGRESSWEBVIEW_H

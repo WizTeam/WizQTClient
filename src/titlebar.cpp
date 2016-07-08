@@ -663,7 +663,6 @@ void TitleBar::onCommentsButtonClicked()
     WizGetAnalyzer().LogAction("showComments");
 
     if (isNetworkAccessible()) {
-        commentWidget->showLocalProgress();
         QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
         Q_ASSERT(splitter);
         QList<int> li = splitter->sizes();
@@ -682,19 +681,14 @@ void TitleBar::onCommentsButtonClicked()
 
 void TitleBar::onCommentPageLoaded(bool ok)
 {
-    QWebEngineView* comments = noteView()->commentView();
-
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 
     if (!ok)
     {
         qDebug() << "Wow, load comment page failed! " << commentWidget->web()->url();
-        loadErrorPage();
+        //失败的时候会造成死循环
+        //loadErrorPage();
         commentWidget->show();
-    }
-    else
-    {
-        commentWidget->hideLocalProgress();
     }
 }
 

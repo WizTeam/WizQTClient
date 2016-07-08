@@ -41,8 +41,6 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
         web->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
     }
     connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
-    //
-    m_progressWebView->showLocalProgress();
 }
 
 WizWebEngineView* CWizWebSettingsDialog::web()
@@ -52,7 +50,6 @@ WizWebEngineView* CWizWebSettingsDialog::web()
 
 void CWizWebSettingsDialog::load()
 {
-    m_progressWebView->showLocalProgress();
     web()->load(m_url);
 }
 
@@ -67,11 +64,11 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok)
     {
-        m_progressWebView->hideLocalProgress();
     }
     else
     {
-        loadErrorPage();
+        //失败的时候会造成死循环
+        //loadErrorPage();
     }
 }
 
@@ -95,14 +92,11 @@ void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
 
 void CWizWebSettingsDialog::showError()
 {
-    m_progressWebView->hideLocalProgress();
-    loadErrorPage();
+    //loadErrorPage();
 }
 
 void CWizWebSettingsWithTokenDialog::load()
 {
-    m_progressWebView->showLocalProgress();
-
     connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
             SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
 
