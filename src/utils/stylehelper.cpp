@@ -275,7 +275,7 @@ QColor StyleHelper::treeViewItemCategoryText()
 }
 QColor StyleHelper::treeViewItemLinkText()
 {    
-    return QColor(getValue("Category/ItemLinkText", "#a0aaaf").toString());
+    return QColor(getValue("Category/ItemLinkText", "#448aff").toString());
 }
 
 QColor StyleHelper::treeViewItemBottomLine()

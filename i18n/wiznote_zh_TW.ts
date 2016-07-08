@@ -330,11 +330,6 @@
         <translation>您的企業服務已到期，將無法進行成員管理。請購買服務或申請延期。</translation>
     </message>
     <message>
-        <location filename="../src/wizCategoryView.cpp" line="2966"/>
-        <source>Create new group</source>
-        <translation>建立群組</translation>
-    </message>
-    <message>
         <location filename="../src/wizCategoryView.cpp" line="2973"/>
         <location filename="../src/wizCategoryView.cpp" line="2980"/>
         <source>View group info</source>
@@ -392,9 +387,14 @@
         <translation>無標題</translation>
     </message>
     <message>
+        <location filename="../src/wizCategoryView.cpp" line="2966"/>
+        <source>Create Team for Free</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
         <location filename="../src/wizCategoryView.cpp" line="4396"/>
-        <source>Create new group...</source>
-        <translation>建立群組...</translation>
+        <source>Create Team for Free...</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="4488"/>

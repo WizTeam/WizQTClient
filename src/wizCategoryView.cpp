@@ -2963,7 +2963,7 @@ void CWizCategoryView::createGroup()
 {
     QString strExtInfo = CommonApiEntry::appstoreParam(false);
     QString strUrl = CommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
-    WizShowWebDialogWithToken(tr("Create new group"), strUrl, window());
+    WizShowWebDialogWithToken(tr("Create Team for Free"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
@@ -4393,7 +4393,7 @@ void CWizCategoryView::resetCreateGroupLink()
     {
         if (-1 == createLinkIndex)
         {
-            CWizCategoryViewCreateGroupLinkItem* pItem = new CWizCategoryViewCreateGroupLinkItem(m_app, tr("Create new group..."), LINK_COMMAND_ID_CREATE_GROUP);
+            CWizCategoryViewCreateGroupLinkItem* pItem = new CWizCategoryViewCreateGroupLinkItem(m_app, tr("Create Team for Free..."), LINK_COMMAND_ID_CREATE_GROUP);
             addTopLevelItem(pItem);
         }
     }

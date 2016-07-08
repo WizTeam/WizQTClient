@@ -2416,7 +2416,7 @@ void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewI
     QRect rc(vopt->rect);
     rc.setLeft(rc.left() + 16);
     QFont fontLink = p->font();
-    fontLink.setItalic(true);
+    //fontLink.setItalic(true);
     fontLink.setPixelSize(::WizSmartScaleUI(12));
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::StyleHelper::treeViewItemLinkText(), fontLink);
 }
