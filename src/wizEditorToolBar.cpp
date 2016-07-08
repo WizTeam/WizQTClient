@@ -1558,6 +1558,12 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
         QWebEnginePage::WebAction a = menuText2WebAction(page, action->iconText());
         switch (a)
         {
+        case QWebEnginePage::Copy:
+            action->setText(QObject::tr("Copy"));
+            break;
+        case QWebEnginePage::Unselect:
+            action->setText(QObject::tr("Unselect"));
+            break;
         case QWebEnginePage::Back:
         case QWebEnginePage::Forward:
         case QWebEnginePage::Stop:
