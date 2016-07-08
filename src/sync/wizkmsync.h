@@ -2,6 +2,7 @@
 #define WIZKMSYNC_H
 
 #include <QThread>
+#include <QMessageBox>
 
 #include "sync.h"
 #include "wizKMServer.h"
@@ -131,6 +132,15 @@ public:
 #define WIZKM_WAIT_AND_PAUSE_SYNC() \
     CWizKMWaitAndPauseSyncHelper __waitHelper;\
     Q_UNUSED(__waitHelper)
+
+#define WIZKM_CHECK_SYNCING(parent) \
+    if (CWizKMSyncThread::isBusy()) \
+    {   \
+        QString title = QObject::tr("Syncing"); \
+        QString message = QObject::tr("The notes is being synced, please wait and try again.");  \
+        QMessageBox::information(parent, title, message);\
+        return;    \
+    }
 
 
 #endif // WIZKMSYNC_H

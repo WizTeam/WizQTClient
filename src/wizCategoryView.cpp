@@ -442,6 +442,15 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
+    if (CWizKMSyncThread::isBusy())
+    {
+        QString title = QObject::tr("Syncing");
+        QString message = QObject::tr("The notes is being synced, please wait and try again.");
+        QMessageBox::information(this, title, message);
+        event->ignore();
+        return;
+    }
+    //
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
     m_dragUrls = false;
@@ -2077,6 +2086,8 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuMoveFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
@@ -2158,6 +2169,8 @@ void CWizCategoryView::on_action_copyItem()
 
 void CWizCategoryView::on_action_user_copyFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuCopyFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
@@ -2333,6 +2346,8 @@ void CWizCategoryView::on_action_user_renameTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_renameFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuRenameGroupFolder");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
 

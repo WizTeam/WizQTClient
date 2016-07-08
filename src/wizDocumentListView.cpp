@@ -26,6 +26,8 @@
 #include "wiztaglistwidget.h"
 #include "wizCategoryView.h"
 
+#include "sync/wizkmsync.h"
+
 #include "thumbcache.h"
 
 
@@ -1655,6 +1657,8 @@ void CWizDocumentListView::on_action_moveDocument()
     //
     m_menuDocument->hide();
 
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("documentListMenuMoveDocument");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move notes"), m_app, WIZ_USERGROUP_AUTHOR, this);
     selector->setAcceptRoot(false);

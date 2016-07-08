@@ -3945,7 +3945,10 @@ bool CWizDatabase::DocumentToHtmlFile(const WIZDOCUMENTDATA& document,
                                           const QString& strPath)
 {
     QMutexLocker locker(&m_mtxTempFile);
-    ::WizDeleteAllFilesInFolder(strPath);
+    //
+    //
+    //避免编辑的时候临时文件被删除导致图片等丢失
+    //::WizDeleteAllFilesInFolder(strPath);
     ::WizEnsurePathExists(strPath);
     if (!ExtractZiwFileToFolder(document, strPath))
         return false;

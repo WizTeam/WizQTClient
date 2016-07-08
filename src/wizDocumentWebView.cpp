@@ -765,7 +765,7 @@ void CWizDocumentWebView::on_insertCommentToNote_request(const QString& docGUID,
             if (!db.DocumentFromGUID(documentGuid, doc))
                 return;
             //
-            QString strTempPath = ::Utils::PathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly() + "/";
+            QString strTempPath = ::Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
             ::WizEnsurePathExists(strTempPath);
             //
             if (!db.DocumentToHtmlFile(doc, strTempPath))
