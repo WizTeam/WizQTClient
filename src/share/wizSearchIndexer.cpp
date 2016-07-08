@@ -286,6 +286,9 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     if (ret) {
         db.setDocumentSearchIndexed(doc.strGUID, true);
     }
+    //
+    ::WizDeleteAllFilesInFolder(strTempFolder);
+    ::WizDeleteFolder(strTempFolder);
 
     return ret;
 }
