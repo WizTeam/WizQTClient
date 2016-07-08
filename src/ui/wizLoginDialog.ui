@@ -35,7 +35,7 @@
         <bool>false</bool>
        </property>
        <property name="styleSheet">
-        <string notr="true">background-color:#43a6e8</string>
+        <string notr="true">background-color:#448aff</string>
        </property>
        <layout class="QHBoxLayout" name="horizontalLayout_7">
         <property name="leftMargin">
@@ -112,7 +112,7 @@
    <item>
     <widget class="QWidget" name="widget" native="true">
      <property name="styleSheet">
-      <string notr="true">background-color: #43A6E8;</string>
+      <string notr="true">background-color: #448aff;</string>
      </property>
      <layout class="QHBoxLayout" name="horizontalLayout_8">
       <property name="spacing">

@@ -529,8 +529,8 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     }
     ui->label_logo->setMinimumWidth(190);   // use fixed logo size for oem
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(m_wizLogoPath));
-    ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
+                                        "background-position: center; background-repeat: no-repeat; background-color:#448aff}").arg(m_wizLogoPath));
+    ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#448aff}"));
 
     //
 #ifdef Q_OS_MAC
@@ -627,14 +627,14 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_noaccount->setStyleSheet(QString("QLabel {border: none; color: #5f5f5f;}"));
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
 #else
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #448aff; padding-left: 10px; padding-bottom: 0px}"));
 #endif
 
     QString bg_switchserver_menu = ::WizGetSkinResourceFileName(strThemeName, "bg_switchserver_menu");
@@ -666,7 +666,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_passwordError->setText("");
 
     m_menuUsers->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}");
+    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #448aff; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}");
 //                          "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
 //                          "QMenu::item:selected {background-color: #E7F5FF; }"
 //                          "QMenu::item:default {background-color: #E7F5FF; }");
@@ -955,7 +955,7 @@ void CWizLoginDialog::downloadOEMSettingsFromWizBox()
 void CWizLoginDialog::setLogo(const QString& logoPath)
 {
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").
+                                        "background-position: center; background-repeat: no-repeat; background-color:#448aff}").
                                   arg(logoPath.isEmpty() ? m_wizLogoPath : logoPath));
 }
 
