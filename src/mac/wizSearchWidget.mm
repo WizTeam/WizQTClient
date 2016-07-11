@@ -11,7 +11,8 @@
 #include "wizmactoolbar.h"
 
 // WizSearchField
-@interface WizSearchField: NSSearchField <NSSearchFieldDelegate>
+
+@interface WizSearchField: NSSearchField <NSTextFieldDelegate>
 {
     CWizSearchView* m_pSearchWidget;
     BOOL m_isEditing;
@@ -218,7 +219,9 @@ CWizSearchView::CWizSearchView()
     WizSearchField* pSearchField = [[WizSearchField alloc] init];
     [pSearchField setAutoresizesSubviews: YES];
     [pSearchField setAutoresizingMask: NSViewMinYMargin | NSViewWidthSizable];
-    [pSearchField setDelegate: pSearchField];
+    NSTextField* field = pSearchField;
+    [field setDelegate: pSearchField];
+    //[pSearchField setDelegate: pSearchField];
     [pSearchField.window makeFirstResponder:nil];
     [pSearchField setSearchView:this];
     setCocoaView(pSearchField);
