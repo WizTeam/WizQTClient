@@ -1390,6 +1390,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_secondLineButtonContainer->setVisible(showExtraButtons);
     m_btnShowExtra->setChecked(showExtraButtons);
 
+    m_delayUpdateUITimer.setInterval(300);
     connect(&m_delayUpdateUITimer, SIGNAL(timeout()), SLOT(on_delay_updateToolbar()));
 }
 
@@ -1636,7 +1637,7 @@ void EditorToolBar::on_delay_updateToolbar()
         return;
     //
     int delay = GetTickCount() - m_lastUpdateUIRequest;
-    if (delay < 1000)
+    if (delay < 250)
         return;
     //
     resetToolbar(m_currentStyle);
