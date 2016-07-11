@@ -1593,7 +1593,7 @@ void CWizDocumentWebView::replaceAndFindNext(QString strSource, QString strTarge
 
 void CWizDocumentWebView::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
-    QString strExec = QString("WizEditor.repalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive ? "true" : "false");
+    QString strExec = QString("WizEditor.replaceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive ? "true" : "false");
     page()->runJavaScript(strExec);
     setModified(true);
 }
