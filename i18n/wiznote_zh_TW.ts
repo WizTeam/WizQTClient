@@ -759,22 +759,22 @@
         <translation>在新視窗中開啟</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1663"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1665"/>
         <source>Move notes</source>
         <translation>移動筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1725"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1727"/>
         <source>Copy documents</source>
         <translation>複製筆記</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1849"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1851"/>
         <source>Password</source>
         <translation>密碼</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1849"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1851"/>
         <source>Please input document password to cancel encrypt.</source>
         <translation>請輸入筆記密碼。</translation>
     </message>
@@ -4169,7 +4169,7 @@ Reason: %3</source>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="448"/>
         <location filename="../src/sync/wizkmsync.h" line="140"/>
-        <source>The notes is being synced, please wait and try again.</source>
+        <source>WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

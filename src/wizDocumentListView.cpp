@@ -1391,6 +1391,8 @@ void CWizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentO
             resetSectionData();
         }
     }
+    //
+    CWizKMSyncThread::quickSyncKb(documentNew.strKbGUID);
 }
 
 void CWizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)

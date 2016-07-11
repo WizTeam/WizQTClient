@@ -759,22 +759,22 @@
         <translation>在新窗口中打开</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1663"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1665"/>
         <source>Move notes</source>
         <translation>移动笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1725"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1727"/>
         <source>Copy documents</source>
         <translation>复制笔记</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1849"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1851"/>
         <source>Password</source>
         <translation>密码</translation>
     </message>
     <message>
-        <location filename="../src/wizDocumentListView.cpp" line="1849"/>
+        <location filename="../src/wizDocumentListView.cpp" line="1851"/>
         <source>Please input document password to cancel encrypt.</source>
         <translation>请输入笔记密码。</translation>
     </message>
@@ -3804,8 +3804,8 @@ w: %3  h: %4</translation>
     <message>
         <location filename="../src/wizCategoryView.cpp" line="448"/>
         <location filename="../src/sync/wizkmsync.h" line="140"/>
-        <source>The notes is being synced, please wait and try again.</source>
-        <translation>笔记正在被同步，请等待同步完成然后重试。</translation>
+        <source>WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.</source>
+        <translation>笔记同步中，请等待同步完成后再操作。 </translation>
     </message>
     <message>
         <location filename="../src/wizDocumentListView.cpp" line="35"/>

@@ -445,7 +445,7 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     if (CWizKMSyncThread::isBusy())
     {
         QString title = QObject::tr("Syncing");
-        QString message = QObject::tr("The notes is being synced, please wait and try again.");
+        QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
         QMessageBox::information(this, title, message);
         event->ignore();
         return;
