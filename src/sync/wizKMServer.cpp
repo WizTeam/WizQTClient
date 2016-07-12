@@ -277,7 +277,7 @@ QString CWizKMAccountsServer::MakeXmlRpcPassword(const QString& strPassword)
     if (strPassword.startsWith(_T("md5.")))
         return QString(strPassword);
     //
-    return QString(_T("md5.")) + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
+    return strPassword;
 }
 
 
