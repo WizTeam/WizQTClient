@@ -3,6 +3,9 @@
 #include <QMenu>
 #include <QApplication>
 #include "share/wizthreads.h"
+#include <QStyleOption>
+#include <QPainter>
+#include <QStyle>
 
 WizTableItemWidget::WizTableItemWidget(int row, int col, QWidget* parent)
     : QWidget(parent)
@@ -10,9 +13,9 @@ WizTableItemWidget::WizTableItemWidget(int row, int col, QWidget* parent)
     , m_row(row)
     , m_col(col)
 {
-    setFixedSize(QSize(16, 16));
+    setFixedSize(QSize(15, 15));
     //
-    setAutoFillBackground(true);
+    //setAutoFillBackground(true);
     setSelected(false);
     //
     setMouseTracking(true);
@@ -26,12 +29,20 @@ void WizTableItemWidget::setSelected(bool selected)
     m_selected = selected;
     if (m_selected)
     {
-        setPalette(QPalette(QColor(0x44, 0x8a, 0xff)));
+        setStyleSheet("WizTableItemWidget {border: 1px solid #99448aff; background-color:#4c448aff}");
     }
     else
     {
-        setPalette(QPalette(QColor(0xcc, 0xcc, 0xcc)));
+        setStyleSheet("WizTableItemWidget {border: 1px solid #cccccc; background-color:#ffffff}");
     }
+}
+//
+void WizTableItemWidget::paintEvent(QPaintEvent *)
+{
+    QStyleOption opt;
+    opt.init(this);
+    QPainter p(this);
+    style()->drawPrimitive(QStyle::PE_Widget, &opt, &p, this);
 }
 //
 void WizTableItemWidget::mouseMoveEvent(QMouseEvent * e)
@@ -60,6 +71,7 @@ WizTableSelectorWidget::WizTableSelectorWidget(QWidget* parent)
 {
     QGridLayout* grid = new QGridLayout();
     setLayout(grid);
+    grid->setSpacing(4);
     //
     for (int row = 0; row < ROW_COUNT; row++)
     {

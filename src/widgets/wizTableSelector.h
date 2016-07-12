@@ -15,6 +15,7 @@ public:
 protected:
     virtual void mouseMoveEvent(QMouseEvent * e);
     virtual void mousePressEvent(QMouseEvent * e);
+    virtual void paintEvent(QPaintEvent *);
 Q_SIGNALS:
     void mouseTracked(int row, int col);
     void mousePressed(int row, int col);
