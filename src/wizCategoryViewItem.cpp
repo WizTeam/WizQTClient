@@ -1006,7 +1006,7 @@ void CWizCategoryViewFolderItem::drop(const CWizDocumentDataArray& arrayDocument
     }
     else
     {
-        documentOperator.moveDocumentsToPersonalFolder(arrayOp, location(), true);
+        documentOperator.moveDocumentsToPersonalFolder(arrayOp, location(), false);
     }    
 }
 

@@ -950,37 +950,21 @@ void CWizDocumentOperator::copyDocumentsToGroupFolder(const CWizDocumentDataArra
 }
 
 void CWizDocumentOperator::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument,
-                                                         const QString& targetFolder, bool showProgressDialog)
+                                                         const QString& targetFolder, bool waitForSync)
 {
     OperatorData* optData = new OperatorData();
     optData->arrayDocument =  arrayDocument;
     optData->targetFolder = targetFolder;
-    if (showProgressDialog && arrayDocument.size() > 3)
-    {
-        CWizProgressDialog dlg(qApp->activeWindow(), true);
-        dlg.setWindowTitle(QObject::tr("Move notes to %1").arg(targetFolder));
-
-        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
-            //
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        //
+        if (waitForSync)
+        {
             WIZKM_WAIT_AND_PAUSE_SYNC();
-            //
-            CWizDocumentOperatorPrivate helper(optData);
-            helper.bindSignalsToProgressDialog(&dlg);
-            helper.moveDocumentToPersonalFolder();
-        });
-
-        dlg.exec();
-    }
-    else
-    {
-        WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
-            //
-            WIZKM_WAIT_AND_PAUSE_SYNC();
-            //
-            CWizDocumentOperatorPrivate helper(optData);
-            helper.moveDocumentToPersonalFolder();
-        });
-    }
+        }
+        //
+        CWizDocumentOperatorPrivate helper(optData);
+        helper.moveDocumentToPersonalFolder();
+    });
 }
 
 void CWizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument,

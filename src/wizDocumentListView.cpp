@@ -377,7 +377,7 @@ bool CWizDocumentListView::acceptDocumentChange(const WIZDOCUMENTDATA& document)
 void CWizDocumentListView::moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder)
 {    
     CWizDocumentOperator documentOperator(m_dbMgr);
-    documentOperator.moveDocumentsToPersonalFolder(arrayDocument, targetFolder, true);
+    documentOperator.moveDocumentsToPersonalFolder(arrayDocument, targetFolder, false);
 }
 
 void CWizDocumentListView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)

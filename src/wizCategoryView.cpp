@@ -442,15 +442,6 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
 
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
-    if (CWizKMSyncThread::isBusy())
-    {
-        QString title = QObject::tr("Syncing");
-        QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
-        QMessageBox::information(this, title, message);
-        event->ignore();
-        return;
-    }
-    //
     m_bDragHovered = false;
     m_dragHoveredPos = QPoint();
     m_dragUrls = false;
@@ -490,6 +481,15 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
+        if (CWizKMSyncThread::isBusy())
+        {
+            QString title = QObject::tr("Syncing");
+            QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
+            QMessageBox::information(this, title, message);
+            event->ignore();
+            return;
+        }
+        //
         if (m_dragItem && !(m_dragItem->flags() & Qt::ItemIsDropEnabled))
         {
             qDebug() << "[DragDrop]Can not drop item at invalid position";
@@ -5955,7 +5955,7 @@ void CWizCategoryView::moveFolder(QString oldLocation, QString newLocation)
     ::WizExecutingActionDialog::executeAction(tr("Moving folder..."), WIZ_THREAD_DEFAULT, [=]{
         //
         //wait for sync
-        CWizKMSyncThread::waitUntilIdleAndPause();
+        WIZKM_WAIT_AND_PAUSE_SYNC();
         //
         CWizDatabase& db = m_dbMgr.db();
         db.blockSignals(true);
@@ -5964,9 +5964,6 @@ void CWizCategoryView::moveFolder(QString oldLocation, QString newLocation)
         folder.MoveToLocation(newLocation);
         folder.blockSignals(false);
         db.blockSignals(false);
-        //
-        CWizKMSyncThread::setPause(false);
-        //
     });
     //
     CWizCategoryViewFolderItem* newItem = findFolder(newLocation, true, true);
