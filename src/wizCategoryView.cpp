@@ -2126,7 +2126,10 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         CWizCategoryViewFolderItem* folderItem = currentCategoryItem<CWizCategoryViewFolderItem>();
         Q_ASSERT(folderItem != nullptr);
 
-        movePersonalFolder(folderItem->location(), selector);
+        if (!movePersonalFolder(folderItem->location(), selector))
+            return;
+        //
+        folderItem->parent()->removeChild(folderItem);
         //
         mainWindow->quickSyncKb("");
     }
@@ -5676,7 +5679,7 @@ void CWizCategoryView::moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFold
     documentOperator.moveGroupFolderToGroupDB(sourceFolder, targetFolder, combineFolder, true);
 }
 
-void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector)
+bool CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector)
 {
     // mvoe  personal folder to personal folder
     if (selector->isSelectPersonalFolder())
@@ -5684,31 +5687,35 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty() || strSelectedFolder == sourceFolder ||
                 (sourceFolder.startsWith(strSelectedFolder) && sourceFolder.indexOf('/', strSelectedFolder.length()) == sourceFolder.length() -1))
-            return;
+            return false;
 
         //combine same name folder
         CWizCategoryViewItemBase* sourceItem = findFolder(sourceFolder, false, false);
         bool combineSameNameFolder = false;
         if (!isCombineSameNameFolder(strSelectedFolder, CWizDatabase::GetLocationName(sourceFolder), combineSameNameFolder, sourceItem))
-            return;
+            return false;
 
         qDebug() << "move personal folder to personal folder  ; " << strSelectedFolder;
         //
         movePersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder);
+        return true;
     }
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
         if (tag.strKbGUID.isEmpty())
-            return;
+            return false;
         //        
         bool combineSameNameFolders = false;
         if (!isCombineSameNameFolder(tag, CWizDatabase::GetLocationName(sourceFolder), combineSameNameFolders))
-            return;
+            return false;
         qDebug() << "move personal folder to group folder " << tag.strName;
         //
         movePersonalFolderToGroupFolder(sourceFolder, tag, combineSameNameFolders);
+        return true;
     }
+    //
+    return false;
 }
 
 void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder)

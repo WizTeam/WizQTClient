@@ -523,7 +523,7 @@ private:
 
     void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
     //
-    void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
+    bool movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
 
     void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
 
