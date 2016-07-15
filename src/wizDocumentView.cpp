@@ -318,7 +318,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     int nLockReason = -1;
 
     if (m_dbMgr.db(data.strKbGUID).IsGroup()) {
-        if (forceEdit) {
+        if (!forceEdit) {
             nLockReason = NotifyBar::LockForGruop;
             m_bLocked = true;
         }
@@ -870,22 +870,13 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
     {       
         if (changed)
         {
-//            if (m_status & DOCUMENT_FIRSTTIMEVIEW)
-//            {
-//                // downlaod document data when document changed at first time to view document
-//                downloadDocumentFromServer();
-//            }
-//            else
-//            {
-                m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to download new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
-//            }
-                m_editStatus |= DOCUMENT_STATUS_NEWVERSIONFOUNDED;
+            m_title->showMessageTips(Qt::RichText, QString(tr("New version on server avalible. <a href='%1'>Click to download new version.<a>")).arg(NOTIFYBAR_LABELLINK_DOWNLOAD));
+            m_editStatus |= DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }
         else
         {
             m_bLocked = false;
             int nLockReason = -1;
-            m_editorMode = modeReader;
 
             const WIZDOCUMENTDATA& doc = note();
             if (!m_dbMgr.db(doc.strKbGUID).CanEditDocument(doc)) {
@@ -901,6 +892,8 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
                 bool bGroup = m_dbMgr.db(doc.strKbGUID).IsGroup();
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
+            //
+            setEditorMode(modeReader);
 
             m_editStatus &= ~DOCUMENT_STATUS_NEWVERSIONFOUNDED;
         }
