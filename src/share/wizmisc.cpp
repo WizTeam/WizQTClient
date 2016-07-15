@@ -2210,12 +2210,44 @@ bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
 }
 
 
+bool WizHTMLIsInCommentsBlock(const QString& strHtml, int pos)
+{
+    if (pos <= 0)
+        return false;
+    if (pos >= strHtml.length())
+        return false;
+    //
+    int commentBegin = strHtml.lastIndexOf("<!--", pos);
+    if (-1 == commentBegin)
+        return false;
+    //
+    int commentEnd = strHtml.indexOf("-->", commentBegin);
+    if (commentEnd == -1)
+        return false;
+    //
+    if (commentEnd < pos)
+        return false;
+    //
+    return true;
+}
+
 void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML)
 {
-    ptrdiff_t nPos = strHTML.indexOf("</head", 0, Qt::CaseInsensitive);
-    if (-1 == nPos)
+    ptrdiff_t nPos = 0;
+    int from = 0;
+    while (1)
     {
-        nPos = 0;
+        nPos = strHTML.indexOf("</head", from, Qt::CaseInsensitive);
+        if (-1 == nPos)
+        {
+            nPos = 0;
+            break;
+        }
+        //
+        if (!WizHTMLIsInCommentsBlock(strHTML, nPos))
+            break;
+        //
+        from = nPos + 6;
     }
     //
     strHTML.insert(int(nPos), strText);
