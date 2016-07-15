@@ -559,7 +559,6 @@ private:
                                 QTreeWidgetItem* item);
     void moveFolder(QString oldLocation, QString newLocation);
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
-    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
     bool renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName);
     //

@@ -809,19 +809,6 @@ QString CWizCategoryView::getUseableItemName(QTreeWidgetItem* parent, \
     return name;
 }
 
-void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
-{
-    item->setLocation(strNewLocation);
-    for (int i = 0; i < item->childCount(); i++)
-    {
-        CWizCategoryViewFolderItem* child = dynamic_cast<CWizCategoryViewFolderItem*>(item->child(i));
-        if (child)
-        {
-            QString strChildLocation = strNewLocation + child->text(0) + "/";
-            resetFolderLocation(child, strChildLocation);
-        }
-    }
-}
 
 bool CWizCategoryView::renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName)
 {
@@ -5952,7 +5939,18 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
         newLocation = "/" + strName + "/";
     }
     //
-    item->parent()->removeChild(item);
+    if (item->parent())
+    {
+        item->parent()->removeChild(item);
+    }
+    else
+    {
+        int index = indexOfTopLevelItem(item);
+        if (-1 != index)
+        {
+            takeTopLevelItem(index);
+        }
+    }
     //
     moveFolder(oldLocation, newLocation);
 }
