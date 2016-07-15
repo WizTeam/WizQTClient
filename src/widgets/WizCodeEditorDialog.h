@@ -29,6 +29,12 @@ public slots:
     QString getLastCodeType();
     void saveLastCodeType(const QString& codeType);
 
+    Q_INVOKABLE void selectAll();
+    Q_INVOKABLE void undo();
+    Q_INVOKABLE void copy();
+    Q_INVOKABLE void cut();
+    Q_INVOKABLE void paste();
+
 protected:
     void changeEvent(QEvent * event);
 

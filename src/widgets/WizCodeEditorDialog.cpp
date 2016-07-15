@@ -108,4 +108,29 @@ void WizCodeEditorDialog::saveLastCodeType(const QString& codeType)
 }
 
 
+void WizCodeEditorDialog::selectAll()
+{
+    m_codeBrowser->page()->triggerAction(QWebEnginePage::SelectAll);
+}
+
+void WizCodeEditorDialog::undo()
+{
+    m_codeBrowser->page()->triggerAction(QWebEnginePage::Undo);
+}
+
+void WizCodeEditorDialog::copy()
+{
+    m_codeBrowser->page()->triggerAction(QWebEnginePage::Copy);
+}
+
+void WizCodeEditorDialog::cut()
+{
+    m_codeBrowser->page()->triggerAction(QWebEnginePage::Cut);
+}
+
+void WizCodeEditorDialog::paste()
+{
+    m_codeBrowser->page()->triggerAction(QWebEnginePage::Paste);
+}
+
 
