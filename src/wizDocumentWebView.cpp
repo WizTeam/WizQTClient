@@ -1816,7 +1816,8 @@ void CWizDocumentWebView::editorCommandExecuteInsertCode()
     WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
     connect(dialog, SIGNAL(insertHtmlRequest(QString)), SLOT(on_insertCodeHtml_requset(QString)));
     dialog->setCode(strSelectHtml);
-    dialog->exec();
+    //dialog->exec();
+    dialog->show();
     //dialog->setWindowState(dialog->windowState() & ~Qt::WindowFullScreen | Qt::WindowActive);
 
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();

@@ -20,6 +20,14 @@ class WizCodeEditorDialog : public QDialog
 public:
     explicit WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView *external, QWidget *parent = 0);
     void setCode(const QString& strCode);
+    //
+
+    static bool selectAll();
+    static bool undo();
+    static bool copy();
+    static bool cut();
+    static bool paste();
+
 signals:
     void insertHtmlRequest(QString strHtml);
 
@@ -29,14 +37,10 @@ public slots:
     QString getLastCodeType();
     void saveLastCodeType(const QString& codeType);
 
-    Q_INVOKABLE void selectAll();
-    Q_INVOKABLE void undo();
-    Q_INVOKABLE void copy();
-    Q_INVOKABLE void cut();
-    Q_INVOKABLE void paste();
-
 protected:
-    void changeEvent(QEvent * event);
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
+    virtual void closeEvent(QCloseEvent *);
 
 private:
     WizWebEngineView *m_codeBrowser;

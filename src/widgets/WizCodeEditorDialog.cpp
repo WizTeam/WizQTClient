@@ -19,6 +19,7 @@
 #include <QEvent>
 #include <QDebug>
 #include <QWebEnginePage>
+#include <QApplication>
 
 #include "share/wizGlobal.h"
 #include "share/wizwebengineview.h"
@@ -36,7 +37,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
     m_codeBrowser->addToJavaScriptWindowObject("external", m_external);
 
     //
-    setAttribute(Qt::WA_DeleteOnClose);
+    //setAttribute(Qt::WA_DeleteOnClose);
     //setWindowFlags(Qt::WindowStaysOnTopHint);          //could cause fullscreen problem on mac when mainwindow was fullscreen
     setWindowState(windowState() & ~Qt::WindowFullScreen);
     resize(650, 550);
@@ -79,14 +80,6 @@ void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
     emit insertHtmlRequest(strHtml);
 }
 
-void WizCodeEditorDialog::changeEvent(QEvent* event)
-{
-    if (event->type() == QEvent::WindowStateChange)
-    {
-        setWindowState(windowState() & ~Qt::WindowFullScreen);
-    }
-}
-
 QString WizCodeEditorDialog::getLastCodeType()
 {
     QString strLastType = m_app.userSettings().get((LASTUSEDCODETYPE));
@@ -103,30 +96,81 @@ void WizCodeEditorDialog::saveLastCodeType(const QString& codeType)
     m_app.userSettings().set(LASTUSEDCODETYPE, codeType);
 }
 
+static WizCodeEditorDialog* g_instance = NULL;
 
-void WizCodeEditorDialog::selectAll()
+void WizCodeEditorDialog::showEvent(QShowEvent *)
 {
-    m_codeBrowser->page()->triggerAction(QWebEnginePage::SelectAll);
+    g_instance = this;
 }
 
-void WizCodeEditorDialog::undo()
+void WizCodeEditorDialog::hideEvent(QHideEvent *)
 {
-    m_codeBrowser->page()->triggerAction(QWebEnginePage::Undo);
+    g_instance = NULL;
 }
 
-void WizCodeEditorDialog::copy()
+void WizCodeEditorDialog::closeEvent(QCloseEvent *)
 {
-    m_codeBrowser->page()->triggerAction(QWebEnginePage::Copy);
+    g_instance = NULL;
 }
 
-void WizCodeEditorDialog::cut()
+
+bool WizCodeEditorDialog::selectAll()
 {
-    m_codeBrowser->page()->triggerAction(QWebEnginePage::Cut);
+    if (!g_instance)
+        return false;
+    if (QApplication::activeWindow() != g_instance)
+        return false;
+
+    g_instance->m_codeBrowser->page()->triggerAction(QWebEnginePage::SelectAll);
+    //
+    return true;
 }
 
-void WizCodeEditorDialog::paste()
+bool WizCodeEditorDialog::undo()
 {
-    m_codeBrowser->page()->triggerAction(QWebEnginePage::Paste);
+    if (!g_instance)
+        return false;
+    if (QApplication::activeWindow() != g_instance)
+        return false;
+
+    g_instance->m_codeBrowser->page()->triggerAction(QWebEnginePage::Undo);
+    //
+    return true;
 }
 
+bool WizCodeEditorDialog::copy()
+{
+    if (!g_instance)
+        return false;
+    if (QApplication::activeWindow() != g_instance)
+        return false;
+
+    g_instance->m_codeBrowser->page()->triggerAction(QWebEnginePage::Copy);
+    //
+    return true;
+}
+
+bool WizCodeEditorDialog::cut()
+{
+    if (!g_instance)
+        return false;
+    if (QApplication::activeWindow() != g_instance)
+        return false;
+
+    g_instance->m_codeBrowser->page()->triggerAction(QWebEnginePage::Cut);
+    //
+    return true;
+}
+
+bool WizCodeEditorDialog::paste()
+{
+    if (!g_instance)
+        return false;
+    if (QApplication::activeWindow() != g_instance)
+        return false;
+
+    g_instance->m_codeBrowser->page()->triggerAction(QWebEnginePage::Paste);
+    //
+    return true;
+}
 

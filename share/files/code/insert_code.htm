@@ -296,51 +296,6 @@
             }
         }
 
-        var ctrlDown = false,
-            ctrlKey = 17,
-            cmdKey = 91,
-            aKey = 65,
-            vKey = 86,
-            cKey = 67
-            xKey = 88
-            zKey = 90;
-
-        document.onkeydown = function(e) {
-            if (e.keyCode == ctrlKey || e.keyCode == cmdKey)
-                ctrlDown = true;
-        };
-        document.onkeyup = function(e) {
-            if (e.keyCode == ctrlKey || e.keyCode == cmdKey)
-                ctrlDown = false;
-        };
-
-        textSource.onkeydown = function(e)
-        {
-            if (ctrlDown)
-            {
-                if (e.keyCode == vKey)
-                {
-                    codeEditor.paste();
-                }
-                else if (e.keyCode == xKey)
-                {
-                    codeEditor.cut();
-                }
-                else if (e.keyCode == cKey)
-                {
-                    codeEditor.copy();
-                }
-                else if (e.keyCode == aKey)
-                {
-                    codeEditor.selectAll();
-                }
-                else if (e.keyCode == zKey)
-                {
-                    codeEditor.undo();
-                }
-            }
-
-        };
 
     </script>
 

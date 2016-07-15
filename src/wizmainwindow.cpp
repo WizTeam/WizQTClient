@@ -63,6 +63,7 @@
 #include "widgets/wizIAPDialog.h"
 #include "widgets/wizLocalProgressWebView.h"
 #include "widgets/wizTemplatePurchaseDialog.h"
+#include "widgets/WizCodeEditorDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -2243,6 +2244,9 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
 
 void MainWindow::on_actionEditingUndo_triggered()
 {    
+    if (WizCodeEditorDialog::undo())
+        return;
+    //
     if (m_doc->commentView()->hasFocus())
     {
         m_doc->commentView()->triggerPageAction(QWebEnginePage::Undo);
@@ -2267,6 +2271,9 @@ void MainWindow::on_actionEditingRedo_triggered()
 
 void MainWindow::on_actionEditingCut_triggered()
 {
+    if (WizCodeEditorDialog::cut())
+        return;
+    //
     if (m_doc->commentView()->hasFocus())
     {
         m_doc->commentView()->triggerPageAction(QWebEnginePage::Cut);
@@ -2279,6 +2286,9 @@ void MainWindow::on_actionEditingCut_triggered()
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
+    if (WizCodeEditorDialog::copy())
+        return;
+    //
     if (m_doc->commentView()->hasFocus())
     {
         m_doc->commentView()->triggerPageAction(QWebEnginePage::Copy);
@@ -2291,6 +2301,9 @@ void MainWindow::on_actionEditingCopy_triggered()
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
+    if (WizCodeEditorDialog::paste())
+        return;
+    //
     if (m_doc->commentView()->hasFocus())
     {
         m_doc->commentView()->triggerPageAction(QWebEnginePage::Paste);
@@ -2315,6 +2328,9 @@ void MainWindow::on_actionEditingPastePlain_triggered()
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
+    if (WizCodeEditorDialog::selectAll())
+        return;
+    //
     if (m_doc->commentView()->hasFocus())
     {
         m_doc->commentView()->triggerPageAction(QWebEnginePage::SelectAll);
