@@ -2550,7 +2550,7 @@ void EditorToolBar::on_btnTable_clicked(int row, int col)
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarTable");
     if (m_editor) {
-        m_editor->editorCommandExecuteTableInsert(row + 1, col + 1);
+        m_editor->editorCommandExecuteTableInsert(row, col);
     }
 }
 
