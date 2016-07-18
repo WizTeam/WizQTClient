@@ -70,6 +70,13 @@ protected:
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dragLeaveEvent(QDragLeaveEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    //
+    bool dropOn(QDropEvent *event, int *dropRow, int *dropCol, QModelIndex *dropIndex);
+    void dropEventCore(QDropEvent *event);
+    bool droppingOnItself(QDropEvent *event, const QModelIndex &index);
+    QAbstractItemView::DropIndicatorPosition position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const;
+
+
 
     virtual void enterEvent(QEvent * event);
     virtual void leaveEvent(QEvent * event);
@@ -80,12 +87,6 @@ protected:
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
     virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);    
-
-    //
-    virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                   bool dropAtTop, bool deleteDragSource);
-    virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                 bool deleteDragSource);
 
 protected:
     CWizExplorerApp& m_app;
@@ -559,6 +560,7 @@ private:
                                 QTreeWidgetItem* item);
     void moveFolder(QString oldLocation, QString newLocation);
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
+    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
     bool renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName);
     //

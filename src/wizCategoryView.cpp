@@ -440,6 +440,172 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
     viewport()->repaint();    
 }
 
+
+
+
+QAbstractItemView::DropIndicatorPosition CWizCategoryBaseView::position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const
+{
+    QAbstractItemView::DropIndicatorPosition r = QAbstractItemView::OnViewport;
+    const int margin = 2;
+    if (pos.y() - rect.top() < margin) {
+        r = QAbstractItemView::AboveItem;
+    } else if (rect.bottom() - pos.y() < margin) {
+        r = QAbstractItemView::BelowItem;
+    } else if (rect.contains(pos, true)) {
+        r = QAbstractItemView::OnItem;
+    }
+
+    if (r == QAbstractItemView::OnItem && (!(model()->flags(index) & Qt::ItemIsDropEnabled)))
+        r = pos.y() < rect.center().y() ? QAbstractItemView::AboveItem : QAbstractItemView::BelowItem;
+
+    return r;
+}
+
+bool CWizCategoryBaseView::droppingOnItself(QDropEvent *event, const QModelIndex &index)
+{
+    Qt::DropAction dropAction = event->dropAction();
+    if (dragDropMode() == QAbstractItemView::InternalMove)
+        dropAction = Qt::MoveAction;
+    if (event->source() == this
+        && event->possibleActions() & Qt::MoveAction
+        && dropAction == Qt::MoveAction) {
+        QModelIndexList selected = selectedIndexes();
+        QModelIndex child = index;
+        while (child.isValid() && child != rootIndex()) {
+            if (selected.contains(child))
+                return true;
+            child = child.parent();
+        }
+    }
+    return false;
+}
+
+bool CWizCategoryBaseView::dropOn(QDropEvent *event, int *dropRow, int *dropCol, QModelIndex *dropIndex)
+{
+    if (event->isAccepted())
+        return false;
+
+    QModelIndex index;
+    // rootIndex() (i.e. the viewport) might be a valid index
+    if (viewport()->rect().contains(event->pos())) {
+        index = indexAt(event->pos());
+        if (!index.isValid())
+        {
+            index = rootIndex();
+        }
+        //don't reset index
+        /*
+        else {
+            QRect rc = visualRect(index);
+            QPoint pt = event->pos();
+            if (!rc.contains(pt)) {
+                index = rootIndex();
+            }
+        }
+        */
+    }
+    else
+    {
+        return false;
+    }
+
+    QAbstractItemView::DropIndicatorPosition dropIndicatorPosition;
+    int row = -1;
+    int col = -1;
+    if (index != rootIndex()) {
+        dropIndicatorPosition = position(event->pos(), visualRect(index), index);
+        switch (dropIndicatorPosition) {
+        case QAbstractItemView::AboveItem:
+            row = index.row();
+            col = index.column();
+            index = index.parent();
+            break;
+        case QAbstractItemView::BelowItem:
+            row = index.row() + 1;
+            col = index.column();
+            index = index.parent();
+            break;
+        case QAbstractItemView::OnItem:
+        case QAbstractItemView::OnViewport:
+            break;
+        }
+    } else {
+        dropIndicatorPosition = QAbstractItemView::OnViewport;
+    }
+    *dropIndex = index;
+    *dropRow = row;
+    *dropCol = col;
+    if (!droppingOnItself(event, index))
+        return true;
+    //
+    return false;
+}
+
+
+
+
+void CWizCategoryBaseView::dropEventCore(QDropEvent *event)
+{
+    if (event->source() == this && (event->dropAction() == Qt::MoveAction ||
+                                    dragDropMode() == QAbstractItemView::InternalMove)) {
+        QModelIndex topIndex;
+        int col = -1;
+        int row = -1;
+        if (dropOn(event, &row, &col, &topIndex)) {
+            const QList<QModelIndex> idxs = selectedIndexes();
+            QList<QPersistentModelIndex> indexes;
+            const int indexesCount = idxs.count();
+            indexes.reserve(indexesCount);
+            for (const auto &idx : idxs)
+                indexes.append(idx);
+
+            if (indexes.contains(topIndex))
+                return;
+
+            // When removing items the drop location could shift
+            QPersistentModelIndex dropRow = model()->index(row, col, topIndex);
+
+            // Remove the items
+            QList<QTreeWidgetItem *> taken;
+            for (const auto &index : indexes) {
+                QTreeWidgetItem *parent = itemFromIndex(index);
+                if (!parent || !parent->parent()) {
+                    taken.append(takeTopLevelItem(index.row()));
+                } else {
+                    taken.append(parent->parent()->takeChild(index.row()));
+                }
+            }
+
+            // insert them back in at their new positions
+            for (int i = 0; i < indexes.count(); ++i) {
+                // Either at a specific point or appended
+                if (row == -1) {
+                    if (topIndex.isValid()) {
+                        QTreeWidgetItem *parent = itemFromIndex(topIndex);
+                        parent->insertChild(parent->childCount(), taken.takeFirst());
+                    } else {
+                        insertTopLevelItem(topLevelItemCount(), taken.takeFirst());
+                    }
+                } else {
+                    int r = dropRow.row() >= 0 ? dropRow.row() : row;
+                    if (topIndex.isValid()) {
+                        QTreeWidgetItem *parent = itemFromIndex(topIndex);
+                        parent->insertChild(qMin(r, parent->childCount()), taken.takeFirst());
+                    } else {
+                        insertTopLevelItem(qMin(r, topLevelItemCount()), taken.takeFirst());
+                    }
+                }
+            }
+
+            event->accept();
+            // Don't want QAbstractItemView to delete it because it was "moved" we already did it
+            event->setDropAction(Qt::CopyAction);
+        }
+    }
+
+    QTreeView::dropEvent(event);
+}
+
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
@@ -501,6 +667,12 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         QModelIndex droppedIndex = indexAt(event->pos());
         if( !droppedIndex.isValid() )
           return;
+        //
+        CWizCategoryViewItemBase* hoverItem = itemAt(event->pos());
+        if (!hoverItem)
+        {
+            qDebug() << "null item";
+        }
 
         if (pItem->type() == Category_ShortcutRootItem || pItem->type() == Category_TagItem)
         {
@@ -510,49 +682,14 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         }
         else
         {
-            QTreeWidget::dropEvent(event);
-            if (m_dragItem)
+            dropEventCore(event);
+            if (m_dragItem && event->isAccepted())
             {
                 on_itemPosition_changed(m_dragItem);
             }
         }
         viewport()->repaint();
         return;
-
-//        CWizCategoryViewItemBase* hoveredItem = itemAt(event->pos());
-//        Q_ASSERT(hoveredItem != nullptr);
-
-//        if (hoveredItem->kbGUID() == m_dragItem->kbGUID())
-//        {
-//            QTreeWidget::dropEvent(event);
-//            if (m_dragItem)
-//            {
-//                on_itemPosition_changed(m_dragItem);
-//            }
-//            viewport()->repaint();
-//            return;
-//        }
-//        else
-//        {
-//            Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
-//            bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
-//            QRect rcItem = visualItemRect(hoveredItem);
-//            qDebug() << "hover item rect : " << rcItem << "  event pos : " << event->pos();
-//            if (event->pos().y() < rcItem.top() + 2)
-//            {
-//                dropItemAsBrother(hoveredItem, m_dragItem, true, !isCTRL);
-//            }
-//            else if (event->pos().y() > rcItem.bottom() - 2)
-//            {
-//                dropItemAsBrother(hoveredItem, m_dragItem, false, !isCTRL);
-//            }
-//            else
-//            {
-//                dropItemAsChild(hoveredItem, m_dragItem, !isCTRL);
-//            }
-////                setCurrentItem(hoveredItem);
-//                m_dragItem = nullptr;
-//         }
     }
 
     viewport()->repaint();
@@ -1068,16 +1205,6 @@ bool CWizCategoryView::combineGroupFolder(CWizCategoryViewGroupItem* sourceItem,
         }
     }
     return db.DeleteTag(sourceItem->tag(), true);
-}
-
-void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
-                                             CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
-{
-}
-
-void CWizCategoryBaseView::dropItemAsChild(CWizCategoryViewItemBase* targetItem,
-                                           CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
-{
 }
 
 void CWizCategoryBaseView::on_dragHovered_timeOut()
@@ -5416,6 +5543,12 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
 
 void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
 {
+    QTreeWidgetItem* parentItem = pItem->parent();
+    if (!parentItem)
+    {
+        return;
+    }
+    //
     qDebug() << "category item position changed, try to update item position data, item text : " << pItem->text(0);
     CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
     if (db.IsGroup())
@@ -5938,21 +6071,29 @@ void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
     {
         newLocation = "/" + strName + "/";
     }
+    //change item location
+    resetFolderLocation(item, newLocation);
     //
-    if (item->parent())
+    //save folder pos
+    CWizDatabase& db = m_dbMgr.db();
+    updatePersonalFolderLocation(db, oldLocation, newLocation);
+    //
+    //start move folder
+    moveFolder(oldLocation, newLocation);
+}
+
+void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
+{
+    item->setLocation(strNewLocation);
+    for (int i = 0; i < item->childCount(); i++)
     {
-        item->parent()->removeChild(item);
-    }
-    else
-    {
-        int index = indexOfTopLevelItem(item);
-        if (-1 != index)
+        CWizCategoryViewFolderItem* child = dynamic_cast<CWizCategoryViewFolderItem*>(item->child(i));
+        if (child)
         {
-            takeTopLevelItem(index);
+            QString strChildLocation = strNewLocation + child->text(0) + "/";
+            resetFolderLocation(child, strChildLocation);
         }
     }
-    //
-    moveFolder(oldLocation, newLocation);
 }
 
 void CWizCategoryView::moveFolder(QString oldLocation, QString newLocation)
