@@ -1914,8 +1914,7 @@ void CWizDocumentWebView::redo()
 
 QString CWizDocumentWebView::getUserGuid()
 {
-    QString strKbGUID = view()->note().strKbGUID;
-    return m_dbMgr.db(strKbGUID).GetUserGUID();
+    return m_dbMgr.db().GetUserGUID();
 }
 
 
