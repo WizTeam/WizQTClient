@@ -30,7 +30,7 @@ public slots:
     void setServerIp(const QString& ip);
     void downloadOEMLogo(const QString& strUrl);
     void downloadOEMSettings();
-    void onCheckServerLicenceRequest(const QString& licence);
+    void checkServerLicence(const QString& licence);
 
 signals:
     void oemSettingsDownloaded(const QString& setting);
@@ -256,7 +256,6 @@ private:
 
     //
     QMap<QString, QString> m_oemLogoMap;
-    QThread* m_oemThread;
     CWizOEMDownloader* m_oemDownloader;
 
     QList<WizLocalUser> m_userList;

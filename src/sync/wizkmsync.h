@@ -2,6 +2,7 @@
 #define WIZKMSYNC_H
 
 #include <QThread>
+#include <QMessageBox>
 
 #include "sync.h"
 #include "wizKMServer.h"
@@ -42,6 +43,7 @@ public:
     CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
     ~CWizKMSyncThread();
     void startSyncAll(bool bBackground = true);
+    bool isBackground() const;
     void stopSync();
     //
     void setFullSyncInterval(int nMinutes);
@@ -52,30 +54,41 @@ public:
 
     bool clearCurrentToken();
     //
-    void waitForDone();    
+    void waitForDone();
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe
+    static bool isBusy();
+    static void waitUntilIdleAndPause();
+    static void setPause(bool pause);
+
+signals:
+    void startTimer(int interval);
+    void stopTimer();
 
 protected:
     virtual void run();
 
 private slots:
     void syncAfterStart();
+    void on_timerOut();
 
 private:
     bool m_bBackground;
-    QThread* m_worker;
     CWizDatabase& m_db;
     WIZUSERINFO m_info;
     CWizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
     bool m_bNeedDownloadMessages;
     QDateTime m_tLastSyncAll;
-    int m_nfullSyncInterval;
+    int m_nFullSyncSecondsInterval;
+    bool m_bBusy;
+    bool m_bPause;
 
     //
     QMutex m_mutex;
+    QWaitCondition m_wait;
+    QTimer m_timer;
     std::set<QString> m_setQuickSyncKb;
     QDateTime m_tLastKbModified;
 
@@ -97,10 +110,37 @@ private:
 
 Q_SIGNALS:
     void syncStarted(bool syncAll);
-    void syncFinished(int nErrorCode, const QString& strErrorMesssage);
+    void syncFinished(int nErrorCode, const QString& strErrorMesssage, bool isBackground);
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
 };
+
+class CWizKMWaitAndPauseSyncHelper
+{
+public:
+    CWizKMWaitAndPauseSyncHelper()
+    {
+        CWizKMSyncThread::waitUntilIdleAndPause();
+    }
+    ~CWizKMWaitAndPauseSyncHelper()
+    {
+        CWizKMSyncThread::setPause(false);
+    }
+};
+
+#define WIZKM_WAIT_AND_PAUSE_SYNC() \
+    CWizKMWaitAndPauseSyncHelper __waitHelper;\
+    Q_UNUSED(__waitHelper)
+
+#define WIZKM_CHECK_SYNCING(parent) \
+    if (CWizKMSyncThread::isBusy()) \
+    {   \
+        QString title = QObject::tr("Syncing"); \
+        QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
+        QMessageBox::information(parent, title, message);\
+        return;    \
+    }
+
 
 #endif // WIZKMSYNC_H

@@ -11,6 +11,9 @@ public:
     bool isVip();
     bool isPaidUser();
 
+    bool isPaidGroup(const QString& kbGUID);
+    bool isBizGroup(const QString& kbGUID);
+
 private:
     CWizDatabaseManager& m_dbMgr;
 };

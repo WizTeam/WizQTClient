@@ -1,5 +1,4 @@
 #include "apientry.h"
-#include "apientry_p.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -12,7 +11,6 @@
 #include <QDebug>
 #include <QUrl>
 
-#include "apientry.h"
 #include "token.h"
 #include "wizKMServer.h"
 #include "wizdef.h"
@@ -66,9 +64,6 @@
 //    QString strPlatform = "x86";
 //#endif
 
-using namespace WizService;
-using namespace WizService::Internal;
-
 
 static QString LocalLanguage = QLocale::system().name();
 QString CommonApiEntry::m_server = QString();
@@ -86,14 +81,14 @@ QString _requestUrl(const QString& strUrl)
 
     if (loop.error() != QNetworkReply::NoError)
     {
-        return NULL;
+        return QString();
     }
 
     //NOTE: reply has been delete in event loop, should not be deleted here
 //    reply->deleteLater();
 
 
-    return loop.result();
+    return QString::fromUtf8(loop.result().constData());
 }
 
 QString addExtendedInfo(const QString& strUrl, const QString& strExt)
@@ -102,290 +97,7 @@ QString addExtendedInfo(const QString& strUrl, const QString& strExt)
     return strUrl + strExtInfo;
 }
 
-/*
-CommonApiEntryPrivate::CommonApiEntryPrivate()
-    : m_strEnterpriseAPIUrl(WIZNOTE_API_SERVER)
-{
-}
 
-CommonApiEntryPrivate::~CommonApiEntryPrivate()
-{
-}
-
-void CommonApiEntryPrivate::setEnterpriseServerIP(const QString& strIP)
-{
-    if (strIP == m_strEnterpriseAPIUrl)
-        return;
-
-    if (!strIP.isEmpty())
-    {
-        m_strEnterpriseAPIUrl = QString("http://%1/").arg(strIP);
-    }
-    else
-    {
-        m_strEnterpriseAPIUrl = WIZNOTE_API_SERVER;
-    }
-
-    qDebug() << "set server ip : " << m_strEnterpriseAPIUrl;
-
-    m_strSyncUrl.clear();
-    m_strMessageServerUrl.clear();
-    m_strMessageVersionUrl.clear();
-    m_strAvatarDownloadUrl.clear();
-    m_strAvatarUploadUrl.clear();
-    m_strCommentUrl.clear();
-    m_strCommentCountUrl.clear();
-}
-
-void CommonApiEntryPrivate::setLanguage(const QString& strLocal)
-{
-    m_strLocal = strLocal;
-}
-
-QString CommonApiEntryPrivate::asServerUrl()
-{
-    QString strAsUrl;
-    return requestUrl(WIZNOTE_API_COMMAND_AS_SERVER, strAsUrl, false);
-}
-
-QString CommonApiEntryPrivate::messageServerUrl()
-{
-    return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_SERVER, m_strMessageServerUrl, false);
-}
-
-QString CommonApiEntryPrivate::urlFromCommand(const QString& strCommand, bool bUseWizServer)
-{
-    // random seed
-    qsrand((uint)QTime::currentTime().msec());
-
-    QString strUrl = QString(WIZNOTE_API_ENTRY)
-            .arg(bUseWizServer ? WIZNOTE_API_SERVER : m_strEnterpriseAPIUrl)\
-            .arg(WIZNOTE_API_ARG_PRODUCT)\
-            .arg(m_strLocal)\
-            .arg(WIZ_CLIENT_VERSION)\
-            .arg(strCommand)\
-            .arg(qrand())\
-            .arg(QHostInfo::localHostName())\
-            .arg(WIZNOTE_API_ARG_PLATFORM)\
-            .arg("false");
-
-    qDebug() << "url from command : " << strCommand << " use wiz server : " << bUseWizServer
-             << "  enterprise url : " << m_strEnterpriseAPIUrl << "  result : " << strUrl;
-    return strUrl;
-}
-
-QString CommonApiEntryPrivate::addExtendedInfo(const QString& strUrl, const QString& strExt)
-{
-    QString strExtInfo = QString("&a=%1").arg(QUrl::toPercentEncoding(strExt).constData());
-    return strUrl + strExtInfo;
-}
-
-QString CommonApiEntryPrivate::requestUrl(const QString& strUrl)
-{
-    QNetworkAccessManager* net = new QNetworkAccessManager();
-    QNetworkReply* reply = net->get(QNetworkRequest(strUrl));
-
-    CWizAutoTimeOutEventLoop loop(reply);
-//    loop.setTimeoutWaitSeconds(5);
-    loop.exec(QEventLoop::ExcludeUserInputEvents);
-
-    if (loop.error() != QNetworkReply::NoError)
-        return NULL;
-
-    //NOTE: reply has been delete in event loop, should not be deleted here
-//    reply->deleteLater();
-
-    net->deleteLater();
-
-    return loop.result();
-}
-
-QString CommonApiEntryPrivate::requestUrl(const QString& strCommand, QString& strUrl, bool bUseWizServer)
-{
-    QString strRequestUrl= urlFromCommand(strCommand, bUseWizServer);
-
-    strUrl = requestUrl(strRequestUrl);
-
-    qDebug() << "request url by command : " << strCommand << "  request result : "  << strUrl;
-    return strUrl;
-}
-
-QString CommonApiEntryPrivate::syncUrl()
-{
-    QString strSyncUrl = requestUrl(WIZNOTE_API_COMMAND_SYNC_HTTPS, m_strSyncUrl, false);
-    qDebug() << "get sync url , cache url :  " << m_strSyncUrl  << "   result :  " << strSyncUrl;
-    return strSyncUrl;
-}
-
-QString CommonApiEntryPrivate::messageVersionUrl()
-{
-    return requestUrl(WIZNOTE_API_COMMAND_MESSAGE_VERSION, m_strMessageVersionUrl, false);
-}
-
-QString CommonApiEntryPrivate::avatarDownloadUrl(const QString& strUserGUID)
-{
-    QString strRawUrl(requestUrl(WIZNOTE_API_COMMAND_AVATAR, m_strAvatarDownloadUrl, false));
-
-    strRawUrl.replace(QRegExp("\\{.*\\}"), strUserGUID);
-    strRawUrl += "?default=false"; // Do not download server default avatar
-    return strRawUrl;
-}
-
-QString CommonApiEntryPrivate::avatarUploadUrl()
-{
-    return requestUrl(WIZNOTE_API_COMMAND_UPLOAD_AVATAR, m_strAvatarUploadUrl, false);
-}
-
-QString CommonApiEntryPrivate::commentUrl(const QString& strToken, const QString& strKbGUID,const QString& strGUID)
-{
-    if (m_strCommentUrl.isEmpty()) {
-        requestUrl(WIZNOTE_API_COMMAND_COMMENT, m_strCommentUrl, false);
-    }
-
-    QString strUrl(m_strCommentUrl);
-    strUrl.replace("{token}", strToken);
-    strUrl.replace("{kbGuid}", strKbGUID);
-    strUrl.replace("{documentGuid}", strGUID);
-
-    return strUrl;
-}
-
-QString CommonApiEntryPrivate::commentCountUrl(const QString& strKUrl, const QString& strToken,
-                                         const QString& strKbGUID, const QString& strGUID)
-{
-    if (m_strCommentCountUrl.isEmpty()) {
-        requestUrl(WIZNOTE_API_COMMAND_COMMENT_COUNT, m_strCommentCountUrl, false);
-    }
-
-    QString strServer = strKUrl;
-    //NOTE: 新版服务器修改了评论数目获取方法，需要自行将KUrl中的/xmlrpc移除
-    strServer.remove("/xmlrpc");
-    QString strUrl(m_strCommentCountUrl);
-    strUrl.replace("{server_url}", strServer);
-    strUrl.replace("{token}", strToken);
-    strUrl.replace("{kbGuid}", strKbGUID);
-    strUrl.replace("{documentGuid}", strGUID);
-    return strUrl;
-
-    //WARNING: 不知道问什么强制使用Https请求，暂时注掉
-//    // use https
-//    QUrl url(strUrl);
-//    url.setScheme("https");
-//    return url.toString();
-
-}
-
-QString CommonApiEntryPrivate::analyzerUploadUrl()
-{
-    QString analyzerUrl;
-    requestUrl("analyzer", analyzerUrl, true);
-    return analyzerUrl;
-}
-
-QString CommonApiEntryPrivate::mailShareUrl(const QString& strKUrl, const QString& strMailInfo)
-{
-//    QString strKsHost = syncUrl();
-
-    QString strMailShare;
-    requestUrl(WIZNOTE_API_COMMAND_MAIL_SHARE, strMailShare, false);
-    QString strServer = strKUrl;
-    //NOTE: 新版服务器修改了评论数目获取方法，需要自行将KUrl中的/xmlrpc移除
-    strServer.remove("/xmlrpc");
-    strMailShare.replace("{server_url}", strServer);
-    strMailShare.append(strMailInfo);
-    return strMailShare;
-}
-
-QString CommonApiEntryPrivate::accountInfoUrl(const QString& strToken)
-{
-    QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_USER_INFO, false);
-    return addExtendedInfo(strUrl, strExt);
-}
-
-QString CommonApiEntryPrivate::createGroupUrl(const QString& strToken)
-{
-    QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand("create_group", false);
-    return addExtendedInfo(strUrl, strExt);
-}
-
-QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, bool bUseWizServer)
-{
-    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
-    return strUrl;
-}
-
-QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, bool bUseWizServer)
-{
-    QString strExt = QString("token=%1").arg(strToken);
-    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
-    return addExtendedInfo(strUrl, strExt);
-}
-
-QString CommonApiEntryPrivate::standardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExtInfo, bool bUseWizServer)
-{
-    QString strExt = QString("token=%1").arg(strToken) + "&" + strExtInfo;
-    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
-    return addExtendedInfo(strUrl, strExt);
-}
-
-QString CommonApiEntryPrivate::newStandardCommandUrl(const QString& strCommand, const QString& strToken, const QString& strExt, bool bUseWizServer)
-{
-    QString strUrl = urlFromCommand(strCommand, bUseWizServer);
-    QString strExtInfo = QString("&token=%1").arg(strToken);
-    strExtInfo.append(strExt.isEmpty() ? "" : "&" + strExt);
-    return strUrl + strExtInfo;
-}
-
-QString CommonApiEntryPrivate::groupAttributeUrl(const QString& strToken, const QString& strKbGUID)
-{
-    QString strExt = QString("token=%1&kb_guid=%2").arg(strToken).arg(strKbGUID);
-    QString strUrl = urlFromCommand(WIZNOTE_API_COMMAND_VIEW_GROUP, false);
-    return addExtendedInfo(strUrl, strExt);
-}
-
-QString CommonApiEntryPrivate::groupUsersUrl(const QString& strToken, const QString& strBizGUID, const QString& strkbGUID)
-{
-    QUrl url(syncUrl());
-    QString strExt = QString("?token=%1&biz_guid=%2&kb_guid=%3&t=%4")
-            .arg(strToken)
-            .arg(strBizGUID)
-            .arg(strkbGUID)
-            .arg(qrand());
-
-    return url.scheme() + "://" + url.host() + "/wizas/a/biz/user_aliases" + strExt;
-}
-
-QString CommonApiEntryPrivate::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
-{
-    Q_ASSERT(!strToken.isEmpty());
-
-    if (m_mapkUrl.contains(strKbGUID))
-        return m_mapkUrl.value(strKbGUID);
-
-    WIZUSERINFO info = Token::info();
-    m_mapkUrl.insert(info.strKbGUID, info.strDatabaseServer);
-    qDebug() << "user: " << info.strKbGUID << " kbUrl: " << info.strDatabaseServer;
-
-    CWizKMAccountsServer asServer(syncUrl());
-    asServer.SetUserInfo(info);
-
-    CWizGroupDataArray arrayGroup;
-    if (asServer.GetGroupList(arrayGroup)) {
-        CWizGroupDataArray::const_iterator it = arrayGroup.begin();
-        for (; it != arrayGroup.end(); it++) {
-            const WIZGROUPDATA& group = *it;
-            m_mapkUrl.insert(group.strGroupGUID, group.strDatabaseServer);
-            qDebug() << "group:" << group.strGroupGUID << " kburl: " <<  group.strDatabaseServer;
-        }
-    } else {
-        qDebug() << asServer.GetLastErrorMessage();
-    }
-
-    return m_mapkUrl.value(strKbGUID, 0);
-}
-*/
 
 void CommonApiEntry::setEnterpriseServerIP(const QString& strIP)
 {
@@ -451,6 +163,11 @@ QString CommonApiEntry::asServerUrl()
 QString CommonApiEntry::messageServerUrl()
 {    
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);
+}
+
+QString CommonApiEntry::systemAvatarUrl(const QString& avatarName)
+{
+    return getUrlFromCache(avatarName);
 }
 
 QString CommonApiEntry::avatarDownloadUrl(const QString& strUserGUID)
@@ -607,7 +324,11 @@ QString CommonApiEntry::groupUsersUrl(const QString& strToken, const QString& st
 
 QString CommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
-    Q_ASSERT(!strToken.isEmpty());
+    if (strToken.isEmpty())
+    {
+        qCritical() << "request kb url by empty token";
+        return QString();
+    }
     
     if (m_mapkUrl.contains(strKbGUID))
         return m_mapkUrl.value(strKbGUID);
@@ -675,8 +396,10 @@ QString CommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 
 void CommonApiEntry::getEndPoints()
 {
-    qDebug() << "get end points";
     QString urls = requestUrl("endpoints");
+#ifdef QT_DEBUG
+    qDebug() << "get end points : " << urls;
+#endif
     if (urls.isEmpty() || !urls.contains("http"))
         return;
 
@@ -686,13 +409,21 @@ void CommonApiEntry::getEndPoints()
     if (d.HasParseError())
     {
         qWarning() << "parse endpoints data error : " << d.GetParseError();
+        return;
     }
 
-    for(auto iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
+    for(rapidjson::Document::ConstMemberIterator iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
     {
+        if (!(iter->name).IsString() || !(iter->value).IsString())
+        {
+            continue;
+        }
+
         QString key = (iter->name).GetString();
         QString url = (iter->value).GetString();
+#ifdef QT_DEBUG
         qDebug() << "key: " << key << " url : " << url;
+#endif
         m_cacheMap.insert(key, url);
     }
 }

@@ -51,7 +51,7 @@ QString PathResolve::builtinTemplatePath()
     return resourcesPath() + "templates/";
 }
 
-QString PathResolve::downloadedTemplatesPath()
+QString PathResolve::customNoteTemplatesPath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
@@ -62,6 +62,37 @@ QString PathResolve::downloadedTemplatesPath()
     #endif
 #else
     strPath = dataStorePath() + "templates/";
+#endif
+
+    return strPath;
+}
+
+QString PathResolve::wizTemplateJsFilePath()
+{
+    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.js";
+}
+
+QString PathResolve::wizTemplateJsonFilePath()
+{
+    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.json";
+}
+
+QString PathResolve::wizTemplatePurchaseRecordFile()
+{
+    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_templateRecord.json";
+}
+
+QString PathResolve::customMarkdownTemplatesPath()
+{
+    QString strPath;
+#ifdef Q_OS_MAC
+    #ifdef BUILD4APPSTORE
+        strPath = QDir::homePath() + "/Library/MarkdownTemplates/";
+    #else
+        strPath = dataStorePath() + "markdownTemplates/";
+    #endif
+#else
+    strPath = dataStorePath() + "markdownTemplates/";
 #endif
 
     return strPath;
@@ -81,6 +112,7 @@ QString PathResolve::dataStorePath()
     strPath += "/.wiznote/";
 #endif
     ensurePathExists(strPath);
+    //
     return strPath;
 }
 
@@ -135,10 +167,6 @@ QString PathResolve::logFile()
     return strLogfile;
 }
 
-QString PathResolve::pluginsPath()
-{
-    return resourcesPath() + "plugins/";
-}
 
 QString PathResolve::tempPath()
 {

@@ -58,44 +58,47 @@ var zh_tw_loc = {
 } ;
 //
 function GetBrowserLanguage() {
-	return external.getLocalLanguage();
+    return external.localLanguage;
 }
 //
-var ShareLocale = (function() {
-	var lng = GetBrowserLanguage().toLowerCase();
-	//
-	var objLng;
-	switch (lng) {
-		case "zh_cn":
-			objLng = zh_cn_loc;
-			break;
-		default:
-			objLng = en_us_loc;
-	};
-	//
-	return objLng;
-})();
 
 function wizTranslate (str) {
+
+    var ShareLocale = (function() {
+        var lng = GetBrowserLanguage().toLowerCase();
+        //
+        var objLng;
+        switch (lng) {
+            case "zh_cn":
+                objLng = zh_cn_loc;
+                break;
+            default:
+                objLng = en_us_loc;
+        };
+        //
+        return objLng;
+    })();
+
 	if (!ShareLocale || !ShareLocale[str])
 		return str;
 	//
 	return ShareLocale[str];
 }
-
-var sharelocale_remain_days = wizTranslate("(%1 Day(s) Left)");
-var sharelocale_remain_times = wizTranslate("(%1 Time(s) Left)");
-var sharelocale_token_invalid = wizTranslate("WizNote internal error.(token invalid)");
-var sharelocale_copy_link_succeeded = wizTranslate("Link copied successfully!");
-var sharelocale_copy_link_password_succeeded = wizTranslate("Link and password copied successfully!");
-var sharelocale_unknown_error = wizTranslate("Unknown error.");
-var sharelocale_cancel_succeeded = wizTranslate("Canceled successfully!");
-var sharelocale_modify_succeeded = wizTranslate("Modified successfully!");
-var sharelocale_network_error = wizTranslate("Network error! Please check the network and retry.");
-var sharelocale_server_error = wizTranslate("Server error.");
-var sharelocale_free_account_set_limit = wizTranslate("Only VIP user can modify access limitations.");
-var sharelocale_mail_unverified = wizTranslate("Account unverified! Please verify it and retry.");
-var sharelocale_access_other_kb = wizTranslate("No permission to access the knowledge base.");
-var sharelocale_note_not_in_server = wizTranslate("The note has not been uploaded to server! Please upload it and retry.");
-var sharelocale_free_account_create_link = wizTranslate("Only VIP user can create link, please retry after upgrading to VIP and syncing with server.");
-var sharelocale_blacklist = wizTranslate("Sorry, due to some restriction, you can't use link sharing service temporarily.");
+function wizInitLang() {
+    window.sharelocale_remain_days = wizTranslate("(%1 Day(s) Left)");
+    window.sharelocale_remain_times = wizTranslate("(%1 Time(s) Left)");
+    window.sharelocale_token_invalid = wizTranslate("WizNote internal error.(token invalid)");
+    window.sharelocale_copy_link_succeeded = wizTranslate("Link copied successfully!");
+    window.sharelocale_copy_link_password_succeeded = wizTranslate("Link and password copied successfully!");
+    window.sharelocale_unknown_error = wizTranslate("Unknown error.");
+    window.sharelocale_cancel_succeeded = wizTranslate("Canceled successfully!");
+    window.sharelocale_modify_succeeded = wizTranslate("Modified successfully!");
+    window.sharelocale_network_error = wizTranslate("Network error! Please check the network and retry.");
+    window.sharelocale_server_error = wizTranslate("Server error.");
+    window.sharelocale_free_account_set_limit = wizTranslate("Only VIP user can modify access limitations.");
+    window.sharelocale_mail_unverified = wizTranslate("Account unverified! Please verify it and retry.");
+    window.sharelocale_access_other_kb = wizTranslate("No permission to access the knowledge base.");
+    window.sharelocale_note_not_in_server = wizTranslate("The note has not been uploaded to server! Please upload it and retry.");
+    window.sharelocale_free_account_create_link = wizTranslate("Only VIP user can create link, please retry after upgrading to VIP and syncing with server.");
+    window.sharelocale_blacklist = wizTranslate("Sorry, due to some restriction, you can't use link sharing service temporarily.");
+}

@@ -1,12 +1,13 @@
 #include "wizsettings.h"
 #include "wizWebSettingsDialog.h"
 
-#include <QApplication>
-#include <stdlib.h>
-#include <QTextDocument>
 #include <algorithm>
-#include <QCursor>
 #include <fstream>
+#include <stdlib.h>
+#include <QApplication>
+#include <QTextDocument>
+#include <QClipboard>
+#include <QCursor>
 #include <QBitmap>
 #include <QPixmap>
 #include <QPainter>
@@ -405,7 +406,7 @@ QString WizGetEmailPrefix(const QString& strMail)
 {
     int n = strMail.indexOf('@');
     if (n == -1) {
-        return NULL;
+        return QString();
     }
 
     return strMail.left(n);
@@ -455,7 +456,7 @@ BOOL WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError)
     int nMin = atoi(lpsz + 14);
     int nSec = atoi(lpsz + 17);
     //
-    if (nYear < 1900 || nYear > 2100)
+    if (nYear < 0)
     {
         strError = _T("Invalid date time format (year)");
         return TRUE;
@@ -1127,6 +1128,19 @@ bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
+
+bool WizLoadTextFromResource(const QString& resourceName, QString& text)
+{
+    QFile data(resourceName);
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        text = in.readAll();
+        return true;
+    }
+    return false;
+}
+
+
 bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
@@ -1659,7 +1673,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     };
 
     QStringList suffixList;
-    suffixList << ".png" << ".tiff";
+    suffixList << ".png" << ".tiff" << ".gif";
 
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
@@ -1851,6 +1865,17 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+QString WizText2Html(const QString& text)
+{
+    QString html = text;
+    html.replace("&", "&amp;");
+    html.replace("<", "&lt;");
+    html.replace(">", "&gt;");
+    //
+    return "<pre>" + html + "</pre>";
+}
+
+
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
@@ -1862,21 +1887,25 @@ QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgS
             .arg(linkHref).arg(imgSize.width()).arg(imgSize.height()).arg(imageFile);
 }
 
-bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath)
 {
+    Utils::Misc::addBackslash(strDestImagePath);
+    //
+    QString srcPath = Utils::Misc::extractFilePath(strImageFile);
+    //
     QString strDestFile = strImageFile;
-    if (bUseCopyFile)
+    if (srcPath != strDestImagePath)
     {
-        QFileInfo info(strImageFile);
-        strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-
+        strDestFile = strDestImagePath + WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strImageFile);
+        //
         qDebug() << "[Editor] copy to: " << strDestFile;
 
         if (!QFile::copy(strImageFile, strDestFile)) {
+            qDebug() << "[Editor] failed to copy image to: " << strDestFile;
             return false;
         }
     }
-
+    //
     strHtml = getImageHtmlLabelByFile(strDestFile);
     return true;
 }
@@ -1892,11 +1921,7 @@ void WizDeleteFolder(const CString& strPath)
 
     dir = QDir(strPath);
 
-#if QT_VERSION > 0x050000
     dir.removeRecursively();
-#else
-    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
-#endif
 }
 
 void WizDeleteFile(const CString& strFileName)
@@ -2185,6 +2210,52 @@ bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
 }
 
 
+bool WizHTMLIsInCommentsBlock(const QString& strHtml, int pos)
+{
+    if (pos <= 0)
+        return false;
+    if (pos >= strHtml.length())
+        return false;
+    //
+    int commentBegin = strHtml.lastIndexOf("<!--", pos);
+    if (-1 == commentBegin)
+        return false;
+    //
+    int commentEnd = strHtml.indexOf("-->", commentBegin);
+    if (commentEnd == -1)
+        return false;
+    //
+    if (commentEnd < pos)
+        return false;
+    //
+    return true;
+}
+
+void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML)
+{
+    ptrdiff_t nPos = 0;
+    int from = 0;
+    while (1)
+    {
+        nPos = strHTML.indexOf("</head", from, Qt::CaseInsensitive);
+        if (-1 == nPos)
+        {
+            nPos = 0;
+            break;
+        }
+        //
+        if (!WizHTMLIsInCommentsBlock(strHTML, nPos))
+            break;
+        //
+        from = nPos + 6;
+    }
+    //
+    strHTML.insert(int(nPos), strText);
+}
+
+
+
+
 bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
 {
     QDir sourceDir(strSrcDir);
@@ -2224,7 +2295,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2480,12 +2551,12 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
 
-bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc)
+bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc)
 {
     QStringList fileTypes;
     fileTypes << ".xls" << ".xlsx";
@@ -2510,8 +2581,7 @@ void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocum
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
@@ -2519,6 +2589,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2539,8 +2610,7 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                                                    CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
@@ -2548,6 +2618,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     QString strFileName = db.GetDocumentFileName(doc.strGUID);
     if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2561,8 +2632,7 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     return PathFileExists(strFileName);
 }
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
@@ -2570,6 +2640,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2584,7 +2655,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
 }
 
 
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData, CWizObjectDataDownloaderHost* downloaderHost)
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
@@ -2592,6 +2663,7 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
     QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
     if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
+        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2599,9 +2671,9 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
         dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
+
         QObject::connect(downloaderHost, SIGNAL(downloadProgress(QString,int,int)), &dlg, SLOT(setProgress(QString,int,int)));
         QObject::connect(downloaderHost, SIGNAL(finished()), &dlg, SLOT(accept()));
-
         downloaderHost->downloadData(attachData);
         dlg.exec();
         //
@@ -2707,4 +2779,120 @@ bool WizIsChineseLanguage(const QString& local)
         return true;
 
     return false;
+}
+
+
+bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc)
+{
+    if (doc.strTitle.indexOf(".md") == -1 && doc.strTitle.indexOf(".mj") == -1)
+        return false;
+
+    int nPointPos = doc.strTitle.length() - 3;
+    if (doc.strTitle.lastIndexOf(".md") == nPointPos || doc.strTitle.lastIndexOf(".mj") == nPointPos)
+        return true;
+
+    if (doc.strTitle.indexOf(".md ") != -1 || doc.strTitle.indexOf(".md@") != -1 ||
+            doc.strTitle.indexOf(".mj ") != -1|| doc.strTitle.indexOf(".mj@") != -1)
+        return true;
+
+    return false;
+}
+
+void WizCopyNoteAsInternalLink(const WIZDOCUMENTDATA& document)
+{
+    QString strHtml, strLink;
+    WizNoteToHtmlLink(document, strHtml, strLink);
+    //
+    QClipboard* clip = QApplication::clipboard();
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHtml);
+    data->setText(strLink);
+    clip->setMimeData(data);
+}
+
+
+void WizCopyNotesAsInternalLink(const QList<WIZDOCUMENTDATA>& documents)
+{
+    QString strHtml, strLink;
+    WizNotesToHtmlLink(documents, strHtml, strLink);
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(strHtml);
+    data->setText(strLink);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
+}
+
+
+QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document)
+{
+    CWizDatabase& db = CWizDatabaseManager::instance()->db(document.strKbGUID);
+    //
+    if (!db.IsGroup())
+    {
+        return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, "", db.kbGUID());
+    }
+    else
+    {
+        return WizFormatString2(_T("wiz://open_document?guid=%1&kbguid=%2"), document.strGUID, document.strKbGUID);
+    }
+    return QString();
+}
+
+
+void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
+{
+    strLink = WizNoteToWizKMURL(document);
+    QString strTitle = document.strTitle.toHtmlEscaped();
+    strTitle.replace(_T("&"), _T("&amp;"));
+    //
+    strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
+}
+
+
+void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString& strLink)
+{
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString strOneHtml, strOneLink;
+        WizNoteToHtmlLink(documents.at(i), strOneHtml, strOneLink);
+        strHtml += strOneHtml + "<br>";
+        strLink += strOneLink + "\n";
+    }
+}
+
+
+void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
+{
+    // https://note.wiz.cn?dc={document_guid}&kb={kb_guid}&cmd=km%2C"}
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
+    url.replace("{document_guid}", document.strGUID);
+    url.replace("{kb_guid}", document.strKbGUID);
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(url);
+    data->setText(url);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
+}
+
+
+void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents)
+{
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
+    QString link;
+    for (int i = 0; i < documents.count(); i++)
+    {
+        QString tmp = url;
+        tmp.replace("{document_guid}", documents.at(i).strGUID);
+        tmp.replace("{kb_guid}", documents.at(i).strKbGUID);
+        link.append((i == 0 ? "" : "\n") + tmp);
+    }
+
+    QMimeData* data = new QMimeData();
+    data->setHtml(link);
+    data->setText(link);
+    QClipboard* clip = QApplication::clipboard();
+    clip->setMimeData(data);
 }

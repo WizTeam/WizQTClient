@@ -32,7 +32,7 @@ protected:
     bool m_bAutoLogout;
 
 public:
-    WIZUSERINFO m_retLogin;
+    WIZUSERINFO m_userInfo;
 
 public:
     bool Login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
@@ -64,9 +64,8 @@ public:
     QString GetToken();
     QString GetKbGUID();
     //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
-    int GetMaxFileSize() { return m_retLogin.GetMaxFileSize(); }
-    const WIZUSERINFO& GetUserInfo() const { return m_retLogin; }
-    WIZUSERINFO& GetUserInfo() { return m_retLogin; }
+    const WIZUSERINFO& GetUserInfo() const { return m_userInfo; }
+    WIZUSERINFO& GetUserInfo() { return m_userInfo; }
     void SetUserInfo(const WIZUSERINFO& userInfo);
 
 private:
@@ -158,27 +157,27 @@ public:
     virtual ~CWizKMDatabaseServer();
     virtual void OnXmlRpcError();
 
+    const WIZKBINFO& kbInfo();
+    void setKBInfo(const WIZKBINFO& info);
+
 protected:
-    WIZUSERINFOBASE m_kbInfo;
+    WIZUSERINFOBASE m_userInfo;
+    WIZKBINFO m_kbInfo;
 
 public:
-    QString GetToken() const { return m_kbInfo.strToken; }
-    QString GetKbGUID() const { return m_kbInfo.strKbGUID; }
+    QString GetToken() const { return m_userInfo.strToken; }
+    QString GetKbGUID() const { return m_userInfo.strKbGUID; }
     int GetMaxFileSize() const { return m_kbInfo.GetMaxFileSize(); }
 
-    BOOL wiz_getInfo(WIZKBINFO& info);
+    BOOL wiz_getInfo();
     BOOL wiz_getVersion(WIZOBJECTVERSION& version, BOOL bAuto = FALSE);
 
-    BOOL document_getData(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret);
-    BOOL document_postData(const WIZDOCUMENTDATAEX& data, UINT nParts, __int64& nServerVersion);
-    BOOL attachment_getData(const QString& strAttachmentGUID, UINT nParts, WIZDOCUMENTATTACHMENTDATAEX& ret);
-    BOOL attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion);
-
-    BOOL document_downloadSimpleList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
-    BOOL attachment_downloadSimpleList(const CWizStdStringArray& arrayAttachmentGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
-
-    BOOL document_downloadFullList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
-
+    BOOL document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret);
+    BOOL attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
+    //
+    BOOL document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+    BOOL attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion);
+    //
     BOOL document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     BOOL attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet);
     BOOL tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet);
@@ -190,6 +189,9 @@ public:
     BOOL deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
     QByteArray DownloadDocumentData(const QString& strDocumentGUID);
     QByteArray DownloadAttachmentData(const QString& strAttachmentGUID);
+    //
+    BOOL document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
+    BOOL document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc);
 
     BOOL category_getAll(QString& str);
 
@@ -207,11 +209,6 @@ signals:
     void downloadProgress(int totalSize, int loadedSize);
 
 protected:
-    BOOL document_getData2(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret);
-    BOOL document_postData2(const WIZDOCUMENTDATAEX& data, UINT nParts, __int64& nServerVersion);
-    BOOL attachment_getData2(const QString& strAttachmentGUID, UINT nParts, WIZDOCUMENTATTACHMENTDATAEX& ret);
-    BOOL attachment_postData2(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion);
-
     BOOL data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, BOOL& bEOF);
     BOOL data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream);
     //
@@ -226,7 +223,7 @@ protected:
         if (arrayGUID.empty())
             return TRUE;
         //
-        CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
+        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
         param.AddStringArray(strGUIDArrayValueName, arrayGUID);
         //
         std::deque<TWrapData> arrayWrap;
@@ -277,29 +274,6 @@ protected:
     }
 
     //
-    /////////////////////////////////////////////
-    //getList
-    ////通过版本号获得对象列表////
-    //
-    template <class TData, class TWrapData>
-    BOOL getList(const QString& strMethodName, int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
-    {
-        CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
-        param.AddInt(_T("count"), nCountPerPage);
-        param.AddString(_T("version"), WizInt64ToStr(nVersion));
-        //
-        std::deque<TWrapData> arrayWrap;
-        if (!Call(strMethodName, arrayWrap, &param))
-        {
-            TOLOG(_T("object.getList failure!"));
-            return FALSE;
-        }
-        //
-        arrayRet.assign(arrayWrap.begin(), arrayWrap.end());
-        //
-        return TRUE;
-    }
-    //
     //
     ////////////////////////////////////////////
     //postList
@@ -331,7 +305,7 @@ protected:
             }
             //
 
-            CWizKMTokenOnlyParam param(m_kbInfo.strToken, m_kbInfo.strKbGUID);
+            CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
             //
             param.AddArray<TWrapData>(strArrayName, subArray);
             //
@@ -366,6 +340,55 @@ protected:
         //
         return TRUE;
     }
+    //
+    /////////////////////////////////////////////////////////
+    ////下载对象数据/////////////////
+
+    template <class TData>
+    BOOL downloadObjectData(TData& data)
+    {
+        return TRUE;
+    }
+    template <class TData>
+    BOOL downloadObjectData(WIZDOCUMENTDATAEX& data)
+    {
+        return document_downloadData(data.strGUID, data);
+    }
+    template <class TData>
+    BOOL downloadObjectData(WIZDOCUMENTATTACHMENTDATAEX& data)
+    {
+        return attachment_downloadData(data.strGUID, data);
+    }
+
+
+    /////////////////////////////////////////////
+    //getList
+    ////通过版本号获得对象列表////
+    //
+
+    template <class TData, class TWrapData>
+    BOOL getList(const QString& strMethodName, int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
+    {
+        CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
+        param.AddInt(_T("count"), nCountPerPage);
+        param.AddString(_T("version"), WizInt64ToStr(nVersion));
+        //
+        std::deque<TWrapData> arrayWrap;
+        if (!Call(strMethodName, arrayWrap, &param))
+        {
+            TOLOG(_T("object.getList failure!"));
+            return FALSE;
+        }
+        //
+        arrayRet.assign(arrayWrap.begin(), arrayWrap.end());
+        //
+        return TRUE;
+    }
+
+public:
+    //
+
+    //
     /////////////////////////////////////////////////////
     ////获得所有的对象列表//
     //
@@ -400,27 +423,6 @@ protected:
     {
         return attachment_getList(nCountPerPage, nVersion, arrayRet);
     }
-    //
-    /////////////////////////////////////////////////////////
-    ////下载对象数据/////////////////
-
-    template <class TData>
-    BOOL getObjectData(TData& data, UINT nParts)
-    {
-        return TRUE;
-    }
-    template <class TData>
-    BOOL getObjectData(WIZDOCUMENTDATAEX& data, UINT nParts)
-    {
-        return document_getData(data.strGUID, nParts, data);
-    }
-    template <class TData>
-    BOOL getObjectData(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts)
-    {
-        return attachment_getData(data.strGUID, nParts, data);
-    }
-public:
-    //
     ///////////////////////////////////////////////////////
     ////下载列表//////////////
     //
@@ -428,16 +430,6 @@ public:
     BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<TData>& arrayData)
     {
         return TRUE;
-    }
-    template <class TData>
-    BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTDATAEX>& arrayData)
-    {
-        return document_downloadSimpleList(arrayGUID, arrayData);
-    }
-    template <class TData>
-    BOOL downloadSimpleList(const CWizStdStringArray& arrayGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
-    {
-        return attachment_downloadSimpleList(arrayGUID, arrayData);
     }
     //
     template <class TData>
@@ -464,61 +456,23 @@ public:
     }
     //
     template <class TData>
-    BOOL postData(TData& data, UINT nParts, __int64& nServerVersion)
+    BOOL postData(TData& data, bool bWithData, __int64& nServerVersion)
     {
         ATLASSERT(FALSE);
         return FALSE;
     }
     //
     template <class TData>
-    BOOL postData(WIZDOCUMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
+    BOOL postData(WIZDOCUMENTDATAEX& data, bool bWithData, __int64& nServerVersion)
     {
-        return document_postData(data, nParts, nServerVersion);
+        return document_postData(data, bWithData, nServerVersion);
     }
     template <class TData>
-    BOOL postData(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
+    BOOL postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool bWithData, __int64& nServerVersion)
     {
-        return attachment_postData(data, nParts, nServerVersion);
+        return attachment_postData(data, nServerVersion);
     }
 public:
-
-    template <class TData>
-    BOOL getAllList(int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
-    {
-        __int64 nNextVersion = nVersion + 1;
-        //
-        while (1)
-        {
-            std::deque<TData> arrayPageData;
-            //
-            //TODO: version
-            //QString strProgress = WizFormatString1(::WizTranslationsTranslateString(_T("Start Version: %1")), WizInt64ToStr(nNextVersion));
-            //m_pProgress->OnText(wizhttpstatustypeNormal, strProgress);
-            //
-            if (!getList<TData>(nCountPerPage, nNextVersion, arrayPageData))
-            {
-                TOLOG2(_T("Failed to get object list: CountPerPage=%1, Version=%2"), WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
-                return FALSE;
-            }
-            //
-            arrayRet.insert(arrayRet.end(), arrayPageData.begin(), arrayPageData.end());
-            //
-            for (typename std::deque<TData>::const_iterator it = arrayPageData.begin();
-                it != arrayPageData.end();
-                it++)
-            {
-                nNextVersion = std::max<__int64>(nNextVersion, it->nVersion);
-            }
-            //
-            if (int(arrayPageData.size()) < nCountPerPage)
-                break;
-            //
-            nNextVersion++;
-        }
-        //
-        return TRUE;
-    }
-
     //
     BOOL getDocumentInfoOnServer(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& dataServer)
     {
@@ -588,7 +542,7 @@ void GetSyncProgressRange(WizKMSyncProgress progress, int& start, int& count);
 int GetSyncStartProgress(WizKMSyncProgress progress);
 
 
-#define _TR(x) (x)
+#define _TR(x) x
 
 
 

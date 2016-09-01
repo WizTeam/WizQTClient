@@ -14,7 +14,7 @@
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
                  const QString& strResourcePath, long flags, \
-                 const QString& strMetaText, const QString& strZipFileName)
+                 const QString& strZipFileName)
 {
     Q_UNUSED(flags);
 
@@ -28,18 +28,18 @@ bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
         return false;
     }
 
-    return collector.Html2Zip(strResourcePath, strMetaText, strZipFileName);
+    return collector.Html2Zip(strResourcePath, strZipFileName);
 }
 
 bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource, \
-                 const QString& strMetaText, const QString& strZipFileName)
+                 const QString& strZipFileName)
 {
     CWizZipFile zip;
     if (!zip.open(strZipFileName))
         return false;
 
     QString strHtmlText = strHtml;
-    if (strHtmlText.left(2) != " <!")
+    if (strHtmlText.left(2) != "<!")
     {
         strHtmlText = "<!DOCTYPE html>" + strHtmlText;
     }
@@ -48,17 +48,10 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtmlText))
         return false;
 
-    CString strMetaFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".xml";
-    if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
-        return false;
-
     if (!zip.compressFile(strIndexFileName, "index.html"))
         return false;
 
     int failed = 0;
-
-    if (!zip.compressFile(strMetaFileName, "meta.xml"))
-        failed++;
 
     for (CWizStdStringArray::const_iterator it = arrayResource.begin();
         it != arrayResource.end();
@@ -76,7 +69,7 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
 }
 
 
-bool WizFolder2Zip(const QString &strFolder, const QString &strMetaText,    \
+bool WizFolder2Zip(const QString &strFolder,    \
                    const QString &strZipFileName, const QString &indexFile /*= "index.html"*/, \
                    const QString &strResourceFolder /*= "index_files"*/)
 {
@@ -86,17 +79,10 @@ bool WizFolder2Zip(const QString &strFolder, const QString &strMetaText,    \
 
     CString strIndexFileName = strFolder + indexFile;
 
-    CString strMetaFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".xml";
-    if (!::WizSaveUnicodeTextToUtf8File(strMetaFileName, strMetaText))
-        return false;
-
     if (!zip.compressFile(strIndexFileName, "index.html"))
         return false;
 
     int failed = 0;
-
-    if (!zip.compressFile(strMetaFileName, "meta.xml"))
-        failed++;
 
     QDir dir(strFolder + strResourceFolder);
     QStringList strResourceList = dir.entryList(QDir::Files, QDir::NoSort);

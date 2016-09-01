@@ -15,12 +15,12 @@
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 
+#define TIMEINTERVAL  60 * 1000
 
 CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
     : QThread(parent)
     , m_dbMgr(dbMgr)
     , m_stop(false)
-    , m_buldNow(false)
 {
     qRegisterMetaType<WIZDOCUMENTDATAEX>("WIZDOCUMENTDATAEX");
 
@@ -31,6 +31,11 @@ CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent
             SLOT(on_document_deleted(const WIZDOCUMENTDATA&)));
     connect(&m_dbMgr, SIGNAL(attachmentDeleted(const WIZDOCUMENTATTACHMENTDATA&)), \
             SLOT(on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA&)));
+
+    m_timer.setSingleShot(true);
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
+    connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
+    connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
 }
 
 void CWizSearchIndexer::rebuild() {
@@ -39,27 +44,34 @@ void CWizSearchIndexer::rebuild() {
     }
 }
 
+void CWizSearchIndexer::on_timerOut()
+{
+    m_mutex.lock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
+}
+
+void CWizSearchIndexer::start(QThread::Priority priority)
+{
+    QThread::start(priority);
+
+    emit startTimer(TIMEINTERVAL);
+}
+
 void CWizSearchIndexer::run()
 {
-    int idleCounter = 0;
-    while (1)
+    while (!m_stop)
     {
-        if (idleCounter >= 60 || m_buldNow || m_stop)
-        {
-            if (m_stop)
-                return;
+        m_mutex.lock();
+        m_wait.wait(&m_mutex);
+        m_mutex.unlock();
 
-            idleCounter = 0;
-            //
-            buildFTSIndex();
-            m_buldNow = false;
+        if (m_stop)
+            return;
+        //
+        buildFTSIndex();
 
-        }
-        else
-        {
-            idleCounter++;
-            msleep(1000);
-        }
+        emit startTimer(TIMEINTERVAL);
     }
 }
 
@@ -72,7 +84,6 @@ void CWizSearchIndexer::waitForDone()
 
 bool CWizSearchIndexer::buildFTSIndex()
 {
-    m_stop = false;
     int nErrors = 0;
 
     // build private first
@@ -80,11 +91,14 @@ bool CWizSearchIndexer::buildFTSIndex()
         nErrors++;
     }
 
+    if (m_stop)
+        return true;
+
     // build group db
     int total = m_dbMgr.count();
     for (int i = 0; i < total; i++) {
         if (m_stop)
-            break;
+            return true;
 
         if (!buildFTSIndexByDatabase(m_dbMgr.at(i))) {
             nErrors++;
@@ -152,7 +166,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     int nTotal = arrayDocuments.size();
     for (int i = 0; i < nTotal; i++) {
         if (m_stop) {
-            break;
+            return true;
         }
 
         const WIZDOCUMENTDATAEX& doc = arrayDocuments.at(i);
@@ -184,17 +198,26 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
 {
     int nCount = arrayDocument.size();
     for (intptr_t i = nCount - 1; i >= 0; i--) {
+        //
         bool bFilter = false;
         WIZDOCUMENTDATAEX& doc = arrayDocument.at(i);
 
         if (!searchEncryptedDoc && doc.nProtected)
             bFilter = true;
 
-        QString strFileName = db.GetDocumentFileName(doc.strGUID);
-        if (!QFile::exists(strFileName))
+        if (!bFilter)
         {
-            db.SetDocumentDataDownloaded(doc.strGUID, false);
-            bFilter = true;
+            QString strFileName = db.GetDocumentFileName(doc.strGUID);
+            //
+            if (!QFile::exists(strFileName))
+            {
+                db.SetDocumentDataDownloaded(doc.strGUID, false);
+                bFilter = true;
+            }
+            else if (CWizZiwReader::isEncryptedFile(strFileName))
+            {
+                bFilter = true;
+            }
         }
 
         if (bFilter) {
@@ -231,12 +254,12 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
 
     // decompress
     QString strTempFolder = Utils::PathResolve::tempPath() + doc.strGUID + "-update/";
-    if (!db.DocumentToHtmlFile(doc, strTempFolder, "sindex.html")) {
+    if (!db.DocumentToHtmlFile(doc, strTempFolder)) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
         //Q_ASSERT(0);
         return false;
     }
-    QString strDataFile = strTempFolder + "sindex.html";
+    QString strDataFile = strTempFolder + "index.html";
 
     // get plain text content
     QString strHtmlData;
@@ -263,6 +286,9 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     if (ret) {
         db.setDocumentSearchIndexed(doc.strGUID, true);
     }
+    //
+    ::WizDeleteAllFilesInFolder(strTempFolder);
+    ::WizDeleteFolder(strTempFolder);
 
     return ret;
 }
@@ -280,7 +306,9 @@ bool CWizSearchIndexer::deleteDocument(const WIZDOCUMENTDATAEX& doc)
 bool CWizSearchIndexer::rebuildFTSIndex()
 {
     if (clearAllFTSData()) {
-        m_buldNow = true;
+        m_mutex.lock();
+        m_wait.wakeAll();
+        m_mutex.unlock();
         return true;
     }
 
@@ -300,7 +328,12 @@ void CWizSearchIndexer::clearFlags(CWizDatabase& db)
 
 void CWizSearchIndexer::stop()
 {
+    emit stopTimer();
+
+    m_mutex.lock();
     m_stop = true;
+    m_wait.wakeAll();
+    m_mutex.unlock();
 }
 
 bool CWizSearchIndexer::clearAllFTSData()

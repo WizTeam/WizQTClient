@@ -8,7 +8,7 @@
 #include "avatar.h"
 #include "rapidjson/document.h"
 
-#include  "share/wizSyncableDatabase.h"
+#include "share/wizSyncableDatabase.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizEventLoop.h"
 
@@ -101,20 +101,16 @@ bool CWizKMSync::SyncCore()
     m_pEvents->OnStatus(QObject::tr("Query server infomation"));
     if (!m_bGroup)
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(_T(""), info);
-            m_kbInfo = info;
+            m_pDatabase->SetKbInfo(_T(""), m_server.kbInfo());
         }
     }
     else
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(m_info.strKbGUID, info);
-            m_kbInfo = info;
+            m_pDatabase->SetKbInfo(m_info.strKbGUID, m_server.kbInfo());
         }
     }
     //
@@ -144,9 +140,6 @@ bool CWizKMSync::SyncCore()
         m_pEvents->OnError(QObject::tr("Cannot upload deleted objects list!"));
         //return FALSE;
     }
-    //
-    m_pEvents->OnStatus(QObject::tr("Sync settings"));
-    UploadKeys();
     //
     if (m_pEvents->IsStop())
         return FALSE;
@@ -180,6 +173,10 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     }
     //
+    //上传完笔记之后再上传文件夹等设置
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
+    UploadKeys();
+    //
     if (m_pEvents->IsStop())
         return FALSE;
     //
@@ -197,9 +194,6 @@ bool CWizKMSync::SyncCore()
         return TRUE;
     //    
 
-    m_pEvents->OnStatus(QObject::tr("Sync settings"));
-    DownloadKeys();
-    //
     if (m_pEvents->IsStop())
         return FALSE;
     //
@@ -224,7 +218,7 @@ bool CWizKMSync::SyncCore()
         return FALSE;
     //
     m_pEvents->OnStatus(QObject::tr("Download notes list"));
-    if (!DownloadSimpleDocumentList(versionServer.nDocumentVersion))
+    if (!DownloadDocumentList(versionServer.nDocumentVersion))
     {
         m_pEvents->OnError(QObject::tr("Cannot download notes list!"));
         return FALSE;
@@ -232,6 +226,10 @@ bool CWizKMSync::SyncCore()
     //
     if (m_pEvents->IsStop())
         return FALSE;
+    //
+    //should after download tags for grouo tag positions
+    m_pEvents->OnStatus(QObject::tr("Sync settings"));
+    DownloadKeys();
     //
     /*
     // 重新更新服务器的数据，因为如果pc客户端文件夹被移动后，
@@ -259,10 +257,9 @@ bool CWizKMSync::SyncCore()
     //
     if (!m_bGroup)
     {
-        WIZKBINFO info;
-        if (m_server.wiz_getInfo(info))
+        if (m_server.wiz_getInfo())
         {
-            m_pDatabase->SetKbInfo(_T(""), info);
+            m_pDatabase->SetKbInfo(_T(""), m_server.kbInfo());
         }
     }
     //
@@ -447,19 +444,6 @@ bool GetModifiedObjectList(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUME
 
 
 template <class TData>
-bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<TData>& arrayData)
-{
-    ATLASSERT(FALSE);
-    return FALSE;
-}
-
-template <class TData>
-bool ModifiedObjectsVersion(IWizSyncableDatabase* pDatabase, std::deque<WIZDOCUMENTDATAEX>& arrayData)
-{
-    return pDatabase->ModifyDocumentsVersion(arrayData);
-}
-
-template <class TData>
 bool UploadSimpleList(const QString& strObjectType, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, WizKMSyncProgress progress)
 {
     pEvents->OnSyncProgress(::GetSyncStartProgress(progress));
@@ -529,15 +513,15 @@ bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUI
 }
 
 template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data, int part)
+bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTDATAEX& data)
 {
-    return pDatabase->InitDocumentData(strObjectGUID, data, part);
+    return pDatabase->InitDocumentData(strObjectGUID, data);
 }
 
 template <class TData>
-bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data, int part)
+bool InitObjectData(IWizSyncableDatabase* pDatabase, const QString& strObjectGUID, WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    return pDatabase->InitAttachmentData(strObjectGUID, data, part);
+    return pDatabase->InitAttachmentData(strObjectGUID, data);
 }
 
 
@@ -562,132 +546,6 @@ bool CanEditData(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTATTACHMENTDAT
 {
     ATLASSERT(pDatabase->IsGroup());
     return pDatabase->CanEditAttachment(data);
-}
-
-
-
-int CalDocumentDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QString& strObjectType, const WIZDOCUMENTDATAEX& dataLocal, const WIZDOCUMENTDATAEX& dataServer)
-{
-    int nPart = 0;
-
-    if (dataLocal.strInfoMD5 != dataServer.strInfoMD5
-            && dataLocal.tInfoModified > dataServer.tInfoModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
-    }
-
-    if (dataLocal.strDataMD5 != dataServer.strDataMD5
-            && dataLocal.tDataModified > dataServer.tDataModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    }
-
-    //if (dataLocal.strDataMD5 != dataServer.strDataMD5)
-    //{
-    //    long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
-    //    if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
-    //    {
-    //        if (dataLocal.tDataModified > dataServer.tDataModified)
-    //        {
-    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
-    //        {
-    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    //        }
-    //    }
-    //}
-
-    if (dataLocal.strParamMD5 != dataServer.strParamMD5
-            && dataLocal.tParamModified > dataServer.tParamModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_PARAM;
-    }
-
-    return nPart;
-}
-
-int CalAttachmentDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QString& strObjectType, const WIZDOCUMENTATTACHMENTDATAEX& dataLocal, const WIZDOCUMENTATTACHMENTDATAEX& dataServer)
-{
-    int nPart = 0;
-
-    if (dataLocal.strInfoMD5 != dataServer.strInfoMD5
-            && dataLocal.tInfoModified > dataServer.tInfoModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
-    }
-
-    if (dataLocal.strDataMD5 != dataServer.strDataMD5
-            && dataLocal.tDataModified > dataServer.tDataModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    }
-
-    //if (dataLocal.strDataMD5 != dataServer.strDataMD5)
-    //{
-    //    long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
-    //    if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
-    //    {
-    //        if (dataLocal.tDataModified > dataServer.tDataModified)
-    //        {
-    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    //        }
-    //    }
-    //    else
-    //    {
-    //        if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
-    //        {
-    //            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-    //        }
-    //    }
-    //}
-
-    return nPart;
-}
-
-
-template <class TData, bool _document>
-int CalObjectDataForUploadToServer(IWizSyncableDatabase* pDatabase, const QString& strObjectType, const TData& dataLocal, const TData& dataServer)
-{
-    int nPart = 0;
-    //
-    if (dataLocal.strInfoMD5 != dataServer.strInfoMD5
-        && dataLocal.tInfoModified > dataServer.tInfoModified)
-    {
-        nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
-    }
-    if (dataLocal.strDataMD5 != dataServer.strDataMD5)
-    {
-        long nFlags = pDatabase->GetLocalFlags(dataLocal.strGUID, strObjectType);
-        if (-1 == nFlags)	////为了兼容以前的数据，以前没有记录这个字段，所以需要用时间来判断////
-        {
-            if (dataLocal.tDataModified > dataServer.tDataModified)
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
-        else
-        {
-            if (nFlags & WIZKM_XMLRPC_OBJECT_PART_DATA)	////本地数据修改了////
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-            }
-        }
-    }
-    //
-    if (_document )
-    {
-        if (dataLocal.strParamMD5 != dataServer.strParamMD5
-            && dataLocal.tParamModified > dataServer.tParamModified)
-        {
-            nPart |= WIZKM_XMLRPC_OBJECT_PART_PARAM;
-        }
-    }
-    //
-    return nPart;
 }
 
 
@@ -746,7 +604,7 @@ void SaveServerError(const WIZKBINFO& kbInfo, const CWizKMDatabaseServer& server
 
 
 
-bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
 
@@ -761,26 +619,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         }
     }
     //
-    __int64 nOldServerVersion = -1;
-    //
-    //typename std::map<QString, WIZDOCUMENTDATAEX>::const_iterator itMapOnServer = mapDataOnServer.find(local.strGUID);
-    std::map<QString, WIZDOCUMENTDATAEX>::const_iterator itMapOnServer = mapDataOnServer.find(local.strGUID);
-    //
-    UINT part = 0;
-    if (itMapOnServer == mapDataOnServer.end())	//new
-    {
-        part = WIZKM_XMLRPC_OBJECT_PART_INFO | WIZKM_XMLRPC_OBJECT_PART_DATA | WIZKM_XMLRPC_OBJECT_PART_PARAM;
-    }
-    else
-    {
-        const WIZDOCUMENTDATAEX& server = itMapOnServer->second;
-        nOldServerVersion = server.nVersion;
-        part = CalDocumentDataForUploadToServer(pDatabase, strObjectType, local, server);
-        //
-        ////服务器有了历史版本功能，不再需要解决冲突问题////
-    }
-    //
-    if (!InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local, part))
+    if (!InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local))
     {
         pEvents->OnError(_TR("Cannot init object data!"));
         return FALSE;
@@ -798,74 +637,28 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
             QString str;
             str = local.strTitle;
 
-            //pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, ::WizInt64ToByteSizeStr(nDataSize)));
+            pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
             return FALSE;
         }
     }
     //
     //
     //upload
-    bool succeeded = false;
+    bool withData = !local.arrayData.isEmpty();
     __int64 nServerVersion = -1;
-    if (0 == part)
+    QString strParts = withData ? "info" : "data";
+    QString strInfo = WizFormatString2(QObject::tr("Upload note [%2] %1"), local.strTitle, strParts);
+    bool succeeded = server.document_postData(local, withData, nServerVersion);
+    //
+    if (!succeeded)
     {
-        succeeded = true;	//update server version to newest
-        //
-        if (nOldServerVersion != -1)
+        switch (server.GetLastErrorCode())
         {
-            nServerVersion = nOldServerVersion;
-        }
-        else
-        {
-            TOLOG(_T("Fault error: part == 0 && nOldServerVersion = -1"));	//on server and version = -1?
-#ifdef _DEBUG
-            WizErrorMessageBox(_T("Fault error: part == 0 && nOldServerVersion = -1"));
-#endif
-            ATLASSERT(FALSE);
-        }
-    }
-    else
-    {
-        CWizStdStringArray arrayPart;
-        if (part & WIZKM_XMLRPC_OBJECT_PART_INFO)
-        {
-            arrayPart.push_back(_TR("information"));
-        }
-        if (part & WIZKM_XMLRPC_OBJECT_PART_DATA)
-        {
-            arrayPart.push_back(_TR("data"));
-        }
-        if (part & WIZKM_XMLRPC_OBJECT_PART_PARAM)
-        {
-            arrayPart.push_back(_TR("params"));
-        }
-        //
-        CString strParts;
-        WizStringArrayToText(arrayPart, strParts, _T(", "));
-        //
-        QString strInfo;
-        strInfo = ::WizFormatString2(QObject::tr("Upload note [%2] %1"), local.strTitle, strParts);
-        //
-        for (int i = 0; i < 2; i++)	//try twice
-        {
-            pEvents->OnStatus(strInfo);
-            if (server.postData<WIZDOCUMENTDATAEX>(local, part, nServerVersion))
-            {
-                succeeded = true;
-                break;
-            }
-            else
-            {
-                switch (server.GetLastErrorCode())
-                {
-                case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
-                case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
-                case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
-                case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
-                    SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
-                    return FALSE;
-                }
-            }
+        case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
+        case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+        case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+        case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
+            return FALSE;
         }
     }
     //
@@ -877,7 +670,8 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
         if (-1 != nServerVersion)
         {
             WIZDOCUMENTDATAEX local2 = local;
-            InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local2, WIZKM_XMLRPC_OBJECT_PART_INFO);
+            local2.nDataChanged = 0;
+            InitObjectData<WIZDOCUMENTDATAEX>(pDatabase, local.strGUID, local2);
             //
             COleDateTime tLocalModified2;
             tLocalModified2 = local2.tModified;
@@ -902,7 +696,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //
     if (!updateVersion)
     {
-        pEvents->OnError(WizFormatString1(_T("Cannot update local version of document: %1!"), local.strTitle));
+        pEvents->OnError(WizFormatString1(_T("Cannot update local version of note: %1!"), local.strTitle));
         //
         return FALSE;
     }
@@ -910,7 +704,7 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     return TRUE;
 }
 
-bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
     QString strDisplayName;
 
@@ -931,26 +725,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         }
     }
     //
-    __int64 nOldServerVersion = -1;
-    //
-    //typename std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>::const_iterator itMapOnServer = mapDataOnServer.find(local.strGUID);
-    std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>::const_iterator itMapOnServer = mapDataOnServer.find(local.strGUID);
-    //
-    UINT part = 0;
-    if (itMapOnServer == mapDataOnServer.end())	//new
-    {
-        part = WIZKM_XMLRPC_OBJECT_PART_INFO | WIZKM_XMLRPC_OBJECT_PART_DATA | WIZKM_XMLRPC_OBJECT_PART_PARAM;
-    }
-    else
-    {
-        const WIZDOCUMENTATTACHMENTDATAEX& server = itMapOnServer->second;
-        nOldServerVersion = server.nVersion;
-        part = CalAttachmentDataForUploadToServer(pDatabase, strObjectType, local, server);
-        //
-        ////服务器有了历史版本功能，不再需要解决冲突问题////
-    }
-    //
-    if (!InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local, part))
+    if (!InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local))
     {
         pEvents->OnError(_TR("Cannot init object data!"));
         return FALSE;
@@ -960,111 +735,39 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
     tLocalModified = local.tDataModified;
     //
     //check data size
-    if (!local.arrayData.isEmpty())
+    if (local.arrayData.isEmpty())
     {
-        __int64 nDataSize = local.arrayData.size();
-        if (nDataSize > server.GetMaxFileSize())
-        {
-            QString str;
-            str = local.strName;
-            //pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, ::WizInt64ToByteSizeStr(nDataSize)));
-            return FALSE;
-        }
+        pEvents->OnError(_TR("No attachment data"));
+        return FALSE;
+    }
+    //
+    __int64 nDataSize = local.arrayData.size();
+    if (nDataSize > server.GetMaxFileSize())
+    {
+        QString str;
+        str = local.strName;
+        pEvents->OnWarning(WizFormatString2(_TR("[%1] is too large (%2), skip it"), str, QString::number(nDataSize)));
+        return FALSE;
     }
     //
     //
     //upload
-    bool succeeded = false;
     __int64 nServerVersion = -1;
-    if (0 == part)
-    {
-        succeeded = true;	//update server version to newest
-        //
-        if (nOldServerVersion != -1)
-        {
-            nServerVersion = nOldServerVersion;
-        }
-        else
-        {
-            TOLOG(_T("Fault error: part == 0 && nOldServerVersion = -1"));	//on server and version = -1?
-#ifdef _DEBUG
-            WizErrorMessageBox(_T("Fault error: part == 0 && nOldServerVersion = -1"));
-#endif
-            ATLASSERT(FALSE);
-        }
-    }
-    else
-    {
-        CWizStdStringArray arrayPart;
-        if (part & WIZKM_XMLRPC_OBJECT_PART_INFO)
-        {
-            arrayPart.push_back(_TR("information"));
-        }
-        if (part & WIZKM_XMLRPC_OBJECT_PART_DATA)
-        {
-            arrayPart.push_back(_TR("data"));
-        }
-        if (part & WIZKM_XMLRPC_OBJECT_PART_PARAM)
-        {
-            arrayPart.push_back(_TR("params"));
-        }
-        //
-        CString strParts;
-        WizStringArrayToText(arrayPart, strParts, _T(", "));
-        //
-        QString strInfo;
-        strInfo = ::WizFormatString2(_TR("Updating attachment [%2] %1"), local.strName, strParts);
-        //
-        for (int i = 0; i < 2; i++)	//try twice
-        {
-            pEvents->OnStatus(strInfo);
-            if (server.postData<WIZDOCUMENTATTACHMENTDATAEX>(local, part, nServerVersion))
-            {
-                succeeded = true;
-                break;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT)
-            {
-                QString strMessage = WizFormatString2("Monthly traffic limit reached! \n\nTraffic Limit %1\nTraffic Using:%2",
-                                                      ::WizInt64ToStr(kbInfo.nTrafficLimit),
-                                                      ::WizInt64ToStr(kbInfo.nTrafficUsage)
-                    );
-                //
-                pDatabase->OnTrafficLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnTrafficLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_STORAGE_LIMIT)
-            {
-                QString strMessage = WizFormatString3("Storage limit reached.\n\n%1\nStorage Limit: %2, Storage Using: %3", _T(""),
-                    ::WizInt64ToStr(kbInfo.nStorageLimit),
-                    ::WizInt64ToStr(kbInfo.nStorageUsage)
-                    );
-                //
-                pDatabase->OnStorageLimit(strMessage + _T("\n\n") + server.GetLastErrorMessage());
-                //
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnStorageLimit(pDatabase);
-                return FALSE;
-            }
-            else if (server.GetLastErrorCode() == WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR)
-            {
-                CString strMessage = WizFormatString0(IDS_BIZ_SERVICE_EXPR);
-                //
-                QString strBizGUID;
-                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
-                pDatabase->OnBizServiceExpr(strBizGUID, strMessage);
-                //
-                //pEvents->SetStop(TRUE);
-                pEvents->OnBizServiceExpr(pDatabase);
-                return FALSE;
-            }
-        }
-    }
     //
+    QString strInfo = WizFormatString1(_TR("Updating attachment [data] %1"), local.strName);
+        //
+    pEvents->OnStatus(strInfo);
+    bool succeeded = server.postData<WIZDOCUMENTATTACHMENTDATAEX>(local, true, nServerVersion);
+    if (!succeeded)
+    {
+        switch (server.GetLastErrorCode())
+        {
+        case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
+        case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
+        case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+            return FALSE;
+        }
+    }
     //
     bool updateVersion = false;
     //
@@ -1073,7 +776,7 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
         if (-1 != nServerVersion)
         {
             WIZDOCUMENTATTACHMENTDATAEX local2 = local;
-            InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local2, WIZKM_XMLRPC_OBJECT_PART_INFO);
+            InitObjectData<WIZDOCUMENTATTACHMENTDATAEX>(pDatabase, local.strGUID, local2);
             //
             COleDateTime tLocalModified2;
             tLocalModified2 = local2.tDataModified;
@@ -1112,15 +815,15 @@ bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int i
 }
 
 template <class TData>
-bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTDATAEX>& mapDataOnServer, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
-    return UploadDocument(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress);
+    return UploadDocument(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
 }
 
 template <class TData>
-bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, std::map<QString, WIZDOCUMENTATTACHMENTDATAEX>& mapDataOnServer, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
+bool UploadObject(const WIZKBINFO& kbInfo, int size, int start, int total, int index, WIZDOCUMENTATTACHMENTDATAEX& local, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase, CWizKMDatabaseServer& server, const QString& strObjectType, WizKMSyncProgress progress)
 {
-    return UploadAttachment(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress);
+    return UploadAttachment(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress);
 }
 
 
@@ -1145,35 +848,6 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
     int total = int(arrayData.size());
     int index = 0;
     //
-    CWizStdStringArray arrayGUID;
-    for (typename std::deque<TData>::const_iterator it = arrayData.begin();
-         it != arrayData.end();
-         it++)
-    {
-        arrayGUID.push_back(it->strGUID);
-    }
-
-    /*
-        //
-        ////从服务器获取本地对象信息，然后判断是否需要上传数据或者信息////
-        //
-        */
-    TArray arrayDataOnServer;
-    if (!server.downloadSimpleList<TData>(arrayGUID, arrayDataOnServer))
-    {
-        pEvents->OnError(QObject::tr("Cannot download object list!"));
-        return FALSE;
-    }
-
-    //
-    std::map<QString, TData> mapDataOnServer;
-    for (typename TArray::const_iterator it = arrayDataOnServer.begin();
-        it != arrayDataOnServer.end();
-        it++)
-    {
-        mapDataOnServer[it->strGUID] = *it;
-    }
-    //
     for (typename TArray::const_iterator it = arrayData.begin();
         it != arrayData.end();
         it++)
@@ -1191,7 +865,7 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
         }
         //
         BOOL bUploaded = TRUE;
-        if (!UploadObject<TData>(kbInfo, size, start, total, index, mapDataOnServer, local, pEvents, pDatabase, server, strObjectType, progress))
+        if (!UploadObject<TData>(kbInfo, size, start, total, index, local, pEvents, pDatabase, server, strObjectType, progress))
         {
             bUploaded = FALSE;
             //
@@ -1200,11 +874,20 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
             //
             switch (server.GetLastErrorCode())
             {
+            case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
+            {
+                pEvents->SetLastErrorCode(WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR);
+                QString strBizGUID;
+                pDatabase->GetBizGUID(local.strKbGUID, strBizGUID);
+                WIZBIZDATA bizData;
+                pDatabase->GetBizData(strBizGUID, bizData);
+                QString error = pEvents->GetLastErrorMessage() + QObject::tr("Team service of ' %1 ' has expired, temporarily unable to sync the new and edited notes, please renew on time.").arg(bizData.bizName) +"\n";
+                pEvents->SetLastErrorMessage(error);
+            }
             case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
             case WIZKM_XMLRPC_ERROR_STORAGE_LIMIT:
-            case WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR:
             case WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT:
-                SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);
+                SaveServerError(kbInfo, server, local.strKbGUID, pEvents, pDatabase);                
                 return FALSE;
             }
         }
@@ -1226,7 +909,7 @@ bool CWizKMSync::UploadDocumentList()
             return TRUE;
     }
     //
-    return UploadList<WIZDOCUMENTDATAEX, true>(m_kbInfo, m_pEvents, m_pDatabase, m_server, _T("document"), syncUploadDocumentList);
+    return UploadList<WIZDOCUMENTDATAEX, true>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, _T("document"), syncUploadDocumentList);
 }
 bool CWizKMSync::UploadAttachmentList()
 {
@@ -1236,7 +919,7 @@ bool CWizKMSync::UploadAttachmentList()
             return TRUE;
     }
     //
-    return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_kbInfo, m_pEvents, m_pDatabase, m_server, _T("attachment"), syncUploadAttachmentList);
+    return UploadList<WIZDOCUMENTATTACHMENTDATAEX, false>(m_server.kbInfo(), m_pEvents, m_pDatabase, m_server, _T("attachment"), syncUploadAttachmentList);
 }
 ///////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -1255,87 +938,11 @@ bool CWizKMSync::DownloadStyleList(__int64 nServerVersion)
     return DownloadList<WIZSTYLEDATA>(nServerVersion, _T("style"), syncDownloadStyleList);
 }
 
-bool CWizKMSync::DownloadSimpleDocumentList(__int64 nServerVersion)
+bool CWizKMSync::DownloadDocumentList(__int64 nServerVersion)
 {
     return DownloadList<WIZDOCUMENTDATAEX>(nServerVersion, _T("document"), syncDownloadSimpleDocumentList);
 }
 
-
-bool CWizKMSync::DownloadFullDocumentList()
-{
-    if (m_arrayDocumentNeedToBeDownloaded.empty())
-        return TRUE;
-    //
-    const QString& strObjectType = _T("document");
-    //
-    int start = 0;
-    int size = 0;
-    ::GetSyncProgressRange(::syncDownloadFullDocumentList, start, size);
-    m_pEvents->OnSyncProgress(start);
-    //
-    int total = int(m_arrayDocumentNeedToBeDownloaded.size());
-    //
-    CWizStdStringArray arrayDocumentGUID;
-    //
-    std::map<QString, int> mapDocumentPart;
-    //
-    for (std::deque<WIZDOCUMENTDATAEX_XMLRPC_SIMPLE>::const_iterator itNeedToBeDownloaded = m_arrayDocumentNeedToBeDownloaded.begin();
-        itNeedToBeDownloaded != m_arrayDocumentNeedToBeDownloaded.end();
-        itNeedToBeDownloaded++)
-    {
-        if (m_pEvents->IsStop())
-            return FALSE;
-        //
-        WIZDOCUMENTDATAEX_XMLRPC_SIMPLE simple = *itNeedToBeDownloaded;
-        //
-        int part = CalDocumentPartForDownloadToLocal(simple);
-        if (part & WIZKM_XMLRPC_OBJECT_PART_DATA)
-        {
-            part &= ~WIZKM_XMLRPC_OBJECT_PART_DATA;
-            //
-            m_pDatabase->SetObjectDataDownloaded(simple.strGUID, strObjectType, false);	//////设置为未下载//////
-            m_pDatabase->SetObjectServerDataInfo(simple.strGUID, strObjectType, simple.tDataModified, simple.strDataMD5);	//////设置成服务器的修改时间和md5，等待下载//////
-            m_pDatabase->SetObjectLocalServerVersion(simple.strGUID, strObjectType, simple.nVersion);		//////设置为服务器的版本号//////
-        }
-        //
-        if (0 != part)
-        {
-            mapDocumentPart[itNeedToBeDownloaded->strGUID] = part;
-            arrayDocumentGUID.push_back(itNeedToBeDownloaded->strGUID);
-        }
-    }
-    //
-    if (!arrayDocumentGUID.empty())
-    {
-        m_pEvents->OnStatus(_TR(_T("Query notes information")));
-        //
-        std::deque<WIZDOCUMENTDATAEX> arrayDocument;
-        if (!m_server.document_downloadFullList(arrayDocumentGUID, arrayDocument))
-        {
-            TOLOG(_T("Can't download note info list!"));
-            return FALSE;
-        }
-        //
-        for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocument.begin();
-             itDocument != arrayDocument.end();
-             itDocument++)
-        {
-            m_pEvents->OnStatus(WizFormatString1(_TR(_T("Update note information: %1")), itDocument->strTitle));
-            //
-            int nDocumentPart = mapDocumentPart[itDocument->strGUID];
-            if (!m_pDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
-            {
-                m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-                return FALSE;
-            }
-        }
-    }
-    //
-    double fPos = size;
-    m_pEvents->OnSyncProgress(start + int(fPos));
-    //
-    return TRUE;
-}
 
 
 bool CWizKMSync::DownloadAttachmentList(__int64 nServerVersion)
@@ -1393,7 +1000,7 @@ bool CWizKMSync::DownloadObjectData()
         QByteArray stream;
         if (m_server.data_download(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream, data.strDisplayName))
         {
-            if (m_pDatabase->UpdateObjectData(data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream))
+            if (m_pDatabase->UpdateObjectData(data.strDisplayName, data.strObjectGUID, WIZOBJECTDATA::ObjectTypeToTypeString(data.eObjectType), stream))
             {
                 succeeded++;
             }
@@ -1415,55 +1022,6 @@ bool CWizKMSync::DownloadObjectData()
     }
     //
     return succeeded == nCount;
-}
-
-
-int WizCalDocumentPartForDownloadToLocal(IWizSyncableDatabase* pDatabase, const WIZDOCUMENTDATAEX_XMLRPC_SIMPLE& dataServer)
-{
-    int nPart = 0;
-    //
-    WIZDOCUMENTDATA dataLocal;
-    if (pDatabase->DocumentFromGUID(dataServer.strGUID, dataLocal))
-    {
-        if (dataLocal.strInfoMD5 != dataServer.strInfoMD5)
-        {
-            if ((dataLocal.tInfoModified < dataServer.tInfoModified) || (dataLocal.nVersion < dataServer.nVersion))
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_INFO;
-            }
-            else
-            {
-                TOLOG2(_T("local and server changed info: local: %1, server :%2\n"), ::WizTimeToSQL(dataLocal.tInfoModified), ::WizTimeToSQL(dataServer.tInfoModified));
-            }
-        }
-        if (dataLocal.strDataMD5 != dataServer.strDataMD5)
-        {
-            ////不需要解决冲突，在上传的时候，已经解决冲突了////
-            nPart |= WIZKM_XMLRPC_OBJECT_PART_DATA;
-        }
-        if (dataLocal.strParamMD5 != dataServer.strParamMD5)
-        {
-            if (dataLocal.tParamModified < dataServer.tParamModified)
-            {
-                nPart |= WIZKM_XMLRPC_OBJECT_PART_PARAM;
-            }
-            else
-            {
-                TOLOG2(_T("local and server changed param: local: %1, server :%2\n"), ::WizTimeToSQL(dataLocal.tParamModified), ::WizTimeToSQL(dataServer.tParamModified));
-            }
-        }
-    }
-    else
-    {
-        nPart = WIZKM_XMLRPC_OBJECT_PART_INFO | WIZKM_XMLRPC_OBJECT_PART_DATA | WIZKM_XMLRPC_OBJECT_PART_PARAM;
-    }
-    //
-    return nPart;
-}
-
-int CWizKMSync::CalDocumentPartForDownloadToLocal(const WIZDOCUMENTDATAEX_XMLRPC_SIMPLE& dataServer)
-{
-    return WizCalDocumentPartForDownloadToLocal(m_pDatabase, dataServer);
 }
 
 
@@ -1539,8 +1097,6 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         }
     }
     //
-    std::set<QString> setDownloadedDocumentGUID;
-    //
     /*
     ////按照kb，下载消息里面的笔记////
     */
@@ -1562,7 +1118,7 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         //
         if (!group.strDatabaseServer.isEmpty())
         {
@@ -1575,45 +1131,12 @@ bool WizDownloadMessages(IWizKMSyncEvents* pEvents, CWizKMAccountsServer& server
         pEvents->OnStatus(_TR(_T("Query notes information")));
         //
         std::deque<WIZDOCUMENTDATAEX> arrayDocumentServer;
-        if (!serverDB.document_downloadFullList(arrayDocumentGUID, arrayDocumentServer))
+        if (!serverDB.document_getListByGuids(arrayDocumentGUID, arrayDocumentServer))
         {
             pEvents->OnError(_T("Can download notes of messages"));
         }
         //
-        for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayDocumentServer.begin();
-            itDocument != arrayDocumentServer.end();
-            itDocument++)
-        {
-            WIZDOCUMENTDATAEX documentServer = *itDocument;
-            /*
-            ////记住下载了哪些笔记////
-            */
-            setDownloadedDocumentGUID.insert(documentServer.strGUID);
-
-            pEvents->OnStatus(WizFormatString1(_T("Update note information: %1"), itDocument->strTitle));
-            //
-            UINT nDocumentPart = WIZKM_XMKRPC_DOCUMENT_PART_PARAM | WIZKM_XMKRPC_DOCUMENT_PART_INFO | WIZKM_XMKRPC_DOCUMENT_PART_DATA;
-            WIZDOCUMENTDATA dataLocal;
-            if (pGroupDatabase->DocumentFromGUID(itDocument->strGUID, dataLocal))
-            {
-                nDocumentPart = WizCalDocumentPartForDownloadToLocal(pGroupDatabase, documentServer);
-                if (nDocumentPart & WIZKM_XMLRPC_OBJECT_PART_DATA)
-                {
-                    nDocumentPart &= ~WIZKM_XMLRPC_OBJECT_PART_DATA;
-                    //
-                    static const QString& strObjectType = _T("document");
-                    //
-                    pGroupDatabase->SetObjectDataDownloaded(documentServer.strGUID, strObjectType, false);	//////设置为未下载//////
-                    pGroupDatabase->SetObjectServerDataInfo(documentServer.strGUID, strObjectType, documentServer.tDataModified, documentServer.strDataMD5);	//////设置成服务器的修改时间和md5，等待下载//////
-                    pGroupDatabase->SetObjectLocalServerVersion(documentServer.strGUID, strObjectType, documentServer.nVersion);		//////设置为服务器的版本号//////
-                }
-            }
-            //
-            if (!pGroupDatabase->OnDownloadDocument(nDocumentPart, *itDocument))
-            {
-                pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
-            }
-        }
+        pGroupDatabase->OnDownloadDocumentList(arrayDocumentServer);
         //
         pDatabase->CloseGroupDatabase(pGroupDatabase);
     }
@@ -1723,13 +1246,13 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     {
         if (QDateTime::fromString(strt).daysTo(QDateTime::currentDateTime()) > 7)
         {
-            _TR("Remove all user avatar.");
+            qInfo() << "Remove all user avatar.";
             CWizStdStringArray arrayUsers;
             pPersonalGroupDatabase->getAllNotesOwners(arrayUsers);
             for (CWizStdStringArray::const_iterator it = arrayUsers.begin();
                  it != arrayUsers.end(); it ++)
             {
-                WizService::AvatarHost::deleteAvatar(*it);
+                AvatarHost::reload(*it);
             }
         }
     }
@@ -1737,10 +1260,10 @@ bool WizSyncPersonalGroupAvatar(IWizSyncableDatabase* pPersonalGroupDatabase)
     return pPersonalGroupDatabase->setMeta(_T("SYNC_INFO"), _T("SyncPersonalGroupAvatar"), QDateTime::currentDateTime().toString());
 }
 
-class CWizDownloadAvatarRunable : public QRunnable
+class CWizAvatarStatusChecker
 {
 public:
-    CWizDownloadAvatarRunable(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
+    CWizAvatarStatusChecker(const CWizBizUserDataArray& arrayUser, const QString& currentUserGUID)
         : m_arrayUser(arrayUser)
         , m_currentUserGUID(currentUserGUID)
     {
@@ -1749,7 +1272,7 @@ private:
     CWizBizUserDataArray m_arrayUser;
     QString m_currentUserGUID;
 public:
-    void	run()
+    void run()
     {
         QMap<QString, QString> mapAllUser;
         for (WIZBIZUSER bizUser : m_arrayUser)
@@ -1769,14 +1292,7 @@ public:
                 }
             }
 
-            QString strDownLoadUrl = WizService::CommonApiEntry::avatarDownloadUrl(it.key());
-            if (!strDownLoadUrl.startsWith("http"))
-                continue;
-
-            qDebug() << "update user avatar  : " << it.value();
-            WizService::AvatarHost::deleteAvatar(it.value());
-            WizURLDownloadToFile(strDownLoadUrl, strFileName, true);
-            WizService::AvatarHost::load(it.value());
+            AvatarHost::reload(it.value());
         }
     }
 };
@@ -1792,10 +1308,8 @@ bool WizSyncBizGroupAvatar(IWizSyncableDatabase* pPersonalDatabase)
     userSelf.userId = pPersonalDatabase->GetUserId();
     arrayUser.push_back(userSelf);
 
-    CWizDownloadAvatarRunable* downloader = new CWizDownloadAvatarRunable(arrayUser,
-                                                                          userSelf.userGUID);
-    downloader->setAutoDelete(true);
-    QThreadPool::globalInstance()->start(downloader);
+    CWizAvatarStatusChecker checker(arrayUser, userSelf.userGUID);
+    checker.run();
 
     return true;
 }
@@ -1812,9 +1326,9 @@ QString downloadFromUrl(const QString& strUrl)
     loop.exec();    
 
     if (loop.error() != QNetworkReply::NoError)
-        return NULL;
+        return QString();
 
-    return loop.result();
+    return QString::fromUtf8(loop.result().constData());
 }
 
 void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arrayGroup,
@@ -1838,7 +1352,7 @@ void syncGroupUsers(CWizKMAccountsServer& server, const CWizGroupDataArray& arra
         const WIZGROUPDATA& g = *it;
         if (!g.bizGUID.isEmpty())
         {
-            QString strUrl = WizService::CommonApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
+            QString strUrl = CommonApiEntry::groupUsersUrl(server.GetToken(), g.bizGUID, g.strGroupGUID);
             QString strJsonRaw = downloadFromUrl(strUrl);            
             if (!strJsonRaw.isEmpty())
                 pDatabase->setBizGroupUsers(g.strGroupGUID, strJsonRaw);
@@ -1858,7 +1372,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     pEvents->OnSyncProgress(0);
     pEvents->OnStatus(QObject::tr("Connecting to server"));
 
-    QString syncUrl = WizService::CommonApiEntry::syncUrl();
+    QString syncUrl = CommonApiEntry::syncUrl();
     if (syncUrl.isEmpty() || !syncUrl.startsWith("http"))
         return false;
 
@@ -1900,7 +1414,11 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     if (server.GetGroupList(arrayGroup))
     {
         pDatabase->OnDownloadGroups(arrayGroup);
-        syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+        //
+        if (WizIsDayFirstSync(pDatabase))
+        {
+            syncGroupUsers(server, arrayGroup, pEvents, pDatabase, bBackground);
+        }
     }
     else
     {
@@ -1941,7 +1459,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         pEvents->SetCurrentDatabase(0);
-        CWizKMSync syncPrivate(pDatabase, server.m_retLogin, pEvents, FALSE, FALSE, NULL);
+        CWizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.Sync())
         {
@@ -1952,11 +1470,13 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
                 pEvents->OnText(wizSyncMeesageError, QString("Sync database error, for reason : %1").arg(strLastError));
                 pEvents->OnMessage(wizSyncMeesageError, "", strLastError);
             }
+            //quit on sync error
+            return false;
         }
         else
         {
             pDatabase->SaveLastSyncTime();
-            pEvents->OnSyncProgress(100);
+            pEvents->OnSyncProgress(100);            
         }
     }
     //
@@ -1986,7 +1506,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
@@ -2019,7 +1539,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
     //
     {
         //pEvents->SetCurrentDatabase(0);
-        CWizKMSync syncPrivate(pDatabase, server.m_retLogin, pEvents, FALSE, FALSE, NULL);
+        CWizKMSync syncPrivate(pDatabase, server.m_userInfo, pEvents, FALSE, FALSE, NULL);
         //
         if (!syncPrivate.DownloadObjectData())
         {
@@ -2054,7 +1574,7 @@ bool WizSyncDatabase(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents,
             continue;
         }
         //
-        WIZUSERINFO userInfo = server.m_retLogin;
+        WIZUSERINFO userInfo = server.m_userInfo;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         userInfo.strKbGUID = group.strGroupGUID;
         //
@@ -2105,7 +1625,7 @@ bool WizSyncDatabaseOnly(IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatab
 bool WizQuickDownloadMessage(const WIZUSERINFO& info, IWizKMSyncEvents* pEvents, IWizSyncableDatabase* pDatabase)
 {
     pEvents->OnStatus(_TR("Quick download messages"));
-    CWizKMAccountsServer server(WizService::CommonApiEntry::syncUrl());
+    CWizKMAccountsServer server(CommonApiEntry::syncUrl());
     server.SetUserInfo(info);
     /*
     ////获得群组信息////

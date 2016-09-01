@@ -55,16 +55,14 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
+
+    //NOTE: DEPRECATED
     int nMaxFileSize;
 
     WIZUSERINFOBASE()
         : nMaxFileSize(10 * 1024 * 1024)
     {
-    }
-    int GetMaxFileSize() const
-    {
-        return std::max<int>(20 * 1024 * 1024, nMaxFileSize);;
-    }
+    }    
 };
 
 struct WIZUSERINFO : public WIZUSERINFOBASE
@@ -182,11 +180,21 @@ struct WIZKBINFO
 {
     WIZKBINFO();
     bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    //
+    int GetMaxFileSize() const
+    {
+        return std::max<int>(30 * 1024 * 1024, nUploadSizeLimit);
+    }
 
     qint64 nStorageLimit;
     qint64 nStorageUsage;
     QString strStorageLimit;
     QString strStorageUsage;
+
+    qint64 nUploadSizeLimit;
+    QString strUploadSizeLimitString;
+    qint64 nNotesCount;
+    qint64 nNotesCountLimit;
 
     qint64 nTrafficLimit;
     qint64 nTrafficUsage;
@@ -224,27 +232,11 @@ enum WizObjectType
 };
 
 
-struct WIZDOCUMENTPARAMDATA : public WIZOBJECTBASE
-{
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-
-    // helper field, indicate which document this object link to
-    QString strDocumentGUID;
-
-    // field: param_name, like: DOC_READ_COUNT
-    QString strName;
-
-    // field: param_value
-    QString strValue;
-};
-
-typedef std::deque<WIZDOCUMENTPARAMDATA> CWizDocumentParamDataArray;
 
 
 struct WIZTAGDATA : public WIZOBJECTBASE
 {
-    WIZTAGDATA();
+    explicit WIZTAGDATA();
     WIZTAGDATA(const WIZTAGDATA& data);
     virtual ~WIZTAGDATA();
 
@@ -299,12 +291,18 @@ bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
 
 typedef std::deque<WIZSTYLEDATA> CWizStyleDataArray;
 
-
-struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
+enum WizDocumentFlags
 {
-    WIZDOCUMENTDATABASE();
+    wizDocumentAlwaysOnTop	= 0x1
+};
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+struct WIZDOCUMENTDATA : public WIZOBJECTBASE
+{
+    WIZDOCUMENTDATA();
+    virtual ~WIZDOCUMENTDATA();
+    //
+    bool EqualForSync(const WIZDOCUMENTDATA& data) const;
+    //
     static QString VersionName() { return "document_version"; }
     static QString ObjectName() { return "document"; }
 
@@ -323,37 +321,8 @@ struct WIZDOCUMENTDATABASE : public WIZOBJECTBASE
     // field: dt_data_modified
     COleDateTime tDataModified;
 
-    // field: dt_info_modified
-    COleDateTime tInfoModified;
-
-    // field: dt_param_modified
-    COleDateTime tParamModified;
-
-    // field: info_md5
-    QString strInfoMD5;
-
-    // field: param_md5, default is empty
-    QString strParamMD5;
-
     // field: version
     qint64 nVersion;  // -1: modified , 0: uploaded
-
-    // helper filed
-    // used to indicate which part of full info need download or downloaded
-    int nObjectPart;
-};
-
-enum WizDocumentFlags
-{
-    wizDocumentAlwaysOnTop	= 0x1
-};
-
-struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
-{
-    WIZDOCUMENTDATA();
-    virtual ~WIZDOCUMENTDATA();
-
-    bool EqualForSync(const WIZDOCUMENTDATA& data) const;
 
     // field: document_filename, default: "guid + .ziw"
     QString strName;
@@ -391,9 +360,6 @@ struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
     // filed: dt_accessed
     COleDateTime tAccessed;
 
-    // field: document_iconindex, default is 0, what's this?
-    long nIconIndex;
-
     // field: document_protected, 1 protected, 0 none-protected
     long nProtected;
 
@@ -402,12 +368,14 @@ struct WIZDOCUMENTDATA : public WIZDOCUMENTDATABASE
 
     // additional helper filed
     long nReadCount;
+    //
     long nIndexed;
-    long nSync;
-    int nFlags;
-    int nRate;
-    QString strSystemTags;
-    int nShareFlags;
+
+    // field: local info modified
+    long nInfoChanged;
+
+    // field: local data modified
+    long nDataChanged;
 };
 
 struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
@@ -416,36 +384,15 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
-    bool ParamArrayToStringArray(CWizStdStringArray& params) const;
     virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
-
-    // field: document_params, default is empty, WIZDOCUMENTPARAMDATA object array.
-    CWizDocumentParamDataArray arrayParam;
-
+    //
     QByteArray arrayData;
 
     bool bSkipped;
 };
-
-/*
-////用于getList，获得简单信息////
-*/
-struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE : public WIZDOCUMENTDATAEX
-{
-    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE()
-    {
-    }
-    WIZDOCUMENTDATAEX_XMLRPC_SIMPLE(const WIZDOCUMENTDATAEX& data)
-        : WIZDOCUMENTDATAEX(data)
-    {
-    }
-
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-};
-
 
 
 struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
@@ -589,6 +536,8 @@ struct WIZGROUPDATA
 
     // field: kb_type, default is "group", not used
     QString strType;
+    // field: mywiz_email, group mywiz_email
+    QString strMyWiz;
 
     // field: owner_name, default is null, not used
     QString strOwner;
@@ -646,8 +595,10 @@ const int WIZ_USER_MSG_TYPE_COMMENT_REPLY = 30;
 const int WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP = 40;
 const int WIZ_USER_MSG_TYPE_ADDED_TO_GROUP = 50;
 const int WIZ_USER_MSG_TYPE_LIKE = 60;
+const int WIZ_USER_MSG_TYPE_REMIND = 90;
 const int WIZ_USER_MSG_TYPE_SYSTEM = 100;
-const int WIZ_USER_MSG_TYPE_MAX = 100;      //支持的最大消息类型，超过该类型的消息直接丢弃
+const int WIZ_USER_MSG_TYPE_REMIND_CREATE = 110;
+const int WIZ_USER_MSG_TYPE_MAX = 110;      //支持的最大消息类型，超过该类型的消息直接丢弃
 
 struct WIZUSERMESSAGEDATA
 {
@@ -741,7 +692,6 @@ struct WIZMESSAGEDATA
     qint32 nMessageType;
 
     // Filed: note
-    // not used currently
     QString note;
 
     // Field: read_status
@@ -901,40 +851,21 @@ __int64 WizObjectsGetMaxVersion(const std::deque<TData>& arrayData)
     return nVersion;
 }
 
-
-#define WIZDOCUMENT_SHARE_NONE			0
-#define WIZDOCUMENT_SHARE_FRIENDS		1
-#define WIZDOCUMENT_SHARE_PUBLIC		10
-
-
-#define WIZKM_XMLRPC_OBJECT_PART_INFO		0x01
-#define WIZKM_XMLRPC_OBJECT_PART_DATA		0x02
-#define WIZKM_XMLRPC_OBJECT_PART_PARAM		0x04
-
-#define WIZKM_XMKRPC_DOCUMENT_PART_INFO			WIZKM_XMLRPC_OBJECT_PART_INFO
-#define WIZKM_XMKRPC_DOCUMENT_PART_DATA			WIZKM_XMLRPC_OBJECT_PART_DATA
-#define WIZKM_XMKRPC_DOCUMENT_PART_PARAM		WIZKM_XMLRPC_OBJECT_PART_PARAM
-
-#define WIZKM_XMKRPC_ATTACHMENT_PART_INFO		WIZKM_XMLRPC_OBJECT_PART_INFO
-#define WIZKM_XMKRPC_ATTACHMENT_PART_DATA		WIZKM_XMLRPC_OBJECT_PART_DATA
-
-
-const char* const TAG_NAME_PUBLIC				= "$public-documents$";
-const char* const TAG_NAME_SHARE_WITH_FRIENDS	= "$share-with-friends$";
-
-
-inline const CString TAG_DISPLAY_NAME_PUBLIC()
-{
-    return QObject::tr("$Public Notes");
-}
-
-inline const CString TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS()
-{
-    return QObject::tr("$Share with friends");
-}
-
 #define LOCATION_DELETED_ITEMS      "/Deleted Items/"
 #define LOCATION_DEFAULT            "/My Notes/"
+
+enum WizDocumentViewMode
+{
+    viewmodeAlwaysEditing,
+    viewmodeAlwaysReading,
+    viewmodeKeep
+};
+
+enum WizEditorMode
+{
+    modeEditor,
+    modeReader
+};
 
 
 #endif // WIZOBJECT_H

@@ -69,12 +69,8 @@ QPixmap CWizScreenShotWidget::getFullScreenPixmap()
 {
     initCWizScreenShotWidget();
     QPixmap result = QPixmap();
-#if QT_VERSION > 0x050000
     QScreen *screen = QGuiApplication::primaryScreen();
     result = screen->grabWindow(0);
-#else
-    result = QPixmap::grabWindow(QApplication::desktop()->winId());
-#endif
 
     return result;
 }

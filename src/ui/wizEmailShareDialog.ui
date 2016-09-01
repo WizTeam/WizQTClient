@@ -28,6 +28,9 @@
    </property>
    <item>
     <layout class="QVBoxLayout" name="verticalLayout">
+     <property name="bottomMargin">
+      <number>6</number>
+     </property>
      <item>
       <layout class="QHBoxLayout" name="horizontalLayout_4">
        <property name="leftMargin">
@@ -146,7 +149,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_4">
          <property name="text">
-          <string>Notes:</string>
+          <string>Comment:</string>
          </property>
         </widget>
        </item>
@@ -172,6 +175,13 @@
            </property>
           </widget>
          </item>
+         <item>
+          <widget class="QToolButton" name="toolButton_settings">
+           <property name="text">
+            <string>...</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </item>
       </layout>
@@ -184,12 +194,29 @@
        <property name="text">
         <string/>
        </property>
+       <property name="alignment">
+        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+       </property>
+       <property name="indent">
+        <number>12</number>
+       </property>
       </widget>
      </item>
     </layout>
    </item>
   </layout>
  </widget>
+ <tabstops>
+  <tabstop>textEdit_notes</tabstop>
+  <tabstop>lineEdit_to</tabstop>
+  <tabstop>lineEdit_subject</tabstop>
+  <tabstop>comboBox_replyTo</tabstop>
+  <tabstop>checkBox_sendMeCopy</tabstop>
+  <tabstop>toolButton_contacts</tabstop>
+  <tabstop>checkBox_saveNotes</tabstop>
+  <tabstop>toolButton_settings</tabstop>
+  <tabstop>toolButton_send</tabstop>
+ </tabstops>
  <resources/>
  <connections/>
 </ui>

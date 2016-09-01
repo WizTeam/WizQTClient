@@ -1,7 +1,5 @@
 #include "wizAnalyzer.h"
 #include <QMutexLocker>
-#include <QRunnable>
-#include <QThreadPool>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -17,10 +15,11 @@
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "sync/apientry.h"
+#include "share/wizEventLoop.h"
+#include "share/wizthreads.h"
 #include "wizmainwindow.h"
 #include "wizDatabase.h"
 #include "wizDatabaseManager.h"
-#include "share/wizEventLoop.h"
 
 CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
@@ -176,10 +175,10 @@ void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
 void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 {
     //
-    class CPostRunable : public QRunnable
+    class CPostRunnable
     {
     public:
-        CPostRunable(IWizSyncableDatabase* db)
+        CPostRunnable(IWizSyncableDatabase* db)
             : m_db(db)
         {}
 
@@ -193,12 +192,79 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
         IWizSyncableDatabase* m_db;
     };
 
-    QThreadPool::globalInstance()->start(new CPostRunable(db));
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        CPostRunnable runnable(db);
+        runnable.run();
+    });
 }
 
 
 //
 void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
+{
+    QByteArray buffer = constructUploadData(db);
+
+    CString strURL = WizApiEntry::analyzerUploadUrl();
+
+    if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
+        && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
+        return;    
+
+    QNetworkAccessManager net;
+    QNetworkRequest request;
+    request.setUrl(strURL);
+    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
+    QNetworkReply* reply = net.post(request, buffer);
+
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
+
+    if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+    {
+        qDebug() << "[Analyzer]Upload failed!";
+        return;
+    }
+
+    rapidjson::Document d;
+    d.Parse<0>(loop.result().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "[Analyzer]Can not get return code ";
+        return;
+    }
+
+    int returnCode = d.FindMember("return_code")->value.GetInt();
+    if (returnCode != 200)
+    {
+        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
+        return;
+    }
+    else
+    {
+        qDebug() << "[Analyzer]Upload OK";
+    }
+
+//	//
+    m_csLog.lock();
+    ::DeleteFile(m_strRecordFileName);	//remove old file
+    m_csLog.unlock();
+}
+
+QString analyzerFile()
+{
+    QString strFile = CWizDatabaseManager::instance()->db().GetAccountPath() + "analyzer.ini";
+    return strFile;
+}
+
+CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
+{    
+    static CWizAnalyzer analyzer(analyzerFile());
+	//
+    return analyzer;
+}
+
+QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 {
     QMutexLocker locker(&m_csPost);
 
@@ -226,7 +292,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     dd.AddMember("versionCode", Utils::Misc::getVersionCode(), allocator);
 
     //
-    Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+    MainWindow *window = MainWindow::instance();
     QByteArray baLocal = QLocale::system().name().toUtf8();
     if (window)
     {
@@ -235,10 +301,10 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     rapidjson::Value locale(baLocal.constData(), baLocal.size());
     dd.AddMember("locale", locale, allocator);
 
-    //  only used for phone
-    dd.AddMember("screenSize", 13, allocator);
+//    //  only used for phone
+//    dd.AddMember("screenSize", 13, allocator);
 
-#ifdef Q_OS_MAC    
+#ifdef Q_OS_MAC
     dd.AddMember("deviceName", "MacOSX", allocator);
 #ifdef BUILD4APPSTORE
     dd.AddMember("packageType", "AppStore", allocator);
@@ -267,11 +333,11 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     int signUpDays = dtSignUp.daysTo(QDateTime::currentDateTime());
     dd.AddMember("signUpDays", signUpDays, allocator);
 
-	//
+    //
 
     QMap<QByteArray, QByteArray> firstActionMap;
-	for (int i = 0; i < 10; i++)
-	{
+    for (int i = 0; i < 10; i++)
+    {
         CString strFirstAction = GetFirstAction(i);
         if (!strFirstAction.IsEmpty())
         {
@@ -293,40 +359,41 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
         dd.AddMember(vKey, fistAction, allocator);
     }
 
-	//
-	CWizIniFileEx iniFile;
-	iniFile.LoadFromFile(m_strRecordFileName);
-	//
+    QMutexLocker logLocker(&m_csLog);
+    //
+    CWizIniFileEx iniFile;
+    iniFile.LoadFromFile(m_strRecordFileName);
+    //
     rapidjson::Value actions(rapidjson::kObjectType);
     actions.SetObject();
-	//
+    //
     QMap<QByteArray, QByteArray> actionMap;
     iniFile.GetSection(_T("Actions"), actionMap);
     for (QMap<QByteArray, QByteArray>::iterator it = actionMap.begin();
         it != actionMap.end();
-		it++)
-	{        
+        it++)
+    {
         const QByteArray& baKey = it.key();
         rapidjson::Value vValue(it.value().toInt());
         rapidjson::Value vKey(baKey.constData(), baKey.size());
         actions.AddMember(vKey, vValue, allocator);
-	}
-	//
+    }
+    //
     dd.AddMember("actions", actions, allocator);
-	//
+    //
     rapidjson::Value durations(rapidjson::kObjectType);
     durations.SetObject();
-	//
+    //
     QMap<QString, QString> seconds;
     iniFile.GetSection(_T("Durations"), seconds);
-	//
+    //
     QMap<QByteArray, QByteArray> functionMap;
 
     iniFile.GetSection(_T("Functions"), functionMap);
     for (QMap<QByteArray, QByteArray>::const_iterator it = functionMap.begin();
         it != functionMap.end();
-		it++)
-	{
+        it++)
+    {
         QString strKey = it.key();
         int sec = seconds.value(strKey).toInt();
         if (sec == 0)
@@ -340,8 +407,8 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
         //
         rapidjson::Value vKey(it.key().constData(), it.key().size());
         durations.AddMember(vKey, elem, allocator);
-	}
-	//
+    }
+    //
     dd.AddMember("durations", durations, allocator);
     //
 
@@ -350,63 +417,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
     dd.Accept(writer);
 
-
-    CString strURL = WizService::WizApiEntry::analyzerUploadUrl();
-
-    if (0 != ::WizStrStrI_Pos(strURL, _T("http://"))
-        && 0 != ::WizStrStrI_Pos(strURL, _T("https://")))
-        return;    
-
-    QNetworkAccessManager net;
-    QNetworkRequest request;
-    request.setUrl(strURL);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
-    QNetworkReply* reply = net.post(request, buffer.GetString());    
-
-    CWizAutoTimeOutEventLoop loop(reply);
-    loop.exec();
-
-    if (loop.error() != QNetworkReply::NoError)
-    {
-        qDebug() << "[Analyzer]Upload failed!";
-        return;
-    }
-
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().toUtf8().constData());
-
-    if (!d.HasMember("return_code"))
-    {
-        qDebug() << "[Analyzer]Can not get return code ";
-        return;
-    }
-
-    int returnCode = d.FindMember("return_code")->value.GetInt();
-    if (returnCode != 200)
-    {
-        qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
-        return;
-    }
-    else
-    {
-        qDebug() << "[Analyzer]Upload OK";
-    }
-
-//	//
-    ::DeleteFile(m_strRecordFileName);	//remove old file
-}
-
-QString analyzerFile()
-{
-    QString strFile = CWizDatabaseManager::instance()->db().GetAccountPath() + "analyzer.ini";
-    return strFile;
-}
-
-CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
-{    
-    static CWizAnalyzer analyzer(analyzerFile());
-	//
-    return analyzer;
+    return buffer.GetString();
 }
 
 

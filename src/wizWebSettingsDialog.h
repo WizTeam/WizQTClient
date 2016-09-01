@@ -6,9 +6,10 @@
 class QUrl;
 class QLabel;
 class QMovie;
-class QWebView;
+class WizWebEngineView;
 class QPushButton;
 class QNetworkReply;
+class CWizLocalProgressWebView;
 
 class CWizWebSettingsDialog : public QDialog
 {
@@ -16,7 +17,7 @@ class CWizWebSettingsDialog : public QDialog
 
 public:
     explicit CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent = 0);
-    QWebView* webVew();
+    WizWebEngineView* web();
 
     void showError();
 protected:
@@ -24,14 +25,11 @@ protected:
     virtual void showEvent(QShowEvent* event);
 protected:
     QString m_url;
-    QLabel* m_labelProgress;
-    QMovie* m_movie;
-    QWebView* m_web;
+    CWizLocalProgressWebView* m_progressWebView;
 
 private Q_SLOTS:
     void on_web_loaded(bool ok);
     void loadErrorPage();
-    void onEditorPopulateJavaScriptWindowObject();
     void on_networkRequest_finished(QNetworkReply* reply);
 };
 

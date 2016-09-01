@@ -8,17 +8,16 @@
 #include "wizKMServer.h"
 #include "asyncapi.h"
 #include "apientry.h"
-
-using namespace WizService;
-using namespace WizService::Internal;
+#include "share/wizthreads.h"
 
 // use 5 minutes locally, server use 20 minutes
 #define TOKEN_TIMEOUT_INTERVAL 60 * 5
 
 TokenPrivate::TokenPrivate(Token* token)
-    : q(token)
+    : m_bProcessing(false)
     , m_mutex(new QMutex(QMutex::Recursive))
-    , m_bProcessing(false)
+    , q(token)
+
 {
 }
 
@@ -97,7 +96,7 @@ void TokenPrivate::requestToken()
         return;
     }
     //
-    class GetTokenRunnable : public QRunnable
+    class GetTokenRunnable : public QObject
     {
         TokenPrivate* m_p;
     public:
@@ -114,8 +113,10 @@ void TokenPrivate::requestToken()
             Q_EMIT m_p->q->tokenAcquired(token);
         }
     };
-    //
-    QThreadPool::globalInstance()->start(new GetTokenRunnable(this));
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        GetTokenRunnable runnable(this);
+        runnable.run();
+    });
 }
 
 void TokenPrivate::clearToken()

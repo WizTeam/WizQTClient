@@ -5,10 +5,7 @@
 
 struct WIZABSTRACT;
 
-namespace Core {
-namespace Internal{
 class ThumbCachePrivate;
-}
 
 class ThumbCache : public QObject
 {
@@ -24,9 +21,8 @@ public:
 Q_SIGNALS:
     void loaded(const QString& strKbGUID, const QString& strGUID);
 
-    friend class Internal::ThumbCachePrivate;
+    friend class ThumbCachePrivate;
 };
 
-} // namespace Core
 
 #endif // CORE_THUMBCACHE_H

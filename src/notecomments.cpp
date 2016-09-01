@@ -3,30 +3,23 @@
 
 #include <QDebug>
 
-#include <coreplugin/icore.h>
-
 #include "wizDocumentView.h"
 #include "share/wizobject.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 
-using namespace Core;
-
-namespace WizService {
-namespace Internal {
-
-static NoteCommentsPrivate* m_comments = 0;
+static NoteCommentsPrivate* g_comments = 0;
 
 NoteCommentsPrivate::NoteCommentsPrivate()
 {
-    //connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)),
-    //        SLOT(onViewNoteLoaded(Core::CWizDocumentView*, const WIZDOCUMENTDATA&)));
+    //connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)),
+    //        SLOT(onViewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)));
     //connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 }
 
 NoteCommentsPrivate::~NoteCommentsPrivate()
 {
-    m_comments = 0;
+    g_comments = 0;
 }
 
 void NoteCommentsPrivate::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
@@ -57,8 +50,6 @@ void NoteCommentsPrivate::loadComments(const QString& strToken)
 }
 
 
-} // namespace Internal
-
 
 NoteComments::NoteComments()
 {
@@ -66,10 +57,9 @@ NoteComments::NoteComments()
 
 void NoteComments::init()
 {
-    if (!Internal::m_comments) {
-        Internal::m_comments = new Internal::NoteCommentsPrivate();
+    if (!g_comments) {
+        g_comments = new NoteCommentsPrivate();
     }
 }
 
 
-} // namespace WizService

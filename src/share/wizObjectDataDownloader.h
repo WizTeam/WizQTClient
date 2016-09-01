@@ -4,12 +4,16 @@
 #include <QThread>
 #include <QMap>
 #include <QRunnable>
+#include <QMutex>
+#include <memory>
+#include <functional>
 
 #include "wizobject.h"
 
 class CWizApi;
 class CWizDatabase;
 class CWizDatabaseManager;
+struct IWizThreadPool;
 
 enum DownloadType
 {
@@ -20,45 +24,50 @@ enum DownloadType
 /* ---------------------- CWizObjectDataDownloaderHost ---------------------- */
 // host running in main thread and manage downloader
 
-class CWizObjectDataDownloaderHost : public QObject
+class CWizObjectDownloaderHost : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizObjectDataDownloaderHost(CWizDatabaseManager& dbMgr, QObject* parent = 0);
+    static CWizObjectDownloaderHost* instance();
+
     void downloadData(const WIZOBJECTDATA& data);
+    void downloadData(const WIZOBJECTDATA& data, std::function<void(void)> callback);
     void downloadDocument(const WIZOBJECTDATA& data);
+    void downloadDocument(const WIZOBJECTDATA& data, std::function<void(void)> callback);
 
-private:
-    void download(const WIZOBJECTDATA& data, DownloadType type);
+    void waitForDone();
 
-private:
-    CWizDatabaseManager& m_dbMgr;
-    QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
+    CWizObjectDownloaderHost(QObject* parent = 0);
+    ~CWizObjectDownloaderHost();
+Q_SIGNALS:
+    void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
+    void finished();
+    void downloadProgress(QString objectGUID, int totalSize, int loadedSize);
 
 private Q_SLOTS:
     void on_downloadDone(QString data, bool bSucceed);
     void on_downloadProgress(QString data, int totalSize, int loadedSize);
 
-Q_SIGNALS:
-    void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
-    void finished();
-    void downloadProgress(QString objectGUID, int totalSize, int loadedSize);
+private:
+    void download(const WIZOBJECTDATA& data, DownloadType type, std::function<void(void)> callback = nullptr);
+
+private:
+    QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
+    static std::shared_ptr<CWizObjectDownloaderHost> m_instance;
+    IWizThreadPool* m_threadPool;
+    QMutex m_mutex;
 };
 
 
-class CWizDownloadObjectRunnable
-        : public QObject
-        , public QRunnable
+class CWizObjectDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data, \
-                               DownloadType type);
+    CWizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type);
     virtual void run();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
     WIZOBJECTDATA m_data;
     DownloadType m_type;
     //
@@ -74,14 +83,12 @@ Q_SIGNALS:
     void downloadProgress(QString objectGuid, int totalSize, int loadedSize);
 };
 
-class CWizFileDownloader
-        : public QObject
-        , public QRunnable
+class CWizFileDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizFileDownloader(const QString& strUrl, const QString& strFileName = "", const QString& strPath = "", bool isImage = "false");
-    virtual void run();
+    CWizFileDownloader(const QString& strUrl, const QString& strFileName,
+                       const QString& strPath, bool isImage);
     void startDownload();
 
 signals:
@@ -92,6 +99,7 @@ private:
     QString m_strFileName;
     bool m_isImage;
 
+    virtual void run();
     bool download();
 };
 

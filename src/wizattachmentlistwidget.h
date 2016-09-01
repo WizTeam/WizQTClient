@@ -11,7 +11,7 @@ class QMenu;
 class CWizDatabaseManager;
 class CWizAttachmentListViewItem;
 class CWizButton;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizAttachmentListView;
 
 class CWizAttachmentListViewItem : public QObject, public QListWidgetItem
@@ -72,7 +72,6 @@ public Q_SLOTS:
     //
     void resetAttachments();
 
-
 public:
     QAction* findAction(const QString& strName);
     void setDocument(const WIZDOCUMENTDATA& document);
@@ -101,7 +100,7 @@ private:
     WIZDOCUMENTDATA m_document;
     CWizFileIconProvider m_iconProvider;
     QMenu* m_menu;
-    CWizObjectDataDownloaderHost* m_downloaderHost;
+    CWizObjectDownloaderHost* m_downloaderHost;
 
     void resetPermission();
     void startDownload(CWizAttachmentListViewItem* item);
@@ -111,9 +110,6 @@ private:
     //
     bool isAttachmentModified(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
     void updateAttachmentInfo(const WIZDOCUMENTATTACHMENTDATAEX& attachment);
-
-    // if has item that is downloading waiting for open , would not open another attach that is not exists in local.
-    static bool m_bHasItemWaitingForDownload;
 };
 
 

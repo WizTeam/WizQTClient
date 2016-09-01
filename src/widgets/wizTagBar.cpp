@@ -22,7 +22,6 @@ const int TAGITEM_MARGIN = 16;
 const int TAGITEM_HEIGHT  = 16;
 const int TAGITEM_DELETEICONSIZE = 10;
 
-using namespace Core::Internal;
 
 CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
@@ -310,7 +309,7 @@ void CWizTagBar::on_lineEditReturnPressed()
         db.TagByName(strTagName, arrayTag);
         for (WIZTAGDATA tagItem : arrayTag)
         {
-            if (tagItem.strParentGUID.IsEmpty())
+            if (!tagItem.strGUID.IsEmpty())
             {
                 tag = tagItem;
                 break;

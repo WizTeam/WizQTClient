@@ -55,7 +55,7 @@ void CWizFolderView::showEvent(QShowEvent *event)
 
 void CWizFolderView::initFolders()
 {
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Note Folders"), m_dbMgr.db().kbGUID());
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, tr("Personal Notes"), m_dbMgr.db().kbGUID());
     addTopLevelItem(pAllFoldersItem);
 
     CWizStdStringArray arrayAllLocation;
@@ -109,11 +109,11 @@ void CWizFolderView::initFolders(QTreeWidgetItem* pParent,
 void CWizFolderView::initGroups()
 {
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     //
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
     //
     std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
     //

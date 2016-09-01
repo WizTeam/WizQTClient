@@ -10,7 +10,6 @@
 #include "share/wizmisc.h"
 #include "wizdef.h"
 
-using namespace Core::Internal;
 
 InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)

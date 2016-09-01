@@ -46,7 +46,7 @@
         <number>0</number>
        </property>
        <item>
-        <widget class="QWebView" name="webView">
+        <widget class="WizWebEngineView" name="webView">
          <property name="url">
           <url>
            <string>about:blank</string>
@@ -329,9 +329,9 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QWebView</class>
-   <extends>QWidget</extends>
-   <header>QtWebKitWidgets/QWebView</header>
+   <class>WizWebEngineView</class>
+   <extends>QWebEngineView</extends>
+   <header>share/wizwebengineview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

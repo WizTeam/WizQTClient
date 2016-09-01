@@ -10,9 +10,6 @@ class QPropertyAnimation;
 
 #define NOTIFYBAR_LABELLINK_DOWNLOAD  "clicktodownload"
 
-namespace Core {
-namespace Internal {
-
 class NotifyBar : public QWidget
 {
     Q_OBJECT
@@ -56,7 +53,5 @@ private:
     void showCloseButton(bool isForbidden);
 };
 
-} // namespace Internal
-} // namespace Core
 
 #endif // CORE_NOTIFYBAR_H

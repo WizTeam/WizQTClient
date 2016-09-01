@@ -1,17 +1,9 @@
 #include "thumbcache.h"
 #include "thumbcache_p.h"
-
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
-
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
+#include "share/wizthreads.h"
 
-using namespace Core;
-using namespace Core::Internal;
 
 #define THUMB_CACHE_MAX 10000
 
@@ -49,7 +41,9 @@ bool ThumbCachePrivate::find(const QString& strKbGUID, const QString& strGUID, W
 
 void ThumbCachePrivate::load(const QString& strKbGUID, const QString& strGUID)
 {
-    QtConcurrent::run(this, &ThumbCachePrivate::load_impl, strKbGUID, strGUID);
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        load_impl(strKbGUID, strGUID);
+    });
 }
 
 void ThumbCachePrivate::load_impl(const QString& strKbGUID, const QString& strGUID)

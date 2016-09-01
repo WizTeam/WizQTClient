@@ -3,8 +3,6 @@
 
 #include "wizKMServer.h"
 
-struct WIZDOCUMENTDATAEX_XMLRPC_SIMPLE;
-
 class CWizKMSync
 {
 public:
@@ -12,7 +10,7 @@ public:
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:
     bool Sync();
-    bool DownloadObjectData();
+    bool DownloadObjectData();    
 
 protected:
     bool SyncCore();
@@ -22,8 +20,7 @@ protected:
     bool DownloadDeletedList(__int64 nServerVersion);
     bool DownloadTagList(__int64 nServerVersion);
     bool DownloadStyleList(__int64 nServerVersion);
-    bool DownloadSimpleDocumentList(__int64 nServerVersion);
-    bool DownloadFullDocumentList();
+    bool DownloadDocumentList(__int64 nServerVersion);
     bool DownloadAttachmentList(__int64 nServerVersion);
 
     bool UploadDeletedList();
@@ -37,13 +34,8 @@ protected:
     bool ProcessOldKeyValues();
 
 private:
-    std::deque<WIZDOCUMENTDATAEX_XMLRPC_SIMPLE> m_arrayDocumentNeedToBeDownloaded;
-    int CalDocumentPartForDownloadToLocal(const WIZDOCUMENTDATAEX_XMLRPC_SIMPLE& data);
-
-private:
     IWizSyncableDatabase* m_pDatabase;
     WIZUSERINFOBASE m_info;
-    WIZKBINFO m_kbInfo;
     IWizKMSyncEvents* m_pEvents;
     bool m_bGroup;
     bool m_bUploadOnly;
@@ -82,21 +74,45 @@ private:
             return TRUE;
         }
         //
-        std::deque<TData> arrayData;
-        if (!m_server.getAllList<TData>(200, nVersion, arrayData))
-            return FALSE;
         //
-        if (!OnDownloadList<TData>(arrayData))
-            return FALSE;
+        __int64 nNextVersion = nVersion + 1;
+        int nCountPerPage = 200;
         //
-        for (typename std::deque<TData>::iterator it = arrayData.begin();
-             it != arrayData.end();
-             it++)
+        while (1)
         {
-            it->strKbGUID = m_info.strKbGUID;
+            std::deque<TData> arrayPageData;
+            //
+            //QString strProgress = WizFormatString1(::WizTranslationsTranslateString(_T("Start Version: %1")), WizInt64ToStr(nNextVersion));
+            //m_pProgress->OnText(wizhttpstatustypeNormal, strProgress);
+            //
+            if (!m_server.getList<TData>(nCountPerPage, nNextVersion, arrayPageData))
+            {
+                TOLOG2(_T("Failed to get object list: CountPerPage=%1, Version=%2"), WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
+                return FALSE;
+            }
+            //
+            if (arrayPageData.empty())
+                break;
+            //
+            for (TData& data : arrayPageData)
+            {
+                data.strKbGUID = m_info.strKbGUID;
+            }
+            //
+            if (!OnDownloadList<TData>(arrayPageData))
+                return FALSE;
+            //
+            nNextVersion = GetObjectsVersion<TData>(nNextVersion, arrayPageData);
+            //
+            if (!m_pDatabase->SetObjectVersion(strObjectType, nNextVersion))
+                return FALSE;
+
+            //
+            if (int(arrayPageData.size()) < nCountPerPage)
+                break;
+            //
+            nNextVersion++;
         }
-        //
-        nVersion = GetObjectsVersion<TData>(nVersion, arrayData);
         //
         nVersion = std::max<__int64>(nVersion, nServerVersion);
         //
@@ -127,10 +143,7 @@ private:
     template <class TData>
     bool OnDownloadList(const std::deque<WIZDOCUMENTDATAEX>& arrayData)
     {
-        m_arrayDocumentNeedToBeDownloaded.clear();
-        m_arrayDocumentNeedToBeDownloaded.assign(arrayData.begin(), arrayData.end());
-        //
-        return DownloadFullDocumentList();
+        return m_pDatabase->OnDownloadDocumentList(arrayData);
     }
     template <class TData>
     bool OnDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)

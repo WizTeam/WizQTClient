@@ -6,9 +6,10 @@
 #include "wizdef.h"
 
 class WIZDOCUMENTDATA;
-namespace Core {
+class CWizDocumentWebEngine;
 
 class CWizDocumentView;
+
 class CWizSingleDocumentViewer : public QWidget
 {
     Q_OBJECT
@@ -28,17 +29,14 @@ signals:
 
 protected:
     void resizeEvent(QResizeEvent* ev);
+    void closeEvent(QCloseEvent *ev);
     bool event(QEvent *ev);
 
 private:
     void applyWidgetBackground(bool isFullScreen);
 
 private:
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_webEngine;
-#else
     CWizDocumentView* m_docView;
-#endif
     QString m_guid;
 
     QWidget* m_containerWgt;
@@ -69,8 +67,6 @@ private:
     QMap<QString, CWizSingleDocumentViewer*> m_viewerMap;
     CWizExplorerApp& m_app;
 };
-
-}
 
 void bindESCToQuitFullScreen(QWidget* wgt);
 void bringWidgetToFront(QWidget* wgt);

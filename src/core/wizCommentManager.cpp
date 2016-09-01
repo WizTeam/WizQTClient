@@ -1,8 +1,6 @@
 #include "wizCommentManager.h"
 
 #include <QMutexLocker>
-#include <QRunnable>
-#include <QThreadPool>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QDebug>
@@ -11,132 +9,113 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 #include "share/wizEventLoop.h"
+#include "share/wizthreads.h"
 
 #define QUERY_DELAY 3
 
-using namespace Core;
-
-enum QueryType
+CWizCommentQuerier::CWizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject* parent)
+    : QObject(parent)
+    , m_kbGUID(kbGUID)
+    , m_GUID(GUID)
+    , m_type(type)
 {
-    QueryNone,
-    QueryUrl,
-    QueryCount,
-    QueryUrlAndCount
-};
+}
 
-class CWizQueryCommentRunnable : public QRunnable
+void CWizCommentQuerier::setCommentsUrl(const QString& url)
 {
-public:
-    CWizQueryCommentRunnable(CWizCommentManager *manager, const QString& kbGUID, const QString& GUID, QueryType type)
-        : m_manager(manager)
-        , m_kbGUID(kbGUID)
-        , m_GUID(GUID)
-        , m_type(type)
+    emit commentUrlAcquired(m_GUID, url);
+}
+
+void CWizCommentQuerier::setCommentsCount(int count)
+{
+    emit commentCountAcquired(m_GUID, count);
+}
+
+void CWizCommentQuerier::errorOccurred()
+{
+    if (QueryUrl == m_type || QueryUrlAndCount == m_type)
     {
-        setAutoDelete(true);
+        setCommentsUrl("");
+    }
+    if (QueryCount == m_type || QueryUrlAndCount == m_type)
+    {
+        setCommentsCount(0);
+    }
+}
+
+void CWizCommentQuerier::parseReplyData(const QString& reply)
+{
+    if (reply.isEmpty())
+        return;
+
+    rapidjson::Document d;
+    d.Parse<0>(reply.toUtf8().constData());
+
+    if (d.HasMember("error_code")) {
+        qDebug() << "Failed to get comment count: "
+                 << QString::fromUtf8(d.FindMember("error")->value.GetString())
+                 << " code: " << d.FindMember("error_code")->value.GetInt();
+        setCommentsCount(0);
+        return;
     }
 
-    void getCommentsUrlFinished(const QString& url)
-    {
-        QMetaObject::invokeMethod(m_manager, "on_commentUrlAcquired", Qt::QueuedConnection,
-                                  Q_ARG(QString, m_GUID), Q_ARG(QString, url));
-    }
-
-    void getCommentsCountFinished(int count)
-    {
-        QMetaObject::invokeMethod(m_manager, "on_commentCountAcquired", Qt::QueuedConnection,
-                                  Q_ARG(QString, m_GUID), Q_ARG(int, count));
-    }
-
-    void errorOccurred()
-    {
-        if (QueryUrl == m_type || QueryUrlAndCount == m_type)
-        {
-            getCommentsUrlFinished("");
-        }
-        if (QueryCount == m_type || QueryUrlAndCount == m_type)
-        {
-            getCommentsCountFinished(0);
-        }
-    }
-
-    void parseReplyData(const QString& reply)
-    {
-        if (reply.isEmpty())
-            return;
-
-        rapidjson::Document d;
-        d.Parse<0>(reply.toUtf8().constData());
-
-        if (d.HasMember("error_code")) {
-            qDebug() << "Failed to get comment count: "
-                     << QString::fromUtf8(d.FindMember("error")->value.GetString())
-                     << " code: " << d.FindMember("error_code")->value.GetInt();
-            getCommentsCountFinished(0);
+    if (d.HasMember("return_code")) {
+        int nCode = d.FindMember("return_code")->value.GetInt();
+        if (nCode != 200) {
+            qDebug() << "Failed to get comment count, need 200, but return "
+                     << d.FindMember("return_code")->value.GetInt();
+            setCommentsCount(0);
             return;
         }
-
-        if (d.HasMember("return_code")) {
-            int nCode = d.FindMember("return_code")->value.GetInt();
-            if (nCode != 200) {
-                qDebug() << "Failed to get comment count, need 200, but return "
-                         << d.FindMember("return_code")->value.GetInt();
-                getCommentsCountFinished(0);
-                return;
-            }
-        }
-
-        if (d.HasMember("comment_count"))
-        {
-            int count = d.FindMember("comment_count")->value.GetInt();
-            getCommentsCountFinished(count);
-        }
     }
 
-    void run()
+    if (d.HasMember("comment_count"))
     {
-        if (m_type == QueryNone)
-            return;
+        int count = d.FindMember("comment_count")->value.GetInt();
+        setCommentsCount(count);
+    }
+}
 
-        QString token = WizService::Token::token();
-        QString commentsUrl =  WizService::CommonApiEntry::commentUrl(token, m_kbGUID, m_GUID);
-        if (commentsUrl.isEmpty())
-        {
-            qDebug() << "Can not get comment url by token : " << token;
-            errorOccurred();
-            return;
-        }
-        else if (QueryUrl == m_type || QueryUrlAndCount == m_type)
-        {
-            getCommentsUrlFinished(commentsUrl);
-        }
+void CWizCommentQuerier::run()
+{
+    if (m_type == QueryNone)
+        return;
 
-        if (QueryCount != m_type && QueryUrlAndCount != m_type)
-            return;
-
-        QString kUrl = WizService::CommonApiEntry::kUrlFromGuid(token, m_kbGUID);
-        QString strCountUrl = WizService::CommonApiEntry::commentCountUrl(kUrl, token, m_kbGUID, m_GUID);
-
-        QNetworkAccessManager net;
-        QNetworkReply* reply = net.get(QNetworkRequest(strCountUrl));
-
-        CWizAutoTimeOutEventLoop loop(reply);
-        loop.exec();
-
-        if (loop.error() != QNetworkReply::NoError)
-        {
-            getCommentsCountFinished(0);
-        }
-
-        parseReplyData(loop.result());
+    QString token = Token::token();
+    QString commentsUrl =  CommonApiEntry::commentUrl(token, m_kbGUID, m_GUID);
+    if (commentsUrl.isEmpty() || token.isEmpty())
+    {
+        qDebug() << "Can not get comment url by token : " << token;
+        errorOccurred();
+        return;
+    }
+    else if (QueryUrl == m_type || QueryUrlAndCount == m_type)
+    {
+        setCommentsUrl(commentsUrl);
     }
 
-private:
-    QString m_kbGUID;
-    QString m_GUID;
-    QueryType m_type;
-    CWizCommentManager * m_manager;
-};
+    if (QueryCount != m_type && QueryUrlAndCount != m_type)
+        return;
+
+    QString kUrl = CommonApiEntry::kUrlFromGuid(token, m_kbGUID);
+    QString strCountUrl = CommonApiEntry::commentCountUrl(kUrl, token, m_kbGUID, m_GUID);
+
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(QNetworkRequest(strCountUrl));
+
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
+
+    if (loop.error() != QNetworkReply::NoError)
+    {
+        setCommentsCount(0);
+        return;
+    }
+
+    QString result = QString::fromUtf8(loop.result().constData());
+    parseReplyData(result);
+}
+
 
 
 CWizCommentManager::CWizCommentManager(QObject* parent)
@@ -151,8 +130,12 @@ CWizCommentManager::CWizCommentManager(QObject* parent)
  */
 void CWizCommentManager::queryCommentUrl(const QString& kbGUID, const QString& GUID)
 {
-    CWizQueryCommentRunnable* runnable = new CWizQueryCommentRunnable(this, kbGUID, GUID, QueryUrl);
-    QThreadPool::globalInstance()->start(runnable);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
+        CWizCommentQuerier seacher(kbGUID, GUID, CWizCommentQuerier::QueryUrl);
+        connect(&seacher, SIGNAL(commentUrlAcquired(const QString&, const QString&)),
+                SLOT(on_commentUrlAcquired(QString,QString)));
+        seacher.run();
+    });
 }
 
 /*
@@ -204,8 +187,11 @@ void CWizCommentManager::on_timer_timeOut()
     if (data.strGUID.isEmpty())
         return;
 
-    CWizQueryCommentRunnable* runnable = new CWizQueryCommentRunnable(this, data.strKBGUID, data.strGUID, QueryCount);
-    QThreadPool::globalInstance()->start(runnable);
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=] {
+        CWizCommentQuerier seacher(data.strKBGUID, data.strGUID, CWizCommentQuerier::QueryCount);
+        connect(&seacher, SIGNAL(commentCountAcquired(QString,int)), SLOT(on_commentCountAcquired(QString,int)));
+        seacher.run();
+    });
 }
 
 void CWizCommentManager::pickData(CountQueryData& data)

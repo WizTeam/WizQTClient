@@ -123,7 +123,7 @@ void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
 {
     Q_UNUSED(link);
 
-    Core::Internal::MainWindow *mainWindow = Core::Internal::MainWindow::instance();
+    MainWindow *mainWindow = MainWindow::instance();
     if (mainWindow)
     {
         mainWindow->locateDocument(m_docKbGuid, m_docGuid);

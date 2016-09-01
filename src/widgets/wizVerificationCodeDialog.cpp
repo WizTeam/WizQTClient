@@ -4,11 +4,6 @@
 #include <QIcon>
 #include <QPixmap>
 #include <QEventLoop>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 #include <QNetworkReply>
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
@@ -17,14 +12,19 @@
 #include "utils/pathresolve.h"
 #include "share/wizmisc.h"
 #include "share/wizMessageBox.h"
+#include "share/wizthreads.h"
+#include "share/wizEventLoop.h"
 
-CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent) :
-    QDialog(parent),
-    ui(new Ui::CWizVerificationCodeDialog)
+CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizVerificationCodeDialog)
+    , m_downloader(new CWizVerificationCodeDownloader(this))
 {
     ui->setupUi(this);
     ui->btn_image->setToolTip(tr("Click to refresh verification code"));
     connect(ui->lineEdit, SIGNAL(returnPressed()), SLOT(inputFinished()));
+
+    connect(m_downloader, SIGNAL(downloadFinished(QByteArray)), SLOT(on_image_downloaded(QByteArray)));
 }
 
 CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
@@ -50,19 +50,8 @@ QString CWizVerificationCodeDialog::getVerificationCode() const
 
 void CWizVerificationCodeDialog::downloadImage()
 {
-    QtConcurrent::run([this](){
-        QNetworkAccessManager m_WebCtrl;
-        QString strUrl = WizService::CommonApiEntry::captchaUrl(m_strCaptchaID);
-        QNetworkRequest request(strUrl);
-        QEventLoop loop;
-        loop.connect(&m_WebCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
-        QNetworkReply* reply = m_WebCtrl.get(request);
-        loop.exec();
-
-        QByteArray byData = reply->readAll();
-
-        QMetaObject::invokeMethod(this, "on_image_downloaded", Qt::QueuedConnection,
-                                  Q_ARG(QByteArray, byData));
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+        m_downloader->download(m_strCaptchaID);
     });
 }
 
@@ -104,4 +93,25 @@ void CWizVerificationCodeDialog::on_image_downloaded(const QByteArray& ba)
 
         update();
     }
+}
+
+
+CWizVerificationCodeDownloader::CWizVerificationCodeDownloader(QObject* parent)
+    : QObject(parent)
+{
+
+}
+
+void CWizVerificationCodeDownloader::download(const QString& strCaptchaID)
+{
+    QNetworkAccessManager m_WebCtrl;
+    QString strUrl = CommonApiEntry::captchaUrl(strCaptchaID);
+    QNetworkRequest request(strUrl);
+    QNetworkReply* reply = m_WebCtrl.get(request);
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
+
+    QByteArray byData = loop.result();
+
+    emit downloadFinished(byData);
 }

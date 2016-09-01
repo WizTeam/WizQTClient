@@ -4,82 +4,130 @@
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include "utils/pathresolve.h"
-
+#include "share/wizthreads.h"
+#include "sync/wizKMServer.h"
+#include "sync/token.h"
+#include "sync/apientry.h"
+#include "wizmisc.h"
 #include "wizDatabaseManager.h"
 #include "wizDatabase.h"
-#include "sync/wizKMServer.h"
-
-#include "../sync/token.h"
-#include "../sync/apientry.h"
-#include "wizmisc.h"
 
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1
 
+std::shared_ptr<CWizObjectDownloaderHost> CWizObjectDownloaderHost::m_instance = nullptr;
 
 /* --------------------- CWizObjectDataDownloaderHost --------------------- */
-CWizObjectDataDownloaderHost::CWizObjectDataDownloaderHost(CWizDatabaseManager& dbMgr,
-                                                           QObject* parent /* = 0 */)
+CWizObjectDownloaderHost::CWizObjectDownloaderHost(QObject* parent /* = 0 */)
     : QObject(parent)
-    , m_dbMgr(dbMgr)
+    , m_threadPool(nullptr)
 {
 }
 
-void CWizObjectDataDownloaderHost::downloadData(const WIZOBJECTDATA& data)
+CWizObjectDownloaderHost::~CWizObjectDownloaderHost()
+{
+}
+
+CWizObjectDownloaderHost* CWizObjectDownloaderHost::instance()
+{
+    if (nullptr == m_instance.get())
+    {
+        m_instance = std::make_shared<CWizObjectDownloaderHost>();
+    }
+
+    return m_instance.get();
+}
+
+void CWizObjectDownloaderHost::downloadData(const WIZOBJECTDATA& data)
 {
     download(data, TypeNomalData);
 }
 
-void CWizObjectDataDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
+void CWizObjectDownloaderHost::downloadData(const WIZOBJECTDATA& data, std::function<void ()> callback)
+{
+    download(data, TypeNomalData, callback);
+}
+
+void CWizObjectDownloaderHost::downloadDocument(const WIZOBJECTDATA& data)
 {
     download(data, TypeDocument);
 }
 
-void CWizObjectDataDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type)
+void CWizObjectDownloaderHost::downloadDocument(const WIZOBJECTDATA& data, std::function<void ()> callback)
+{
+    download(data, TypeDocument, callback);
+}
+
+void CWizObjectDownloaderHost::waitForDone()
+{
+    if (m_threadPool)
+    {
+        m_threadPool->Shutdown(0);
+        m_threadPool = nullptr;
+    }
+}
+
+void CWizObjectDownloaderHost::download(const WIZOBJECTDATA& data, DownloadType type, std::function<void(void)> callback)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
     //
-    if (m_mapObject.contains(data.strObjectGUID))
     {
-        qDebug() << "\n[downloader host] object already in the pool: "
-                 << data.strDisplayName;
-
-        return;
+        QMutexLocker locker(&m_mutex);
+        if (m_mapObject.contains(data.strObjectGUID))
+        {
+            qDebug() << "\n[downloader host] object already in the pool: "
+                     << data.strDisplayName;
+            return;
+        }
+        //
+        m_mapObject[data.strObjectGUID] = data;
     }
     //
-    m_mapObject[data.strObjectGUID] = data;
-    //
-    CWizDownloadObjectRunnable* downloader = new CWizDownloadObjectRunnable(m_dbMgr, data, type);
+    CWizObjectDownloader* downloader = new CWizObjectDownloader(data, type);
     //
     connect(downloader, SIGNAL(downloadDone(QString,bool)), this, SLOT(on_downloadDone(QString,bool)));
     connect(downloader, SIGNAL(downloadProgress(QString,int,int)), this, SLOT(on_downloadProgress(QString,int,int)));
 
-    QThreadPool::globalInstance()->start(downloader);
+    if (!m_threadPool)
+    {
+        m_threadPool = WizCreateThreadPool(5);
+    }
+
+    IWizRunable* action = WizCreateRunable([=](){
+        downloader->run();
+        downloader->deleteLater();
+        if (callback)
+        {
+            callback();
+        }
+    });
+    m_threadPool->AddTask(action);
 }
-void CWizObjectDataDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
+
+void CWizObjectDownloaderHost::on_downloadDone(QString objectGUID, bool bSucceed)
 {
+    m_mutex.lock();
     WIZOBJECTDATA data = m_mapObject[objectGUID];
     //
     m_mapObject.remove(objectGUID);
+    m_mutex.unlock();
     //
     Q_EMIT downloadDone(data, bSucceed);
     Q_EMIT finished();
 }
 
-void CWizObjectDataDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
+void CWizObjectDownloaderHost::on_downloadProgress(QString objectGUID, int totalSize, int loadedSize)
 {
     Q_EMIT downloadProgress(objectGUID, totalSize, loadedSize);
 }
 
-CWizDownloadObjectRunnable::CWizDownloadObjectRunnable(CWizDatabaseManager& dbMgr, const WIZOBJECTDATA& data,
-                                                       DownloadType type)
-    : m_dbMgr(dbMgr)
-    , m_data(data)
+CWizObjectDownloader::CWizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type)
+    : m_data(data)
     , m_type(type)
 {
 }
 
-void CWizDownloadObjectRunnable::run()
+void CWizObjectDownloader::run()
 {
     bool ret = false;
     switch (m_type) {
@@ -96,7 +144,7 @@ void CWizDownloadObjectRunnable::run()
     Q_EMIT downloadDone(m_data.strObjectGUID, ret);
 }
 
-bool CWizDownloadObjectRunnable::downloadNormalData()
+bool CWizObjectDownloader::downloadNormalData()
 {
     WIZUSERINFO info;
     if (!getUserInfo(info))
@@ -112,14 +160,17 @@ bool CWizDownloadObjectRunnable::downloadNormalData()
         return false;
     }
 
+    if (CWizDatabaseManager* dbMgr = CWizDatabaseManager::instance())
+    {
+        return dbMgr->db(m_data.strKbGUID).UpdateObjectData(m_data.strDisplayName, m_data.strObjectGUID,
+                                                             WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
+                                                             m_data.arrayData);
+    }
 
-
-    return m_dbMgr.db(m_data.strKbGUID).UpdateObjectData(m_data.strObjectGUID,
-                                                  WIZOBJECTDATA::ObjectTypeToTypeString(m_data.eObjectType),
-                                                  m_data.arrayData);    
+    return false;
 }
 
-bool CWizDownloadObjectRunnable::downloadDocument()
+bool CWizObjectDownloader::downloadDocument()
 {
     WIZUSERINFO info;
     if (!getUserInfo(info))
@@ -128,13 +179,16 @@ bool CWizDownloadObjectRunnable::downloadDocument()
     CWizKMDatabaseServer ksServer(info);
     connect(&ksServer, SIGNAL(downloadProgress(int, int)), SLOT(on_downloadProgress(int,int)));
 
-    CWizDatabase& db = m_dbMgr.db(m_data.strKbGUID);
+    CWizDatabaseManager* dbMgr = CWizDatabaseManager::instance();
+    if (!dbMgr)
+        return false;
+
+    CWizDatabase& db = dbMgr->db(m_data.strKbGUID);
     WIZDOCUMENTDATAEX document;
     if (!db.DocumentFromGUID(m_data.strObjectGUID, document))
         return false;
 
-    int nPart = WIZKM_XMKRPC_DOCUMENT_PART_INFO | WIZKM_XMKRPC_DOCUMENT_PART_DATA;
-    if (!ksServer.document_getData(m_data.strObjectGUID, nPart, document))
+    if (!ksServer.document_downloadData(m_data.strObjectGUID, document))
     {
         return false;
     }
@@ -145,6 +199,8 @@ bool CWizDownloadObjectRunnable::downloadDocument()
     __int64 nLocalVersion = db.GetObjectVersion("attachment");
     if (document.nAttachmentCount > 0 && nLocalVersion < versionServer.nAttachmentVersion)
     {
+        //todo: wsj, 奇怪的逻辑，需要修复
+        /*
         std::deque<WIZDOCUMENTATTACHMENTDATAEX> arrayRet;
         ksServer.attachment_getList(50, nLocalVersion, arrayRet);
         //
@@ -156,7 +212,7 @@ bool CWizDownloadObjectRunnable::downloadDocument()
             nPart = WIZKM_XMKRPC_ATTACHMENT_PART_INFO;
             WIZDOCUMENTATTACHMENTDATAEX attachRet = attach;
             attachRet.strKbGUID = db.kbGUID();
-            if (ksServer.attachment_getData(attach.strGUID, nPart, attachRet))
+            if (ksServer.attachment_downloadData(attach.strGUID, attachRet))
             {
 //                qDebug() << "get attachment from server : " << attachRet.strName;
                 //
@@ -165,11 +221,12 @@ bool CWizDownloadObjectRunnable::downloadDocument()
                 db.blockSignals(false);
             }
         }
+        */
     }
-
+    //
     bool ret = false;
     db.blockSignals(true);
-    if (db.UpdateObjectData(document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
+    if (db.UpdateObjectData(document.strTitle, document.strGUID, WIZOBJECTDATA::ObjectTypeToTypeString(wizobjectDocument),
                              document.arrayData))
     {
         ret = db.UpdateDocument(document);
@@ -179,20 +236,20 @@ bool CWizDownloadObjectRunnable::downloadDocument()
     return ret;
 }
 
-bool CWizDownloadObjectRunnable::getUserInfo(WIZUSERINFOBASE& info)
+bool CWizObjectDownloader::getUserInfo(WIZUSERINFOBASE& info)
 {
-    QString token = WizService::Token::token();
+    QString token = Token::token();
     if (token.isEmpty()) {
         return false;
     }
 
     info.strToken = token;
     info.strKbGUID = m_data.strKbGUID;
-    info.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
+    info.strDatabaseServer = CommonApiEntry::kUrlFromGuid(token, m_data.strKbGUID);
 
     return true;
 }
-void CWizDownloadObjectRunnable::on_downloadProgress(int totalSize, int loadedSize)
+void CWizObjectDownloader::on_downloadProgress(int totalSize, int loadedSize)
 {
     emit downloadProgress(m_data.strObjectGUID, totalSize, loadedSize);
 }
@@ -226,10 +283,14 @@ void CWizFileDownloader::run()
 
 void CWizFileDownloader::startDownload()
 {
-    QThreadPool::globalInstance()->start(this);
+    WizExecuteOnThread(WIZ_THREAD_DOWNLOAD, [=](){
+        run();
+        deleteLater();
+    });
 }
 
 bool CWizFileDownloader::download()
 {
      return WizURLDownloadToFile(m_strUrl, m_strFileName, m_isImage);
 }
+

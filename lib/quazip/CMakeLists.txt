@@ -3,7 +3,7 @@ project (QuaZip)
 file(GLOB SRCS "*.c" "*.cpp")
 file(GLOB PUBLIC_HEADERS "*.h")
 
-include(QtChooser)
+include(../../cmake/QtChooser.cmake)
 add_library(quazip STATIC ${SRCS} ${PUBLIC_HEADERS})
 qt_use_modules(quazip)
 qt_suppress_warnings(quazip)

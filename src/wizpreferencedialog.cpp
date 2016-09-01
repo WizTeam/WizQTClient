@@ -5,11 +5,10 @@
 #include <QFontDialog>
 #include <QColorDialog>
 
-#include "plugins/coreplugin/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/pathresolve.h"
 #include "share/wizMessageBox.h"
 #include "share/wizDatabaseManager.h"
-#include "widgets/wizMarkdownTemplateDialog.h"
 #include "wizmainwindow.h"
 #include "wizproxydialog.h"
 
@@ -23,8 +22,6 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->setupUi(this);
     setWindowIcon(QIcon());
     setWindowTitle(tr("Preference"));
-
-    setFixedSize(430, 290);
 
     connect(ui->btnClose, SIGNAL(clicked()), SLOT(accept()));
 
@@ -358,7 +355,7 @@ void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
     m_app.userSettings().setAutoCheckUpdate(autoUpdate);
 
     if (autoUpdate) {
-        Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
         mainWindow->checkWizUpdate();
     }
 }
@@ -366,7 +363,7 @@ void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
 void CWizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
 {
     m_app.userSettings().setShowSystemTrayIcon(checked);
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     mainWindow->setSystemTrayIconVisible(checked);
 }
 
@@ -427,7 +424,7 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 
         if (QMessageBox::Ok == clickedButton)
         {
-            Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+            MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
             Q_ASSERT(mainWindow);
             mainWindow->rebuildFTS();
         }
@@ -472,16 +469,6 @@ void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
     m_app.userSettings().setManualSortingEnable(checked);
     emit settingsChanged(wizoptionsFolders);
 }
-
-void CWizPreferenceWindow::on_pushButtonChoseMarkdwonTemplate_clicked()
-{
-    CWizMarkdownTemplateDialog dlg;
-    if (dlg.exec() == QDialog::Accepted)
-//        Core::ICore::instance()->emitMarkdownSettingChanged();
-        Q_EMIT settingsChanged(wizoptionsMarkdown);
-    return;
-}
-
 
 void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
 {

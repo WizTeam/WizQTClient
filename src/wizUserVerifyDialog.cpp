@@ -54,7 +54,7 @@ QString CWizUserVerifyDialog::password()
 void CWizUserVerifyDialog::on_btnAccept_clicked()
 {
     if (!m_editPasswd->text().isEmpty()) {
-        WizService::Token::setPasswd(m_editPasswd->text());
+        Token::setPasswd(m_editPasswd->text());
         accept();
     }
 }

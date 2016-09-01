@@ -31,8 +31,6 @@
 **
 ****************************************************************************/
 
-#ifdef USEWEBENGINE
-
 #include "websockettransport.h"
 
 #include <QJsonDocument>
@@ -101,4 +99,3 @@ void WebSocketTransport::textMessageReceived(const QString &messageData)
 
 QT_END_NAMESPACE
 
-#endif

@@ -7,9 +7,6 @@
 #include "utils/stylehelper.h"
 
 
-using namespace WizService;
-using namespace WizService::Internal;
-
 QString CWizUserInfoWidgetBaseMac::text() const
 {
     return m_text;

@@ -6,6 +6,7 @@
 #include <QMap>
 #include <QThread>
 #include <QMutex>
+#include <QWaitCondition>
 #include <QTcpSocket>
 
 struct UdpSegment
@@ -40,7 +41,6 @@ public:
 
     void addNewSegment(QByteArray *ba);
 
-    bool hasUnprocessedData();
     void processData();
 
     void waitForDone();
@@ -65,6 +65,7 @@ private:
     void deleteAllSegments();
 private:
     QMutex m_mutex;
+    QWaitCondition m_wait;
     QList<QByteArray *> m_segmentList;
     QMap<QString, MobileFileData> m_dataMap;
     bool m_stop;

@@ -24,11 +24,7 @@
 	// var documentTitle = "TestDocumentTitle";
 
 	function toLog(log) {
-		try {
-			external.writeToLog(log);
-		}
-		catch (e) {
-		}
+            external.writeToLog(log);
 	}
 
 	var kbGuid;
@@ -49,21 +45,11 @@
 	}
 
 	function getToken(callback) {
-		// try {
-			kbGuid = external.getKbGuid();
-			documentGuid = external.getGuid();
-			documentTitle = external.getTitle();
-			// external.tokenObtained.disconnect(callback);
-			external.tokenObtained.connect(callback);
-			external.getToken();
-			
-			// external.Window.GetToken(function(t) {
-			// 	token = t;
-				// callback();
-			// });
-		// }
-		// catch (e) {
-		// }
+            kbGuid = external.kbGuid;
+            documentGuid = external.documentGuid;
+            documentTitle = external.title;
+            external.tokenObtained.connect(callback);
+            external.getToken();
 	}
 
 	var requestSucceeded = 0;
@@ -568,16 +554,16 @@
 	}
 
 	function resizeex() {
-		if (customObject) {
+                if (external) {
 			var width = document.body.clientWidth;
 			var height = document.body.clientHeight;
-			customObject.resizeEx(width, height);
+                        external.resizeEx(width, height);
 		}
 	}
 
 	function closeDialog() {
-		if (customObject) {
-			customObject.close();
+                if (external) {
+                        external.close();
 		}
 	}
 
@@ -966,8 +952,8 @@
 		url = url.replace("{documentTitle}", documentTitle)
 				.replace("{url}", link);
 		//
-		if (customObject) {
-			customObject.openindefaultbrowser(url);
+                if (external) {
+                        external.openindefaultbrowser(url);
 		}
 		else {
 			window.open(url);
@@ -1048,8 +1034,8 @@
 	//
 	function onClickLink(e) {
 		var url = linkPart1.innerText;
-		if (customObject) {
-			customObject.openindefaultbrowser(url);
+                if (external) {
+                        external.openindefaultbrowser(url);
 		}
 		else {
 			window.open(url);
@@ -1155,7 +1141,8 @@
 				dayTips.style.display = "";				
 				var expiredDate = new Date(expiredAt);
 				if (!expiredDate.getTime()) {
-					expiredDate = new Date(external.formateISO8601String(expiredAt));
+                                    expiredDate.formateISO8601StringParam = expiredAt;
+                                    expiredDate = new Date(external.formateISO8601StringResult);
 				}				
 				var days = Math.round((expiredDate.getTime() - Date.now()) / (1000*60*60*24.0));
 				dayTips.innerText = sharelocale_remain_days.replace("%1", days);
@@ -1304,9 +1291,9 @@
 
 	function onDocumentMouseMove(e) {
 		if (g_mousedown) {
-			if (customObject) {
-				// customObject.Execute("dragcaption", g_lastX, g_lastY, "", "");
-				customObject.dragcaption(g_lastX, g_lastY);
+                        if (external) {
+                                // external.Execute("dragcaption", g_lastX, g_lastY, "", "");
+                                external.dragcaption(g_lastX, g_lastY);
 			}
 		}
 	}
@@ -1327,8 +1314,8 @@
 			tips.style.display = "none";
 		}
 		//
-		showBackground();
-		getToken(createLink);
+                showBackground();
+                getToken(createLink);
 	}
 
 	function onCancelCreate() {
@@ -1336,25 +1323,21 @@
 	}
 
 	function promptFirstTips() {
-		try {
-				//
-				var firstTips = external.getShareLinkFirstTips();
-				var content = document.querySelector("#content");
-				if (content) {
-					content.style.display = ("1" === firstTips) ? "" : "none";
-				}
-				//
-				var tips = document.querySelector("#first-tips");
-				if (tips) {
-					tips.style.display = ("1" === firstTips) ? "none" : "";
-				}				
-				if ("1" == firstTips) {
-					showBackground();
-					getToken(createLink);
-				}
-		}
-		catch (e) {
-		}
+            //
+            var firstTips = external.shareLinkFirstTips;
+            var content = document.querySelector("#content");
+            if (content) {
+                    content.style.display = ("1" === firstTips) ? "" : "none";
+            }
+            //
+            var tips = document.querySelector("#first-tips");
+            if (tips) {
+                    tips.style.display = ("1" === firstTips) ? "none" : "";
+            }
+            if ("1" == firstTips) {
+                    showBackground();
+                    getToken(createLink);
+            }
 	}
 
 	function onDocumentKeyUp (e) {
@@ -1413,23 +1396,20 @@
 		}
 	}
 
-	function onLoad () {
+        function initForWebEngine () {
+                wizInitLang();
+
 		translatePage();
 		//
 
 		initButtons();
 		//
-		try {
-			promptFirstTips();
-		}
-		catch(e) {
-
-		}
+                promptFirstTips();
 	}
 
 	</script>
 </head>
-<body onload='onLoad();'>
+<body >
 	<div id='main'>
 		<div id='head'>
 			<div>

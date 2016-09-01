@@ -22,6 +22,7 @@ class QLabel;
 class QSystemTrayIcon;
 class QComboBox;
 class QActionGroup;
+struct TemplateData;
 
 class CWizProgressDialog;
 class CWizDocumentListView;
@@ -35,13 +36,14 @@ class CWizSplitter;
 class CWizAnimateAction;
 class CWizOptionsWidget;
 class CWizIAPDialog;
+class CWizTemplatePurchaseDialog;
 
-class CWizSearchWidget;
+class CWizSearchView;
 class CWizSearcher;
 class CWizSearchIndexer;
 
 class QtSegmentControl;
-class CWizObjectDataDownloaderHost;
+class CWizObjectDownloaderHost;
 class CWizUserAvatarDownloaderHost;
 class CWizKMSyncThread;
 class CWizUserVerifyDialog;
@@ -50,7 +52,7 @@ class wizImageButton;
 class CWizMacToolBar;
 class QNetworkDiskCache;
 class CWizConsoleDialog;
-class CWizUpgrade;
+class CWizUpgradeChecker;
 class CWizCategoryView;
 class QListWidgetItem;
 class CWizCategoryViewMessageItem;
@@ -58,21 +60,18 @@ class CWizCategoryViewShortcutItem;
 class CWizDocumentWebView;
 class CWizTrayIcon;
 class CWizMobileFileReceiver;
+class ICore;
 
-namespace WizService {
-namespace Internal {
 class MessageListView;
 class WizMessageSelector;
 class WizMessageListTitleBar;
-}
-}
 
-namespace Core {
-class ICore;
 class CWizDocumentView;
 class CWizSingleDocumentViewDelegate;
 
-namespace Internal {
+#ifdef Q_OS_MAC
+class CWizMacToolBarButtonItem;
+#endif
 
 class MainWindow
 #ifdef Q_OS_MAC
@@ -134,17 +133,16 @@ protected:
 #endif
 
 private:
-    ICore* m_core;
     CWizDatabaseManager& m_dbMgr;
     CWizProgressDialog* m_progress;
     CWizUserSettings* m_settings;
     CWizKMSyncThread* m_sync;
     CWizUserVerifyDialog* m_userVerifyDialog;
     CWizConsoleDialog* m_console;
-    CWizUpgrade* m_upgrade;
+    CWizUpgradeChecker* m_upgrade;
     CWizIAPDialog* m_iapDialog;
+    CWizTemplatePurchaseDialog* m_templateIAPDialog;
 
-    CWizObjectDataDownloaderHost* m_objectDownloaderHost;
     //
     CWizTrayIcon* m_tray;
     QMenu* m_trayMenu;
@@ -152,6 +150,7 @@ private:
 #ifdef USECOCOATOOLBAR
     CWizMacToolBar* m_toolBar;
     CWizMacFixedSpacer* m_spacerForToolButtonAdjust;
+    CWizMacToolBarButtonItem* m_newNoteButton;
 #else
     QToolBar* m_toolBar;
     CWizFixedSpacer* m_spacerForToolButtonAdjust;
@@ -160,6 +159,7 @@ private:
     QMenuBar* m_menuBar;
     QMenu* m_dockMenu;
     QMenu* m_windowListMenu;
+    QMenu* m_newNoteExtraMenu;
     QActionGroup* m_viewTypeActions;
     QActionGroup* m_sortTypeActions;
 #ifdef Q_OS_LINUX
@@ -179,10 +179,10 @@ private:
     CWizActions* m_actions;
     CWizCategoryView* m_category;
     CWizDocumentListView* m_documents;
-    WizService::Internal::MessageListView* m_msgList;
+    MessageListView* m_msgList;
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
-    WizService::Internal::WizMessageListTitleBar* m_msgListTitleBar;
+    WizMessageListTitleBar* m_msgListTitleBar;
 
     CWizDocumentSelectionView* m_documentSelection;
     CWizDocumentView* m_doc;
@@ -201,16 +201,16 @@ private:
     QString m_strSearchKeywords;
 
     CWizSearchIndexer* m_searchIndexer;
-    CWizSearchWidget* m_searchWidget;
+    CWizSearchView* m_searchWidget;
 
-    CWizMobileFileReceiver *m_mobileFileReceiver;
+    CWizMobileFileReceiver *m_mobileFileReceiver;    
 
     bool m_bRestart;
     bool m_bLogoutRestart;
     bool m_bUpdatingSelection;
 
     bool m_bQuickDownloadMessageEnable;
-
+    //
     WIZDOCUMENTDATA m_documentForEditing;
 
 private:
@@ -233,12 +233,12 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
-    void showClient(bool visible) const;
     CWizDocumentView* documentView() const;
 
     CWizActions* actions() const { return m_actions; }
-    //CWizDownloadObjectDataDialog* objectDownloadDialog() const { return m_objectDownloadDialog; }
-    CWizObjectDataDownloaderHost* downloaderHost() const { return m_objectDownloaderHost; }
+
+    //FIXME: why provide download host and dialog by mainwidnow ???
+    CWizObjectDownloaderHost* downloaderHost() const;
     CWizProgressDialog* progressDialog() const { return m_progress; }
     CWizIAPDialog* iapDialog();
 
@@ -256,9 +256,9 @@ public:
     //
     void createNoteWithAttachments(const QStringList& strAttachList);
     void createNoteWithText(const QString& strText);
-    void createNoteWithImage(const QString& strImageFile);
 
-signals:    
+    void createNoteByTemplateCore(const TemplateData& tmplData);
+signals:
     void documentsViewTypeChanged(int);
     void documentsSortTypeChanged(int);
 
@@ -272,7 +272,6 @@ public Q_SLOTS:
     void on_actionNewNoteByTemplate_triggered();
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
-    void on_actionDeveloper_triggered();
     void on_actionPreference_triggered();
     void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
@@ -286,7 +285,6 @@ public Q_SLOTS:
     void on_actionSaveAsPDF_triggered();
     void on_actionSaveAsHtml_triggered();
     void on_actionImportFile_triggered();
-    void on_actionPrint_triggered();
     void on_actionPrintMargin_triggered();
 
     // menu editing
@@ -299,14 +297,6 @@ public Q_SLOTS:
     void on_actionEditingPastePlain_triggered();
     void on_actionEditingDelete_triggered();
     void on_actionEditingSelectAll_triggered();
-
-#ifdef USEWEBENGINE
-    //move input position
-    void on_actionMoveToPageStart_triggered();
-    void on_actionMoveToPageEnd_triggered();
-    void on_actionMoveToLineStart_triggered();
-    void on_actionMoveToLineEnd_triggered();
-#endif
 
     // menu view
     void on_actionViewToggleCategory_triggered();
@@ -330,7 +320,6 @@ public Q_SLOTS:
     void on_actionSortByAccessTime_triggered();
     void on_actionSortByTitle_triggered();
     void on_actionSortByFolder_triggered();
-    void on_actionSortByTag_triggered();
     void on_actionSortBySize_triggered();
 
     void on_categoryUnreadButton_triggered();
@@ -347,7 +336,6 @@ public Q_SLOTS:
     void on_actionMenuFormatOutdent_triggered();
     void on_actionMenuFormatInsertOrderedList_triggered();
     void on_actionMenuFormatInsertUnorderedList_triggered();
-    void on_actionMenuFormatInsertTable_triggered();
     void on_actionMenuFormatInsertLink_triggered();
     void on_actionMenuFormatBold_triggered();
     void on_actionMenuFormatItalic_triggered();
@@ -357,12 +345,11 @@ public Q_SLOTS:
     void on_actionMenuFormatInsertDate_triggered();
     void on_actionMenuFormatInsertTime_triggered();
     void on_actionMenuFormatRemoveFormat_triggered();
-    void on_actionMenuFormatPlainText_triggered();
-    void on_actionMenuEditorViewSource_triggered();
     void on_actionMenuFormatInsertCheckList_triggered();
     void on_actionMenuFormatInsertCode_triggered();
     void on_actionMenuFormatInsertImage_triggered();
     void on_actionMenuFormatScreenShot_triggered();
+    void on_actionMenuFormatInsertTable(int row, int col);
 
     void on_searchProcess(const QString &strKeywords, const CWizDocumentDataArray& arrayDocument,
                           bool bStart, bool bEnd);
@@ -386,7 +373,7 @@ public Q_SLOTS:
 
     void on_syncLogined();
     void on_syncStarted(bool syncAll);
-    void on_syncDone(int nErrorcode, const QString& strErrorMsg);
+    void on_syncDone(int nErrorcode, const QString& strErrorMsg, bool isBackground);
     void on_syncDone_userVerified();
 
     void on_syncProcessLog(const QString& strMsg);
@@ -399,9 +386,9 @@ public Q_SLOTS:
 
     void on_options_restartForSettings();
 
-    void on_editor_statusChanged();
+    void on_editor_statusChanged(const QString& currentStyle);
 
-    void createDocumentByTemplate(const QString& strFile);
+    void createNoteByTemplate(const TemplateData& tmplData);
 
     void on_mobileFileRecived(const QString& strFile);
 
@@ -449,6 +436,9 @@ public Q_SLOTS:
     //
     void viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data);
     void viewCurrentNoteInSeparateWindow();
+    //
+    void onAttachmentModified(QString strKbGUID, QString strGUID,QString strFileName,
+                              QString strMD5, QDateTime dtLastModified);
 
 public:
     // WizExplorerApp pointer
@@ -482,6 +472,7 @@ public:
     Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
     Q_INVOKABLE void AppStoreIAP();
+    Q_INVOKABLE void copyLink(const QString& link);
 
 private:
     void syncAllData();
@@ -535,6 +526,8 @@ private:
 
     //
     bool processApplicationActiveEvent();
+    //
+    void prepareNewNoteMenu();
 
 private slots:
     void windowActived();
@@ -542,9 +535,17 @@ private slots:
     void resetDockMenu();
     void resetWindowMenu();
     void removeWindowsMenuItem(QString guid);
+
+    void showVipUpgradePage();
+
+#ifdef Q_OS_MAC
+    void on_newNoteButton_extraMenuRequest();
+#endif
+    void on_newNoteByExtraMenu_request();
+
+private:
+    void showTemplateIAPDlg(const TemplateData& tmpl);
 };
 
-} // namespace Internal
-} // namespace Core
 
 #endif // WIZMAINWINDOW_H

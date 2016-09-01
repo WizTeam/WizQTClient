@@ -15,7 +15,6 @@
 #include <QSystemTrayIcon>
 #include <QPrintDialog>
 #include <QPrinter>
-#include <QWebFrame>
 #include <QCheckBox>
 
 #ifdef Q_OS_MAC
@@ -29,9 +28,8 @@
 #include "share/wizMessageBox.h"
 #include "widgets/wizTrayIcon.h"
 
-#include <extensionsystem/pluginmanager.h>
-#include <coreplugin/icore.h>
-#include <coreplugin/aboutdialog.h>
+#include "share/wizGlobal.h"
+#include "widgets/aboutdialog.h"
 
 #include "wizUpgrade.h"
 #include "wizconsoledialog.h"
@@ -47,7 +45,7 @@
 #include "wizactions.h"
 #include "wizpreferencedialog.h"
 #include "wizupgradenotifydialog.h"
-
+#include "core/wizNoteManager.h"
 #include "share/wizcommonui.h"
 #include "share/wizui.h"
 #include "share/wizmisc.h"
@@ -64,6 +62,8 @@
 #include "widgets/wizImageButton.h"
 #include "widgets/wizIAPDialog.h"
 #include "widgets/wizLocalProgressWebView.h"
+#include "widgets/wizTemplatePurchaseDialog.h"
+#include "widgets/WizCodeEditorDialog.h"
 
 #include "wiznotestyle.h"
 #include "wizdocumenthistory.h"
@@ -84,31 +84,30 @@
 #include "sync/token.h"
 
 #include "wizUserVerifyDialog.h"
-#include "plugindialog.h"
 #include "notecomments.h"
 #include "wizMobileFileReceiver.h"
 #include "wizDocTemplateDialog.h"
 #include "share/wizFileMonitor.h"
 #include "share/wizAnalyzer.h"
 #include "share/wizTranslater.h"
+#include "share/wizthreads.h"
 #include "widgets/wizShareLinkDialog.h"
 #include "widgets/wizSingleDocumentView.h"
 #include "widgets/wizCustomToolBar.h"
 #include "widgets/wizTipsWidget.h"
 #include "wizPositionDelegate.h"
 #include "core/wizAccountManager.h"
+#include "share/wizwebengineview.h"
+#include "rapidjson/document.h"
+#include "widgets/wizexecutingactiondialog.h"
 
 #define MAINWINDOW  "MainWindow"
 
-using namespace Core;
-using namespace Core::Internal;
-using namespace WizService::Internal;
 
 static MainWindow* windowInstance = 0;
 
 MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     : _baseClass(parent)
-    , m_core(new ICore(this))
     , m_dbMgr(dbMgr)
     , m_progress(new CWizProgressDialog(this))
     , m_settings(new CWizUserSettings(dbMgr.db()))
@@ -117,14 +116,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_searcher(new CWizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
-#ifndef BUILD4APPSTORE
-    , m_upgrade(new CWizUpgrade(this))
-#else
-    , m_upgrade(0)
-#endif
-    //, m_certManager(new CWizCertManager(*this))
-    , m_objectDownloaderHost(new CWizObjectDataDownloaderHost(dbMgr, this))
     , m_iapDialog(nullptr)
+    , m_templateIAPDialog(nullptr)
 #ifndef Q_OS_MAC
     , m_labelNotice(NULL)
     , m_optionsAction(NULL)
@@ -132,9 +125,11 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_menuBar(nullptr)
     , m_dockMenu(nullptr)
     , m_windowListMenu(nullptr)
+    , m_newNoteExtraMenu(nullptr)
 #ifdef Q_OS_MAC
     #ifdef USECOCOATOOLBAR
     , m_toolBar(new CWizMacToolBar(this))
+    , m_newNoteButton(NULL)
     #else
     , m_toolBar(new QToolBar(this))
 //    , m_toolBar(nullptr)
@@ -164,6 +159,8 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     , m_mobileFileReceiver(nullptr)
     , m_bQuickDownloadMessageEnable(false)
 {
+    WizGlobal::setMainWindow(this);
+    //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
     setWindowStyleForLinux(m_useSystemBasedStyle);
@@ -196,7 +193,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_sync, SIGNAL(syncFinished(int, QString)), SLOT(on_syncDone(int, QString)));
+    connect(m_sync, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
 
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
@@ -222,9 +219,9 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
 
 #if QT_VERSION > 0x050400
     connect(&m_dbMgr, &CWizDatabaseManager::userIdChanged, [](const QString& oldId, const QString& newId){
-        WizService::AvatarHost::deleteAvatar(oldId);
-        WizService::AvatarHost::load(oldId);
-        WizService::AvatarHost::load(newId);
+        AvatarHost::deleteAvatar(oldId);
+        AvatarHost::load(oldId, false);
+        AvatarHost::load(newId, false);
     });
 #endif
 
@@ -243,16 +240,14 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     initToolBar();
     initClient();
 
-//    setWindowTitle(tr("WizNote"));
+    setWindowTitle(tr("WizNote"));
 
     restoreStatus();
 
-    client()->hide();
-
     // upgrade check
-#ifndef BUILD4APPSTORE
-    connect(m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
-    if (userSettings().autoCheckUpdate()) {
+#ifndef BUILD4APPSTORE    
+    if (userSettings().autoCheckUpdate())
+    {
         checkWizUpdate();
     }
 #endif
@@ -261,7 +256,7 @@ MainWindow::MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent)
     setupFullScreenMode(this);
 #endif
 
-    WizService::NoteComments::init();
+    NoteComments::init();
     //
     m_sync->start(QThread::IdlePriority);
     //
@@ -356,10 +351,10 @@ void MainWindow::on_application_aboutToQuit()
 
 void MainWindow::cleanOnQuit()
 {
-    m_category->saveExpandState();
-    saveStatus();    
+    CWizObjectDownloaderHost::instance()->waitForDone();
     //
-    CWizTipListManager::cleanOnQuit();
+    m_category->saveExpandState();
+    saveStatus();
     //
     m_sync->waitForDone();
     //
@@ -368,8 +363,6 @@ void MainWindow::cleanOnQuit()
     //
     m_doc->waitForDone();
     //
-    QThreadPool::globalInstance()->waitForDone();
-    WizService::AvatarHost::waitForDone();
 
     if (m_mobileFileReceiver)
     {
@@ -506,7 +499,7 @@ void MainWindow::showEvent(QShowEvent* event)
 void MainWindow::on_actionExit_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarExit");
-
+    //
     qApp->exit();
 }
 
@@ -560,10 +553,10 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
     if (!bUpgradeAvaliable)
         return;
 
-    QString strUrl = m_upgrade->getWhatsNewUrl();
+    QString strUrl = CWizUpgradeChecker::getWhatsNewUrl();
     CWizUpgradeNotifyDialog notifyDialog(strUrl, this);
     if (QDialog::Accepted == notifyDialog.exec()) {
-        QString url = WizService::WizApiEntry::standardCommandUrl("link");
+        QString url = WizApiEntry::standardCommandUrl("link");
 #if defined(Q_OS_MAC)
         url += "&name=wiznote-mac.html";
 #elif defined(Q_OS_LINUX)
@@ -572,7 +565,7 @@ void MainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
         Q_ASSERT(0);
 #endif
         QDesktopServices::openUrl(QUrl(url));
-    }
+    }    
 }
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
@@ -584,13 +577,13 @@ bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
 
 void MainWindow::on_TokenAcquired(const QString& strToken)
 {
-    //WizService::Token::instance()->disconnect(this);
-    disconnect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)), this,
+    //Token::instance()->disconnect(this);
+    disconnect(Token::instance(), SIGNAL(tokenAcquired(QString)), this,
             SLOT(on_TokenAcquired(QString)));
 
     if (strToken.isEmpty())
     {
-        int nErrorCode = WizService::Token::lastErrorCode();
+        int nErrorCode = Token::lastErrorCode();
         // network unavailable
         if (QNetworkReply::ProtocolUnknownError == nErrorCode)
         {
@@ -675,8 +668,14 @@ void MainWindow::on_viewMessage_request(qint64 messageID)
 void MainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
 {
     WIZDOCUMENTDATA doc;
-    if ((msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE) &&
-            !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc))
+    if (
+            (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+             )
+            && !m_dbMgr.db(msg.kbGUID).DocumentFromGUID(msg.documentGUID, doc)
+            )
     {
         m_doc->promptMessage(tr("Can't find note %1 , may be it has been deleted.").arg(msg.title));
         return;
@@ -690,8 +689,11 @@ void MainWindow::on_viewMessage_request(const WIZMESSAGEDATA& msg)
         showCommentWidget();
         viewDocument(doc, true);
     }
-    else if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
-             msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+    else if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+             || msg.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+             )
     {
         viewDocument(doc, true);
     }
@@ -841,14 +843,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::saveStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     settings->setValue("Window/Geometry", saveGeometry());
     settings->setValue("Window/Splitter", m_splitter->saveState());
 }
 
 void MainWindow::restoreStatus()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QByteArray geometry = settings->value("Window/Geometry").toByteArray();
     QByteArray splitterState = settings->value("Window/Splitter").toByteArray();
     // main window
@@ -881,14 +883,10 @@ void MainWindow::initActions()
 #endif
     m_animateSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_animateSync->setSingleIcons("sync");
+    //
+    connect(m_actions, SIGNAL(insertTableSelected(int,int)), SLOT(on_actionMenuFormatInsertTable(int,int)));
 
-    connect(m_doc->web(), SIGNAL(statusChanged()), SLOT(on_editor_statusChanged()));
-//#ifndef USEWEBENGINE
-//    connect(m_doc->web()->page(), SIGNAL(contentsChanged()), SLOT(on_document_contentChanged()));
-//    connect(m_doc->web()->page(), SIGNAL(selectionChanged()), SLOT(on_document_contentChanged()));
-//#endif
-
-    on_editor_statusChanged();
+    connect(m_doc->web(), SIGNAL(statusChanged(const QString&)), SLOT(on_editor_statusChanged(const QString&)));
 }
 
 void setActionCheckState(const QList<QAction*>& actionList, int type)
@@ -972,9 +970,6 @@ void MainWindow::initMenuBar()
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_FOLDER);
     action->setData(SortingByLocation);
     m_sortTypeActions->addAction(action);
-//    action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_TAG);
-//    action->setData(SortingByTag);
-//    m_sortTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZDOCUMENT_SORTBY_SIZE);
     action->setData(SortingBySize);
     m_sortTypeActions->addAction(action);
@@ -997,499 +992,122 @@ void MainWindow::initDockMenu()
 #endif
 }
 
-void MainWindow::on_editor_statusChanged()
+void MainWindow::on_editor_statusChanged(const QString& currentStyle)
 {
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* editor = m_doc->web();
-#else
-    CWizDocumentWebView* editor = getActiveEditor();
-#endif
-
-    if (!editor->isInited() || !editor->hasFocus()) {
-        m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(false);
-
-        m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-
-        return;
-    }
-
-    m_actions->actionFromName(WIZACTION_EDITOR_FIND_REPLACE)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_EDITOR_SELECT_ALL)->setEnabled(true);
-
-    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_PDF)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_GLOBAL_SAVE_AS_HTML)->setEnabled(true);
-    m_actions->actionFromName(WIZACTION_GLOBAL_PRINT)->setEnabled(true);
-
-#ifdef USEWEBENGINE
-    editor->editorCommandQueryCommandState("undo", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("redo", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
-        }
-    });
-
-    if (!editor->isEditing()) {
-        m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
-        m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-
-        if (!editor->page()->selectedText().isEmpty()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-        }
-    } else {
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(true);
-        m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(true);
-
-        if (!editor->page()->selectedText().isEmpty()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(true);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-        }
-    }
-
-    editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("indent", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("outdent", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("inserttable", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("link", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("date", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("time", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("removeformat", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("plaintext", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("checklist", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertCode", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-        }
-    });
-
-    editor->editorCommandQueryCommandState("insertImage", [this](const QVariant& returnValue) {
-        if (-1 == returnValue.toInt()) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-        }
-    });
-
-#else
-        if (editor->editorCommandQueryCommandState("undo") == -1) {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_UNDO)->setEnabled(true);
-        }
-
-        if (editor->editorCommandQueryCommandState("redo") == -1) {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_REDO)->setEnabled(true);
-        }
-
-        if (!editor->isEditing()) {
-            m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-
-            if (!editor->page()->selectedHtml().isEmpty()) {
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-            } else {
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-            }
-        } else {
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_EDITOR_PASTE_PLAIN)->setEnabled(true);
-
-            if (!editor->page()->selectedHtml().isEmpty()) {
-                m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(true);
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(true);
-                m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(true);
-            } else {
-                m_actions->actionFromName(WIZACTION_EDITOR_CUT)->setEnabled(false);
-                m_actions->actionFromName(WIZACTION_EDITOR_COPY)->setEnabled(false);
-                m_actions->actionFromName(WIZACTION_EDITOR_DELETE)->setEnabled(false);
-            }
-        }
-
-        if (-1 == editor->editorCommandQueryCommandState("bold")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_BOLD)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("italic")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ITALIC)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("underline")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNDERLINE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("strikethrough")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_STRIKETHROUGH)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertUnorderedList")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_UNORDEREDLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertOrderedList")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_ORDEREDLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("justify")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(false);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYLEFT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYRIGHT)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYCENTER)->setEnabled(true);
-            m_actions->actionFromName(WIZACTION_FORMAT_JUSTIFYJUSTIFY)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("indent")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INDENT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("outdent")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_OUTDENT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("inserttable")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TABLE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("link")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_LINK)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("horizontal")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_HORIZONTAL)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("date")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_DATE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("time")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_TIME)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("removeformat")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_REMOVE_FORMAT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("plaintext")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_PLAINTEXT)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("source")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_VIEW_SOURCE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("checklist")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CHECKLIST)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertCode")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_CODE)->setEnabled(true);
-        }
-
-        if (-1 ==editor->editorCommandQueryCommandState("insertImage")) {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(false);
-        } else {
-            m_actions->actionFromName(WIZACTION_FORMAT_INSERT_IMAGE)->setEnabled(true);
-        }
-#endif
-
 }
 
-void MainWindow::createDocumentByTemplate(const QString& strFile)
+void MainWindow::createNoteByTemplate(const TemplateData& tmplData)
 {
-    initVariableBeforCreateNote();
-    WIZDOCUMENTDATA data;
-    if (!m_category->createDocumentByTemplate(data, strFile))
+    QFileInfo info(tmplData.strFileName);
+    if (info.exists())
     {
-        return;
+        createNoteByTemplateCore(tmplData);
+    }
+    else
+    {
+        qDebug() << "template file not exists : " << tmplData.strFileName;
+        //
+        WizExecutingActionDialog::executeAction(tr("Downloading template..."), WIZ_THREAD_DEFAULT, [=]{
+            //
+            bool ret = CWizNoteManager::downloadTemplateBlocked(tmplData);
+            //
+            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+                if (ret)
+                {
+                    createNoteByTemplateCore(tmplData);
+                }
+                else
+                {
+                    QMessageBox::warning(this, tr("Error"), tr("Can't download template from server. Please try again later."));
+                }
+            });
+        });
+    }
+}
+void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
+{
+    QFileInfo info(tmplData.strFileName);
+    //
+    initVariableBeforCreateNote();
+    //
+    QString kbGUID;
+    WIZTAGDATA currTag;
+    QString currLocation;
+    m_category->getAvailableNewNoteTagAndLocation(kbGUID, currTag, currLocation);
+    //
+    if (currLocation.isEmpty())
+    {
+        currLocation = m_dbMgr.db(kbGUID).GetDefaultNoteLocation();
+    }
+    //
+    WIZDOCUMENTDATA data;
+    data.strKbGUID = kbGUID;
+    //
+    if (kbGUID.isEmpty())   //personal
+    {
+        data.strTitle = tmplData.strTitle.isEmpty() ? info.completeBaseName() : tmplData.strTitle;
+        data.strLocation = tmplData.strFolder;
+
+        if (data.strLocation.isEmpty())
+        {
+            data.strLocation = currLocation;
+        }
+        else
+        {
+            data.strLocation.replace("{year}", QDate::currentDate().toString("yyyy"));
+            data.strLocation.replace("{month}", QDate::currentDate().toString("MM"));
+            //
+            if (CWizCategoryViewFolderItem* folder = m_category->findFolder(data.strLocation, true, false))
+            {
+                if (m_category->currentItem() != folder)
+                {
+                    m_category->setCurrentItem(folder);
+                }
+            }
+        }
+        //  Journal {date}({week})
+        if (tmplData.strTitle.isEmpty())
+        {
+            data.strTitle = tmplData.strName;
+        }
+        else
+        {
+            COleDateTime dt;
+            data.strTitle.replace("{date}", dt.toLocalLongDate());
+            data.strTitle.replace("{date_time}", dt.toLocalLongDate() + " " + dt.toString("hh:mm:ss"));
+            QLocale local;
+            data.strTitle.replace("{week}", local.toString(dt.toLocalTime(), "ddd"));
+        }
+    }
+    else
+    {
+        data.strLocation = currLocation;
+    }
+    //
+    CWizNoteManager noteManager(m_dbMgr);
+    noteManager.createNoteByTemplate(data, currTag, tmplData.strFileName);
+    //
+    setFocusForNewNote(data);
+    //
+    locateDocument(data);
+    //
+    CWizDocumentDataArray arrayDocument;
+    m_documents->getSelectedDocuments(arrayDocument);
+    if (arrayDocument.size() == 1 && arrayDocument[0].strGUID == data.strGUID)
+    {
+        //already selected
+    }
+    else
+    {
+        viewDocument(data, true);
     }
 
-    setFocusForNewNote(data);
+    quickSyncKb(kbGUID);
 }
 
 void MainWindow::on_mobileFileRecived(const QString& strFile)
 {
-    //目前只支持在有编辑状态的笔记时插入图片，其他时候删除掉接受到的图片
-    /*
-    QMessageBox msgBox;
-    msgBox.setWindowTitle(tr("Info"));
-    msgBox.setText(tr("Mobile file received : ") + strFile);
-    QAbstractButton *ignoreButton = msgBox.addButton(tr("Do nothing"), QMessageBox::ActionRole);
-    QAbstractButton *delButton = msgBox.addButton(tr("Delete file"), QMessageBox::ActionRole);
-    QAbstractButton *newNoteButton = msgBox.addButton(tr("Create new note whith the file"), QMessageBox::ActionRole);
-    QAbstractButton *insertButton = msgBox.addButton(tr("Insert into current note"), QMessageBox::ActionRole);
-
-    QImageReader imageReader(strFile);
-    bool isImageFile = imageReader.canRead();
-
-    msgBox.exec();
-   // Q_UNUSED(ignoreButton);
-    if (msgBox.clickedButton() == delButton)
-    {
-        QFile::remove(strFile);
-    }
-    else if (msgBox.clickedButton() == newNoteButton)
-    {
-        if (isImageFile)
-        {
-            createNoteWithImage(strFile);
-        }
-        else
-        {
-            createNoteWithAttachments(QStringList(strFile));
-        }
-    }
-    else if (msgBox.clickedButton() == insertButton && m_doc->web()->isEditing())
-    {
-        if (isImageFile)
-        {
-            QString strHtml;
-            if (WizImage2Html(strFile, strHtml))
-            {
-                m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
-            }
-        }
-        else
-        {
-            const WIZDOCUMENTDATA& doc = m_doc->note();
-            CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            WIZDOCUMENTATTACHMENTDATA attach;
-            db.AddAttachment(doc, strFile, attach);
-        }
-    }
-    */
     if (m_doc->web()->isEditing())
     {
         QImageReader imageReader(strFile);
@@ -1498,7 +1116,7 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
         if (isImageFile)
         {
             QString strHtml;
-            if (WizImage2Html(strFile, strHtml))
+            if (WizImage2Html(strFile, strHtml, m_doc->web()->noteResourcesPath()))
             {
                 m_doc->web()->editorCommandExecuteInsertHtml(strHtml, false);
             }
@@ -1520,12 +1138,33 @@ void MainWindow::on_mobileFileRecived(const QString& strFile)
 void MainWindow::on_shareDocumentByLink_request(const QString& strKbGUID, const QString& strGUID)
 {
     CWizAccountManager account(m_dbMgr);
-    if (!account.isVip())
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    if (db.IsGroup())
+    {
+        if (db.IsPersonalGroup())
+            return;
+
+        if (account.isPaidGroup(strKbGUID))
+        {
+            if (!db.IsGroupSuper())
+            {
+                CWizMessageBox::information(this, tr("Info"), tr("Your permission is insufficient, super member or group administrators can share notes."));
+                return;
+            }
+        }
+        else
+        {
+            CWizMessageBox::information(this, tr("Info"), tr("You are using the free version of the service, upgrade now, you can share notes."));
+            return;
+        }
+    }
+    else if (!account.isVip())
     {
         openVipPageInWebBrowser();
         return;
     }
 
+    //
     WIZDOCUMENTDATA doc;
     if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc))
     {
@@ -1557,15 +1196,7 @@ void MainWindow::openVipPageInWebBrowser()
 
     if (msg.clickedButton() == actionBuy)
     {
-#ifndef BUILD4APPSTORE
-        QString strToken = WizService::Token::token();
-        QString strUrl = WizService::WizApiEntry::standardCommandUrl("vip", strToken);
-        QDesktopServices::openUrl(QUrl(strUrl));
-#else
-    CWizIAPDialog* dlg = iapDialog();
-    dlg->loadIAPPage();
-    dlg->exec();
-#endif
+        showVipUpgradePage();
     }
 }
 
@@ -1737,6 +1368,111 @@ void MainWindow::removeWindowsMenuItem(QString guid)
     resetDockMenu();
 }
 
+void MainWindow::showVipUpgradePage()
+{
+#ifndef BUILD4APPSTORE
+        WizExecuteOnThread(WIZ_THREAD_NETWORK, [](){
+            QString strToken = Token::token();
+            QString strUrl = WizApiEntry::standardCommandUrl("vip", strToken);
+            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                QDesktopServices::openUrl(QUrl(strUrl));
+            });
+        });
+#else
+    CWizIAPDialog* dlg = iapDialog();
+    dlg->loadIAPPage();
+    dlg->exec();
+#endif
+}
+
+void MainWindow::showTemplateIAPDlg(const TemplateData& tmpl)
+{
+#ifdef BUILD4APPSTORE
+    if (!m_templateIAPDialog)
+    {
+        m_templateIAPDialog = new CWizTemplatePurchaseDialog(this);
+        m_templateIAPDialog->setModal(true);
+        connect(m_templateIAPDialog, &CWizTemplatePurchaseDialog::purchaseSuccess, [=](){
+            CWizNoteManager manager(m_dbMgr);
+            manager.downloadTemplatePurchaseRecord();
+        });
+    }
+    m_templateIAPDialog->showTemplateInfo(tmpl.id, tmpl.strName, tmpl.strThumbUrl);
+    m_templateIAPDialog->open();
+#endif
+}
+
+void MainWindow::prepareNewNoteMenu()
+{
+    if (!m_newNoteExtraMenu)
+    {
+        m_newNoteExtraMenu = new QMenu(this);
+
+        QList<TemplateData> tmplList;
+        getTemplateListFroNewNoteMenu(tmplList);
+        for (TemplateData tmpl : tmplList)
+        {
+            if (tmpl.strName == "-")
+            {
+                m_newNoteExtraMenu->addSeparator();
+            }
+            else
+            {
+                QAction* action = m_newNoteExtraMenu->addAction(tmpl.strName, this, SLOT(on_newNoteByExtraMenu_request()));
+                action->setData(tmpl.toQVariant());
+            }
+        }
+    }
+}
+
+#ifdef Q_OS_MAC
+void MainWindow::on_newNoteButton_extraMenuRequest()
+{
+    prepareNewNoteMenu();
+    //
+    QRect rc = m_newNoteButton->geometry();
+    QPoint pt = rc.bottomLeft();
+    pt = mapToGlobal(pt);
+    //
+    m_newNoteExtraMenu->popup(QPoint(pt.x(), pt.y() - 92));
+}
+#endif
+
+void MainWindow::on_newNoteByExtraMenu_request()
+{
+    if (QAction* action = qobject_cast<QAction*>(sender()))
+    {
+        TemplateData tmpl;
+        tmpl.fromQVariant(action->data());
+        if (isTemplateUsable(tmpl, m_dbMgr))
+        {
+            createNoteByTemplate(tmpl);
+        }
+        else
+        {
+            WizTemplateUpgradeResult result = showTemplateUnusableDialog(this);
+            switch (result) {
+            case UpgradeResult_None:
+                return;
+                break;
+            case UpgradeResult_UpgradeVip:
+                showVipUpgradePage();
+                return;
+                break;
+            case UpgradeResult_PurchaseTemplate:
+            {
+                showTemplateIAPDlg(tmpl);
+                return;
+            }
+                break;
+            default:
+                Q_ASSERT(0);
+                break;
+            }
+        }
+    }
+}
+
 void MainWindow::windowActived()
 {
     static  bool isBizUser = m_dbMgr.db().meta("BIZS", "COUNT").toInt() > 0;
@@ -1753,7 +1489,7 @@ void MainWindow::windowActived()
  */
 void MainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
 {
-    m_doc->web()->onEditorLinkClicked(strUrl);
+    QDesktopServices::openUrl(strUrl);
 }
 
 /** web页面调用该方法，token失效时重新获取token
@@ -1762,10 +1498,10 @@ void MainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
  */
 void MainWindow::GetToken(const QString& strFunctionName)
 {
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     QString strExec = strFunctionName + QString("('%1')").arg(strToken);
     qDebug() << "cpp get token callled : " << strExec;
-    m_doc->commentView()->page()->mainFrame()->evaluateJavaScript(strExec);
+    m_doc->commentView()->page()->runJavaScript(strExec);
 }
 
 /**   web页面调用该方法，将页面的结果返回
@@ -1796,6 +1532,11 @@ void MainWindow::AppStoreIAP()
         dlg->exec();
     }
 #endif
+}
+
+void MainWindow::copyLink(const QString& link)
+{
+    Utils::Misc::copyTextToClipboard(link);
 }
 
 #ifndef Q_OS_MAC
@@ -1870,6 +1611,8 @@ void MainWindow::initToolBar()
     #ifdef USECOCOATOOLBAR
     m_toolBar->showInWindow(this);
 
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK)->setEnabled(false);
+    m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD)->setEnabled(false);
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
@@ -1880,12 +1623,17 @@ void MainWindow::initToolBar()
     m_toolBar->addSearch(tr("Search"), "", isHighPix ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH);
     m_toolBar->addWidget(new CWizMacFixedSpacer(QSize(28, 1), m_toolBar), "", "");
 
-    int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 91 : 101;
+    int buttonWidth = WizIsChineseLanguage(userSettings().locale()) ? 116 : 124;
     //WARNING:不能创建使用toolbar作为父类对象，会造成输入法偏移
-    CWizMacToolBarButtonItem* texturedItem = new CWizMacToolBarButtonItem(tr("New  Note "), 0, 11, buttonWidth, nullptr);
-    connect(texturedItem, SIGNAL(triggered(bool)),
-            m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool))),
-    m_toolBar->addWidget(texturedItem, "", "");
+    QPixmap pixExtraMenu = Utils::StyleHelper::skinResourceFileName("actionNewNoteExtraMenu", true);
+    CWizMacToolBarButtonItem* newNoteItem = new CWizMacToolBarButtonItem(tr("New Note"), pixExtraMenu, buttonWidth, nullptr);
+    connect(newNoteItem, SIGNAL(triggered(bool)),
+            m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT), SIGNAL(triggered(bool)));
+    connect(newNoteItem, SIGNAL(showExtraMenuRequest()), SLOT(on_newNoteButton_extraMenuRequest()));
+
+    m_toolBar->addWidget(newNoteItem, "", "");
+    //
+    m_newNoteButton = newNoteItem;
 
 
     m_toolBar->addStandardItem(CWizMacToolBar::FlexibleSpace);
@@ -1928,7 +1676,7 @@ void MainWindow::initToolBar()
 
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
     m_searchWidget->setWidthHint(280);
     m_toolBar->addWidget(m_searchWidget);
 
@@ -1965,19 +1713,24 @@ void MainWindow::initToolBar()
     m_spacerForToolButtonAdjust = new CWizFixedSpacer(QSize(20, 1), m_toolBar);
     m_toolBar->addWidget(m_spacerForToolButtonAdjust);
 
-    m_searchWidget = new CWizSearchWidget(this);
+    m_searchWidget = new CWizSearchView(this);
 
     m_toolBar->addWidget(m_searchWidget);
 
     m_toolBar->addWidget(new CWizFixedSpacer(QSize(20, 1), m_toolBar));
 
-    CWizButton* buttonNew = new CWizButton(m_toolBar);
-    buttonNew->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT));
+    prepareNewNoteMenu();
+    //
+    QAction* newNoteAction = m_actions->actionFromName(WIZACTION_GLOBAL_NEW_DOCUMENT);
+    //
+    QToolButton* buttonNew = new QToolButton(m_toolBar);
+    buttonNew->setMenu(m_newNoteExtraMenu);
+    buttonNew->setDefaultAction(newNoteAction);//m_newNoteExtraMenu->actionAt(QPoint(0 ,0)));
+    buttonNew->setPopupMode(QToolButton::MenuButtonPopup);
+    //buttonNew->setAction(newNoteAction);
     m_toolBar->addWidget(buttonNew);
-
-
+    //
     m_toolBar->addWidget(new CWizSpacer(m_toolBar));
-
 
     CWizUserInfoWidget* info = new CWizUserInfoWidget(*this, m_toolBar);
     m_toolBar->addWidget(info);
@@ -2104,7 +1857,7 @@ QWidget* MainWindow::createNoteListView()
     m_noteListWidget->setAutoFillBackground(true);
 
     QWidget* noteButtonsContainer = new QWidget(this);
-    noteButtonsContainer->setFixedHeight(30);
+    noteButtonsContainer->setFixedHeight(::WizSmartScaleUI(30));
     QHBoxLayout* layoutButtonContainer = new QHBoxLayout();
     layoutButtonContainer->setContentsMargins(0, 0, 0, 0);
     layoutButtonContainer->setSpacing(0);
@@ -2160,7 +1913,7 @@ QWidget* MainWindow::createNoteListView()
 
     QWidget* wgtRightBorder = new QWidget(this);
     wgtRightBorder->setFixedWidth(13);
-    wgtRightBorder->setFixedHeight(30);
+    wgtRightBorder->setFixedHeight(::WizSmartScaleUI(30));
     wgtRightBorder->setStyleSheet(QString("border-left:1px solid #E7E7E7;"));
     layoutButtonContainer->addWidget(wgtRightBorder);
 
@@ -2202,7 +1955,7 @@ QWidget*MainWindow::createMessageListView()
     titleBarLayout->addWidget(m_msgListTitleBar);
 
     QWidget* placeHoldWgt = new QWidget(this);
-    placeHoldWgt->setFixedSize(13, 30);
+    placeHoldWgt->setFixedSize(13, WizSmartScaleUI(20));
     placeHoldWgt->setStyleSheet("border-left:1px solid #E7E7E7;");
     QHBoxLayout* layout2 = new QHBoxLayout();
     layout2->setContentsMargins(0, 0, 0, 0);
@@ -2228,14 +1981,14 @@ QWidget*MainWindow::client() const
     return m_doc->client();
 }
 
-void MainWindow::showClient(bool visible) const
-{
-    return m_doc->showClient(visible);
-}
-
 CWizDocumentView* MainWindow::documentView() const
 {
     return m_doc;
+}
+
+CWizObjectDownloaderHost* MainWindow::downloaderHost() const
+{
+    return CWizObjectDownloaderHost::instance();
 }
 
 CWizIAPDialog*MainWindow::iapDialog()
@@ -2274,7 +2027,7 @@ CWizIAPDialog*MainWindow::iapDialog()
 
 void MainWindow::on_documents_lastDocumentDeleted()
 {
-    ICore::instance()->emitCloseNoteRequested(m_doc);
+    WizGlobal::instance()->emitCloseNoteRequested(m_doc);
 }
 
 void MainWindow::on_btnMarkDocumentsRead_triggered()
@@ -2346,6 +2099,8 @@ void MainWindow::init()
             SLOT(on_groupDocuments_unreadCount_modified(QString)));
 
     QTimer::singleShot(100, this, SLOT(adjustToolBarLayout()));
+    //
+    QTimer::singleShot(1000 * 3, this, SLOT(on_actionSync_triggered()));
 
     //ESC键退出全屏
     bindESCToQuitFullScreen(this);
@@ -2398,10 +2153,8 @@ void MainWindow::on_syncStarted(bool syncAll)
     }
 }
 
-void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
-{
-    Q_UNUSED(strErrorMsg);
-
+void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
+{    
     m_animateSync->stopPlay();    
 
     //
@@ -2411,25 +2164,15 @@ void MainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg)
         reconnectServer();
         return;
     }
-    else if (QNetworkReply::ProtocolUnknownError == nErrorCode)
-    {
-//        //network avaliable, show message once
-//        static bool showMessageAgain = true;
-//        if (showMessageAgain) {
-//            QMessageBox messageBox(this);
-//            messageBox.setIcon(QMessageBox::Information);
-//            messageBox.setText(tr("Connection is not available, please check your network connection."));
-//            QAbstractButton *btnDontShowAgain =
-//                    messageBox.addButton(tr("Don't show this again"), QMessageBox::ActionRole);
-//            messageBox.addButton(QMessageBox::Ok);
-//            messageBox.exec();
-//            showMessageAgain = messageBox.clickedButton() != btnDontShowAgain;
-//        }
-    }
     else if (S_OK == nErrorCode)
     {
         // set quick download message enable
         m_bQuickDownloadMessageEnable = true;
+    }
+    else if (WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR == nErrorCode && !isBackground)
+    {
+        //当用户的企业付费到期并且有待上传的内容的时候，进行弹框提示
+        CWizMessageBox::information(this, tr("Info"), strErrorMsg);
     }
 
     m_documents->viewport()->update();
@@ -2485,7 +2228,6 @@ void MainWindow::on_actionNewNote_triggered()
     }
 
     setFocusForNewNote(data);
-    m_doc->web()->setEditorEnable(true);
     m_history->addHistory(data);
 }
 
@@ -2494,116 +2236,111 @@ void MainWindow::on_actionNewNoteByTemplate_triggered()
     WizGetAnalyzer().LogAction("newNoteByTemplate");
 
     //通过模板创建笔记
-    CWizDocTemplateDialog dlg;
-    connect(&dlg, SIGNAL(documentTemplateSelected(QString)), SLOT(createDocumentByTemplate(QString)));
+    CWizDocTemplateDialog dlg(m_dbMgr);
+    connect(&dlg, SIGNAL(documentTemplateSelected(TemplateData)), SLOT(createNoteByTemplate(TemplateData)));
+    connect(&dlg, SIGNAL(upgradeVipRequest()), SLOT(showVipUpgradePage()));
     dlg.exec();
 }
 
 void MainWindow::on_actionEditingUndo_triggered()
 {    
-    WizGetAnalyzer().LogAction("MenuBarUndo");
-
-    getActiveEditor()->undo();
+    if (WizCodeEditorDialog::undo())
+        return;
+    //
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Undo);
+    }
+    else
+    {
+        getActiveEditor()->undo();
+    }
 }
 
 void MainWindow::on_actionEditingRedo_triggered()
 {
-    WizGetAnalyzer().LogAction("MenuBarRedo");
-
-    getActiveEditor()->redo();
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Redo);
+    }
+    else
+    {
+        getActiveEditor()->redo();
+    }
 }
 
-#ifdef USEWEBENGINE
 void MainWindow::on_actionEditingCut_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::Cut);
+    if (WizCodeEditorDialog::cut())
+        return;
+    //
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Cut);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Cut);
+    }
 }
 
 void MainWindow::on_actionEditingCopy_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::Copy);
+    if (WizCodeEditorDialog::copy())
+        return;
+    //
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Copy);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Copy);
+    }
 }
 
 void MainWindow::on_actionEditingPaste_triggered()
 {
-    m_doc->web()->setPastePlainTextEnable(false);
-    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
+    if (WizCodeEditorDialog::paste())
+        return;
+    //
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Paste);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::Paste);
+    }
 }
 
 void MainWindow::on_actionEditingPastePlain_triggered()
 {
-    m_doc->web()->setPastePlainTextEnable(true);
-    m_doc->web()->triggerPageAction(QWebEnginePage::Paste);
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::Paste);
+    }
+    else
+    {
+        getActiveEditor()->editorCommandExecutePastePlainText();
+    }
 }
 
 void MainWindow::on_actionEditingSelectAll_triggered()
 {
-    m_doc->web()->triggerPageAction(QWebEnginePage::SelectAll);
+    if (WizCodeEditorDialog::selectAll())
+        return;
+    //
+    if (m_doc->commentView()->hasFocus())
+    {
+        m_doc->commentView()->triggerPageAction(QWebEnginePage::SelectAll);
+    }
+    else
+    {
+        getActiveEditor()->triggerPageAction(QWebEnginePage::SelectAll);
+    }
 }
 
-void MainWindow::on_actionMoveToPageStart_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageUp , Qt::AltModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToPageEnd_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_PageDown , Qt::AltModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToLineStart_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_Home, Qt::NoModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-void MainWindow::on_actionMoveToLineEnd_triggered()
-{
-    QKeyEvent keyPress(QEvent::KeyPress, Qt::Key_End, Qt::NoModifier, QString());
-    m_doc->web()->sendEventToChildWidgets(&keyPress);
-}
-
-#else
-
-void MainWindow::on_actionEditingCut_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarCut");
-
-    getActiveEditor()->triggerPageAction(QWebPage::Cut);
-}
-
-void MainWindow::on_actionEditingCopy_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarCopy");
-
-    getActiveEditor()->triggerPageAction(QWebPage::Copy);
-}
-
-void MainWindow::on_actionEditingPaste_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPaste");
-
-    getActiveEditor()->setPastePlainTextEnable(false);
-    getActiveEditor()->triggerPageAction(QWebPage::Paste);
-}
-
-void MainWindow::on_actionEditingPastePlain_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPastePlain");
-
-    getActiveEditor()->setPastePlainTextEnable(true);
-    getActiveEditor()->triggerPageAction(QWebPage::Paste);
-}
-
-void MainWindow::on_actionEditingSelectAll_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarSelectAll");
-
-    getActiveEditor()->triggerPageAction(QWebPage::SelectAll);
-}
-#endif
 
 void MainWindow::on_actionEditingDelete_triggered()
 {
@@ -2818,12 +2555,6 @@ void MainWindow::on_actionSortByFolder_triggered()
     changeDocumentsSortTypeByAction(action);
 }
 
-void MainWindow::on_actionSortByTag_triggered()
-{
-    QAction* action = qobject_cast<QAction*>(sender());
-    changeDocumentsSortTypeByAction(action);
-}
-
 void MainWindow::on_actionSortBySize_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
@@ -2831,6 +2562,14 @@ void MainWindow::on_actionSortBySize_triggered()
 }
 
 #define MARKDOCUMENTSREADCHECKED       "MarkDocumentsReadedChecked"
+#include <functional>
+
+std::function<void()> tipBindFunction = [](){
+    if (MainWindow* mainWindow = MainWindow::instance())
+    {
+        mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
+    }
+};
 
 void MainWindow::on_categoryUnreadButton_triggered()
 {
@@ -2838,26 +2577,18 @@ void MainWindow::on_categoryUnreadButton_triggered()
     m_labelDocumentsHint->setVisible(true);
 
     bool showTips = userSettings().get(MARKDOCUMENTSREADCHECKED).toInt() == 0;
-    if (showTips)
+    if (showTips && !CWizTipsWidget::isTipsExists(MARKDOCUMENTSREADCHECKED))
     {
-        CWizTipListManager* manager = CWizTipListManager::instance();
-        if (manager->tipsWidgetExists(MARKDOCUMENTSREADCHECKED))
-            return;
-
         CWizTipsWidget* tipWidget = new CWizTipsWidget(MARKDOCUMENTSREADCHECKED, this);
-        connect(m_btnMarkDocumentsReaded, SIGNAL(clicked(bool)), tipWidget, SLOT(onTargetWidgetClicked()));
+        connect(m_btnMarkDocumentsReaded, SIGNAL(clicked(bool)), tipWidget, SLOT(on_targetWidgetClicked()));
         tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
         tipWidget->setText(tr("Mark all as readed"), tr("Mark all documents as readed."));
         tipWidget->setSizeHint(QSize(280, 60));
         tipWidget->setButtonVisible(false);
-        tipWidget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
-            {
-                mainWindow->userSettings().set(MARKDOCUMENTSREADCHECKED, "1");
-            }
-        });
+        tipWidget->bindCloseFunction(tipBindFunction);
         //
-        tipWidget->addToTipListManager(m_btnMarkDocumentsReaded, 0, 2);
+        tipWidget->bindTargetWidget(m_btnMarkDocumentsReaded, 0, 2);
+        tipWidget->on_showRequest();
     }
 }
 
@@ -2910,11 +2641,6 @@ void MainWindow::on_actionMenuFormatInsertUnorderedList_triggered()
     getActiveEditor()->editorCommandExecuteInsertUnorderedList();
 }
 
-void MainWindow::on_actionMenuFormatInsertTable_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarUnorderedList");
-    getActiveEditor()->editorCommandExecuteTableInsert();
-}
 
 void MainWindow::on_actionMenuFormatInsertLink_triggered()
 {
@@ -2964,6 +2690,16 @@ void MainWindow::on_actionMenuFormatInsertTime_triggered()
     getActiveEditor()->editorCommandExecuteInsertTime();
 }
 
+void MainWindow::on_actionMenuFormatInsertTable(int row, int col)
+{
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+        WizGetAnalyzer().LogAction("MenuBarInsertTable");
+        getActiveEditor()->editorCommandExecuteTableInsert(row, col);
+
+    });
+}
+
 void MainWindow::on_actionMenuFormatIndent_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarIndent");
@@ -2980,18 +2716,6 @@ void MainWindow::on_actionMenuFormatRemoveFormat_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarRemoveFormat");
     getActiveEditor()->editorCommandExecuteRemoveFormat();
-}
-
-void MainWindow::on_actionMenuFormatPlainText_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarPlainText");
-    getActiveEditor()->editorCommandExecutePlainText();
-}
-
-void MainWindow::on_actionMenuEditorViewSource_triggered()
-{
-    WizGetAnalyzer().LogAction("MenuBarViewSource");
-    getActiveEditor()->editorCommandExecuteViewSource();
 }
 
 void MainWindow::on_actionMenuFormatInsertCheckList_triggered()
@@ -3048,14 +2772,6 @@ void MainWindow::on_actionAbout_triggered()
     dialog.exec();
 }
 
-void MainWindow::on_actionDeveloper_triggered()
-{
-    m_doc->web()->settings()->globalSettings()->setAttribute(QWebSettings::DeveloperExtrasEnabled, true);
-
-    WizGetAnalyzer().LogAction("MenuBarDeveloperMode");
-}
-
-
 void MainWindow::on_actionPreference_triggered()
 {
     WizGetAnalyzer().LogAction("MenuBarPreference");
@@ -3069,7 +2785,7 @@ void MainWindow::on_actionPreference_triggered()
 
 void MainWindow::on_actionFeedback_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("feedback");
+    QString strUrl = WizApiEntry::standardCommandUrl("feedback");
 
     if (strUrl.isEmpty())
         return;
@@ -3086,7 +2802,7 @@ void MainWindow::on_actionFeedback_triggered()
 
 void MainWindow::on_actionSupport_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("support");
+    QString strUrl = WizApiEntry::standardCommandUrl("support");
 
     if (strUrl.isEmpty())
         return;
@@ -3098,7 +2814,7 @@ void MainWindow::on_actionSupport_triggered()
 
 void MainWindow::on_actionManual_triggered()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
 
     if (strUrl.isEmpty())
         return;
@@ -3196,12 +2912,6 @@ void MainWindow::on_actionImportFile_triggered()
         m_category->on_action_importFile();
     }
     WizGetAnalyzer().LogAction("MenuBarImportFile");
-}
-
-void MainWindow::on_actionPrint_triggered()
-{
-    getActiveEditor()->printDocument();
-    WizGetAnalyzer().LogAction("MenuBarPrint");
 }
 
 void MainWindow::on_actionPrintMargin_triggered()
@@ -3479,16 +3189,12 @@ void MainWindow::on_options_settingsChanged(WizOptionsType type)
         QList<CWizSingleDocumentViewer*> singleViewrList = viewerMap.values();
         for (CWizSingleDocumentViewer* viewer : singleViewrList)
         {
-            viewer->docView()->web()->resetDefaultCss();
             viewer->docView()->web()->editorResetFont();
         }
     }
         break;
     case wizoptionsFolders:
         m_category->sortItems(0, Qt::AscendingOrder);
-        break;
-    case wizoptionsMarkdown:
-        m_doc->web()->resetMarkdownCssPath();
         break;
     default:
         break;
@@ -3571,8 +3277,15 @@ void MainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
     }
 
     resetPermission(data.strKbGUID, data.strOwner);
+    //
+    bool forceEditing = false;
+    if (data.strGUID == m_documentForEditing.strGUID)
+    {
+        forceEditing = true;
+        m_documentForEditing = WIZDOCUMENTDATA();
+    }
 
-    ICore::emitViewNoteRequested(m_doc, data);
+    WizGlobal::emitViewNoteRequested(m_doc, data, forceEditing);
 
     if (addToHistory) {
         m_history->addHistory(data);
@@ -3647,7 +3360,11 @@ void MainWindow::on_application_messageAvailable(const QString& strMsg)
 void MainWindow::checkWizUpdate()
 {
 #ifndef BUILD4APPSTORE
-    m_upgrade->startCheck();
+    WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+       CWizUpgradeChecker m_upgrade;
+       connect(&m_upgrade, SIGNAL(checkFinished(bool)), SLOT(on_checkUpgrade_finished(bool)));
+       m_upgrade.checkUpgrade();
+    });
 #endif
 }
 
@@ -3725,7 +3442,7 @@ QObject* MainWindow::CreateWizObject(const QString& strObjectID)
         return commonUI;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void MainWindow::SetSavingDocument(bool saving)
@@ -3780,16 +3497,16 @@ void MainWindow::syncAllData()
 void MainWindow::reconnectServer()
 {
     CWizDatabase& db = m_dbMgr.db();
-    WizService::Token::setUserId(db.GetUserId());
+    Token::setUserId(db.GetUserId());
     if (!m_settings->password().isEmpty())
     {
-        WizService::Token::setPasswd(m_settings->password());
+        Token::setPasswd(m_settings->password());
     }
 
     m_sync->clearCurrentToken();
-    connect(WizService::Token::instance(), SIGNAL(tokenAcquired(QString)),
+    connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
-    WizService::Token::requestToken();
+    Token::requestToken();
 }
 
 void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
@@ -3797,7 +3514,7 @@ void MainWindow::setFocusForNewNote(WIZDOCUMENTDATA doc)
     m_documentForEditing = doc;
     m_documents->addAndSelectDocument(doc);
     m_documents->clearFocus();
-    m_doc->setFocus(Qt::MouseFocusReason);
+    m_doc->web()->setFocus(Qt::MouseFocusReason);
     m_doc->web()->editorFocus();
 }
 
@@ -3877,11 +3594,7 @@ void MainWindow::createNoteWithAttachments(const QStringList& strAttachList)
 void MainWindow::createNoteWithText(const QString& strText)
 {
     initVariableBeforCreateNote();
-#if QT_VERSION > 0x050000
     QString strHtml = strText.toHtmlEscaped();
-#else
-    QString strHtml = strText;
-#endif
     QString strTitle = strHtml.left(strHtml.indexOf("\n"));
     if (strTitle.isEmpty())
     {
@@ -3902,32 +3615,9 @@ void MainWindow::createNoteWithText(const QString& strText)
     setFocusForNewNote(data);
 }
 
-void MainWindow::createNoteWithImage(const QString& strImageFile)
-{
-    initVariableBeforCreateNote();
-
-    QString strTitle = Utils::Misc::extractFileTitle(strImageFile);
-    if (strTitle.isEmpty())
-    {
-        strTitle = "New note";
-    }
-
-    QString strHtml;
-    bool bUseCopyFile = true;
-    if (WizImage2Html(strImageFile, strHtml, bUseCopyFile))
-    {
-        WIZDOCUMENTDATA data;
-        if (!m_category->createDocument(data, strHtml, strTitle))
-        {
-            return;
-        }
-        setFocusForNewNote(data);
-    }
-}
-
 void MainWindow::showNewFeatureGuide()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
@@ -3937,8 +3627,10 @@ void MainWindow::showNewFeatureGuide()
 
 void MainWindow::showMobileFileReceiverUserGuide()
 {
-    QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+    QString strUrl = WizApiEntry::standardCommandUrl("link");
+    strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=guidemap_sendimage.html";
+    qInfo() <<"open dialog with url : " << strUrl;
 
     CWizFramelessWebDialog *dlg = new CWizFramelessWebDialog();
     connect(dlg, SIGNAL(doNotShowThisAgain(bool)),
@@ -4037,7 +3729,7 @@ void MainWindow::setMobileFileReceiverEnable(bool bEnable)
         {
             m_mobileFileReceiver->waitForDone();
             delete m_mobileFileReceiver;
-            m_mobileFileReceiver = 0;
+            m_mobileFileReceiver = nullptr;
         }
     }
 }
@@ -4214,7 +3906,6 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
         WIZDOCUMENTDATA doc;
         if (db.DocumentFromGUID(pShortcut->guid(), doc))
         {
-            viewDocument(doc, true);
             CWizCategoryViewItemBase* baseItem = m_category->findFolder(doc);
             if (baseItem)
             {
@@ -4226,6 +3917,10 @@ void MainWindow::viewDocumentByShortcut(CWizCategoryViewShortcutItem* pShortcut)
                 m_documents->setAcceptAllSearchItems(true);
                 m_documents->addAndSelectDocument(doc);
                 m_documents->setAcceptAllSearchItems(false);
+            }
+            else
+            {
+                viewDocument(doc, true);
             }
         }
     }
@@ -4299,16 +3994,26 @@ void MainWindow::openAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment,
     {
         qDebug() << "Can not open attachment file : " << strFileName;
     }
-
+    //
+    MainWindow* mainWindow = MainWindow::instance();
+    //
     CWizFileMonitor& monitor = CWizFileMonitor::instance();
     connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
-            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
+            mainWindow, SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
-    QFileInfo info(strFileName);
-    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-                    attachment.strDataMD5, info.lastModified());
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName, attachment.strDataMD5);
 }
+
+void MainWindow::onAttachmentModified(QString strKbGUID, QString strGUID, QString strFileName,
+                          QString strMD5, QDateTime dtLastModified)
+{
+    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    //
+    db.onAttachmentModified(strKbGUID, strGUID, strFileName, strMD5, dtLastModified);
+    //
+    quickSyncKb(strKbGUID);
+}
+
 
 void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
@@ -4316,11 +4021,13 @@ void MainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachment)
     dlg->setProgress(100,0);
     dlg->setActionString(tr("Downloading attachment file  %1 ...").arg(attachment.strName));
     dlg->setWindowTitle(tr("Downloading"));
-    connect(m_objectDownloaderHost, SIGNAL(downloadProgress(QString,int,int)),
+
+    CWizObjectDownloaderHost* downloader = CWizObjectDownloaderHost::instance();
+    connect(downloader, SIGNAL(downloadProgress(QString,int,int)),
             dlg, SLOT(setProgress(QString,int,int)));
-    connect(m_objectDownloaderHost, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
+    connect(downloader, SIGNAL(downloadDone(WIZOBJECTDATA,bool)),
             dlg, SLOT(accept()));
-    m_objectDownloaderHost->downloadData(attachment);
+    downloader->downloadData(attachment);
     dlg->exec();
 }
 

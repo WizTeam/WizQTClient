@@ -1,35 +1,36 @@
 #include "wizShareLinkDialog.h"
 #include "sync/token.h"
 #include "utils/pathresolve.h"
+#include "utils/misc.h"
 #include "share/wizsettings.h"
 #include <QVBoxLayout>
-#include <QWebFrame>
+#include <QWebEngineView>
+#include <QWebEnginePage>
+#include <QWebEngineSettings>
 #include <QTimer>
 #include <QMouseEvent>
 #include <QDesktopServices>
-#include <QApplication>
-#include <QClipboard>
-#include <QMimeData>
 #include <QMessageBox>
 #include <QDebug>
+#include "share/wizwebengineview.h"
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 
 CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
     , m_settings(settings)
-    , m_view(new QWebView(this))
+    , m_view(new WizWebEngineView(this))
 {
     setWindowFlags(Qt::CustomizeWindowHint);
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(m_view);
 
-    m_view->settings()->setAttribute(QWebSettings::LocalStorageEnabled, true);
-    m_view->settings()->setAttribute(QWebSettings::LocalStorageDatabaseEnabled, true);
-    m_view->settings()->setAttribute(QWebSettings::LocalContentCanAccessRemoteUrls, true);
-    connect(m_view->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onJavaScriptWindowObject()));
+    m_view->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
+    m_view->settings()->setAttribute(QWebEngineSettings::LocalContentCanAccessRemoteUrls, true);
+    //
+    m_view->addToJavaScriptWindowObject("external", this);
+    //m_view->addToJavaScriptWindowObject("customObject", this);
 
     m_animation = new QPropertyAnimation(this, "size", this);
 }
@@ -66,9 +67,12 @@ void CWizShareLinkDialog::writeToLog(const QString& strLog)
 
 void CWizShareLinkDialog::getToken()
 {
-    QString strToken = WizService::Token::token();
-    m_view->page()->mainFrame()->evaluateJavaScript(QString("setToken('%1')").arg(strToken));
-    emit tokenObtained();
+    QString strToken = Token::token();
+    m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken), [=](const QVariant& vRet){
+
+        emit tokenObtained();
+
+    });
 }
 
 QString CWizShareLinkDialog::getKbGuid()
@@ -120,13 +124,12 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
         return;
     }
 
-    QClipboard* clip = QApplication::clipboard();
-    QMimeData* data = new QMimeData();
-    data->setHtml(link);
-    data->setText(link);
-    clip->setMimeData(data);
+    Utils::Misc::copyTextToClipboard(link);
 
-    m_view->page()->mainFrame()->evaluateJavaScript(callBack);
+    if (callBack.isEmpty())
+        return;
+
+    m_view->page()->runJavaScript(callBack);
 }
 
 QString CWizShareLinkDialog::getShareLinkFirstTips()
@@ -144,11 +147,17 @@ QString CWizShareLinkDialog::getLocalLanguage()
     return m_settings.locale();
 }
 
-QString CWizShareLinkDialog::formateISO8601String(const QString& value)
+void CWizShareLinkDialog::setFormateISO8601StringParam(const QString& param)
 {
-    QDateTime date = QDateTime::fromString(value, Qt::ISODate);
+    m_formateISO8601StringParam = param;
+    emit formateISO8601StringChanged();
+}
+
+QString CWizShareLinkDialog::formateISO8601String()
+{
+    QDateTime date = QDateTime::fromString(m_formateISO8601StringParam, Qt::ISODate);
     if (!date.isValid() || date.isNull())
-        return value;
+        return m_formateISO8601StringParam;
 
     return date.toString(Qt::ISODate);
 }
@@ -160,8 +169,4 @@ void CWizShareLinkDialog::loadHtml()
     m_view->load(url);
 }
 
-void CWizShareLinkDialog::onJavaScriptWindowObject()
-{
-    m_view->page()->mainFrame()->addToJavaScriptWindowObject("external", this);
-    m_view->page()->mainFrame()->addToJavaScriptWindowObject("customObject", this);
-}
+

@@ -466,7 +466,7 @@ CWizSearchParamItem::CWizSearchParamItem(const QString& text, QListWidget* view,
     m_pix = QPixmap(::WizGetSkinResourceFileName(strThemeName, "listItem_delete"));
 }
 
-void CWizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();
 

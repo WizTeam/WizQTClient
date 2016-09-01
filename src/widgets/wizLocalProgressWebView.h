@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-class QWebView;
+class WizWebEngineView;
 class QMovie;
 class QLabel;
 
@@ -14,12 +14,7 @@ public:
     explicit CWizLocalProgressWebView(QWidget *parent = 0);
     ~CWizLocalProgressWebView();
 
-    QWebView* web();
-    QMovie* movie();
-    QLabel* labelProgress();
-
-    void showLocalProgress();
-    void hideLocalProgress();
+    WizWebEngineView* web();
 
 signals:
     void widgetStatusChanged();
@@ -32,9 +27,7 @@ protected:
     void showEvent(QShowEvent* ev);
 
 private:
-    QWebView* m_web;
-    QMovie* m_movie;
-    QLabel* m_labelProgress;
+    WizWebEngineView* m_web;
 };
 
 #endif // CWIZLOCALPROGRESSWEBVIEW_H

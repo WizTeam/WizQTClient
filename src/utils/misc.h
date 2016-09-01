@@ -41,9 +41,15 @@ public:
     static void splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody);
 
     //
+    static void copyTextToClipboard(const QString& text);
+
+    //
     static bool isChinese();
     static bool isSimpChinese();
     static bool isTraditionChinese();
+
+    //
+    static bool localeAwareCompare(const QString &s1, const QString &s2);
 
     static int getVersionCode();
 };

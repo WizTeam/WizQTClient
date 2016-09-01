@@ -10,7 +10,6 @@
  *  为防止快速切换笔记时创建大量评论数目查询带来的问题，获取评论数目的请求会延迟执行
  */
 
-namespace Core {
 
 class CWizCommentManager : public QObject
 {
@@ -47,5 +46,39 @@ private:
     void pickData(CountQueryData& data);
 };
 
-}
+class CWizCommentQuerier : public QObject
+{
+    Q_OBJECT
+public:
+    enum QueryType
+    {
+        QueryNone,
+        QueryUrl,
+        QueryCount,
+        QueryUrlAndCount
+    };
+
+    CWizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject*parent = 0);
+
+    void run();
+
+signals:
+    void commentUrlAcquired(const QString& GUID, const QString& url);
+    void commentCountAcquired(const QString& GUID, int count);
+
+private:
+    void setCommentsUrl(const QString& url);
+    void setCommentsCount(int count);
+
+    void errorOccurred();
+
+    void parseReplyData(const QString& reply);
+
+
+private:
+    QString m_kbGUID;
+    QString m_GUID;
+    QueryType m_type;
+};
+
 #endif // CWIZCOMMENTDOWNLOADER_H

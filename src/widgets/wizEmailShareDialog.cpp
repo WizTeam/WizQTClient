@@ -7,11 +7,6 @@
 #include <QTextCodec>
 #include <QPixmap>
 #include <QVBoxLayout>
-#if QT_VERSION > 0x050000
-#include <QtConcurrent>
-#else
-#include <QtConcurrentRun>
-#endif
 #include <QDebug>
 
 #include "share/wizMessageBox.h"
@@ -24,6 +19,9 @@
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
 
+#define AUTO_INSERT_COMMENT_TO_NOTE  "EmailAutoInsertComment"
+#define Signature_TEXT          "EmailSignatureText"
+
 enum returnCode {
     codeOK = 200,                   //:ok,
     codeErrorParam = 322,      //:参数错误，
@@ -35,13 +33,14 @@ enum returnCode {
     codeErrorServer = 500           //:服务器错误
 };
 
-CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent) :
-    m_app(app),
-    QDialog(parent),
-    ui(new Ui::CWizEmailShareDialog)
+CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent)
+    : QDialog(parent)
+    , ui(new Ui::CWizEmailShareDialog)
+    , m_app(app)
+    , m_net(nullptr)
 {
     ui->setupUi(this);
-    ui->checkBox_saveNotes->setVisible(false);
+//    ui->checkBox_saveNotes->setVisible(false);
     QPixmap pix(Utils::StyleHelper::skinResourceFileName("send_email"));
     QIcon icon(Utils::StyleHelper::skinResourceFileName("send_email"));
     ui->toolButton_send->setIcon(icon);
@@ -57,6 +56,16 @@ CWizEmailShareDialog::CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent
     layout->addWidget(m_contactList);
     connect(m_contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_contactsListItemClicked(QListWidgetItem*)));
+
+    //
+    QString stext = m_app.userSettings().get(Signature_TEXT);
+    if (!stext.isEmpty())
+    {
+        ui->textEdit_notes->setPlainText("\n\n"+stext);
+    }
+
+    bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    ui->checkBox_saveNotes->setChecked(autoInsert);
 }
 
 CWizEmailShareDialog::~CWizEmailShareDialog()
@@ -71,6 +80,24 @@ void CWizEmailShareDialog::setNote(const WIZDOCUMENTDATA& note, const QString& s
     ui->lineEdit_to->setText(sendTo);
     ui->comboBox_replyTo->insertItem(0, m_app.userSettings().userId());
     ui->comboBox_replyTo->insertItem(1, m_app.userSettings().myWizMail());
+    if (m_app.databaseManager().db(note.strKbGUID).IsGroup())
+    {
+        WIZGROUPDATA group;
+        m_app.databaseManager().db().GetGroupData(note.strKbGUID, group);
+        qDebug() << "group my wiz : strkbguid " <<  note.strKbGUID << group.strMyWiz;
+        ui->comboBox_replyTo->insertItem(0, group.strMyWiz);
+        ui->comboBox_replyTo->setCurrentIndex(0);
+    }
+}
+
+bool CWizEmailShareDialog::isInsertCommentToNote() const
+{
+    return ui->checkBox_saveNotes->isChecked();
+}
+
+QString CWizEmailShareDialog::getCommentsText() const
+{
+    return QString::fromUtf8(QUrl::toPercentEncoding(ui->textEdit_notes->toPlainText()));
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()
@@ -92,11 +119,11 @@ QString CWizEmailShareDialog::getExInfo()
 //    note
 //    api_version        4
 
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     QString cc_to_self = ui->checkBox_sendMeCopy->isChecked() ? "true" : "false";
     QString result = "?kb_guid=" + m_note.strKbGUID + "&document_guid=" + m_note.strGUID + "&token=" + strToken
             + "&mail_to=" + ui->lineEdit_to->text() + "&subject=" + ui->lineEdit_subject->text() + "&cc_to_self=" + cc_to_self
-            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + ui->textEdit_notes->toPlainText()
+            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + getCommentsText()
             + "&api_version=4";
 
     return result;
@@ -107,6 +134,10 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
     switch (nCode) {
     case codeOK:
         ui->labelInfo->setText(tr("Send success"));
+        if (isInsertCommentToNote())
+        {
+            emit insertCommentToNoteRequest(m_note.strGUID, getCommentsText());
+        }
         accept();
         break;
     case codeErrorParam:
@@ -116,12 +147,10 @@ void CWizEmailShareDialog::on_mailShare_finished(int nCode, const QString& retur
     case codeErrorEmail:
     case codeErrorFrequent:
     case codeErrorServer:
-        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                  Q_ARG(QString, returnMessage));
+        on_networkError(returnMessage);
         break;
     default:
-        QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                  Q_ARG(QString, tr("Unkown error.")));
+        on_networkError(tr("Unkown error."));
         break;
     }
 }
@@ -131,12 +160,12 @@ void CWizEmailShareDialog::processReturnMessage(const QString& returnMessage, in
     rapidjson::Document d;
     d.Parse<0>(returnMessage.toUtf8().constData());
 
-    if (d.FindMember("error_code")) {
+    if (d.HasMember("error_code")) {
         qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
         return;
     }
 
-    if (d.FindMember("return_code")) {
+    if (d.HasMember("return_code")) {
         nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode == 200) {
             qDebug() <<"[EmailShar]:send email successed!";
@@ -176,44 +205,20 @@ void CWizEmailShareDialog::updateContactList()
 
 void CWizEmailShareDialog::sendEmails()
 {
-//    QMessageBox msgBox(this);
-//    msgBox.setText(tr("Sending..."));
-//    msgBox.setWindowTitle(tr("Info"));
-
     ui->labelInfo->setText(tr("Sending..."));
 
-    QtConcurrent::run([this](){
-        QString strToken = WizService::Token::token();
-        QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
-        QString strExInfo = getExInfo();
-        QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    QString strToken = Token::token();
+    QString strKS = CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+    QString strExInfo = getExInfo();
+    QString strUrl = CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    qDebug() << "share url : " << strUrl;
 
-        qDebug() << "share url : " << strUrl;
-
-        QEventLoop loop;
-        QNetworkAccessManager net;
-        QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
-
-        connect(reply, SIGNAL(finished()), &loop, SLOT(quit()));
-        loop.exec();
-
-        if (reply->error() != QNetworkReply::NoError) {
-            QMetaObject::invokeMethod(this, "on_networkError", Qt::QueuedConnection,
-                                      Q_ARG(QString, reply->errorString()));
-            reply->deleteLater();
-            return;
-        }
-
-        QString strReply = QString::fromUtf8(reply->readAll());
-        reply->deleteLater();
-
-        int nCode;
-        QString returnMessage;
-        processReturnMessage(strReply, nCode, returnMessage);
-
-        QMetaObject::invokeMethod(this, "on_mailShare_finished", Qt::QueuedConnection,
-                                  Q_ARG(int, nCode), Q_ARG(QString, returnMessage));
-    });
+    if(!m_net)
+    {
+        m_net = new QNetworkAccessManager(this);
+        connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(on_networkFinished(QNetworkReply*)));
+    }
+    m_net->get(QNetworkRequest(strUrl));
 }
 
 void CWizEmailShareDialog::on_toolButton_contacts_clicked()
@@ -235,7 +240,79 @@ void CWizEmailShareDialog::on_contactsListItemClicked(QListWidgetItem *item)
     ui->lineEdit_to->setText(strTo);
 }
 
+void CWizEmailShareDialog::on_networkFinished(QNetworkReply* reply)
+{
+    if (reply->error() != QNetworkReply::NoError)
+    {
+        on_networkError(reply->errorString());
+    }
+    else
+    {
+        QString strReply = QString::fromUtf8(reply->readAll());
+
+        int nCode;
+        QString returnMessage;
+        processReturnMessage(strReply, nCode, returnMessage);
+
+        on_mailShare_finished(nCode, returnMessage);
+    }
+
+    reply->deleteLater();
+}
+
 void CWizEmailShareDialog::on_networkError(const QString& errorMsg)
 {
     CWizMessageBox::information(this, tr("Info"), errorMsg);
+    ui->labelInfo->setText(errorMsg);
+}
+
+void CWizEmailShareDialog::on_toolButton_settings_clicked()
+{
+    QDialog dlg;
+    QVBoxLayout* layout = new QVBoxLayout(&dlg);
+    QCheckBox* checkbox = new QCheckBox(&dlg);
+    checkbox->setText(tr("Auto insert comment to note"));
+    QLabel* label = new QLabel(&dlg);
+    label->setText(tr("Signature:"));
+    QTextEdit* textEdit = new QTextEdit(&dlg);
+    layout->addWidget(checkbox);
+    layout->addWidget(label);
+    layout->addWidget(textEdit);
+
+    bool autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    checkbox->setChecked(autoInsert);
+
+    QString text = m_app.userSettings().get(Signature_TEXT);
+    textEdit->setText(text);
+
+    //
+    connect(textEdit, SIGNAL(textChanged()), SLOT(signature_text_edit_finished()));
+    connect(checkbox, SIGNAL(toggled(bool)), SLOT(autoInsert_state_changed(bool)));
+
+    dlg.exec();
+
+    autoInsert = m_app.userSettings().get(AUTO_INSERT_COMMENT_TO_NOTE).toInt() == 1;
+    if (autoInsert)
+    {
+        ui->checkBox_saveNotes->setChecked(true);
+    }
+    text = m_app.userSettings().get(Signature_TEXT);
+    if (!text.isEmpty() && ui->textEdit_notes->toPlainText().isEmpty())
+    {
+        ui->textEdit_notes->setPlainText("\n\n"+text);
+    }
+}
+
+void CWizEmailShareDialog::signature_text_edit_finished()
+{
+    if (QTextEdit* textEdit = qobject_cast<QTextEdit*>(sender()))
+    {
+        QString text = textEdit->toPlainText();
+        m_app.userSettings().set(Signature_TEXT, text);
+    }
+}
+
+void CWizEmailShareDialog::autoInsert_state_changed(bool checked)
+{
+    m_app.userSettings().set(AUTO_INSERT_COMMENT_TO_NOTE, checked ? "1" : "0");
 }

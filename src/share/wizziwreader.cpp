@@ -101,6 +101,28 @@ ZiwEncryptType CWizZiwReader::encryptType()
     }
 }
 
+bool CWizZiwReader::isEncryptedFile(const QString& fileName)
+{
+    QFile file(fileName);
+
+    if (!file.open(QIODevice::ReadOnly)) {
+        TOLOG("Can't open for reading while load header");
+        return false;
+    }
+
+    QDataStream ds(&file);
+    //
+    char szHeader[WIZZIWFILE_SIGN_LENGTH + 1];
+    memset(szHeader, 0, WIZZIWFILE_SIGN_LENGTH + 1);
+
+    ds.readRawData(szHeader, WIZZIWFILE_SIGN_LENGTH);
+
+    file.close();
+    //
+    return 0 == QString("ZIWR").compare(szHeader, Qt::CaseSensitive);
+}
+
+
 bool CWizZiwReader::isFileAccessible(const QString& encryptedFile)
 {
     if (!setFile(encryptedFile)) {

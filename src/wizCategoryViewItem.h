@@ -61,8 +61,8 @@ public:
     virtual void mousePressed(const QPoint& pos) { Q_UNUSED(pos); }
     virtual void mouseReleased(const QPoint& pos) { Q_UNUSED(pos); }
 
-    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const;
 
     virtual QVariant data(int column, int role) const;
     virtual int getItemHeight(int hintHeight) const;
@@ -112,8 +112,8 @@ public:
     virtual int getSortOrder() const { return m_sortOrder; }
     void reset(const QString& sectionName, int sortOrder);
 
-    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const;
 protected:
     int m_sortOrder;
 };
@@ -130,7 +130,7 @@ public:
     };
 
     CWizCategoryViewMessageItem(CWizExplorerApp& app, const QString& strName, int nFilter);
-    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4 *vopt) const;
+    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItem *vopt) const;
 
     virtual void showContextMenu(CWizCategoryBaseView* pCtrl, QPoint pos)
     { Q_UNUSED(pCtrl); Q_UNUSED(pos); }
@@ -201,7 +201,7 @@ public:
 
     virtual int getItemHeight(int hintHeight) const;
 
-    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItem* vopt) const;
 };
 
 class CWizCategoryViewShortcutItem : public CWizCategoryViewItemBase
@@ -422,7 +422,7 @@ public:
     virtual int getSortOrder() const { return 30; }    
     //
     virtual void getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument);
-    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const;
 
     //
     virtual bool acceptMousePressedInfo() { return true; }
@@ -482,7 +482,7 @@ public:
     { Q_UNUSED(db); Q_UNUSED(arrayDocument); }
     int commandId() const { return m_commandId; }
 
-    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawItemBody(QPainter* p, const QStyleOptionViewItem* vopt) const;
 
 protected:
     int m_commandId;
@@ -514,12 +514,14 @@ public:
     virtual bool acceptDrop(const CWizCategoryViewItemBase* pItem) const;
     virtual bool acceptDrop(const QString& urls) const;
     virtual void drop(const CWizDocumentDataArray& arrayDocument, bool forceCopy = false);
-    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    virtual void drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const;
     void reload(CWizDatabase& db);
     //
     virtual bool acceptMousePressedInfo() { return true; }
     virtual void mousePressed(const QPoint& pos);
-    virtual void mouseReleased(const QPoint& pos);
+    virtual void mouseReleased(const QPoint& pos);    
+    //
+    virtual bool operator<(const QTreeWidgetItem &other) const;
     //
     bool isAdmin(CWizDatabase& db);
     bool isOwner(CWizDatabase& db);

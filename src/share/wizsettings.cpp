@@ -3,6 +3,7 @@
 
 #include "wizdef.h"
 #include <QLocale>
+#include <algorithm>
 
 CWizSettings::CWizSettings(const QString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
@@ -197,7 +198,7 @@ QString CWizUserSettings::get(const QString& section, const QString& strKey) con
         return m_db->GetMetaDef(section, strKey);
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
@@ -259,7 +260,7 @@ QString CWizUserSettings::get(const QString& strKey) const
         return m_db->GetMetaDef(USER_SETTINGS_SECTION, strKey);
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizUserSettings::set(const QString& strKey, const QString& strValue)
@@ -716,6 +717,13 @@ void CWizUserSettings::appendRecentSearch(const QString& search)
         return;
 
     QStringList recentSearches = getRecentSearches();
+    QStringList::const_iterator pos = std::find_if(recentSearches.begin(), recentSearches.end(), [search](QString it){
+        return it == search;
+    });
+
+    if (pos != recentSearches.end())
+        return;
+
     while (recentSearches.count() >= 5)
         recentSearches.pop_front();
 

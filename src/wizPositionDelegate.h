@@ -4,10 +4,12 @@
 #include <QObject>
 #include <QPoint>
 #include <QList>
-#include <QWidget>
 
-class CWizPositionDelegate
+class QWidget;
+
+class CWizPositionDelegate : public QObject
 {
+    Q_OBJECT
 public:
     static CWizPositionDelegate& instance()
     {
@@ -15,27 +17,15 @@ public:
         return _instance;
     }
 
-    void addListener(QWidget* widget)
-    {
-        m_widgetList.append(widget);
-    }
+    void addListener(QWidget* widget);
 
-    void removeListener(QWidget* widget)
-    {
-        m_widgetList.removeOne(widget);
-    }
+    void removeListener(QWidget* widget);
 
-    void mainwindowPositionChanged(const QPoint& oldPos, const QPoint& newPos)
-    {
-        int xOff = newPos.x() - oldPos.x();
-        int yOff = newPos.y() - oldPos.y();
 
-        for (QWidget* widget : m_widgetList)
-        {
-            QPoint pos(widget->pos().x() + xOff, widget->pos().y() + yOff);
-            widget->move(pos);
-        }
-    }
+    void mainwindowPositionChanged(const QPoint& oldPos, const QPoint& newPos);
+
+public slots:
+    void on_WidgetDeleted(QObject * obj);
 
 private:
     explicit CWizPositionDelegate() {}

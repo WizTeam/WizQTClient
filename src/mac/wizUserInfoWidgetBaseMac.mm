@@ -296,7 +296,7 @@ bool isHighPixel()
 
 
 CWizUserInfoWidgetBaseMac::CWizUserInfoWidgetBaseMac(QWidget* parent)
-    : QMacCocoaViewContainer(nil, parent)
+    : CWizCocoaViewContainer()
     , m_menuPopup(NULL)
     , m_textWidth(0)
     , m_textHeight(0)

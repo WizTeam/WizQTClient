@@ -198,8 +198,8 @@ bool CWizIndex::getAllMessages(CWizMessageDataArray& arrayMsg)
 
 bool CWizIndex::getAllMessageSenders(CWizStdStringArray& arraySender)
 {
-    QString strSQL = WizFormatString1("SELECT distinct SENDER_GUID from %1",
-                                      TABLE_NAME_WIZ_MESSAGE);
+    QString strSQL = WizFormatString2("SELECT distinct SENDER_GUID from %1 where MESSAGE_TYPE<%2",
+                                      TABLE_NAME_WIZ_MESSAGE, QString::number(WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP));
     return SQLToStringArray(strSQL, 0, arraySender);
 }
 
@@ -389,21 +389,25 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
 	data.tModified = data.tCreated;
 	data.tAccessed = data.tCreated;
 
-	data.nIconIndex = nIconIndex;
-	data.nSync = nSync;
+    //data.nIconIndex = nIconIndex;
+    //data.nSync = nSync;
 	data.nProtected = nProtected;
 	data.nReadCount = 0;
 	data.nAttachmentCount = 0;
 	data.nIndexed = 0;
+    //
+    data.nVersion = -1;
+    data.nInfoChanged = 1;
+    data.nDataChanged = 1;
 
 	GetNextTitle(data.strLocation, data.strTitle);
 
-	data.tInfoModified = data.tCreated;
-	data.strInfoMD5 = CalDocumentInfoMD5(data);
+    //data.tInfoModified = data.tCreated;
+    //data.strInfoMD5 = CalDocumentInfoMD5(data);
 	data.tDataModified = data.tCreated;
 	data.strDataMD5 = _T("");
-	data.tParamModified = data.tCreated;
-	data.strParamMD5 = _T("");
+    //data.tParamModified = data.tCreated;
+    //data.strParamMD5 = _T("");
 
 	return CreateDocumentEx(data);
 
@@ -415,7 +419,7 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
 {
     return CreateDocument(strTitle, strName, \
                           strLocation, strURL, \
-                          "", "", "", "", "", "", 0, 0, 0, data);
+                          "", "", data.strType, "", "", "", 0, 0, 0, data);
 }
 
 bool CWizIndex::CreateAttachment(const CString& strDocumentGUID, const CString& strName,
@@ -501,41 +505,6 @@ bool CWizIndex::setTableStructureVersion(const QString& strVersion)
 }
 
 
-CString CWizIndex::CalDocumentInfoMD5(const WIZDOCUMENTDATA& data)
-{
-	return WizMd5StringNoSpace(data.strTitle + data.strAuthor 
-		+ data.strSEO + data.strKeywords 
-		+ data.strType + data.strOwner + data.strFileType
-		+ data.strURL + data.strLocation + WizIntToStr(data.nIconIndex)
-		+ WizIntToStr(data.nProtected)
-		+ WizIntToStr(data.nAttachmentCount)
-		+ data.strStyleGUID
-        + GetDocumentTagGUIDsString(data.strGUID) + data.strDataMD5);
-}
-
-CString CWizIndex::CalDocumentParamInfoMD5(const CWizDocumentParamDataArray& arrayParam)
-{
-    CString strFeed;
-
-    CWizDocumentParamDataArray::const_iterator it;
-    for (it = arrayParam.begin(); it != arrayParam.end(); it++) {
-		strFeed += (it->strName  + it->strValue);
-	}
-
-	return WizMd5StringNoSpace(strFeed);
-}
-
-CString CWizIndex::CalDocumentParamInfoMD5(const WIZDOCUMENTDATA& data)
-{
-	CWizDocumentParamDataArray arrayParam;
-    if (!GetDocumentParams(data.strGUID, arrayParam)) {
-		TOLOG1(_T("Failed to get document params: %1"), data.strTitle);
-		return CString();
-	}
-
-	return CalDocumentParamInfoMD5(arrayParam);
-}
-
 CString CWizIndex::CalDocumentAttachmentInfoMD5(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     return WizMd5StringNoSpace(data.strDocumentGUID \
@@ -610,7 +579,7 @@ QString CWizIndex::getTagTreeText(const QString& strTagGUID)
 {
     WIZTAGDATA tag;
     if (!TagFromGUID(strTagGUID, tag)) {
-        return NULL;
+        return QString();
     }
 
     QString strText = "/" + tag.strName;
@@ -684,8 +653,7 @@ bool CWizIndex::ModifyDocumentInfo(WIZDOCUMENTDATA& data, bool bReset /* = true 
     //
 
     if (bReset) {
-        data.tInfoModified = WizGetCurrentTime();
-        data.strInfoMD5 = CalDocumentInfoMD5(data);
+        data.nInfoChanged = 1;
         data.tModified = WizGetCurrentTime();
         data.nVersion = -1;
         //
@@ -702,8 +670,7 @@ bool CWizIndex::ModifyDocumentDateModified(WIZDOCUMENTDATA& data)
         return false;
 	}
 
-	data.tInfoModified = WizGetCurrentTime();
-	data.strInfoMD5 = CalDocumentInfoMD5(data);
+    data.nInfoChanged = 1;
     data.nVersion = -1;
 
 	return ModifyDocumentInfoEx(data);
@@ -716,7 +683,7 @@ bool CWizIndex::ModifyDocumentDataDateModified(WIZDOCUMENTDATA& data)
         return false;
     }
 
-	data.strInfoMD5 = CalDocumentInfoMD5(data);
+    data.nInfoChanged = 1;
     data.nVersion = -1;
 
 	return ModifyDocumentInfoEx(data);
@@ -741,9 +708,6 @@ bool CWizIndex::ModifyDocumentDateAccessed(WIZDOCUMENTDATA& data)
 
 bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
 {
-    WIZDOCUMENTDATA dataOld;
-    DocumentFromGUID(data.strGUID, dataOld);
-
 	CString strSQL;
 	strSQL.Format(_T("update WIZ_DOCUMENT set DOCUMENT_READ_COUNT=%d where DOCUMENT_GUID=%s"),
 		data.nReadCount,
@@ -751,10 +715,11 @@ bool CWizIndex::ModifyDocumentReadCount(const WIZDOCUMENTDATA& data)
         );
 
     bool ret = ExecSQL(strSQL);
-    WIZDOCUMENTDATA dataNew;
-    DocumentFromGUID(data.strGUID, dataNew);
 
-    emit documentReadCountChanged(dataNew);
+    if (ret)
+    {
+        emit documentReadCountChanged(data);
+    }
     return ret;
 }
 
@@ -765,8 +730,7 @@ bool CWizIndex::ModifyDocumentLocation(WIZDOCUMENTDATA& data)
         return false;
     }
 
-    data.strInfoMD5 = CalDocumentInfoMD5(data);
-    data.tInfoModified = WizGetCurrentTime();
+    data.nInfoChanged = 1;
     data.nVersion = -1;
 
     return ModifyDocumentInfoEx(data);
@@ -782,12 +746,6 @@ bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
         return false;
     }
 
-    // as above
-    if (!DeleteDocumentParams(data.strGUID, false)) {
-        TOLOG1("Failed to delete document params: %1", data.strTitle);
-        return false;
-    }
-
     if (bLog) {
         if (!LogDeletedGUID(data.strGUID, wizobjectDocument)) {
             TOLOG("Warning: Failed to log deleted document guid!");
@@ -797,118 +755,11 @@ bool CWizIndex::DeleteDocument(const WIZDOCUMENTDATA& data, bool bLog)
     return DeleteDocumentEx(data);
 }
 
-void CWizIndex::InitDocumentExFields(CWizDocumentDataArray& arrayDocument,
-                                     const CWizStdStringArray& arrayGUID,
-                                     const std::map<CString, int>& mapDocumentIndex)
-{
-    CString strDocumentGUIDs;
-    ::WizStringArrayToText(arrayGUID, strDocumentGUIDs, _T("\',\'"));
-
-    CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID in('%1')"), strDocumentGUIDs);
-
-    CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
-    while (!queryParam.eof())
-    {
-        CString strGUID = queryParam.getStringField(0);
-        CString strParamName = queryParam.getStringField(1);
-
-        std::map<CString, int>::const_iterator it = mapDocumentIndex.find(strGUID);
-        Q_ASSERT(it != mapDocumentIndex.end());
-        if (it != mapDocumentIndex.end())
-        {
-            int index = it->second;
-            Q_ASSERT(index >= 0 && index < int(arrayDocument.size()));
-            if (index >= 0 && index < int(arrayDocument.size()))
-            {
-                WIZDOCUMENTDATA& data = arrayDocument[index];
-                Q_ASSERT(strGUID == data.strGUID);
-                if (strGUID == data.strGUID)
-                {
-                    if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
-                    {
-                        int nFlags = queryParam.getIntField(2);
-                        data.nFlags = nFlags;
-                    }
-                    else if (strParamName == _T("RATE"))
-                    {
-                        int nRate = queryParam.getIntField(2);
-                        data.nRate = nRate;
-                    }
-                    else if (strParamName == _T("SYSTEM_TAGS"))
-                    {
-                        CString strSystemTags = queryParam.getStringField(2);
-                        data.strSystemTags = strSystemTags;
-                    }
-                }
-            }
-        }
-
-        queryParam.nextRow();
-    }
-
-    InitDocumentShareFlags(arrayDocument, strDocumentGUIDs, mapDocumentIndex, TAG_NAME_SHARE_WITH_FRIENDS, WIZDOCUMENT_SHARE_FRIENDS);
-    InitDocumentShareFlags(arrayDocument, strDocumentGUIDs, mapDocumentIndex, TAG_NAME_PUBLIC, WIZDOCUMENT_SHARE_PUBLIC);
-}
-
-void CWizIndex::InitDocumentShareFlags(CWizDocumentDataArray& arrayDocument,
-                                           const CString& strDocumentGUIDs,
-                                           const std::map<CString, int>& mapDocumentIndex,
-                                           const CString& strTagName,
-                                           int nShareFlags)
-{        
-    CWizTagDataArray arrayTag;
-    TagByName(strTagName, arrayTag);
-
-    for (WIZTAGDATA dataShare : arrayTag) {
-        GetAllChildTags(dataShare.strGUID, arrayTag);
-    }
-
-
-    CWizStdStringArray arrayTagGUID;
-    CWizTagDataArray::const_iterator it;
-    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-        arrayTagGUID.push_back(it->strGUID);
-    }
-
-    CString strTagGUIDs;
-    ::WizStringArrayToText(arrayTagGUID, strTagGUIDs, _T("\',\'"));
-
-    CString strTagSQL = WizFormatString2(_T("select distinct DOCUMENT_GUID from WIZ_DOCUMENT_TAG where DOCUMENT_GUID in('%1') and TAG_GUID in ('%2')"), strDocumentGUIDs, strTagGUIDs);
-
-    CppSQLite3Query queryTag = m_db.execQuery(strTagSQL);
-    while (!queryTag.eof())
-    {
-        CString strGUID = queryTag.getStringField(0);
-
-        std::map<CString, int>::const_iterator it = mapDocumentIndex.find(strGUID);
-        ATLASSERT(it != mapDocumentIndex.end());
-        if (it != mapDocumentIndex.end())
-        {
-            int index = it->second;
-            ATLASSERT(index >= 0 && index < int(arrayDocument.size()));
-            if (index >= 0 && index < int(arrayDocument.size()))
-            {
-                WIZDOCUMENTDATA& data = arrayDocument[index];
-                ATLASSERT(strGUID == data.strGUID);
-                if (strGUID == data.strGUID)
-                {
-                    data.nShareFlags = nShareFlags;
-                }
-            }
-        }
-
-        queryTag.nextRow();
-    }
-}
-
 bool CWizIndex::getGroupUnreadDocuments(CWizDocumentDataArray& arrayDocument)
 {
 
-    CString strExt;
-    strExt.Format("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%'");
-    QString strSQL = FormatCanonicSQL(TABLE_NAME_WIZ_DOCUMENT,
-                                      FIELD_LIST_WIZ_DOCUMENT,
-                                      strExt);
+    QString strSQL = QString("select %1 from %2 %3").arg(FIELD_LIST_WIZ_DOCUMENT)
+            .arg(TABLE_NAME_WIZ_DOCUMENT).arg("where DOCUMENT_READ_COUNT=0 and DOCUMENT_LOCATION not like '/Deleted Items/%' limit 1000");
 
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
@@ -1037,9 +888,7 @@ bool CWizIndex::DeleteDocumentsByLocation(const CString& strLocation)
 
 bool CWizIndex::UpdateDocumentInfoMD5(WIZDOCUMENTDATA& data)
 {
-//	data.tModified = WizGetCurrentTime();
-	data.tInfoModified = WizGetCurrentTime();
-	data.strInfoMD5 = CalDocumentInfoMD5(data);
+    data.nInfoChanged = 1;
 	data.nVersion = -1;
 
 	return ModifyDocumentInfoEx(data);
@@ -1052,11 +901,9 @@ bool CWizIndex::UpdateDocumentDataMD5(WIZDOCUMENTDATA& data, const CString& strZ
     data.strDataMD5 = ::WizMd5FileString(strZipFileName);
     data.tDataModified = WizGetCurrentTime();
 
-    // modify note data lead modify time change, recount info md5 needed
-    data.strInfoMD5 = CalDocumentInfoMD5(data);
-    data.tInfoModified = WizGetCurrentTime();
-
-	data.nVersion = -1;
+    data.nDataChanged = 1;
+    data.nInfoChanged = 1;
+    data.nVersion = -1;
 
     bool bRet = ModifyDocumentInfoEx(data);
 
@@ -1090,78 +937,6 @@ bool CWizIndex::DeleteDocumentTags(WIZDOCUMENTDATA& data, bool bReset /* = true 
     Q_EMIT documentTagModified(data);
 
     return bRet;
-}
-
-bool CWizIndex::DeleteDocumentParams(const QString& strDocumentGUID,
-                                     bool bReset /* = true */)
-{
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_PARAM,
-                                              "DOCUMENT_GUID");
-
-	CString strSQL;
-	strSQL.Format(strFormat,
-        STR2SQL(strDocumentGUID).utf16()
-        );
-
-	if (!ExecSQL(strSQL))
-        return false;
-
-    if (bReset && !UpdateDocumentParamMD5(strDocumentGUID)) {
-        TOLOG("Failed to update document param md5, guid: " + strDocumentGUID);
-        return false;
-    }
-
-    return true;
-}
-
-bool CWizIndex::DeleteDocumentParam(const CString& strDocumentGUID, CString strParamName, bool bUpdateParamMD5)
-{
-	if (strParamName.IsEmpty())
-        return false;
-
-	strParamName.MakeUpper();
-
-	CString strSQL;
-	strSQL.Format(_T("delete from %s where DOCUMENT_GUID=%s and PARAM_NAME=%s"),
-        QString(TABLE_NAME_WIZ_DOCUMENT_PARAM).utf16(),
-        STR2SQL(strDocumentGUID).utf16(),
-        STR2SQL(strParamName).utf16()
-		);
-
-	if (!ExecSQL(strSQL))
-        return false;
-
-    if (bUpdateParamMD5) {
-        if (!UpdateDocumentParamMD5(strDocumentGUID)) {
-			TOLOG(_T("Failed to update document param md5!"));
-		}
-	}
-
-    return true;
-}
-
-bool CWizIndex::DeleteDocumentParamEx(const CString& strDocumentGUID, CString strParamNamePart)
-{
-	if (strParamNamePart.IsEmpty())
-        return false;
-
-    strParamNamePart.MakeUpper();
-
-	CString strSQL;
-	strSQL.Format(_T("delete from %s where DOCUMENT_GUID=%s and PARAM_NAME like '%s%%'"),
-        QString(TABLE_NAME_WIZ_DOCUMENT_PARAM).utf16(),
-        STR2SQL(strDocumentGUID).utf16(),
-        strParamNamePart.utf16()
-		);
-
-	if (!ExecSQL(strSQL))
-        return false;
-
-    if (!UpdateDocumentParamMD5(strDocumentGUID)) {
-		TOLOG(_T("Failed to update document param md5!"));
-    }
-
-    return true;
 }
 
 bool CWizIndex::DeleteDeletedGUID(const CString& strGUID)
@@ -1374,7 +1149,7 @@ QString CWizIndex::GetDocumentTagTreeDisplayString(const QString& strDocumentGUI
 {
     CWizTagDataArray arrayTag;
     if (!GetDocumentTags(strDocumentGUID, arrayTag)) {
-        return NULL;
+        return QString();
     }
 
     if (arrayTag.size() == 0)
@@ -1523,55 +1298,6 @@ bool CWizIndex::DeleteDocumentTag(WIZDOCUMENTDATA& data, const CString& strTagGU
     return true;
 }
 
-bool CWizIndex::GetDocumentParams(const CString& strDocumentGUID, CWizDocumentParamDataArray& arrayParam)
-{
-    CString strWhere = WizFormatString1(_T("DOCUMENT_GUID='%1'"), strDocumentGUID);
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_PARAM, FIELD_LIST_WIZ_DOCUMENT_PARAM, strWhere); 
-	return SQLToDocumentParamDataArray(strSQL, arrayParam);
-}
-
-bool CWizIndex::GetDocumentParam(const CString& strDocumentGUID, \
-                              CString strParamName, \
-                              CString& strParamValue, \
-                              const CString& strDefault /*= NULL*/, \
-                              bool* pbParamExists /*= NULL*/)
-{
-    if (pbParamExists) {
-        *pbParamExists = false;
-	}
-
-	strParamName.Trim();
-	strParamName.MakeUpper();
-
-	CString strWhere = WizFormatString2(_T("DOCUMENT_GUID=%1 and PARAM_NAME=%2"), 
-        STR2SQL(strDocumentGUID),
-		STR2SQL(strParamName)
-		);
-
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_PARAM, FIELD_LIST_WIZ_DOCUMENT_PARAM, strWhere); 
-
-	CWizDocumentParamDataArray arrayParam;
-    if (!SQLToDocumentParamDataArray(strSQL, arrayParam)) {
-		TOLOG1(_T("Failed tog get document param: %1"), strParamName);
-        return false;
-	}
-
-    if (arrayParam.empty()) {
-        strParamValue = CString(strDefault);
-    } else {
-		strParamValue = arrayParam[0].strValue;
-
-        if (arrayParam.size() > 1) {
-			TOLOG1(_T("Warning: too more param: %1"), strParamName);
-		}
-
-        if (pbParamExists) {
-            *pbParamExists = true;
-		}
-	}
-
-    return true;
-}
 
 CString CWizIndex::GetMetaDef(const CString& strMetaName, const CString& strKey, const CString& strDef /*= NULL*/)
 {
@@ -1628,135 +1354,6 @@ bool CWizIndex::GetMeta(CString strMetaName, CString strKey, CString& strValue, 
 	}
 
     return true;
-}
-
-bool CWizIndex::SetDocumentParam(const QString& strDocumentGUID,
-                                 const QString &strParamName,
-                                 const QString &strParamValue,
-                                 bool bUpdateParamMD5)
-{
-	WIZDOCUMENTDATA data;
-    if (!DocumentFromGUID(strDocumentGUID, data)) {
-        return false;
-    }
-
-	return SetDocumentParam(data, strParamName, strParamValue, bUpdateParamMD5);
-}
-
-bool CWizIndex::SetDocumentParam(WIZDOCUMENTDATA& data,
-                                 const QString& strName,
-                                 const QString& strValue,
-                                 bool bUpdateParamMD5)
-{
-    QString strParamName = strName.trimmed();
-    QString strParamValue = strValue.trimmed();
-
-    if (data.strGUID.isEmpty()) {
-        TOLOG1("Failed to modify document param %1: document guid is empty!", strParamName);
-        return false;
-    }
-
-    if (strParamName.isEmpty()) {
-        TOLOG("Failed to modify document param %1: param name is empty!");
-        return false;
-	}
-
-	CString strOldParamValue;
-    bool bParamExists = false;
-    GetDocumentParam(data.strGUID, strParamName, strOldParamValue, "", &bParamExists);
-
-	if (strOldParamValue == strParamValue)
-        return true;
-
-    strParamName = strParamName.toUpper();
-
-	CString strSQL;
-    if (bParamExists) {
-        strSQL.Format("update WIZ_DOCUMENT_PARAM set PARAM_VALUE=%s where DOCUMENT_GUID=%s and PARAM_NAME=%s",
-            STR2SQL(strParamValue).utf16(),
-            STR2SQL(data.strGUID).utf16(),
-            STR2SQL(strParamName).utf16()
-			);
-    } else {
-        CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT_PARAM,
-                                                  FIELD_LIST_WIZ_DOCUMENT_PARAM,
-                                                  PARAM_LIST_WIZ_DOCUMENT_PARAM);
-
-		strSQL.Format(strFormat,
-            STR2SQL(data.strGUID).utf16(),
-            STR2SQL(strParamName).utf16(),
-            STR2SQL(strParamValue).utf16()
-			);
-	}
-
-    if (!ExecSQL(strSQL)) {
-        TOLOG2("Failed to update document %1 param: %2", data.strTitle, strParamName);
-        return false;
-	}
-
-    if (bUpdateParamMD5) {
-		return UpdateDocumentParamMD5(data);
-    } else {
-        return true;
-	}
-}
-
-bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data,
-                                  const CWizDocumentParamDataArray& arrayParam,
-                                  bool bReset /* = true */)
-{
-    DeleteDocumentParams(data.strGUID, bReset);
-
-    CWizDocumentParamDataArray::const_iterator it;
-    for (it = arrayParam.begin(); it != arrayParam.end(); it++) {
-        if (!SetDocumentParam(data, it->strName, it->strValue, bReset)) {
-            TOLOG2("Failed to set document param: %1=%2", it->strName, it->strValue);
-		}
-	}
-
-    if (bReset) {
-        UpdateDocumentParamMD5(data);
-    }
-
-    return true;
-}
-
-bool CWizIndex::StringArrayToDocumentParams(const CString& strDocumentGUID,
-                                             const CWizStdStringArray& arrayText,
-                                             std::deque<WIZDOCUMENTPARAMDATA>& arrayParam)
-{
-    CWizStdStringArray::const_iterator it;
-    for (it = arrayText.begin(); it != arrayText.end(); it++) {
-        CString str = *it;
-
-		int nPos = str.Find('=');
-        if (-1 == nPos) {
-			TOLOG1(_T("String %1 is not a valid param line"), str);
-			continue;
-        }
-
-		CString strName = str.Left(nPos);
-		str.Delete(0, nPos + 1);
-        CString strValue = str;
-
-		WIZDOCUMENTPARAMDATA data;
-        data.strDocumentGUID = strDocumentGUID;
-		data.strName = strName;
-		data.strValue = strValue;
-		arrayParam.push_back(data);
-    }
-
-    return true;
-}
-
-bool CWizIndex::SetDocumentParams(WIZDOCUMENTDATA& data,
-                                  const CWizStdStringArray& arrayParam,
-                                  bool bReset /* = true */)
-{
-    CWizDocumentParamDataArray arrayRet;
-    StringArrayToDocumentParams(data.strGUID, arrayParam, arrayRet);
-
-    return SetDocumentParams(data, arrayRet, bReset);
 }
 
 bool CWizIndex::SetMeta(CString strMetaName, CString strKey, const CString& strValue)
@@ -1860,67 +1457,6 @@ bool CWizIndex::getLastestDocuments(CWizDocumentDataArray& arrayDocument, int nM
     return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
-bool CWizIndex::GetDocumentsByParamName(const CString& strLocation,
-                                        bool bIncludeSubFolders,
-                                        CString strParamName,
-                                        CWizDocumentDataArray& arrayDocument)
-{
-	strParamName.MakeUpper();
-
-	CString strWhere;
-	strWhere.Format(_T("DOCUMENT_GUID in (select DOCUMENT_GUID from WIZ_DOCUMENT_PARAM where PARAM_NAME=%s)"),
-        STR2SQL(strParamName).utf16()
-		);
-
-    if (strLocation && *strLocation) {
-        CString strLocation2(strLocation);
-        if (bIncludeSubFolders) {
-            strLocation2.AppendChar('%');
-		}
-
-        strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation2));
-	}
-
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
-
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
-}
-
-bool CWizIndex::GetDocumentsByParam(const CString& strLocation,
-                                    bool bIncludeSubFolders,
-                                    CString strParamName,
-                                    const CString& strParamValue,
-                                    CWizDocumentDataArray& arrayDocument,
-                                    bool bIncludeDeletedItems /*= true*/)
-{
-	strParamName.MakeUpper();
-
-	CString strWhere;
-	strWhere.Format(_T("DOCUMENT_GUID in (select DOCUMENT_GUID from WIZ_DOCUMENT_PARAM where PARAM_NAME=%s and PARAM_VALUE=%s)"),
-        STR2SQL(strParamName).utf16(),
-        STR2SQL(strParamValue).utf16()
-		);
-
-    if (!strLocation.IsEmpty()) {
-        CString strLocation2(strLocation);
-        if (bIncludeSubFolders) {
-            strLocation2.AppendChar('%');
-		}
-
-        strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION like %1"), STR2SQL(strLocation2));
-	}
-
-    if (!bIncludeDeletedItems) {
-		strWhere += WizFormatString1(_T(" and DOCUMENT_LOCATION not like %1"),
-            STR2SQL(m_strDeletedItemsLocation + _T("%"))
-			);
-	}
-
-	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
-
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
-}
-
 bool CWizIndex::GetDocumentsByTag(const CString& strLocation,
                                   const WIZTAGDATA& data,
                                   CWizDocumentDataArray& arrayDocument,
@@ -1947,7 +1483,7 @@ bool CWizIndex::GetDocumentsByTag(const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsSizeByTag(const WIZTAGDATA& data, int& size)
@@ -1997,7 +1533,7 @@ bool CWizIndex::GetDocumentsByStyle(const CString& strLocation, const WIZSTYLEDA
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsByTags(bool bAnd, const CString& strLocation,
@@ -2039,7 +1575,7 @@ bool CWizIndex::GetDocumentsByTags(bool bAnd, const CString& strLocation,
 
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetDocumentsCountByLocation(const CString& strLocation,
@@ -2073,7 +1609,7 @@ bool CWizIndex::GetDocumentsByLocation(const CString& strLocation,
     }
 
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 //bool CWizIndex::GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument)
@@ -2102,40 +1638,6 @@ bool CWizIndex::GetDocumentsByGUIDs(const CWizStdStringArray& arrayGUID, CWizDoc
 	CString strWhere = WizFormatString1(_T("DOCUMENT_GUID in (%1)"), strText);
 
 	return GetDocumentsBySQLWhere(strWhere, arrayDocument);
-}
-
-bool CWizIndex::UpdateDocumentParamMD5(const CString& strDocumentGUID)
-{
-	WIZDOCUMENTDATA data;
-    if (!DocumentFromGUID(strDocumentGUID, data))
-        return false;
-
-	return UpdateDocumentParamMD5(data);
-}
-
-bool CWizIndex::UpdateDocumentParamMD5(WIZDOCUMENTDATA& data)
-{
-	CString strMD5 = CalDocumentParamInfoMD5(data);
-	if (strMD5 == data.strParamMD5)
-        return true;
-
-	data.tModified = WizGetCurrentTime();
-	data.tParamModified = WizGetCurrentTime();
-	data.strParamMD5 = strMD5;
-
-	CString strSQL;
-	strSQL.Format(_T("update WIZ_DOCUMENT set DT_PARAM_MODIFIED=%s, DOCUMENT_PARAM_MD5=%s, WIZ_VERSION=-1 where DOCUMENT_GUID=%s"),
-        TIME2SQL(data.tParamModified).utf16(),
-        STR2SQL(data.strParamMD5).utf16(),
-        STR2SQL(data.strGUID).utf16()
-		);
-
-    if (!ExecSQL(strSQL)) {
-        TOLOG1(_T("Failed to update document params: %1"), data.strTitle);
-        return false;
-	}
-
-    return true;
 }
 
 bool CWizIndex::DocumentFromLocationAndName(const CString& strLocation, const CString& strName, WIZDOCUMENTDATA& data)
@@ -2228,7 +1730,7 @@ bool CWizIndex::GetDocumentsByTime(const QDateTime& t, CWizDocumentDataArray& ar
 		FIELD_DATA_MODIFIED_WIZ_DOCUMENT, 
 		FIELD_PARAM_MODIFIED_WIZ_DOCUMENT, 
 		t); 
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 bool CWizIndex::GetAttachmentsByTime(const COleDateTime& t, CWizDocumentAttachmentDataArray& arrayData)
@@ -2311,7 +1813,7 @@ bool CWizIndex::GetModifiedStyles(CWizStyleDataArray& arrayData)
 bool CWizIndex::GetModifiedDocuments(CWizDocumentDataArray& arrayData)
 {
 	CString strSQL = FormatModifiedQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 CString CWizIndex::GetLocationArraySQLWhere(const CWizStdStringArray& arrayLocation)
@@ -2340,7 +1842,7 @@ bool CWizIndex::GetModifiedDocuments(const CWizStdStringArray& arrayLocation, CW
 
 	strSQL = strSQL + _T(" and ") + strWhere2;
 
-	return SQLToDocumentDataArray(strSQL, arrayData);
+    return SQLToDocumentDataArray(strSQL, arrayData);
 }
 
 bool CWizIndex::GetModifiedAttachments(CWizDocumentAttachmentDataArray& arrayData)
@@ -2491,6 +1993,8 @@ bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strTy
     if (-1 == nVersion)
     {
         qDebug() << "modify object version (-1), type: " << strType << " guid: " << strGUID;
+        Q_ASSERT("Should not modify object version to -1");
+        return false;
     }
 
 	CString strTableName;
@@ -2499,13 +2003,27 @@ bool CWizIndex::ModifyObjectVersion(const CString& strGUID, const CString& strTy
     if (!GetObjectTableInfo(strType, strTableName, strKeyFieldName))
         return false;
     //
-    CString strSQL = WizFormatString4("update %1 set WIZ_VERSION=%2 where %3=%4",
-		strTableName,
-		WizInt64ToStr(nVersion),
-		strKeyFieldName, 
-        STR2SQL(strGUID));
+    if (strType.toLower() == "document")
+    {
+        CString strSQL = WizFormatString4("update %1 set WIZ_VERSION=%2, INFO_CHANGED=0, DATA_CHANGED=0 where %3=%4",
+            strTableName,
+            WizInt64ToStr(nVersion),
+            strKeyFieldName,
+            STR2SQL(strGUID));
 
-    return ExecSQL(strSQL);
+        return ExecSQL(strSQL);
+    }
+    else
+    {
+        //
+        CString strSQL = WizFormatString4("update %1 set WIZ_VERSION=%2 where %3=%4",
+            strTableName,
+            WizInt64ToStr(nVersion),
+            strKeyFieldName,
+            STR2SQL(strGUID));
+
+        return ExecSQL(strSQL);
+    }
 }
 
 bool CWizIndex::IsObjectDataModified(const CString& strGUID, const CString& strType)
@@ -2992,7 +2510,7 @@ bool CWizIndex::Search(const CString& strKeywords,
 	//
 	DEBUG_TOLOG(strSQL);
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 
 }
 
@@ -3068,7 +2586,7 @@ bool CWizIndex::Search(const CString& strKeywords,
 	//
 	CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere); 
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3099,7 +2617,7 @@ bool CWizIndex::GetRecentDocuments(long nFlags, const CString& strDocumentType, 
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3126,7 +2644,7 @@ bool CWizIndex::GetRecentDocumentsCreated(const CString& strDocumentType, int nC
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int nCount, CWizDocumentDataArray& arrayDocument)
@@ -3153,7 +2671,7 @@ bool CWizIndex::GetRecentDocumentsModified(const CString& strDocumentType, int n
 			);
 	}
 	//
-	return SQLToDocumentDataArray(strSQL, arrayDocument);
+    return SQLToDocumentDataArray(strSQL, arrayDocument);
 }
 
 bool CWizIndex::GetRecentDocumentsByCreatedTime(const COleDateTime& t, CWizDocumentDataArray& arrayDocument)
@@ -3391,13 +2909,22 @@ int CWizIndex::GetDocumentAttachmentCount(const CString& strDocumentGUID)
 void CWizIndex::UpdateDocumentAttachmentCount(const CString& strDocumentGUID,
                                               bool bResetDocInfo /* = true */)
 {
-    WIZDOCUMENTDATA data;
-    if (!DocumentFromGUID(strDocumentGUID, data))
-        return;
+    if (bResetDocInfo)
+    {
+        WIZDOCUMENTDATA data;
+        if (!DocumentFromGUID(strDocumentGUID, data))
+            return;
 
-    data.nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
+        data.nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
 
-    ModifyDocumentInfo(data, bResetDocInfo);
+        ModifyDocumentInfo(data, bResetDocInfo);
+    }
+    else
+    {
+        int nAttachmentCount = GetDocumentAttachmentCount(strDocumentGUID);
+        QString sql = WizFormatString2("update WIZ_DOCUMENT set DOCUMENT_ATTACHEMENT_COUNT=%1 where DOCUMENT_GUID='%2'", WizIntToStr(nAttachmentCount), strDocumentGUID);
+        ExecSQL(sql);
+    }
 }
 
 bool CWizIndex::GetSync(const CString& strLocation)
@@ -3981,21 +3508,12 @@ bool CWizIndex::GetNeedToBeDownloadedAttachments(CWizDocumentAttachmentDataArray
 CString CWizIndex::TagDisplayNameToName(const CString& strDisplayName)
 {
     CString strName(strDisplayName);
-    if (strName == TAG_DISPLAY_NAME_PUBLIC())
-		strName = TAG_NAME_PUBLIC;
-    else if (strName == TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS())
-		strName = TAG_NAME_SHARE_WITH_FRIENDS;
-
 	return strName;
 }
 
 CString CWizIndex::TagNameToDisplayName(const CString& strName)
 {
     CString strDisplayName(strName);
-    if (strDisplayName == TAG_NAME_PUBLIC)
-        strDisplayName = TAG_DISPLAY_NAME_PUBLIC();
-    else if (strDisplayName == TAG_NAME_SHARE_WITH_FRIENDS)
-        strDisplayName = TAG_DISPLAY_NAME_SHARE_WITH_FRIENDS();
 
     return strDisplayName;
 }
@@ -4094,6 +3612,7 @@ bool CWizIndex::UpdateLocation(const QString& strOldLocation, const QString& str
     {
         WIZDOCUMENTDATA doc = *it;
         doc.strLocation.replace(strOldLocation, strNewLocation);
+        doc.nInfoChanged = 1;
         doc.nVersion = -1;
         ModifyDocumentInfoEx(doc);
     }

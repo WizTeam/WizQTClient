@@ -7,9 +7,6 @@ struct WIZDOCUMENTDATA;
 class QLabel;
 class CWizExplorerApp;
 
-namespace Core {
-namespace Internal {
-
 class InfoBar : public QWidget
 {
     Q_OBJECT
@@ -26,7 +23,5 @@ private:
     CWizExplorerApp& m_app;
 };
 
-} // namespace Internal
-} // namespace Core
 
 #endif // CORE_INFOBAR_H

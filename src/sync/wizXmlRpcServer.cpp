@@ -72,7 +72,7 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
             return false;
         }
         //
-        QString strXml = loop.result();
+        QString strXml = QString::fromUtf8(loop.result().constData());
         //
         CWizXMLDocument doc;
         if (!doc.LoadXML(strXml)) {

@@ -6,10 +6,11 @@
 class QString;
 class QPixmap;
 
-namespace WizService {
-namespace Internal {
 class AvatarHostPrivate;
-}
+
+#define SYSTEM_AVATAR_APPLY_GROUP       "message_icons_apply_group"
+#define SYSTEM_AVATAR_ADMIN_PERMIT      "message_icons_admin_permit"
+#define SYSTEM_AVATAR_SYSTEM            "message_icons_system"
 
 class AvatarHost: public QObject
 {
@@ -20,11 +21,12 @@ public:
     ~AvatarHost();
 
     static AvatarHost* instance();
-    static void load(const QString& strUserID);
+    static void load(const QString& strUserID, bool isSystem);
     static void reload(const QString& strUserID);
     static bool isLoaded(const QString& strUserID);
     static bool isFileExists(const QString& strUserID);
     static bool avatar(const QString& strUserID, QPixmap* pixmap);
+    static bool systemAvatar(const QString& avatarName, QPixmap* pixmap);
     static bool deleteAvatar(const QString& strUserID);
     static QPixmap orgAvatar(const QString& strUserID);
     static QString keyFromUserID(const QString& strUserID);
@@ -34,16 +36,12 @@ public:
 Q_SIGNALS:
     void loaded(const QString& strUserID);
 
-    friend class Internal::AvatarHostPrivate;
+    friend class AvatarHostPrivate;
 
 public:
-
-    static void waitForDone();
-
     static QPixmap corpImage(const QPixmap& org);
     static QPixmap circleImage(const QPixmap& org, int width, int height);
 };
 
-} // namespace WizService
 
 #endif // WIZSERVICE_AVATAR_H

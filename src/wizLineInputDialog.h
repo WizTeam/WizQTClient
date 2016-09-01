@@ -23,6 +23,11 @@ public:
 public:
     QString input();
 
+    void setOKButtonEnable(bool enable);
+
+signals:
+    void textChanged(const QString&);
+
 private:
     Ui::CWizLineInputDialog *ui;
     QString m_strDefault;

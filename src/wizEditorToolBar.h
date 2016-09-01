@@ -5,6 +5,7 @@
 #include <QPointer>
 #include <QMap>
 #include <QTimer>
+#include <functional>
 
 class QFontDialog;
 class QString;
@@ -16,11 +17,7 @@ class CWizToolButtonColor;
 class CWizToolComboBox;
 class CWizToolComboBoxFont;
 class CWizExplorerApp;
-
-struct WizEditorContextMenuItem;
-
-namespace Core {
-namespace Internal {
+class CWizTipsWidget;
 
 
 class EditorToolBar : public QWidget
@@ -29,28 +26,19 @@ class EditorToolBar : public QWidget
 
 public:
     explicit EditorToolBar(CWizExplorerApp& app, QWidget *parent);
-#ifdef USEWEBENGINE
-    void setDelegate(CWizDocumentWebEngine* editor);
-#else
     void setDelegate(CWizDocumentWebView* editor);
-#endif
 
     bool hasFocus();
 
     void adjustButtonPosition();
     //
-    void showCoachingTips();
+    CWizTipsWidget* showCoachingTips();
 
 private:
     CWizExplorerApp& m_app;
 
-#ifdef USEWEBENGINE
-    CWizDocumentWebEngine* m_editor;
-#else
     CWizDocumentWebView* m_editor;
-#endif
     QMap<QString, QAction*> m_actions;
-    QPointer<QMenu> m_menuContext;
     CWizToolComboBox* m_comboParagraph;
     CWizToolComboBox* m_comboFontFamily;
     CWizToolComboBox* m_comboFontSize;
@@ -74,7 +62,6 @@ private:
     CWizToolButton* m_btnSearchReplace;
     CWizToolButton* m_btnMobileImage;
     CWizToolButton* m_btnScreenShot;
-    CWizToolButton* m_btnViewSource;
     CWizToolButton* m_btnInsertCode;
     CWizToolButton* m_btnShowExtra;
     QMenu* m_menuJustify;
@@ -88,15 +75,12 @@ private:
     QWidget* m_secondLineButtonContainer;
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
-    bool m_resetLocked;
-    QTimer m_resetLockTimer;
-
-    WizEditorContextMenuItem* contextMenuData();
-    void buildMenu();
-    int buildMenu(QMenu* pMenu, int indx);
+    QString m_currentStyle;
+    __int64_t m_lastUpdateUIRequest;
+    QTimer m_delayUpdateUITimer;
 
     // editor status reflect
-    void resetToolbar();
+    void resetToolbar(const QString& currentStyle);
 
     QAction* actionFromName(const QString& strName);
 
@@ -116,6 +100,7 @@ protected Q_SLOTS:
     void on_editor_cut_triggered();
     void on_editor_copy_triggered();
     void on_editor_paste_triggered();
+    void on_editor_pastePlain_triggered();
     void on_editor_bold_triggered();
     void on_editor_italic_triggered();
     void on_editor_underline_triggered();
@@ -123,8 +108,6 @@ protected Q_SLOTS:
     void on_editor_insertLink_triggered();
     void on_editor_editLink_triggered();
     void on_editor_removeLink_triggered();
-    void on_editor_insertTable_triggered();
-    void on_editor_deleteTable_triggered();
     void on_editor_justifyLeft_triggered();
     void on_editor_justifyCenter_triggered();
     void on_editor_justifyRight_triggered();
@@ -135,6 +118,8 @@ protected Q_SLOTS:
     void on_comboFontSize_indexChanged(const QString& strSize);
     void on_btnFormatMatch_clicked();
     void on_btnRemoveFormat_clicked();
+    void on_btnForeColor_clicked();
+    void on_btnBackColor_clicked();
     void on_btnBold_clicked();
     void on_btnItalic_clicked();
     void on_btnUnderLine_clicked();
@@ -146,7 +131,7 @@ protected Q_SLOTS:
     void on_btnSearchReplace_clicked();
     void on_btnUnorderedList_clicked();
     void on_btnOrderedList_clicked();
-    void on_btnTable_clicked();
+    void on_btnTable_clicked(int row, int col);
     void on_btnHorizontal_clicked();
     void on_btnCheckList_clicked();
     void on_btnInsertImage_clicked();
@@ -154,7 +139,6 @@ protected Q_SLOTS:
     void on_btnInsertDate_clicked();
     void on_btnMobileImage_clicked();
     void on_btnScreenShot_clicked();
-    void on_btnViewSource_clicked();
     void on_btnInsertCode_clicked();
     void on_btnShowExtra_clicked();
     void on_editor_saveImageAs_triggered();
@@ -162,20 +146,20 @@ protected Q_SLOTS:
     void on_editor_copyImageLink_triggered();
 
     void on_delegate_showContextMenuRequest(const QPoint& pos);
-    void on_delegate_selectionChanged();
-
-    void on_updateToolBarStatus_request();
-    void on_resetLockTimer_timeOut();
+    void on_delegate_selectionChanged(const QString&);
+    void on_delay_updateToolbar();
 
     void on_foreColor_changed();
     void on_showForeColorBoard();
     void on_backColor_changed();
     void on_showBackColorBoard();
+    void applyForeColor(const QColor& color);
+    void applyBackColor(const QColor& color);
 
     void on_fontDailogFontChanged(const QFont & font);    
 
 private:
-    void queryCurrentFont(QFont& font);
+    void queryCurrentFont(std::function<void(const QFont& font)> callback);
     void setCurrentFont(const QFont& font);
     void selectCurrentFontFamily(const QString& strFontFamily);
     void selectCurrentFontFamilyItem(const QString& strFontFamily);
@@ -186,11 +170,8 @@ private:
 
     void moveWidgetFromSecondLineToFirstLine(QWidget* widget);
     void moveWidgetFromFristLineToSecondLine(QWidget* widget);
-
 };
 
 
-} // namespace Internal
-} // namespace Core
 
 #endif // WIZEDITORTOOLBAR_H

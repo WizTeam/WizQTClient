@@ -1,20 +1,19 @@
 #include "wizWebSettingsDialog.h"
 #include "sync/token.h"
 #include "wizmainwindow.h"
-#include "coreplugin/icore.h"
+#include "share/wizGlobal.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
 
-#include <QWebView>
 #include <QMovie>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
-#include <QWebFrame>
 #include <QApplication>
 #include <QNetworkReply>
+#include <QWebEngineView>
+#include "share/wizwebengineview.h"
 
-using namespace WizService;
 
 CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
     : QDialog(parent)
@@ -27,40 +26,31 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    CWizLocalProgressWebView* localProgressWebView = new CWizLocalProgressWebView(this);
+    m_progressWebView = new CWizLocalProgressWebView(this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    layout->addWidget(localProgressWebView);
+    layout->addWidget(m_progressWebView);
     setLayout(layout);
 
-    m_web = localProgressWebView->web();
-//    connect(m_web->page()->networkAccessManager(), SIGNAL(finished(QNetworkReply*)),
-//            SLOT(on_networkRequest_finished(QNetworkReply*)));
-    connect(m_web, SIGNAL(loadFinished(bool)), SLOT(on_web_loaded(bool)));
-    connect(m_web->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onEditorPopulateJavaScriptWindowObject()));
-
-    m_movie = localProgressWebView->movie();
-    m_labelProgress = localProgressWebView->labelProgress();
-
+    WizWebEngineView* web = m_progressWebView->web();
     //
-    m_labelProgress->setVisible(false);
-    m_web->setVisible(true);
+    MainWindow* mainWindow = WizGlobal::mainWindow();
+    if (mainWindow) {
+        web->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    }
+    connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
 }
 
-QWebView*CWizWebSettingsDialog::webVew()
+WizWebEngineView* CWizWebSettingsDialog::web()
 {
-    return m_web;
+    return m_progressWebView->web();
 }
 
 void CWizWebSettingsDialog::load()
 {
-    m_web->setVisible(false);
-    m_labelProgress->setVisible(true);
-    m_movie->start();
-    m_web->page()->mainFrame()->load(m_url);
+    web()->load(m_url);
 }
 
 void CWizWebSettingsDialog::showEvent(QShowEvent* event)
@@ -74,13 +64,11 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok)
     {
-        m_movie->stop();
-        m_labelProgress->setVisible(false);
-        m_web->setVisible(true);
     }
     else
     {
-        loadErrorPage();
+        //失败的时候会造成死循环
+        //loadErrorPage();
     }
 }
 
@@ -90,15 +78,7 @@ void CWizWebSettingsDialog::loadErrorPage()
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);    
     QUrl url = QUrl::fromLocalFile(strFileName);
-    m_web->setHtml(strHtml, url);
-}
-
-void CWizWebSettingsDialog::onEditorPopulateJavaScriptWindowObject()
-{
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
-    if (mainWindow) {
-        m_web->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
-    }
+    web()->setHtml(strHtml, url);
 }
 
 void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
@@ -112,19 +92,11 @@ void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
 
 void CWizWebSettingsDialog::showError()
 {
-    m_movie->stop();
-    m_labelProgress->setVisible(false);
-    m_web->setVisible(true);
-    loadErrorPage();
+    //loadErrorPage();
 }
 
 void CWizWebSettingsWithTokenDialog::load()
 {
-    m_web->setVisible(false);
-    m_labelProgress->setVisible(true);
-
-    m_movie->start();
-
     connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
             SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
 
@@ -145,5 +117,5 @@ void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
     qDebug() << " show web dialog with token : " << u;
 
     //
-    m_web->page()->mainFrame()->load(u);
+    web()->load(u);
 }

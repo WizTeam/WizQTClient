@@ -13,7 +13,6 @@
 #include "wizmactoolbar.h"
 
 class CWizMacToolBarItem;
-class QMacCocoaViewContainer;
 
 
 
@@ -45,7 +44,7 @@ class QMacCocoaViewContainer;
 - (void)addAction:(QAction *)action;
 - (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
 - (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip width:(int)width;
-- (void)addWidget:(QMacCocoaViewContainer *)widget label:(const QString&)label tooltip:(const QString&)tooltip;
+- (void)addCustomView:(CWizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip;
 
 - (void)deleteAllToolBarItem;
 
@@ -55,9 +54,8 @@ class QMacCocoaViewContainer;
 - (void) viewSizeChanged:(NSNotification*)notification;
 - (IBAction)itemClicked:(id)sender;
 
-- (CWizSearchWidget*) getSearchWidget;
+- (CWizSearchView*) getSearchWidget;
 - (NSToolbarItem*) getSearchToolBarItem;
-- (NSToolbarItem*) getWidgetToolBarItemByWidget:(QWidget*) widget;
 @end
 
 

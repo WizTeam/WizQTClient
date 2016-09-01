@@ -4,13 +4,12 @@
 #include <QObject>
 #include <QStringList>
 #include <QUrl>
+#include <QMutex>
+#include <memory>
 
+class QNetworkReply;
 class QNetworkAccessManager;
-
-namespace WizService {
 class AvatarHost;
-
-namespace Internal {
 
 
 class AvatarDownloader : public QObject
@@ -19,10 +18,10 @@ class AvatarDownloader : public QObject
 
 public:
     AvatarDownloader(QObject* parent = 0);
-    Q_INVOKABLE void download(const QString& strUserGUID);
+    Q_INVOKABLE void download(const QString& strUserGUID, bool isSystemAvatar);
 
 private:
-    QNetworkAccessManager* m_net;
+    std::shared_ptr<QNetworkAccessManager> m_net;
     QString m_strCurrentUser;
 
     void fetchUserAvatarEnd(bool bSucceed);
@@ -33,9 +32,7 @@ private:
 
     bool saveDefaultUserAvatar();
     bool save(const QString& strUserGUID, const QByteArray& bytes);
-
-private Q_SLOTS:
-    void on_queryUserAvatar_finished();
+    void queryUserAvatar(const QString& strUrl);
 
 Q_SIGNALS:
     void downloaded(QString strUserGUID, bool bSucceed);
@@ -48,9 +45,10 @@ class AvatarHostPrivate: public QObject
 
 public:
     explicit AvatarHostPrivate(AvatarHost* avatarHost);
-    void load(const QString& strUserID);
+    void load(const QString& strUserID, bool isSystem);
     void reload(const QString& strUserID);
     bool avatar(const QString& strUserID, QPixmap* pixmap);
+    bool systemAvatar(const QString& avatarName, QPixmap* pixmap);
     QPixmap orgAvatar(const QString& strUserID);
     bool customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath);
 
@@ -60,14 +58,21 @@ public:
     QString defaultKey() const;
     bool deleteAvatar(const QString& strUserID);
     //
-    void waitForDone();
 
 private:
     QThread* m_thread;
+    QMutex m_mutex;
     AvatarDownloader* m_downloader;
 
-    QStringList m_listUser; // download pool
-    QString m_strCurrentDownloadingUser;    // current user's id
+
+    struct DownloadingUser
+    {
+        QString userID;
+        bool isSystemAvatar;
+    };
+
+    QList<DownloadingUser> m_listUser; // download pool
+    DownloadingUser m_currentDownloadingUser;    // current user's id
 
     bool loadCache(const QString& strUserID);
     void loadCacheDefault();
@@ -76,19 +81,18 @@ private:
 //    QPixmap loadOrg(const QString& strUserID, bool bForce);
     QPixmap loadOrg(const QString& strUserID);
 
-    void addToDownloadList(const QString& strUserID);
+    void addToDownloadList(const QString& strUserID, bool isSystem);
     void download_impl();
+
+    void appendUserID(const QString& strUserID, bool isSystem);
+    void peekUserID(DownloadingUser& user);
 
     AvatarHost* q;
 
 private Q_SLOTS:
-    void on_thread_started();
     void on_downloaded(QString strUserID, bool bSucceed);
 };
 
-
-} // namespace Internal
-} // namespace WizService
 
 
 #endif // WIZSERVICE_AVATAR_P_H

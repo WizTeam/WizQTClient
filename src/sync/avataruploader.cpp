@@ -10,21 +10,19 @@
 
 #include "apientry.h"
 #include "token.h"
-
-using namespace WizService;
+#include "share/wizEventLoop.h"
 
 AvatarUploader::AvatarUploader(QObject* parent)
     : QObject(parent)
     , m_net(new QNetworkAccessManager(this))
 {
-    connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(onUploadFinished(QNetworkReply*)));
 }
 
 QString AvatarUploader::convert2Avatar(const QString& strFileName)
 {
     QImage image(strFileName);
     if (image.isNull())
-        return NULL;
+        return QString();
 
     if (image.width() > 100 || image.height() > 100) {
         image = image.scaled(100, 100, Qt::IgnoreAspectRatio);
@@ -32,7 +30,7 @@ QString AvatarUploader::convert2Avatar(const QString& strFileName)
 
     QString strTempAvatar = QDir::tempPath() + "/" + QString::number(qrand()) + ".png";
     if (!image.save(strTempAvatar))
-        return NULL;
+        return QString();
 
     return strTempAvatar;
 }
@@ -47,7 +45,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    m_strUrl = WizService::CommonApiEntry::avatarUploadUrl();
+    m_strUrl = CommonApiEntry::avatarUploadUrl();
     if (m_strUrl.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get url for uploading avatar!";
         m_strError = "failed to get url for uploading avatar!";
@@ -55,15 +53,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    connect(Token::instance(), SIGNAL(tokenAcquired(QString)),
-            SLOT(onTokenAcquired(QString)), Qt::QueuedConnection);
-    Token::instance()->requestToken();
-}
-
-void AvatarUploader::onTokenAcquired(const QString& strToken)
-{
-    Token::instance()->disconnect(this);
-
+    QString strToken = Token::token();
     if (strToken.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get token while upload avatar!";
         m_strError = "failed to get token while upload avatar!";
@@ -103,11 +93,10 @@ void AvatarUploader::upload_impl(const QString& strUrl,
     QNetworkRequest request(strUrl);
     QNetworkReply *reply = m_net->post(request, multiPart);
     multiPart->setParent(reply); // delete the multiPart with the reply
-}
 
-void AvatarUploader::onUploadFinished(QNetworkReply* reply)
-{
-    reply->deleteLater();
+
+    CWizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
 
     if (reply->error()) {
         m_strError = "network error! code = " + QString(reply->error());
@@ -115,16 +104,8 @@ void AvatarUploader::onUploadFinished(QNetworkReply* reply)
         return;
     }
 
-    if (!reply->open(QIODevice::ReadOnly)) {
-        m_strError = "failed to open reply!";
-        Q_EMIT uploaded(false);
-        return;
-    }
+    QString strReply = loop.result();
 
-    QString strReply = reply->readAll();
-    reply->close();
-
-    // FIXME
     if (!strReply.contains("200")) {
         m_strError = "server rejected! detail:" + strReply;
         Q_EMIT uploaded(false);

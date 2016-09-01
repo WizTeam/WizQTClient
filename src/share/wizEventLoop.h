@@ -5,18 +5,25 @@
 #include <QNetworkReply>
 #include <QTimer>
 
+/**
+ * NOTE: CWizAutoTimeOutEventLoop would delete network reply at destruct,
+ * should not delete network reply again
+ */
+
 class CWizAutoTimeOutEventLoop : public QEventLoop
 {
     Q_OBJECT
 public:
     explicit CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent = 0);
+    ~CWizAutoTimeOutEventLoop();
     void setTimeoutWaitSeconds(int seconds);
 
 public:
-    QNetworkReply::NetworkError error() { return m_error; }
-    QString errorString() { return m_errorString; }
-    QString result() { return m_result; }
-    bool timeOut() { return m_timeOut; }
+    QNetworkReply::NetworkError error() const { return m_error; }
+    QString errorString() const { return m_errorString; }
+    QByteArray result() const { return m_result; }
+    bool timeOut() const { return m_timeOut; }
+    QNetworkReply* networkReply() const;
 
     int exec(ProcessEventsFlags flags = AllEvents);
 
@@ -32,7 +39,8 @@ protected:
     virtual void doFinished(QNetworkReply* reply);
     virtual void doError(QNetworkReply::NetworkError error);
 
-    QString m_result;
+    QByteArray m_result;
+    QNetworkReply* m_reply;
     QNetworkReply::NetworkError m_error;
     QString m_errorString;
     bool m_timeOut;

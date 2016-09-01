@@ -7,10 +7,7 @@ class QCompleter;
 class QModelIndex;
 class QInputMethodEvent;
 
-namespace Core {
 class CWizDocumentView;
-
-namespace Internal {
 
 class TitleEdit : public QLineEdit
 {
@@ -53,7 +50,5 @@ private Q_SLOTS:
     void onTextChanged(const QString & text);
 };
 
-} // namespace Internal
-} // namespace Core
 
 #endif // CORE_TITLEEDIT_H

@@ -152,9 +152,9 @@ void CWizMacToolBar::addSearch(const QString& label, const QString& tooltip, int
     [d->delegate addSearch:label tooltip:tooltip width: width];
 }
 
-void CWizMacToolBar::addWidget(QMacCocoaViewContainer* widget, const QString& label, const QString& tooltip)
+void CWizMacToolBar::addWidget(CWizCocoaViewContainer* widget, const QString& label, const QString& tooltip)
 {
-    [d->delegate addWidget:widget label:label tooltip:tooltip];
+    [d->delegate addCustomView:widget label:label tooltip:tooltip];
 }
 
 void CWizMacToolBar::deleteAllToolBarItems()
@@ -167,7 +167,7 @@ void CWizMacToolBar::onSearchEndEditing(const QString& str)
     emit doSearch(str);
 }
 
-CWizSearchWidget* CWizMacToolBar::getSearchWidget()
+CWizSearchView* CWizMacToolBar::getSearchWidget()
 {
     return [d->delegate getSearchWidget];
 }
@@ -183,6 +183,7 @@ void CWizMacToolBar::adjustSearchWidgetWidth(int nWidth)
     nsView.frame = f;
 }
 
+/*
 void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
 {
    NSToolbarItem* toolbarItem = [d->delegate getWidgetToolBarItemByWidget: widget];
@@ -196,20 +197,16 @@ void CWizMacToolBar::adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth)
        nsView.frame = f;
    }
 }
+*/
 
 CWizMacFixedSpacer::CWizMacFixedSpacer(QSize sz, QWidget* parent)
-    : QMacCocoaViewContainer(nil, parent)
-    , m_sz(sz)
+    : m_sz(sz)
 {
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    setSizePolicy(sizePolicy);
 }
 
 void CWizMacFixedSpacer::adjustWidth(int width)
 {
      m_sz.setWidth(width);
-     setFixedWidth(width);
-//     setMinimumWidth(width);
 }
 
 
@@ -234,26 +231,81 @@ void CWizMacFixedSpacer::adjustWidth(int width)
 }
 @end
 
-
-CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title,
-                                                           int buttonType, int bezelStyle, int width, QWidget* parent)
-    : QMacCocoaViewContainer(nil, parent)
-    , m_width(width)
+@interface WizSegmentedControl: NSSegmentedControl
 {
-    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
-    [myButton setTitle: WizToNSString(title)];
-    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
-    [myButton setImagePosition: NSImageLeft];
-    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
-    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
+    CWizMacToolBarButtonItem* m_pButtonWidget;
+}
 
-    [myButton setButtonWidget: this];
-    [myButton setTarget:myButton];
-    [myButton setAction:@selector(buttonPressed)];
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget;
+- (void)buttonPressed;
+@end
 
-    setCocoaView(myButton);   
+@implementation WizSegmentedControl
+- (void)setButtonWidget:(CWizMacToolBarButtonItem*)buttonWidget
+{
+    m_pButtonWidget = buttonWidget;
+}
 
-    [myButton release];
+- (void)buttonPressed
+{
+    NSInteger intger = [self selectedSegment];
+
+    if (0 == intger)
+    {
+        m_pButtonWidget->buttonClicked();
+    }
+    else if (1 == intger)
+    {
+        m_pButtonWidget->extraMenuClicked();
+    }
+}
+@end
+
+
+CWizMacToolBarButtonItem::CWizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent)
+    : m_width(width)
+{
+//    WizButtonItem *myButton = [[WizButtonItem alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
+//    [myButton setTitle: WizToNSString(title)];
+//    [myButton setImage: [NSImage imageNamed: NSImageNameAddTemplate]];
+//    [myButton setImagePosition: NSImageLeft];
+//    [myButton setButtonType:NSButtonType(buttonType)]; //Set what type button You want
+//    [myButton setBezelStyle:NSBezelStyle(bezelStyle)]; //Set what style You want
+
+//    [myButton setButtonWidget: this];
+//    [myButton setTarget:myButton];
+//    [myButton setAction:@selector(buttonPressed)];
+
+//    setCocoaView(myButton);
+
+//    [myButton release];
+
+    WizSegmentedControl* button = [[WizSegmentedControl alloc] initWithFrame:NSMakeRect(0, 0, sizeHint().width(), sizeHint().height())];
+    [[button cell] setTrackingMode:NSSegmentSwitchTrackingMomentary];
+    [button setSegmentCount:2];
+
+    [button setLabel:WizToNSString(title) forSegment:0];
+    [button setImage:[NSImage imageNamed: NSImageNameAddTemplate] forSegment:0];
+    [button setWidth:(sizeHint().width() - 24) forSegment:0];
+    //
+    NSSize imageSize;
+    int pixScale = qApp->devicePixelRatio() >= 2 ? 2 : 1;
+    imageSize.width = (CGFloat)extraMenuIcon.width() / pixScale;
+    imageSize.height = (CGFloat)extraMenuIcon.height() / pixScale;
+    NSImage* image = WizToNSImage(extraMenuIcon);
+    [image setSize:imageSize];
+    [button setImage:image forSegment:1];
+    [button setLabel:@"" forSegment:1];
+    [button setWidth:17 forSegment:1];
+
+    //
+    [button setButtonWidget: this];
+    [button setTarget:button];
+    [button setAction:@selector(buttonPressed)];
+
+    setCocoaView(button);
+
+    [button release];
 }
 
 QSize CWizMacToolBarButtonItem::sizeHint() const
@@ -261,9 +313,30 @@ QSize CWizMacToolBarButtonItem::sizeHint() const
      return  QSize(m_width, TOOLBARITEMHEIGHT);
 }
 
+QRect CWizMacToolBarButtonItem::geometry()
+{
+    WizSegmentedControl* button = (WizSegmentedControl *)cocoaView();
+    //
+    NSRect frame = button.bounds;
+    //
+    frame = [button convertRect:frame toView:nil];
+    //
+    NSWindow* window = button.window;
+    NSRect windowFrame = window.frame;
+    CGFloat y = windowFrame.size.height - frame.origin.y;
+    //
+    return QRect(frame.origin.x, (int)y, frame.size.width, frame.size.height);
+}
+
+
 void CWizMacToolBarButtonItem::buttonClicked()
 {
     emit triggered(true);
+}
+
+void CWizMacToolBarButtonItem::extraMenuClicked()
+{
+    emit showExtraMenuRequest();
 }
 
 #endif

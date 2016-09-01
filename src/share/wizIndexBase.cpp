@@ -155,6 +155,11 @@ bool CWizIndexBase::updateTableStructure(int oldVersion)
         Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
     }
     //
+    if (oldVersion < 4) {
+        Exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
+        Exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+    }
+    //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
@@ -435,37 +440,12 @@ bool CWizIndexBase::SQLToStringArray(const CString& strSQL, int nFieldIndex, CWi
     }
 }
 
-bool CWizIndexBase::SQLToDocumentParamDataArray(const CString& strSQL, CWizDocumentParamDataArray& arrayParam)
-{
-    try
-    {
-        CppSQLite3Query query = m_db.execQuery(strSQL);
-        while (!query.eof())
-        {
-            WIZDOCUMENTPARAMDATA data;
-            data.strKbGUID = kbGUID();
-            data.strDocumentGUID = query.getStringField(documentparamDOCUMENT_GUID);
-            data.strName = query.getStringField(documentparamPARAM_NAME);
-            data.strValue = query.getStringField(documentparamPARAM_VALUE);
-
-            arrayParam.push_back(data);
-            query.nextRow();
-        }
-        return true;
-    }
-    catch (const CppSQLite3Exception& e)
-    {
-        return LogSQLException(e, strSQL);
-    }
-}
 
 bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
 {
     try
     {
         CppSQLite3Query query = m_db.execQuery(strSQL);
-        CWizStdStringArray arrayGUID;
-        std::map<CString, int> mapDocumentIndex;
         while (!query.eof())
         {
             WIZDOCUMENTDATA data;
@@ -485,30 +465,19 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
             data.tCreated = query.getTimeField(documentDT_CREATED);
             data.tModified = query.getTimeField(documentDT_MODIFIED);
             data.tAccessed = query.getTimeField(documentDT_ACCESSED);
-            data.nIconIndex = query.getIntField(documentDOCUMENT_ICON_INDEX);
-            data.nSync = query.getIntField(documentDOCUMENT_SYNC);
             data.nProtected = query.getIntField(documentDOCUMENT_PROTECT);
             data.nReadCount = query.getIntField(documentDOCUMENT_READ_COUNT);
             data.nAttachmentCount = query.getIntField(documentDOCUMENT_ATTACHEMENT_COUNT);
             data.nIndexed = query.getIntField(documentDOCUMENT_INDEXED);
-            data.tInfoModified = query.getTimeField(documentDT_INFO_MODIFIED);
-            data.strInfoMD5 = query.getStringField(documentDOCUMENT_INFO_MD5);
             data.tDataModified = query.getTimeField(documentDT_DATA_MODIFIED);
             data.strDataMD5 = query.getStringField(documentDOCUMENT_DATA_MD5);
-            data.tParamModified = query.getTimeField(documentDT_PARAM_MODIFIED);
-            data.strParamMD5 = query.getStringField(documentDOCUMENT_PARAM_MD5);
             data.nVersion = query.getInt64Field(documentVersion);
+            data.nInfoChanged = query.getIntField(documentINFO_CHANGED);
+            data.nDataChanged = query.getIntField(documentDATA_CHANGED);
 
-            arrayGUID.push_back(data.strGUID);
             arrayDocument.push_back(data);
-            mapDocumentIndex[data.strGUID] = int(arrayDocument.size() - 1);
             query.nextRow();
         }
-
-        if (!arrayGUID.empty()) {
-            InitDocumentExFields(arrayDocument, arrayGUID, mapDocumentIndex);
-        }
-
         return true;
     }
     catch (const CppSQLite3Exception& e)
@@ -516,9 +485,6 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
         return LogSQLException(e, strSQL);
     }
 }
-
-
-
 
 bool CWizIndexBase::SQLToDocumentAttachmentDataArray(const CString& strSQL,
                                                      CWizDocumentAttachmentDataArray& arrayAttachment)
@@ -1026,20 +992,22 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
         TIME2SQL(data.tModified).utf16(),
         TIME2SQL(data.tAccessed).utf16(),
 
-        data.nIconIndex,
-        data.nSync,
-        data.nProtected,
-        data.nReadCount,
-        data.nAttachmentCount,
-        data.nIndexed,
+        0,//data.nIconIndex,
+        0,//data.nSync,
+        (int)data.nProtected,
+        (int)data.nReadCount,
+        (int)data.nAttachmentCount,
+        (int)data.nIndexed,
 
-        TIME2SQL(data.tInfoModified).utf16(),
-        STR2SQL(data.strInfoMD5).utf16(),
+        TIME2SQL(data.tModified).utf16(),//TIME2SQL(data.tInfoModified).utf16(),
+        STR2SQL(data.strDataMD5).utf16(),//STR2SQL(data.strInfoMD5).utf16(),
         TIME2SQL(data.tDataModified).utf16(),
         STR2SQL(data.strDataMD5).utf16(),
-        TIME2SQL(data.tParamModified).utf16(),
-        STR2SQL(data.strParamMD5).utf16(),
-        WizInt64ToStr(data.nVersion).utf16()
+        TIME2SQL(data.tModified).utf16(),//TIME2SQL(data.tParamModified).utf16(),
+        STR2SQL(data.strDataMD5).utf16(),//STR2SQL(data.strParamMD5).utf16(),
+        WizInt64ToStr(data.nVersion).utf16(),
+        (int)data.nInfoChanged,
+        (int)data.nDataChanged
     );
 
     if (!ExecSQL(strSQL))
@@ -1083,6 +1051,16 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 
         TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
     }
+    //
+    if (data.nVersion >= 0)
+    {
+        if (data.nDataChanged || data.nInfoChanged)
+        {
+            qDebug() << "fault error: data changed or info changed is not false";
+            data.nDataChanged = 0;
+            data.nInfoChanged = 0;
+        }
+    }
 
     CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT);
 
@@ -1104,20 +1082,22 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         TIME2SQL(data.tModified).utf16(),
         TIME2SQL(data.tAccessed).utf16(),
 
-        data.nIconIndex,
-        data.nSync,
-        data.nProtected,
-        data.nReadCount,
-        data.nAttachmentCount,
-        data.nIndexed,
+        0,//data.nIconIndex,
+        0,//data.nSync,
+        (int)data.nProtected,
+        (int)data.nReadCount,
+        (int)data.nAttachmentCount,
+        (int)data.nIndexed,
 
-        TIME2SQL(data.tInfoModified).utf16(),
-        STR2SQL(data.strInfoMD5 ).utf16(),
+        TIME2SQL(data.tDataModified).utf16(),//TIME2SQL(data.tInfoModified).utf16(),
+        STR2SQL(data.strDataMD5 ).utf16(),//STR2SQL(data.strInfoMD5 ).utf16(),
         TIME2SQL(data.tDataModified).utf16(),
         STR2SQL(data.strDataMD5 ).utf16(),
-        TIME2SQL(data.tParamModified).utf16(),
-        STR2SQL(data.strParamMD5 ).utf16(),
+        TIME2SQL(data.tDataModified).utf16(),//TIME2SQL(data.tParamModified).utf16(),
+        STR2SQL(data.strDataMD5 ).utf16(),//STR2SQL(data.strParamMD5 ).utf16(),
         WizInt64ToStr(data.nVersion).utf16(),
+        (int)data.nInfoChanged,
+        (int)data.nDataChanged,
 
         STR2SQL(data.strGUID).utf16()
     );
@@ -1260,6 +1240,36 @@ bool CWizIndexBase::GetAllTags(CWizTagDataArray& arrayTag)
 {
     CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
     return SQLToTagDataArray(strSQL, arrayTag);
+}
+
+bool CWizIndexBase::GetAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
+{
+    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
+    try
+    {
+        CppSQLite3Query query = m_db.execQuery(strSQL);
+        while (!query.eof())
+        {
+            WIZTAGDATA data;
+            data.strKbGUID = kbGUID();
+            data.strGUID = query.getStringField(tagTAG_GUID);
+            data.strParentGUID = query.getStringField(tagTAG_GROUP_GUID);
+            data.strName = query.getStringField(tagTAG_NAME);
+            data.strDescription = query.getStringField(tagTAG_DESCRIPTION);
+            data.tModified = query.getTimeField(tagDT_MODIFIED);
+            data.nVersion = query.getInt64Field(tagVersion);
+            data.nPostion = query.getInt64Field(tagTAG_POS);
+
+            mapTag.insert(std::make_pair(data.strParentGUID, data));
+            query.nextRow();
+        }
+
+        return true;
+    }
+    catch (const CppSQLite3Exception& e)
+    {
+        return LogSQLException(e, strSQL);
+    }
 }
 
 bool CWizIndexBase::GetRootTags(CWizTagDataArray& arrayTag)
@@ -1456,46 +1466,6 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
 
     data = arrayDocument[0];
     return true;
-}
-
-bool CWizIndexBase::DocumentWithExFieldsFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
-{
-    if (DocumentFromGUID(strDocumentGUID, data))
-    {
-        CString strParamSQL = WizFormatString1(_T("select DOCUMENT_GUID, PARAM_NAME, PARAM_VALUE from WIZ_DOCUMENT_PARAM where (PARAM_NAME='DOCUMENT_FLAGS' or PARAM_NAME='RATE' or PARAM_NAME='SYSTEM_TAGS') and DOCUMENT_GUID = '%1'"), strDocumentGUID);
-
-        CppSQLite3Query queryParam = m_db.execQuery(strParamSQL);
-        while (!queryParam.eof())
-        {
-            CString strGUID = queryParam.getStringField(0);
-            CString strParamName = queryParam.getStringField(1);
-
-            if (strGUID == data.strGUID)
-            {
-                if (strParamName == _T(TABLE_KEY_WIZ_DOCUMENT_PARAM_FLAGS))
-                {
-                    int nFlags = queryParam.getIntField(2);
-                    data.nFlags = nFlags;
-                }
-                else if (strParamName == _T("RATE"))
-                {
-                    int nRate = queryParam.getIntField(2);
-                    data.nRate = nRate;
-                }
-                else if (strParamName == _T("SYSTEM_TAGS"))
-                {
-                    CString strSystemTags = queryParam.getStringField(2);
-                    data.strSystemTags = strSystemTags;
-                }
-            }
-
-            queryParam.nextRow();
-        }
-
-        return true;
-    }
-
-    return false;
 }
 
 bool CWizIndexBase::GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment)

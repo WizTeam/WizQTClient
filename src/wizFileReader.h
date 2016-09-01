@@ -1,39 +1,35 @@
 #ifndef WIZFILEREADER_H
 #define WIZFILEREADER_H
 
-#include <QThread>
-#include <QStringList>
+#include "share/wizDatabaseManager.h"
 
-class CWizFileReader : public QThread
+class WIZTAGDATA;
+
+class CWizFileImporter : public QObject
 {
     Q_OBJECT
 public:
-    explicit CWizFileReader(QObject *parent = 0);
+    explicit CWizFileImporter(CWizDatabaseManager& dbMgr,QObject *parent = 0);
 
-    void loadFiles(const QStringList& strFiles);
+    void importFiles(const QStringList& strFiles, const QString& strTargetFolderLocation);
+    void importFiles(const QStringList& strFiles, const QString& strKbGUID, const WIZTAGDATA& tag);
+    void importFiles(const QStringList& strFiles, const QString& strKbGUID, const QString& strTargetFolderLocation, const WIZTAGDATA& tag);
 
     QString loadHtmlFileToHtml(const QString& strFileName);
     QString loadTextFileToHtml(const QString& strFileName);
     QString loadImageFileToHtml(const QString& strFileName);
-    QString loadRtfFileToHtml(const QString& strFileName);
-
+    //
 signals:
-    void fileLoaded(QString strHtml, QString strTitle);
-    void fileLoadFailed(const QString& strFileName);
-    void loadFinished();
-    void loadProgress(int total,int loaded);
-    void htmlFileloaded(const QString &strFileName, const QString& strHtml,
-                     const QString& strTitle);
-    void richTextFileLoaded(const QString& strHtml, const QString& strTitle,
-                         const QString& strFileName);
+    void importFinished(bool ok, const QString& text, const QString& kbGuid);
+    void importProgress(int total,int loaded);
 
-public slots:
-
-protected:
-    void run();
 
 private:
-    QStringList m_files;
+    bool importFile(const QString& strFile, const QString& strKbGUID, const QString& strLocation, const WIZTAGDATA& tag);
+
+private:
+    CWizDatabaseManager& m_dbMgr;
+    QString m_strKbGuid;
 };
 
 #endif // WIZFILEREADER_H

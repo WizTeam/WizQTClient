@@ -3,8 +3,6 @@
 
 #include <QObject>
 
-namespace WizService {
-
 class NoteComments : public QObject
 {
     Q_OBJECT
@@ -16,6 +14,5 @@ public:
 
 };
 
-} // namespace WizService
 
 #endif // WIZSERVICE_NOTECOMMENTS_H

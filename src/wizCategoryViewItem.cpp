@@ -7,7 +7,6 @@
 #include <QStyle>
 #include <QDebug>
 
-#include <extensionsystem/pluginmanager.h>
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 #include "utils/notify.h"
@@ -23,8 +22,10 @@
 #include "widgets/wizTipsWidget.h"
 
 #include "wizdef.h"
-#include "share/wizsettings.h"
 #include "wiznotestyle.h"
+
+#include "share/wizsettings.h"
+#include "share/wizGlobal.h"
 #include "share/wizDatabaseManager.h"
 #include "share/wizmisc.h"
 
@@ -37,15 +38,14 @@
 
 #define WIZ_CATEGORY_SECTION_GENERAL QObject::tr("General")
 #define WIZ_CATEGORY_SECTION_PERSONAL QObject::tr("Personal Notes")
-#define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team & Groups")
+#define WIZ_CATEGORY_SECTION_GROUPS QObject::tr("Team Notes")
 
-#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag doucment form document list")
+#define WIZ_CATEGORY_SHOTCUT_PLACEHOLD QObject::tr("Drag note form note list")
 
 
 const int nNumberButtonHeight = 14;
 const int nNumberButtonHorizontalMargin = 3;
 
-using namespace Core;
 
 /* ------------------------------ CWizCategoryViewItemBase ------------------------------ */
 
@@ -60,7 +60,7 @@ CWizCategoryViewItemBase::CWizCategoryViewItemBase(CWizExplorerApp& app,
 {
 }
 
-void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewItemBase::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     bool bSelected = vopt->state.testFlag(QStyle::State_Selected);
 
@@ -257,7 +257,7 @@ QString CWizCategoryViewItemBase::getExtraButtonToolTip() const
     return "";
 }
 
-void CWizCategoryViewItemBase::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewItemBase::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
 
 
@@ -367,7 +367,7 @@ CWizCategoryViewSectionItem::CWizCategoryViewSectionItem(CWizExplorerApp& app, c
 
 int CWizCategoryViewSectionItem::getItemHeight(int /*nHeight*/) const
 {    
-    return 32;
+    return WizSmartScaleUI(32);
 }
 void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrder)
 {
@@ -377,7 +377,7 @@ void CWizCategoryViewSectionItem::reset(const QString& sectionName, int sortOrde
     setText(0, sectionName);
 }
 
-void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QString str = vopt->text;
     QRect rc(vopt->rect);
@@ -387,7 +387,7 @@ void CWizCategoryViewSectionItem::drawItemBody(QPainter *p, const QStyleOptionVi
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignVCenter, Utils::StyleHelper::treeViewSectionItemText(), font);
 }
 
-void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewSectionItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
 //    QRect rc = vopt->rect;
 //    rc.setTop(rc.bottom());
@@ -527,7 +527,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 //void CWizCategoryViewMessageItem::showCoachingTips()
 //{
 //    bool showTips = false;
-//    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//    if (MainWindow* mainWindow = MainWindow::instance())
 //    {
 //        showTips = mainWindow->userSettings().get(CATEGORYMESSAGEITEMTIPSCHECKED).toInt() == 0;
 //    }
@@ -544,7 +544,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 //        tipWidget->setSizeHint(QSize(280, 60));
 //        tipWidget->setButtonVisible(false);
 //        tipWidget->bindFunction([](){
-//            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+//            if (MainWindow* mainWindow = MainWindow::instance())
 //            {
 //                mainWindow->userSettings().set(CATEGORYMESSAGEITEMTIPSCHECKED, "1");
 //            }
@@ -557,7 +557,7 @@ QRect CWizCategoryViewMessageItem::getExtraButtonRect(const QRect& itemBorder, b
 void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& text, bool isPressed)
 {
     QFont f;
-    f.setPixelSize(10);
+    f.setPixelSize(::WizSmartScaleUI(10));
     p->setFont(f);
     p->setPen("999999");
     //
@@ -580,7 +580,7 @@ void drawClickableUnreadButton(QPainter* p, const QRect& rcd, const QString& tex
     }
 }
 
-void CWizCategoryViewMessageItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewMessageItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem *vopt) const
 {
     if (!m_nUnread)
         return;
@@ -674,16 +674,11 @@ void CWizCategoryViewShortcutRootItem::drop(const CWizDocumentDataArray& arrayDo
 
     if (changed)
     {
-#if QT_VERSION < 0x050400
-        CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
-        QTimer::singleShot(200, categoryView, SLOT(saveShortcutState()));
-#else
         QTimer::singleShot(200, [this]() {
             CWizCategoryView* categoryView = dynamic_cast<CWizCategoryView*>(treeWidget());
             Q_ASSERT(categoryView);
             categoryView->saveShortcutState();
         });
-#endif
     }
 }
 
@@ -733,6 +728,10 @@ CWizCategoryViewShortcutItem* CWizCategoryViewShortcutRootItem::addItemToShortcu
         const CWizCategoryViewGroupItem* groupItem = dynamic_cast<const CWizCategoryViewGroupItem*>(pItem);
         newItem = new CWizCategoryViewShortcutItem(m_app, groupItem->tag().strName, CWizCategoryViewShortcutItem::GroupTag,
                                                     groupItem->tag().strKbGUID, groupItem->tag().strGUID, "");
+    }
+    else
+    {
+        return nullptr;
     }
     //
     for (int i = 0; i < childCount(); i++)
@@ -876,8 +875,7 @@ CWizCategoryViewAllFoldersItem::CWizCategoryViewAllFoldersItem(CWizExplorerApp& 
 
 void CWizCategoryViewAllFoldersItem::getDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument)
 {
-//    db.GetAllDocuments(arrayDocument);
-    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%'", arrayDocument);
+    db.GetDocumentsBySQLWhere("DOCUMENT_LOCATION not like '/Deleted Items/%' order by DT_DATA_MODIFIED desc limit 1000", arrayDocument);
 }
 
 bool CWizCategoryViewAllFoldersItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
@@ -1001,21 +999,14 @@ void CWizCategoryViewFolderItem::drop(const CWizDocumentDataArray& arrayDocument
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(location()));
-        documentOperator->copyDocumentsToPersonalFolder(arrayOp, location(), false, true, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToPersonalFolder(arrayOp, location(), false, true, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(location()));
-        documentOperator->moveDocumentsToPersonalFolder(arrayOp, location(), window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToPersonalFolder(arrayOp, location(), false);
     }    
 }
 
@@ -1052,7 +1043,7 @@ bool CWizCategoryViewFolderItem::operator < (const QTreeWidgetItem &other) const
     {
         int nThis = 0, nOther = 0;
         if (!pOther->location().isEmpty()) {
-            QSettings* setting = ExtensionSystem::PluginManager::settings();
+            QSettings* setting = WizGlobal::settings();
 //            qDebug() << "pother location : " << pOther->location() << "  this location : " << location();
             nOther = setting->value("FolderPosition/" + pOther->location()).toInt();
             nThis = setting->value("FolderPosition/" + location()).toInt();
@@ -1304,7 +1295,7 @@ bool CWizCategoryViewGroupsRootItem::accept(CWizDatabase& db, const WIZDOCUMENTD
             continue;
 
         if (pGroup->kbGUID() == data.strKbGUID) {
-            if (data.tDataModified > t || data.tInfoModified > t || data.tParamModified > t)
+            if (data.tDataModified > t)
                 return true;
         }
     }
@@ -1380,7 +1371,7 @@ void CWizCategoryViewBizGroupRootItem::getDocuments(CWizDatabase& db, CWizDocume
     }
 }
 
-void CWizCategoryViewBizGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewBizGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     if (isUnreadButtonUseable())
     {
@@ -1620,7 +1611,7 @@ void CWizCategoryViewGroupRootItem::getDocuments(CWizDatabase& db, CWizDocumentD
     }
     else
     {
-        db.getLastestDocuments(arrayDocument);
+        db.getLastestDocuments(arrayDocument, 1000);
     }
 }
 
@@ -1680,30 +1671,23 @@ void CWizCategoryViewGroupRootItem::drop(const CWizDocumentDataArray& arrayDocum
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
 
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
         WIZTAGDATA tag;
         tag.strKbGUID = m_strKbGUID;
-        documentOperator->copyDocumentsToGroupFolder(arrayOp, tag, false, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToGroupFolder(arrayOp, tag, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
         WIZTAGDATA tag;
         tag.strKbGUID = m_strKbGUID;
-        documentOperator->moveDocumentsToGroupFolder(arrayOp, tag, window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToGroupFolder(arrayOp, tag, true);
     }
 }
 
-void CWizCategoryViewGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizCategoryViewGroupRootItem::drawExtraBadge(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     //
     if (m_nUnread > 0)
@@ -1742,6 +1726,15 @@ void CWizCategoryViewGroupRootItem::mousePressed(const QPoint& pos)
 void CWizCategoryViewGroupRootItem::mouseReleased(const QPoint& pos)
 {
     m_extraButtonIconPressed = false;
+}
+
+bool CWizCategoryViewGroupRootItem::operator<(const QTreeWidgetItem& other) const
+{
+    if (other.type() != Category_GroupRootItem)
+        return QTreeWidgetItem::operator <(other);
+
+    const CWizCategoryViewGroupRootItem* pItem = dynamic_cast<const CWizCategoryViewGroupRootItem*>(&other);
+    return Utils::Misc::localeAwareCompare(m_group.strGroupName, pItem->m_group.strGroupName);
 }
 
 bool CWizCategoryViewGroupRootItem::isAdmin(CWizDatabase& db)
@@ -1987,22 +1980,16 @@ void CWizCategoryViewGroupItem::drop(const CWizDocumentDataArray& arrayDocument,
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
+
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
 
     if (needCopy)
     {
-        progress->setWindowTitle(QObject::tr("Copy note to %1").arg(name()));
-        documentOperator->copyDocumentsToGroupFolder(arrayOp, m_tag, false, window->downloaderHost());
-        progress->exec();
+        documentOperator.copyDocumentsToGroupFolder(arrayOp, m_tag, false, true);
     }
     else
     {
-        progress->setWindowTitle(QObject::tr("Move note to %1").arg(name()));
-        documentOperator->moveDocumentsToGroupFolder(arrayOp, m_tag, window->downloaderHost());
-        progress->exec();
+        documentOperator.moveDocumentsToGroupFolder(arrayOp, m_tag, true);
     }
 }
 
@@ -2069,6 +2056,9 @@ void CWizCategoryViewTrashItem::getDocuments(CWizDatabase& db, CWizDocumentDataA
 
 bool CWizCategoryViewTrashItem::accept(CWizDatabase& db, const WIZDOCUMENTDATA& data)
 {
+    if (kbGUID() != data.strKbGUID)
+        return false;
+    //
     return db.IsInDeletedItems(data.strLocation);
 }
 
@@ -2102,13 +2092,8 @@ void CWizCategoryViewTrashItem::drop(const CWizDocumentDataArray& arrayDocument,
     if (arrayOp.empty())
         return;
 
-    Internal::MainWindow* window = qobject_cast<Internal::MainWindow *>(m_app.mainWindow());
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_app.databaseManager());
-    CWizProgressDialog* progress = window->progressDialog();
-    documentOperator->bindSignalsToProgressDialog(progress);
-    progress->setWindowTitle(QObject::tr("Delete note"));
-    documentOperator->deleteDocuments(arrayOp);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_app.databaseManager());
+    documentOperator.deleteDocuments(arrayOp);
 }
 
 
@@ -2204,7 +2189,24 @@ bool CWizCategoryViewShortcutItem::accept(CWizDatabase& db, const WIZDOCUMENTDAT
 {
     switch (m_type) {
     case Document:
-        return data.strGUID == m_strGuid;
+        //现在笔记列表会显示快捷方式中笔记所在文件夹的所有笔记，所以允许该文件夹下所有笔记
+    {
+        if(db.IsGroup())
+        {
+            CWizStdStringArray arrayTag1;
+            db.GetDocumentTags(data.strGUID, arrayTag1);
+            CWizStdStringArray arrayTag2;
+            m_app.databaseManager().db(m_strKbGUID).GetDocumentTags(m_strGuid, arrayTag2);
+
+            return (arrayTag1.size() == 1 && arrayTag2.size() == 1 && arrayTag1.front() == arrayTag2.front());
+        }
+        else
+        {
+            WIZDOCUMENTDATA doc;
+            m_app.databaseManager().db(m_strKbGUID).DocumentFromGUID(m_strGuid, doc);
+            return doc.strLocation == data.strLocation;
+        }
+    }
         break;
     case PersonalFolder:
         return data.strLocation == m_location;
@@ -2250,10 +2252,10 @@ CWizCategoryViewShortcutPlaceHoldItem::CWizCategoryViewShortcutPlaceHoldItem(
 
 int CWizCategoryViewShortcutPlaceHoldItem::getItemHeight(int /*hintHeight*/) const
 {
-    return 20;
+    return WizSmartScaleUI(20);
 }
 
-void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QRect rcIcon = treeWidget()->style()->subElementRect(QStyle::SE_ItemViewItemDecoration, vopt, treeWidget());
     QRect rcText(rcIcon.right() + 8, vopt->rect.top(), vopt->rect.right() - rcIcon.right() - 24,
@@ -2266,7 +2268,7 @@ void CWizCategoryViewShortcutPlaceHoldItem::drawItemBody(QPainter *p, const QSty
         colorText.setAlpha(240);
         p->setPen(colorText);
         QFont f;
-        f.setPixelSize(10);
+        f.setPixelSize(::WizSmartScaleUI(10));
         f.setStyleStrategy(QFont::PreferBitmap);
         QFontMetrics fm(f);
         strText = fm.elidedText(strText, Qt::ElideRight, rcText.width());
@@ -2408,13 +2410,13 @@ void CWizCategoryViewCustomSearchItem::setSearchScope(int nSearchScope)
     m_nSearchScope = nSearchScope;
 }
 
-void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewItemV4 *vopt) const
+void CWizCategoryViewLinkItem::drawItemBody(QPainter *p, const QStyleOptionViewItem *vopt) const
 {
     QString str = vopt->text;
     QRect rc(vopt->rect);
     rc.setLeft(rc.left() + 16);
     QFont fontLink = p->font();
-    fontLink.setItalic(true);
-    fontLink.setPixelSize(12);
+    //fontLink.setItalic(true);
+    fontLink.setPixelSize(::WizSmartScaleUI(12));
     Utils::StyleHelper::drawSingleLineText(p, rc, str, Qt::AlignTop, Utils::StyleHelper::treeViewItemLinkText(), fontLink);
 }

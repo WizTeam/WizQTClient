@@ -14,7 +14,6 @@
 
 
 @interface IAPHelper : NSObject <SKProductsRequestDelegate, SKPaymentTransactionObserver> {
-    NSSet * _productIdentifiers;
     NSArray * _products;
     NSMutableSet * _purchasedProducts;
     SKProductsRequest * _request;
@@ -27,8 +26,7 @@
 @property (retain) SKProductsRequest *request;
 @property CWizIAPHelperPrivate *container;
 
-- (void)requestProducts;
-- (id)initWithProductIdentifiers:(NSSet *)productIdentifiers;
+- (void)requestProducts:(NSMutableSet *)productIdentifiers;
 - (void)buyProduct:(SKProduct *)product;
 - (void)buyProductIdentifier:(NSString *)productIdentifier;
 - (NSData *)loadLocalReceipt;
@@ -42,7 +40,7 @@
         CWizIAPHelperPrivate(CWizIAPHelper* container);
         ~CWizIAPHelperPrivate();
 
-        void requestProducts();
+        void requestProducts(const QList<QString>& productIdList);
         void loadLocalReceipt(QByteArray& receipt);
         void onProductsLoaded(const QList<CWizIAPProduct>& productList);
         void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
@@ -59,38 +57,14 @@
 
 
 @implementation IAPHelper
-@synthesize productIdentifiers = _productIdentifiers;
 @synthesize products = _products;
 @synthesize purchasedProducts = _purchasedProducts;
 @synthesize request = _request;
 
-- (id)initWithProductIdentifiers:(NSSet *)productIdentifiers {
-    if ((self = [super init])) {
-
-        // Store product identifiers
-        _productIdentifiers = [productIdentifiers retain];
-
-        // Check for previously purchased products
-//        NSMutableSet * purchasedProducts = [NSMutableSet set];
-//        for (NSString * productIdentifier in _productIdentifiers) {
-//            BOOL productPurchased = [[NSUserDefaults standardUserDefaults] boolForKey:productIdentifier];
-//            if (productPurchased) {
-//                [purchasedProducts addObject:productIdentifier];
-//                NSLog(@"Previously purchased: %@", productIdentifier);
-//            }
-//            NSLog(@"Not purchased: %@", productIdentifier);
-//        }
-//        self.purchasedProducts = purchasedProducts;
-
-    }
-
-    return self;
-}
-
-- (void)requestProducts {
-
-    self.request = [[[SKProductsRequest alloc] initWithProductIdentifiers:_productIdentifiers] autorelease];
-     [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
+- (void)requestProducts:(NSMutableSet *)productIdentifiers {
+    NSLog(@"identifiers : @%", productIdentifiers);
+    self.request = [[[SKProductsRequest alloc] initWithProductIdentifiers:productIdentifiers] autorelease];
+    [[SKPaymentQueue defaultQueue] addTransactionObserver:self];
     _request.delegate = self;
     [_request start];
 
@@ -284,7 +258,7 @@
     if (![verctor verifyAppReceipt])
     {
         NSLog(@"Valide receipt failed");
-        exit(173);
+        //exit(173);
     }
 #endif
 }
@@ -292,8 +266,6 @@
 
 - (void)dealloc
 {
-    [_productIdentifiers release];
-    _productIdentifiers = nil;
     [_products release];
     _products = nil;
     [_purchasedProducts release];
@@ -306,9 +278,8 @@
 @end
 
 CWizIAPHelperPrivate::CWizIAPHelperPrivate(CWizIAPHelper* container)
-{
-    NSSet *idSet = [NSSet setWithObjects : @"cn.wiz.wiznote.mac.pro.monthly", @"cn.wiz.wiznote.mac.pro.yearly", nil];
-    m_helper = [[IAPHelper alloc] initWithProductIdentifiers : idSet];
+{    
+    m_helper = [[IAPHelper alloc] init];
     m_helper.container = this;
     m_container = container;
 }
@@ -318,9 +289,15 @@ CWizIAPHelperPrivate::~CWizIAPHelperPrivate()
     [m_helper dealloc];
 }
 
-void CWizIAPHelperPrivate::requestProducts()
+void CWizIAPHelperPrivate::requestProducts(const QList<QString>& productIdList)
 {
-    [m_helper requestProducts];
+    NSMutableSet *idSet = [[[NSMutableSet alloc] init] autorelease];
+    for (QString product : productIdList)
+    {
+        NSString* nsProduct = WizToNSString(product);
+        [idSet addObject:nsProduct];
+    }
+    [m_helper requestProducts:idSet];
 }
 
 void CWizIAPHelperPrivate::loadLocalReceipt(QByteArray& receipt)
@@ -373,9 +350,9 @@ void CWizIAPHelper::purchaseProduct(const QString& strID)
     m_helper->purchaseProduct(strID);
 }
 
-void CWizIAPHelper::requestProducts()
+void CWizIAPHelper::requestProducts(const QList<QString>& productIdList)
 {
-    m_helper->requestProducts();
+    m_helper->requestProducts(productIdList);
 }
 
 void CWizIAPHelper::loadLocalReceipt(QByteArray& receipt)

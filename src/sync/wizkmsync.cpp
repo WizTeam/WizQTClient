@@ -9,8 +9,6 @@
 #include "../share/wizDatabase.h"
 #include "sync_p.h"
 
-using namespace WizService;
-
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 void CWizKMSyncEvents::OnSyncProgress(int pos)
@@ -103,7 +101,8 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
-#define DEFAULT_FULL_SYNC_INTERVAL 15 * 60
+#define DEFAULT_FULL_SYNC_SECONDS_INTERVAL 15 * 60
+#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 1000
 
 static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
@@ -113,8 +112,9 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_bNeedDownloadMessages(false)
     , m_pEvents(NULL)
     , m_bBackground(true)
-    , m_mutex(QMutex::Recursive)
-    , m_nfullSyncInterval(DEFAULT_FULL_SYNC_INTERVAL)
+    , m_nFullSyncSecondsInterval(DEFAULT_FULL_SYNC_SECONDS_INTERVAL)
+    , m_bBusy(false)
+    , m_bPause(false)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -123,6 +123,11 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
     connect(m_pEvents, SIGNAL(bubbleNotificationRequest(const QVariant&)), SIGNAL(bubbleNotificationRequest(const QVariant&)));
+
+    m_timer.setSingleShot(true);
+    connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));
+    connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
+    connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
     //
     g_pSyncThread = this;
 }
@@ -133,20 +138,23 @@ CWizKMSyncThread::~CWizKMSyncThread()
 
 void CWizKMSyncThread::run()
 {
-    while (1)
+    while (!m_pEvents->IsStop())
     {
+        m_mutex.lock();
+        m_wait.wait(&m_mutex, 1000 * 3);
+        m_mutex.unlock();
+
         if (m_pEvents->IsStop())
         {
             return;
         }
         //
-        if (doSync())
-        {
-        }
-        else
-        {
-            sleep(1);    //idle
-        }
+        if (m_bPause)
+            continue;
+        //
+        m_bBusy = true;
+        doSync();
+        m_bBusy = false;
     }
 }
 
@@ -160,10 +168,26 @@ void CWizKMSyncThread::syncAfterStart()
 #endif
 }
 
+void CWizKMSyncThread::on_timerOut()
+{
+    m_mutex.lock();
+    m_wait.wakeAll();
+    m_mutex.unlock();
+}
+
 void CWizKMSyncThread::startSyncAll(bool bBackground)
 {
+    m_mutex.lock();
     m_bNeedSyncAll = true;
     m_bBackground = bBackground;
+
+    m_wait.wakeAll();
+    m_mutex.unlock();
+}
+
+bool CWizKMSyncThread::isBackground() const
+{
+    return m_bBackground;
 }
 
 
@@ -172,7 +196,7 @@ bool CWizKMSyncThread::prepareToken()
     QString token = Token::token();
     if (token.isEmpty())
     {
-        Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage());
+        Q_EMIT syncFinished(Token::lastErrorCode(), Token::lastErrorMessage(), isBackground());
         return false;
     }
     //
@@ -190,12 +214,14 @@ bool CWizKMSyncThread::doSync()
         syncAll();
         m_bNeedSyncAll = false;
         m_tLastSyncAll = QDateTime::currentDateTime();
+        emit startTimer(m_nFullSyncSecondsInterval * 1000 + 1);
         return true;
     }
     else if (needQuickSync())
     {
         qDebug() << "[Sync] quick syncing started, thread:" << QThread::currentThreadId();
         //
+        m_bBackground = true;
         quickSync();
         return true;
     }
@@ -235,9 +261,10 @@ bool CWizKMSyncThread::needSyncAll()
 
     QDateTime tNow = QDateTime::currentDateTime();
     int seconds = m_tLastSyncAll.secsTo(tNow);
-    if (m_nfullSyncInterval > 0 && seconds > m_nfullSyncInterval)
+    if (m_nFullSyncSecondsInterval > 0 && seconds > m_nFullSyncSecondsInterval)
     {
         m_bNeedSyncAll = true;
+        m_bBackground = true;
     }
 
     return m_bNeedSyncAll;
@@ -255,7 +282,10 @@ public:
     }
     ~CWizKMSyncThreadHelper()
     {
-        Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode(), "");
+        Q_EMIT m_pThread->syncFinished(m_pThread->m_pEvents->GetLastErrorCode()
+                                       , m_pThread->m_pEvents->GetLastErrorMessage()
+                                       , m_pThread->isBackground());
+        m_pThread->m_pEvents->ClearLastErrorMessage();
     }
 };
 
@@ -315,7 +345,7 @@ bool CWizKMSyncThread::quickSync()
                 userInfo.strDatabaseServer = group.strDatabaseServer;
                 if (userInfo.strDatabaseServer.isEmpty())
                 {
-                    userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+                    userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
                 }
                 //
                 CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
@@ -328,7 +358,6 @@ bool CWizKMSyncThread::quickSync()
                 m_db.CloseGroupDatabase(pGroupDatabase);
             }
         }
-
     }
     //
     //
@@ -355,7 +384,7 @@ void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    CWizKMAccountsServer serser(WizService::CommonApiEntry::syncUrl());
+    CWizKMAccountsServer serser(CommonApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
     }
@@ -369,13 +398,7 @@ bool CWizKMSyncThread::needQuickSync()
     if (m_setQuickSyncKb.empty())
         return false;
     //
-    QDateTime tNow = QDateTime::currentDateTime();
-    int seconds = m_tLastKbModified.secsTo(tNow);
-    //
-    if (seconds >= 3)
-        return true;
-    //
-    return false;
+    return true;
 }
 
 bool CWizKMSyncThread::needDownloadMessage()
@@ -394,15 +417,20 @@ bool CWizKMSyncThread::needDownloadMessage()
 
 void CWizKMSyncThread::stopSync()
 {
-    if (isRunning() && m_pEvents) {
+    if (isRunning() && m_pEvents)
+    {
         m_pEvents->SetStop(true);
+        m_mutex.lock();
+        m_wait.wakeAll();
+        m_mutex.unlock();
     }
 }
 
 void CWizKMSyncThread::setFullSyncInterval(int nMinutes)
 {
-    m_nfullSyncInterval = nMinutes * 60;
+    m_nFullSyncSecondsInterval = nMinutes * 60;
 }
+
 void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
 {
     QMutexLocker locker(&m_mutex);
@@ -411,6 +439,8 @@ void CWizKMSyncThread::addQuickSyncKb(const QString& kbGuid)
     m_setQuickSyncKb.insert(kbGuid);
     //
     m_tLastKbModified = QDateTime::currentDateTime();
+
+    QTimer::singleShot(DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL + 1, this, SLOT(on_timerOut()));
 }
 
 void CWizKMSyncThread::quickDownloadMesages()
@@ -424,6 +454,7 @@ void CWizKMSyncThread::quickDownloadMesages()
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     m_bNeedDownloadMessages = true;
+    m_wait.wakeAll();
 }
 
 bool CWizKMSyncThread::peekQuickSyncKb(QString& kbGuid)
@@ -444,4 +475,29 @@ void CWizKMSyncThread::quickSyncKb(const QString& kbGuid)
         return;
     //
     g_pSyncThread->addQuickSyncKb(kbGuid);
+}
+bool CWizKMSyncThread::isBusy()
+{
+    if (!g_pSyncThread)
+        return false;
+    //
+    return g_pSyncThread->m_bBusy;
+}
+
+void CWizKMSyncThread::waitUntilIdleAndPause()
+{
+    while(isBusy())
+    {
+        QThread::sleep(1);
+    }
+    //
+    setPause(true);
+}
+
+void CWizKMSyncThread::setPause(bool pause)
+{
+    if (!g_pSyncThread)
+        return;
+    //
+    g_pSyncThread->m_bPause = pause;
 }

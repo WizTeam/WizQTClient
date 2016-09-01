@@ -4,7 +4,6 @@
 
 #include "wizmainwindow.h"
 
-using namespace Core::Internal;
 
 CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
     : QLabel(parent)

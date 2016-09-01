@@ -14,7 +14,6 @@
 class CWizDatabase;
 class CWizDatabaseManager;
 class CWizProgressDialog;
-class CWizObjectDataDownloaderHost;
 
 #define WIZNOTE_OBSOLETE
 
@@ -106,8 +105,10 @@ QString WizEncryptPassword(const QString& strPassword);
 QString WizDecryptPassword(const QString& strEncryptedText);
 
 
-bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& steText);
+bool WizLoadUnicodeTextFromFile(const QString& strFileName, QString& strText);
 bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText);
+bool WizLoadTextFromResource(const QString& resourceName, QString& text);
+
 bool WizSaveUnicodeTextToUtf16File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);
@@ -158,11 +159,15 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
 QString WizGetHtmlBodyContent(const QString& strHtml);
 bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse);
 void WizHtml2Text(const QString& strHtml, QString& strText);
+QString WizText2Html(const QString& text);
+void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML);
+
 void WizDeleteFolder(const CString& strPath);
 void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
-bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile = false);
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath);
+
 QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QString& linkHref);
 QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgSize, const QString& linkHref);
 QString WizStr2Title(const QString& str);
@@ -189,21 +194,26 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
 
 
 ///  make sure document exist, if not try to download document, show download dialog by default.
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost);
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc,
-                              CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost);
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData,
-                                                      CWizObjectDataDownloaderHost* downloaderHost);
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
 
 //
 void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
 
+//
+void WizCopyNoteAsInternalLink(const WIZDOCUMENTDATA& document);
+void WizCopyNotesAsInternalLink(const QList<WIZDOCUMENTDATA>& documents);
+void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document);
+void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents);
+QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document);
+void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink);
+void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtml, QString &strLink);
 
-bool WizIsDocumentContainsFrameset(const WIZDOCUMENTDATA& doc);
+bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc);
+bool WizIsMarkdownNote(const WIZDOCUMENTDATA& doc);
 
 enum WizKMUrlType
 {

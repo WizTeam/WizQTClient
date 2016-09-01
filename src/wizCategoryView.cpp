@@ -8,13 +8,7 @@
 #include <QTimer>
 #include <QFileDialog>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "wizdef.h"
-#include "widgets/wizScrollBar.h"
-#include "wizmainwindow.h"
-#include "wizProgressDialog.h"
-#include "wiznotestyle.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
 #include "share/wizdrawtexthelper.h"
@@ -24,30 +18,32 @@
 #include "share/wizAnalyzer.h"
 #include "share/wizObjectOperator.h"
 #include "share/wizMessageBox.h"
+#include "share/wizthreads.h"
+#include "share/wizGlobal.h"
+#include "sync/wizkmsync.h"
 #include "sync/wizKMServer.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
+#include "widgets/wizScrollBar.h"
+#include "widgets/wizAdvancedSearchDialog.h"
+#include "widgets/wizexecutingactiondialog.h"
 #include "mac/wizmachelper.h"
+#include "core/wizNoteManager.h"
+#include "wizmainwindow.h"
+#include "wizProgressDialog.h"
+#include "wiznotestyle.h"
 #include "wizFolderSelector.h"
 #include "wizLineInputDialog.h"
 #include "wizWebSettingsDialog.h"
 #include "wizFileReader.h"
-#include "widgets/wizAdvancedSearchDialog.h"
 #include "wizOEMSettings.h"
-
-using namespace WizService;
-
-using namespace Core::Internal;
 
 
 #define CATEGORY_GENERAL    QObject::tr("General")
-#define CATEGORY_PERSONAL   QObject::tr("Personal Notes")
-#define CATEGORY_TEAM_GROUPS QObject::tr("Team & Groups")
-//#define CATEGORY_ENTERPRISE QObject::tr("Enterprise groups")
-#define CATEGORY_INDIVIDUAL QObject::tr("Individual Groups")
+#define CATEGORY_TEAM_GROUPS QObject::tr("Team Notes")
 #define CATEGORY_SHORTCUTS  QObject::tr("Shortcuts")
 #define CATEGORY_SEARCH     QObject::tr("Quick Search")
-#define CATEGORY_FOLDERS    QObject::tr("Note Folders")
+#define CATEGORY_FOLDERS    QObject::tr("Folders")
 #define CATEGORY_TAGS       QObject::tr("Tags")
 #define CATEGORY_STYLES     QObject::tr("Styles")
 
@@ -98,16 +94,16 @@ using namespace Core::Internal;
 /* ------------------------------ CWizCategoryBaseView ------------------------------ */
 
 CWizCategoryBaseView::CWizCategoryBaseView(CWizExplorerApp& app, QWidget* parent)
-    : ITreeView(parent)
+    : QTreeWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
-    , m_bDragHovered(false)
     , m_selectedItem(NULL)
-    , m_dragHoveredTimer(new QTimer())
-    , m_dragHoveredItem(0)
-    , m_dragItem(NULL)
-    , m_dragUrls(false)
+    , m_bDragHovered(false)
     , m_cursorEntered(false)
+    , m_dragUrls(false)
+    , m_dragHoveredTimer(new QTimer())
+    , m_dragItem(NULL)
+    , m_dragHoveredItem(0)
 {
     // basic features
     header()->hide();
@@ -444,6 +440,172 @@ void CWizCategoryBaseView::dragLeaveEvent(QDragLeaveEvent* event)
     viewport()->repaint();    
 }
 
+
+
+
+QAbstractItemView::DropIndicatorPosition CWizCategoryBaseView::position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const
+{
+    QAbstractItemView::DropIndicatorPosition r = QAbstractItemView::OnViewport;
+    const int margin = 2;
+    if (pos.y() - rect.top() < margin) {
+        r = QAbstractItemView::AboveItem;
+    } else if (rect.bottom() - pos.y() < margin) {
+        r = QAbstractItemView::BelowItem;
+    } else if (rect.contains(pos, true)) {
+        r = QAbstractItemView::OnItem;
+    }
+
+    if (r == QAbstractItemView::OnItem && (!(model()->flags(index) & Qt::ItemIsDropEnabled)))
+        r = pos.y() < rect.center().y() ? QAbstractItemView::AboveItem : QAbstractItemView::BelowItem;
+
+    return r;
+}
+
+bool CWizCategoryBaseView::droppingOnItself(QDropEvent *event, const QModelIndex &index)
+{
+    Qt::DropAction dropAction = event->dropAction();
+    if (dragDropMode() == QAbstractItemView::InternalMove)
+        dropAction = Qt::MoveAction;
+    if (event->source() == this
+        && event->possibleActions() & Qt::MoveAction
+        && dropAction == Qt::MoveAction) {
+        QModelIndexList selected = selectedIndexes();
+        QModelIndex child = index;
+        while (child.isValid() && child != rootIndex()) {
+            if (selected.contains(child))
+                return true;
+            child = child.parent();
+        }
+    }
+    return false;
+}
+
+bool CWizCategoryBaseView::dropOn(QDropEvent *event, int *dropRow, int *dropCol, QModelIndex *dropIndex)
+{
+    if (event->isAccepted())
+        return false;
+
+    QModelIndex index;
+    // rootIndex() (i.e. the viewport) might be a valid index
+    if (viewport()->rect().contains(event->pos())) {
+        index = indexAt(event->pos());
+        if (!index.isValid())
+        {
+            index = rootIndex();
+        }
+        //don't reset index
+        /*
+        else {
+            QRect rc = visualRect(index);
+            QPoint pt = event->pos();
+            if (!rc.contains(pt)) {
+                index = rootIndex();
+            }
+        }
+        */
+    }
+    else
+    {
+        return false;
+    }
+
+    QAbstractItemView::DropIndicatorPosition dropIndicatorPosition;
+    int row = -1;
+    int col = -1;
+    if (index != rootIndex()) {
+        dropIndicatorPosition = position(event->pos(), visualRect(index), index);
+        switch (dropIndicatorPosition) {
+        case QAbstractItemView::AboveItem:
+            row = index.row();
+            col = index.column();
+            index = index.parent();
+            break;
+        case QAbstractItemView::BelowItem:
+            row = index.row() + 1;
+            col = index.column();
+            index = index.parent();
+            break;
+        case QAbstractItemView::OnItem:
+        case QAbstractItemView::OnViewport:
+            break;
+        }
+    } else {
+        dropIndicatorPosition = QAbstractItemView::OnViewport;
+    }
+    *dropIndex = index;
+    *dropRow = row;
+    *dropCol = col;
+    if (!droppingOnItself(event, index))
+        return true;
+    //
+    return false;
+}
+
+
+
+
+void CWizCategoryBaseView::dropEventCore(QDropEvent *event)
+{
+    if (event->source() == this && (event->dropAction() == Qt::MoveAction ||
+                                    dragDropMode() == QAbstractItemView::InternalMove)) {
+        QModelIndex topIndex;
+        int col = -1;
+        int row = -1;
+        if (dropOn(event, &row, &col, &topIndex)) {
+            const QList<QModelIndex> idxs = selectedIndexes();
+            QList<QPersistentModelIndex> indexes;
+            const int indexesCount = idxs.count();
+            indexes.reserve(indexesCount);
+            for (const auto &idx : idxs)
+                indexes.append(idx);
+
+            if (indexes.contains(topIndex))
+                return;
+
+            // When removing items the drop location could shift
+            QPersistentModelIndex dropRow = model()->index(row, col, topIndex);
+
+            // Remove the items
+            QList<QTreeWidgetItem *> taken;
+            for (const auto &index : indexes) {
+                QTreeWidgetItem *parent = itemFromIndex(index);
+                if (!parent || !parent->parent()) {
+                    taken.append(takeTopLevelItem(index.row()));
+                } else {
+                    taken.append(parent->parent()->takeChild(index.row()));
+                }
+            }
+
+            // insert them back in at their new positions
+            for (int i = 0; i < indexes.count(); ++i) {
+                // Either at a specific point or appended
+                if (row == -1) {
+                    if (topIndex.isValid()) {
+                        QTreeWidgetItem *parent = itemFromIndex(topIndex);
+                        parent->insertChild(parent->childCount(), taken.takeFirst());
+                    } else {
+                        insertTopLevelItem(topLevelItemCount(), taken.takeFirst());
+                    }
+                } else {
+                    int r = dropRow.row() >= 0 ? dropRow.row() : row;
+                    if (topIndex.isValid()) {
+                        QTreeWidgetItem *parent = itemFromIndex(topIndex);
+                        parent->insertChild(qMin(r, parent->childCount()), taken.takeFirst());
+                    } else {
+                        insertTopLevelItem(qMin(r, topLevelItemCount()), taken.takeFirst());
+                    }
+                }
+            }
+
+            event->accept();
+            // Don't want QAbstractItemView to delete it because it was "moved" we already did it
+            event->setDropAction(Qt::CopyAction);
+        }
+    }
+
+    QTreeView::dropEvent(event);
+}
+
 void CWizCategoryBaseView::dropEvent(QDropEvent * event)
 {
     m_bDragHovered = false;
@@ -485,6 +647,15 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
     }
     else
     {
+        if (CWizKMSyncThread::isBusy())
+        {
+            QString title = QObject::tr("Syncing");
+            QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
+            QMessageBox::information(this, title, message);
+            event->ignore();
+            return;
+        }
+        //
         if (m_dragItem && !(m_dragItem->flags() & Qt::ItemIsDropEnabled))
         {
             qDebug() << "[DragDrop]Can not drop item at invalid position";
@@ -496,6 +667,12 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         QModelIndex droppedIndex = indexAt(event->pos());
         if( !droppedIndex.isValid() )
           return;
+        //
+        CWizCategoryViewItemBase* hoverItem = itemAt(event->pos());
+        if (!hoverItem)
+        {
+            qDebug() << "null item";
+        }
 
         if (pItem->type() == Category_ShortcutRootItem || pItem->type() == Category_TagItem)
         {
@@ -505,49 +682,14 @@ void CWizCategoryBaseView::dropEvent(QDropEvent * event)
         }
         else
         {
-            QTreeWidget::dropEvent(event);
-            if (m_dragItem)
+            dropEventCore(event);
+            if (m_dragItem && event->isAccepted())
             {
                 on_itemPosition_changed(m_dragItem);
             }
         }
         viewport()->repaint();
         return;
-
-//        CWizCategoryViewItemBase* hoveredItem = itemAt(event->pos());
-//        Q_ASSERT(hoveredItem != nullptr);
-
-//        if (hoveredItem->kbGUID() == m_dragItem->kbGUID())
-//        {
-//            QTreeWidget::dropEvent(event);
-//            if (m_dragItem)
-//            {
-//                on_itemPosition_changed(m_dragItem);
-//            }
-//            viewport()->repaint();
-//            return;
-//        }
-//        else
-//        {
-//            Qt::KeyboardModifiers keyMod = QApplication::keyboardModifiers();
-//            bool isCTRL = keyMod.testFlag(Qt::ControlModifier);
-//            QRect rcItem = visualItemRect(hoveredItem);
-//            qDebug() << "hover item rect : " << rcItem << "  event pos : " << event->pos();
-//            if (event->pos().y() < rcItem.top() + 2)
-//            {
-//                dropItemAsBrother(hoveredItem, m_dragItem, true, !isCTRL);
-//            }
-//            else if (event->pos().y() > rcItem.bottom() - 2)
-//            {
-//                dropItemAsBrother(hoveredItem, m_dragItem, false, !isCTRL);
-//            }
-//            else
-//            {
-//                dropItemAsChild(hoveredItem, m_dragItem, !isCTRL);
-//            }
-////                setCurrentItem(hoveredItem);
-//                m_dragItem = nullptr;
-//         }
     }
 
     viewport()->repaint();
@@ -570,26 +712,9 @@ void CWizCategoryBaseView::leaveEvent(QEvent* event)
     update();
 }
 
-void CWizCategoryBaseView::importFiles(QStringList &strFileList)
+void CWizCategoryBaseView::importFiles(QStringList &/*strFileList*/)
 {
-    CWizFileReader *fileReader = new CWizFileReader();
-    connect(fileReader, SIGNAL(fileLoaded(QString, QString)),
-            SLOT(createDocumentByHtml(QString, QString)));
-    connect(fileReader, SIGNAL(htmlFileloaded(QString, QString, QString)),
-            SLOT(createDocumentByHtml(QString, QString, QString)));
-    connect(fileReader, SIGNAL(fileLoadFailed(QString)),
-            SLOT(createDocumentWithAttachment(QString)));
-    connect(fileReader, SIGNAL(richTextFileLoaded(QString,QString,QString)),
-            SLOT(createDocumentByHtmlWithAttachment(QString,QString,QString)));
-    MainWindow *mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
-    CWizProgressDialog *progressDialog  = mainWindow->progressDialog();
-    progressDialog->setProgress(100,0);
-    progressDialog->setActionString(tr("loading..."));
-    progressDialog->setWindowTitle(tr("%1 files to load.").arg(strFileList.count()));
-    connect(fileReader, SIGNAL(loadProgress(int,int)), progressDialog, SLOT(setProgress(int,int)));
-    connect(fileReader,SIGNAL(loadFinished()),progressDialog,SLOT(close()));
-    fileReader->loadFiles(strFileList);
-    progressDialog->exec();
+    Q_ASSERT(0);
 }
 
 QString CWizCategoryBaseView::selectedItemKbGUID()
@@ -598,12 +723,12 @@ QString CWizCategoryBaseView::selectedItemKbGUID()
     if (!items.isEmpty()) {
         CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(items.first());
         if (!pItem)
-            return NULL;
+            return QString();
 
         return pItem->kbGUID();
     }
 
-    return NULL;
+    return QString();
 }
 
 void CWizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
@@ -821,19 +946,6 @@ QString CWizCategoryView::getUseableItemName(QTreeWidgetItem* parent, \
     return name;
 }
 
-void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
-{
-    item->setLocation(strNewLocation);
-    for (int i = 0; i < item->childCount(); i++)
-    {
-        CWizCategoryViewFolderItem* child = dynamic_cast<CWizCategoryViewFolderItem*>(item->child(i));
-        if (child)
-        {
-            QString strChildLocation = strNewLocation + child->text(0) + "/";
-            resetFolderLocation(child, strChildLocation);
-        }
-    }
-}
 
 bool CWizCategoryView::renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName)
 {
@@ -1095,16 +1207,6 @@ bool CWizCategoryView::combineGroupFolder(CWizCategoryViewGroupItem* sourceItem,
     return db.DeleteTag(sourceItem->tag(), true);
 }
 
-void CWizCategoryBaseView::dropItemAsBrother(CWizCategoryViewItemBase* targetItem,
-                                             CWizCategoryViewItemBase* dragedItem, bool dropAtTop, bool deleteDragSource)
-{
-}
-
-void CWizCategoryBaseView::dropItemAsChild(CWizCategoryViewItemBase* targetItem,
-                                           CWizCategoryViewItemBase* dragedItem, bool deleteDragSource)
-{
-}
-
 void CWizCategoryBaseView::on_dragHovered_timeOut()
 {
     if (m_dragHoveredItem) {
@@ -1121,16 +1223,22 @@ bool CWizCategoryBaseView::validateDropDestination(const QPoint& p) const
 
     if (m_dragUrls)
     {
-        CWizCategoryViewItemBase* itemBase = itemAt(p);
-        return itemBase->acceptDrop("");
+        if (CWizCategoryViewItemBase* itemBase = itemAt(p))
+        {
+            return itemBase->acceptDrop("");
+        }
     }
 
     if (m_dragDocArray.empty())
         return false;
 
-    CWizCategoryViewItemBase* itemBase = itemAt(p);
-    WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
-    return (itemBase && itemBase->acceptDrop(data));
+    if (CWizCategoryViewItemBase* itemBase = itemAt(p))
+    {
+        WIZDOCUMENTDATAEX data = *m_dragDocArray.begin();
+        return (itemBase && itemBase->acceptDrop(data));
+    }
+
+    return false;
 }
 
 Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
@@ -1140,30 +1248,6 @@ Qt::ItemFlags CWizCategoryBaseView::dragItemFlags() const
 
     return Qt::NoItemFlags;
 }
-
-void CWizCategoryBaseView::createDocumentByHtml(const QString& /*strHtml*/, const QString& /*strTitle*/)
-{
-    // do nothing
-    // create document in CWizCategoryView
-
-}
-
-void CWizCategoryBaseView::createDocumentByHtml(const QString &/*strFileName*/,
-                                                const QString& /*strHtml*/, const QString& /*strTitle*/)
-{
-}
-
-bool CWizCategoryBaseView::createDocumentWithAttachment(const QString& /*strFileName*/)
-{
-    return true;
-}
-
-bool CWizCategoryBaseView::createDocumentByHtmlWithAttachment(const QString& /*strHtml*/,
-                                                              const QString& /*strTitle*/, const QString& /*strAttachFile*/)
-{
-    return true;
-}
-
 
 /* ------------------------------ CWizCategoryView ------------------------------ */
 CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
@@ -1181,13 +1265,10 @@ CWizCategoryView::CWizCategoryView(CWizExplorerApp& app, QWidget* parent)
     connect(this, SIGNAL(itemClicked(QTreeWidgetItem*, int)), SLOT(on_itemClicked(QTreeWidgetItem *, int)));
     connect(this, SIGNAL(itemChanged(QTreeWidgetItem*,int)), SLOT(on_itemChanged(QTreeWidgetItem*,int)));
     connect(this, SIGNAL(itemSelectionChanged()), SLOT(on_itemSelectionChanged()));
-
-    ExtensionSystem::PluginManager::addObject(this);
 }
 
 CWizCategoryView::~CWizCategoryView()
 {
-    ExtensionSystem::PluginManager::removeObject(this);
 }
 
 void CWizCategoryView::initMenus()
@@ -1369,6 +1450,7 @@ void CWizCategoryView::initMenus()
     // group root menu normal
     m_menuNormalGroupRoot = std::make_shared<QMenu>();
     m_menuNormalGroupRoot->addAction(actionNewDoc);
+    m_menuNormalGroupRoot->addAction(actionImportFile);
     m_menuNormalGroupRoot->addAction(actionNewItem);
     m_menuNormalGroupRoot->addSeparator();
     m_menuNormalGroupRoot->addAction(actionItemAttr);
@@ -1377,6 +1459,7 @@ void CWizCategoryView::initMenus()
     // group root menu admin
     m_menuAdminGroupRoot = std::make_shared<QMenu>();
     m_menuAdminGroupRoot->addAction(actionNewDoc);
+    m_menuAdminGroupRoot->addAction(actionImportFile);
     m_menuAdminGroupRoot->addAction(actionNewItem);
     m_menuAdminGroupRoot->addSeparator();
     m_menuAdminGroupRoot->addAction(actionManageGroup);
@@ -1385,6 +1468,7 @@ void CWizCategoryView::initMenus()
     // group root menu normal
     m_menuOwnerGroupRoot = std::make_shared<QMenu>();
     m_menuOwnerGroupRoot->addAction(actionNewDoc);
+    m_menuOwnerGroupRoot->addAction(actionImportFile);
     m_menuOwnerGroupRoot->addAction(actionNewItem);
     m_menuOwnerGroupRoot->addSeparator();
     m_menuOwnerGroupRoot->addAction(actionManageGroup);
@@ -1401,6 +1485,7 @@ void CWizCategoryView::initMenus()
     // group menu
     m_menuGroup = std::make_shared<QMenu>();
     m_menuGroup->addAction(actionNewDoc);
+    m_menuGroup->addAction(actionImportFile);
     m_menuGroup->addAction(actionNewItem);
     m_menuGroup->addAction(actionRenameItem);
     m_menuGroup->addAction(actionCopyItem);
@@ -1630,6 +1715,9 @@ bool CWizCategoryView::isSectionVisible(CategorySection section) const
 void setItemVisible(const QString& strXML, CategorySection section, QTreeWidget* treeWidget,
                     QTreeWidgetItem* item)
 {
+    if (!treeWidget || !item)
+        return;
+
     QDomDocument doc;
     doc.setContent(strXML);
     bool sectionVisible;
@@ -1706,10 +1794,10 @@ void CWizCategoryView::loadSectionStatus()
     setItemVisible(optionXML, Section_Tags, this, item);
 
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
 
     for (WIZBIZDATA biz : arrayBiz)
     {
@@ -1828,8 +1916,7 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
 
     if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
     {
-        QString strBody = Utils::Misc::getHtmlBodyContent(strHtml);
-        if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strBody, "", 0, strTitle, "newnote", strLocation, "", data))
+        if (!m_dbMgr.db(strKbGUID).CreateDocumentAndInit(strHtml, "", 0, strTitle, "newnote", strLocation, "", data))
         {
             TOLOG("Failed to new document!");
             return false;
@@ -1843,35 +1930,6 @@ bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data, const QString& strH
 
     quickSyncNewDocument(data.strKbGUID);
     //
-    return true;
-}
-
-bool CWizCategoryView::createDocumentWithAttachment(const QString& strFileName)
-{
-    if (!QFile::exists(strFileName))
-        return false;
-
-    QStringList fileList(strFileName);
-    WIZDOCUMENTDATA data;
-    return createDocumentByAttachments(data, fileList);
-}
-
-bool CWizCategoryView::createDocumentByHtmlWithAttachment(const QString& strHtml, const QString& strTitle, const QString& strAttachFile)
-{
-    if (!QFile::exists(strAttachFile))
-        return false;
-
-     WIZDOCUMENTDATA data;
-    if (!createDocument(data, strHtml, strTitle))
-        return false;
-
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    WIZDOCUMENTATTACHMENTDATA attach;
-    if (!db.AddAttachment(data, strAttachFile, attach))
-    {
-        qWarning() << "add attachment failed , " << strAttachFile;
-        return false;
-    }
     return true;
 }
 
@@ -1894,31 +1952,6 @@ bool CWizCategoryView::createDocumentByAttachments(WIZDOCUMENTDATA& data, const 
         }
     }
 
-    return true;
-}
-
-bool CWizCategoryView::createDocumentByTemplate(WIZDOCUMENTDATA& data, const QString& strZiw)
-{
-    QString strKbGUID = m_dbMgr.db().kbGUID();
-    QString strLocation = m_dbMgr.db().GetDefaultNoteLocation();
-    WIZTAGDATA tag;
-
-    if (getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
-    {
-        if (!m_dbMgr.db(strKbGUID).CreateDocumentByTemplate(strZiw, strLocation, tag, data))
-        {
-            TOLOG("Failed to new document!");
-            return false;
-        }
-
-        if (!tag.strGUID.IsEmpty()) {
-            CWizDocument doc(m_dbMgr.db(strKbGUID), data);
-            doc.AddTag(tag);
-        }
-    }
-
-    quickSyncNewDocument(data.strKbGUID);
-    //
     return true;
 }
 
@@ -1982,9 +2015,40 @@ void CWizCategoryView::on_action_user_newFolder()
                                                           "", m_app.mainWindow());      //use mainWindow as parent
 
     connect(dialog, SIGNAL(finished(int)), SLOT(on_action_user_newFolder_confirmed(int)));
+    connect(dialog, SIGNAL(textChanged(QString)), SLOT(on_newFolder_inputText_changed(QString)));
 
     dialog->exec();
 
+}
+
+void CWizCategoryView::on_newFolder_inputText_changed(const QString& text)
+{
+    if (CWizLineInputDialog* dialog = qobject_cast<CWizLineInputDialog*>(sender()))
+    {
+        if (!WizIsValidFileNameNoPath(text))
+        {
+            dialog->setOKButtonEnable(false);
+            return;
+        }
+
+        QString strLocation;
+        if (currentCategoryItem<CWizCategoryViewAllFoldersItem>())
+        {
+            strLocation = "/" + text + "/";
+        }
+        else if (CWizCategoryViewFolderItem* p = currentCategoryItem<CWizCategoryViewFolderItem>())
+        {
+            strLocation = p->location() + text + "/";
+        }
+
+        if (m_dbMgr.db().isFolderExists(strLocation))
+        {
+            dialog->setOKButtonEnable(false);
+            return;
+        }
+
+        dialog->setOKButtonEnable(true);
+    }
 }
 
 void CWizCategoryView::on_action_user_newFolder_confirmed(int result)
@@ -2136,6 +2200,8 @@ void CWizCategoryView::on_action_moveItem()
 
 void CWizCategoryView::on_action_user_moveFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuMoveFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Move folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
@@ -2165,8 +2231,7 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         CWizCategoryViewGroupItem* groupItem = currentCategoryItem<CWizCategoryViewGroupItem>();
         Q_ASSERT(groupItem != nullptr);
 
-        moveGroupFolder(groupItem->tag(), selector, mainWindow->progressDialog(),
-                        mainWindow->downloaderHost());
+        moveGroupFolder(groupItem->tag(), selector);
         //
         mainWindow->quickSyncKb(groupItem->kbGUID());
     }
@@ -2175,8 +2240,10 @@ void CWizCategoryView::on_action_user_moveFolder_confirmed(int result)
         CWizCategoryViewFolderItem* folderItem = currentCategoryItem<CWizCategoryViewFolderItem>();
         Q_ASSERT(folderItem != nullptr);
 
-        movePersonalFolder(folderItem->location(), selector, mainWindow->progressDialog(),
-                           mainWindow->downloaderHost());
+        if (!movePersonalFolder(folderItem->location(), selector))
+            return;
+        //
+        folderItem->parent()->removeChild(folderItem);
         //
         mainWindow->quickSyncKb("");
     }
@@ -2219,6 +2286,8 @@ void CWizCategoryView::on_action_copyItem()
 
 void CWizCategoryView::on_action_user_copyFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuCopyFolder");
     CWizFolderSelector* selector = new CWizFolderSelector(tr("Copy folder"), m_app, WIZ_USERGROUP_SUPER, window());
     selector->setAcceptRoot(true);
@@ -2250,16 +2319,14 @@ void CWizCategoryView::on_action_user_copyFolder_confirmed(int result)
         CWizCategoryViewGroupItem* groupItem = currentCategoryItem<CWizCategoryViewGroupItem>();
         Q_ASSERT(groupItem != nullptr);
 
-        copyGroupFolder(groupItem->tag(), selector, mainWindow->progressDialog(),
-                        mainWindow->downloaderHost());
+        copyGroupFolder(groupItem->tag(), selector);
     }
     else            //copy  private folder to ...
     {
         CWizCategoryViewFolderItem* folderItem = currentCategoryItem<CWizCategoryViewFolderItem>();
         Q_ASSERT(folderItem != nullptr);
 
-        copyPersonalFolder(folderItem->location(), selector, mainWindow->progressDialog(),
-                           mainWindow->downloaderHost());
+        copyPersonalFolder(folderItem->location(), selector);
     }
 
     //
@@ -2396,6 +2463,8 @@ void CWizCategoryView::on_action_user_renameTag_confirmed(int result)
 
 void CWizCategoryView::on_action_group_renameFolder()
 {
+    WIZKM_CHECK_SYNCING(this);
+    //
     ::WizGetAnalyzer().LogAction("categoryMenuRenameGroupFolder");
     CWizCategoryViewItemBase* p = currentCategoryItem<CWizCategoryViewItemBase>();
 
@@ -2577,9 +2646,13 @@ void CWizCategoryView::on_action_deleted_recovery()
     CWizCategoryViewTrashItem* trashItem = currentCategoryItem<CWizCategoryViewTrashItem>();
     if (trashItem)
     {
-        QString strToken = WizService::Token::token();
-        QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
-        WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
+        WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
+            QString strToken = Token::token();
+            QString strUrl = CommonApiEntry::makeUpUrlFromCommand("deleted_recovery", strToken, "&kb_guid=" + trashItem->kbGUID());
+            WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+                WizShowWebDialogWithToken(tr("Recovery notes"), strUrl, 0, QSize(800, 480), true);
+            });
+        });
     }
 }
 
@@ -2912,21 +2985,23 @@ void CWizCategoryView::on_itemClicked(QTreeWidgetItem *item, int column)
     }
     else if (item->type() == Category_ShortcutItem)
     {
+        /*
         CWizCategoryViewShortcutItem* shortcut = dynamic_cast<CWizCategoryViewShortcutItem*>(item);
         if (shortcut && shortcut->shortcutType() == CWizCategoryViewShortcutItem::Document)
         {
             emit itemSelectionChanged();
         }
+        */
     }
 }
 
 void CWizCategoryView::updateGroupsData()
 {
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
     //
     CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
     //
     for (CWizBizDataArray::const_iterator it = arrayBiz.begin(); it != arrayBiz.end(); it++)
     {
@@ -3003,36 +3078,36 @@ void CWizCategoryView::addDocumentToShortcuts(const WIZDOCUMENTDATA& doc)
 
 void CWizCategoryView::createGroup()
 {
-    QString strExtInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
-    WizShowWebDialogWithToken(tr("Create new group"), strUrl, window());
+    QString strExtInfo = CommonApiEntry::appstoreParam(false);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
+    WizShowWebDialogWithToken(tr("Create Team for Free"), strUrl, window());
 }
 
 void CWizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
 }
 
 void CWizCategoryView::managePersonalGroup(const QString& groupGUID)
 {
-    QString extInfo = "kb=" + groupGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
 void CWizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
 {
-    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
 }
 
@@ -3054,10 +3129,73 @@ void CWizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const Q
     }
 }
 
+void CWizCategoryView::initTopLevelItems()
+{
+    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
+    addTopLevelItem(pMsg);
+    pMsg->setUnreadCount(m_dbMgr.db().getUnreadMessageCount());
+
+    CWizCategoryViewShortcutRootItem* pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
+    addTopLevelItem(pShortcutRoot);
+
+    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
+    addTopLevelItem(pSearchRoot);
+
+    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
+    addTopLevelItem(pAllFoldersItem);
+
+    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
+    addTopLevelItem(pAllTagsItem);
+
+    CWizGroupDataArray arrayGroup;
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
+
+    //
+    CWizBizDataArray arrayBiz;
+    m_dbMgr.db().GetAllBizInfo(arrayBiz);
+    //
+    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
+    //
+    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
+         it != arrayBiz.end();
+         it++)
+    {
+        const WIZBIZDATA& biz = *it;
+        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
+        setBizRootItemExtraButton(pBizGroupItem, biz);
+
+        addTopLevelItem(pBizGroupItem);
+        pBizGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pBizGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayOwnGroup;
+    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
+    if (!arrayOwnGroup.empty())
+    {
+        CWizCategoryViewOwnGroupRootItem* pOwnGroupItem = new CWizCategoryViewOwnGroupRootItem(m_app);
+        addTopLevelItem(pOwnGroupItem);
+        pOwnGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pOwnGroupItem);
+    }
+    //
+    CWizGroupDataArray arrayJionedGroup;
+    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
+    if (!arrayJionedGroup.empty())
+    {
+        CWizCategoryViewJionedGroupRootItem* pJionedGroupItem = new CWizCategoryViewJionedGroupRootItem(m_app);
+        addTopLevelItem(pJionedGroupItem);
+        pJionedGroupItem->setExpanded(true);
+        arrayGroupsItem.push_back(pJionedGroupItem);
+    }
+
+    resetCreateGroupLink();
+}
+
 void CWizCategoryView::viewBizInfo(const QString& bizGUID)
 {
-    QString extInfo = "biz=" + bizGUID + WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    QString extInfo = "biz=" + bizGUID + CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View team info"), strUrl, window());
 }
 
@@ -3068,25 +3206,38 @@ void CWizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     {
         extInfo += _T("&p=payment");
     }
-    extInfo += WizService::CommonApiEntry::appstoreParam();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    extInfo += CommonApiEntry::appstoreParam();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage team"), strUrl, window());
 
 }
 
 
 void CWizCategoryView::init()
-{
+{    
+    initTopLevelItems();
     initGeneral();
     initFolders();
     initTags();
     initStyles();
-    initGroups();
-    //
     resetSections();
+    sortFolders();
+    sortPersonalTags();
 
-    loadExpandState();
-    loadSectionStatus();
+    initGroups();
+
+    for (int i = 0; i < topLevelItemCount(); ++i)
+    {
+        if (dynamic_cast<CWizCategoryViewBizGroupRootItem*>(topLevelItem(i)))
+        {
+            topLevelItem(i)->sortChildren(0, Qt::AscendingOrder);
+        }
+    }
+    //
+    for (int i = 0 ; i < m_dbMgr.count(); ++i)
+    {
+        sortGroupTags(m_dbMgr.at(i).kbGUID());
+    }
 }
 
 void CWizCategoryView::resetSections()
@@ -3362,9 +3513,36 @@ void CWizCategoryView::updateGroupTagDocumentCount(const QString& strKbGUID)
     Q_UNUSED (strKbGUID)
 }
 
+void CWizCategoryView::importFiles(QStringList& strFileList)
+{
+    CWizFileImporter *fileReader = new CWizFileImporter(m_dbMgr);
+
+    CWizProgressDialog progressDialog;
+    progressDialog.setProgress(100,0);
+    progressDialog.setActionString(tr("loading..."));
+    progressDialog.setWindowTitle(tr("%1 files to import.").arg(strFileList.count()));
+    connect(fileReader, SIGNAL(importProgress(int,int)), &progressDialog, SLOT(setProgress(int,int)));
+    connect(fileReader,SIGNAL(importFinished(bool,QString,QString)), &progressDialog,SLOT(close()));
+    connect(fileReader, SIGNAL(importFinished(bool,QString,QString)), SLOT(on_importFile_finished(bool,QString,QString)));
+
+    QString strKbGUID;
+    WIZTAGDATA tag;
+    QString strLocation;
+    if (!getAvailableNewNoteTagAndLocation(strKbGUID, tag, strLocation))
+        return;
+
+    WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
+        fileReader->importFiles(strFileList, strKbGUID, strLocation, tag);
+        //
+        fileReader->deleteLater();
+    });
+    //
+    progressDialog.exec();
+}
+
 bool CWizCategoryView::createDocument(WIZDOCUMENTDATA& data)
 {
-    return createDocument(data, "<p><br/></p>", tr("Untitled"));
+    return createDocument(data, "<!DOCTYPE html><html><head></head><body><p><br/></p></body></html>", tr("Untitled"));
 }
 
 void CWizCategoryView::on_updatePersonalTagDocumentCount_timeout()
@@ -3379,6 +3557,18 @@ void CWizCategoryView::on_updateGroupFolderDocumentCount_mapped_timeout(const QS
     m_mapTimerUpdateGroupCount.remove(strKbGUID);
 
     updateGroupFolderDocumentCount_impl(strKbGUID);
+}
+
+void CWizCategoryView::on_initGroupFolder_finished()
+{
+    static int count = 0;
+    ++count;
+//    qDebug() << count << " group init finished, total " << m_dbMgr.count();
+    if (count >= m_dbMgr.count())
+    {
+        loadExpandState();
+        loadSectionStatus();
+    }
 }
 
 void CWizCategoryView::updatePersonalTagDocumentCount_impl(const QString& strKbGUID)
@@ -3511,7 +3701,7 @@ void CWizCategoryView::setGroupRootItemExtraButton(CWizCategoryViewItemBase* pIt
 void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 {
     const QString strFolderPostion = "FolderPosition/";
-    QSettings* setting = ExtensionSystem::PluginManager::settings();
+    QSettings* setting = WizGlobal::settings();
     int nValue = setting->value(strFolderPostion + "/Deleted Items/").toInt();
     setting->setValue(strFolderPostion + strLocation, nValue);
     //
@@ -3528,63 +3718,136 @@ void CWizCategoryView::moveFolderPostionBeforeTrash(const QString& strLocation)
 
 bool CWizCategoryView::getAvailableNewNoteTagAndLocation(QString& strKbGUID, WIZTAGDATA& tag, QString& strLocation)
 {
-    bool bFallback = true;
-    // trash first, because it's inherited
-    if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+    QTreeWidgetItem* item = currentItem();
+    if (!item)
     {
-        // only handle group trash
-        if (pItem->kbGUID() != m_dbMgr.db().kbGUID()) {
-            CWizCategoryViewGroupRootItem* pRItem =
-                    dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+        strLocation = LOCATION_DEFAULT;
+        return true;
+    }
 
-            Q_ASSERT(pRItem);
+    bool bFallback = true;
 
-            strKbGUID = pRItem->kbGUID();
-            bFallback = false;
+    switch (item->type()) {
+    case Category_FolderItem:
+        if (CWizCategoryViewTrashItem* pItem = currentCategoryItem<CWizCategoryViewTrashItem>())
+        {
+            // only handle group trash
+            if (pItem->kbGUID() != m_dbMgr.db().kbGUID())
+            {
+                CWizCategoryViewGroupRootItem* pRItem =
+                        dynamic_cast<CWizCategoryViewGroupRootItem*>(pItem->parent());
+                Q_ASSERT(pRItem);
 
-            //set noTag item as current item.
-            selectedItems().clear();
-            for (int i = 0; i < pRItem->childCount(); i++) {
-                CWizCategoryViewGroupNoTagItem* pNoTag =
-                        dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
-                if (0 != pNoTag) {
-                    setCurrentItem(pNoTag);
-                    break;
+                strKbGUID = pRItem->kbGUID();
+                bFallback = false;
+
+                //set noTag item as current item.
+                selectedItems().clear();
+                for (int i = 0; i < pRItem->childCount(); i++)
+                {
+                    if (pRItem->child(i)->type() != Category_GroupNoTagItem)
+                        continue;
+
+                    CWizCategoryViewGroupNoTagItem* pNoTag =
+                            dynamic_cast<CWizCategoryViewGroupNoTagItem*>(pRItem->child(i));
+                    if (0 != pNoTag)
+                    {
+                        setCurrentItem(pNoTag);
+                        break;
+                    }
                 }
             }
         }
-    }
-    else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
-    {
-        // only handle individual folders except trash
-        if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
-            strLocation = pItem->location();
+        else if (CWizCategoryViewFolderItem* pItem = currentCategoryItem<CWizCategoryViewFolderItem>())
+        {
+            // only handle individual folders except trash
+            if (!CWizDatabase::IsInDeletedItems(pItem->location())) {
+                strLocation = pItem->location();
+                bFallback = false;
+            }
+        }
+        break;
+    case Category_TagItem:
+        if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
+        {
+            tag = pItem->tag();
             bFallback = false;
         }
-    }
-    else if (CWizCategoryViewTagItem* pItem = currentCategoryItem<CWizCategoryViewTagItem>())
-    {
-        tag = pItem->tag();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
-    }
-    else if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
-    {
-        strKbGUID = pItem->kbGUID();
-        tag = pItem->tag();
-        strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
-        bFallback = false;
+        break;
+    case Category_GroupRootItem:
+        if (CWizCategoryViewGroupRootItem* pItem = currentCategoryItem<CWizCategoryViewGroupRootItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_GroupNoTagItem:
+        if (CWizCategoryViewGroupNoTagItem* pItem = currentCategoryItem<CWizCategoryViewGroupNoTagItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_GroupItem:
+        if (CWizCategoryViewGroupItem* pItem = currentCategoryItem<CWizCategoryViewGroupItem>())
+        {
+            strKbGUID = pItem->kbGUID();
+            tag = pItem->tag();
+            strLocation = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+            bFallback = false;
+        }
+        break;
+    case Category_ShortcutItem:
+        if (CWizCategoryViewShortcutItem* pItem = currentCategoryItem<CWizCategoryViewShortcutItem>())
+        {
+            switch (pItem->shortcutType())
+            {
+            case CWizCategoryViewShortcutItem::PersonalFolder:
+                strLocation = pItem->location();
+                break;
+            case CWizCategoryViewShortcutItem::GroupTag:
+            {
+                strKbGUID = pItem->kbGUID();
+                CWizDatabase& db = m_dbMgr.db(strKbGUID);
+                db.TagFromGUID(pItem->guid(), tag);
+                strLocation = db.GetDefaultNoteLocation();
+            }
+                break;
+            case CWizCategoryViewShortcutItem::PersonalTag:
+                m_dbMgr.db().TagFromGUID(pItem->guid(), tag);
+                strLocation = LOCATION_DEFAULT;
+                break;
+            case CWizCategoryViewShortcutItem::Document:
+            {
+                strKbGUID = pItem->kbGUID();
+                CWizDatabase& db = m_dbMgr.db(strKbGUID);
+                //如果是群组笔记，则在该笔记目录下创建新笔记
+                if (db.IsGroup())
+                {
+                    CWizTagDataArray arrayTag;
+                    db.GetDocumentTags(pItem->guid(), arrayTag);
+                    if (arrayTag.size() == 1)
+                    {
+                        tag = arrayTag.front();
+                    }
+                    strLocation = db.GetDefaultNoteLocation();
+                }
+                else
+                {
+                    WIZDOCUMENTDATA doc;
+                    db.DocumentFromGUID(pItem->guid(), doc);
+                    strLocation = doc.strLocation;
+                }
+            }
+                break;
+            }
+            bFallback = false;
+        }
+        break;
+    default:
+        break;
     }
 
     if (bFallback) {
@@ -3708,21 +3971,6 @@ void CWizCategoryView::updatePersonalTagPosition()
 
 void CWizCategoryView::initGeneral()
 {
-    //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_GENERAL);
-    //addTopLevelItem(pCategoryItem);
-
-    CWizCategoryViewMessageItem* pMsg = new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_ALL, CWizCategoryViewMessageItem::All);
-    addTopLevelItem(pMsg);
-
-    pMsg->setUnreadCount(m_dbMgr.db().getUnreadMessageCount());
-
-    //QList<QTreeWidgetItem*> pList;
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_TO_ME, CWizCategoryViewMessageItem::SendToMe));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_MODIFY, CWizCategoryViewMessageItem::ModifyNote));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_COMMENTS, CWizCategoryViewMessageItem::Comment));
-    //pList.append(new CWizCategoryViewMessageItem(m_app, CATEGORY_MESSAGES_SEND_FROM_ME, CWizCategoryViewMessageItem::SendFromMe));
-    //pMsg->addChildren(pList);
-
     loadShortcutState();
 
     initQuickSearches();
@@ -3760,6 +4008,26 @@ void CWizCategoryView::sortFolders(CWizCategoryViewFolderItem* pItem)
             return;
 
         sortFolders(pFolder);
+    }
+}
+
+void CWizCategoryView::sortPersonalTags()
+{
+    if (CWizCategoryViewItemBase* allTagsItem = findAllTagsItem())
+    {
+        sortPersonalTags(allTagsItem);
+    }
+}
+
+void CWizCategoryView::sortPersonalTags(QTreeWidgetItem* pItem)
+{
+    if (pItem)
+    {
+        pItem->sortChildren(0, Qt::AscendingOrder);
+        for (int i = 0; i < pItem->childCount(); ++i)
+        {
+            sortPersonalTags(pItem->child(i));
+        }
     }
 }
 
@@ -3923,35 +4191,19 @@ QString CWizCategoryView::getAllFoldersPosition(CWizCategoryViewFolderItem* pIte
 }
 
 void CWizCategoryView::initFolders()
-{
-    //CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
-    //addTopLevelItem(pSpacer);
-
-    //CWizCategoryViewCategoryItem* pCategoryItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_PERSONAL);
-    //addTopLevelItem(pCategoryItem);
-
-    CWizCategoryViewAllFoldersItem* pAllFoldersItem = new CWizCategoryViewAllFoldersItem(m_app, CATEGORY_FOLDERS, m_dbMgr.db().kbGUID());
-    addTopLevelItem(pAllFoldersItem);
+{       
+    CWizCategoryViewItemBase* pAllFoldersItem = findAllFolderItem();
+    if (!pAllFoldersItem)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
     CWizStdStringArray arrayAllLocation;
-    m_dbMgr.db().GetAllLocationsWithExtra(arrayAllLocation);
-
-    /*
-    // folder cache
-    CWizStdStringArray arrayExtLocation;
-    m_dbMgr.db().GetExtraFolder(arrayExtLocation);
-
-    if (!arrayExtLocation.empty()) {
-        for (CWizStdStringArray::const_iterator it = arrayExtLocation.begin();
-             it != arrayExtLocation.end();
-             it++) {
-            if (-1 == ::WizFindInArray(arrayAllLocation, *it)) {
-                arrayAllLocation.push_back(*it);
-            }
-        }
-    }
-    */
-
+    CWizDatabase& newDB = m_dbMgr.db();
+    newDB.GetAllLocationsWithExtra(arrayAllLocation);
     if (arrayAllLocation.empty()) {
         arrayAllLocation.push_back(m_dbMgr.db().GetDefaultNoteLocation());
     }
@@ -3962,17 +4214,22 @@ void CWizCategoryView::initFolders()
     CWizCategoryViewTrashItem* pTrash = new CWizCategoryViewTrashItem(m_app, m_dbMgr.db().kbGUID());
     pAllFoldersItem->addChild(pTrash);
 
-    pAllFoldersItem->setExpanded(true);
-
-    sortFolders();
-    updatePersonalFolderDocumentCount();
-
     // push back folders cache
     for (CWizStdStringArray::const_iterator it = arrayAllLocation.begin();
          it != arrayAllLocation.end();
          it++) {
-        m_dbMgr.db().AddExtraFolder(*it);
+        newDB.AddExtraFolder(*it);
     }
+
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        pAllFoldersItem->setExpanded(true);
+        updatePersonalFolderDocumentCount();
+        // load expand state
+        if (m_dbMgr.count() == 0)
+        {
+            on_initGroupFolder_finished();
+        }
+    });
 }
 
 void CWizCategoryView::initFolders(QTreeWidgetItem* pParent, \
@@ -4067,31 +4324,6 @@ void CWizCategoryView::doLocationSanityCheck(CWizStdStringArray& arrayLocation)
 
 void CWizCategoryView::loadShortcutState()
 {   
-    //
-//    QString strData = m_dbMgr.db().meta(CATEGORY_META, CATEGORY_SHORTCUT);
-//    if (!strData.isEmpty())
-//    {
-//        QStringList shortCutList = strData.split(';');
-//        foreach (QString shortCut, shortCutList) {
-//            QStringList shortDataList = shortCut.split(',');
-//            if (shortDataList.count() != 2)
-//                continue;
-
-//            QString strKbGuid = shortDataList.first();
-//            QString strGuid = shortDataList.last();
-//            CWizDatabase &db = m_dbMgr.db(strKbGuid);
-//            WIZDOCUMENTDATA doc;
-//            if (db.DocumentFromGUID(strGuid, doc))
-//            {
-//                bool isEncrypted = doc.nProtected == 1;
-//                CWizCategoryViewShortcutItem *pShortcutItem =
-//                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, doc.strKbGUID, doc.strGUID, isEncrypted);
-//                pShortcutRoot->addChild(pShortcutItem);
-//            }
-
-//        }
-//    }
-
     QString strData = m_dbMgr.db().GetFavorites();
     initShortcut(strData);
 
@@ -4099,9 +4331,7 @@ void CWizCategoryView::loadShortcutState()
     if (pShortcutRoot->childCount() == 0)
     {
         pShortcutRoot->addPlaceHoldItem();
-    }
-
-    pShortcutRoot->sortChildren(0, Qt::AscendingOrder);
+    }    
 }
 
 void CWizCategoryView::saveShortcutState()
@@ -4159,7 +4389,7 @@ void CWizCategoryView::saveShortcutState()
 
 void CWizCategoryView::loadExpandState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = WizGlobal::settings();
     settings->beginGroup(TREEVIEW_STATE);
     m_strSelectedId = selectedId(settings);
 
@@ -4170,16 +4400,23 @@ void CWizCategoryView::loadExpandState()
 }
 
 void CWizCategoryView::initTags()
-{
-    CWizCategoryViewAllTagsItem* pAllTagsItem = new CWizCategoryViewAllTagsItem(m_app, CATEGORY_TAGS, m_dbMgr.db().kbGUID());
-    addTopLevelItem(pAllTagsItem);
+{        
+    CWizCategoryViewItemBase* pAllTagsItem = findAllTagsItem();
+
+    if (!pAllTagsItem)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
     initTags(pAllTagsItem, "");
 
-    pAllTagsItem->setExpanded(true);
-    pAllTagsItem->sortChildren(0, Qt::AscendingOrder);
-
-    updatePersonalTagDocumentCount();
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        pAllTagsItem->setExpanded(true);
+        updatePersonalTagDocumentCount();
+    });
 }
 
 void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strParentTagGUID)
@@ -4194,8 +4431,6 @@ void CWizCategoryView::initTags(QTreeWidgetItem* pParent, const QString& strPare
 
         initTags(pTagItem, it->strGUID);
     }
-
-   pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initStyles()
@@ -4206,64 +4441,20 @@ void CWizCategoryView::initStyles()
 }
 
 void CWizCategoryView::initGroups()
-{
-    CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
-
-    //
-    CWizBizDataArray arrayBiz;
-    m_dbMgr.db().GetUserBizInfo(false, arrayGroup, arrayBiz);
-    //
-    std::vector<CWizCategoryViewItemBase*> arrayGroupsItem;
-    //
-    for (CWizBizDataArray::const_iterator it = arrayBiz.begin();
-         it != arrayBiz.end();
-         it++)
-    {
-        const WIZBIZDATA& biz = *it;
-        CWizCategoryViewBizGroupRootItem* pBizGroupItem = new CWizCategoryViewBizGroupRootItem(m_app, biz);
-        setBizRootItemExtraButton(pBizGroupItem, biz);
-
-        addTopLevelItem(pBizGroupItem);
-        pBizGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pBizGroupItem);
-    }
-    //
-    CWizGroupDataArray arrayOwnGroup;
-    CWizDatabase::GetOwnGroups(arrayGroup, arrayOwnGroup);
-    if (!arrayOwnGroup.empty())
-    {
-        CWizCategoryViewOwnGroupRootItem* pOwnGroupItem = new CWizCategoryViewOwnGroupRootItem(m_app);
-        addTopLevelItem(pOwnGroupItem);
-        pOwnGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pOwnGroupItem);
-    }
-    //
-    CWizGroupDataArray arrayJionedGroup;
-    CWizDatabase::GetJionedGroups(arrayGroup, arrayJionedGroup);
-    if (!arrayJionedGroup.empty())
-    {
-        CWizCategoryViewJionedGroupRootItem* pJionedGroupItem = new CWizCategoryViewJionedGroupRootItem(m_app);
-        addTopLevelItem(pJionedGroupItem);
-        pJionedGroupItem->setExpanded(true);
-        arrayGroupsItem.push_back(pJionedGroupItem);
-    }
-
+{   
     int nTotal = m_dbMgr.count();
     for (int i = 0; i < nTotal; i++) {
-        initGroup(m_dbMgr.at(i));
-        updateGroupFolderDocumentCount(m_dbMgr.at(i).kbGUID());
+        initGroup(m_dbMgr.at(i));        
     }
     //
-    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
-         it != arrayGroupsItem.end();
-         it++)
-    {
-        CWizCategoryViewItemBase* pItem = *it;
-        pItem->sortChildren(0, Qt::AscendingOrder);
-    }
+//    for (std::vector<CWizCategoryViewItemBase*>::const_iterator it = arrayGroupsItem.begin();
+//         it != arrayGroupsItem.end();
+//         it++)
+//    {
+//        CWizCategoryViewItemBase* pItem = *it;
+//        pItem->sortChildren(0, Qt::AscendingOrder);
+//    }
     //
-    resetCreateGroupLink();
 }
 
 void CWizCategoryView::initBiz(const WIZBIZDATA& biz)
@@ -4273,7 +4464,7 @@ void CWizCategoryView::initBiz(const WIZBIZDATA& biz)
     addTopLevelItem(pBizGroupItem);
 
     CWizGroupDataArray arrayGroup;
-    m_dbMgr.db().GetUserGroupInfo(arrayGroup);
+    m_dbMgr.db().GetAllGroupInfo(arrayGroup);
 
     //
     int nTotal = arrayGroup.size();
@@ -4319,7 +4510,7 @@ void CWizCategoryView::resetCreateGroupLink()
     {
         if (-1 == createLinkIndex)
         {
-            CWizCategoryViewCreateGroupLinkItem* pItem = new CWizCategoryViewCreateGroupLinkItem(m_app, tr("Create new group..."), LINK_COMMAND_ID_CREATE_GROUP);
+            CWizCategoryViewCreateGroupLinkItem* pItem = new CWizCategoryViewCreateGroupLinkItem(m_app, tr("Create Team for Free..."), LINK_COMMAND_ID_CREATE_GROUP);
             addTopLevelItem(pItem);
         }
     }
@@ -4330,6 +4521,9 @@ void CWizCategoryView::initGroup(CWizDatabase& db)
     bool itemCreeated = false;
     initGroup(db, itemCreeated);
 }
+
+typedef std::multimap<CString, WIZTAGDATA>::const_iterator mapTagIterator;
+
 void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
 {
     itemCreeated = false;
@@ -4353,58 +4547,59 @@ void CWizCategoryView::initGroup(CWizDatabase& db, bool& itemCreeated)
     //
     setGroupRootItemExtraButton(pGroupItem, group);
 
-    initGroup(db, pGroupItem, "");
+    //
+    QString strKbGUID = db.kbGUID();
+    std::multimap<CString, WIZTAGDATA> mapTag;
+    CWizDatabase& newDb = m_dbMgr.db(strKbGUID);
+    newDb.GetAllTags(mapTag);
+    initGroup(newDb, pGroupItem, "", mapTag);
 
-    CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, db.kbGUID());
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        on_initGroupFolder_finished();
+
+        updateGroupFolderDocumentCount(strKbGUID);
+    });
+
+
+    CWizCategoryViewGroupNoTagItem* pGroupNoTagItem = new CWizCategoryViewGroupNoTagItem(m_app, newDb.kbGUID());
     pGroupItem->addChild(pGroupNoTagItem);
 
-    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, db.kbGUID());
+    CWizCategoryViewTrashItem* pTrashItem = new CWizCategoryViewTrashItem(m_app, newDb.kbGUID());
     pGroupItem->addChild(pTrashItem);
 
-    //对父文件夹数据出现错误的文件夹进行容错处理，如果有父标签指向，但标签不存在则显示在根目录
-    CWizTagDataArray arrayTag;
-    if (db.GetAllTagsWithErrorParent(arrayTag)) {
-        CWizTagDataArray::const_iterator it;
-        for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-            qWarning() << "group folder with error parent fount, folder name : " << (QString)it->strName << " folder guid : "
-                       << (QString)it->strGUID << "  parent guid : " << (QString)it->strParentGUID;
-            CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
-            pGroupItem->addChild(pTagItem);
-            initGroup(db, pTagItem, it->strGUID);
+    WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
+        // only show trash if permission is enough
+        CWizDatabase& newDb = m_dbMgr.db(strKbGUID);
+        if (newDb.permission() > WIZ_USERGROUP_SUPER)
+        {
+            pTrashItem->setHidden(true);
         }
-    }
-
-
-    // only show trash if permission is enough
-    if (db.permission() > WIZ_USERGROUP_SUPER) {
-        pTrashItem->setHidden(true);
-    }
-
-    pGroupItem->sortChildren(0, Qt::AscendingOrder);
-    //
-    resetCreateGroupLink();
+    });
 }
 
-void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID)
+void CWizCategoryView::initGroup(CWizDatabase& db, QTreeWidgetItem* pParent, const QString& strParentTagGUID,
+                                 const std::multimap<CString, WIZTAGDATA>& mapTag)
 {
-    CWizTagDataArray arrayTag;
-    db.GetChildTags(strParentTagGUID, arrayTag);
-
-    CWizTagDataArray::const_iterator it;
-    for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
-        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, *it, db.kbGUID());
+    std::pair<mapTagIterator, mapTagIterator> itPair = mapTag.equal_range(strParentTagGUID);
+    mapTagIterator it;
+    for (it = itPair.first; it != itPair.second; ++it)
+    {
+        CWizCategoryViewGroupItem* pTagItem = new CWizCategoryViewGroupItem(m_app, (*it).second, db.kbGUID());
         pParent->addChild(pTagItem);
-
-        initGroup(db, pTagItem, it->strGUID);
+        initGroup(db, pTagItem, (*it).second.strGUID, mapTag);
     }
-    //
-    pParent->sortChildren(0, Qt::AscendingOrder);
 }
 
 void CWizCategoryView::initQuickSearches()
-{
-    CWizCategoryViewSearchRootItem* pSearchRoot = new CWizCategoryViewSearchRootItem(m_app, CATEGORY_SEARCH);
-    addTopLevelItem(pSearchRoot);
+{   
+    CWizCategoryViewItemBase* pSearchRoot = findAllSearchItem();
+    if (!pSearchRoot)
+    {
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
+    }
 
 //    CWizCategoryViewSearchItem* pSearchByAttributes = new CWizCategoryViewSearchItem(m_app, tr("Search by Attributes(Personal Notes)"));
     CWizCategoryViewSearchItem* pSearchByDTCreated = new CWizCategoryViewSearchItem(m_app, tr("Search by Date Created"));
@@ -4473,8 +4668,10 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
     CWizCategoryViewItemBase* pShortcutRoot = findAllShortcutItem();
     if (!pShortcutRoot)
     {
-        pShortcutRoot = new CWizCategoryViewShortcutRootItem(m_app, CATEGORY_SHORTCUTS);
-        addTopLevelItem(pShortcutRoot);
+#ifdef QT_DEBUG
+        Q_ASSERT(0);
+#endif
+        return;
     }
 
     //
@@ -4537,44 +4734,13 @@ void CWizCategoryView::initShortcut(const QString& shortcut)
         {
             qDebug() << "Invalid shortcut type : " << type;
         }
-    }
-
-    ////FIXME:兼容旧版本的快捷方式
-    ////REMOVEME: 2015-10-1日之后可以删除
-    QString strData = m_dbMgr.db().meta(CATEGORY_META, "CategoryShortcut");
-    if (!strData.isEmpty())
-    {
-        QStringList shortCutList = strData.split(';');
-        foreach (QString str, shortCutList) {
-            QStringList shortDataList = str.split(',');
-            if (shortDataList.count() != 2)
-                continue;
-
-            QString strKbGuid = shortDataList.first();
-            QString strGuid = shortDataList.last();
-            if (shortcut.contains(strGuid))
-                continue;
-            //
-            CWizDatabase &db = m_dbMgr.db(strKbGuid);
-            WIZDOCUMENTDATA doc;
-            if (db.DocumentFromGUID(strGuid, doc))
-            {
-                bool isEncrypted = doc.nProtected == 1;
-                CWizCategoryViewShortcutItem *pShortcutItem =
-                        new CWizCategoryViewShortcutItem(m_app, doc.strTitle, CWizCategoryViewShortcutItem::Document,
-                                                         doc.strKbGUID, doc.strGUID, doc.strLocation, isEncrypted);
-                pShortcutRoot->addChild(pShortcutItem);
-            }
-        }
-        // clear old value
-        m_dbMgr.db().setMeta(CATEGORY_META, "CategoryShortcut", "");
-        m_dbMgr.db().deleteMetaByKey(CATEGORY_META, "CategoryShortcut");
-        saveShortcutState();
-    }
+    }    
 }
 
 CWizCategoryViewItemBase* CWizCategoryView::findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate /* = true*/)
 {
+    qDebug() << "find group root: " << group.strGroupName;
+    //
     if (group.IsBiz())
     {
         WIZBIZDATA biz;
@@ -4706,75 +4872,6 @@ CWizCategoryViewItemBase* CWizCategoryView::findAllMessagesItem()
     return NULL;
 }
 
-/*
-
-CWizCategoryViewItemBase* CWizCategoryView::findCategory(const QString& strName, bool bCreate)
-{
-    for (int i = 0; i < topLevelItemCount(); i++) {
-        CWizCategoryViewItemBase* pItem = dynamic_cast<CWizCategoryViewItemBase*>(topLevelItem(i));
-        if (pItem && pItem->name() == strName) {
-            return pItem;
-        }
-    }
-
-    if (!bCreate)
-        return NULL;
-
-    // create group root if not found
-    if (strName == CATEGORY_ENTERPRISE)
-    {
-        // find style root and insert after it
-        CWizCategoryViewItemBase* pStyle = findCategory(CATEGORY_STYLES, false);
-        if (!pStyle)
-            return NULL;
-
-        int index = indexOfTopLevelItem(pStyle);
-
-        CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
-        insertTopLevelItem(index + 1, pSpacer);
-
-        CWizCategoryViewCategoryItem* pItem = new CWizCategoryViewCategoryItem(m_app, CATEGORY_ENTERPRISE);
-        insertTopLevelItem(index + 2, pItem);
-
-        return pItem;
-    }
-    else if (strName == CATEGORY_GROUP)
-    {
-        // always append on the end
-        if (!findCategory(CATEGORY_INDIVIDUAL, false)) {
-            CWizCategoryViewSpacerItem* pSpacer = new CWizCategoryViewSpacerItem(m_app);
-            addTopLevelItem(pSpacer);
-
-            CWizCategoryViewCategoryItem* pRoot = new CWizCategoryViewCategoryItem(m_app, CATEGORY_INDIVIDUAL);
-            addTopLevelItem(pRoot);
-        }
-
-        // insert individual group root
-        CWizCategoryViewGroupsRootItem* pItem  = new CWizCategoryViewGroupsRootItem(m_app, CATEGORY_GROUP, "");
-        addTopLevelItem(pItem);
-        pItem->setExpanded(true);
-
-        return pItem;
-    }
-    else
-    {
-        // it should be enterprise groups root
-        CWizCategoryViewItemBase* pEnterprise = findCategory(CATEGORY_ENTERPRISE);
-        if (!pEnterprise)
-            return NULL;
-
-        // insert enterprise group root
-        CWizCategoryViewBizGroupRootItem* pItem = new CWizCategoryViewBizGroupRootItem(m_app, strName, "");
-        insertTopLevelItem(indexOfTopLevelItem(pEnterprise) + 1, pItem);
-        pItem->setExpanded(true);
-
-        return pItem;
-    }
-    //
-    return NULL;
-}
-*/
-
 CWizCategoryViewGroupRootItem* CWizCategoryView::findGroup(const QString& strKbGUID)
 {
     for (int i = 0; i < topLevelItemCount(); i++) {
@@ -4883,6 +4980,10 @@ CWizCategoryViewFolderItem* CWizCategoryView::findFolder(const QString& strLocat
             return NULL;
 
         CWizCategoryViewFolderItem* pFolderItem = createFolderItem(parent, strCurrentLocation);
+        //
+        CWizStdStringArray arrayAllLocation;
+        m_dbMgr.db().GetAllLocations(arrayAllLocation);
+        initFolders(pFolderItem, pFolderItem->location(), arrayAllLocation);
         if (sort) {
             parent->sortChildren(0, Qt::AscendingOrder);
         }
@@ -5319,6 +5420,8 @@ void CWizCategoryView::on_group_opened(const QString& strKbGUID)
                     parent->sortChildren(0, Qt::AscendingOrder);
                 }
             }
+
+            resetCreateGroupLink();
         }
     }
 }
@@ -5440,6 +5543,12 @@ void CWizCategoryView::on_groupDocuments_unreadCount_modified(const QString& str
 
 void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
 {
+    QTreeWidgetItem* parentItem = pItem->parent();
+    if (!parentItem)
+    {
+        return;
+    }
+    //
     qDebug() << "category item position changed, try to update item position data, item text : " << pItem->text(0);
     CWizDatabase& db = m_dbMgr.db(pItem->kbGUID());
     if (db.IsGroup())
@@ -5469,23 +5578,17 @@ void CWizCategoryView::on_itemPosition_changed(CWizCategoryViewItemBase* pItem)
     }
 }
 
-
-void CWizCategoryView::createDocumentByHtml(const QString& strHtml, const QString& strTitle)
+void CWizCategoryView::on_importFile_finished(bool ok, QString text, QString kbGuid)
 {
-    WIZDOCUMENTDATA data;
-    createDocument(data, strHtml, strTitle);
+    if (ok)
+    {
+        quickSyncNewDocument(kbGuid);
+    }
+    else
+    {
+        CWizMessageBox::information(nullptr, tr("Info"), text);
+    }
 }
-
-void CWizCategoryView::createDocumentByHtml(const QString& strFileName,
-                                            const QString& strHtml, const QString& strTitle)
-{
-    //为了提取和file路径相关联的图片，不直接使用strHtml创建笔记，而是在创建之后更新笔记内容
-    WIZDOCUMENTDATA data;
-    createDocument(data, "<p><br/></p>", strTitle);
-    CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-    db.UpdateDocumentData(data, strHtml, strFileName, 0);
-}
-
 
 CWizFolder* CWizCategoryView::SelectedFolder()
 {
@@ -5548,7 +5651,7 @@ void CWizCategoryView::loadItemState(QTreeWidgetItem* pi, QSettings* settings)
 
 void CWizCategoryView::saveExpandState()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::settings();
+    QSettings* settings = WizGlobal::settings();
     settings->beginGroup(TREEVIEW_STATE);
     settings->remove("");
     for (int i = 0 ; i < topLevelItemCount(); i++) {
@@ -5645,8 +5748,7 @@ CWizCategoryViewFolderItem* CWizCategoryView::createFolderItem(QTreeWidgetItem* 
     return pFolderItem;
 }
 
-void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
-                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector)
 {
     // move group folder to private folder
     if (selector->isSelectPersonalFolder())
@@ -5660,7 +5762,7 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
             return;
 
         qDebug() << "move group folder to private folder " << strSelectedFolder;
-        moveGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder, progress, downloader);
+        moveGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder);
     }
     else if (selector->isSelectGroupFolder())
     {
@@ -5677,36 +5779,27 @@ void CWizCategoryView::moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
 
         qDebug() << "move group folder to group folder " << tag.strName;
         //
-        moveGroupFolderToGroupFolder(sourceFolder, tag, combineSameNameFolder, progress, downloader);
+        moveGroupFolderToGroupFolder(sourceFolder, tag, combineSameNameFolder);
     }
 }
 
-void CWizCategoryView::moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder,
-                                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder)
 {
     qDebug() << "move group folder to personal folder, group folder : " << groupFolder.strName << " private folder ; " << targetParentFolder;
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetParentFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->moveGroupFolderToPersonalDB(groupFolder, targetParentFolder, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.moveGroupFolderToPersonalDB(groupFolder, targetParentFolder, combineFolder, true);
 }
 
-void CWizCategoryView::moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
-                                                    CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder)
 {
     qDebug() << "move group folder to group folder , source : " << sourceFolder.strName << "  kb : " << sourceFolder.strKbGUID
              << "target : " << targetFolder.strName << " kb ; " << targetFolder.strKbGUID;
 
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetFolder.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->moveGroupFolderToGroupDB(sourceFolder, targetFolder, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.moveGroupFolderToGroupDB(sourceFolder, targetFolder, combineFolder, true);
 }
 
-void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector,
-                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+bool CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector)
 {
     // mvoe  personal folder to personal folder
     if (selector->isSelectPersonalFolder())
@@ -5714,63 +5807,59 @@ void CWizCategoryView::movePersonalFolder(const QString& sourceFolder, CWizFolde
         QString strSelectedFolder = selector->selectedFolder();
         if (strSelectedFolder.isEmpty() || strSelectedFolder == sourceFolder ||
                 (sourceFolder.startsWith(strSelectedFolder) && sourceFolder.indexOf('/', strSelectedFolder.length()) == sourceFolder.length() -1))
-            return;
+            return false;
 
         //combine same name folder
         CWizCategoryViewItemBase* sourceItem = findFolder(sourceFolder, false, false);
         bool combineSameNameFolder = false;
         if (!isCombineSameNameFolder(strSelectedFolder, CWizDatabase::GetLocationName(sourceFolder), combineSameNameFolder, sourceItem))
-            return;
+            return false;
 
         qDebug() << "move personal folder to personal folder  ; " << strSelectedFolder;
         //
-        movePersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder, progress);
+        movePersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, combineSameNameFolder);
+        return true;
     }
     else if (selector->isSelectGroupFolder())
     {
         WIZTAGDATA tag = selector->selectedGroupFolder();
         if (tag.strKbGUID.isEmpty())
-            return;
+            return false;
         //        
         bool combineSameNameFolders = false;
         if (!isCombineSameNameFolder(tag, CWizDatabase::GetLocationName(sourceFolder), combineSameNameFolders))
-            return;
+            return false;
         qDebug() << "move personal folder to group folder " << tag.strName;
         //
-        movePersonalFolderToGroupFolder(sourceFolder, tag, combineSameNameFolders, progress, downloader);
+        movePersonalFolderToGroupFolder(sourceFolder, tag, combineSameNameFolders);
+        return true;
     }
+    //
+    return false;
 }
 
-void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder,
-                                                          CWizProgressDialog* progress)
+void CWizCategoryView::movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder)
 {
-    qDebug() << "move personal folder to personal folder , source : " << sourceFolder << "  target folder : " << targetParentFolder;
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetParentFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->movePersonalFolderToPersonalDB(sourceFolder, targetParentFolder, combineFolder);
-    progress->exec();
+    QString name = CWizDatabase::GetLocationName(sourceFolder);
+    QString newLocation = targetParentFolder + name + "/";
+    //
+    moveFolder(sourceFolder, newLocation);
 }
 
-void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder,
-                                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder)
 {
     CWizDatabase& db = m_dbMgr.db();
     if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
     qDebug() << "move personal folder : " << sourceFolder << "  to gorup folder ; " << targetFolder.strName;
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Move folders to %1").arg(targetFolder.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->movePersonalFolderToGroupDB(sourceFolder, targetFolder, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.movePersonalFolderToGroupDB(sourceFolder, targetFolder, combineFolder, true);
 
     WizClearUserCipher(db, m_app.userSettings());
 }
 
-void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector,
-                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector)
 {
     // copy group folder to private folder
     if (selector->isSelectPersonalFolder())
@@ -5785,8 +5874,7 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
             return;
 
         qDebug() << "copy group folder to private folder " << strSelectedFolder;
-        copyGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
-                                        combineSameNameFolder, progress, downloader);
+        copyGroupFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(), combineSameNameFolder);
     }
     else if (selector->isSelectGroupFolder())
     {
@@ -5800,34 +5888,25 @@ void CWizCategoryView::copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolde
         if (!isCombineSameNameFolder(tag, sourceFolder.strName, combineSameNameFolder))
             return;
 
-        copyGroupFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
-                                     combineSameNameFolder, progress, downloader);
+        copyGroupFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(), combineSameNameFolder);
     }
 }
 
 void CWizCategoryView::copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder,
-                                                       const QString& targetParentFolder, bool keepDocTime, bool combineFolder,
-                                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+                                                       const QString& targetParentFolder, bool keepDocTime, bool combineFolder)
 {
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetParentFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyGroupFolderToPersonalDB(groupFolder, targetParentFolder, keepDocTime, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyGroupFolderToPersonalDB(groupFolder, targetParentFolder, keepDocTime, combineFolder, true);
 }
 
 void CWizCategoryView::copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
-                                                    bool keepDocTime, bool combineFolder, CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+                                                    bool keepDocTime, bool combineFolder)
 {
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetFolder.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyGroupFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyGroupFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder, true);
 }
 
-void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolderSelector* selector,
-                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector)
 {
     // copy  personal folder to personal folder
     if (selector->isSelectPersonalFolder())
@@ -5845,7 +5924,7 @@ void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolder
             return;
 
         copyPersonalFolderToPersonalFolder(sourceFolder, strSelectedFolder, selector->isKeepTime(),
-                                            selector->isKeepTag(), combineSameNameFolder, progress, downloader);
+                                            selector->isKeepTag(), combineSameNameFolder);
     }
     else if (selector->isSelectGroupFolder())
     {
@@ -5857,63 +5936,49 @@ void CWizCategoryView::copyPersonalFolder(const QString& sourceFolder,CWizFolder
         if (!isCombineSameNameFolder(tag, CWizDatabase::GetLocationName(sourceFolder), combineSameNameFolders))
             return;
         //
-        copyPersonalFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(),
-                                        combineSameNameFolders, progress, downloader);
+        copyPersonalFolderToGroupFolder(sourceFolder, tag, selector->isKeepTime(), combineSameNameFolders);
     }
 }
 
-void CWizCategoryView::copyPersonalFolderToPersonalFolder(const QString& sourceFolder,
-                                                          const QString& targetParentFolder, bool keepDocTime, bool keepTag, bool combineFolder,
-                                                          CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+void CWizCategoryView::copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
+                                                          bool keepDocTime, bool keepTag, bool combineFolder)
 {
     CWizDatabase& db = m_dbMgr.db();
     if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetParentFolder));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyPersonalFolderToPersonalDB(sourceFolder, targetParentFolder,
-                                                     keepDocTime, keepTag, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyPersonalFolderToPersonalDB(sourceFolder, targetParentFolder,
+                                                     keepDocTime, keepTag, combineFolder, true);
 
     WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizCategoryView::copyPersonalFolderToGroupFolder(const QString& sourceFolder,
-                                                       const WIZTAGDATA& targetFolder, bool keepDocTime, bool combineFolder,
-                                                       CWizProgressDialog* progress, CWizObjectDataDownloaderHost* downloader)
+                                                       const WIZTAGDATA& targetFolder, bool keepDocTime, bool combineFolder)
 {
     CWizDatabase& db = m_dbMgr.db();
     if (!WizAskUserCipherToOperateEncryptedNotes(sourceFolder, db))
         return;
 
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
-    progress->setWindowTitle(QObject::tr("Copy folders to %1").arg(targetFolder.strName));
-    documentOperator->bindSignalsToProgressDialog(progress);
-    documentOperator->copyPersonalFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder, downloader);
-    progress->exec();
+    CWizDocumentOperator documentOperator(m_dbMgr);
+    documentOperator.copyPersonalFolderToGroupDB(sourceFolder, targetFolder, keepDocTime, combineFolder);
 
     WizClearUserCipher(db, m_app.userSettings());
 }
 
 void CWizCategoryView::moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
-
-    CWizDocumentOperator* documentOperator = new CWizDocumentOperator(m_dbMgr);
+    CWizDocumentOperator documentOperator(m_dbMgr);
     // move, show progress if size > 3
     if (arrayDocument.size() <= 3)
     {
-        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
+        documentOperator.moveDocumentsToGroupFolder(arrayDocument, targetTag, false);
     }
     else
     {
-        CWizProgressDialog* progress = mainWindow->progressDialog();
-        progress->setWindowTitle(QObject::tr("Move notes to %1").arg(targetTag.strName));
-        documentOperator->bindSignalsToProgressDialog(progress);
-        documentOperator->moveDocumentsToGroupFolder(arrayDocument, targetTag, mainWindow->downloaderHost());
-        progress->exec();
+
+        documentOperator.moveDocumentsToGroupFolder(arrayDocument, targetTag, true);
     }
 }
 
@@ -5940,7 +6005,6 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
         return;
     }
 
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
     if (targetItem->type() == Category_AllFoldersItem || targetItem->type() == Category_FolderItem)
     {
         QString targetParentFolder = "/";
@@ -5954,13 +6018,11 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
             CWizCategoryViewGroupItem* groupItem = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
             if (deleteDragSource)
             {
-                moveGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder, true,
-                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+                moveGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder, true);
             }
             else
             {
-                copyGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder, true, true,
-                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+                copyGroupFolderToPersonalFolder(groupItem->tag(), targetParentFolder, true, true);
             }
         }
     }
@@ -5972,13 +6034,11 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
             CWizCategoryViewFolderItem* sourceFolder = dynamic_cast<CWizCategoryViewFolderItem*>(dragedItem);
             if (deleteDragSource)
             {
-                movePersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(), false,
-                                                mainWindow->progressDialog(), mainWindow->downloaderHost());
+                movePersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(), false);
             }
             else
             {
-                copyPersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(), true,
-                                                true, mainWindow->progressDialog(), mainWindow->downloaderHost());
+                copyPersonalFolderToGroupFolder(sourceFolder->location(), targetFolder->tag(), true, true);
             }
         }
         else if (dragedItem->type() == Category_GroupItem)
@@ -5986,13 +6046,11 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
             CWizCategoryViewGroupItem* dragedFolder = dynamic_cast<CWizCategoryViewGroupItem*>(dragedItem);
             if (deleteDragSource)
             {
-                moveGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(), false,
-                                             mainWindow->progressDialog(), mainWindow->downloaderHost());
+                moveGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(), false);
             }
             else
             {
-                copyGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(), true,
-                                             true, mainWindow->progressDialog(), mainWindow->downloaderHost());
+                copyGroupFolderToGroupFolder(dragedFolder->tag(), targetFolder->tag(), true, true);
             }
         }
     }
@@ -6000,76 +6058,69 @@ void CWizCategoryView::dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWi
 
 void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item)
 {
-    CWizCategoryViewItemBase* folderRoot = findAllFolderItem();
-    QTreeWidgetItem* parentItem = item->parent();
-    if (parentItem == 0)
-    {
-        parentItem = folderRoot;
-    }
-
-    QString strName = getUseableItemName(parentItem, item);
-
-    bool combineFolder = false;
-    QString strNewLocation = "/" + strName + "/";
-    if (strName != item->text(0))
-    {
-        if (CWizMessageBox::question(0, tr("Info"), tr("Folder '%1' already exists, combine these folders?").arg(item->text(0))) == QMessageBox::Yes)
-        {
-            combineFolder = true;
-            // 处理默认文件夹的合并，默认文件夹的显示名称和实际数据不相同
-            QTreeWidgetItem* brother = findSameNameBrother(parentItem, item, item->text(0));
-            if (brother && brother->type() == Category_FolderItem)
-            {
-                CWizCategoryViewFolderItem* brotherFolder = dynamic_cast<CWizCategoryViewFolderItem*>(brother);
-                if (brotherFolder)
-                {
-                    strName = item->text(0);
-                    strNewLocation = "/" + strName + "/";
-                    if (!brotherFolder->location().contains(brotherFolder->text(0)))
-                    {
-                        strNewLocation = brotherFolder->location();
-                    }
-                }
-            }
-        }        
-    }
-
-    item->setText(0,  strName);
-    if (combineFolder)
-    {
-        item->parent()->removeChild(item);
-    }
-
-    if (parentItem != folderRoot)
-    {
-        CWizCategoryViewItemBase* parentBase = dynamic_cast<CWizCategoryViewItemBase*>(parentItem);
-        if (!parentBase)
-            return;
-
-//                qDebug() << "parent is not root , parent name : " << parentBase->name();
-        strNewLocation = parentBase->name() + strNewLocation.remove(0, 1);
-        parentItem = parentBase->parent();
-    }
-
-    QString strOldLocation = item->location();
-
-//            qDebug() << "item position changed , " << strOldLocation << " ,  new location : " << strNewLocation;
-    resetFolderLocation(item, strNewLocation);
-    CWizDatabase& db = m_dbMgr.db();
-    updatePersonalFolderLocation(db, strOldLocation, strNewLocation);
-
+    QString oldLocation = item->location();
+    QString newLocation;
     //
-    if (combineFolder)
-    {        
-        CWizCategoryViewFolderItem* currentItem = findFolder(strNewLocation, false, false);
-        setCurrentItem(currentItem);
-        if (m_dragItem == item)
-        {
-            m_dragItem = nullptr;
-        }
-        qDebug() << "delete current item : " << item;
-        delete item;
+    QString strName = item->name();
+    //
+    if (CWizCategoryViewFolderItem* parentFolderItem = dynamic_cast<CWizCategoryViewFolderItem*>(item->parent()))
+    {
+        newLocation = parentFolderItem->location() + strName + "/";
     }
+    else
+    {
+        newLocation = "/" + strName + "/";
+    }
+    //change item location
+    resetFolderLocation(item, newLocation);
+    //
+    //save folder pos
+    CWizDatabase& db = m_dbMgr.db();
+    updatePersonalFolderLocation(db, oldLocation, newLocation);
+    //
+    //start move folder
+    moveFolder(oldLocation, newLocation);
+}
+
+void CWizCategoryView::resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation)
+{
+    item->setLocation(strNewLocation);
+    for (int i = 0; i < item->childCount(); i++)
+    {
+        CWizCategoryViewFolderItem* child = dynamic_cast<CWizCategoryViewFolderItem*>(item->child(i));
+        if (child)
+        {
+            QString strChildLocation = strNewLocation + child->text(0) + "/";
+            resetFolderLocation(child, strChildLocation);
+        }
+    }
+}
+
+void CWizCategoryView::moveFolder(QString oldLocation, QString newLocation)
+{
+    ::WizExecutingActionDialog::executeAction(tr("Moving folder..."), WIZ_THREAD_DEFAULT, [=]{
+        //
+        //wait for sync
+        WIZKM_WAIT_AND_PAUSE_SYNC();
+        //
+        CWizDatabase& db = m_dbMgr.db();
+        db.blockSignals(true);
+        CWizFolder folder(db, oldLocation);
+        folder.blockSignals(true);
+        folder.MoveToLocation(newLocation);
+        folder.blockSignals(false);
+        db.blockSignals(false);
+    });
+    //
+    CWizCategoryViewFolderItem* newItem = findFolder(newLocation, true, true);
+    if (newItem)
+    {
+        setCurrentItem(newItem);
+    }
+    //
+    MainWindow::instance()->quickSyncKb("");
+    //
+    updatePersonalFolderDocumentCount();
 }
 
 void CWizCategoryView::saveSelected(QSettings* settings)

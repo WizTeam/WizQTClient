@@ -51,7 +51,7 @@ public:
     virtual void setLeadInfoState(int state);
 
     // drawing
-    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const {}
+    virtual void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const {}
 
 protected:
     int m_nSortingType;      // upercase : -  decrease : +
@@ -69,7 +69,7 @@ public:
     // used for sorting
     virtual bool operator<(const QListWidgetItem &other) const;
 
-    virtual void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
+    virtual void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const;
 
 private:
     bool compareWithDocumentItem(const CWizDocumentListViewDocumentItem* docItem) const;
@@ -114,7 +114,7 @@ public:
     virtual bool operator<(const QListWidgetItem &other) const;
 
     // drawing
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const;
     void setNeedUpdate() const;
     QString cacheKey() const;
 
@@ -130,13 +130,13 @@ private Q_SLOTS:
     void on_thumbnailReloaded();
 
 private:
-    void draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const;
-    void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    void drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    void drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    void drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
-    void drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const;
-    void drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const;
+    void draw_impl(QPainter* p, const QStyleOptionViewItem* vopt, int nItemType, int nViewType) const;
+    void drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    void drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    void drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    void drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const;
+    void drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const;
+    void drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const;
 
     QRect drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const;
 

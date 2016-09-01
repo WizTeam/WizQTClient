@@ -31,29 +31,6 @@ Logger::~Logger()
 }
 
 
-#if QT_VERSION < 0x050000
-void Logger::messageHandler(QtMsgType type, const char* msg)
-{
-    QString text = QString::fromUtf8(msg);
-    logger()->saveToLogFile(text);
-    logger()->addToBuffer(text);
-
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stderr, "[DEBUG] %s\n", msg);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "[WARNING]: %s\n", msg);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "[CRITICAL]: %s\n", msg);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "[FATAL]: %s\n", msg);
-        abort();
-    }
-}
-#else
 void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString &msg)
 {
     Q_UNUSED(context);
@@ -64,16 +41,8 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         return;
 #endif
 
-    bool saveLog = true;
-#ifndef QT_DEBUG
-    if (type == QtDebugMsg)
-        saveLog = false;
-#endif
-    if (saveLog)
-    {
-        logger()->saveToLogFile(msg);
-        logger()->addToBuffer(msg);
-    }
+    logger()->saveToLogFile(msg);
+    logger()->addToBuffer(msg);
 
     switch (type) {
     case QtDebugMsg:
@@ -95,7 +64,6 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         abort();
     }
 }
-#endif
 
 QString Logger::logFileName()
 {
@@ -117,8 +85,8 @@ QString Logger::msg2LogMsg(const QString& strMsg)
 
 void Logger::saveToLogFile(const QString& strMsg)
 {
-//    QMutexLocker locker(&m_mutex);
-//    Q_UNUSED(locker);
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
 
     std::ofstream logFile;
     logFile.open(logFileName().toUtf8().constData(), std::ios::out | std::ios::app);
@@ -128,8 +96,8 @@ void Logger::saveToLogFile(const QString& strMsg)
 
 void Logger::addToBuffer(const QString& strMsg)
 {
-//    QMutexLocker locker(&m_mutex);
-//    Q_UNUSED(locker);
+    QMutexLocker locker(&m_mutex);
+    Q_UNUSED(locker);
     //
     m_buffer->open(QIODevice::Append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());
@@ -175,10 +143,10 @@ CWizInfo::~CWizInfo()
         if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
             stream->buffer.chop(1);
         if (stream->message_output) {
-            qt_message_output(stream->type,
-                              stream->context,
-                              stream->buffer);
-//            Utils::Logger::logger()->writeLog(stream->buffer);
+//            qt_message_output(stream->type,
+//                              stream->context,
+//                              stream->buffer);
+            Utils::Logger::logger()->writeLog(stream->buffer);
         }
         delete stream;
     }

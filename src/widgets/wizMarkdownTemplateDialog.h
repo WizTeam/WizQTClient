@@ -8,7 +8,7 @@
 namespace Ui {
 class CWizMarkdownTemplateDialog;
 }
-
+/*
 class CWizTemplateItem : public QListWidgetItem
 {
 public:
@@ -28,11 +28,14 @@ public:
     QString fileName() const;
     void setFileName(const QString& fileName);
 
+    virtual bool operator<(const QListWidgetItem &other) const;
+
 private:
     QString m_title;
     bool m_isCustom;
     QString m_fileName;
 };
+*/
 
 class CWizMarkdownTemplateDialog : public QDialog
 {
@@ -60,8 +63,16 @@ private slots:
 
     void on_pushButton_Cancel_clicked();
 
+    void on_pushButton_delete_clicked();
+
+    void on_customContextMenuRequested(const QPoint & pos);
+
+    void on_actionSaveAs_clicked();
+
 private:
     Ui::CWizMarkdownTemplateDialog *ui;
+
+    QMenu* m_menu;
 };
 
 #endif // WIZMARKDOWNTEMPLATEDIALOG_H

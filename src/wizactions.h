@@ -20,7 +20,6 @@ class QShortcut;
 #define WIZACTION_GLOBAL_SAVE_AS_PDF        "actionSaveAsPDF"
 #define WIZACTION_GLOBAL_SAVE_AS_HTML        "actionSaveAsHtml"
 #define WIZACTION_GLOBAL_IMPORT_FILE            "actionImportFile"
-#define WIZACTION_GLOBAL_PRINT        "actionPrint"
 #define WIZACTION_GLOBAL_PRINT_MARGIN        "actionPrintMargin"
 #define WIZACTION_GLOBAL_TOGGLE_CATEGORY    "actionViewToggleCategory"
 #define WIZACTION_GLOBAL_TOGGLE_FULLSCREEN  "actionViewToggleFullscreen"
@@ -47,14 +46,11 @@ class QShortcut;
 #define WIZACTION_FORMAT_JUSTIFYJUSTIFY     "actionMenuFormatJustifyJustify"
 #define WIZACTION_FORMAT_INDENT             "actionMenuFormatIndent"
 #define WIZACTION_FORMAT_OUTDENT            "actionMenuFormatOutdent"
-#define WIZACTION_FORMAT_INSERT_TABLE       "actionMenuFormatInsertTable"
 #define WIZACTION_FORMAT_INSERT_LINK        "actionMenuFormatInsertLink"
 #define WIZACTION_FORMAT_INSERT_HORIZONTAL  "actionMenuFormatInsertHorizontal"
 #define WIZACTION_FORMAT_INSERT_DATE        "actionMenuFormatInsertDate"
 #define WIZACTION_FORMAT_INSERT_TIME        "actionMenuFormatInsertTime"
 #define WIZACTION_FORMAT_REMOVE_FORMAT      "actionMenuFormatRemoveFormat"
-#define WIZACTION_FORMAT_PLAINTEXT          "actionMenuFormatPlainText"
-#define WIZACTION_FORMAT_VIEW_SOURCE        "actionMenuEditorViewSource"
 #define WIZACTION_FORMAT_INSERT_CHECKLIST   "actionMenuFormatInsertCheckList"
 #define WIZACTION_FORMAT_INSERT_CODE        "actionMenuFormatInsertCode"
 #define WIZACTION_FORMAT_INSERT_IMAGE       "actionMenuFormatInsertImage"
@@ -75,7 +71,6 @@ class QShortcut;
 #define WIZDOCUMENT_SORTBY_ACCESSTIME                 "actionSortByAccessTime"
 #define WIZDOCUMENT_SORTBY_TITLE                              "actionSortByTitle"
 #define WIZDOCUMENT_SORTBY_FOLDER                          "actionSortByFolder"
-#define WIZDOCUMENT_SORTBY_TAG                                 "actionSortByTag"
 #define WIZDOCUMENT_SORTBY_SIZE                                 "actionSortBySize"
 
 /**
@@ -97,8 +92,9 @@ private:
 };
 
 
-class CWizActions
+class CWizActions : public QObject
 {
+    Q_OBJECT
 public:
     CWizActions(CWizExplorerApp& app, QObject* parent);
 
@@ -121,6 +117,10 @@ public:
     void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu);
     void buildMenu(QMenu* menu, const QString& strFileName);
+    //
+Q_SIGNALS:
+    void insertTableSelected(int row, int col);
 };
+
 
 #endif // WIZACTIONS_H

@@ -1,9 +1,12 @@
 #include "wizFramelessWebDialog.h"
-#include <QWebFrame>
-#include <QWebView>
-#include <QWebPage>
 #include <QVBoxLayout>
 #include <QDesktopServices>
+#include <QWebEnginePage>
+#include "../share/wizwebengineview.h"
+#include "../share/wizthreads.h"
+#include <QTimer>
+
+bool CWizFramelessWebDialog::m_bVisibling = false;
 
 CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
@@ -12,12 +15,14 @@ CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
-    QWebView *view = new QWebView(this);
-    m_frame = view->page()->mainFrame();
-    connect(m_frame, SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onJavaScriptWindowObjectCleared()));
+    WizWebEngineView *view = new WizWebEngineView(this);
+    //
+    view->addToJavaScriptWindowObject("customObject", this);
+    //
+    m_frame = view->page();
+    connect(view, SIGNAL(loadFinishedEx(bool)), SLOT(onPageLoadFinished(bool)));
+    //
     view->setContextMenuPolicy(Qt::NoContextMenu);
-    connect(m_frame, SIGNAL(loadFinished(bool)), SLOT(onPageLoadFinished(bool)));
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -30,17 +35,17 @@ void CWizFramelessWebDialog::loadAndShow(const QString& strUrl)
     m_frame->load(QUrl(m_url));
 }
 
-void CWizFramelessWebDialog::timerEvent(QTimerEvent* /*event*/)
-{
-    deleteLater();
-}
-
 void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
                                               QVariant param2, QVariant param3, QVariant param4)
 {
     if (strFunction == "close")
     {
-        close();
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            hide();
+            QTimer::singleShot(1000, Qt::PreciseTimer, [=]{
+                deleteLater();
+            });
+        });
     }
     else if (strFunction == "openindefaultbrowser")
     {
@@ -54,11 +59,6 @@ void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1
 }
 
 
-void CWizFramelessWebDialog::onJavaScriptWindowObjectCleared()
-{
-    m_frame->addToJavaScriptWindowObject("customObject", this);
-}
-
 void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
 {
     if (ok)
@@ -71,13 +71,23 @@ void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
         }
         //avoid QDialog::exec: Recursive call
         disconnect(m_frame, SIGNAL(loadFinished(bool)), this, SLOT(onPageLoadFinished(bool)));
-        exec();
+        //
+        WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+            //
+            if (m_bVisibling)
+                return;
+            //
+            m_bVisibling = true;
+            show();
+            m_bVisibling = false;
+            //
+        });
     }
     else
     {
-        // start timer to delete my self
-        int nTimerID = startTimer(2 * 60 * 1000);
-        m_timerIDList.append(nTimerID);
+        QTimer::singleShot(2 * 60 * 1000, Qt::PreciseTimer, [=]{
+            deleteLater();
+        });
     }
 }
 
