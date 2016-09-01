@@ -36,7 +36,7 @@ public:
 
     virtual void paint(QPainter * painter, const QStyleOptionViewItem & option, const QModelIndex & index) const
     {
-        QStyleOptionViewItemV4 opt = option;
+        QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
 
@@ -60,7 +60,7 @@ public:
 
 
 
-WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
+WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchView *parent)
     : QObject(parent)
     , m_editor(parent)
     , m_popupWgtWidth(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH)
@@ -70,7 +70,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchWidget *parent)
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
     m_popupWgt->setFocusPolicy(Qt::NoFocus);
-    m_popupWgt->setFocusProxy(parent);
+    //m_popupWgt->setFocusProxy(parent);
     m_popupWgt->setMouseTracking(true);
     m_popupWgt->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Minimum);
 
@@ -204,7 +204,6 @@ bool WizSuggestCompletionon::eventFilter(QObject *obj, QEvent *ev)
 
         default:
             m_editor->setFocus();
-            m_editor->processEvent(ev);
             m_popupWgt->hide();
             break;
         }

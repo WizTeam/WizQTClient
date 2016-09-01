@@ -29,7 +29,7 @@ bool CWizAccountManager::isPaidUser()
     CWizDatabase& personDb = m_dbMgr.db();
 
     CWizBizDataArray arrayBiz;
-    personDb.GetUserBizInfo(true, arrayBiz);
+    personDb.GetAllBizInfo(arrayBiz);
 
     for (WIZBIZDATA biz : arrayBiz)
     {

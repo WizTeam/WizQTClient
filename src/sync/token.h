@@ -8,11 +8,7 @@ class QString;
 
 struct WIZUSERINFO;
 
-namespace WizService {
-
-namespace Internal {
 class TokenPrivate;
-}
 
 class Token : public QObject
 {
@@ -39,9 +35,8 @@ public:
 Q_SIGNALS:
     void tokenAcquired(QString strToken);
 
-    friend class Internal::TokenPrivate;
+    friend class TokenPrivate;
 };
 
-} // namespace WizService
 
 #endif // WIZSERVICE_TOKEN_H

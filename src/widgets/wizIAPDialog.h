@@ -49,7 +49,6 @@ private slots:
 
     //
     void onWaitingTimeOut();
-    void onEditorPopulateJavaScriptWindowObject();
 
     void onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID);
 

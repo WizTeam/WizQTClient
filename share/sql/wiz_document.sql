@@ -28,5 +28,7 @@ create table WIZ_DOCUMENT
    DT_PARAM_MODIFIED              char(19),
    DOCUMENT_PARAM_MD5             char(32),
    WIZ_VERSION                    int64,
+   INFO_CHANGED                   int,
+   DATA_CHANGED                   int,
    primary key (DOCUMENT_GUID)
 )

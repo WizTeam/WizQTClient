@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>430</width>
-    <height>308</height>
+    <width>583</width>
+    <height>385</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -365,38 +365,35 @@
          </property>
          <layout class="QVBoxLayout" name="verticalLayout_8">
           <item>
-           <widget class="QRadioButton" name="radioAuto">
-            <property name="text">
-             <string>Auto (Keep view state)</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="radioAlwaysEditing">
-            <property name="text">
-             <string>Always open in Editing-View</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QRadioButton" name="radioAlwaysReading">
-            <property name="text">
-             <string>Always open in Reading-View</string>
-            </property>
-           </widget>
+           <layout class="QVBoxLayout" name="verticalLayout_13">
+            <item>
+             <widget class="QRadioButton" name="radioAuto">
+              <property name="text">
+               <string>Auto (Keep view state)</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioAlwaysEditing">
+              <property name="text">
+               <string>Always open in Editing-View</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QRadioButton" name="radioAlwaysReading">
+              <property name="text">
+               <string>Always open in Reading-View</string>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>
        </item>
        <item>
         <layout class="QHBoxLayout" name="horizontalLayout_5">
-         <item>
-          <widget class="QPushButton" name="pushButtonChoseMarkdwonTemplate">
-           <property name="text">
-            <string>Choose Markdown template</string>
-           </property>
-          </widget>
-         </item>
          <item>
           <spacer name="horizontalSpacer_2">
            <property name="orientation">

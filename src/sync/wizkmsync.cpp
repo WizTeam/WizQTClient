@@ -9,8 +9,6 @@
 #include "../share/wizDatabase.h"
 #include "sync_p.h"
 
-using namespace WizService;
-
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 void CWizKMSyncEvents::OnSyncProgress(int pos)
@@ -104,7 +102,7 @@ void CWizKMSyncEvents::OnEndKb(const QString& strKbGUID)
 /* ---------------------------- CWizKMSyncThead ---------------------------- */
 
 #define DEFAULT_FULL_SYNC_SECONDS_INTERVAL 15 * 60
-#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 3000
+#define DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL 1000
 
 static CWizKMSyncThread* g_pSyncThread = NULL;
 CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
@@ -115,6 +113,8 @@ CWizKMSyncThread::CWizKMSyncThread(CWizDatabase& db, QObject* parent)
     , m_pEvents(NULL)
     , m_bBackground(true)
     , m_nFullSyncSecondsInterval(DEFAULT_FULL_SYNC_SECONDS_INTERVAL)
+    , m_bBusy(false)
+    , m_bPause(false)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -141,7 +141,7 @@ void CWizKMSyncThread::run()
     while (!m_pEvents->IsStop())
     {
         m_mutex.lock();
-        m_wait.wait(&m_mutex);
+        m_wait.wait(&m_mutex, 1000 * 3);
         m_mutex.unlock();
 
         if (m_pEvents->IsStop())
@@ -149,7 +149,12 @@ void CWizKMSyncThread::run()
             return;
         }
         //
-        doSync();        
+        if (m_bPause)
+            continue;
+        //
+        m_bBusy = true;
+        doSync();
+        m_bBusy = false;
     }
 }
 
@@ -340,7 +345,7 @@ bool CWizKMSyncThread::quickSync()
                 userInfo.strDatabaseServer = group.strDatabaseServer;
                 if (userInfo.strDatabaseServer.isEmpty())
                 {
-                    userInfo.strDatabaseServer = WizService::CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+                    userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
                 }
                 //
                 CWizKMSync syncGroup(pGroupDatabase, userInfo, m_pEvents, TRUE, TRUE, NULL);
@@ -379,7 +384,7 @@ void CWizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    CWizKMAccountsServer serser(WizService::CommonApiEntry::syncUrl());
+    CWizKMAccountsServer serser(CommonApiEntry::syncUrl());
     if (serser.GetCert(m_db.GetUserId(), m_db.GetPassword(), strN, stre, strd, strHint)) {
         m_db.SetUserCert(strN, stre, strd, strHint);
     }
@@ -393,13 +398,7 @@ bool CWizKMSyncThread::needQuickSync()
     if (m_setQuickSyncKb.empty())
         return false;
     //
-    QDateTime tNow = QDateTime::currentDateTime();
-    int mseconds = m_tLastKbModified.msecsTo(tNow);
-    //
-    if (mseconds >= DEFAULT_QUICK_SYNC_MILLISECONDS_INTERVAL)
-        return true;
-    //
-    return false;
+    return true;
 }
 
 bool CWizKMSyncThread::needDownloadMessage()
@@ -476,4 +475,29 @@ void CWizKMSyncThread::quickSyncKb(const QString& kbGuid)
         return;
     //
     g_pSyncThread->addQuickSyncKb(kbGuid);
+}
+bool CWizKMSyncThread::isBusy()
+{
+    if (!g_pSyncThread)
+        return false;
+    //
+    return g_pSyncThread->m_bBusy;
+}
+
+void CWizKMSyncThread::waitUntilIdleAndPause()
+{
+    while(isBusy())
+    {
+        QThread::sleep(1);
+    }
+    //
+    setPause(true);
+}
+
+void CWizKMSyncThread::setPause(bool pause)
+{
+    if (!g_pSyncThread)
+        return;
+    //
+    g_pSyncThread->m_bPause = pause;
 }

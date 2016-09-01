@@ -1128,6 +1128,19 @@ bool WizLoadUtf8TextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
+
+bool WizLoadTextFromResource(const QString& resourceName, QString& text)
+{
+    QFile data(resourceName);
+    if (data.open(QFile::ReadOnly)) {
+        QTextStream in(&data);
+        text = in.readAll();
+        return true;
+    }
+    return false;
+}
+
+
 bool WizSaveUnicodeTextToUtf16File(const CString& strFileName, const CString& strText)
 {
     QFile file(strFileName);
@@ -1660,7 +1673,7 @@ QString WizGetSkinResourceFileName(const QString& strSkinName, const QString& st
     };
 
     QStringList suffixList;
-    suffixList << ".png" << ".tiff";
+    suffixList << ".png" << ".tiff" << ".gif";
 
     for (size_t i = 0; i < sizeof(arrayPath) / sizeof(QString); i++)
     {
@@ -1852,6 +1865,17 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+QString WizText2Html(const QString& text)
+{
+    QString html = text;
+    html.replace("&", "&amp;");
+    html.replace("<", "&lt;");
+    html.replace(">", "&gt;");
+    //
+    return "<pre>" + html + "</pre>";
+}
+
+
 QString getImageHtmlLabelByFile(const QString& strImageFile)
 {
     return QString("<div><img border=\"0\" src=\"file://%1\" /></div>").arg(strImageFile);
@@ -1863,21 +1887,25 @@ QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgS
             .arg(linkHref).arg(imgSize.width()).arg(imgSize.height()).arg(imageFile);
 }
 
-bool WizImage2Html(const QString& strImageFile, QString& strHtml, bool bUseCopyFile)
+bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath)
 {
+    Utils::Misc::addBackslash(strDestImagePath);
+    //
+    QString srcPath = Utils::Misc::extractFilePath(strImageFile);
+    //
     QString strDestFile = strImageFile;
-    if (bUseCopyFile)
+    if (srcPath != strDestImagePath)
     {
-        QFileInfo info(strImageFile);
-        strDestFile =Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "." + info.suffix();
-
+        strDestFile = strDestImagePath + WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strImageFile);
+        //
         qDebug() << "[Editor] copy to: " << strDestFile;
 
         if (!QFile::copy(strImageFile, strDestFile)) {
+            qDebug() << "[Editor] failed to copy image to: " << strDestFile;
             return false;
         }
     }
-
+    //
     strHtml = getImageHtmlLabelByFile(strDestFile);
     return true;
 }
@@ -1893,11 +1921,7 @@ void WizDeleteFolder(const CString& strPath)
 
     dir = QDir(strPath);
 
-#if QT_VERSION > 0x050000
     dir.removeRecursively();
-#else
-    dir.rmdir(Utils::Misc::extractLastPathName(strPath));
-#endif
 }
 
 void WizDeleteFile(const CString& strFileName)
@@ -2186,6 +2210,52 @@ bool WizGetBodyContentFromHtml(QString& strHtml, bool bNeedTextParse)
 }
 
 
+bool WizHTMLIsInCommentsBlock(const QString& strHtml, int pos)
+{
+    if (pos <= 0)
+        return false;
+    if (pos >= strHtml.length())
+        return false;
+    //
+    int commentBegin = strHtml.lastIndexOf("<!--", pos);
+    if (-1 == commentBegin)
+        return false;
+    //
+    int commentEnd = strHtml.indexOf("-->", commentBegin);
+    if (commentEnd == -1)
+        return false;
+    //
+    if (commentEnd < pos)
+        return false;
+    //
+    return true;
+}
+
+void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML)
+{
+    ptrdiff_t nPos = 0;
+    int from = 0;
+    while (1)
+    {
+        nPos = strHTML.indexOf("</head", from, Qt::CaseInsensitive);
+        if (-1 == nPos)
+        {
+            nPos = 0;
+            break;
+        }
+        //
+        if (!WizHTMLIsInCommentsBlock(strHTML, nPos))
+            break;
+        //
+        from = nPos + 6;
+    }
+    //
+    strHTML.insert(int(nPos), strText);
+}
+
+
+
+
 bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCoverFileIfExist)
 {
     QDir sourceDir(strSrcDir);
@@ -2225,7 +2295,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2481,7 +2551,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2774,13 +2844,7 @@ QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document)
 void WizNoteToHtmlLink(const WIZDOCUMENTDATA& document, QString& strHtml, QString& strLink)
 {
     strLink = WizNoteToWizKMURL(document);
-#if QT_VERSION > 0x050000
     QString strTitle = document.strTitle.toHtmlEscaped();
-#else
-    QString strTitle = document.strTitle;
-    strTitle.replace(_T("<"), _T("&lt;"));
-    strTitle.replace(_T(">"), _T("&gt;"));
-#endif
     strTitle.replace(_T("&"), _T("&amp;"));
     //
     strHtml = WizFormatString2(_T("<a href=\"%1\">%2</a>"), strLink, strTitle);
@@ -2802,7 +2866,7 @@ void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtm
 void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 {
     // https://note.wiz.cn?dc={document_guid}&kb={kb_guid}&cmd=km%2C"}
-    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
     url.replace("{document_guid}", document.strGUID);
     url.replace("{kb_guid}", document.strKbGUID);
 
@@ -2816,7 +2880,7 @@ void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 
 void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents)
 {
-    QString url = WizService::CommonApiEntry::getUrlByCommand("note_link");
+    QString url = CommonApiEntry::getUrlByCommand("note_link");
     QString link;
     for (int i = 0; i < documents.count(); i++)
     {

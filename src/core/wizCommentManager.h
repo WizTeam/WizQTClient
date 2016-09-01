@@ -10,7 +10,6 @@
  *  为防止快速切换笔记时创建大量评论数目查询带来的问题，获取评论数目的请求会延迟执行
  */
 
-namespace Core {
 
 class CWizCommentManager : public QObject
 {
@@ -82,5 +81,4 @@ private:
     QueryType m_type;
 };
 
-}
 #endif // CWIZCOMMENTDOWNLOADER_H

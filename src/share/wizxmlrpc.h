@@ -151,6 +151,8 @@ public:
 
     void Add(CWizXmlRpcValue* pValue);
     bool ToStringArray(CWizStdStringArray& arrayRet);
+    //
+    std::deque<CWizXmlRpcValue*> value() const { return m_array; }
 
 private:
     std::deque<CWizXmlRpcValue*> m_array;

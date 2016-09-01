@@ -3,7 +3,7 @@
 
 #include <QPointer>
 #include <memory>
-#include <coreplugin/itreeview.h>
+#include <QTreeView>
 #include "wizCategoryViewItem.h"
 
 class CWizFolder;
@@ -22,15 +22,9 @@ class CWizFolderSelector;
 #define CATEGORY_MESSAGES_SEND_FROM_ME      QObject::tr("Send from me")
 
 
-#ifdef Q_OS_LINUX
 #define WIZNOTE_CUSTOM_SCROLLBAR
-#else
-//#if QT_VERSION < 0x050000
-#define WIZNOTE_CUSTOM_SCROLLBAR
-//#endif
-#endif
 
-class CWizCategoryBaseView : public Core::ITreeView
+class CWizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
 
@@ -41,6 +35,7 @@ public:
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
+    void updateItem(QTreeWidgetItem* pItem) { update(indexFromItem(pItem, 0)); }
 
     virtual void importFiles(QStringList& strFileList);
 
@@ -75,6 +70,13 @@ protected:
     virtual void dragMoveEvent(QDragMoveEvent* event);
     virtual void dragLeaveEvent(QDragLeaveEvent* event);
     virtual void dropEvent(QDropEvent* event);
+    //
+    bool dropOn(QDropEvent *event, int *dropRow, int *dropCol, QModelIndex *dropIndex);
+    void dropEventCore(QDropEvent *event);
+    bool droppingOnItself(QDropEvent *event, const QModelIndex &index);
+    QAbstractItemView::DropIndicatorPosition position(const QPoint &pos, const QRect &rect, const QModelIndex &index) const;
+
+
 
     virtual void enterEvent(QEvent * event);
     virtual void leaveEvent(QEvent * event);
@@ -85,12 +87,6 @@ protected:
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
     virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);    
-
-    //
-    virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                   bool dropAtTop, bool deleteDragSource);
-    virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
-                                 bool deleteDragSource);
 
 protected:
     CWizExplorerApp& m_app;
@@ -327,6 +323,7 @@ public:
     //
     bool getAvailableNewNoteTagAndLocation(QString& strKbGUID,WIZTAGDATA& strTag,
                                            QString& strLocation);
+    //
 
 signals:
     void newDocument();
@@ -363,7 +360,7 @@ protected Q_SLOTS:
     virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
 
 
-    void on_importFile_finished(bool ok, QString text);
+    void on_importFile_finished(bool ok, QString text, QString kbGuid);
 
 public Q_SLOTS:
     void on_action_newDocument();
@@ -527,7 +524,7 @@ private:
 
     void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
     //
-    void movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
+    bool movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
 
     void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
 
@@ -561,6 +558,7 @@ private:
     //
     QString getUseableItemName(QTreeWidgetItem* parent, \
                                 QTreeWidgetItem* item);
+    void moveFolder(QString oldLocation, QString newLocation);
     void resetFolderLocation(CWizCategoryViewFolderItem* item);
     void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
     bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);

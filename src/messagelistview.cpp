@@ -14,8 +14,6 @@
 #include <QApplication>
 #include <QTextCodec>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "rapidjson/document.h"
 
 #include "utils/stylehelper.h"
@@ -25,14 +23,14 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 
-#include "coreplugin/itreeview.h"
-
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "share/wizobject.h"
 #include "share/wizsettings.h"
 #include "share/wizsettings.h"
 #include "share/wizthreads.h"
+#include "share/wizGlobal.h"
+
 #include "widgets/wizScrollBar.h"
 #include "widgets/wizImageButton.h"
 #include "widgets/wizTipsWidget.h"
@@ -98,32 +96,29 @@ void avatarFromMessage(const WIZMESSAGEDATA& msg, QPixmap* pix)
 {
     if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP)
     {
-        WizService::AvatarHost::avatar(msg.senderId, pix);
+        AvatarHost::avatar(msg.senderId, pix);
     }
     else if (WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
+        AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
     }
     else if (WIZ_USER_MSG_TYPE_ADDED_TO_GROUP == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
+        AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
     }
     else if (WIZ_USER_MSG_TYPE_LIKE == msg.nMessageType
              || WIZ_USER_MSG_TYPE_SYSTEM == msg.nMessageType)
     {
-        WizService::AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
-        WizService::AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
+        AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
+        AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
     }
     else
     {
-        WizService::AvatarHost::avatar(msg.senderId, pix);
+        AvatarHost::avatar(msg.senderId, pix);
     }
 }
-
-namespace WizService {
-namespace Internal {
 
 
 class MessageListViewItem : public QListWidgetItem
@@ -221,7 +216,7 @@ public:
     {
         switch (type) {
         case WIZ_USER_MSG_TYPE_CALLED_IN_TITLE:
-            return QObject::tr("@ you in note title");
+            return QObject::tr("refer you in note title");
             break;
         case WIZ_USER_MSG_TYPE_MODIFIED:
             return QObject::tr("modified your note");
@@ -230,7 +225,7 @@ public:
             return QObject::tr("comment your note");
             break;
         case WIZ_USER_MSG_TYPE_CALLED_IN_COMMENT:
-            return QObject::tr("@ you in note comment");
+            return QObject::tr("refer you in note comment");
             break;
         case WIZ_USER_MSG_TYPE_COMMENT_REPLY:
             return QObject::tr("reply your comment");
@@ -240,6 +235,10 @@ public:
             break;
         case WIZ_USER_MSG_TYPE_ADDED_TO_GROUP:
             return QString();
+            break;
+        case WIZ_USER_MSG_TYPE_REMIND:
+        case WIZ_USER_MSG_TYPE_REMIND_CREATE:
+            return QObject::tr("Remind you to view");
             break;
         case WIZ_USER_MSG_TYPE_LIKE:
             return QObject::tr("like you note");
@@ -253,7 +252,7 @@ public:
 
 
 
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt) const
     {     
         //unread
         int nUnreadSymSize = 8;
@@ -271,7 +270,7 @@ public:
         int nMargin = 12;
         QRect rcd = vopt->rect.adjusted(nMargin + nUnreadSymSize, 26, -nMargin, 0);
         QPixmap pmAvatar;       
-//        WizService::AvatarHost::avatar(m_data.senderId, &pmAvatar);
+//        AvatarHost::avatar(m_data.senderId, &pmAvatar);
         avatarFromMessage(m_data, &pmAvatar);
         QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
         int nAvatarRightMargin = 12;
@@ -534,7 +533,7 @@ const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index
     return pItem->data();
 }
 
-void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();    
     MessageListViewItem* pItem = messageItem(vopt->index);
@@ -651,7 +650,7 @@ void MessageListView::onReadTimeout()
 void MessageListView::onSyncTimeout()
 {
     if (!m_api) {
-        m_api = new WizService::AsyncApi(this);
+        m_api = new AsyncApi(this);
 
         connect(m_api, SIGNAL(uploadMessageReadStatusFinished(QString)),
                 SLOT(on_uploadReadStatus_finished(QString)));
@@ -702,7 +701,7 @@ void MessageListView::onSyncTimeout()
 
 void MessageListView::updateTreeItem()
 {
-    CWizCategoryView* tree = ExtensionSystem::PluginManager::getObject<CWizCategoryView>();
+    CWizCategoryView* tree = dynamic_cast<CWizCategoryView *>(WizGlobal::mainWindow()->CategoryCtrl());
     if (tree) {
         CWizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
         if (!pBase)
@@ -834,8 +833,11 @@ void MessageListView::on_itemSelectionChanged()
         WIZMESSAGEDATA msgData;
         m_dbMgr.db().messageFromId(listMsg[0].nId, msgData);
 
-        if (msgData.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP ||
-                msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE)
+        if (msgData.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_LIKE
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_REMIND
+                || msgData.nMessageType == WIZ_USER_MSG_TYPE_REMIND_CREATE
+                )
         {
             emit viewMessageRequest(msgData);
         }
@@ -844,8 +846,8 @@ void MessageListView::on_itemSelectionChanged()
         {
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [msgData](){
                 QString command = QString("message_%1").arg(msgData.nMessageType);
-                QString strUrl = WizService::CommonApiEntry::getUrlByCommand(command);                
-                strUrl.replace("{token}", WizService::Token::token());
+                QString strUrl = CommonApiEntry::getUrlByCommand(command);
+                strUrl.replace("{token}", Token::token());
                 strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
                 strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
                 strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
@@ -882,7 +884,7 @@ void MessageListView::on_itemSelectionChanged()
                 QString link = str;
                 if (link.contains("{token}"))
                 {
-                    link.replace("{token}", WizService::Token::token());
+                    link.replace("{token}", Token::token());
                 }
                 QDesktopServices::openUrl(link);
             });
@@ -978,7 +980,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     , m_nUnreadCount(0)
     , m_currentSenderGUID(QString())
 {
-    setFixedHeight(Utils::StyleHelper::titleEditorHeight());
+    setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     setPalette(pal);
@@ -1152,7 +1154,7 @@ void WizMessageListTitleBar::showTipsWidget()
     tipWidget->setSizeHint(QSize(280, 60));
     tipWidget->setButtonVisible(false);
     tipWidget->bindCloseFunction([](){
-        if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+        if (MainWindow* mainWindow = MainWindow::instance())
         {
             mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");
         }
@@ -1170,7 +1172,7 @@ WizMessageSelectorItemDelegate::WizMessageSelectorItemDelegate(QObject* parent)
 void WizMessageSelectorItemDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const
 {
 //    QStyleOptionViewItem opt(option);
-    QStyleOptionViewItemV4 opt = option;
+    QStyleOptionViewItem opt = option;
     initStyleOption(&opt, index);
     //NOTE:QCombobox 的项目的背景css颜色样式无效，需要通过绘制实现。
     if (option.state & QStyle::State_Selected)
@@ -1354,8 +1356,8 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     QString strText = userList.join(";");
 
     QPixmap pix;
-    WizService::AvatarHost::load(strUserId, false);
-    WizService::AvatarHost::avatar(strUserId, &pix);
+    AvatarHost::load(strUserId, false);
+    AvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 24));
@@ -1392,7 +1394,7 @@ WizSenderSelectorItem::WizSenderSelectorItem(const QString& text, const QString&
 
 }
 
-void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void WizSenderSelectorItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();
 
@@ -1463,5 +1465,3 @@ void WizClickableLabel::mouseReleaseEvent(QMouseEvent* ev)
 }
 
 
-} // namespace Internal
-} // namespace WizService

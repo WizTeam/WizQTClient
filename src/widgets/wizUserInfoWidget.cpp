@@ -19,10 +19,6 @@
 #include "wizmainwindow.h"
 #include "wizOEMSettings.h"
 
-using namespace WizService;
-using namespace WizService::Internal;
-using namespace Core::Internal;
-
 
 CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     : WIZUSERINFOWIDGETBASE(parent)
@@ -43,7 +39,7 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_iconArraw.addFile(strIconPath);
 
     // setup menu
-    m_menuMain = new QMenu(this);
+    m_menuMain = new QMenu(NULL);
 
     QAction* actionAccountInfo = new QAction(tr("View account info..."), m_menuMain);
     connect(actionAccountInfo, SIGNAL(triggered()), SLOT(on_action_accountInfo_triggered()));
@@ -96,7 +92,8 @@ void CWizUserInfoWidget::resetUserInfo()
     if (info.strDisplayName.isEmpty()) {
         setText(::WizGetEmailPrefix(m_db.GetUserId()));
     } else {
-        QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
+        QString strName = info.strDisplayName;
+        //QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
         setText(strName);
     }
     //
@@ -134,13 +131,13 @@ void CWizUserInfoWidget::on_action_accountInfo_triggered()
 
 void CWizUserInfoWidget::on_action_accountSettings_triggered()
 {    
-#ifndef BUILD4APPSTORE
-    QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("user_info",
-                                                              WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
-    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window());
-#else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+#ifndef BUILD4APPSTORE
+    QString extInfo = CommonApiEntry::appstoreParam(false);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("user_info",
+                                                              WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
+    WizShowWebDialogWithToken(tr("Account settings"), strUrl, window);
+#else
     CWizIAPDialog* dlg = window->iapDialog();
     dlg->loadUserInfo();
     dlg->exec();
@@ -153,8 +150,8 @@ void CWizUserInfoWidget::on_action_upgradeVip_triggered()
 {
 #ifndef BUILD4APPSTORE
     QString strToken = Token::token();
-    QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
+    QString extInfo = CommonApiEntry::appstoreParam(false);
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
     QDesktopServices::openUrl(strUrl);
 #else
     MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
@@ -195,7 +192,8 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
     if (ok) {
         AvatarHost::reload(m_db.GetUserId());
     } else {
-        QMessageBox::warning(this, tr("Upload Avatar"), uploader->lastErrorMessage());
+        MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+        QMessageBox::warning(window, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
 
     uploader->deleteLater();
@@ -203,8 +201,8 @@ void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 
 void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 {
-    QString strToken = WizService::Token::token();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("service", strToken);
+    QString strToken = Token::token();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("service", strToken);
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
@@ -212,8 +210,8 @@ void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 
 void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
 {
-    QString strToken = WizService::Token::token();
-    QString strUrl = WizService::CommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
+    QString strToken = Token::token();
+    QString strUrl = CommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);

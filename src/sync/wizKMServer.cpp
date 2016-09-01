@@ -250,7 +250,7 @@ BOOL CWizKMAccountsServer::SetMessageReadStatus(const QString& strMessageIDs, in
 
 bool CWizKMAccountsServer::SetMessageDeleteStatus(const QString& strMessageIDs, int nStatus)
 {
-    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
+    QString strUrl = CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&ids=%2").arg(m_userInfo.strToken).arg(strMessageIDs);
     qDebug() << "set message delete status, strken:" << m_userInfo.strToken << "   ids : " << strMessageIDs << " url : " << strUrl;
     //
@@ -277,7 +277,7 @@ QString CWizKMAccountsServer::MakeXmlRpcPassword(const QString& strPassword)
     if (strPassword.startsWith(_T("md5.")))
         return QString(strPassword);
     //
-    return QString(_T("md5.")) + ::WizMd5StringNoSpaceJava(strPassword.toUtf8());
+    return strPassword;
 }
 
 
@@ -559,7 +559,7 @@ QString getStringFromRapidValue(const rapidjson::Value& u, const QString& member
 
 bool CWizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
-    QString strUrl = WizService::CommonApiEntry::messageServerUrl();
+    QString strUrl = CommonApiEntry::messageServerUrl();
     strUrl += QString("/messages?token=%1&page_size=%2&version=%3&api_version=6").arg(m_userInfo.strToken).arg(nCountPerPage).arg(nVersion);
     //
     QString strResult;
@@ -722,160 +722,12 @@ BOOL CWizKMDatabaseServer::SetValue(const QString& strKey, const QString& strVal
     return CWizKMXmlRpcServerBase::SetValue(_T("kb"), GetToken(), GetKbGUID(), strKey, strValue, nRetVersion);
 }
 
-struct WIZDOCUMENTDATAEX_XMLRPC_FULL
-    : public WIZDOCUMENTDATAEX
+BOOL CWizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret)
 {
-    int nApiVersion;
-    //
-    UINT nParts;
-    //
-    int nDataSize;
-    //
-    WIZDOCUMENTDATAEX_XMLRPC_FULL()
+    if (!data_download(ret.strGUID, _T("document"), ret.arrayData, ret.strTitle))
     {
-        nApiVersion = WIZKM_WEBAPI_VERSION;
-        nParts = 0;
-        nDataSize = 0;
-    }
-    //
-    WIZDOCUMENTDATAEX_XMLRPC_FULL(WIZDOCUMENTDATAEX& data)
-        : WIZDOCUMENTDATAEX(data)
-    {
-        nApiVersion = WIZKM_WEBAPI_VERSION;
-        nParts = 0;
-        nDataSize = 0;
-    }
-    //
-    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-    {
-        BOOL bInfo = FALSE;
-        BOOL bData = FALSE;
-        BOOL bParam = FALSE;
-        data.GetBool(_T("document_info"), bInfo);
-        data.GetBool(_T("document_data"), bData);
-        data.GetBool(_T("document_param"), bParam);
-        data.GetInt64(_T("version"), nVersion);
-        //
-        nParts = 0;
-        nParts |= bInfo ? WIZKM_XMKRPC_DOCUMENT_PART_INFO : 0;
-        nParts |= bData ? WIZKM_XMKRPC_DOCUMENT_PART_DATA : 0;
-        nParts |= bParam ? WIZKM_XMKRPC_DOCUMENT_PART_PARAM : 0;
-        //
-        data.GetStr(_T("document_guid"), strGUID);
-        //
-        if (bInfo)
-        {
-            data.GetStr(_T("document_title"), strTitle);
-            data.GetStr(_T("document_category"), strLocation);
-            data.GetStr(_T("document_filename"), strName);
-            data.GetStr(_T("document_seo"), strSEO);
-            data.GetStr(_T("document_url"), strURL);
-            data.GetStr(_T("document_author"), strAuthor);
-            data.GetStr(_T("document_keywords"), strKeywords);
-            data.GetStr(_T("document_type"), strType);
-            data.GetStr(_T("document_owner"), strOwner);
-            data.GetStr(_T("document_filetype"), strFileType);
-            data.GetStr(_T("document_styleguid"), strStyleGUID);
-            data.GetTime(_T("dt_created"), tCreated);
-            data.GetTime(_T("dt_modified"), tModified);
-            data.GetTime(_T("dt_accessed"), tAccessed);
-            data.GetInt(_T("document_iconindex"), nIconIndex);
-            data.GetInt(_T("document_protected"), nProtected);
-            //data.GetInt(_T("document_readcount"), nReadCount);
-            data.GetInt(_T("document_attachment_count"), nAttachmentCount);
-            data.GetTime(_T("dt_info_modified"), tInfoModified);
-            data.GetStr(_T("info_md5"), strInfoMD5);
-            data.GetTime(_T("dt_data_modified"), tDataModified);
-            data.GetStr(_T("data_md5"), strDataMD5);
-            data.GetTime(_T("dt_param_modified"), tParamModified);
-            data.GetStr(_T("param_md5"), strParamMD5);
-            //
-            data.GetStringArray(_T("document_tags"), arrayTagGUID);
-        }
-        //
-        if (bData)
-        {
-            data.GetInt(_T("document_zip_size"), nDataSize);
-            if (nApiVersion < 2)
-            {
-                if (!data.GetStream(_T("document_zip_data"), arrayData))
-                {
-                    TOLOG(_T("Failed to get note data!"));
-                    return FALSE;
-                }
-            }
-        }
-        //
-        if (bParam)
-        {
-            std::deque<WIZDOCUMENTPARAMDATA> params;
-            if (!data.GetArray(_T("document_params"), params))
-            {
-                TOLOG(_T("Failed to get note param!"));
-                return FALSE;
-            }
-            arrayParam.assign(params.begin(), params.end());
-        }
-        //
-        return !strGUID.isEmpty();
-    }
-};
-
-
-struct CWizKMDocumentGetDataParam : public CWizKMTokenOnlyParam
-{
-    CWizKMDocumentGetDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strDocumentGUID, UINT nParts)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        ChangeApiVersion(nApiVersion);
-        //
-        AddString(_T("document_guid"), strDocumentGUID);
-        AddBool(_T("document_info"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? TRUE : FALSE);
-        AddBool(_T("document_data"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE);
-        AddBool(_T("document_param"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? TRUE : FALSE);
-    }
-};
-
-
-
-struct CWizKMAttachmentGetDataParam : public CWizKMTokenOnlyParam
-{
-    CWizKMAttachmentGetDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strAttachmentGUID, UINT nParts)
-        : CWizKMTokenOnlyParam(strToken, strBookGUID)
-    {
-        ChangeApiVersion(nApiVersion);
-        //
-        AddString(_T("attachment_guid"), strAttachmentGUID);
-        AddBool(_T("attachment_info"), (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? TRUE : FALSE);
-        AddBool(_T("attachment_data"), (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? TRUE : FALSE);
-    }
-};
-
-
-BOOL CWizKMDatabaseServer::document_getData2(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret)
-{
-    WIZDOCUMENTDATAEX_XMLRPC_FULL wrap(ret);
-    wrap.arrayData.clear();
-
-    //
-    CWizKMDocumentGetDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, strDocumentGUID, nParts);
-    if (!Call(_T("document.getData"), wrap, &param))
-    {
-        TOLOG(_T("document.getData failure!"));
+        TOLOG1(_T("Failed to download attachment data: %1"), ret.strTitle);
         return FALSE;
-    }
-    //
-    ret = wrap;
-    //
-    BOOL bDownloadData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE;
-    //
-    if (bDownloadData)
-    {
-        if (!data_download(ret.strGUID, _T("document"), ret.arrayData, ret.strTitle))
-        {
-            TOLOG1(_T("Failed to download attachment data: %1"), ret.strTitle);
-            return FALSE;
-        }
     }
     //
     return TRUE;
@@ -883,231 +735,92 @@ BOOL CWizKMDatabaseServer::document_getData2(const QString& strDocumentGUID, UIN
 //
 
 struct CWizKMDocumentPostDataParam
-    : public CWizKMDocumentGetDataParam
+    : public CWizKMTokenOnlyParam
 {
-    CWizKMDocumentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strDocumentGUID, UINT nParts, const WIZDOCUMENTDATA& infodata, const CWizStdStringArray& tags, const std::deque<WIZDOCUMENTPARAMDATA>& params, const QString& strObjMd5)
-        : CWizKMDocumentGetDataParam(nApiVersion, strToken, strBookGUID, strDocumentGUID, nParts)
+    CWizKMDocumentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strDocumentGUID, bool withDocumentData, const WIZDOCUMENTDATA& infodata, const CWizStdStringArray& tags, const QString& strObjMd5)
+        : CWizKMTokenOnlyParam(strToken, strBookGUID)
     {
-        CWizXmlRpcStructValue* pDocumentStruct = new CWizXmlRpcStructValue();
-        AddStruct(_T("document"), pDocumentStruct);
+        ChangeApiVersion(nApiVersion);
         //
-        pDocumentStruct->AddString(_T("document_guid"), strDocumentGUID);
-        pDocumentStruct->AddBool(_T("document_info"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? TRUE : FALSE);
-        pDocumentStruct->AddBool(_T("document_data"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE);
-        pDocumentStruct->AddBool(_T("document_param"), (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? TRUE : FALSE);
+        AddBool("with_document_data", withDocumentData);
         //
-        BOOL bInfo = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_INFO) ? TRUE : FALSE;
-        BOOL bData = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA) ? TRUE : FALSE;
-        BOOL bParam = (nParts & WIZKM_XMKRPC_DOCUMENT_PART_PARAM) ? TRUE : FALSE;
+        Q_ASSERT(strDocumentGUID == infodata.strGUID);
+
+        AddString(_T("document_guid"), strDocumentGUID);
+        AddString(_T("document_title"), infodata.strTitle);
+        AddString(_T("document_category"), infodata.strLocation);
+        AddString(_T("document_filename"), infodata.strName);
+        AddString(_T("document_seo"), infodata.strSEO);
+        AddString(_T("document_url"), infodata.strURL);
+        AddString(_T("document_author"), infodata.strAuthor);
+        AddString(_T("document_keywords"), infodata.strKeywords);
+        AddString(_T("document_type"), infodata.strType);
+        AddString(_T("document_owner"), infodata.strOwner);
+        AddString(_T("document_filetype"), infodata.strFileType);
+        AddString(_T("document_styleguid"), infodata.strStyleGUID);
+        AddTime(_T("dt_created"), infodata.tCreated);
+        AddTime(_T("dt_modified"), infodata.tModified);
+        AddTime(_T("dt_accessed"), infodata.tAccessed);
+        AddInt(_T("document_protected"), infodata.nProtected);
+        AddInt(_T("document_readcount"), infodata.nReadCount);
+        AddInt(_T("document_attachment_count"), infodata.nAttachmentCount);
+        AddTime(_T("dt_data_modified"), infodata.tDataModified);
+        AddString(_T("data_md5"), infodata.strDataMD5);
+        AddString("document_zip_md5", strObjMd5);
         //
-        BOOL bParamInfoAdded = FALSE;
-        BOOL bDataInfoAdded = FALSE;
+        CString strTagGuids;
+        ::WizStringArrayToText(tags, strTagGuids, "*");
         //
-        if (bInfo)
-        {
-            pDocumentStruct->AddString(_T("document_title"), infodata.strTitle);
-            pDocumentStruct->AddString(_T("document_category"), infodata.strLocation);
-            pDocumentStruct->AddString(_T("document_filename"), infodata.strName);
-            pDocumentStruct->AddString(_T("document_seo"), infodata.strSEO);
-            pDocumentStruct->AddString(_T("document_url"), infodata.strURL);
-            pDocumentStruct->AddString(_T("document_author"), infodata.strAuthor);
-            pDocumentStruct->AddString(_T("document_keywords"), infodata.strKeywords);
-            pDocumentStruct->AddString(_T("document_type"), infodata.strType);
-            pDocumentStruct->AddString(_T("document_owner"), infodata.strOwner);
-            pDocumentStruct->AddString(_T("document_filetype"), infodata.strFileType);
-            pDocumentStruct->AddString(_T("document_styleguid"), infodata.strStyleGUID);
-            pDocumentStruct->AddTime(_T("dt_created"), infodata.tCreated);
-            pDocumentStruct->AddTime(_T("dt_modified"), infodata.tModified);
-            pDocumentStruct->AddTime(_T("dt_accessed"), infodata.tAccessed);
-            pDocumentStruct->AddInt(_T("document_iconindex"), infodata.nIconIndex);
-            pDocumentStruct->AddInt(_T("document_protected"), infodata.nProtected);
-            pDocumentStruct->AddInt(_T("document_readcount"), infodata.nReadCount);
-            pDocumentStruct->AddInt(_T("document_attachment_count"), infodata.nAttachmentCount);
-            pDocumentStruct->AddTime(_T("dt_info_modified"), infodata.tInfoModified);
-            pDocumentStruct->AddString(_T("info_md5"), infodata.strInfoMD5);
-            pDocumentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
-            pDocumentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-            pDocumentStruct->AddTime(_T("dt_param_modified"), infodata.tParamModified);
-            pDocumentStruct->AddString(_T("param_md5"), infodata.strParamMD5);
-            //
-            bParamInfoAdded = TRUE;
-            bDataInfoAdded = TRUE;
-            //
-            pDocumentStruct->AddStringArray(_T("document_tags"), tags);
-        }
-        if (bParam)
-        {
-            if (!bParamInfoAdded)
-            {
-                pDocumentStruct->AddTime(_T("dt_param_modified"), infodata.tParamModified);
-                pDocumentStruct->AddString(_T("param_md5"), infodata.strParamMD5);
-                bParamInfoAdded = TRUE;
-            }
-            //
-            std::deque<WIZDOCUMENTPARAMDATA> arrParams;
-            arrParams.assign(params.begin(), params.end());
-            pDocumentStruct->AddArray(_T("document_params"), arrParams);
-        }
-        if (bData)
-        {
-            if (!bDataInfoAdded)
-            {
-                pDocumentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
-                pDocumentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-                bDataInfoAdded = TRUE;
-            }
-            //
-            pDocumentStruct->AddString(_T("document_zip_md5"), strObjMd5);
-        }
+        AddString(_T("document_tag_guids"), strTagGuids);
     }
 };
 
 
-
-BOOL CWizKMDatabaseServer::document_postData2(const WIZDOCUMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
+BOOL CWizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    QString strObjMd5;
-    //
-    if (!data.arrayData.isEmpty() && (nParts & WIZKM_XMKRPC_DOCUMENT_PART_DATA))
+    ATLASSERT(!ret.arrayData.isEmpty());
+    if (!ret.arrayData.isEmpty())
     {
-        strObjMd5 = WizMd5StringNoSpaceJava(data.arrayData);
-        if (!data_upload(data.strGUID, _T("document"), data.arrayData, strObjMd5, data.strTitle))
-        {
-            TOLOG1(_T("Failed to upload note data: %1"), data.strTitle);
-            return FALSE;
-        }
-    }
-    //
-    CWizKMDocumentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, nParts, data, data.arrayTagGUID, data.arrayParam, strObjMd5);
-    //
-    CWizXmlRpcResult ret;
-    if (!Call(_T("document.postData"), ret, &param))
-    {
-        TOLOG(_T("document.postData failure!"));
+        TOLOG(_T("fault error: ret.arrayData is not null!"));
         return FALSE;
     }
     //
-    if (CWizXmlRpcStructValue* pRet = ret.GetResultValue<CWizXmlRpcStructValue>())
+    if (!data_download(strAttachmentGUID, _T("attachment"), ret.arrayData, ret.strName))
     {
-        pRet->GetInt64(_T("version"), nServerVersion);
-    }
-    //
-    return TRUE;
-}
-
-//
-
-
-BOOL CWizKMDatabaseServer::attachment_getData2(const QString& strAttachmentGUID, UINT nParts, WIZDOCUMENTATTACHMENTDATAEX& ret)
-{
-    WIZDOCUMENTATTACHMENTDATAEX wrap(ret);
-    //
-    CWizKMAttachmentGetDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, strAttachmentGUID, nParts);
-    //
-    if (!Call(_T("attachment.getData"), wrap, &param))
-    {
-        TOLOG(_T("attachment.getData failure!"));
+        TOLOG1(_T("Failed to download attachment data: %1"), ret.strName);
         return FALSE;
     }
-    //
-    ret = wrap;
-    //
-    if (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA)
-    {
-        ATLASSERT(!ret.arrayData.isEmpty());
-        if (!ret.arrayData.isEmpty())
-        {
-            TOLOG(_T("fault error: ret.arrayData is null!"));
-            return FALSE;
-        }
-        //
-        if (!data_download(ret.strGUID, _T("attachment"), ret.arrayData, ret.strName))
-        {
-            TOLOG1(_T("Failed to download attachment data: %1"), ret.strName);
-            return FALSE;
-        }
-    }
-    //
     //
     return TRUE;
 }
 
 struct CWizKMAttachmentPostDataParam
-    : public CWizKMAttachmentGetDataParam
+    : public CWizKMTokenOnlyParam
 {
-    CWizKMAttachmentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strAttachmentGUID, UINT nParts, const WIZDOCUMENTATTACHMENTDATA& infodata, const QString& strObjMd5)
-        : CWizKMAttachmentGetDataParam(nApiVersion, strToken, strBookGUID, strAttachmentGUID, nParts)
+    CWizKMAttachmentPostDataParam(int nApiVersion, const QString& strToken, const QString& strBookGUID, const QString& strAttachmentGUID, const WIZDOCUMENTATTACHMENTDATA& infodata, const QString& strObjMd5)
+        : CWizKMTokenOnlyParam(strToken, strBookGUID)
     {
-        CWizXmlRpcStructValue* pAttachmentStruct = new CWizXmlRpcStructValue();
-        AddStruct(_T("attachment"), pAttachmentStruct);
+        ChangeApiVersion(nApiVersion);
+
+        Q_ASSERT(strAttachmentGUID == infodata.strGUID);
+        AddString(_T("attachment_guid"), strAttachmentGUID);
+        AddString(_T("attachment_document_guid"), infodata.strDocumentGUID);
+        AddString(_T("attachment_name"), infodata.strName);
+        AddString(_T("attachment_url"), infodata.strURL);
+        AddString(_T("attachment_description"), infodata.strDescription);
+        AddTime(_T("dt_info_modified"), infodata.tInfoModified);
+        AddString(_T("info_md5"), infodata.strInfoMD5);
+        AddTime(_T("dt_data_modified"), infodata.tDataModified);
+        AddString(_T("data_md5"), infodata.strDataMD5);
         //
-        pAttachmentStruct->AddString(_T("attachment_guid"), strAttachmentGUID);
-        pAttachmentStruct->AddBool(_T("attachment_info"), (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? TRUE : FALSE);
-        pAttachmentStruct->AddBool(_T("attachment_data"), (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? TRUE : FALSE);
+        AddTime(_T("dt_data_modified"), infodata.tDataModified);
+        AddString(_T("data_md5"), infodata.strDataMD5);
+        AddString(_T("attachment_zip_md5"), strObjMd5);
         //
-        BOOL bInfo = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_INFO) ? TRUE : FALSE;
-        BOOL bData = (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA) ? TRUE : FALSE;
-        //
-        BOOL bDataInfoAdded = FALSE;
-        //
-        if (bInfo)
-        {
-            pAttachmentStruct->AddString(_T("attachment_document_guid"), infodata.strDocumentGUID);
-            pAttachmentStruct->AddString(_T("attachment_name"), infodata.strName);
-            pAttachmentStruct->AddString(_T("attachment_url"), infodata.strURL);
-            pAttachmentStruct->AddString(_T("attachment_description"), infodata.strDescription);
-            pAttachmentStruct->AddTime(_T("dt_info_modified"), infodata.tInfoModified);
-            pAttachmentStruct->AddString(_T("info_md5"), infodata.strInfoMD5);
-            pAttachmentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
-            pAttachmentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-            //
-            bDataInfoAdded = TRUE;
-        }
-        if (bData)
-        {
-            if (!bDataInfoAdded)
-            {
-                pAttachmentStruct->AddTime(_T("dt_data_modified"), infodata.tDataModified);
-                pAttachmentStruct->AddString(_T("data_md5"), infodata.strDataMD5);
-                bDataInfoAdded = TRUE;
-            }
-            pAttachmentStruct->AddString(_T("attachment_zip_md5"), strObjMd5);
-        }
+        AddBool("attachment_info", true);
+        AddBool("attachment_data", true);
     }
 };
-
-BOOL CWizKMDatabaseServer::attachment_postData2(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
-{
-    QString strObjMd5;
-    //
-    if (!data.arrayData.isEmpty() && (nParts & WIZKM_XMKRPC_ATTACHMENT_PART_DATA))
-    {
-        strObjMd5 = ::WizMd5StringNoSpaceJava(data.arrayData);
-        //
-        if (!data_upload(data.strGUID, _T("attachment"), data.arrayData, strObjMd5, data.strName))
-        {
-            TOLOG1(_T("Failed to upload attachment data: %1"), data.strName);
-            return FALSE;
-        }
-    }
-    //
-    CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, nParts, data, strObjMd5);
-    //
-    CWizXmlRpcResult ret;
-    if (!Call(_T("attachment.postData"), ret, &param))
-    {
-        TOLOG(_T("attachment.postData2 failure!"));
-        return FALSE;
-    }
-    //
-    if (CWizXmlRpcStructValue* pRet = ret.GetResultValue<CWizXmlRpcStructValue>())
-    {
-        pRet->GetInt64(_T("version"), nServerVersion);
-    }
-    //
-    return TRUE;
-}
-
 
 struct CWizKMDataDownloadParam
     : public CWizKMTokenOnlyParam
@@ -1311,15 +1024,7 @@ BOOL CWizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStri
 
 //////////////////////////////////////////////////////////////////////////////////////
 //
-
-BOOL CWizKMDatabaseServer::document_getData(const QString& strDocumentGUID, UINT nParts, WIZDOCUMENTDATAEX& ret)
-{
-    if (document_getData2(strDocumentGUID, nParts, ret))
-        return TRUE;
-    //
-    return FALSE;//document_getData1(strDocumentGUID, nParts, ret);
-}
-BOOL CWizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
+BOOL CWizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
     if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.GetMaxFileSize())
     {
@@ -1327,55 +1032,100 @@ BOOL CWizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, UINT
         return FALSE;
     }
     //
-    BOOL bRet = document_postData2(data, nParts, nServerVersion);
+    QString strObjMd5;
     //
-    return bRet;
+    if (!data.arrayData.isEmpty() && bWithDocumentData)
+    {
+        strObjMd5 = WizMd5StringNoSpaceJava(data.arrayData);
+        if (!data_upload(data.strGUID, _T("document"), data.arrayData, strObjMd5, data.strTitle))
+        {
+            TOLOG1(_T("Failed to upload note data: %1"), data.strTitle);
+            return FALSE;
+        }
+    }
+    else
+    {
+        bWithDocumentData = false;
+    }
+    //
+    CWizKMDocumentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, bWithDocumentData, data, data.arrayTagGUID, strObjMd5);
+    //
+    CWizXmlRpcResult ret;
+    if (!Call(_T("document.postSimpleData"), ret, &param))
+    {
+        TOLOG(_T("document.postSimpleData failure!"));
+        return FALSE;
+    }
+    //
+    if (CWizXmlRpcStructValue* pRet = ret.GetResultValue<CWizXmlRpcStructValue>())
+    {
+        pRet->GetInt64(_T("version"), nServerVersion);
+    }
+    //
+    return TRUE;
 }
 
-BOOL CWizKMDatabaseServer::attachment_getData(const QString& strAttachmentGUID, UINT nParts, WIZDOCUMENTATTACHMENTDATAEX& ret)
+
+BOOL CWizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
 {
-    if (attachment_getData2(strAttachmentGUID, nParts, ret))
-        return TRUE;
-    //
-    return FALSE;//attachment_getData1(strAttachmentGUID, nParts, ret);
-}
-BOOL CWizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, UINT nParts, __int64& nServerVersion)
-{
-    if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.GetMaxFileSize())
+    if (data.arrayData.size() > m_kbInfo.GetMaxFileSize())
     {
         TOLOG1(_T("%1 is too large, skip it"), data.strName);
         return TRUE;
     }
     //
-    if (attachment_postData2(data, nParts, nServerVersion))
-        return TRUE;
+    QString strObjMd5 = ::WizMd5StringNoSpaceJava(data.arrayData);
     //
-    return FALSE;
+    if (!data_upload(data.strGUID, _T("attachment"), data.arrayData, strObjMd5, data.strName))
+    {
+        TOLOG1(_T("Failed to upload attachment data: %1"), data.strName);
+        return FALSE;
+    }
+    //
+    CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, data, strObjMd5);
+    //
+    CWizXmlRpcResult ret;
+    if (!Call(_T("attachment.postSimpleData"), ret, &param))
+    {
+        TOLOG(_T("attachment.postSimpleData failure!"));
+        return FALSE;
+    }
+    //
+    if (CWizXmlRpcStructValue* pRet = ret.GetResultValue<CWizXmlRpcStructValue>())
+    {
+        pRet->GetInt64(_T("version"), nServerVersion);
+    }
+    //
+    return TRUE;
 }
 
 
-
-
-BOOL CWizKMDatabaseServer::document_downloadSimpleList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+BOOL CWizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
 {
-    return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX_XMLRPC_SIMPLE>(_T("document.downloadList"), _T("document_guids"), arrayDocumentGUID, arrayRet);
+   return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>(_T("document.downloadInfoList"), _T("document_guids"), arrayDocumentGUID, arrayRet);
 }
 
-BOOL CWizKMDatabaseServer::document_downloadFullList(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+BOOL CWizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc)
 {
-   return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX_XMLRPC_FULL>(_T("document.downloadInfoList"), _T("document_guids"), arrayDocumentGUID, arrayRet);
+    CWizStdStringArray guids;
+    guids.push_back(strDocumentGuid);
+    //
+    std::deque<WIZDOCUMENTDATAEX> arrayRet;
+    if (!document_getListByGuids(guids, arrayRet))
+        return FALSE;
+    //
+    if (arrayRet.size() != 1)
+        return FALSE;
+    //
+    doc = arrayRet[0];
+    return TRUE;
 }
 
-BOOL CWizKMDatabaseServer::attachment_downloadSimpleList(const CWizStdStringArray& arrayAttachmentGUID, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
-{
-    return downloadList<WIZDOCUMENTATTACHMENTDATAEX, WIZDOCUMENTATTACHMENTDATAEX>(_T("attachment.downloadList"), _T("attachment_guids"), arrayAttachmentGUID, arrayRet);
-}
-//
+
 BOOL CWizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
 {
-    return getList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX_XMLRPC_SIMPLE>(_T("document.getList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>(_T("document.getSimpleList"), nCountPerPage, nVersion, arrayRet);
 }
-
 
 BOOL CWizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
@@ -1425,8 +1175,8 @@ BOOL CWizKMDatabaseServer::category_getAll(QString& str)
 
 QByteArray CWizKMDatabaseServer::DownloadDocumentData(const QString& strDocumentGUID)
 {
-    WIZDOCUMENTDATAEX_XMLRPC_FULL ret;
-    if (!document_getData(strDocumentGUID, WIZKM_XMKRPC_DOCUMENT_PART_DATA, ret))
+    WIZDOCUMENTDATAEX ret;
+    if (!document_downloadData(strDocumentGUID, ret))
     {
         TOLOG1(_T("Failed to download note data: %1"), strDocumentGUID);
         return QByteArray();
@@ -1438,66 +1188,11 @@ QByteArray CWizKMDatabaseServer::DownloadDocumentData(const QString& strDocument
     return ret.arrayData;
 }
 //
-struct WIZDOCUMENTATTACHMENTDATAEX_XMLRPC_FULL
-    : public WIZDOCUMENTATTACHMENTDATAEX
-{
-    int nApiVersion;
-    UINT nParts;
-    int nDataSize;
-    //
-    WIZDOCUMENTATTACHMENTDATAEX_XMLRPC_FULL()
-    {
-        nApiVersion = WIZKM_WEBAPI_VERSION;
-        nParts = 0;
-        nDataSize = 0;
-    }
-    WIZDOCUMENTATTACHMENTDATAEX_XMLRPC_FULL(WIZDOCUMENTATTACHMENTDATAEX& data)
-        :WIZDOCUMENTATTACHMENTDATAEX(data)
-    {
-        nApiVersion = WIZKM_WEBAPI_VERSION;
-        nParts = 0;
-        nDataSize = 0;
-    }
-    BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data)
-    {
-        BOOL bInfo = FALSE;
-        BOOL bData = FALSE;
-        data.GetBool(_T("attachment_info"), bInfo);
-        data.GetBool(_T("attachment_data"), bData);
-        data.GetInt64(_T("version"), nVersion);
-        //
-        nParts = 0;
-        nParts |= bInfo ? WIZKM_XMKRPC_ATTACHMENT_PART_INFO : 0;
-        nParts |= bData ? WIZKM_XMKRPC_ATTACHMENT_PART_DATA : 0;
-        //
-        data.GetString(_T("attachment_guid"), strGUID);
-        data.GetInt64(_T("version"), nVersion);
-        //
-        if (bInfo)
-        {
-            data.GetStr(_T("attachment_document_guid"), strDocumentGUID);
-            data.GetStr(_T("attachment_name"), strName);
-            data.GetStr(_T("attachment_url"), strURL);
-            data.GetStr(_T("attachment_description"), strDescription);
-            data.GetTime(_T("dt_info_modified"), tInfoModified);
-            data.GetStr(_T("info_md5"), strInfoMD5);
-            data.GetTime(_T("dt_data_modified"), tDataModified);
-            data.GetStr(_T("data_md5"), strDataMD5);
-        }
-
-        //
-        data.GetInt(_T("attachment_zip_size"), nDataSize);
-        //
-        return !strGUID.isEmpty();
-    }
-};
-
-
 
 QByteArray CWizKMDatabaseServer::DownloadAttachmentData(const QString& strAttachmentGUID)
 {
-    WIZDOCUMENTATTACHMENTDATAEX_XMLRPC_FULL ret;
-    if (!attachment_getData(strAttachmentGUID, WIZKM_XMKRPC_ATTACHMENT_PART_DATA, ret))
+    WIZDOCUMENTATTACHMENTDATAEX ret;
+    if (!attachment_downloadData(strAttachmentGUID, ret))
     {
         TOLOG1(_T("Failed to download attachment data: %1"), strAttachmentGUID);
         return QByteArray();

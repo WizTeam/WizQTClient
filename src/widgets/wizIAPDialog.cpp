@@ -1,9 +1,7 @@
 #include "wizIAPDialog.h"
 #include "ui_wizIAPDialog.h"
 #include <QMessageBox>
-#include <QWebView>
 #include <QTextBrowser>
-#include <QWebFrame>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QNetworkRequest>
@@ -20,7 +18,7 @@
 #include "share/wizDatabaseManager.h"
 #include "share/wizDatabase.h"
 #include "sync/apientry.h"
-#include "coreplugin/icore.h"
+#include "share/wizGlobal.h"
 #include "mac/wizIAPHelper.h"
 #include "wizmainwindow.h"
 
@@ -43,10 +41,14 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent)
     setPurchaseAvailable(false);
 
     initStyles();
+    //
+    MainWindow* mainWindow = qobject_cast<MainWindow *>(WizGlobal::mainWindow());
+    if (mainWindow) {
+        ui->webView->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
+    }
+
 
     connect(&m_timer, SIGNAL(timeout()), SLOT(onWaitingTimeOut()));
-    connect(ui->webView->page()->mainFrame(), SIGNAL(javaScriptWindowObjectCleared()),
-            SLOT(onEditorPopulateJavaScriptWindowObject()));
     connect(m_net, SIGNAL(finished(QNetworkReply*)), SLOT(checkReceiptFinished(QNetworkReply*)));
 
     // call check receipt function in main thread
@@ -102,9 +104,9 @@ void CWizIAPDialog::loadUserInfo()
 {
     setWindowTitle(tr("Account settings"));
     ui->stackedWidget->setCurrentIndex(0);
-    QString extInfo = WizService::CommonApiEntry::appstoreParam(false);
-    QString strToken = WizService::Token::token();
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
+    QString extInfo = CommonApiEntry::appstoreParam(false);
+    QString strToken = Token::token();
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
     qDebug() << "load user info : " << strUrl;
     ui->webView->load(QUrl(strUrl));
 }
@@ -198,7 +200,7 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
 #else
     strPlat = "linux";
 #endif
-    QString asServerUrl = WizService::CommonApiEntry::asServerUrl();
+    QString asServerUrl = CommonApiEntry::asServerUrl();
     QString checkUrl = asServerUrl + "/a/pay2/ios";
     //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
     //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";
@@ -343,14 +345,6 @@ void CWizIAPDialog::onWaitingTimeOut()
     m_waitingMsgBox->setText(tr("Can not connect to Server, please try again later."));
     m_waitingMsgBox->exec();
     accept();
-}
-
-void CWizIAPDialog::onEditorPopulateJavaScriptWindowObject()
-{
-    Core::Internal::MainWindow* mainWindow = qobject_cast<Core::Internal::MainWindow *>(Core::ICore::mainWindow());
-    if (mainWindow) {
-        ui->webView->page()->mainFrame()->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
-    }
 }
 
 void CWizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID)

@@ -7,13 +7,9 @@
 #include <QSize>
 #include <QXmlStreamReader>
 #include <QStringList>
-#include <QWebPage>
-#include <QWebElement>
-#include <QWebElementCollection>
-#include <QWebFrame>
 #include <QEventLoop>
-#include <QMacCocoaViewContainer>
 #include <QDebug>
+#include "html/wizhtmlcollector.h"
 
 #import <WebKit/WebKit.h>
 
@@ -419,7 +415,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
         if (strFileList.count() > 0)
         {
-            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            MainWindow *window = MainWindow::instance();
             if (window)
             {
                 convertYosemiteFileListToNormalList(strFileList);
@@ -437,7 +433,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
         if (!strText.isEmpty())
         {
             qDebug() << "[service] : text string finded : " << strText;
-            Core::Internal::MainWindow *window = Core::Internal::MainWindow::instance();
+            MainWindow *window = MainWindow::instance();
             if (window)
             {
                 window->createNoteWithText(strText);
@@ -456,122 +452,6 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 }
 
 @end
-
-
-bool processWebImageUrl(QString& strHtml, const QString& strUrl)
-{
-    QWebPage page;
-    QWebFrame* frame = page.mainFrame();
-    QUrl webUrl(strUrl);
-    frame->setHtml(strHtml, webUrl);
-    QWebElement document = frame->documentElement();
-    QWebElementCollection collection = document.findAll("img");
-    foreach (QWebElement paraElement, collection) {
-        QString strSrc = paraElement.attribute("src");
-        QUrl elemUrl(strSrc);
-//        qDebug() << "origin image src :  "  << strSrc;
-        if (elemUrl.scheme().isEmpty())
-        {
-            if (strSrc.left(2) == "//")
-            {
-                elemUrl.setScheme(webUrl.scheme());
-            }
-            else if (strSrc.left(1) == "/")
-            {
-                elemUrl.setScheme(webUrl.scheme());
-                elemUrl.setHost(webUrl.host());
-            }
-            else if (strSrc.left(3) == "../")
-            {
-                elemUrl.setUrl(webUrl.scheme() + "://"+ webUrl.host() + strSrc.remove(0, 2));
-            }
-            else if (elemUrl.host().isEmpty())
-            {
-                elemUrl.setHost(webUrl.host());
-                elemUrl.setScheme(webUrl.scheme());
-            }
-            else
-            {
-                elemUrl.setScheme(webUrl.scheme());
-            }
-//            qDebug() << "after reset url scheme , url " << elemUrl.toString();
-        }
-        paraElement.setAttribute("src", elemUrl.toString());
-//        strSrc = paraElement.attribute("src");te
-//        qDebug() << "after change scheme image src :  "  << strSrc;
-    }
-    strHtml = document.toInnerXml();
-
-    return true;
-}
-
-bool processWebarchiveImageUrl(QString& strHtml, const QString& strFolderPath)
-{
-    QWebPage page;
-    QWebFrame* frame = page.mainFrame();
-    frame->setHtml(strHtml);
-    QWebElement document = frame->documentElement();
-    QWebElementCollection collection = document.findAll("img");
-    foreach (QWebElement paraElement, collection) {
-        QString strSrc = paraElement.attribute("src");
-        qDebug() << "origin image src :  "  << strSrc;
-        if (strSrc.left(8) == "file:///")
-        {
-            strSrc.remove(0, 8);
-            strSrc = strFolderPath + strSrc;
-        }
-        paraElement.setAttribute("src", strSrc);
-        strSrc = paraElement.attribute("src");
-        qDebug() << "after change scheme image src :  "  << strSrc;
-    }
-    strHtml = document.toInnerXml();
-
-    return true;
-}
-
-
-
-QString wizSystemClipboardData(QString& orignUrl)
-{
-    NSPasteboard *pasteboard = [NSPasteboard generalPasteboard];
-
-    NSArray *typeArray = [pasteboard types];
-//    NSLog(@"clipboard types : %@", typeArray);
-//    NSString* htmlType = @"public.html";
-//    if ([typeArray containsObject:htmlType])
-//    {
-//        NSData* data = [pasteboard dataForType:htmlType];
-
-//        WebArchive *archive = [[WebArchive alloc] initWithData:data];
-//        WebResource *resource = archive.mainResource;
-//        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
-//        [archive release];
-
-//        NSString* url = [[resource URL] absoluteString];
-//        orignUrl = WizToQString(url);
-//    }
-    NSString *type = @"com.apple.webarchive";
-    if ([typeArray containsObject:type])
-    {
-        NSData* data = [pasteboard dataForType:type];
-
-        WebArchive *archive = [[WebArchive alloc] initWithData:data];
-        WebResource *resource = archive.mainResource;
-        NSString *string = [[NSString alloc] initWithData:resource.data encoding:NSUTF8StringEncoding];
-    //        NSLog(@"webresource url %@", [[resource URL] absoluteString]);
-    //        NSLog(@"%@", string);
-        [archive release];
-
-        QString strHtml = WizToQString(string);
-        NSString* url = [[resource URL] absoluteString];
-        orignUrl = WizToQString(url);
-        processWebImageUrl(strHtml, orignUrl);
-        return strHtml;
-    }
-
-    return "";
-}
-
 
 bool wizIsYosemiteFilePath(const QString& strPath)
 {
@@ -597,7 +477,7 @@ void wizHIDictionaryWindowShow(const QString& strText, QRect rcText)
 //    [HIDictionaryWindowShow dictionary:NULL textString:cfString selectionRange:];
 }
 
-NSString* getDoucmentType(documentType type)
+NSString* getDoucmentType(WizMacDocumentType type)
 {
    // NSString* temp = @"NULL";
     switch (type) {
@@ -679,45 +559,110 @@ QString wizDocToHtml(NSData *data)
     return wizAttributedStringToHtml(string);
 }
 
+bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, const QString& strResourcePath)
+{
+    class CProcessWebarchiveHtmlCollector : public CWizHtmlCollector
+    {
+    public:
+        CProcessWebarchiveHtmlCollector(const QString& strResourcePath)
+            : m_strResourcePath(strResourcePath)
+        {
+
+        }
+
+        virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
+        {
+            QString tagName = pTag->getTagName();
+            tagName = tagName.toUpper();
+            //
+            if (tagName == "IMG"
+                    || tagName == "SCRIPT"
+                    || tagName == "STYLE")
+            {
+                processTagValue(pTag, "src");
+            }
+            else if (tagName == "LINK")
+            {
+                processTagValue(pTag, "href");
+                //
+                qDebug() << pTag->getTag();
+            }
+            //
+            processTagValue(pTag, "background");
+            //
+            m_ret.push_back(pTag->getTag());
+        }
+        //
+        void processTagValue(CWizHtmlTag* pTag, const QString& valueName)
+        {
+            QString value = pTag->getValueFromName(valueName);
+            if (value.isEmpty())
+                return;
+            //
+            qDebug() << "value before: " << value;
+            //
+            if (value.startsWith("file:///"))
+            {
+                value.remove(0, 8);
+                value = "file://" + m_strResourcePath + value;
+                //
+                qDebug() << "value result: " << value;
+                //
+                pTag->setValueToName(valueName, value);
+            }
+        }
+    private:
+        QString m_strResourcePath;
+    };
+    //
+    CProcessWebarchiveHtmlCollector collector(strResourcePath);
+    //
+    collector.Collect(strFileName, strHtml, true, strResourcePath);
+
+    return true;
+}
+
 
 QString wizWebarchiveToHtml(NSString *filePath)
 {
     QString webFile = WizToQString(filePath);
-    if (QFile::exists(webFile))
-    {
-        QFileInfo info(webFile);
-        QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
-        QString newFile = strFolder + info.fileName();
-        QDir dir;
-        dir.mkdir(strFolder);
-        QFile::copy(webFile, newFile);
+    if (!QFile::exists(webFile))
+        return QString();
+    //
+    QFileInfo info(webFile);
+    QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
+    QString newFile = strFolder + info.fileName();
+    QDir dir;
+    dir.mkdir(strFolder);
+    if (!QFile::copy(webFile, newFile))
+        return QString();
+    //
+    QString htmlFile = strFolder + info.baseName() + ".html";
+    QString commandLine = QString("textutil -convert html \"%1\" -output \"%2\"").arg(newFile).arg(htmlFile);
 
-        // convert webarchive to html
-        QProcess process;
-        QEventLoop loop;
-        QObject::connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
-        process.start(QString("textutil -convert html %1").arg(newFile));
-        loop.exec();
-        newFile = strFolder + info.baseName() + ".html";
+    // convert webarchive to html
+    QProcess process;
+    QEventLoop loop;
+    QObject::connect(&process, SIGNAL(finished(int)), &loop, SLOT(quit()));
+    process.start(commandLine);
+    loop.exec();
 
-        qDebug() << "convert html file finished";
+    qDebug() << "convert html file finished";
 
-        QByteArray ba;
-        WizLoadDataFromFile(newFile, ba);
-        QString strHtml(ba);
+    QString strHtml;
+    ::WizLoadUnicodeTextFromFile(htmlFile, strHtml);
 
+    if (strHtml.isEmpty())
+        return QString();
+    //
+    //qDebug() << strHtml;
+    //
+    processWebarchiveImageUrl(newFile, strHtml, strFolder);
 
-        if (!strHtml.isEmpty())
-        {
-            processWebarchiveImageUrl(strHtml, strFolder);
-
-            return strHtml;
-        }
-    }
-    return "";
+    return strHtml;
 }
 
-bool documentToHtml(const QString& strFile, documentType type, QString& strHtml)
+bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml)
 {
     NSString* filePath = WizToNSString(strFile);
 
@@ -875,13 +820,6 @@ void adjustSubViews(QWidget* wgt)
 
 
 
-QMacCocoaViewContainer* createViewContainer(QWidget* wgt)
-{
-    NSView* wgtView = (NSView *) wgt->winId();
-    QMacCocoaViewContainer* container = new QMacCocoaViewContainer(wgtView);
-    return container;
-}
-
 
 int getSystemMinorVersion()
 {
@@ -992,4 +930,73 @@ void readShareExtensionAccount()
 //    qDebug() << "user id : " << WizToQString(nsUserId);
 //    qDebug() << "user guid : " << WizToQString(nsUserGUID);
 //    qDebug() << "mywiz : " << WizToQString(nsMyWiz);
+}
+
+
+CWizCocoaViewContainer::CWizCocoaViewContainer()
+    : m_view(nil)
+{
+
+}
+void CWizCocoaViewContainer::setCocoaView(NSView* view)
+{
+    m_view = view;
+    [m_view retain];
+}
+
+
+QList<WizWindowInfo> WizGetActiveWindows()
+{
+    QList<WizWindowInfo> windowTitles;
+
+    // get frontmost process for currently active application
+    ProcessSerialNumber psn = { 0L, 0L };
+    OSStatus err = GetFrontProcess(&psn);
+
+    CFStringRef processName = NULL;
+    err = CopyProcessName(&psn, &processName);
+
+    NSString *pname = (NSString *)processName;
+
+    // loop through all application windows
+    CFArrayRef windowList = CGWindowListCopyWindowInfo(kCGWindowListOptionOnScreenOnly | kCGWindowListExcludeDesktopElements, kCGNullWindowID);
+    for (NSMutableDictionary* entry in (NSArray*)windowList)
+    {
+        NSString* ownerName = [entry objectForKey:(id)kCGWindowOwnerName];
+        NSString *name = [entry objectForKey:@"kCGWindowName" ];
+        NSInteger ownerPID = [[entry objectForKey:(id)kCGWindowOwnerPID] integerValue];
+        NSInteger layer = [[entry objectForKey:@"kCGWindowLayer"] integerValue];
+        if(layer == 0)
+        {
+            if([ownerName isEqualToString:pname])
+            {
+                NSRange range;
+                range.location = 0;
+                range.length = [ownerName length];
+
+                unichar *chars = new unichar[range.length];
+                [ownerName getCharacters:chars range:range];
+                QString owner = QString::fromUtf16(chars, range.length);
+
+                range.length = [name length];
+
+                chars = new unichar[range.length];
+                [name getCharacters:chars range:range];
+                QString windowTitle = QString::fromUtf16(chars, range.length);
+                delete[] chars;
+
+                long pid = (long)ownerPID;
+
+                WizWindowInfo wi;
+                wi.processName = owner;
+                wi.windowTitle = windowTitle;
+                wi.pid = pid;
+                windowTitles.append(wi);
+            }
+        }
+    }
+    CFRelease(windowList);
+    CFRelease(processName);
+
+    return windowTitles;
 }

@@ -72,7 +72,6 @@ public Q_SLOTS:
     //
     void resetAttachments();
 
-
 public:
     QAction* findAction(const QString& strName);
     void setDocument(const WIZDOCUMENTDATA& document);

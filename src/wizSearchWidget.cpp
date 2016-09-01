@@ -15,7 +15,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
+CWizSearchView::CWizSearchView(QWidget* parent /* = 0 */)
     : QWidget(parent)
     , m_widthHint(360)
 {
@@ -51,33 +51,33 @@ CWizSearchWidget::CWizSearchWidget(QWidget* parent /* = 0 */)
             SIGNAL(addCustomSearchRequest()));
 }
 
-void CWizSearchWidget::clear()
+void CWizSearchView::clear()
 {
     m_editSearch->clear();
 }
 
-void CWizSearchWidget::focus()
+void CWizSearchView::focus()
 {
     m_editSearch->selectAll();
     m_editSearch->setFocus();
 }
 
-QSize CWizSearchWidget::sizeHint() const
+QSize CWizSearchView::sizeHint() const
 {
     return QSize(m_widthHint, height());
 }
 
-void CWizSearchWidget::setWidthHint(int nWidth)
+void CWizSearchView::setWidthHint(int nWidth)
 {
     m_widthHint = nWidth;
 }
 
-void CWizSearchWidget::on_search_returnPressed()
+void CWizSearchView::on_search_returnPressed()
 {
     Q_EMIT doSearch(m_editSearch->text());
 }
 
-void CWizSearchWidget::on_searchTextChanged(QString str)
+void CWizSearchView::on_searchTextChanged(QString str)
 {
 //    if (str.isEmpty())
 //    {

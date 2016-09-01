@@ -5,16 +5,9 @@
 #include <QMenu>
 #include <QNetworkConfigurationManager>
 #include <QMessageBox>
-#include <QWebHistory>
 #include <QSplitter>
 #include <QList>
 #include <QLabel>
-
-//#include "share/websocketclientwrapper.h"
-//#include "share/websockettransport.h"
-//#include "wizWebEngineInjectObject.h"
-
-#include <coreplugin/icore.h>
 
 #include "widgets/wizTagBar.h"
 #include "titleedit.h"
@@ -33,6 +26,7 @@
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
 #include "share/wizAnalyzer.h"
+#include "share/wizGlobal.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
 #include "widgets/wizLocalProgressWebView.h"
@@ -42,11 +36,9 @@
 #include "wizOEMSettings.h"
 #include "wizmainwindow.h"
 #include "share/wizsettings.h"
+#include "share/wizwebengineview.h"
 
 #include "core/wizCommentManager.h"
-
-using namespace Core;
-using namespace Core::Internal;
 
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK QObject::tr("Share by Link")
 #define WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_EMAIL QObject::tr("Share by Email")
@@ -75,7 +67,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     , m_editButtonAnimation(0)
     , m_commentManager(new CWizCommentManager(this))
 {
-    m_editTitle->setCompleter(new WizService::MessageCompleter(m_editTitle));
+    m_editTitle->setCompleter(new MessageCompleter(m_editTitle));
     int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
     m_editTitle->setFixedHeight(nTitleHeight);
     m_editTitle->setAlignment(Qt::AlignVCenter);
@@ -166,8 +158,8 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
     m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(ICore::instance(), SIGNAL(viewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(Core::INoteView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
@@ -265,23 +257,6 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
 }
 
-#ifdef USEWEBENGINE
-void TitleBar::setEditor(CWizDocumentWebEngine* editor)
-{
-    Q_ASSERT(!m_editor);
-
-    m_editorBar->setDelegate(editor);
-
-    connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
-    connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
-
-    connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
-
-    connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
-
-    m_editor = editor;
-}
-#else
 void TitleBar::setEditor(CWizDocumentWebView* editor)
 {
     Q_ASSERT(!m_editor);
@@ -290,10 +265,6 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
 
     connect(editor, SIGNAL(focusIn()), SLOT(onEditorFocusIn()));
     connect(editor, SIGNAL(focusOut()), SLOT(onEditorFocusOut()));
-    connect(editor, SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
-
-//    connect(editor->page(), SIGNAL(selectionChanged()), SLOT(onEditorChanged()));
-    connect(editor->page(), SIGNAL(contentsChanged()), SLOT(onEditorChanged()));
 
     connect(m_editTitle, SIGNAL(titleEdited(QString)), editor, SLOT(onTitleEdited(QString)));
 
@@ -312,7 +283,7 @@ void TitleBar::setBackgroundColor(QColor color)
 //    pal.setColor(QPalette::Window, color);
 //    m_infoBar->setPalette(pal);
 }
-#endif
+
 
 void TitleBar::onEditorFocusIn()
 {
@@ -378,13 +349,7 @@ void TitleBar::showEditorBar()
 
 void TitleBar::loadErrorPage()
 {
-#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-#else
-    noteView()->commentWidget()->hideLocalProgress();
-    QWebView* comments = noteView()->commentView();
-    comments->setVisible(true);
-#endif
     QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
@@ -399,67 +364,16 @@ void TitleBar::setTagBarVisible(bool visible)
     m_tagBar->setVisible(visible);
 }
 
-#ifdef USEWEBENGINE
-void TitleBar::initWebChannel()
-{
-    QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
-    if (!server->listen(QHostAddress::LocalHost, 0)) {
-        qFatal("Failed to open web socket server.");
-        return;
-    }
-
-    // wrap WebSocket clients in QWebChannelAbstractTransport objects
-    WebSocketClientWrapper *clientWrapper  = new WebSocketClientWrapper(server, this);
-
-    // setup the dialog and publish it to the QWebChannel
-    QWebChannel *webChannel = new QWebChannel(this);
-    // setup the channel
-    QObject::connect(clientWrapper, &WebSocketClientWrapper::clientConnected,
-                     webChannel, &QWebChannel::connectTo);
-    CWizCommentsExternal* exteranl = new CWizCommentsExternal(this);
-    webChannel->registerObject(QStringLiteral("externalObject"), exteranl);
-
-    m_strWebchannelUrl = server->serverUrl().toString();
-}
-
-void TitleBar::registerWebChannel()
-{
-    QString strFile = Utils::PathResolve::resourcesPath() + "files/editor/qwebchannel.js";
-    QFile f(strFile);
-    if (!f.open(QIODevice::ReadOnly))
-    {
-        qDebug() << "[Comments]Failed to get execute code";
-        return;
-    }
-
-    QTextStream ts(&f);
-    QString strExec = ts.readAll();
-    f.close();
-
-    Q_ASSERT(strExec.indexOf("//${INIT_COMMAND}") != -1);
-    if (m_strWebchannelUrl.isEmpty())
-    {
-        initWebChannel();
-    }
-    QString strCommand = QString("initWebChannel('%1')").arg(m_strWebchannelUrl);
-    strExec.replace("//${INIT_COMMAND}", strCommand);
-    noteView()->commentView()->page()->runJavaScript(strExec);
-}
-#endif
 
 void TitleBar::onEditorChanged()
 {
-    if (m_editor->isModified() || m_editor->isContentsChanged()) {
-        m_editBtn->setState(CellButton::Badge);
-    } else {
-        m_editBtn->setState(noteView()->isEditing() ? CellButton::Checked : CellButton::Normal);
-    }
+    updateEditButton(noteView()->editorMode());
 }
 
-void TitleBar::setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked)
+void TitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked)
 {
     updateInfo(data);
-    setEditingDocument(editing);
+    setEditorMode(editorMode);
     //
     CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
     bool isGroup = db.IsGroup();
@@ -479,26 +393,31 @@ void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
     m_attachBtn->setCount(doc.nAttachmentCount);
 }
 
-void TitleBar::setEditingDocument(bool editing)
+void TitleBar::setEditorMode(WizEditorMode editorMode)
 {
+    m_editTitle->setReadOnly(editorMode == modeReader);
+    m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
     //
-    m_editTitle->setReadOnly(!editing);
-    m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
+    if (editorMode == modeReader)
+    {
+        showInfoBar();
+    }
 }
 
-void TitleBar::setEditButtonState(bool enable, bool editing)
+void TitleBar::setEditButtonEnabled(bool enable)
 {
     m_editBtn->setEnabled(enable);
-    setEditingDocument(editing);
 }
 
-void TitleBar::updateEditButton(bool editing)
+void TitleBar::updateEditButton(WizEditorMode editorMode)
 {
-    if (m_editor->isModified()) {
-        m_editBtn->setState(CellButton::Badge);
-    } else {
-        m_editBtn->setState(editing ? CellButton::Checked : CellButton::Normal);
-    }
+    m_editor->isModified([=](bool modified) {
+        if (modified){
+            m_editBtn->setState(CellButton::Badge);
+        } else {
+            m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
+        }
+    });
 }
 
 void TitleBar::resetTitle(const QString& strTitle)
@@ -523,7 +442,7 @@ void TitleBar::clearPlaceHolderText()
 void TitleBar::showCoachingTips()
 {
     bool showTips = false;
-    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    if (MainWindow* mainWindow = MainWindow::instance())
     {
         showTips = mainWindow->userSettings().get(TITLEBARTIPSCHECKED).toInt() == 0;
     }
@@ -538,7 +457,7 @@ void TitleBar::showCoachingTips()
         widget->setSizeHint(QSize(290, 82));
         widget->setButtonVisible(false);       
         widget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 mainWindow->userSettings().set(TITLEBARTIPSCHECKED, "1");
             }
@@ -577,10 +496,10 @@ void TitleBar::applyButtonStateForSeparateWindow(bool inSeparateWindow)
 
 void TitleBar::onEditButtonClicked()
 {
-    bool bEdit = !m_editBtn->state();
-    noteView()->setEditNote(bEdit);
+    noteView()->setEditorMode(noteView()->editorMode() == modeEditor ? modeReader: modeEditor);
+    //
     CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
-    if (bEdit)
+    if (noteView()->isEditing())
     {
         analyzer.LogAction("editNote");
     }
@@ -722,9 +641,8 @@ bool isNetworkAccessible()
 
 void TitleBar::onCommentsButtonClicked()
 {
-#ifdef USEWEBENGINE
     QWebEngineView* comments = noteView()->commentView();
-#else
+
     CWizDocumentView* view = noteView();
     if (!view)
         return;
@@ -733,7 +651,7 @@ void TitleBar::onCommentsButtonClicked()
     connect(commentWidget, SIGNAL(widgetStatusChanged()), this,
             SLOT(updateCommentsButtonStatus()), Qt::UniqueConnection);
 
-#endif
+
     if (commentWidget->isVisible()) {
         commentWidget->hide();
 
@@ -745,7 +663,6 @@ void TitleBar::onCommentsButtonClicked()
     WizGetAnalyzer().LogAction("showComments");
 
     if (isNetworkAccessible()) {
-        commentWidget->showLocalProgress();
         QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
         Q_ASSERT(splitter);
         QList<int> li = splitter->sizes();
@@ -764,37 +681,18 @@ void TitleBar::onCommentsButtonClicked()
 
 void TitleBar::onCommentPageLoaded(bool ok)
 {
-#ifdef USEWEBENGINE
-    QWebEngineView* comments = noteView()->commentView();
-#else
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
-    commentWidget->web()->history()->clear();
-#endif
+
     if (!ok)
     {
         qDebug() << "Wow, load comment page failed! " << commentWidget->web()->url();
-        loadErrorPage();
+        //失败的时候会造成死循环
+        //loadErrorPage();
         commentWidget->show();
     }
-    else
-    {
-        commentWidget->hideLocalProgress();
-    }
-#ifdef USEWEBENGINE
-    else
-    {
-        comments->page()->runJavaScript("location.protocol",[this](const QVariant& returnValue) {
-            qDebug() << "lcation protocol :  " << returnValue.toString();
-            if ("file:" != returnValue.toString())
-            {
-                registerWebChannel();
-            }
-        });
-    }
-#endif
 }
 
-void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bool bOk)
+void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     if (!bOk)
         return;    
@@ -809,13 +707,19 @@ void TitleBar::onViewNoteLoaded(INoteView* view, const WIZDOCUMENTDATA& note, bo
     CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
     if (commentWidget && commentWidget->isVisible())
     {
-        commentWidget->showLocalProgress();
+        //commentWidget->showLocalProgress();
         m_commentManager->queryCommentUrl(note.strKbGUID, note.strGUID);
     }
 }
 
 void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
 {
+    QUrl commentsUrl(url);
+    QUrlQuery query(commentsUrl.query());
+
+    QString token = query.queryItemValue("token");
+    QString kbGuid = query.queryItemValue("kb_guid");
+    //
     CWizDocumentView* view = noteView();
     if (view && view->note().strGUID == GUID)
     {
@@ -829,7 +733,14 @@ void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
             }
             else
             {
-                commentWidget->web()->load(url);
+
+                QString js = QString("updateCmt('%1','%2','%3')").arg(token).arg(kbGuid).arg(GUID);
+                commentWidget->web()->page()->runJavaScript(js, [=](const QVariant& vRet){
+                    if (!vRet.toBool())
+                    {
+                        commentWidget->web()->load(url);
+                    }
+                });
             }
         }
     }

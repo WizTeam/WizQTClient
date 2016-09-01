@@ -8,7 +8,6 @@
 #include <QDesktopServices>
 #include <QUrl>
 #include <QLabel>
-#include <QWebView>
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QMovie>
@@ -20,6 +19,7 @@
 #include <QHistoryState>
 #include <QAbstractState>
 #include <QStateMachine>
+#include <QWebEngineView>
 
 #include "rapidjson/document.h"
 #include "utils/stylehelper.h"
@@ -33,18 +33,18 @@
 #include "share/wizObjectDataDownloader.h"
 #include "share/wizui.h"
 #include "share/wizthreads.h"
+#include "share/wizGlobal.h"
 #include "sync/wizKMServer.h"
 #include "sync/asyncapi.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include <extensionsystem/pluginmanager.h>
 #include "widgets/wizVerificationCodeDialog.h"
 #include "wizWebSettingsDialog.h"
 #include "wizproxydialog.h"
 #include "wiznotestyle.h"
 #include "wizOEMSettings.h"
+#include "share/wizwebengineview.h"
 
-using namespace WizService;
 
 #define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"
 #define WIZ_SERVERACTION_CONNECT_BIZSERVER        "CONNECT_TO_BIZSERVER"
@@ -112,15 +112,13 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);
     ui->setupUi(uiWidget);
-    QRect rcUI = uiWidget->geometry();
-    setMinimumSize(rcUI.width() + 20, rcUI.height() + 20);
     //
     //  init style for wizbox
-    ui->btn_selectServer->setMaximumHeight(20);
+    ui->btn_selectServer->setMaximumHeight(::WizSmartScaleUI(20));
     ui->layout_titleBar->setContentsMargins(0, 0, 0, 0);
     ui->widget_titleBar->layout()->setContentsMargins(0, 0, 0, 0);
     ui->widget_titleBar->layout()->setSpacing(0);
-    ui->label_logo->setMinimumHeight(80);
+    ui->label_logo->setMinimumHeight(WizSmartScaleUI(80));
     ui->btn_max->setVisible(false);
     ui->btn_min->setVisible(false);
     ui->btn_close->setVisible(false);
@@ -128,16 +126,7 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
     CWizTitleBar* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
-    rootWidget()->setContentsMargins(10, 0, 10, 10);
-    //
-
 #endif
-    QPainterPath path;
-    QRectF rect = geometry();
-    path.addRoundRect(rect, 4, 1);
-    QPolygon polygon= path.toFillPolygon().toPolygon();
-    QRegion region(polygon);
-    setMask(region);
 
     m_lineEditUserName = ui->wgt_usercontainer->edit();
     m_lineEditPassword = ui->wgt_passwordcontainer->edit();
@@ -195,6 +184,21 @@ CWizLoginDialog::CWizLoginDialog(const QString &strLocale, const QList<WizLocalU
 
     loadDefaultUser();
     //
+#ifndef Q_OS_MAC
+    //
+    QSize totalSizeHint = layout()->totalSizeHint();
+    //
+    QSize minSize = QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10));
+    setMinimumSize(minSize);
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        //
+        QSize sz = ui->btn_login->size();
+        ui->btn_singUp->setMinimumSize(sz);
+
+    }, 300, 30000, [=]{});
+#endif
+    //
     initSateMachine();
 }
 
@@ -215,6 +219,8 @@ CWizLoginDialog::~CWizLoginDialog()
         m_oemDownloader->deleteLater();
     }
 }
+
+
 
 QString CWizLoginDialog::userId() const
 {
@@ -258,7 +264,7 @@ void CWizLoginDialog::resetUserList()
         }
     }
     //
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QString strDefault = (WizServer == m_serverType) ? settings->value("Users/DefaultWizUserGuid").toString()
                                                      : settings->value("Users/DefaultWizBoxUserGuid").toString();
 
@@ -378,7 +384,7 @@ void CWizLoginDialog::doOnlineVerify()
 
 bool CWizLoginDialog::updateGlobalProfile()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     settings->setValue("Users/DefaultUserGuid", m_loginUserGuid);
     return true;
 }
@@ -510,8 +516,8 @@ void CWizLoginDialog::on_btn_close_clicked()
 void CWizLoginDialog::applyElementStyles(const QString &strLocal)
 {
     ui->stackedWidget->setCurrentIndex(0);
-    setFixedWidth(354);
-    ui->widget_titleBar->setFixedHeight(40);
+    //setFixedWidth(::WizSmartScaleUI(354));
+    ui->widget_titleBar->setFixedHeight(::WizSmartScaleUI(40));
 
     QString strThemeName = Utils::StyleHelper::themeName();
 
@@ -523,8 +529,8 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     }
     ui->label_logo->setMinimumWidth(190);   // use fixed logo size for oem
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").arg(m_wizLogoPath));
-    ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#43A6E8}"));
+                                        "background-position: center; background-repeat: no-repeat; background-color:#448aff}").arg(m_wizLogoPath));
+    ui->label_placehold->setStyleSheet(QString("QLabel {border: none;background-color:#448aff}"));
 
     //
 #ifdef Q_OS_MAC
@@ -551,7 +557,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
                                                          "QToolButton:hover{ border-image:url(%2); height: 16px; width: 16px;}"
                                                          "QToolButton:pressed{ border-image:url(%3); height: 16px; width: 16px;}")
                                                  .arg(strBtnCloseNormal).arg(strBtnCloseHover).arg(strBtnCloseDown));
-        m_titleBar->closeButton()->setFixedSize(16, 16);
+        m_titleBar->closeButton()->setFixedSize(::WizSmartScaleUI(16), ::WizSmartScaleUI(16));
     }
 #endif
 
@@ -621,14 +627,14 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_noaccount->setStyleSheet(QString("QLabel {border: none; color: #5f5f5f;}"));
 #ifdef Q_OS_MAC
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 3px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 3px}"));
 #else
     ui->btn_changeToSignin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8;  padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #448aff;  padding-left: 10px; padding-bottom: 0px}"));
     ui->btn_changeToLogin->setStyleSheet(QString("QPushButton { border: 1px; background: none; "
-                                                 "color: #43a6e8; padding-left: 10px; padding-bottom: 0px}"));
+                                                 "color: #448aff; padding-left: 10px; padding-bottom: 0px}"));
 #endif
 
     QString bg_switchserver_menu = ::WizGetSkinResourceFileName(strThemeName, "bg_switchserver_menu");
@@ -660,7 +666,7 @@ void CWizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->label_passwordError->setText("");
 
     m_menuUsers->setFixedWidth(ui->wgt_usercontainer->width());
-    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #43A6E8; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}");
+    m_menuUsers->setStyleSheet("QMenu {background-color: #ffffff; border-style: solid; border-color: #448aff; border-width: 1px; color: #5F5F5F; padding: 0px 0px 0px 0px; menu-scrollable: 1;}");
 //                          "QMenu::item {padding: 10px 0px 10px 40px; background-color: #ffffff;}"
 //                          "QMenu::item:selected {background-color: #E7F5FF; }"
 //                          "QMenu::item:default {background-color: #E7F5FF; }");
@@ -882,7 +888,7 @@ void CWizLoginDialog::checkServerLicence()
         initOEMDownloader();
     }
     m_oemDownloader->setServerIp(serverIp());
-    WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+    CommonApiEntry::setEnterpriseServerIP(serverIp());
 
     CWizUserSettings userSettings(userId());
     QString strOldLicence = userSettings.serverLicence();
@@ -949,7 +955,7 @@ void CWizLoginDialog::downloadOEMSettingsFromWizBox()
 void CWizLoginDialog::setLogo(const QString& logoPath)
 {
     ui->label_logo->setStyleSheet(QString("QLabel {border: none; image: url(%1);"
-                                        "background-position: center; background-repeat: no-repeat; background-color:#43A6E8}").
+                                        "background-position: center; background-repeat: no-repeat; background-color:#448aff}").
                                   arg(logoPath.isEmpty() ? m_wizLogoPath : logoPath));
 }
 
@@ -1006,7 +1012,7 @@ void CWizLoginDialog::checkLocalUser(const QString& strAccountFolder, const QStr
         }
         else
         {
-            WizService::CommonApiEntry::setEnterpriseServerIP(serverIp());
+            CommonApiEntry::setEnterpriseServerIP(serverIp());
         }
     }
 
@@ -1042,7 +1048,7 @@ void CWizLoginDialog::on_btn_proxysetting_clicked()
 
 void CWizLoginDialog::on_btn_fogetpass_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("forgot_password");
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("forgot_password");
     QDesktopServices::openUrl(QUrl(strUrl));
 }
 
@@ -1217,7 +1223,7 @@ void CWizLoginDialog::serverListMenuClicked(QAction* action)
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {
-            QString strUrl = WizService::WizApiEntry::standardCommandUrl("link");
+            QString strUrl = WizApiEntry::standardCommandUrl("link");
             strUrl += "&name=wiz-box-search-help.html";
             QDesktopServices::openUrl(strUrl);
         }
@@ -1398,6 +1404,9 @@ void CWizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QStrin
         TOLOG(_T("no ip field"));
         return;
     }
+    //
+    if (d.FindMember("ip")->value.IsNull())
+        return;
 
     QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
     QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());
@@ -1613,7 +1622,7 @@ void CWizLoginDialog::onSignUpCheckEnd()
 
 void CWizLoginDialog::loadDefaultUser()
 {
-    QSettings* settings = ExtensionSystem::PluginManager::globalSettings();
+    QSettings* settings = WizGlobal::globalSettings();
     QString strDefaultGuid = settings->value("Users/DefaultUserGuid").toString();
     if (!strDefaultGuid.isEmpty())
     {
@@ -1711,9 +1720,9 @@ void CWizLoginDialog::initOEMDownloader()
 
 void CWizLoginDialog::on_btn_snsLogin_clicked()
 {
-    QString strUrl = WizService::CommonApiEntry::makeUpUrlFromCommand("snspage");
+    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("snspage");
     CWizWebSettingsDialog dlg(strUrl, QSize(800, 480), 0);
-    connect(dlg.webVew(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
+    connect(dlg.web(), SIGNAL(urlChanged(QUrl)), SLOT(onSNSPageUrlChanged(QUrl)));
     connect(this, SIGNAL(snsLoginSuccess(QString)), &dlg, SLOT(accept()));
     dlg.exec();
 }

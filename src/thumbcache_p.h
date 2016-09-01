@@ -8,10 +8,7 @@
 struct WIZABSTRACT;
 struct WIZDOCUMENTDATA;
 
-namespace Core {
 class ThumbCache;
-
-namespace Internal{
 
 
 class ThumbCachePrivate : public QObject
@@ -39,7 +36,5 @@ private:
 };
 
 
-} // namespace Internal
-} // namespace Core
 
 #endif // THUMBCACHE_P_H

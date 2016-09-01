@@ -1,8 +1,7 @@
 #ifndef CWIZDOCUMENTWEBENGINE_H
 #define CWIZDOCUMENTWEBENGINE_H
 
-#ifdef USEWEBENGINE
-#include <QWebEngineView>
+#if 0
 #include <QTimer>
 #include <QPointer>
 #include <QMutex>
@@ -11,7 +10,9 @@
 #include <QThread>
 #include <QWaitCondition>
 #include <QVariant>
-
+#include <QtWebEngine/QtWebEngine>
+#include <QtWebEngineWidgets/QWebEnginePage>
+#include <QtWebEngineWidgets/QWebEngineView>
 
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizdef.h"
@@ -141,7 +142,7 @@ public:
     void printDocument();
     bool shareNoteByEmail();
     //
-    Q_INVOKABLE bool isContentsChanged() { return m_bContentsChanged; }
+    Q_INVOKABLE bool isContentsChanged();
     Q_INVOKABLE void setContentsChanged(bool b) { m_bContentsChanged = b; }
 
 
@@ -155,6 +156,10 @@ public:
 
     //
     void sendEventToChildWidgets(QEvent* event);
+    //
+    void setInSeperateWindow(bool inSeperateWindow) { m_bInSeperateWindow = inSeperateWindow; }
+    bool isInSeperateWindow() const { return m_bInSeperateWindow; }
+
 
 private:
     void loadEditor();
@@ -209,6 +214,8 @@ private:
     bool m_bCurrentEditing;
     //
     bool m_bContentsChanged;
+    //
+    bool m_bInSeperateWindow;
 
     CWizDocumentTransitionView* m_transitionView;
     CWizDocumentWebViewLoaderThread* m_docLoadThread;

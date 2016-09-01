@@ -6,10 +6,7 @@
 class QString;
 class QPixmap;
 
-namespace WizService {
-namespace Internal {
 class AvatarHostPrivate;
-}
 
 #define SYSTEM_AVATAR_APPLY_GROUP       "message_icons_apply_group"
 #define SYSTEM_AVATAR_ADMIN_PERMIT      "message_icons_admin_permit"
@@ -39,13 +36,12 @@ public:
 Q_SIGNALS:
     void loaded(const QString& strUserID);
 
-    friend class Internal::AvatarHostPrivate;
+    friend class AvatarHostPrivate;
 
 public:
     static QPixmap corpImage(const QPixmap& org);
     static QPixmap circleImage(const QPixmap& org, int width, int height);
 };
 
-} // namespace WizService
 
 #endif // WIZSERVICE_AVATAR_H

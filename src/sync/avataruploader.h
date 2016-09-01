@@ -7,7 +7,6 @@ class QString;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-namespace WizService {
 
 class AvatarUploader : public QObject
 {
@@ -30,8 +29,6 @@ private:
 Q_SIGNALS:
     void uploaded(bool ok);
 };
-
-} // namespace WizService
 
 
 #endif // WIZSERVICE_AVATARUPLOADER_H

@@ -13,7 +13,7 @@ class CWizSearchReplaceWidget : public QDialog
     Q_OBJECT
 
 public:
-    explicit CWizSearchReplaceWidget(QDialog *parent = 0);
+    explicit CWizSearchReplaceWidget(QWidget *parent = 0);
     ~CWizSearchReplaceWidget();
 
     void showInEditor(const QRect& rcEditor);

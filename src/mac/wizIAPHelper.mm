@@ -258,7 +258,7 @@
     if (![verctor verifyAppReceipt])
     {
         NSLog(@"Valide receipt failed");
-        exit(173);
+        //exit(173);
     }
 #endif
 }

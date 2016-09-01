@@ -24,18 +24,10 @@ struct WIZDOCUMENTDATA;
 typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 typedef std::deque<CString> CWizStdStringArray;
 
-#ifdef Q_OS_LINUX
 #define WIZNOTE_CUSTOM_SCROLLBAR
-#else
-//#if QT_VERSION < 0x050000
-#define WIZNOTE_CUSTOM_SCROLLBAR
-//#endif
-#endif
 
-namespace WizService {
 class AsyncApi;
 
-namespace Internal {
 
 class MessageListViewItem;
 
@@ -53,7 +45,7 @@ public:
     explicit WizSenderSelectorItem(const QString& text, const QString& id, const QPixmap& avatar,
                                    QListWidget *view = 0, int type = Type);
 
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt) const;
     QString itemID() const;
     QString itemText() const;
 
@@ -187,7 +179,7 @@ public:
     MessageListViewItem* messageItem(const QModelIndex& index) const;
     const WIZMESSAGEDATA& messageFromIndex(const QModelIndex& index) const;
 
-    void drawItem(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const;
 
 public slots:
     void markAllMessagesReaded(bool removeItems);
@@ -212,7 +204,7 @@ private:
     QList<qint64> m_readList;
     QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
-    WizService::AsyncApi* m_api;
+    AsyncApi* m_api;
     CWizDatabaseManager& m_dbMgr;
 
     void updateTreeItem();
@@ -246,7 +238,5 @@ private Q_SLOTS:
     void clearRightMenuFocus();
 };
 
-} // namespace Internal
-} // namespace WizService
 
 #endif // WIZSERVICE_INTERNAL_MESSAGELISTVIEW_H

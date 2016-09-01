@@ -3,11 +3,12 @@
 
 #include <QtGlobal>
 #include <QRect>
+#include <QObject>
 
 #ifdef Q_OS_MAC
 
 
-enum documentType {
+enum WizMacDocumentType {
     RTFTextDocumentType,                            //Rich text format document.
     RTFDTextDocumentType,                         //Rich text format with attachments document.
     MacSimpleTextDocumentType,            //Macintosh SimpleText document.
@@ -22,7 +23,6 @@ enum documentType {
 
 class QMainWindow;
 class QWidget;
-class QMacCocoaViewContainer;
 class QStringList;
 
 float qt_mac_get_scalefactor(QWidget *window);
@@ -42,9 +42,7 @@ void wizMacRegisterSystemService();
 
 void wizHIDictionaryWindowShow(const QString& strText, QRect rcText);
 
-QString wizSystemClipboardData(QString& orignUrl);
-
-bool documentToHtml(const QString& strFile, documentType type, QString& strHtml);
+bool wizDocumentToHtml(const QString& strFile, WizMacDocumentType type, QString& strHtml);
 
 //path for yosemite
 bool wizIsYosemiteFilePath(const QString& strPath);
@@ -66,7 +64,23 @@ void readShareExtensionAccount();
 
 void adjustSubViews(QWidget* wgt);
 
-QMacCocoaViewContainer* createViewContainer(QWidget* wgt);
+
+Q_FORWARD_DECLARE_OBJC_CLASS(NSView);
+
+class CWizCocoaViewContainer : public QObject
+{
+public:
+    CWizCocoaViewContainer();
+    //
+    void setCocoaView(NSView* view);
+    NSView* cocoaView() { return m_view; }
+    //
+    virtual QSize sizeHint() const { return QSize(); }
+private:
+    NSView* m_view;
+};
+
+
 
 #endif // Q_OS_MAC
 

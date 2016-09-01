@@ -16,7 +16,7 @@ class CWizSearchParamItem : public QListWidgetItem
 public:
     explicit CWizSearchParamItem(const QString &text, QListWidget *view = 0, int type = Type);
 
-    void draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const;
+    void draw(QPainter* p, const QStyleOptionViewItem* vopt) const;
     QRect drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const;
 
     bool removeIconClicked();

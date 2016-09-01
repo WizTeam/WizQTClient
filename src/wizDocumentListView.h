@@ -14,13 +14,7 @@ class CWizFolderSelector;
 class CWizScrollBar;
 class CWizUserAvatarDownloaderHost;
 
-#ifdef Q_OS_LINUX
 #define WIZNOTE_CUSTOM_SCROLLBAR
-#else
-//#if QT_VERSION < 0x050000
-#define WIZNOTE_CUSTOM_SCROLLBAR
-//#endif
-#endif
 
 
 #define DocumentLeadInfo_None                      0x0000
@@ -37,7 +31,6 @@ enum DocumentsSortingType {
     SortingByAccessedTime,
     SortingByTitle,
     SortingByLocation,
-    SortingByTag,
     SortingBySize,
     SortingAsAscendingOrder,
     SortingAsDescendingOrder
@@ -74,7 +67,7 @@ public:
     //CWizThumbIndexCache* thumbCache() const { return m_thumbCache; }
 
     void setItemsNeedUpdate(const QString& strKbGUID = 0, const QString& strGUID = 0);
-    void drawItem(QPainter*p, const QStyleOptionViewItemV4* vopt) const;
+    void drawItem(QPainter*p, const QStyleOptionViewItem* vopt) const;
     void reloadItem(const QString& strKbGUID, const QString& strGUID);
 
     bool acceptAllSearchItems() const;
@@ -124,6 +117,9 @@ private:
 
     bool m_itemSelectionChanged;
     bool m_accpetAllSearchItems;
+    //
+    int m_nAddedDocumentCount;
+    bool m_bSortDocumentsAfterAdded;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
 
@@ -135,7 +131,6 @@ private:
     bool isDocumentsAllCanDelete(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithGroupDocument(const CWizDocumentDataArray& arrayDocument);
     bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
-    bool isDocumentsAlwaysOnTop(const CWizDocumentDataArray &arrayDocument);
 
 public:
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -189,7 +184,6 @@ public Q_SLOTS:
     void on_action_deleteDocument();
     void on_action_encryptDocument();
     void on_action_cancelEncryption();
-    void on_action_alwaysOnTop();
     void on_action_addToShortcuts();
 
     void on_action_moveDocument();

@@ -2,6 +2,8 @@
 
 #include <QtCore>
 #include <QtGui>
+#include <QApplication>
+
 
 bool PathFileExists(const CString& strPath)
 {
@@ -85,9 +87,7 @@ COleDateTime &COleDateTime::operator=(const COleDateTime &other)
 int GetTickCount()
 {
     QTime time = QTime::currentTime();
-    qsrand((uint)time.msec());
-
-    return qrand();
+    return time.msecsSinceStartOfDay();
 }
 
 
@@ -149,7 +149,7 @@ void CString::SetAt(int index, QChar ch)
 }
 
 
-void CString::Format(const CString& strFormat, ...)
+void CString::Format(QString strFormat, ...)
 {
     CString strFormat2 = strFormat;
     strFormat2.replace("%s", "%ls");
@@ -408,3 +408,196 @@ long wiz_strtoul(const unsigned short* nptr, QChar endchar, int base)
     ctr = ctr.left(ctr.indexOf(QChar(endchar)));
     return ctr.toLong(NULL, base);
 }
+
+int WizSmartScaleUI(int spec)
+{
+#ifdef Q_OS_MAC
+    return spec;
+#else
+
+    static double rate = 0;
+    if (0 == (int)rate)
+    {
+        rate = 1.0;
+        //
+        QList<QScreen*> screens = QApplication::screens();
+        if (screens.size() > 0)
+        {
+            QScreen* screen = screens[0];
+            double dpi = screen->logicalDotsPerInch();
+            //
+            rate = dpi / 96.0;
+            //
+
+            if (rate < 1.1)
+            {
+                rate = 1.0;
+            }
+            else if (rate < 1.4)
+            {
+                rate = 1.25;
+            }
+            else if (rate < 1.6)
+            {
+                rate = 1.5;
+            }
+            else if (rate < 1.8)
+            {
+                rate = 1.75;
+            }
+            else
+            {
+                rate = 2.0;
+            }
+        }
+    }
+    //
+    return int(spec * rate);
+    //
+#endif
+}
+
+#ifdef Q_OS_LINUX
+#include <X11/X.h>
+#include <X11/Xlib.h>
+#include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <sstream>
+#include <stdlib.h>
+#include <stdio.h>
+
+class linux_x11
+{
+public:
+    linux_x11();
+    QList<WizWindowInfo> getActiveWindows();
+
+private:
+    Window* active(Display *disp, unsigned long *len);
+    char *name (Display *disp, Window win);
+    int *pid(Display *disp, Window win);
+    QString processName(long pid);
+};
+
+/*
+  Linux/X11 specific code for obtaining information about the frontmost window
+*/
+
+
+
+linux_x11::linux_x11()
+{
+}
+
+/**
+  * Returns the window name for a specific window on a display
+***/
+char *linux_x11::name (Display *disp, Window win) {
+    Atom prop = XInternAtom(disp,"WM_NAME",False), type;
+    int form;
+    unsigned long remain, len;
+    unsigned char *list;
+
+    if (XGetWindowProperty(disp,win,prop,0,1024,False,AnyPropertyType, &type,&form,&len,&remain,&list) != Success)
+        return NULL;
+
+    return (char*)list;
+}
+
+/**
+  * Returns the pid for a specific window on a display
+***/
+int* linux_x11::pid(Display *disp, Window win) {
+    Atom prop = XInternAtom(disp,"_NET_WM_PID",False), type;
+    int form;
+    unsigned long remain, len;
+    unsigned char *list;
+
+    if (XGetWindowProperty(disp,win,prop,0,1024,False,AnyPropertyType, &type,&form,&len,&remain,&list) != Success)
+        return NULL;
+
+    return (int*)list;
+}
+
+/**
+  * Returns the active window on a specific display
+***/
+Window * linux_x11::active (Display *disp, unsigned long *len) {
+    Atom prop = XInternAtom(disp,"_NET_ACTIVE_WINDOW",False), type;
+    int form;
+    unsigned long remain;
+    unsigned char *list;
+
+    if (XGetWindowProperty(disp,XDefaultRootWindow(disp),prop,0,1024,False,XA_WINDOW, &type,&form,len,&remain,&list) != Success)
+        return NULL;
+
+    return (Window*)list;
+}
+
+/**
+  * Returns process name from pid (processes output from /proc/<pid>/status)
+***/
+QString linux_x11::processName(long pid)
+{
+    // construct command string
+    QString command = "cat /proc/" + QString("%1").arg(pid) + "/status";
+    // capture output in a FILE pointer returned from popen
+    FILE * output = popen(command.toStdString().c_str(), "r");
+    // initialize a buffer for storing the first line of the output
+    char buffer[1024];
+    // put the contents of the buffer into a QString
+    QString line = QString::fromUtf8(fgets(buffer, sizeof(buffer), output));
+    // close the process pipe
+    pclose(output);
+    // take right substring of line returned to get process name
+    return line.right(line.length() - 6).replace("\n", "");
+}
+
+QList<WizWindowInfo> linux_x11::getActiveWindows()
+{
+    QList<WizWindowInfo> windowTitles;
+    unsigned long len;
+    Display *disp = XOpenDisplay(NULL);
+    Window *list;
+    char *n;
+    int* p;
+
+    list = (Window*)active(disp,&len);
+    if((int)len > 0)
+    {
+        for (int i=0;i<(int)len;i++) {
+            n = name(disp,list[i]);
+            p = pid(disp, list[i]);
+            long p_id = 0;
+            QString pName;
+            QString windowTitle;
+
+            if(p!=NULL)
+            {
+                p_id = *p; // dereference pointer for obtaining pid
+                pName = processName(p_id);
+            }
+
+            if(n!=NULL)
+                windowTitle = QString::fromUtf8(n);
+
+            WizWindowInfo wi;
+            wi.windowTitle = windowTitle;
+            wi.processName = pName;
+            wi.pid = p_id;
+            windowTitles.append(wi);
+            delete n;
+            delete p;
+        }
+    }
+    delete list;
+    XCloseDisplay (disp);
+    return windowTitles;
+}
+
+QList<WizWindowInfo> WizGetActiveWindows()
+{
+    linux_x11 x11;
+    return x11.getActiveWindows();
+}
+#endif

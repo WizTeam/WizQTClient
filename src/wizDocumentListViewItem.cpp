@@ -5,7 +5,7 @@
 
 #include <QPixmapCache>
 #include <QPainter>
-#include <QStyleOptionViewItemV4>
+#include <QStyleOptionViewItem>
 
 #include "wizDocumentListView.h"
 #include "share/wizDatabaseManager.h"
@@ -17,7 +17,6 @@
 #include "sync/avatar.h"
 #include "utils/stylehelper.h"
 
-using namespace Core;
 
 CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
@@ -35,10 +34,6 @@ CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerA
     m_data.nReadStatus = data.nReadStatus;
     m_data.strAuthorId = data.strAuthorId;
 
-
-    //load document ex info from db
-    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
 
     setText(data.doc.strTitle);
 
@@ -79,7 +74,6 @@ bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
 int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
     int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInSummary : DocTypeEncrytedInTitle) : DocTypeNormal;
-    nType = m_data.doc.nFlags & wizDocumentAlwaysOnTop ? (DocTypeAlwaysOnTop | nType) : nType;
     nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
     return nType;
 }
@@ -140,9 +134,6 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
 //        qDebug() << "compare doc and sec 2.2, loc : " << m_data.location << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
         return result;
     }
-    case SortingByTag:
-    case -SortingByTag:
-        return false;
     case SortingBySize:
     {
         bool result = m_nSize >= secItem->sectionData().sizePair.second;
@@ -209,10 +200,6 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
         case -SortingByTitle:
             m_data.infoList << strAuthor << m_data.doc.tDataModified.toHumanFriendlyString();
             break;
-        case SortingByTag:
-        case -SortingByTag:
-            m_data.infoList << strAuthor << tagTree();
-            break;
         case SortingByLocation:
         case -SortingByLocation:
         {
@@ -254,10 +241,6 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
             break;
         case SortingByTitle:
         case -SortingByTitle:
-            m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
-            break;
-        case SortingByTag:
-        case -SortingByTag:
             m_data.infoList << m_data.doc.tDataModified.toHumanFriendlyString() << tags();
             break;
         case SortingByLocation:
@@ -315,7 +298,7 @@ void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
 
 const QString& CWizDocumentListViewDocumentItem::tags()
 {
-    if ((qAbs(m_nSortingType) != SortingByTag) && ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
+    if (((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
                                                    (m_nLeadInfoState & DocumentLeadInfo_SearchResult)))
     {
         m_strTags.clear();
@@ -347,7 +330,7 @@ void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 
-    db.DocumentWithExFieldsFromGUID(m_data.doc.strGUID, m_data.doc);
+    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
     updateDocumentUnreadCount();
 
@@ -379,27 +362,12 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
 
     if (other.type() == WizDocumentListType_Section)
     {
-        if(document().nFlags & wizDocumentAlwaysOnTop)
-            return true;
-
         const CWizDocumentListViewSectionItem* secItem = dynamic_cast<const CWizDocumentListViewSectionItem*>(&other);
         return compareWithSectionItem(secItem);
     }
 
     const CWizDocumentListViewDocumentItem* pOther = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
-
-    if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop || m_data.doc.nFlags & wizDocumentAlwaysOnTop)
-    {
-        if (pOther->m_data.doc.nFlags & wizDocumentAlwaysOnTop && m_data.doc.nFlags & wizDocumentAlwaysOnTop)
-        {
-        }
-        else
-        {
-               bool bTop = m_data.doc.nFlags & wizDocumentAlwaysOnTop;
-               return bTop;               
-        }
-    }
 
 
     switch (m_nSortingType) {
@@ -458,10 +426,6 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
 //        qDebug() << "compare doc and doc 2, loc : " << m_data.location << "  other loc : " << pOther->documentLocation() << "result : " << result;
         return result;
     }
-    case SortingByTag:
-        return pOther->m_strTags < m_strTags;
-    case -SortingByTag:
-        return pOther->m_strTags > m_strTags;
     case SortingBySize:
     {
         bool result = pOther->m_nSize < m_nSize;
@@ -492,7 +456,7 @@ void CWizDocumentListViewDocumentItem::on_thumbnailReloaded()
 //        setNeedUpdate();
 //}
 
-void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     int nItemType = itemType();
     draw_impl(p, vopt, nItemType, nViewType);
@@ -500,7 +464,7 @@ void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewI
     drawSyncStatus(p, vopt, nViewType);
 }
 
-void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItemV4* vopt, int nItemType, int nViewType) const
+void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItem* vopt, int nItemType, int nViewType) const
 {
     if (nItemType == CWizDocumentListViewDocumentItem::TypePrivateDocument)
     {
@@ -559,12 +523,12 @@ QString CWizDocumentListViewDocumentItem::cacheKey() const
         stat = "Normal";
     }
 
-    return "Core::ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
+    return "ListItem::" + m_data.doc.strGUID + "::" + view->viewType() + "::" + stat;
 }
 
 const int nTextTopMargin = 6;
 
-void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -587,7 +551,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
 }
 
 const int nAvatarRightMargin = 8;
-void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -598,7 +562,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
     rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
@@ -609,7 +573,7 @@ void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, co
                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -622,7 +586,7 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -630,7 +594,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    WizService::AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,10, 0, 0);
     rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
@@ -641,7 +605,7 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItemV4* vopt) const
+void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -652,7 +616,7 @@ void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  
     Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     Q_UNUSED(nViewType);
 
@@ -738,9 +702,6 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
     if (other.type() == WizDocumentListType_Document)
     {
         const CWizDocumentListViewDocumentItem* docItem = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
-        if(docItem->document().nFlags & wizDocumentAlwaysOnTop)
-            return false;
-
         return compareWithDocumentItem(docItem);
     }
     else
@@ -783,9 +744,6 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
 //            qDebug() << "compare sec and sec 2 , loc : " << m_data.strInfo << "  other loc : " << secItem->sectionData().strInfo << "result : " << result;
             return result;
         }
-        case SortingByTag:
-        case -SortingByTag:
-            return 0;
         case SortingBySize:
         {
             bool result = sectionData().sizePair.second > secItem->sectionData().sizePair.second;
@@ -804,7 +762,7 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
     return true;
 }
 
-void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt, int nViewType) const
+void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     p->save();
     p->fillRect(vopt->rect, Utils::StyleHelper::listViewSectionItemBackground());
@@ -875,9 +833,6 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
 //        qDebug() << "compare sec and doc 2 , loc : " << m_data.strInfo << "  other loc : " << docItem->documentLocation() << "result : " << result;
         return result;
     }
-    case SortingByTag:
-    case -SortingByTag:
-        return true;
     case SortingBySize:
     {
         bool result = docItem->documentSize() <= sectionData().sizePair.second;

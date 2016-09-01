@@ -1867,3 +1867,97 @@ UINT CWizHtmlReader::Read(const QString& strHtml)
 
 	return (0U);
 }
+
+
+
+void WizHtmlRemoveStyle(QString& strHtml, const QString& styleId)
+{
+    int from = 0;
+    while (1)
+    {
+        int tagStart = strHtml.indexOf("<style", from, Qt::CaseInsensitive);
+        if (tagStart == -1)
+            return;
+        //
+        int tagEnd = strHtml.indexOf('>', tagStart);
+        if (tagEnd == -1)
+            return;
+        //
+        from = tagEnd;
+        //
+        QString strTag = strHtml.mid(tagStart, tagEnd - tagStart + 1);
+        //
+        CWizHtmlTag tag;
+        bool bIsOpeningTag = false;
+        bool bIsClosingTag = false;
+        tag.parseFromStr(strTag.utf16(), bIsOpeningTag, bIsClosingTag, true);
+        //
+        if (tag.getValueFromName("id") != styleId)
+            continue;
+        //
+        int styleEnd = strHtml.indexOf("</style>", from, Qt::CaseInsensitive);
+        if (styleEnd == -1)
+            return;
+        //
+        styleEnd += 8;
+        //
+        strHtml.remove(tagStart, styleEnd - tagStart);
+        //
+        from = tagStart;
+    }
+}
+
+void WizHtmlInsertStyle(QString& strHtml, const QString& styleId, const QString& strCssText)
+{
+    const QString insertHtml = QString("<style id='%1'>%2</style>").arg(styleId).arg(strCssText);
+    //
+    int insertPos = 0;
+    //
+    int headEnd = strHtml.indexOf("</head", 0, Qt::CaseInsensitive);
+    if (headEnd == -1)
+    {
+        int bodyBegin = strHtml.indexOf("<body", 0, Qt::CaseInsensitive);
+        if (bodyBegin == -1)
+        {
+            insertPos = 0;
+        }
+        else
+        {
+            insertPos = bodyBegin;
+        }
+    }
+    else
+    {
+        insertPos = headEnd;
+    }
+
+    //
+    strHtml.insert(insertPos, insertHtml);
+}
+
+
+void WizHtmlInsertHtmlBeforeAllBodyChildren(QString& strHtml, const QString& strHtmlPart)
+{
+    int insertPos = 0;
+    //
+    int bodyBegin = strHtml.indexOf("<body", 0, Qt::CaseInsensitive);
+    if (bodyBegin == -1)
+    {
+        insertPos = 0;
+    }
+    else
+    {
+        insertPos = strHtml.indexOf(">", bodyBegin);
+        if (insertPos == -1)
+        {
+            insertPos = 0;
+        }
+        else
+        {
+            insertPos++;
+        }
+    }
+    //
+    strHtml.insert(insertPos, strHtmlPart);
+}
+

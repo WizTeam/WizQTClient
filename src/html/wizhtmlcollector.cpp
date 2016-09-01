@@ -81,6 +81,11 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
             pTag->removeAttribute("contentEditable");
         }
     }
+    //
+    if (pTag->getValueFromName("wiz_style") == "unsave")
+    {
+        return;
+    }
 
     m_ret.push_back(pTag->getTag());
 }
@@ -232,7 +237,7 @@ QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
 
 bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
 {
-    Core::Internal::MainWindow *mainWindow = Core::Internal::MainWindow::instance();
+    MainWindow *mainWindow = MainWindow::instance();
     QNetworkDiskCache *cache = mainWindow->webViewNetworkCache();
     if (cache)
     {
@@ -303,15 +308,14 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
 
     reader.Read(strHtml);
 
-    CString strHtml2 = strHtml;
-
+    CString strHtml2;
     ::WizStringArrayToText(m_ret, strHtml2, "");
+    strHtml = strHtml2;
 
     return true;
 }
 
 bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
-                                 const QString& strMetaText, \
                                  const QString& strZipFileName)
 {
     std::deque<WIZHTMLFILEDATA> arrayResource;
@@ -342,7 +346,7 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
     CWizStdStringArray arrayAllResource;
     arrayAllResource.assign(files.begin(), files.end());
 
-    return WizHtml2Zip(strRet, arrayAllResource, strMetaText, strZipFileName);
+    return WizHtml2Zip(strRet, arrayAllResource, strZipFileName);
 }
 
 /* -------------------------- CWizHtmlToPlainText -------------------------- */

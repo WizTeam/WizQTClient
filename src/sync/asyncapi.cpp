@@ -11,8 +11,6 @@
 #include "wizKMServer.h"
 #include "token.h"
 
-using namespace WizService;
-
 
 AsyncApi::AsyncApi(QObject *parent) : QObject(parent)
 {

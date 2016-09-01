@@ -13,9 +13,6 @@
 #include "wizDocumentWebView.h"
 #include "wizDocumentWebEngine.h"
 
-using namespace Core;
-using namespace Core::Internal;
-
 TitleEdit::TitleEdit(QWidget *parent)
     : QLineEdit(parent)
     , c(NULL)

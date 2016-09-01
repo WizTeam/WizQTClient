@@ -15,7 +15,6 @@ public:
     static QString builtinTemplatePath();
 
     static QString customMarkdownTemplatesPath();
-    static QString pluginsPath();
     static QString dataStorePath();
     static QString cachePath();
     static QString avatarPath();

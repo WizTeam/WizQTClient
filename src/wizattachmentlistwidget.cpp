@@ -9,7 +9,7 @@
 #include <QDebug>
 #include <QEventLoop>
 
-#include <coreplugin/icore.h>
+#include "share/wizGlobal.h"
 
 #include "wizdef.h"
 #include "share/wizDatabaseManager.h"
@@ -26,7 +26,6 @@
 #include "wizmainwindow.h"
 #include "share/wizthreads.h"
 
-using namespace Core::Internal;
 
 const int nAttachmentListViewItemHeight  = 40;
 
@@ -56,7 +55,7 @@ CWizAttachmentListView::CWizAttachmentListView(QWidget* parent)
     connect(this, SIGNAL(itemDoubleClicked(QListWidgetItem*)),
             SLOT(on_list_itemDoubleClicked(QListWidgetItem*)));
 
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+    MainWindow* mainWindow = WizGlobal::mainWindow();
     m_downloaderHost = mainWindow->downloaderHost();
 
     // setup context menu
@@ -138,7 +137,7 @@ bool CWizAttachmentListView::itemExtraImage(const QModelIndex& index, const QRec
     {
         QString strIconPath;
         CWizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
-        MainWindow* mainWindow = qobject_cast<MainWindow *>(Core::ICore::mainWindow());
+        MainWindow* mainWindow = WizGlobal::mainWindow();
         bool isRetina = WizIsHighPixel();
         strIconPath = ::WizGetSkinResourcePath(mainWindow->userSettings().skin());
         if (!db.IsAttachmentDownloaded(item->attachment().strGUID))
@@ -261,7 +260,6 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
         return;
     }
 
-#if QT_VERSION > 0x050000
     // try to set the attachement read-only.
     QFile file(strFileName);
     if (file.exists() && !db.CanEditAttachment(attachment) && (file.permissions() & QFileDevice::WriteUser))
@@ -271,19 +269,17 @@ void CWizAttachmentListView::openAttachment(CWizAttachmentListViewItem* item)
                 & ~QFileDevice::WriteGroup & ~QFileDevice::WriteOther;
         file.setPermissions(permissions);
     }
-#endif
 
     qDebug() << "try to open file : " << strFileName;
     QDesktopServices::openUrl(QUrl::fromLocalFile(strFileName));
+    //
+    MainWindow* mainWindow = MainWindow::instance();
+    //
+    CWizFileMonitor& monitor = CWizFileMonitor::instance();
+    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
+            mainWindow, SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
 
-//    CWizFileMonitor& monitor = CWizFileMonitor::instance();
-//    connect(&monitor, SIGNAL(fileModified(QString,QString,QString,QString,QDateTime)),
-//            &m_dbMgr.db(), SLOT(onAttachmentModified(QString,QString,QString,QString,QDateTime)), Qt::UniqueConnection);
-
-//    /*需要使用文件的修改日期来判断文件是否被改动,从服务器上下载下的文件修改日期必定大于数据库中日期.*/
-//    QFileInfo info(strFileName);
-//    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName,
-//                    attachment.strDataMD5, info.lastModified());
+    monitor.addFile(attachment.strKbGUID, attachment.strGUID, strFileName, attachment.strDataMD5);
 }
 
 void CWizAttachmentListView::downloadAttachment(CWizAttachmentListViewItem* item)
@@ -612,11 +608,7 @@ void CWizAttachmentListView::on_list_itemDoubleClicked(QListWidgetItem* it)
 
 void CWizAttachmentListView::forceRepaint()
 {
-#if QT_VERSION < 0x050000
-    update();
-#else
     viewport()->repaint();
-#endif
 }
 
 

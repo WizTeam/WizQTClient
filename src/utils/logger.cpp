@@ -31,29 +31,6 @@ Logger::~Logger()
 }
 
 
-#if QT_VERSION < 0x050000
-void Logger::messageHandler(QtMsgType type, const char* msg)
-{
-    QString text = QString::fromUtf8(msg);
-    logger()->saveToLogFile(text);
-    logger()->addToBuffer(text);
-
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stderr, "[DEBUG] %s\n", msg);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "[WARNING]: %s\n", msg);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "[CRITICAL]: %s\n", msg);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "[FATAL]: %s\n", msg);
-        abort();
-    }
-}
-#else
 void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString &msg)
 {
     Q_UNUSED(context);
@@ -87,7 +64,6 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
         abort();
     }
 }
-#endif
 
 QString Logger::logFileName()
 {

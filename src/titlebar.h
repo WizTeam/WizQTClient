@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QIcon>
+#include "share/wizobject.h"
 
 class QString;
 class QMenu;
@@ -18,12 +19,10 @@ class CWizAnimateAction;
 class CWizExplorerApp;
 class QNetworkReply;
 
-namespace Core {
 class CWizDocumentView;
 class INoteView;
 class CWizCommentManager;
 
-namespace Internal {
 class TitleEdit;
 class InfoBar;
 class NotifyBar;
@@ -43,19 +42,15 @@ public:
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
-#ifdef USEWEBENGINE
-    void setEditor(CWizDocumentWebEngine* editor);
-#else
     void setEditor(CWizDocumentWebView* editor);
-#endif
 
     void setBackgroundColor(QColor color);
 
-    void setNote(const WIZDOCUMENTDATA& data, bool editing, bool locked);
+    void setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked);
     void updateInfo(const WIZDOCUMENTDATA& doc);
-    void setEditingDocument(bool editing);
-    void setEditButtonState(bool enable, bool editing);
-    void updateEditButton(bool bEditing);
+    void setEditorMode(WizEditorMode editorMode);
+    void setEditButtonEnabled(bool enable);
+    void updateEditButton(WizEditorMode editorMode);
     void resetTitle(const QString& strTitle);
     void moveTitileTextToPlaceHolder();
     void clearPlaceHolderText();
@@ -79,7 +74,7 @@ public Q_SLOTS:
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
-    void onViewNoteLoaded(Core::INoteView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
 
     void on_commentUrlAcquired(QString GUID, QString url);
     void on_commentCountAcquired(QString GUID, int count);
@@ -107,16 +102,8 @@ private:
     void showInfoBar();
     void showEditorBar();
     void setTagBarVisible(bool visible);
-#ifdef USEWEBENGINE
     //
-    void initWebChannel();
-    void registerWebChannel();
-
-private:
-    CWizDocumentWebEngine* m_editor;
-#else
     CWizDocumentWebView* m_editor;
-#endif
     CWizExplorerApp& m_app;
 
     TitleEdit* m_editTitle;
@@ -148,7 +135,5 @@ private:
     CWizAnimateAction* m_editButtonAnimation;
 };
 
-} //namesapce Internal
-} // namespace Core
 
 #endif // CORE_TITLEBAR_H

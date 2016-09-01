@@ -4,7 +4,7 @@
 
 #ifdef USECOCOATOOLBAR
 
-#include <QMacCocoaViewContainer>
+#include "wizmachelper.h"
 #include <QTreeWidget>
 
 QT_BEGIN_NAMESPACE
@@ -20,12 +20,13 @@ const int TOOLBARITEMHEIGHT =  23;
 const int NORMALSEARCHWIDGETWIDTH = 292;
 const int HIGHPIXSEARCHWIDGETWIDTH = 270;
 
-class CWizSearchWidget : public QMacCocoaViewContainer
+
+class CWizSearchView : public CWizCocoaViewContainer
 {
     Q_OBJECT
 
 public:
-    CWizSearchWidget(QWidget* parent = 0);
+    CWizSearchView();
     void clear();
     void clearFocus();
     void focus();
@@ -47,8 +48,6 @@ public:
 
     void setSizeHint(QSize sizeHint);
     virtual QSize sizeHint() const;
-
-    void processEvent(QEvent* ev);
 
 public Q_SLOTS:
     void on_search_editFinished(const QString& strText);
@@ -96,7 +95,7 @@ class WizSuggestCompletionon : public QObject
     Q_OBJECT
 
 public:
-    WizSuggestCompletionon(CWizSearchWidget *parent = 0);
+    WizSuggestCompletionon(CWizSearchView *parent = 0);
     ~WizSuggestCompletionon();
 
     void setUserSettings(CWizUserSettings* settings);
@@ -122,7 +121,7 @@ private:
     void resetContainerSize(int width, int height);
 
 private:
-    CWizSearchWidget *m_editor;
+    CWizSearchView *m_editor;
     QWidget *m_popupWgt;
     QWidget *m_infoWgt;
     QTreeWidget *m_treeWgt;

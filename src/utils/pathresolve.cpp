@@ -112,6 +112,7 @@ QString PathResolve::dataStorePath()
     strPath += "/.wiznote/";
 #endif
     ensurePathExists(strPath);
+    //
     return strPath;
 }
 
@@ -166,10 +167,6 @@ QString PathResolve::logFile()
     return strLogfile;
 }
 
-QString PathResolve::pluginsPath()
-{
-    return resourcesPath() + "plugins/";
-}
 
 QString PathResolve::tempPath()
 {

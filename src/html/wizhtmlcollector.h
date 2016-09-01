@@ -40,8 +40,7 @@ public:
     CWizHtmlCollector();
 
     bool Collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
-    bool Html2Zip(const QString& strExtResourcePath, const QString& strMetaText, \
-                  const QString& strZipFileName);
+    bool Html2Zip(const QString& strExtResourcePath, const QString& strZipFileName);
 
 protected:
     virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
@@ -49,7 +48,7 @@ protected:
     virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
     virtual void Comment(const CString &rComment, DWORD dwAppData, bool &bAbort);
 
-private:
+protected:
     CWizHtmlFileMap m_files;
     bool m_bMainPage;
     QUrl m_url;

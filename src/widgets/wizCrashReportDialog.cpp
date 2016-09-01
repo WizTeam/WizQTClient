@@ -50,7 +50,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
         }
 
         //
-        QString url = WizService::WizApiEntry::crashReportUrl();
+        QString url = WizApiEntry::crashReportUrl();
         QNetworkRequest request(url);
         request.setHeader(QNetworkRequest::ContentTypeHeader,
             "application/x-www-form-urlencoded");

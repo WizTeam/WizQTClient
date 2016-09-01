@@ -64,6 +64,8 @@ public:
     bool isZiwCipherAvailable();
     bool initZiwCipher();
     bool createZiwHeader();
+    //
+    static bool isEncryptedFile(const QString& fileName);
 
 private:
     QString m_strFileName;

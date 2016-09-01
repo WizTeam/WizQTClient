@@ -17,6 +17,8 @@
 #include <QListWidget>
 #include <QFontDialog>
 #include <QDebug>
+#include <QWidgetAction>
+#include <QActionGroup>
 
 #include "share/wizmisc.h"
 #include "wizdef.h"
@@ -32,6 +34,7 @@
 #include "wizDocumentView.h"
 #include "widgets/wizTipsWidget.h"
 #include "wizmainwindow.h"
+#include "widgets/wizTableSelector.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;
@@ -234,7 +237,7 @@ public:
             }
         }
 
-        const int nIconSize = 16;
+        const int nIconSize = WizSmartScaleUI(16);
         if (index.model()->data(index, WizCheckStateRole).toInt() == Qt::Checked)
         {
             static QIcon icon = Utils::StyleHelper::loadIcon("listViewItemSelected");
@@ -283,7 +286,7 @@ public:
 
     QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const
     {
-        QStyleOptionViewItemV4 opt = option;
+        QStyleOptionViewItem opt = option;
         initStyleOption(&opt, index);
 
         if (index.data(WizFontFamilyHelperRole).toString() == WIZSEPARATOR)
@@ -370,7 +373,6 @@ QIcon createColorIcon(QColor color)
 const int TOOLBUTTON_MARGIN_WIDTH = 12;
 const int TOOLBUTTON_ARRWO_WIDTH = 16;
 
-using namespace Core::Internal;
 
 void drawComboPrimitive(QStylePainter* p, QStyle::PrimitiveElement pe, const QStyleOption &opt);
 
@@ -492,7 +494,7 @@ public:
     {
         setFocusPolicy(Qt::NoFocus);
         setCheckable(true);
-        setIconSize(QSize(12, 12));
+        setIconSize(QSize(WizSmartScaleUI(12), WizSmartScaleUI(12)));
         setFixedHeight(Utils::StyleHelper::editorButtonHeight());
     }
 
@@ -527,7 +529,20 @@ protected:
 
         update();
     }
-
+    void mouseReleaseEvent(QMouseEvent* ev)
+    {
+#ifdef Q_OS_OSX
+        QMenu* m = menu();
+        if (m)
+        {
+            QPoint pt = mapToGlobal(rect().bottomLeft());
+            m->popup(pt);
+            return;
+        }
+#endif
+        //
+        QToolButton::mouseReleaseEvent(ev);
+    }
     virtual void paintEvent(QPaintEvent *event)
     {
         Q_UNUSED(event);
@@ -592,11 +607,11 @@ class CWizToolButtonColor : public CWizToolButton
 {
 public:
     CWizToolButtonColor(QWidget* parent = 0) : CWizToolButton(parent)
-      , m_menu(menu())
+      , m_menu(NULL)
       , m_color(Qt::transparent)
     {
         setCheckable(false);
-        setIconSize(QSize(12, 12));
+        setIconSize(QSize(WizSmartScaleUI(12), WizSmartScaleUI(12)));
         setPopupMode(QToolButton::MenuButtonPopup);
     }
 
@@ -725,6 +740,35 @@ public:
 
         m_strText = strText;
         repaint();
+    }
+    //
+    void setFontName(const QString& strFontName)
+    {
+        CWizStdStringArray arrayFontName;
+        WizSplitTextToArray(strFontName, _T(','), arrayFontName);
+        //
+        QString firstName;
+        //
+        for (auto name : arrayFontName)
+        {
+            QString fontName = name;
+            fontName = fontName.trimmed();
+            fontName.remove("\"");
+            fontName.remove("\'");
+            //
+            if (firstName.isEmpty())
+                firstName = fontName;
+            //
+            int index = findText(fontName);
+            if (index != -1) {
+                setCurrentIndex(index);
+                m_strText = fontName;
+                return;
+            }
+        }
+        //
+        m_strText = firstName;
+        setCurrentIndex(-1);
     }
 
     QString text() const { return m_strText; }
@@ -920,7 +964,7 @@ QString shiftKey()
 EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
-    , m_resetLocked(false)
+    , m_lastUpdateUIRequest(0)
 {
     setContentsMargins(0, 4, 0, 0);
 
@@ -1003,14 +1047,14 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnFormatMatch = new CWizToolButton(this);
     m_btnFormatMatch->setIcon(::WizLoadSkinIcon(skin, "actionFormatMatch"));
-    m_btnFormatMatch->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatMatch")).size());
+    //m_btnFormatMatch->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatMatch")).size());
     m_btnFormatMatch->setToolTip(tr("Format Match"));
     m_btnFormatMatch->setPosition(CWizToolButton::Left);
     connect(m_btnFormatMatch, SIGNAL(clicked()), SLOT(on_btnFormatMatch_clicked()));
 
     m_btnRemoveFormat = new CWizToolButton(this);
     m_btnRemoveFormat->setIcon(::WizLoadSkinIcon(skin, "actionFormatRemoveFormat"));
-    m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
+    //m_btnRemoveFormat->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatRemoveFormat")).size());
     m_btnRemoveFormat->setToolTip(tr("Remove Format"));
     m_btnRemoveFormat->setCheckable(false);
     m_btnRemoveFormat->setPosition(CWizToolButton::Right);
@@ -1019,7 +1063,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnForeColor = new CWizToolButtonColor(this);
     m_btnForeColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatForeColor"));
     m_btnForeColor->setColor(QColor("#ff0000"));
-    m_btnForeColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatForeColor")).size());
+    //m_btnForeColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatForeColor")).size());
     m_btnForeColor->setToolTip(tr("ForeColor"));
     m_btnForeColor->setCheckable(false);
     m_btnForeColor->setPosition(CWizToolButton::Left);
@@ -1031,7 +1075,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnBackColor = new CWizToolButtonColor(this);
     m_btnBackColor->setIcon(::WizLoadSkinIcon(skin, "actionFormatBackColor"));
     m_btnBackColor->setColor(QColor("#ffff00"));
-    m_btnBackColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBackColor")).size());
+    //m_btnBackColor->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBackColor")).size());
     m_btnBackColor->setToolTip(tr("BackColor"));
     m_btnBackColor->setCheckable(false);
     m_btnBackColor->setPosition(CWizToolButton::Right);
@@ -1041,7 +1085,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnBackColor->setMenu(backColorMenu);
     m_btnBold = new CWizToolButton(this);
     m_btnBold->setIcon(::WizLoadSkinIcon(skin, "actionFormatBold"));
-    m_btnBold->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBold")).size());
+    //m_btnBold->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatBold")).size());
     m_btnBold->setToolTip(tr("Bold %1B").arg(commandKey()));
     m_btnBold->setPosition(CWizToolButton::Left);
     connect(m_btnBold, SIGNAL(clicked()), SLOT(on_btnBold_clicked()));
@@ -1055,28 +1099,28 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     m_btnShowExtra = new CWizToolButton(this);
     m_btnShowExtra->setIcon(::WizLoadSkinIcon(skin, "actionFormatExtra"));
-    m_btnShowExtra->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatExtra")).size());
+    //m_btnShowExtra->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatExtra")).size());
     m_btnShowExtra->setToolTip(tr("Extra"));
     m_btnShowExtra->setPosition(CWizToolButton::NoPosition);
     connect(m_btnShowExtra, SIGNAL(clicked()), SLOT(on_btnShowExtra_clicked()));
 
     m_btnUnderLine = new CWizToolButton(this);
     m_btnUnderLine->setIcon(::WizLoadSkinIcon(skin, "actionFormatUnderLine"));
-    m_btnUnderLine->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatUnderLine")).size());
+    //m_btnUnderLine->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatUnderLine")).size());
     m_btnUnderLine->setToolTip(tr("Underline %1U").arg(commandKey()));
     m_btnUnderLine->setPosition(CWizToolButton::Center);
     connect(m_btnUnderLine, SIGNAL(clicked()), SLOT(on_btnUnderLine_clicked()));
 
     m_btnStrikeThrough = new CWizToolButton(this);
     m_btnStrikeThrough->setIcon(::WizLoadSkinIcon(skin, "actionFormatStrikeThrough"));
-    m_btnStrikeThrough->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatStrikeThrough")).size());
+    //m_btnStrikeThrough->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatStrikeThrough")).size());
     m_btnStrikeThrough->setToolTip(tr("Strike Through %1%2K").arg(optionKey()).arg(commandKey()));
     m_btnStrikeThrough->setPosition(CWizToolButton::Right);
     connect(m_btnStrikeThrough, SIGNAL(clicked()), SLOT(on_btnStrikeThrough_clicked()));
 
     m_btnJustify = new CWizToolButton(this);
     m_btnJustify->setIcon(::WizLoadSkinIcon(skin, "actionFormatJustifyLeft"));
-    m_btnJustify->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatJustifyLeft")).size());
+    //m_btnJustify->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatJustifyLeft")).size());
     m_btnJustify->setCheckable(false);
     m_btnJustify->setArrowType(Qt::RightArrow);
     m_btnJustify->setPopupMode(QToolButton::MenuButtonPopup);
@@ -1094,36 +1138,55 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
                              tr("Justify Right"), this, SLOT(on_btnJustifyRight_clicked()));
     m_actionJustifyRight->setCheckable(true);
     m_btnJustify->setMenu(m_menuJustify);
-
+    //
+    QActionGroup* alignGroup = new QActionGroup(this);
+    alignGroup->setExclusive(true);
+    alignGroup->addAction(m_actionJustifyLeft);
+    alignGroup->addAction(m_actionJustifyCenter);
+    alignGroup->addAction(m_actionJustifyRight);
 
     m_btnUnorderedList = new CWizToolButton(this);
     m_btnUnorderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertUnorderedList"));
-    m_btnUnorderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertUnorderedList")).size());
+    //m_btnUnorderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertUnorderedList")).size());
     m_btnUnorderedList->setToolTip(tr("UnorderedList %1%2U").arg(optionKey()).arg(commandKey()));
     m_btnUnorderedList->setPosition(CWizToolButton::Left);
     connect(m_btnUnorderedList, SIGNAL(clicked()), SLOT(on_btnUnorderedList_clicked()));
 
     m_btnOrderedList = new CWizToolButton(this);
     m_btnOrderedList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertOrderedList"));
-    m_btnOrderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertOrderedList")).size());
+    //m_btnOrderedList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertOrderedList")).size());
     m_btnOrderedList->setToolTip(tr("OrderedList %1%2O").arg(optionKey()).arg(commandKey()));
     m_btnOrderedList->setPosition(CWizToolButton::Right);
     connect(m_btnOrderedList, SIGNAL(clicked()), SLOT(on_btnOrderedList_clicked()));
 
+    QWidgetAction* tableAction = new QWidgetAction(this);
+    tableAction->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
+    tableAction->setText(tr("Insert Table"));
+    WizTableSelectorWidget* tableWidget = new WizTableSelectorWidget(this);
+    tableAction->setDefaultWidget(tableWidget);
+    //
+    connect(tableWidget, SIGNAL(itemSelected(int,int)), SLOT(on_btnTable_clicked(int,int)));
+
+    //
+    QMenu* menuTable = new QMenu(this);
+    menuTable->addAction(tableAction);
+    //
     m_btnTable = new CWizToolButton(this);
     m_btnTable->setCheckable(false);
 //    m_btnTable->setHorizontalPadding(8);
     m_btnTable->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertTable"));
-    m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
+    //m_btnTable->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertTable")).size());
     m_btnTable->setToolTip(tr("Insert Table"));
     m_btnTable->setPosition(CWizToolButton::Center);
-    connect(m_btnTable, SIGNAL(clicked()), SLOT(on_btnTable_clicked()));
+    m_btnTable->setMenu(menuTable);
+    m_btnTable->setPopupMode(QToolButton::MenuButtonPopup);
+    //
 
     m_btnHorizontal = new CWizToolButton(this);
     m_btnHorizontal->setCheckable(false);
     m_btnHorizontal->setHorizontalPadding(9);
     m_btnHorizontal->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertHorizontal"));
-    m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
+    //m_btnHorizontal->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertHorizontal")).size());
     m_btnHorizontal->setToolTip(tr("Insert Horizontal %1%2H").arg(shiftKey()).arg(commandKey()));
     m_btnHorizontal->setPosition(CWizToolButton::Center);
     connect(m_btnHorizontal, SIGNAL(clicked()), SLOT(on_btnHorizontal_clicked()));
@@ -1131,7 +1194,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnCheckList = new CWizToolButton(this);
     m_btnCheckList->setCheckable(false);
     m_btnCheckList->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCheckList"));
-    m_btnCheckList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCheckList")).size());
+    //m_btnCheckList->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCheckList")).size());
     m_btnCheckList->setToolTip(tr("Insert Checklist %1O").arg(commandKey()));
     m_btnCheckList->setPosition(CWizToolButton::Left);
     connect(m_btnCheckList, SIGNAL(clicked()), SLOT(on_btnCheckList_clicked()));
@@ -1140,7 +1203,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertLink->setCheckable(false);
     m_btnInsertLink->setHorizontalPadding(6, 10);
     m_btnInsertLink->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertLink"));
-    m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
+    //m_btnInsertLink->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertLink")).size());
     m_btnInsertLink->setToolTip(tr("Insert Link %1K").arg(commandKey()));
     m_btnInsertLink->setPosition(CWizToolButton::Center);
     connect(m_btnInsertLink, SIGNAL(clicked()), SLOT(on_btnInsertLink_clicked()));
@@ -1149,7 +1212,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertImage->setCheckable(false);
     m_btnInsertImage->setHorizontalPadding(8);
     m_btnInsertImage->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertImage"));
-    m_btnInsertImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertImage")).size());
+    //m_btnInsertImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertImage")).size());
     m_btnInsertImage->setToolTip(tr("Insert Image %1%2I").arg(shiftKey()).arg(commandKey()));
     m_btnInsertImage->setPosition(CWizToolButton::Center);
     connect(m_btnInsertImage, SIGNAL(clicked()), SLOT(on_btnInsertImage_clicked()));
@@ -1158,7 +1221,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnInsertDate->setCheckable(false);
     m_btnInsertDate->setHorizontalPadding(8, 10);
     m_btnInsertDate->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertDate"));
-    m_btnInsertDate->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertDate")).size());
+    //m_btnInsertDate->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertDate")).size());
     m_btnInsertDate->setToolTip(tr("Insert Date %1%2D").arg(shiftKey()).arg(commandKey()));
     m_btnInsertDate->setPosition(CWizToolButton::Right);
     connect(m_btnInsertDate, SIGNAL(clicked()), SLOT(on_btnInsertDate_clicked()));
@@ -1166,7 +1229,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnMobileImage = new CWizToolButton(this);
 //    m_btnMobileImage->setHorizontalPadding(6);
     m_btnMobileImage->setIcon(::WizLoadSkinIcon(skin, "actionMobileImage"));
-    m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
+    //m_btnMobileImage->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionMobileImage")).size());
     m_btnMobileImage->setToolTip(tr("Receive mobile image"));
     m_btnMobileImage->setPosition(CWizToolButton::Center);
     connect(m_btnMobileImage, SIGNAL(clicked()), SLOT(on_btnMobileImage_clicked()));
@@ -1174,7 +1237,7 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnSearchReplace = new CWizToolButton(this);
     m_btnSearchReplace->setCheckable(false);
     m_btnSearchReplace->setIcon(::WizLoadSkinIcon(skin, "actionFormatSearchReplace"));
-    m_btnSearchReplace->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatSearchReplace")).size());
+    //m_btnSearchReplace->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatSearchReplace")).size());
     m_btnSearchReplace->setToolTip(tr("Find & Replace %1F").arg(commandKey()));
     m_btnSearchReplace->setPosition(CWizToolButton::Right);
     connect(m_btnSearchReplace, SIGNAL(clicked()), SLOT(on_btnSearchReplace_clicked()));
@@ -1190,19 +1253,10 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_btnScreenShot = 0;
 #endif
 
-    m_btnViewSource = new CWizToolButton(this);
-    m_btnViewSource->setCheckable(true);
-    m_btnViewSource->setHorizontalPadding(3, 8);
-    m_btnViewSource->setIcon(::WizLoadSkinIcon(skin, "actionFormatViewSource"));
-    m_btnViewSource->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatViewSource")).size());
-    m_btnViewSource->setToolTip(tr("View source"));
-    m_btnViewSource->setPosition(CWizToolButton::Center);
-    connect(m_btnViewSource, SIGNAL(clicked()), SLOT(on_btnViewSource_clicked()));
-
     m_btnInsertCode = new CWizToolButton(this);
     m_btnInsertCode->setCheckable(false);
     m_btnInsertCode->setIcon(::WizLoadSkinIcon(skin, "actionFormatInsertCode"));
-    m_btnInsertCode->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCode")).size());
+    //m_btnInsertCode->setIconSize(QPixmap(WizGetSkinResourceFileName(skin, "actionFormatInsertCode")).size());
     m_btnInsertCode->setToolTip(tr("Insert code %1%2C").arg(shiftKey()).arg(commandKey()));
     m_btnInsertCode->setPosition(CWizToolButton::Left);
     connect(m_btnInsertCode, SIGNAL(clicked()), SLOT(on_btnInsertCode_clicked()));
@@ -1293,7 +1347,11 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
 
     QWidget*  moveableButtonContainer4 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout4 = qobject_cast<QHBoxLayout*>(moveableButtonContainer4->layout());
-    moveableLayout4->addWidget(m_btnFormatMatch);
+    //
+    //not support in wizeditor
+    m_btnFormatMatch->setVisible(false);
+    //moveableLayout4->addWidget(m_btnFormatMatch);
+    //
     moveableLayout4->addWidget(new CWizEditorButtonSpliter(this));
     moveableLayout4->addWidget(m_btnRemoveFormat);
     moveableLayout4->addSpacing(12);
@@ -1304,7 +1362,6 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     QWidget*  moveableButtonContainer5 = createMoveAbleWidget(this);
     QHBoxLayout* moveableLayout5 = qobject_cast<QHBoxLayout*>(moveableButtonContainer5->layout());
     moveableLayout5->addWidget(m_btnInsertCode);
-    moveableLayout5->addWidget(m_btnViewSource);
 #ifndef Q_OS_MAC
     hLayout->addWidget(m_btnScreenShot);
 #endif
@@ -1333,434 +1390,98 @@ EditorToolBar::EditorToolBar(CWizExplorerApp& app, QWidget *parent)
     m_secondLineButtonContainer->setVisible(showExtraButtons);
     m_btnShowExtra->setChecked(showExtraButtons);
 
-    connect(&m_resetLockTimer, SIGNAL(timeout()), SLOT(on_resetLockTimer_timeOut()));
+    m_delayUpdateUITimer.setInterval(300);
+    connect(&m_delayUpdateUITimer, SIGNAL(timeout()), SLOT(on_delay_updateToolbar()));
 }
 
-void EditorToolBar::resetToolbar()
+void EditorToolBar::resetToolbar(const QString& currentStyle)
 {
     Q_ASSERT(m_editor);
+    //
+    rapidjson::Document d;
+    d.Parse(currentStyle.toUtf8().constData());
+    if (d.HasParseError())
+        return;
+    //
+    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].GetString());
+    CString strForeColor = QString::fromUtf8(d["foreColor"].GetString());
+    CString strBackColor = QString::fromUtf8(d["backColor"].GetString());
+    //
+    CString strFontName = QString::fromUtf8(d["fontName"].GetString());
+    CString strFontSize = QString::fromUtf8(d["fontSize"].GetString());
+    //
+    bool subscript = QString::fromUtf8(d["subscript"].GetString()) == "1";
+    bool superscript = QString::fromUtf8(d["superscript"].GetString()) == "1";
+    //
+    bool bold = QString::fromUtf8(d["bold"].GetString()) == "1";
+    bool italic = QString::fromUtf8(d["italic"].GetString()) == "1";
+    bool underline = QString::fromUtf8(d["underline"].GetString()) == "1";
+    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].GetString()) == "1";
+    //
+    bool justifyleft = QString::fromUtf8(d["justifyleft"].GetString()) == "1";
+    bool justifycenter = QString::fromUtf8(d["justifycenter"].GetString()) == "1";
+    bool justifyright = QString::fromUtf8(d["justifyright"].GetString()) == "1";
+    bool justifyfull = QString::fromUtf8(d["justifyfull"].GetString()) == "1";
+    //
+    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].GetString()) == "1";
+    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
+    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
 
-#ifdef USEWEBENGINE
-    m_editor->editorCommandQueryCommandValue("fontFamily", [this](const QVariant& returnValue) {
-        m_comboFontFamily->setText(returnValue.toString());
-    });
-
-    m_editor->editorCommandQueryCommandValue("fontSize", [this](const QVariant& returnValue) {
-        m_comboFontSize->setText(returnValue.toString());
-    });
-
-    m_editor->editorCommandQueryCommandState("formatMatch", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnFormatMatch->setEnabled(false);
-        } else if (state == 0) {
-            m_btnFormatMatch->setEnabled(true);
-            m_btnFormatMatch->setChecked(false);
-        } else if (state == 1) {
-            m_btnFormatMatch->setEnabled(true);
-            m_btnFormatMatch->setChecked(true);
-        } else {
-            Q_ASSERT(0);
+    //
+    bool blockFormatSetted = false;
+    WizComboboxStyledItem* paraItems = ParagraphItems();
+    for (int i = 0; i < nParagraphItemCount; i ++)
+    {
+        if (0 == paraItems[i].strUserData.compare(strBlockFormat, Qt::CaseInsensitive))
+        {
+            m_comboParagraph->setText(paraItems[i].strText);
+            blockFormatSetted = true;
+            break;
         }
-    });
+    }
+    if (!blockFormatSetted)
+    {
+        m_comboParagraph->setText("");
+    }
 
-    m_editor->editorCommandQueryCommandValue("foreColor", [this](const QVariant& returnValue) {
-        m_btnForeColor->setColor(QColor(returnValue.toString()));
-    });
+    //
+    m_comboFontFamily->setFontName(strFontName);
+    //
+    strFontSize.remove("px");
+    int fontSizeInPx = _ttoi(strFontSize);
+    if (0 != fontSizeInPx)
+    {
+        CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
+        m_comboFontSize->setText(strsFontsizeInPx);
+    }
+    else
+    {
+        m_comboFontSize->setText("");
+    }
 
-    m_editor->editorCommandQueryCommandValue("backColor", [this](const QVariant& returnValue) {
-        m_btnBackColor->setColor(QColor(returnValue.toString()));
-    });
+    m_btnForeColor->setColor(QColor(strForeColor));
+    m_btnBackColor->setColor(QColor(strBackColor));
 
-    m_editor->editorCommandQueryCommandState("bold", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnBold->setEnabled(false);
-        } else if (state == 0) {
-            m_btnBold->setEnabled(true);
-            m_btnBold->setChecked(false);
-        } else if (state == 1) {
-            m_btnBold->setEnabled(true);
-            m_btnBold->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
+    m_btnBold->setChecked(bold);
+    m_btnItalic->setChecked(italic);
+    m_btnUnderLine->setChecked(underline);
+    m_btnStrikeThrough->setChecked(strikeThrough);
 
-    m_editor->editorCommandQueryCommandState("italic", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnItalic->setEnabled(false);
-        } else if (state == 0) {
-            m_btnItalic->setEnabled(true);
-            m_btnItalic->setChecked(false);
-        } else if (state == 1) {
-            m_btnItalic->setEnabled(true);
-            m_btnItalic->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
+    m_actionJustifyLeft->setChecked(justifyleft);
+    m_actionJustifyCenter->setChecked(justifycenter);
+    m_actionJustifyRight->setChecked(justifyright);
 
-    m_editor->editorCommandQueryCommandState("underline", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnUnderLine->setEnabled(false);
-        } else if (state == 0) {
-            m_btnUnderLine->setEnabled(true);
-            m_btnUnderLine->setChecked(false);
-        } else if (state == 1) {
-            m_btnUnderLine->setEnabled(true);
-            m_btnUnderLine->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
+    m_btnOrderedList->setChecked(InsertOrderedList);
+    m_btnUnorderedList->setChecked(InsertUnorderedList);
 
-    m_editor->editorCommandQueryCommandState("strikethrough", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnStrikeThrough->setEnabled(false);
-        } else if (state == 0) {
-            m_btnStrikeThrough->setEnabled(true);
-            m_btnStrikeThrough->setChecked(false);
-        } else if (state == 1) {
-            m_btnStrikeThrough->setEnabled(true);
-            m_btnStrikeThrough->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("justify", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnJustifyLeft->setEnabled(false);
-            m_btnJustifyCenter->setEnabled(false);
-            m_btnJustifyRight->setEnabled(false);
-        } else {
-            m_btnJustifyLeft->setEnabled(true);
-            m_btnJustifyCenter->setEnabled(true);
-            m_btnJustifyRight->setEnabled(true);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandValue("justify", [this](const QVariant& returnValue) {
-        QString value = returnValue.toString();
-        if (value == "left") {
-            m_btnJustifyLeft->setChecked(true);
-            m_btnJustifyCenter->setChecked(false);
-            m_btnJustifyRight->setChecked(false);
-        } else if (value == "center") {
-            m_btnJustifyLeft->setChecked(false);
-            m_btnJustifyCenter->setChecked(true);
-            m_btnJustifyRight->setChecked(false);
-        } else if (value == "right") {
-            m_btnJustifyLeft->setChecked(false);
-            m_btnJustifyCenter->setChecked(false);
-            m_btnJustifyRight->setChecked(true);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("insertOrderedList", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnOrderedList->setEnabled(false);
-        } else if (state == 0) {
-            m_btnOrderedList->setEnabled(true);
-            m_btnOrderedList->setChecked(false);
-        } else if (state == 1) {
-            m_btnOrderedList->setEnabled(true);
-            m_btnOrderedList->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("insertUnorderedList", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnUnorderedList->setEnabled(false);
-        } else if (state == 0) {
-            m_btnUnorderedList->setEnabled(true);
-            m_btnUnorderedList->setChecked(false);
-        } else if (state == 1) {
-            m_btnUnorderedList->setEnabled(true);
-            m_btnUnorderedList->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("insertTable", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnTable->setEnabled(false);
-        } else if (state == 0) {
-            m_btnTable->setEnabled(true);
-            m_btnTable->setChecked(false);
-        } else if (state == 1) {
-            m_btnTable->setEnabled(true);
-            m_btnTable->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("horizontal", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnHorizontal->setEnabled(false);
-        } else if (state == 0) {
-            m_btnHorizontal->setEnabled(true);
-            m_btnHorizontal->setChecked(false);
-        } else if (state == 1) {
-            m_btnHorizontal->setEnabled(true);
-            m_btnHorizontal->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
-
-    m_editor->editorCommandQueryCommandState("source", [this](const QVariant& returnValue) {
-        int state = returnValue.toInt();
-        if (state == -1) {
-            m_btnViewSource->setEnabled(false);
-        } else if (state == 0) {
-            m_btnViewSource->setEnabled(true);
-            m_btnViewSource->setChecked(false);
-        } else if (state == 1) {
-            m_btnViewSource->setEnabled(true);
-            m_btnViewSource->setChecked(true);
-        } else {
-            Q_ASSERT(0);
-        }
-    });
+    //m_btnTable->setEnabled(canInsertTable);
 
     bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
     m_btnMobileImage->setChecked(bReceiveImage);
     m_btnMobileImage->setEnabled(true);
-
-#else
-    int state;
-    QString value;
-
-    state = m_editor->editorCommandQueryCommandState("source");
-    if (state == -1) {
-        m_btnViewSource->setEnabled(false);
-    } else if (state == 0) {
-        m_btnViewSource->setEnabled(true);
-        m_btnViewSource->setChecked(false);
-    } else if (state == 1) {
-        m_btnViewSource->setEnabled(true);
-        m_btnViewSource->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-    bool isSourceMode = (1 == state);
-
-    m_btnCheckList->setEnabled(!isSourceMode);
-    m_btnSearchReplace->setEnabled(!isSourceMode);
-    m_btnInsertImage->setEnabled(!isSourceMode);
-    m_btnInsertCode->setEnabled(!isSourceMode);
-
-    value = m_editor->editorCommandQueryCommandValue("Paragraph");
-    WizComboboxStyledItem* paraItems = ParagraphItems();
-    WizComboboxStyledItem styledItem = itemFromArrayByKey(value, paraItems, nParagraphItemCount);
-    m_comboParagraph->setText(styledItem.strText);
-    m_comboParagraph->setEnabled(!isSourceMode);
-
-    CString fontName = m_editor->editorCommandQueryCommandValue("fontFamily");
-    QStringList fontList = fontName.split(',', QString::SkipEmptyParts);
-    fontName = fontList.isEmpty() ? "" : fontList.first();
-    fontName.Trim('\'');
-    m_comboFontFamily->setEnabled(!isSourceMode);
-    if (!fontName.isEmpty())
-    {
-        selectCurrentFontFamily(fontName);
-    }
-
-    value = m_editor->editorCommandQueryCommandValue("fontSize");
-    m_comboFontSize->setText(value.remove("px"));
-    m_comboFontSize->setEnabled(!isSourceMode);
-
-    //
-    if (!isSourceMode)
-    {
-        clearWizCheckState(m_comboParagraph);
-        QModelIndex modelIndex = m_comboParagraph->model()->index(m_comboParagraph->currentIndex(), 0);
-        m_comboParagraph->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);        
-        //
-        clearWizCheckState(m_comboFontFamily);
-        modelIndex = m_comboFontFamily->model()->index(m_comboFontFamily->currentIndex(), 0);
-        m_comboFontFamily->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
-        //
-        clearWizCheckState(m_comboFontSize);
-        modelIndex = m_comboFontSize->model()->index(m_comboFontSize->currentIndex(), 0);
-        m_comboFontSize->model()->setData(modelIndex, Qt::Checked, WizCheckStateRole);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("formatMatch");
-    if (state == -1) {
-        m_btnFormatMatch->setEnabled(false);
-    } else if (state == 0) {
-        m_btnFormatMatch->setEnabled(true);
-        m_btnFormatMatch->setChecked(false);
-    } else if (state == 1) {
-        m_btnFormatMatch->setEnabled(true);
-        m_btnFormatMatch->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    value = m_editor->editorCommandQueryCommandValue("foreColor");
-    m_btnForeColor->setEnabled(!isSourceMode);
-
-    value = m_editor->editorCommandQueryCommandValue("backColor");
-    m_btnBackColor->setEnabled(!isSourceMode);
-
-    state = m_editor->editorCommandQueryCommandState("bold");
-    if (state == -1) {
-        m_btnBold->setEnabled(false);
-    } else if (state == 0) {
-        m_btnBold->setEnabled(true);
-        m_btnBold->setChecked(false);
-    } else if (state == 1) {
-        m_btnBold->setEnabled(true);
-        m_btnBold->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("italic");
-    if (state == -1) {
-        m_btnItalic->setEnabled(false);
-    } else if (state == 0) {
-        m_btnItalic->setEnabled(true);
-        m_btnItalic->setChecked(false);
-    } else if (state == 1) {
-        m_btnItalic->setEnabled(true);
-        m_btnItalic->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("underline");
-    if (state == -1) {
-        m_btnUnderLine->setEnabled(false);
-    } else if (state == 0) {
-        m_btnUnderLine->setEnabled(true);
-        m_btnUnderLine->setChecked(false);
-    } else if (state == 1) {
-        m_btnUnderLine->setEnabled(true);
-        m_btnUnderLine->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("strikethrough");
-    if (state == -1) {
-        m_btnStrikeThrough->setEnabled(false);
-    } else if (state == 0) {
-        m_btnStrikeThrough->setEnabled(true);
-        m_btnStrikeThrough->setChecked(false);
-    } else if (state == 1) {
-        m_btnStrikeThrough->setEnabled(true);
-        m_btnStrikeThrough->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("justify");
-    value = m_editor->editorCommandQueryCommandValue("justify");
-    if (state == -1) {
-        m_btnJustify->setEnabled(false);
-    } else {
-        m_btnJustify->setEnabled(true);
-
-        if (value == "left") {
-            m_actionJustifyLeft->setChecked(true);
-            m_actionJustifyCenter->setChecked(false);
-            m_actionJustifyRight->setChecked(false);
-            m_btnJustify->setIcon(m_actionJustifyLeft->icon());
-        } else if (value == "center") {
-            m_actionJustifyLeft->setChecked(false);
-            m_actionJustifyCenter->setChecked(true);
-            m_actionJustifyRight->setChecked(false);
-            m_btnJustify->setIcon(m_actionJustifyCenter->icon());
-        } else if (value == "right") {
-            m_actionJustifyLeft->setChecked(false);
-            m_actionJustifyCenter->setChecked(false);
-            m_actionJustifyRight->setChecked(true);
-            m_btnJustify->setIcon(m_actionJustifyRight->icon());
-        }
-    }
-
-    state = m_editor->editorCommandQueryCommandState("insertOrderedList");
-    if (state == -1) {
-        m_btnOrderedList->setEnabled(false);
-    } else if (state == 0) {
-        m_btnOrderedList->setEnabled(true);
-        m_btnOrderedList->setChecked(false);
-    } else if (state == 1) {
-        m_btnOrderedList->setEnabled(true);
-        m_btnOrderedList->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("insertUnorderedList");
-    if (state == -1) {
-        m_btnUnorderedList->setEnabled(false);
-    } else if (state == 0) {
-        m_btnUnorderedList->setEnabled(true);
-        m_btnUnorderedList->setChecked(false);
-    } else if (state == 1) {
-        m_btnUnorderedList->setEnabled(true);
-        m_btnUnorderedList->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("insertTable");
-    if (state == -1) {
-        m_btnTable->setEnabled(false);
-    } else if (state == 0) {
-        m_btnTable->setEnabled(true);
-        m_btnTable->setChecked(false);
-    } else if (state == 1) {
-        m_btnTable->setEnabled(true);
-        m_btnTable->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    state = m_editor->editorCommandQueryCommandState("horizontal");
-    if (state == -1) {
-        m_btnHorizontal->setEnabled(false);
-    } else if (state == 0) {
-        m_btnHorizontal->setEnabled(true);
-        m_btnHorizontal->setChecked(false);
-    } else if (state == 1) {
-        m_btnHorizontal->setEnabled(true);
-        m_btnHorizontal->setChecked(true);
-    } else {
-        Q_ASSERT(0);
-    }
-
-    bool bReceiveImage = m_editor->editorCommandQueryMobileFileReceiverState();
-    m_btnMobileImage->setChecked(bReceiveImage);
-    m_btnMobileImage->setEnabled(!isSourceMode);
-#endif
 }
 
-struct WizEditorContextMenuItem
-{
-    QString label;
-    QString command;
-    QString execute;
-    bool localSlot;
-};
+
 
 #define WIZEDITOR_ACTION_GOOGLE         QObject::tr("Use \"Google\" search")
 #define WIZEDITOR_ACTION_BAIDU           QObject::tr("Use \"Baidu\" search")
@@ -1768,142 +1489,10 @@ struct WizEditorContextMenuItem
 #define WIZEDITOR_ACTION_CUT            QObject::tr("Cut")
 #define WIZEDITOR_ACTION_COPY           QObject::tr("Copy")
 #define WIZEDITOR_ACTION_PASTE          QObject::tr("Paste")
-
-#define WIZEDITOR_ACTION_SAVEIMGAS          QObject::tr("Save Image as...")
-#define WIZEDITOR_ACTION_COPYIMG          QObject::tr("Copy Image")
-#define WIZEDITOR_ACTION_COPYIMGLINK          QObject::tr("Copy Image Link")
-
-#define WIZEDITOR_ACTION_LINK_INSERT    QObject::tr("Insert Link")
-#define WIZEDITOR_ACTION_LINK_EDIT      QObject::tr("Edit Link")
-#define WIZEDITOR_ACTION_LINK_REMOVE    QObject::tr("Remove Link")
-
-#define WIZEDITOR_ACTION_FONT_BOLD          QObject::tr("Bold")
-#define WIZEDITOR_ACTION_FONT_ITALIC        QObject::tr("Italic")
-#define WIZEDITOR_ACTION_FONT_UNDERLINE     QObject::tr("Underline")
-#define WIZEDITOR_ACTION_FONT_STRIKETHROUGH QObject::tr("Strike through")
-#define WIZEDITOR_ACTION_FONT_FORECOLOR     QObject::tr("font color")
-#define WIZEDITOR_ACTION_FONT_BACKCOLOR     QObject::tr("background color")
-
-#define WIZEDITOR_ACTION_JUSTIFY_LEFT       QObject::tr("Justify left")
-#define WIZEDITOR_ACTION_JUSTIFY_CENTER     QObject::tr("Justify center")
-#define WIZEDITOR_ACTION_JUSTIFY_RIGHT      QObject::tr("Justify right")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT       QObject::tr("Insert table")
-#define WIZEDITOR_ACTION_TABLE_DELETE       QObject::tr("Delete table")
-
-#define WIZEDITOR_ACTION_TABLE_DELETE_ROW   QObject::tr("Delete row")
-#define WIZEDITOR_ACTION_TABLE_DELETE_COLUM QObject::tr("Delete colum")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW           QObject::tr("Insert row")
-#define WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT      QObject::tr("Insert row next")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM         QObject::tr("Insert colum")
-#define WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT    QObject::tr("Insert colum next")
-
-#define WIZEDITOR_ACTION_TABLE_INSERT_CAPTION   QObject::tr("Insert caption")
-#define WIZEDITOR_ACTION_TABLE_DELETE_CAPTION   QObject::tr("Delete caption")
-#define WIZEDITOR_ACTION_TABLE_INSERT_TITLE     QObject::tr("Insert title")
-#define WIZEDITOR_ACTION_TABLE_DELETE_TITLE     QObject::tr("Delete title")
-
-#define WIZEDITOR_ACTION_TABLE_MERGE_CELLS  QObject::tr("Merge cells")
-#define WIZEDITOR_ACTION_TABLE_MERGE_RIGHT  QObject::tr("Merge right")
-#define WIZEDITOR_ACTION_TABLE_MERGE_DOWN   QObject::tr("Merge down")
-
-#define WIZEDITOR_ACTION_TABLE_SPLIT_CELLS  QObject::tr("Split cells")
-#define WIZEDITOR_ACTION_TABLE_SPLIT_ROWS   QObject::tr("Split rows")
-#define WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS QObject::tr("Split colums")
-
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS     QObject::tr("Averaged distribute rows")
-#define WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS   QObject::tr("Averaged distribute colums")
+#define WIZEDITOR_ACTION_PASTE_PLAIN    QObject::tr("Paste plain text")
 
 
-WizEditorContextMenuItem* EditorToolBar::contextMenuData()
-{
-    static WizEditorContextMenuItem arrayData[] =
-    {
-        {WIZEDITOR_ACTION_GOOGLE,                   "",                 "on_editor_google_triggered", true},
-        {WIZEDITOR_ACTION_BAIDU,                   "",                 "on_editor_baidu_triggered", true},
-        {"-", "-", "-"},
-
-        {WIZEDITOR_ACTION_CUT,                      "",                 "on_editor_cut_triggered", true},
-        {WIZEDITOR_ACTION_COPY,                     "",                 "on_editor_copy_triggered", true},
-        {WIZEDITOR_ACTION_PASTE,                    "",                 "on_editor_paste_triggered", true},
-        {"-", "-", "-"},
-
-        {WIZEDITOR_ACTION_SAVEIMGAS,                      "",                 "on_editor_saveImageAs_triggered", true},
-        {WIZEDITOR_ACTION_COPYIMG,                     "",                 "on_editor_copyImage_triggered", true},
-        {WIZEDITOR_ACTION_COPYIMGLINK,                    "",                 "on_editor_copyImageLink_triggered", true},
-        {"-", "-", "-"},
-
-        {QObject::tr("Link"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_LINK_INSERT,              "link",             "on_editor_insertLink_triggered", true},
-        {WIZEDITOR_ACTION_LINK_EDIT,                "link",             "on_editor_editLink_triggered", true},
-        {WIZEDITOR_ACTION_LINK_REMOVE,              "unlink",           "on_editor_removeLink_triggered", true},
-        {"+", "+", "+"},
-
-        {QObject::tr("Font"),                       "+",                "+"},
-        {WIZEDITOR_ACTION_FONT_BOLD,                "bold",             "on_editor_bold_triggered", true},
-        {WIZEDITOR_ACTION_FONT_ITALIC,              "italic",           "on_editor_italic_triggered", true},
-        {WIZEDITOR_ACTION_FONT_UNDERLINE,           "underline",        "on_editor_underline_triggered", true},
-        {WIZEDITOR_ACTION_FONT_STRIKETHROUGH,       "strikethrough",    "on_editor_strikethrough_triggered", true},
-//        {"-", "-", "-"},
-//        {WIZEDITOR_ACTION_FONT_FORECOLOR,           "foreColor",        "editorCommandExecuteForeColor"},
-//        {WIZEDITOR_ACTION_FONT_BACKCOLOR,           "backColor",        "editorCommandExecuteBackColor"},
-        {"+", "+", "+"},
-
-        {QObject::tr("Justify"),                    "+",          "+"},
-        {WIZEDITOR_ACTION_JUSTIFY_LEFT,             "justify",          "on_editor_justifyLeft_triggered", true},
-        {WIZEDITOR_ACTION_JUSTIFY_CENTER,           "justify",          "on_editor_justifyCenter_triggered", true},
-        {WIZEDITOR_ACTION_JUSTIFY_RIGHT,            "justify",          "on_editor_justifyRight_triggered", true},
-        {"+", "+", "+"},
-
-        {QObject::tr("Table"),                      "+",                "+"},
-        {WIZEDITOR_ACTION_TABLE_INSERT,             "inserttable",      "on_editor_insertTable_triggered", true},
-        {WIZEDITOR_ACTION_TABLE_DELETE,             "deletetable",     "on_editor_deleteTable_triggered", true},
-        {"-", "-", "-"},
-        {QObject::tr("Cell Alignment"),                      "+",                "+"},
-        {QObject::tr("Align leftTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftTop", false},
-        {QObject::tr("Align top"),         "cellalignment",        "editorCommandExecuteTableCellAlignTop", false},
-        {QObject::tr("Align rightTop"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightTop", false},
-        {QObject::tr("Align left"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeft", false},
-        {QObject::tr("Align center"),         "cellalignment",        "editorCommandExecuteTableCellAlignCenter", false},
-        {QObject::tr("Align right"),         "cellalignment",        "editorCommandExecuteTableCellAlignRight", false},
-        {QObject::tr("Align leftBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignLeftBottom", false},
-        {QObject::tr("Align bottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignBottom", false},
-        {QObject::tr("Align rightBottom"),         "cellalignment",        "editorCommandExecuteTableCellAlignRightBottom", false},
-        {"+", "+", "+"},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_DELETE_ROW,         "deleterow",        "editorCommandExecuteTableDeleteRow", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_COLUM,       "deletecol",        "editorCommandExecuteTableDeleteCol", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW,         "insertrow",        "editorCommandExecuteTableInsertRow", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_ROW_NEXT,    "insertrownext",    "editorCommandExecuteTableInsertRowNext", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM,       "insertcol",        "editorCommandExecuteTableInsertCol", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_COLUM_NEXT,  "insertcolnext",    "editorCommandExecuteTableInsertColNext", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_INSERT_CAPTION,     "insertcaption",    "editorCommandExecuteTableInsertCaption", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_CAPTION,     "deletecaption",    "editorCommandExecuteTableDeleteCaption", false},
-        {WIZEDITOR_ACTION_TABLE_INSERT_TITLE,       "inserttitle",      "editorCommandExecuteTableInsertTitle", false},
-        {WIZEDITOR_ACTION_TABLE_DELETE_TITLE,       "deletetitle",      "editorCommandExecuteTableDeleteTitle", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_MERGE_CELLS,        "mergecells",       "editorCommandExecuteTableMergeCells", false},
-        {WIZEDITOR_ACTION_TABLE_MERGE_RIGHT,        "mergeright",       "editorCommandExecuteTalbeMergeRight", false},
-        {WIZEDITOR_ACTION_TABLE_MERGE_DOWN,         "mergedown",        "editorCommandExecuteTableMergeDown", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_CELLS,        "splittocells",     "editorCommandExecuteTableSplitCells", false},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_ROWS,         "splittorows",      "editorCommandExecuteTableSplitRows", false},
-        {WIZEDITOR_ACTION_TABLE_SPLIT_COLUMS,       "splittocols",      "editorCommandExecuteTableSplitCols", false},
-        {"-", "-", "-"},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_ROWS,       "averagedistributerow", "editorCommandExecuteTableAverageRows", false},
-        {WIZEDITOR_ACTION_TABLE_AVERAGE_COLUMS,     "averagedistributecol", "editorCommandExecuteTableAverageCols", false},
-        {"+", "+", "+"},
-
-        {"", "", ""}
-    };
-
-    return arrayData;
-}
-
-#ifdef USEWEBENGINE
-void EditorToolBar::setDelegate(CWizDocumentWebEngine* editor)
+void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
 {
     Q_ASSERT(editor);
 
@@ -1912,72 +1501,116 @@ void EditorToolBar::setDelegate(CWizDocumentWebEngine* editor)
     connect(m_editor, SIGNAL(showContextMenuRequest(QPoint)),
             SLOT(on_delegate_showContextMenuRequest(QPoint)), Qt::QueuedConnection);
 
-    connect(m_editor, SIGNAL(selectionChanged()),
-            SLOT(on_delegate_selectionChanged()));
+    connect(m_editor, SIGNAL(statusChanged(const QString&)),
+            SLOT(on_delegate_selectionChanged(const QString&)));
 }
-#else
-void EditorToolBar::setDelegate(CWizDocumentWebView* editor)
+
+static std::map<QString, QWebEnginePage::WebAction> g_webActions;
+//
+void initWebActions(QWebEnginePage* page)
 {
-    Q_ASSERT(editor);
-
-    m_editor = editor;
-
-    connect(m_editor, SIGNAL(showContextMenuRequest(QPoint)),
-            SLOT(on_delegate_showContextMenuRequest(QPoint)));
-    connect(m_editor, SIGNAL(selectionChanged()),
-            SLOT(on_delegate_selectionChanged()));
-    connect(m_editor, SIGNAL(updateEditorToolBarRequest()),
-            SLOT(on_updateToolBarStatus_request()));
+    if (!g_webActions.empty())
+        return;
+    //
+    for (int action = QWebEnginePage::NoWebAction + 1;
+         action < QWebEnginePage::WebActionCount;
+         action++)
+    {
+        QWebEnginePage::WebAction a = (QWebEnginePage::WebAction)action;
+        QAction* actionObj = page->action(a);
+        //
+        QString text = actionObj->text();
+        g_webActions[text] = a;
+    }
 }
-#endif
+//
+QWebEnginePage::WebAction menuText2WebAction(QWebEnginePage* page, QString text)
+{
+    initWebActions(page);
+    //
+    auto it = g_webActions.find(text);
+    if (it == g_webActions.end())
+        return QWebEnginePage::NoWebAction;
+    //
+    return it->second;
+}
+
 
 void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 {
     if (!m_editor)
         return;
-
-    buildMenu();    
-
-    m_strImageSrc.clear();
-    if (m_editor->findIMGElementAt(pos, m_strImageSrc))
+    //
+    QWebEnginePage* page = m_editor->page();
+    if (!page)
+        return;
+    //
+    QMenu *menu = page->createStandardContextMenu();
+    if (!menu)
+        return;
+    //
+    bool editing = m_editor->isEditing();
+    //
+    bool hasPasteMenu = false;
+    //
+    QList<QAction*> actions = menu->actions();
+    for (QAction* action : actions)
     {
-        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(true);
-        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(true);
-        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(true);
+        QWebEnginePage::WebAction a = menuText2WebAction(page, action->iconText());
+        switch (a)
+        {
+        case QWebEnginePage::Copy:
+            action->setText(QObject::tr("Copy"));
+            break;
+        case QWebEnginePage::Unselect:
+            action->setText(QObject::tr("Unselect"));
+            break;
+        case QWebEnginePage::Back:
+        case QWebEnginePage::Forward:
+        case QWebEnginePage::Stop:
+        case QWebEnginePage::Reload:
+#if QT_VERSION >= 0x050600
+        case QWebEnginePage::DownloadImageToDisk:
+#endif
+            menu->removeAction(action);
+            break;
+            //
+        case QWebEnginePage::Paste:
+            hasPasteMenu = true;
+            break;
+        default:
+            break;
+        }
     }
-    else
+    //
+    if (!m_editor->selectedText().isEmpty())
     {
-        actionFromName(WIZEDITOR_ACTION_SAVEIMGAS)->setVisible(false);
-        actionFromName(WIZEDITOR_ACTION_COPYIMG)->setVisible(false);
-        actionFromName(WIZEDITOR_ACTION_COPYIMGLINK)->setVisible(false);
+        if (!menu->actions().isEmpty())
+        {
+            menu->addSeparator();
+        }
+        menu->addAction(WIZEDITOR_ACTION_GOOGLE, this, SLOT(on_editor_google_triggered()));
+        menu->addAction(WIZEDITOR_ACTION_BAIDU, this, SLOT(on_editor_baidu_triggered()));
     }
+    //
+    if (editing)
+    {
+        if (!hasPasteMenu)
+        {
+            if (!menu->actions().isEmpty())
+            {
+                menu->addSeparator();
+            }
 
-    if (m_editor->selectedText().isEmpty()) {
-        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(false);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_GOOGLE)->setEnabled(true);
+            menu->addAction(WIZEDITOR_ACTION_PASTE, this, SLOT(on_editor_paste_triggered()));
+            menu->addAction(WIZEDITOR_ACTION_PASTE_PLAIN, this, SLOT(on_editor_pastePlain_triggered()));
+        }
     }
-
-    if (m_editor->selectedText().isEmpty()) {
-        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(false);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_BAIDU)->setEnabled(true);
-    }
-
-    if (m_editor->isEditing() && m_editor->hasFocus()) {
-        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(true);
-        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(true);
-    } else {
-        actionFromName(WIZEDITOR_ACTION_CUT)->setEnabled(false);
-        actionFromName(WIZEDITOR_ACTION_PASTE)->setEnabled(false);
-    }    
-
-    if (m_editor->page()->settings()->globalSettings()->testAttribute(QWebSettings::DeveloperExtrasEnabled)) {
-        m_menuContext->addAction(m_editor->pageAction(QWebPage::InspectElement));
-    }
-
-    m_menuContext->popup(pos);
-    m_menuContext->update();
+    //
+    if (menu->actions().isEmpty())
+        return;
+    //
+    menu->popup(pos);
 
     WizGetAnalyzer().LogAction("editorContextMenu");
 }
@@ -1985,37 +1618,36 @@ void EditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 /*
  * 此处对slectionChanged引起的刷新做延迟和屏蔽处理。在输入中文的时候频繁的刷新会引起输入卡顿的问题
  */
-void EditorToolBar::on_delegate_selectionChanged()
+void EditorToolBar::on_delegate_selectionChanged(const QString& currentStyle)
 {
-    static int counter = 0;
-    if (m_resetLocked)
+    m_currentStyle = currentStyle;
+    m_lastUpdateUIRequest = GetTickCount();
+    //
+    if (!m_delayUpdateUITimer.isActive())
     {
-        if (counter == 0)
-        {
-            counter ++;
-            QTimer::singleShot(1600, this,SLOT(on_delegate_selectionChanged()));
-        }
-        return;
+        m_delayUpdateUITimer.start();
     }
-
-    resetToolbar();
-
-    // 锁定更新
-    m_resetLocked = true;
-    m_resetLockTimer.start(1500);
-    counter = 0;
 }
 
-void EditorToolBar::on_updateToolBarStatus_request()
+void EditorToolBar::on_delay_updateToolbar()
 {
-    resetToolbar();
+    if (m_currentStyle.isEmpty())
+        return;
+    if (0 == m_lastUpdateUIRequest)
+        return;
+    //
+    int delay = GetTickCount() - m_lastUpdateUIRequest;
+    if (delay < 250)
+        return;
+    //
+    resetToolbar(m_currentStyle);
+    m_lastUpdateUIRequest = 0;
+    //
+#ifdef QT_DEBUG
+    qDebug() << "update editor toolbar ui";
+#endif
 }
 
-void EditorToolBar::on_resetLockTimer_timeOut()
-{
-    m_resetLockTimer.stop();
-    m_resetLocked = false;
-}
 
 
 QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoard)
@@ -2062,7 +1694,9 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
         }
     }
 
-    QWidget *widget = new QWidget;
+    QMenu *colorMenu = new QMenu(this);
+    //
+    QWidget *widget = new QWidget(colorMenu);
     widget->setLayout(pGridLayout);
 
     QVBoxLayout *pVLayout = new QVBoxLayout;
@@ -2070,9 +1704,14 @@ QMenu* EditorToolBar::createColorMenu(const char *slot, const char *slotColorBoa
     pVLayout->addWidget(pBtnTransparent);
     pVLayout->addWidget(widget);
     pVLayout->addWidget(pBtnOtherColor);
+    //
+    QWidget* itemsWidget = new QWidget(colorMenu);
+    itemsWidget->setLayout(pVLayout);
 
-    QMenu *colorMenu = new QMenu(this);
-    colorMenu->setLayout(pVLayout);
+    QWidgetAction* widgetAction = new QWidgetAction(colorMenu);
+    widgetAction->setDefaultWidget(itemsWidget);
+
+    colorMenu->addAction(widgetAction);
 
     return colorMenu;
 }
@@ -2128,70 +1767,82 @@ void EditorToolBar::on_fontDailogFontChanged(const QFont& font)
     }
 }
 
-void EditorToolBar::queryCurrentFont(QFont& font)
+void EditorToolBar::queryCurrentFont(std::function<void(const QFont& font)> callback)
 {
-    QString familyName = m_editor->editorCommandQueryCommandValue("fontFamily");
-    familyName.isEmpty() ? void() : font.setFamily(familyName);
+    m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& familyName){
+        //
+        m_editor->editorCommandQueryCommandState("bold", [=](int bold){
 
-    int value = m_editor->editorCommandQueryCommandState("bold");
-//    qDebug() << "query current font bold : " << value;
-    font.setBold(value == 1);
+            m_editor->editorCommandQueryCommandState("italic", [=](int italic){
 
-    value = m_editor->editorCommandQueryCommandState("italic");
-//    qDebug() << "query current font italic : " << value;
-    font.setItalic(value == 1);
+                m_editor->editorCommandQueryCommandState("underline", [=](int underline){
 
-    QString fontSize = m_editor->editorCommandQueryCommandValue("fontSize");
-    fontSize.remove("px");
-    value = fontSize.toInt();
-//    qDebug() << "query current font size : " << value;
-    font.setPointSize(value == 0 ? m_app.userSettings().defaultFontSize() : value);
+                    m_editor->editorCommandQueryCommandValue("fontSize", [=](const QString& fontSize){
 
-    value = m_editor->editorCommandQueryCommandState("underline");
-//    qDebug() << "query current font underline : " << value;
-    font.setUnderline(value == 1);
+                        m_editor->editorCommandQueryCommandState("strikethrough", [=](int strikethrough){
+                            //
+                            QFont font;
 
-    value = m_editor->editorCommandQueryCommandState("strikethrough");
-//    qDebug() << "query current font strikethrough : " << value;
-    font.setStrikeOut(value == 1);
+                            familyName.isEmpty() ? void() : font.setFamily(familyName);
+                            font.setBold(bold == 1);
+                            font.setItalic(italic == 1);
+                            font.setStrikeOut(strikethrough == 1);
+                            font.setUnderline(underline == 1);
+                            //
+                            QString size = fontSize;
+                            size.remove("px");
+                            int sizeValue = size.toInt();
+                            font.setPointSize(sizeValue == 0 ? m_app.userSettings().defaultFontSize() : sizeValue);
+                            //
+                            callback(font);
+                            //
+                        });
+                    });
+                });
+            });
+        });
+    });
 }
 
-void EditorToolBar::setCurrentFont(const QFont& font)
+void EditorToolBar::setCurrentFont(const QFont& fontTemp)
 {
-    QFont currentFont;
-    queryCurrentFont(currentFont);
+    QFont font = fontTemp;
+    //
+    queryCurrentFont([=](const QFont& currentFont){
 
-    if (font.family() != currentFont.family())
-    {
-        QString strFontFamily = font.family();
-        m_editor->editorCommandExecuteFontFamily(strFontFamily);
-        selectCurrentFontFamily(strFontFamily);
-    }
+        if (font.family() != currentFont.family())
+        {
+            QString strFontFamily = font.family();
+            m_editor->editorCommandExecuteFontFamily(strFontFamily);
+            selectCurrentFontFamily(strFontFamily);
+        }
 
-    if (font.pointSize() != currentFont.pointSize())
-    {
-        setFontPointSize(QString::number(font.pointSize()));
-    }
+        if (font.pointSize() != currentFont.pointSize())
+        {
+            setFontPointSize(QString::number(font.pointSize()));
+        }
 
-    if (font.bold() != currentFont.bold())
-    {
-        m_editor->editorCommandExecuteBold();
-    }
+        if (font.bold() != currentFont.bold())
+        {
+            m_editor->editorCommandExecuteBold();
+        }
 
-    if (font.italic() !=  currentFont.italic())
-    {
-        m_editor->editorCommandExecuteItalic();
-    }
+        if (font.italic() !=  currentFont.italic())
+        {
+            m_editor->editorCommandExecuteItalic();
+        }
 
-    if (font.strikeOut() != currentFont.strikeOut())
-    {
-        m_editor->editorCommandExecuteStrikeThrough();
-    }
+        if (font.strikeOut() != currentFont.strikeOut())
+        {
+            m_editor->editorCommandExecuteStrikeThrough();
+        }
 
-    if (font.underline() != currentFont.underline())
-    {
-        m_editor->editorCommandExecuteUnderLine();
-    }
+        if (font.underline() != currentFont.underline())
+        {
+            m_editor->editorCommandExecuteUnderLine();
+        }
+    });
+
 }
 
 void EditorToolBar::selectCurrentFontFamily(const QString& strFontFamily)
@@ -2440,7 +2091,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
         return nullptr;
 
     bool showTips = false;
-    if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+    if (MainWindow* mainWindow = MainWindow::instance())
     {
         showTips = mainWindow->userSettings().get(EDITORTOOLBARTIPSCHECKED).toInt() == 0;
     }
@@ -2457,7 +2108,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
 
         //NOTE：绑定方法来控制webview的焦点问题
         tipWidget->bindShowFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 if (CWizDocumentView* docView = mainWindow->docView())
                 {
@@ -2466,7 +2117,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
             }
         });
         tipWidget->bindHideFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 if (CWizDocumentView* docView = mainWindow->docView())
                 {
@@ -2475,7 +2126,7 @@ CWizTipsWidget* EditorToolBar::showCoachingTips()
             }
         });
         tipWidget->bindCloseFunction([](){
-            if (Core::Internal::MainWindow* mainWindow = Core::Internal::MainWindow::instance())
+            if (MainWindow* mainWindow = MainWindow::instance())
             {
                 mainWindow->userSettings().set(EDITORTOOLBARTIPSCHECKED, "1");
                 if (CWizDocumentView* docView = mainWindow->docView())
@@ -2602,111 +2253,6 @@ bool EditorToolBar::hasFocus()
     return QWidget::hasFocus() || m_comboFontFamily->isPopuping() || m_comboFontSize->isPopuping() || m_comboParagraph->isPopuping();
 }
 
-void EditorToolBar::buildMenu()
-{
-    if (!m_menuContext) {
-        m_menuContext = new QMenu(this);
-    }
-
-    m_menuContext->clear();
-    m_actions.clear();
-
-    int index = 0;
-    WizEditorContextMenuItem* arrayData = contextMenuData();
-    while (1) {
-        WizEditorContextMenuItem& item = arrayData[index];
-        if (item.label.isEmpty() && item.command.isEmpty() && item.execute.isEmpty()) {
-            break;
-
-        } else if (item.label == "-") {
-            m_menuContext->addSeparator();
-
-        } else if (item.execute == "+") {
-            index = buildMenu(m_menuContext, index);
-
-        } else if (item.command != "+") {
-            if (!item.command.isEmpty()) {
-                int value = m_editor->editorCommandQueryCommandState(item.command);
-                if (value == -1) {
-                    index++;
-                    continue;
-                }
-            }
-
-            QString strSlot = "1" + item.execute + "()";
-            if (item.localSlot) {
-                m_actions[item.label] = m_menuContext->addAction(item.label, this, strSlot.toUtf8());
-            } else {
-                m_actions[item.label] = m_menuContext->addAction(item.label, m_editor, strSlot.toUtf8());
-            }
-        } else {
-            Q_ASSERT(0);
-        }
-
-        index++;
-    }
-}
-
-int EditorToolBar::buildMenu(QMenu* pMenu, int indx)
-{
-    int index = indx;
-    bool bSkip = true;
-    WizEditorContextMenuItem* arrayData = contextMenuData();
-    WizEditorContextMenuItem& curItem = arrayData[index];
-    QMenu* pSubMenu = new QMenu(curItem.label, pMenu);
-
-    while(1) {
-        index++;
-
-        WizEditorContextMenuItem& item = arrayData[index];
-        if (item.label == "+") {
-            break;
-        } else if (item.execute == "+") {
-            index = buildMenu(pSubMenu, index);
-        } else if (item.label == "-") {
-            pSubMenu->addSeparator();
-
-        } else if (item.command != "+" && !item.execute.isEmpty()) {
-
-//            // special case
-//            if (m_editor->editorCommandQueryLink()
-//                    && item.label == WIZEDITOR_ACTION_LINK_INSERT) {
-//                continue;
-//            } else if (!m_editor->editorCommandQueryLink()
-//                       && item.label == WIZEDITOR_ACTION_LINK_EDIT) {
-//                continue;
-//            }
-
-            if (!item.command.isEmpty()) {
-                int value = m_editor->editorCommandQueryCommandState(item.command);
-                if (value == -1) {
-                    continue;
-                }
-            }
-
-            bSkip = false;
-            QString strSlot = "1" + item.execute + "()";
-            if (item.localSlot) {
-                m_actions[item.label] = pSubMenu->addAction(item.label, this, strSlot.toUtf8());
-            } else {
-                m_actions[item.label] = pSubMenu->addAction(item.label, m_editor, strSlot.toUtf8());
-            }
-
-        } else if (item.command.isEmpty() && item.execute.isEmpty()) {
-            continue;
-        } else {
-            Q_ASSERT(0);
-        }
-    }
-
-    if (!bSkip) {
-        pMenu->addMenu(pSubMenu);
-    } else {
-        pSubMenu->deleteLater();
-    }
-
-    return index;
-}
 
 void EditorToolBar::on_editor_google_triggered()
 {
@@ -2722,38 +2268,29 @@ void EditorToolBar::on_editor_baidu_triggered()
     QDesktopServices::openUrl(url);
 }
 
-#ifdef USEWEBENGINE
+
 void EditorToolBar::on_editor_cut_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCut");
     m_editor->triggerPageAction(QWebEnginePage::Cut);
 }
 
 void EditorToolBar::on_editor_copy_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopy");
     m_editor->triggerPageAction(QWebEnginePage::Copy);
 }
 
 void EditorToolBar::on_editor_paste_triggered()
 {
+    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
     m_editor->triggerPageAction(QWebEnginePage::Paste);
 }
-#else
-void EditorToolBar::on_editor_cut_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCut");
-    m_editor->triggerPageAction(QWebPage::Cut);
-}
 
-void EditorToolBar::on_editor_copy_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuCopy");
-    m_editor->triggerPageAction(QWebPage::Copy);
-}
-
-void EditorToolBar::on_editor_paste_triggered()
+void EditorToolBar::on_editor_pastePlain_triggered()
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuPaste");
-    m_editor->triggerPageAction(QWebPage::Paste);
+    m_editor->editorCommandExecutePastePlainText();
 }
 
 void EditorToolBar::on_editor_bold_triggered()
@@ -2798,17 +2335,6 @@ void EditorToolBar::on_editor_removeLink_triggered()
     m_editor->editorCommandExecuteLinkRemove();
 }
 
-void EditorToolBar::on_editor_insertTable_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuInsertTable");
-    m_editor->editorCommandExecuteTableInsert();
-}
-
-void EditorToolBar::on_editor_deleteTable_triggered()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorMenuDeleteTable");
-    m_editor->editorCommandExecuteTableDelete();
-}
 
 void EditorToolBar::on_editor_justifyLeft_triggered()
 {
@@ -2827,7 +2353,7 @@ void EditorToolBar::on_editor_justifyRight_triggered()
     CWizAnalyzer::GetAnalyzer().LogAction("editorMenuJustifyRight");
     m_editor->editorCommandExecuteJustifyRight();
 }
-#endif
+
 
 void EditorToolBar::on_comboParagraph_indexChanged(int index)
 {
@@ -2870,19 +2396,22 @@ void EditorToolBar::on_comboFontFamily_indexChanged(int index)
     }
     else if (helperData == WIZFONTPANEL)
     {
-        QFont font;
-        queryCurrentFont(font);
-        //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
-        // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
-        QFontDialog fontDialog;
-        fontDialog.setCurrentFont(font);
-        connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
-        fontDialog.exec();
+        queryCurrentFont([=](const QFont& font){
+            //NOTE : 在QT5.4.2版本中存在问题，打开QFontDialog后，在编辑器中选择文本，再次回到QFontDialog时
+            // currentFontChanged 将不会再次发出。 所以使用模态对话框强制用户关闭
+            QFontDialog fontDialog;
+            fontDialog.setCurrentFont(font);
+            connect(&fontDialog, SIGNAL(currentFontChanged(QFont)), SLOT(on_fontDailogFontChanged(QFont)));
+            fontDialog.exec();
+        });
     }
     else if (helperData == WIZSEPARATOR)
     {
-        QString value = m_editor->editorCommandQueryCommandValue("fontFamily");
-        m_comboFontFamily->setText(value);
+        m_editor->editorCommandQueryCommandValue("fontFamily", [=](const QString& fontFamily){
+            //
+            m_comboFontFamily->setText(fontFamily);
+
+        });
     }
 }
 
@@ -2987,7 +2516,7 @@ void EditorToolBar::on_btnJustifyCenter_clicked()
 
 void EditorToolBar::on_btnJustifyRight_clicked()
 {
-    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyLeft");
+    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarJustifyRight");
     if (m_editor) {
         m_editor->editorCommandExecuteJustifyRight();
     }
@@ -3017,11 +2546,11 @@ void EditorToolBar::on_btnOrderedList_clicked()
     }
 }
 
-void EditorToolBar::on_btnTable_clicked()
+void EditorToolBar::on_btnTable_clicked(int row, int col)
 {
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarTable");
     if (m_editor) {
-        m_editor->editorCommandExecuteTableInsert();
+        m_editor->editorCommandExecuteTableInsert(row, col);
     }
 }
 
@@ -3083,14 +2612,6 @@ void EditorToolBar::on_btnScreenShot_clicked()
     CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarScreenShot");
     if (m_editor) {
         m_editor->editorCommandExecuteScreenShot();
-    }
-}
-
-void EditorToolBar::on_btnViewSource_clicked()
-{
-    CWizAnalyzer::GetAnalyzer().LogAction("editorToolBarViewSource");
-    if (m_editor) {
-        m_editor->editorCommandExecuteViewSource();
     }
 }
 

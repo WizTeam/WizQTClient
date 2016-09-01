@@ -101,7 +101,7 @@ public:
     int GetLength() const { return length(); }
     int CompareNoCase(const CString& strOther) const { return compare(strOther, Qt::CaseInsensitive); }
     int Compare(const CString& strOther) const { return compare(strOther, Qt::CaseSensitive); }
-    void Format(const CString& strFormat, ... );
+    void Format(QString strFormat, ... );
     void Empty() { clear(); }
     int Find(char ch) const { return indexOf(ch); }
     int Find(char ch, int start) const { return indexOf(ch, start); }
@@ -215,5 +215,16 @@ private: // noncopyable
 };
 
 typedef std::deque<CString> CWizStdStringArray;
+
+int WizSmartScaleUI(int spec);
+
+struct WizWindowInfo
+{
+    QString processName;
+    QString windowTitle;
+    long pid;
+};
+
+QList<WizWindowInfo> WizGetActiveWindows();
 
 #endif // WIZQTHELPER_H

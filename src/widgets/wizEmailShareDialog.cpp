@@ -97,14 +97,7 @@ bool CWizEmailShareDialog::isInsertCommentToNote() const
 
 QString CWizEmailShareDialog::getCommentsText() const
 {
-#if QT_VERSION > 0x050000
-    return ui->textEdit_notes->toPlainText().toHtmlEscaped();
-#else
-    QString strText = ui->textEdit_notes->toPlainText();
-    strText.replace(_T("<"), _T("&lt;"));
-    strText.replace(_T(">"), _T("&gt;"));
-    return strText;
-#endif
+    return QString::fromUtf8(QUrl::toPercentEncoding(ui->textEdit_notes->toPlainText()));
 }
 
 void CWizEmailShareDialog::on_toolButton_send_clicked()
@@ -126,11 +119,11 @@ QString CWizEmailShareDialog::getExInfo()
 //    note
 //    api_version        4
 
-    QString strToken = WizService::Token::token();
+    QString strToken = Token::token();
     QString cc_to_self = ui->checkBox_sendMeCopy->isChecked() ? "true" : "false";
     QString result = "?kb_guid=" + m_note.strKbGUID + "&document_guid=" + m_note.strGUID + "&token=" + strToken
             + "&mail_to=" + ui->lineEdit_to->text() + "&subject=" + ui->lineEdit_subject->text() + "&cc_to_self=" + cc_to_self
-            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + ui->textEdit_notes->toPlainText()
+            + "&reply_to=" + ui->comboBox_replyTo->currentText() + "&note=" + getCommentsText()
             + "&api_version=4";
 
     return result;
@@ -214,10 +207,10 @@ void CWizEmailShareDialog::sendEmails()
 {
     ui->labelInfo->setText(tr("Sending..."));
 
-    QString strToken = WizService::Token::token();
-    QString strKS = WizService::CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
+    QString strToken = Token::token();
+    QString strKS = CommonApiEntry::kUrlFromGuid(strToken, m_note.strKbGUID);
     QString strExInfo = getExInfo();
-    QString strUrl = WizService::CommonApiEntry::mailShareUrl(strKS, strExInfo);
+    QString strUrl = CommonApiEntry::mailShareUrl(strKS, strExInfo);
     qDebug() << "share url : " << strUrl;
 
     if(!m_net)

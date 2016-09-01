@@ -26,7 +26,7 @@ public:
         {
         case CE_ItemViewItem:
             {
-                const QStyleOptionViewItemV4 *vopt = qstyleoption_cast<const QStyleOptionViewItemV4 *>(option);
+                const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option);
                 Q_ASSERT(vopt);
 
                 if (const QListWidget* view = dynamic_cast<const QListWidget*>(widget))

@@ -6,18 +6,18 @@
 #include <QDebug>
 #include "utils/stylehelper.h"
 #include "share/wizmisc.h"
+#include "share/wizthreads.h"
 #include "widgets/wizLocalProgressWebView.h"
 #include "titlebar.h"
 #include "wizDocumentView.h"
 #include "wizDocumentWebView.h"
 #include "wizmainwindow.h"
 #include "wizEditorToolBar.h"
+#include "wizDocumentWebEngine.h"
 
 #ifdef Q_OS_MAC
 #include "mac/wizmachelper.h"
 #endif
-
-using namespace Core;
 
 QRegion creteRoundMask(const QRectF& rect)
 {
@@ -45,13 +45,6 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     layout->setContentsMargins(0, 0, 0, 0);
 
     applyWidgetBackground(false);
-    //        m_webEngine = new CWizDocumentWebEngine(app, this);
-    //        layout->addWidget(m_webEngine);
-    //        m_edit = new QLineEdit(this);
-    //        layout->addWidget(m_edit);
-    //        connect(m_edit, SIGNAL(returnPressed()), SLOT(on_textInputFinished()));
-    //        WIZDOCUMENTDATA doc;
-    //        m_webEngine->viewDocument(doc, true);
 
     m_containerWgt = new QWidget(this);
     m_containerWgt->setStyleSheet(".QWidget{background-color:#F5F5F5;}");
@@ -68,7 +61,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     m_docView->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
                                      "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
     m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"));
-    m_docView->web()->setInSeperateWindow(true);
+    //m_docView->web()->setInSeperateWindow(true);
     if (WizIsHighPixel())
     {
         m_docView->setMaximumWidth(1095);
@@ -98,6 +91,13 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //#endif
 }
 
+CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
+{
+    emit documentViewerDeleted(m_guid);
+}
+//
+
+
 CWizDocumentView* CWizSingleDocumentViewer::docView()
 {        
     return m_docView;
@@ -121,6 +121,15 @@ void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
     QWidget::resizeEvent(ev);
 
     m_docView->titleBar()->editorToolBar()->adjustButtonPosition();    
+}
+
+void CWizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
+{
+    m_docView->waitForDone();
+    //
+    m_docView->web()->closeAll();
+    //
+    QWidget::closeEvent(ev);
 }
 
 bool CWizSingleDocumentViewer::event(QEvent* ev)
@@ -172,13 +181,6 @@ void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
     }
 }
 
-CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
-{
-    emit documentViewerDeleted(m_guid);
-
-    m_docView->waitForDone();
-}
-
 
 CWizSingleDocumentViewDelegate::CWizSingleDocumentViewDelegate(CWizExplorerApp& app, QObject* parent)
     : QObject(parent)
@@ -205,15 +207,15 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
     }
     else
     {
-        Core::Internal::MainWindow* mainWindow = dynamic_cast<Core::Internal::MainWindow*>(m_app.mainWindow());
+        MainWindow* mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
         CWizSingleDocumentViewer* wgt = new CWizSingleDocumentViewer(m_app, doc.strGUID);
         CWizDocumentView* docView = wgt->docView();
         connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentChanged(QString,CWizDocumentView*)));
         connect(this, SIGNAL(documentChanged(QString,CWizDocumentView*)), docView, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
         connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
                 mainWindow, SLOT(on_shareDocumentByLink_request(QString,QString)));
-        connect(docView->web(), SIGNAL(statusChanged()), mainWindow,
-                SLOT(on_editor_statusChanged()));
+        connect(docView->web(), SIGNAL(statusChanged(const QString&)), mainWindow,
+                SLOT(on_editor_statusChanged(const QString&)));
         connect(wgt, SIGNAL(documentViewerDeleted(QString)), SLOT(onDocumentViewerDeleted(QString)));
         static int nOffset = 0;
         wgt->setGeometry((mainWindow->width() - mainWindow->documentView()->width())  / 2 + nOffset,

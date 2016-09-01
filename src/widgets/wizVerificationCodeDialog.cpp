@@ -105,7 +105,7 @@ CWizVerificationCodeDownloader::CWizVerificationCodeDownloader(QObject* parent)
 void CWizVerificationCodeDownloader::download(const QString& strCaptchaID)
 {
     QNetworkAccessManager m_WebCtrl;
-    QString strUrl = WizService::CommonApiEntry::captchaUrl(strCaptchaID);
+    QString strUrl = CommonApiEntry::captchaUrl(strCaptchaID);
     QNetworkRequest request(strUrl);
     QNetworkReply* reply = m_WebCtrl.get(request);
     CWizAutoTimeOutEventLoop loop(reply);

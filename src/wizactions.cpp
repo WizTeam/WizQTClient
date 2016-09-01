@@ -2,9 +2,11 @@
 #include <QMenuBar>
 #include <QKeySequence>
 #include <QShortcut>
+#include <QWidgetAction>
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 #include "share/wizanimateaction.h"
+#include "widgets/wizTableSelector.h"
 
 struct WIZACTION
 {
@@ -16,7 +18,8 @@ struct WIZACTION
 
 
 CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
-    : m_parent(parent)
+    : QObject(parent)
+    , m_parent(parent)
     , m_app(app)
 {
 }
@@ -71,8 +74,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_GLOBAL_SAVE_AS_PDF,      QObject::tr("Save as PDF..."),             "",      QKeySequence()},
         {WIZACTION_GLOBAL_SAVE_AS_HTML,      QObject::tr("Save as Html..."),          "",      QKeySequence()},
         {WIZACTION_GLOBAL_IMPORT_FILE,      QObject::tr("Import Files..."),          "",      QKeySequence()},
-        {WIZACTION_GLOBAL_PRINT,                    QObject::tr("Print..."),                           "",      QKeySequence("Ctrl+P")},
-        {WIZACTION_GLOBAL_PRINT_MARGIN,      QObject::tr("Print Page Margins..."),   "",     QKeySequence()},
+        {WIZACTION_GLOBAL_PRINT_MARGIN,      QObject::tr("PDF Page Margins..."),   "",     QKeySequence()},
         //{WIZACTION_GLOBAL_VIEW_MESSAGES,    QObject::tr("View messages"),     "",       QKeySequence()},
         {WIZACTION_GLOBAL_GOBACK,                    QObject::tr("Back"),                        "",       QKeySequence()},
         {WIZACTION_GLOBAL_GOFORWARD,                 QObject::tr("Forward"), "",                   QKeySequence()},
@@ -95,20 +97,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_EDITOR_PASTE_PLAIN,      QObject::tr("Paste as Plain Text"), "", QKeySequence("Shift+Ctrl+V")},
         {WIZACTION_EDITOR_DELETE,                QObject::tr("Delete"),    "",          QKeySequence()},
         {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select All"), "",         QKeySequence("Ctrl+A")},
-
-#ifdef USEWEBENGINE
-        {"actionMoveToPageStart",          QObject::tr("Move to page start"),     "",     QKeySequence(QKeySequence::MoveToStartOfDocument)},
-        {"actionMoveToPageEnd",           QObject::tr("Move to page end"),      "",     QKeySequence(QKeySequence::MoveToEndOfDocument)},
-    #ifdef Q_OS_MAC
-        {"actionMoveToLineStart",            QObject::tr("Move to line start"),       "",     QKeySequence(QKeySequence::MoveToStartOfLine)},
-        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToEndOfLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToNextPage)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousLine)},
-//        {"actionMoveToLineEnd",             QObject::tr("Move to line end"),        "",     QKeySequence(QKeySequence::MoveToPreviousPage)},
-
-    #endif
-#endif
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide Sidebar"),   QObject::tr("Show Sidebar"),    QKeySequence("Alt+Ctrl+S")},
@@ -134,7 +122,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZDOCUMENT_SORTBY_ACCESSTIME,                                 QObject::tr("Sort by Access Time"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_TITLE,                                               QObject::tr("Sort by Title"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_FOLDER,                                          QObject::tr("Sort by Folder"),    QObject::tr(""), QKeySequence()},
-        {WIZDOCUMENT_SORTBY_TAG,                                                  QObject::tr("Sort by Tag"),    QObject::tr(""), QKeySequence()},
         {WIZDOCUMENT_SORTBY_SIZE,                                                 QObject::tr("Sort by Size"),    QObject::tr(""), QKeySequence()},
 
         // format
@@ -146,7 +133,6 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_OUTDENT,                      QObject::tr("Outdent"),                   "",           QKeySequence()},
         {WIZACTION_FORMAT_UNORDEREDLIST,         QObject::tr("Convert to Unoredered List"), "", QKeySequence("Ctrl+Alt+U")},
         {WIZACTION_FORMAT_ORDEREDLIST,              QObject::tr("Convert to Ordered List"), "",       QKeySequence("Ctrl+Alt+O")},
-        {WIZACTION_FORMAT_INSERT_TABLE,             QObject::tr("Insert Table"),                "",           QKeySequence()},
         {WIZACTION_FORMAT_INSERT_LINK,                 QObject::tr("Insert Link"),                  "",          QKeySequence("Ctrl+K")},
         {WIZACTION_FORMAT_BOLD,                              QObject::tr("Bold"),                       "",             QKeySequence("Ctrl+B")},
         {WIZACTION_FORMAT_ITALIC,                             QObject::tr("Italic"),                        "",           QKeySequence("Ctrl+I")},
@@ -159,10 +145,7 @@ WIZACTION* CWizActions::actionsData()
         {WIZACTION_FORMAT_INSERT_CODE,              QObject::tr("Insert Code"),               "",           QKeySequence("Shift+Ctrl+C")},
         {WIZACTION_FORMAT_INSERT_IMAGE,             QObject::tr("Insert Image"),            "",           QKeySequence("Shift+Ctrl+I")},
         {WIZACTION_FORMAT_REMOVE_FORMAT,        QObject::tr("Remove Format"),       "",           QKeySequence()},
-        {WIZACTION_FORMAT_PLAINTEXT,                    QObject::tr("Convert to Plain Text"), "",           QKeySequence()},
-        {WIZACTION_FORMAT_VIEW_SOURCE,             QObject::tr("View Html Source..."),  "",           QKeySequence()},
         {WIZACTION_FORMAT_SCREEN_SHOT,             QObject::tr("Screen Shot..."),           "",           QKeySequence()},
-        {"actionDeveloper",                       QObject::tr("Developer Mode"), "", QKeySequence()},
 
 
         {"", "", "", QKeySequence()}
@@ -277,13 +260,31 @@ CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionNa
 
 QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection)
 {
-    QMenu* pMenu = new QMenu(parent);
-    QString strLocalText = QObject::tr(strSection.toUtf8());
+    if (strSection == "Table")
+    {
+        QWidgetAction* tableAction = new QWidgetAction(parent);
+        tableAction->setText(QObject::tr("Table"));
+        WizTableSelectorWidget* tableWidget = new WizTableSelectorWidget(parent);
+        tableAction->setDefaultWidget(tableWidget);
+        //
+        connect(tableWidget, SIGNAL(itemSelected(int,int)), SIGNAL(insertTableSelected(int,int)));
+        //
+        QMenu* menuTable = new QMenu(parent);
+        menuTable->setTitle(tableAction->text());
+        menuTable->addAction(tableAction);
+        //
+        return menuTable;
+    }
+    else
+    {
+        QMenu* pMenu = new QMenu(parent);
+        QString strLocalText = QObject::tr(strSection.toUtf8());
 
-    pMenu->setTitle(strLocalText);
-    buildMenu(pMenu, settings, strSection, false);
+        pMenu->setTitle(strLocalText);
+        buildMenu(pMenu, settings, strSection, false);
 
-    return pMenu;
+        return pMenu;
+    }
 }
 
 void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar)

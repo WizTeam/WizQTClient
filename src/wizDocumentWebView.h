@@ -1,7 +1,7 @@
 #ifndef WIZDOCUMENTWEBVIEW_H
 #define WIZDOCUMENTWEBVIEW_H
 
-#include <QWebView>
+#include <QWebEngineView>
 #include <QTimer>
 #include <QPointer>
 #include <QMutex>
@@ -13,6 +13,7 @@
 //#include "wizdownloadobjectdatadialog.h"
 #include "wizdef.h"
 #include "share/wizobject.h"
+#include "share/wizwebengineview.h"
 
 
 class CWizObjectDownloaderHost;
@@ -26,18 +27,40 @@ class CWizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
-namespace Core {
 class CWizDocumentView;
-} // namespace Core
+
+class CWizWaitEvent
+{
+private:
+    QMutex m_mutex;
+    QWaitCondition m_waitForData;
+public:
+    void wait()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_waitForData.wait(&m_mutex);
+    }
+
+    void wakeAll()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_waitForData.wakeAll();
+    }
+};
 
 
 class CWizDocumentWebViewLoaderThread : public QThread
 {
     Q_OBJECT
+    //
 public:
     CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
 
-    void load(const WIZDOCUMENTDATA& doc);
+    void load(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode);
     //
     void stop();
     //
@@ -46,16 +69,19 @@ public:
 protected:
     virtual void run();
     //
-    void setCurrentDoc(QString kbGuid, QString docGuid);
-    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID);
+    void setCurrentDoc(QString kbGuid, QString docGuid, WizEditorMode editorMode);
+    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, WizEditorMode& editorMode);
 Q_SIGNALS:
-    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName);
+    void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode);
+private:
+    bool isEmpty();
 private:
     CWizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
+    WizEditorMode m_editorMode;
     QMutex m_mutex;
-    QWaitCondition m_waitForData;
+    CWizWaitEvent m_waitEvent;
     bool m_stop;
 };
 
@@ -81,6 +107,9 @@ private:
     };
     //
     std::vector<SAVEDATA> m_arrayData;
+    //
+    bool isEmpty();
+    SAVEDATA peekFirst();
 protected:
     virtual void run();
     //
@@ -91,74 +120,64 @@ Q_SIGNALS:
 private:
     CWizDatabaseManager& m_dbMgr;
     QMutex m_mutex;
-    QWaitCondition m_waitForData;
+    CWizWaitEvent m_waitEvent;
     bool m_stop;
 };
 
-class CWizDocumentWebViewPage: public QWebPage
+class CWizDocumentWebViewPage: public WizWebEnginePage
 {
     Q_OBJECT
 
 public:
-    explicit CWizDocumentWebViewPage(QObject* parent = 0);
-    virtual void triggerAction(QWebPage::WebAction typeAction, bool checked = false);
-    virtual void javaScriptConsoleMessage(const QString& message, int lineNumber, const QString& sourceID);
-
-    void on_editorCommandPaste_triggered();
+    explicit CWizDocumentWebViewPage(CWizDocumentWebView* parent);
+    virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
+    virtual void triggerAction(WebAction action, bool checked = false);
+    virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
 
 Q_SIGNALS:
-    void actionTriggered(QWebPage::WebAction act);
+    void actionTriggered(WebAction act);
+private:
+    CWizDocumentWebView* m_engineView;
 };
 
-class CWizDocumentWebView : public QWebView
+
+class CWizDocumentWebView : public WizWebEngineView
 {
     Q_OBJECT
 
 public:
     CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
     ~CWizDocumentWebView();
-    Core::CWizDocumentView* view();
-    QWebFrame* noteFrame();
+    //
+    CWizDocumentView* view();
+    //
+    void clear();
+    //
+    friend class CWizDocumentWebViewPage;
     //
     void waitForDone();
 
     // view and save
-    void viewDocument(const WIZDOCUMENTDATA& doc, bool editing);
-    void setEditingDocument(bool editing);
-    void saveDocument(const WIZDOCUMENTDATA& data, bool force);
+    void viewDocument(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode);
+    void setEditorMode(WizEditorMode editorMode);
+    void trySaveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
     void reloadNoteData(const WIZDOCUMENTDATA& data);
-    void closeDocument(const WIZDOCUMENTDATA& doc);
 
-    bool isInited() const { return m_bEditorInited; }
-    bool isEditing() const { return m_bEditingMode; }
+    bool isEditing() const { return m_currentEditorMode == modeEditor; }
 
     void setNoteTitleInited(bool inited);
 
     void setInSeperateWindow(bool inSeperateWindow);
     bool isInSeperateWindow() const;
 
-    Q_INVOKABLE QString currentNoteGUID();
-    Q_INVOKABLE QString currentNoteHtml();
-    Q_INVOKABLE QString currentNoteHead();
-    Q_INVOKABLE QString currentBodyStyle();
-    Q_INVOKABLE bool currentIsEditing();
-
-    //only update Html in JS editor, wouldn't refresh WebView display
-    void updateNoteHtml();
-
     // initialize editor style before render, only invoke once.
-    bool resetDefaultCss();
-    Q_INVOKABLE QString getDefaultCssFilePath() const;
-    Q_INVOKABLE QString getWizReaderDependencyFilePath() const;
-    Q_INVOKABLE QString getWizReaderFilePath() const;
-    Q_INVOKABLE QString getMarkdownCssFilePath() const;
-    Q_INVOKABLE QString getWizTemplateJsFile() const;
-    void resetMarkdownCssPath();
+    void replaceDefaultCss(QString& strHtml);
 
     /* editor related */
     void editorResetFont();
     void editorFocus();
-    void setEditorEnable(bool enalbe);
+    void enableEditor(bool enalbe);
+    QString noteResourcesPath();
 
     void setIgnoreActiveWindowEvent(bool igoreEvent);
 
@@ -167,71 +186,74 @@ public:
     // -1: command invalid
     // 0: available
     // 1: executed before
-    int editorCommandQueryCommandState(const QString& strCommand);
-    QString editorCommandQueryCommandValue(const QString& strCommand);
-    bool editorCommandExecuteCommand(const QString& strCommand,
+    void editorCommandQueryCommandState(const QString& strCommand, std::function<void(int state)> callback);
+    void editorCommandQueryCommandValue(const QString& strCommand, std::function<void(const QString& value)> callback);
+    //
+    void editorCommandExecuteCommand(const QString& strCommand,
                                      const QString& arg1 = QString(),
                                      const QString& arg2 = QString(),
                                      const QString& arg3 = QString());
 
-    // UEditor still miss link discover api
-    bool editorCommandQueryLink();
-
     bool editorCommandQueryMobileFileReceiverState();
 
-    bool editorCommandExecuteParagraph(const QString& strType);
-    bool editorCommandExecuteFontFamily(const QString& strFamily);
-    bool editorCommandExecuteFontSize(const QString& strSize);
-    bool editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
+    void editorCommandExecuteParagraph(const QString& strType);
+    void editorCommandExecuteFontFamily(const QString& strFamily);
+    void editorCommandExecuteFontSize(const QString& strSize);
+    void editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize);
 
-    void setPastePlainTextEnable(bool bEnable);
+    void editorCommandExecutePastePlainText();
     //
     void saveAsPDF();
     void saveAsHtml(const QString& strDirPath);
-    void printDocument();
     void shareNoteByEmail();
     void shareNoteByLink();
-    bool findIMGElementAt(QPoint point, QString& strSrc);
     //
-    Q_INVOKABLE bool isContentsChanged();
-    Q_INVOKABLE void setContentsChanged(bool b);
+    void isModified(std::function<void(bool modified)> callback);
+    Q_INVOKABLE void setModified(bool b);
 
     //use undo func provied by editor
     void undo();
     void redo();
 
     //js environment func
-    Q_INVOKABLE QString getSkinResourcePath();
-    Q_INVOKABLE QString getUserAvatarFilePath(int size);
+    Q_INVOKABLE QString getUserGuid();
+    Q_INVOKABLE QString getUserAvatarFilePath();
     Q_INVOKABLE QString getUserAlias();
-    Q_INVOKABLE QString getFormatedDateTime();
     Q_INVOKABLE bool isPersonalDocument();
     Q_INVOKABLE QString getCurrentNoteHtml();
-    Q_INVOKABLE void saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource);
     Q_INVOKABLE bool hasEditPermissionOnCurrentNote();
-    Q_INVOKABLE void setCurrentDocumentType(const QString& strType);
+    Q_INVOKABLE void changeCurrentDocumentType(const QString& strType);
     Q_INVOKABLE bool checkListClickable();
     Q_INVOKABLE bool shouldAddCustomCSS();
     Q_INVOKABLE bool canRenderMarkdown();
     Q_INVOKABLE bool canEditNote();
     Q_INVOKABLE QString getLocalLanguage();
+    Q_INVOKABLE void OnSelectionChange(const QString& currentStyle);
+    Q_INVOKABLE void saveCurrentNote();
 
+    Q_PROPERTY(QString userGuid READ getUserGuid)
+    Q_PROPERTY(QString userAlias READ getUserAlias)
+    Q_PROPERTY(QString userAvatarFilePath READ getUserAvatarFilePath)
+    Q_PROPERTY(bool isPersonalDocument READ isPersonalDocument)
+    Q_PROPERTY(QString canEditNote READ canEditNote)
+    Q_PROPERTY(QString currentNoteHtml READ getCurrentNoteHtml NOTIFY currentHtmlChanged STORED false)
+    Q_PROPERTY(bool hasEditPermissionOnCurrentNote READ hasEditPermissionOnCurrentNote)
     //
-    QNetworkDiskCache* networkCache();    
-
 private:
-    void initEditor();
-    void resetEditor();
-    void viewDocumentInEditor(bool editing);
-    void viewDocumentWithoutEditor();
-    void tryResetTitle();    
+    void loadDocumentInWeb(WizEditorMode editorMode);
+    //
+    void getAllEditorScriptAndStypeFileName(QStringList& arrayFile);
+    void insertScriptAndStyleCore(QString& strHtml, const QStringList& arrayFiles);
+    //
+    void tryResetTitle();
+    bool onPasteCommand();
 
     bool isInternalUrl(const QUrl& url);
     void viewDocumentByUrl(const QString& strUrl);
     void viewAttachmentByUrl(const QString& strKbGUID, const QString& strUrl);
     //
-    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force);
-    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force);    
+    void saveEditingViewDocument(const WIZDOCUMENTDATA& data, bool force, const std::function<void(const QVariant &)> callback);
+    void saveReadingViewDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback);
 
 protected:
     virtual void keyPressEvent(QKeyEvent* event);
@@ -249,19 +271,13 @@ private:
     CWizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
 
-    QWebFrame* m_noteFrame;
-
     QTimer m_timerAutoSave;
-    bool m_bEditorInited;
-    bool m_bEditingMode;
+    WizEditorMode m_currentEditorMode;
     bool m_bNewNote;
     bool m_bNewNoteTitleInited;
     //
-    QString m_strCurrentNoteGUID;
-    QString m_strCurrentNoteHead;
-    QString m_strCurrentNoteHtml;
-    QString m_strCurrentNoteBodyStyle;
-    bool m_bCurrentEditing;
+    QString m_strNoteHtmlFileName;
+    QString m_currentNoteHtml;
     //
     bool m_bContentsChanged;
     //
@@ -270,16 +286,13 @@ private:
     // flag : if current webview is in seperate window, editor background-color will
     //different with webview in mainwindow
     bool m_bInSeperateWindow;
-    QString m_strDefaultCssFilePath;
-    QString m_strMarkdownCssFilePath;
 
     int m_nWindowID;
 
     CWizDocumentWebViewLoaderThread* m_docLoadThread;
     CWizDocumentWebViewSaverThread* m_docSaverThread;
-
+    //
     QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
-    QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
 
     CWizSearchReplaceWidget* m_searchReplaceWidget;
 
@@ -287,23 +300,19 @@ public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback
 
 public Q_SLOTS:
-    void onActionTriggered(QWebPage::WebAction act);
+    void onActionTriggered(QWebEnginePage::WebAction act);
 
-    void onEditorPopulateJavaScriptWindowObject();
     void onEditorLoadFinished(bool ok);
-    void onEditorLinkClicked(const QUrl& url);
-    void onEditorContentChanged();
-    void onEditorSelectionChanged();
+    void onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page);
 
     void onTimerAutoSaveTimout();
 
     void onTitleEdited(QString strTitle);
 
-    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName);
+    void onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode);
     void onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok);
 
     void on_editorCommandExecuteLinkInsert_accepted();
-    void on_editorCommandExecuteTableInsert_accepted();
 
     void applySearchKeywordHighlight();
     void clearSearchKeywordHighlight();
@@ -315,16 +324,16 @@ public Q_SLOTS:
     // font
     void editorCommandExecuteBackColor(const QColor& color);
     void editorCommandExecuteForeColor(const QColor& color);
-    bool editorCommandExecuteBold();
-    bool editorCommandExecuteItalic();
-    bool editorCommandExecuteUnderLine();
-    bool editorCommandExecuteStrikeThrough();
+    void editorCommandExecuteBold();
+    void editorCommandExecuteItalic();
+    void editorCommandExecuteUnderLine();
+    void editorCommandExecuteStrikeThrough();
 
-    bool editorCommandExecuteLinkInsert();
-    bool editorCommandExecuteLinkRemove();
+    void editorCommandExecuteLinkInsert();
+    void editorCommandExecuteLinkRemove();
 
     // search and repalce
-    bool editorCommandExecuteFindReplace();
+    void editorCommandExecuteFindReplace();
     void findPre(QString strTxt, bool bCasesensitive);
     void findNext(QString strTxt, bool bCasesensitive);
     void replaceCurrent(QString strSource, QString strTarget);
@@ -332,83 +341,41 @@ public Q_SLOTS:
     void replaceAll(QString strSource, QString strTarget, bool bCasesensitive);
 
     // format
-    bool editorCommandExecuteIndent();
-    bool editorCommandExecuteOutdent();
+    void editorCommandExecuteIndent();
+    void editorCommandExecuteOutdent();
 
-    bool editorCommandExecuteJustifyLeft();
-    bool editorCommandExecuteJustifyRight();
-    bool editorCommandExecuteJustifyCenter();
-    bool editorCommandExecuteJustifyJustify();
+    void editorCommandExecuteJustifyLeft();
+    void editorCommandExecuteJustifyRight();
+    void editorCommandExecuteJustifyCenter();
+    void editorCommandExecuteJustifyJustify();
 
-    bool editorCommandExecuteInsertOrderedList();
-    bool editorCommandExecuteInsertUnorderedList();
-
-    // table
-    bool editorCommandExecuteTableInsert();
-    bool editorCommandExecuteTableDelete();
-    bool editorCommandExecuteTableDeleteRow();
-    bool editorCommandExecuteTableDeleteCol();
-    bool editorCommandExecuteTableInsertRow();
-    bool editorCommandExecuteTableInsertRowNext();
-    bool editorCommandExecuteTableInsertCol();
-    bool editorCommandExecuteTableInsertColNext();
-    bool editorCommandExecuteTableInsertCaption();
-    bool editorCommandExecuteTableDeleteCaption();
-    bool editorCommandExecuteTableInsertTitle();
-    bool editorCommandExecuteTableDeleteTitle();
-    bool editorCommandExecuteTableMergeCells();
-    bool editorCommandExecuteTalbeMergeRight();
-    bool editorCommandExecuteTableMergeDown();
-    bool editorCommandExecuteTableSplitCells();
-    bool editorCommandExecuteTableSplitRows();
-    bool editorCommandExecuteTableSplitCols();
-    bool editorCommandExecuteTableAverageRows();
-    bool editorCommandExecuteTableAverageCols();
-    bool editorCommandExecuteTableCellAlignLeftTop();
-    bool editorCommandExecuteTableCellAlignTop();
-    bool editorCommandExecuteTableCellAlignRightTop();
-    bool editorCommandExecuteTableCellAlignLeft();
-    bool editorCommandExecuteTableCellAlignCenter();
-    bool editorCommandExecuteTableCellAlignRight();
-    bool editorCommandExecuteTableCellAlignLeftBottom();
-    bool editorCommandExecuteTableCellAlignBottom();
-    bool editorCommandExecuteTableCellAlignRightBottom();
+    void editorCommandExecuteInsertOrderedList();
+    void editorCommandExecuteInsertUnorderedList();
+    //
+    void editorCommandExecuteTableInsert(int row, int col);
 
     // fast operation
-    bool editorCommandExecuteInsertDate();
-    bool editorCommandExecuteInsertTime();
-    bool editorCommandExecuteRemoveFormat();
-    bool editorCommandExecutePlainText();
-    bool editorCommandExecuteFormatMatch();
-    bool editorCommandExecuteInsertHorizontal();
-    bool editorCommandExecuteInsertCheckList();
-    bool editorCommandExecuteInsertImage();
-    bool editorCommandExecuteViewSource();
-    bool editorCommandExecuteInsertCode();
-    bool editorCommandExecuteMobileImage(bool bReceiveImage);
-    bool editorCommandExecuteScreenShot();
+    void editorCommandExecuteInsertDate();
+    void editorCommandExecuteInsertTime();
+    void editorCommandExecuteRemoveFormat();
+    void editorCommandExecuteFormatMatch();
+    void editorCommandExecuteInsertHorizontal();
+    void editorCommandExecuteInsertCheckList();
+    void editorCommandExecuteInsertImage();
+    void editorCommandExecuteInsertCode();
+    void editorCommandExecuteMobileImage(bool bReceiveImage);
+    void editorCommandExecuteScreenShot();
     void on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix);
     void on_editorCommandExecuteScreenShot_finished();
 
-#ifdef Q_OS_MAC
-    bool editorCommandExecuteRemoveStartOfLine();
-#endif
-
-    // js func
-    void resetCheckListEnvironment();
-    void initCheckListEnvironment();
-
 Q_SIGNALS:
     // signals for notify command reflect status, triggered when selection, focus, editing mode changed
-    void statusChanged();
+    void statusChanged(const QString& currentStyle);
     void selectAllKeyPressed();
     // signals used request reset info toolbar and editor toolbar
     void focusIn();
     void focusOut();
     //
-    void contentsChanged();
-
-
     void showContextMenuRequest(const QPoint& pos);
     void updateEditorToolBarRequest();
     //
@@ -418,21 +385,26 @@ Q_SIGNALS:
 
     // signal connect to checklist in javascript
     void clickingTodoCallBack(bool cancel, bool needCallAgain);
+    //
+    void currentHtmlChanged();
 
 private slots:
     void on_insertCommentToNote_request(const QString& docGUID, const QString& comment);
 
 private:
     void setWindowVisibleOnScreenShot(bool bVisible);
-    bool insertImage(const QString& strFileName, bool bCopyFile);
-    void closeSourceMode();
+    void insertImage(const QString& strFileName);
     void addAttachmentThumbnail(const QString strFile, const QString& strGuid);
     void openVipPageInWebBrowser();
+    QString getNoteType();
 
-    QString getMailSender();
+    void getMailSender(std::function<void(QString)> callback);
 
+    //
+    void innerFindText(QString text, bool next, bool matchCase);
     //
 //    bool shouldAddUserDefaultCSS();
 };
+
 
 #endif // WIZDOCUMENTWEBVIEW_H

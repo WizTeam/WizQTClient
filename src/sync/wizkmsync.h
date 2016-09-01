@@ -2,6 +2,7 @@
 #define WIZKMSYNC_H
 
 #include <QThread>
+#include <QMessageBox>
 
 #include "sync.h"
 #include "wizKMServer.h"
@@ -57,6 +58,9 @@ public:
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe
+    static bool isBusy();
+    static void waitUntilIdleAndPause();
+    static void setPause(bool pause);
 
 signals:
     void startTimer(int interval);
@@ -71,7 +75,6 @@ private slots:
 
 private:
     bool m_bBackground;
-    QThread* m_worker;
     CWizDatabase& m_db;
     WIZUSERINFO m_info;
     CWizKMSyncEvents* m_pEvents;
@@ -79,6 +82,8 @@ private:
     bool m_bNeedDownloadMessages;
     QDateTime m_tLastSyncAll;
     int m_nFullSyncSecondsInterval;
+    bool m_bBusy;
+    bool m_bPause;
 
     //
     QMutex m_mutex;
@@ -110,5 +115,32 @@ Q_SIGNALS:
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
 };
+
+class CWizKMWaitAndPauseSyncHelper
+{
+public:
+    CWizKMWaitAndPauseSyncHelper()
+    {
+        CWizKMSyncThread::waitUntilIdleAndPause();
+    }
+    ~CWizKMWaitAndPauseSyncHelper()
+    {
+        CWizKMSyncThread::setPause(false);
+    }
+};
+
+#define WIZKM_WAIT_AND_PAUSE_SYNC() \
+    CWizKMWaitAndPauseSyncHelper __waitHelper;\
+    Q_UNUSED(__waitHelper)
+
+#define WIZKM_CHECK_SYNCING(parent) \
+    if (CWizKMSyncThread::isBusy()) \
+    {   \
+        QString title = QObject::tr("Syncing"); \
+        QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \
+        QMessageBox::information(parent, title, message);\
+        return;    \
+    }
+
 
 #endif // WIZKMSYNC_H

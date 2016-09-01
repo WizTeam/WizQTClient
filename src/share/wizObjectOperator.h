@@ -20,7 +20,7 @@ public:
     void copyDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                      bool keepDocTime, bool showProgressDialog = true);
     void moveDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
-                                      bool showProgressDialog = true);
+                                      bool waitForSync);
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag,
                                       bool showProgressDialog = true);
     //
@@ -39,7 +39,6 @@ public:
                                          bool showProgressDialog = true);
     void moveGroupFolderToGroupDB(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                       bool showProgressDialog = true);
-    void movePersonalFolderToPersonalDB(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
     void movePersonalFolderToGroupDB(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolders,
                                          bool showProgressDialog = true);
 

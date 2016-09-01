@@ -9,12 +9,9 @@
 #include <QFontMetrics>
 #include <QPropertyAnimation>
 
-#include <extensionsystem/pluginmanager.h>
-
 #include "utils/stylehelper.h"
 #include "share/wizmisc.h"
 
-using namespace Core::Internal;
 
 CellButton::CellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)
@@ -287,3 +284,6 @@ void RoundCellButton::applyAnimation()
 
     m_animation->start();
 }
+
+
+

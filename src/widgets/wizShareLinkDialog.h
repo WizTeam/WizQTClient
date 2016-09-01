@@ -2,11 +2,16 @@
 #define CWIZSHARELINKDIALOG_H
 
 #include <QDialog>
-#include <QWebView>
+#include <QtWebEngine>
 #include <QPropertyAnimation>
 #include "share/wizobject.h"
+#include <QWebEngineView>
+
+
 
 class CWizUserSettings;
+class WizWebEngineView;
+
 class CWizShareLinkDialog : public QDialog
 {
     Q_OBJECT
@@ -33,22 +38,32 @@ public:
     Q_INVOKABLE QString getShareLinkFirstTips();
     Q_INVOKABLE void setShareLinkFirstTips(const QString& value);
     Q_INVOKABLE QString getLocalLanguage();
-    Q_INVOKABLE QString formateISO8601String(const QString& value);
+    Q_INVOKABLE void setFormateISO8601StringParam(const QString& param);
+    Q_INVOKABLE QString formateISO8601String();
+
+    Q_PROPERTY(QString kbGuid READ getKbGuid)
+    Q_PROPERTY(QString documentGuid READ getGuid)
+    Q_PROPERTY(QString title READ getTitle)
+    Q_PROPERTY(QString shareLinkFirstTips READ getShareLinkFirstTips WRITE setShareLinkFirstTips)
+    Q_PROPERTY(QString localLanguage READ getLocalLanguage)
+
+    Q_PROPERTY(QString formateISO8601StringParam WRITE setFormateISO8601StringParam)
+    Q_PROPERTY(QString formateISO8601StringResult READ formateISO8601String NOTIFY formateISO8601StringChanged)
 
 public slots:
     void loadHtml();
 
-    void onJavaScriptWindowObject();
-
 
 signals:
     void tokenObtained();
+    void formateISO8601StringChanged();
 
 private:
     CWizUserSettings& m_settings;
-    QWebView* m_view;
+    WizWebEngineView* m_view;
     WIZDOCUMENTDATA m_doc;
     QPropertyAnimation* m_animation;
+    QString m_formateISO8601StringParam;
 };
 
 #endif // CWIZSHARELINKDIALOG_H

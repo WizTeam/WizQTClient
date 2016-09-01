@@ -11,7 +11,7 @@
 // refer to mac/wizSearchWidget.mm for osx NSSearchField
 
 #ifdef USECOCOATOOLBAR
-class CWizSearchWidget;
+class CWizSearchView;
 
 #else
 
@@ -42,12 +42,12 @@ private:
     QMenu* m_menu;
 };
 
-class CWizSearchWidget : public QWidget
+class CWizSearchView : public QWidget
 {
     Q_OBJECT
 
 public:
-    CWizSearchWidget(QWidget* parent = 0);
+    CWizSearchView(QWidget* parent = 0);
     void clear();
     void focus();
 

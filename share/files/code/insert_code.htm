@@ -9,7 +9,7 @@
         }
         body
         {
-            font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, ËÎÌå, serif, PMingLiU;
+            font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, å®‹ä½“, serif, PMingLiU;
             color: black;
             background-color: #fff;
             font-size: 9pt;
@@ -19,10 +19,10 @@
         }
         .button {
             width: 70px;
-            font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, ËÎÌå, serif, PMingLiU;
+            font-family: "Microsoft YaHei", Georgia, Helvetica, Arial, sans-serif, å®‹ä½“, serif, PMingLiU;
         }
     </style>
-    <script type="text/javascript" charset="utf-8" src="../markdown/google-code-prettify/prettify.js" ></script>
+    <script type="text/javascript" charset="utf-8" src="google-code-prettify/prettify.js" ></script>
     <link  rel="stylesheet" type="text/css" href="wiz_code_highlight.css" />
 </head>
 <body>
@@ -76,20 +76,25 @@
         </table>
         <div id="divResult"></div>
     <script language="javascript">
-        
-        var objApp = codeEditor;
-        // var pluginPath = objApp.GetHtmlDocumentPath(document);
-        // var languageFileName = pluginPath + "insert_code.ini";
-        // //
-        // objApp.LocalizeHtmlDocument(languageFileName, document);
-        /*
-        //
-        var objTools = objApp.CreateCommonTools();
-        var settingsPath = objApp.SettingsPath;
-        var settingsFileName = settingsPath + "plugin_settings.ini";
-        //
-        //var strRemoveColor = objTools.GetValueFromIni(settingsFileName, "RemoveFormat", "RemoveColor");
-        */
+
+        function initForWebEngine()
+        {
+            window.objApp = codeEditor;
+            //
+            (function init() {
+                textSource.focus();
+                //
+                var text = getSelectText();
+                if (text) {
+                    textSource.value = text;
+                    highlightCode();
+                }
+                //
+                initLanguage();
+                //
+            })();
+        }
+
         //
         function highlightCode() {
             var source = textSource.value;
@@ -290,17 +295,7 @@
                 }
             }
         }
-        (function init() {
-            textSource.focus();
-            //
-            var text = getSelectText();
-            if (text) {
-                textSource.value = text;
-                highlightCode();
-            }
-            //
-            initLanguage();
-        })();
+
 
     </script>
 

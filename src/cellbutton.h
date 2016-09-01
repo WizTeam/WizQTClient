@@ -9,10 +9,6 @@ class QPaintEvent;
 class QString;
 class QPropertyAnimation;
 
-namespace Core {
-namespace Internal {
-
-
 class CellButton : public QToolButton
 {
     Q_OBJECT
@@ -89,8 +85,5 @@ protected:
     QPropertyAnimation* m_animation;
 };
 
-
-}
-} // namespace Core
 
 #endif // CORE_CELLBUTTON_H

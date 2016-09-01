@@ -220,4 +220,9 @@ protected:
 };
 
 
+void WizHtmlRemoveStyle(QString& strHtml, const QString& styleId);
+void WizHtmlInsertStyle(QString& strHtml, const QString& styleId, const QString& strCssText);
+void WizHtmlInsertHtmlBeforeAllBodyChildren(QString& strHtml, const QString& strHtmlPart);
+
+
 #endif	// !__WIZHTMLREADER_H__

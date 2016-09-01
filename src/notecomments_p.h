@@ -8,12 +8,7 @@ class QString;
 
 struct WIZDOCUMENTDATA;
 
-namespace Core {
 class CWizDocumentView;
-}
-
-namespace WizService {
-namespace Internal {
 
 class NoteCommentsPrivate : public QObject
 {
@@ -24,19 +19,17 @@ public:
     ~NoteCommentsPrivate();
 
 private:
-    QMap<Core::CWizDocumentView*, WIZDOCUMENTDATA> m_map;
+    QMap<CWizDocumentView*, WIZDOCUMENTDATA> m_map;
 
     void loadComments(const QString& strToken);
 
 public Q_SLOTS:
     void onTokenAcquired(const QString& strToken);
-    void onViewNoteLoaded(Core::CWizDocumentView* view, const WIZDOCUMENTDATA& note);
+    void onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note);
     void onCommentsButtonClicked();
 
 };
 
-} // namespace Internal
-} // namespace WizService
 
 
 #endif // WIZSERVICE_NOTECOMMENTS_P_H
