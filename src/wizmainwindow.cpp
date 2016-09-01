@@ -1086,7 +1086,8 @@ void MainWindow::createNoteByTemplateCore(const TemplateData& tmplData)
     }
     //
     CWizNoteManager noteManager(m_dbMgr);
-    noteManager.createNoteByTemplate(data, currTag, tmplData.strFileName);
+    if (!noteManager.createNoteByTemplate(data, currTag, tmplData.strFileName))
+        return;
     //
     setFocusForNewNote(data);
     //

@@ -28,6 +28,8 @@
 #include "wizusercipherform.h"
 #include "wizDatabaseManager.h"
 #include "wizLineInputDialog.h"
+#include "initbizcertdialog.h"
+#include "wizenc.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 
@@ -2105,6 +2107,7 @@ bool CWizDatabase::GetGroupData(const QString& groupGUID, WIZGROUPDATA& group)
     group.nUserGroup = GetMetaDef(g_strGroupSection, groupGUID + "_Role", QString::number(WIZ_USERGROUP_MAX)).toInt();
     group.strDatabaseServer = GetMetaDef(g_strGroupSection, group.strGroupGUID + "_DatabaseServer");
     group.strMyWiz = GetMetaDef(g_strGroupSection, group.strGroupGUID + "_MyWizEmail");
+    group.bEncryptData = GetMetaDef(g_strGroupSection, groupGUID + "_EncryptData") == "1";
     //
     if (group.bizGUID.isEmpty())
     {
@@ -2170,6 +2173,7 @@ bool CWizDatabase::SetAllGroupInfoCore(const CWizGroupDataArray& arrayGroup)
         SetMeta(g_strGroupSection, group.strGroupGUID + "_Role", QString::number(group.nUserGroup));
         SetMeta(g_strGroupSection, group.strGroupGUID + "_DatabaseServer", group.strDatabaseServer);
         SetMeta(g_strGroupSection, group.strGroupGUID + "_MyWizEmail", group.strMyWiz);
+        SetMeta(g_strGroupSection, group.strGroupGUID + "_EncryptData", group.bEncryptData ? "1" : "0");
     }
 
     return true;
@@ -2348,6 +2352,7 @@ bool CWizDatabase::LoadDatabaseInfo()
     m_info.name = GetMetaDef(g_strDatabaseInfoSection, "Name");
     m_info.nPermission = GetMetaDef(g_strDatabaseInfoSection, "Permission").toInt();
     m_info.bOwner = GetMetaDef(g_strDatabaseInfoSection, "Owner") == "1";
+    m_info.bEncryptData = GetMetaDef(g_strDatabaseInfoSection, "EncryptData") == "1";
 
     return true;
 }
@@ -2365,6 +2370,8 @@ bool CWizDatabase::InitDatabaseInfo(const WIZDATABASEINFO& dbInfo)
     if (!SetMeta(g_strDatabaseInfoSection, "Permission", QString::number(dbInfo.nPermission)))
         nErrors++;
     if (!SetMeta(g_strDatabaseInfoSection, "Owner", dbInfo.bOwner ? "1" : "0"))
+        nErrors++;
+    if (!SetMeta(g_strDatabaseInfoSection, "EncryptData", dbInfo.bEncryptData ? "1" : "0"))
         nErrors++;
 
     // biz group info
@@ -2446,6 +2453,9 @@ bool CWizDatabase::SetDatabaseInfo(const WIZDATABASEINFO& dbInfo)
         nErrors++;
 
     if (!SetMeta(g_strDatabaseInfoSection, "Version", WIZ_DATABASE_VERSION))
+        nErrors++;
+    //
+    if (!SetMeta(g_strDatabaseInfoSection, "EncryptData", dbInfo.bEncryptData ? "1" : "0"))
         nErrors++;
 
     if (nErrors)
@@ -2701,10 +2711,24 @@ bool CWizDatabase::SetPasswordFalgs(UINT nFlags)
 
 bool CWizDatabase::GetUserCert(QString& strN, QString& stre, QString& strd, QString& strHint)
 {
-    strN = GetMetaDef(g_strCertSection, "N");
-    stre = GetMetaDef(g_strCertSection, "E");
-    strd = GetMetaDef(g_strCertSection, "D");
-    strHint = GetMetaDef(g_strCertSection, "Hint");
+    if (IsGroup())
+    {
+        Q_ASSERT(!m_info.bizGUID.isEmpty());
+        //
+        CWizDatabase* pDatabase = getPersonalDatabase();
+        QString key = QString(g_strCertSection) + "/" + m_info.bizGUID;
+        strN = pDatabase->GetMetaDef(key, "N");
+        stre = pDatabase->GetMetaDef(key, "E");
+        strd = pDatabase->GetMetaDef(key, "D");
+        strHint = pDatabase->GetMetaDef(key, "Hint");
+    }
+    else
+    {
+        strN = GetMetaDef(g_strCertSection, "N");
+        stre = GetMetaDef(g_strCertSection, "E");
+        strd = GetMetaDef(g_strCertSection, "D");
+        strHint = GetMetaDef(g_strCertSection, "Hint");
+    }
 
     if (strN.isEmpty() || stre.isEmpty() || strd.isEmpty())
         return false;
@@ -2714,10 +2738,24 @@ bool CWizDatabase::GetUserCert(QString& strN, QString& stre, QString& strd, QStr
 
 bool CWizDatabase::SetUserCert(const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
-    return SetMeta(g_strCertSection, "N", strN) \
-            && SetMeta(g_strCertSection, "E", stre) \
-            && SetMeta(g_strCertSection, "D", strd) \
-            && SetMeta(g_strCertSection, "Hint", strHint);
+    if (IsGroup())
+    {
+        Q_ASSERT(!m_info.bizGUID.isEmpty());
+        //
+        CWizDatabase* pDatabase = getPersonalDatabase();
+        QString key = QString(g_strCertSection) + "/" + m_info.bizGUID;
+        return pDatabase->SetMeta(key, "N", strN) \
+                && pDatabase->SetMeta(key, "E", stre) \
+                && pDatabase->SetMeta(key, "D", strd) \
+                && pDatabase->SetMeta(key, "Hint", strHint);
+    }
+    else
+    {
+        return SetMeta(g_strCertSection, "N", strN) \
+                && SetMeta(g_strCertSection, "E", stre) \
+                && SetMeta(g_strCertSection, "D", strd) \
+                && SetMeta(g_strCertSection, "Hint", strHint);
+    }
 }
 
 bool CWizDatabase::GetUserInfo(WIZUSERINFO& userInfo)
@@ -3466,6 +3504,12 @@ QString CWizDatabase::GetDocumentLocation(const WIZDOCUMENTDATA& doc)
     return QString();
 }
 
+
+bool CWizDatabase::InitCert()
+{
+    return QueryCertPassword();
+}
+
 bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                                          const CString& strHtmlUrl, \
                                          int nFlags, \
@@ -3475,6 +3519,13 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
                                          const CString& strURL, \
                                          WIZDOCUMENTDATA& data)
 {
+    bool encrypt = IsEncryptAllData();
+    if (encrypt)
+    {
+        if (!InitCert())
+            return false;
+    }
+    //
     bool bRet = false;
     try
     {
@@ -3503,6 +3554,13 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
 bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const QByteArray& baData,
                                          const QString& strLocation, const WIZTAGDATA& tag, WIZDOCUMENTDATA& newDoc)
 {
+    bool encrypt = IsEncryptAllData();
+    if (encrypt)
+    {
+        if (!InitCert())
+            return false;
+    }
+    //
     bool bRet = false;
     try
     {
@@ -3926,6 +3984,111 @@ bool CWizDatabase::loadUserCert()
 
     m_ziwReader->setRSAKeys(strN.toUtf8(), stre.toUtf8(), strEncryptedd.toUtf8(), strHint);
     return true;
+}
+
+bool CWizDatabase::IsEncryptAllData()
+{
+    if (IsGroup())
+        return m_info.bEncryptData;
+    //
+    return false;
+}
+
+bool CWizDatabase::InitBizCert()
+{
+    InitBizCertDialog dlg;
+    if (dlg.exec() == QDialog::Accepted)
+        return true;
+    //
+    return false;
+}
+
+class WizUserCertPassword
+{
+private:
+    WizUserCertPassword() : m_mutex(QMutex::Recursive){}
+public:
+    static WizUserCertPassword& Instance()
+    {
+        static WizUserCertPassword passwords;
+        return passwords;
+    }
+private:
+    std::map<QString, QString> m_passwords;
+    QMutex m_mutex;
+public:
+    void SetPassword(const QString& strBizGUID, const QString& strPassword)
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_passwords[strBizGUID] = strPassword;
+    }
+    QString GetPassword(const QString& strBizGUID)
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        return m_passwords[strBizGUID];
+    }
+    void Clear()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_passwords.clear();
+    }
+};
+
+QString CWizDatabase::GetCertPassword()
+{
+    QString password = WizUserCertPassword::Instance().GetPassword(m_info.bizGUID);
+    return password;
+}
+
+
+bool CWizDatabase::QueryCertPassword()
+{
+    QString password = GetCertPassword();
+    if (!password.isEmpty())
+        return true;
+    //
+    QString n;
+    QString e;
+    QString hint;
+    QString encrypted_d;
+    GetUserCert(n, e, encrypted_d, hint);
+    //
+    QString description;
+    if (IsGroup())
+    {
+        QString bizName = m_info.bizName;
+        description = QObject::tr("Please enter the password of team cert: %1\nPassword hint: %2").arg(bizName).arg(hint);
+    }
+    else
+    {
+        description = QObject::tr("Please enter the password of cert:\nPassword hint: %1").arg(hint);
+    }
+    //
+    CWizLineInputDialog dlg(QObject::tr("Cert Password"), description);
+    dlg.setOKHandler([&](QString password) {
+        //
+        QByteArray d;
+        //
+        if (WizAESDecryptToString((const unsigned char *)(password.toUtf8().constData()), encrypted_d.toUtf8(), d)
+                && d.length() > 0)
+        {
+            WizUserCertPassword::Instance().SetPassword(m_info.bizGUID, password);
+            return true;
+        }
+        //
+        return false;
+    });
+    //
+    if (dlg.exec() == QDialog::Accepted)
+        return true;
+    //
+    return false;
 }
 
 bool CWizDatabase::DocumentToTempHtmlFile(const WIZDOCUMENTDATA& document,

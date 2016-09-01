@@ -33,9 +33,12 @@ struct WIZDATABASEINFO
     //
     bool bOwner;
     //
+    bool bEncryptData;
+    //
     WIZDATABASEINFO()
         : nPermission(WIZ_USERGROUP_MAX)
         , bOwner(false)
+        , bEncryptData(false)
     {
     }
 };
@@ -561,6 +564,8 @@ struct WIZGROUPDATA
     QString strUserName;
     //
     bool bOwn;
+    //
+    bool bEncryptData;
 };
 
 

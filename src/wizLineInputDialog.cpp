@@ -48,3 +48,14 @@ void CWizLineInputDialog::setOKButtonEnable(bool enable)
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enable);
 }
+void CWizLineInputDialog::accept()
+{
+    if (m_okHandler)
+    {
+        if (!m_okHandler(ui->editInput->text()))
+            return;
+    }
+    //
+    QDialog::accept();
+}
+

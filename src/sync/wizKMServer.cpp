@@ -2,6 +2,8 @@
 #include "apientry.h"
 #include "token.h"
 #include "rapidjson/document.h"
+#include "rapidjson/writer.h"
+#include "rapidjson/stringbuffer.h"
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
@@ -146,6 +148,84 @@ BOOL CWizKMAccountsServer::GetCert(const QString& strUserName, const QString& st
 BOOL CWizKMAccountsServer::SetCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
     return accounts_setCert(strUserName, strPassword, strN, stre, strd, strHint);
+}
+
+bool CWizKMAccountsServer::GetAdminBizCert(const QString& strToken, const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
+{
+    CWizKMBaseParam param;
+    param.AddString(_T("token"), strToken);
+    param.AddString(_T("biz_guid"), strBizGuid);
+    //
+    if (!Call(_T("accounts.getBizCert"), _T("n"), strN, _T("e"), stre, _T("d"), strd, _T("hint"), strHint, &param))
+    {
+        TOLOG(_T("Failed to get biz cert!"));
+        return false;
+    }
+    //
+    return true;
+}
+
+inline void AddJsonMemeber(rapidjson::Document& doc, rapidjson::Document::AllocatorType& allocator, const QString& name, const QString& str)
+{
+    QByteArray baName = name.toUtf8();
+    rapidjson::Value valueName(baName.constData(), baName.size());
+    //
+    QByteArray baValue = str.toUtf8();
+    rapidjson::Value value(baValue.constData(), baValue.size());
+    doc.AddMember(valueName, value, allocator);
+}
+
+bool CWizKMAccountsServer::SetUserBizCert(const QString& strBizGuid, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+{
+    rapidjson::Document doc;
+    doc.SetObject();
+    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+    //
+    AddJsonMemeber(doc, allocator, "n", strN);
+    AddJsonMemeber(doc, allocator, "e", stre);
+    AddJsonMemeber(doc, allocator, "d", strd);
+    AddJsonMemeber(doc, allocator, "hint", strHint);
+    //
+    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
+    rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
+
+    doc.Accept(writer);
+
+    QByteArray ba = buffer.GetString();
+    //
+    QString json = QString::fromUtf8(ba);
+    //
+    QString key = WizFormatString1(_T("BizCert/%1"), strBizGuid);
+    //
+    __int64 version = -1;
+    return SetValue(key, json, version);
+}
+
+bool CWizKMAccountsServer::GetUserBizCert(const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
+{
+    QString key = WizFormatString1(_T("BizCert/%1"),strBizGuid);
+    QString json;
+    __int64 version = -1;
+    if (!GetValue(key, json, version))
+        return false;
+    if (version == -1)
+        return false;
+    //
+    rapidjson::Document d;
+    d.Parse<0>(json.toUtf8().constData());
+    //
+    try {
+        strN = QString::fromUtf8(d.FindMember("n")->value.GetString());
+        stre = QString::fromUtf8(d.FindMember("e")->value.GetString());
+        strd = QString::fromUtf8(d.FindMember("d")->value.GetString());
+        strHint = QString::fromUtf8(d.FindMember("hint")->value.GetString());
+    }
+    catch (...) {
+        return false;
+    }
+
+    //
+    return true;
 }
 
 /*

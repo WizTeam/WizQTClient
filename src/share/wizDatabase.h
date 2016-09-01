@@ -486,7 +486,13 @@ public:
     void setUserCipher(const QString& cipher) { m_ziwReader->setUserCipher(cipher); }
     QString userCipherHint() { return m_ziwReader->userCipherHint(); }
     void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
-
+    //
+    bool InitCert();
+    //
+    bool IsEncryptAllData();
+    bool InitBizCert();
+    bool QueryCertPassword();
+    QString GetCertPassword();
     //
     bool tryAccessDocument(const WIZDOCUMENTDATA &doc);
 

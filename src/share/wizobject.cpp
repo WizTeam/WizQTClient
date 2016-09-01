@@ -581,6 +581,7 @@ WIZDOCUMENTATTACHMENTDATAEX& WIZDOCUMENTATTACHMENTDATAEX::operator= (const WIZDO
 /* ------------------------------ WIZGROUPDATA ------------------------------ */
 WIZGROUPDATA::WIZGROUPDATA()
     : nUserGroup(WIZ_USERGROUP_MAX)
+    , bEncryptData(false)
 {
 }
 
@@ -605,6 +606,7 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
     , nUserGroup(data.nUserGroup)
     , strUserName(data.strUserName)
     , bOwn(data.bOwn)
+    , bEncryptData(data.bEncryptData)
 {
 }
 
@@ -637,6 +639,11 @@ bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
     data.GetString("is_kb_owner", owner);
     owner = owner.toLower();
     bOwn = (owner == "1" || owner == "true");
+    //
+    QString encryptData;
+    data.GetString(("is_encrypt"), encryptData);
+    encryptData = encryptData.toLower();
+    bEncryptData = (encryptData == "1" || encryptData == "true");
 
     return !strGroupName.isEmpty()
             && !strGroupGUID.isEmpty()

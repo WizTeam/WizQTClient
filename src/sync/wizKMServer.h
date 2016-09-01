@@ -52,12 +52,18 @@ public:
     bool GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
     bool SetMessageReadStatus(const QString& strMessageIDs, int nStatus);
 
+    bool GetAdminBizCert(const QString& strToken, const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool SetUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    bool GetUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
+
     //
     bool SetMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
 
     bool GetValueVersion(const QString& strKey, __int64& nVersion);
     bool GetValue(const QString& strKey, QString& strValue, __int64& nVersion);
     bool SetValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    //
+
 
 public:
     bool GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
@@ -93,7 +99,7 @@ private:
 
 
 
-#define WIZKM_WEBAPI_VERSION		5
+#define WIZKM_WEBAPI_VERSION		9
 
 struct CWizKMBaseParam: public CWizXmlRpcStructValue
 {

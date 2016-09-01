@@ -199,6 +199,7 @@ set(wiznote_SOURCES
     share/wizthreads.cpp
     wizPositionDelegate.cpp
     main.cpp
+    initbizcertdialog.cpp
 )
 
 set(wiznote_HEADERS
@@ -378,6 +379,7 @@ set(wiznote_HEADERS
     core/wizNoteManager.h
     share/wizthreads.h
     share/wizthreads_p.h
+    initbizcertdialog.h
 )
 
 set(wiznote_FORMS
@@ -403,6 +405,7 @@ set(wiznote_FORMS
     ui/wizCrashReportDialog.ui
     ui/wizTemplatePurchaseDialog.ui
     ui/wizexecutingactiondialog.ui
+    ui/initbizcertdialog.ui
 )
 
 set(wiznote_TRANSLATIONS

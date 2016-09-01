@@ -350,6 +350,7 @@ void CWizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arra
         info.bizName = group.bizName;
         info.name = group.strGroupName;
         info.nPermission = group.nUserGroup;
+        info.bEncryptData = group.bEncryptData;
         //
         addDb(group.strGroupGUID, info);
         db(group.strGroupGUID).SetDatabaseInfo(info);

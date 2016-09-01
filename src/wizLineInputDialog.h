@@ -24,13 +24,19 @@ public:
     QString input();
 
     void setOKButtonEnable(bool enable);
+    //
+    void setOKHandler(std::function<bool(QString)> handler) { m_okHandler = handler; }
 
+    virtual void accept();
 signals:
     void textChanged(const QString&);
+
+private slots:
 
 private:
     Ui::CWizLineInputDialog *ui;
     QString m_strDefault;
+    std::function<bool(QString)> m_okHandler;
 };
 
 #endif // WIZLINEINPUTDIALOG_H
