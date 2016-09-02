@@ -128,6 +128,7 @@ public:
 
     const WIZDATABASEINFO& info() { return m_info; }
     QString name() const { return m_info.name; }
+    QString bizGuid() const { return m_info.bizGUID; }
     int permission() const { return m_info.nPermission; }
 
     // IWizSyncableDatabase interface implementations
@@ -475,24 +476,24 @@ public:
     bool CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QString& strFileFoler);
     bool CompressFolderToZiwFile(WIZDOCUMENTDATA& document, \
                                 const QString& strFileFoler, const QString& strZiwFileName);
-    bool CancelDocumentEncryption(WIZDOCUMENTDATA& document, const QString& strUserCipher);
+    bool CancelDocumentEncryption(WIZDOCUMENTDATA& document);
 
     bool IsFileAccessible(const WIZDOCUMENTDATA& document);
 
     // CWizZiwReader passthrough methods
-    bool checkUserCertExists();
     bool loadUserCert();
-    const QString& userCipher() const { return m_ziwReader->userCipher(); }
-    void setUserCipher(const QString& cipher) { m_ziwReader->setUserCipher(cipher); }
-    QString userCipherHint() { return m_ziwReader->userCipherHint(); }
-    void setSaveUserCipher(bool b) { m_ziwReader->setSaveUserCipher(b); }
     //
-    bool InitCert();
+    bool RefreshCertFromServer();
+    bool HasCert();
+    bool InitCert(bool queryPassword);
     //
     bool IsEncryptAllData();
     bool InitBizCert();
     bool QueryCertPassword();
+    bool VerifyCertPassword(QString password);
     QString GetCertPassword();
+    QString GetCertPasswordHint();
+
     //
     bool tryAccessDocument(const WIZDOCUMENTDATA &doc);
 
@@ -532,7 +533,7 @@ private:
     bool GetBizMetaName(const QString& strBizGUID, QString& strMetaName);
 
     //
-    bool initZiwReaderForEncryption(const QString& strUserCipher = "");
+    bool initZiwReaderForEncryption();
     //
     bool GetAllGroupInfoCore(CWizGroupDataArray& arrayGroup);
     bool SetAllGroupInfoCore(const CWizGroupDataArray& arrayGroup);

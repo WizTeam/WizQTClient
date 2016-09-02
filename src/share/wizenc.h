@@ -48,8 +48,14 @@ bool simpleAESDecrypt(const unsigned char* lpszKey, QDataStream* pStreamSrc, QDa
 bool WizAESEncryptToString(const unsigned char* cipher, \
                            const QByteArray& inStr, QByteArray& outStr);
 
+bool WizAESEncryptStringToBase64String(const QString& password, \
+                           const QString& inStr, QString& outBase64Str);
+
 bool WizAESDecryptToString(const unsigned char* cipher, \
                            const QByteArray& inStr, QByteArray& outStr);
+
+bool WizAESDecryptBase64StringToString(const QString& password, \
+                           const QString& inBase64Str, QString& outStr);
 
 bool WizAESEncryptToFile(const unsigned char* cipher, \
                          QDataStream* inStream, const QString& strFileName);

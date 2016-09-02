@@ -120,8 +120,7 @@ void clearDatabaseCipher(CWizDatabase& db)
         CWizUserSettings settings(db);
         if (!settings.isRememberNotePasswordForSession())
         {
-            db.setSaveUserCipher(false);
-            db.setUserCipher("");
+            //TODO:wsj
         }
     }
 }
@@ -148,8 +147,9 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
         QString strPassword = settings.encryptedNotePassword();
         if (settings.searchEncryptedNote() && !strPassword.isEmpty()) {
             db.loadUserCert();
-            db.setUserCipher(strPassword);
-            db.setSaveUserCipher(true);
+            //
+            //TODO:wsj
+            //
             searchEncryptedDoc = true;
         }
     }

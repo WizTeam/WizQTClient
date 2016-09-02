@@ -21,18 +21,19 @@ struct WIZZIWHEADER
     unsigned char szReserved[WIZZIWFILE_RESERVED_LENGTH];
 };
 
+class CWizDatabase;
+
 class CWizZiwReader : public QObject
 {
     Q_OBJECT
 
 public:
     explicit CWizZiwReader(QObject *parent = 0);
+    //
+    void setDatabase(CWizDatabase* pDatabase) { m_pDatabase = pDatabase; }
 
-    const QString& userCipher() const { return m_userCipher; }
-    void setUserCipher(const QString& strCipher) { m_userCipher = strCipher; }
-
-    const QString& userCipherHint() const { return m_strHint; }
-    void setSaveUserCipher(bool b) { m_bSaveUserCipher = b; }
+    QString password();
+    QString passwordHint() const { return m_strHint; }
 
     void setRSAKeys(const QByteArray& strN, \
                     const QByteArray& stre, \
@@ -68,10 +69,10 @@ public:
     static bool isEncryptedFile(const QString& fileName);
 
 private:
+    CWizDatabase* m_pDatabase;
+    //
     QString m_strFileName;
     WIZZIWHEADER m_header;
-    QString m_userCipher;
-    bool m_bSaveUserCipher;
     QString m_strZiwCipher;
 
     QByteArray m_N;

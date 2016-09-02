@@ -171,19 +171,9 @@ void CWizNoteInfoForm::on_checkEncrypted_clicked(bool checked)
         }
         else
         {
-            QString strUserCipher;
-            CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to cancel encrypt."),
-                                    "", 0, QLineEdit::Password);
-            if (dlg.exec() == QDialog::Rejected)
-                return;
-
-            strUserCipher = dlg.input();
-            if (strUserCipher.isEmpty())
-                return;
-
             if (doc.nProtected)
             {
-                if (!db.CancelDocumentEncryption(doc, strUserCipher))
+                if (!db.CancelDocumentEncryption(doc))
                     return;
             }
         }

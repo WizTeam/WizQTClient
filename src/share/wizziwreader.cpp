@@ -6,13 +6,19 @@
 #include "wizmisc.h"
 #include "wizenc.h"
 #include "utils/logger.h"
+#include "wizDatabase.h"
 
 
 CWizZiwReader::CWizZiwReader(QObject *parent)
     : QObject(parent)
-    , m_bSaveUserCipher(false)
+    , m_pDatabase(NULL)
 {
     memset(&m_header, 0, sizeof(m_header));
+}
+
+QString CWizZiwReader::password()
+{
+    return m_pDatabase->GetCertPassword();
 }
 
 bool CWizZiwReader::setFile(const QString& strFileName)
@@ -197,9 +203,9 @@ bool CWizZiwReader::decryptRSAdPart(QByteArray& d)
 
 bool CWizZiwReader::decryptRSAdPart(const QByteArray& encrypted_d, QByteArray& d)
 {
-    Q_ASSERT(!m_userCipher.isEmpty());
+    Q_ASSERT(!password().isEmpty());
 
-    return WizAESDecryptToString((const unsigned char *)m_userCipher.toUtf8().constData(), encrypted_d, d);
+    return WizAESDecryptToString((const unsigned char *)password().toUtf8().constData(), encrypted_d, d);
 }
 
 bool CWizZiwReader::encryptRSAdPart(QByteArray& encrypted_d)
@@ -222,9 +228,9 @@ bool CWizZiwReader::encryptRSAdPart(QByteArray& encrypted_d)
 
 bool CWizZiwReader::encryptRSAdPart(const QByteArray& d, QByteArray& encrypted_d)
 {
-    Q_ASSERT(!m_userCipher.isEmpty());
+    Q_ASSERT(!password().isEmpty());
 
-    return WizAESDecryptToString((const unsigned char *)m_userCipher.toUtf8().constData(), d, encrypted_d);
+    return WizAESDecryptToString((const unsigned char *)password().toUtf8().constData(), d, encrypted_d);
 }
 
 bool CWizZiwReader::encryptZiwCipher(QByteArray& encryptedZiwCipher)
@@ -359,11 +365,6 @@ bool CWizZiwReader::decryptDataToTempFile(const QString& tempFileName)
     }
 
     file.close();
-
-    // clean user cipher when done
-    if (!m_bSaveUserCipher) {
-        m_userCipher.clear();
-    }
 
     return true;
 }

@@ -790,13 +790,9 @@ bool getUserCipher(CWizDatabase& db, const WIZDOCUMENTDATA& encryptedDoc)
         return false;
     }
 
-    CWizLineInputDialog dlg(QObject::tr("Please input note password"),
-                            QObject::tr("Password :"), "", 0, QLineEdit::Password);
-    if (dlg.exec() == QDialog::Rejected)
-        return false;
-
     db.loadUserCert();
-    db.setUserCipher(dlg.input());
+    if (!db.QueryCertPassword())
+        return false;
 
     if (db.IsDocumentDownloaded(encryptedDoc.strGUID))
     {
@@ -806,7 +802,6 @@ bool getUserCipher(CWizDatabase& db, const WIZDOCUMENTDATA& encryptedDoc)
             return false;
         }
     }
-    db.setSaveUserCipher(true);
     return true;
 }
 
@@ -876,8 +871,7 @@ void WizClearUserCipher(CWizDatabase& db, CWizUserSettings& settings)
 {
     if (!settings.isRememberNotePasswordForSession())
     {
-        db.setUserCipher(QString());
-        db.setSaveUserCipher(false);
+        //TODO:wsj
     }
 }
 

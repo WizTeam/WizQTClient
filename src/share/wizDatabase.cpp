@@ -30,6 +30,11 @@
 #include "wizLineInputDialog.h"
 #include "initbizcertdialog.h"
 #include "wizenc.h"
+#include "widgets/wizexecutingactiondialog.h"
+#include "sync/wizKMServer.h"
+#include "sync/apientry.h"
+#include "share/wizthreads.h"
+#include "wizMessageBox.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 
@@ -62,6 +67,45 @@ QString GetResoucePathFromFile(const QString& strHtmlFileName)
 
     return QString();
 }
+
+
+class WizUserCertPassword
+{
+private:
+    WizUserCertPassword() : m_mutex(QMutex::Recursive){}
+public:
+    static WizUserCertPassword& Instance()
+    {
+        static WizUserCertPassword passwords;
+        return passwords;
+    }
+private:
+    std::map<QString, QString> m_passwords;
+    QMutex m_mutex;
+public:
+    void SetPassword(const QString& strBizGUID, const QString& strPassword)
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_passwords[strBizGUID] = strPassword;
+    }
+    QString GetPassword(const QString& strBizGUID)
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        return m_passwords[strBizGUID];
+    }
+    void Clear()
+    {
+        QMutexLocker locker(&m_mutex);
+        Q_UNUSED(locker);
+        //
+        m_passwords.clear();
+    }
+};
+
 
 CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
     : m_db(db)
@@ -601,6 +645,7 @@ CWizDatabase::CWizDatabase()
     , m_bIsPersonal(true)
     , m_mutexCache(QMutex::Recursive)
 {
+    m_ziwReader->setDatabase(this);
 }
 
 QString CWizDatabase::GetUserId()
@@ -970,52 +1015,20 @@ bool CWizDatabase::GetBizMetaName(const QString &strBizGUID, QString &strMetaNam
     return false;
 }
 
-bool CWizDatabase::initZiwReaderForEncryption(const QString& strUserCipher)
+bool CWizDatabase::initZiwReaderForEncryption()
 {
     if (!m_ziwReader->isRSAKeysAvailable())
     {
         CWizDatabase* persionDB = getPersonalDatabase();
-        if (!persionDB->checkUserCertExists() || !persionDB->loadUserCert())
+        if (!persionDB->HasCert() || !persionDB->loadUserCert())
         {
             QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
                                      " cert from windows client first."));
             return false;
         }
     }
-
-    if (!m_ziwReader->isZiwCipherAvailable())
-    {
-        if (m_ziwReader->userCipher().isEmpty())
-        {
-            QString userCipher = strUserCipher;
-            if (userCipher.isEmpty())
-            {
-                CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to encrypt")
-                                        , "", 0, QLineEdit::Password);
-                if (dlg.exec() == QDialog::Rejected)
-                    return false;
-
-                userCipher = dlg.input();
-
-                if (userCipher.isEmpty())
-                    return false;
-            }
-            m_ziwReader->setUserCipher(userCipher);
-        }
-
-        m_ziwReader->createZiwHeader();
-        bool initResult = m_ziwReader->initZiwCipher();
-        m_ziwReader->setUserCipher(QString());
-
-        //
-        if (!initResult)
-        {
-            QMessageBox::warning(0, tr("Info"), tr("User password check failed!"));
-            return false;
-        }
-    }
-
-    return true;
+    //
+    return QueryCertPassword();
 }
 
 bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
@@ -3504,9 +3517,74 @@ QString CWizDatabase::GetDocumentLocation(const WIZDOCUMENTDATA& doc)
     return QString();
 }
 
-
-bool CWizDatabase::InitCert()
+bool CWizDatabase::HasCert()
 {
+    QString n;
+    QString e;
+    QString d;
+    QString hint;
+    return GetUserCert(n, e, d, hint);
+}
+
+bool CWizDatabase::RefreshCertFromServer()
+{
+    auto refreshCore = [&]{
+        if (IsGroup())
+        {
+            CWizDatabase* db = getPersonalDatabase();
+            CWizKMAccountsServer server(CommonApiEntry::syncUrl());
+            if (!server.Login(db->GetUserId(), db->GetPassword()))
+                return false;
+            //
+            QString strN, stre, strd, strHint;
+
+            if (!server.GetUserBizCert(bizGuid(), strN, stre, strd, strHint))
+                return false;
+            //
+            return SetUserCert(strN, stre, strd, strHint);
+        }
+        else
+        {
+            QString strN, stre, strd, strHint;
+            //
+            CWizKMAccountsServer server(CommonApiEntry::syncUrl());
+            if (!server.GetCert(GetUserId(), GetPassword(), strN, stre, strd, strHint))
+                return false;
+            //
+            return SetUserCert(strN, stre, strd, strHint);
+        }
+    };
+
+    bool ret = false;
+    WizExecutingActionDialog::executeAction(tr("Downloading cert..."), WIZ_THREAD_NETWORK, [&]{
+        ret = refreshCore();
+    });
+    //
+    return ret;
+}
+
+bool CWizDatabase::InitCert(bool queryPassword)
+{
+    if (!HasCert())
+    {
+        if (IsGroup())
+        {
+            if (!RefreshCertFromServer())
+            {
+                if (!InitBizCert())
+                    return false;
+            }
+        }
+        else
+        {
+            if (!RefreshCertFromServer())
+                return false;
+        }
+    }
+    //
+    if (!queryPassword)
+        return true;
+    //
     return QueryCertPassword();
 }
 
@@ -3522,7 +3600,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
     bool encrypt = IsEncryptAllData();
     if (encrypt)
     {
-        if (!InitCert())
+        if (!InitCert(true))
             return false;
     }
     //
@@ -3557,7 +3635,7 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
     bool encrypt = IsEncryptAllData();
     if (encrypt)
     {
-        if (!InitCert())
+        if (!InitCert(true))
             return false;
     }
     //
@@ -3668,7 +3746,8 @@ bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& 
             return false;
 
         if (document.nProtected) {
-            if (userCipher().isEmpty())
+            QString password = GetCertPassword();
+            if (password.isEmpty())
                 return false;
 
             if (!m_ziwReader->setFile(strFileName))
@@ -3679,7 +3758,7 @@ bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& 
 
             if (!m_ziwReader->decryptDataToTempFile(strFileName)) {
                 // force clear usercipher
-                m_ziwReader->setUserCipher(QString());
+                WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
                 return false;
             }
         }
@@ -3994,56 +4073,66 @@ bool CWizDatabase::IsEncryptAllData()
     return false;
 }
 
+
 bool CWizDatabase::InitBizCert()
 {
-    InitBizCertDialog dlg;
+    InitBizCertDialog dlg(this);
     if (dlg.exec() == QDialog::Accepted)
+    {
+        WizUserCertPassword::Instance().SetPassword(bizGuid(), dlg.userCertPassword());
         return true;
+    }
     //
     return false;
 }
 
-class WizUserCertPassword
-{
-private:
-    WizUserCertPassword() : m_mutex(QMutex::Recursive){}
-public:
-    static WizUserCertPassword& Instance()
-    {
-        static WizUserCertPassword passwords;
-        return passwords;
-    }
-private:
-    std::map<QString, QString> m_passwords;
-    QMutex m_mutex;
-public:
-    void SetPassword(const QString& strBizGUID, const QString& strPassword)
-    {
-        QMutexLocker locker(&m_mutex);
-        Q_UNUSED(locker);
-        //
-        m_passwords[strBizGUID] = strPassword;
-    }
-    QString GetPassword(const QString& strBizGUID)
-    {
-        QMutexLocker locker(&m_mutex);
-        Q_UNUSED(locker);
-        //
-        return m_passwords[strBizGUID];
-    }
-    void Clear()
-    {
-        QMutexLocker locker(&m_mutex);
-        Q_UNUSED(locker);
-        //
-        m_passwords.clear();
-    }
-};
 
 QString CWizDatabase::GetCertPassword()
 {
     QString password = WizUserCertPassword::Instance().GetPassword(m_info.bizGUID);
     return password;
+}
+QString CWizDatabase::GetCertPasswordHint()
+{
+    QString n;
+    QString e;
+    QString hint;
+    QString encrypted_d;
+    GetUserCert(n, e, encrypted_d, hint);
+    //
+    return hint;
+}
+
+bool CWizDatabase::VerifyCertPassword(QString password)
+{
+    QString n;
+    QString e;
+    QString hint;
+    QString encrypted_d;
+    GetUserCert(n, e, encrypted_d, hint);
+    //
+    QString d;
+    //
+    if (WizAESDecryptBase64StringToString(password, encrypted_d, d)
+            && d.length() > 0)
+    {
+        WizUserCertPassword::Instance().SetPassword(m_info.bizGUID, password);
+        return true;
+    }
+    //
+    if (!RefreshCertFromServer())
+        return false;
+    //
+    GetUserCert(n, e, encrypted_d, hint);
+    //
+    if (WizAESDecryptBase64StringToString(password, encrypted_d, d)
+            && d.length() > 0)
+    {
+        WizUserCertPassword::Instance().SetPassword(m_info.bizGUID, password);
+        return true;
+    }
+    //
+    return false;
 }
 
 
@@ -4053,11 +4142,7 @@ bool CWizDatabase::QueryCertPassword()
     if (!password.isEmpty())
         return true;
     //
-    QString n;
-    QString e;
-    QString hint;
-    QString encrypted_d;
-    GetUserCert(n, e, encrypted_d, hint);
+    QString hint = GetCertPasswordHint();
     //
     QString description;
     if (IsGroup())
@@ -4070,17 +4155,13 @@ bool CWizDatabase::QueryCertPassword()
         description = QObject::tr("Please enter the password of cert:\nPassword hint: %1").arg(hint);
     }
     //
-    CWizLineInputDialog dlg(QObject::tr("Cert Password"), description);
+    CWizLineInputDialog dlg(QObject::tr("Cert Password"), description, "", NULL, QLineEdit::Password);
     dlg.setOKHandler([&](QString password) {
         //
-        QByteArray d;
-        //
-        if (WizAESDecryptToString((const unsigned char *)(password.toUtf8().constData()), encrypted_d.toUtf8(), d)
-                && d.length() > 0)
-        {
-            WizUserCertPassword::Instance().SetPassword(m_info.bizGUID, password);
+        if (VerifyCertPassword(password))
             return true;
-        }
+        //
+        CWizMessageBox::critical(&dlg, tr("Invalid password."));
         //
         return false;
     });
@@ -4156,7 +4237,8 @@ bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,
     bool isProtected = CWizZiwReader::isEncryptedFile(strZipFileName);
 
     if (isProtected) {
-        if (userCipher().isEmpty()) {
+        QString password = WizUserCertPassword::Instance().GetPassword(bizGuid());
+        if (password.isEmpty()) {
             return false;
         }
 
@@ -4169,7 +4251,7 @@ bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,
 
         if (!m_ziwReader->decryptDataToTempFile(strZipFileName)) {
             // force clear usercipher
-            m_ziwReader->setUserCipher(QString());
+            WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
             return false;
         }
     }
@@ -4189,7 +4271,6 @@ bool CWizDatabase::EncryptDocument(WIZDOCUMENTDATA& document)
         TOLOG("extract ziw file failed!");
         return false;
     }
-
     //
     if (!initZiwReaderForEncryption())
         return false;
@@ -4245,17 +4326,15 @@ bool CWizDatabase::CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QStr
     return UpdateDocumentDataMD5(document, strZiwFileName, notify);
 }
 
-bool CWizDatabase::CancelDocumentEncryption(WIZDOCUMENTDATA& document, const QString& strUserCipher)
+bool CWizDatabase::CancelDocumentEncryption(WIZDOCUMENTDATA& document)
 {
     if (!document.nProtected || kbGUID() != document.strKbGUID)
         return false;
 
     //
-    if (!initZiwReaderForEncryption(strUserCipher))
+    if (!initZiwReaderForEncryption())
         return false;
 
-    m_ziwReader->setUserCipher(strUserCipher);
-    //
     QString strFolder = Utils::PathResolve::tempDocumentFolder(document.strGUID);
     if (!ExtractZiwFileToFolder(document, strFolder))
     {
@@ -4283,7 +4362,7 @@ bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
     }
 
     if (document.nProtected) {
-        if (userCipher().isEmpty()) {
+        if (GetCertPassword().isEmpty()) {
             return false;
         }
 
@@ -4295,19 +4374,6 @@ bool CWizDatabase::IsFileAccessible(const WIZDOCUMENTDATA& document)
     return true;
 }
 
-bool CWizDatabase::checkUserCertExists()
-{
-    QString strN, stre, strEncryptedd, strHint;
-    if (GetUserCert(strN, stre, strEncryptedd, strHint))
-    {
-        if ((!strN.isEmpty()) && (!stre.isEmpty()) && (!strEncryptedd.isEmpty()))
-        {
-            return true;
-        }
-    }
-
-    return false;
-}
 
 QObject* CWizDatabase::GetFolderByLocation(const QString& strLocation, bool create)
 {
@@ -4342,24 +4408,18 @@ void CWizDatabase::onAttachmentModified(const QString strKbGUID, const QString& 
 bool CWizDatabase::tryAccessDocument(const WIZDOCUMENTDATA &doc)
 {
     if (doc.nProtected) {
-        if (userCipher().isEmpty()) {
-            if (!loadUserCert())
-                return false;
-
-            QString strPassWord;
-            CWizLineInputDialog dlg(tr("Doucment  %1  Password").arg(doc.strTitle),
-                                    tr("Password :"), "", 0, QLineEdit::Password);
-
-            if (dlg.exec() == QDialog::Rejected)
-                return false;
-
-            strPassWord = dlg.input();
-            setUserCipher(strPassWord);
-        }
-
+        //
+        if (!loadUserCert())
+            return false;
+        //
+        if (!QueryCertPassword())
+            return false;
+        //
         if (!IsFileAccessible(doc)) {
             QMessageBox::information(0, tr("Info"), tr("password error!"));
-            setUserCipher(QString());
+            //
+            WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
+            //
             return false;
         }
     }

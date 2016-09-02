@@ -1,6 +1,7 @@
 #include "wizMessageBox.h"
 #include <QPushButton>
-#include <QDebug>\
+#include <QDebug>
+#include <QApplication>
 
 CWizMessageBox::CWizMessageBox()
 {
@@ -39,6 +40,35 @@ QMessageBox::StandardButton CWizMessageBox::warning(QWidget* parent, const QStri
 {
     return messageBox(parent, title, text, buttons, defaultButton, QMessageBox::Warning);
 }
+
+QMessageBox::StandardButton CWizMessageBox::critical(QWidget * parent, const QString & text,
+                                     QMessageBox::StandardButtons buttons,
+                                     QMessageBox::StandardButton defaultButton)
+{
+    return critical(parent, QApplication::applicationName(), text, buttons, defaultButton);
+}
+
+QMessageBox::StandardButton CWizMessageBox::information(QWidget * parent, const QString & text,
+                                        QMessageBox::StandardButtons buttons,
+                                        QMessageBox::StandardButton defaultButton)
+{
+    return information(parent, QApplication::applicationName(), text, buttons, defaultButton);
+}
+
+QMessageBox::StandardButton CWizMessageBox::question(QWidget * parent, const QString & text,
+                                     QMessageBox::StandardButtons buttons,
+                                     QMessageBox::StandardButton defaultButton)
+{
+    return question(parent, QApplication::applicationName(), text, buttons, defaultButton);
+}
+
+QMessageBox::StandardButton CWizMessageBox::warning(QWidget * parent, const QString & text,
+                                    QMessageBox::StandardButtons buttons,
+                                    QMessageBox::StandardButton defaultButton)
+{
+    return warning(parent, QApplication::applicationName(), text, buttons, defaultButton);
+}
+
 
 QString CWizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton button)
 {

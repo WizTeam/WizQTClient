@@ -38,6 +38,7 @@
 
 #include "share/wizthreads.h"
 #include "share/wizwebengineview.h"
+#include "share/wizenc.h"
 
 
 #define DOCUMENT_STATUS_NOSTATUS            0x0000
@@ -391,12 +392,15 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         //
         data.nProtected = CWizZiwReader::isEncryptedFile(strDocumentFileName) ? 1 : 0;
         if (data.nProtected) {
+            //
+            db.InitCert(false);
+            //
             if(!db.loadUserCert()) {
                 return;
             }
 
-            if (db.userCipher().isEmpty()) {
-                m_passwordView->setHint(db.userCipherHint());
+            if (db.GetCertPassword().isEmpty()) {
+                m_passwordView->setHint(db.GetCertPasswordHint());
                 m_tab->setCurrentWidget(m_passwordView);
                 m_passwordView->setCipherEditorFocus();
 
@@ -439,8 +443,8 @@ void CWizDocumentView::reviewCurrentNote()
             return;
         }
 
-        if (db.userCipher().isEmpty()) {
-            m_passwordView->setHint(db.userCipherHint());
+        if (db.GetCertPassword().isEmpty()) {
+            m_passwordView->setHint(db.GetCertPasswordHint());
             m_tab->setCurrentWidget(m_passwordView);
             m_passwordView->setCipherEditorFocus();
 
@@ -741,18 +745,14 @@ void CWizDocumentView::onCipherCheckRequest()
 {
     const WIZDOCUMENTDATA& noteData = note();
     CWizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
-
-    db.setUserCipher(m_passwordView->userCipher());
-    db.setSaveUserCipher(m_passwordView->isSaveForSession());
-    m_app.userSettings().setRememberNotePasswordForSession(m_passwordView->isSaveForSession());
-
-    if (!db.IsFileAccessible(noteData))
+    //
+    QString password = m_passwordView->userCipher();
+    if (!db.VerifyCertPassword(password))
     {
         m_passwordView->cipherError();
-        db.setUserCipher(QString());
-        db.setSaveUserCipher(false);
         return;
     }
+    //
     m_passwordView->cipherCorrect();
 
     m_tab->setCurrentWidget(m_docView);

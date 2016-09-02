@@ -399,6 +399,17 @@ bool WizAESEncryptToString(const unsigned char* cipher, \
     return true;
 }
 
+bool WizAESEncryptStringToBase64String(const QString& password, \
+                           const QString& inStr, QString& outBase64Str)
+{
+    QByteArray ret;
+    if (!WizAESEncryptToString((const unsigned char*)password.toUtf8().constData(), inStr.toUtf8().constData(), ret))
+        return false;
+    //
+    WizBase64Encode(ret, outBase64Str);
+    return true;
+}
+
 bool WizAESDecryptToString(const unsigned char* cipher, \
                            const QByteArray& inStr, QByteArray& outStr)
 {
@@ -419,6 +430,20 @@ bool WizAESDecryptToString(const unsigned char* cipher, \
 
     outStr.clear();
     outStr.append(obuf.buffer());
+    return true;
+}
+
+bool WizAESDecryptBase64StringToString(const QString& password, \
+                           const QString& inBase64Str, QString& outStr)
+{
+    QByteArray src;
+    WizBase64Decode(inBase64Str, src);
+    //
+    QByteArray ret;
+    if (!WizAESDecryptToString((const unsigned char*)password.toUtf8().constData(), src, ret))
+        return false;
+    //
+    outStr = QString::fromUtf8(ret);
     return true;
 }
 

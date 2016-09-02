@@ -1847,16 +1847,6 @@ void CWizDocumentListView::on_action_encryptDocument()
 void CWizDocumentListView::on_action_cancelEncryption()
 {
     ::WizGetAnalyzer().LogAction("documentListMenuCancelEncryptionn");
-    QString strUserCipher;
-    CWizLineInputDialog dlg(tr("Password"), tr("Please input document password to cancel encrypt."),
-                            "", 0, QLineEdit::Password);
-    if (dlg.exec() == QDialog::Rejected)
-        return;
-
-    strUserCipher = dlg.input();
-    if (strUserCipher.isEmpty())
-        return;
-
     //
     foreach(CWizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
     {
@@ -1864,7 +1854,7 @@ void CWizDocumentListView::on_action_cancelEncryption()
         if (doc.nProtected)
         {
             CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            if (!db.CancelDocumentEncryption(doc, strUserCipher))
+            if (!db.CancelDocumentEncryption(doc))
                 return;
         }
     }
