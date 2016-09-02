@@ -161,7 +161,7 @@ public:
                         int nIconIndex, int nSync, int nProtected, WIZDOCUMENTDATA& data);
 
     bool CreateDocument(const CString& strTitle, const CString& strName, \
-                        const CString& strLocation, const CString& strURL, WIZDOCUMENTDATA& data);
+                        const CString& strLocation, const CString& strURL, int nProtected, WIZDOCUMENTDATA& data);
 
 
     bool ModifyDocumentInfo(WIZDOCUMENTDATA& data, bool bReset = true);

@@ -32,48 +32,34 @@ public:
     //
     void setDatabase(CWizDatabase* pDatabase) { m_pDatabase = pDatabase; }
 
-    QString password();
-    QString passwordHint() const { return m_strHint; }
+    QString certPassword();
+    QString certPasswordHint() const { return m_strHint; }
 
     void setRSAKeys(const QByteArray& strN, \
                     const QByteArray& stre, \
                     const QByteArray& str_encrypted_d, \
                     const QString& strHint);
 
-    // ziw file initialization
-    bool setFile(const QString& strFileName);
-
-    // encrypt new note
-    bool encryptDataToTempFile(const QString& sourceFileName, \
-                               const QString& destFileName, \
-                               const QString& strZiwCipher);
-
     // encrypt note decrypted before
-    bool encryptDataToTempFile(const QString& sourceFileName, \
-                               const QString& destFileName);
-
+    bool encryptFileToFile(const QString& sourceFileName, const QString& destFileName);
+    bool encryptDataToFile(const QByteArray& sourceData, const QString& destFileName);
+    //
     // call setUserCipher and setRSAKeys before use this
-    bool decryptDataToTempFile(const QString& tempFileName);
+    bool decryptFileToFile(const QString& strEncryptedFileName, const QString& destFileName);
+    bool decryptFileToData(const QString& strEncryptedFileName, QByteArray& destData);
 
-    ZiwEncryptType encryptType();
 
     //call setUserCipher and setRSAKeys before use this
     bool isFileAccessible(const QString& encryptedFile);
-
     //
     bool isRSAKeysAvailable();
-    bool isZiwCipherAvailable();
-    bool initZiwCipher();
     bool createZiwHeader();
     //
+    static ZiwEncryptType encryptType(const QString& strFileName);
     static bool isEncryptedFile(const QString& fileName);
 
 private:
     CWizDatabase* m_pDatabase;
-    //
-    QString m_strFileName;
-    WIZZIWHEADER m_header;
-    QString m_strZiwCipher;
 
     QByteArray m_N;
     QByteArray m_e;
@@ -81,22 +67,17 @@ private:
     QByteArray m_encrypted_d;
     QString m_strHint;
 
-    bool loadZiwHeader(const QString& strFileName, WIZZIWHEADER& header);
-    bool loadZiwData(const QString& strFileName, QByteArray& strData);
+    static bool loadZiwHeader(const QString& strFileName, WIZZIWHEADER& header);
+    static bool loadZiwData(const QString& strFileName, QByteArray& strData);
 
-    bool encryptZiwCipher(QByteArray& encryptedZiwCipher);
-    bool encryptZiwCipher(const QByteArray& ziwCipher, QByteArray& encryptedZiwCipher);
-
-    bool decryptZiwCipher(QByteArray& ziwCipher);
-    bool decryptZiwCipher(const QByteArray& encryptedZiwCipher, QByteArray& ziwCipher);
+    bool encryptZiwPassword(const QByteArray& ziwPassword, QByteArray& encryptedZiwPassword);
+    bool decryptZiwPassword(const QByteArray& encryptedZiwPassword, QByteArray& ziwPassword);
 
     bool encryptRSAdPart(QByteArray& encrypted_d);
     bool encryptRSAdPart(const QByteArray& d, QByteArray& encrypted_d);
 
     bool decryptRSAdPart(QByteArray& d);
     bool decryptRSAdPart(const QByteArray& encrypted_d, QByteArray& d);
-
-    void debugPrintHeader();
 
     bool initZiwHeader(WIZZIWHEADER& header, const QString& strZiwCipher);
 };

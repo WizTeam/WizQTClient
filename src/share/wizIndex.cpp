@@ -415,11 +415,11 @@ bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, 
 
 bool CWizIndex::CreateDocument(const CString& strTitle, const CString& strName, \
                             const CString& strLocation, const CString& strURL, \
-                            WIZDOCUMENTDATA& data)
+                            int nProtected, WIZDOCUMENTDATA& data)
 {
     return CreateDocument(strTitle, strName, \
                           strLocation, strURL, \
-                          "", "", data.strType, "", "", "", 0, 0, 0, data);
+                          "", "", data.strType, "", "", "", 0, 0, nProtected, data);
 }
 
 bool CWizIndex::CreateAttachment(const CString& strDocumentGUID, const CString& strName,

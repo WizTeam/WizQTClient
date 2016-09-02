@@ -411,10 +411,11 @@ public:
 
     bool GetDocumentsByTag(const WIZTAGDATA& tag, CWizDocumentDataArray& arrayDocument);
 
-    //if "forceLoadData == true", just load doc data, don't care it was encrypted or not.
-    //if "forceLoadData == false", try to decrypt encrypted file before load doc data.
-    bool LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData,
-                          bool forceLoadData = true);
+    //load zip data
+    bool LoadDocumentDecryptedData(const QString& strDocumentGUID, QByteArray& arrayData);
+    //load raw data, for upload to server
+    bool LoadDocumentZiwData(const QString& strDocumentGUID, QByteArray& arrayData);
+    //
     bool LoadFileData(const QString& strFileName, QByteArray& arrayData);
     bool WriteDataToDocument(const QString& strDocumentGUID, const QByteArray &arrayData);
     bool LoadAttachmentData(const CString& strDocumentGUID,

@@ -401,7 +401,7 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
         return false;
 
     QByteArray ba;
-    if (!m_db.LoadDocumentData(sourceDoc.strGUID, ba, false))
+    if (!m_db.LoadDocumentDecryptedData(sourceDoc.strGUID, ba))
         return false;
 
     WIZDOCUMENTDATA newDoc;
@@ -944,7 +944,7 @@ bool CWizDatabase::InitDocumentData(const QString& strGUID,
     }
 
     if (data.nDataChanged) {
-        if (!LoadDocumentData(strGUID, data.arrayData)) {
+        if (!LoadDocumentZiwData(strGUID, data.arrayData)) {
             return false;
         }
     }
@@ -988,9 +988,10 @@ bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
 {
     QByteArray ba;
-    LoadDocumentData(sourceDoc.strGUID, ba, false);
-    targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
-    return true;
+    if (!LoadDocumentDecryptedData(sourceDoc.strGUID, ba))
+        return false;
+    //
+    return targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
 }
 
 
@@ -1019,8 +1020,7 @@ bool CWizDatabase::initZiwReaderForEncryption()
 {
     if (!m_ziwReader->isRSAKeysAvailable())
     {
-        CWizDatabase* persionDB = getPersonalDatabase();
-        if (!persionDB->HasCert() || !persionDB->loadUserCert())
+        if (!HasCert() || !loadUserCert())
         {
             QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
                                      " cert from windows client first."));
@@ -3137,7 +3137,7 @@ bool CWizDatabase::UpdateDocumentData(WIZDOCUMENTDATA& data,
             return false;
         }
 
-        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+        if (!m_ziwReader->encryptFileToFile(strTempFile, strZipFileName)) {
             return false;
         }
     }
@@ -3165,7 +3165,7 @@ bool CWizDatabase::UpdateDocumentDataWithFolder(WIZDOCUMENTDATA& data,
             return false;
         }
 
-        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZipFileName)) {
+        if (!m_ziwReader->encryptFileToFile(strTempFile, strZipFileName)) {
             return false;
         }
     }
@@ -3602,6 +3602,11 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
     {
         if (!InitCert(true))
             return false;
+        //
+        if (!initZiwReaderForEncryption())
+            return false;
+        //
+        data.nProtected = 1;
     }
     //
     bool bRet = false;
@@ -3611,7 +3616,7 @@ bool CWizDatabase::CreateDocumentAndInit(const CString& strHtml, \
 
         data.strKbGUID = kbGUID();
         data.strOwner = GetUserId();
-        bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data);
+        bRet = CreateDocument(strTitle, strName, strLocation, strHtmlUrl, data.nProtected, data);
         if (bRet)
         {
             bRet = UpdateDocumentData(data, strHtml, strURL, nFlags);
@@ -3637,6 +3642,11 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
     {
         if (!InitCert(true))
             return false;
+        //
+        if (!initZiwReaderForEncryption())
+            return false;
+        //
+        newDoc.nProtected = 1;
     }
     //
     bool bRet = false;
@@ -3649,14 +3659,26 @@ bool CWizDatabase::CreateDocumentAndInit(const WIZDOCUMENTDATA& sourceDoc, const
 
         bRet = CreateDocument(sourceDoc.strTitle, sourceDoc.strName, strLocation, "", sourceDoc.strAuthor,
                               sourceDoc.strKeywords, sourceDoc.strType, GetUserId(), sourceDoc.strFileType,
-                              sourceDoc.strStyleGUID, 0, 0, 0, newDoc);
+                              sourceDoc.strStyleGUID, 0, 0, newDoc.nProtected, newDoc);
         if (bRet)
         {
-            if (WriteDataToDocument(newDoc.strGUID, baData)) {
+            if (newDoc.nProtected)
+            {
+                CString strZipFileName = GetDocumentFileName(newDoc.strGUID);
+                bRet = m_ziwReader->encryptDataToFile(baData, strZipFileName);
+            }
+            else
+            {
+                bRet = WriteDataToDocument(newDoc.strGUID, baData);
+            }
+            //
+            if (bRet)
+            {
                 SetObjectDataDownloaded(newDoc.strGUID, "document", true);
-
+                //
                 CString strFileName = GetDocumentFileName(newDoc.strGUID);
                 bRet = UpdateDocumentDataMD5(newDoc, strFileName);
+                //
             } else {
                 bRet = false;
             }
@@ -3732,39 +3754,45 @@ bool CWizDatabase::DeleteTagWithChildren(const WIZTAGDATA& data, bool bLog)
     return true;
 }
 
-bool CWizDatabase::LoadDocumentData(const QString& strDocumentGUID, QByteArray& arrayData, bool forceLoadData)
+bool CWizDatabase::LoadDocumentZiwData(const QString& strDocumentGUID, QByteArray& arrayData)
 {
     CString strFileName = GetDocumentFileName(strDocumentGUID);
     if (!PathFileExists(strFileName))
-    {
         return false;
-    }
+    //
+    return LoadFileData(strFileName, arrayData);
+}
 
-    if (!forceLoadData) {
-        WIZDOCUMENTDATA document;
-        if (!DocumentFromGUID(strDocumentGUID, document))
+bool CWizDatabase::LoadDocumentDecryptedData(const QString& strDocumentGUID, QByteArray& arrayData)
+{
+    CString strFileName = GetDocumentFileName(strDocumentGUID);
+    if (!PathFileExists(strFileName))
+        return false;
+
+    WIZDOCUMENTDATA document;
+    if (!DocumentFromGUID(strDocumentGUID, document))
+        return false;
+
+    if (document.nProtected) {
+        QString password = GetCertPassword();
+        if (password.isEmpty())
             return false;
 
-        if (document.nProtected) {
-            QString password = GetCertPassword();
-            if (password.isEmpty())
-                return false;
+        QString strDecryptedFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
+        QFile::remove(strDecryptedFileName);
 
-            if (!m_ziwReader->setFile(strFileName))
-                return false;
-
-            strFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
-            QFile::remove(strFileName);
-
-            if (!m_ziwReader->decryptDataToTempFile(strFileName)) {
-                // force clear usercipher
-                WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
-                return false;
-            }
+        if (!m_ziwReader->decryptFileToFile(strFileName, strDecryptedFileName)) {
+            // force clear usercipher
+            WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
+            return false;
         }
+        //
+        return LoadFileData(strDecryptedFileName, arrayData);
+        //
+    } else {
+        //
+        return LoadFileData(strFileName, arrayData);
     }
-
-    return LoadFileData(strFileName, arrayData);
 }
 
 bool CWizDatabase::LoadFileData(const QString& strFileName, QByteArray& arrayData)
@@ -4236,27 +4264,25 @@ bool CWizDatabase::ExtractZiwFileToFolder(const WIZDOCUMENTDATA& document,
     //
     bool isProtected = CWizZiwReader::isEncryptedFile(strZipFileName);
 
-    if (isProtected) {
-        QString password = WizUserCertPassword::Instance().GetPassword(bizGuid());
-        if (password.isEmpty()) {
-            return false;
-        }
-
-        if (!m_ziwReader->setFile(strZipFileName)) {
-            return false;
-        }
-
-        strZipFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
-        QFile::remove(strZipFileName);
-
-        if (!m_ziwReader->decryptDataToTempFile(strZipFileName)) {
-            // force clear usercipher
-            WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
-            return false;
-        }
+    if (!isProtected) {
+        return CWizUnzipFile::extractZip(strZipFileName, strFolder);
+    }
+    //
+    QString password = WizUserCertPassword::Instance().GetPassword(bizGuid());
+    if (password.isEmpty()) {
+        return false;
     }
 
-    return CWizUnzipFile::extractZip(strZipFileName, strFolder);
+    QString strDecryptedFileName = Utils::PathResolve::tempPath() + document.strGUID + "-decrypted";
+    QFile::remove(strDecryptedFileName);
+
+    if (!m_ziwReader->decryptFileToFile(strZipFileName, strDecryptedFileName)) {
+        // force clear usercipher
+        WizUserCertPassword::Instance().SetPassword(bizGuid(), "");
+        return false;
+    }
+    //
+    return CWizUnzipFile::extractZip(strDecryptedFileName, strFolder);
 }
 
 bool CWizDatabase::EncryptDocument(WIZDOCUMENTDATA& document)
@@ -4314,7 +4340,7 @@ bool CWizDatabase::CompressFolderToZiwFile(WIZDOCUMENTDATA& document, const QStr
         if (!bZip)
             return false;
 
-        if (!m_ziwReader->encryptDataToTempFile(strTempFile, strZiwFileName))
+        if (!m_ziwReader->encryptFileToFile(strTempFile, strZiwFileName))
             return false;
     }
 
