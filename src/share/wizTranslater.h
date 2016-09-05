@@ -9,11 +9,11 @@ struct WizTranslateItem
     QString value;
 };
 
-class CWizTranslater
+class WizTranslater
 {
 public:
-    CWizTranslater();
-    ~CWizTranslater();
+    WizTranslater();
+    ~WizTranslater();
 
     WizTranslateItem* itemsData();
 };

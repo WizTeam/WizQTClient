@@ -4,12 +4,12 @@
 #include <QPushButton>
 #include <QIcon>
 
-class CWizSegmentedButton : public QPushButton
+class WizSegmentedButton : public QPushButton
 {
     Q_OBJECT
 
 public:
-    explicit CWizSegmentedButton(QWidget *parent = 0);
+    explicit WizSegmentedButton(QWidget *parent = 0);
     void setCellSpacing(int nSpacing);
     void addCell(const QIcon& icon);
 

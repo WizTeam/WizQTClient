@@ -24,12 +24,12 @@
 #include "utils/misc.h"
 
 
-CWizFileIconProvider::CWizFileIconProvider()
+WizFileIconProvider::WizFileIconProvider()
 {
 }
 
 
-QIcon CWizFileIconProvider::icon(const QString& strFilePath) const
+QIcon WizFileIconProvider::icon(const QString& strFilePath) const
 {
     QFileInfo fi(strFilePath);
     if (!fi.exists())
@@ -66,7 +66,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFilePath) const
         }
     }
 #elif defined (Q_OS_MAC)
-    QString strTempFileName = Utils::PathResolve::tempPath() + "test" + Utils::Misc::extractFileExt(strFilePath);
+    QString strTempFileName = Utils::WizPathResolve::tempPath() + "test" + Utils::WizMisc::extractFileExt(strFilePath);
     ::WizSaveDataToFile(strTempFileName, QByteArray());
     retIcon = QFileIconProvider::icon(QFileInfo(strTempFileName));
     ::WizDeleteFile(strTempFileName);
@@ -76,7 +76,7 @@ QIcon CWizFileIconProvider::icon(const QString& strFilePath) const
 }
 
 
-QString CWizFileIconProvider::type(const QString& strFileName) const
+QString WizFileIconProvider::type(const QString& strFileName) const
 {
 #if defined(Q_OS_WIN)
     long flags = SHGFI_TYPENAME | SHGFI_USEFILEATTRIBUTES;

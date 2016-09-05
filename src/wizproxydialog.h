@@ -5,16 +5,16 @@
 #include <QNetworkProxy>
 
 namespace Ui {
-    class ProxyDialog;
+    class WizProxyDialog;
 }
 
-class ProxyDialog : public QDialog
+class WizProxyDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit ProxyDialog(QWidget *parent = 0);
-    ~ProxyDialog();
+    explicit WizProxyDialog(QWidget *parent = 0);
+    ~WizProxyDialog();
 
 public Q_SLOTS:
     virtual void accept();
@@ -23,7 +23,7 @@ public Q_SLOTS:
 
 
 private:
-    Ui::ProxyDialog *ui;
+    Ui::WizProxyDialog *ui;
 
     void enableControl(bool b);
     void setApplicationProxy();

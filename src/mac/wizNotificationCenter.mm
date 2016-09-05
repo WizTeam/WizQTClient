@@ -46,14 +46,14 @@
 @end
 
 
-CWizNotificationCenter::CWizNotificationCenter(QObject* parent)
+WizNotificationCenter::WizNotificationCenter(QObject* parent)
     : QObject(parent)
 {
 }
 
 
 
-void CWizNotificationCenter::showNofification(CWizNotificationCenter::NotificationType type,
+void WizNotificationCenter::showNofification(WizNotificationCenter::NotificationType type,
                                               const QString& title, const QString& text, const QString& userInfo)
 {
     NSUserNotification *notification = [[NSUserNotification alloc] init];
@@ -76,7 +76,7 @@ void CWizNotificationCenter::showNofification(CWizNotificationCenter::Notificati
     [[NSUserNotificationCenter defaultUserNotificationCenter] setDelegate:delegate];
 }
 
-void CWizNotificationCenter::showNofification(const WIZMESSAGEDATA& message)
+void WizNotificationCenter::showNofification(const WIZMESSAGEDATA& message)
 {
     NSUserNotification *notification = [[NSUserNotification alloc] init];
     NSString* nsText = WizToNSString(message.title);

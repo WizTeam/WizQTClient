@@ -13,7 +13,7 @@
 #include "wizDocumentWebView.h"
 #include "wizDocumentWebEngine.h"
 
-TitleEdit::TitleEdit(QWidget *parent)
+WizTitleEdit::WizTitleEdit(QWidget *parent)
     : QLineEdit(parent)
     , c(NULL)
     , m_separator('@')
@@ -32,12 +32,12 @@ TitleEdit::TitleEdit(QWidget *parent)
     setFont(f);
 }
 
-QSize TitleEdit::sizeHint() const
+QSize WizTitleEdit::sizeHint() const
 {
     return QSize(fontMetrics().width(text()), fontMetrics().height() + 10);
 }
 
-void TitleEdit::keyPressEvent(QKeyEvent* e)
+void WizTitleEdit::keyPressEvent(QKeyEvent* e)
 {
     if (c && c->popup()->isVisible()) {
         // The following keys are forwarded by the completer to the widget
@@ -95,18 +95,18 @@ void TitleEdit::keyPressEvent(QKeyEvent* e)
 
 
 
-void TitleEdit::contextMenuEvent(QContextMenuEvent* e)
+void WizTitleEdit::contextMenuEvent(QContextMenuEvent* e)
 {
     //do nothing.
 }
 
-void TitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
+void WizTitleEdit::updateCompleterPopupItems(const QString& completionPrefix)
 {
     c->setCompletionPrefix(completionPrefix);
     c->popup()->setCurrentIndex(c->completionModel()->index(0, 0));
 }
 
-QString TitleEdit::textUnderCursor()
+QString WizTitleEdit::textUnderCursor()
 {
     QString strText;
     int i = cursorPosition() - 1;
@@ -122,7 +122,7 @@ QString TitleEdit::textUnderCursor()
     return strText;
 }
 
-QChar TitleEdit::charBeforeCursor()
+QChar WizTitleEdit::charBeforeCursor()
 {
     int i = cursorPosition() - 1;
     if (i >= 0)
@@ -131,11 +131,11 @@ QChar TitleEdit::charBeforeCursor()
     return QChar();
 }
 
-CWizDocumentView* TitleEdit::noteView()
+WizDocumentView* WizTitleEdit::noteView()
 {
     QWidget* pParent = parentWidget();
     while (pParent) {
-        CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent);
+        WizDocumentView* view = dynamic_cast<WizDocumentView*>(pParent);
         if (view) {
             return view;
         }
@@ -147,7 +147,7 @@ CWizDocumentView* TitleEdit::noteView()
     return 0;
 }
 
-void TitleEdit::resetTitle(const QString& strTitle)
+void WizTitleEdit::resetTitle(const QString& strTitle)
 {
     if (strTitle.isEmpty())
         return;
@@ -156,7 +156,7 @@ void TitleEdit::resetTitle(const QString& strTitle)
     onTitleEditingFinished();
 }
 
-void TitleEdit::setReadOnly(bool b)
+void WizTitleEdit::setReadOnly(bool b)
 {
     QLineEdit::setReadOnly(b);
 
@@ -168,7 +168,7 @@ void TitleEdit::setReadOnly(bool b)
 //        onTitleEditingFinished();
 }
 
-void TitleEdit::setCompleter(QCompleter* completer)
+void WizTitleEdit::setCompleter(QCompleter* completer)
 {
     if (c)
         QObject::disconnect(c, 0, this, 0);
@@ -185,7 +185,7 @@ void TitleEdit::setCompleter(QCompleter* completer)
     connect(c, SIGNAL(activated(const QModelIndex &)), SLOT(onInsertCompletion(const QModelIndex &)));
 }
 
-void TitleEdit::onInsertCompletion(const QModelIndex& index)
+void WizTitleEdit::onInsertCompletion(const QModelIndex& index)
 {
     if (c->widget() != this)
         return;
@@ -197,14 +197,14 @@ void TitleEdit::onInsertCompletion(const QModelIndex& index)
     setText(strNew);
 }
 
-void TitleEdit::onTitleEditingFinished()
+void WizTitleEdit::onTitleEditingFinished()
 {
     setCursorPosition(0);
     //
     WIZDOCUMENTDATA data;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(noteView()->note().strKbGUID);
-    if (db.DocumentFromGUID(noteView()->note().strGUID, data)) {
-        if (!db.CanEditDocument(data))
+    WizDatabase& db = WizDatabaseManager::instance()->db(noteView()->note().strKbGUID);
+    if (db.documentFromGuid(noteView()->note().strGUID, data)) {
+        if (!db.canEditDocument(data))
             return;
 
         QString strNewTitle = text().left(255);
@@ -217,28 +217,28 @@ void TitleEdit::onTitleEditingFinished()
         if (strNewTitle != data.strTitle) {
             data.strTitle = strNewTitle;
             data.tDataModified = WizGetCurrentTime();
-            db.ModifyDocumentInfo(data);
+            db.modifyDocumentInfo(data);
 
             emit titleEdited(strNewTitle);
         }
     }
 }
 
-void TitleEdit::setText(const QString& text)
+void WizTitleEdit::setText(const QString& text)
 {
     QLineEdit::setText(text);
     setCursorPosition(0);
     setStyleSheet("color:#535353;");
 }
 
-void TitleEdit::onTitleReturnPressed()
+void WizTitleEdit::onTitleReturnPressed()
 {
     noteView()->setEditorFocus();
     noteView()->web()->setFocus(Qt::MouseFocusReason);
     noteView()->web()->editorFocus();
 }
 
-void TitleEdit::onTextEdit(const QString& text)
+void WizTitleEdit::onTextEdit(const QString& text)
 {
     if (!c)
         return;
@@ -270,6 +270,6 @@ void TitleEdit::onTextEdit(const QString& text)
     c->complete(cr); // popup it up!
 }
 
-void TitleEdit::onTextChanged(const QString& text)
+void WizTitleEdit::onTextChanged(const QString& text)
 {    
 }

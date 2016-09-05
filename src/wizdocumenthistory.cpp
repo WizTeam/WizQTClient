@@ -4,11 +4,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CWizDocumentViewHistory::CWizDocumentViewHistory()
+WizDocumentViewHistory::WizDocumentViewHistory()
     : m_nIndex(-1)
 {
 }
-void CWizDocumentViewHistory::addHistory(const WIZDOCUMENTDATA& data)
+void WizDocumentViewHistory::addHistory(const WIZDOCUMENTDATA& data)
 {
     if (m_nIndex < 0)
     {
@@ -29,15 +29,15 @@ void CWizDocumentViewHistory::addHistory(const WIZDOCUMENTDATA& data)
     }
 }
 
-bool CWizDocumentViewHistory::canBack() const
+bool WizDocumentViewHistory::canBack() const
 {
     return m_nIndex > 0;
 }
-bool CWizDocumentViewHistory::canForward() const
+bool WizDocumentViewHistory::canForward() const
 {
     return m_nIndex < int(m_arrayHistory.size()) - 1;
 }
-WIZDOCUMENTDATA CWizDocumentViewHistory::back()
+WIZDOCUMENTDATA WizDocumentViewHistory::back()
 {
     WIZDOCUMENTDATA data;
     if (!canBack())
@@ -54,7 +54,7 @@ WIZDOCUMENTDATA CWizDocumentViewHistory::back()
     return data;
 }
 
-WIZDOCUMENTDATA CWizDocumentViewHistory::forward()
+WIZDOCUMENTDATA WizDocumentViewHistory::forward()
 {
     WIZDOCUMENTDATA data;
     if (!canForward())

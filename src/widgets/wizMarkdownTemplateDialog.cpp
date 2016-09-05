@@ -15,15 +15,15 @@
 #include <QMessageBox>
 #include <QDebug>
 
-CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent)
+WizMarkdownTemplateDialog::WizMarkdownTemplateDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizMarkdownTemplateDialog)
+    , ui(new Ui::WizMarkdownTemplateDialog)
     , m_menu(nullptr)
 {
     ui->setupUi(this);
     ui->listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
     ui->listWidget->setTextElideMode(Qt::ElideMiddle);
-    CWizListItemStyle<CWizTemplateItem>* listStyle = new CWizListItemStyle<CWizTemplateItem>();
+    WizListItemStyle<WizTemplateItem>* listStyle = new WizListItemStyle<WizTemplateItem>();
     ui->listWidget->setStyle(listStyle);
     ui->webView->page()->setLinkDelegationPolicy(QWebPage::DelegateAllLinks);
     QTimer::singleShot(100, this, SLOT(initListWidget()));
@@ -33,12 +33,12 @@ CWizMarkdownTemplateDialog::CWizMarkdownTemplateDialog(QWidget *parent)
             SLOT(on_customContextMenuRequested(QPoint)));
 }
 
-CWizMarkdownTemplateDialog::~CWizMarkdownTemplateDialog()
+WizMarkdownTemplateDialog::~WizMarkdownTemplateDialog()
 {
     delete ui;
 }
 
-bool CWizMarkdownTemplateDialog::initListWidget()
+bool WizMarkdownTemplateDialog::initListWidget()
 {
     QMap<QString, bool> itemMap;
     QString strSelectedFile;
@@ -51,7 +51,7 @@ bool CWizMarkdownTemplateDialog::initListWidget()
             QFileInfo info(strFileName);
             QString strTitle = info.baseName();
             bool isCustom = it.value();
-            CWizTemplateItem* item = new CWizTemplateItem(ui->listWidget);
+            WizTemplateItem* item = new WizTemplateItem(ui->listWidget);
             item->setTitle(strTitle);
             item->setIsCustom(isCustom);
             item->setFileName(strFileName);
@@ -61,16 +61,16 @@ bool CWizMarkdownTemplateDialog::initListWidget()
     else
     {
         QStringList itemList;
-        QString strPath = Utils::PathResolve::resourcesPath() + "files/markdown/markdown/";
+        QString strPath = Utils::WizPathResolve::resourcesPath() + "files/markdown/markdown/";
         if (!getListDataFromLocalFiles(strPath, itemList))
         {
             QMessageBox::critical(0, tr("Info"), tr("Can not find template files."));
             return false;
         }
-        strSelectedFile = Utils::PathResolve::resourcesPath() + "files/markdown/markdown/github2.css";;
+        strSelectedFile = Utils::WizPathResolve::resourcesPath() + "files/markdown/markdown/github2.css";;
         foreach (QString strFileName, itemList) {
             QString strTitle = strFileName;
-            CWizTemplateItem* item = new CWizTemplateItem(ui->listWidget);
+            WizTemplateItem* item = new WizTemplateItem(ui->listWidget);
             item->setTitle(strTitle.remove(".css"));
             item->setIsCustom(false);
             item->setFileName(strPath + strFileName);
@@ -85,7 +85,7 @@ bool CWizMarkdownTemplateDialog::initListWidget()
     return true;
 }
 
-bool CWizMarkdownTemplateDialog::getListDataFromSettings(QMap<QString, bool>& itemList,
+bool WizMarkdownTemplateDialog::getListDataFromSettings(QMap<QString, bool>& itemList,
                                                          QString& selectedFile)
 {
     QSettings* settings = ExtensionSystem::PluginManager::settings();
@@ -110,19 +110,19 @@ bool CWizMarkdownTemplateDialog::getListDataFromSettings(QMap<QString, bool>& it
     return !itemList.isEmpty();
 }
 
-bool CWizMarkdownTemplateDialog::saveListDataToSettings()
+bool WizMarkdownTemplateDialog::saveListDataToSettings()
 {
     QSettings* settings = ExtensionSystem::PluginManager::settings();
     settings->beginGroup("MarkdownTemplate");
     settings->remove("");
     for (int i = 0; i < ui->listWidget->count(); ++i)
     {
-        CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->item(i));
+        WizTemplateItem* item = dynamic_cast<WizTemplateItem*>(ui->listWidget->item(i));
         Q_ASSERT(item);
         QString strLocation = QString::fromUtf8(item->fileName().toUtf8().toBase64());
         settings->setValue(strLocation, item->isCustom());
     }
-    if (CWizTemplateItem* selectedItem = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    if (WizTemplateItem* selectedItem = dynamic_cast<WizTemplateItem*>(ui->listWidget->currentItem()))
     {
         QByteArray ba = selectedItem->fileName().toUtf8();
         settings->setValue("SelectedItem", ba.toBase64());
@@ -133,7 +133,7 @@ bool CWizMarkdownTemplateDialog::saveListDataToSettings()
     return true;
 }
 
-bool CWizMarkdownTemplateDialog::getListDataFromLocalFiles(const QString& strPath,
+bool WizMarkdownTemplateDialog::getListDataFromLocalFiles(const QString& strPath,
                                                            QStringList& itemList)
 {
     QDir dir(strPath);
@@ -144,7 +144,7 @@ bool CWizMarkdownTemplateDialog::getListDataFromLocalFiles(const QString& strPat
     return true;
 }
 
-void CWizMarkdownTemplateDialog::loadMarkdownHtml(const QString& strCssFile)
+void WizMarkdownTemplateDialog::loadMarkdownHtml(const QString& strCssFile)
 {
     QString strHtml;
     if (strCssFile.isEmpty())
@@ -155,7 +155,7 @@ void CWizMarkdownTemplateDialog::loadMarkdownHtml(const QString& strCssFile)
     {
         if (QFile::exists(strCssFile))
         {
-            QString strHtmlFile = Utils::PathResolve::resourcesPath() + "files/markdown/markdown.html";
+            QString strHtmlFile = Utils::WizPathResolve::resourcesPath() + "files/markdown/markdown.html";
             QFile f(strHtmlFile);
             if (!f.open(QIODevice::ReadOnly)) {
                 qDebug() << "[Markdown]Failed to get html text.";
@@ -177,14 +177,14 @@ void CWizMarkdownTemplateDialog::loadMarkdownHtml(const QString& strCssFile)
     ui->webView->setHtml(strHtml);
 }
 
-void CWizMarkdownTemplateDialog::selectItemByLocation(const QString& strFileName)
+void WizMarkdownTemplateDialog::selectItemByLocation(const QString& strFileName)
 {
     if (strFileName.isEmpty())
         return;
 
     for (int i = 0; i < ui->listWidget->count(); i++)
     {
-        CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->item(i));
+        WizTemplateItem* item = dynamic_cast<WizTemplateItem*>(ui->listWidget->item(i));
         Q_ASSERT(item);
         if (item->fileName() == strFileName)
         {
@@ -194,12 +194,12 @@ void CWizMarkdownTemplateDialog::selectItemByLocation(const QString& strFileName
     }
 }
 
-CWizTemplateItem::CWizTemplateItem(QListWidget* view, int type)
+WizTemplateItem::WizTemplateItem(QListWidget* view, int type)
     : QListWidgetItem(view, type)
 {
 }
 
-void CWizTemplateItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
+void WizTemplateItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) const
 {
     p->save();
 
@@ -242,51 +242,51 @@ void CWizTemplateItem::draw(QPainter* p, const QStyleOptionViewItemV4* vopt) con
     p->restore();
 }
 
-QRect CWizTemplateItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
+QRect WizTemplateItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
 {
     if (selected && focused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,Utils::StyleHelper::ListBGTypeActive);
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect,Utils::WizStyleHelper::ListBGTypeActive);
     }
     else if (selected && !focused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,  Utils::StyleHelper::ListBGTypeHalfActive);
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect,  Utils::WizStyleHelper::ListBGTypeHalfActive);
     }
 
-    return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeNone);
+    return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeNone);
 }
 
-QString CWizTemplateItem::title() const
+QString WizTemplateItem::title() const
 {
     return m_title;
 }
 
-void CWizTemplateItem::setTitle(const QString& title)
+void WizTemplateItem::setTitle(const QString& title)
 {
     m_title = title;
 }
-bool CWizTemplateItem::isCustom() const
+bool WizTemplateItem::isCustom() const
 {
     return m_isCustom;
 }
 
-void CWizTemplateItem::setIsCustom(bool location)
+void WizTemplateItem::setIsCustom(bool location)
 {
     m_isCustom = location;
 }
-QString CWizTemplateItem::fileName() const
+QString WizTemplateItem::fileName() const
 {
     return m_fileName;
 }
 
-void CWizTemplateItem::setFileName(const QString& fileName)
+void WizTemplateItem::setFileName(const QString& fileName)
 {
     m_fileName = fileName;
 }
 
-bool CWizTemplateItem::operator<(const QListWidgetItem& other) const
+bool WizTemplateItem::operator<(const QListWidgetItem& other) const
 {
-    if (const CWizTemplateItem* pItem = dynamic_cast<const CWizTemplateItem*>(&other))
+    if (const WizTemplateItem* pItem = dynamic_cast<const WizTemplateItem*>(&other))
     {
         if (pItem->isCustom() != isCustom())
             return !isCustom();
@@ -297,9 +297,9 @@ bool CWizTemplateItem::operator<(const QListWidgetItem& other) const
     return QListWidgetItem::operator <(other);
 }
 
-void CWizMarkdownTemplateDialog::on_listWidget_itemSelectionChanged()
+void WizMarkdownTemplateDialog::on_listWidget_itemSelectionChanged()
 {
-    if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    if (WizTemplateItem* item = dynamic_cast<WizTemplateItem*>(ui->listWidget->currentItem()))
     {
         QString strCss = item->fileName();
         loadMarkdownHtml(strCss);
@@ -309,7 +309,7 @@ void CWizMarkdownTemplateDialog::on_listWidget_itemSelectionChanged()
 }
 
 
-void CWizMarkdownTemplateDialog::on_pushButton_Add_clicked()
+void WizMarkdownTemplateDialog::on_pushButton_Add_clicked()
 {
     QStringList files = QFileDialog::getOpenFileNames(
                             this,
@@ -317,13 +317,13 @@ void CWizMarkdownTemplateDialog::on_pushButton_Add_clicked()
                             QDir::homePath(),
                             tr("CSS files (*.css)"));
 
-    WizEnsurePathExists(Utils::PathResolve::customMarkdownTemplatesPath());
+    WizEnsurePathExists(Utils::WizPathResolve::customMarkdownTemplatesPath());
 
     foreach (QString file, files)
     {
         //copy file to template loaction
         QFileInfo info(file);
-        QString newFile = Utils::PathResolve::customMarkdownTemplatesPath() + info.fileName();
+        QString newFile = Utils::WizPathResolve::customMarkdownTemplatesPath() + info.fileName();
         WizDeleteFile(newFile);
         if (!QFile::copy(file, newFile))
         {
@@ -331,7 +331,7 @@ void CWizMarkdownTemplateDialog::on_pushButton_Add_clicked()
             return;
         }
 
-        CWizTemplateItem* item = new CWizTemplateItem(ui->listWidget);
+        WizTemplateItem* item = new WizTemplateItem(ui->listWidget);
         item->setTitle(info.baseName());
         item->setIsCustom(true);
         item->setFileName(newFile);
@@ -342,20 +342,20 @@ void CWizMarkdownTemplateDialog::on_pushButton_Add_clicked()
     ui->listWidget->sortItems();
 }
 
-void CWizMarkdownTemplateDialog::on_pushButton_OK_clicked()
+void WizMarkdownTemplateDialog::on_pushButton_OK_clicked()
 {
     saveListDataToSettings();
     accept();
 }
 
-void CWizMarkdownTemplateDialog::on_pushButton_Cancel_clicked()
+void WizMarkdownTemplateDialog::on_pushButton_Cancel_clicked()
 {
     reject();
 }
 
-void CWizMarkdownTemplateDialog::on_pushButton_delete_clicked()
+void WizMarkdownTemplateDialog::on_pushButton_delete_clicked()
 {
-    if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    if (WizTemplateItem* item = dynamic_cast<WizTemplateItem*>(ui->listWidget->currentItem()))
     {
         QString strCss = item->fileName();
         WizDeleteFile(strCss);
@@ -364,7 +364,7 @@ void CWizMarkdownTemplateDialog::on_pushButton_delete_clicked()
     }
 }
 
-void CWizMarkdownTemplateDialog::on_customContextMenuRequested(const QPoint& pos)
+void WizMarkdownTemplateDialog::on_customContextMenuRequested(const QPoint& pos)
 {
     if (!m_menu)
     {
@@ -374,9 +374,9 @@ void CWizMarkdownTemplateDialog::on_customContextMenuRequested(const QPoint& pos
     m_menu->popup(ui->listWidget->mapToGlobal(pos));
 }
 
-void CWizMarkdownTemplateDialog::on_actionSaveAs_clicked()
+void WizMarkdownTemplateDialog::on_actionSaveAs_clicked()
 {
-    if (CWizTemplateItem* item = dynamic_cast<CWizTemplateItem*>(ui->listWidget->currentItem()))
+    if (WizTemplateItem* item = dynamic_cast<WizTemplateItem*>(ui->listWidget->currentItem()))
     {
         QString strCss = item->fileName();
         QString filePath = QFileDialog::getSaveFileName(this, tr("Save File"),

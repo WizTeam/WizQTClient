@@ -1,19 +1,19 @@
 #include "wizCustomToolBar.h"
 #include <QMouseEvent>
 
-CWizCustomToolBar::CWizCustomToolBar(QWidget* hostWidget, QWidget *parent)
+WizCustomToolBar::WizCustomToolBar(QWidget* hostWidget, QWidget *parent)
     : QWidget(parent)
     , m_hostWidget(hostWidget)
 {
     setFixedHeight(68);
 }
 
-void CWizCustomToolBar::mousePressEvent(QMouseEvent *event)
+void WizCustomToolBar::mousePressEvent(QMouseEvent *event)
 {
     m_mousePoint = event->globalPos();
 }
 
-void CWizCustomToolBar::mouseMoveEvent(QMouseEvent *event)
+void WizCustomToolBar::mouseMoveEvent(QMouseEvent *event)
 {
     if(m_mousePoint != QPoint(0, 0))
     {
@@ -23,7 +23,7 @@ void CWizCustomToolBar::mouseMoveEvent(QMouseEvent *event)
     }
 }
 
-void CWizCustomToolBar::mouseReleaseEvent(QMouseEvent *)
+void WizCustomToolBar::mouseReleaseEvent(QMouseEvent *)
 {
     m_mousePoint = QPoint(0, 0);
 }

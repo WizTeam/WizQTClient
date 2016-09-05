@@ -8,14 +8,14 @@
 #include <QObject>
 #include <QString>
 
-class CWizLockedFile;
+class WizLockedFile;
 
-class CWizLocalPeer : public QObject
+class WizLocalPeer : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CWizLocalPeer(QObject *parent = 0, const QString &appId = QString());
+    explicit WizLocalPeer(QObject *parent = 0, const QString &appId = QString());
     bool isClient();
     bool sendMessage(const QString &message, int timeout, bool block);
     QString applicationId() const
@@ -32,7 +32,7 @@ protected:
     QString id;
     QString socketName;
     QLocalServer* server;
-    CWizLockedFile lockFile;
+    WizLockedFile lockFile;
 
 };
 

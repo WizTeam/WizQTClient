@@ -43,7 +43,7 @@
 
     \sa QFile::QFile()
 */
-CWizLockedFile::CWizLockedFile()
+WizLockedFile::WizLockedFile()
     : QFile()
 {
 #ifdef Q_OS_WIN
@@ -59,7 +59,7 @@ CWizLockedFile::CWizLockedFile()
 
     \sa QFile::QFile()
 */
-CWizLockedFile::CWizLockedFile(const QString &name)
+WizLockedFile::WizLockedFile(const QString &name)
     : QFile(name)
 {
 #ifdef Q_OS_WIN
@@ -75,7 +75,7 @@ CWizLockedFile::CWizLockedFile(const QString &name)
 
     \sa lockMode()
 */
-bool CWizLockedFile::isLocked() const
+bool WizLockedFile::isLocked() const
 {
     return m_lock_mode != NoLock;
 }
@@ -85,7 +85,7 @@ bool CWizLockedFile::isLocked() const
 
     \sa isLocked()
 */
-CWizLockedFile::LockMode CWizLockedFile::lockMode() const
+WizLockedFile::LockMode WizLockedFile::lockMode() const
 {
     return m_lock_mode;
 }
@@ -130,7 +130,7 @@ CWizLockedFile::LockMode CWizLockedFile::lockMode() const
 
 
 
-bool CWizLockedFile::lock(LockMode mode, bool block)
+bool WizLockedFile::lock(LockMode mode, bool block)
 {
     if (!isOpen()) {
         qWarning("CWizLockedFile::lock(): file is not opened");
@@ -166,7 +166,7 @@ bool CWizLockedFile::lock(LockMode mode, bool block)
 }
 
 
-bool CWizLockedFile::unlock()
+bool WizLockedFile::unlock()
 {
     if (!isOpen()) {
         qWarning("CWizLockedFile::unlock(): file is not opened");
@@ -193,7 +193,7 @@ bool CWizLockedFile::unlock()
     return true;
 }
 
-CWizLockedFile::~CWizLockedFile()
+WizLockedFile::~WizLockedFile()
 {
     if (isOpen())
         unlock();

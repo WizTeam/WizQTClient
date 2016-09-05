@@ -35,14 +35,14 @@
 */
 
 
-CWizTemplateFileItem* convertToTempalteFileItem(QTreeWidgetItem *item)
+WizTemplateFileItem* convertToTempalteFileItem(QTreeWidgetItem *item)
 {
-    return dynamic_cast<CWizTemplateFileItem *>(item);
+    return dynamic_cast<WizTemplateFileItem *>(item);
 }
 
-CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget *parent)
+WizDocTemplateDialog::WizDocTemplateDialog(WizDatabaseManager& dbMgr, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizDocTemplateDialog)
+    , ui(new Ui::WizDocTemplateDialog)
     , m_dbMgr(dbMgr)
     , m_purchaseDialog(nullptr)
 {
@@ -56,7 +56,7 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget
     ui->treeWidget->setAttribute(Qt::WA_MacShowFocusRect,false);
 
     ui->treeWidget->setMaximumWidth(200);
-    m_transitionView = new CWizDocumentTransitionView(this);
+    m_transitionView = new WizDocumentTransitionView(this);
     ui->horizontalLayout_2->addWidget(m_transitionView);
     m_transitionView->setStyleSheet(".QWidget{background-color:#FFFFFF;} QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}");
     m_transitionView->hide();
@@ -64,11 +64,11 @@ CWizDocTemplateDialog::CWizDocTemplateDialog(CWizDatabaseManager& dbMgr, QWidget
 
     connect(ui->webView_preview, SIGNAL(loadFinished(bool)), SLOT(load_templateDemo_finished(bool)));
 
-    CWizNoteManager noteManager(m_dbMgr);
+    WizNoteManager noteManager(m_dbMgr);
     noteManager.downloadTemplatePurchaseRecord();
 }
 
-CWizDocTemplateDialog::~CWizDocTemplateDialog()
+WizDocTemplateDialog::~WizDocTemplateDialog()
 {
     delete ui;
 }
@@ -78,7 +78,7 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     // 内置的空白模板
     TemplateData tmplEmpty;
     tmplEmpty.type = CustomTemplate;
-    tmplEmpty.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/newnote.ziw";
+    tmplEmpty.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/newnote.ziw";
     tmplEmpty.strName = QObject::tr("Empty Note");
     tmplEmpty.strTitle = QObject::tr("Untitled");
     tmplEmpty.isFree = true;
@@ -87,7 +87,7 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     // 内置的markdown模板
     TemplateData tmplMarkdown;
     tmplMarkdown.type = CustomTemplate;
-    tmplMarkdown.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
+    tmplMarkdown.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
     tmplMarkdown.strName = QObject::tr("Markdown Note");
     tmplMarkdown.strTitle = QObject::tr("Markdown Note.md");
     tmplMarkdown.isFree = true;
@@ -96,7 +96,7 @@ bool getGenericTemplateData(QList<TemplateData>& tmplList)
     return true;
 }
 
-void CWizDocTemplateDialog::initTemplateFileTreeWidget()
+void WizDocTemplateDialog::initTemplateFileTreeWidget()
 {    
     //
     QTreeWidgetItem *genericItem = new QTreeWidgetItem(ui->treeWidget);
@@ -107,14 +107,14 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
     getGenericTemplateData(tmplList);
     for (TemplateData tmpl : tmplList)
     {
-        CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, genericItem);
+        WizTemplateFileItem *item = new WizTemplateFileItem(tmpl, genericItem);
         item->setText(0, tmpl.strName);
         genericItem->addChild(item);
     }
 
     //
     //init template list download from server
-    QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+    QString jsonFile = Utils::WizPathResolve::wizTemplateJsonFilePath();
     if (QFile::exists(jsonFile))
     {
         QFile file(jsonFile);
@@ -137,7 +137,7 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
             for (TemplateData tmpl : templateList)
             {
                 tmpl.type = WizServerTemplate;
-                CWizTemplateFileItem *item = new CWizTemplateFileItem(tmpl, onlineItem);
+                WizTemplateFileItem *item = new WizTemplateFileItem(tmpl, onlineItem);
                 item->setText(0, tmpl.strName);
                 onlineItem->addChild(item);
             }
@@ -153,9 +153,9 @@ void CWizDocTemplateDialog::initTemplateFileTreeWidget()
 }
 
 
-QString CWizDocTemplateDialog::previewFileName()
+QString WizDocTemplateDialog::previewFileName()
 {
-    MainWindow *window = MainWindow::instance();
+    WizMainWindow *window = WizMainWindow::instance();
     if (window)
     {
         //FIXME: hardcode
@@ -177,35 +177,35 @@ QString CWizDocTemplateDialog::previewFileName()
     return "index.html";
 }
 
-void CWizDocTemplateDialog::getPurchasedTemplates()
+void WizDocTemplateDialog::getPurchasedTemplates()
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
        QNetworkAccessManager manager;
-       QString url = CommonApiEntry::asServerUrl() + "/a/templates/record?token=" + Token::token();
+       QString url = WizCommonApiEntry::asServerUrl() + "/a/templates/record?token=" + WizToken::token();
        QNetworkReply* reply = manager.get(QNetworkRequest(url));
-       CWizAutoTimeOutEventLoop loop(reply);
+       WizAutoTimeOutEventLoop loop(reply);
        loop.exec();
 
        if (loop.error() != QNetworkReply::NoError)
            return;
 
        QByteArray ba = loop.result();
-       QString file = Utils::PathResolve::wizTemplatePurchaseRecordFile();
+       QString file = Utils::WizPathResolve::wizTemplatePurchaseRecordFile();
        std::ofstream recordFile(file.toUtf8().constData(), std::ios::out | std::ios::trunc);
        recordFile << ba.constData();
     });
 }
 
-bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr)
+bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
 {
     if (WizServerTemplate != tmplData.type || tmplData.isFree)
         return true;
 
-    CWizAccountManager account(dbMgr);
+    WizAccountManager account(dbMgr);
     if (account.isVip())
         return true;
 
-    QString record = Utils::PathResolve::wizTemplatePurchaseRecordFile();
+    QString record = Utils::WizPathResolve::wizTemplatePurchaseRecordFile();
     if(!QFile::exists(record))
         return false;
 
@@ -232,27 +232,27 @@ bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr)
         if (!templateObj.HasMember("templateId"))
             continue;
 
-        if (templateObj.FindMember("templateId")->value.GetInt() == tmplData.id)
+        if (templateObj.FindMember("templateId")->value.getInt() == tmplData.id)
             return true;
     }
 
     return false;
 }
 
-void CWizDocTemplateDialog::createPurchaseDialog()
+void WizDocTemplateDialog::createPurchaseDialog()
 {
 #ifdef Q_OS_MAC
     if (m_purchaseDialog)
         return;
 
-    m_purchaseDialog = new CWizTemplatePurchaseDialog(this);
+    m_purchaseDialog = new WizTemplatePurchaseDialog(this);
     connect(m_purchaseDialog, SIGNAL(purchaseSuccess()), SLOT(purchaseFinished()));
 #endif
 }
 
-void CWizDocTemplateDialog::on_btn_ok_clicked()
+void WizDocTemplateDialog::on_btn_ok_clicked()
 {
-    CWizTemplateFileItem * pItem = convertToTempalteFileItem(ui->treeWidget->currentItem());
+    WizTemplateFileItem * pItem = convertToTempalteFileItem(ui->treeWidget->currentItem());
 
     if (pItem)
     {
@@ -299,12 +299,12 @@ void CWizDocTemplateDialog::on_btn_ok_clicked()
     }
 }
 
-void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
+void WizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
 {
     m_transitionView->hide();
     ui->webView_preview->show();
 
-    CWizTemplateFileItem * pItem = convertToTempalteFileItem(item);
+    WizTemplateFileItem * pItem = convertToTempalteFileItem(item);
     ui->btn_ok->setEnabled(pItem != nullptr);
     if (pItem)
     {
@@ -323,18 +323,18 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
             // download template file
             if (!info.exists())
             {
-                QString strUrl = CommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(pItem->templateData().id);
+                QString strUrl = WizCommonApiEntry::asServerUrl() + "/a/templates/download/" + QString::number(pItem->templateData().id);
                 qDebug() << "download template data form url : " << strUrl;
 
-                CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);
+                WizFileDownloader* downloader = new WizFileDownloader(strUrl, info.fileName(), info.absolutePath() + "/", false);
                 connect(downloader, SIGNAL(downloadDone(QString,bool)), SLOT(download_templateFile_finished(QString,bool)));
                 downloader->startDownload();
             }
         }
         else if (QFile::exists(strZiwFile))
         {
-            QString strTempFolder = Utils::PathResolve::tempPath() +Utils::Misc::extractFileTitle(strZiwFile) + "/";
-            if (CWizUnzipFile::extractZip(strZiwFile, strTempFolder))
+            QString strTempFolder = Utils::WizPathResolve::tempPath() +Utils::WizMisc::extractFileTitle(strZiwFile) + "/";
+            if (WizUnzipFile::extractZip(strZiwFile, strTempFolder))
             {
                 QString previewFile = strTempFolder + previewFileName();
                 if (!QFile::exists(previewFile))
@@ -363,26 +363,26 @@ void CWizDocTemplateDialog::itemClicked(QTreeWidgetItem *item, int)
     }
 }
 
-CWizTemplateFileItem::CWizTemplateFileItem(const TemplateData& data, QTreeWidgetItem* parent)
+WizTemplateFileItem::WizTemplateFileItem(const TemplateData& data, QTreeWidgetItem* parent)
     : QTreeWidgetItem(parent)
     , m_data(data)
 {
-    setText(0, Utils::Misc::extractFileTitle(data.strFileName));
+    setText(0, Utils::WizMisc::extractFileTitle(data.strFileName));
 }
 
-const TemplateData& CWizTemplateFileItem::templateData() const
+const TemplateData& WizTemplateFileItem::templateData() const
 {
     return m_data;
 }
 
-void CWizDocTemplateDialog::on_btn_cancel_clicked()
+void WizDocTemplateDialog::on_btn_cancel_clicked()
 {
     reject();
 }
 
 
 
-void CWizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)
+void WizDocTemplateDialog::download_templateFile_finished(QString fileName, bool ok)
 {
     qDebug() << "template file downloaded ; " << fileName;
     for (int i = 0; i < ui->treeWidget->topLevelItemCount(); ++i)
@@ -407,29 +407,29 @@ void CWizDocTemplateDialog::download_templateFile_finished(QString fileName, boo
     }
 }
 
-void CWizDocTemplateDialog::load_templateDemo_finished(bool Ok)
+void WizDocTemplateDialog::load_templateDemo_finished(bool Ok)
 {
     if (!Ok)
     {
         ui->webView_preview->hide();
-        m_transitionView->showAsMode("", CWizDocumentTransitionView::ErrorOccured);
+        m_transitionView->showAsMode("", WizDocumentTransitionView::ErrorOccured);
     }
 }
 
-void CWizDocTemplateDialog::purchaseFinished()
+void WizDocTemplateDialog::purchaseFinished()
 {
-    CWizNoteManager noteManager(m_dbMgr);
+    WizNoteManager noteManager(m_dbMgr);
     noteManager.downloadTemplatePurchaseRecord();
 }
 
-void CWizDocTemplateDialog::checkUnfinishedTransation()
+void WizDocTemplateDialog::checkUnfinishedTransation()
 {
 #ifdef BUILD4APPSTORE
-    QStringList idList = CWizTemplatePurchaseDialog::getUnfinishedTransations();
+    QStringList idList = WizTemplatePurchaseDialog::getUnfinishedTransations();
     if (idList.size() == 0 || idList.first().isEmpty())
         return;
 
-    int result = CWizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
+    int result = WizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
                              QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Ok);
     if (QMessageBox::Ok == result)
     {
@@ -457,13 +457,13 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
     if (d.HasMember("preview_link"))
     {
         //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
-        demoUrl = d.FindMember("preview_link")->value.GetString();
+        demoUrl = d.FindMember("preview_link")->value.getString();
     }
 
     QString thumbUrl;
     if (d.HasMember("thumb_link"))
     {
-        thumbUrl = d.FindMember("thumb_link")->value.GetString();
+        thumbUrl = d.FindMember("thumb_link")->value.getString();
     }
 
     const rapidjson::Value& templates = d.FindMember("templates")->value;
@@ -478,34 +478,34 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
 
         if (templateObj.HasMember("fileName"))
         {
-            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
+            data.strFileName = templateObj.FindMember("fileName")->value.getString();
             data.strThumbUrl.replace("{file_name}", data.strFileName);
             data.strDemoUrl.replace("{file_name}",data.strFileName);
-            data.strFileName = Utils::PathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
+            data.strFileName = Utils::WizPathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
         }
         if (templateObj.HasMember("folder"))
         {
-            data.strFolder = templateObj.FindMember("folder")->value.GetString();
+            data.strFolder = templateObj.FindMember("folder")->value.getString();
         }
         if (templateObj.HasMember("id"))
         {
-            data.id = templateObj.FindMember("id")->value.GetInt();
+            data.id = templateObj.FindMember("id")->value.getInt();
         }
         if (templateObj.HasMember("name"))
         {
-            data.strName = templateObj.FindMember("name")->value.GetString();
+            data.strName = templateObj.FindMember("name")->value.getString();
         }
         if (templateObj.HasMember("title"))
         {
-            data.strTitle = templateObj.FindMember("title")->value.GetString();
+            data.strTitle = templateObj.FindMember("title")->value.getString();
         }
         if (templateObj.HasMember("version"))
         {
-            data.strVersion = templateObj.FindMember("version")->value.GetString();
+            data.strVersion = templateObj.FindMember("version")->value.getString();
         }
         if (templateObj.HasMember("isFree"))
         {
-            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
+            data.isFree = templateObj.FindMember("isFree")->value.getBool();
         }        
 
         tmplMap.insert(data.id, data);
@@ -554,7 +554,7 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     // 内置的空白模板
     TemplateData tmplEmpty;
     tmplEmpty.type = CustomTemplate;
-    tmplEmpty.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/newnote.ziw";
+    tmplEmpty.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/newnote.ziw";
     tmplEmpty.strName = QObject::tr("Empty Note");
     tmplEmpty.strTitle = QObject::tr("Untitled");
     tmplEmpty.isFree = true;
@@ -563,7 +563,7 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     // 内置的markdown模板
     TemplateData tmplMarkdown;
     tmplMarkdown.type = CustomTemplate;
-    tmplMarkdown.strFileName = Utils::PathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
+    tmplMarkdown.strFileName = Utils::WizPathResolve::resourcesPath() + "templates/generic/markdown.md.ziw";
     tmplMarkdown.strName = QObject::tr("Markdown Note");
     tmplMarkdown.strTitle = QObject::tr("Markdown Note.md");
     tmplMarkdown.isFree = true;
@@ -579,7 +579,7 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
     tmplList.append(tmplSep);
 
     // 通过服务器下载的笔记模板
-    QString jsonFile = Utils::PathResolve::wizTemplateJsonFilePath();
+    QString jsonFile = Utils::WizPathResolve::wizTemplateJsonFilePath();
     if (QFile::exists(jsonFile))
     {
         QFile file(jsonFile);
@@ -602,7 +602,7 @@ bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList)
 
 WizTemplateUpgradeResult showTemplateUnusableDialog(QWidget* parent)
 {
-    CMessageBox msg(parent);
+    WizMessageBox msg(parent);
     msg.setIcon(QMessageBox::Information);
     msg.setWindowTitle(QObject::tr("Info"));
     msg.setText(QObject::tr("You can use this template after upgrading to VIP or buy it."));

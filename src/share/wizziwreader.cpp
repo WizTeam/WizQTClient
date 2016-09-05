@@ -9,18 +9,18 @@
 #include "wizDatabase.h"
 
 
-CWizZiwReader::CWizZiwReader(QObject *parent)
+WizZiwReader::WizZiwReader(QObject *parent)
     : QObject(parent)
     , m_pDatabase(NULL)
 {
 }
 
-QString CWizZiwReader::certPassword()
+QString WizZiwReader::certPassword()
 {
-    return m_pDatabase->GetCertPassword();
+    return m_pDatabase->getCertPassword();
 }
 
-bool CWizZiwReader::loadZiwHeader(const QString& strFileName, WIZZIWHEADER& header)
+bool WizZiwReader::loadZiwHeader(const QString& strFileName, WIZZIWHEADER& header)
 {
     QFile file(strFileName);
 
@@ -63,7 +63,7 @@ bool CWizZiwReader::loadZiwHeader(const QString& strFileName, WIZZIWHEADER& head
     return true;
 }
 
-bool CWizZiwReader::loadZiwData(const QString& strFileName, QByteArray& strData)
+bool WizZiwReader::loadZiwData(const QString& strFileName, QByteArray& strData)
 {
     QFile file(strFileName);
 
@@ -80,7 +80,7 @@ bool CWizZiwReader::loadZiwData(const QString& strFileName, QByteArray& strData)
     return true;
 }
 
-ZiwEncryptType CWizZiwReader::encryptType(const QString& strFileName)
+ZiwEncryptType WizZiwReader::encryptType(const QString& strFileName)
 {
 
     WIZZIWHEADER header;
@@ -95,24 +95,24 @@ ZiwEncryptType CWizZiwReader::encryptType(const QString& strFileName)
         return ZiwUnknown;
 }
 
-bool CWizZiwReader::isEncryptedFile(const QString& fileName)
+bool WizZiwReader::isEncryptedFile(const QString& fileName)
 {
     return encryptType(fileName) == ZiwR;
 }
 
 
-bool CWizZiwReader::isFileAccessible(const QString& encryptedFile)
+bool WizZiwReader::isFileAccessible(const QString& encryptedFile)
 {
     QByteArray data;
     return decryptFileToData(encryptedFile, data);
 }
 
-bool CWizZiwReader::isRSAKeysAvailable()
+bool WizZiwReader::isRSAKeysAvailable()
 {
     return !m_N.isEmpty() && !m_e.isEmpty() && !m_d.isEmpty();
 }
 
-void CWizZiwReader::setRSAKeys(const QByteArray& strN, \
+void WizZiwReader::setRSAKeys(const QByteArray& strN, \
                                const QByteArray& stre, \
                                const QByteArray& str_encrypted_d, \
                                const QString& strHint)
@@ -124,7 +124,7 @@ void CWizZiwReader::setRSAKeys(const QByteArray& strN, \
     m_d.clear();
 }
 
-bool CWizZiwReader::decryptRSAdPart(QByteArray& d)
+bool WizZiwReader::decryptRSAdPart(QByteArray& d)
 {
     Q_ASSERT(!m_encrypted_d.isEmpty());
 
@@ -134,14 +134,14 @@ bool CWizZiwReader::decryptRSAdPart(QByteArray& d)
     return decryptRSAdPart(rawEncrypted_d, d);
 }
 
-bool CWizZiwReader::decryptRSAdPart(const QByteArray& encrypted_d, QByteArray& d)
+bool WizZiwReader::decryptRSAdPart(const QByteArray& encrypted_d, QByteArray& d)
 {
     Q_ASSERT(!certPassword().isEmpty());
 
     return WizAESDecryptToString((const unsigned char *)certPassword().toUtf8().constData(), encrypted_d, d);
 }
 
-bool CWizZiwReader::encryptRSAdPart(QByteArray& encrypted_d)
+bool WizZiwReader::encryptRSAdPart(QByteArray& encrypted_d)
 {
     Q_ASSERT(!m_d.isEmpty());
 
@@ -159,14 +159,14 @@ bool CWizZiwReader::encryptRSAdPart(QByteArray& encrypted_d)
     return true;
 }
 
-bool CWizZiwReader::encryptRSAdPart(const QByteArray& d, QByteArray& encrypted_d)
+bool WizZiwReader::encryptRSAdPart(const QByteArray& d, QByteArray& encrypted_d)
 {
     Q_ASSERT(!certPassword().isEmpty());
 
     return WizAESDecryptToString((const unsigned char *)certPassword().toUtf8().constData(), d, encrypted_d);
 }
 
-bool CWizZiwReader::encryptZiwPassword(const QByteArray& ziwPassword, QByteArray& encryptedZiwPassword)
+bool WizZiwReader::encryptZiwPassword(const QByteArray& ziwPassword, QByteArray& encryptedZiwPassword)
 {
     Q_ASSERT(!m_N.isEmpty());
     Q_ASSERT(!m_e.isEmpty());
@@ -182,7 +182,7 @@ bool CWizZiwReader::encryptZiwPassword(const QByteArray& ziwPassword, QByteArray
 }
 
 
-bool CWizZiwReader::decryptZiwPassword(const QByteArray& encryptedZiwPassword, QByteArray& ziwPassword)
+bool WizZiwReader::decryptZiwPassword(const QByteArray& encryptedZiwPassword, QByteArray& ziwPassword)
 {
     Q_ASSERT(!m_N.isEmpty());
     Q_ASSERT(!m_e.isEmpty());
@@ -200,7 +200,7 @@ bool CWizZiwReader::decryptZiwPassword(const QByteArray& encryptedZiwPassword, Q
 
 
 // encrypt note decrypted before
-bool CWizZiwReader::encryptDataToFile(const QByteArray& sourceData, \
+bool WizZiwReader::encryptDataToFile(const QByteArray& sourceData, \
                            const QString& destFileName)
 {
     //random password
@@ -240,7 +240,7 @@ bool CWizZiwReader::encryptDataToFile(const QByteArray& sourceData, \
 }
 
 
-bool CWizZiwReader::encryptFileToFile(const QString& sourceFileName, \
+bool WizZiwReader::encryptFileToFile(const QString& sourceFileName, \
                                           const QString& destFileName)
 {
     QFile sourceFile(sourceFileName);
@@ -260,7 +260,7 @@ bool CWizZiwReader::encryptFileToFile(const QString& sourceFileName, \
 }
 
 //
-bool CWizZiwReader::decryptFileToData(const QString& strEncryptedFileName, QByteArray& destData)
+bool WizZiwReader::decryptFileToData(const QString& strEncryptedFileName, QByteArray& destData)
 {
     if (!decryptRSAdPart(m_d))
         return false;
@@ -289,7 +289,7 @@ bool CWizZiwReader::decryptFileToData(const QString& strEncryptedFileName, QByte
     return true;
 }
 
-bool CWizZiwReader::decryptFileToFile(const QString& strEncryptedFileName, const QString& destFileName)
+bool WizZiwReader::decryptFileToFile(const QString& strEncryptedFileName, const QString& destFileName)
 {
     QByteArray plainData;
     if (!decryptFileToData(strEncryptedFileName, plainData))
@@ -314,7 +314,7 @@ bool CWizZiwReader::decryptFileToFile(const QString& strEncryptedFileName, const
     return true;
 }
 
-bool CWizZiwReader::initZiwHeader(WIZZIWHEADER& header, const QString& ziwPassword)
+bool WizZiwReader::initZiwHeader(WIZZIWHEADER& header, const QString& ziwPassword)
 {
     // encrypt ziw cipher
     QByteArray encryptedZiwPassword;

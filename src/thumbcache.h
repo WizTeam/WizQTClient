@@ -5,23 +5,23 @@
 
 struct WIZABSTRACT;
 
-class ThumbCachePrivate;
+class WizThumbCachePrivate;
 
-class ThumbCache : public QObject
+class WizThumbCache : public QObject
 {
     Q_OBJECT
 
 public:
-    ThumbCache();
-    ~ThumbCache();
+    WizThumbCache();
+    ~WizThumbCache();
 
-    static ThumbCache* instance();
+    static WizThumbCache* instance();
     static bool find(const QString& strKbGUID, const QString& strGUID, WIZABSTRACT& abs);
 
 Q_SIGNALS:
     void loaded(const QString& strKbGUID, const QString& strGUID);
 
-    friend class ThumbCachePrivate;
+    friend class WizThumbCachePrivate;
 };
 
 

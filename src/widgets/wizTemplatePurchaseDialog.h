@@ -12,16 +12,16 @@ class QNetworkReply;
 class QNetworkAccessManager;
 
 namespace Ui {
-class CWizTemplatePurchaseDialog;
+class WizTemplatePurchaseDialog;
 }
 
-class CWizTemplatePurchaseDialog : public QDialog, public CWizIAPCaller
+class WizTemplatePurchaseDialog : public QDialog, public WizIAPCaller
 {
     Q_OBJECT
 
 public:
-    explicit CWizTemplatePurchaseDialog(QWidget *parent = 0);
-    ~CWizTemplatePurchaseDialog();
+    explicit WizTemplatePurchaseDialog(QWidget *parent = 0);
+    ~WizTemplatePurchaseDialog();
 
     void showTemplateInfo(int tmplId, const QString& tmplName, const QString& thumbUrl);
 
@@ -64,10 +64,10 @@ private:
     void on_purchase_successed();
 
 private:
-    Ui::CWizTemplatePurchaseDialog *ui;
+    Ui::WizTemplatePurchaseDialog *ui;
     QNetworkAccessManager* m_net;
     int m_tmplId;
-    CWizIAPHelper* m_iapHelper;
+    WizIAPHelper* m_iapHelper;
     QString m_transationID;
     QTimer m_waitingTimer;
 };

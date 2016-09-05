@@ -13,12 +13,12 @@ class QMenu;
 Q_FORWARD_DECLARE_OBJC_CLASS(NSMenu);
 #endif
 
-class CWizUserInfoWidgetBaseMac : public CWizCocoaViewContainer
+class WizUserInfoWidgetBaseMac : public WizCocoaViewContainer
 {
     Q_OBJECT
 
 public:
-    explicit CWizUserInfoWidgetBaseMac(QWidget* parent);
+    explicit WizUserInfoWidgetBaseMac(QWidget* parent);
 
 protected:
     QString m_text;

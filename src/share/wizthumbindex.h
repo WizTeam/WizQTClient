@@ -8,33 +8,33 @@
 
 const int nThumbnailPixmapMaxWidth = 50;
 
-class CThumbIndex
+class WizThumbIndex
 {
 private:
     CppSQLite3DB m_dbThumb;
 
 public:
-    CThumbIndex();
-    ~CThumbIndex();
+    WizThumbIndex();
+    ~WizThumbIndex();
 
 private:
-    bool InitThumbDB();
+    bool initThumbDB();
     bool checkThumbTable(const CString& strTableName, const CString& strTableSQL);
-    bool UpdateAbstract(const WIZABSTRACT& abstract, const CString& type);
-    bool AbstractFromGUID(const CString& guid, WIZABSTRACT& lpszAbstract,const CString& type);
-    bool AbstractIsExist(const CString& guid,const CString& type);
+    bool updateAbstract(const WIZABSTRACT& abstract, const CString& type);
+    bool abstractFromGuid(const CString& guid, WIZABSTRACT& lpszAbstract,const CString& type);
+    bool abstractIsExist(const CString& guid,const CString& type);
 
 public:
-    bool OpenThumb(const CString& strFileName, const QString& strVersion);
-    void CloseThumb();
-    bool IsThumbOpened();
-    bool UpdatePadAbstract(const WIZABSTRACT &lpszAbstract);
-    bool UpdateIphoneAbstract(const WIZABSTRACT &lpszAbstract);
-    bool PhoneAbstractFromGUID(const CString& guid, WIZABSTRACT& lpszAbstract);
-    bool PadAbstractFromGUID(const CString& guid, WIZABSTRACT& lpszAbstract);
-    bool DeleteAbstractByGUID(const CString& guid);
-    bool PhoneAbstractExist(const CString& guid);
-    bool PadAbstractExist(const CString& guid);
+    bool openThumb(const CString& strFileName, const QString& strVersion);
+    void closeThumb();
+    bool isThumbOpened();
+    bool updatePadAbstract(const WIZABSTRACT &lpszAbstract);
+    bool updateIphoneAbstract(const WIZABSTRACT &lpszAbstract);
+    bool phoneAbstractFromGuid(const CString& guid, WIZABSTRACT& lpszAbstract);
+    bool padAbstractFromGuid(const CString& guid, WIZABSTRACT& lpszAbstract);
+    bool deleteAbstractByGuid(const CString& guid);
+    bool phoneAbstractExist(const CString& guid);
+    bool padAbstractExist(const CString& guid);
 };
 
 

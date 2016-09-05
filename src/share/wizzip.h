@@ -6,11 +6,11 @@
 
 class QuaZip;
 
-class CWizZipFile
+class WizZipFile
 {
 public:
-    CWizZipFile();
-    virtual ~CWizZipFile();
+    WizZipFile();
+    virtual ~WizZipFile();
 protected:
     QuaZip* m_zip;
 public:
@@ -20,11 +20,11 @@ public:
 };
 
 
-class CWizUnzipFile
+class WizUnzipFile
 {
 public:
-    CWizUnzipFile();
-    virtual ~CWizUnzipFile();
+    WizUnzipFile();
+    virtual ~WizUnzipFile();
 protected:
     QuaZip* m_zip;
     QStringList m_names;

@@ -9,7 +9,7 @@ class QDateTime;
 
 namespace Utils {
 
-class Misc
+class WizMisc
 {
 public:
     static QString time2humanReadable(const QDateTime& time);

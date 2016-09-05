@@ -9,9 +9,9 @@
 #include "share/wizuihelper.h"
 #include "wizDocumentListViewItem.h"
 
-class CWizTagListWidget;
-class CWizFolderSelector;
-class CWizScrollBar;
+class WizTagListWidget;
+class WizFolderSelector;
+class WizScrollBar;
 class CWizUserAvatarDownloaderHost;
 
 #define WIZNOTE_CUSTOM_SCROLLBAR
@@ -37,7 +37,7 @@ enum DocumentsSortingType {
 };
 
 
-class CWizDocumentListView : public QListWidget
+class WizDocumentListView : public QListWidget
 {
     Q_OBJECT
 
@@ -49,12 +49,12 @@ public:
     };
 
 public:
-    explicit CWizDocumentListView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual ~CWizDocumentListView();
+    explicit WizDocumentListView(WizExplorerApp& app, QWidget *parent = 0);
+    virtual ~WizDocumentListView();
 
     int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
-    QSize itemSizeFromViewType(CWizDocumentListView::ViewType type);
+    QSize itemSizeFromViewType(WizDocumentListView::ViewType type);
 
     void setLeadInfoState(int state);
 
@@ -88,24 +88,24 @@ protected:
     virtual void dropEvent(QDropEvent * event);
 
 private:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
-    CWizScrollBar* m_vScroll;
+    WizScrollBar* m_vScroll;
 #endif
 
-    CWizDocumentListView::ViewType m_nViewType;
+    WizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
     int m_nLeadInfoState;
 
     QMenu* m_menuDocument;
-    CWizTagListWidget* m_tagList;
+    WizTagListWidget* m_tagList;
 
     QPoint m_dragStartPosition;
 
-    QList<CWizDocumentListViewDocumentItem*> m_rightButtonFocusedItems;
+    QList<WizDocumentListViewDocumentItem*> m_rightButtonFocusedItems;
 
-    QList<CWizDocumentListViewSectionItem*> m_sectionItems;
+    QList<WizDocumentListViewSectionItem*> m_sectionItems;
 
 //#ifndef Q_OS_MAC
     // used for smoothly scroll
@@ -143,10 +143,10 @@ public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
 
     int documentIndexFromGUID(const QString &strGUID);
-    CWizDocumentListViewBaseItem *itemFromIndex(int index) const;
-    CWizDocumentListViewBaseItem* itemFromIndex(const QModelIndex &index) const;
-    CWizDocumentListViewDocumentItem* documentItemAt(int index) const;
-    CWizDocumentListViewDocumentItem *documentItemFromIndex(const QModelIndex &index) const;
+    WizDocumentListViewBaseItem *itemFromIndex(int index) const;
+    WizDocumentListViewBaseItem* itemFromIndex(const QModelIndex &index) const;
+    WizDocumentListViewDocumentItem* documentItemAt(int index) const;
+    WizDocumentListViewDocumentItem *documentItemFromIndex(const QModelIndex &index) const;
 
     const WIZDOCUMENTDATA& documentFromIndex(const QModelIndex &index) const;
     const WizDocumentListViewItemData& documentItemDataFromIndex(const QModelIndex& index) const;

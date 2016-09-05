@@ -9,15 +9,15 @@
 
 
 
-class CWizUserSettings;
+class WizUserSettings;
 class WizWebEngineView;
 
-class CWizShareLinkDialog : public QDialog
+class WizShareLinkDialog : public QDialog
 {
     Q_OBJECT
 public:
-    CWizShareLinkDialog(CWizUserSettings& settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
-    ~CWizShareLinkDialog();
+    WizShareLinkDialog(WizUserSettings& settings, QWidget *parent = 0, Qt::WindowFlags f = 0);
+    ~WizShareLinkDialog();
 
     virtual QSize sizeHint() const;
 
@@ -59,7 +59,7 @@ signals:
     void formateISO8601StringChanged();
 
 private:
-    CWizUserSettings& m_settings;
+    WizUserSettings& m_settings;
     WizWebEngineView* m_view;
     WIZDOCUMENTDATA m_doc;
     QPropertyAnimation* m_animation;

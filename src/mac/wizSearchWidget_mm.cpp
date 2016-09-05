@@ -60,12 +60,12 @@ public:
 
 
 
-WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchView *parent)
+WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     : QObject(parent)
     , m_editor(parent)
     , m_popupWgtWidth(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH)
     , m_usable(true)
-    , m_searcher(new CWizSuggestionSeacher(this))
+    , m_searcher(new WizSuggestionSeacher(this))
 {
     m_popupWgt = new QWidget;
     m_popupWgt->setWindowFlags(Qt::Popup);
@@ -76,7 +76,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchView *parent)
 
     resetContainerSize(m_popupWgtWidth, 170);
 
-    m_treeWgt = new CWizSuggestiongList;
+    m_treeWgt = new WizSuggestiongList;
     m_treeWgt->setFixedHeight(134);
     m_treeWgt->setFixedWidth(m_popupWgtWidth);
     m_treeWgt->setFocusPolicy(Qt::NoFocus);
@@ -154,7 +154,7 @@ WizSuggestCompletionon::WizSuggestCompletionon(CWizSearchView *parent)
     connect(m_timer, SIGNAL(timeout()), SLOT(autoSuggest()));
     connect(m_editor, SIGNAL(textEdited(QString)), m_timer, SLOT(start()));
 
-    CWizPositionDelegate& delegate = CWizPositionDelegate::instance();
+    WizPositionDelegate& delegate = WizPositionDelegate::instance();
     delegate.addListener(m_popupWgt);
 }
 
@@ -163,7 +163,7 @@ WizSuggestCompletionon::~WizSuggestCompletionon()
     delete m_popupWgt;
 }
 
-void WizSuggestCompletionon::setUserSettings(CWizUserSettings* settings)
+void WizSuggestCompletionon::setUserSettings(WizUserSettings* settings)
 {
     m_settings = settings;
 }
@@ -316,10 +316,10 @@ void WizSuggestCompletionon::doneCompletion()
     }
 }
 
-void searchTitleFromDB(CWizDatabase& db, const QString& title, QStringList& suggestions)
+void searchTitleFromDB(WizDatabase& db, const QString& title, QStringList& suggestions)
 {
     CWizStdStringArray arrayTitle;
-    if (db.GetDocumentTitleStartWith(title, 5, arrayTitle))
+    if (db.getDocumentTitleStartWith(title, 5, arrayTitle))
     {
         for (CString title : arrayTitle)
         {
@@ -356,7 +356,7 @@ void WizSuggestCompletionon::resetContainerSize(int width, int height)
 {
     m_popupWgt->setFixedSize(m_editor->sizeHint().width(), height);
     QRect rect(0, 0, m_editor->sizeHint().width(), height); //= geometry();    
-    QRegion region = Utils::StyleHelper::borderRadiusRegion(rect);
+    QRegion region = Utils::WizStyleHelper::borderRadiusRegion(rect);
 
     m_popupWgt->setMask(region);
 }
@@ -366,13 +366,13 @@ void WizSuggestCompletionon::preventSuggest()
     m_timer->stop();
 }
 
-CWizSuggestiongList::CWizSuggestiongList(QWidget* parent)
+WizSuggestiongList::WizSuggestiongList(QWidget* parent)
     : QTreeWidget(parent)
 {
     setMouseTracking(true);
 }
 
-void CWizSuggestiongList::mouseMoveEvent(QMouseEvent* event)
+void WizSuggestiongList::mouseMoveEvent(QMouseEvent* event)
 {
     QTreeWidget::mouseMoveEvent(event);
     QTreeWidgetItem* item = itemAt(event->pos());
@@ -380,7 +380,7 @@ void CWizSuggestiongList::mouseMoveEvent(QMouseEvent* event)
     update();
 }
 
-void CWizSuggestiongList::leaveEvent(QEvent* ev)
+void WizSuggestiongList::leaveEvent(QEvent* ev)
 {
     QTreeWidget::leaveEvent(ev);
     setCurrentItem(nullptr);
@@ -389,17 +389,17 @@ void CWizSuggestiongList::leaveEvent(QEvent* ev)
 
 
 
-CWizSuggestionSeacher::CWizSuggestionSeacher(QObject* parent)
+WizSuggestionSeacher::WizSuggestionSeacher(QObject* parent)
     : QObject(parent)
 {
 }
 
-void CWizSuggestionSeacher::searchSuggestion(const QString& inputText)
+void WizSuggestionSeacher::searchSuggestion(const QString& inputText)
 {
     QStringList suggestions;
-    CWizDatabaseManager* manager = CWizDatabaseManager::instance();
+    WizDatabaseManager* manager = WizDatabaseManager::instance();
 
-    CWizDatabase& db = manager->db();
+    WizDatabase& db = manager->db();
     searchTitleFromDB(db, inputText, suggestions);
 
     for (int i = 0; i < manager->count(); i++)
@@ -407,7 +407,7 @@ void CWizSuggestionSeacher::searchSuggestion(const QString& inputText)
         if (suggestions.count() >= 5)
             break;
 
-        CWizDatabase& db = manager->at(i);
+        WizDatabase& db = manager->at(i);
         searchTitleFromDB(db, inputText, suggestions);
     }
 

@@ -10,23 +10,23 @@
 
 typedef std::function<void(void)> WizTaskMethod;
 
-class CWizIOTask
+class WizIOTask
 {
 
 public:
-    CWizIOTask()
+    WizIOTask()
     {
         m_task_method = NULL;
         m_callback_method = NULL;
     }
 
-    CWizIOTask(WizTaskMethod _task_method, WizTaskMethod _callback_method)
+    WizIOTask(WizTaskMethod _task_method, WizTaskMethod _callback_method)
     {
         m_task_method = _task_method;
         m_callback_method = _callback_method;
     }
 
-    CWizIOTask(const CWizIOTask& t)
+    WizIOTask(const WizIOTask& t)
     {
         m_task_method = t.task();
         m_callback_method = t.callback();
@@ -41,57 +41,57 @@ private:
 };
 
 template <typename T>
-class CWizFutureWatcher : public QFutureWatcher<T>
+class WizFutureWatcher : public QFutureWatcher<T>
 {
 
 public:
-    CWizFutureWatcher(const CWizIOTask& ts, QObject* parent = 0)
+    WizFutureWatcher(const WizIOTask& ts, QObject* parent = 0)
         : QFutureWatcher<T>(parent)
         , m_task(ts)
     {
     }
 
-    CWizIOTask task() { return m_task; }
+    WizIOTask task() { return m_task; }
 
 private:
-    CWizIOTask m_task;
+    WizIOTask m_task;
 };
 
 
-class CWizIOHost : public QObject
+class WizIOHost : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CWizIOHost(QObject* parent = 0);
+    explicit WizIOHost(QObject* parent = 0);
 
 private Q_SLOTS:
-    void on_taskBegin(const CWizIOTask& task);
+    void on_taskBegin(const WizIOTask& task);
     void on_watcher_finished();
 
 Q_SIGNALS:
-    void taskEnd(const CWizIOTask& task);
+    void taskEnd(const WizIOTask& task);
 };
 
 
-class CWizIOHostThread : public QThread
+class WizIOHostThread : public QThread
 {
     Q_OBJECT
 
 public:
-    explicit CWizIOHostThread(QObject *parent = 0);
+    explicit WizIOHostThread(QObject *parent = 0);
     virtual void run();
 
     void postTask(WizTaskMethod fn, WizTaskMethod callback);
 
 private:
-    CWizIOHost* m_ioHost;
+    WizIOHost* m_ioHost;
 
 private Q_SLOTS:
-    void on_taskEnd(const CWizIOTask& task);
+    void on_taskEnd(const WizIOTask& task);
 
 Q_SIGNALS:
-    void taskBegin(const CWizIOTask& task);
+    void taskBegin(const WizIOTask& task);
 };
 
 

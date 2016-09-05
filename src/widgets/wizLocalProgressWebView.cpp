@@ -7,7 +7,7 @@
 #include <QPalette>
 #include "share/wizwebengineview.h"
 
-CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(parent)
+WizLocalProgressWebView::WizLocalProgressWebView(QWidget *parent) : QWidget(parent)
 {
     setContentsMargins(0, 0, 0, 0);
 
@@ -24,24 +24,24 @@ CWizLocalProgressWebView::CWizLocalProgressWebView(QWidget *parent) : QWidget(pa
     layout->addWidget(m_web);
 }
 
-CWizLocalProgressWebView::~CWizLocalProgressWebView()
+WizLocalProgressWebView::~WizLocalProgressWebView()
 {
 
 }
-WizWebEngineView* CWizLocalProgressWebView::web()
+WizWebEngineView* WizLocalProgressWebView::web()
 {
     return m_web;
 }
 
 
-void CWizLocalProgressWebView::hideEvent(QHideEvent* ev)
+void WizLocalProgressWebView::hideEvent(QHideEvent* ev)
 {
     QWidget::hideEvent(ev);
 
     emit widgetStatusChanged();
 }
 
-void CWizLocalProgressWebView::showEvent(QShowEvent* ev)
+void WizLocalProgressWebView::showEvent(QShowEvent* ev)
 {
     emit willShow();
 

@@ -9,40 +9,40 @@ class QString;
 class QMenu;
 
 struct WIZDOCUMENTDATA;
-class CWizDatabase;
-class CWizTagListWidget;
-class CWizNoteInfoForm;
-class CWizDocumentWebEngine;
-class CWizDocumentWebView;
-class CWizAttachmentListWidget;
-class CWizAnimateAction;
-class CWizExplorerApp;
+class WizDatabase;
+class WizTagListWidget;
+class WizNoteInfoForm;
+class WizDocumentWebEngine;
+class WizDocumentWebView;
+class WizAttachmentListWidget;
+class WizAnimateAction;
+class WizExplorerApp;
 class QNetworkReply;
 
-class CWizDocumentView;
+class WizDocumentView;
 class INoteView;
-class CWizCommentManager;
+class WizCommentManager;
 
-class TitleEdit;
-class InfoBar;
-class NotifyBar;
-class EditorToolBar;
-class CellButton;
-class RoundCellButton;
-class CWizTagBar;
+class WizTitleEdit;
+class WizInfoBar;
+class WizNotifyBar;
+class WizEditorToolBar;
+class WizCellButton;
+class WizRoundCellButton;
+class WizTagBar;
 
-class TitleBar : public QWidget
+class WizTitleBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit TitleBar(CWizExplorerApp& app, QWidget *parent);
-    CWizDocumentView* noteView();
-    EditorToolBar* editorToolBar();
+    explicit WizTitleBar(WizExplorerApp& app, QWidget *parent);
+    WizDocumentView* noteView();
+    WizEditorToolBar* editorToolBar();
     void setLocked(bool bReadOnly, int nReason, bool bIsGroup);
     void showMessageTips(Qt::TextFormat format, const QString& strInfo);
     void hideMessageTips(bool useAnimation);
-    void setEditor(CWizDocumentWebView* editor);
+    void setEditor(WizDocumentWebView* editor);
 
     void setBackgroundColor(QColor color);
 
@@ -74,7 +74,7 @@ public Q_SLOTS:
 
     void onCommentsButtonClicked();
     void onCommentPageLoaded(bool ok);
-    void onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
+    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk);
 
     void on_commentUrlAcquired(QString GUID, QString url);
     void on_commentCountAcquired(QString GUID, int count);
@@ -103,36 +103,36 @@ private:
     void showEditorBar();
     void setTagBarVisible(bool visible);
     //
-    CWizDocumentWebView* m_editor;
-    CWizExplorerApp& m_app;
+    WizDocumentWebView* m_editor;
+    WizExplorerApp& m_app;
 
-    TitleEdit* m_editTitle;
-    CWizTagBar* m_tagBar;
-    InfoBar* m_infoBar;
-    NotifyBar* m_notifyBar;
-    EditorToolBar* m_editorBar;
+    WizTitleEdit* m_editTitle;
+    WizTagBar* m_tagBar;
+    WizInfoBar* m_infoBar;
+    WizNotifyBar* m_notifyBar;
+    WizEditorToolBar* m_editorBar;
 
-    RoundCellButton* m_editBtn;
-    CellButton* m_separateBtn;
-    CellButton* m_tagBtn;    
+    WizRoundCellButton* m_editBtn;
+    WizCellButton* m_separateBtn;
+    WizCellButton* m_tagBtn;    
 //    CellButton* m_emailBtn;
-    CellButton* m_shareBtn;
-    CellButton* m_attachBtn;
+    WizCellButton* m_shareBtn;
+    WizCellButton* m_attachBtn;
 //    CellButton* m_historyBtn;
-    CellButton* m_infoBtn;    
+    WizCellButton* m_infoBtn;    
 
     QMenu* m_shareMenu;
 
-    CellButton* m_commentsBtn;
+    WizCellButton* m_commentsBtn;
 
-    CWizCommentManager* m_commentManager;
+    WizCommentManager* m_commentManager;
 
-    CWizTagListWidget* m_tags;
-    CWizAttachmentListWidget* m_attachments;
-    CWizNoteInfoForm* m_info;
+    WizTagListWidget* m_tags;
+    WizAttachmentListWidget* m_attachments;
+    WizNoteInfoForm* m_info;
 
     QString m_strWebchannelUrl;
-    CWizAnimateAction* m_editButtonAnimation;
+    WizAnimateAction* m_editButtonAnimation;
 };
 
 

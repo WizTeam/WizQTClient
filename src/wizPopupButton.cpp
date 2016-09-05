@@ -7,7 +7,7 @@
 #include "wizDocumentListView.h"
 #include <QApplication>
 
-CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
+WizPopupButton::WizPopupButton(WizExplorerApp& app, QWidget *parent)
     : QToolButton(parent)
     , m_app(app)
     , m_iconSize(23, 14)
@@ -18,7 +18,7 @@ CWizPopupButton::CWizPopupButton(CWizExplorerApp& app, QWidget *parent)
 //    m_iconArraw.addFile(strIconPath);
 }
 
-void CWizPopupButton::paintEvent(QPaintEvent* event)
+void WizPopupButton::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
 
@@ -65,7 +65,7 @@ void CWizPopupButton::paintEvent(QPaintEvent* event)
     }
 }
 
-void CWizPopupButton::createAction(const QString& text, int type,
+void WizPopupButton::createAction(const QString& text, int type,
                                    QMenu* menu, QActionGroup* group)
 {
     QAction* action = new QAction(text, menu);
@@ -76,7 +76,7 @@ void CWizPopupButton::createAction(const QString& text, int type,
     connect(action, SIGNAL(triggered()), SLOT(on_action_triggered()));
 }
 
-void CWizPopupButton::setActionChecked(const QMenu* menu, int type)
+void WizPopupButton::setActionChecked(const QMenu* menu, int type)
 {
     QList<QAction*> listActions = menu->actions();
     for (int i = 0; i < listActions.size(); i++) {
@@ -89,8 +89,8 @@ void CWizPopupButton::setActionChecked(const QMenu* menu, int type)
 
 
 /* ------------------------ CWizViewTypePopupButton ------------------------ */
-CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* parent)
-    : CWizPopupButton(app, parent)
+WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* parent)
+    : WizPopupButton(app, parent)
 {
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
@@ -99,9 +99,9 @@ CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* 
     group->setExclusive(true);
 
     QMenu* menu = new QMenu(this);
-    createAction(tr("Thumbnail view"), CWizDocumentListView::TypeThumbnail, menu, group);
-    createAction(tr("Two line view"), CWizDocumentListView::TypeTwoLine, menu, group);
-    createAction(tr("One line view"), CWizDocumentListView::TypeOneLine, menu, group);
+    createAction(tr("Thumbnail view"), WizDocumentListView::TypeThumbnail, menu, group);
+    createAction(tr("Two line view"), WizDocumentListView::TypeTwoLine, menu, group);
+    createAction(tr("One line view"), WizDocumentListView::TypeOneLine, menu, group);
     setMenu(menu);
 
 //    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
@@ -116,12 +116,12 @@ CWizViewTypePopupButton::CWizViewTypePopupButton(CWizExplorerApp& app, QWidget* 
 //    setActionIcon(type);
 }
 
-QSize CWizViewTypePopupButton::sizeHint() const
+QSize WizViewTypePopupButton::sizeHint() const
 {
     return QSize(32 + 10, fontMetrics().height() + 10);
 }
 
-void CWizViewTypePopupButton::on_action_triggered()
+void WizViewTypePopupButton::on_action_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
 
@@ -153,7 +153,7 @@ void CWizViewTypePopupButton::on_action_triggered()
 //    }
 //}
 
-void CWizViewTypePopupButton::on_viewTypeChanged(int type)
+void WizViewTypePopupButton::on_viewTypeChanged(int type)
 {
     setActionChecked(menu(), type);
 //    setActionIcon(type);
@@ -161,8 +161,8 @@ void CWizViewTypePopupButton::on_viewTypeChanged(int type)
 
 
 /* ------------------------ CWizSortingPopupButton ------------------------ */
-CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent)
-    : CWizPopupButton(app, parent)
+WizSortingPopupButton::WizSortingPopupButton(WizExplorerApp& app, QWidget *parent)
+    : WizPopupButton(app, parent)
 {
     setToolButtonStyle(Qt::ToolButtonIconOnly);
 
@@ -214,13 +214,13 @@ CWizSortingPopupButton::CWizSortingPopupButton(CWizExplorerApp& app, QWidget *pa
     setIcon(icon);
 }
 
-void CWizSortingPopupButton::on_sortingTypeChanged(int type)
+void WizSortingPopupButton::on_sortingTypeChanged(int type)
 {
     QMenu* myMenu = menu();
     setActionChecked(myMenu, type);
 }
 
-QSize CWizSortingPopupButton::sizeHint () const
+QSize WizSortingPopupButton::sizeHint () const
 {
 //#ifdef Q_OS_MAC
 //    return QSize(fontMetrics().width(text()) + 45, fontMetrics().height() + 16);
@@ -231,7 +231,7 @@ QSize CWizSortingPopupButton::sizeHint () const
     return QSize(32 + 10, fontMetrics().height() + 10);
 }
 
-void CWizSortingPopupButton::on_action_triggered()
+void WizSortingPopupButton::on_action_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
 

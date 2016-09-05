@@ -7,14 +7,14 @@ class QCompleter;
 class QModelIndex;
 class QInputMethodEvent;
 
-class CWizDocumentView;
+class WizDocumentView;
 
-class TitleEdit : public QLineEdit
+class WizTitleEdit : public QLineEdit
 {
     Q_OBJECT
 
 public:
-    explicit TitleEdit(QWidget *parent);
+    explicit WizTitleEdit(QWidget *parent);
     void resetTitle(const QString& strTitle);
     void setReadOnly(bool b);
 
@@ -41,7 +41,7 @@ private:
     QString textUnderCursor();
     QChar charBeforeCursor();
 
-    CWizDocumentView* noteView();
+    WizDocumentView* noteView();
 
 private Q_SLOTS:
     void onInsertCompletion(const QModelIndex &index);    

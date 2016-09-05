@@ -14,19 +14,19 @@ struct CWizIAPProduct
     QString localizedDescription;
 };
 
-class CWizIAPCaller
+class WizIAPCaller
 {
 public:
     virtual void onProductsLoaded(const QList<CWizIAPProduct>& productList) = 0;
     virtual void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID) = 0;
 };
 
-class CWizIAPHelper
+class WizIAPHelper
 {
 public:
-    CWizIAPHelper();
-    CWizIAPHelper(CWizIAPCaller* caller);
-    ~CWizIAPHelper();
+    WizIAPHelper();
+    WizIAPHelper(WizIAPCaller* caller);
+    ~WizIAPHelper();
 
     void purchaseProduct(const QString& strID);
     void requestProducts(const QList<QString>& productIdList);
@@ -37,7 +37,7 @@ public:
 
 protected:
     CWizIAPHelperPrivate* m_helper;
-    CWizIAPCaller* m_caller;
+    WizIAPCaller* m_caller;
 };
 
 #endif // CWIZIPAMANAGER_H

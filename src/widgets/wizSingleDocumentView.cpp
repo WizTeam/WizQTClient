@@ -33,7 +33,7 @@ QRegion creteRoundMask(const QRectF& rect)
     return QRegion(polygon);
 }
 
-CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const QString& guid, QWidget* parent) :
+WizSingleDocumentViewer::WizSingleDocumentViewer(WizExplorerApp& app, const QString& guid, QWidget* parent) :
     QWidget(parent)
   , m_guid(guid)
   , m_docView(nullptr)
@@ -57,7 +57,7 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
     containerLayout->setContentsMargins(0, 0, 0, 0);
     m_containerWgt->setLayout(containerLayout);
 
-    m_docView = new CWizDocumentView(app, m_containerWgt);
+    m_docView = new WizDocumentView(app, m_containerWgt);
     m_docView->setStyleSheet(QString("QLineEdit{border:1px solid #DDDDDD; border-radius:2px;}"
                                      "QToolButton {border:0px; padding:0px; border-radius:0px;background-color:#F5F5F5;}"));
     m_docView->titleBar()->setStyleSheet(QString("QLineEdit{padding:0px; padding-left:-2px; padding-bottom:1px; border:0px;background-color:#F5F5F5;}"));
@@ -91,19 +91,19 @@ CWizSingleDocumentViewer::CWizSingleDocumentViewer(CWizExplorerApp& app, const Q
 //#endif
 }
 
-CWizSingleDocumentViewer::~CWizSingleDocumentViewer()
+WizSingleDocumentViewer::~WizSingleDocumentViewer()
 {
     emit documentViewerDeleted(m_guid);
 }
 //
 
 
-CWizDocumentView* CWizSingleDocumentViewer::docView()
+WizDocumentView* WizSingleDocumentViewer::docView()
 {        
     return m_docView;
 }
 
-void CWizSingleDocumentViewer::on_commentWidget_statusChanged()
+void WizSingleDocumentViewer::on_commentWidget_statusChanged()
 {
     if ((windowState() & Qt::WindowFullScreen) && !m_docView->isVisible())
     {
@@ -111,19 +111,19 @@ void CWizSingleDocumentViewer::on_commentWidget_statusChanged()
     }
 }
 
-void CWizSingleDocumentViewer::on_commentWidget_willShow()
+void WizSingleDocumentViewer::on_commentWidget_willShow()
 {
     m_containerWgt->clearMask();
 }
 
-void CWizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
+void WizSingleDocumentViewer::resizeEvent(QResizeEvent* ev)
 {
     QWidget::resizeEvent(ev);
 
     m_docView->titleBar()->editorToolBar()->adjustButtonPosition();    
 }
 
-void CWizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
+void WizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
 {
     m_docView->waitForDone();
     //
@@ -132,7 +132,7 @@ void CWizSingleDocumentViewer::closeEvent(QCloseEvent *ev)
     QWidget::closeEvent(ev);
 }
 
-bool CWizSingleDocumentViewer::event(QEvent* ev)
+bool WizSingleDocumentViewer::event(QEvent* ev)
 {
     if (ev->type() == QEvent::WindowStateChange)
     {
@@ -158,7 +158,7 @@ bool CWizSingleDocumentViewer::event(QEvent* ev)
     return QWidget::event(ev);
 }
 
-void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
+void WizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
 {
     QPalette pal = palette();
     pal.setColor(QPalette::Window, isFullScreen ? QColor("#3e3e3e") : QColor("#DDDDDD"));
@@ -182,23 +182,23 @@ void CWizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
 }
 
 
-CWizSingleDocumentViewDelegate::CWizSingleDocumentViewDelegate(CWizExplorerApp& app, QObject* parent)
+WizSingleDocumentViewDelegate::WizSingleDocumentViewDelegate(WizExplorerApp& app, QObject* parent)
     : QObject(parent)
     ,m_app(app)
 {
 }
 
-CWizSingleDocumentViewer*CWizSingleDocumentViewDelegate::getDocumentViewer(const QString& guid)
+WizSingleDocumentViewer*WizSingleDocumentViewDelegate::getDocumentViewer(const QString& guid)
 {
     return m_viewerMap.value(guid, nullptr);
 }
 
-QMap<QString, CWizSingleDocumentViewer*>& CWizSingleDocumentViewDelegate::getDocumentViewerMap()
+QMap<QString, WizSingleDocumentViewer*>& WizSingleDocumentViewDelegate::getDocumentViewerMap()
 {
     return m_viewerMap;
 }
 
-void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
+void WizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
 {
     if (m_viewerMap.find(doc.strGUID) != m_viewerMap.end())
     {
@@ -207,11 +207,11 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
     }
     else
     {
-        MainWindow* mainWindow = dynamic_cast<MainWindow*>(m_app.mainWindow());
-        CWizSingleDocumentViewer* wgt = new CWizSingleDocumentViewer(m_app, doc.strGUID);
-        CWizDocumentView* docView = wgt->docView();
-        connect(docView, SIGNAL(documentSaved(QString,CWizDocumentView*)), SIGNAL(documentChanged(QString,CWizDocumentView*)));
-        connect(this, SIGNAL(documentChanged(QString,CWizDocumentView*)), docView, SLOT(on_document_data_changed(QString,CWizDocumentView*)));
+        WizMainWindow* mainWindow = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
+        WizSingleDocumentViewer* wgt = new WizSingleDocumentViewer(m_app, doc.strGUID);
+        WizDocumentView* docView = wgt->docView();
+        connect(docView, SIGNAL(documentSaved(QString,WizDocumentView*)), SIGNAL(documentChanged(QString,WizDocumentView*)));
+        connect(this, SIGNAL(documentChanged(QString,WizDocumentView*)), docView, SLOT(on_document_data_changed(QString,WizDocumentView*)));
         connect(docView->web(), SIGNAL(shareDocumentByLinkRequest(QString,QString)),
                 mainWindow, SLOT(on_shareDocumentByLink_request(QString,QString)));
         connect(docView->web(), SIGNAL(statusChanged(const QString&)), mainWindow,
@@ -234,7 +234,7 @@ void CWizSingleDocumentViewDelegate::viewDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void CWizSingleDocumentViewDelegate::onDocumentViewerDeleted(QString guid)
+void WizSingleDocumentViewDelegate::onDocumentViewerDeleted(QString guid)
 {
     m_viewerMap.remove(guid);
 

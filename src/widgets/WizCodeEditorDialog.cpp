@@ -27,7 +27,7 @@
 
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
-WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView* external, QWidget *parent) :
+WizCodeEditorDialog::WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView* external, QWidget *parent) :
     QDialog(parent)
   , m_app(app)
   , m_external(external)
@@ -49,7 +49,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
 
     verticalLayout->addWidget(m_codeBrowser);
 
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/code/insert_code.htm";
+    QString strFileName = Utils::WizPathResolve::resourcesPath() + "files/code/insert_code.htm";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     strHtml.replace("Wiz_Language_Replace", tr("Language"));

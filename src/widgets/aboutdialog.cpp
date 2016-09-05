@@ -11,7 +11,7 @@
 
 #include <QTextStream>
 
-AboutDialog::AboutDialog(QWidget *parent)
+WizAboutDialog::WizAboutDialog(QWidget *parent)
     : QDialog(parent)
 {
     QLabel* labelIcon = new QLabel(this);

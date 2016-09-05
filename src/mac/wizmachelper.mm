@@ -185,11 +185,11 @@ QString WizMacGetOSVersion()
     return WizToQString(versionString);
 }
 
-CWizNSAutoReleasePool::CWizNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
+WizNSAutoReleasePool::WizNSAutoReleasePool() : _pool([[NSAutoreleasePool alloc] init])
 {
 }
 
-CWizNSAutoReleasePool::~CWizNSAutoReleasePool()
+WizNSAutoReleasePool::~WizNSAutoReleasePool()
 {
     [static_cast<NSAutoreleasePool*>(_pool) release];
 }
@@ -276,7 +276,7 @@ NSString* WizGenGUID()
     return [str lowercaseString];
 }
 
-CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SEL originalSel,
+WizChangeCocoaImplementation::WizChangeCocoaImplementation(Class baseClass, SEL originalSel,
      Class proxyClass, SEL replacementSel, SEL backupSel, bool apply)
     : _baseClass(baseClass), _originalSel(originalSel), _backupSel(backupSel), _apply(apply)
 {
@@ -284,13 +284,13 @@ CWizChangeCocoaImplementation::CWizChangeCocoaImplementation(Class baseClass, SE
         change(baseClass, originalSel, proxyClass, replacementSel, backupSel);
 }
 
-CWizChangeCocoaImplementation::~CWizChangeCocoaImplementation()
+WizChangeCocoaImplementation::~WizChangeCocoaImplementation()
 {
     if (_apply)
         changeBack(_baseClass, _originalSel, _backupSel);
 }
 
-void CWizChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel)
+void WizChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel)
 {
 #ifndef QT_MAC_USE_COCOA
     if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5)
@@ -321,7 +321,7 @@ void CWizChangeCocoaImplementation::change(Class baseClass, SEL originalSel, Cla
     }
 }
 
-void CWizChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel, SEL backupSel)
+void WizChangeCocoaImplementation::changeBack(Class baseClass, SEL originalSel, SEL backupSel)
 {
 #ifndef QT_MAC_USE_COCOA
     if (QSysInfo::MacintoshVersion >= QSysInfo::MV_10_5)
@@ -415,7 +415,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
 
         if (strFileList.count() > 0)
         {
-            MainWindow *window = MainWindow::instance();
+            WizMainWindow *window = WizMainWindow::instance();
             if (window)
             {
                 convertYosemiteFileListToNormalList(strFileList);
@@ -433,7 +433,7 @@ void convertYosemiteFileListToNormalList(QStringList& fileList)
         if (!strText.isEmpty())
         {
             qDebug() << "[service] : text string finded : " << strText;
-            MainWindow *window = MainWindow::instance();
+            WizMainWindow *window = WizMainWindow::instance();
             if (window)
             {
                 window->createNoteWithText(strText);
@@ -561,7 +561,7 @@ QString wizDocToHtml(NSData *data)
 
 bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, const QString& strResourcePath)
 {
-    class CProcessWebarchiveHtmlCollector : public CWizHtmlCollector
+    class CProcessWebarchiveHtmlCollector : public WizHtmlCollector
     {
     public:
         CProcessWebarchiveHtmlCollector(const QString& strResourcePath)
@@ -570,7 +570,7 @@ bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, con
 
         }
 
-        virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
+        virtual void startTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
         {
             QString tagName = pTag->getTagName();
             tagName = tagName.toUpper();
@@ -593,7 +593,7 @@ bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, con
             m_ret.push_back(pTag->getTag());
         }
         //
-        void processTagValue(CWizHtmlTag* pTag, const QString& valueName)
+        void processTagValue(WizHtmlTag* pTag, const QString& valueName)
         {
             QString value = pTag->getValueFromName(valueName);
             if (value.isEmpty())
@@ -617,7 +617,7 @@ bool processWebarchiveImageUrl(const QString& strFileName, QString& strHtml, con
     //
     CProcessWebarchiveHtmlCollector collector(strResourcePath);
     //
-    collector.Collect(strFileName, strHtml, true, strResourcePath);
+    collector.collect(strFileName, strHtml, true, strResourcePath);
 
     return true;
 }
@@ -630,7 +630,7 @@ QString wizWebarchiveToHtml(NSString *filePath)
         return QString();
     //
     QFileInfo info(webFile);
-    QString strFolder = Utils::PathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
+    QString strFolder = Utils::WizPathResolve::tempPath() + WizGenGUIDLowerCaseLetterOnly() + "/";
     QString newFile = strFolder + info.fileName();
     QDir dir;
     dir.mkdir(strFolder);
@@ -765,7 +765,7 @@ void handleCrashReport(PLCrashReporter *crashReporter)
     //
     [crashReporter purgePendingCrashReport];
 
-    CWizCrashReportDialog dlg(strReport);
+    WizCrashReportDialog dlg(strReport);
     dlg.exec();
 }
 
@@ -933,12 +933,12 @@ void readShareExtensionAccount()
 }
 
 
-CWizCocoaViewContainer::CWizCocoaViewContainer()
+WizCocoaViewContainer::WizCocoaViewContainer()
     : m_view(nil)
 {
 
 }
-void CWizCocoaViewContainer::setCocoaView(NSView* view)
+void WizCocoaViewContainer::setCocoaView(NSView* view)
 {
     m_view = view;
     [m_view retain];

@@ -3,19 +3,19 @@
 #include <algorithm>
 #include <QDebug>
 
-void CWizPositionDelegate::addListener(QWidget* widget)
+void WizPositionDelegate::addListener(QWidget* widget)
 {
     m_widgetList.append(widget);
     connect(widget, SIGNAL(destroyed(QObject*)), SLOT(on_WidgetDeleted(QObject*)));
 }
 
-void CWizPositionDelegate::removeListener(QWidget* widget)
+void WizPositionDelegate::removeListener(QWidget* widget)
 {
     m_widgetList.removeOne(widget);
     disconnect(widget, SIGNAL(destroyed(QObject*)), this, SLOT(on_WidgetDeleted(QObject*)));
 }
 
-void CWizPositionDelegate::mainwindowPositionChanged(const QPoint& oldPos, const QPoint& newPos)
+void WizPositionDelegate::mainwindowPositionChanged(const QPoint& oldPos, const QPoint& newPos)
 {
     int xOff = newPos.x() - oldPos.x();
     int yOff = newPos.y() - oldPos.y();
@@ -27,7 +27,7 @@ void CWizPositionDelegate::mainwindowPositionChanged(const QPoint& oldPos, const
     }
 }
 
-void CWizPositionDelegate::on_WidgetDeleted(QObject* obj)
+void WizPositionDelegate::on_WidgetDeleted(QObject* obj)
 {
     for (QWidget* wgt : m_widgetList)
     {

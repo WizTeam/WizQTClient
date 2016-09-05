@@ -6,14 +6,14 @@
 #include <QTreeView>
 #include "wizCategoryViewItem.h"
 
-class CWizFolder;
-class CWizScrollBar;
-class CWizDatabaseManager;
-class CWizExplorerApp;
+class WizFolder;
+class WizScrollBar;
+class WizDatabaseManager;
+class WizExplorerApp;
 class QSettings;
-class CWizProgressDialog;
-class CWizObjectDownloaderHost;
-class CWizFolderSelector;
+class WizProgressDialog;
+class WizObjectDownloaderHost;
+class WizFolderSelector;
 
 #define CATEGORY_MESSAGES_ALL               QObject::tr("Message Center")
 #define CATEGORY_MESSAGES_SEND_TO_ME        QObject::tr("Send to me")
@@ -24,13 +24,13 @@ class CWizFolderSelector;
 
 #define WIZNOTE_CUSTOM_SCROLLBAR
 
-class CWizCategoryBaseView : public QTreeWidget
+class WizCategoryBaseView : public QTreeWidget
 {
     Q_OBJECT
 
 public:
-    CWizCategoryBaseView(CWizExplorerApp& app, QWidget *parent = 0);
-    ~CWizCategoryBaseView();
+    WizCategoryBaseView(WizExplorerApp& app, QWidget *parent = 0);
+    ~WizCategoryBaseView();
 
     QString selectedItemKbGUID();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
@@ -42,15 +42,15 @@ public:
     void saveSelection();
     void restoreSelection();
 
-    CWizCategoryViewItemBase* itemAt(const QPoint& p) const;
-    CWizCategoryViewItemBase* itemFromKbGUID(const QString& strKbGUID) const;
+    WizCategoryViewItemBase* itemAt(const QPoint& p) const;
+    WizCategoryViewItemBase* itemFromKbGUID(const QString& strKbGUID) const;
 
     template <class T> T* currentCategoryItem() const
     {
         return dynamic_cast<T*>(currentItem());
     }
 
-    CWizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
+    WizCategoryViewItemBase* categoryItemFromIndex(const QModelIndex &index) const;
 
     bool isDragHovered() const { return m_bDragHovered; }
     QPoint dragHoveredPos() const { return m_dragHoveredPos; }
@@ -86,11 +86,11 @@ protected:
 
     virtual QModelIndex moveCursor(CursorAction cursorAction, Qt::KeyboardModifiers modifiers);
 
-    virtual void resetRootItemsDropEnabled(CWizCategoryViewItemBase* pItem);    
+    virtual void resetRootItemsDropEnabled(WizCategoryViewItemBase* pItem);    
 
 protected:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
     QTreeWidgetItem* m_selectedItem;
 
 
@@ -119,7 +119,7 @@ protected Q_SLOTS:
     virtual void on_group_permissionChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
     virtual void on_group_bizChanged(const QString& strKbGUID) { Q_UNUSED(strKbGUID); }
 
-    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
+    virtual void on_itemPosition_changed(WizCategoryViewItemBase* pItem) { Q_UNUSED(pItem); }
 
     void on_dragHovered_timeOut();
 
@@ -131,11 +131,11 @@ protected:
     CWizDocumentDataArray m_dragDocArray;
     bool m_dragUrls;
     QTimer* m_dragHoveredTimer;
-    CWizCategoryViewItemBase* m_dragItem;
-    CWizCategoryViewItemBase* m_dragHoveredItem;
+    WizCategoryViewItemBase* m_dragItem;
+    WizCategoryViewItemBase* m_dragHoveredItem;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
-    CWizScrollBar* m_vScroll;
+    WizScrollBar* m_vScroll;
 #endif
 };
 
@@ -150,13 +150,13 @@ enum CategorySection
     Section_PersonalGroups
 };
 
-class CWizCategoryView : public CWizCategoryBaseView
+class WizCategoryView : public WizCategoryBaseView
 {
     Q_OBJECT
 
 public:
-    CWizCategoryView(CWizExplorerApp& app, QWidget *parent = 0);
-    virtual ~CWizCategoryView();
+    WizCategoryView(WizExplorerApp& app, QWidget *parent = 0);
+    virtual ~WizCategoryView();
     Q_INVOKABLE void init();
 
     void loadShortcutState();
@@ -233,64 +233,64 @@ public:
     void loadSectionStatus();
 
 public:
-    CWizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
+    WizCategoryViewItemBase* findFolder(const WIZDOCUMENTDATA& doc);
 
     // folders
-    CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
-    CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
+    WizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
+    WizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
     void addAndSelectFolder(const CString& strLocation);
     bool setCurrentIndex(const WIZDOCUMENTDATA& document);
 
     void sortFolders();
-    void sortFolders(CWizCategoryViewFolderItem* pItem);
+    void sortFolders(WizCategoryViewFolderItem* pItem);
 
     void sortPersonalTags();
     void sortPersonalTags(QTreeWidgetItem* pItem);
 
     void sortGroupTags(const QString& strKbGUID, bool bReloadData = false);
-    void sortGroupTags(CWizCategoryViewGroupItem* pItem, bool bReloadData);
+    void sortGroupTags(WizCategoryViewGroupItem* pItem, bool bReloadData);
 
     void savePersonalTagsPosition();
-    void savePersonalTagsPosition(CWizDatabase& db, CWizCategoryViewTagItem* pItem);
+    void savePersonalTagsPosition(WizDatabase& db, WizCategoryViewTagItem* pItem);
 
     void saveGroupTagsPosition(const QString& strKbGUID);
-    void saveGroupTagsPosition(CWizDatabase& db, CWizCategoryViewGroupItem* pItem);
+    void saveGroupTagsPosition(WizDatabase& db, WizCategoryViewGroupItem* pItem);
 
     QString getAllFoldersPosition();
-    QString getAllFoldersPosition(CWizCategoryViewFolderItem* pItem, int& nStartPos);
+    QString getAllFoldersPosition(WizCategoryViewFolderItem* pItem, int& nStartPos);
 
     // tags
-    CWizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
-    CWizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
-    CWizCategoryViewTagItem* addTag(const WIZTAGDATA& tag, bool sort);
-    CWizCategoryViewTagItem* addAndSelectTag(const WIZTAGDATA& tag);
-    CWizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag);
-    CWizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag,
+    WizCategoryViewTagItem* findTag(const WIZTAGDATA& tag, bool create, bool sort);
+    WizCategoryViewTagItem* addTagWithChildren(const WIZTAGDATA& tag);
+    WizCategoryViewTagItem* addTag(const WIZTAGDATA& tag, bool sort);
+    WizCategoryViewTagItem* addAndSelectTag(const WIZTAGDATA& tag);
+    WizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag);
+    WizCategoryViewTagItem* findTagInTree(const WIZTAGDATA& tag,
                                            QTreeWidgetItem* itemParent);
     void removeTag(const WIZTAGDATA& tag);
 
     // groups
-    CWizCategoryViewGroupItem* findGroupFolder(const WIZTAGDATA& tag, bool create, bool sort);
-    CWizCategoryViewGroupItem* addGroupFolderWithChildren(const WIZTAGDATA& tag);
-    CWizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
-    CWizCategoryViewGroupItem* findGroupFolderInTree(const WIZTAGDATA& tag);
-    CWizCategoryViewGroupItem* findGroupFolderInTree(const WIZTAGDATA& tag,
+    WizCategoryViewGroupItem* findGroupFolder(const WIZTAGDATA& tag, bool create, bool sort);
+    WizCategoryViewGroupItem* addGroupFolderWithChildren(const WIZTAGDATA& tag);
+    WizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
+    WizCategoryViewGroupItem* findGroupFolderInTree(const WIZTAGDATA& tag);
+    WizCategoryViewGroupItem* findGroupFolderInTree(const WIZTAGDATA& tag,
                                                      QTreeWidgetItem* itemParent);
     void removeGroupFolder(const WIZTAGDATA& tag);
 
     // helper
     QAction* findAction(CategoryActions type);
 
-    CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
-    CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
-    CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
-    CWizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
-    CWizCategoryViewItemBase* findAllFolderItem();
-    CWizCategoryViewItemBase* findAllTagsItem();
-    CWizCategoryViewItemBase* findAllSearchItem();
-    CWizCategoryViewItemBase* findAllMessagesItem();
-    CWizCategoryViewItemBase* findAllShortcutItem();
-    CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
+    WizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
+    WizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
+    WizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
+    WizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
+    WizCategoryViewItemBase* findAllFolderItem();
+    WizCategoryViewItemBase* findAllTagsItem();
+    WizCategoryViewItemBase* findAllSearchItem();
+    WizCategoryViewItemBase* findAllMessagesItem();
+    WizCategoryViewItemBase* findAllShortcutItem();
+    WizCategoryViewTrashItem* findTrash(const QString& strKbGUID = NULL);
 
     // document count update
     void updatePersonalFolderDocumentCount();
@@ -357,7 +357,7 @@ protected Q_SLOTS:
     virtual void on_group_bizChanged(const QString& strKbGUID);
     virtual void on_groupDocuments_unreadCount_modified(const QString& strKbGUID);
 
-    virtual void on_itemPosition_changed(CWizCategoryViewItemBase* pItem);
+    virtual void on_itemPosition_changed(WizCategoryViewItemBase* pItem);
 
 
     void on_importFile_finished(bool ok, QString text, QString kbGuid);
@@ -442,7 +442,7 @@ public Q_SLOTS:
 
 public:
     // Public API:
-    Q_INVOKABLE CWizFolder* SelectedFolder();
+    Q_INVOKABLE WizFolder* SelectedFolder();
 
 private Q_SLOTS:
     void on_updatePersonalFolderDocumentCount_timeout();
@@ -453,25 +453,25 @@ private Q_SLOTS:
     void on_initGroupFolder_finished();
 
 private:
-    void updateChildFolderDocumentCount(CWizCategoryViewItemBase* pItem,
+    void updateChildFolderDocumentCount(WizCategoryViewItemBase* pItem,
                                        const std::map<CString, int>& mapDocumentCount, int& allCount);
 
-    void updateChildTagDocumentCount(CWizCategoryViewItemBase* pItem,
+    void updateChildTagDocumentCount(WizCategoryViewItemBase* pItem,
                                     const std::map<CString, int>& mapDocumentCount, int& allCount);
 
-    void setBizRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+    void setBizRootItemExtraButton(WizCategoryViewItemBase* pItem, \
                                      const WIZBIZDATA& bizData);
-    void setGroupRootItemExtraButton(CWizCategoryViewItemBase* pItem, \
+    void setGroupRootItemExtraButton(WizCategoryViewItemBase* pItem, \
                                      const WIZGROUPDATA& gData);
 
     void moveFolderPostionBeforeTrash(const QString& strLocation);    
 
     void quickSyncNewDocument(const QString& strKbGUID);
 
-    void updatePersonalFolderLocation(CWizDatabase& db,const QString& strOldLocation,\
+    void updatePersonalFolderLocation(WizDatabase& db,const QString& strOldLocation,\
                                       const QString& strNewLocation);
     void updatePersonalTagPosition();
-    void updateGroupFolderPosition(CWizDatabase& db, CWizCategoryViewItemBase* pItem);
+    void updateGroupFolderPosition(WizDatabase& db, WizCategoryViewItemBase* pItem);
 
     //
     void promptGroupLimitMessage(const QString& groupGUID, const QString& bizGUID);
@@ -487,9 +487,9 @@ private:
     void initStyles();
     void initGroups();
     void initBiz(const WIZBIZDATA& biz);
-    void initGroup(CWizDatabase& db);
-    void initGroup(CWizDatabase& db, bool& itemCreeated);
-    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
+    void initGroup(WizDatabase& db);
+    void initGroup(WizDatabase& db, bool& itemCreeated);
+    void initGroup(WizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID, const std::multimap<CString, WIZTAGDATA>& mapTag);
     void initQuickSearches();
     void initShortcut(const QString& shortcut);
@@ -514,24 +514,24 @@ private:
     void loadCustomAdvancedSearchParamFromDB(QMap<QString, QString>& paramMap);
     void deleteCustomAdvancedSearchParamFromDB(const QString& strGuid);
 
-    CWizCategoryViewFolderItem* createFolderItem(QTreeWidgetItem* parent, const QString& strLocation);
+    WizCategoryViewFolderItem* createFolderItem(QTreeWidgetItem* parent, const QString& strLocation);
 
 
     //
-    void moveGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector);
+    void moveGroupFolder(const WIZTAGDATA& sourceFolder, WizFolderSelector* selector);
 
     void moveGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder, bool combineFolder);
 
     void moveGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
     //
-    bool movePersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
+    bool movePersonalFolder(const QString& sourceFolder, WizFolderSelector* selector);
 
     void movePersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder, bool combineFolder);
 
     void movePersonalFolderToGroupFolder(const QString& sourceFolder, const WIZTAGDATA& targetFolder, bool combineFolder);
 
     //
-    void copyGroupFolder(const WIZTAGDATA& sourceFolder, CWizFolderSelector* selector);
+    void copyGroupFolder(const WIZTAGDATA& sourceFolder, WizFolderSelector* selector);
 
     void copyGroupFolderToPersonalFolder(const WIZTAGDATA& groupFolder, const QString& targetParentFolder,
                                          bool keepDocTime, bool combineFolder);
@@ -539,7 +539,7 @@ private:
     void copyGroupFolderToGroupFolder(const WIZTAGDATA& sourceFolder, const WIZTAGDATA& targetFolder,
                                       bool keepDocTime, bool combineFolder);
     //
-    void copyPersonalFolder(const QString& sourceFolder, CWizFolderSelector* selector);
+    void copyPersonalFolder(const QString& sourceFolder, WizFolderSelector* selector);
 
     void copyPersonalFolderToPersonalFolder(const QString& sourceFolder, const QString& targetParentFolder,
                                             bool keepDocTime, bool keepTag, bool combineFolder);
@@ -550,23 +550,23 @@ private:
     void moveDocumentsToGroupFolder(const CWizDocumentDataArray& arrayDocument, const WIZTAGDATA& targetTag);    
 
     //
-    virtual void dropItemAsBrother(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+    virtual void dropItemAsBrother(WizCategoryViewItemBase* targetItem, WizCategoryViewItemBase* dragedItem,
                                    bool dropAtTop, bool deleteDragSource);
-    virtual void dropItemAsChild(CWizCategoryViewItemBase* targetItem, CWizCategoryViewItemBase* dragedItem,
+    virtual void dropItemAsChild(WizCategoryViewItemBase* targetItem, WizCategoryViewItemBase* dragedItem,
                                  bool deleteDragSource);
 
     //
     QString getUseableItemName(QTreeWidgetItem* parent, \
                                 QTreeWidgetItem* item);
     void moveFolder(QString oldLocation, QString newLocation);
-    void resetFolderLocation(CWizCategoryViewFolderItem* item);
-    void resetFolderLocation(CWizCategoryViewFolderItem* item, const QString& strNewLocation);
-    bool renameFolder(CWizCategoryViewFolderItem* item, const QString& strFolderName);
-    bool renameGroupFolder(CWizCategoryViewGroupItem* pGroup, const QString& strFolderName);
+    void resetFolderLocation(WizCategoryViewFolderItem* item);
+    void resetFolderLocation(WizCategoryViewFolderItem* item, const QString& strNewLocation);
+    bool renameFolder(WizCategoryViewFolderItem* item, const QString& strFolderName);
+    bool renameGroupFolder(WizCategoryViewGroupItem* pGroup, const QString& strFolderName);
     //
     void updateShortcut(int type, const QString& keyValue, const QString& name);
     void removeShortcut(int type, const QString& keyValue);
-    void removeShortcut(CWizCategoryViewItemBase* shortcut);
+    void removeShortcut(WizCategoryViewItemBase* shortcut);
 
     //
     QTreeWidgetItem* findSameNameBrother(QTreeWidgetItem* parent, QTreeWidgetItem* exceptItem, const QString& name);
@@ -575,7 +575,7 @@ private:
     bool isCombineSameNameFolder(const QString& parentFolder, const QString& folderName,
                                  bool& isCombine, QTreeWidgetItem* exceptBrother = nullptr);
 
-    bool combineGroupFolder(CWizCategoryViewGroupItem* sourceItem, CWizCategoryViewGroupItem* targetItem);
+    bool combineGroupFolder(WizCategoryViewGroupItem* sourceItem, WizCategoryViewGroupItem* targetItem);
 
 private:
     std::shared_ptr<QMenu> m_menuShortcut;

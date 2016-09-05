@@ -42,42 +42,42 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
 }
 
 
-bool WIZUSERINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
 {
-    CWizXmlRpcStructValue& data = val;    
-    data.GetString("token", strToken);
-    data.GetTime("expried_time", tTokenExpried);
+    WizXmlRpcStructValue& data = val;    
+    data.getString("token", strToken);
+    data.getTime("expried_time", tTokenExpried);
 
-    data.GetStr("download_url", strDownloadUrl);
-    data.GetStr("upload_url", strUploadUrl);
-    data.GetStr("capi_url", strChatUrl);
-    data.GetInt("enable_group", bEnableGroup);
+    data.getStr("download_url", strDownloadUrl);
+    data.getStr("upload_url", strUploadUrl);
+    data.getStr("capi_url", strChatUrl);
+    data.getInt("enable_group", bEnableGroup);
 
-    data.GetString("kapi_url", strDatabaseServer);
-    data.GetString("kb_guid", strKbGUID);
-    data.GetString("invite_code", strInviteCode);
-    data.GetString("mywiz_email", strMywizEmail);
-    data.GetInt("upload_size_limit", nMaxFileSize);
+    data.getString("kapi_url", strDatabaseServer);
+    data.getString("kb_guid", strKbGUID);
+    data.getString("invite_code", strInviteCode);
+    data.getString("mywiz_email", strMywizEmail);
+    data.getInt("upload_size_limit", nMaxFileSize);
 
-    data.GetString("notice_link", strNoticeLink);
-    data.GetString("notice_text", strNoticeText);
-    data.GetString("sns_list", strSNSList);
+    data.getString("notice_link", strNoticeLink);
+    data.getString("notice_text", strNoticeText);
+    data.getString("sns_list", strSNSList);
 
-    if (CWizXmlRpcStructValue* pUser = data.GetStruct("user"))
+    if (WizXmlRpcStructValue* pUser = data.getStruct("user"))
     {
-        pUser->GetString("displayname", strDisplayName);
-        pUser->GetString("email", strUserEmail);
-        pUser->GetString("language", strLanguage);
-        pUser->GetString("nickname", strNickName);
-        pUser->GetString("user_guid", strUserGUID);
-        pUser->GetTime("dt_created", tCreated);
+        pUser->getString("displayname", strDisplayName);
+        pUser->getString("email", strUserEmail);
+        pUser->getString("language", strLanguage);
+        pUser->getString("nickname", strNickName);
+        pUser->getString("user_guid", strUserGUID);
+        pUser->getTime("dt_created", tCreated);
     }
 
-    data.GetInt("user_level", nUserLevel);
-    data.GetString("user_level_name", strUserLevelName);
-    data.GetInt("user_points", nUserPoints);
-    data.GetString("user_type", strUserType);
-    data.GetTime("vip_date", tVipExpried);
+    data.getInt("user_level", nUserLevel);
+    data.getString("user_level_name", strUserLevelName);
+    data.getInt("user_points", nUserPoints);
+    data.getString("user_type", strUserType);
+    data.getTime("vip_date", tVipExpried);
 
     return !strToken.isEmpty()
             && !strKbGUID.isEmpty()
@@ -89,13 +89,13 @@ WIZUSERCERT::WIZUSERCERT()
 {
 }
 
-bool WIZUSERCERT::LoadFromXmlRpc(CWizXmlRpcStructValue& val)
+bool WIZUSERCERT::loadFromXmlRpc(WizXmlRpcStructValue& val)
 {
-    CWizXmlRpcStructValue& data = val;
-    data.GetStr("n", strN);
-    data.GetStr("e", stre);
-    data.GetStr("d", strd);
-    data.GetStr("hint", strHint);
+    WizXmlRpcStructValue& data = val;
+    data.getStr("n", strN);
+    data.getStr("e", stre);
+    data.getStr("d", strd);
+    data.getStr("hint", strHint);
 
     return true;
 }
@@ -109,20 +109,20 @@ WIZKBINFO::WIZKBINFO()
     nTrafficUsage = 0;
 }
 
-bool WIZKBINFO::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZKBINFO::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetInt64(_T("storage_limit"), nStorageLimit);
-    data.GetInt64(_T("storage_usage"), nStorageUsage);
-    data.GetStr(_T("storage_limit_string"), strStorageLimit);
-    data.GetStr(_T("storage_usage_string"), strStorageUsage);
-    data.GetInt64(_T("traffic_limit"), nTrafficLimit);
-    data.GetInt64(_T("traffic_usage"), nTrafficUsage);
-    data.GetStr(_T("traffic_limit_string"), strTrafficLimit);
-    data.GetStr(_T("traffic_usage_string"), strTrafficUsage);
-    data.GetInt64("upload_size_limit", nUploadSizeLimit);
-    data.GetString("upload_size_limit_string", strUploadSizeLimitString);
-    data.GetInt64("notes_count", nNotesCount);
-    data.GetInt64("notes_count_limit", nNotesCountLimit);
+    data.getInt64(_T("storage_limit"), nStorageLimit);
+    data.getInt64(_T("storage_usage"), nStorageUsage);
+    data.getStr(_T("storage_limit_string"), strStorageLimit);
+    data.getStr(_T("storage_usage_string"), strStorageUsage);
+    data.getInt64(_T("traffic_limit"), nTrafficLimit);
+    data.getInt64(_T("traffic_usage"), nTrafficUsage);
+    data.getStr(_T("traffic_limit_string"), strTrafficLimit);
+    data.getStr(_T("traffic_usage_string"), strTrafficUsage);
+    data.getInt64("upload_size_limit", nUploadSizeLimit);
+    data.getString("upload_size_limit_string", strUploadSizeLimitString);
+    data.getInt64("notes_count", nNotesCount);
+    data.getInt64("notes_count_limit", nNotesCountLimit);
 
     return true;
 }
@@ -137,14 +137,14 @@ WIZOBJECTPARTDATA::WIZOBJECTPARTDATA()
 {
 }
 
-bool WIZOBJECTPARTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZOBJECTPARTDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetInt("eof", bEOF);
-    data.GetInt64("obj_size", nObjectSize);
-    data.GetString("part_md5", strPartMD5);
-    data.GetInt64("part_size", nPartSize);
+    data.getInt("eof", bEOF);
+    data.getInt64("obj_size", nObjectSize);
+    data.getString("part_md5", strPartMD5);
+    data.getInt64("part_size", nPartSize);
 
-    if (!data.GetStream("data", arrayData)){
+    if (!data.getStream("data", arrayData)){
         TOLOG("Fault error, data is null!");
         return false;
     }
@@ -191,7 +191,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data)
 }
 
 
-WizObjectType WIZOBJECTDATA::IntToObjectType(int n)
+WizObjectType WIZOBJECTDATA::intToObjectType(int n)
 {
     if (n <= wizobjectError || n > wizobjectDocument)
     {
@@ -202,9 +202,9 @@ WizObjectType WIZOBJECTDATA::IntToObjectType(int n)
     return WizObjectType(n);
 }
 
-WizObjectType WIZOBJECTDATA::TypeStringToObjectType(const CString& strType)
+WizObjectType WIZOBJECTDATA::typeStringToObjectType(const CString& strType)
 {
-    if (strType.IsEmpty())
+    if (strType.isEmpty())
     {
         TOLOG1(_T("Unknown guid type: %1"), strType);
         ATLASSERT(FALSE);
@@ -227,7 +227,7 @@ WizObjectType WIZOBJECTDATA::TypeStringToObjectType(const CString& strType)
     return wizobjectError;
 }
 
-QString WIZOBJECTDATA::ObjectTypeToTypeString(WizObjectType eType)
+QString WIZOBJECTDATA::objectTypeToTypeString(WizObjectType eType)
 {
     switch (eType) {
     case wizobjectTag:
@@ -263,7 +263,7 @@ WIZTAGDATA::WIZTAGDATA(const WIZTAGDATA& data)
     nPostion = data.nPostion;
 }
 
-BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
+BOOL WIZTAGDATA::equalForSync(const WIZTAGDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strName == data.strName
@@ -271,31 +271,31 @@ BOOL WIZTAGDATA::EqualForSync(const WIZTAGDATA& data) const
         && strParentGUID == data.strParentGUID;
 }
 
-BOOL WIZTAGDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZTAGDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    return data.GetStr(_T("tag_guid"), strGUID)
-            && data.GetStr(_T("tag_group_guid"), strParentGUID)
-            && data.GetStr(_T("tag_name"), strName)
-            && data.GetStr(_T("tag_description"), strDescription)
-            && data.GetTime(_T("dt_info_modified"), tModified)
-            && data.GetInt64(_T("version"), nVersion);
+    return data.getStr(_T("tag_guid"), strGUID)
+            && data.getStr(_T("tag_group_guid"), strParentGUID)
+            && data.getStr(_T("tag_name"), strName)
+            && data.getStr(_T("tag_description"), strDescription)
+            && data.getTime(_T("dt_info_modified"), tModified)
+            && data.getInt64(_T("version"), nVersion);
 }
 
-BOOL WIZTAGDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
+BOOL WIZTAGDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
 {
-    data.AddString(_T("tag_guid"), strGUID);
-    data.AddString(_T("tag_group_guid"), strParentGUID);
-    data.AddString(_T("tag_name"), strName);
-    data.AddString(_T("tag_description"), strDescription);
-    data.AddTime(_T("dt_info_modified"), tModified);
-    data.AddInt64(_T("version"), nVersion);
+    data.addString(_T("tag_guid"), strGUID);
+    data.addString(_T("tag_group_guid"), strParentGUID);
+    data.addString(_T("tag_name"), strName);
+    data.addString(_T("tag_description"), strDescription);
+    data.addTime(_T("dt_info_modified"), tModified);
+    data.addInt64(_T("version"), nVersion);
 
     return TRUE;
 }
 
 bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw()
 {
-    return( data1.strName.CompareNoCase( data2.strName) < 0 );
+    return( data1.strName.compareNoCase( data2.strName) < 0 );
 }
 
 WIZTAGDATA::~WIZTAGDATA()
@@ -311,7 +311,7 @@ WIZSTYLEDATA::WIZSTYLEDATA()
     nVersion = -1;
 }
 
-BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
+BOOL WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strName == data.strName
@@ -322,39 +322,39 @@ BOOL WIZSTYLEDATA::EqualForSync(const WIZSTYLEDATA& data) const
             && nFlagIndex == data.nFlagIndex;
 }
 
-BOOL WIZSTYLEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZSTYLEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetStr(_T("style_description"), strDescription);
+    data.getStr(_T("style_description"), strDescription);
 
-    return data.GetStr(_T("style_guid"), strGUID)
-        && data.GetStr(_T("style_name"), strName)
-        && data.GetColor(_T("style_textcolor"), crTextColor)
-        && data.GetColor(_T("style_backcolor"), crBackColor)
-        && data.GetBool(_T("style_text_bold"), bTextBold)
-        && data.GetInt(_T("style_flagindex"), nFlagIndex)
-        && data.GetTime(_T("dt_info_modified"), tModified)
-        && data.GetInt64(_T("version"), nVersion);
+    return data.getStr(_T("style_guid"), strGUID)
+        && data.getStr(_T("style_name"), strName)
+        && data.getColor(_T("style_textcolor"), crTextColor)
+        && data.getColor(_T("style_backcolor"), crBackColor)
+        && data.getBool(_T("style_text_bold"), bTextBold)
+        && data.getInt(_T("style_flagindex"), nFlagIndex)
+        && data.getTime(_T("dt_info_modified"), tModified)
+        && data.getInt64(_T("version"), nVersion);
 }
 
-BOOL WIZSTYLEDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
+BOOL WIZSTYLEDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
 {
-    data.AddString(_T("style_description"), strDescription);;
+    data.addString(_T("style_description"), strDescription);;
 
-    data.AddString(_T("style_guid"), strGUID);
-    data.AddString(_T("style_name"), strName);
-    data.AddColor(_T("style_textcolor"), crTextColor);
-    data.AddColor(_T("style_backcolor"), crBackColor);
-    data.AddBool(_T("style_text_bold"), bTextBold);
-    data.AddInt(_T("style_flagindex"), nFlagIndex);
-    data.AddTime(_T("dt_info_modified"), tModified);
-    data.AddInt64(_T("version"), nVersion);;
+    data.addString(_T("style_guid"), strGUID);
+    data.addString(_T("style_name"), strName);
+    data.addColor(_T("style_textcolor"), crTextColor);
+    data.addColor(_T("style_backcolor"), crBackColor);
+    data.addBool(_T("style_text_bold"), bTextBold);
+    data.addInt(_T("style_flagindex"), nFlagIndex);
+    data.addTime(_T("dt_info_modified"), tModified);
+    data.addInt64(_T("version"), nVersion);;
 
     return TRUE;
 }
 
 bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw()
 {
-    return( data1.strName.CompareNoCase( data2.strName) < 0 );
+    return( data1.strName.compareNoCase( data2.strName) < 0 );
 }
 
 
@@ -365,34 +365,34 @@ WIZDELETEDGUIDDATA::WIZDELETEDGUIDDATA()
     nVersion = 0;
 }
 
-bool WIZDELETEDGUIDDATA::EqualForSync(const WIZDELETEDGUIDDATA& data) const
+bool WIZDELETEDGUIDDATA::equalForSync(const WIZDELETEDGUIDDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return TRUE;
 }
 
-bool WIZDELETEDGUIDDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZDELETEDGUIDDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
     CString strType;
 
     // this field maybe "nil"
-    data.GetTime(_T("dt_deleted"), tDeleted);
+    data.getTime(_T("dt_deleted"), tDeleted);
 
-    bool bRet = data.GetStr(_T("deleted_guid"), strGUID)
-        && data.GetStr(_T("guid_type"), strType)
-        && data.GetInt64(_T("version"), nVersion);
+    bool bRet = data.getStr(_T("deleted_guid"), strGUID)
+        && data.getStr(_T("guid_type"), strType)
+        && data.getInt64(_T("version"), nVersion);
 
-    eType = WIZOBJECTDATA::TypeStringToObjectType(strType);
+    eType = WIZOBJECTDATA::typeStringToObjectType(strType);
 
     return bRet;
 }
 
-bool WIZDELETEDGUIDDATA::SaveToXmlRpc(CWizXmlRpcStructValue& data) const
+bool WIZDELETEDGUIDDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
 {
-    data.AddString("deleted_guid", strGUID);
-    data.AddString("guid_type", WIZOBJECTDATA::ObjectTypeToTypeString(eType));
-    data.AddTime("dt_deleted", tDeleted);
-    data.AddInt64("version", nVersion);
+    data.addString("deleted_guid", strGUID);
+    data.addString("guid_type", WIZOBJECTDATA::objectTypeToTypeString(eType));
+    data.addTime("dt_deleted", tDeleted);
+    data.addInt64("version", nVersion);
 
     return true;
 }
@@ -404,25 +404,25 @@ WIZDOCUMENTATTACHMENTDATA::WIZDOCUMENTATTACHMENTDATA()
 {
 }
 
-BOOL WIZDOCUMENTATTACHMENTDATA::EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const
+BOOL WIZDOCUMENTATTACHMENTDATA::equalForSync(const WIZDOCUMENTATTACHMENTDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strInfoMD5 == data.strInfoMD5
             && strDataMD5 == data.strDataMD5;
 }
 
-BOOL WIZDOCUMENTATTACHMENTDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTATTACHMENTDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetStr("attachment_guid", strGUID);
-    data.GetStr("attachment_document_guid", strDocumentGUID);
-    data.GetStr("attachment_name", strName);
-    data.GetStr("attachment_url", strURL);
-    data.GetStr("attachment_description", strDescription);
-    data.GetTime("dt_info_modified", tInfoModified);
-    data.GetStr("info_md5", strInfoMD5);
-    data.GetTime("dt_data_modified", tDataModified);
-    data.GetStr("data_md5", strDataMD5);
-    data.GetInt64("version", nVersion);
+    data.getStr("attachment_guid", strGUID);
+    data.getStr("attachment_document_guid", strDocumentGUID);
+    data.getStr("attachment_name", strName);
+    data.getStr("attachment_url", strURL);
+    data.getStr("attachment_description", strDescription);
+    data.getTime("dt_info_modified", tInfoModified);
+    data.getStr("info_md5", strInfoMD5);
+    data.getTime("dt_data_modified", tDataModified);
+    data.getStr("data_md5", strDataMD5);
+    data.getInt64("version", nVersion);
 
     return !strGUID.isEmpty() && !strDocumentGUID.isEmpty();
 }
@@ -454,7 +454,7 @@ WIZDOCUMENTDATA::WIZDOCUMENTDATA()
 {
 }
 
-bool WIZDOCUMENTDATA::EqualForSync(const WIZDOCUMENTDATA& data) const
+bool WIZDOCUMENTDATA::equalForSync(const WIZDOCUMENTDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strDataMD5 == data.strDataMD5;
@@ -488,61 +488,61 @@ WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
     return *this;
 }
 
-BOOL WIZDOCUMENTDATAEX::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+BOOL WIZDOCUMENTDATAEX::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
     nInfoChanged = 0;
     nDataChanged = 0;
-    data.GetInt64("version", nVersion);
-    data.GetString("document_guid", strGUID);
+    data.getInt64("version", nVersion);
+    data.getString("document_guid", strGUID);
 
-    data.GetString("document_title", strTitle);
-    data.GetString("document_category", strLocation);
-    data.GetString("data_md5", strDataMD5);
-    data.GetString("document_filename", strName);
-    data.GetString("document_url", strURL);
+    data.getString("document_title", strTitle);
+    data.getString("document_category", strLocation);
+    data.getString("data_md5", strDataMD5);
+    data.getString("document_filename", strName);
+    data.getString("document_url", strURL);
     //
-    data.GetString("document_seo", strSEO);
-    data.GetString("document_author", strAuthor);
-    data.GetString("document_keywords", strKeywords);
-    data.GetString("document_type", strType);
-    data.GetString("document_owner", strOwner);
-    data.GetString("document_filetype", strFileType);
-    data.GetString("document_styleguid", strStyleGUID);
-    data.GetInt("document_protect", nProtected);
-    data.GetInt("document_attachment_count", nAttachmentCount);
+    data.getString("document_seo", strSEO);
+    data.getString("document_author", strAuthor);
+    data.getString("document_keywords", strKeywords);
+    data.getString("document_type", strType);
+    data.getString("document_owner", strOwner);
+    data.getString("document_filetype", strFileType);
+    data.getString("document_styleguid", strStyleGUID);
+    data.getInt("document_protect", nProtected);
+    data.getInt("document_attachment_count", nAttachmentCount);
 
     // time
-    data.GetTime("dt_created", tCreated);
-    data.GetTime("dt_modified", tModified);
-    data.GetTime("dt_data_modified", tDataModified);
+    data.getTime("dt_created", tCreated);
+    data.getTime("dt_modified", tModified);
+    data.getTime("dt_data_modified", tDataModified);
 
-    if (CWizXmlRpcArrayValue* objTags = data.GetArray("document_tags"))
+    if (WizXmlRpcArrayValue* objTags = data.getArray("document_tags"))
     {
-        std::deque<CWizXmlRpcValue*> arr = objTags->value();
-        for (CWizXmlRpcValue* elem : arr)
+        std::deque<WizXmlRpcValue*> arr = objTags->value();
+        for (WizXmlRpcValue* elem : arr)
         {
-            if (CWizXmlRpcStructValue* pTag = dynamic_cast<CWizXmlRpcStructValue *>(elem))
+            if (WizXmlRpcStructValue* pTag = dynamic_cast<WizXmlRpcStructValue *>(elem))
             {
                 QString tagGuid;
-                if (pTag->GetString("tag_guid", tagGuid))
+                if (pTag->getString("tag_guid", tagGuid))
                 {
                     arrayTagGUID.push_back(tagGuid);
                 }
             }
-            else if (CWizXmlRpcStringValue* pTag = dynamic_cast<CWizXmlRpcStringValue *>(elem))
+            else if (WizXmlRpcStringValue* pTag = dynamic_cast<WizXmlRpcStringValue *>(elem))
             {
-                arrayTagGUID.push_back(pTag->ToString());
+                arrayTagGUID.push_back(pTag->toString());
             }
             else
             {
-                qDebug() << "invalid tag param from server: " << elem->ToString();
+                qDebug() << "invalid tag param from server: " << elem->toString();
             }
         }
     }
     else
     {
         QString tagGuids;
-        data.GetString("document_tag_guids", tagGuids);
+        data.getString("document_tag_guids", tagGuids);
         if (!tagGuids.isEmpty())
         {
             QStringList sl = tagGuids.split('*');
@@ -610,38 +610,38 @@ WIZGROUPDATA::WIZGROUPDATA(const WIZGROUPDATA& data)
 {
 }
 
-bool WIZGROUPDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZGROUPDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetString("biz_guid", bizGUID);
-    data.GetString("biz_name", bizName);
+    data.getString("biz_guid", bizGUID);
+    data.getString("biz_name", bizName);
 
-    data.GetTime("dt_created", tCreated);
-    data.GetTime("dt_modified", tModified);
-    data.GetTime("dt_role_created", tRoleCreated);
+    data.getTime("dt_created", tCreated);
+    data.getTime("dt_modified", tModified);
+    data.getTime("dt_role_created", tRoleCreated);
 
-    data.GetString("kapi_url", strDatabaseServer);
+    data.getString("kapi_url", strDatabaseServer);
 
-    data.GetString("kb_guid", strGroupGUID);
-    data.GetString("kb_id", strId);
-    data.GetString("kb_name", strGroupName);
-    data.GetString("kb_note", strGroupNote);
-    data.GetString("kb_seo", strGroupSEO);
-    data.GetString("kb_type", strType);
-    data.GetString("mywiz_email", strMyWiz);
-    data.GetString("owner_name", strOwner);
-    data.GetString("role_note", strRoleNote);
-    data.GetString("server_url", strServerUrl);
-    data.GetString("tag_names", strGroupTags);
-    data.GetInt("user_group", nUserGroup);
-    data.GetString("user_name", strUserName);
+    data.getString("kb_guid", strGroupGUID);
+    data.getString("kb_id", strId);
+    data.getString("kb_name", strGroupName);
+    data.getString("kb_note", strGroupNote);
+    data.getString("kb_seo", strGroupSEO);
+    data.getString("kb_type", strType);
+    data.getString("mywiz_email", strMyWiz);
+    data.getString("owner_name", strOwner);
+    data.getString("role_note", strRoleNote);
+    data.getString("server_url", strServerUrl);
+    data.getString("tag_names", strGroupTags);
+    data.getInt("user_group", nUserGroup);
+    data.getString("user_name", strUserName);
     //
     QString owner;
-    data.GetString("is_kb_owner", owner);
+    data.getString("is_kb_owner", owner);
     owner = owner.toLower();
     bOwn = (owner == "1" || owner == "true");
     //
     QString encryptData;
-    data.GetString(("is_encrypt"), encryptData);
+    data.getString(("is_encrypt"), encryptData);
     encryptData = encryptData.toLower();
     bEncryptData = (encryptData == "1" || encryptData == "true");
 
@@ -666,18 +666,18 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
 {
 }
 
-bool WIZBIZDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZBIZDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetStr(_T("biz_name"), bizName);
-    data.GetStr(_T("biz_guid"), bizGUID);
-    data.GetInt(_T("user_group"), bizUserRole);
-    data.GetInt(_T("biz_level"), bizLevel);
-    data.GetBool(_T("is_due"), bizIsDue);
+    data.getStr(_T("biz_name"), bizName);
+    data.getStr(_T("biz_guid"), bizGUID);
+    data.getInt(_T("user_group"), bizUserRole);
+    data.getInt(_T("biz_level"), bizLevel);
+    data.getBool(_T("is_due"), bizIsDue);
 
-    CWizXmlRpcStructValue* structData = data.GetStruct(_T("avatar_changes"));
+    WizXmlRpcStructValue* structData = data.getStruct(_T("avatar_changes"));
     if (structData)
     {
-        structData->ToStringMap(mapAvatarChanges);
+        structData->toStringMap(mapAvatarChanges);
     }
 
     if (bizGUID.isEmpty() || bizName.isEmpty())
@@ -747,33 +747,33 @@ WIZMESSAGEDATA::WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data)
 
 }
 
-bool WIZMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetString("biz_guid", bizGUID);
-    data.GetString("kb_guid", kbGUID);
-    data.GetString("document_guid", documentGUID);
+    data.getString("biz_guid", bizGUID);
+    data.getString("kb_guid", kbGUID);
+    data.getString("document_guid", documentGUID);
 
-    data.GetInt64("id", nId);
-    data.GetTime("dt_created", tCreated);
-    data.GetInt("message_type", nMessageType);
-    data.GetInt("read_status", nReadStatus);
-    data.GetInt("delete_status", nDeleteStatus);
-    data.GetInt("email_status", nEmailStatus);
-    data.GetInt("sms_status", nSMSStatus);
+    data.getInt64("id", nId);
+    data.getTime("dt_created", tCreated);
+    data.getInt("message_type", nMessageType);
+    data.getInt("read_status", nReadStatus);
+    data.getInt("delete_status", nDeleteStatus);
+    data.getInt("email_status", nEmailStatus);
+    data.getInt("sms_status", nSMSStatus);
 
-    data.GetString("title", title);
-    data.GetString("message_body", messageBody);
-    data.GetString("note", note);
+    data.getString("title", title);
+    data.getString("message_body", messageBody);
+    data.getString("note", note);
 
-    data.GetString("receiver_alias", receiverAlias);
-    data.GetString("receiver_guid", receiverGUID);
-    data.GetString("receiver_id", receiverId);
+    data.getString("receiver_alias", receiverAlias);
+    data.getString("receiver_guid", receiverGUID);
+    data.getString("receiver_id", receiverId);
 
-    data.GetString("sender_alias", senderAlias);
-    data.GetString("sender_guid", senderGUID);
-    data.GetString("sender_id", senderId);
+    data.getString("sender_alias", senderAlias);
+    data.getString("sender_guid", senderGUID);
+    data.getString("sender_id", senderId);
 
-    data.GetInt64("version", nVersion);
+    data.getInt64("version", nVersion);
 
     return true;
 }
@@ -796,42 +796,42 @@ bool WIZMESSAGEDATA::isAd()
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
-    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
+    QString type = encoder->toUnicode(d["type"].getString(), d["type"].GetStringLength());
 
     return type == "ad";
 }
 
 /* ---------------------------- WIZKVRETURN ---------------------------- */
-bool WIZKVRETURN::LoadFromXmlRpc(CWizXmlRpcStructValue& data)
+bool WIZKVRETURN::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.GetInt("return_code", nCode);
-    data.GetString("value_of_key", value);
-    data.GetInt64("version", nVersion);
+    data.getInt("return_code", nCode);
+    data.getString("value_of_key", value);
+    data.getInt64("version", nVersion);
 
     return nCode == 200;
 }
 
 
-BOOL WIZUSERMESSAGEDATA::LoadFromXmlRpc(CWizXmlRpcStructValue &data)
+BOOL WIZUSERMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue &data)
 {
-    data.GetInt64(_T("id"), nMessageID);
-    data.GetStr(_T("biz_guid"), strBizGUID);
-    data.GetStr(_T("kb_guid"), strKbGUID);
-    data.GetStr(_T("document_guid"), strDocumentGUID);
-    data.GetStr(_T("sender_guid"), strSenderGUID);
-    data.GetStr(_T("sender_id"), strSenderID);
-    data.GetStr(_T("receiver_guid"), strReceiverGUID);
-    data.GetStr(_T("receiver_id"), strReceiverID);
-    data.GetInt(_T("message_type"), nMessageType);
-    data.GetInt(_T("read_status"), nReadStatus);
-    data.GetInt(_T("delete_status"), nDeletedStatus);
-    data.GetTime(_T("dt_created"), tCreated);
-    data.GetStr(_T("message_body"), strMessageText);
-    data.GetInt64(_T("version"), nVersion);
-    data.GetStr(_T("sender_alias"), strSender);
-    data.GetStr(_T("receiver_alias"), strReceiver);
-    data.GetStr(_T("sender_alias"), strSender);
-    data.GetStr(_T("title"), strTitle);
-    data.GetStr(_T("note"), strNote);
+    data.getInt64(_T("id"), nMessageID);
+    data.getStr(_T("biz_guid"), strBizGUID);
+    data.getStr(_T("kb_guid"), strKbGUID);
+    data.getStr(_T("document_guid"), strDocumentGUID);
+    data.getStr(_T("sender_guid"), strSenderGUID);
+    data.getStr(_T("sender_id"), strSenderID);
+    data.getStr(_T("receiver_guid"), strReceiverGUID);
+    data.getStr(_T("receiver_id"), strReceiverID);
+    data.getInt(_T("message_type"), nMessageType);
+    data.getInt(_T("read_status"), nReadStatus);
+    data.getInt(_T("delete_status"), nDeletedStatus);
+    data.getTime(_T("dt_created"), tCreated);
+    data.getStr(_T("message_body"), strMessageText);
+    data.getInt64(_T("version"), nVersion);
+    data.getStr(_T("sender_alias"), strSender);
+    data.getStr(_T("receiver_alias"), strReceiver);
+    data.getStr(_T("sender_alias"), strSender);
+    data.getStr(_T("title"), strTitle);
+    data.getStr(_T("note"), strNote);
     return 	TRUE;
 }

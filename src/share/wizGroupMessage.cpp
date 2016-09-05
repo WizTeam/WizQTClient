@@ -4,7 +4,7 @@
 #include "wizApiEntry.h"
 #include "rapidjson/document.h"
 
-CWizGroupMessage::CWizGroupMessage(CWizDatabase& db, QObject* parent /* = 0 */)
+WizGroupMessage::WizGroupMessage(WizDatabase& db, QObject* parent /* = 0 */)
     : m_db(db)
     , CWizApiBase(WIZ_API_URL, parent)
     , m_bMsgUploadStatus(false)
@@ -15,7 +15,7 @@ CWizGroupMessage::CWizGroupMessage(CWizDatabase& db, QObject* parent /* = 0 */)
     m_timer.start(120 * 1000);   // default message fetching interval, 2 minutes
 }
 
-void CWizGroupMessage::on_timer_timeout()
+void WizGroupMessage::on_timer_timeout()
 {
     m_timer.stop();
 
@@ -30,7 +30,7 @@ void CWizGroupMessage::on_timer_timeout()
     callClientLogin(strUserId, strPasswd);
 }
 
-void CWizGroupMessage::onClientLogin(const WIZUSERINFO& userInfo)
+void WizGroupMessage::onClientLogin(const WIZUSERINFO& userInfo)
 {
     qDebug() << "\n[Message Sync]logined...";
 
@@ -38,7 +38,7 @@ void CWizGroupMessage::onClientLogin(const WIZUSERINFO& userInfo)
     uploadMessages();
 }
 
-void CWizGroupMessage::uploadMessages()
+void WizGroupMessage::uploadMessages()
 {
     if (!m_db.getModifiedMessages(m_arrayMsgNeedUpload)) {
         qDebug() << "[Message Sync]failed: unable to get modified messages";
@@ -49,7 +49,7 @@ void CWizGroupMessage::uploadMessages()
     uploadMessageNext();
 }
 
-void CWizGroupMessage::uploadMessageNext()
+void WizGroupMessage::uploadMessageNext()
 {
     if (!m_arrayMsgNeedUpload.size()) {
         uploadMessageEnd();
@@ -82,12 +82,12 @@ void CWizGroupMessage::uploadMessageNext()
     callSetMessageStatus(m_listMsgUploading, m_bMsgUploadStatus);
 }
 
-void CWizGroupMessage::onSetMessageStatus()
+void WizGroupMessage::onSetMessageStatus()
 {
     QList<qint64>::iterator it;
     for (it = m_listMsgUploading.begin(); it != m_listMsgUploading.end();) {
         QString strId = QString::number(*it);
-        m_db.ModifyObjectVersion(strId, WIZMESSAGEDATA::ObjectName(), 0);
+        m_db.modifyObjectVersion(strId, WIZMESSAGEDATA::objectName(), 0);
 
         it = m_listMsgUploading.erase(it);
     }
@@ -95,13 +95,13 @@ void CWizGroupMessage::onSetMessageStatus()
     uploadMessageNext();
 }
 
-void CWizGroupMessage::uploadMessageEnd()
+void WizGroupMessage::uploadMessageEnd()
 {
     // query message version from light-weight api
     acquireMessageVersionEntry();
 }
 
-void CWizGroupMessage::acquireMessageVersionEntry()
+void WizGroupMessage::acquireMessageVersionEntry()
 {
     if (!m_strVersionRequestUrl.isEmpty()) {
         queryMessageVersion();
@@ -117,7 +117,7 @@ void CWizGroupMessage::acquireMessageVersionEntry()
     entry->getMessageUrl();
 }
 
-void CWizGroupMessage::on_acquireMessageVersionEntry_finished(const QString& strReply)
+void WizGroupMessage::on_acquireMessageVersionEntry_finished(const QString& strReply)
 {
     sender()->deleteLater();
 
@@ -135,7 +135,7 @@ void CWizGroupMessage::on_acquireMessageVersionEntry_finished(const QString& str
     queryMessageVersion();
 }
 
-void CWizGroupMessage::queryMessageVersion()
+void WizGroupMessage::queryMessageVersion()
 {
     Q_ASSERT(!m_strVersionRequestUrl.isEmpty() && !m_strUserGUID.isEmpty());
 
@@ -150,7 +150,7 @@ void CWizGroupMessage::queryMessageVersion()
     connect(reply, SIGNAL(finished()), SLOT(on_queryMessageVersion_finished()));
 }
 
-void CWizGroupMessage::on_queryMessageVersion_finished()
+void WizGroupMessage::on_queryMessageVersion_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -177,12 +177,12 @@ void CWizGroupMessage::on_queryMessageVersion_finished()
 
     QString nCode;
     if (document["return_code"].IsString()) {
-        nCode = document["return_code"].GetString();
+        nCode = document["return_code"].getString();
     } else {
-        nCode = QString::number(document["return_code"].GetInt());
+        nCode = QString::number(document["return_code"].getInt());
     }
 
-    QString strMsg = document["return_message"].GetString();
+    QString strMsg = document["return_message"].getString();
     if (nCode != WIZAPI_RETURN_SUCCESS) {
         TOLOG2("Error occured when get message version, code: %1, message: %2",
                nCode, strMsg);
@@ -190,8 +190,8 @@ void CWizGroupMessage::on_queryMessageVersion_finished()
         return;
     }
 
-    qint64 nVersionRemote = document["result"].GetInt64();
-    qint64 nVersionLocal = m_db.GetObjectVersion(WIZMESSAGEDATA::ObjectName());
+    qint64 nVersionRemote = document["result"].getInt64();
+    qint64 nVersionLocal = m_db.getObjectVersion(WIZMESSAGEDATA::objectName());
 
     qDebug() << "[Message Sync]local message version: " << nVersionLocal;
 
@@ -203,18 +203,18 @@ void CWizGroupMessage::on_queryMessageVersion_finished()
     }
 }
 
-void CWizGroupMessage::onGetMessages(const CWizMessageDataArray& messages)
+void WizGroupMessage::onGetMessages(const CWizMessageDataArray& messages)
 {
     qDebug() << "[Message Sync]fetch message finished, total: " << messages.size();
 
     // update messages info
-    m_db.UpdateMessages(messages);
+    m_db.updateMessages(messages);
 
     // 4. fetch user list
     fetchBizUsers();
 }
 
-void CWizGroupMessage::fetchBizUsers()
+void WizGroupMessage::fetchBizUsers()
 {
     // biz group info is set when call getGroupKbList api
     if (!m_db.GetBizGroupInfo(m_bizInfo)) {
@@ -234,7 +234,7 @@ void CWizGroupMessage::fetchBizUsers()
     fetchBizUsersNext();
 }
 
-void CWizGroupMessage::fetchBizUsersNext()
+void WizGroupMessage::fetchBizUsersNext()
 {
     QMap<QString, QString>::const_iterator it = m_bizInfo.begin();
     QString bizGUID = it.key();
@@ -244,7 +244,7 @@ void CWizGroupMessage::fetchBizUsersNext()
     callGetBizUsers(bizGUID);
 }
 
-void CWizGroupMessage::onGetBizUsers(const QString& strJsonUsers)
+void WizGroupMessage::onGetBizUsers(const QString& strJsonUsers)
 {
     CWizBizUserDataArray arrayUser;
 
@@ -254,7 +254,7 @@ void CWizGroupMessage::onGetBizUsers(const QString& strJsonUsers)
         return;
     }
 
-    if (!m_db.UpdateBizUsers(arrayUser)) {
+    if (!m_db.updateBizUsers(arrayUser)) {
         qDebug() << "[Message Sync]failed: unable to update users!";
         syncEnd();
         return;
@@ -282,7 +282,7 @@ void CWizGroupMessage::onGetBizUsers(const QString& strJsonUsers)
     fetchBizUsersNext();
 }
 
-bool CWizGroupMessage::loadBizUsersFromJson(const QString& strJsonUsers,
+bool WizGroupMessage::loadBizUsersFromJson(const QString& strJsonUsers,
                                             CWizBizUserDataArray& arrayUser)
 {
     // QString assumes Lantin-1 when convert to and from const char* and QByteArrays
@@ -305,10 +305,10 @@ bool CWizGroupMessage::loadBizUsersFromJson(const QString& strJsonUsers,
         }
 
         WIZBIZUSER user;
-        user.alias = u["alias"].GetString();
-        user.pinyin = u["pinyin"].GetString();
-        user.userGUID = u["user_guid"].GetString();
-        user.userId = u["user_id"].GetString();
+        user.alias = u["alias"].getString();
+        user.pinyin = u["pinyin"].getString();
+        user.userGUID = u["user_guid"].getString();
+        user.userId = u["user_id"].getString();
 
         QMap<QString, QString>::const_iterator it = m_bizInfo.begin();
         user.bizGUID = it.key();
@@ -319,18 +319,18 @@ bool CWizGroupMessage::loadBizUsersFromJson(const QString& strJsonUsers,
     return true;
 }
 
-void CWizGroupMessage::fetchBizUsersEnd()
+void WizGroupMessage::fetchBizUsersEnd()
 {
     syncEnd();
     //acquireUserAvatarEntry();
 }
 
-void CWizGroupMessage::syncEnd()
+void WizGroupMessage::syncEnd()
 {
     m_timer.start();
 }
 
-void CWizGroupMessage::onXmlRpcError(const QString& strMethodName,
+void WizGroupMessage::onXmlRpcError(const QString& strMethodName,
                                      WizXmlRpcError err,
                                      int errorCode,
                                      const QString& errorMessage)

@@ -6,12 +6,12 @@
 class QLineEdit;
 class QLabel;
 
-class CWizUserVerifyDialog : public QDialog
+class WizUserVerifyDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizUserVerifyDialog(const QString& strUser,
+    explicit WizUserVerifyDialog(const QString& strUser,
                                   const QString& strHint,
                                   QWidget* parent = 0);
 

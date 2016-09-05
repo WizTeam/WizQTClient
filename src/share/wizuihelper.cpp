@@ -9,11 +9,11 @@
 QBrush WizGetLeftViewBrush()
 {
     QPixmap pixmapBg;
-    pixmapBg.load(Utils::PathResolve::resourcesPath() + "skins/leftview_bg.png");
+    pixmapBg.load(Utils::WizPathResolve::resourcesPath() + "skins/leftview_bg.png");
     return QBrush(pixmapBg);
 }
 
-CWizSpacer::CWizSpacer(QWidget *parent)
+WizSpacer::WizSpacer(QWidget *parent)
     :QWidget(parent)
 {
     QSizePolicy sizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
@@ -21,7 +21,7 @@ CWizSpacer::CWizSpacer(QWidget *parent)
 }
 
 
-CWizVerSpacer::CWizVerSpacer(QWidget* parent)
+WizVerSpacer::WizVerSpacer(QWidget* parent)
     :QWidget(parent)
 {
     QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
@@ -79,14 +79,14 @@ protected:
     }
 };
 
-CWizSplitter::CWizSplitter(QWidget* parent /*= 0*/)
+WizSplitter::WizSplitter(QWidget* parent /*= 0*/)
     : QSplitter(parent)
 {
     setHandleWidth(1);
     setChildrenCollapsible(false);
 }
 
-QSplitterHandle *CWizSplitter::createHandle()
+QSplitterHandle *WizSplitter::createHandle()
 {
     CWizSplitterHandle* spliter =  new CWizSplitterHandle(orientation(), this);
     return spliter;

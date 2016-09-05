@@ -3,45 +3,45 @@
 #include <QDesktopServices>
 
 
-CWizCodeExternal::CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent)
+WizCodeExternal::WizCodeExternal(WizCodeEditorDialog* editor, QObject* parent)
     : m_editor(editor)
     , QObject(parent)
 {
 }
 
-void CWizCodeExternal::accept()
+void WizCodeExternal::accept()
 {
     m_editor->accept();
 }
 
-void CWizCodeExternal::reject()
+void WizCodeExternal::reject()
 {
     m_editor->reject();
 }
 
-void CWizCodeExternal::insertHtml(const QString& strResult)
+void WizCodeExternal::insertHtml(const QString& strResult)
 {
     m_editor->insertHtml(strResult);
 }
 
-QString CWizCodeExternal::getLastCodeType()
+QString WizCodeExternal::getLastCodeType()
 {
     return m_editor->getLastCodeType();
 }
 
-void CWizCodeExternal::saveLastCodeType(const QString& codeType)
+void WizCodeExternal::saveLastCodeType(const QString& codeType)
 {
     m_editor->saveLastCodeType(codeType);
 }
 
 
 
-CWizCommentsExternal::CWizCommentsExternal(QObject* parent)
+WizCommentsExternal::WizCommentsExternal(QObject* parent)
     : QObject(parent)
 {
 }
 
-void CWizCommentsExternal::openUrl(const QString& strUrl)
+void WizCommentsExternal::openUrl(const QString& strUrl)
 {
     QDesktopServices::openUrl(strUrl);
 }

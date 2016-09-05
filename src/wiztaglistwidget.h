@@ -11,15 +11,15 @@ class QLineEdit;
 class QListWidget;
 class QListWidgetItem;
 
-class CWizDatabaseManager;
+class WizDatabaseManager;
 
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;
 
-class CWizTagListWidget : public CWizPopupWidget
+class WizTagListWidget : public WizPopupWidget
 {
     Q_OBJECT
 public:
-    CWizTagListWidget(QWidget* parent);
+    WizTagListWidget(QWidget* parent);
 
     void setDocument(const WIZDOCUMENTDATAEX& doc);
     void setDocuments(const CWizDocumentDataArray& arrayDocument);
@@ -27,7 +27,7 @@ public:
     virtual void showEvent(QShowEvent* event);
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     CWizDocumentDataArray m_arrayDocuments;
     bool m_bUpdating; // avoid itemChanged signal emit programmatically
 

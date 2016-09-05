@@ -13,10 +13,10 @@ struct TemplateData;
 
 #define WIZ_DOCUMENT_TYPE_NORMAL    "document"
 
-class CWizNoteManager
+class WizNoteManager
 {
 public:
-    CWizNoteManager(CWizDatabaseManager& dbMgr);
+    WizNoteManager(WizDatabaseManager& dbMgr);
 
     //
     void createIntroductionNoteForNewRegisterAccount();
@@ -47,7 +47,7 @@ private:
     bool updateLocalTemplates(const QByteArray& newJsonData, QNetworkAccessManager& manager);
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
 };
 
 #endif // CWIZNOTEMANAGER_H

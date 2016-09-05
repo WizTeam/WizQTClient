@@ -15,7 +15,7 @@
 #include "share/wizwebengineview.h"
 
 
-CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
+WizWebSettingsDialog::WizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
     : QDialog(parent)
     , m_url(url)
 {
@@ -26,7 +26,7 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
     pal.setBrush(backgroundRole(), QBrush("#FFFFFF"));
     setPalette(pal);
 
-    m_progressWebView = new CWizLocalProgressWebView(this);
+    m_progressWebView = new WizLocalProgressWebView(this);
 
     QVBoxLayout* layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
@@ -36,31 +36,31 @@ CWizWebSettingsDialog::CWizWebSettingsDialog(QString url, QSize sz, QWidget *par
 
     WizWebEngineView* web = m_progressWebView->web();
     //
-    MainWindow* mainWindow = WizGlobal::mainWindow();
+    WizMainWindow* mainWindow = WizGlobal::mainWindow();
     if (mainWindow) {
         web->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
     }
     connect(web, SIGNAL(loadFinishedEx(bool)), SLOT(on_web_loaded(bool)));
 }
 
-WizWebEngineView* CWizWebSettingsDialog::web()
+WizWebEngineView* WizWebSettingsDialog::web()
 {
     return m_progressWebView->web();
 }
 
-void CWizWebSettingsDialog::load()
+void WizWebSettingsDialog::load()
 {
     web()->load(m_url);
 }
 
-void CWizWebSettingsDialog::showEvent(QShowEvent* event)
+void WizWebSettingsDialog::showEvent(QShowEvent* event)
 {
     QDialog::showEvent(event);
     //
     load();
 }
 
-void CWizWebSettingsDialog::on_web_loaded(bool ok)
+void WizWebSettingsDialog::on_web_loaded(bool ok)
 {
     if (ok)
     {
@@ -72,16 +72,16 @@ void CWizWebSettingsDialog::on_web_loaded(bool ok)
     }
 }
 
-void CWizWebSettingsDialog::loadErrorPage()
+void WizWebSettingsDialog::loadErrorPage()
 {
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail.html";
+    QString strFileName = Utils::WizPathResolve::resourcesPath() + "files/errorpage/load_fail.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);    
     QUrl url = QUrl::fromLocalFile(strFileName);
     web()->setHtml(strHtml, url);
 }
 
-void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
+void WizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
 {
     // 即使在连接正常情况下也会出现OperationCanceledError，此处将其忽略
     if (reply && reply->error() != QNetworkReply::NoError && reply->error() != QNetworkReply::OperationCanceledError)
@@ -90,20 +90,20 @@ void CWizWebSettingsDialog::on_networkRequest_finished(QNetworkReply* reply)
     }
 }
 
-void CWizWebSettingsDialog::showError()
+void WizWebSettingsDialog::showError()
 {
     //loadErrorPage();
 }
 
-void CWizWebSettingsWithTokenDialog::load()
+void WizWebSettingsWithTokenDialog::load()
 {
-    connect(Token::instance(), SIGNAL(tokenAcquired(const QString&)),
+    connect(WizToken::instance(), SIGNAL(tokenAcquired(const QString&)),
             SLOT(on_token_acquired(const QString&)), Qt::QueuedConnection);
 
-    Token::requestToken();
+    WizToken::requestToken();
 }
 
-void CWizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
+void WizWebSettingsWithTokenDialog::on_token_acquired(const QString& token)
 {
     if (token.isEmpty()) {
         showError();

@@ -7,20 +7,20 @@
 
 class QGraphicsView;
 
-class CWizExplorerApp;
-class CWizDatabaseManager;
+class WizExplorerApp;
+class WizDatabaseManager;
 
-class CWizDocumentSelectionView : public QWidget
+class WizDocumentSelectionView : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CWizDocumentSelectionView(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizDocumentSelectionView(WizExplorerApp& app, QWidget *parent = 0);
     void requestDocuments(const CWizDocumentDataArray& arrayDocument);
 
 protected:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
     QGraphicsView* m_graphicsView;
 
     virtual void showEvent(QShowEvent* event);

@@ -6,57 +6,57 @@
 #include "../utils/logger.h"
 
 
-bool WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
+bool WizXmlRpcValueFromXml(WizXMLNode& nodeValue, WizXmlRpcValue** ppRet)
 {
     *ppRet = NULL;
 
-    CWizXMLNode nodeTypeTest;
-    nodeValue.GetFirstChildNode(nodeTypeTest);
+    WizXMLNode nodeTypeTest;
+    nodeValue.getFirstChildNode(nodeTypeTest);
     if (nodeTypeTest.isNull()) {
-        QString strText = nodeValue.GetText();
-        *ppRet = new CWizXmlRpcStringValue(strText);
+        QString strText = nodeValue.getText();
+        *ppRet = new WizXmlRpcStringValue(strText);
         return true;
     }
 
-    CWizXmlRpcValue* pValue = NULL;
-    CString strValueType = nodeTypeTest.GetName();
+    WizXmlRpcValue* pValue = NULL;
+    CString strValueType = nodeTypeTest.getName();
 
-    if (0 == strValueType.CompareNoCase("int")
-        || 0 == strValueType.CompareNoCase("i4"))
+    if (0 == strValueType.compareNoCase("int")
+        || 0 == strValueType.compareNoCase("i4"))
     {
-        pValue = new CWizXmlRpcIntValue();
+        pValue = new WizXmlRpcIntValue();
     }
-    else if (0 == strValueType.CompareNoCase("string")
-        || 0 == strValueType.CompareNoCase("ex:nil")
-        || 0 == strValueType.CompareNoCase("ex:i8"))
+    else if (0 == strValueType.compareNoCase("string")
+        || 0 == strValueType.compareNoCase("ex:nil")
+        || 0 == strValueType.compareNoCase("ex:i8"))
     {
-        pValue = new CWizXmlRpcStringValue();
+        pValue = new WizXmlRpcStringValue();
     }
-    else if (0 == strValueType.CompareNoCase("nil")
-        || 0 == strValueType.CompareNoCase("i8"))
+    else if (0 == strValueType.compareNoCase("nil")
+        || 0 == strValueType.compareNoCase("i8"))
     {
-        pValue = new CWizXmlRpcStringValue();
+        pValue = new WizXmlRpcStringValue();
     }
-    else if (0 == strValueType.CompareNoCase("struct"))
+    else if (0 == strValueType.compareNoCase("struct"))
     {
-        pValue = new CWizXmlRpcStructValue();
+        pValue = new WizXmlRpcStructValue();
     }
-    else if (0 == strValueType.CompareNoCase("array"))
+    else if (0 == strValueType.compareNoCase("array"))
     {
-        pValue = new CWizXmlRpcArrayValue();
+        pValue = new WizXmlRpcArrayValue();
     }
-    else if (0 == strValueType.CompareNoCase("base64"))
+    else if (0 == strValueType.compareNoCase("base64"))
     {
-        pValue = new CWizXmlRpcBase64Value();
+        pValue = new WizXmlRpcBase64Value();
     }
-    else if (0 == strValueType.CompareNoCase("boolean")
-        || 0 == strValueType.CompareNoCase("bool"))
+    else if (0 == strValueType.compareNoCase("boolean")
+        || 0 == strValueType.compareNoCase("bool"))
     {
-        pValue = new CWizXmlRpcBoolValue();
+        pValue = new WizXmlRpcBoolValue();
     }
-    else if (0 == strValueType.CompareNoCase("dateTime.iso8601"))
+    else if (0 == strValueType.compareNoCase("dateTime.iso8601"))
     {
-        pValue = new CWizXmlRpcTimeValue();
+        pValue = new WizXmlRpcTimeValue();
     }
     else
     {
@@ -66,7 +66,7 @@ bool WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
 
     Q_ASSERT(pValue);
 
-    if (pValue->Read(nodeValue))
+    if (pValue->read(nodeValue))
     {
         *ppRet = pValue;
         return true;
@@ -78,29 +78,29 @@ bool WizXmlRpcValueFromXml(CWizXMLNode& nodeValue, CWizXmlRpcValue** ppRet)
     return false;
 }
 
-bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
+bool WizXmlRpcResultFromXml(WizXMLDocument& doc, WizXmlRpcValue** ppRet)
 {
-    CWizXMLNode nodeMethodResponse;
-    doc.FindChildNode("methodResponse", nodeMethodResponse);
+    WizXMLNode nodeMethodResponse;
+    doc.findChildNode("methodResponse", nodeMethodResponse);
     if (nodeMethodResponse.isNull())
     {
         TOLOG("Failed to get methodResponse node!");
         return false;
     }
 
-    CWizXMLNode nodeTest;
-    if (!nodeMethodResponse.GetFirstChildNode(nodeTest))
+    WizXMLNode nodeTest;
+    if (!nodeMethodResponse.getFirstChildNode(nodeTest))
     {
         TOLOG("Failed to get methodResponse child node!");
         return false;
     }
 
-    QString strTestName = nodeTest.GetName();
+    QString strTestName = nodeTest.getName();
 
     if (0 == strTestName.compare("params", Qt::CaseInsensitive))
     {
-        CWizXMLNode nodeParamValue;
-        nodeTest.FindNodeByPath("param/value", nodeParamValue);
+        WizXMLNode nodeParamValue;
+        nodeTest.findNodeByPath("param/value", nodeParamValue);
         if (nodeParamValue.isNull())
         {
             TOLOG("Failed to get param value node of params!");
@@ -111,16 +111,16 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
     }
     else if (0 == strTestName.compare("fault", Qt::CaseInsensitive))
     {
-        CWizXMLNode nodeFaultValue;
-        nodeTest.FindChildNode("value", nodeFaultValue);
+        WizXMLNode nodeFaultValue;
+        nodeTest.findChildNode("value", nodeFaultValue);
         if (nodeFaultValue.isNull())
         {
             TOLOG("Failed to get fault value node!");
             return false;
         }
 
-        CWizXmlRpcFaultValue* pFault = new CWizXmlRpcFaultValue();
-        pFault->Read(nodeFaultValue);
+        WizXmlRpcFaultValue* pFault = new WizXmlRpcFaultValue();
+        pFault->read(nodeFaultValue);
 
         *ppRet = pFault;
 
@@ -135,33 +135,33 @@ bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet)
 
 
 /* ------------------------- CWizXmlRpcIntValue ------------------------- */
-CWizXmlRpcRequest::CWizXmlRpcRequest(const QString& strMethodName)
+WizXmlRpcRequest::WizXmlRpcRequest(const QString& strMethodName)
 {
-    CWizXMLNode nodeMethodCall;
-    m_doc.AppendChild("methodCall", nodeMethodCall);
-    nodeMethodCall.SetChildNodeText("methodName", strMethodName);
+    WizXMLNode nodeMethodCall;
+    m_doc.appendChild("methodCall", nodeMethodCall);
+    nodeMethodCall.setChildNodeText("methodName", strMethodName);
 
-    CWizXMLNode nodeParams;
-    nodeMethodCall.AppendChild("params", nodeParams);
+    WizXMLNode nodeParams;
+    nodeMethodCall.appendChild("params", nodeParams);
 }
 
-void CWizXmlRpcRequest::addParam(CWizXmlRpcValue* pParam)
+void WizXmlRpcRequest::addParam(WizXmlRpcValue* pParam)
 {
     Q_ASSERT(pParam);
 
-    CWizXMLNode nodeParams;
-    m_doc.FindNodeByPath("methodCall/params", nodeParams);
+    WizXMLNode nodeParams;
+    m_doc.findNodeByPath("methodCall/params", nodeParams);
 
-    CWizXMLNode nodeParamValue;
-    nodeParams.AppendNodeByPath("param/value", nodeParamValue);
+    WizXMLNode nodeParamValue;
+    nodeParams.appendNodeByPath("param/value", nodeParamValue);
 
-    pParam->Write(nodeParamValue);
+    pParam->write(nodeParamValue);
 }
 
-QByteArray CWizXmlRpcRequest::toData()
+QByteArray WizXmlRpcRequest::toData()
 {
     QString strText;
-    if (!m_doc.ToXML(strText, true)) {
+    if (!m_doc.toXML(strText, true)) {
         TOLOG("Failed to get xml text!");
         return QByteArray();
     }
@@ -184,115 +184,115 @@ QByteArray CWizXmlRpcRequest::toData()
 
 
 /* ------------------------- CWizXmlRpcIntValue ------------------------- */
-CWizXmlRpcIntValue::CWizXmlRpcIntValue(int n /* = 0 */)
+WizXmlRpcIntValue::WizXmlRpcIntValue(int n /* = 0 */)
     : m_n(n)
 {
 }
 
-bool CWizXmlRpcIntValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcIntValue::write(WizXMLNode& nodeValue)
 {
-    nodeValue.SetChildNodeText("int", QString::number(m_n));
+    nodeValue.setChildNodeText("int", QString::number(m_n));
     return true;
 }
 
-bool CWizXmlRpcIntValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcIntValue::read(WizXMLNode& nodeValue)
 {
-    QString strValue = nodeValue.GetFirstChildNodeText();
+    QString strValue = nodeValue.getFirstChildNodeText();
     m_n = strValue.toInt();
     return true;
 }
 
-QString CWizXmlRpcIntValue::ToString() const
+QString WizXmlRpcIntValue::toString() const
 {
     return QString::number(m_n);
 }
 
-CWizXmlRpcIntValue::operator int()
+WizXmlRpcIntValue::operator int()
 {
 	return m_n;
 }
 
 
 /* ------------------------- CWizXmlRpcBoolValue ------------------------- */
-CWizXmlRpcBoolValue::CWizXmlRpcBoolValue(bool b /* = false */)
+WizXmlRpcBoolValue::WizXmlRpcBoolValue(bool b /* = false */)
     : m_b(b)
 {
 }
 
-bool CWizXmlRpcBoolValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcBoolValue::write(WizXMLNode& nodeValue)
 {
-    nodeValue.SetChildNodeText("boolean", m_b ? "1" : "0");
+    nodeValue.setChildNodeText("boolean", m_b ? "1" : "0");
     return true;
 }
 
-bool CWizXmlRpcBoolValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcBoolValue::read(WizXMLNode& nodeValue)
 {
-    QString strValue = nodeValue.GetFirstChildNodeText();
+    QString strValue = nodeValue.getFirstChildNodeText();
     m_b = (strValue == "1" || 0 == strValue.compare("true", Qt::CaseInsensitive));
     return true;
 }
 
-QString CWizXmlRpcBoolValue::ToString() const
+QString WizXmlRpcBoolValue::toString() const
 {
     return m_b ? "1" : "0";
 }
 
-CWizXmlRpcBoolValue::operator bool()
+WizXmlRpcBoolValue::operator bool()
 {
 	return m_b;
 }
 
 
 /* ------------------------- CWizXmlRpcStringValue ------------------------- */
-CWizXmlRpcStringValue::CWizXmlRpcStringValue(const QString& strDef /* = "" */)
+WizXmlRpcStringValue::WizXmlRpcStringValue(const QString& strDef /* = "" */)
     : m_str(strDef)
 {
 }
 
-bool CWizXmlRpcStringValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcStringValue::write(WizXMLNode& nodeValue)
 {
-    nodeValue.SetChildNodeText("string", m_str);
+    nodeValue.setChildNodeText("string", m_str);
     return true;
 }
 
-bool CWizXmlRpcStringValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcStringValue::read(WizXMLNode& nodeValue)
 {
-	m_str = nodeValue.GetFirstChildNodeText();
+	m_str = nodeValue.getFirstChildNodeText();
     return true;
 }
 
-QString CWizXmlRpcStringValue::ToString() const
+QString WizXmlRpcStringValue::toString() const
 {
     return m_str;
 }
 
-CWizXmlRpcStringValue::operator QString()
+WizXmlRpcStringValue::operator QString()
 {
 	return m_str;
 }
 
 
 /* ------------------------- CWizXmlRpcTimeValue ------------------------- */
-CWizXmlRpcTimeValue::CWizXmlRpcTimeValue()
+WizXmlRpcTimeValue::WizXmlRpcTimeValue()
     : m_t(::WizGetCurrentTime())
 {
 }
 
-CWizXmlRpcTimeValue::CWizXmlRpcTimeValue(const COleDateTime& t)
+WizXmlRpcTimeValue::WizXmlRpcTimeValue(const WizOleDateTime& t)
 	: m_t(t)
 {
 }
 
-bool CWizXmlRpcTimeValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcTimeValue::write(WizXMLNode& nodeValue)
 {
     QString str = WizDateTimeToIso8601String(m_t);
-    nodeValue.SetChildNodeText("dateTime.iso8601", str);
+    nodeValue.setChildNodeText("dateTime.iso8601", str);
     return true;
 }
 
-bool CWizXmlRpcTimeValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcTimeValue::read(WizXMLNode& nodeValue)
 {
-    CString str = nodeValue.GetFirstChildNodeText();
+    CString str = nodeValue.getFirstChildNodeText();
     CString strError;
     if (!WizIso8601StringToDateTime(str, m_t, strError)) {
 		TOLOG(strError);
@@ -302,46 +302,46 @@ bool CWizXmlRpcTimeValue::Read(CWizXMLNode& nodeValue)
     return true;
 }
 
-QString CWizXmlRpcTimeValue::ToString() const
+QString WizXmlRpcTimeValue::toString() const
 {
 	return ::WizDateTimeToString(m_t);
 }
 
-CWizXmlRpcTimeValue::operator COleDateTime()
+WizXmlRpcTimeValue::operator WizOleDateTime()
 {
 	return m_t;
 }
 
 
 /* ------------------------- CWizXmlRpcBase64Value ------------------------- */
-CWizXmlRpcBase64Value::CWizXmlRpcBase64Value(const QByteArray& arrayData)
+WizXmlRpcBase64Value::WizXmlRpcBase64Value(const QByteArray& arrayData)
     : m_arrayData(arrayData)
 {
 }
 
-bool CWizXmlRpcBase64Value::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcBase64Value::write(WizXMLNode& nodeValue)
 {
     QString strText;
     WizBase64Encode(m_arrayData, strText);
-    nodeValue.SetChildNodeText("base64", strText);
+    nodeValue.setChildNodeText("base64", strText);
     return true;
 }
 
-bool CWizXmlRpcBase64Value::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcBase64Value::read(WizXMLNode& nodeValue)
 {
-    QString str = nodeValue.GetFirstChildNodeText();
+    QString str = nodeValue.getFirstChildNodeText();
     m_arrayData.clear();;
     return WizBase64Decode(str, m_arrayData);
 }
 
-QString CWizXmlRpcBase64Value::ToString() const
+QString WizXmlRpcBase64Value::toString() const
 {
     QString strText;
     WizBase64Encode(m_arrayData, strText);
     return strText;
 }
 
-bool CWizXmlRpcBase64Value::GetStream(QByteArray& arrayData)
+bool WizXmlRpcBase64Value::getStream(QByteArray& arrayData)
 {
     arrayData = m_arrayData;
     return true;
@@ -349,56 +349,56 @@ bool CWizXmlRpcBase64Value::GetStream(QByteArray& arrayData)
 
 
 /* ------------------------- CWizXmlRpcArrayValue ------------------------- */
-CWizXmlRpcArrayValue::CWizXmlRpcArrayValue()
+WizXmlRpcArrayValue::WizXmlRpcArrayValue()
 {
 }
 
-CWizXmlRpcArrayValue::CWizXmlRpcArrayValue(const CWizStdStringArray& arrayData)
+WizXmlRpcArrayValue::WizXmlRpcArrayValue(const CWizStdStringArray& arrayData)
 {
-	SetStringArray(arrayData);
+	setStringArray(arrayData);
 }
 
-CWizXmlRpcArrayValue::~CWizXmlRpcArrayValue ()
+WizXmlRpcArrayValue::~WizXmlRpcArrayValue ()
 {
-	Clear();
+	clear();
 }
 
-bool CWizXmlRpcArrayValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcArrayValue::write(WizXMLNode& nodeValue)
 {
-	CWizXMLNode nodeData;
-    nodeValue.AppendNodeByPath("array/data", nodeData);
+	WizXMLNode nodeData;
+    nodeValue.appendNodeByPath("array/data", nodeData);
 
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++)
 	{
-		CWizXmlRpcValue* pValue = *it;
+		WizXmlRpcValue* pValue = *it;
 
-		CWizXMLNode nodeElementValue;
-        nodeData.AppendChild("value", nodeElementValue);
-		pValue->Write(nodeElementValue);
+		WizXMLNode nodeElementValue;
+        nodeData.appendChild("value", nodeElementValue);
+		pValue->write(nodeElementValue);
 	}
 
     return true;
 }
 
-bool CWizXmlRpcArrayValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcArrayValue::read(WizXMLNode& nodeValue)
 {
-	CWizXMLNode nodeData;
-    if (!nodeValue.FindNodeByPath("array/data", nodeData))
+	WizXMLNode nodeData;
+    if (!nodeValue.findNodeByPath("array/data", nodeData))
 	{
         TOLOG("Failed to get array data node!");
         return false;
 	}
 
-    std::deque<CWizXMLNode> arrayValue;
-	nodeData.GetAllChildNodes(arrayValue);
+    std::deque<WizXMLNode> arrayValue;
+	nodeData.getAllChildNodes(arrayValue);
 
-    std::deque<CWizXMLNode>::iterator it;
+    std::deque<WizXMLNode>::iterator it;
     for (it = arrayValue.begin(); it != arrayValue.end(); it++)
 	{
-		CWizXMLNode& nodeElementValue = *it;
+		WizXMLNode& nodeElementValue = *it;
 
-		CWizXmlRpcValue* pElementValue = NULL;
+		WizXmlRpcValue* pElementValue = NULL;
         if (!WizXmlRpcValueFromXml(nodeElementValue, &pElementValue))
 		{
             TOLOG("Failed to load array element value from node!");
@@ -406,20 +406,20 @@ bool CWizXmlRpcArrayValue::Read(CWizXMLNode& nodeValue)
 		}
 
         Q_ASSERT(pElementValue);
-		Add(pElementValue);
+		add(pElementValue);
 	}
 
     return true;
 }
 
-QString CWizXmlRpcArrayValue::ToString() const
+QString WizXmlRpcArrayValue::toString() const
 {
     QString str;
 
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++)
     {
-        str += (*it)->ToString();
+        str += (*it)->toString();
 
         if (it != m_array.end() - 1) {
             str += ", ";
@@ -429,14 +429,14 @@ QString CWizXmlRpcArrayValue::ToString() const
     return str;
 }
 
-void CWizXmlRpcArrayValue::Add(CWizXmlRpcValue* pValue)
+void WizXmlRpcArrayValue::add(WizXmlRpcValue* pValue)
 {
 	m_array.push_back(pValue);
 }
 
-void CWizXmlRpcArrayValue::Clear()
+void WizXmlRpcArrayValue::clear()
 {
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++)
 	{
 		delete *it;
@@ -445,12 +445,12 @@ void CWizXmlRpcArrayValue::Clear()
 	m_array.clear();
 }
 
-bool CWizXmlRpcArrayValue::ToStringArray(CWizStdStringArray& arrayRet)
+bool WizXmlRpcArrayValue::toStringArray(CWizStdStringArray& arrayRet)
 {
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++)
 	{
-		CWizXmlRpcStringValue* pValue = dynamic_cast<CWizXmlRpcStringValue*>(*it);
+		WizXmlRpcStringValue* pValue = dynamic_cast<WizXmlRpcStringValue*>(*it);
 		if (!pValue)
 		{
             TOLOG("Fault error: element of array is null or not a string");
@@ -464,12 +464,12 @@ bool CWizXmlRpcArrayValue::ToStringArray(CWizStdStringArray& arrayRet)
     return true;
 }
 
-bool CWizXmlRpcArrayValue::SetStringArray(const CWizStdStringArray& arrayData)
+bool WizXmlRpcArrayValue::setStringArray(const CWizStdStringArray& arrayData)
 {
     CWizStdStringArray::const_iterator it;
     for (it = arrayData.begin(); it != arrayData.end(); it++)
 	{
-		Add(new CWizXmlRpcStringValue(*it));
+		add(new WizXmlRpcStringValue(*it));
     }
 
     return true;
@@ -477,81 +477,81 @@ bool CWizXmlRpcArrayValue::SetStringArray(const CWizStdStringArray& arrayData)
 
 
 /* ------------------------- CWizXmlRpcStructValue ------------------------- */
-void CWizXmlRpcStructValue::AddValue(const QString& strName, CWizXmlRpcValue* pValue)
+void WizXmlRpcStructValue::addValue(const QString& strName, WizXmlRpcValue* pValue)
 {
-    RemoveValue(strName);
+    removeValue(strName);
     m_map[strName] = pValue;
 }
 
-CWizXmlRpcValue* CWizXmlRpcStructValue::GetMappedValue(const QString& strName) const
+WizXmlRpcValue* WizXmlRpcStructValue::getMappedValue(const QString& strName) const
 {
-    std::map<QString, CWizXmlRpcValue*>::const_iterator it = m_map.find(strName);
+    std::map<QString, WizXmlRpcValue*>::const_iterator it = m_map.find(strName);
 	if (it == m_map.end())
 		return NULL;
 
 	return it->second;
 }
 
-CWizXmlRpcStructValue::~CWizXmlRpcStructValue()
+WizXmlRpcStructValue::~WizXmlRpcStructValue()
 {
-	Clear();
+	clear();
 }
 
-bool CWizXmlRpcStructValue::Write(CWizXMLNode& nodeValue)
+bool WizXmlRpcStructValue::write(WizXMLNode& nodeValue)
 {
-	CWizXMLNode nodeStruct;
-    nodeValue.AppendChild("struct", nodeStruct);
+	WizXMLNode nodeStruct;
+    nodeValue.appendChild("struct", nodeStruct);
 
-    std::map<QString, CWizXmlRpcValue*>::const_iterator it;
+    std::map<QString, WizXmlRpcValue*>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++) {
         QString strName = it->first;
-		CWizXmlRpcValue* pValue = it->second;
+		WizXmlRpcValue* pValue = it->second;
 
-		CWizXMLNode nodeMember;
-        nodeStruct.AppendChild("member", nodeMember);
+		WizXMLNode nodeMember;
+        nodeStruct.appendChild("member", nodeMember);
 
-        nodeMember.SetChildNodeText("name", strName);
+        nodeMember.setChildNodeText("name", strName);
 
-		CWizXMLNode nodeElementValue;
-        nodeMember.AppendChild("value", nodeElementValue);
+		WizXMLNode nodeElementValue;
+        nodeMember.appendChild("value", nodeElementValue);
 
-		pValue->Write(nodeElementValue);
+		pValue->write(nodeElementValue);
 	}
 
     return true;
 }
 
-bool CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcStructValue::read(WizXMLNode& nodeValue)
 {
-	CWizXMLNode nodeStruct;
-    if (!nodeValue.FindChildNode("struct", nodeStruct)) {
+	WizXMLNode nodeStruct;
+    if (!nodeValue.findChildNode("struct", nodeStruct)) {
         TOLOG("Failed to get struct node!");
         return false;
 	}
 
-    std::deque<CWizXMLNode> arrayMember;
-	nodeStruct.GetAllChildNodes(arrayMember);
+    std::deque<WizXMLNode> arrayMember;
+	nodeStruct.getAllChildNodes(arrayMember);
 
-    std::deque<CWizXMLNode>::iterator it;
+    std::deque<WizXMLNode>::iterator it;
     for (it = arrayMember.begin(); it != arrayMember.end(); it++)
     {
-		CWizXMLNode& nodeMember = *it;
+		WizXMLNode& nodeMember = *it;
 
         QString strName;
-        if (!nodeMember.GetChildNodeText("name", strName))
+        if (!nodeMember.getChildNodeText("name", strName))
         {
             TOLOG("Failed to get struct member name!");
             return false;
 		}
 
-		CWizXMLNode nodeMemberValue;
-        if (!nodeMember.FindChildNode("value", nodeMemberValue))
+		WizXMLNode nodeMemberValue;
+        if (!nodeMember.findChildNode("value", nodeMemberValue))
         {
             TOLOG("Failed to get struct member value!");
             return false;
 		}
 
-		CWizXmlRpcValue* pMemberValue = NULL;
+		WizXmlRpcValue* pMemberValue = NULL;
         if (!WizXmlRpcValueFromXml(nodeMemberValue, &pMemberValue))
 		{
             TOLOG("Failed to load struct member value from node!");
@@ -560,119 +560,119 @@ bool CWizXmlRpcStructValue::Read(CWizXMLNode& nodeValue)
 
         Q_ASSERT(pMemberValue);
 
-		AddValue(strName, pMemberValue);
+		addValue(strName, pMemberValue);
 	}
 
     return true;
 }
 
-QString CWizXmlRpcStructValue::ToString() const
+QString WizXmlRpcStructValue::toString() const
 {
     QString str;
 
-    std::map<QString, CWizXmlRpcValue*>::const_iterator it;
+    std::map<QString, WizXmlRpcValue*>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++)
     {
         QString strKeyValue;
-        CWizXmlRpcStructValue* p = dynamic_cast<CWizXmlRpcStructValue*>(it->second);
+        WizXmlRpcStructValue* p = dynamic_cast<WizXmlRpcStructValue*>(it->second);
         if (p) {
-            strKeyValue = "{" + it->first + ":" + it->second->ToString() + "}";
+            strKeyValue = "{" + it->first + ":" + it->second->toString() + "}";
             str += strKeyValue;
             continue;
         }
 
-        CWizXmlRpcArrayValue* p2 = dynamic_cast<CWizXmlRpcArrayValue*>(it->second);
+        WizXmlRpcArrayValue* p2 = dynamic_cast<WizXmlRpcArrayValue*>(it->second);
         if (p2) {
-            strKeyValue = "[" + it->first + ":" + it->second->ToString() + "]";
+            strKeyValue = "[" + it->first + ":" + it->second->toString() + "]";
             str += strKeyValue;
             continue;
         }
 
-        strKeyValue = "(" + it->first + ":" + it->second->ToString() + ")";
+        strKeyValue = "(" + it->first + ":" + it->second->toString() + ")";
         str += strKeyValue;
     }
 
     return "{" + str + "}\n";
 }
 
-void CWizXmlRpcStructValue::AddInt(const QString& strName, int n)
+void WizXmlRpcStructValue::addInt(const QString& strName, int n)
 {
-    AddValue(strName, new CWizXmlRpcIntValue(n));
+    addValue(strName, new WizXmlRpcIntValue(n));
 }
 
-void CWizXmlRpcStructValue::AddString(const QString& strName, const QString& str)
+void WizXmlRpcStructValue::addString(const QString& strName, const QString& str)
 {
-    AddValue(strName, new CWizXmlRpcStringValue(str));
+    addValue(strName, new WizXmlRpcStringValue(str));
 }
 
-void CWizXmlRpcStructValue::AddBool(const QString& strName, bool b)
+void WizXmlRpcStructValue::addBool(const QString& strName, bool b)
 {
-    AddValue(strName, new CWizXmlRpcBoolValue(b));
+    addValue(strName, new WizXmlRpcBoolValue(b));
 }
 
-void CWizXmlRpcStructValue::AddTime(const QString& strName, const COleDateTime& t)
+void WizXmlRpcStructValue::addTime(const QString& strName, const WizOleDateTime& t)
 {
-    AddValue(strName, new CWizXmlRpcTimeValue(t));
+    addValue(strName, new WizXmlRpcTimeValue(t));
 }
 
-void CWizXmlRpcStructValue::AddBase64(const QString& strName, const QByteArray& arrayData)
+void WizXmlRpcStructValue::addBase64(const QString& strName, const QByteArray& arrayData)
 {
-    AddValue(strName, new CWizXmlRpcBase64Value(arrayData));
+    addValue(strName, new WizXmlRpcBase64Value(arrayData));
 }
 
-void CWizXmlRpcStructValue::AddStringArray(const QString& strName, const CWizStdStringArray& arrayData)
+void WizXmlRpcStructValue::addStringArray(const QString& strName, const CWizStdStringArray& arrayData)
 {
-    AddValue(strName, new CWizXmlRpcArrayValue(arrayData));
+    addValue(strName, new WizXmlRpcArrayValue(arrayData));
 }
 
-void CWizXmlRpcStructValue::AddInt64(const QString& strName, __int64 n)
+void WizXmlRpcStructValue::addInt64(const QString& strName, __int64 n)
 {
-    AddValue(strName, new CWizXmlRpcStringValue(WizInt64ToStr(n)));
+    addValue(strName, new WizXmlRpcStringValue(WizInt64ToStr(n)));
 }
 
-void CWizXmlRpcStructValue::AddColor(const QString& strName, COLORREF cr)
+void WizXmlRpcStructValue::addColor(const QString& strName, COLORREF cr)
 {
-    AddValue(strName, new CWizXmlRpcStringValue(WizColorToString(cr)));
+    addValue(strName, new WizXmlRpcStringValue(WizColorToString(cr)));
 }
 
-void CWizXmlRpcStructValue::AddStruct(const QString& strName, CWizXmlRpcStructValue* pStruct)
+void WizXmlRpcStructValue::addStruct(const QString& strName, WizXmlRpcStructValue* pStruct)
 {
-    AddValue(strName, pStruct);
+    addValue(strName, pStruct);
 }
 
-void CWizXmlRpcStructValue::AddArray(const QString& strName, CWizXmlRpcValue* pArray)
+void WizXmlRpcStructValue::addArray(const QString& strName, WizXmlRpcValue* pArray)
 {
-    AddValue(strName, pArray);
+    addValue(strName, pArray);
 }
 
-void CWizXmlRpcStructValue::Clear()
+void WizXmlRpcStructValue::clear()
 {
-    std::map<QString, CWizXmlRpcValue*>::const_iterator it;
+    std::map<QString, WizXmlRpcValue*>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++) {
-		DeleteValue(it->second);
+		deleteValue(it->second);
 	}
 
 	m_map.clear();
 }
 
-void CWizXmlRpcStructValue::RemoveValue(const QString& strName)
+void WizXmlRpcStructValue::removeValue(const QString& strName)
 {
-    std::map<QString, CWizXmlRpcValue*>::iterator it = m_map.find(strName);
+    std::map<QString, WizXmlRpcValue*>::iterator it = m_map.find(strName);
 	if (it == m_map.end())
 		return;
 
-	DeleteValue(it->second);
+	deleteValue(it->second);
 	m_map.erase(it);
 }
 
-void CWizXmlRpcStructValue::DeleteValue(CWizXmlRpcValue* pValue)
+void WizXmlRpcStructValue::deleteValue(WizXmlRpcValue* pValue)
 {
 	delete pValue;
 }
 
-bool CWizXmlRpcStructValue::GetBool(const QString& strName, bool& b) const
+bool WizXmlRpcStructValue::getBool(const QString& strName, bool& b) const
 {
-    CWizXmlRpcBoolValue* p = GetValue<CWizXmlRpcBoolValue>(strName);
+    WizXmlRpcBoolValue* p = getValue<WizXmlRpcBoolValue>(strName);
 	if (!p)
         return false;
 
@@ -680,14 +680,14 @@ bool CWizXmlRpcStructValue::GetBool(const QString& strName, bool& b) const
     return true;
 }
 
-bool CWizXmlRpcStructValue::GetInt(const QString& strName, int& n) const
+bool WizXmlRpcStructValue::getInt(const QString& strName, int& n) const
 {
-    if (CWizXmlRpcIntValue* p = GetValue<CWizXmlRpcIntValue>(strName)) {
+    if (WizXmlRpcIntValue* p = getValue<WizXmlRpcIntValue>(strName)) {
 		n = *p;
         return true;
 	}
 
-    if (CWizXmlRpcStringValue* p = GetValue<CWizXmlRpcStringValue>(strName)) {
+    if (WizXmlRpcStringValue* p = getValue<WizXmlRpcStringValue>(strName)) {
         n = QString(*p).toInt();
         return true;
     }
@@ -695,14 +695,14 @@ bool CWizXmlRpcStructValue::GetInt(const QString& strName, int& n) const
     return false;
 }
 
-bool CWizXmlRpcStructValue::GetString(const QString& strName, QString& str) const
+bool WizXmlRpcStructValue::getString(const QString& strName, QString& str) const
 {
-    if (CWizXmlRpcIntValue* p = GetValue<CWizXmlRpcIntValue>(strName)) {
+    if (WizXmlRpcIntValue* p = getValue<WizXmlRpcIntValue>(strName)) {
         str = QString::number(*p);
         return true;
 	}
 
-    if (CWizXmlRpcStringValue* p = GetValue<CWizXmlRpcStringValue>(strName)) {
+    if (WizXmlRpcStringValue* p = getValue<WizXmlRpcStringValue>(strName)) {
 		str = *p;
         return true;
     }
@@ -710,9 +710,9 @@ bool CWizXmlRpcStructValue::GetString(const QString& strName, QString& str) cons
     return false;
 }
 
-bool CWizXmlRpcStructValue::GetTime(const QString& strName, COleDateTime& t) const
+bool WizXmlRpcStructValue::getTime(const QString& strName, WizOleDateTime& t) const
 {
-    if (CWizXmlRpcTimeValue* p = GetValue<CWizXmlRpcTimeValue>(strName))
+    if (WizXmlRpcTimeValue* p = getValue<WizXmlRpcTimeValue>(strName))
 	{
 		t = *p;
         return true;
@@ -721,30 +721,30 @@ bool CWizXmlRpcStructValue::GetTime(const QString& strName, COleDateTime& t) con
     return false;
 }
 
-bool CWizXmlRpcStructValue::GetStream(const QString& strName, QByteArray& arrayData) const
+bool WizXmlRpcStructValue::getStream(const QString& strName, QByteArray& arrayData) const
 {
-    if (CWizXmlRpcBase64Value* p = GetValue<CWizXmlRpcBase64Value>(strName))
+    if (WizXmlRpcBase64Value* p = getValue<WizXmlRpcBase64Value>(strName))
     {
-        return p->GetStream(arrayData);
+        return p->getStream(arrayData);
     }
 
     return false;
 }
 
-CWizXmlRpcStructValue* CWizXmlRpcStructValue::GetStruct(const QString& strName) const
+WizXmlRpcStructValue* WizXmlRpcStructValue::getStruct(const QString& strName) const
 {
-    return GetValue<CWizXmlRpcStructValue>(strName);
+    return getValue<WizXmlRpcStructValue>(strName);
 }
 
-CWizXmlRpcArrayValue* CWizXmlRpcStructValue::GetArray(const QString& strName) const
+WizXmlRpcArrayValue* WizXmlRpcStructValue::getArray(const QString& strName) const
 {
-    return GetValue<CWizXmlRpcArrayValue>(strName);
+    return getValue<WizXmlRpcArrayValue>(strName);
 }
 
-bool CWizXmlRpcStructValue::GetInt64(const QString& strName, qint64& n) const
+bool WizXmlRpcStructValue::getInt64(const QString& strName, qint64& n) const
 {
     QString str;
-    if (!GetString(strName, str))
+    if (!getString(strName, str))
         return false;
 
     n = str.toLongLong();
@@ -771,20 +771,20 @@ bool CWizXmlRpcStructValue::GetInt64(const QString& strName, qint64& n) const
 //    return true;
 //}
 
-bool CWizXmlRpcStructValue::GetInt(const QString& strName, long& n) const
+bool WizXmlRpcStructValue::getInt(const QString& strName, long& n) const
 {
 	int i = 0;
-    if (!GetInt(strName, i))
+    if (!getInt(strName, i))
         return false;
 
 	n = i;
     return true;
 }
 
-bool CWizXmlRpcStructValue::GetColor(const QString& strName, COLORREF& cr) const
+bool WizXmlRpcStructValue::getColor(const QString& strName, COLORREF& cr) const
 {
     QString str;
-    if (!GetString(strName, str)) {
+    if (!getString(strName, str)) {
         TOLOG1("Failed to get member %1", strName);
         return false;
 	}
@@ -793,26 +793,26 @@ bool CWizXmlRpcStructValue::GetColor(const QString& strName, COLORREF& cr) const
     return true;
 }
 
-bool CWizXmlRpcStructValue::GetStringArray(const QString& strName, CWizStdStringArray& arrayData) const
+bool WizXmlRpcStructValue::getStringArray(const QString& strName, CWizStdStringArray& arrayData) const
 {
-    CWizXmlRpcArrayValue* pArray = GetArray(strName);
+    WizXmlRpcArrayValue* pArray = getArray(strName);
     if (!pArray) {
         TOLOG("Failed to get array data in struct");
         return false;
 	}
 
-	return pArray->ToStringArray(arrayData);
+	return pArray->toStringArray(arrayData);
 }
 
 
 
-BOOL CWizXmlRpcStructValue::ToStringMap(std::map<QString, QString>& ret) const
+BOOL WizXmlRpcStructValue::toStringMap(std::map<QString, QString>& ret) const
 {
-    for (std::map<QString, CWizXmlRpcValue*>::const_iterator it = m_map.begin();
+    for (std::map<QString, WizXmlRpcValue*>::const_iterator it = m_map.begin();
         it != m_map.end();
         it++)
     {
-        ret[it->first] = it->second->ToString();
+        ret[it->first] = it->second->toString();
     }
     //
     return TRUE;
@@ -823,24 +823,24 @@ BOOL CWizXmlRpcStructValue::ToStringMap(std::map<QString, QString>& ret) const
 
 
 /* ------------------------- CWizXmlRpcFaultValue ------------------------- */
-CWizXmlRpcFaultValue::~CWizXmlRpcFaultValue()
+WizXmlRpcFaultValue::~WizXmlRpcFaultValue()
 {
 }
 
-bool CWizXmlRpcFaultValue::Read(CWizXMLNode& nodeValue)
+bool WizXmlRpcFaultValue::read(WizXMLNode& nodeValue)
 {
-	return m_val.Read(nodeValue);
+	return m_val.read(nodeValue);
 }
 
-QString CWizXmlRpcFaultValue::ToString() const
+QString WizXmlRpcFaultValue::toString() const
 {
-    return WizFormatString2(_T("Fault error: %1, %2"), WizIntToStr(GetFaultCode()), GetFaultString());
+    return WizFormatString2(_T("Fault error: %1, %2"), WizIntToStr(getFaultCode()), getFaultString());
 }
 
-int CWizXmlRpcFaultValue::GetFaultCode() const
+int WizXmlRpcFaultValue::getFaultCode() const
 {
 	int nCode = 0;
-	m_val.GetInt(_T("faultCode"), nCode);
+	m_val.getInt(_T("faultCode"), nCode);
     /* 此处不能返回Wiz服务器定义的 301,因为QT将 301 定义为连接协议无效.现在需要通过错误代码判断连接状态.
     NOTE：如果Wiz服务器错误代码变更,或者QT错误代码变更,需要修改此处*/
     if (301 == nCode) {
@@ -854,17 +854,17 @@ int CWizXmlRpcFaultValue::GetFaultCode() const
 	return nCode;
 }
 
-QString CWizXmlRpcFaultValue::GetFaultString() const
+QString WizXmlRpcFaultValue::getFaultString() const
 {
     QString str;
-	m_val.GetString(_T("faultString"), str);
+	m_val.getString(_T("faultString"), str);
 	return str;
 }
 
 
 
 
-CWizXmlRpcResult::CWizXmlRpcResult()
+WizXmlRpcResult::WizXmlRpcResult()
     : m_pResult(NULL)
     , m_nFaultCode(0)
     , m_bXmlRpcSucceeded(FALSE)
@@ -872,7 +872,7 @@ CWizXmlRpcResult::CWizXmlRpcResult()
 {
 }
 //
-CWizXmlRpcResult::~CWizXmlRpcResult()
+WizXmlRpcResult::~WizXmlRpcResult()
 {
     if (m_pResult)
     {
@@ -881,7 +881,7 @@ CWizXmlRpcResult::~CWizXmlRpcResult()
     }
 }
 //
-void CWizXmlRpcResult::SetResult(const QString& strMethodName, CWizXmlRpcValue* pRet)
+void WizXmlRpcResult::setResult(const QString& strMethodName, WizXmlRpcValue* pRet)
 {
     m_pResult = pRet;
     if (!m_pResult)
@@ -894,31 +894,31 @@ void CWizXmlRpcResult::SetResult(const QString& strMethodName, CWizXmlRpcValue* 
     //
     m_bXmlRpcSucceeded = TRUE;
     //
-    if (CWizXmlRpcFaultValue* pFault = GetResultValue<CWizXmlRpcFaultValue>())
+    if (WizXmlRpcFaultValue* pFault = getResultValue<WizXmlRpcFaultValue>())
     {
         m_bFault = TRUE;
         //
-        m_nFaultCode = pFault->GetFaultCode();
-        m_strFaultString = pFault->GetFaultString();
+        m_nFaultCode = pFault->getFaultCode();
+        m_strFaultString = pFault->getFaultString();
         TOLOG3(_T("Failed to call xml rpc %1: %2, %3"), strMethodName, WizIntToStr(m_nFaultCode), m_strFaultString);
     }
 }
 //
-BOOL CWizXmlRpcResult::IsXmlRpcSucceeded() const
+BOOL WizXmlRpcResult::isXmlRpcSucceeded() const
 {
     return m_bXmlRpcSucceeded;
 }
-BOOL CWizXmlRpcResult::IsFault() const
+BOOL WizXmlRpcResult::isFault() const
 {
     return m_bFault;
 }
-BOOL CWizXmlRpcResult::IsNoError() const
+BOOL WizXmlRpcResult::isNoError() const
 {
     return m_bXmlRpcSucceeded && !m_bFault && m_pResult;
 }
-BOOL CWizXmlRpcResult::GetString(QString& str) const
+BOOL WizXmlRpcResult::getString(QString& str) const
 {
-    if (CWizXmlRpcStringValue* pValue = GetResultValue<CWizXmlRpcStringValue>())
+    if (WizXmlRpcStringValue* pValue = getResultValue<WizXmlRpcStringValue>())
     {
         str = *pValue;
         return TRUE;
@@ -926,9 +926,9 @@ BOOL CWizXmlRpcResult::GetString(QString& str) const
     //
     return FALSE;
 }
-BOOL CWizXmlRpcResult::GetBool(BOOL& b) const
+BOOL WizXmlRpcResult::getBool(BOOL& b) const
 {
-    if (CWizXmlRpcBoolValue* pValue = GetResultValue<CWizXmlRpcBoolValue>())
+    if (WizXmlRpcBoolValue* pValue = getResultValue<WizXmlRpcBoolValue>())
     {
         b = *pValue;
         return TRUE;

@@ -4,15 +4,15 @@
 #include <QGraphicsEffect>
 #include <QWidget>
 
-class CWizSkin9GridImage;
+class WizSkin9GridImage;
 
-class CWizShadowEffect : public QGraphicsEffect
+class WizShadowEffect : public QGraphicsEffect
 {
 public:
-    CWizShadowEffect();
+    WizShadowEffect();
 private:
     int m_shadowSize;
-    CWizSkin9GridImage* m_shadow;
+    WizSkin9GridImage* m_shadow;
 protected:
     virtual void draw(QPainter *painter);
 public:
@@ -20,12 +20,12 @@ public:
 };
 
 
-class CWizShadowWidget : public QWidget
+class WizShadowWidget : public QWidget
 {
 public:
-    CWizShadowWidget(QWidget* parent);
+    WizShadowWidget(QWidget* parent);
 private:
-    CWizSkin9GridImage* m_shadow;
+    WizSkin9GridImage* m_shadow;
 protected:
     virtual void paintEvent(QPaintEvent *);
 };

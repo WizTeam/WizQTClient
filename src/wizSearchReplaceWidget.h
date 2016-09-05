@@ -4,17 +4,17 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizSearchReplaceWidget;
+class WizSearchReplaceWidget;
 }
 
-class CWizDocumentWebView;
-class CWizSearchReplaceWidget : public QDialog
+class WizDocumentWebView;
+class WizSearchReplaceWidget : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizSearchReplaceWidget(QWidget *parent = 0);
-    ~CWizSearchReplaceWidget();
+    explicit WizSearchReplaceWidget(QWidget *parent = 0);
+    ~WizSearchReplaceWidget();
 
     void showInEditor(const QRect& rcEditor);
 signals:
@@ -38,7 +38,7 @@ private slots:
 
     void on_lineEdit_source_returnPressed();
 private:
-    Ui::CWizSearchReplaceWidget *ui;
+    Ui::WizSearchReplaceWidget *ui;
 
     void clearAllText();
 };

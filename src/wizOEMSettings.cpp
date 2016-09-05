@@ -26,24 +26,24 @@
 void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, QSettings* settings)
 {
     if (d.HasMember(strMember)) {
-        bool b = d.FindMember(strMember)->value.GetBool();
+        bool b = d.FindMember(strMember)->value.getBool();
         qDebug() << strMember << " : " << b;
         settings->setValue(strMember, b);
     }
 }
 
-CWizOEMSettings::CWizOEMSettings(const QString& strUserAccountPath)
+WizOEMSettings::WizOEMSettings(const QString& strUserAccountPath)
     : QSettings(strUserAccountPath + "oem.ini", QSettings::IniFormat)
 {
 }
 
 
-bool CWizOEMSettings::settingFileExists(const QString& strUserAccountPath)
+bool WizOEMSettings::settingFileExists(const QString& strUserAccountPath)
 {
     return QFile::exists(strUserAccountPath + "oem.ini");
 }
 
-void CWizOEMSettings::updateOEMSettings(const QString& strUserAccountPath, const QString& strOEMJSONData)
+void WizOEMSettings::updateOEMSettings(const QString& strUserAccountPath, const QString& strOEMJSONData)
 {
     if (strUserAccountPath.isEmpty() || strOEMJSONData.isEmpty())
         return;
@@ -68,72 +68,72 @@ void CWizOEMSettings::updateOEMSettings(const QString& strUserAccountPath, const
     getBoolValueFromJSON(d, ForbidCreateBiz, &settings);
 }
 
-bool CWizOEMSettings::isHideShareByEmail()
+bool WizOEMSettings::isHideShareByEmail()
 {
     return value(HideShareByEmail, false).toBool();
 }
 
-bool CWizOEMSettings::isHidePersonalGroup()
+bool WizOEMSettings::isHidePersonalGroup()
 {
     return value(HidePersonalGroup, false).toBool();
 }
 
-bool CWizOEMSettings::isHideFeedback()
+bool WizOEMSettings::isHideFeedback()
 {
     return value(HideFeedback, false).toBool();
 }
 
-bool CWizOEMSettings::isHideRegister()
+bool WizOEMSettings::isHideRegister()
 {
     return value(HideRegister, false).toBool();
 }
 
-bool CWizOEMSettings::isEncryptPassword()
+bool WizOEMSettings::isEncryptPassword()
 {
     return value(EncryptPassword, false).toBool();
 }
 
-bool CWizOEMSettings::isHideSocialLogin()
+bool WizOEMSettings::isHideSocialLogin()
 {
     return value(HideSocialLogin, false).toBool();
 }
 
-bool CWizOEMSettings::isHideForgotPassword()
+bool WizOEMSettings::isHideForgotPassword()
 {
     return value(HideForgotPassword, false).toBool();
 }
 
-bool CWizOEMSettings::isHideShare()
+bool WizOEMSettings::isHideShare()
 {
     return value(HideShare, false).toBool();
 }
 
-bool CWizOEMSettings::isAccountPlaceholder()
+bool WizOEMSettings::isAccountPlaceholder()
 {
     return value(AccountPlaceholder, false).toBool();
 }
 
-bool CWizOEMSettings::isHideMyShare()
+bool WizOEMSettings::isHideMyShare()
 {
     return value(HideMyShare, false).toBool();
 }
 
-bool CWizOEMSettings::isHideBuyVip()
+bool WizOEMSettings::isHideBuyVip()
 {
     return value(HideBuyVip, false).toBool();
 }
 
-bool CWizOEMSettings::isForbidCreateBiz()
+bool WizOEMSettings::isForbidCreateBiz()
 {
     return value(ForbidCreateBiz, false).toBool();
 }
 
-void CWizOEMSettings::setLogoPath(const QString& path)
+void WizOEMSettings::setLogoPath(const QString& path)
 {
     setValue(LoginLogoPath, path);
 }
 
-QString CWizOEMSettings::logoPath()
+QString WizOEMSettings::logoPath()
 {
     return value(LoginLogoPath, "").toString();
 }

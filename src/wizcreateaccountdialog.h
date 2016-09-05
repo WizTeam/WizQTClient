@@ -4,19 +4,19 @@
 #include <QDialog>
 
 namespace Ui {
-    class CreateAccountDialog;
+    class WizCreateAccountDialog;
 }
 
-class CreateAccountDialog : public QDialog
+class WizCreateAccountDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CreateAccountDialog(QWidget *parent = 0);
-    ~CreateAccountDialog();
+    explicit WizCreateAccountDialog(QWidget *parent = 0);
+    ~WizCreateAccountDialog();
 
 private:
-    Ui::CreateAccountDialog *ui;
+    Ui::WizCreateAccountDialog *ui;
 
     void enableControls(bool b);
     QString password2() const;

@@ -45,9 +45,9 @@
 
 using namespace Core::Internal;
 
-bool PluginDialog::m_isRestartRequired = false;
+bool WizPluginDialog::m_isRestartRequired = false;
 
-PluginDialog::PluginDialog(QWidget *parent)
+WizPluginDialog::WizPluginDialog(QWidget *parent)
     : QDialog(parent),
       m_view(new ExtensionSystem::PluginView(this))
 {
@@ -92,20 +92,20 @@ PluginDialog::PluginDialog(QWidget *parent)
     updateButtons();
 }
 
-void PluginDialog::closeDialog()
+void WizPluginDialog::closeDialog()
 {
     ExtensionSystem::PluginManager::writeSettings();
     accept();
 }
 
-void PluginDialog::updateRestartRequired()
+void WizPluginDialog::updateRestartRequired()
 {
     // just display the notice all the time after once changing something
     m_isRestartRequired = true;
     m_restartRequired->setVisible(true);
 }
 
-void PluginDialog::updateButtons()
+void WizPluginDialog::updateButtons()
 {
     ExtensionSystem::PluginSpec *selectedSpec = m_view->currentPlugin();
     if (selectedSpec) {
@@ -118,12 +118,12 @@ void PluginDialog::updateButtons()
 }
 
 
-void PluginDialog::openDetails()
+void WizPluginDialog::openDetails()
 {
     openDetails(m_view->currentPlugin());
 }
 
-void PluginDialog::openDetails(ExtensionSystem::PluginSpec *spec)
+void WizPluginDialog::openDetails(ExtensionSystem::PluginSpec *spec)
 {
     if (!spec)
         return;
@@ -134,7 +134,7 @@ void PluginDialog::openDetails(ExtensionSystem::PluginSpec *spec)
     ExtensionSystem::PluginDetailsView *details = new ExtensionSystem::PluginDetailsView(&dialog);
     layout->addWidget(details);
     details->update(spec);
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, &dialog);
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::close, Qt::Horizontal, &dialog);
     layout->addWidget(buttons);
     connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
     connect(buttons, SIGNAL(rejected()), &dialog, SLOT(reject()));
@@ -142,7 +142,7 @@ void PluginDialog::openDetails(ExtensionSystem::PluginSpec *spec)
     dialog.exec();
 }
 
-void PluginDialog::openErrorDetails()
+void WizPluginDialog::openErrorDetails()
 {
     ExtensionSystem::PluginSpec *spec = m_view->currentPlugin();
     if (!spec)
@@ -154,7 +154,7 @@ void PluginDialog::openErrorDetails()
     ExtensionSystem::PluginErrorView *errors = new ExtensionSystem::PluginErrorView(&dialog);
     layout->addWidget(errors);
     errors->update(spec);
-    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::Close, Qt::Horizontal, &dialog);
+    QDialogButtonBox *buttons = new QDialogButtonBox(QDialogButtonBox::close, Qt::Horizontal, &dialog);
     layout->addWidget(buttons);
     connect(buttons, SIGNAL(accepted()), &dialog, SLOT(accept()));
     connect(buttons, SIGNAL(rejected()), &dialog, SLOT(reject()));

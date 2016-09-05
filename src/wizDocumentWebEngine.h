@@ -19,30 +19,30 @@
 #include "share/wizobject.h"
 
 class CWizObjectDataDownloaderHost;
-class CWizEditorInsertLinkForm;
-class CWizEditorInsertTableForm;
-class CWizDocumentWebView;
-class CWizDocumentTransitionView;
+class WizEditorInsertLinkForm;
+class WizEditorInsertTableForm;
+class WizDocumentWebView;
+class WizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
-class CWizSearchReplaceWidget;
+class WizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
 namespace Core {
-class CWizDocumentView;
+class WizDocumentView;
 } // namespace Core
 
-class CWizDocumentWebViewLoaderThread;
-class CWizDocumentWebViewSaverThread;
+class WizDocumentWebViewLoaderThread;
+class WizDocumentWebViewSaverThread;
 
 
-class WebEnginePage : public QWebEnginePage
+class WizWebEnginePage : public QWebEnginePage
 {
     Q_OBJECT
 public:
-    explicit WebEnginePage(QObject *parent = 0);
-    ~WebEnginePage();
+    explicit WizWebEnginePage(QObject *parent = 0);
+    ~WizWebEnginePage();
 
 public slots:
     void on_urlChanged(const QUrl& url);
@@ -53,13 +53,13 @@ protected:
     void load(const QUrl &url);
 };
 
-class CWizDocumentWebEngine : public QWebEngineView
+class WizDocumentWebEngine : public QWebEngineView
 {
     Q_OBJECT
 public:
-    CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* parent = 0);
-    ~CWizDocumentWebEngine();
-    Core::CWizDocumentView* view() const;
+    WizDocumentWebEngine(WizExplorerApp& app, QWidget* parent = 0);
+    ~WizDocumentWebEngine();
+    Core::WizDocumentView* view() const;
     //
     void waitForDone();
 
@@ -191,9 +191,9 @@ protected:
     virtual void dropEvent(QDropEvent* event) Q_DECL_OVERRIDE;
 
 private:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
-    Core::CWizDocumentView* m_parentView;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
+    Core::WizDocumentView* m_parentView;
     QMap<QString, QString> m_mapFile;
 
     //NOTE: noraml key events is processed by child widgets, if we want create key events by ourself
@@ -217,15 +217,15 @@ private:
     //
     bool m_bInSeperateWindow;
 
-    CWizDocumentTransitionView* m_transitionView;
-    CWizDocumentWebViewLoaderThread* m_docLoadThread;
-    CWizDocumentWebViewSaverThread* m_docSaverThread;
+    WizDocumentTransitionView* m_transitionView;
+    WizDocumentWebViewLoaderThread* m_docLoadThread;
+    WizDocumentWebViewSaverThread* m_docSaverThread;
 
-    QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
-    QPointer<CWizEditorInsertTableForm> m_editorInsertTableForm;
+    QPointer<WizEditorInsertLinkForm> m_editorInsertLinkForm;
+    QPointer<WizEditorInsertTableForm> m_editorInsertTableForm;
     QPointer<QColorDialog> m_colorDialog;
 
-    CWizSearchReplaceWidget* m_searchReplaceWidget;
+    WizSearchReplaceWidget* m_searchReplaceWidget;
 
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback

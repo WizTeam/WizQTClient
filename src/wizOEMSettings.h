@@ -3,10 +3,10 @@
 
 #include <QSettings>
 
-class CWizOEMSettings : public QSettings
+class WizOEMSettings : public QSettings
 {
 public:
-    CWizOEMSettings(const QString& strUserAccountPath);
+    WizOEMSettings(const QString& strUserAccountPath);
 
     static bool settingFileExists(const QString& strUserAccountPath);
     //

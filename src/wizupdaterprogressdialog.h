@@ -6,17 +6,17 @@
 class QMouseEvent;
 
 namespace Ui {
-class CWizUpdaterDialog;
+class WizUpdaterDialog;
 }
 
-class CWizUpdaterDialog : public QDialog
+class WizUpdaterDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizUpdaterDialog(QWidget *parent = 0);
+    explicit WizUpdaterDialog(QWidget *parent = 0);
     void center();
-    ~CWizUpdaterDialog();
+    ~WizUpdaterDialog();
 
     bool checkNeedUpdate();
     bool isPrepared();
@@ -24,7 +24,7 @@ public:
     void doUpdate();
 
 private:
-    Ui::CWizUpdaterDialog *ui;
+    Ui::WizUpdaterDialog *ui;
 
     bool m_bMovable;
     QPoint m_lastPos;

@@ -14,11 +14,11 @@
 
 @interface WizSearchField: NSSearchField <NSTextFieldDelegate>
 {
-    CWizSearchView* m_pSearchWidget;
+    WizSearchView* m_pSearchWidget;
     BOOL m_isEditing;
 }
 
-- (void)setSearchView:(CWizSearchView*)widget;
+- (void)setSearchView:(WizSearchView*)widget;
 - (BOOL)performKeyEquivalent:(NSEvent *)theEvent;
 - (BOOL)becomeFirstResponder;
 - (void)textDidBeginEditing:(NSNotification *)aNotification;
@@ -32,7 +32,7 @@
 @end
 
 @implementation WizSearchField
-- (void)setSearchView:(CWizSearchView*)widget
+- (void)setSearchView:(WizSearchView*)widget
 {
     m_pSearchWidget = widget;
 }
@@ -208,7 +208,7 @@
 @end
 
 
-CWizSearchView::CWizSearchView()
+WizSearchView::WizSearchView()
     : m_sizeHint(QSize(WizIsHighPixel() ? HIGHPIXSEARCHWIDGETWIDTH : NORMALSEARCHWIDGETWIDTH, TOOLBARITEMHEIGHT))
 {
     // Many Cocoa objects create temporary autorelease objects,
@@ -233,7 +233,7 @@ CWizSearchView::CWizSearchView()
     m_completer = new WizSuggestCompletionon(this);
 }
 
-void CWizSearchView::clear()
+void WizSearchView::clear()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     QString strText = WizToQString([pSearchField stringValue]);
@@ -244,19 +244,19 @@ void CWizSearchView::clear()
     [pSearchField setStringValue:@""];
 }
 
-void CWizSearchView::clearFocus()
+void WizSearchView::clearFocus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
 }
 
-void CWizSearchView::focus()
+void WizSearchView::focus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
 //    [pSearchField.window makeFirstResponder:pSearchField];
 }
 
-void CWizSearchView::setText(const QString& text)
+void WizSearchView::setText(const QString& text)
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     NSString* nstring = WizToNSString(text);
@@ -264,55 +264,55 @@ void CWizSearchView::setText(const QString& text)
     focus();
 }
 
-QString CWizSearchView::currentText()
+QString WizSearchView::currentText()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     NSString* nstring = [pSearchField stringValue];
     return WizToQString(nstring);
 }
 
-void CWizSearchView::setUserSettings(CWizUserSettings* settings)
+void WizSearchView::setUserSettings(WizUserSettings* settings)
 {
     m_completer->setUserSettings(settings);
 }
 
-bool CWizSearchView::isEditing()
+bool WizSearchView::isEditing()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     return [pSearchField isEditing];
 }
 
-void CWizSearchView::setCompleterUsable(bool usable)
+void WizSearchView::setCompleterUsable(bool usable)
 {
     m_completer->setUsable(usable);
 }
 
-bool CWizSearchView::isCompleterVisible()
+bool WizSearchView::isCompleterVisible()
 {
     return m_completer->isVisible();
 }
 
-void CWizSearchView::showCompleter()
+void WizSearchView::showCompleter()
 {
     m_completer->autoSuggest();
 }
 
-void CWizSearchView::hideCompleter()
+void WizSearchView::hideCompleter()
 {
     m_completer->hide();
 }
 
-void CWizSearchView::moveCompleter(bool up)
+void WizSearchView::moveCompleter(bool up)
 {
     m_completer->selectSuggestItem(up);
 }
 
-QString CWizSearchView::getCurrentCompleterText()
+QString WizSearchView::getCurrentCompleterText()
 {
     return m_completer->getCurrentText();
 }
 
-void CWizSearchView::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
+void WizSearchView::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
 {
     if (m_completer)
     {
@@ -320,25 +320,25 @@ void CWizSearchView::setPopupWgtOffset(int popupWgtWidth, const QSize& offset)
     }
 }
 
-void CWizSearchView::setSizeHint(QSize sizeHint)
+void WizSearchView::setSizeHint(QSize sizeHint)
 {
     m_sizeHint = sizeHint;
 }
 
-QSize CWizSearchView::sizeHint() const
+QSize WizSearchView::sizeHint() const
 {
     return m_sizeHint;
 }
 
 static QString oldSearchText = QString();
 
-void CWizSearchView::on_search_editFinished(const QString& strText)
+void WizSearchView::on_search_editFinished(const QString& strText)
 {
     emit doSearch(strText);
     oldSearchText = strText;
 }
 
-void CWizSearchView::on_search_textChanged(const QString& strText)
+void WizSearchView::on_search_textChanged(const QString& strText)
 {
     if (!oldSearchText.isEmpty() && strText.isEmpty())
     {
@@ -349,18 +349,18 @@ void CWizSearchView::on_search_textChanged(const QString& strText)
     emit textEdited(strText);
 }
 
-void CWizSearchView::setFocus()
+void WizSearchView::setFocus()
 {
     focus();
 }
 
-void CWizSearchView::clearSearchFocus()
+void WizSearchView::clearSearchFocus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
     [pSearchField.window makeFirstResponder:nil];
 }
 
-void CWizSearchView::on_advanced_buttonClicked()
+void WizSearchView::on_advanced_buttonClicked()
 {
     clearSearchFocus();
 

@@ -4,16 +4,16 @@
 #include <QDialog>
 #include <QPointer>
 
-class CWizExplorerApp;
-class CWizFolderView;
+class WizExplorerApp;
+class WizFolderView;
 struct WIZTAGDATA;
 
-class CWizFolderSelector : public QDialog
+class WizFolderSelector : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app, unsigned int nPermission,QWidget *parent = 0);
+    explicit WizFolderSelector(const QString& strTitle, WizExplorerApp& app, unsigned int nPermission,QWidget *parent = 0);
 
     void setCopyStyle(bool showKeepTagsOption);
     void setAcceptRoot(bool b) { m_bAcceptRoot = b; }
@@ -27,10 +27,10 @@ public:
     WIZTAGDATA selectedGroupFolder();
 
 protected:
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 
 private:
-    QPointer<CWizFolderView> m_folderView;
+    QPointer<WizFolderView> m_folderView;
     bool m_bAcceptRoot;
     bool m_bKeepTime;
     bool m_bKeepTags;

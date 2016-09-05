@@ -44,12 +44,12 @@
 
 #define ALLMENBERS QObject::tr("All Members")
 
-QString processMssageTitle(CWizDatabaseManager& dbMgr, const WIZMESSAGEDATA& data)
+QString processMssageTitle(WizDatabaseManager& dbMgr, const WIZMESSAGEDATA& data)
 {
     if (data.nMessageType == WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP && !data.kbGUID.isEmpty())
     {
         WIZGROUPDATA group;
-        if (!dbMgr.db().GetGroupData(data.kbGUID, group))
+        if (!dbMgr.db().getGroupData(data.kbGUID, group))
             return data.title;
         return QObject::tr("%1 applied to jion the group \" %2 \"").
                 arg(data.senderAlias.isEmpty() ? data.senderId : data.senderAlias).
@@ -58,7 +58,7 @@ QString processMssageTitle(CWizDatabaseManager& dbMgr, const WIZMESSAGEDATA& dat
     else if (data.nMessageType == WIZ_USER_MSG_TYPE_ADDED_TO_GROUP && !data.kbGUID.isEmpty())
     {
         WIZGROUPDATA group;
-        if (!dbMgr.db().GetGroupData(data.kbGUID, group))
+        if (!dbMgr.db().getGroupData(data.kbGUID, group))
             return data.title;
 
         return QObject::tr("%1 has agreed you to join the group \" %2 \"").
@@ -96,27 +96,27 @@ void avatarFromMessage(const WIZMESSAGEDATA& msg, QPixmap* pix)
 {
     if (msg.nMessageType < WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP)
     {
-        AvatarHost::avatar(msg.senderId, pix);
+        WizAvatarHost::avatar(msg.senderId, pix);
     }
     else if (WIZ_USER_MSG_TYPE_REQUEST_JOIN_GROUP == msg.nMessageType)
     {
-        AvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
-        AvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
+        WizAvatarHost::load(SYSTEM_AVATAR_APPLY_GROUP, true);
+        WizAvatarHost::systemAvatar(SYSTEM_AVATAR_APPLY_GROUP, pix);
     }
     else if (WIZ_USER_MSG_TYPE_ADDED_TO_GROUP == msg.nMessageType)
     {
-        AvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
-        AvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
+        WizAvatarHost::load(SYSTEM_AVATAR_ADMIN_PERMIT, true);
+        WizAvatarHost::systemAvatar(SYSTEM_AVATAR_ADMIN_PERMIT, pix);
     }
     else if (WIZ_USER_MSG_TYPE_LIKE == msg.nMessageType
              || WIZ_USER_MSG_TYPE_SYSTEM == msg.nMessageType)
     {
-        AvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
-        AvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
+        WizAvatarHost::load(SYSTEM_AVATAR_SYSTEM, true);
+        WizAvatarHost::systemAvatar(SYSTEM_AVATAR_SYSTEM, pix);
     }
     else
     {
-        AvatarHost::avatar(msg.senderId, pix);
+        WizAvatarHost::avatar(msg.senderId, pix);
     }
 }
 
@@ -144,7 +144,7 @@ public:
         if (m_data.messageBody.isEmpty())
         {
             strMsg = m_data.title;
-            Utils::StyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
+            Utils::WizStyleHelper::drawText(p, rcMsg, strMsg, 2, Qt::AlignVCenter, p->pen().color(), f);
         }
         else
         {
@@ -156,55 +156,55 @@ public:
             QColor colorSummary = Qt::black;
             QColor colorTitle("#3998d6");
 
-            QRect rcBeforeTitle = Utils::StyleHelper::drawText(p, rcMsg, strBeforeTitle, 1, Qt::AlignVCenter, p->pen().color(), f, false);
+            QRect rcBeforeTitle = Utils::WizStyleHelper::drawText(p, rcMsg, strBeforeTitle, 1, Qt::AlignVCenter, p->pen().color(), f, false);
             if (strBeforeTitle.isEmpty() && rcBeforeTitle.height() < rcMsg.height())   //  第一行有剩余空间
             {
                 QString strTitle(m_data.title);
-                QRect rcTitle1(rcMsg.adjusted(rcBeforeTitle.width() - Utils::StyleHelper::margin(), 0, 0, 0));
-                rcTitle1 = Utils::StyleHelper::drawText(p, rcTitle1, strTitle, 1, Qt::AlignVCenter, colorTitle, f, false);
+                QRect rcTitle1(rcMsg.adjusted(rcBeforeTitle.width() - Utils::WizStyleHelper::margin(), 0, 0, 0));
+                rcTitle1 = Utils::WizStyleHelper::drawText(p, rcTitle1, strTitle, 1, Qt::AlignVCenter, colorTitle, f, false);
 
                 if (!strTitle.isEmpty())        //继续绘制标题
                 {
                     QRect rcTitle2(rcMsg.adjusted(0, rcBeforeTitle.height(), 0, 0));
-                    rcTitle2 = Utils::StyleHelper::drawText(p, rcTitle2, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
+                    rcTitle2 = Utils::WizStyleHelper::drawText(p, rcTitle2, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
                     if (strTitle.isEmpty() && rcTitle2.width() < rcMsg.width())
                     {
-                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle2.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
-                        Utils::StyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle2.width() - Utils::WizStyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                        Utils::WizStyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
                     }
                 }
                 else if (rcTitle1.right() < rcMsg.right())   //在第一行绘制标题后内容
                 {
-                    QRect rcAfterTitle1(rcMsg.adjusted(rcBeforeTitle.width() + rcTitle1.width()  - Utils::StyleHelper::margin() * 2, 0, 0, 0));
-                    rcAfterTitle1 = Utils::StyleHelper::drawText(p, rcAfterTitle1, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f, false);
+                    QRect rcAfterTitle1(rcMsg.adjusted(rcBeforeTitle.width() + rcTitle1.width()  - Utils::WizStyleHelper::margin() * 2, 0, 0, 0));
+                    rcAfterTitle1 = Utils::WizStyleHelper::drawText(p, rcAfterTitle1, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f, false);
 
                     if (!strAfterTitle.isEmpty()) {
                         QRect rcLine2(rcMsg.adjusted(0, rcAfterTitle1.height(), 0, 0));
-                        rcLine2 = Utils::StyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                        rcLine2 = Utils::WizStyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
                     }
                 }
                 else        //第一行没剩余空间，在第二行绘制标题后内容
                 {
                     QRect rcLine2(rcMsg.adjusted(0, rcTitle1.height(), 0, 0));
-                    Utils::StyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                    Utils::WizStyleHelper::drawText(p, rcLine2, strAfterTitle, 1, Qt::AlignVCenter, colorSummary, f);
                 }
             }
             else                // 第一行没有剩余空间
             {
                 QRect rcBeforeTitle2(rcMsg.adjusted(0, rcBeforeTitle.height(), 0, 0));
-                rcBeforeTitle2 = Utils::StyleHelper::drawText(p, rcBeforeTitle2, strBeforeTitle, 1, Qt::AlignVCenter, colorSummary, f);
+                rcBeforeTitle2 = Utils::WizStyleHelper::drawText(p, rcBeforeTitle2, strBeforeTitle, 1, Qt::AlignVCenter, colorSummary, f);
 
                 if (strBeforeTitle.isEmpty() && rcBeforeTitle2.width() < rcMsg.width())
                 {
                     QString strTitle(m_data.title);
-                    QRect rcTitle(rcMsg.adjusted(rcBeforeTitle2.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
-                    rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
+                    QRect rcTitle(rcMsg.adjusted(rcBeforeTitle2.width() - Utils::WizStyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                    rcTitle = Utils::WizStyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, f);
 
                     //
                     if (strTitle.isEmpty())
                     {
-                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle.width() - Utils::StyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
-                        rcAfterTitle = Utils::StyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorTitle, f);
+                        QRect rcAfterTitle(rcMsg.adjusted(rcTitle.width() - Utils::WizStyleHelper::margin(), rcBeforeTitle.height(), 0, 0));
+                        rcAfterTitle = Utils::WizStyleHelper::drawText(p, rcAfterTitle, strAfterTitle, 1, Qt::AlignVCenter, colorTitle, f);
                     }
                 }
 
@@ -272,7 +272,7 @@ public:
         QPixmap pmAvatar;       
 //        AvatarHost::avatar(m_data.senderId, &pmAvatar);
         avatarFromMessage(m_data, &pmAvatar);
-        QRect rectAvatar = Utils::StyleHelper::drawAvatar(p, rcd, pmAvatar);
+        QRect rectAvatar = Utils::WizStyleHelper::drawAvatar(p, rcd, pmAvatar);
         int nAvatarRightMargin = 12;
 
         QFont f;
@@ -283,7 +283,7 @@ public:
         QRect  rectSender = rcd;
         rectSender.setLeft(rectAvatar.right() + nAvatarRightMargin);
         rectSender.setTop(vopt->rect.top() + 24);
-        rectSender = Utils::StyleHelper::drawText(p, rectSender, strSender, 1,
+        rectSender = Utils::WizStyleHelper::drawText(p, rectSender, strSender, 1,
                                                   Qt::AlignVCenter | Qt::AlignLeft, p->pen().color(), f);
 
         QString strType = descriptionOfMessageType(m_data.nMessageType);
@@ -294,22 +294,22 @@ public:
             rectType.setLeft(rectSender.right());
             rectType.setTop(vopt->rect.top() + 25);
             f.setPixelSize(11);
-            Utils::StyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
+            Utils::WizStyleHelper::drawText(p, rectType, strType, 1, Qt::AlignVCenter | Qt::AlignLeft,
                                          messageTextColor, f);
         }
 
         QRect rcTime = vopt->rect.adjusted(0, 8, -14, 0);
         QColor dateColor("#C1C1C1");
         f.setPixelSize(10);
-        QString strTime = Utils::Misc::time2humanReadable(m_data.tCreated, "yyyy.MM.dd");
-        rcTime = Utils::StyleHelper::drawText(p, rcTime, strTime, 1, Qt::AlignRight | Qt::AlignTop,
+        QString strTime = Utils::WizMisc::time2humanReadable(m_data.tCreated, "yyyy.MM.dd");
+        rcTime = Utils::WizStyleHelper::drawText(p, rcTime, strTime, 1, Qt::AlignRight | Qt::AlignTop,
                                               dateColor, f);
 
         QRect rcTitle(rectAvatar.right() + nAvatarRightMargin, rectSender.bottom(), vopt->rect.right() - 12 - rectAvatar.right() - 16,
                       vopt->rect.bottom() - rectSender.bottom());
         f.setPixelSize(14);
         QString strTitle = bodyText(m_data);
-        Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignTop, p->pen().color(), f);
+        Utils::WizStyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignLeft| Qt::AlignTop, p->pen().color(), f);
 
         p->restore();
     }
@@ -327,7 +327,7 @@ private:
 #define WIZACTION_LIST_MESSAGE_DELETE       QObject::tr("Delete Message(s)")
 #define WIZACTION_LIST_MESSAGE_LOCATE       QObject::tr("Locate Message")
 
-MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
+WizMessageListView::WizMessageListView(WizDatabaseManager& dbMgr, QWidget *parent)
     : QListWidget(parent)
     , m_dbMgr(dbMgr)
     , m_pCurrentItem(NULL)
@@ -341,7 +341,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     QString strSkinName = "default"; // FIXME
     setStyle(::WizGetStyle(strSkinName));
     QPalette pal = palette();
-    pal.setColor(QPalette::Base, Utils::StyleHelper::listViewBackground());
+    pal.setColor(QPalette::Base, Utils::WizStyleHelper::listViewBackground());
     setPalette(pal);
 
     setCursor(QCursor(Qt::ArrowCursor));
@@ -356,7 +356,7 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_vScroll = new CWizScrollBar(this);
+    m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
     m_vScroll->applyStyle("#F5F5F5", "#C1C1C1", true);
 #endif
@@ -404,10 +404,10 @@ MessageListView::MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent)
     connect(this, SIGNAL(itemSelectionChanged()),
             SLOT(on_itemSelectionChanged()));
 
-    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
+    connect(WizAvatarHost::instance(), SIGNAL(loaded(const QString&)), SLOT(onAvatarLoaded(const QString&)));
 }
 
-void MessageListView::resizeEvent(QResizeEvent* event)
+void WizMessageListView::resizeEvent(QResizeEvent* event)
 {
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
     // reset scrollbar position
@@ -418,7 +418,7 @@ void MessageListView::resizeEvent(QResizeEvent* event)
     QListWidget::resizeEvent(event);
 }
 
-void MessageListView::contextMenuEvent(QContextMenuEvent* event)
+void WizMessageListView::contextMenuEvent(QContextMenuEvent* event)
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemAt(event->pos()));
 
@@ -428,7 +428,7 @@ void MessageListView::contextMenuEvent(QContextMenuEvent* event)
     m_menu->popup(event->globalPos());
 }
 
-void MessageListView::setMessages(const CWizMessageDataArray& arrayMsg)
+void WizMessageListView::setMessages(const CWizMessageDataArray& arrayMsg)
 {
     clear();
     verticalScrollBar()->setValue(0);
@@ -436,7 +436,7 @@ void MessageListView::setMessages(const CWizMessageDataArray& arrayMsg)
     addMessages(arrayMsg);
 }
 
-void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
+void WizMessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
 {
     CWizMessageDataArray::const_iterator it;
     for (it = arrayMessage.begin(); it != arrayMessage.end(); it++) {
@@ -446,7 +446,7 @@ void MessageListView::addMessages(const CWizMessageDataArray& arrayMessage)
     sortItems();
 }
 
-void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
+void WizMessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 {
     if (msg.nDeleteStatus == 1 || msg.nMessageType > WIZ_USERGROUP_MAX)
     {
@@ -458,7 +458,7 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
 
     MessageListViewItem* pItem = new MessageListViewItem(msgData);
 
-    int nHeight = Utils::StyleHelper::messageViewItemHeight();
+    int nHeight = Utils::WizStyleHelper::messageViewItemHeight();
     pItem->setSizeHint(QSize(sizeHint().width(), nHeight));
 
     addItem(pItem);
@@ -471,7 +471,7 @@ void MessageListView::addMessage(const WIZMESSAGEDATA& msg, bool sort)
     Q_EMIT sizeChanged(count());
 }
 
-int MessageListView::rowFromId(qint64 nId) const
+int WizMessageListView::rowFromId(qint64 nId) const
 {
     for (int i = 0; i < count(); i++) {
         if (MessageListViewItem* pItem = messageItem(i)) {
@@ -484,14 +484,14 @@ int MessageListView::rowFromId(qint64 nId) const
     return -1;
 }
 
-void MessageListView::specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
+void WizMessageListView::specialFocusedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
 {
     foreach(MessageListViewItem* item, m_rightButtonFocusedItems) {
         arrayMsg.push_back(item->data());
     }
 }
 
-void MessageListView::selectMessage(qint64 nId)
+void WizMessageListView::selectMessage(qint64 nId)
 {
     for (int i = 0; i < count(); i++) {
         if (MessageListViewItem* pItem = messageItem(i)) {
@@ -502,7 +502,7 @@ void MessageListView::selectMessage(qint64 nId)
     }
 }
 
-void MessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
+void WizMessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
 {
     QList<QListWidgetItem*> items = selectedItems();
 
@@ -512,49 +512,49 @@ void MessageListView::selectedMessages(QList<WIZMESSAGEDATA>& arrayMsg)
     }
 }
 
-MessageListViewItem* MessageListView::messageItem(int row) const
+MessageListViewItem* WizMessageListView::messageItem(int row) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item(row));
     Q_ASSERT(pItem);
     return pItem;
 }
 
-MessageListViewItem* MessageListView::messageItem(const QModelIndex& index) const
+MessageListViewItem* WizMessageListView::messageItem(const QModelIndex& index) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
     Q_ASSERT(pItem);
     return pItem;
 }
 
-const WIZMESSAGEDATA& MessageListView::messageFromIndex(const QModelIndex& index) const
+const WIZMESSAGEDATA& WizMessageListView::messageFromIndex(const QModelIndex& index) const
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(itemFromIndex(index));
     Q_ASSERT(pItem);
     return pItem->data();
 }
 
-void MessageListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizMessageListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();    
     MessageListViewItem* pItem = messageItem(vopt->index);
 
     if (!(vopt->state & QStyle::State_Selected) && pItem->specialFocusd())
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);
+        Utils::WizStyleHelper::drawListViewItemBackground(p, vopt->rect, false, true);
     }
     else
     {
-        Utils::StyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
+        Utils::WizStyleHelper::drawListViewItemBackground(p, vopt->rect, hasFocus(), vopt->state & QStyle::State_Selected);
     }
     pItem->draw(p, vopt);
 
     // draw seperator at last
-    Utils::StyleHelper::drawListViewItemSeperator(p, vopt->rect);
+    Utils::WizStyleHelper::drawListViewItemSeperator(p, vopt->rect);
 
     p->restore();
 }
 
-void MessageListView::markAllMessagesReaded(bool removeItems)
+void WizMessageListView::markAllMessagesReaded(bool removeItems)
 {
     for (int i = 0; i < count(); i++) {
         MessageListViewItem* pItem = messageItem(i);
@@ -577,10 +577,10 @@ void MessageListView::markAllMessagesReaded(bool removeItems)
     }
 }
 
-void MessageListView::on_uploadReadStatus_finished(const QString& ids)
+void WizMessageListView::on_uploadReadStatus_finished(const QString& ids)
 {
     QStringList idList = ids.split(',');
-    CWizDatabase& db = m_dbMgr.db();
+    WizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
     {
 #ifdef QT_DEBUG
@@ -596,10 +596,10 @@ void MessageListView::on_uploadReadStatus_finished(const QString& ids)
     }
 }
 
-void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
+void WizMessageListView::on_uploadDeleteStatus_finished(const QString& ids)
 {
     QStringList idList = ids.split(',');
-    CWizDatabase& db = m_dbMgr.db();
+    WizDatabase& db = m_dbMgr.db();
     for (QString id : idList)
     {
 #ifdef QT_DEBUG
@@ -615,7 +615,7 @@ void MessageListView::on_uploadDeleteStatus_finished(const QString& ids)
     }
 }
 
-void MessageListView::onAvatarLoaded(const QString& strUserId)
+void WizMessageListView::onAvatarLoaded(const QString& strUserId)
 {
     for (int i = 0; i < count(); i++) {
         MessageListViewItem* pItem = messageItem(i);
@@ -625,7 +625,7 @@ void MessageListView::onAvatarLoaded(const QString& strUserId)
     }
 }
 
-void MessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetItem* previous)
+void WizMessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetItem* previous)
 {
     Q_UNUSED(previous);
 
@@ -638,7 +638,7 @@ void MessageListView::onCurrentItemChanged(QListWidgetItem* current,QListWidgetI
     }
 }
 
-void MessageListView::onReadTimeout()
+void WizMessageListView::onReadTimeout()
 {
     if (m_pCurrentItem && !m_pCurrentItem->data().nReadStatus) {
         m_dbMgr.db().setMessageReadStatus(m_pCurrentItem->data());
@@ -647,10 +647,10 @@ void MessageListView::onReadTimeout()
     }
 }
 
-void MessageListView::onSyncTimeout()
+void WizMessageListView::onSyncTimeout()
 {
     if (!m_api) {
-        m_api = new AsyncApi(this);
+        m_api = new WizAsyncApi(this);
 
         connect(m_api, SIGNAL(uploadMessageReadStatusFinished(QString)),
                 SLOT(on_uploadReadStatus_finished(QString)));
@@ -699,15 +699,15 @@ void MessageListView::onSyncTimeout()
     }
 }
 
-void MessageListView::updateTreeItem()
+void WizMessageListView::updateTreeItem()
 {
-    CWizCategoryView* tree = dynamic_cast<CWizCategoryView *>(WizGlobal::mainWindow()->CategoryCtrl());
+    WizCategoryView* tree = dynamic_cast<WizCategoryView *>(WizGlobal::mainWindow()->CategoryCtrl());
     if (tree) {
-        CWizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
+        WizCategoryViewItemBase* pBase = tree->findAllMessagesItem();
         if (!pBase)
             return;
 
-        CWizCategoryViewMessageItem* pItem = dynamic_cast<CWizCategoryViewMessageItem*>(pBase);
+        WizCategoryViewMessageItem* pItem = dynamic_cast<WizCategoryViewMessageItem*>(pBase);
         Q_ASSERT(pItem);
 
         int nUnread = m_dbMgr.db().getUnreadMessageCount();
@@ -717,7 +717,7 @@ void MessageListView::updateTreeItem()
 
 
 
-void MessageListView::on_action_message_mark_read()
+void WizMessageListView::on_action_message_mark_read()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
     specialFocusedMessages(arrayMsg);
@@ -732,7 +732,7 @@ void MessageListView::on_action_message_mark_read()
     m_timerTriggerSync.start();
 }
 
-void MessageListView::on_action_message_delete()
+void WizMessageListView::on_action_message_delete()
 {
     QList<WIZMESSAGEDATA> arrayMsg;
     specialFocusedMessages(arrayMsg);
@@ -749,7 +749,7 @@ void MessageListView::on_action_message_delete()
     m_timerTriggerSync.start();
 }
 
-void MessageListView::on_action_message_locate()
+void WizMessageListView::on_action_message_locate()
 {
     if (m_rightButtonFocusedItems.isEmpty())
         return;
@@ -761,7 +761,7 @@ void MessageListView::on_action_message_locate()
     }
 }
 
-void MessageListView::on_action_message_viewInSeparateWindow()
+void WizMessageListView::on_action_message_viewInSeparateWindow()
 {
     if (m_rightButtonFocusedItems.isEmpty())
         return;
@@ -771,18 +771,18 @@ void MessageListView::on_action_message_viewInSeparateWindow()
     {
         WIZMESSAGEDATA message = pItem->data();
         WIZDOCUMENTDATA doc;
-        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
-        if (!db.DocumentFromGUID(message.documentGUID, doc))
+        WizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.documentFromGuid(message.documentGUID, doc))
             return;
 
-        if (db.IsDocumentDownloaded(doc.strGUID))
+        if (db.isDocumentDownloaded(doc.strGUID))
         {
             emit viewNoteInSparateWindowRequest(doc);
         }
     }
 }
 
-void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
+void WizMessageListView::on_message_created(const WIZMESSAGEDATA& msg)
 {
     if (rowFromId(msg.nId) == -1) {
         addMessage(msg, true);
@@ -791,7 +791,7 @@ void MessageListView::on_message_created(const WIZMESSAGEDATA& msg)
     updateTreeItem();
 }
 
-void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
+void WizMessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
                                           const WIZMESSAGEDATA& newMsg)
 {
     Q_UNUSED(oldMsg);
@@ -811,7 +811,7 @@ void MessageListView::on_message_modified(const WIZMESSAGEDATA& oldMsg,
     updateTreeItem();
 }
 
-void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
+void WizMessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
 {
     int i = rowFromId(msg.nId);
     if (i != -1) {
@@ -823,7 +823,7 @@ void MessageListView::on_message_deleted(const WIZMESSAGEDATA& msg)
     updateTreeItem();
 }
 
-void MessageListView::on_itemSelectionChanged()
+void WizMessageListView::on_itemSelectionChanged()
 {
     QList<WIZMESSAGEDATA> listMsg;
     selectedMessages(listMsg);
@@ -846,8 +846,8 @@ void MessageListView::on_itemSelectionChanged()
         {
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [msgData](){
                 QString command = QString("message_%1").arg(msgData.nMessageType);
-                QString strUrl = CommonApiEntry::getUrlByCommand(command);
-                strUrl.replace("{token}", Token::token());
+                QString strUrl = WizCommonApiEntry::getUrlByCommand(command);
+                strUrl.replace("{token}", WizToken::token());
                 strUrl.replace("{kb_guid}", msgData.kbGUID.isEmpty() ? "{kb_guid}" : msgData.kbGUID);
                 strUrl.replace("{biz_guid}", msgData.bizGUID.isEmpty() ? "{biz_guid}" : msgData.bizGUID);
                 strUrl.replace("{document_guid}", msgData.documentGUID.isEmpty() ? "{document_guid}" : msgData.documentGUID);
@@ -864,7 +864,7 @@ void MessageListView::on_itemSelectionChanged()
         {
             if (msgData.isAd())
             {
-                CWizAccountManager account(m_dbMgr);
+                WizAccountManager account(m_dbMgr);
                 if (account.isPaidUser())
                     return;
             }
@@ -879,12 +879,12 @@ void MessageListView::on_itemSelectionChanged()
             QTextCodec* codec = QTextCodec::codecForName("UTF-8");
             QTextDecoder* encoder = codec->makeDecoder();
             const rapidjson::Value& u = d["link"];
-            QString str = encoder->toUnicode(u.GetString(), u.GetStringLength());
+            QString str = encoder->toUnicode(u.getString(), u.GetStringLength());
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [str](){
                 QString link = str;
                 if (link.contains("{token}"))
                 {
-                    link.replace("{token}", Token::token());
+                    link.replace("{token}", WizToken::token());
                 }
                 QDesktopServices::openUrl(link);
             });
@@ -893,25 +893,25 @@ void MessageListView::on_itemSelectionChanged()
     viewport()->update();
 }
 
-void MessageListView::on_itemDoubleClicked(QListWidgetItem* item)
+void WizMessageListView::on_itemDoubleClicked(QListWidgetItem* item)
 {
     MessageListViewItem* pItem = dynamic_cast<MessageListViewItem*>(item);
     if (pItem)
     {
         WIZMESSAGEDATA message = pItem->data();
         WIZDOCUMENTDATA doc;
-        CWizDatabase& db = m_dbMgr.db(message.kbGUID);
-        if (!db.DocumentFromGUID(message.documentGUID, doc))
+        WizDatabase& db = m_dbMgr.db(message.kbGUID);
+        if (!db.documentFromGuid(message.documentGUID, doc))
             return;
 
-        if (db.IsDocumentDownloaded(doc.strGUID))
+        if (db.isDocumentDownloaded(doc.strGUID))
         {
             emit viewNoteInSparateWindowRequest(doc);
         }
     }
 }
 
-void MessageListView::clearRightMenuFocus()
+void WizMessageListView::clearRightMenuFocus()
 {
     foreach (MessageListViewItem *item, m_rightButtonFocusedItems)
     {
@@ -919,7 +919,7 @@ void MessageListView::clearRightMenuFocus()
     }
 }
 
-void MessageListView::wheelEvent(QWheelEvent* event)
+void WizMessageListView::wheelEvent(QWheelEvent* event)
 {
     int delta = event->delta();
     delta = delta / 3;
@@ -932,7 +932,7 @@ void MessageListView::wheelEvent(QWheelEvent* event)
     QListWidget::wheelEvent(newEvent);
 }
 
-void MessageListView::mousePressEvent(QMouseEvent* event)
+void WizMessageListView::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -971,7 +971,7 @@ void MessageListView::mousePressEvent(QMouseEvent* event)
 
 const int SenderNameFontSize = 14;
 
-WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* parent)
+WizMessageListTitleBar::WizMessageListTitleBar(WizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
@@ -980,7 +980,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     , m_nUnreadCount(0)
     , m_currentSenderGUID(QString())
 {
-    setFixedHeight(Utils::StyleHelper::listViewSortControlWidgetHeight());
+    setFixedHeight(Utils::WizStyleHelper::listViewSortControlWidgetHeight());
     QPalette pal = palette();
     pal.setColor(QPalette::Window, QColor("#F7F7F7"));
     setPalette(pal);
@@ -1010,7 +1010,7 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     m_btnSelectSender->setStyleSheet(QString("border:0px;background-image:url(%1); "
                                              "background-repeat: no-repeat;"
                                              "background-position: center;").arg(
-                                         Utils::StyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
+                                         Utils::WizStyleHelper::skinResourceFileName("messageSelectorDownArrow", false)));
     m_btnSelectSender->setFixedWidth(7);
     connect(m_btnSelectSender, SIGNAL(clicked(bool)), SLOT(on_userSelectButton_clicked()));
     layoutActions->addWidget(m_btnSelectSender);
@@ -1022,8 +1022,8 @@ WizMessageListTitleBar::WizMessageListTitleBar(CWizExplorerApp& app, QWidget* pa
     m_msgListHintLabel->setStyleSheet("color: #A7A7A7; font-size:14px; padding-top:2px; margin-right:6px;");
     layoutActions->addWidget(m_msgListHintLabel);
 
-    m_msgListMarkAllBtn = new wizImageButton(this);
-    QIcon btnIcon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "actionMarkMessagesRead");
+    m_msgListMarkAllBtn = new WizImageButton(this);
+    QIcon btnIcon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "actionMarkMessagesRead");
     m_msgListMarkAllBtn->setIcon(btnIcon);
     m_msgListMarkAllBtn->setFixedSize(QSize(18, 18));
     m_msgListMarkAllBtn->setToolTip(tr("Mark all messages read"));
@@ -1136,7 +1136,7 @@ void WizMessageListTitleBar::addUserToSelector(const QString& userGUID)
 void WizMessageListTitleBar::initUserList()
 {
     CWizStdStringArray arraySender;
-    CWizDatabase& db = m_dbMgr.db();
+    WizDatabase& db = m_dbMgr.db();
     db.getAllMessageSenders(arraySender);
 
     m_msgSenderSelector->setUsers(arraySender);
@@ -1144,17 +1144,17 @@ void WizMessageListTitleBar::initUserList()
 
 void WizMessageListTitleBar::showTipsWidget()
 {
-    if (CWizTipsWidget::isTipsExists(MESSAGELISTTITLEBARTIPSCHECKED))
+    if (WizTipsWidget::isTipsExists(MESSAGELISTTITLEBARTIPSCHECKED))
         return;
 
-    CWizTipsWidget* tipWidget = new CWizTipsWidget(MESSAGELISTTITLEBARTIPSCHECKED, this);
+    WizTipsWidget* tipWidget = new WizTipsWidget(MESSAGELISTTITLEBARTIPSCHECKED, this);
     connect(m_msgListMarkAllBtn, SIGNAL(clicked(bool)), tipWidget, SLOT(on_targetWidgetClicked()));
     tipWidget->setAttribute(Qt::WA_DeleteOnClose, true);
     tipWidget->setText(tr("Mark all as readed"), tr("Mark all messages as readed."));
     tipWidget->setSizeHint(QSize(280, 60));
     tipWidget->setButtonVisible(false);
     tipWidget->bindCloseFunction([](){
-        if (MainWindow* mainWindow = MainWindow::instance())
+        if (WizMainWindow* mainWindow = WizMainWindow::instance())
         {
             mainWindow->userSettings().set(MESSAGELISTTITLEBARTIPSCHECKED, "1");
         }
@@ -1229,7 +1229,7 @@ bool WizSortFilterProxyModel::lessThan(const QModelIndex& left, const QModelInde
 //    return QString::localeAwareCompare(leftString, rightString) < 0;
 
 
-    return Utils::Misc::localeAwareCompare(leftString, rightString);
+    return Utils::WizMisc::localeAwareCompare(leftString, rightString);
 }
 
 class WizUserSelectorList : public QListWidget
@@ -1260,8 +1260,8 @@ protected:
 
 const int maxSenderSelectorHeight = 378;
 const int maxSenderSelectorWidth = 152;
-WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent)
-    : CWizPopupWidget(parent)
+WizMessageSenderSelector::WizMessageSenderSelector(WizDatabaseManager& dbMgr, QWidget* parent)
+    : WizPopupWidget(parent)
     , m_dbMgr(dbMgr)
     , m_userList(new WizUserSelectorList(this))
 {
@@ -1278,14 +1278,14 @@ WizMessageSenderSelector::WizMessageSenderSelector(CWizDatabaseManager& dbMgr, Q
     //
     setStyleSheet(QString(".QWidget{padding:0px; background-color:#FFFFFF;} \
                   QListWidget{border:0px;padding:0xp;background-color:#FFFFFF;}"));
-    m_userList->verticalScrollBar()->setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet());
+    m_userList->verticalScrollBar()->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet());
     QPalette pl = palette();
     pl.setColor(QPalette::Window, QColor(Qt::white));
     setPalette(pl);
 
     connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
 
-    CWizListItemStyle<WizSenderSelectorItem>* listStyle = new CWizListItemStyle<WizSenderSelectorItem>();
+    WizListItemStyle<WizSenderSelectorItem>* listStyle = new WizListItemStyle<WizSenderSelectorItem>();
     m_userList->setStyle(listStyle);
 
     connect(m_userList, SIGNAL(itemClicked(QListWidgetItem*)), SLOT(on_selectorItem_clicked(QListWidgetItem*)));
@@ -1303,7 +1303,7 @@ void WizMessageSenderSelector::setUsers(const CWizStdStringArray& arraySender)
         addUser(sender);
     }
 
-    QPixmap pix(Utils::StyleHelper::skinResourceFileName("avatar_all"));
+    QPixmap pix(Utils::WizStyleHelper::skinResourceFileName("avatar_all"));
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(ALLMENBERS, "", pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 22));
     m_userList->addItem(selectorItem);
@@ -1356,8 +1356,8 @@ void WizMessageSenderSelector::addUser(const QString& userGUID)
     QString strText = userList.join(";");
 
     QPixmap pix;
-    AvatarHost::load(strUserId, false);
-    AvatarHost::avatar(strUserId, &pix);
+    WizAvatarHost::load(strUserId, false);
+    WizAvatarHost::avatar(strUserId, &pix);
 
     WizSenderSelectorItem* selectorItem = new WizSenderSelectorItem(strText, userGUID, pix, m_userList);
     selectorItem->setSizeHint(QSize(width(), 24));
@@ -1439,7 +1439,7 @@ bool WizSenderSelectorItem::operator<(const QListWidgetItem& other) const
     if (pOther->itemID().isEmpty())
         return false;
 
-    static bool isChinese = Utils::Misc::isChinese();
+    static bool isChinese = Utils::WizMisc::isChinese();
     if (isChinese)
     {
         if (QTextCodec* pCodec = QTextCodec::codecForName("GBK"))

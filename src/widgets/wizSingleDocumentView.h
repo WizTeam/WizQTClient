@@ -6,18 +6,18 @@
 #include "wizdef.h"
 
 class WIZDOCUMENTDATA;
-class CWizDocumentWebEngine;
+class WizDocumentWebEngine;
 
-class CWizDocumentView;
+class WizDocumentView;
 
-class CWizSingleDocumentViewer : public QWidget
+class WizSingleDocumentViewer : public QWidget
 {
     Q_OBJECT
 public:
-    CWizSingleDocumentViewer(CWizExplorerApp& app, const QString& guid, QWidget* parent = 0);
-    ~CWizSingleDocumentViewer();
+    WizSingleDocumentViewer(WizExplorerApp& app, const QString& guid, QWidget* parent = 0);
+    ~WizSingleDocumentViewer();
 
-    CWizDocumentView* docView();
+    WizDocumentView* docView();
     QString guid() const { return m_guid; }   
 
 public slots:
@@ -36,7 +36,7 @@ private:
     void applyWidgetBackground(bool isFullScreen);
 
 private:
-    CWizDocumentView* m_docView;
+    WizDocumentView* m_docView;
     QString m_guid;
 
     QWidget* m_containerWgt;
@@ -44,28 +44,28 @@ private:
 
 
 
-class CWizSingleDocumentViewDelegate : public QObject
+class WizSingleDocumentViewDelegate : public QObject
 {
     Q_OBJECT
 public:
-    CWizSingleDocumentViewDelegate(CWizExplorerApp& app, QObject* parent = 0);
+    WizSingleDocumentViewDelegate(WizExplorerApp& app, QObject* parent = 0);
 
-    CWizSingleDocumentViewer* getDocumentViewer(const QString& guid);
-    QMap<QString, CWizSingleDocumentViewer*>& getDocumentViewerMap();
+    WizSingleDocumentViewer* getDocumentViewer(const QString& guid);
+    QMap<QString, WizSingleDocumentViewer*>& getDocumentViewerMap();
 
 public slots:
     void viewDocument(const WIZDOCUMENTDATA& doc);
     void onDocumentViewerDeleted(QString guid);
 
 signals:
-    void documentChanged(const QString& strGUID, CWizDocumentView* viewer);
+    void documentChanged(const QString& strGUID, WizDocumentView* viewer);
     void documentViewerClosed(QString guid);
 
 private:
 
 private:
-    QMap<QString, CWizSingleDocumentViewer*> m_viewerMap;
-    CWizExplorerApp& m_app;
+    QMap<QString, WizSingleDocumentViewer*> m_viewerMap;
+    WizExplorerApp& m_app;
 };
 
 void bindESCToQuitFullScreen(QWidget* wgt);

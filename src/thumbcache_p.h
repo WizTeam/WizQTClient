@@ -8,15 +8,15 @@
 struct WIZABSTRACT;
 struct WIZDOCUMENTDATA;
 
-class ThumbCache;
+class WizThumbCache;
 
 
-class ThumbCachePrivate : public QObject
+class WizThumbCachePrivate : public QObject
 {
     Q_OBJECT
 
 public:
-    ThumbCachePrivate(ThumbCache* cache);
+    WizThumbCachePrivate(WizThumbCache* cache);
     bool find(const QString& strKbGUID, const QString& strGUID, WIZABSTRACT& abs);
 
 private:
@@ -32,7 +32,7 @@ Q_SIGNALS:
 
 private:
     QMap<QString, WIZABSTRACT> m_mapThumb;
-    ThumbCache* q;
+    WizThumbCache* q;
 };
 
 

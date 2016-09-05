@@ -10,17 +10,17 @@ class QMutex;
 
 struct WIZUSERINFO;
 
-class Token;
-class AsyncApi;
+class WizToken;
+class WizAsyncApi;
 
 
-class TokenPrivate: QObject
+class WizTokenPrivate: QObject
 {
     Q_OBJECT
 
 public:
-    explicit TokenPrivate(Token* token);
-    ~TokenPrivate();
+    explicit WizTokenPrivate(WizToken* token);
+    ~WizTokenPrivate();
 
     QString token();
     void requestToken();
@@ -42,7 +42,7 @@ private:
     int m_lastErrorCode;
     QString m_lastErrorMessage;
 
-    Token* q;
+    WizToken* q;
 };
 
 

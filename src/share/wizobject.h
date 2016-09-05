@@ -44,7 +44,7 @@ struct WIZDATABASEINFO
 };
 
 
-class CWizXmlRpcStructValue;
+class WizXmlRpcStructValue;
 
 struct WIZOBJECTBASE
 {
@@ -72,7 +72,7 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 {
     WIZUSERINFO();
     WIZUSERINFO(const WIZUSERINFO& info);
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
+    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& val);
 
     // field: api_version, default: 1
 
@@ -88,7 +88,7 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     int bEnableGroup;
 
     // field: expried_time
-    COleDateTime tTokenExpried;
+    WizOleDateTime tTokenExpried;
 
     // field: invite_code, current is 8 length char
     QString strInviteCode;
@@ -150,10 +150,10 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     QString strUserType;
 
     // field: vip_date
-    COleDateTime tVipExpried;
+    WizOleDateTime tVipExpried;
 
     // field: sign up date
-    COleDateTime tCreated;
+    WizOleDateTime tCreated;
 
 
 
@@ -170,7 +170,7 @@ Q_DECLARE_METATYPE(WIZUSERINFO)
 struct WIZUSERCERT
 {
     WIZUSERCERT();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& val);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& val);
 
     QString strN;
     QString stre;
@@ -182,9 +182,9 @@ struct WIZUSERCERT
 struct WIZKBINFO
 {
     WIZKBINFO();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
     //
-    int GetMaxFileSize() const
+    int getMaxFileSize() const
     {
         return std::max<int>(30 * 1024 * 1024, nUploadSizeLimit);
     }
@@ -209,7 +209,7 @@ struct WIZKBINFO
 struct WIZOBJECTPARTDATA : public WIZOBJECTBASE
 {
     WIZOBJECTPARTDATA();
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     CString strObjectGUID;
     CString strObjectType;
@@ -247,18 +247,18 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     CString strParentGUID;
     CString strName;
     CString strDescription;
-    COleDateTime tModified;
+    WizOleDateTime tModified;
     qint64 nVersion;
     qint64 nPostion;
 
     friend bool operator< (const WIZTAGDATA& data1, const WIZTAGDATA& data2) throw();
 
-    BOOL EqualForSync(const WIZTAGDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual BOOL SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+    BOOL equalForSync(const WIZTAGDATA& data) const;
+    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
+    virtual BOOL saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
-    static CString VersionName() { return CString(_T("tag_version")); }
-    static CString ObjectName() { return CString(_T("tag")); }
+    static CString versionName() { return CString(_T("tag_version")); }
+    static CString objectName() { return CString(_T("tag")); }
 };
 
 bool operator< ( const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw();
@@ -270,12 +270,12 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
 {
     WIZSTYLEDATA();
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    virtual bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
+    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    virtual bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
-    bool EqualForSync(const WIZSTYLEDATA& data) const;
-    static CString VersionName() { return CString(_T("style_version")); }
-    static CString ObjectName() { return CString(_T("style")); }
+    bool equalForSync(const WIZSTYLEDATA& data) const;
+    static CString versionName() { return CString(_T("style_version")); }
+    static CString objectName() { return CString(_T("style")); }
 
     CString strGUID;
     CString strName;
@@ -284,7 +284,7 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
     COLORREF crBackColor;
     bool bTextBold;
     int nFlagIndex;
-    COleDateTime tModified;
+    WizOleDateTime tModified;
     qint64 nVersion;
 
     friend bool operator< (const WIZSTYLEDATA& data1, const WIZSTYLEDATA& data2 ) throw();
@@ -304,10 +304,10 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
     WIZDOCUMENTDATA();
     virtual ~WIZDOCUMENTDATA();
     //
-    bool EqualForSync(const WIZDOCUMENTDATA& data) const;
+    bool equalForSync(const WIZDOCUMENTDATA& data) const;
     //
-    static QString VersionName() { return "document_version"; }
-    static QString ObjectName() { return "document"; }
+    static QString versionName() { return "document_version"; }
+    static QString objectName() { return "document"; }
 
     // field: data_md5
     QString strDataMD5;
@@ -322,7 +322,7 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
     QString strTitle;
 
     // field: dt_data_modified
-    COleDateTime tDataModified;
+    WizOleDateTime tDataModified;
 
     // field: version
     qint64 nVersion;  // -1: modified , 0: uploaded
@@ -355,13 +355,13 @@ struct WIZDOCUMENTDATA : public WIZOBJECTBASE
     QString strStyleGUID;
 
     // field: dt_created
-    COleDateTime tCreated;
+    WizOleDateTime tCreated;
 
     // filed: dt_modfied
-    COleDateTime tModified;
+    WizOleDateTime tModified;
 
     // filed: dt_accessed
-    COleDateTime tAccessed;
+    WizOleDateTime tAccessed;
 
     // field: document_protected, 1 protected, 0 none-protected
     long nProtected;
@@ -387,7 +387,7 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     WIZDOCUMENTDATAEX(const WIZDOCUMENTDATA& data);
 
     WIZDOCUMENTDATAEX& operator= (const WIZDOCUMENTDATAEX& right);
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     // field: document_tags, guid list
     CWizStdStringArray arrayTagGUID;
@@ -404,11 +404,11 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     virtual ~WIZDOCUMENTATTACHMENTDATA();
 
     friend bool operator< (const WIZDOCUMENTATTACHMENTDATA& data1,const WIZDOCUMENTATTACHMENTDATA& data2 ) throw();
-    BOOL EqualForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
-    virtual BOOL LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    BOOL equalForSync(const WIZDOCUMENTATTACHMENTDATA& data) const;
+    virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
 
-    static QString VersionName() { return "attachment_version"; }
-    static QString ObjectName() { return "attachment"; }
+    static QString versionName() { return "attachment_version"; }
+    static QString objectName() { return "attachment"; }
 
     QString strKbGUID;
     QString strGUID;
@@ -416,9 +416,9 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     QString strName;
     QString strURL;
     QString strDescription;
-    COleDateTime tInfoModified;
+    WizOleDateTime tInfoModified;
     QString strInfoMD5;
-    COleDateTime tDataModified;
+    WizOleDateTime tDataModified;
     QString strDataMD5;
     qint64 nVersion;
 };
@@ -447,11 +447,11 @@ struct WIZOBJECTDATA : public WIZOBJECTBASE
     WIZOBJECTDATA(const WIZDOCUMENTDATA& data);
     WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data);
 
-    static WizObjectType IntToObjectType(int n);
-    static WizObjectType TypeStringToObjectType(const CString& strType);
-    static QString ObjectTypeToTypeString(WizObjectType eType);
+    static WizObjectType intToObjectType(int n);
+    static WizObjectType typeStringToObjectType(const CString& strType);
+    static QString objectTypeToTypeString(WizObjectType eType);
 
-    COleDateTime tTime;
+    WizOleDateTime tTime;
     CString strDisplayName;
     CString strObjectGUID;
     WizObjectType eObjectType;
@@ -464,15 +464,15 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
 {
     WIZDELETEDGUIDDATA();
 
-    virtual bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    bool SaveToXmlRpc(CWizXmlRpcStructValue& data) const;
-    bool EqualForSync(const WIZDELETEDGUIDDATA& data) const;
-    static CString VersionName() { return CString(_T("deleted_guid_version")); }
-    static CString ObjectName() { return CString(_T("deleted_guid")); }
+    virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
+    bool equalForSync(const WIZDELETEDGUIDDATA& data) const;
+    static CString versionName() { return CString(_T("deleted_guid_version")); }
+    static CString objectName() { return CString(_T("deleted_guid")); }
 
     CString strGUID;
     WizObjectType eType;
-    COleDateTime tDeleted;
+    WizOleDateTime tDeleted;
     qint64 nVersion;
 };
 
@@ -483,7 +483,7 @@ struct WIZMETADATA : public WIZOBJECTBASE
     CString strName;
     CString strKey;
     CString strValue;
-    COleDateTime tModified;
+    WizOleDateTime tModified;
 };
 
 
@@ -491,13 +491,13 @@ struct WIZGROUPDATA
 {
     WIZGROUPDATA();
     WIZGROUPDATA(const WIZGROUPDATA& data);
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
     //
-    bool IsBiz() const
+    bool isBiz() const
     {
         return !bizGUID.isEmpty();
     }
-    bool IsOwn() const
+    bool isOwn() const
     {
         return bOwn;
     }
@@ -510,13 +510,13 @@ struct WIZGROUPDATA
     QString bizName;
 
     // field: dt_created
-    COleDateTime tCreated;
+    WizOleDateTime tCreated;
 
     // field: dt_modified
-    COleDateTime tModified;
+    WizOleDateTime tModified;
 
     // field: dt_role_created, not used
-    COleDateTime tRoleCreated;
+    WizOleDateTime tRoleCreated;
 
     // field: kapi_url
     // server_url, aka "ks"(knowledge server)
@@ -581,7 +581,7 @@ struct WIZBIZDATA
 {
     WIZBIZDATA();
     WIZBIZDATA(const WIZBIZDATA& data);
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     QString bizGUID;
     QString bizName;
@@ -618,7 +618,7 @@ struct WIZUSERMESSAGEDATA
     int nMessageType;
     int nReadStatus;	//阅读状态, 0:未读，1:已读
     int nDeletedStatus;  // 删除状态， 0：为删除， 1：已删除
-    COleDateTime tCreated;
+    WizOleDateTime tCreated;
     QString strMessageText;
     qint64 nVersion;
     QString strSender;
@@ -638,7 +638,7 @@ struct WIZUSERMESSAGEDATA
 
     }
 
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
 };
 
 typedef std::deque<WIZUSERMESSAGEDATA> CWizUserMessageDataArray;
@@ -650,8 +650,8 @@ struct WIZMESSAGEDATA
     WIZMESSAGEDATA();
     WIZMESSAGEDATA(const WIZMESSAGEDATA& data);
     WIZMESSAGEDATA(const WIZUSERMESSAGEDATA& data);
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
-    static QString ObjectName() { return "messages"; }
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
+    static QString objectName() { return "messages"; }
 
     bool isAd();
 
@@ -673,7 +673,7 @@ struct WIZMESSAGEDATA
     QString documentGUID;
 
     // Field: dt_created
-    COleDateTime tCreated;
+    WizOleDateTime tCreated;
 
     // Field: email_status
     // 0: no email notify
@@ -752,7 +752,7 @@ typedef std::deque<WIZMESSAGEDATA> CWizMessageDataArray;
 // struct return from accounts.getValue method
 struct WIZKVRETURN
 {
-    bool LoadFromXmlRpc(CWizXmlRpcStructValue& data);
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data);
 
     // field: return_code
     // 200 ok

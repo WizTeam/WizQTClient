@@ -15,10 +15,10 @@
 #include "share/wizthreads.h"
 #include "share/wizEventLoop.h"
 
-CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent)
+WizVerificationCodeDialog::WizVerificationCodeDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizVerificationCodeDialog)
-    , m_downloader(new CWizVerificationCodeDownloader(this))
+    , ui(new Ui::WizVerificationCodeDialog)
+    , m_downloader(new WizVerificationCodeDownloader(this))
 {
     ui->setupUi(this);
     ui->btn_image->setToolTip(tr("Click to refresh verification code"));
@@ -27,12 +27,12 @@ CWizVerificationCodeDialog::CWizVerificationCodeDialog(QWidget *parent)
     connect(m_downloader, SIGNAL(downloadFinished(QByteArray)), SLOT(on_image_downloaded(QByteArray)));
 }
 
-CWizVerificationCodeDialog::~CWizVerificationCodeDialog()
+WizVerificationCodeDialog::~WizVerificationCodeDialog()
 {
     delete ui;
 }
 
-int CWizVerificationCodeDialog::verificationRequest(const QString& strCaptchaID)
+int WizVerificationCodeDialog::verificationRequest(const QString& strCaptchaID)
 {
     m_strCaptchaID = strCaptchaID;
     ui->btn_image->setText(tr("Downloading..."));
@@ -43,25 +43,25 @@ int CWizVerificationCodeDialog::verificationRequest(const QString& strCaptchaID)
     return exec();
 }
 
-QString CWizVerificationCodeDialog::getVerificationCode() const
+QString WizVerificationCodeDialog::getVerificationCode() const
 {
     return ui->lineEdit->text();
 }
 
-void CWizVerificationCodeDialog::downloadImage()
+void WizVerificationCodeDialog::downloadImage()
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         m_downloader->download(m_strCaptchaID);
     });
 }
 
-void CWizVerificationCodeDialog::on_btn_image_clicked()
+void WizVerificationCodeDialog::on_btn_image_clicked()
 {
     ui->btn_image->setText(tr("Downloading..."));
     downloadImage();
 }
 
-void CWizVerificationCodeDialog::on_btn_OK_clicked()
+void WizVerificationCodeDialog::on_btn_OK_clicked()
 {
     QString strCode = ui->lineEdit->text();
     accept();
@@ -69,18 +69,18 @@ void CWizVerificationCodeDialog::on_btn_OK_clicked()
     emit verificationCodeInputed(strCode);
 }
 
-void CWizVerificationCodeDialog::inputFinished()
+void WizVerificationCodeDialog::inputFinished()
 {
     on_btn_OK_clicked();
 }
 
-void CWizVerificationCodeDialog::on_image_downloaded(const QByteArray& ba)
+void WizVerificationCodeDialog::on_image_downloaded(const QByteArray& ba)
 {
     QPixmap pix;
     pix.loadFromData(ba);
     if (pix.isNull() && !ba.isEmpty())
     {
-        CWizMessageBox::warning(parentWidget(), tr("Info"), tr("Too many request, please wait for one minute."));
+        WizMessageBox::warning(parentWidget(), tr("Info"), tr("Too many request, please wait for one minute."));
         reject();
     }
     else
@@ -96,19 +96,19 @@ void CWizVerificationCodeDialog::on_image_downloaded(const QByteArray& ba)
 }
 
 
-CWizVerificationCodeDownloader::CWizVerificationCodeDownloader(QObject* parent)
+WizVerificationCodeDownloader::WizVerificationCodeDownloader(QObject* parent)
     : QObject(parent)
 {
 
 }
 
-void CWizVerificationCodeDownloader::download(const QString& strCaptchaID)
+void WizVerificationCodeDownloader::download(const QString& strCaptchaID)
 {
     QNetworkAccessManager m_WebCtrl;
-    QString strUrl = CommonApiEntry::captchaUrl(strCaptchaID);
+    QString strUrl = WizCommonApiEntry::captchaUrl(strCaptchaID);
     QNetworkRequest request(strUrl);
     QNetworkReply* reply = m_WebCtrl.get(request);
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     QByteArray byData = loop.result();

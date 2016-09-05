@@ -11,66 +11,66 @@
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"
 
-class CWizAnalyzer
+class WizAnalyzer
 {
 protected:
-    CWizAnalyzer(const CString& strRecordFileName);
+    WizAnalyzer(const CString& strRecordFileName);
 
 	CString m_strRecordFileName;
 	CString m_strRecordFileNameNoDelete;
-	COleDateTime m_tLastLog;
+	WizOleDateTime m_tLastLog;
     QMutex m_csLog;
     QMutex m_csPost;
 
-    void IncreaseCounter(const CString& strSection, const CString& strKey);
-    void AddDuration(const CString& strFunctionName, int seconds);
+    void increaseCounter(const CString& strSection, const CString& strKey);
+    void addDuration(const CString& strFunctionName, int seconds);
 
-	void LogTimes();
-	void LogUseDays();
+	void logTimes();
+	void logUseDays();
 	//
-	CString GetFirstAction(int index);
-    void LogFirstAction(const CString& strActionName);
-	CString KeyOfFirstAction(int index);
+	CString getFirstAction(int index);
+    void logFirstAction(const CString& strActionName);
+	CString keyOfFirstAction(int index);
 	//
 	CString guid();
-	CString GetUseDays();
-    CString GetInstallDays();
+	CString getUseDays();
+    CString getInstallDays();
 public:
-    void LogAction(const CString& strAction);
-    void LogDurations(const CString& strAction, int seconds);
+    void logAction(const CString& strAction);
+    void logDurations(const CString& strAction, int seconds);
 
-    void Post(IWizSyncableDatabase* db);
-    void PostBlocked(IWizSyncableDatabase* db);
-    static CWizAnalyzer& GetAnalyzer();
+    void post(IWizSyncableDatabase* db);
+    void postBlocked(IWizSyncableDatabase* db);
+    static WizAnalyzer& getAnalyzer();
 
 private:
     QByteArray constructUploadData(IWizSyncableDatabase* db);
 
 };
 
-CWizAnalyzer& WizGetAnalyzer();
+WizAnalyzer& WizGetAnalyzer();
 
-class CWizFunctionDurationLogger
+class WizFunctionDurationLogger
 {
 public:
-    CWizFunctionDurationLogger(const CString& strFunctionName);
-	virtual ~CWizFunctionDurationLogger();
+    WizFunctionDurationLogger(const CString& strFunctionName);
+	virtual ~WizFunctionDurationLogger();
 private:
 	CString m_strFunctionName;
     QTime m_tStart;
 };
 
 
-#define LOG_ACTION(x)	WizGetAnalyzer().LogAction(x)
+#define LOG_ACTION(x)	WizGetAnalyzer().logAction(x)
 
-#define LOG_FUNCTION_DURATION(x)	class CWizInnerFunctionDurationLogger : public CWizFunctionDurationLogger\
+#define LOG_FUNCTION_DURATION(x)	class CWizInnerFunctionDurationLogger : public WizFunctionDurationLogger\
 {\
 public:\
-	CWizInnerFunctionDurationLogger() : CWizFunctionDurationLogger(x) {}\
+	CWizInnerFunctionDurationLogger() : WizFunctionDurationLogger(x) {}\
 } m_wizDurationLogger
 //
 
-#define LOG_FUNCTION_DURATION_INLINE(x) CWizFunctionDurationLogger __durationLogger(x)
+#define LOG_FUNCTION_DURATION_INLINE(x) WizFunctionDurationLogger __durationLogger(x)
 
 /*
 usage:

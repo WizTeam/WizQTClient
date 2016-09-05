@@ -4,32 +4,32 @@
 
 const QString g_strAccountSection = "Account";
 
-CWizAccountManager::CWizAccountManager(CWizDatabaseManager& dbMgr)
+WizAccountManager::WizAccountManager(WizDatabaseManager& dbMgr)
     : m_dbMgr(dbMgr)
 {
 
 }
 
-bool CWizAccountManager::isVip()
+bool WizAccountManager::isVip()
 {
-    CWizDatabase& personDb = m_dbMgr.db();
+    WizDatabase& personDb = m_dbMgr.db();
 
-    CString strUserType = personDb.GetMetaDef(g_strAccountSection, "USERTYPE");
-    if (strUserType.IsEmpty() || strUserType == "free")
+    CString strUserType = personDb.getMetaDef(g_strAccountSection, "USERTYPE");
+    if (strUserType.isEmpty() || strUserType == "free")
         return false;
 
     return true;
 }
 
-bool CWizAccountManager::isPaidUser()
+bool WizAccountManager::isPaidUser()
 {
     if (isVip())
         return true;
 
-    CWizDatabase& personDb = m_dbMgr.db();
+    WizDatabase& personDb = m_dbMgr.db();
 
     CWizBizDataArray arrayBiz;
-    personDb.GetAllBizInfo(arrayBiz);
+    personDb.getAllBizInfo(arrayBiz);
 
     for (WIZBIZDATA biz : arrayBiz)
     {
@@ -40,16 +40,16 @@ bool CWizAccountManager::isPaidUser()
     return false;
 }
 
-bool CWizAccountManager::isPaidGroup(const QString& kbGUID)
+bool WizAccountManager::isPaidGroup(const QString& kbGUID)
 {
     WIZGROUPDATA group;
-    if (m_dbMgr.db().GetGroupData(kbGUID, group))
+    if (m_dbMgr.db().getGroupData(kbGUID, group))
     {
         if (group.bizGUID.isEmpty())
             return false;
 
         WIZBIZDATA biz;
-        if (m_dbMgr.db().GetBizData(group.bizGUID, biz))
+        if (m_dbMgr.db().getBizData(group.bizGUID, biz))
         {
             return biz.bizLevel > 0;
         }
@@ -58,10 +58,10 @@ bool CWizAccountManager::isPaidGroup(const QString& kbGUID)
     return false;
 }
 
-bool CWizAccountManager::isBizGroup(const QString& kbGUID)
+bool WizAccountManager::isBizGroup(const QString& kbGUID)
 {
     WIZGROUPDATA group;
-    m_dbMgr.db().GetGroupData(kbGUID, group);
-    return group.IsBiz();
+    m_dbMgr.db().getGroupData(kbGUID, group);
+    return group.isBiz();
 }
 

@@ -6,7 +6,7 @@
 #include <QString>
 #include <QMap>
 
-class CommonApiEntry
+class WizCommonApiEntry
 {
 public:
     static void setEnterpriseServerIP(const QString& strIP);

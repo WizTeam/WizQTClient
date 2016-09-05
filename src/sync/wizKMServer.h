@@ -9,23 +9,23 @@
 #define WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT		3032
 #define WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR		380
 
-class CWizKMXmlRpcServerBase : public CWizXmlRpcServerBase
+class WizKMXmlRpcServerBase : public WizXmlRpcServerBase
 {
 public:
-    CWizKMXmlRpcServerBase(const QString& strUrl, QObject* parent);
-    bool GetValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion);
-    bool GetValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion);
-    bool SetValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent);
+    bool getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion);
+    bool getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion);
+    bool setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion);
 };
 
 
-class CWizKMAccountsServer : public CWizKMXmlRpcServerBase, public CWizJSONServerBase
+class WizKMAccountsServer : public WizKMXmlRpcServerBase, public WizJSONServerBase
 {
 public:
-    CWizKMAccountsServer(const QString& strUrl, QObject* parent = 0);
-    virtual ~CWizKMAccountsServer(void);
+    WizKMAccountsServer(const QString& strUrl, QObject* parent = 0);
+    virtual ~WizKMAccountsServer(void);
 
-    virtual void OnXmlRpcError();
+    virtual void onXmlRpcError();
 
 protected:
     bool m_bLogin;
@@ -35,47 +35,47 @@ public:
     WIZUSERINFO m_userInfo;
 
 public:
-    bool Login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
-    bool Logout();
-    bool ChangePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
-    bool ChangeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
-    bool GetToken(const QString& strUserName, const QString& strPassword, QString& strToken);
-    bool GetCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
-    bool SetCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    bool CreateAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode, const QString& strCaptchaID, const QString& strCaptcha);
-    void SetAutoLogout(bool b) { m_bAutoLogout = b; }
-    bool ShareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
-    bool GetGroupList(CWizGroupDataArray& arrayGroup);
-    bool GetBizList(CWizBizDataArray& arrayBiz);
-    bool CreateTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
-    bool KeepAlive(const QString& strToken);
-    bool GetMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
-    bool SetMessageReadStatus(const QString& strMessageIDs, int nStatus);
+    bool login(const QString& strUserName, const QString& strPassword, const QString& strType = "normal");
+    bool logout();
+    bool changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword);
+    bool changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId);
+    bool getToken(const QString& strUserName, const QString& strPassword, QString& strToken);
+    bool getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    bool createAccount(const QString& strUserName, const QString& strPassword, const QString& InviteCode, const QString& strCaptchaID, const QString& strCaptcha);
+    void setAutoLogout(bool b) { m_bAutoLogout = b; }
+    bool shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID);
+    bool getGroupList(CWizGroupDataArray& arrayGroup);
+    bool getBizList(CWizBizDataArray& arrayBiz);
+    bool createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group);
+    bool keepAlive(const QString& strToken);
+    bool getMessages(__int64 nVersion, CWizUserMessageDataArray& arrayMessage);
+    bool setMessageReadStatus(const QString& strMessageIDs, int nStatus);
 
-    bool GetAdminBizCert(const QString& strToken, const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
-    bool SetUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
-    bool GetUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool getAdminBizCert(const QString& strToken, const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
+    bool setUserBizCert(const QString& strBizGUID, const QString& strN, const QString& stre, const QString& strd, const QString& strHint);
+    bool getUserBizCert(const QString& strBizGUID, QString& strN, QString& stre, QString& strd, QString& strHint);
 
     //
-    bool SetMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
+    bool setMessageDeleteStatus(const QString &strMessageIDs, int nStatus);
 
-    bool GetValueVersion(const QString& strKey, __int64& nVersion);
-    bool GetValue(const QString& strKey, QString& strValue, __int64& nVersion);
-    bool SetValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    bool getValueVersion(const QString& strKey, __int64& nVersion);
+    bool getValue(const QString& strKey, QString& strValue, __int64& nVersion);
+    bool setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
     //
 
 
 public:
-    bool GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
-    QString GetToken();
-    QString GetKbGUID();
+    bool getWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile);
+    QString getToken();
+    QString getKbGuid();
     //void setKbGUID(const QString& strkbGUID) { m_retLogin.strKbGUID = strkbGUID; }
-    const WIZUSERINFO& GetUserInfo() const { return m_userInfo; }
-    WIZUSERINFO& GetUserInfo() { return m_userInfo; }
-    void SetUserInfo(const WIZUSERINFO& userInfo);
+    const WIZUSERINFO& getUserInfo() const { return m_userInfo; }
+    WIZUSERINFO& getUserInfo() { return m_userInfo; }
+    void setUserInfo(const WIZUSERINFO& userInfo);
 
 private:
-    QString MakeXmlRpcPassword(const QString& strPassword);
+    QString makeXmlRpcPassword(const QString& strPassword);
 
     bool accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret);
     bool accounts_clientLogout(const QString& strToken);
@@ -101,28 +101,28 @@ private:
 
 #define WIZKM_WEBAPI_VERSION		9
 
-struct CWizKMBaseParam: public CWizXmlRpcStructValue
+struct CWizKMBaseParam: public WizXmlRpcStructValue
 {
     CWizKMBaseParam(int apiVersion = WIZKM_WEBAPI_VERSION)
     {
-        ChangeApiVersion(apiVersion);
+        changeApiVersion(apiVersion);
         //
 #ifdef Q_OS_MAC
-        AddString(_T("client_type"), _T("mac"));
+        addString(_T("client_type"), _T("mac"));
 #else
-        AddString(_T("client_type"), _T("linux"));
+        addString(_T("client_type"), _T("linux"));
 #endif
-        AddString(_T("client_version"), _T("2.0"));
+        addString(_T("client_version"), _T("2.0"));
     }
     //
-    void ChangeApiVersion(int nApiVersion)
+    void changeApiVersion(int nApiVersion)
     {
-        AddString(_T("api_version"), WizIntToStr(nApiVersion));
+        addString(_T("api_version"), WizIntToStr(nApiVersion));
     }
-    int GetApiVersion()
+    int getApiVersion()
     {
         QString str;
-        GetString(_T("api_version"), str);
+        getString(_T("api_version"), str);
         return _ttoi(str);
     }
 };
@@ -131,8 +131,8 @@ struct CWizKMTokenOnlyParam : public CWizKMBaseParam
 {
     CWizKMTokenOnlyParam(const QString& strToken, const QString& strKbGUID)
     {
-        AddString(_T("token"), strToken);
-        AddString(_T("kb_guid"), strKbGUID);
+        addString(_T("token"), strToken);
+        addString(_T("kb_guid"), strKbGUID);
     }
 };
 
@@ -155,13 +155,13 @@ struct WIZOBJECTVERSION
     }
 };
 
-class CWizKMDatabaseServer: public CWizKMXmlRpcServerBase
+class WizKMDatabaseServer: public WizKMXmlRpcServerBase
 {
     Q_OBJECT
 public:
-    CWizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
-    virtual ~CWizKMDatabaseServer();
-    virtual void OnXmlRpcError();
+    WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject* parent = 0);
+    virtual ~WizKMDatabaseServer();
+    virtual void onXmlRpcError();
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);
@@ -171,9 +171,9 @@ protected:
     WIZKBINFO m_kbInfo;
 
 public:
-    QString GetToken() const { return m_userInfo.strToken; }
-    QString GetKbGUID() const { return m_userInfo.strKbGUID; }
-    int GetMaxFileSize() const { return m_kbInfo.GetMaxFileSize(); }
+    QString getToken() const { return m_userInfo.strToken; }
+    QString getKbGuid() const { return m_userInfo.strKbGUID; }
+    int getMaxFileSize() const { return m_kbInfo.getMaxFileSize(); }
 
     BOOL wiz_getInfo();
     BOOL wiz_getVersion(WIZOBJECTVERSION& version, BOOL bAuto = FALSE);
@@ -193,8 +193,8 @@ public:
     BOOL tag_postList(std::deque<WIZTAGDATA>& arrayTag);
     BOOL style_postList(std::deque<WIZSTYLEDATA>& arrayStyle);
     BOOL deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
-    QByteArray DownloadDocumentData(const QString& strDocumentGUID);
-    QByteArray DownloadAttachmentData(const QString& strAttachmentGUID);
+    QByteArray downloadDocumentData(const QString& strDocumentGUID);
+    QByteArray downloadAttachmentData(const QString& strAttachmentGUID);
     //
     BOOL document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     BOOL document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc);
@@ -204,12 +204,12 @@ public:
     BOOL data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName);
     BOOL data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
     //
-    BOOL GetValueVersion(const QString& strKey, __int64& nVersion);
-    BOOL GetValue(const QString& strKey, QString& strValue, __int64& nVersion);
-    BOOL SetValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
+    BOOL getValueVersion(const QString& strKey, __int64& nVersion);
+    BOOL getValue(const QString& strKey, QString& strValue, __int64& nVersion);
+    BOOL setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion);
 
 public:
-    virtual int GetCountPerPage();
+    virtual int getCountPerPage();
 
 signals:
     void downloadProgress(int totalSize, int loadedSize);
@@ -230,10 +230,10 @@ protected:
             return TRUE;
         //
         CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-        param.AddStringArray(strGUIDArrayValueName, arrayGUID);
+        param.addStringArray(strGUIDArrayValueName, arrayGUID);
         //
         std::deque<TWrapData> arrayWrap;
-        if (!Call(strMethodName, arrayWrap, &param))
+        if (!call(strMethodName, arrayWrap, &param))
         {
             TOLOG1(_T("%1 failure!"), strMethodName);
             return FALSE;
@@ -291,7 +291,7 @@ protected:
         if (arrayData.empty())
             return TRUE;
         //
-        int nCountPerPage = GetCountPerPage();
+        int nCountPerPage = getCountPerPage();
         //
         typename std::deque<TData>::const_iterator it = arrayData.begin();
         //
@@ -313,10 +313,10 @@ protected:
 
             CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
             //
-            param.AddArray<TWrapData>(strArrayName, subArray);
+            param.addArray<TWrapData>(strArrayName, subArray);
             //
             QString strCount;
-            if (!Call(strMethosName, _T("success_count"), strCount, &param))
+            if (!call(strMethosName, _T("success_count"), strCount, &param))
             {
         #ifdef _DEBUG
                 WizMessageBox1(_T("Failed to upload list: %1"), strMethosName);
@@ -376,11 +376,11 @@ protected:
     BOOL getList(const QString& strMethodName, int nCountPerPage, __int64 nVersion, std::deque<TData>& arrayRet)
     {
         CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
-        param.AddInt(_T("count"), nCountPerPage);
-        param.AddString(_T("version"), WizInt64ToStr(nVersion));
+        param.addInt(_T("count"), nCountPerPage);
+        param.addString(_T("version"), WizInt64ToStr(nVersion));
         //
         std::deque<TWrapData> arrayWrap;
-        if (!Call(strMethodName, arrayWrap, &param))
+        if (!call(strMethodName, arrayWrap, &param))
         {
             TOLOG(_T("object.getList failure!"));
             return FALSE;

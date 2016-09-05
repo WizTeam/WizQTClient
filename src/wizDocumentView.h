@@ -12,72 +12,72 @@ class QLabel;
 
 struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
-class CWizExplorerApp;
-class CWizDatabaseManager;
-class CWizUserSettings;
-class CWizScrollBar;
-class CWizDocumentWebView;
-class CWizDatabase;
-class CWizSplitter;
-class CWizUserCipherForm;
-class CWizObjectDownloaderHost;
+class WizExplorerApp;
+class WizDatabaseManager;
+class WizUserSettings;
+class WizScrollBar;
+class WizDocumentWebView;
+class WizDatabase;
+class WizSplitter;
+class WizUserCipherForm;
+class WizObjectDownloaderHost;
 class QStackedWidget;
 class QWebFrame;
 class QWebEnginePage;
 class WizWebEngineView;
-class CWizDocumentEditStatusSyncThread;
-class CWizDocumentStatusChecker;
-class CWizLocalProgressWebView;
-class CWizDocumentTransitionView;
+class WizDocumentEditStatusSyncThread;
+class WizDocumentStatusChecker;
+class WizLocalProgressWebView;
+class WizDocumentTransitionView;
 
-class TitleBar;
-class EditorToolBar;
-class CWizTagBar;
+class WizTitleBar;
+class WizEditorToolBar;
+class WizTagBar;
 
-class CWizDocumentView : public QWidget
+class WizDocumentView : public QWidget
 {
     Q_OBJECT
 
 public:
-    CWizDocumentView(CWizExplorerApp& app, QWidget* parent = 0);
-    ~CWizDocumentView();
+    WizDocumentView(WizExplorerApp& app, QWidget* parent = 0);
+    ~WizDocumentView();
     virtual QSize sizeHint() const;
     void setSizeHint(QSize size);
 
     QWidget* client() const;
-    CWizDocumentWebView* web() const { return m_web; }
+    WizDocumentWebView* web() const { return m_web; }
     WizWebEngineView* commentView() const;
-    CWizLocalProgressWebView* commentWidget() const;
+    WizLocalProgressWebView* commentWidget() const;
     //
-    CWizDocumentTransitionView* transitionView();
+    WizDocumentTransitionView* transitionView();
     //
-    TitleBar* titleBar();
+    WizTitleBar* titleBar();
     //
     void waitForDone();
 
 protected:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
-    CWizUserSettings& m_userSettings;
-    CWizObjectDownloaderHost* m_downloaderHost;
-    CWizDocumentTransitionView* m_transitionView;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
+    WizUserSettings& m_userSettings;
+    WizObjectDownloaderHost* m_downloaderHost;
+    WizDocumentTransitionView* m_transitionView;
 
     QStackedWidget* m_tab;
     QWidget* m_msgWidget;
     QLabel* m_msgLabel;
 
     QWidget* m_docView;
-    CWizDocumentWebView* m_web;
+    WizDocumentWebView* m_web;
     WizWebEngineView* m_comments;
-    CWizLocalProgressWebView* m_commentWidget;
-    CWizSplitter* m_splitter;
-    TitleBar* m_title;
+    WizLocalProgressWebView* m_commentWidget;
+    WizSplitter* m_splitter;
+    WizTitleBar* m_title;
     QWidget* m_blankView;
 
-    CWizUserCipherForm* m_passwordView;
-    CWizDocumentEditStatusSyncThread* m_editStatusSyncThread;
+    WizUserCipherForm* m_passwordView;
+    WizDocumentEditStatusSyncThread* m_editStatusSyncThread;
 //    CWizDocumentStatusCheckThread* m_editStatusCheckThread;
-    CWizDocumentStatusChecker* m_editStatusChecker;
+    WizDocumentStatusChecker* m_editStatusChecker;
 
     virtual void showEvent(QShowEvent *event);
     virtual void resizeEvent(QResizeEvent* ev);
@@ -118,14 +118,14 @@ public:
     void showCoachingTips();
 
 signals:
-    void documentSaved(const QString& strGUID, CWizDocumentView* viewer);
+    void documentSaved(const QString& strGUID, WizDocumentView* viewer);
     void checkDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
     void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
-    void onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    void onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool);
-    void onCloseNoteRequested(CWizDocumentView* view);
+    void onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
+    void onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool);
+    void onCloseNoteRequested(WizDocumentView* view);
 
     void onCipherCheckRequest();
 
@@ -134,7 +134,7 @@ public Q_SLOTS:
     void on_document_modified(const WIZDOCUMENTDATA& documentOld,
                               const WIZDOCUMENTDATA& documentNew);
     void on_document_data_modified(const WIZDOCUMENTDATA& data);
-    void on_document_data_changed(const QString& strGUID, CWizDocumentView* viewer);
+    void on_document_data_changed(const QString& strGUID, WizDocumentView* viewer);
 
     void on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment);
     void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment);

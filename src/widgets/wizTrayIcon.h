@@ -4,15 +4,15 @@
 #include <QSystemTrayIcon>
 #include <QVariant>
 
-class CWizExplorerApp;
+class WizExplorerApp;
 
-class CWizTrayIcon : public QSystemTrayIcon
+class WizTrayIcon : public QSystemTrayIcon
 {
     Q_OBJECT
 public:
-    CWizTrayIcon(CWizExplorerApp& app, QObject* parent = 0);
-    CWizTrayIcon(CWizExplorerApp& app, const QIcon &icon, QObject *parent = 0);
-    ~CWizTrayIcon();
+    WizTrayIcon(WizExplorerApp& app, QObject* parent = 0);
+    WizTrayIcon(WizExplorerApp& app, const QIcon &icon, QObject *parent = 0);
+    ~WizTrayIcon();
 
 
 
@@ -29,7 +29,7 @@ signals:
 private:
     int m_messageType;
     QVariant m_messageData;
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 };
 
 #endif // CWIZTRAYICON_H

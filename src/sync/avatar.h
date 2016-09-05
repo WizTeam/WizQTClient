@@ -6,21 +6,21 @@
 class QString;
 class QPixmap;
 
-class AvatarHostPrivate;
+class WizAvatarHostPrivate;
 
 #define SYSTEM_AVATAR_APPLY_GROUP       "message_icons_apply_group"
 #define SYSTEM_AVATAR_ADMIN_PERMIT      "message_icons_admin_permit"
 #define SYSTEM_AVATAR_SYSTEM            "message_icons_system"
 
-class AvatarHost: public QObject
+class WizAvatarHost: public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AvatarHost();
-    ~AvatarHost();
+    explicit WizAvatarHost();
+    ~WizAvatarHost();
 
-    static AvatarHost* instance();
+    static WizAvatarHost* instance();
     static void load(const QString& strUserID, bool isSystem);
     static void reload(const QString& strUserID);
     static bool isLoaded(const QString& strUserID);
@@ -36,7 +36,7 @@ public:
 Q_SIGNALS:
     void loaded(const QString& strUserID);
 
-    friend class AvatarHostPrivate;
+    friend class WizAvatarHostPrivate;
 
 public:
     static QPixmap corpImage(const QPixmap& org);

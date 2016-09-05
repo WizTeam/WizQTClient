@@ -8,11 +8,11 @@
 class QLabel;
 #endif
 
-class CWizOptionsWidget : public CWizPopupWidget
+class WizOptionsWidget : public WizPopupWidget
 {
     Q_OBJECT
 public:
-    CWizOptionsWidget(QWidget* parent);
+    WizOptionsWidget(QWidget* parent);
 private:
 #ifndef Q_OS_MAC
     QLabel* m_labelRestartForSkin;

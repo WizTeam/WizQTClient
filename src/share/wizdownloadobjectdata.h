@@ -4,18 +4,18 @@
 #include "wizDatabaseManager.h"
 #include "../sync/wizXmlRpcServer.h"
 
-class CWizDownloadObjectData
+class WizDownloadObjectData
 {
     Q_OBJECT
 
 public:
-    CWizDownloadObjectData(CWizDatabaseManager& dbMgr);
+    WizDownloadObjectData(WizDatabaseManager& dbMgr);
 
     void setData(const WIZOBJECTDATA& data);
     void startDownload();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     WIZOBJECTDATA m_data;
     bool m_bInited;
 

@@ -16,20 +16,20 @@
 #include "share/wizwebengineview.h"
 
 
-class CWizObjectDownloaderHost;
-class CWizEditorInsertLinkForm;
-class CWizEditorInsertTableForm;
-class CWizDocumentWebView;
-class CWizDocumentTransitionView;
+class WizObjectDownloaderHost;
+class WizEditorInsertLinkForm;
+class WizEditorInsertTableForm;
+class WizDocumentWebView;
+class WizDocumentTransitionView;
 class CWizDocumentWebViewWorker;
 class QNetworkDiskCache;
-class CWizSearchReplaceWidget;
+class WizSearchReplaceWidget;
 
 struct WIZODUCMENTDATA;
 
-class CWizDocumentView;
+class WizDocumentView;
 
-class CWizWaitEvent
+class WizWaitEvent
 {
 private:
     QMutex m_mutex;
@@ -53,12 +53,12 @@ public:
 };
 
 
-class CWizDocumentWebViewLoaderThread : public QThread
+class WizDocumentWebViewLoaderThread : public QThread
 {
     Q_OBJECT
     //
 public:
-    CWizDocumentWebViewLoaderThread(CWizDatabaseManager& dbMgr, QObject* parent);
+    WizDocumentWebViewLoaderThread(WizDatabaseManager& dbMgr, QObject* parent);
 
     void load(const WIZDOCUMENTDATA& doc, WizEditorMode editorMode);
     //
@@ -70,26 +70,26 @@ protected:
     virtual void run();
     //
     void setCurrentDoc(QString kbGuid, QString docGuid, WizEditorMode editorMode);
-    void PeekCurrentDocGUID(QString& kbGUID, QString& docGUID, WizEditorMode& editorMode);
+    void peekCurrentDocGuid(QString& kbGUID, QString& docGUID, WizEditorMode& editorMode);
 Q_SIGNALS:
     void loaded(const QString kbGUID, const QString strGUID, const QString strFileName, WizEditorMode editorMode);
 private:
     bool isEmpty();
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QString m_strCurrentKbGUID;
     QString m_strCurrentDocGUID;
     WizEditorMode m_editorMode;
     QMutex m_mutex;
-    CWizWaitEvent m_waitEvent;
+    WizWaitEvent m_waitEvent;
     bool m_stop;
 };
 
-class CWizDocumentWebViewSaverThread : public QThread
+class WizDocumentWebViewSaverThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentWebViewSaverThread(CWizDatabaseManager& dbMgr, QObject* parent);
+    WizDocumentWebViewSaverThread(WizDatabaseManager& dbMgr, QObject* parent);
 
     void save(const WIZDOCUMENTDATA& doc, const QString& strHtml,
               const QString& strHtmlFile, int nFlags);
@@ -114,22 +114,22 @@ protected:
     virtual void run();
     //
     void stop();
-    void PeekData(SAVEDATA& data);
+    void peekData(SAVEDATA& data);
 Q_SIGNALS:
     void saved(const QString kbGUID, const QString strGUID, bool ok);
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QMutex m_mutex;
-    CWizWaitEvent m_waitEvent;
+    WizWaitEvent m_waitEvent;
     bool m_stop;
 };
 
-class CWizDocumentWebViewPage: public WizWebEnginePage
+class WizDocumentWebViewPage: public WizWebEnginePage
 {
     Q_OBJECT
 
 public:
-    explicit CWizDocumentWebViewPage(CWizDocumentWebView* parent);
+    explicit WizDocumentWebViewPage(WizDocumentWebView* parent);
     virtual bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame);
     virtual void triggerAction(WebAction action, bool checked = false);
     virtual void javaScriptConsoleMessage(JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID);
@@ -137,23 +137,23 @@ public:
 Q_SIGNALS:
     void actionTriggered(WebAction act);
 private:
-    CWizDocumentWebView* m_engineView;
+    WizDocumentWebView* m_engineView;
 };
 
 
-class CWizDocumentWebView : public WizWebEngineView
+class WizDocumentWebView : public WizWebEngineView
 {
     Q_OBJECT
 
 public:
-    CWizDocumentWebView(CWizExplorerApp& app, QWidget* parent);
-    ~CWizDocumentWebView();
+    WizDocumentWebView(WizExplorerApp& app, QWidget* parent);
+    ~WizDocumentWebView();
     //
-    CWizDocumentView* view();
+    WizDocumentView* view();
     //
     void clear();
     //
-    friend class CWizDocumentWebViewPage;
+    friend class WizDocumentWebViewPage;
     //
     void waitForDone();
 
@@ -267,8 +267,8 @@ protected:
     virtual void dropEvent(QDropEvent* event);
 
 private:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
     QMap<QString, QString> m_mapFile;
 
     QTimer m_timerAutoSave;
@@ -289,12 +289,12 @@ private:
 
     int m_nWindowID;
 
-    CWizDocumentWebViewLoaderThread* m_docLoadThread;
-    CWizDocumentWebViewSaverThread* m_docSaverThread;
+    WizDocumentWebViewLoaderThread* m_docLoadThread;
+    WizDocumentWebViewSaverThread* m_docSaverThread;
     //
-    QPointer<CWizEditorInsertLinkForm> m_editorInsertLinkForm;
+    QPointer<WizEditorInsertLinkForm> m_editorInsertLinkForm;
 
-    CWizSearchReplaceWidget* m_searchReplaceWidget;
+    WizSearchReplaceWidget* m_searchReplaceWidget;
 
 public:
     Q_INVOKABLE void onNoteLoadFinished(); // editor callback

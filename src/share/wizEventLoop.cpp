@@ -5,7 +5,7 @@
 
 const int TIMEOUT_WAIT_SECONDS = 120;
 
-CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
+WizAutoTimeOutEventLoop::WizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent /*= 0*/)
     : QEventLoop(parent)
     , m_error(QNetworkReply::NoError)
     , m_timeOut(false)
@@ -23,7 +23,7 @@ CWizAutoTimeOutEventLoop::CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObjec
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timeOut()));
 }
 
-CWizAutoTimeOutEventLoop::~CWizAutoTimeOutEventLoop()
+WizAutoTimeOutEventLoop::~WizAutoTimeOutEventLoop()
 {
     if (m_reply)
     {
@@ -32,17 +32,17 @@ CWizAutoTimeOutEventLoop::~CWizAutoTimeOutEventLoop()
     }
 }
 
-void CWizAutoTimeOutEventLoop::setTimeoutWaitSeconds(int seconds)
+void WizAutoTimeOutEventLoop::setTimeoutWaitSeconds(int seconds)
 {
     m_timeOutSeconds = seconds;
 }
 
-QNetworkReply*CWizAutoTimeOutEventLoop::networkReply() const
+QNetworkReply*WizAutoTimeOutEventLoop::networkReply() const
 {
     return m_reply;
 }
 
-void CWizAutoTimeOutEventLoop::doFinished(QNetworkReply* reply)
+void WizAutoTimeOutEventLoop::doFinished(QNetworkReply* reply)
 {
     m_error = reply->error();
     if (m_error) {
@@ -52,18 +52,18 @@ void CWizAutoTimeOutEventLoop::doFinished(QNetworkReply* reply)
     m_result = reply->readAll();
 }
 
-void CWizAutoTimeOutEventLoop::doError(QNetworkReply::NetworkError error)
+void WizAutoTimeOutEventLoop::doError(QNetworkReply::NetworkError error)
 {
     m_error = error;
 }
 
-int CWizAutoTimeOutEventLoop::exec(QEventLoop::ProcessEventsFlags flags)
+int WizAutoTimeOutEventLoop::exec(QEventLoop::ProcessEventsFlags flags)
 {
     m_timer.start(m_timeOutSeconds * 1000);
     return QEventLoop::exec(flags);
 }
 
-void CWizAutoTimeOutEventLoop::on_replyFinished()
+void WizAutoTimeOutEventLoop::on_replyFinished()
 {
     m_timer.stop();
     //
@@ -72,7 +72,7 @@ void CWizAutoTimeOutEventLoop::on_replyFinished()
     quit();
 }
 
-void CWizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
+void WizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
 {
     m_timer.stop();
     doError(error);
@@ -80,7 +80,7 @@ void CWizAutoTimeOutEventLoop::on_replyError(QNetworkReply::NetworkError error)
     quit();
 }
 
-void CWizAutoTimeOutEventLoop::on_timeOut()
+void WizAutoTimeOutEventLoop::on_timeOut()
 {
     qDebug() << "network status check, " << "downloaded bytes : " << m_downloadBytes << "  last time : " << m_lastDownloadBytes
              << " uploaded bytes : " << m_uploadBytes << " last time : " << m_lastUploadBytes;
@@ -105,25 +105,25 @@ void CWizAutoTimeOutEventLoop::on_timeOut()
     }
 }
 
-void CWizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void WizAutoTimeOutEventLoop::on_downloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     m_downloadBytes = bytesReceived;
 //    qDebug() << "download progress changed  " << bytesReceived << "  totoal  : " << bytesTotal;
 }
 
-void CWizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)
+void WizAutoTimeOutEventLoop::on_uploadProgress(qint64 bytesSent, qint64 bytesTotal)
 {
     m_uploadBytes = bytesSent;
 //    qDebug() << "upload progress changed  " << bytesSent << "  totoal  : " << bytesTotal;
 }
 
 
-CWizXmlRpcEventLoop::CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject* parent)
-    : CWizAutoTimeOutEventLoop(pReply, parent)
+WizXmlRpcEventLoop::WizXmlRpcEventLoop(QNetworkReply* pReply, QObject* parent)
+    : WizAutoTimeOutEventLoop(pReply, parent)
 {
 }
 
-void CWizXmlRpcEventLoop::doFinished(QNetworkReply* reply)
+void WizXmlRpcEventLoop::doFinished(QNetworkReply* reply)
 {
     m_error = reply->error();
     if (m_error) {

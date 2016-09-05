@@ -7,12 +7,12 @@
 #include <QListWidget>
 
 
-class CWizScrollBar : public QScrollBar
+class WizScrollBar : public QScrollBar
 {
     Q_OBJECT
 
 public:
-    explicit CWizScrollBar(QWidget* parent = 0);
+    explicit WizScrollBar(QWidget* parent = 0);
     void syncWith(QScrollBar* source);
     void applyStyle(const QString& bgColorName, const QString& handleColorName, bool leftBorder);
 
@@ -39,17 +39,17 @@ private:
     bool m_bLeftBorder;
 };
 
-class CWizListWidgetWithCustomScorllBar : public  QListWidget
+class WizListWidgetWithCustomScorllBar : public  QListWidget
 {
     Q_OBJECT
 public:
-    CWizListWidgetWithCustomScorllBar(QWidget* parent = 0);
+    WizListWidgetWithCustomScorllBar(QWidget* parent = 0);
 
 protected:
     void resizeEvent(QResizeEvent* event);
 
 protected:
-    CWizScrollBar* m_vScroll;
+    WizScrollBar* m_vScroll;
 };
 
 #endif // WIZSCROLLBAR_H

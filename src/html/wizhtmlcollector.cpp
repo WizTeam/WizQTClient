@@ -10,7 +10,7 @@
 #include <QNetworkCacheMetaData>
 #include <QNetworkDiskCache>
 
-bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
+bool WizHtmlFileMap::lookup(const QString& strUrl, QString& strFileName)
 {
     QString strKey(strUrl.toLower());
     CWizHtmlFileDataMap::const_iterator it = m_map.find(strKey);
@@ -21,7 +21,7 @@ bool CWizHtmlFileMap::Lookup(const QString& strUrl, QString& strFileName)
     return true;
 }
 
-void CWizHtmlFileMap::Add(const QString& strUrl, const QString& strFileName,
+void WizHtmlFileMap::add(const QString& strUrl, const QString& strFileName,
                           WIZHTMLFILEDATA::HtmlFileType eType, bool bProcessed)
 {
     QString strKey(strUrl.toLower());
@@ -34,7 +34,7 @@ void CWizHtmlFileMap::Add(const QString& strUrl, const QString& strFileName,
     m_map[strKey] = data;
 }
 
-void CWizHtmlFileMap::GetAll(std::deque<WIZHTMLFILEDATA>& arrayFile)
+void WizHtmlFileMap::getAll(std::deque<WIZHTMLFILEDATA>& arrayFile)
 {
     for (CWizHtmlFileDataMap::const_iterator it = m_map.begin();
     it != m_map.end();
@@ -46,12 +46,12 @@ void CWizHtmlFileMap::GetAll(std::deque<WIZHTMLFILEDATA>& arrayFile)
 
 
 /* --------------------------- CWizHtmlCollector --------------------------- */
-CWizHtmlCollector::CWizHtmlCollector()
+WizHtmlCollector::WizHtmlCollector()
     : m_bMainPage(false)
 {
 }
 
-void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
+void WizHtmlCollector::startTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
@@ -59,19 +59,19 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     QString strName = pTag->getTagName().toLower();
     if (strName == "script")
     {
-        ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        processTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
     }
     else if (strName == "img")
     {
         //ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
-        ProcessImgTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+        processImgTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
     }
     else if (strName == "link")
     {
         if (pTag->getValueFromName("type") == "text/css")
         {
-            ProcessTagValue(pTag, "href", WIZHTMLFILEDATA::typeResource);
-            ProcessTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
+            processTagValue(pTag, "href", WIZHTMLFILEDATA::typeResource);
+            processTagValue(pTag, "src", WIZHTMLFILEDATA::typeResource);
         }
     }
     else if (strName == "body")
@@ -90,7 +90,7 @@ void CWizHtmlCollector::StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbor
     m_ret.push_back(pTag->getTag());
 }
 
-void CWizHtmlCollector::EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
+void WizHtmlCollector::endTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
@@ -100,7 +100,7 @@ void CWizHtmlCollector::EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort)
     }
 }
 
-void CWizHtmlCollector::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
+void WizHtmlCollector::characters(const CString &rText, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
@@ -108,7 +108,7 @@ void CWizHtmlCollector::Characters(const CString &rText, DWORD dwAppData, bool &
     m_ret.push_back(rText);
 }
 
-void CWizHtmlCollector::Comment(const CString &rComment, DWORD dwAppData, bool &bAbort)
+void WizHtmlCollector::comment(const CString &rComment, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);
@@ -151,7 +151,7 @@ static bool IsRegFileName(const QString& name)
     return true;
 }
 
-void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
+void WizHtmlCollector::processTagValue(WizHtmlTag *pTag,
                                         const QString& strAttributeName,
                                         WIZHTMLFILEDATA::HtmlFileType eType)
 {
@@ -166,7 +166,7 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
     }
 
     QString strFileName;
-    if (!m_files.Lookup(url.toString(), strFileName)) {
+    if (!m_files.lookup(url.toString(), strFileName)) {
         strFileName = url.toLocalFile();
         if (!strFileName.isEmpty() && !PathFileExists(strFileName)) {
             strFileName.clear();
@@ -175,23 +175,23 @@ void CWizHtmlCollector::ProcessTagValue(CWizHtmlTag *pTag,
         if (strFileName.isEmpty())
             return;
         //
-        QString strName = Utils::Misc::extractFileName(strFileName);
+        QString strName = Utils::WizMisc::extractFileName(strFileName);
         if (!IsRegFileName(strName))
         {
-            QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strFileName);
+            QString strNewFileName = m_strTempPath + ::WizGenGUIDLowerCaseLetterOnly() + Utils::WizMisc::extractFileExt(strFileName);
             if (WizCopyFile(strFileName, strNewFileName, FALSE))
             {
                 strFileName = strNewFileName;
             }
         }
         //
-        m_files.Add(url.toString(), strFileName, eType, false);
+        m_files.add(url.toString(), strFileName, eType, false);
     }
 
-    pTag->setValueToName(strAttributeName, ToResourceFileName(strFileName));
+    pTag->setValueToName(strAttributeName, toResourceFileName(strFileName));
 }
 
-void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& strAttributeName, WIZHTMLFILEDATA::HtmlFileType eType)
+void WizHtmlCollector::processImgTagValue(WizHtmlTag* pTag, const QString& strAttributeName, WIZHTMLFILEDATA::HtmlFileType eType)
 {
     QString strValue = pTag->getValueFromName(strAttributeName);
     if (strValue.isEmpty())
@@ -217,27 +217,27 @@ void CWizHtmlCollector::ProcessImgTagValue(CWizHtmlTag* pTag, const QString& str
         {
             qDebug() <<"[Save] change to local image : " << strFile;
             QString strAbsFile = "file://" + strFile;
-            m_files.Add(strAbsFile, strFile, eType, false);
-            pTag->setValueToName(strAttributeName, ToResourceFileName(strFile));
+            m_files.add(strAbsFile, strFile, eType, false);
+            pTag->setValueToName(strAttributeName, toResourceFileName(strFile));
             return;
         }
     }
 
-    ProcessTagValue(pTag, strAttributeName, eType);
+    processTagValue(pTag, strAttributeName, eType);
 }
 
-QString CWizHtmlCollector::ToResourceFileName(const QString& strFileName)
+QString WizHtmlCollector::toResourceFileName(const QString& strFileName)
 {
     if (m_bMainPage) {
-        return "index_files/" + Utils::Misc::extractFileName(strFileName);
+        return "index_files/" + Utils::WizMisc::extractFileName(strFileName);
     } else {
-        return Utils::Misc::extractFileName(strFileName);
+        return Utils::WizMisc::extractFileName(strFileName);
     }
 }
 
-bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
+bool WizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName)
 {
-    MainWindow *mainWindow = MainWindow::instance();
+    WizMainWindow *mainWindow = WizMainWindow::instance();
     QNetworkDiskCache *cache = mainWindow->webViewNetworkCache();
     if (cache)
     {
@@ -269,12 +269,12 @@ bool CWizHtmlCollector::loadImageFromCache(const QUrl& url, QString& strFileName
     return false;
 }
 
-bool CWizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileName)
+bool WizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileName)
 {
     strFileName = ::WizGenGUIDLowerCaseLetterOnly()
             + strUrl.right(strUrl.length() - strUrl.lastIndexOf('.'));
     qDebug() << "[Save] Start to download image : " << strUrl;
-    CWizFileDownloader* downloader = new CWizFileDownloader(strUrl, strFileName, m_strTempPath, true);
+    WizFileDownloader* downloader = new WizFileDownloader(strUrl, strFileName, m_strTempPath, true);
     QEventLoop loop;
     loop.connect(downloader, SIGNAL(downloadDone(QString,bool)), &loop, SLOT(quit()));
     //  just wait for 15 seconds
@@ -285,7 +285,7 @@ bool CWizHtmlCollector::downloadImage(const QString& strUrl, QString& strFileNam
     return true;
 }
 
-bool CWizHtmlCollector::Collect(const QString& strUrl, \
+bool WizHtmlCollector::collect(const QString& strUrl, \
                                 QString& strHtml, \
                                 bool mainPage,
                                 const QString& strTempPath)
@@ -303,10 +303,10 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
         m_url = QUrl(strUrl);
     }
 
-    CWizHtmlReader reader;
+    WizHtmlReader reader;
     reader.setEventHandler(this);
 
-    reader.Read(strHtml);
+    reader.read(strHtml);
 
     CString strHtml2;
     ::WizStringArrayToText(m_ret, strHtml2, "");
@@ -315,11 +315,11 @@ bool CWizHtmlCollector::Collect(const QString& strUrl, \
     return true;
 }
 
-bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
+bool WizHtmlCollector::html2Zip(const QString& strExtResourcePath, \
                                  const QString& strZipFileName)
 {
     std::deque<WIZHTMLFILEDATA> arrayResource;
-    m_files.GetAll(arrayResource);
+    m_files.getAll(arrayResource);
 
     std::set<QString> files;
     std::deque<WIZHTMLFILEDATA>::const_iterator it;
@@ -350,11 +350,11 @@ bool CWizHtmlCollector::Html2Zip(const QString& strExtResourcePath, \
 }
 
 /* -------------------------- CWizHtmlToPlainText -------------------------- */
-CWizHtmlToPlainText::CWizHtmlToPlainText()
+WizHtmlToPlainText::WizHtmlToPlainText()
 {
 }
 
-bool CWizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainText)
+bool WizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainText)
 {
     WizHtml2Text(strHtmlAll,strPlainText);
     strPlainText.replace("\n", " ");
@@ -378,7 +378,7 @@ bool CWizHtmlToPlainText::toText(const QString& strHtmlAll, QString& strPlainTex
     return true;
 }
 
-void CWizHtmlToPlainText::Characters(const CString &rText, DWORD dwAppData, bool &bAbort)
+void WizHtmlToPlainText::characters(const CString &rText, DWORD dwAppData, bool &bAbort)
 {
     Q_UNUSED(dwAppData);
     Q_UNUSED(bAbort);

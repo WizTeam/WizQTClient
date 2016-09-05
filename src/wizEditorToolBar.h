@@ -10,34 +10,34 @@
 class QFontDialog;
 class QString;
 class QMenu;
-class CWizDocumentWebEngine;
-class CWizDocumentWebView;
+class WizDocumentWebEngine;
+class WizDocumentWebView;
 class CWizToolButton;
 class CWizToolButtonColor;
 class CWizToolComboBox;
 class CWizToolComboBoxFont;
-class CWizExplorerApp;
-class CWizTipsWidget;
+class WizExplorerApp;
+class WizTipsWidget;
 
 
-class EditorToolBar : public QWidget
+class WizEditorToolBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit EditorToolBar(CWizExplorerApp& app, QWidget *parent);
-    void setDelegate(CWizDocumentWebView* editor);
+    explicit WizEditorToolBar(WizExplorerApp& app, QWidget *parent);
+    void setDelegate(WizDocumentWebView* editor);
 
     bool hasFocus();
 
     void adjustButtonPosition();
     //
-    CWizTipsWidget* showCoachingTips();
+    WizTipsWidget* showCoachingTips();
 
 private:
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 
-    CWizDocumentWebView* m_editor;
+    WizDocumentWebView* m_editor;
     QMap<QString, QAction*> m_actions;
     CWizToolComboBox* m_comboParagraph;
     CWizToolComboBox* m_comboFontFamily;

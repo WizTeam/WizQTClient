@@ -28,8 +28,8 @@
 #endif
 
 
-class CWizCategoryBaseView;
-class CWizDocumentListView;
+class WizCategoryBaseView;
+class WizDocumentListView;
 
 
 typedef QProxyStyle CWizNoteBaseStyle;
@@ -48,20 +48,20 @@ private:
 
 //    CWizSkin9GridImage m_multiLineListSelectedItemBackground;
 //    CWizSkin9GridImage m_multiLineListSelectedItemBackgroundHot;
-    CWizSkin9GridImage m_imagePushButton;
-    CWizSkin9GridImage m_imagePushButtonHot;
-    CWizSkin9GridImage m_imagePushButtonPressed;
-    CWizSkin9GridImage m_imagePushButtonDisabled;
-    CWizSkin9GridImage m_imagePushButtonLabel;
-    CWizSkin9GridImage m_imagePushButtonLabelRed;
+    WizSkin9GridImage m_imagePushButton;
+    WizSkin9GridImage m_imagePushButtonHot;
+    WizSkin9GridImage m_imagePushButtonPressed;
+    WizSkin9GridImage m_imagePushButtonDisabled;
+    WizSkin9GridImage m_imagePushButtonLabel;
+    WizSkin9GridImage m_imagePushButtonLabelRed;
 
     QFont m_fontImagePushButtonLabel;
     QFont m_fontLink;
 
 protected:
-    virtual void drawCategoryViewItem(const QStyleOptionViewItem *option, QPainter *painter, const CWizCategoryBaseView *widget) const;
-    virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItem *option, QPainter *painter, const CWizMultiLineListWidget *widget) const;
-    virtual void drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const;
+    virtual void drawCategoryViewItem(const QStyleOptionViewItem *option, QPainter *painter, const WizCategoryBaseView *widget) const;
+    virtual void drawMultiLineListWidgetItem(const QStyleOptionViewItem *option, QPainter *painter, const WizMultiLineListWidget *widget) const;
+    virtual void drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const WizMultiLineListWidget* view) const;
     void drawcenterImage(QPainter* p, const QImage& image, const QRect& rc) const;
 
 public:
@@ -98,12 +98,12 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
 //        m_multiLineListSelectedItemBackground.SetImage(strSkinPath + "multilinelist_selected_background.png", QPoint(4, 4));
 //        m_multiLineListSelectedItemBackgroundHot.SetImage(strSkinPath + "multilinelist_selected_background_hot.png", QPoint(4, 4));
-        m_imagePushButton.SetImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
-        m_imagePushButtonHot.SetImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
-        m_imagePushButtonPressed.SetImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
-        m_imagePushButtonDisabled.SetImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
-        m_imagePushButtonLabel.SetImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
-        m_imagePushButtonLabelRed.SetImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
+        m_imagePushButton.setImage(strSkinPath + "imagepushbutton.png", QPoint(4, 4));
+        m_imagePushButtonHot.setImage(strSkinPath + "imagepushbutton_hot.png", QPoint(4, 4));
+        m_imagePushButtonPressed.setImage(strSkinPath + "imagepushbutton_pressed.png", QPoint(4, 4));
+        m_imagePushButtonDisabled.setImage(strSkinPath + "imagepushbutton_disabled.png", QPoint(4, 4));
+        m_imagePushButtonLabel.setImage(strSkinPath + "imagepushbutton_label.png", QPoint(8, 8));
+        m_imagePushButtonLabelRed.setImage(strSkinPath + "imagepushbutton_label_red.png", QPoint(8, 8));
     }
 
 #ifdef Q_OS_MAC
@@ -121,7 +121,7 @@ CWizNoteStyle::CWizNoteStyle(const QString& strSkinName)
 
 
 void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItem *vopt,
-                                         QPainter *p, const CWizCategoryBaseView *view) const
+                                         QPainter *p, const WizCategoryBaseView *view) const
 {
     if (view->isDragHovered() && view->validateDropDestination(view->dragHoveredPos())) {
         QRect rect = view->visualItemRect(view->itemAt(view->dragHoveredPos()));
@@ -144,7 +144,7 @@ void CWizNoteStyle::drawCategoryViewItem(const QStyleOptionViewItem *vopt,
 
 }
 
-void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt, QPainter *p, const CWizMultiLineListWidget *view) const
+void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt, QPainter *p, const WizMultiLineListWidget *view) const
 {
     bool imageAlignLeft = view->imageAlignLeft();
     int imageWidth = view->imageWidth();
@@ -157,7 +157,7 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
 
     QRect textLine = vopt->rect;
     textLine.adjust(14, 0, 0, 0);
-    p->setPen(Utils::StyleHelper::listViewItemSeperator());
+    p->setPen(Utils::WizStyleHelper::listViewItemSeperator());
     p->drawLine(textLine.bottomLeft(), textLine.bottomRight());
 
     QRect textRect = vopt->rect;
@@ -286,11 +286,11 @@ void CWizNoteStyle::drawMultiLineListWidgetItem(const QStyleOptionViewItem *vopt
     p->restore();
 }
 
-void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const CWizMultiLineListWidget* view) const
+void CWizNoteStyle::drawMultiLineItemBackground(const QStyleOptionViewItem* vopt, QPainter* pt, const WizMultiLineListWidget* view) const
 {
-    if (const CWizAttachmentListView *attachView = dynamic_cast<const CWizAttachmentListView *>(view))
+    if (const WizAttachmentListView *attachView = dynamic_cast<const WizAttachmentListView *>(view))
     {
-        const CWizAttachmentListViewItem* item = attachView->attachmentItemFromIndex(vopt->index);
+        const WizAttachmentListViewItem* item = attachView->attachmentItemFromIndex(vopt->index);
         if (item && (item->isDownloading() || item->isUploading()))
         {
             pt->save();
@@ -329,22 +329,22 @@ void CWizNoteStyle::drawControl(ControlElement element, const QStyleOption *opti
             const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option);
             Q_ASSERT(vopt);
 
-            if (const MessageListView* view = dynamic_cast<const MessageListView*>(widget))
+            if (const WizMessageListView* view = dynamic_cast<const WizMessageListView*>(widget))
             {
                 view->drawItem(painter, vopt);
                 //drawMessageListViewItem(vopt, painter, view);
             }
-            else if (const CWizDocumentListView *view = dynamic_cast<const CWizDocumentListView *>(widget))
+            else if (const WizDocumentListView *view = dynamic_cast<const WizDocumentListView *>(widget))
             {
 //                qDebug() << "view left top : " << view->mapToGlobal(view->rect().topLeft());
                 view->drawItem(painter, vopt);
                 //drawDocumentListViewItem(vopt, painter, view);
             }
-            else if (const CWizMultiLineListWidget *view = dynamic_cast<const CWizMultiLineListWidget *>(widget))
+            else if (const WizMultiLineListWidget *view = dynamic_cast<const WizMultiLineListWidget *>(widget))
             {
                 drawMultiLineListWidgetItem(vopt, painter, view);
             }
-            else if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(widget))
+            else if (const WizCategoryBaseView *view = dynamic_cast<const WizCategoryBaseView *>(widget))
             {
                 drawCategoryViewItem(vopt, painter, view);
             }
@@ -392,7 +392,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
     {
     case PE_IndicatorBranch:
         {
-            if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
+            if (const WizCategoryBaseView *view = dynamic_cast<const WizCategoryBaseView *>(w))
             {
                 if (!view->isCursorEntered())
                     return;
@@ -411,7 +411,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         break;
     case PE_IndicatorItemViewItemDrop:
     {
-        if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
+        if (const WizCategoryBaseView *view = dynamic_cast<const WizCategoryBaseView *>(w))
         {
             if (!(view->dragItemFlags() & Qt::ItemIsDropEnabled))
                 return;
@@ -438,13 +438,13 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
         break;
     case PE_PanelItemViewRow:
         {
-            if (const CWizCategoryBaseView *view = dynamic_cast<const CWizCategoryBaseView *>(w))
+            if (const WizCategoryBaseView *view = dynamic_cast<const WizCategoryBaseView *>(w))
             {
                 const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(opt);
                 Q_ASSERT(vopt);
 
                 const QTreeWidgetItem* pItemBase = view->itemAt(vopt->rect.center());
-                const CWizCategoryViewSectionItem *secItem = dynamic_cast<const CWizCategoryViewSectionItem *>(pItemBase);
+                const WizCategoryViewSectionItem *secItem = dynamic_cast<const WizCategoryViewSectionItem *>(pItemBase);
                 if (NULL != secItem) {                   
                     return;
                 }
@@ -454,7 +454,7 @@ void CWizNoteStyle::drawPrimitive(PrimitiveElement pe, const QStyleOption *opt, 
                     rc.setWidth(p->window().width());
                     int nMargin = (opt->rect.height() - WizSmartScaleUI(20)) / 2;
                     rc.adjust(0, nMargin, 0, -nMargin);
-                    Utils::StyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
+                    Utils::WizStyleHelper::drawTreeViewItemBackground(p, rc, opt->state & State_HasFocus);
                 }                
             }
 
@@ -510,19 +510,19 @@ public:
                          const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
                          const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor)
     {
-        m_imagePushButton.SetImage(normalBackgroundFileName, QPoint(4, 4));
-        m_imagePushButtonHot.SetImage(hotBackgroundFileName, QPoint(4, 4));
-        m_imagePushButtonPressed.SetImage(downBackgroundFileName, QPoint(4, 4));
-        m_imagePushButtonDisabled.SetImage(disabledBackgroundFileName, QPoint(4, 4));
+        m_imagePushButton.setImage(normalBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonHot.setImage(hotBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonPressed.setImage(downBackgroundFileName, QPoint(4, 4));
+        m_imagePushButtonDisabled.setImage(disabledBackgroundFileName, QPoint(4, 4));
         m_colorTextNormal = normalTextColor;
         m_colorTextActive = activeTextColor;
         m_colorTextDisable = disableTextColor;
     }
 private:
-    CWizSkin9GridImage m_imagePushButton;
-    CWizSkin9GridImage m_imagePushButtonHot;
-    CWizSkin9GridImage m_imagePushButtonPressed;
-    CWizSkin9GridImage m_imagePushButtonDisabled;
+    WizSkin9GridImage m_imagePushButton;
+    WizSkin9GridImage m_imagePushButtonHot;
+    WizSkin9GridImage m_imagePushButtonPressed;
+    WizSkin9GridImage m_imagePushButtonDisabled;
     QColor m_colorTextNormal;
     QColor m_colorTextActive;
     QColor m_colorTextDisable;
@@ -538,22 +538,22 @@ protected:
                 //
                 if (!vopt->state.testFlag(QStyle::State_Enabled))
                 {
-                    m_imagePushButtonDisabled.Draw(painter, vopt->rect, 0);
+                    m_imagePushButtonDisabled.draw(painter, vopt->rect, 0);
                     painter->setPen(m_colorTextDisable);
                 }
                 else if (!vopt->state.testFlag(QStyle::State_Raised))
                 {
-                    m_imagePushButtonPressed.Draw(painter, vopt->rect, 0);
+                    m_imagePushButtonPressed.draw(painter, vopt->rect, 0);
                     painter->setPen(m_colorTextActive);
                 }
                 else if (vopt->state.testFlag(QStyle::State_MouseOver))
                 {
-                    m_imagePushButtonHot.Draw(painter, vopt->rect, 0);
+                    m_imagePushButtonHot.draw(painter, vopt->rect, 0);
                     painter->setPen(m_colorTextActive);
                 }
                 else
                 {
-                    m_imagePushButton.Draw(painter, vopt->rect, 0);
+                    m_imagePushButton.draw(painter, vopt->rect, 0);
                     painter->setPen(m_colorTextNormal);
                 }
                 //

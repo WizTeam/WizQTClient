@@ -8,13 +8,13 @@
 
 class QMenu;
 
-class CWizDatabaseManager;
-class CWizAttachmentListViewItem;
-class CWizButton;
-class CWizObjectDownloaderHost;
-class CWizAttachmentListView;
+class WizDatabaseManager;
+class WizAttachmentListViewItem;
+class WizButton;
+class WizObjectDownloaderHost;
+class WizAttachmentListView;
 
-class CWizAttachmentListViewItem : public QObject, public QListWidgetItem
+class WizAttachmentListViewItem : public QObject, public QListWidgetItem
 {
     Q_OBJECT
 public:
@@ -25,10 +25,10 @@ public:
         Uploading
     };
 
-    CWizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att, QListWidget* view);
+    WizAttachmentListViewItem(const WIZDOCUMENTATTACHMENTDATA& att, QListWidget* view);
     const WIZDOCUMENTATTACHMENTDATA& attachment() const { return m_attachment; }
 
-    QString detailText(const CWizAttachmentListView* view) const;
+    QString detailText(const WizAttachmentListView* view) const;
 
     bool isDownloading() const;
     void setIsDownloading(bool isDownloading);
@@ -50,12 +50,12 @@ private:
 };
 
 
-class CWizAttachmentListView : public CWizMultiLineListWidget
+class WizAttachmentListView : public WizMultiLineListWidget
 {
     Q_OBJECT
 
 public:
-    CWizAttachmentListView(QWidget* parent);
+    WizAttachmentListView(QWidget* parent);
     const WIZDOCUMENTDATA& document() const { return m_document; }
 
 
@@ -75,10 +75,10 @@ public Q_SLOTS:
 public:
     QAction* findAction(const QString& strName);
     void setDocument(const WIZDOCUMENTDATA& document);
-    const CWizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
+    const WizAttachmentListViewItem* attachmentItemFromIndex(const QModelIndex& index) const;
     void addAttachments();
-    void openAttachment(CWizAttachmentListViewItem* item);
-    void downloadAttachment(CWizAttachmentListViewItem* item);
+    void openAttachment(WizAttachmentListViewItem* item);
+    void downloadAttachment(WizAttachmentListViewItem* item);
 
 signals:
     void closeRequest();
@@ -93,18 +93,18 @@ protected:
 
     virtual void contextMenuEvent(QContextMenuEvent * e);
 
-    friend class CWizAttachmentListViewItem;
+    friend class WizAttachmentListViewItem;
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     WIZDOCUMENTDATA m_document;
-    CWizFileIconProvider m_iconProvider;
+    WizFileIconProvider m_iconProvider;
     QMenu* m_menu;
-    CWizObjectDownloaderHost* m_downloaderHost;
+    WizObjectDownloaderHost* m_downloaderHost;
 
     void resetPermission();
-    void startDownload(CWizAttachmentListViewItem* item);
-    CWizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
+    void startDownload(WizAttachmentListViewItem* item);
+    WizAttachmentListViewItem* newAttachmentItem(const WIZDOCUMENTATTACHMENTDATA& att);
     void waitForDownload();
 
     //
@@ -113,12 +113,12 @@ private:
 };
 
 
-class CWizAttachmentListWidget : public CWizPopupWidget
+class WizAttachmentListWidget : public WizPopupWidget
 {
     Q_OBJECT
 
 public:
-    CWizAttachmentListWidget(QWidget* parent);
+    WizAttachmentListWidget(QWidget* parent);
     bool setDocument(const WIZDOCUMENTDATA& document);
 
     virtual QSize sizeHint() const;
@@ -129,8 +129,8 @@ protected:
     void hideEvent(QHideEvent* ev);
 
 private:
-    CWizAttachmentListView* m_list;
-    CWizButton* m_btnAddAttachment;
+    WizAttachmentListView* m_list;
+    WizButton* m_btnAddAttachment;
     //CWizImagePushButton* m_btnAddAttachment;
 
 public Q_SLOTS:

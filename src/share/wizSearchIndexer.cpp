@@ -17,14 +17,14 @@
 
 #define TIMEINTERVAL  60 * 1000
 
-CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent)
+WizSearchIndexer::WizSearchIndexer(WizDatabaseManager& dbMgr, QObject *parent)
     : QThread(parent)
     , m_dbMgr(dbMgr)
     , m_stop(false)
 {
     qRegisterMetaType<WIZDOCUMENTDATAEX>("WIZDOCUMENTDATAEX");
 
-    m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
+    m_strIndexPath = m_dbMgr.db().getAccountPath() + "fts_index";
 
     // signals for deletion, database responsible for reset FTS flag when update document or attachment.
     connect(&m_dbMgr, SIGNAL(documentDeleted(const WIZDOCUMENTDATA&)), \
@@ -38,27 +38,27 @@ CWizSearchIndexer::CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent
     connect(this, SIGNAL(stopTimer()), &m_timer, SLOT(stop()));
 }
 
-void CWizSearchIndexer::rebuild() {
+void WizSearchIndexer::rebuild() {
     if (!QMetaObject::invokeMethod(this, "rebuildFTSIndex")) {
         qDebug() << "\nInvoke rebuildFTSIndex failed\n";
     }
 }
 
-void CWizSearchIndexer::on_timerOut()
+void WizSearchIndexer::on_timerOut()
 {
     m_mutex.lock();
     m_wait.wakeAll();
     m_mutex.unlock();
 }
 
-void CWizSearchIndexer::start(QThread::Priority priority)
+void WizSearchIndexer::start(QThread::Priority priority)
 {
     QThread::start(priority);
 
     emit startTimer(TIMEINTERVAL);
 }
 
-void CWizSearchIndexer::run()
+void WizSearchIndexer::run()
 {
     while (!m_stop)
     {
@@ -75,14 +75,14 @@ void CWizSearchIndexer::run()
     }
 }
 
-void CWizSearchIndexer::waitForDone()
+void WizSearchIndexer::waitForDone()
 {
     stop();
 
     WizWaitForThread(this);
 }
 
-bool CWizSearchIndexer::buildFTSIndex()
+bool WizSearchIndexer::buildFTSIndex()
 {
     int nErrors = 0;
 
@@ -113,11 +113,11 @@ bool CWizSearchIndexer::buildFTSIndex()
     return true;
 }
 
-void clearDatabaseCipher(CWizDatabase& db)
+void clearDatabaseCipher(WizDatabase& db)
 {
-    if (!db.IsGroup())
+    if (!db.isGroup())
     {
-        CWizUserSettings settings(db);
+        WizUserSettings settings(db);
         if (!settings.isRememberNotePasswordForSession())
         {
             //TODO:wsj
@@ -125,7 +125,7 @@ void clearDatabaseCipher(CWizDatabase& db)
     }
 }
 
-bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
+bool WizSearchIndexer::buildFTSIndexByDatabase(WizDatabase& db)
 {
     // if FTS version is lower than release, rebuild all
     int strVersion = db.getDocumentFTSVersion().toInt();
@@ -142,8 +142,8 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
 
     // filter document data have not downloadeded or encrypted
     bool searchEncryptedDoc = false;
-    if (!db.IsGroup()) {
-        CWizUserSettings settings(db);
+    if (!db.isGroup()) {
+        WizUserSettings settings(db);
         QString strPassword = settings.encryptedNotePassword();
         if (settings.searchEncryptedNote() && !strPassword.isEmpty()) {
             db.loadUserCert();
@@ -194,7 +194,7 @@ bool CWizSearchIndexer::buildFTSIndexByDatabase(CWizDatabase& db)
     return true;
 }
 
-void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument, bool searchEncryptedDoc)
+void WizSearchIndexer::filterDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument, bool searchEncryptedDoc)
 {
     int nCount = arrayDocument.size();
     for (intptr_t i = nCount - 1; i >= 0; i--) {
@@ -207,14 +207,14 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
 
         if (!bFilter)
         {
-            QString strFileName = db.GetDocumentFileName(doc.strGUID);
+            QString strFileName = db.getDocumentFileName(doc.strGUID);
             //
             if (!QFile::exists(strFileName))
             {
-                db.SetDocumentDataDownloaded(doc.strGUID, false);
+                db.setDocumentDataDownloaded(doc.strGUID, false);
                 bFilter = true;
             }
-            else if (CWizZiwReader::isEncryptedFile(strFileName))
+            else if (WizZiwReader::isEncryptedFile(strFileName))
             {
                 bFilter = true;
             }
@@ -226,7 +226,7 @@ void CWizSearchIndexer::filterDocuments(CWizDatabase& db, CWizDocumentDataArray&
     }
 }
 
-bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
+bool WizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
 {
     Q_ASSERT(!doc.strGUID.isEmpty());
 
@@ -247,14 +247,14 @@ bool CWizSearchIndexer::updateDocument(const WIZDOCUMENTDATAEX& doc)
     return ret;
 }
 
-bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
+bool WizSearchIndexer::_updateDocumentImpl(void *pHandle,
                                             const WIZDOCUMENTDATAEX& doc)
 {
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
 
     // decompress
-    QString strTempFolder = Utils::PathResolve::tempPath() + doc.strGUID + "-update/";
-    if (!db.DocumentToHtmlFile(doc, strTempFolder)) {
+    QString strTempFolder = Utils::WizPathResolve::tempPath() + doc.strGUID + "-update/";
+    if (!db.documentToHtmlFile(doc, strTempFolder)) {
         TOLOG("Can't decompress document while update FTS index: " + doc.strTitle);
         //Q_ASSERT(0);
         return false;
@@ -269,12 +269,12 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     }
 
     QString strPlainText;
-    CWizHtmlToPlainText htmlConverter;
+    WizHtmlToPlainText htmlConverter;
     htmlConverter.toText(strHtmlData, strPlainText);
 
     bool ret = false;
     if (!strPlainText.isEmpty()) {
-        ret = IWizCluceneSearch::updateDocument(pHandle,
+        ret = WizCluceneSearch::updateDocument(pHandle,
                                                 doc.strKbGUID.toStdWString().c_str(),
                                                 doc.strGUID.toStdWString().c_str(),
                                                 doc.strTitle.toLower().toStdWString().c_str(),
@@ -293,17 +293,17 @@ bool CWizSearchIndexer::_updateDocumentImpl(void *pHandle,
     return ret;
 }
 
-bool CWizSearchIndexer::deleteDocument(const WIZDOCUMENTDATAEX& doc)
+bool WizSearchIndexer::deleteDocument(const WIZDOCUMENTDATAEX& doc)
 {
     Q_ASSERT(!doc.strKbGUID.isEmpty() && !doc.strGUID.isEmpty());
 
     qDebug() << "\nDocument FTS deleted: " << doc.strTitle << "\n";
 
-    return IWizCluceneSearch::deleteDocument(m_strIndexPath.toStdWString().c_str(),
+    return WizCluceneSearch::deleteDocument(m_strIndexPath.toStdWString().c_str(),
                                              doc.strGUID.toStdWString().c_str());
 }
 
-bool CWizSearchIndexer::rebuildFTSIndex()
+bool WizSearchIndexer::rebuildFTSIndex()
 {
     if (clearAllFTSData()) {
         m_mutex.lock();
@@ -315,7 +315,7 @@ bool CWizSearchIndexer::rebuildFTSIndex()
     return false;
 }
 
-void CWizSearchIndexer::clearFlags(CWizDatabase& db)
+void WizSearchIndexer::clearFlags(WizDatabase& db)
 {
     if (!db.setDocumentFTSVersion("0")) {
         TOLOG1("FATAL: Can't reset db index flag: %1", db.name());
@@ -326,7 +326,7 @@ void CWizSearchIndexer::clearFlags(CWizDatabase& db)
     }
 }
 
-void CWizSearchIndexer::stop()
+void WizSearchIndexer::stop()
 {
     emit stopTimer();
 
@@ -336,7 +336,7 @@ void CWizSearchIndexer::stop()
     m_mutex.unlock();
 }
 
-bool CWizSearchIndexer::clearAllFTSData()
+bool WizSearchIndexer::clearAllFTSData()
 {
     if (!::WizDeleteAllFilesInFolder(m_strIndexPath)) {
         TOLOG("Can't delete old index files while rebuild FTS index");
@@ -353,12 +353,12 @@ bool CWizSearchIndexer::clearAllFTSData()
     return true;
 }
 
-void CWizSearchIndexer::on_document_deleted(const WIZDOCUMENTDATA& doc)
+void WizSearchIndexer::on_document_deleted(const WIZDOCUMENTDATA& doc)
 {
     deleteDocument(doc);
 }
 
-void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach)
+void WizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach)
 {
     Q_UNUSED(attach);
 }
@@ -368,17 +368,17 @@ void CWizSearchIndexer::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& a
 
 
 /* ----------------------------- CWizSearcher ----------------------------- */
-CWizSearcher::CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent)
+WizSearcher::WizSearcher(WizDatabaseManager& dbMgr, QObject *parent)
     : QThread(parent)
     , m_dbMgr(dbMgr)
     , m_mutexWait(QMutex::NonRecursive)
     , m_stop(false)
 {
-    m_strIndexPath = m_dbMgr.db().GetAccountPath() + "fts_index";
+    m_strIndexPath = m_dbMgr.db().getAccountPath() + "fts_index";
     qRegisterMetaType<CWizDocumentDataArray>("CWizDocumentDataArray");
 }
 
-void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */, SearchScope scope)
+void WizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */, SearchScope scope)
 {
     m_mutexWait.lock();
     m_strkeywords = strKeywords;
@@ -389,18 +389,18 @@ void CWizSearcher::search(const QString &strKeywords, int nMaxSize /* = -1 */, S
 
 }
 
-void CWizSearcher::searchByDateCreate(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
+void WizSearcher::searchByDateCreate(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
 {
     m_mapDocumentSearched.clear();
     m_nMaxResult = nMaxSize;
     m_scope = scope;
-    COleDateTime dt = getDateByInterval(dateInterval);
+    WizOleDateTime dt = getDateByInterval(dateInterval);
     //
     CWizDocumentDataArray arrayDocument;
     CWizDocumentDataArray::const_iterator it;
     if (Scope_AllNotes == m_scope || Scope_PersonalNotes == m_scope)
     {
-        m_dbMgr.db().GetRecentDocumentsByCreatedTime(dt, arrayDocument);
+        m_dbMgr.db().getRecentDocumentsByCreatedTime(dt, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
 
@@ -417,7 +417,7 @@ void CWizSearcher::searchByDateCreate(SearchDateInterval dateInterval, int nMaxS
     {
         int nCount = m_dbMgr.count();
         for (int i = 0; i < nCount; i++) {
-            m_dbMgr.at(i).GetRecentDocumentsByCreatedTime(dt, arrayDocument);
+            m_dbMgr.at(i).getRecentDocumentsByCreatedTime(dt, arrayDocument);
 
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
                 const WIZDOCUMENTDATAEX& doc = *it;
@@ -436,18 +436,18 @@ void CWizSearcher::searchByDateCreate(SearchDateInterval dateInterval, int nMaxS
     emitSearchProcess("");
 }
 
-void CWizSearcher::searchByDateModified(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
+void WizSearcher::searchByDateModified(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
 {
     m_mapDocumentSearched.clear();
     m_nMaxResult = nMaxSize;
     m_scope = scope;
-    COleDateTime dt = getDateByInterval(dateInterval);
+    WizOleDateTime dt = getDateByInterval(dateInterval);
     //
     CWizDocumentDataArray arrayDocument;
     CWizDocumentDataArray::const_iterator it;
     if (Scope_AllNotes == m_scope || Scope_PersonalNotes == m_scope)
     {
-        m_dbMgr.db().GetRecentDocumentsByModifiedTime(dt, arrayDocument);
+        m_dbMgr.db().getRecentDocumentsByModifiedTime(dt, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
 
@@ -464,7 +464,7 @@ void CWizSearcher::searchByDateModified(SearchDateInterval dateInterval, int nMa
     {
         int nCount = m_dbMgr.count();
         for (int i = 0; i < nCount; i++) {
-            m_dbMgr.at(i).GetRecentDocumentsByModifiedTime(dt, arrayDocument);
+            m_dbMgr.at(i).getRecentDocumentsByModifiedTime(dt, arrayDocument);
 
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
                 const WIZDOCUMENTDATAEX& doc = *it;
@@ -483,18 +483,18 @@ void CWizSearcher::searchByDateModified(SearchDateInterval dateInterval, int nMa
     emitSearchProcess("");
 }
 
-void CWizSearcher::searchByDateAccessed(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
+void WizSearcher::searchByDateAccessed(SearchDateInterval dateInterval, int nMaxSize, SearchScope scope)
 {
     m_mapDocumentSearched.clear();
     m_nMaxResult = nMaxSize;
     m_scope = scope;
-    COleDateTime dt = getDateByInterval(dateInterval);
+    WizOleDateTime dt = getDateByInterval(dateInterval);
     //
     CWizDocumentDataArray arrayDocument;
     CWizDocumentDataArray::const_iterator it;
     if (Scope_AllNotes == m_scope || Scope_PersonalNotes == m_scope)
     {
-        m_dbMgr.db().GetRecentDocumentsByAccessedTime(dt, arrayDocument);
+        m_dbMgr.db().getRecentDocumentsByAccessedTime(dt, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
 
@@ -511,7 +511,7 @@ void CWizSearcher::searchByDateAccessed(SearchDateInterval dateInterval, int nMa
     {
         int nCount = m_dbMgr.count();
         for (int i = 0; i < nCount; i++) {
-            m_dbMgr.at(i).GetRecentDocumentsByAccessedTime(dt, arrayDocument);
+            m_dbMgr.at(i).getRecentDocumentsByAccessedTime(dt, arrayDocument);
 
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
                 const WIZDOCUMENTDATAEX& doc = *it;
@@ -530,20 +530,20 @@ void CWizSearcher::searchByDateAccessed(SearchDateInterval dateInterval, int nMa
     emitSearchProcess("");
 }
 
-void CWizSearcher::stop()
+void WizSearcher::stop()
 {
     m_stop = true;
     m_wait.wakeAll();
 }
 
-void CWizSearcher::waitForDone()
+void WizSearcher::waitForDone()
 {
     stop();
 
     WizWaitForThread(this);
 }
 
-void CWizSearcher::doSearch()
+void WizSearcher::doSearch()
 {
     m_mapDocumentSearched.clear();
     m_nResults = 0;
@@ -554,7 +554,7 @@ void CWizSearcher::doSearch()
     }
 }
 
-void CWizSearcher::searchKeyword(const QString& strKeywords)
+void WizSearcher::searchKeyword(const QString& strKeywords)
 {
     Q_ASSERT(!strKeywords.isEmpty());
 
@@ -578,14 +578,14 @@ void CWizSearcher::searchKeyword(const QString& strKeywords)
     emitSearchProcess(strKeywords);
 }
 
-void CWizSearcher::searchDatabaseByKeyword(const QString& strKeywords)
+void WizSearcher::searchDatabaseByKeyword(const QString& strKeywords)
 {
     CWizDocumentDataArray arrayDocument;
     CWizDocumentDataArray::const_iterator it;
     //
     if (Scope_AllNotes == m_scope || Scope_PersonalNotes == m_scope)
     {
-        m_dbMgr.db().SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
+        m_dbMgr.db().searchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
 
@@ -600,7 +600,7 @@ void CWizSearcher::searchDatabaseByKeyword(const QString& strKeywords)
     {
         int nCount = m_dbMgr.count();
         for (int i = 0; i < nCount; i++) {
-            m_dbMgr.at(i).SearchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
+            m_dbMgr.at(i).searchDocumentByTitle(strKeywords, NULL, true, 5000, arrayDocument);
 
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
                 const WIZDOCUMENTDATAEX& doc = *it;
@@ -615,7 +615,7 @@ void CWizSearcher::searchDatabaseByKeyword(const QString& strKeywords)
     qDebug() << QString("[Search]Find %1 results in database").arg(m_mapDocumentSearched.size());
 }
 
-void CWizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize, SearchScope scope)
+void WizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize, SearchScope scope)
 {
     m_mapDocumentSearched.clear();
     m_nMaxResult = nMaxSize;
@@ -625,7 +625,7 @@ void CWizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize, Searc
     CWizDocumentDataArray::const_iterator it;
     if (Scope_AllNotes == m_scope || Scope_PersonalNotes == m_scope)
     {
-        m_dbMgr.db().SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+        m_dbMgr.db().searchDocumentByWhere(strWhere, 5000, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
 
@@ -640,7 +640,7 @@ void CWizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize, Searc
     {
         int nCount = m_dbMgr.count();
         for (int i = 0; i < nCount; i++) {
-            m_dbMgr.at(i).SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+            m_dbMgr.at(i).searchDocumentByWhere(strWhere, 5000, arrayDocument);
 
             for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
                 const WIZDOCUMENTDATAEX& doc = *it;
@@ -656,7 +656,7 @@ void CWizSearcher::searchBySQLWhere(const QString& strWhere, int nMaxSize, Searc
     emitSearchProcess("");
 }
 
-void CWizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
+void WizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
                                            const QString& strWhere, int nMaxSize, SearchScope scope)
 {
     // search keyword
@@ -679,7 +679,7 @@ void CWizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
     // search by where
     QSet<QString> whereSet; // = mapDocByWhere.keys().toSet();
     CWizDocumentDataArray arrayDocument;
-    m_dbMgr.db().SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+    m_dbMgr.db().searchDocumentByWhere(strWhere, 5000, arrayDocument);
 
     CWizDocumentDataArray::const_iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
@@ -692,7 +692,7 @@ void CWizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
 
     int nCount = m_dbMgr.count();
     for (int i = 0; i < nCount; i++) {
-        m_dbMgr.at(i).SearchDocumentByWhere(strWhere, 5000, arrayDocument);
+        m_dbMgr.at(i).searchDocumentByWhere(strWhere, 5000, arrayDocument);
 
         for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
             const WIZDOCUMENTDATAEX& doc = *it;
@@ -721,9 +721,9 @@ void CWizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
     emitSearchProcess(strKeywords);
 }
 
-COleDateTime CWizSearcher::getDateByInterval(SearchDateInterval dateInterval)
+WizOleDateTime WizSearcher::getDateByInterval(SearchDateInterval dateInterval)
 {
-    COleDateTime dt;
+    WizOleDateTime dt;
     switch (dateInterval) {
     case today:
         dt = dt.addDays(-1);
@@ -746,7 +746,7 @@ COleDateTime CWizSearcher::getDateByInterval(SearchDateInterval dateInterval)
     return dt;
 }
 
-void CWizSearcher::emitSearchProcess(const QString& strKeywords)
+void WizSearcher::emitSearchProcess(const QString& strKeywords)
 {
     int nTimes = m_mapDocumentSearched.size() % SEARCH_PAGE_MAX ?
                 (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX) + 1: (m_mapDocumentSearched.size() / SEARCH_PAGE_MAX);
@@ -779,7 +779,7 @@ void CWizSearcher::emitSearchProcess(const QString& strKeywords)
     Q_EMIT searchProcess(strKeywords, arrayDocument, true, true);
 }
 
-bool CWizSearcher::onSearchProcess(const std::string& lpszKbGUID,
+bool WizSearcher::onSearchProcess(const std::string& lpszKbGUID,
                                    const std::string& lpszDocumentID,
                                    const std::string& lpszURL)
 {
@@ -813,7 +813,7 @@ bool CWizSearcher::onSearchProcess(const std::string& lpszKbGUID,
 
     // valid document
     WIZDOCUMENTDATA doc;
-    if (!m_dbMgr.db(strKbGUID).DocumentFromGUID(strGUID, doc)) {
+    if (!m_dbMgr.db(strKbGUID).documentFromGuid(strGUID, doc)) {
         qDebug() << "\nsearch process meet invalide document: " << strGUID;
         return false;
     }
@@ -824,13 +824,13 @@ bool CWizSearcher::onSearchProcess(const std::string& lpszKbGUID,
     return true;
 }
 
-bool CWizSearcher::onSearchEnd()
+bool WizSearcher::onSearchEnd()
 {
     qDebug() << "[Search]Search process end, total: " << m_nResults;
     return true;
 }
 
-void CWizSearcher::run()
+void WizSearcher::run()
 {
     QString strKeyWord;
     while (!m_stop)

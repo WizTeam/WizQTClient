@@ -10,11 +10,11 @@
 
 class QMenu;
 class MainPixmap;
-class CWizScreenShotWidget : public QWidget
+class WizScreenShotWidget : public QWidget
 {
     Q_OBJECT
 public:
-    CWizScreenShotWidget(QWidget* parent = 0);
+    WizScreenShotWidget(QWidget* parent = 0);
 
     void active();
 
@@ -100,12 +100,12 @@ private:
 };
 
 
-class CWizScreenShotHelper : public QObject
+class WizScreenShotHelper : public QObject
 {
     Q_OBJECT
 public:
-    CWizScreenShotHelper();
-    ~CWizScreenShotHelper();
+    WizScreenShotHelper();
+    ~WizScreenShotHelper();
 
 public slots:
     void startScreenShot();
@@ -115,7 +115,7 @@ signals:
     void screenShotCaptured(QPixmap pix);
 
 private:
-    CWizScreenShotWidget *m_widget;
+    WizScreenShotWidget *m_widget;
 };
 
 

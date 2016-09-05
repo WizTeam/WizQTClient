@@ -8,12 +8,12 @@
 #include "share/wizsettings.h"
 
 
-CWizButton::CWizButton(QWidget* parent)
+WizButton::WizButton(QWidget* parent)
     : QToolButton(parent)
 {
 }
 
-QSize CWizButton::sizeHint() const
+QSize WizButton::sizeHint() const
 {
 #ifdef Q_OS_LINUX
     return QSize(32, 32);
@@ -22,12 +22,12 @@ QSize CWizButton::sizeHint() const
 #endif
 }
 
-void CWizButton::setAction(QAction* action)
+void WizButton::setAction(QAction* action)
 {
     setDefaultAction(action);
 }
 
-void CWizButton::paintEvent(QPaintEvent *event)
+void WizButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 

@@ -9,13 +9,13 @@
 #import <AppKit/AppKit.h>
 #import <objc/objc-class.h>
 
-class CWizNSAutoReleasePool
+class WizNSAutoReleasePool
 {
 private:
     void *_pool;
 public:
-    CWizNSAutoReleasePool();
-    ~CWizNSAutoReleasePool();
+    WizNSAutoReleasePool();
+    ~WizNSAutoReleasePool();
     inline void *handle() const { return _pool; }
 };
 
@@ -27,11 +27,11 @@ NSImage* WizToNSImage(const QPixmap &pixmap);
 NSImage* WizToNSImage(const QIcon &icon, const QSize &size = QSize());
 NSString* WizGenGUID();
 
-class CWizChangeCocoaImplementation
+class WizChangeCocoaImplementation
 {
     public:
-    CWizChangeCocoaImplementation(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel, bool apply = true);
-    ~CWizChangeCocoaImplementation();
+    WizChangeCocoaImplementation(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel, bool apply = true);
+    ~WizChangeCocoaImplementation();
 
     static void change(Class baseClass, SEL originalSel, Class proxyClass, SEL replacementSel, SEL backupSel);
     static void changeBack(Class baseClass, SEL originalSel, SEL backupSel);

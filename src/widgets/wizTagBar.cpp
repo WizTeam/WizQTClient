@@ -23,13 +23,13 @@ const int TAGITEM_HEIGHT  = 16;
 const int TAGITEM_DELETEICONSIZE = 10;
 
 
-CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
+WizTagBar::WizTagBar(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_tagList(nullptr)
 {
-    int nHeight = Utils::StyleHelper::tagBarHeight() - 4;
+    int nHeight = Utils::WizStyleHelper::tagBarHeight() - 4;
     setFixedHeight(nHeight);
 
 //    setStyleSheet("font-size: 11px; color: #646464;");
@@ -55,7 +55,7 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     m_btnMore = new QToolButton(this);
     hLayout->addWidget(m_btnMore);
     m_btnMore->setVisible(false);
-    m_lineEdit = new CTagLineEdit(this);
+    m_lineEdit = new WizTagLineEdit(this);
     QFont f = m_lineEdit->font();
     f.setPixelSize(12);
     m_lineEdit->setFont(f);
@@ -89,18 +89,18 @@ CWizTagBar::CWizTagBar(CWizExplorerApp& app, QWidget *parent)
     resetLineEditCompleter();
 }
 
-CWizTagBar::~CWizTagBar()
+WizTagBar::~WizTagBar()
 {
 }
 
-void CWizTagBar::setDocument(const WIZDOCUMENTDATA& doc)
+void WizTagBar::setDocument(const WIZDOCUMENTDATA& doc)
 {
     reset();
     //
     m_doc = doc;
-    CWizDatabase&db = m_app.databaseManager().db(m_doc.strKbGUID);
+    WizDatabase&db = m_app.databaseManager().db(m_doc.strKbGUID);
     CWizTagDataArray arrayTag;
-    db.GetDocumentTags(m_doc.strGUID, arrayTag);
+    db.getDocumentTags(m_doc.strGUID, arrayTag);
     for (WIZTAGDATA tag : arrayTag)
     {
         // qDebug() << "add tag item : " << tag.strName;
@@ -108,16 +108,16 @@ void CWizTagBar::setDocument(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void CWizTagBar::on_removeTagRequest(const QString& guid)
+void WizTagBar::on_removeTagRequest(const QString& guid)
 {
-    CWizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
+    WizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
     WIZTAGDATA tagData;
-    if (db.TagFromGUID(guid, tagData))
+    if (db.tagFromGuid(guid, tagData))
     {
         WIZDOCUMENTDATA docData;
-        db.DocumentFromGUID(m_doc.strGUID, docData);
-        CWizDocument doc(m_dbMgr.db(), docData);
-        doc.RemoveTag(tagData);
+        db.documentFromGuid(m_doc.strGUID, docData);
+        WizDocument doc(m_dbMgr.db(), docData);
+        doc.removeTag(tagData);
         //
         on_tagDeleted(tagData);
     }
@@ -127,16 +127,16 @@ void CWizTagBar::on_removeTagRequest(const QString& guid)
     }
 }
 
-void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
+void WizTagBar::addTagToTagBar(const QString& guid, const QString text)
 {
-    CTagItem* tagItem = new CTagItem(guid, text, this);            
+    WizTagItem* tagItem = new WizTagItem(guid, text, this);            
 
     int maxWidth = width() - m_label->width() - m_btnAdd->width() * 3 - m_lineEdit->width() * 1.5;
     int wgtWidth = 0;
 
     // calculate current tagWidgets
     // qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
-    std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, CTagItem*>& it){
+    std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, WizTagItem*>& it){
         // qDebug() << "item guid : " << it.first << " item : " << it.second;
         if (guid == it.first)
         {
@@ -172,20 +172,20 @@ void CWizTagBar::addTagToTagBar(const QString& guid, const QString text)
     m_mapTagWidgets.insert(std::make_pair(guid, tagItem));
     //
     connect(tagItem, SIGNAL(deleteTagRequest(QString)), SLOT(on_deleteTagRequest(QString)));
-    connect(tagItem, SIGNAL(selectedItemChanged(CTagItem*)), SLOT(on_selectedItemChanged(CTagItem*)));
+    connect(tagItem, SIGNAL(selectedItemChanged(WizTagItem*)), SLOT(on_selectedItemChanged(WizTagItem*)));
     connect(tagItem, SIGNAL(renameTagRequest(QString, QString)), SLOT(on_renameTagRequest(QString,QString)));
     connect(tagItem, SIGNAL(removeTagRequest(QString)), SLOT(on_removeTagRequest(QString)));
 
 }
 
-void CWizTagBar::calculateTagWidgetWidth()
+void WizTagBar::calculateTagWidgetWidth()
 {
     int maxWidth = width() - m_label->width() - m_btnAdd->width() * 3 - m_lineEdit->width() * 2;
     int wgtWidth = 0;
     std::map<QString, QString> mapTemp;
     // calculate current tagWidgets
     // qDebug() << "before cal m_mapTagWidgets size : " << m_mapTagWidgets.size();
-    std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, CTagItem*>& it){
+    std::for_each(std::begin(m_mapTagWidgets), std::end(m_mapTagWidgets), [&](const std::pair<QString, WizTagItem*>& it){
         // qDebug() << "item guid : " << it.first << " item : " << it.second;
         int itemWidth = it.second->sizeHint().width();
         if (wgtWidth < maxWidth && wgtWidth + itemWidth < maxWidth)
@@ -204,7 +204,7 @@ void CWizTagBar::calculateTagWidgetWidth()
     if (mapTemp.empty())
     {
         std::for_each(std::begin(m_mapMoreTags), std::end(m_mapMoreTags), [&](const std::pair<QString, QString>& it){
-            int itemWidth = CTagItem::textWidth(it.second);
+            int itemWidth = WizTagItem::textWidth(it.second);
             if (wgtWidth < maxWidth && wgtWidth + itemWidth < maxWidth)
             {
                 wgtWidth += itemWidth;
@@ -232,7 +232,7 @@ void CWizTagBar::calculateTagWidgetWidth()
     m_btnMore->setVisible(visible);
 }
 
-void CWizTagBar::clearTagSelection()
+void WizTagBar::clearTagSelection()
 {
     for (auto tagItem : m_mapTagWidgets)
     {
@@ -240,10 +240,10 @@ void CWizTagBar::clearTagSelection()
     }
 }
 
-void CWizTagBar::resetLineEditCompleter()
+void WizTagBar::resetLineEditCompleter()
 {
     CWizTagDataArray arrayTag;
-    m_dbMgr.db().GetAllTags(arrayTag);
+    m_dbMgr.db().getAllTags(arrayTag);
     QSet<QString> tagNameSet;
     for (WIZTAGDATA tag : arrayTag)
     {
@@ -253,13 +253,13 @@ void CWizTagBar::resetLineEditCompleter()
     m_lineEdit->resetCompleter(tagNames);
 }
 
-void CWizTagBar::on_deleteTagRequest(const QString& guid)
+void WizTagBar::on_deleteTagRequest(const QString& guid)
 {    
-    CWizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
+    WizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
     WIZTAGDATA data;
-    if (db.TagFromGUID(guid, data))
+    if (db.tagFromGuid(guid, data))
     {
-        db.DeleteTag(data, true, false);
+        db.deleteTag(data, true, false);
     }
     else
     {
@@ -267,15 +267,15 @@ void CWizTagBar::on_deleteTagRequest(const QString& guid)
     }
 }
 
-void CWizTagBar::on_renameTagRequest(const QString& guid, const QString& newName)
+void WizTagBar::on_renameTagRequest(const QString& guid, const QString& newName)
 {
     // qDebug() << "on rename tag request";
     WIZTAGDATA data;
-    CWizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
-    if (db.TagFromGUID(guid, data))
+    WizDatabase& db = m_app.databaseManager().db(m_doc.strKbGUID);
+    if (db.tagFromGuid(guid, data))
     {
         data.strName = newName;
-        db.ModifyTag(data);
+        db.modifyTag(data);
     }
     else
     {
@@ -283,19 +283,19 @@ void CWizTagBar::on_renameTagRequest(const QString& guid, const QString& newName
     }
 }
 
-void CWizTagBar::on_lineEditReturnPressed()
+void WizTagBar::on_lineEditReturnPressed()
 {
     QString strTagNames = m_lineEdit->text();
     if (strTagNames.isEmpty())
         return;
     m_lineEdit->setText("");
 
-    WizGetAnalyzer().LogAction("addTagByTagBarInput");
+    WizGetAnalyzer().logAction("addTagByTagBarInput");
 
     WIZDOCUMENTDATA docData;
-    CWizDatabase& db = m_dbMgr.db();
-    db.DocumentFromGUID(m_doc.strGUID, docData);
-    CWizDocument doc(db, docData);
+    WizDatabase& db = m_dbMgr.db();
+    db.documentFromGuid(m_doc.strGUID, docData);
+    WizDocument doc(db, docData);
 
     //
     QStringList sl = strTagNames.split(';');
@@ -306,29 +306,29 @@ void CWizTagBar::on_lineEditReturnPressed()
         // only create tag for unique name
         WIZTAGDATA tag;
         CWizTagDataArray arrayTag;
-        db.TagByName(strTagName, arrayTag);
+        db.tagByName(strTagName, arrayTag);
         for (WIZTAGDATA tagItem : arrayTag)
         {
-            if (!tagItem.strGUID.IsEmpty())
+            if (!tagItem.strGUID.isEmpty())
             {
                 tag = tagItem;
                 break;
             }
         }
-        if (!tag.strGUID.IsEmpty())
+        if (!tag.strGUID.isEmpty())
         {
             qInfo() << QString("Tag name already exist: %1").arg(strTagName);
-             doc.AddTag(tag);
+             doc.addTag(tag);
         }
         else
         {
-            db.CreateTag("", strTagName, "", tag);
-            doc.AddTag(tag);
+            db.createTag("", strTagName, "", tag);
+            doc.addTag(tag);
         }
     }    
 }
 
-void CWizTagBar::on_selectedItemChanged(CTagItem* item)
+void WizTagBar::on_selectedItemChanged(WizTagItem* item)
 {
     clearTagSelection();
     if (item)
@@ -339,7 +339,7 @@ void CWizTagBar::on_selectedItemChanged(CTagItem* item)
     update();
 }
 
-void CWizTagBar::on_buttonMoreClicked()
+void WizTagBar::on_buttonMoreClicked()
 {
     QMenu* menu = new QMenu(this);
     for (auto moreTag : m_mapMoreTags)
@@ -351,29 +351,29 @@ void CWizTagBar::on_buttonMoreClicked()
     QPoint pos = m_btnMore->mapToGlobal(QPoint(0, height() - buttonTopMargin));
     menu->popup(pos);
 
-    WizGetAnalyzer().LogAction("buttonMoreOnTagBar");
+    WizGetAnalyzer().logAction("buttonMoreOnTagBar");
 }
 
-void CWizTagBar::on_buttonAddClicked()
+void WizTagBar::on_buttonAddClicked()
 {
     clearTagSelection();
     //
     if (!m_tagList) {
-        m_tagList = new CWizTagListWidget(this);
+        m_tagList = new WizTagListWidget(this);
     }
 
     WIZDOCUMENTDATA doc;
-    m_dbMgr.db(m_doc.strKbGUID).DocumentFromGUID(m_doc.strGUID, doc);
+    m_dbMgr.db(m_doc.strKbGUID).documentFromGuid(m_doc.strGUID, doc);
     m_tagList->setDocument(doc);
 
     QRect rc = m_btnAdd->rect();
     QPoint pt = m_btnAdd->mapToGlobal(QPoint(rc.width()/2, rc.height()));
     m_tagList->showAtPoint(pt);
 
-    WizGetAnalyzer().LogAction("buttonAddOnTagBar");
+    WizGetAnalyzer().logAction("buttonAddOnTagBar");
 }
 
-void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
+void WizTagBar::on_tagCreated(const WIZTAGDATA& tag)
 {
     //NOTE: do not process tag created signal. new tag could be created in other place
     if (tag.strKbGUID == m_dbMgr.db().kbGUID())
@@ -382,7 +382,7 @@ void CWizTagBar::on_tagCreated(const WIZTAGDATA& tag)
     }
 }
 
-void CWizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
+void WizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagNew)
 {
     if (tagNew.strKbGUID == m_dbMgr.db().kbGUID())
     {
@@ -409,7 +409,7 @@ void CWizTagBar::on_tagModified(const WIZTAGDATA& tagOld, const WIZTAGDATA& tagN
     }
 }
 
-void CWizTagBar::on_tagDeleted(const WIZTAGDATA& tag)
+void WizTagBar::on_tagDeleted(const WIZTAGDATA& tag)
 {
     if (tag.strKbGUID == m_dbMgr.db().kbGUID())
     {
@@ -439,7 +439,7 @@ void CWizTagBar::on_tagDeleted(const WIZTAGDATA& tag)
     }
 }
 
-void CWizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
+void WizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
 {
     if (document.strGUID == m_doc.strGUID)
     {
@@ -448,7 +448,7 @@ void CWizTagBar::on_documentTagModified(const WIZDOCUMENTDATA& document)
     }
 }
 
-void CWizTagBar::on_lineEditTextChanged(const QString& text)
+void WizTagBar::on_lineEditTextChanged(const QString& text)
 {
 //    if (text.isEmpty())
 //    {
@@ -460,35 +460,35 @@ void CWizTagBar::on_lineEditTextChanged(const QString& text)
 //    }
 }
 
-void CWizTagBar::resizeEvent(QResizeEvent* event)
+void WizTagBar::resizeEvent(QResizeEvent* event)
 {
     QWidget::resizeEvent(event);
 
     calculateTagWidgetWidth();
 }
 
-void CWizTagBar::focusOutEvent(QFocusEvent* event)
+void WizTagBar::focusOutEvent(QFocusEvent* event)
 {
     QWidget::focusOutEvent(event);
     //
     clearTagSelection();
 }
 
-void CWizTagBar::hideEvent(QHideEvent* ev)
+void WizTagBar::hideEvent(QHideEvent* ev)
 {
     QWidget::hideEvent(ev);
 
     emit widgetStatusChanged();
 }
 
-void CWizTagBar::showEvent(QShowEvent* ev)
+void WizTagBar::showEvent(QShowEvent* ev)
 {
     QWidget::showEvent(ev);
 
     emit widgetStatusChanged();
 }
 
-void CWizTagBar::reset()
+void WizTagBar::reset()
 {
     for (auto tagIt : m_mapTagWidgets)
     {
@@ -500,7 +500,7 @@ void CWizTagBar::reset()
     m_btnMore->setVisible(false);
 }
 
-void CWizTagBar::applyStyleSheet()
+void WizTagBar::applyStyleSheet()
 {
     m_lineEdit->setPlaceholderText(tr("Click here to add tags"));
     m_lineEdit->setStyleSheet("QLineEdit {border: 0px; color:#B6B6B6; background-color:transparent;}");
@@ -508,17 +508,17 @@ void CWizTagBar::applyStyleSheet()
     m_lineEdit->setAttribute(Qt::WA_MacShowFocusRect, false);
 
     //
-    QIcon icon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "action_addEditorBarItem");
+    QIcon icon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "action_addEditorBarItem");
     m_btnAdd->setIcon(icon);
     m_btnAdd->setStyleSheet("QToolButton { border: 0px; margin-top:2px;}");
 
-    icon = ::WizLoadSkinIcon(Utils::StyleHelper::themeName(), "action_moreTags");
+    icon = ::WizLoadSkinIcon(Utils::WizStyleHelper::themeName(), "action_moreTags");
     m_btnMore->setIcon(icon);
     m_btnMore->setStyleSheet("QToolButton { border: 0px; margin-top:2px;}");
 }
 
 
-CTagItem::CTagItem(const QString guid, const QString text, QWidget* parent)
+WizTagItem::WizTagItem(const QString guid, const QString text, QWidget* parent)
     : QWidget(parent)
     , m_tagGuid(guid)
     , m_tagName(text)
@@ -531,8 +531,8 @@ CTagItem::CTagItem(const QString guid, const QString text, QWidget* parent)
 {
     if (!m_pixDeleteNormal)
     {        
-        QString deleteNormal = Utils::StyleHelper::skinResourceFileName("action_deleteEditorBarItem", true);
-        QString deletePressed = Utils::StyleHelper::skinResourceFileName("action_deleteEditorBarItem_on", true);
+        QString deleteNormal = Utils::WizStyleHelper::skinResourceFileName("action_deleteEditorBarItem", true);
+        QString deletePressed = Utils::WizStyleHelper::skinResourceFileName("action_deleteEditorBarItem_on", true);
         m_pixDeleteNormal = std::make_shared<QPixmap>(deleteNormal);
         m_pixDeletePressed = std::make_shared<QPixmap>(deletePressed);
     }
@@ -543,42 +543,42 @@ CTagItem::CTagItem(const QString guid, const QString text, QWidget* parent)
 //    setFixedWidth(nWidth);
 }
 
-CTagItem::~CTagItem()
+WizTagItem::~WizTagItem()
 {
 
 }
 
-QString CTagItem::guid()
+QString WizTagItem::guid()
 {
     return m_tagGuid;
 }
 
-QString CTagItem::name()
+QString WizTagItem::name()
 {
     return m_tagName;
 }
 
-void CTagItem::setName(const QString& name)
+void WizTagItem::setName(const QString& name)
 {
     m_tagName = name;
 }
 
-bool CTagItem::isReadOnly() const
+bool WizTagItem::isReadOnly() const
 {
     return m_readOnly;
 }
 
-void CTagItem::setReadOnly(bool b)
+void WizTagItem::setReadOnly(bool b)
 {
     m_readOnly = b;
 }
 
-void CTagItem::setSelected(bool b)
+void WizTagItem::setSelected(bool b)
 {
     m_selected = b;
 }
 
-QSize CTagItem::sizeHint() const
+QSize WizTagItem::sizeHint() const
 {
     QFont f;
     QFontMetrics fm(f);
@@ -586,14 +586,14 @@ QSize CTagItem::sizeHint() const
     return sz;
 }
 
-int CTagItem::textWidth(const QString text)
+int WizTagItem::textWidth(const QString text)
 {
     QFont f;
     QFontMetrics fm(f);
     return fm.width(text) + TAGITEM_MARGIN * 2;
 }
 
-void CTagItem::paintEvent(QPaintEvent* event)
+void WizTagItem::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
     QPainter pt(this);
@@ -626,19 +626,19 @@ void CTagItem::paintEvent(QPaintEvent* event)
     }
 }
 
-void CTagItem::focusInEvent(QFocusEvent* event)
+void WizTagItem::focusInEvent(QFocusEvent* event)
 {
     m_selected = true;
     QWidget::focusInEvent(event);
 }
 
-void CTagItem::focusOutEvent(QFocusEvent* event)
+void WizTagItem::focusOutEvent(QFocusEvent* event)
 {
     m_selected = false;
     QWidget::focusOutEvent(event);
 }
 
-void CTagItem::mousePressEvent(QMouseEvent* event)
+void WizTagItem::mousePressEvent(QMouseEvent* event)
 {
     if (m_selected)
     {
@@ -662,19 +662,19 @@ void CTagItem::mousePressEvent(QMouseEvent* event)
     QWidget::mousePressEvent(event);
 }
 
-void CTagItem::mouseReleaseEvent(QMouseEvent* event)
+void WizTagItem::mouseReleaseEvent(QMouseEvent* event)
 {
     if (m_closeButtonPressed)
     {
         m_closeButtonPressed = false;
         update();
         on_menuActionRemove();
-        WizGetAnalyzer().LogAction("removeTagByCloseButton");
+        WizGetAnalyzer().logAction("removeTagByCloseButton");
     }
     QWidget::mouseReleaseEvent(event);
 }
 
-void CTagItem::contextMenuEvent(QContextMenuEvent* event)
+void WizTagItem::contextMenuEvent(QContextMenuEvent* event)
 {
     if (!m_menu)
     {
@@ -686,7 +686,7 @@ void CTagItem::contextMenuEvent(QContextMenuEvent* event)
     emit selectedItemChanged(this);
 }
 
-void CTagItem::createContextMenu()
+void WizTagItem::createContextMenu()
 {
     m_menu = new QMenu(this);
     QAction* actionR = m_menu->addAction(tr("Rename..."));
@@ -698,9 +698,9 @@ void CTagItem::createContextMenu()
     connect(actionD, SIGNAL(triggered()), SLOT(on_menuActionDelete()));
 }
 
-void CTagItem::on_menuActionRename()
+void WizTagItem::on_menuActionRename()
 {
-    CWizLineInputDialog dialog(tr("Rename tag"),
+    WizLineInputDialog dialog(tr("Rename tag"),
                                                           tr("Please input tag name: "),
                                                           m_tagName, window());
 
@@ -716,12 +716,12 @@ void CTagItem::on_menuActionRename()
     }
 }
 
-void CTagItem::on_menuActionRemove()
+void WizTagItem::on_menuActionRemove()
 {
     removeTagRequest(m_tagGuid);
 }
 
-void CTagItem::on_menuActionDelete()
+void WizTagItem::on_menuActionDelete()
 {
     QMessageBox* msgBox = new QMessageBox(window());
     msgBox->setWindowTitle(tr("Delete tag"));
@@ -739,17 +739,17 @@ void CTagItem::on_menuActionDelete()
 }
 
 
-CTagLineEdit::CTagLineEdit(QWidget* parent)
+WizTagLineEdit::WizTagLineEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_completer(nullptr)
 {
 }
 
-void CTagLineEdit::resetCompleter(const QStringList& tagNames)
+void WizTagLineEdit::resetCompleter(const QStringList& tagNames)
 {
     if (!m_completer)
     {        
-        m_completer = new CWizStringListCompleter(tagNames, this);
+        m_completer = new WizStringListCompleter(tagNames, this);
         QStyledItemDelegate* mCompleterItemDelegate = new QStyledItemDelegate(m_completer);
         m_completer->popup()->setItemDelegate(mCompleterItemDelegate); //Must be set after every time the model is set
         m_completer->popup()->setStyleSheet("QAbstractItemView::item:selected{background:#448aff;}"
@@ -761,7 +761,7 @@ void CTagLineEdit::resetCompleter(const QStringList& tagNames)
     m_completer->resetStringList(tagNames);
 }
 
-void CTagLineEdit::keyPressEvent(QKeyEvent* event)
+void WizTagLineEdit::keyPressEvent(QKeyEvent* event)
 {
     if (event->key() == Qt::Key_Enter || event->key() == Qt::Key_Return)
     {

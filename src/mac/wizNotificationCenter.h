@@ -5,7 +5,7 @@
 
 struct WIZMESSAGEDATA;
 
-class CWizNotificationCenter : public QObject
+class WizNotificationCenter : public QObject
 {
     Q_OBJECT
 public:
@@ -17,7 +17,7 @@ public:
         Notification_BizService
     };
 
-    explicit CWizNotificationCenter(QObject* parent = 0);
+    explicit WizNotificationCenter(QObject* parent = 0);
 
     void showNofification(NotificationType type, const QString& title,
                           const QString& text, const QString& userInfo);

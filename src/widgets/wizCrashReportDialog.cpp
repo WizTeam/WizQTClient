@@ -17,7 +17,7 @@
 #include "sync/token.h"
 #include "sync/apientry.h"
 
-CWizCrashReportDialog::CWizCrashReportDialog(const QString& text, QWidget *parent)
+WizCrashReportDialog::WizCrashReportDialog(const QString& text, QWidget *parent)
     : QDialog(parent)
     , ui(new Ui::WizCrashReportDialog)
     , m_reports(text)
@@ -30,12 +30,12 @@ CWizCrashReportDialog::CWizCrashReportDialog(const QString& text, QWidget *paren
     layout()->addWidget(m_textEdit);
 }
 
-CWizCrashReportDialog::~CWizCrashReportDialog()
+WizCrashReportDialog::~WizCrashReportDialog()
 {
     delete ui;
 }
 
-void CWizCrashReportDialog::on_btn_yes_clicked()
+void WizCrashReportDialog::on_btn_yes_clicked()
 {
     accept();
 
@@ -64,7 +64,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
         QNetworkAccessManager net;
         QNetworkReply* reply = net.post(request, postData.toString(QUrl::FullyEncoded).toUtf8());
 
-        CWizAutoTimeOutEventLoop loop(reply);
+        WizAutoTimeOutEventLoop loop(reply);
         loop.exec();
 
         if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
@@ -82,7 +82,7 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
             return;
         }
 
-        int returnCode = d.FindMember("return_code")->value.GetInt();
+        int returnCode = d.FindMember("return_code")->value.getInt();
         if (returnCode != 200)
         {
             qDebug() << "[Crash report]Return code was not 200, error :  " << returnCode << loop.result();
@@ -96,12 +96,12 @@ void CWizCrashReportDialog::on_btn_yes_clicked()
     });
 }
 
-void CWizCrashReportDialog::on_btn_no_clicked()
+void WizCrashReportDialog::on_btn_no_clicked()
 {
     reject();
 }
 
-void CWizCrashReportDialog::on_btn_details_clicked()
+void WizCrashReportDialog::on_btn_details_clicked()
 {
     m_textEdit->setVisible(!m_textEdit->isVisible());
     if (m_textEdit->toPlainText().isEmpty())

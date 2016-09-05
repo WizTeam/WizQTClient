@@ -3,35 +3,35 @@
 
 #include "wizKMServer.h"
 
-class CWizKMSync
+class WizKMSync
 {
 public:
-    CWizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info,
+    WizKMSync(IWizSyncableDatabase* pDatabase, const WIZUSERINFOBASE& info,
                IWizKMSyncEvents* pEvents, bool bGroup, bool bUploadOnly, QObject* parent);
 public:
-    bool Sync();
-    bool DownloadObjectData();    
+    bool sync();
+    bool downloadObjectData();    
 
 protected:
-    bool SyncCore();
-    bool UploadValue(const QString& strKey);
-    bool DownloadValue(const QString& strKey);
+    bool syncCore();
+    bool uploadValue(const QString& strKey);
+    bool downloadValue(const QString& strKey);
 
-    bool DownloadDeletedList(__int64 nServerVersion);
-    bool DownloadTagList(__int64 nServerVersion);
-    bool DownloadStyleList(__int64 nServerVersion);
-    bool DownloadDocumentList(__int64 nServerVersion);
-    bool DownloadAttachmentList(__int64 nServerVersion);
+    bool downloadDeletedList(__int64 nServerVersion);
+    bool downloadTagList(__int64 nServerVersion);
+    bool downloadStyleList(__int64 nServerVersion);
+    bool downloadDocumentList(__int64 nServerVersion);
+    bool downloadAttachmentList(__int64 nServerVersion);
 
-    bool UploadDeletedList();
-    bool UploadTagList();
-    bool UploadStyleList();
-    bool UploadDocumentList();
-    bool UploadAttachmentList();
+    bool uploadDeletedList();
+    bool uploadTagList();
+    bool uploadStyleList();
+    bool uploadDocumentList();
+    bool uploadAttachmentList();
 
-    bool UploadKeys();
-    bool DownloadKeys();
-    bool ProcessOldKeyValues();
+    bool uploadKeys();
+    bool downloadKeys();
+    bool processOldKeyValues();
 
 private:
     IWizSyncableDatabase* m_pDatabase;
@@ -40,13 +40,13 @@ private:
     bool m_bGroup;
     bool m_bUploadOnly;
 
-    CWizKMDatabaseServer m_server;
+    WizKMDatabaseServer m_server;
 
     std::map<QString, WIZKEYVALUEDATA> m_mapOldKeyValues;
 
 public:
     template <class TData>
-    static __int64 GetObjectsVersion(__int64 nOldVersion, const std::deque<TData>& arrayData)
+    static __int64 getObjectsVersion(__int64 nOldVersion, const std::deque<TData>& arrayData)
     {
         if (arrayData.empty())
             return nOldVersion;
@@ -63,14 +63,14 @@ public:
 
 private:
     template <class TData>
-    bool DownloadList(__int64 nServerVersion, const QString& strObjectType, WizKMSyncProgress progress)
+    bool downloadList(__int64 nServerVersion, const QString& strObjectType, WizKMSyncProgress progress)
     {
-        m_pEvents->OnSyncProgress(::GetSyncStartProgress(progress));
+        m_pEvents->onSyncProgress(::GetSyncStartProgress(progress));
         //
-        __int64 nVersion = m_pDatabase->GetObjectVersion(strObjectType);
+        __int64 nVersion = m_pDatabase->getObjectVersion(strObjectType);
         if (nServerVersion == nVersion)
         {
-            m_pEvents->OnStatus(QObject::tr("No change, skip"));
+            m_pEvents->onStatus(QObject::tr("No change, skip"));
             return TRUE;
         }
         //
@@ -99,12 +99,12 @@ private:
                 data.strKbGUID = m_info.strKbGUID;
             }
             //
-            if (!OnDownloadList<TData>(arrayPageData))
+            if (!onDownloadList<TData>(arrayPageData))
                 return FALSE;
             //
-            nNextVersion = GetObjectsVersion<TData>(nNextVersion, arrayPageData);
+            nNextVersion = getObjectsVersion<TData>(nNextVersion, arrayPageData);
             //
-            if (!m_pDatabase->SetObjectVersion(strObjectType, nNextVersion))
+            if (!m_pDatabase->setObjectVersion(strObjectType, nNextVersion))
                 return FALSE;
 
             //
@@ -116,39 +116,39 @@ private:
         //
         nVersion = std::max<__int64>(nVersion, nServerVersion);
         //
-        return m_pDatabase->SetObjectVersion(strObjectType, nVersion);
+        return m_pDatabase->setObjectVersion(strObjectType, nVersion);
     }
 
     template <class TData>
-    bool OnDownloadList(const std::deque<TData>& arrayData)
+    bool onDownloadList(const std::deque<TData>& arrayData)
     {
         ATLASSERT(FALSE);
         return FALSE;
     }
     template <class TData>
-    bool OnDownloadList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
+    bool onDownloadList(const std::deque<WIZDELETEDGUIDDATA>& arrayData)
     {
-        return m_pDatabase->OnDownloadDeletedList(arrayData);
+        return m_pDatabase->onDownloadDeletedList(arrayData);
     }
     template <class TData>
-    bool OnDownloadList(const std::deque<WIZTAGDATA>& arrayData)
+    bool onDownloadList(const std::deque<WIZTAGDATA>& arrayData)
     {
-        return m_pDatabase->OnDownloadTagList(arrayData);
+        return m_pDatabase->onDownloadTagList(arrayData);
     }
     template <class TData>
-    bool OnDownloadList(const std::deque<WIZSTYLEDATA>& arrayData)
+    bool onDownloadList(const std::deque<WIZSTYLEDATA>& arrayData)
     {
-        return m_pDatabase->OnDownloadStyleList(arrayData);
+        return m_pDatabase->onDownloadStyleList(arrayData);
     }
     template <class TData>
-    bool OnDownloadList(const std::deque<WIZDOCUMENTDATAEX>& arrayData)
+    bool onDownloadList(const std::deque<WIZDOCUMENTDATAEX>& arrayData)
     {
-        return m_pDatabase->OnDownloadDocumentList(arrayData);
+        return m_pDatabase->onDownloadDocumentList(arrayData);
     }
     template <class TData>
-    bool OnDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
+    bool onDownloadList(const std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayData)
     {
-        return m_pDatabase->OnDownloadAttachmentList(arrayData);
+        return m_pDatabase->onDownloadAttachmentList(arrayData);
     }
 };
 

@@ -13,8 +13,8 @@
 #include "proxydialog.h"
 
 
-CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
-    : CWizPopupWidget(parent)
+WizOptionsWidget::WizOptionsWidget(QWidget* parent)
+    : WizPopupWidget(parent)
 #ifndef Q_OS_MAC
     , m_labelRestartForSkin(NULL)
 #endif
@@ -125,7 +125,7 @@ CWizOptionsWidget::CWizOptionsWidget(QWidget* parent)
 
 }
 
-void CWizOptionsWidget::on_radioAuto_clicked(bool chcked)
+void WizOptionsWidget::on_radioAuto_clicked(bool chcked)
 {
     if (chcked)
     {
@@ -135,7 +135,7 @@ void CWizOptionsWidget::on_radioAuto_clicked(bool chcked)
 }
 
 
-void CWizOptionsWidget::on_radioAlwaysReading_clicked(bool chcked)
+void WizOptionsWidget::on_radioAlwaysReading_clicked(bool chcked)
 {
     if (chcked)
     {
@@ -145,7 +145,7 @@ void CWizOptionsWidget::on_radioAlwaysReading_clicked(bool chcked)
 }
 
 
-void CWizOptionsWidget::on_radioAlwaysEditing_clicked(bool chcked)
+void WizOptionsWidget::on_radioAlwaysEditing_clicked(bool chcked)
 {
     if (chcked)
     {
@@ -153,23 +153,23 @@ void CWizOptionsWidget::on_radioAlwaysEditing_clicked(bool chcked)
         emit settingsChanged(wizoptionsNoteView);
     }
 }
-void CWizOptionsWidget::on_checkAutoSync_clicked(bool checked)
+void WizOptionsWidget::on_checkAutoSync_clicked(bool checked)
 {
     ::WizSetAutoSync(checked);
     emit settingsChanged(wizoptionsSync);
 }
-void CWizOptionsWidget::on_checkDownloadAllNotesData_clicked(bool checked)
+void WizOptionsWidget::on_checkDownloadAllNotesData_clicked(bool checked)
 {
     ::WizSetDownloadAllNotesData(checked);
     emit settingsChanged(wizoptionsSync);
 }
 
 
-void CWizOptionsWidget::on_labelProxy_linkActivated(const QString & link)
+void WizOptionsWidget::on_labelProxy_linkActivated(const QString & link)
 {
     Q_UNUSED(link);
     //
-    ProxyDialog dlg(parentWidget());
+    WizProxyDialog dlg(parentWidget());
     if (QDialog::Accepted != dlg.exec())
         return;
     //
@@ -179,13 +179,13 @@ void CWizOptionsWidget::on_labelProxy_linkActivated(const QString & link)
 
 #ifndef Q_OS_MAC
 
-void CWizOptionsWidget::on_comboSkin_currentIndexChanged(const QString& text)
+void WizOptionsWidget::on_comboSkin_currentIndexChanged(const QString& text)
 {
     WizSetSkinDisplayName(text);
     m_labelRestartForSkin->setVisible(true);
     emit settingsChanged(wizoptionsSkin);
 }
-void CWizOptionsWidget::on_labelRestartForSkin_linkActivated(const QString& text)
+void WizOptionsWidget::on_labelRestartForSkin_linkActivated(const QString& text)
 {
     Q_UNUSED(text);
     close();

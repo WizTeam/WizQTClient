@@ -8,24 +8,24 @@ class QString;
 
 struct WIZDOCUMENTDATA;
 
-class CWizDocumentView;
+class WizDocumentView;
 
-class NoteCommentsPrivate : public QObject
+class WizNoteCommentsPrivate : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit NoteCommentsPrivate();
-    ~NoteCommentsPrivate();
+    explicit WizNoteCommentsPrivate();
+    ~WizNoteCommentsPrivate();
 
 private:
-    QMap<CWizDocumentView*, WIZDOCUMENTDATA> m_map;
+    QMap<WizDocumentView*, WIZDOCUMENTDATA> m_map;
 
     void loadComments(const QString& strToken);
 
 public Q_SLOTS:
     void onTokenAcquired(const QString& strToken);
-    void onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note);
+    void onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note);
     void onCommentsButtonClicked();
 
 };

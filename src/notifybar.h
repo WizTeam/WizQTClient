@@ -5,12 +5,12 @@
 #include <QIcon>
 
 class QLabel;
-class wizImageButton;
+class WizImageButton;
 class QPropertyAnimation;
 
 #define NOTIFYBAR_LABELLINK_DOWNLOAD  "clicktodownload"
 
-class NotifyBar : public QWidget
+class WizNotifyBar : public QWidget
 {
     Q_OBJECT
 public:
@@ -24,7 +24,7 @@ public:
         CustomMessage
     };
 
-    explicit NotifyBar(QWidget *parent);
+    explicit WizNotifyBar(QWidget *parent);
     void showPermissionNotify(int type);
     void showMessageTips(Qt::TextFormat format, const QString& info);
     void hideMessageTips(bool useAnimation);
@@ -39,8 +39,8 @@ private:
     QLabel* m_spacer;
     QWidget* m_childWgt;
     QLabel* m_labelNotify;
-    wizImageButton* m_buttonCloseRed;
-    wizImageButton* m_buttonCloseBlue;
+    WizImageButton* m_buttonCloseRed;
+    WizImageButton* m_buttonCloseBlue;
     QPropertyAnimation* m_animation;
     NotifyType m_type;
 

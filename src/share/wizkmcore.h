@@ -61,7 +61,7 @@ BOOL WizKMStringArrayIsEqual(const std::deque<T>& arrayData1, const std::deque<T
 
 struct IWizToolsSearchDocumentsEvents
 {
-    virtual BOOL OnDocuments(const CString& strDocumentID, const CString& strURL) = 0;
+    virtual BOOL onDocuments(const CString& strDocumentID, const CString& strURL) = 0;
 };
 
 

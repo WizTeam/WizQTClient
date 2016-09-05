@@ -16,7 +16,7 @@
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 
-CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
+WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
     : QDialog(parent, f)
     , m_settings(settings)
     , m_view(new WizWebEngineView(this))
@@ -35,11 +35,11 @@ CWizShareLinkDialog::CWizShareLinkDialog(CWizUserSettings& settings, QWidget* pa
     m_animation = new QPropertyAnimation(this, "size", this);
 }
 
-CWizShareLinkDialog::~CWizShareLinkDialog()
+WizShareLinkDialog::~WizShareLinkDialog()
 {
 }
 
-QSize CWizShareLinkDialog::sizeHint() const
+QSize WizShareLinkDialog::sizeHint() const
 {
     if (m_settings.locale() == ::WizGetDefaultTranslatedLocal())
     {
@@ -49,25 +49,25 @@ QSize CWizShareLinkDialog::sizeHint() const
     return QSize(541, 335);
 }
 
-void CWizShareLinkDialog::shareDocument(const WIZDOCUMENTDATA& doc)
+void WizShareLinkDialog::shareDocument(const WIZDOCUMENTDATA& doc)
 {
     m_doc = doc;
     loadHtml();
 }
 
-void CWizShareLinkDialog::logAction(const QString& strAction)
+void WizShareLinkDialog::logAction(const QString& strAction)
 {
     qDebug() << "[Share Link] " << strAction;
 }
 
-void CWizShareLinkDialog::writeToLog(const QString& strLog)
+void WizShareLinkDialog::writeToLog(const QString& strLog)
 {
     qDebug() << "[Share Link] " << strLog;
 }
 
-void CWizShareLinkDialog::getToken()
+void WizShareLinkDialog::getToken()
 {
-    QString strToken = Token::token();
+    QString strToken = WizToken::token();
     m_view->page()->runJavaScript(QString("setToken('%1')").arg(strToken), [=](const QVariant& vRet){
 
         emit tokenObtained();
@@ -75,22 +75,22 @@ void CWizShareLinkDialog::getToken()
     });
 }
 
-QString CWizShareLinkDialog::getKbGuid()
+QString WizShareLinkDialog::getKbGuid()
 {
     return m_doc.strKbGUID;
 }
 
-QString CWizShareLinkDialog::getGuid()
+QString WizShareLinkDialog::getGuid()
 {
     return m_doc.strGUID;
 }
 
-QString CWizShareLinkDialog::getTitle()
+QString WizShareLinkDialog::getTitle()
 {
     return m_doc.strTitle;
 }
 
-void CWizShareLinkDialog::resizeEx(int nWidth, int nHeight)
+void WizShareLinkDialog::resizeEx(int nWidth, int nHeight)
 {
 //    resize(nWidth, nHeight);
     QRect rec = geometry();
@@ -105,18 +105,18 @@ void CWizShareLinkDialog::resizeEx(int nWidth, int nHeight)
 //    m_animation->start();
 }
 
-void CWizShareLinkDialog::openindefaultbrowser(const QString& url)
+void WizShareLinkDialog::openindefaultbrowser(const QString& url)
 {
     QDesktopServices::openUrl(QUrl(url));
 }
 
-void CWizShareLinkDialog::dragcaption(int x, int y)
+void WizShareLinkDialog::dragcaption(int x, int y)
 {
     QPoint pos = QCursor::pos();
     move(pos.x() - x, pos.y() - y);
 }
 
-void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
+void WizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
 {
     if (link.isEmpty())
     {
@@ -124,7 +124,7 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
         return;
     }
 
-    Utils::Misc::copyTextToClipboard(link);
+    Utils::WizMisc::copyTextToClipboard(link);
 
     if (callBack.isEmpty())
         return;
@@ -132,28 +132,28 @@ void CWizShareLinkDialog::copyLink(const QString& link, const QString& callBack)
     m_view->page()->runJavaScript(callBack);
 }
 
-QString CWizShareLinkDialog::getShareLinkFirstTips()
+QString WizShareLinkDialog::getShareLinkFirstTips()
 {
     return m_settings.get(ShareLinkFirstTips);
 }
 
-void CWizShareLinkDialog::setShareLinkFirstTips(const QString& value)
+void WizShareLinkDialog::setShareLinkFirstTips(const QString& value)
 {
     m_settings.set(ShareLinkFirstTips, value);
 }
 
-QString CWizShareLinkDialog::getLocalLanguage()
+QString WizShareLinkDialog::getLocalLanguage()
 {
     return m_settings.locale();
 }
 
-void CWizShareLinkDialog::setFormateISO8601StringParam(const QString& param)
+void WizShareLinkDialog::setFormateISO8601StringParam(const QString& param)
 {
     m_formateISO8601StringParam = param;
     emit formateISO8601StringChanged();
 }
 
-QString CWizShareLinkDialog::formateISO8601String()
+QString WizShareLinkDialog::formateISO8601String()
 {
     QDateTime date = QDateTime::fromString(m_formateISO8601StringParam, Qt::ISODate);
     if (!date.isValid() || date.isNull())
@@ -162,9 +162,9 @@ QString CWizShareLinkDialog::formateISO8601String()
     return date.toString(Qt::ISODate);
 }
 
-void CWizShareLinkDialog::loadHtml()
+void WizShareLinkDialog::loadHtml()
 {
-    QString strFile = Utils::PathResolve::resourcesPath() + "files/share_link/index.html";
+    QString strFile = Utils::WizPathResolve::resourcesPath() + "files/share_link/index.html";
     QUrl url = QUrl::fromLocalFile(strFile);
     m_view->load(url);
 }

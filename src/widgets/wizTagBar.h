@@ -12,16 +12,16 @@
 #include <map>
 #include "share/wizobject.h"
 
-class CWizExplorerApp;
-class CWizDatabaseManager;
-class CWizTagListWidget;
+class WizExplorerApp;
+class WizDatabaseManager;
+class WizTagListWidget;
 
-class CWizStringListCompleter : public QCompleter
+class WizStringListCompleter : public QCompleter
 {
     Q_OBJECT
 
 public:
-    inline CWizStringListCompleter(const QStringList& words, QObject * parent)
+    inline WizStringListCompleter(const QStringList& words, QObject * parent)
         : QCompleter(parent)
         , m_model()
     {
@@ -38,11 +38,11 @@ private:
     QStringListModel m_model;
 };
 
-class CTagLineEdit : public QLineEdit
+class WizTagLineEdit : public QLineEdit
 {
     Q_OBJECT
 public:
-    CTagLineEdit(QWidget* parent = 0);
+    WizTagLineEdit(QWidget* parent = 0);
     void resetCompleter(const QStringList& tagNames);
 
 signals:
@@ -52,15 +52,15 @@ protected:
     void keyPressEvent(QKeyEvent* event);
 
 private:
-    CWizStringListCompleter* m_completer;
+    WizStringListCompleter* m_completer;
 };
 
-class CTagItem : public QWidget
+class WizTagItem : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CTagItem(const QString guid, const QString text, QWidget *parent = 0);
-    ~CTagItem();
+    explicit WizTagItem(const QString guid, const QString text, QWidget *parent = 0);
+    ~WizTagItem();
 
     QString guid();
     QString name();
@@ -76,7 +76,7 @@ public:
 signals:
     void deleteTagRequest(const QString& guid);
     void removeTagRequest(const QString& guid);
-    void selectedItemChanged(CTagItem* item);
+    void selectedItemChanged(WizTagItem* item);
     void renameTagRequest(const QString& guid, const QString& newName);
 
 
@@ -107,12 +107,12 @@ private:
     std::shared_ptr<QPixmap> m_pixDeletePressed;
 };
 
-class CWizTagBar : public QWidget
+class WizTagBar : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CWizTagBar(CWizExplorerApp& app, QWidget *parent = 0);
-    ~CWizTagBar();
+    explicit WizTagBar(WizExplorerApp& app, QWidget *parent = 0);
+    ~WizTagBar();
 
     void setDocument(const WIZDOCUMENTDATA& doc);    
 
@@ -121,7 +121,7 @@ public slots:
     void on_deleteTagRequest(const QString& guid);
     void on_renameTagRequest(const QString& guid, const QString& newName);
     void on_lineEditReturnPressed();
-    void on_selectedItemChanged(CTagItem* item);
+    void on_selectedItemChanged(WizTagItem* item);
     void on_buttonMoreClicked();
     void on_buttonAddClicked();
 
@@ -154,17 +154,17 @@ private:
 
 private:
     WIZDOCUMENTDATA m_doc;
-    CWizTagListWidget* m_tagList;
+    WizTagListWidget* m_tagList;
     QLabel* m_label;
     QWidget* m_tagWidget;
     QToolButton* m_btnAdd;
     QToolButton* m_btnMore;
     QHBoxLayout* m_tagLayout;
-    CTagLineEdit* m_lineEdit;
-    std::map<QString, CTagItem*> m_mapTagWidgets;
+    WizTagLineEdit* m_lineEdit;
+    std::map<QString, WizTagItem*> m_mapTagWidgets;
     std::map<QString, QString> m_mapMoreTags;
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
 };
 
 

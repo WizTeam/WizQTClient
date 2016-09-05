@@ -21,33 +21,33 @@
 #include "wizDatabase.h"
 #include "wizDatabaseManager.h"
 
-CWizAnalyzer::CWizAnalyzer(const CString& strRecordFileName)
+WizAnalyzer::WizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)
 {
 
-    m_strRecordFileNameNoDelete = Utils::Misc::extractFilePath(strRecordFileName) + Utils::Misc::extractFileTitle(strRecordFileName) + _T("Ex") + Utils::Misc::extractFileExt(strRecordFileName);
+    m_strRecordFileNameNoDelete = Utils::WizMisc::extractFilePath(strRecordFileName) + Utils::WizMisc::extractFileTitle(strRecordFileName) + _T("Ex") + Utils::WizMisc::extractFileExt(strRecordFileName);
 	//
-	m_tLastLog = ::WizIniReadDateTimeDef(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), COleDateTime(2015, 1, 1, 0, 0, 0));
+	m_tLastLog = ::WizIniReadDateTimeDef(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), WizOleDateTime(2015, 1, 1, 0, 0, 0));
 }
 
-CString CWizAnalyzer::guid()
+CString WizAnalyzer::guid()
 {
 	CString str = ::WizIniReadStringDef(m_strRecordFileNameNoDelete, _T("Common"), _T("guid"));
-	if (str.IsEmpty())
+	if (str.isEmpty())
 	{
 		str = ::WizGenGUIDLowerCaseLetterOnly();
 		::WizIniWriteString(m_strRecordFileNameNoDelete, _T("Common"), _T("guid"), str);
 	}
 	return str;
 }
-CString CWizAnalyzer::GetUseDays()
+CString WizAnalyzer::getUseDays()
 {
 	int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
 	//
     return WizIntToStr(days);
 }
 
-CString CWizAnalyzer::GetInstallDays()
+CString WizAnalyzer::getInstallDays()
 {
     int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
     //
@@ -60,44 +60,44 @@ CString CWizAnalyzer::GetInstallDays()
     //
     return WizIntToStr(days);
 }
-void CWizAnalyzer::IncreaseCounter(const CString& strSection, const CString& strKey)
+void WizAnalyzer::increaseCounter(const CString& strSection, const CString& strKey)
 {
     int count = ::WizIniReadIntDef(m_strRecordFileName, strSection, strKey, 0);
 	count++;
     ::WizIniWriteInt(m_strRecordFileName, strSection, strKey, count);
 }
 
-void CWizAnalyzer::AddDuration(const CString& strFunctionName, int seconds)
+void WizAnalyzer::addDuration(const CString& strFunctionName, int seconds)
 {
     int count = ::WizIniReadIntDef(m_strRecordFileName, _T("Durations"), strFunctionName, 0);
 	count += seconds;
     ::WizIniWriteInt(m_strRecordFileName, _T("Durations"), strFunctionName, count);
 }
 
-void CWizAnalyzer::LogTimes()
+void WizAnalyzer::logTimes()
 {
-	COleDateTime t = ::WizGetCurrentTime();
+	WizOleDateTime t = ::WizGetCurrentTime();
 	//
-	int hour = t.GetHour();
-	int week = t.GetDayOfWeek();
+	int hour = t.getHour();
+	int week = t.getDayOfWeek();
 	if (week == 1)
 		week = 7;
 	else
 		week = week - 1;
 	//
 	CString hourString = _T("Hour") + WizIntToStr(hour);
-	IncreaseCounter(_T("Actions"), hourString);
+	increaseCounter(_T("Actions"), hourString);
 	//
 	CString weekString = _T("Week") + WizIntToStr(week);
-	IncreaseCounter(_T("Actions"), weekString);
+	increaseCounter(_T("Actions"), weekString);
 }
 //
-void CWizAnalyzer::LogUseDays()
+void WizAnalyzer::logUseDays()
 {
-	COleDateTime t = ::WizGetCurrentTime();
+	WizOleDateTime t = ::WizGetCurrentTime();
 	//
-	if (m_tLastLog.GetYear() == t.GetYear()
-		&& m_tLastLog.GetDayOfYear() == t.GetDayOfYear())
+	if (m_tLastLog.getYear() == t.getYear()
+		&& m_tLastLog.getDayOfYear() == t.getDayOfYear())
 		return;
 	//
 	int days = ::WizIniReadIntDef(m_strRecordFileNameNoDelete, _T("Common"), _T("useDays"), 0);
@@ -107,7 +107,7 @@ void CWizAnalyzer::LogUseDays()
 	::WizIniWriteDateTime(m_strRecordFileNameNoDelete, _T("Common"), _T("Last"), t);
 }
 //
-CString CWizAnalyzer::KeyOfFirstAction(int index)
+CString WizAnalyzer::keyOfFirstAction(int index)
 {
 	index++;
 	//
@@ -119,13 +119,13 @@ CString CWizAnalyzer::KeyOfFirstAction(int index)
 	return key;
 }
 //
-CString CWizAnalyzer::GetFirstAction(int index)
+CString WizAnalyzer::getFirstAction(int index)
 {
-	CString strKey = KeyOfFirstAction(index);
+	CString strKey = keyOfFirstAction(index);
 	CString strAction = ::WizIniReadStringDef(m_strRecordFileNameNoDelete, _T("firstAction"), strKey);
 	return strAction;
 }
-void CWizAnalyzer::LogFirstAction(const CString& strActionName)
+void WizAnalyzer::logFirstAction(const CString& strActionName)
 {
     if (!strActionName || !*strActionName)
 		return;
@@ -139,10 +139,10 @@ void CWizAnalyzer::LogFirstAction(const CString& strActionName)
 	//
 	for (int i = 0; i < 10; i++)
 	{
-		CString old = GetFirstAction(i);
-		if (old.IsEmpty())
+		CString old = getFirstAction(i);
+		if (old.isEmpty())
 		{
-			CString strKey = KeyOfFirstAction(i);
+			CString strKey = keyOfFirstAction(i);
             ::WizIniWriteString(m_strRecordFileNameNoDelete, _T("firstAction"), strKey, strActionName);
 			return;
 		}
@@ -151,28 +151,28 @@ void CWizAnalyzer::LogFirstAction(const CString& strActionName)
 	logged = TRUE;
 }
 
-void CWizAnalyzer::LogAction(const CString& strAction)
+void WizAnalyzer::logAction(const CString& strAction)
 {
     QMutexLocker locker(&m_csLog);
 	//
-	LogUseDays();
-	LogTimes();
-    LogFirstAction(strAction);
+	logUseDays();
+	logTimes();
+    logFirstAction(strAction);
 	//
-    IncreaseCounter(_T("Actions"), strAction);
+    increaseCounter(_T("Actions"), strAction);
 }
 
-void CWizAnalyzer::LogDurations(const CString& strAction, int seconds)
+void WizAnalyzer::logDurations(const CString& strAction, int seconds)
 {
     QMutexLocker locker(&m_csLog);
     //
-	LogUseDays();
-    IncreaseCounter(_T("Functions"), strAction);
-    AddDuration(strAction, seconds);
+	logUseDays();
+    increaseCounter(_T("Functions"), strAction);
+    addDuration(strAction, seconds);
 }
 //
 //
-void CWizAnalyzer::Post(IWizSyncableDatabase* db)
+void WizAnalyzer::post(IWizSyncableDatabase* db)
 {
     //
     class CPostRunnable
@@ -185,7 +185,7 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
         //
         void run()
         {
-            WizGetAnalyzer().PostBlocked(m_db);
+            WizGetAnalyzer().postBlocked(m_db);
         }
 
     private:
@@ -200,7 +200,7 @@ void CWizAnalyzer::Post(IWizSyncableDatabase* db)
 
 
 //
-void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
+void WizAnalyzer::postBlocked(IWizSyncableDatabase* db)
 {
     QByteArray buffer = constructUploadData(db);
 
@@ -216,7 +216,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/plain"));
     QNetworkReply* reply = net.post(request, buffer);
 
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
@@ -234,7 +234,7 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
         return;
     }
 
-    int returnCode = d.FindMember("return_code")->value.GetInt();
+    int returnCode = d.FindMember("return_code")->value.getInt();
     if (returnCode != 200)
     {
         qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
@@ -253,18 +253,18 @@ void CWizAnalyzer::PostBlocked(IWizSyncableDatabase* db)
 
 QString analyzerFile()
 {
-    QString strFile = CWizDatabaseManager::instance()->db().GetAccountPath() + "analyzer.ini";
+    QString strFile = WizDatabaseManager::instance()->db().getAccountPath() + "analyzer.ini";
     return strFile;
 }
 
-CWizAnalyzer& CWizAnalyzer::GetAnalyzer()
+WizAnalyzer& WizAnalyzer::getAnalyzer()
 {    
-    static CWizAnalyzer analyzer(analyzerFile());
+    static WizAnalyzer analyzer(analyzerFile());
 	//
     return analyzer;
 }
 
-QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
+QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 {
     QMutexLocker locker(&m_csPost);
 
@@ -286,13 +286,13 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
 
     rapidjson::Value versionName(rapidjson::kStringType);
-    versionName.SetString(WIZ_CLIENT_VERSION);
+    versionName.setString(WIZ_CLIENT_VERSION);
     dd.AddMember("versionName", versionName, allocator);
 
-    dd.AddMember("versionCode", Utils::Misc::getVersionCode(), allocator);
+    dd.AddMember("versionCode", Utils::WizMisc::getVersionCode(), allocator);
 
     //
-    MainWindow *window = MainWindow::instance();
+    WizMainWindow *window = WizMainWindow::instance();
     QByteArray baLocal = QLocale::system().name().toUtf8();
     if (window)
     {
@@ -320,13 +320,13 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     dd.AddMember("isAnoymous", isAnoymous, allocator);
 
     //
-    rapidjson::Value isBiz(db->HasBiz());
+    rapidjson::Value isBiz(db->hasBiz());
     dd.AddMember("isBiz", isBiz, allocator);
 
-    int nUseDays = GetUseDays().toInt();
+    int nUseDays = getUseDays().toInt();
     dd.AddMember("useDays", nUseDays, allocator);
 
-    int nInstallDays = GetInstallDays().toInt();
+    int nInstallDays = getInstallDays().toInt();
     dd.AddMember("installDays", nInstallDays, allocator);
 
     QDateTime dtSignUp = QDateTime::fromString(db->meta("Account", "DateSignUp"));
@@ -338,10 +338,10 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     QMap<QByteArray, QByteArray> firstActionMap;
     for (int i = 0; i < 10; i++)
     {
-        CString strFirstAction = GetFirstAction(i);
-        if (!strFirstAction.IsEmpty())
+        CString strFirstAction = getFirstAction(i);
+        if (!strFirstAction.isEmpty())
         {
-            CString strKey = KeyOfFirstAction(i);
+            CString strKey = keyOfFirstAction(i);
             firstActionMap.insert(strKey.toUtf8(), strFirstAction.toUtf8());
         }
         else
@@ -361,14 +361,14 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
     QMutexLocker logLocker(&m_csLog);
     //
-    CWizIniFileEx iniFile;
-    iniFile.LoadFromFile(m_strRecordFileName);
+    WizIniFileEx iniFile;
+    iniFile.loadFromFile(m_strRecordFileName);
     //
     rapidjson::Value actions(rapidjson::kObjectType);
     actions.SetObject();
     //
     QMap<QByteArray, QByteArray> actionMap;
-    iniFile.GetSection(_T("Actions"), actionMap);
+    iniFile.getSection(_T("Actions"), actionMap);
     for (QMap<QByteArray, QByteArray>::iterator it = actionMap.begin();
         it != actionMap.end();
         it++)
@@ -385,11 +385,11 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     durations.SetObject();
     //
     QMap<QString, QString> seconds;
-    iniFile.GetSection(_T("Durations"), seconds);
+    iniFile.getSection(_T("Durations"), seconds);
     //
     QMap<QByteArray, QByteArray> functionMap;
 
-    iniFile.GetSection(_T("Functions"), functionMap);
+    iniFile.getSection(_T("Functions"), functionMap);
     for (QMap<QByteArray, QByteArray>::const_iterator it = functionMap.begin();
         it != functionMap.end();
         it++)
@@ -417,23 +417,23 @@ QByteArray CWizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
     dd.Accept(writer);
 
-    return buffer.GetString();
+    return buffer.getString();
 }
 
 
 
-CWizAnalyzer& WizGetAnalyzer()
+WizAnalyzer& WizGetAnalyzer()
 {
-	return CWizAnalyzer::GetAnalyzer();
+	return WizAnalyzer::getAnalyzer();
 }
 ////////////////////////////////////////////////////////
-CWizFunctionDurationLogger::CWizFunctionDurationLogger(const CString& strFunctionName)
+WizFunctionDurationLogger::WizFunctionDurationLogger(const CString& strFunctionName)
     : m_strFunctionName(strFunctionName)
 {
     m_tStart = QTime::currentTime();
 }
 
-CWizFunctionDurationLogger::~CWizFunctionDurationLogger()
+WizFunctionDurationLogger::~WizFunctionDurationLogger()
 {
     QTime end = QTime::currentTime();
     if (end < m_tStart)
@@ -441,6 +441,6 @@ CWizFunctionDurationLogger::~CWizFunctionDurationLogger()
 	//
     int seconds = m_tStart.secsTo(end); //(end - m_tStart) / 1000;
 	//
-	WizGetAnalyzer().LogDurations(m_strFunctionName, seconds);
+	WizGetAnalyzer().logDurations(m_strFunctionName, seconds);
 }
 

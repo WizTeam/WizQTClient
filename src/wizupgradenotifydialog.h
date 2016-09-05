@@ -4,19 +4,19 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizUpgradeNotifyDialog;
+class WizUpgradeNotifyDialog;
 }
 
-class CWizUpgradeNotifyDialog : public QDialog
+class WizUpgradeNotifyDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizUpgradeNotifyDialog(const QString& changeUrl, QWidget *parent = 0);
-    ~CWizUpgradeNotifyDialog();
+    explicit WizUpgradeNotifyDialog(const QString& changeUrl, QWidget *parent = 0);
+    ~WizUpgradeNotifyDialog();
     
 private:
-    Ui::CWizUpgradeNotifyDialog *ui;
+    Ui::WizUpgradeNotifyDialog *ui;
 };
 
 #endif // WIZPGRADENOTIFYDIALOG_H

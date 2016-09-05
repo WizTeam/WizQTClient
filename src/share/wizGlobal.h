@@ -7,8 +7,8 @@
 struct WIZDOCUMENTDATA;
 class QSettings;
 
-class CWizDocumentView;
-class MainWindow;
+class WizDocumentView;
+class WizMainWindow;
 
 
 class WizGlobal : public QObject
@@ -23,12 +23,12 @@ public:
 public:
     static WizGlobal* instance();
     //
-    static void setMainWindow(MainWindow* mw);
-    static MainWindow* mainWindow();
+    static void setMainWindow(WizMainWindow* mw);
+    static WizMainWindow* mainWindow();
 
-    static void emitViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    static void emitViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
-    static void emitCloseNoteRequested(CWizDocumentView* view);
+    static void emitViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
+    static void emitViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    static void emitCloseNoteRequested(WizDocumentView* view);
     static void emitMarkdownSettingChanged();
     //
     static void setSettings(QSettings *settings);
@@ -38,11 +38,11 @@ public:
 
 private:
     //
-    friend class MainWindow;
+    friend class WizMainWindow;
 Q_SIGNALS:
-    void viewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    void viewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
-    void closeNoteRequested(CWizDocumentView* view);
+    void viewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
+    void viewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void closeNoteRequested(WizDocumentView* view);
     void markdownSettingChanged();
 };
 

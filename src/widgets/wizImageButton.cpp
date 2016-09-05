@@ -3,13 +3,13 @@
 #include <QStyleOptionButton>
 #include <QPixmap>
 
-wizImageButton::wizImageButton(QWidget* parent) :
+WizImageButton::WizImageButton(QWidget* parent) :
     QPushButton(parent)
 {
     m_lockNormalStatus = false;
 }
 
-void wizImageButton::setIcon(const QIcon& icon)
+void WizImageButton::setIcon(const QIcon& icon)
 {
     m_normalIcon = icon.pixmap(size(), QIcon::Normal, QIcon::Off);
     m_hotIcon = icon.pixmap(size(), QIcon::Active, QIcon::On);
@@ -18,45 +18,45 @@ void wizImageButton::setIcon(const QIcon& icon)
     m_currentIcon = m_normalIcon;
 }
 
-void wizImageButton::setIconNormal(const QString& icoFile)
+void WizImageButton::setIconNormal(const QString& icoFile)
 {
     m_normalIcon = QPixmap(icoFile);
 }
 
-void wizImageButton::setIconHot(const QString& icoFile)
+void WizImageButton::setIconHot(const QString& icoFile)
 {
     m_hotIcon = QPixmap(icoFile);
 }
 
-void wizImageButton::setIconDown(const QString& icoFile)
+void WizImageButton::setIconDown(const QString& icoFile)
 {
     m_downIcon = QPixmap(icoFile);
 }
 
-void wizImageButton::setLockNormalStatus(bool lock)
+void WizImageButton::setLockNormalStatus(bool lock)
 {
     m_lockNormalStatus = lock;
 }
 
-void wizImageButton::setStatusHot()
+void WizImageButton::setStatusHot()
 {
     m_currentIcon = m_hotIcon;
     update();
 }
 
-void wizImageButton::setStatusNormal()
+void WizImageButton::setStatusNormal()
 {
     m_currentIcon = m_normalIcon;
     update();
 }
 
-void wizImageButton::setStatusDown()
+void WizImageButton::setStatusDown()
 {
     m_currentIcon = m_downIcon;
     update();
 }
 
-void wizImageButton::paintEvent(QPaintEvent* event)
+void WizImageButton::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
 
@@ -68,7 +68,7 @@ void wizImageButton::paintEvent(QPaintEvent* event)
     p.drawPixmap(opt.rect, m_currentIcon);
 }
 
-void wizImageButton::mousePressEvent(QMouseEvent* event)
+void WizImageButton::mousePressEvent(QMouseEvent* event)
 {
     if (!m_lockNormalStatus) {
         m_oldIcon = m_currentIcon;
@@ -78,7 +78,7 @@ void wizImageButton::mousePressEvent(QMouseEvent* event)
     QPushButton::mousePressEvent(event);
 }
 
-void wizImageButton::mouseReleaseEvent(QMouseEvent* event)
+void WizImageButton::mouseReleaseEvent(QMouseEvent* event)
 {
     if (!m_lockNormalStatus) {
         m_currentIcon = m_oldIcon;

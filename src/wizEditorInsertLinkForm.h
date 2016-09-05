@@ -4,16 +4,16 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizEditorInsertLinkForm;
+class WizEditorInsertLinkForm;
 }
 
-class CWizEditorInsertLinkForm : public QDialog
+class WizEditorInsertLinkForm : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizEditorInsertLinkForm(QWidget *parent = 0);
-    ~CWizEditorInsertLinkForm();
+    explicit WizEditorInsertLinkForm(QWidget *parent = 0);
+    ~WizEditorInsertLinkForm();
 
 //    QString getContent();
 //    void setContent(const QString& strText);
@@ -29,7 +29,7 @@ private slots:
     void on_pushButton_ok_clicked();
 
 private:
-    Ui::CWizEditorInsertLinkForm *ui;
+    Ui::WizEditorInsertLinkForm *ui;
 };
 
 #endif // WIZEDITORINSERTLINKFORM_H

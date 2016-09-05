@@ -12,85 +12,85 @@
 #include "token.h"
 
 
-AsyncApi::AsyncApi(QObject *parent) : QObject(parent)
+WizAsyncApi::WizAsyncApi(QObject *parent) : QObject(parent)
 {
     m_networkManager = new QNetworkAccessManager(this);
     qRegisterMetaType<WIZUSERINFO>("WIZUSERINFO");
 }
 
-AsyncApi::~AsyncApi()
+WizAsyncApi::~WizAsyncApi()
 {
 }
 
-void AsyncApi::login(const QString& strUserId, const QString& strPasswd)
+void WizAsyncApi::login(const QString& strUserId, const QString& strPasswd)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         login_impl(strUserId, strPasswd);
     });
 }
 
-bool AsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
+bool WizAsyncApi::login_impl(const QString& strUserId, const QString& strPasswd)
 {
-    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
-    bool ret = asServer.Login(strUserId, strPasswd);
+    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+    bool ret = asServer.login(strUserId, strPasswd);
     if (!ret) {
-        m_nErrorCode = asServer.GetLastErrorCode();
-        m_strErrorMessage = asServer.GetLastErrorMessage();
+        m_nErrorCode = asServer.getLastErrorCode();
+        m_strErrorMessage = asServer.getLastErrorMessage();
     }
 
-    Q_EMIT loginFinished(asServer.GetUserInfo());
+    Q_EMIT loginFinished(asServer.getUserInfo());
     return ret;
 }
 
-void AsyncApi::getToken(const QString& strUserId, const QString& strPasswd)
+void WizAsyncApi::getToken(const QString& strUserId, const QString& strPasswd)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         getToken_impl(strUserId, strPasswd);
     });
 }
 
-bool AsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
+bool WizAsyncApi::getToken_impl(const QString& strUserId, const QString& strPasswd)
 {
     QString strToken;
 
-    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
-    bool ret = asServer.GetToken(strUserId, strPasswd, strToken);
+    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+    bool ret = asServer.getToken(strUserId, strPasswd, strToken);
     if (!ret) {
-        m_nErrorCode = asServer.GetLastErrorCode();
-        m_strErrorMessage = asServer.GetLastErrorMessage();
+        m_nErrorCode = asServer.getLastErrorCode();
+        m_strErrorMessage = asServer.getLastErrorMessage();
     }
 
     Q_EMIT getTokenFinished(strToken);
     return ret;
 }
 
-void AsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
+void WizAsyncApi::keepAlive(const QString& strToken, const QString& strKbGUID)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         keepAlive_impl(strToken, strKbGUID);
     });
 }
 
-bool AsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
+bool WizAsyncApi::keepAlive_impl(const QString& strToken, const QString& strKbGUID)
 {
-    CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
+    WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
 
     WIZUSERINFO info;
     info.strToken = strToken;
     info.strKbGUID = strKbGUID;
-    asServer.SetUserInfo(info);
+    asServer.setUserInfo(info);
 
-    bool ret = asServer.KeepAlive(strToken);
+    bool ret = asServer.keepAlive(strToken);
     if (!ret) {
-        m_nErrorCode = asServer.GetLastErrorCode();
-        m_strErrorMessage = asServer.GetLastErrorMessage();
+        m_nErrorCode = asServer.getLastErrorCode();
+        m_strErrorMessage = asServer.getLastErrorMessage();
     }
 
     Q_EMIT keepAliveFinished(ret);
     return ret;
 }
 
-void AsyncApi::registerAccount(const QString& strUserId, const QString& strPasswd,
+void WizAsyncApi::registerAccount(const QString& strUserId, const QString& strPasswd,
                                const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
@@ -98,56 +98,56 @@ void AsyncApi::registerAccount(const QString& strUserId, const QString& strPassw
     });
 }
 
-bool AsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
+bool WizAsyncApi::registerAccount_impl(const QString& strUserId, const QString& strPasswd,
                                     const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
-    CWizKMAccountsServer aServer(CommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
 
-    bool ret = aServer.CreateAccount(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
+    bool ret = aServer.createAccount(strUserId, strPasswd, strInviteCode, strCaptchaID, strCaptcha);
     if (!ret) {
-        m_nErrorCode = aServer.GetLastErrorCode();
-        m_strErrorMessage = aServer.GetLastErrorMessage();
+        m_nErrorCode = aServer.getLastErrorCode();
+        m_strErrorMessage = aServer.getLastErrorMessage();
     }
 
     Q_EMIT registerAccountFinished(ret);
     return ret;
 }
 
-void AsyncApi::setMessageReadStatus(const QString& ids, bool bRead)
+void WizAsyncApi::setMessageReadStatus(const QString& ids, bool bRead)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         setMessageReadStatus_impl(ids, bRead);
     });
 }
 
-void AsyncApi::setMessageDeleteStatus(const QString& ids, bool bDelete)
+void WizAsyncApi::setMessageDeleteStatus(const QString& ids, bool bDelete)
 {
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
         setMessageDeleteStatus_impl(ids, bDelete);
     });
 }
 
-void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
+void WizAsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
 {
-    QString strToken = Token::token();
+    QString strToken = WizToken::token();
     qDebug() << "set message read status, strken:" << strToken;
 
     if (strToken.isEmpty()) {
         return;
     }
 
-    CWizKMAccountsServer aServer(CommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
 
-    WIZUSERINFO info = Token::info();
+    WIZUSERINFO info = WizToken::info();
     info.strToken = strToken;
-    aServer.SetUserInfo(info);
+    aServer.setUserInfo(info);
 
-    bool ret = aServer.SetMessageReadStatus(ids, bRead);
+    bool ret = aServer.setMessageReadStatus(ids, bRead);
     qDebug() << "set message read status : " << ret;
     if (!ret)
     {
-        m_nErrorCode = aServer.GetLastErrorCode();
-        m_strErrorMessage = aServer.GetLastErrorMessage();
+        m_nErrorCode = aServer.getLastErrorCode();
+        m_strErrorMessage = aServer.getLastErrorMessage();
     }
     else
     {
@@ -155,20 +155,20 @@ void AsyncApi::setMessageReadStatus_impl(const QString& ids, bool bRead)
     }
 }
 
-void AsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
+void WizAsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
 {
-    QString strToken = Token::token();
+    QString strToken = WizToken::token();
     if (strToken.isEmpty()) {
         return;
     }
 
-    CWizKMAccountsServer aServer(CommonApiEntry::syncUrl());
+    WizKMAccountsServer aServer(WizCommonApiEntry::syncUrl());
 
-    WIZUSERINFO info = Token::info();
+    WIZUSERINFO info = WizToken::info();
     info.strToken = strToken;
-    aServer.SetUserInfo(info);
+    aServer.setUserInfo(info);
 
-    bool ret = aServer.SetMessageDeleteStatus(ids, bDelete);
+    bool ret = aServer.setMessageDeleteStatus(ids, bDelete);
     if (ret)
     {
         qDebug() << "[MessageStatus]Upload message delete status OK";
@@ -176,8 +176,8 @@ void AsyncApi::setMessageDeleteStatus_impl(const QString& ids, bool bDelete)
     }
     else
     {
-        m_nErrorCode = aServer.GetLastErrorCode();
-        m_strErrorMessage = aServer.GetLastErrorMessage();
+        m_nErrorCode = aServer.getLastErrorCode();
+        m_strErrorMessage = aServer.getLastErrorMessage();
         qDebug() << "[MessageStatus]Upload message delete status error :  " << m_nErrorCode << m_strErrorMessage;
     }
     //

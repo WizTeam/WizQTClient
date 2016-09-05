@@ -50,20 +50,20 @@
 #define DOCUMENT_STATUS_PERSONAL           0x0020
 #define DOCUMENT_STATUS_ON_EDITREQUEST       0x0040
 
-CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
+WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     : QWidget(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
     , m_userSettings(app.userSettings())
-    , m_commentWidget(new CWizLocalProgressWebView(app.mainWindow()))
-    , m_title(new TitleBar(app, this))
-    , m_passwordView(new CWizUserCipherForm(app, this))
+    , m_commentWidget(new WizLocalProgressWebView(app.mainWindow()))
+    , m_title(new WizTitleBar(app, this))
+    , m_passwordView(new WizUserCipherForm(app, this))
     , m_defaultViewMode(app.userSettings().noteViewMode())
-    , m_transitionView(new CWizDocumentTransitionView(this))
+    , m_transitionView(new WizDocumentTransitionView(this))
     , m_bLocked(false)
     , m_editorMode(modeReader)
     , m_noteLoaded(false)
-    , m_editStatusSyncThread(new CWizDocumentEditStatusSyncThread(this))
+    , m_editStatusSyncThread(new WizDocumentEditStatusSyncThread(this))
     , m_editStatus(0)
     , m_sizeHint(QSize(200, 1))
     , m_comments(NULL)
@@ -113,7 +113,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
 
     QWidget* wgtEditor = new QWidget(m_docView);
     //
-    m_web = new CWizDocumentWebView(app, wgtEditor);
+    m_web = new WizDocumentWebView(app, wgtEditor);
     //m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_title->setEditor(m_web);
     //
@@ -128,7 +128,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     layoutEditor->setStretchFactor(m_web, 1);
 
     //
-    m_splitter = new CWizSplitter(this);
+    m_splitter = new WizSplitter(this);
     m_splitter->addWidget(wgtEditor);
     m_splitter->addWidget(m_commentWidget);
     m_splitter->setOrientation(Qt::Horizontal);
@@ -142,7 +142,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     setLayout(layoutMain);
     layoutMain->addWidget(m_tab);
 
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     m_downloaderHost = mainWindow->downloaderHost();
     connect(m_downloaderHost, SIGNAL(downloadDone(const WIZOBJECTDATA&, bool)),
             SLOT(on_download_finished(const WIZOBJECTDATA&, bool)));
@@ -162,14 +162,14 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(documentUploaded(QString,QString)), \
             m_editStatusSyncThread, SLOT(documentUploaded(QString,QString)));
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteRequested(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteRequested(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,WIZDOCUMENTDATA,bool)),
+            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
-    connect(WizGlobal::instance(), SIGNAL(closeNoteRequested(CWizDocumentView*)),
-            SLOT(onCloseNoteRequested(CWizDocumentView*)));
+    connect(WizGlobal::instance(), SIGNAL(closeNoteRequested(WizDocumentView*)),
+            SLOT(onCloseNoteRequested(WizDocumentView*)));
 
     connect(m_web, SIGNAL(focusIn()), SLOT(on_webView_focus_changed()));
 
@@ -187,7 +187,7 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     m_editStatusSyncThread->start(QThread::IdlePriority);
 //    m_editStatusCheckThread->start(QThread::IdlePriority);
 
-    m_editStatusChecker = new CWizDocumentStatusChecker();
+    m_editStatusChecker = new WizDocumentStatusChecker();
     connect(this, SIGNAL(checkDocumentEditStatusRequest(QString,QString)), m_editStatusChecker,
             SLOT(checkEditStatus(QString,QString)));
     connect(this, SIGNAL(stopCheckDocumentEditStatusRequest(QString,QString)),
@@ -208,23 +208,23 @@ CWizDocumentView::CWizDocumentView(CWizExplorerApp& app, QWidget* parent)
     checkThread->start();
 }
 
-CWizDocumentView::~CWizDocumentView()
+WizDocumentView::~WizDocumentView()
 {
     if (m_editStatusChecker)
         delete m_editStatusChecker;
 }
 
-QSize CWizDocumentView::sizeHint() const
+QSize WizDocumentView::sizeHint() const
 {
     return m_sizeHint;
 }
 
-void CWizDocumentView::setSizeHint(QSize size)
+void WizDocumentView::setSizeHint(QSize size)
 {
     m_sizeHint = size;
 }
 
-void CWizDocumentView::waitForDone()
+void WizDocumentView::waitForDone()
 {
     m_editStatusChecker->thread()->quit();
     m_editStatusSyncThread->waitForDone();
@@ -244,43 +244,43 @@ void CWizDocumentView::waitForDone()
     }
 }
 
-QWidget* CWizDocumentView::client() const
+QWidget* WizDocumentView::client() const
 {
     return m_tab;
 }
 
-WizWebEngineView*CWizDocumentView::commentView() const
+WizWebEngineView*WizDocumentView::commentView() const
 {
     return m_commentWidget->web();
 }
 
-CWizLocalProgressWebView*CWizDocumentView::commentWidget() const
+WizLocalProgressWebView*WizDocumentView::commentWidget() const
 {
     return m_commentWidget;
 }
 
-CWizDocumentTransitionView* CWizDocumentView::transitionView()
+WizDocumentTransitionView* WizDocumentView::transitionView()
 {
     return m_transitionView;
 }
 
-TitleBar*CWizDocumentView::titleBar()
+WizTitleBar*WizDocumentView::titleBar()
 {
     return m_title;
 }
-void CWizDocumentView::showEvent(QShowEvent *event)
+void WizDocumentView::showEvent(QShowEvent *event)
 {
     Q_UNUSED(event);
 }
 
-void CWizDocumentView::resizeEvent(QResizeEvent* ev)
+void WizDocumentView::resizeEvent(QResizeEvent* ev)
 {
     QWidget::resizeEvent(ev);
 
     m_title->editorToolBar()->adjustButtonPosition();
 }
 
-void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
+void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
 {
     if (view != this)
         return;
@@ -294,40 +294,40 @@ void CWizDocumentView::onViewNoteRequested(CWizDocumentView* view, const WIZDOCU
     }
 }
 
-void CWizDocumentView::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void WizDocumentView::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
 {
 }
 
-bool CWizDocumentView::reload()
+bool WizDocumentView::reload()
 {
-    bool ret = m_dbMgr.db(m_note.strKbGUID).DocumentFromGUID(m_note.strGUID, m_note);
+    bool ret = m_dbMgr.db(m_note.strKbGUID).documentFromGuid(m_note.strGUID, m_note);
     m_title->updateInfo(note());
 
     return ret;
 }
 
-void CWizDocumentView::reloadNote()
+void WizDocumentView::reloadNote()
 {
     reload();
     m_web->reloadNoteData(note());
 }
 
 
-void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
+void WizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
 {
     m_bLocked = false;
     int nLockReason = -1;
 
-    if (m_dbMgr.db(data.strKbGUID).IsGroup()) {
+    if (m_dbMgr.db(data.strKbGUID).isGroup()) {
         if (!forceEdit) {
-            nLockReason = NotifyBar::LockForGruop;
+            nLockReason = WizNotifyBar::LockForGruop;
             m_bLocked = true;
         }
-    } else if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
-        nLockReason = NotifyBar::PermissionLack;
+    } else if (!m_dbMgr.db(data.strKbGUID).canEditDocument(data)) {
+        nLockReason = WizNotifyBar::PermissionLack;
         m_bLocked = true;
-    } else if (CWizDatabase::IsInDeletedItems(data.strLocation)) {
-        nLockReason = NotifyBar::Deleted;
+    } else if (WizDatabase::isInDeletedItems(data.strLocation)) {
+        nLockReason = WizNotifyBar::Deleted;
         m_bLocked = true;
     }
 
@@ -338,7 +338,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
         }
     }
 
-    bool bGroup = m_dbMgr.db(data.strKbGUID).IsGroup();
+    bool bGroup = m_dbMgr.db(data.strKbGUID).isGroup();
     m_editStatus = m_editStatus & DOCUMENT_STATUS_PERSONAL;
     if (bGroup)
     {
@@ -346,7 +346,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
-    if (NotifyBar::LockForGruop == nLockReason)
+    if (WizNotifyBar::LockForGruop == nLockReason)
     {
         startCheckDocumentEditStatus();
     }
@@ -357,7 +357,7 @@ void CWizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 }
 
-void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
+void WizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
 {
     WIZDOCUMENTDATA dataTemp = wizDoc;
     //
@@ -365,7 +365,7 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         //
         WIZDOCUMENTDATA data = dataTemp;
 
-        if (m_dbMgr.db(m_note.strKbGUID).IsGroup())
+        if (m_dbMgr.db(m_note.strKbGUID).isGroup())
         {
             stopDocumentEditingStatus();
         }
@@ -375,9 +375,9 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         initStat(data, forceEdit);
 
         // download document if not exist
-        CWizDatabase& db = m_dbMgr.db(data.strKbGUID);
-        QString strDocumentFileName = db.GetDocumentFileName(data.strGUID);
-        if (!db.IsObjectDataDownloaded(data.strGUID, "document") || \
+        WizDatabase& db = m_dbMgr.db(data.strKbGUID);
+        QString strDocumentFileName = db.getDocumentFileName(data.strGUID);
+        if (!db.isObjectDataDownloaded(data.strGUID, "document") || \
                 !PathFileExists(strDocumentFileName))
         {
             m_web->clear();
@@ -390,17 +390,17 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
 
         // ask user cipher if needed
         //
-        data.nProtected = CWizZiwReader::isEncryptedFile(strDocumentFileName) ? 1 : 0;
+        data.nProtected = WizZiwReader::isEncryptedFile(strDocumentFileName) ? 1 : 0;
         if (data.nProtected) {
             //
-            db.InitCert(false);
+            db.initCert(false);
             //
             if(!db.loadUserCert()) {
                 return;
             }
 
-            if (db.GetCertPassword().isEmpty()) {
-                m_passwordView->setHint(db.GetCertPasswordHint());
+            if (db.getCertPassword().isEmpty()) {
+                m_passwordView->setHint(db.getCertPasswordHint());
                 m_tab->setCurrentWidget(m_passwordView);
                 m_passwordView->setCipherEditorFocus();
 
@@ -413,23 +413,23 @@ void CWizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         loadNote(data);
         WIZDOCUMENTDATA docData = data;
         docData.nReadCount ++;
-        db.ModifyDocumentReadCount(docData);
+        db.modifyDocumentReadCount(docData);
         docData.tAccessed = WizGetCurrentTime();
-        db.ModifyDocumentDateAccessed(docData);
+        db.modifyDocumentDateAccessed(docData);
 
     });
 }
 
-void CWizDocumentView::reviewCurrentNote()
+void WizDocumentView::reviewCurrentNote()
 {
     Q_ASSERT(!m_note.strGUID.isEmpty());
 
     initStat(m_note, m_editorMode == modeEditor);
 
     // download document if not exist
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
-    if (!db.IsObjectDataDownloaded(m_note.strGUID, "document") || \
+    WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    QString strDocumentFileName = db.getDocumentFileName(m_note.strGUID);
+    if (!db.isObjectDataDownloaded(m_note.strGUID, "document") || \
             !PathFileExists(strDocumentFileName))
     {
         downloadNoteFromServer(m_note);
@@ -443,8 +443,8 @@ void CWizDocumentView::reviewCurrentNote()
             return;
         }
 
-        if (db.GetCertPassword().isEmpty()) {
-            m_passwordView->setHint(db.GetCertPasswordHint());
+        if (db.getCertPassword().isEmpty()) {
+            m_passwordView->setHint(db.getCertPasswordHint());
             m_tab->setCurrentWidget(m_passwordView);
             m_passwordView->setCipherEditorFocus();
 
@@ -457,7 +457,7 @@ void CWizDocumentView::reviewCurrentNote()
     }
 }
 
-void CWizDocumentView::setEditorMode(WizEditorMode editorMode)
+void WizDocumentView::setEditorMode(WizEditorMode editorMode)
 {
     if (m_bLocked)
         return;
@@ -468,7 +468,7 @@ void CWizDocumentView::setEditorMode(WizEditorMode editorMode)
     bool edit = editorMode == modeEditor;
     bool read = !edit;
 
-    bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).IsGroup();
+    bool isGroupNote =m_dbMgr.db(m_note.strKbGUID).isGroup();
     if (edit && isGroupNote)
     {
         // don not use message tips when check document editable
@@ -509,7 +509,7 @@ void CWizDocumentView::setEditorMode(WizEditorMode editorMode)
     }
 }
 
-void CWizDocumentView::setDefaultViewMode(WizDocumentViewMode mode)
+void WizDocumentView::setDefaultViewMode(WizDocumentViewMode mode)
 {
     m_defaultViewMode = mode;
 
@@ -527,39 +527,39 @@ void CWizDocumentView::setDefaultViewMode(WizDocumentViewMode mode)
     }
 }
 
-void CWizDocumentView::settingsChanged()
+void WizDocumentView::settingsChanged()
 {
     setDefaultViewMode(m_userSettings.noteViewMode());
 }
 
-void CWizDocumentView::sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID)
+void WizDocumentView::sendDocumentSavedSignal(const QString& strGUID, const QString& strKbGUID)
 {
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    if (db.IsGroup())
+    WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (db.isGroup())
     {
-        QString strUserAlias = db.GetUserAlias();
+        QString strUserAlias = db.getUserAlias();
         m_editStatusSyncThread->documentSaved(strUserAlias, strKbGUID, strGUID);
     }
 
     emit documentSaved(strGUID, this);
 }
 
-void CWizDocumentView::resetTitle(const QString& strTitle)
+void WizDocumentView::resetTitle(const QString& strTitle)
 {
     m_title->resetTitle(strTitle);
 }
 
-void CWizDocumentView::promptMessage(const QString &strMsg)
+void WizDocumentView::promptMessage(const QString &strMsg)
 {
     m_tab->setCurrentWidget(m_msgWidget);
 
     m_msgLabel->setText(strMsg);
 }
 
-bool CWizDocumentView::checkListClickable()
+bool WizDocumentView::checkListClickable()
 {
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    if (db.CanEditDocument(m_note))
+    WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (db.canEditDocument(m_note))
     {
         //m_title->showMessageTips(Qt::PlainText, tr("Checking whether checklist is clickable..."));
         setCursor(Qt::WaitCursor);
@@ -568,7 +568,7 @@ bool CWizDocumentView::checkListClickable()
     return false;
 }
 
-void CWizDocumentView::setStatusToEditingByCheckList()
+void WizDocumentView::setStatusToEditingByCheckList()
 {
     stopCheckDocumentEditStatus();
     sendDocumentEditingStatus();
@@ -576,9 +576,9 @@ void CWizDocumentView::setStatusToEditingByCheckList()
                                                "Switch to other notes to free this note."));
 }
 
-void CWizDocumentView::showCoachingTips()
+void WizDocumentView::showCoachingTips()
 {
-    if (CWizTipsWidget* tipWidget = m_title->editorToolBar()->showCoachingTips())
+    if (WizTipsWidget* tipWidget = m_title->editorToolBar()->showCoachingTips())
     {
         connect(tipWidget, SIGNAL(finished()), m_title, SLOT(showCoachingTips()));
     }
@@ -588,14 +588,14 @@ void CWizDocumentView::showCoachingTips()
     }
 }
 
-void CWizDocumentView::setEditorFocus()
+void WizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);
     m_web->editorFocus();
 }
 
 
-void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
+void WizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     if (attachment.strDocumentGUID != note().strGUID)
         return;
@@ -603,7 +603,7 @@ void CWizDocumentView::on_attachment_created(const WIZDOCUMENTATTACHMENTDATA& at
     reload();
 }
 
-void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment)
+void WizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attachment)
 {
     if (attachment.strDocumentGUID != note().strGUID)
         return;
@@ -611,17 +611,17 @@ void CWizDocumentView::on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& at
     reload();
 }
 
-void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool editable)
+void WizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool editable)
 {
 //    qDebug() << "check eidt status finished , editable  : " << editable;
     if (strGUID == m_note.strGUID)
     {
         if (editable)
         {
-            CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+            WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
             WIZDOCUMENTDATA doc;
-            db.DocumentFromGUID(strGUID, doc);
-            if (db.CanEditDocument(doc) && !CWizDatabase::IsInDeletedItems(doc.strLocation))
+            db.documentFromGuid(strGUID, doc);
+            if (db.canEditDocument(doc) && !WizDatabase::isInDeletedItems(doc.strLocation))
             {
                 //            qDebug() << "document editable , hide message tips.";
                 m_title->hideMessageTips(true);
@@ -633,7 +633,7 @@ void CWizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool 
     }
 }
 
-void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
+void WizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
 {
     m_web->viewDocument(doc, m_editorMode);
     m_title->setNote(doc, m_editorMode, m_bLocked);
@@ -649,41 +649,41 @@ void CWizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
     }
 }
 
-void CWizDocumentView::downloadNoteFromServer(const WIZDOCUMENTDATA& note)
+void WizDocumentView::downloadNoteFromServer(const WIZDOCUMENTDATA& note)
 {
     connect(m_downloaderHost, SIGNAL(downloadProgress(QString,int,int)),
             m_transitionView, SLOT(onDownloadProgressChanged(QString,int,int)), Qt::UniqueConnection);
     m_downloaderHost->downloadDocument(note);
-    m_transitionView->showAsMode(note.strGUID, CWizDocumentTransitionView::Downloading);
+    m_transitionView->showAsMode(note.strGUID, WizDocumentTransitionView::Downloading);
 }
 
-void CWizDocumentView::sendDocumentEditingStatus()
+void WizDocumentView::sendDocumentEditingStatus()
 {
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    if (db.IsGroup())
+    WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (db.isGroup())
     {
-        QString strUserAlias = db.GetUserAlias();
+        QString strUserAlias = db.getUserAlias();
         m_editStatusSyncThread->startEditingDocument(strUserAlias, m_note.strKbGUID, m_note.strGUID);
     }
 }
 
-void CWizDocumentView::stopDocumentEditingStatus()
+void WizDocumentView::stopDocumentEditingStatus()
 {
     WIZDOCUMENTDATA doc = m_note;
-    if (m_dbMgr.db(doc.strKbGUID).DocumentFromGUID(doc.strGUID, doc))
+    if (m_dbMgr.db(doc.strKbGUID).documentFromGuid(doc.strGUID, doc))
     {
         bool bModified = doc.nVersion == -1;
         m_editStatusSyncThread->stopEditingDocument(doc.strKbGUID, doc.strGUID, bModified);
     }
 }
 
-void CWizDocumentView::startCheckDocumentEditStatus()
+void WizDocumentView::startCheckDocumentEditStatus()
 {
     //首先检查笔记是否是待下载状态，如果一篇笔记一直打开，自动同步会把笔记状态设置为待下载，
     //但是其版本号是服务器的版本号，检查新版本无效果
 
-    CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-    if (!db.IsDocumentDownloaded(m_note.strGUID))
+    WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+    if (!db.isDocumentDownloaded(m_note.strGUID))
     {
         on_checkDocumentChanged_finished(m_note.strGUID, true);
         m_title->stopEditButtonAnimation();
@@ -694,12 +694,12 @@ void CWizDocumentView::startCheckDocumentEditStatus()
     emit checkDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
-void CWizDocumentView::stopCheckDocumentEditStatus()
+void WizDocumentView::stopCheckDocumentEditStatus()
 {
     emit stopCheckDocumentEditStatusRequest(m_note.strKbGUID, m_note.strGUID);
 }
 
-bool CWizDocumentView::checkDocumentEditable()
+bool WizDocumentView::checkDocumentEditable()
 {
     QEventLoop loop;
     connect(m_editStatusChecker, SIGNAL(checkEditStatusFinished(QString,bool)), &loop, SLOT(quit()));
@@ -715,7 +715,7 @@ bool CWizDocumentView::checkDocumentEditable()
     return !(editByOther || newVersion) || isOffLine;
 }
 
-void CWizDocumentView::stopCheckDocumentAnimations()
+void WizDocumentView::stopCheckDocumentAnimations()
 {
     if (cursor().shape() != Qt::ArrowCursor)
     {
@@ -724,7 +724,7 @@ void CWizDocumentView::stopCheckDocumentAnimations()
     m_title->stopEditButtonAnimation();
 }
 
-void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
+void WizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, const WIZDOCUMENTDATA& documentNew)
 {
     Q_UNUSED(documentOld);
 
@@ -734,20 +734,20 @@ void CWizDocumentView::on_document_modified(const WIZDOCUMENTDATA& documentOld, 
     reload();
 }
 
-void CWizDocumentView::onCloseNoteRequested(CWizDocumentView *view)
+void WizDocumentView::onCloseNoteRequested(WizDocumentView *view)
 {
     Q_UNUSED(view)
 
     m_tab->setCurrentWidget(m_blankView);
 }
 
-void CWizDocumentView::onCipherCheckRequest()
+void WizDocumentView::onCipherCheckRequest()
 {
     const WIZDOCUMENTDATA& noteData = note();
-    CWizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
+    WizDatabase& db = m_dbMgr.db(noteData.strKbGUID);
     //
     QString password = m_passwordView->userCipher();
-    if (!db.VerifyCertPassword(password))
+    if (!db.verifyCertPassword(password))
     {
         m_passwordView->cipherError();
         return;
@@ -759,7 +759,7 @@ void CWizDocumentView::onCipherCheckRequest()
     loadNote(noteData);
 }
 
-void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSucceed)
+void WizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSucceed)
 {
     if (m_note.strKbGUID != data.strKbGUID
             || m_note.strGUID != data.strObjectGUID)
@@ -767,7 +767,7 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
 
     if (!bSucceed)
     {
-        m_transitionView->showAsMode(data.strObjectGUID, CWizDocumentTransitionView::ErrorOccured);
+        m_transitionView->showAsMode(data.strObjectGUID, WizDocumentTransitionView::ErrorOccured);
         return;
     }
 
@@ -782,7 +782,7 @@ void CWizDocumentView::on_download_finished(const WIZOBJECTDATA &data, bool bSuc
     viewNote(m_note, forceEdit);
 }
 
-void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
+void WizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
 {
     //verify m_noteLoaded before reload
     if (note().strGUID != data.strGUID || !m_noteLoaded)
@@ -790,11 +790,11 @@ void CWizDocumentView::on_document_data_modified(const WIZDOCUMENTDATA& data)
 
     reloadNote();
     //
-    MainWindow::quickSyncKb(data.strKbGUID);
+    WizMainWindow::quickSyncKb(data.strKbGUID);
 }
 
-void CWizDocumentView::on_document_data_changed(const QString& strGUID,
-                                              CWizDocumentView* viewer)
+void WizDocumentView::on_document_data_changed(const QString& strGUID,
+                                              WizDocumentView* viewer)
 {
     if (viewer != this && strGUID == note().strGUID && m_editorMode == modeReader)
     {
@@ -803,7 +803,7 @@ void CWizDocumentView::on_document_data_changed(const QString& strGUID,
 }
 
 
-void CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
+void WizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList editors)
 {
     //
     //QString strCurrentUser = m_dbMgr.db(m_note.strKbGUID).GetUserAlias();
@@ -816,8 +816,8 @@ void CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList e
             QString strEditor = editors.join(" , ");
             if (!strEditor.isEmpty())
             {
-                CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-                QString strUserAlias = db.GetUserAlias();
+                WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+                QString strUserAlias = db.getUserAlias();
                 if (editors.count() == 1 && editors.first() == strUserAlias)
                 {
                     qDebug() << "[EditStatus]:editing by myself.";
@@ -849,7 +849,7 @@ void CWizDocumentView::on_documentEditingByOthers(QString strGUID, QStringList e
     }
 }
 
-void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
+void WizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
 {
     if (strGUID == m_note.strGUID)
     {
@@ -864,7 +864,7 @@ void CWizDocumentView::on_checkEditStatus_timeout(const QString& strGUID)
     }
 }
 
-void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
+void WizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, bool changed)
 {
     if (strGUID == m_note.strGUID)
     {       
@@ -879,17 +879,17 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
             int nLockReason = -1;
 
             const WIZDOCUMENTDATA& doc = note();
-            if (!m_dbMgr.db(doc.strKbGUID).CanEditDocument(doc)) {
-                nLockReason = NotifyBar::PermissionLack;
+            if (!m_dbMgr.db(doc.strKbGUID).canEditDocument(doc)) {
+                nLockReason = WizNotifyBar::PermissionLack;
                 m_bLocked = true;
-            } else if (CWizDatabase::IsInDeletedItems(doc.strLocation)) {
-                nLockReason = NotifyBar::Deleted;
+            } else if (WizDatabase::isInDeletedItems(doc.strLocation)) {
+                nLockReason = WizNotifyBar::Deleted;
                 m_bLocked = true;
             }
 
             if (m_bLocked)
             {
-                bool bGroup = m_dbMgr.db(doc.strKbGUID).IsGroup();
+                bool bGroup = m_dbMgr.db(doc.strKbGUID).isGroup();
                 m_title->setLocked(m_bLocked, nLockReason, bGroup);
             }
             //
@@ -901,13 +901,13 @@ void CWizDocumentView::on_checkDocumentChanged_finished(const QString& strGUID, 
     }
 }
 
-void CWizDocumentView::on_syncDatabase_request(const QString& strKbGUID)
+void WizDocumentView::on_syncDatabase_request(const QString& strKbGUID)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     mainWindow->quickSyncKb(strKbGUID);
 }
 
-void CWizDocumentView::on_webView_focus_changed()
+void WizDocumentView::on_webView_focus_changed()
 {
     if (m_web->hasFocus())
     {
@@ -915,12 +915,12 @@ void CWizDocumentView::on_webView_focus_changed()
     }
 }
 
-void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
+void WizDocumentView::on_notifyBar_link_clicked(const QString& link)
 {
     if (link == NOTIFYBAR_LABELLINK_DOWNLOAD)
     {
-        CWizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
-        QString strDocumentFileName = db.GetDocumentFileName(m_note.strGUID);
+        WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
+        QString strDocumentFileName = db.getDocumentFileName(m_note.strGUID);
         WizDeleteFile(strDocumentFileName);
 
         downloadNoteFromServer(m_note);
@@ -928,12 +928,12 @@ void CWizDocumentView::on_notifyBar_link_clicked(const QString& link)
 }
 
 
-void CWizDocumentView::on_loadComment_request(const QString& url)
+void WizDocumentView::on_loadComment_request(const QString& url)
 {
     m_comments->load(url);
 }
 
-void CWizDocumentView::on_commentWidget_statusChanged()
+void WizDocumentView::on_commentWidget_statusChanged()
 {    
     if (m_web->isInSeperateWindow())
     {

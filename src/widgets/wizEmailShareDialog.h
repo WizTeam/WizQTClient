@@ -6,20 +6,20 @@
 #include "share/wizobject.h"
 
 namespace Ui {
-class CWizEmailShareDialog;
+class WizEmailShareDialog;
 }
 
 class QListWidgetItem;
 class QListWidget;
 class QNetworkReply;
 class QNetworkAccessManager;
-class CWizEmailShareDialog : public QDialog
+class WizEmailShareDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizEmailShareDialog(CWizExplorerApp& app, QWidget *parent = 0);
-    ~CWizEmailShareDialog();
+    explicit WizEmailShareDialog(WizExplorerApp& app, QWidget *parent = 0);
+    ~WizEmailShareDialog();
 
     void setNote(const WIZDOCUMENTDATA& note, const QString& sendTo = "");
 
@@ -56,9 +56,9 @@ private:
     void sendEmails();
 
 private:
-    Ui::CWizEmailShareDialog *ui;
+    Ui::WizEmailShareDialog *ui;
     WIZDOCUMENTDATA m_note;
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
     QDialog* m_contactDialog;
     QListWidget* m_contactList;
     QNetworkAccessManager* m_net;

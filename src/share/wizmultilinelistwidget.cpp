@@ -30,27 +30,27 @@ public:
 };
 
 
-CWizMultiLineListWidget::CWizMultiLineListWidget(int lineCount, QWidget* parent)
+WizMultiLineListWidget::WizMultiLineListWidget(int lineCount, QWidget* parent)
     : QListWidget(parent)
 {
     setItemDelegate(new CWizMultiLineListWidgetDelegate(lineCount, this));
 }
 
-int CWizMultiLineListWidget::wrapTextLineIndex() const
+int WizMultiLineListWidget::wrapTextLineIndex() const
 {
     return 1;
 }
 
-bool CWizMultiLineListWidget::imageAlignLeft() const
+bool WizMultiLineListWidget::imageAlignLeft() const
 {
     return true;
 }
-int CWizMultiLineListWidget::imageWidth() const
+int WizMultiLineListWidget::imageWidth() const
 {
     return 32;
 }
 
-QString CWizMultiLineListWidget::itemText(const QModelIndex& index, int line) const
+QString WizMultiLineListWidget::itemText(const QModelIndex& index, int line) const
 {
     if (line == 0)
     {
@@ -60,7 +60,7 @@ QString CWizMultiLineListWidget::itemText(const QModelIndex& index, int line) co
     return QString();
 }
 
-QColor CWizMultiLineListWidget::itemTextColor(const QModelIndex& index, int line, bool selected, QColor defColor) const
+QColor WizMultiLineListWidget::itemTextColor(const QModelIndex& index, int line, bool selected, QColor defColor) const
 {
     Q_UNUSED(index);
     Q_UNUSED(line);
@@ -69,14 +69,14 @@ QColor CWizMultiLineListWidget::itemTextColor(const QModelIndex& index, int line
     return defColor;
 }
 
-QPixmap CWizMultiLineListWidget::itemImage(const QModelIndex& index) const
+QPixmap WizMultiLineListWidget::itemImage(const QModelIndex& index) const
 {
     Q_UNUSED(index);
     //
     return QPixmap();
 }
 
-bool CWizMultiLineListWidget::itemExtraImage(const QModelIndex& index, const QRect& itemBound,
+bool WizMultiLineListWidget::itemExtraImage(const QModelIndex& index, const QRect& itemBound,
                                               QRect& rcImage, QPixmap& extraPix) const
 {
     Q_UNUSED(index);
@@ -87,7 +87,7 @@ bool CWizMultiLineListWidget::itemExtraImage(const QModelIndex& index, const QRe
     return false;
 }
 
-int CWizMultiLineListWidget::lineCount() const
+int WizMultiLineListWidget::lineCount() const
 {
     if (const CWizMultiLineListWidgetDelegate* delegate = dynamic_cast<const CWizMultiLineListWidgetDelegate*>(itemDelegate()))
     {

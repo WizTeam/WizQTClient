@@ -3,7 +3,7 @@
 
 #include "wizapi.h"
 
-class CWizVerifyAccount : public CWizApiBase
+class WizVerifyAccount : public CWizApiBase
 {
     Q_OBJECT
 

@@ -10,7 +10,7 @@
 
 
 
-NotifyBar::NotifyBar(QWidget *parent)
+WizNotifyBar::WizNotifyBar(QWidget *parent)
     : QWidget(parent)
     , m_type(NoNotify)
     , m_childWgt(new QWidget(this))
@@ -35,13 +35,13 @@ NotifyBar::NotifyBar(QWidget *parent)
     m_labelNotify = new QLabel(this);
     m_labelNotify->setAttribute(Qt::WA_NoSystemBackground, true);
     m_labelNotify->setAlignment(Qt::AlignVCenter);
-    m_buttonCloseRed = new wizImageButton(this);
+    m_buttonCloseRed = new WizImageButton(this);
     m_buttonCloseRed->setMaximumSize(8, 8);
-    m_buttonCloseRed->setIcon(Utils::StyleHelper::loadIcon("closeNotifyBarRed"));
+    m_buttonCloseRed->setIcon(Utils::WizStyleHelper::loadIcon("closeNotifyBarRed"));
     m_buttonCloseRed->setLockNormalStatus(true);
-    m_buttonCloseBlue = new wizImageButton(this);
+    m_buttonCloseBlue = new WizImageButton(this);
     m_buttonCloseBlue->setMaximumSize(8, 8);
-    m_buttonCloseBlue->setIcon(Utils::StyleHelper::loadIcon("closeNotifyBarBlue"));
+    m_buttonCloseBlue->setIcon(Utils::WizStyleHelper::loadIcon("closeNotifyBarBlue"));
     m_buttonCloseBlue->setLockNormalStatus(true);
     childLayout->addWidget(m_labelNotify);
     childLayout->addStretch();
@@ -59,7 +59,7 @@ NotifyBar::NotifyBar(QWidget *parent)
     applyStyleSheet(false);
 }
 
-void NotifyBar::showPermissionNotify(int type)
+void WizNotifyBar::showPermissionNotify(int type)
 {
     if (m_type == type)
         return;
@@ -92,7 +92,7 @@ void NotifyBar::showPermissionNotify(int type)
     }
 }
 
-void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
+void WizNotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
 {
     if (!info.isEmpty())
     {
@@ -109,29 +109,29 @@ void NotifyBar::showMessageTips(Qt::TextFormat format, const QString& info)
     }
 }
 
-void NotifyBar::hideMessageTips(bool useAnimation)
+void WizNotifyBar::hideMessageTips(bool useAnimation)
 {
     hideNotify(useAnimation);
 }
 
-void NotifyBar::on_closeButton_Clicked()
+void WizNotifyBar::on_closeButton_Clicked()
 {
     hideNotify(true);
 }
 
-void NotifyBar::setStyleForPermission()
+void WizNotifyBar::setStyleForPermission()
 {        
     applyStyleSheet(true);
     showCloseButton(true);
 }
 
-void NotifyBar::setStyleForEditing()
+void WizNotifyBar::setStyleForEditing()
 {    
     applyStyleSheet(false);
     showCloseButton(false);
 }
 
-void NotifyBar::showNotify()
+void WizNotifyBar::showNotify()
 {
 //    if (maximumHeight() > 0)
 //        return;
@@ -139,13 +139,13 @@ void NotifyBar::showNotify()
     m_animation->stop();
     m_animation->setDuration(800);
     m_animation->setStartValue(maximumHeight());
-    m_animation->setEndValue(Utils::StyleHelper::notifyBarHeight());
+    m_animation->setEndValue(Utils::WizStyleHelper::notifyBarHeight());
     m_animation->setEasingCurve(QEasingCurve::InExpo);
 
     m_animation->start();
 }
 
-void NotifyBar::hideNotify(bool bUseAnimation)
+void WizNotifyBar::hideNotify(bool bUseAnimation)
 {
     m_spacer->hide();
 
@@ -156,7 +156,7 @@ void NotifyBar::hideNotify(bool bUseAnimation)
         if (bUseAnimation)
         {
             m_animation->setDuration(400);
-            m_animation->setStartValue(Utils::StyleHelper::notifyBarHeight());
+            m_animation->setStartValue(Utils::WizStyleHelper::notifyBarHeight());
             m_animation->setEndValue(0);
 //            m_animation->setEasingCurve(QEasingCurve::InOutQuad);
 
@@ -171,7 +171,7 @@ void NotifyBar::hideNotify(bool bUseAnimation)
     }
 }
 
-void NotifyBar::applyStyleSheet(bool isForbidden)
+void WizNotifyBar::applyStyleSheet(bool isForbidden)
 {
     QString styleSheet;
     if (isForbidden)
@@ -190,7 +190,7 @@ void NotifyBar::applyStyleSheet(bool isForbidden)
 
 }
 
-void NotifyBar::showCloseButton(bool isForbidden)
+void WizNotifyBar::showCloseButton(bool isForbidden)
 {
     m_buttonCloseBlue->setVisible(!isForbidden);
     m_buttonCloseRed->setVisible(isForbidden);

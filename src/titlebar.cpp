@@ -52,23 +52,23 @@ QString getOptionKey()
 #endif
 }
 
-TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
+WizTitleBar::WizTitleBar(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
-    , m_editTitle(new TitleEdit(this))
-    , m_tagBar(new CWizTagBar(app, this))
-    , m_infoBar(new InfoBar(app, this))
-    , m_notifyBar(new NotifyBar(this))
-    , m_editorBar(new EditorToolBar(app, this))
+    , m_editTitle(new WizTitleEdit(this))
+    , m_tagBar(new WizTagBar(app, this))
+    , m_infoBar(new WizInfoBar(app, this))
+    , m_notifyBar(new WizNotifyBar(this))
+    , m_editorBar(new WizEditorToolBar(app, this))
     , m_editor(NULL)
     , m_tags(NULL)
     , m_info(NULL)
     , m_attachments(NULL)
     , m_editButtonAnimation(0)
-    , m_commentManager(new CWizCommentManager(this))
+    , m_commentManager(new WizCommentManager(this))
 {
-    m_editTitle->setCompleter(new MessageCompleter(m_editTitle));
-    int nTitleHeight = Utils::StyleHelper::titleEditorHeight();
+    m_editTitle->setCompleter(new WizMessageCompleter(m_editTitle));
+    int nTitleHeight = Utils::WizStyleHelper::titleEditorHeight();
     m_editTitle->setFixedHeight(nTitleHeight);
     m_editTitle->setAlignment(Qt::AlignVCenter);
     m_editTitle->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Preferred);
@@ -76,14 +76,14 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 //    m_editorBar->setFixedHeight(nEditToolBarHeight);
     m_editorBar->layout()->setAlignment(Qt::AlignVCenter);
 
-    QString strTheme = Utils::StyleHelper::themeName();
+    QString strTheme = Utils::WizStyleHelper::themeName();
 
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 6);
     layout->setSpacing(0);
     setLayout(layout);
 
-    m_editBtn = new RoundCellButton(this);
+    m_editBtn = new WizRoundCellButton(this);
     QString shortcut = ::WizGetShortcut("EditNote", "Alt+1");
     m_editBtn->setShortcut(QKeySequence::fromString(shortcut));
     m_editBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_lock"), tr("Edit"), tr("Switch to Editing View  %1%2").arg(getOptionKey()).arg(1));
@@ -91,14 +91,14 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_editBtn->setBadgeIcon(::WizLoadSkinIcon(strTheme, "document_unlock"), tr("Save & Read"), tr("Save and switch to Reading View  %1%2").arg(getOptionKey()).arg(1));
     connect(m_editBtn, SIGNAL(clicked()), SLOT(onEditButtonClicked()));    
 
-    m_separateBtn = new CellButton(CellButton::ImageOnly, this);
+    m_separateBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_separateBtn->setFixedHeight(nTitleHeight);
     QString separateShortcut = ::WizGetShortcut("EditNoteSeparate", "Alt+2");
     m_separateBtn->setShortcut(QKeySequence::fromString(separateShortcut));
     m_separateBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_use_separate"), tr("View note in seperate window  %1%2").arg(getOptionKey()).arg(2));
     connect(m_separateBtn, SIGNAL(clicked()), SLOT(onSeparateButtonClicked()));
 
-    m_tagBtn = new CellButton(CellButton::ImageOnly, this);
+    m_tagBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_tagBtn->setFixedHeight(nTitleHeight);
     QString tagsShortcut = ::WizGetShortcut("EditNoteTags", "Alt+3");
     m_tagBtn->setShortcut(QKeySequence::fromString(tagsShortcut));
@@ -106,13 +106,13 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_tagBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_tag_on"), tr("View and add tags  %1%2").arg(getOptionKey()).arg(3));
     connect(m_tagBtn, SIGNAL(clicked()), SLOT(onTagButtonClicked()));
 
-    m_shareBtn = new CellButton(CellButton::ImageOnly, this);
+    m_shareBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_shareBtn->setFixedHeight(nTitleHeight);
     QString shareShortcut = ::WizGetShortcut("EditShare", "Alt+4");
     m_shareBtn->setShortcut(QKeySequence::fromString(shareShortcut));
     m_shareBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "document_share"), tr("Share note  %1%2").arg(getOptionKey()).arg(4));
     connect(m_shareBtn, SIGNAL(clicked()), SLOT(onShareButtonClicked()));
-    CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
+    WizOEMSettings oemSettings(m_app.databaseManager().db().getAccountPath());
     m_shareBtn->setVisible(!oemSettings.isHideShare());
     m_shareMenu = new QMenu(m_shareBtn);
     m_shareMenu->addAction(WIZACTION_TITLEBAR_SHARE_DOCUMENT_BY_LINK, this, SLOT(onShareActionClicked()));
@@ -134,7 +134,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
 //    connect(m_emailBtn, SIGNAL(clicked()), SLOT(onEmailButtonClicked()));
 //    m_emailBtn->setVisible(!oemSettings.isHideShareByEmail());
 
-    m_infoBtn = new CellButton(CellButton::ImageOnly, this);
+    m_infoBtn = new WizCellButton(WizCellButton::ImageOnly, this);
     m_infoBtn->setFixedHeight(nTitleHeight);
     QString infoShortcut = ::WizGetShortcut("EditNoteInfo", "Alt+5");
     m_infoBtn->setShortcut(QKeySequence::fromString(infoShortcut));
@@ -142,7 +142,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     m_infoBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "document_info_on"), tr("View and modify note's info  %1%2").arg(getOptionKey()).arg(5));
     connect(m_infoBtn, SIGNAL(clicked()), SLOT(onInfoButtonClicked()));
 
-    m_attachBtn = new CellButton(CellButton::WithCountInfo, this);
+    m_attachBtn = new WizCellButton(WizCellButton::WithCountInfo, this);
     m_attachBtn->setFixedHeight(nTitleHeight);
     QString attachmentShortcut = ::WizGetShortcut("EditNoteAttachments", "Alt+6");
     m_attachBtn->setShortcut(QKeySequence::fromString(attachmentShortcut));
@@ -151,15 +151,15 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     connect(m_attachBtn, SIGNAL(clicked()), SLOT(onAttachButtonClicked()));
 
     // comments
-    m_commentsBtn = new CellButton(CellButton::WithCountInfo, this);
+    m_commentsBtn = new WizCellButton(WizCellButton::WithCountInfo, this);
     m_commentsBtn->setFixedHeight(nTitleHeight);
     QString commentShortcut = ::WizGetShortcut("ShowComment", "Alt+c");
     m_commentsBtn->setShortcut(QKeySequence::fromString(commentShortcut));
     m_commentsBtn->setNormalIcon(::WizLoadSkinIcon(strTheme, "comments"), tr("Add comments  %1C").arg(getOptionKey()));
     m_commentsBtn->setCheckedIcon(::WizLoadSkinIcon(strTheme, "comments_on"), tr("Add comments  %1C").arg(getOptionKey()));
     connect(m_commentsBtn, SIGNAL(clicked()), SLOT(onCommentsButtonClicked()));
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 
 
     QHBoxLayout* layoutInfo2 = new QHBoxLayout();
@@ -178,7 +178,7 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
     layoutInfo2->addWidget(m_commentsBtn);    
 
     QVBoxLayout* layoutInfo1 = new QVBoxLayout();
-    layoutInfo1->setContentsMargins(Utils::StyleHelper::editorBarMargins());
+    layoutInfo1->setContentsMargins(Utils::WizStyleHelper::editorBarMargins());
     layoutInfo1->setSpacing(0);
     layoutInfo1->addLayout(layoutInfo2);
     layoutInfo1->addWidget(m_tagBar);
@@ -200,11 +200,11 @@ TitleBar::TitleBar(CWizExplorerApp& app, QWidget *parent)
             SLOT(on_commentCountAcquired(QString,int)));
 }
 
-CWizDocumentView* TitleBar::noteView()
+WizDocumentView* WizTitleBar::noteView()
 {
     QWidget* pParent = parentWidget();
     while (pParent) {
-        CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent);
+        WizDocumentView* view = dynamic_cast<WizDocumentView*>(pParent);
         if (view)
             return view;
 
@@ -215,18 +215,18 @@ CWizDocumentView* TitleBar::noteView()
     return 0;
 }
 
-EditorToolBar*TitleBar::editorToolBar()
+WizEditorToolBar*WizTitleBar::editorToolBar()
 {
     return m_editorBar;
 }
 
-void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
+void WizTitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
 {
     m_notifyBar->showPermissionNotify(nReason);
     m_editTitle->setReadOnly(bReadOnly);
     m_editBtn->setEnabled(!bReadOnly);
 
-    if (nReason == NotifyBar::Deleted)
+    if (nReason == WizNotifyBar::Deleted)
     {
         m_tagBtn->setEnabled(false);
         m_commentsBtn->setEnabled(false);
@@ -237,7 +237,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
     else
     {
-        CWizOEMSettings oemSettings(m_app.databaseManager().db().GetAccountPath());
+        WizOEMSettings oemSettings(m_app.databaseManager().db().getAccountPath());
         m_tagBtn->setVisible(bIsGroup ? false : true);
         m_tagBtn->setEnabled(bIsGroup ? false : true);
         m_commentsBtn->setEnabled(true);
@@ -257,7 +257,7 @@ void TitleBar::setLocked(bool bReadOnly, int nReason, bool bIsGroup)
     }
 }
 
-void TitleBar::setEditor(CWizDocumentWebView* editor)
+void WizTitleBar::setEditor(WizDocumentWebView* editor)
 {
     Q_ASSERT(!m_editor);
 
@@ -271,7 +271,7 @@ void TitleBar::setEditor(CWizDocumentWebView* editor)
     m_editor = editor;
 }
 
-void TitleBar::setBackgroundColor(QColor color)
+void WizTitleBar::setBackgroundColor(QColor color)
 {
     QPalette pal = m_editTitle->palette();
     pal.setColor(QPalette::Window, color);
@@ -285,72 +285,72 @@ void TitleBar::setBackgroundColor(QColor color)
 }
 
 
-void TitleBar::onEditorFocusIn()
+void WizTitleBar::onEditorFocusIn()
 {
     showEditorBar();
 }
 
-void TitleBar::onEditorFocusOut()
+void WizTitleBar::onEditorFocusOut()
 {
     showEditorBar();
     if (!m_editorBar->hasFocus())
         showInfoBar();
 }
 
-void TitleBar::updateTagButtonStatus()
+void WizTitleBar::updateTagButtonStatus()
 {
     if (m_tagBar && m_tagBtn)
     {
-        m_tagBtn->setState(m_tagBar->isVisible() ? CellButton::Checked : CellButton::Normal);
+        m_tagBtn->setState(m_tagBar->isVisible() ? WizCellButton::Checked : WizCellButton::Normal);
     }
 }
 
-void TitleBar::updateAttachButtonStatus()
+void WizTitleBar::updateAttachButtonStatus()
 {
     if (m_attachments && m_attachBtn)
     {
-        m_attachBtn->setState(m_attachments->isVisible() ? CellButton::Checked : CellButton::Normal);
+        m_attachBtn->setState(m_attachments->isVisible() ? WizCellButton::Checked : WizCellButton::Normal);
     }
 }
 
-void TitleBar::updateInfoButtonStatus()
+void WizTitleBar::updateInfoButtonStatus()
 {
     if (m_info && m_infoBtn)
     {
-        m_infoBtn->setState(m_info->isVisible() ? CellButton::Checked : CellButton::Normal);
+        m_infoBtn->setState(m_info->isVisible() ? WizCellButton::Checked : WizCellButton::Normal);
     }
 }
 
-void TitleBar::updateCommentsButtonStatus()
+void WizTitleBar::updateCommentsButtonStatus()
 {
     if (m_commentsBtn && noteView()->commentWidget())
     {
-        m_commentsBtn->setState(noteView()->commentWidget()->isVisible() ? CellButton::Checked : CellButton::Normal);
+        m_commentsBtn->setState(noteView()->commentWidget()->isVisible() ? WizCellButton::Checked : WizCellButton::Normal);
     }
 }
 
-void TitleBar::onTitleEditFinished()
+void WizTitleBar::onTitleEditFinished()
 {
     m_editTitle->onTitleEditingFinished();
 }
 
-void TitleBar::showInfoBar()
+void WizTitleBar::showInfoBar()
 {
     m_editorBar->hide();
     m_infoBar->show();
 }
 
-void TitleBar::showEditorBar()
+void WizTitleBar::showEditorBar()
 {
     m_infoBar->hide();
     m_editorBar->show();
     m_editorBar->adjustButtonPosition();
 }
 
-void TitleBar::loadErrorPage()
+void WizTitleBar::loadErrorPage()
 {
     QWebEngineView* comments = noteView()->commentView();
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
+    QString strFileName = Utils::WizPathResolve::resourcesPath() + "files/errorpage/load_fail_comments.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     // clear old url
@@ -359,25 +359,25 @@ void TitleBar::loadErrorPage()
     comments->load(url);
 }
 
-void TitleBar::setTagBarVisible(bool visible)
+void WizTitleBar::setTagBarVisible(bool visible)
 {
     m_tagBar->setVisible(visible);
 }
 
 
-void TitleBar::onEditorChanged()
+void WizTitleBar::onEditorChanged()
 {
     updateEditButton(noteView()->editorMode());
 }
 
-void TitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked)
+void WizTitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bool locked)
 {
     updateInfo(data);
     setEditorMode(editorMode);
     //
-    CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
-    bool isGroup = db.IsGroup();
-    int nTagCount = db.GetDocumentTagCount(data.strGUID);
+    WizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
+    bool isGroup = db.isGroup();
+    int nTagCount = db.getDocumentTagCount(data.strGUID);
     setTagBarVisible(!isGroup && nTagCount > 0);
     if (!isGroup)
     {
@@ -386,17 +386,17 @@ void TitleBar::setNote(const WIZDOCUMENTDATA& data, WizEditorMode editorMode, bo
     }
 }
 
-void TitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
+void WizTitleBar::updateInfo(const WIZDOCUMENTDATA& doc)
 {
     m_infoBar->setDocument(doc);
     m_editTitle->setText(doc.strTitle);
     m_attachBtn->setCount(doc.nAttachmentCount);
 }
 
-void TitleBar::setEditorMode(WizEditorMode editorMode)
+void WizTitleBar::setEditorMode(WizEditorMode editorMode)
 {
     m_editTitle->setReadOnly(editorMode == modeReader);
-    m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
+    m_editBtn->setState(editorMode == modeEditor ? WizCellButton::Checked : WizCellButton::Normal);
     //
     if (editorMode == modeReader)
     {
@@ -404,52 +404,52 @@ void TitleBar::setEditorMode(WizEditorMode editorMode)
     }
 }
 
-void TitleBar::setEditButtonEnabled(bool enable)
+void WizTitleBar::setEditButtonEnabled(bool enable)
 {
     m_editBtn->setEnabled(enable);
 }
 
-void TitleBar::updateEditButton(WizEditorMode editorMode)
+void WizTitleBar::updateEditButton(WizEditorMode editorMode)
 {
     m_editor->isModified([=](bool modified) {
         if (modified){
-            m_editBtn->setState(CellButton::Badge);
+            m_editBtn->setState(WizCellButton::Badge);
         } else {
-            m_editBtn->setState(editorMode == modeEditor ? CellButton::Checked : CellButton::Normal);
+            m_editBtn->setState(editorMode == modeEditor ? WizCellButton::Checked : WizCellButton::Normal);
         }
     });
 }
 
-void TitleBar::resetTitle(const QString& strTitle)
+void WizTitleBar::resetTitle(const QString& strTitle)
 {
     m_editTitle->resetTitle(strTitle);
 
 }
 
-void TitleBar::moveTitileTextToPlaceHolder()
+void WizTitleBar::moveTitileTextToPlaceHolder()
 {
     m_editTitle->setPlaceholderText(m_editTitle->text());
     m_editTitle->clear();
 }
 
-void TitleBar::clearPlaceHolderText()
+void WizTitleBar::clearPlaceHolderText()
 {
     m_editTitle->setPlaceholderText("");
 }
 
 #define TITLEBARTIPSCHECKED        "TitleBarTipsChecked"
 
-void TitleBar::showCoachingTips()
+void WizTitleBar::showCoachingTips()
 {
     bool showTips = false;
-    if (MainWindow* mainWindow = MainWindow::instance())
+    if (WizMainWindow* mainWindow = WizMainWindow::instance())
     {
         showTips = mainWindow->userSettings().get(TITLEBARTIPSCHECKED).toInt() == 0;
     }
 
-    if (showTips && !CWizTipsWidget::isTipsExists(TITLEBARTIPSCHECKED))
+    if (showTips && !WizTipsWidget::isTipsExists(TITLEBARTIPSCHECKED))
     {
-        CWizTipsWidget* widget = new CWizTipsWidget(TITLEBARTIPSCHECKED, this);
+        WizTipsWidget* widget = new WizTipsWidget(TITLEBARTIPSCHECKED, this);
         connect(m_editBtn, SIGNAL(clicked(bool)), widget, SLOT(on_targetWidgetClicked()));
         widget->setAttribute(Qt::WA_DeleteOnClose, true);
         widget->setText(tr("Switch to reading mode"), tr("In reading mode, the note can not be "
@@ -457,7 +457,7 @@ void TitleBar::showCoachingTips()
         widget->setSizeHint(QSize(290, 82));
         widget->setButtonVisible(false);       
         widget->bindCloseFunction([](){
-            if (MainWindow* mainWindow = MainWindow::instance())
+            if (WizMainWindow* mainWindow = WizMainWindow::instance())
             {
                 mainWindow->userSettings().set(TITLEBARTIPSCHECKED, "1");
             }
@@ -468,18 +468,18 @@ void TitleBar::showCoachingTips()
     }
 }
 
-void TitleBar::startEditButtonAnimation()
+void WizTitleBar::startEditButtonAnimation()
 {
     if (!m_editButtonAnimation)
     {
-        m_editButtonAnimation = new CWizAnimateAction(this);
+        m_editButtonAnimation = new WizAnimateAction(this);
         m_editButtonAnimation->setToolButton(m_editBtn);
         m_editButtonAnimation->setSingleIcons("editButtonProcessing");
     }
     m_editButtonAnimation->startPlay();
 }
 
-void TitleBar::stopEditButtonAnimation()
+void WizTitleBar::stopEditButtonAnimation()
 {
     if (!m_editButtonAnimation)
         return;
@@ -489,34 +489,34 @@ void TitleBar::stopEditButtonAnimation()
     }
 }
 
-void TitleBar::applyButtonStateForSeparateWindow(bool inSeparateWindow)
+void WizTitleBar::applyButtonStateForSeparateWindow(bool inSeparateWindow)
 {
     m_separateBtn->setVisible(!inSeparateWindow);
 }
 
-void TitleBar::onEditButtonClicked()
+void WizTitleBar::onEditButtonClicked()
 {
     noteView()->setEditorMode(noteView()->editorMode() == modeEditor ? modeReader: modeEditor);
     //
-    CWizAnalyzer& analyzer = CWizAnalyzer::GetAnalyzer();
+    WizAnalyzer& analyzer = WizAnalyzer::getAnalyzer();
     if (noteView()->isEditing())
     {
-        analyzer.LogAction("editNote");
+        analyzer.logAction("editNote");
     }
     else
     {
-        analyzer.LogAction("viewNote");
+        analyzer.logAction("viewNote");
     }
 }
 
-void TitleBar::onSeparateButtonClicked()
+void WizTitleBar::onSeparateButtonClicked()
 {
-    WizGetAnalyzer().LogAction("titleBarViewInSeperateWindow");
+    WizGetAnalyzer().logAction("titleBarViewInSeperateWindow");
 
     emit viewNoteInSeparateWindow_request();
 }
 
-void TitleBar::onTagButtonClicked()
+void WizTitleBar::onTagButtonClicked()
 {
 //    if (!m_tags) {
 //        m_tags = new CWizTagListWidget(topLevelWidget());
@@ -530,7 +530,7 @@ void TitleBar::onTagButtonClicked()
 
     setTagBarVisible(!m_tagBar->isVisible());
 
-    WizGetAnalyzer().LogAction("showTags");
+    WizGetAnalyzer().logAction("showTags");
 }
 
 QAction* actionFromMenu(QMenu* menu, const QString& text)
@@ -544,7 +544,7 @@ QAction* actionFromMenu(QMenu* menu, const QString& text)
     return nullptr;
 }
 
-void TitleBar::onShareButtonClicked()
+void WizTitleBar::onShareButtonClicked()
 {
     if (m_shareMenu)
     {
@@ -554,11 +554,11 @@ void TitleBar::onShareButtonClicked()
         if (actionLink)
         {
             actionLink->setVisible(true);
-            if (m_app.databaseManager().db(doc.strKbGUID).IsGroup())
+            if (m_app.databaseManager().db(doc.strKbGUID).isGroup())
             {
                 WIZGROUPDATA group;
-                m_app.databaseManager().db().GetGroupData(doc.strKbGUID, group);
-                if (!group.IsBiz())
+                m_app.databaseManager().db().getGroupData(doc.strKbGUID, group);
+                if (!group.isBiz())
                 {
                     actionLink->setVisible(false);
                 }
@@ -570,24 +570,24 @@ void TitleBar::onShareButtonClicked()
     }
 }
 
-void TitleBar::onEmailActionClicked()
+void WizTitleBar::onEmailActionClicked()
 {
-    WizGetAnalyzer().LogAction("shareByEmail");
+    WizGetAnalyzer().logAction("shareByEmail");
 
     m_editor->shareNoteByEmail();
 }
 
-void TitleBar::onShareActionClicked()
+void WizTitleBar::onShareActionClicked()
 {
-    WizGetAnalyzer().LogAction("shareByLink");
+    WizGetAnalyzer().logAction("shareByLink");
 
     m_editor->shareNoteByLink();
 }
 
-void TitleBar::onAttachButtonClicked()
+void WizTitleBar::onAttachButtonClicked()
 {
     if (!m_attachments) {
-        m_attachments = new CWizAttachmentListWidget(topLevelWidget());
+        m_attachments = new WizAttachmentListWidget(topLevelWidget());
         connect(m_attachments, SIGNAL(widgetStatusChanged()), SLOT(updateAttachButtonStatus()));
     }
 
@@ -600,23 +600,23 @@ void TitleBar::onAttachButtonClicked()
         updateAttachButtonStatus();
     }
 
-    WizGetAnalyzer().LogAction("showAttachments");
+    WizGetAnalyzer().logAction("showAttachments");
 }
 
-void TitleBar::onHistoryButtonClicked()
+void WizTitleBar::onHistoryButtonClicked()
 {
     const WIZDOCUMENTDATA& doc = noteView()->note();
 
     WizShowDocumentHistory(doc, noteView());
 
-    WizGetAnalyzer().LogAction("showHistory");
+    WizGetAnalyzer().logAction("showHistory");
 }
 
 
-void TitleBar::onInfoButtonClicked()
+void WizTitleBar::onInfoButtonClicked()
 {
     if (!m_info) {
-        m_info = new CWizNoteInfoForm(topLevelWidget());
+        m_info = new WizNoteInfoForm(topLevelWidget());
         connect(m_info, SIGNAL(widgetStatusChanged()), SLOT(updateInfoButtonStatus()));
     }
 
@@ -627,7 +627,7 @@ void TitleBar::onInfoButtonClicked()
     m_info->showAtPoint(pt);
     updateInfoButtonStatus();
 
-    WizGetAnalyzer().LogAction("showNoteInfo");
+    WizGetAnalyzer().logAction("showNoteInfo");
 }
 
 bool isNetworkAccessible()
@@ -639,15 +639,15 @@ bool isNetworkAccessible()
 
 #define COMMENT_FRAME_WIDTH 315
 
-void TitleBar::onCommentsButtonClicked()
+void WizTitleBar::onCommentsButtonClicked()
 {
     QWebEngineView* comments = noteView()->commentView();
 
-    CWizDocumentView* view = noteView();
+    WizDocumentView* view = noteView();
     if (!view)
         return;
 
-    CWizLocalProgressWebView* commentWidget = view->commentWidget();
+    WizLocalProgressWebView* commentWidget = view->commentWidget();
     connect(commentWidget, SIGNAL(widgetStatusChanged()), this,
             SLOT(updateCommentsButtonStatus()), Qt::UniqueConnection);
 
@@ -655,12 +655,12 @@ void TitleBar::onCommentsButtonClicked()
     if (commentWidget->isVisible()) {
         commentWidget->hide();
 
-        WizGetAnalyzer().LogAction("hideComments");
+        WizGetAnalyzer().logAction("hideComments");
 
         return;
     }
 
-    WizGetAnalyzer().LogAction("showComments");
+    WizGetAnalyzer().logAction("showComments");
 
     if (isNetworkAccessible()) {
         QSplitter* splitter = qobject_cast<QSplitter*>(commentWidget->parentWidget());
@@ -679,9 +679,9 @@ void TitleBar::onCommentsButtonClicked()
     }
 }
 
-void TitleBar::onCommentPageLoaded(bool ok)
+void WizTitleBar::onCommentPageLoaded(bool ok)
 {
-    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    WizLocalProgressWebView* commentWidget = noteView()->commentWidget();
 
     if (!ok)
     {
@@ -692,7 +692,7 @@ void TitleBar::onCommentPageLoaded(bool ok)
     }
 }
 
-void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
+void WizTitleBar::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note, bool bOk)
 {
     if (!bOk)
         return;    
@@ -704,7 +704,7 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
     m_commentsBtn->setCount(0);
     m_commentManager->queryCommentCount(note.strKbGUID, note.strGUID, true);
 
-    CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+    WizLocalProgressWebView* commentWidget = noteView()->commentWidget();
     if (commentWidget && commentWidget->isVisible())
     {
         //commentWidget->showLocalProgress();
@@ -712,7 +712,7 @@ void TitleBar::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& n
     }
 }
 
-void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
+void WizTitleBar::on_commentUrlAcquired(QString GUID, QString url)
 {
     QUrl commentsUrl(url);
     QUrlQuery query(commentsUrl.query());
@@ -720,10 +720,10 @@ void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
     QString token = query.queryItemValue("token");
     QString kbGuid = query.queryItemValue("kb_guid");
     //
-    CWizDocumentView* view = noteView();
+    WizDocumentView* view = noteView();
     if (view && view->note().strGUID == GUID)
     {
-        CWizLocalProgressWebView* commentWidget = noteView()->commentWidget();
+        WizLocalProgressWebView* commentWidget = noteView()->commentWidget();
         if (commentWidget && commentWidget->isVisible())
         {
             if (url.isEmpty())
@@ -746,21 +746,21 @@ void TitleBar::on_commentUrlAcquired(QString GUID, QString url)
     }
 }
 
-void TitleBar::on_commentCountAcquired(QString GUID, int count)
+void WizTitleBar::on_commentCountAcquired(QString GUID, int count)
 {
-    CWizDocumentView* view = noteView();
+    WizDocumentView* view = noteView();
     if (view && view->note().strGUID == GUID)
     {
         m_commentsBtn->setCount(count);
     }
 }
 
-void TitleBar::showMessageTips(Qt::TextFormat format, const QString& strInfo)
+void WizTitleBar::showMessageTips(Qt::TextFormat format, const QString& strInfo)
 {
     m_notifyBar->showMessageTips(format, strInfo);
 }
 
-void TitleBar::hideMessageTips(bool useAnimation)
+void WizTitleBar::hideMessageTips(bool useAnimation)
 {
     m_notifyBar->hideMessageTips(useAnimation);
 }

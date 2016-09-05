@@ -7,30 +7,30 @@
 #include "share/wizEventLoop.h"
 
 
-CWizXmlRpcServerBase::CWizXmlRpcServerBase(const QString& strUrl, QObject* parent)
+WizXmlRpcServerBase::WizXmlRpcServerBase(const QString& strUrl, QObject* parent)
     : QObject(parent)
     , m_strUrl(strUrl)
     , m_nLastErrorCode(0)
 {
     m_network = new QNetworkAccessManager(this);
 }
-QString CWizXmlRpcServerBase::GetURL() const
+QString WizXmlRpcServerBase::getURL() const
 {
     return m_strUrl;
 }
 
-int CWizXmlRpcServerBase::GetLastErrorCode() const
+int WizXmlRpcServerBase::getLastErrorCode() const
 {
     return m_nLastErrorCode;
 }
-QString CWizXmlRpcServerBase::GetLastErrorMessage() const
+QString WizXmlRpcServerBase::getLastErrorMessage() const
 {
     return m_strLastErrorMessage;
 }
 
-bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcResult& result, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+bool WizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, WizXmlRpcResult& result, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
-    CWizXmlRpcRequest data(strMethodName);
+    WizXmlRpcRequest data(strMethodName);
     data.addParam(pParam1);
     if (pParam2)
     {
@@ -54,7 +54,7 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
     while (true)
     {
         QNetworkReply* reply = m_network->post(request, data.toData());
-        CWizXmlRpcEventLoop loop(reply);
+        WizXmlRpcEventLoop loop(reply);
 //        qDebug() << "[Sync]Start a xml rpc event loop";
         loop.exec();
 //        qDebug() << "[Sync]Xml rpc event loop finished";
@@ -74,14 +74,14 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
         //
         QString strXml = QString::fromUtf8(loop.result().constData());
         //
-        CWizXMLDocument doc;
-        if (!doc.LoadXML(strXml)) {
+        WizXMLDocument doc;
+        if (!doc.loadXML(strXml)) {
             m_nLastErrorCode = -1;
             m_strLastErrorMessage = "Invalid xml";
             return false;
         }
 
-        CWizXmlRpcValue* pRet = NULL;
+        WizXmlRpcValue* pRet = NULL;
 
         if (!WizXmlRpcResultFromXml(doc, &pRet)) {
             m_nLastErrorCode = -1;
@@ -91,23 +91,23 @@ bool CWizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, CWizXmlRpcRe
 
         Q_ASSERT(pRet);
 
-        if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
-            m_nLastErrorCode = pFault->GetFaultCode();
-            m_strLastErrorMessage = pFault->GetFaultString();
+        if (WizXmlRpcFaultValue* pFault = dynamic_cast<WizXmlRpcFaultValue *>(pRet)) {
+            m_nLastErrorCode = pFault->getFaultCode();
+            m_strLastErrorMessage = pFault->getFaultString();
             TOLOG2(_T("XmlRpcCall failed : %1, %2"), QString::number(m_nLastErrorCode), m_strLastErrorMessage);
             return false;
         }
         //
-        result.SetResult(strMethodName, pRet);
+        result.setResult(strMethodName, pRet);
         break;
     }
     //
     return true;
 }
 
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
-    CWizXmlRpcResult ret;
+    WizXmlRpcResult ret;
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
         TOLOG3(_T("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3")
@@ -119,7 +119,7 @@ BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcValue* p
 }
 
 
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcResult& ret, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, WizXmlRpcResult& ret, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
@@ -131,23 +131,23 @@ BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, CWizXmlRpcResult& 
     return TRUE;
 }
 
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, std::map<QString, QString>& mapRet, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, std::map<QString, QString>& mapRet, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
-    CWizXmlRpcResult ret;
-    if (!Call(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
+    WizXmlRpcResult ret;
+    if (!call(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
         return FALSE;
     //
-    CWizXmlRpcStructValue* pValue = ret.GetResultValue<CWizXmlRpcStructValue>();
+    WizXmlRpcStructValue* pValue = ret.getResultValue<WizXmlRpcStructValue>();
     if (!pValue)
     {
         TOLOG1(_T("The return value of XmpRpc method %1 is not a struct!"), strMethodName);
         return FALSE;
     }
     //
-    return pValue->ToStringMap(mapRet);
+    return pValue->toStringMap(mapRet);
 }
 
-BOOL CWizXmlRpcServerBase::GetReturnValueInStringMap(const QString& strMethodName, std::map<QString, QString>& mapRet, const QString& strName, QString& strValue)
+BOOL WizXmlRpcServerBase::getReturnValueInStringMap(const QString& strMethodName, std::map<QString, QString>& mapRet, const QString& strName, QString& strValue)
 {
     std::map<QString, QString>::const_iterator it = mapRet.find(strName);
     if (it == mapRet.end())
@@ -162,56 +162,56 @@ BOOL CWizXmlRpcServerBase::GetReturnValueInStringMap(const QString& strMethodNam
 }
 
 
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
     std::map<QString, QString> mapRet;
-    if (!Call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
+    if (!call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
         return FALSE;
     //
-    return GetReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1);
+    return getReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1);
 }
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
     std::map<QString, QString> mapRet;
-    if (!Call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
+    if (!call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
         return FALSE;
     //
-    return GetReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2);
+    return getReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2);
 }
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
     std::map<QString, QString> mapRet;
-    if (!Call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
+    if (!call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
         return FALSE;
     //
-    return GetReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName3, strRetValue3);
+    return getReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName3, strRetValue3);
 }
-BOOL CWizXmlRpcServerBase::Call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, const QString& strRetName4, QString& strRetValue4, CWizXmlRpcValue* pParam1, CWizXmlRpcValue* pParam2 /*= NULL*/, CWizXmlRpcValue* pParam3 /*= NULL*/, CWizXmlRpcValue* pParam4 /*= NULL*/)
+BOOL WizXmlRpcServerBase::call(const QString& strMethodName, const QString& strRetName1, QString& strRetValue1, const QString& strRetName2, QString& strRetValue2, const QString& strRetName3, QString& strRetValue3, const QString& strRetName4, QString& strRetValue4, WizXmlRpcValue* pParam1, WizXmlRpcValue* pParam2 /*= NULL*/, WizXmlRpcValue* pParam3 /*= NULL*/, WizXmlRpcValue* pParam4 /*= NULL*/)
 {
     std::map<QString, QString> mapRet;
-    if (!Call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
+    if (!call(strMethodName, mapRet, pParam1, pParam2, pParam3, pParam4))
         return FALSE;
     //
-    return GetReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName3, strRetValue3)
-        && GetReturnValueInStringMap(strMethodName, mapRet, strRetName4, strRetValue4);
+    return getReturnValueInStringMap(strMethodName, mapRet, strRetName1, strRetValue1)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName2, strRetValue2)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName3, strRetValue3)
+        && getReturnValueInStringMap(strMethodName, mapRet, strRetName4, strRetValue4);
 }
 
 
 #if 0
 
-CWizXmlRpcServer::CWizXmlRpcServer(const QString& strUrl, QObject* parent /* = 0 */)
+WizXmlRpcServer::WizXmlRpcServer(const QString& strUrl, QObject* parent /* = 0 */)
     : QObject(parent)
 {
     m_strUrl = strUrl;
     m_network = new QNetworkAccessManager(this);
 }
 
-void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& userName, const QString& password)
+void WizXmlRpcServer::setProxy(const QString& host, int port, const QString& userName, const QString& password)
 {
     QNetworkProxy proxy = m_network->proxy();
 
@@ -228,12 +228,12 @@ void CWizXmlRpcServer::setProxy(const QString& host, int port, const QString& us
     m_network->setProxy(proxy);
 }
 
-void CWizXmlRpcServer::abort()
+void WizXmlRpcServer::abort()
 {
     m_network->disconnect();
 }
 
-bool CWizXmlRpcServer::xmlRpcCall(CWizXmlRpcValue* pParam,
+bool WizXmlRpcServer::xmlRpcCall(WizXmlRpcValue* pParam,
                                   const QString& strMethodName,
                                   const QString& arg1 /* = "" */,
                                   const QString& arg2 /* = "" */)
@@ -242,7 +242,7 @@ bool CWizXmlRpcServer::xmlRpcCall(CWizXmlRpcValue* pParam,
     m_arg1 = arg1;
     m_arg2 = arg2;
 
-    CWizXmlRpcRequest data(strMethodName);
+    WizXmlRpcRequest data(strMethodName);
     data.addParam(pParam);
 
     QNetworkRequest request;
@@ -257,19 +257,19 @@ bool CWizXmlRpcServer::xmlRpcCall(CWizXmlRpcValue* pParam,
     return true;
 }
 
-void CWizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const QString& errorString)
+void WizXmlRpcServer::processError(WizXmlRpcError error, int errorCode, const QString& errorString)
 {
     Q_ASSERT(!m_strMethodName.isEmpty());
     Q_EMIT xmlRpcError(m_strMethodName, error, errorCode, errorString);
 }
 
-void CWizXmlRpcServer::processReturn(CWizXmlRpcValue& ret)
+void WizXmlRpcServer::processReturn(WizXmlRpcValue& ret)
 {
     Q_ASSERT(!m_strMethodName.isEmpty());
     Q_EMIT xmlRpcReturn(ret, m_strMethodName, m_arg1, m_arg2);
 }
 
-void CWizXmlRpcServer::on_replyFinished()
+void WizXmlRpcServer::on_replyFinished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -287,14 +287,14 @@ void CWizXmlRpcServer::on_replyFinished()
 
     QString strXml = QString::fromUtf8(reply->readAll().constData());
 
-    CWizXMLDocument doc;
-    if (!doc.LoadXML(strXml)) {
+    WizXMLDocument doc;
+    if (!doc.loadXML(strXml)) {
         processError(errorXmlFormat, 0, "Invalid xml");
         reply->deleteLater();
         return;
     }
 
-    CWizXmlRpcValue* pRet = NULL;
+    WizXmlRpcValue* pRet = NULL;
 
     if (!WizXmlRpcResultFromXml(doc, &pRet)) {
         processError(errorXmlRpcFormat, 0, "Can not parse xmlrpc");
@@ -304,8 +304,8 @@ void CWizXmlRpcServer::on_replyFinished()
 
     Q_ASSERT(pRet);
 
-    if (CWizXmlRpcFaultValue* pFault = dynamic_cast<CWizXmlRpcFaultValue *>(pRet)) {
-        processError(errorXmlRpcFault, pFault->GetFaultCode(), pFault->GetFaultString());
+    if (WizXmlRpcFaultValue* pFault = dynamic_cast<WizXmlRpcFaultValue *>(pRet)) {
+        processError(errorXmlRpcFault, pFault->getFaultCode(), pFault->getFaultString());
     }
 
     processReturn(*pRet);
@@ -313,12 +313,12 @@ void CWizXmlRpcServer::on_replyFinished()
     reply->deleteLater();
 }
 
-void CWizXmlRpcServer::on_replyError(QNetworkReply::NetworkError error)
+void WizXmlRpcServer::on_replyError(QNetworkReply::NetworkError error)
 {
     processError(errorNetwork, error, QString());
 }
 
-void CWizXmlRpcServer::on_replyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
+void WizXmlRpcServer::on_replyDownloadProgress(qint64 bytesReceived, qint64 bytesTotal)
 {
     emit xmlRpcReadProgress(bytesReceived, bytesTotal);
 }

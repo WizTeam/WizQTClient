@@ -6,7 +6,7 @@
 #include <QListWidgetItem>
 
 namespace Ui {
-class CWizMarkdownTemplateDialog;
+class WizMarkdownTemplateDialog;
 }
 /*
 class CWizTemplateItem : public QListWidgetItem
@@ -37,13 +37,13 @@ private:
 };
 */
 
-class CWizMarkdownTemplateDialog : public QDialog
+class WizMarkdownTemplateDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizMarkdownTemplateDialog(QWidget *parent = 0);
-    ~CWizMarkdownTemplateDialog();
+    explicit WizMarkdownTemplateDialog(QWidget *parent = 0);
+    ~WizMarkdownTemplateDialog();
 
     bool getListDataFromSettings(QMap<QString, bool>& itemList, QString& selectedFile);
     bool saveListDataToSettings();
@@ -70,7 +70,7 @@ private slots:
     void on_actionSaveAs_clicked();
 
 private:
-    Ui::CWizMarkdownTemplateDialog *ui;
+    Ui::WizMarkdownTemplateDialog *ui;
 
     QMenu* m_menu;
 };

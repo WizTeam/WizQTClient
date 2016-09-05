@@ -4,16 +4,16 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizProgressDialog;
+class WizProgressDialog;
 }
 
-class CWizProgressDialog : public QDialog
+class WizProgressDialog : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizProgressDialog(QWidget *parent = 0, bool showStop = true);
-    ~CWizProgressDialog();
+    explicit WizProgressDialog(QWidget *parent = 0, bool showStop = true);
+    ~WizProgressDialog();
 
 signals:
     void stopRequest();
@@ -30,7 +30,7 @@ private slots:
     void on_btn_hide_clicked();
 
 private:
-    Ui::CWizProgressDialog *ui;
+    Ui::WizProgressDialog *ui;
 };
 
 #endif // WIZPROGRESSDIALOG_H

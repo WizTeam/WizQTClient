@@ -10,12 +10,12 @@
  * should not delete network reply again
  */
 
-class CWizAutoTimeOutEventLoop : public QEventLoop
+class WizAutoTimeOutEventLoop : public QEventLoop
 {
     Q_OBJECT
 public:
-    explicit CWizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent = 0);
-    ~CWizAutoTimeOutEventLoop();
+    explicit WizAutoTimeOutEventLoop(QNetworkReply* pReply, QObject *parent = 0);
+    ~WizAutoTimeOutEventLoop();
     void setTimeoutWaitSeconds(int seconds);
 
 public:
@@ -53,11 +53,11 @@ protected:
 };
 
 
-class CWizXmlRpcEventLoop : public CWizAutoTimeOutEventLoop
+class WizXmlRpcEventLoop : public WizAutoTimeOutEventLoop
 {
     Q_OBJECT
 public:
-    explicit CWizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent = 0);
+    explicit WizXmlRpcEventLoop(QNetworkReply* pReply, QObject *parent = 0);
 
 protected:
     virtual void doFinished(QNetworkReply* reply);

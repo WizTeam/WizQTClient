@@ -3,26 +3,26 @@
 #include "rapidjson/document.h"
 #include <QDebug>
 
-CWizJSONServerBase::CWizJSONServerBase()
+WizJSONServerBase::WizJSONServerBase()
     : m_net(std::make_shared<QNetworkAccessManager>())
 {
 
 }
 
-CWizJSONServerBase::~CWizJSONServerBase()
+WizJSONServerBase::~WizJSONServerBase()
 {
 
 }
 
-int CWizJSONServerBase::returnCode()
+int WizJSONServerBase::returnCode()
 {
     return m_nReturnCode;
 }
 
-bool CWizJSONServerBase::get(const QString& strUrl, QString& strResult)
+bool WizJSONServerBase::get(const QString& strUrl, QString& strResult)
 {
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
     //
     if (loop.error() != QNetworkReply::NoError)
@@ -35,10 +35,10 @@ bool CWizJSONServerBase::get(const QString& strUrl, QString& strResult)
     return !strResult.isEmpty();
 }
 
-bool CWizJSONServerBase::deleteResource(const QString& strUrl)
+bool WizJSONServerBase::deleteResource(const QString& strUrl)
 {
     QNetworkReply* reply = m_net->deleteResource(QNetworkRequest(strUrl));
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
     //
     if (loop.error() != QNetworkReply::NoError)
@@ -66,7 +66,7 @@ bool CWizJSONServerBase::deleteResource(const QString& strUrl)
     return returnCode == JSON_RETURNCODE_OK;
 }
 
-bool CWizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
+bool WizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
                                                          int& returnCode, QString& returnMessage)
 {
     rapidjson::Document d;
@@ -78,7 +78,7 @@ bool CWizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
         return false;
     }
 
-    returnCode = d.FindMember("return_code")->value.GetInt();
+    returnCode = d.FindMember("return_code")->value.getInt();
 
     if (!d.HasMember("return_message"))
     {
@@ -86,7 +86,7 @@ bool CWizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
         return false;
     }
 
-    returnMessage = d.FindMember("return_message")->value.GetString();
+    returnMessage = d.FindMember("return_message")->value.getString();
 
     return true;
 }

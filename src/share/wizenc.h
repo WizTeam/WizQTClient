@@ -10,11 +10,11 @@
 #include <QDataStream>
 
 
-class CAES
+class WizAES
 {
 public:
-    CAES() {}
-    ~CAES() {}
+    WizAES() {}
+    ~WizAES() {}
 
     void init(const char* key, int len, const unsigned char* iv);
 
@@ -63,11 +63,11 @@ bool WizAESEncryptToFile(const unsigned char* cipher, \
 bool WizAESDecryptToFile(const unsigned char* cipher, \
                          QDataStream* inStream, const QString& strFileName);
 
-class CRSA
+class WizRSA
 {
 public:
-    CRSA() { enc = 0; dec = 0; }
-    ~CRSA();
+    WizRSA() { enc = 0; dec = 0; }
+    ~WizRSA();
 
     void initPublicKey(const char * N, const char * e);
     void initPrivateKey(const char * N, const char * e, const char * d);

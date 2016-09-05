@@ -24,13 +24,13 @@
 #include "share/wizEventLoop.h"
 
 /* ----------------------- AvatarDownloader ----------------------- */
-AvatarDownloader::AvatarDownloader(QObject* parent)
+WizAvatarDownloader::WizAvatarDownloader(QObject* parent)
     : QObject(parent)
     , m_net(nullptr)
 {
 }
 
-void AvatarDownloader::download(const QString& strUserGUID, bool isSystemAvatar)
+void WizAvatarDownloader::download(const QString& strUserGUID, bool isSystemAvatar)
 {
     if (m_net.get() == nullptr)
     {
@@ -39,11 +39,11 @@ void AvatarDownloader::download(const QString& strUserGUID, bool isSystemAvatar)
 
     m_strCurrentUser = strUserGUID;
 #ifdef Q_OS_LINUX
-    QString strUrl = CommonApiEntry::avatarDownloadUrl(strUserGUID);
+    QString strUrl = WizCommonApiEntry::avatarDownloadUrl(strUserGUID);
 #else
     QString standGID = QUrl::toPercentEncoding(strUserGUID);
-    QString strUrl = isSystemAvatar ? CommonApiEntry::systemAvatarUrl(standGID)
-                                    : CommonApiEntry::avatarDownloadUrl(standGID);
+    QString strUrl = isSystemAvatar ? WizCommonApiEntry::systemAvatarUrl(standGID)
+                                    : WizCommonApiEntry::avatarDownloadUrl(standGID);
 #endif
     if (strUrl.isEmpty()) {
         return;
@@ -53,11 +53,11 @@ void AvatarDownloader::download(const QString& strUserGUID, bool isSystemAvatar)
     queryUserAvatar(strUrl);
 }
 
-void AvatarDownloader::queryUserAvatar(const QString& strUrl)
+void WizAvatarDownloader::queryUserAvatar(const QString& strUrl)
 {
     qDebug() << "downloader start to download : " << m_strCurrentUser;
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     if (loop.error() != QNetworkReply::NoError)
@@ -92,7 +92,7 @@ void AvatarDownloader::queryUserAvatar(const QString& strUrl)
     }
 }
 
-QUrl AvatarDownloader::redirectUrl(const QUrl& possibleRedirectUrl,
+QUrl WizAvatarDownloader::redirectUrl(const QUrl& possibleRedirectUrl,
                                          const QUrl& oldRedirectUrl) const
 {
     QUrl redirectUrl;
@@ -102,14 +102,14 @@ QUrl AvatarDownloader::redirectUrl(const QUrl& possibleRedirectUrl,
     return redirectUrl;
 }
 
-void AvatarDownloader::fetchUserAvatarEnd(bool bSucceed)
+void WizAvatarDownloader::fetchUserAvatarEnd(bool bSucceed)
 {
     Q_EMIT downloaded(m_strCurrentUser, bSucceed);
 }
 
-bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
+bool WizAvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
 {
-    QString strFileName = Utils::PathResolve::avatarPath() + strUserGUID + ".png";
+    QString strFileName = Utils::WizPathResolve::avatarPath() + strUserGUID + ".png";
     if (QFile::exists(strFileName)) {
         ::WizDeleteFile(strFileName);
         qDebug() << "[AvatarHost]avatar file exists , remove it :" << !QFile::exists(strFileName);
@@ -122,16 +122,16 @@ bool AvatarDownloader::save(const QString& strUserGUID, const QByteArray& bytes)
 
 /* --------------------- AvatarHostPrivate --------------------- */
 
-AvatarHostPrivate::AvatarHostPrivate(AvatarHost* avatarHost)
+WizAvatarHostPrivate::WizAvatarHostPrivate(WizAvatarHost* avatarHost)
     : q(avatarHost)
-    , m_downloader(new AvatarDownloader(this))
+    , m_downloader(new WizAvatarDownloader(this))
 {
     connect(m_downloader, SIGNAL(downloaded(QString, bool)),
             SLOT(on_downloaded(QString, bool)));
     loadCacheDefault();
 }
 
-bool AvatarHostPrivate::isLoaded(const QString& strUserID)
+bool WizAvatarHostPrivate::isLoaded(const QString& strUserID)
 {
     QPixmap pm;
     bool ret = QPixmapCache::find(keyFromUserID(strUserID), pm);
@@ -139,41 +139,41 @@ bool AvatarHostPrivate::isLoaded(const QString& strUserID)
     return ret;
 }
 
-bool AvatarHostPrivate::isFileExists(const QString& strUserID)
+bool WizAvatarHostPrivate::isFileExists(const QString& strUserID)
 {
-    QString strFile = Utils::PathResolve::avatarPath() + strUserID + ".png";
+    QString strFile = Utils::WizPathResolve::avatarPath() + strUserID + ".png";
     return QFile::exists(strFile);
 }
 
-bool AvatarHostPrivate::loadCache(const QString& strUserID)
+bool WizAvatarHostPrivate::loadCache(const QString& strUserID)
 {
-    QString strFilePath = Utils::PathResolve::avatarPath() + strUserID + ".png";
+    QString strFilePath = Utils::WizPathResolve::avatarPath() + strUserID + ".png";
     return loadCacheFromFile(keyFromUserID(strUserID), strFilePath);
 }
 
 
-QPixmap AvatarHostPrivate::loadOrg(const QString& strUserID)
+QPixmap WizAvatarHostPrivate::loadOrg(const QString& strUserID)
 {
-    QString strFilePath = Utils::PathResolve::avatarPath() + strUserID + ".png";
+    QString strFilePath = Utils::WizPathResolve::avatarPath() + strUserID + ".png";
     //
     QPixmap ret(strFilePath);
     if (!ret.isNull())
         return ret;
     //
-    QString defaultFilePath = Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png";
+    QString defaultFilePath = Utils::WizPathResolve::skinResourcesPath("default") + "avatar_default.png";
     return QPixmap(defaultFilePath);
 }
 
-void AvatarHostPrivate::addToDownloadList(const QString& strUserID, bool isSystem)
+void WizAvatarHostPrivate::addToDownloadList(const QString& strUserID, bool isSystem)
 {
     appendUserID(strUserID, isSystem);
 
     download_impl();
 }
 
-bool AvatarHostPrivate::customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath)
+bool WizAvatarHostPrivate::customSizeAvatar(const QString& strUserID, int width, int height, QString& strFilePath)
 {
-    strFilePath = Utils::PathResolve::tempPath() + strUserID + QString::number(width) + "x" + QString::number(height) + ".png";
+    strFilePath = Utils::WizPathResolve::tempPath() + strUserID + QString::number(width) + "x" + QString::number(height) + ".png";
     if (QFile::exists(strFilePath))
         return true;
 
@@ -185,12 +185,12 @@ bool AvatarHostPrivate::customSizeAvatar(const QString& strUserID, int width, in
     return customPix.save(strFilePath);
 }
 
-void AvatarHostPrivate::loadCacheDefault()
+void WizAvatarHostPrivate::loadCacheDefault()
 {
-    loadCacheFromFile(defaultKey(), Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png");
+    loadCacheFromFile(defaultKey(), Utils::WizPathResolve::skinResourcesPath("default") + "avatar_default.png");
 }
 
-bool AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)
+bool WizAvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& strFilePath)
 {
     QPixmap pixmap(strFilePath);
 
@@ -200,8 +200,8 @@ bool AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     }
 
     //
-    QSize sz = Utils::StyleHelper::avatarSize();
-    pixmap = AvatarHost::circleImage(pixmap, sz.width(), sz.height());
+    QSize sz = Utils::WizStyleHelper::avatarSize();
+    pixmap = WizAvatarHost::circleImage(pixmap, sz.width(), sz.height());
     //
     if (pixmap.isNull())
         return false;
@@ -216,7 +216,7 @@ bool AvatarHostPrivate::loadCacheFromFile(const QString& key, const QString& str
     return true;
 }
 
-QString AvatarHostPrivate::keyFromUserID(const QString& strUserID) const
+QString WizAvatarHostPrivate::keyFromUserID(const QString& strUserID) const
 {
     if (strUserID.isEmpty())
         return defaultKey();
@@ -224,20 +224,20 @@ QString AvatarHostPrivate::keyFromUserID(const QString& strUserID) const
     return "Avatar::" + strUserID;
 }
 
-QString AvatarHostPrivate::defaultKey() const
+QString WizAvatarHostPrivate::defaultKey() const
 {
     return "Avatar::Default";
 }
 
-bool AvatarHostPrivate::deleteAvatar(const QString& strUserID)
+bool WizAvatarHostPrivate::deleteAvatar(const QString& strUserID)
 {
     qDebug() << "[AvatarHost]remove user avatar: " << strUserID;
     QPixmapCache::remove(keyFromUserID(strUserID));
-    QString strAvatarPath = Utils::PathResolve::avatarPath();
+    QString strAvatarPath = Utils::WizPathResolve::avatarPath();
     return DeleteFile(strAvatarPath + strUserID + _T(".png"));
 }
 
-bool AvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
+bool WizAvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
 {
     if (QPixmapCache::find(keyFromUserID(strUserID), pixmap)) {
         return true;
@@ -261,7 +261,7 @@ bool AvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)
     return false;
 }
 
-bool AvatarHostPrivate::systemAvatar(const QString& avatarName, QPixmap* pixmap)
+bool WizAvatarHostPrivate::systemAvatar(const QString& avatarName, QPixmap* pixmap)
 {
     if (QPixmapCache::find(keyFromUserID(avatarName), pixmap)) {
         return true;
@@ -285,7 +285,7 @@ bool AvatarHostPrivate::systemAvatar(const QString& avatarName, QPixmap* pixmap)
     return false;
 }
 
-QPixmap AvatarHostPrivate::orgAvatar(const QString& strUserID)
+QPixmap WizAvatarHostPrivate::orgAvatar(const QString& strUserID)
 {
 //    return loadOrg(strUserID, false);
     return loadOrg(strUserID);
@@ -303,7 +303,7 @@ QPixmap AvatarHostPrivate::orgAvatar(const QString& strUserID)
 //    return loadOrg(strUserID);
 //}
 
-void AvatarHostPrivate::load(const QString& strUserID, bool isSystem)
+void WizAvatarHostPrivate::load(const QString& strUserID, bool isSystem)
 {
     //
     QPixmap pm;
@@ -315,7 +315,7 @@ void AvatarHostPrivate::load(const QString& strUserID, bool isSystem)
         }
         else
         {
-            QString defaultFilePath = Utils::PathResolve::skinResourcesPath("default") + "avatar_default.png";
+            QString defaultFilePath = Utils::WizPathResolve::skinResourcesPath("default") + "avatar_default.png";
             loadCacheFromFile(keyFromUserID(strUserID), defaultFilePath);
             Q_EMIT q->loaded(strUserID);            
 
@@ -325,12 +325,12 @@ void AvatarHostPrivate::load(const QString& strUserID, bool isSystem)
     }
 }
 
-void AvatarHostPrivate::reload(const QString& strUserID)
+void WizAvatarHostPrivate::reload(const QString& strUserID)
 {    
     addToDownloadList(strUserID, false);
 }
 
-void AvatarHostPrivate::download_impl()
+void WizAvatarHostPrivate::download_impl()
 {
     if (!m_currentDownloadingUser.userID.isEmpty())
         return;
@@ -350,7 +350,7 @@ void AvatarHostPrivate::download_impl()
     });
 }
 
-void AvatarHostPrivate::appendUserID(const QString& strUserID, bool isSystem)
+void WizAvatarHostPrivate::appendUserID(const QString& strUserID, bool isSystem)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -368,7 +368,7 @@ void AvatarHostPrivate::appendUserID(const QString& strUserID, bool isSystem)
     m_listUser.append(user);
 }
 
-void AvatarHostPrivate::peekUserID(DownloadingUser& user)
+void WizAvatarHostPrivate::peekUserID(DownloadingUser& user)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -381,7 +381,7 @@ void AvatarHostPrivate::peekUserID(DownloadingUser& user)
     }
 }
 
-void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
+void WizAvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
 {
     if (bSucceed)
     {
@@ -396,85 +396,85 @@ void AvatarHostPrivate::on_downloaded(QString strUserID, bool bSucceed)
 
 /* --------------------- AvatarHost --------------------- */
 
-static AvatarHostPrivate* d = 0;
-static AvatarHost* m_instance = 0;
+static WizAvatarHostPrivate* d = 0;
+static WizAvatarHost* m_instance = 0;
 
-AvatarHost::AvatarHost()
+WizAvatarHost::WizAvatarHost()
 {
     Q_ASSERT(!m_instance);
 
     m_instance = this;
-    d = new AvatarHostPrivate(this);
+    d = new WizAvatarHostPrivate(this);
 }
 
-AvatarHost::~AvatarHost()
+WizAvatarHost::~WizAvatarHost()
 {
     delete d;
     d = 0;
 }
 
-AvatarHost* AvatarHost::instance()
+WizAvatarHost* WizAvatarHost::instance()
 {
     return m_instance;
 }
 
-void AvatarHost::load(const QString& strUserID, bool isSystem)
+void WizAvatarHost::load(const QString& strUserID, bool isSystem)
 {
     d->load(strUserID, isSystem);
 }
 
-void AvatarHost::reload(const QString& strUserID)
+void WizAvatarHost::reload(const QString& strUserID)
 {
     d->reload(strUserID);
 }
 
 // retrieve pixmap from cache, return default avatar if not exist
-bool AvatarHost::avatar(const QString& strUserID, QPixmap* pixmap)
+bool WizAvatarHost::avatar(const QString& strUserID, QPixmap* pixmap)
 {
     return d->avatar(strUserID, pixmap);
 }
 
-bool AvatarHost::systemAvatar(const QString& avatarName, QPixmap* pixmap)
+bool WizAvatarHost::systemAvatar(const QString& avatarName, QPixmap* pixmap)
 {
     return d->systemAvatar(avatarName, pixmap);
 }
 
-bool AvatarHost::deleteAvatar(const QString& strUserID)
+bool WizAvatarHost::deleteAvatar(const QString& strUserID)
 {
     return d->deleteAvatar(strUserID);
 }
-QPixmap AvatarHost::orgAvatar(const QString& strUserID)
+QPixmap WizAvatarHost::orgAvatar(const QString& strUserID)
 {
     return d->orgAvatar(strUserID);
 }
-bool AvatarHost::isLoaded(const QString& strUserID)
+bool WizAvatarHost::isLoaded(const QString& strUserID)
 {
     return d->isLoaded(strUserID);
 }
 
-bool AvatarHost::isFileExists(const QString& strUserID)
+bool WizAvatarHost::isFileExists(const QString& strUserID)
 {
     return d->isFileExists(strUserID);
 }
 
 // For user want to retrive avatar from global pixmap cache
-QString AvatarHost::keyFromUserID(const QString& strUserID)
+QString WizAvatarHost::keyFromUserID(const QString& strUserID)
 {
     return d->keyFromUserID(strUserID);
 }
 
 // the default avatar's key for fallback drawing
-QString AvatarHost::defaultKey()
+QString WizAvatarHost::defaultKey()
 {
     return d->defaultKey();
 }
 
-bool AvatarHost::customSizeAvatar(const QString& strUserID, int width, int height, QString& strFileName)
+bool WizAvatarHost::customSizeAvatar(const QString& strUserID, int width, int height, QString& strFileName)
 {
     return d->customSizeAvatar(strUserID, width, height, strFileName);
 }
 
-QPixmap AvatarHost::corpImage(const QPixmap& org)
+QPixmap WizAvatarHost::corpImage(const QPixmap& org)
 {
     if (org.isNull())
         return org;
@@ -498,7 +498,7 @@ QPixmap AvatarHost::corpImage(const QPixmap& org)
     }
 }
 
-QPixmap AvatarHost::circleImage(const QPixmap& src, int width, int height)
+QPixmap WizAvatarHost::circleImage(const QPixmap& src, int width, int height)
 {
     QPixmap org = corpImage(src);
     //

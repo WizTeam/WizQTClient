@@ -8,12 +8,12 @@
 #include <QMutex>
 #include <QWaitCondition>
 
-class CWizFileMonitor : public QObject
+class WizFileMonitor : public QObject
 {
     Q_OBJECT
 public:
-    explicit CWizFileMonitor(QObject *parent = 0);
-    static CWizFileMonitor& instance();
+    explicit WizFileMonitor(QObject *parent = 0);
+    static WizFileMonitor& instance();
 
     void addFile(const QString& strKbGUID, const QString& strGUID, const QString& strFileName,
                  const QString& strMD5);

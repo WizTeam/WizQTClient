@@ -8,21 +8,21 @@
 #include "mac/wizIAPHelper.h"
 
 namespace Ui {
-class CWizIAPDialog;
+class WizIAPDialog;
 }
 
 class QMessageBox;
-class CWizIAPHelper;
+class WizIAPHelper;
 class QNetworkAccessManager;
 class QNetworkReply;
 
-class CWizIAPDialog : public QDialog, public CWizIAPCaller
+class WizIAPDialog : public QDialog, public WizIAPCaller
 {
     Q_OBJECT
 
 public:
-    explicit CWizIAPDialog(QWidget *parent = 0);
-    ~CWizIAPDialog();
+    explicit WizIAPDialog(QWidget *parent = 0);
+    ~WizIAPDialog();
 
     virtual void onProductsLoaded(const QList<CWizIAPProduct>& productList);
     virtual void onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID);
@@ -73,8 +73,8 @@ private:
     void removeTransationFromUnfinishedList(const QString& strTransationID);
 
 private:
-    Ui::CWizIAPDialog *ui;
-    CWizIAPHelper* m_iAPhelper;
+    Ui::WizIAPDialog *ui;
+    WizIAPHelper* m_iAPhelper;
     QMessageBox* m_waitingMsgBox;
     QTimer m_timer;
     QString m_transationID;

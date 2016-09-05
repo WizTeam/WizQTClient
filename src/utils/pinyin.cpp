@@ -1,4 +1,4 @@
-﻿#include "pinyin.h"
+#include "pinyin.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -33,7 +33,7 @@ class CWizPinYin
 {
 	std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA> m_data;
 	//
-	void Init()
+	void init()
 	{
 		if (m_data.empty())
 		{
@@ -56,7 +56,7 @@ class CWizPinYin
 public:
 	const char* GetPinYin(WCHAR ch)
 	{
-		Init();
+		init();
 		//
 		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator it = m_data.find(ch);
 		if (it == m_data.end())
@@ -66,7 +66,7 @@ public:
 	}
 	BOOL GetPinYin(WCHAR ch, bool firstLetterOnly, CWizStdStringArray& arrayText)
 	{
-		Init();
+		init();
 		//
 		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator itLower = m_data.lower_bound(ch);
 		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator itUpper = m_data.upper_bound(ch);

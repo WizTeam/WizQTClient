@@ -8,17 +8,17 @@ class QString;
 
 struct WIZUSERINFO;
 
-class TokenPrivate;
+class WizTokenPrivate;
 
-class Token : public QObject
+class WizToken : public QObject
 {
     Q_OBJECT
 
 public:
-    static Token* instance();
+    static WizToken* instance();
 
-    Token(const QString& strUserId = 0, const QString& strPasswd = 0);
-    ~Token();
+    WizToken(const QString& strUserId = 0, const QString& strPasswd = 0);
+    ~WizToken();
 
     static WIZUSERINFO info();
 
@@ -35,7 +35,7 @@ public:
 Q_SIGNALS:
     void tokenAcquired(QString strToken);
 
-    friend class TokenPrivate;
+    friend class WizTokenPrivate;
 };
 
 

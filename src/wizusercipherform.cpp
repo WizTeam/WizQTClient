@@ -7,9 +7,9 @@
 #include "utils/stylehelper.h"
 
 
-CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
+WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
-    , ui(new Ui::CWizUserCipherForm)
+    , ui(new Ui::WizUserCipherForm)
     , m_app(app)
     , m_bSaveForSession(false)
 {
@@ -23,11 +23,11 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
 
 
 
-    QString strIconNormal = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+    QString strIconNormal = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
 //            + "mac_icons_password_done.png";
-    QString strIconHot = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_hot", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+    QString strIconHot = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done_hot", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
 //            + "mac_icons_password_done_hot.png";
-    QString strIconDown = Utils::StyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
+    QString strIconDown = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done_down", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())
 //            + "mac_icons_password_done_down.png";
 
     ui->editUserCipher->setFixedHeight(19);
@@ -51,12 +51,12 @@ CWizUserCipherForm::CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent)
 
 }
 
-QSize CWizUserCipherForm::sizeHint()
+QSize WizUserCipherForm::sizeHint()
 {
     return QSize(350, 120);
 }
 
-void CWizUserCipherForm::showEvent(QShowEvent* event)
+void WizUserCipherForm::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
@@ -94,7 +94,7 @@ void CWizUserCipherForm::sheetShow()
     ui->editUserCipher->setFocus(Qt::MouseFocusReason);
 }*/
 
-void CWizUserCipherForm::cipherError()
+void WizUserCipherForm::cipherError()
 {
     QPoint pos = ui->editUserCipher->pos();
     m_animation->setDuration(500);
@@ -114,13 +114,13 @@ void CWizUserCipherForm::cipherError()
     ui->editUserCipher->setFocus();
 }
 
-void CWizUserCipherForm::cipherCorrect()
+void WizUserCipherForm::cipherCorrect()
 {
     ui->editUserCipher->setText(QString());
     ui->checkSave->setCheckState(Qt::Unchecked);
 }
 
-void CWizUserCipherForm::onButtonOK_clicked()
+void WizUserCipherForm::onButtonOK_clicked()
 {
     if (!ui->editUserCipher->text().isEmpty()) {
         m_userCipher = ui->editUserCipher->text();
@@ -129,7 +129,7 @@ void CWizUserCipherForm::onButtonOK_clicked()
     }
 }
 
-void CWizUserCipherForm::onCheckSave_stateChanged(int state)
+void WizUserCipherForm::onCheckSave_stateChanged(int state)
 {
     if (state == Qt::Checked) {
         m_bSaveForSession = true;
@@ -138,7 +138,7 @@ void CWizUserCipherForm::onCheckSave_stateChanged(int state)
     }
 }
 
-void CWizUserCipherForm::onCipher_changed(const QString &text)
+void WizUserCipherForm::onCipher_changed(const QString &text)
 {
     if (text.isEmpty()) {
         ui->buttonOk->setStatusNormal();
@@ -149,7 +149,7 @@ void CWizUserCipherForm::onCipher_changed(const QString &text)
     }
 }
 
-void CWizUserCipherForm::setHint(const QString& strHint)
+void WizUserCipherForm::setHint(const QString& strHint)
 {
     if (strHint.isEmpty()) {
         ui->labelHint->setVisible(false);
@@ -161,7 +161,7 @@ void CWizUserCipherForm::setHint(const QString& strHint)
     }
 }
 
-void CWizUserCipherForm::setCipherEditorFocus()
+void WizUserCipherForm::setCipherEditorFocus()
 {
     ui->editUserCipher->setFocus();
 }

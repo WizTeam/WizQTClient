@@ -7,26 +7,26 @@
 #include "sync.h"
 #include "wizKMServer.h"
 
-class CWizDatabase;
+class WizDatabase;
 
-class CWizKMSyncEvents : public QObject , public IWizKMSyncEvents
+class WizKMSyncEvents : public QObject , public IWizKMSyncEvents
 {
     Q_OBJECT
 
-    virtual void OnSyncProgress(int pos);
-    virtual HRESULT OnText(WizKMSyncProgressMessageType type, const QString& strStatus);
-    virtual HRESULT OnMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage);
-    virtual HRESULT OnBubbleNotification(const QVariant& param);
-    virtual void SetDatabaseCount(int count);
-    virtual void SetCurrentDatabase(int index);
-    virtual void ClearLastSyncError(IWizSyncableDatabase* pDatabase);
-    virtual void OnTrafficLimit(IWizSyncableDatabase* pDatabase);
-    virtual void OnStorageLimit(IWizSyncableDatabase* pDatabase);
-    virtual void OnBizServiceExpr(IWizSyncableDatabase* pDatabase);
-    virtual void OnBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
-    virtual void OnUploadDocument(const QString& strDocumentGUID, bool bDone);
-    virtual void OnBeginKb(const QString& strKbGUID);
-    virtual void OnEndKb(const QString& strKbGUID);
+    virtual void onSyncProgress(int pos);
+    virtual HRESULT onText(WizKMSyncProgressMessageType type, const QString& strStatus);
+    virtual HRESULT onMessage(WizKMSyncProgressMessageType type, const QString& strTitle, const QString& strMessage);
+    virtual HRESULT onBubbleNotification(const QVariant& param);
+    virtual void setDatabaseCount(int count);
+    virtual void setCurrentDatabase(int index);
+    virtual void clearLastSyncError(IWizSyncableDatabase* pDatabase);
+    virtual void onTrafficLimit(IWizSyncableDatabase* pDatabase);
+    virtual void onStorageLimit(IWizSyncableDatabase* pDatabase);
+    virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase);
+    virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
+    virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone);
+    virtual void onBeginKb(const QString& strKbGUID);
+    virtual void onEndKb(const QString& strKbGUID);
 
 Q_SIGNALS:
     void messageReady(const QString& strStatus);
@@ -35,13 +35,13 @@ Q_SIGNALS:
 };
 
 
-class CWizKMSyncThread : public QThread
+class WizKMSyncThread : public QThread
 {
     Q_OBJECT
 
 public:
-    CWizKMSyncThread(CWizDatabase& db, QObject* parent = 0);
-    ~CWizKMSyncThread();
+    WizKMSyncThread(WizDatabase& db, QObject* parent = 0);
+    ~WizKMSyncThread();
     void startSyncAll(bool bBackground = true);
     bool isBackground() const;
     void stopSync();
@@ -75,9 +75,9 @@ private slots:
 
 private:
     bool m_bBackground;
-    CWizDatabase& m_db;
+    WizDatabase& m_db;
     WIZUSERINFO m_info;
-    CWizKMSyncEvents* m_pEvents;
+    WizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
     bool m_bNeedDownloadMessages;
     QDateTime m_tLastSyncAll;
@@ -116,25 +116,25 @@ Q_SIGNALS:
     void bubbleNotificationRequest(const QVariant& param);
 };
 
-class CWizKMWaitAndPauseSyncHelper
+class WizKMWaitAndPauseSyncHelper
 {
 public:
-    CWizKMWaitAndPauseSyncHelper()
+    WizKMWaitAndPauseSyncHelper()
     {
-        CWizKMSyncThread::waitUntilIdleAndPause();
+        WizKMSyncThread::waitUntilIdleAndPause();
     }
-    ~CWizKMWaitAndPauseSyncHelper()
+    ~WizKMWaitAndPauseSyncHelper()
     {
-        CWizKMSyncThread::setPause(false);
+        WizKMSyncThread::setPause(false);
     }
 };
 
 #define WIZKM_WAIT_AND_PAUSE_SYNC() \
-    CWizKMWaitAndPauseSyncHelper __waitHelper;\
+    WizKMWaitAndPauseSyncHelper __waitHelper;\
     Q_UNUSED(__waitHelper)
 
 #define WIZKM_CHECK_SYNCING(parent) \
-    if (CWizKMSyncThread::isBusy()) \
+    if (WizKMSyncThread::isBusy()) \
     {   \
         QString title = QObject::tr("Syncing"); \
         QString message = QObject::tr("WizNote is synchronizing notes, please wait for the synchronization to complete before the operation.");  \

@@ -12,7 +12,7 @@ class QString;
 class QPolygonF;
 class QFont;
 class QIcon;
-class CWizSettings;
+class WizSettings;
 class QMargins;
 
 #define  DocTypeNormal                         0x0000
@@ -23,7 +23,7 @@ class QMargins;
 
 
 namespace Utils {
-class StyleHelper
+class WizStyleHelper
 {
 public:
     enum TextState {
@@ -158,7 +158,7 @@ public:
     static int notifyBarHeight();
 
 private:
-    static CWizSettings* m_settings;
+    static WizSettings* m_settings;
 
     static QVariant getValue(const QString &key, const QVariant &defaultValue = QVariant());
 };

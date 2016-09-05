@@ -3,10 +3,10 @@
 
 #include "share/wizDatabaseManager.h"
 
-class CWizAccountManager
+class WizAccountManager
 {
 public:
-    CWizAccountManager(CWizDatabaseManager& dbMgr);
+    WizAccountManager(WizDatabaseManager& dbMgr);
 
     bool isVip();
     bool isPaidUser();
@@ -15,7 +15,7 @@ public:
     bool isBizGroup(const QString& kbGUID);
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
 };
 
 #endif // CWIZACCOUNTMANAGER_H

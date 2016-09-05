@@ -9,12 +9,12 @@
 class QLabel;
 class QPushButton;
 
-class CWizTipsWidget : public CWizPopupWidget
+class WizTipsWidget : public WizPopupWidget
 {
     Q_OBJECT
 public:
-    explicit CWizTipsWidget(const QString& id,QWidget *parent = 0);
-    ~CWizTipsWidget();
+    explicit WizTipsWidget(const QString& id,QWidget *parent = 0);
+    ~WizTipsWidget();
 
     void setSizeHint(const QSize& hintSize);
     virtual QSize sizeHint() const;

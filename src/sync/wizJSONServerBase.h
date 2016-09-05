@@ -6,11 +6,11 @@
 
 #define JSON_RETURNCODE_OK    200
 
-class CWizJSONServerBase
+class WizJSONServerBase
 {
 public:
-    CWizJSONServerBase();
-    ~CWizJSONServerBase();
+    WizJSONServerBase();
+    ~WizJSONServerBase();
 
     int returnCode();
 

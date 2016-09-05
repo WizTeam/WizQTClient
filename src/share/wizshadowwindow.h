@@ -14,11 +14,11 @@
 #include "wizshadoweffect.h"
 
 template <class Base>
-class CWizShadowWindow
+class WizShadowWindow
         : public Base
 {
 public:
-    explicit CWizShadowWindow(QWidget *parent = 0)
+    explicit WizShadowWindow(QWidget *parent = 0)
         : Base(parent)
         , m_oldHitCode(wizClient)
         , m_mousePressed(false)
@@ -39,7 +39,7 @@ public:
         windowLayout->setContentsMargins(0, 0, 0, 0);
         windowLayout->setSpacing(0);
         //
-        m_rootWidget = new CWizShadowWidget(this);
+        m_rootWidget = new WizShadowWidget(this);
         m_rootWidget->setContentsMargins(10, 10, 10, 10);
         windowLayout->addWidget(m_rootWidget);
         //
@@ -61,7 +61,7 @@ public:
         //m_shadowWidget->setGraphicsEffect(effect);
         m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
-        m_titleBar = new CWizTitleBar(m_shadowWidget, this, m_rootWidget);
+        m_titleBar = new WizTitleBar(m_shadowWidget, this, m_rootWidget);
         shadowLayout->addWidget(m_titleBar);
         //
         m_clientWidget = new QWidget(m_shadowWidget);
@@ -82,7 +82,7 @@ public:
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
     QWidget* shadowWidget() const { return m_shadowWidget; }
-    CWizTitleBar* titleBar() const { return m_titleBar; }
+    WizTitleBar* titleBar() const { return m_titleBar; }
     bool canResize() const { return m_canResize; }
     void setCanResize(bool b) { m_canResize = b; m_titleBar->setCanResize(b); }
     void setTitleText(QString title) { m_titleBar->setText(title); }
@@ -97,7 +97,7 @@ private:
     QWidget* m_shadowWidget;
     QWidget* m_clientWidget;
     QLayout* m_clientLayout;
-    CWizTitleBar* m_titleBar;
+    WizTitleBar* m_titleBar;
     bool m_canResize;
 protected:
     virtual WizWindowHitTestResult hitTest(const QPoint& posOfWindow)

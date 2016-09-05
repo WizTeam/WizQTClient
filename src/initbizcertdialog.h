@@ -4,19 +4,19 @@
 #include <QDialog>
 
 namespace Ui {
-class InitBizCertDialog;
+class WizInitBizCertDialog;
 }
 
 class QAbstractButton;
-class CWizDatabase;
+class WizDatabase;
 
-class InitBizCertDialog : public QDialog
+class WizInitBizCertDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit InitBizCertDialog(CWizDatabase* pDatabase, QWidget *parent = 0);
-    ~InitBizCertDialog();
+    explicit WizInitBizCertDialog(WizDatabase* pDatabase, QWidget *parent = 0);
+    ~WizInitBizCertDialog();
     //
     QString userCertPassword() { return m_userPassword; }
 private:
@@ -26,9 +26,9 @@ public slots:
     virtual void accept();
 
 private:
-    Ui::InitBizCertDialog *ui;
+    Ui::WizInitBizCertDialog *ui;
     QString m_userPassword;
-    CWizDatabase* m_pDb;
+    WizDatabase* m_pDb;
 };
 
 #endif // INITBIZCERTDIALOG_H

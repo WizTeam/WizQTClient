@@ -5,11 +5,11 @@
 
 class WIZTAGDATA;
 
-class CWizFileImporter : public QObject
+class WizFileImporter : public QObject
 {
     Q_OBJECT
 public:
-    explicit CWizFileImporter(CWizDatabaseManager& dbMgr,QObject *parent = 0);
+    explicit WizFileImporter(WizDatabaseManager& dbMgr,QObject *parent = 0);
 
     void importFiles(const QStringList& strFiles, const QString& strTargetFolderLocation);
     void importFiles(const QStringList& strFiles, const QString& strKbGUID, const WIZTAGDATA& tag);
@@ -28,7 +28,7 @@ private:
     bool importFile(const QString& strFile, const QString& strKbGUID, const QString& strLocation, const WIZTAGDATA& tag);
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QString m_strKbGuid;
 };
 

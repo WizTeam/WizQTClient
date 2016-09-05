@@ -4,14 +4,14 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizVerificationCodeDialog;
+class WizVerificationCodeDialog;
 }
 
-class CWizVerificationCodeDownloader : public QObject
+class WizVerificationCodeDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizVerificationCodeDownloader(QObject* parent = 0);
+    WizVerificationCodeDownloader(QObject* parent = 0);
 
     void download(const QString& strCaptchaID);
 
@@ -19,13 +19,13 @@ signals:
     void downloadFinished(const QByteArray& byData);
 };
 
-class CWizVerificationCodeDialog : public QDialog
+class WizVerificationCodeDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizVerificationCodeDialog(QWidget *parent = 0);
-    virtual ~CWizVerificationCodeDialog();
+    explicit WizVerificationCodeDialog(QWidget *parent = 0);
+    virtual ~WizVerificationCodeDialog();
 
     int verificationRequest(const QString& strCaptchaID);
     QString getVerificationCode() const;
@@ -45,9 +45,9 @@ private slots:
 private:
     void downloadImage();
 
-    Ui::CWizVerificationCodeDialog *ui;
+    Ui::WizVerificationCodeDialog *ui;
     QString m_strCaptchaID;
-    CWizVerificationCodeDownloader* m_downloader;
+    WizVerificationCodeDownloader* m_downloader;
 };
 
 #endif // WIZVERIFICATIONCODEDIALOG_H

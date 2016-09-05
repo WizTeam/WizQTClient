@@ -12,13 +12,13 @@
 #include "token.h"
 #include "share/wizEventLoop.h"
 
-AvatarUploader::AvatarUploader(QObject* parent)
+WizAvatarUploader::WizAvatarUploader(QObject* parent)
     : QObject(parent)
     , m_net(new QNetworkAccessManager(this))
 {
 }
 
-QString AvatarUploader::convert2Avatar(const QString& strFileName)
+QString WizAvatarUploader::convert2Avatar(const QString& strFileName)
 {
     QImage image(strFileName);
     if (image.isNull())
@@ -35,7 +35,7 @@ QString AvatarUploader::convert2Avatar(const QString& strFileName)
     return strTempAvatar;
 }
 
-void AvatarUploader::upload(const QString& strFileName)
+void WizAvatarUploader::upload(const QString& strFileName)
 {
     m_strFileName = convert2Avatar(strFileName);
     if (m_strFileName.isEmpty()) {
@@ -45,7 +45,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    m_strUrl = CommonApiEntry::avatarUploadUrl();
+    m_strUrl = WizCommonApiEntry::avatarUploadUrl();
     if (m_strUrl.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get url for uploading avatar!";
         m_strError = "failed to get url for uploading avatar!";
@@ -53,7 +53,7 @@ void AvatarUploader::upload(const QString& strFileName)
         return;
     }
 
-    QString strToken = Token::token();
+    QString strToken = WizToken::token();
     if (strToken.isEmpty()) {
         qDebug() << "[avatarUploader] failed to get token while upload avatar!";
         m_strError = "failed to get token while upload avatar!";
@@ -64,7 +64,7 @@ void AvatarUploader::upload(const QString& strFileName)
     upload_impl(m_strUrl, strToken, m_strFileName);
 }
 
-void AvatarUploader::upload_impl(const QString& strUrl,
+void WizAvatarUploader::upload_impl(const QString& strUrl,
                                      const QString& strToken,
                                      const QString& strFileName)
 {
@@ -95,7 +95,7 @@ void AvatarUploader::upload_impl(const QString& strUrl,
     multiPart->setParent(reply); // delete the multiPart with the reply
 
 
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     if (reply->error()) {

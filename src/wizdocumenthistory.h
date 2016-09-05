@@ -4,10 +4,10 @@
 
 #include "share/wizDatabase.h"
 
-class CWizDocumentViewHistory
+class WizDocumentViewHistory
 {
 public:
-    CWizDocumentViewHistory();
+    WizDocumentViewHistory();
 private:
     int m_nIndex;
     std::deque<WIZDOCUMENTDATA> m_arrayHistory;

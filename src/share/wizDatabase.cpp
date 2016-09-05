@@ -49,15 +49,15 @@
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //class CWizDocument
 
-QString CWizDatabase::m_strUserId = QString();
+QString WizDatabase::m_strUserId = QString();
 
 QString GetResoucePathFromFile(const QString& strHtmlFileName)
 {
     if (!QFile::exists(strHtmlFileName))
         return QString();
 
-    QString strTitle = Utils::Misc::extractFileTitle(strHtmlFileName);
-    QString strPath = Utils::Misc::extractFilePath(strHtmlFileName);
+    QString strTitle = Utils::WizMisc::extractFileTitle(strHtmlFileName);
+    QString strPath = Utils::WizMisc::extractFilePath(strHtmlFileName);
     QString strPath1 = strPath + strTitle + "_files/";
     QString strPath2 = strPath + strTitle + ".files/";
     if (QFile::exists(strPath1))
@@ -83,21 +83,21 @@ private:
     std::map<QString, QString> m_passwords;
     QMutex m_mutex;
 public:
-    void SetPassword(const QString& strBizGUID, const QString& strPassword)
+    void setPassword(const QString& strBizGUID, const QString& strPassword)
     {
         QMutexLocker locker(&m_mutex);
         Q_UNUSED(locker);
         //
         m_passwords[strBizGUID] = strPassword;
     }
-    QString GetPassword(const QString& strBizGUID)
+    QString getPassword(const QString& strBizGUID)
     {
         QMutexLocker locker(&m_mutex);
         Q_UNUSED(locker);
         //
         return m_passwords[strBizGUID];
     }
-    void Clear()
+    void clear()
     {
         QMutexLocker locker(&m_mutex);
         Q_UNUSED(locker);
@@ -107,18 +107,18 @@ public:
 };
 
 
-CWizDocument::CWizDocument(CWizDatabase& db, const WIZDOCUMENTDATA& data)
+WizDocument::WizDocument(WizDatabase& db, const WIZDOCUMENTDATA& data)
     : m_db(db)
     , m_data(data)
 {
 }
 
-void CWizDocument::makeSureObjectDataExists()
+void WizDocument::makeSureObjectDataExists()
 {
     ::WizMakeSureDocumentExistAndBlockWidthDialog(m_db, m_data);
 
     CWizDocumentAttachmentDataArray arrayAttach;
-    if (m_db.GetDocumentAttachments(m_data.strGUID, arrayAttach))
+    if (m_db.getDocumentAttachments(m_data.strGUID, arrayAttach))
     {
         for (WIZDOCUMENTATTACHMENTDATAEX attach : arrayAttach)
         {
@@ -127,120 +127,120 @@ void CWizDocument::makeSureObjectDataExists()
     }
 }
 
-bool CWizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
+bool WizDocument::UpdateDocument4(const QString& strHtml, const QString& strURL, int nFlags)
 {
-    return m_db.UpdateDocumentData(m_data, strHtml, strURL, nFlags);
+    return m_db.updateDocumentData(m_data, strHtml, strURL, nFlags);
 }
 
-void CWizDocument::deleteToTrash()
+void WizDocument::deleteToTrash()
 {
     // move document to trash
 
 //    int nVersion = m_data.nVersion;
-    MoveTo(m_db.GetDeletedItemsFolder());
-    m_db.SetDocumentVersion(m_data.strGUID, 0);
+    moveTo(m_db.GetDeletedItemsFolder());
+    m_db.setDocumentVersion(m_data.strGUID, 0);
 
     // delete document from server
     CWizDocumentAttachmentDataArray arrayAttachment;
-    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+    m_db.getDocumentAttachments(m_data.strGUID, arrayAttachment);
     CWizDocumentAttachmentDataArray::const_iterator it;
     for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
-        m_db.LogDeletedGUID(it->strGUID, wizobjectDocumentAttachment);
+        m_db.logDeletedGuid(it->strGUID, wizobjectDocumentAttachment);
     }
 
-    m_db.LogDeletedGUID(m_data.strGUID, wizobjectDocument);
+    m_db.logDeletedGuid(m_data.strGUID, wizobjectDocument);
 }
 
-void CWizDocument::deleteFromTrash()
+void WizDocument::deleteFromTrash()
 {
     //NOTE: 在普通文件夹中删除笔记的时候，会把数据存放在deletedguid中，此处需要判断是否已将删除数据同步到
     //服务器上，如果没有同步，则不能删除deletedguid中的数据
-    bool bWaitUpload = m_db.IsObjectDeleted(m_data.strGUID);
+    bool bWaitUpload = m_db.isObjectDeleted(m_data.strGUID);
 
     CWizDocumentAttachmentDataArray arrayAttachment;
-    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+    m_db.getDocumentAttachments(m_data.strGUID, arrayAttachment);
 
     CWizDocumentAttachmentDataArray::const_iterator it;
     for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
-        CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
+        CString strFileName = m_db.getAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
 
-        m_db.DeleteAttachment(*it, true, true);
+        m_db.deleteAttachment(*it, true, true);
         if (!bWaitUpload) {
-            m_db.DeleteDeletedGUID(it->strGUID);
+            m_db.deleteDeletedGuid(it->strGUID);
         }
     }
 
-    if (!m_db.DeleteDocument(m_data, true)) {
+    if (!m_db.deleteDocument(m_data, true)) {
         TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
     }
     if (!bWaitUpload) {
         //NOTE: 笔记移动到已删除时已通知服务器删除，在已删除中删除数据时候不再记录到已删除目录
-        m_db.DeleteDeletedGUID(m_data.strGUID);
+        m_db.deleteDeletedGuid(m_data.strGUID);
     }
 
-    CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
+    CString strZipFileName = m_db.getDocumentFileName(m_data.strGUID);
     if (PathFileExists(strZipFileName))
     {
         WizDeleteFile(strZipFileName);
     }
 }
 
-bool CWizDocument::IsInDeletedItemsFolder()
+bool WizDocument::isInDeletedItemsFolder()
 {
-    QString strDeletedItemsFolderLocation = m_db.GetDeletedItemsLocation();
+    QString strDeletedItemsFolderLocation = m_db.getDeletedItemsLocation();
 
     return m_data.strLocation.startsWith(strDeletedItemsFolderLocation);
 }
 
-void CWizDocument::PermanentlyDelete()
+void WizDocument::PermanentlyDelete()
 {
     CWizDocumentAttachmentDataArray arrayAttachment;
-    m_db.GetDocumentAttachments(m_data.strGUID, arrayAttachment);
+    m_db.getDocumentAttachments(m_data.strGUID, arrayAttachment);
 
     CWizDocumentAttachmentDataArray::const_iterator it;
     for (it = arrayAttachment.begin(); it != arrayAttachment.end(); it++) {
-        CString strFileName = m_db.GetAttachmentFileName(it->strGUID);
+        CString strFileName = m_db.getAttachmentFileName(it->strGUID);
         ::WizDeleteFile(strFileName);
 
-        m_db.DeleteAttachment(*it, true, true);
+        m_db.deleteAttachment(*it, true, true);
     }
 
-    if (!m_db.DeleteDocument(m_data, true)) {
+    if (!m_db.deleteDocument(m_data, true)) {
         TOLOG1("Failed to delete document: %1", m_data.strTitle);
         return;
     }
 
-    CString strZipFileName = m_db.GetDocumentFileName(m_data.strGUID);
+    CString strZipFileName = m_db.getDocumentFileName(m_data.strGUID);
     if (PathFileExists(strZipFileName))
     {
         WizDeleteFile(strZipFileName);
     }
 }
 
-void CWizDocument::MoveTo(QObject* p)
+void WizDocument::moveTo(QObject* p)
 {
-    CWizFolder* folder = dynamic_cast<CWizFolder*>(p);
+    WizFolder* folder = dynamic_cast<WizFolder*>(p);
     if (!folder)
         return;
 
-    MoveTo(folder);
+    moveTo(folder);
 }
 
-bool CWizDocument::MoveTo(CWizFolder* pFolder)
+bool WizDocument::moveTo(WizFolder* pFolder)
 {
     if (!pFolder)
         return false;
 
-    QString strNewLocation = pFolder->Location();
+    QString strNewLocation = pFolder->location();
     QString strOldLocation = m_data.strLocation;
 
     if (strNewLocation == strOldLocation)
         return true;
 
     m_data.strLocation = strNewLocation;
-    if (!m_db.ModifyDocumentLocation(m_data))
+    if (!m_db.modifyDocumentLocation(m_data))
     {
         m_data.strLocation = strOldLocation;
         TOLOG1(_T("Failed to modify document location %1."), m_data.strLocation);
@@ -250,14 +250,14 @@ bool CWizDocument::MoveTo(CWizFolder* pFolder)
     return true;
 }
 
-bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder)
+bool WizDocument::moveTo(WizDatabase& targetDB, WizFolder* pFolder)
 {
-    qDebug() << "wizdocmove  to : " << pFolder->Location();
+    qDebug() << "wizdocmove  to : " << pFolder->location();
     if (targetDB.kbGUID() == m_db.kbGUID())
-        return MoveTo(pFolder);
+        return moveTo(pFolder);
 
     QString newDocGUID;
-    if (!CopyTo(targetDB, pFolder, true, true, newDocGUID))
+    if (!copyTo(targetDB, pFolder, true, true, newDocGUID))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
@@ -267,31 +267,31 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, CWizFolder* pFolder)
     return true;
 }
 
-bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag)
+bool WizDocument::moveTo(WizDatabase& targetDB, const WIZTAGDATA& targetTag)
 {
     qDebug() << "wizdoc move to : " << targetTag.strName;
     if (targetDB.kbGUID() == m_db.kbGUID())
     {
         if (m_data.strLocation == LOCATION_DELETED_ITEMS)
         {
-            CWizFolder folder(m_db, m_db.GetDefaultNoteLocation());
-            MoveTo(&folder);
+            WizFolder folder(m_db, m_db.getDefaultNoteLocation());
+            moveTo(&folder);
         }
 
         CWizTagDataArray arrayTag;
-        m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+        m_db.getDocumentTags(m_data.strGUID, arrayTag);
         if (arrayTag.size() > 0)
         {
             for (CWizTagDataArray::const_iterator it = arrayTag.begin(); it != arrayTag.end(); it++)
             {
-                RemoveTag(*it);
+                removeTag(*it);
             }
         }
-        return AddTag(targetTag);
+        return addTag(targetTag);
     }
 
     //
-    if (!CopyTo(targetDB, targetTag, true))
+    if (!copyTo(targetDB, targetTag, true))
     {
         TOLOG1(_T("Failed to copy document %1. Stop move"), m_data.strTitle);
         return false;
@@ -302,11 +302,11 @@ bool CWizDocument::MoveTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag)
     return true;
 }
 
-bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keepDocTime,
+bool WizDocument::copyTo(WizDatabase& targetDB, WizFolder* pFolder, bool keepDocTime,
                           bool keepDocTag, QString& newDocGUID)
 {
-    qDebug() << "wizdocu copy to : " << pFolder->Location();
-    QString strLocation = pFolder->Location();
+    qDebug() << "wizdocu copy to : " << pFolder->location();
+    QString strLocation = pFolder->location();
     WIZTAGDATA tagEmpty;
     if (!copyDocumentTo(m_data.strGUID, targetDB, strLocation, tagEmpty, newDocGUID, keepDocTime))
     {
@@ -314,42 +314,42 @@ bool CWizDocument::CopyTo(CWizDatabase& targetDB, CWizFolder* pFolder, bool keep
         return false;
     }
 
-    if (keepDocTag && !m_db.IsGroup() && m_db.kbGUID() == targetDB.kbGUID())
+    if (keepDocTag && !m_db.isGroup() && m_db.kbGUID() == targetDB.kbGUID())
     {
         WIZDOCUMENTDATA newDoc;
-        if (!targetDB.DocumentFromGUID(newDocGUID, newDoc))
+        if (!targetDB.documentFromGuid(newDocGUID, newDoc))
             return false;
 
         CWizStdStringArray arrayTag;
-        if (m_db.GetDocumentTags(m_data.strGUID, arrayTag))
+        if (m_db.getDocumentTags(m_data.strGUID, arrayTag))
         {
             for (CString tagGUID : arrayTag)
             {
-                targetDB.InsertDocumentTag(newDoc, tagGUID);
+                targetDB.insertDocumentTag(newDoc, tagGUID);
             }
         }
     }
     return true;
 }
 
-bool CWizDocument::CopyTo(CWizDatabase& targetDB, const WIZTAGDATA& targetTag,
+bool WizDocument::copyTo(WizDatabase& targetDB, const WIZTAGDATA& targetTag,
                           bool keepDocTime)
 {
     qDebug() << "wizdocu copy to : " << targetTag.strName;
-    QString strLocation = targetDB.GetDefaultNoteLocation();
+    QString strLocation = targetDB.getDefaultNoteLocation();
     QString strNewDocGUID;
     return copyDocumentTo(m_data.strGUID, targetDB, strLocation, targetTag, strNewDocGUID, keepDocTime);
 }
 
-bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
+bool WizDocument::addTag(const WIZTAGDATA& dataTag)
 {
     CWizStdStringArray arrayTag;
-    m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+    m_db.getDocumentTags(m_data.strGUID, arrayTag);
 
     if (-1 != WizFindInArray(arrayTag, dataTag.strGUID))
         return true;
 
-    if (!m_db.InsertDocumentTag(m_data, dataTag.strGUID)) {
+    if (!m_db.insertDocumentTag(m_data, dataTag.strGUID)) {
         TOLOG1(_T("Failed to insert document tag: %1"), m_data.strTitle);
         return false;
     }
@@ -357,15 +357,15 @@ bool CWizDocument::AddTag(const WIZTAGDATA& dataTag)
     return true;
 }
 
-bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
+bool WizDocument::removeTag(const WIZTAGDATA& dataTag)
 {
     CWizStdStringArray arrayTag;
-    m_db.GetDocumentTags(m_data.strGUID, arrayTag);
+    m_db.getDocumentTags(m_data.strGUID, arrayTag);
 
     if (-1 == WizFindInArray(arrayTag, dataTag.strGUID))
         return true;
 
-    if (!m_db.DeleteDocumentTag(m_data, dataTag.strGUID)) {
+    if (!m_db.deleteDocumentTag(m_data, dataTag.strGUID)) {
         TOLOG1(_T("Failed to delete document tag: %1"), m_data.strTitle);
         return false;
     }
@@ -373,9 +373,9 @@ bool CWizDocument::RemoveTag(const WIZTAGDATA& dataTag)
     return true;
 }
 
-void CWizDocument::Delete()
+void WizDocument::Delete()
 {
-    if (IsInDeletedItemsFolder()) {
+    if (isInDeletedItemsFolder()) {
 //        return PermanentlyDelete();
         return deleteFromTrash();
     } else {
@@ -386,12 +386,12 @@ void CWizDocument::Delete()
 }
 
 
-bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targetDB,
+bool WizDocument::copyDocumentTo(const QString& sourceGUID, WizDatabase& targetDB,
                                   const QString& strTargetLocation, const WIZTAGDATA& targetTag, QString& resultGUID, bool keepDocTime)
 {
     TOLOG("Copy document");
     WIZDOCUMENTDATA sourceDoc;
-    if (!m_db.DocumentFromGUID(sourceGUID, sourceDoc))
+    if (!m_db.documentFromGuid(sourceGUID, sourceDoc))
         return false;
 
     if (!WizMakeSureDocumentExistAndBlockWidthEventloop(m_db, sourceDoc))
@@ -401,11 +401,11 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
         return false;
 
     QByteArray ba;
-    if (!m_db.LoadDocumentDecryptedData(sourceDoc.strGUID, ba))
+    if (!m_db.loadDocumentDecryptedData(sourceDoc.strGUID, ba))
         return false;
 
     WIZDOCUMENTDATA newDoc;
-    if (!targetDB.CreateDocumentAndInit(sourceDoc, ba, strTargetLocation, targetTag, newDoc))
+    if (!targetDB.createDocumentAndInit(sourceDoc, ba, strTargetLocation, targetTag, newDoc))
     {
         TOLOG("Failed to new document!");
         return false;
@@ -423,17 +423,17 @@ bool CWizDocument::copyDocumentTo(const QString& sourceGUID, CWizDatabase& targe
         newDoc.tDataModified = sourceDoc.tDataModified;
         newDoc.tModified = sourceDoc.tModified;
     }
-    newDoc.nAttachmentCount = targetDB.GetDocumentAttachmentCount(newDoc.strGUID);
-    targetDB.ModifyDocumentInfoEx(newDoc);
+    newDoc.nAttachmentCount = targetDB.getDocumentAttachmentCount(newDoc.strGUID);
+    targetDB.modifyDocumentInfoEx(newDoc);
 
     return true;
 }
 
-bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
-                                          CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
+bool WizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
+                                          WizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
 {
     CWizDocumentAttachmentDataArray arrayAttachment;
-    m_db.GetDocumentAttachments(sourceDoc.strGUID, arrayAttachment);
+    m_db.getDocumentAttachments(sourceDoc.strGUID, arrayAttachment);
 
     for (CWizDocumentAttachmentDataArray::const_iterator it = arrayAttachment.begin();
          it != arrayAttachment.end(); it++)
@@ -445,10 +445,10 @@ bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
         WIZDOCUMENTATTACHMENTDATAEX newAttach;
         QString strNewAttachFileName;
 
-        CString targetAttachPath = targetDB.GetAttachmentsDataPath();
+        CString targetAttachPath = targetDB.getAttachmentsDataPath();
         CString strTempFileName = targetAttachPath + attachData.strName;
         ::WizGetNextFileName(strTempFileName);
-        if (!::WizCopyFile(m_db.GetAttachmentFileName(attachData.strGUID), strTempFileName, FALSE))
+        if (!::WizCopyFile(m_db.getAttachmentFileName(attachData.strGUID), strTempFileName, FALSE))
             return false;
 
         newAttach = attachData;
@@ -461,7 +461,7 @@ bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
 
         newAttach.strKbGUID = targetDoc.strKbGUID;
         newAttach.nVersion = -1;
-        targetDB.AddAttachment(targetDoc, strNewAttachFileName, newAttach);
+        targetDB.addAttachment(targetDoc, strNewAttachFileName, newAttach);
     }
 
     return true;
@@ -472,7 +472,7 @@ bool CWizDocument::copyDocumentAttachment(const WIZDOCUMENTDATA& sourceDoc,
 * Class CWizFolder
 */
 
-CWizFolder::CWizFolder(CWizDatabase& db, const QString& strLocation)
+WizFolder::WizFolder(WizDatabase& db, const QString& strLocation)
     : m_db(db)
     , m_strLocation(strLocation)
 {
@@ -480,14 +480,14 @@ CWizFolder::CWizFolder(CWizDatabase& db, const QString& strLocation)
     Q_ASSERT(strLocation.left(1) == "/");
 }
 
-bool CWizFolder::IsDeletedItems() const
+bool WizFolder::isDeletedItems() const
 {
-    return Location() == LOCATION_DELETED_ITEMS;
+    return location() == LOCATION_DELETED_ITEMS;
 }
 
-bool CWizFolder::IsInDeletedItems() const
+bool WizFolder::isInDeletedItems() const
 {
-    return !IsDeletedItems() && Location().startsWith(LOCATION_DELETED_ITEMS);
+    return !isDeletedItems() && location().startsWith(LOCATION_DELETED_ITEMS);
 }
 
 //QObject* CWizFolder::CreateDocument2(const QString& strTitle, const QString& strURL)
@@ -501,9 +501,9 @@ bool CWizFolder::IsInDeletedItems() const
 //    return pDoc;
 //}
 
-void CWizFolder::Delete()
+void WizFolder::Delete()
 {
-    if (IsDeletedItems())
+    if (isDeletedItems())
         return;
 
 //    if (IsInDeletedItems()) {
@@ -520,38 +520,38 @@ void CWizFolder::Delete()
 //        MoveTo(&deletedItems);
 //    }
     CWizDocumentDataArray arrayDocument;
-    m_db.GetDocumentsByLocation(Location(), arrayDocument, true);
+    m_db.getDocumentsByLocation(location(), arrayDocument, true);
     CWizDocumentDataArray::iterator it;
     for (it = arrayDocument.begin(); it != arrayDocument.end(); it++)
     {
         WIZDOCUMENTDATAEX doc = *it;
-        CWizDocument document(m_db, doc);
+        WizDocument document(m_db, doc);
         document.deleteToTrash();
     }
 
-    m_db.DeleteExtraFolder(Location());
-    m_db.SetLocalValueVersion("folders", -1);
+    m_db.deleteExtraFolder(location());
+    m_db.setLocalValueVersion("folders", -1);
 
 }
 
-void CWizFolder::MoveTo(QObject* dest)
+void WizFolder::moveTo(QObject* dest)
 {
-    CWizFolder* pFolder = dynamic_cast<CWizFolder*>(dest);
+    WizFolder* pFolder = dynamic_cast<WizFolder*>(dest);
     if (!pFolder)
         return;
 
-    if (IsDeletedItems())
+    if (isDeletedItems())
         return;
 
-    if (!CanMove(this, pFolder)) {
-        TOLOG2("Can move %1 to %2", Location(), pFolder->Location());
+    if (!canMove(this, pFolder)) {
+        TOLOG2("Can move %1 to %2", location(), pFolder->location());
         return;
     }
 
-    return MoveToLocation(pFolder->Location());
+    return moveToLocation(pFolder->location());
 }
 
-bool CWizFolder::CanMove(const QString& strSource, const QString& strDest)
+bool WizFolder::canMove(const QString& strSource, const QString& strDest)
 {
     if (LOCATION_DELETED_ITEMS == strSource)
         return false;
@@ -563,23 +563,23 @@ bool CWizFolder::CanMove(const QString& strSource, const QString& strDest)
     return true;
 }
 
-bool CWizFolder::CanMove(CWizFolder* pSrc, CWizFolder* pDest) const
+bool WizFolder::canMove(WizFolder* pSrc, WizFolder* pDest) const
 {
-    return CanMove(pSrc->Location(), pDest->Location());
+    return canMove(pSrc->location(), pDest->location());
 }
 
-void CWizFolder::MoveToLocation(const QString& strDestLocation)
+void WizFolder::moveToLocation(const QString& strDestLocation)
 {
     Q_ASSERT(strDestLocation.right(1) == "/");
     Q_ASSERT(strDestLocation.left(1) == "/");
 
-    if (!CanMove(Location(), strDestLocation))
+    if (!canMove(location(), strDestLocation))
         return;
 
-    QString strOldLocation = Location();
+    QString strOldLocation = location();
 
     CWizDocumentDataArray arrayDocument;
-    if (!m_db.GetDocumentsByLocation(strOldLocation, arrayDocument, true)) {
+    if (!m_db.getDocumentsByLocation(strOldLocation, arrayDocument, true)) {
         TOLOG1("Failed to get documents by location (include sub folders): %1", strOldLocation);
         return;
     }
@@ -598,7 +598,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
         data.strLocation.insert(0, strDestLocation);
         data.nVersion = -1;
 
-        if (!m_db.ModifyDocumentLocation(data)) {
+        if (!m_db.modifyDocumentLocation(data)) {
             TOLOG("Failed to move note to new folder!");
             continue;
         }
@@ -607,7 +607,7 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
     }
 
     CWizStdStringArray arrayFolder;
-    m_db.GetExtraFolder(arrayFolder);
+    m_db.getExtraFolder(arrayFolder);
     for (CWizStdStringArray::const_iterator it = arrayFolder.begin();
          it != arrayFolder.end();
          it++) {
@@ -619,13 +619,13 @@ void CWizFolder::MoveToLocation(const QString& strDestLocation)
             strFolder.remove(0, strOldLocation.length());
             strFolder.insert(0, strDestLocation);
             qDebug() << "Add new folder ; " << strFolder;
-            m_db.AddExtraFolder(strFolder);
+            m_db.addExtraFolder(strFolder);
         }
     }
 
     qDebug() << "Delete old location ; " << strOldLocation;
-    m_db.DeleteExtraFolder(strOldLocation);
-    m_db.SetLocalValueVersion("folders", -1);
+    m_db.deleteExtraFolder(strOldLocation);
+    m_db.setLocalValueVersion("folders", -1);
 }
 
 
@@ -640,28 +640,28 @@ const QString g_strDatabaseInfoSection = "Database";
 #define WIZ_META_SYNCINFO_SECTION "SYNC_INFO"
 #define VERSION_NAME_2_META_KEY(x) "KEY_" + x + "_VERSION"
 
-CWizDatabase::CWizDatabase()
-    : m_ziwReader(new CWizZiwReader())
+WizDatabase::WizDatabase()
+    : m_ziwReader(new WizZiwReader())
     , m_bIsPersonal(true)
     , m_mutexCache(QMutex::Recursive)
 {
     m_ziwReader->setDatabase(this);
 }
 
-QString CWizDatabase::GetUserId()
+QString WizDatabase::getUserId()
 {
     return m_strUserId;
 }
 
-QString CWizDatabase::GetUserGUID()
+QString WizDatabase::getUserGuid()
 {
-    return GetMetaDef(g_strAccountSection, "GUID");
+    return getMetaDef(g_strAccountSection, "GUID");
 }
 
-QString CWizDatabase::GetPassword()
+QString WizDatabase::getPassword()
 {
     CString strPassword;
-    GetPassword(strPassword);
+    getPassword(strPassword);
 
     if (!strPassword.isEmpty()) {
         strPassword = ::WizDecryptPassword(strPassword);
@@ -670,36 +670,36 @@ QString CWizDatabase::GetPassword()
     return strPassword;
 }
 
-qint64 CWizDatabase::GetObjectVersion(const QString& strObjectName)
+qint64 WizDatabase::getObjectVersion(const QString& strObjectName)
 {
-    return GetMetaInt64("SYNC_INFO", strObjectName, -1);
+    return getMetaInt64("SYNC_INFO", strObjectName, -1);
 }
 
-bool CWizDatabase::SetObjectVersion(const QString& strObjectName,
+bool WizDatabase::setObjectVersion(const QString& strObjectName,
                                     qint64 nVersion)
 {
-    return SetMetaInt64("SYNC_INFO", strObjectName, nVersion);
+    return setMetaInt64("SYNC_INFO", strObjectName, nVersion);
 }
 
-bool CWizDatabase::GetModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData)
+bool WizDatabase::getModifiedDeletedList(CWizDeletedGUIDDataArray& arrayData)
 {
-    return GetDeletedGUIDs(arrayData);
+    return getDeletedGuids(arrayData);
 }
 
-bool CWizDatabase::GetModifiedTagList(CWizTagDataArray& arrayData)
+bool WizDatabase::getModifiedTagList(CWizTagDataArray& arrayData)
 {
-    return GetModifiedTags(arrayData);
+    return getModifiedTags(arrayData);
 }
 
-bool CWizDatabase::GetModifiedStyleList(CWizStyleDataArray& arrayData)
+bool WizDatabase::getModifiedStyleList(CWizStyleDataArray& arrayData)
 {
-    return GetModifiedStyles(arrayData);
+    return getModifiedStyles(arrayData);
 }
 
-bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
+bool WizDatabase::getModifiedDocumentList(CWizDocumentDataArray& arrayData)
 {
     CWizDocumentDataArray docList;
-    if (!GetModifiedDocuments(docList))
+    if (!getModifiedDocuments(docList))
         return false;
 
     // remove invalid document
@@ -707,7 +707,7 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
     for (it = docList.begin(); it != docList.end(); it++)
     {
         WIZDOCUMENTDATA doc = *it;
-        if (CanEditDocument(doc) && !IsInDeletedItems(doc.strLocation))  // do not upload doc in trash
+        if (canEditDocument(doc) && !isInDeletedItems(doc.strLocation))  // do not upload doc in trash
         {
             arrayData.push_back(doc);
         }
@@ -715,22 +715,22 @@ bool CWizDatabase::GetModifiedDocumentList(CWizDocumentDataArray& arrayData)
     return true;
 }
 
-bool CWizDatabase::GetModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
+bool WizDatabase::getModifiedAttachmentList(CWizDocumentAttachmentDataArray& arrayData)
 {
-    return GetModifiedAttachments(arrayData);
+    return getModifiedAttachments(arrayData);
 }
 
-bool CWizDatabase::GetModifiedMessageList(CWizMessageDataArray& arrayData)
+bool WizDatabase::getModifiedMessageList(CWizMessageDataArray& arrayData)
 {
     return getModifiedMessages(arrayData);
 }
 
-bool CWizDatabase::GetObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
+bool WizDatabase::getObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayObject)
 {
-    return GetAllObjectsNeedToBeDownloaded(arrayObject, GetObjectSyncTimeline());
+    return getAllObjectsNeedToBeDownloaded(arrayObject, getObjectSyncTimeline());
 }
 
-bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
+bool WizDatabase::onDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayData)
 {
     CWizDeletedGUIDDataArray arrayDeleted;
     CWizDeletedGUIDDataArray::const_iterator it;
@@ -740,10 +740,10 @@ bool CWizDatabase::OnDownloadDeletedList(const CWizDeletedGUIDDataArray& arrayDa
         arrayDeleted.push_back(data);
     }
 
-    return UpdateDeletedGUIDs(arrayDeleted);
+    return updateDeletedGuids(arrayDeleted);
 }
 
-bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
+bool WizDatabase::onDownloadTagList(const CWizTagDataArray& arrayData)
 {
     CWizTagDataArray arrayTag;
     CWizTagDataArray::const_iterator it;
@@ -753,17 +753,17 @@ bool CWizDatabase::OnDownloadTagList(const CWizTagDataArray& arrayData)
         //NOTE:当前同步数据时不会从服务器中下载tag的position数据。
         //将position数据保留为原本的数据。如果后期规则修改，此处需要修改
         WIZTAGDATA dataTemp;
-        if (TagFromGUID(data.strGUID, dataTemp))
+        if (tagFromGuid(data.strGUID, dataTemp))
         {
             data.nPostion = dataTemp.nPostion;
         }
         arrayTag.push_back(data);
     }
 
-    return UpdateTags(arrayTag);
+    return updateTags(arrayTag);
 }
 
-bool CWizDatabase::OnDownloadStyleList(const CWizStyleDataArray& arrayData)
+bool WizDatabase::onDownloadStyleList(const CWizStyleDataArray& arrayData)
 {
     CWizStyleDataArray arrayStyle;
     CWizStyleDataArray::const_iterator it;
@@ -773,10 +773,10 @@ bool CWizDatabase::OnDownloadStyleList(const CWizStyleDataArray& arrayData)
         arrayStyle.push_back(data);
     }
 
-    return UpdateStyles(arrayStyle);
+    return updateStyles(arrayStyle);
 }
 
-bool CWizDatabase::OnDownloadDocumentList(const CWizDocumentDataArray& arrayData)
+bool WizDatabase::onDownloadDocumentList(const CWizDocumentDataArray& arrayData)
 {
     for (std::deque<WIZDOCUMENTDATAEX>::const_iterator itDocument = arrayData.begin();
          itDocument != arrayData.end();
@@ -784,7 +784,7 @@ bool CWizDatabase::OnDownloadDocumentList(const CWizDocumentDataArray& arrayData
     {
         //m_pEvents->OnStatus(WizFormatString1(_TR(_T("Update note information: %1")), itDocument->strTitle));
         //
-        if (!OnDownloadDocument(*itDocument))
+        if (!onDownloadDocument(*itDocument))
         {
             //m_pEvents->OnError(WizFormatString1(_T("Cannot update note information: %1"), itDocument->strTitle));
             return FALSE;
@@ -795,7 +795,7 @@ bool CWizDatabase::OnDownloadDocumentList(const CWizDocumentDataArray& arrayData
 
 
 
-bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData)
+bool WizDatabase::onDownloadAttachmentList(const CWizDocumentAttachmentDataArray& arrayData)
 {
     CWizDocumentAttachmentDataArray arrayAttach;
     CWizDocumentAttachmentDataArray::const_iterator it;
@@ -805,9 +805,9 @@ bool CWizDatabase::OnDownloadAttachmentList(const CWizDocumentAttachmentDataArra
         arrayAttach.push_back(data);
     }
 
-    return UpdateAttachments(arrayAttach);
+    return updateAttachments(arrayAttach);
 }
-bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayData)
+bool WizDatabase::onDownloadMessages(const CWizUserMessageDataArray& arrayData)
 {
     CWizMessageDataArray arrayMsg;
 
@@ -817,41 +817,41 @@ bool CWizDatabase::OnDownloadMessages(const CWizUserMessageDataArray& arrayData)
         arrayMsg.push_back(data);
     }
 
-    return UpdateMessages(arrayMsg);
+    return updateMessages(arrayMsg);
 }
 
-bool CWizDatabase::OnDownloadDocument(const WIZDOCUMENTDATAEX& data)
+bool WizDatabase::onDownloadDocument(const WIZDOCUMENTDATAEX& data)
 {
     WIZDOCUMENTDATAEX d(data);
     d.strKbGUID = kbGUID();
-    return UpdateDocument(d);
+    return updateDocument(d);
 }
 
-qint64 CWizDatabase::GetObjectLocalVersion(const QString& strObjectGUID,
+qint64 WizDatabase::getObjectLocalVersion(const QString& strObjectGUID,
                                            const QString& strObjectType)
 {
-    return CWizIndex::GetObjectLocalVersion(strObjectGUID, strObjectType);
+    return WizIndex::getObjectLocalVersion(strObjectGUID, strObjectType);
 }
 
-qint64 CWizDatabase::GetObjectLocalVersionEx(const QString& strObjectGUID, const QString& strObjectType, bool& bObjectVersion)
+qint64 WizDatabase::getObjectLocalVersionEx(const QString& strObjectGUID, const QString& strObjectType, bool& bObjectVersion)
 {
-     return CWizIndex::GetObjectLocalVersionEx(strObjectGUID, strObjectType, bObjectVersion);
+     return WizIndex::getObjectLocalVersionEx(strObjectGUID, strObjectType, bObjectVersion);
 }
 
-qint64 CWizDatabase::GetObjectLocalServerVersion(const QString& strObjectGUID,
+qint64 WizDatabase::getObjectLocalServerVersion(const QString& strObjectGUID,
                                                  const QString& strObjectType)
 {
-    return CWizIndex::GetObjectLocalVersion(strObjectGUID, strObjectType);
+    return WizIndex::getObjectLocalVersion(strObjectGUID, strObjectType);
 }
 
-bool CWizDatabase::SetObjectLocalServerVersion(const QString& strObjectGUID,
+bool WizDatabase::setObjectLocalServerVersion(const QString& strObjectGUID,
                                                const QString& strObjectType,
                                                qint64 nVersion)
 {
-    return ModifyObjectVersion(strObjectGUID, strObjectType, nVersion);
+    return modifyObjectVersion(strObjectGUID, strObjectType, nVersion);
 }
 
-void CWizDatabase::OnObjectUploaded(const QString& strObjectGUID, const QString& strObjectType)
+void WizDatabase::onObjectUploaded(const QString& strObjectGUID, const QString& strObjectType)
 {
     if (strObjectType == "document")
     {
@@ -859,39 +859,39 @@ void CWizDatabase::OnObjectUploaded(const QString& strObjectGUID, const QString&
     }
 }
 
-bool CWizDatabase::DocumentFromGUID(const QString& strGUID,
+bool WizDatabase::documentFromGuid(const QString& strGUID,
                                     WIZDOCUMENTDATA& dataExists)
 {
-    return CWizIndex::DocumentFromGUID(strGUID, dataExists);
+    return WizIndex::documentFromGuid(strGUID, dataExists);
 }
 
-bool CWizDatabase::IsObjectDataDownloaded(const QString& strGUID,
+bool WizDatabase::isObjectDataDownloaded(const QString& strGUID,
                                           const QString& strType)
 {
-    return CWizIndex::IsObjectDataDownloaded(strGUID, strType);
+    return WizIndex::isObjectDataDownloaded(strGUID, strType);
 }
 
-bool CWizDatabase::SetObjectDataDownloaded(const QString& strGUID,
+bool WizDatabase::setObjectDataDownloaded(const QString& strGUID,
                                            const QString& strType,
                                            bool bDownloaded)
 {
-    return CWizIndex::SetObjectDataDownloaded(strGUID, strType, bDownloaded);
+    return WizIndex::setObjectDataDownloaded(strGUID, strType, bDownloaded);
 }
 
-bool CWizDatabase::SetObjectServerDataInfo(const QString& strGUID,
+bool WizDatabase::setObjectServerDataInfo(const QString& strGUID,
                                            const QString& strType,
-                                           COleDateTime& tServerDataModified,
+                                           WizOleDateTime& tServerDataModified,
                                            const QString& strServerMD5)
 {
-    if (strType == WIZDOCUMENTDATA::ObjectName()) {
+    if (strType == WIZDOCUMENTDATA::objectName()) {
         WIZDOCUMENTDATA data;
-        if (!DocumentFromGUID(strGUID, data))
+        if (!documentFromGuid(strGUID, data))
             return false;
 
         data.tDataModified = tServerDataModified;
         data.strDataMD5 = strServerMD5;
 
-        return ModifyDocumentInfoEx(data);
+        return modifyDocumentInfoEx(data);
     } else {
         Q_ASSERT(0);
     }
@@ -899,7 +899,7 @@ bool CWizDatabase::SetObjectServerDataInfo(const QString& strGUID,
     return false;
 }
 
-bool CWizDatabase::UpdateObjectData(const QString& strDisplayName,
+bool WizDatabase::updateObjectData(const QString& strDisplayName,
                                     const QString& strObjectGUID,
                                     const QString& strObjectType,
                                     const QByteArray& stream)
@@ -909,11 +909,11 @@ bool CWizDatabase::UpdateObjectData(const QString& strDisplayName,
     data.strObjectGUID = strObjectGUID;
     data.arrayData = stream;
 
-    if (strObjectType == WIZDOCUMENTDATAEX::ObjectName())
+    if (strObjectType == WIZDOCUMENTDATAEX::objectName())
     {
         data.eObjectType = wizobjectDocument;
     }
-    else if (strObjectType == WIZDOCUMENTATTACHMENTDATAEX::ObjectName())
+    else if (strObjectType == WIZDOCUMENTATTACHMENTDATAEX::objectName())
     {
         data.eObjectType = wizobjectDocumentAttachment;
     }
@@ -922,17 +922,17 @@ bool CWizDatabase::UpdateObjectData(const QString& strDisplayName,
         Q_ASSERT(0);
     }
 
-    return UpdateSyncObjectLocalData(data);
+    return updateSyncObjectLocalData(data);
 }
 
-bool CWizDatabase::InitDocumentData(const QString& strGUID,
+bool WizDatabase::initDocumentData(const QString& strGUID,
                                     WIZDOCUMENTDATAEX& data)
 {
-    if (!DocumentFromGUID(strGUID, data)) {
+    if (!documentFromGuid(strGUID, data)) {
         return false;
     }
     //
-    GetDocumentTags(strGUID, data.arrayTagGUID);
+    getDocumentTags(strGUID, data.arrayTagGUID);
     //
     if (data.nVersion == -1)
     {
@@ -944,7 +944,7 @@ bool CWizDatabase::InitDocumentData(const QString& strGUID,
     }
 
     if (data.nDataChanged) {
-        if (!LoadDocumentZiwData(strGUID, data.arrayData)) {
+        if (!loadDocumentZiwData(strGUID, data.arrayData)) {
             return false;
         }
     }
@@ -952,30 +952,30 @@ bool CWizDatabase::InitDocumentData(const QString& strGUID,
     return true;
 }
 
-bool CWizDatabase::InitAttachmentData(const QString& strGUID,
+bool WizDatabase::initAttachmentData(const QString& strGUID,
                                       WIZDOCUMENTATTACHMENTDATAEX& data)
 {
-    if (!AttachmentFromGUID(strGUID, data)) {
+    if (!attachmentFromGuid(strGUID, data)) {
         return false;
     }
-    if (!LoadCompressedAttachmentData(strGUID, data.arrayData)) {
+    if (!loadCompressedAttachmentData(strGUID, data.arrayData)) {
         return false;
     }
 
     return true;
 }
 
-bool CWizDatabase::OnUploadObject(const QString& strGUID,
+bool WizDatabase::onUploadObject(const QString& strGUID,
                                   const QString& strObjectType)
 {
-    if (strObjectType == WIZDELETEDGUIDDATA::ObjectName()) {
-        return DeleteDeletedGUID(strGUID);
+    if (strObjectType == WIZDELETEDGUIDDATA::objectName()) {
+        return deleteDeletedGuid(strGUID);
     } else {
-        return ModifyObjectVersion(strGUID, strObjectType, 0);
+        return modifyObjectVersion(strGUID, strObjectType, 0);
     }
 }
 
-bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
+bool WizDatabase::modifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
 {
     for (WIZMESSAGEDATA msg : arrayData)
     {
@@ -985,28 +985,28 @@ bool CWizDatabase::ModifyMessagesLocalChanged(CWizMessageDataArray& arrayData)
     return true;
 }
 
-bool CWizDatabase::CopyDocumentData(const WIZDOCUMENTDATA& sourceDoc, CWizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
+bool WizDatabase::copyDocumentData(const WIZDOCUMENTDATA& sourceDoc, WizDatabase& targetDB, WIZDOCUMENTDATA& targetDoc)
 {
     QByteArray ba;
-    if (!LoadDocumentDecryptedData(sourceDoc.strGUID, ba))
+    if (!loadDocumentDecryptedData(sourceDoc.strGUID, ba))
         return false;
     //
-    return targetDB.WriteDataToDocument(targetDoc.strGUID, ba);
+    return targetDB.writeDataToDocument(targetDoc.strGUID, ba);
 }
 
 
-bool CWizDatabase::GetBizMetaName(const QString &strBizGUID, QString &strMetaName)
+bool WizDatabase::getBizMetaName(const QString &strBizGUID, QString &strMetaName)
 {
     if (strBizGUID.isEmpty())
         return false;
 
-    int count = GetMetaDef("Bizs", "Count").toInt();
+    int count = getMetaDef("Bizs", "Count").toInt();
     //
     for (int i = 0; i < count; i++)
     {
         QString bizSection = "Biz_" + QString::number(i);
 
-        if (strBizGUID == GetMetaDef(bizSection, "GUID"))
+        if (strBizGUID == getMetaDef(bizSection, "GUID"))
         {
             strMetaName = bizSection;
             return true;
@@ -1016,11 +1016,11 @@ bool CWizDatabase::GetBizMetaName(const QString &strBizGUID, QString &strMetaNam
     return false;
 }
 
-bool CWizDatabase::initZiwReaderForEncryption()
+bool WizDatabase::initZiwReaderForEncryption()
 {
     if (!m_ziwReader->isRSAKeysAvailable())
     {
-        if (!HasCert() || !loadUserCert())
+        if (!hasCert() || !loadUserCert())
         {
             QMessageBox::information(0, tr("Info"), tr("No password cert founded. Please create password" \
                                      " cert from windows client first."));
@@ -1031,21 +1031,21 @@ bool CWizDatabase::initZiwReaderForEncryption()
     return QueryCertPassword();
 }
 
-bool CWizDatabase::OnDownloadGroups(const CWizGroupDataArray& arrayGroup)
+bool WizDatabase::onDownloadGroups(const CWizGroupDataArray& arrayGroup)
 {
-    bool ret = SetAllGroupInfo(arrayGroup);
+    bool ret = setAllGroupInfo(arrayGroup);
     Q_EMIT groupsInfoDownloaded(arrayGroup);
     return ret;
 }
 
-bool CWizDatabase::OnDownloadBizs(const CWizBizDataArray& arrayBiz)
+bool WizDatabase::onDownloadBizs(const CWizBizDataArray& arrayBiz)
 {
-    bool ret = SetAllBizInfo(arrayBiz);
+    bool ret = setAllBizInfo(arrayBiz);
     Q_EMIT bizInfoDownloaded(arrayBiz);
     return ret;
 }
 
-IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
+IWizSyncableDatabase* WizDatabase::getGroupDatabase(const WIZGROUPDATA& group)
 {
     Q_ASSERT(!group.strGroupGUID.isEmpty());
 
@@ -1061,11 +1061,11 @@ IWizSyncableDatabase* CWizDatabase::GetGroupDatabase(const WIZGROUPDATA& group)
     // CWizDatabaseManager will take ownership
 //    Q_EMIT databaseOpened(db, group.strGroupGUID);
 
-    CWizDatabase* db = &CWizDatabaseManager::instance()->db(group.strGroupGUID);
+    WizDatabase* db = &WizDatabaseManager::instance()->db(group.strGroupGUID);
     return db;
 }
 
-void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
+void WizDatabase::closeGroupDatabase(IWizSyncableDatabase* pDatabase)
 {
 //    CWizDatabase* db = dynamic_cast<CWizDatabase*>(pDatabase);
 
@@ -1076,51 +1076,51 @@ void CWizDatabase::CloseGroupDatabase(IWizSyncableDatabase* pDatabase)
 
 }
 
-IWizSyncableDatabase* CWizDatabase::GetPersonalDatabase()
+IWizSyncableDatabase* WizDatabase::getPersonalDatabase()
 {
     return getPersonalDatabase();
 }
 
-CWizDatabase *CWizDatabase::getPersonalDatabase()
+WizDatabase *WizDatabase::getPersonalDatabase()
 {
-    CWizDatabase* db = &CWizDatabaseManager::instance()->db();
+    WizDatabase* db = &WizDatabaseManager::instance()->db();
     return db;
 }
 
-void CWizDatabase::SetKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
+void WizDatabase::setKbInfo(const QString& strKBGUID, const WIZKBINFO& info)
 {
     Q_ASSERT(strKBGUID == kbGUID() || (strKBGUID.isEmpty() && m_bIsPersonal));
 
-    SetMeta(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_S", info.strStorageLimit);
-    SetMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_N", info.nStorageLimit);
+    setMeta(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_S", info.strStorageLimit);
+    setMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_LIMIT_N", info.nStorageLimit);
 
-    SetMeta(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_S", info.strStorageUsage);
-    SetMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_N", info.nStorageUsage);
+    setMeta(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_S", info.strStorageUsage);
+    setMetaInt64(WIZ_META_KBINFO_SECTION, "STORAGE_USAGE_N", info.nStorageUsage);
 
-    SetMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_S", info.strTrafficLimit);
-    SetMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_N", info.nTrafficLimit);
+    setMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_S", info.strTrafficLimit);
+    setMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_LIMIT_N", info.nTrafficLimit);
 
-    SetMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_S", info.strTrafficUsage);
-    SetMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_N", info.nTrafficUsage);
+    setMeta(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_S", info.strTrafficUsage);
+    setMetaInt64(WIZ_META_KBINFO_SECTION, "TRAFFIC_USAGE_N", info.nTrafficUsage);
 }
 
-void CWizDatabase::SetUserInfo(const WIZUSERINFO& userInfo)
+void WizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
 {
-    SetMeta(g_strDatabaseInfoSection, "KBGUID", userInfo.strKbGUID);
+    setMeta(g_strDatabaseInfoSection, "KBGUID", userInfo.strKbGUID);
 
-    SetMeta(g_strAccountSection, "GUID", userInfo.strUserGUID);
-    SetMeta(g_strAccountSection, "DisplayName", userInfo.strDisplayName);
-    SetMeta(g_strAccountSection, "UserType", userInfo.strUserType);
-    SetMeta(g_strAccountSection, "UserLevelName", userInfo.strUserLevelName);
-    SetMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel));
-    SetMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
-    SetMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
-    SetMeta(g_strAccountSection, "DateSignUp", userInfo.tCreated.toString());
+    setMeta(g_strAccountSection, "GUID", userInfo.strUserGUID);
+    setMeta(g_strAccountSection, "DisplayName", userInfo.strDisplayName);
+    setMeta(g_strAccountSection, "UserType", userInfo.strUserType);
+    setMeta(g_strAccountSection, "UserLevelName", userInfo.strUserLevelName);
+    setMeta(g_strAccountSection, "UserLevel", QString::number(userInfo.nUserLevel));
+    setMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
+    setMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
+    setMeta(g_strAccountSection, "DateSignUp", userInfo.tCreated.toString());
 
     Q_EMIT userInfoChanged();
 }
 
-bool CWizDatabase::IsGroup()
+bool WizDatabase::isGroup()
 {
     if (m_bIsPersonal)
         return false;
@@ -1128,26 +1128,26 @@ bool CWizDatabase::IsGroup()
     return true;
 }
 
-bool CWizDatabase::IsPersonalGroup()
+bool WizDatabase::isPersonalGroup()
 {
-    if (!IsGroup())
+    if (!isGroup())
         return false;
 
-    CWizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = getPersonalDatabase();
 
     WIZGROUPDATA group;
-    personDb->GetGroupData(kbGUID(), group);
-    return !group.IsBiz();
+    personDb->getGroupData(kbGUID(), group);
+    return !group.isBiz();
 }
 
-bool CWizDatabase::HasBiz()
+bool WizDatabase::hasBiz()
 {
-    CWizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = getPersonalDatabase();
 
-    return !personDb->GetMetaDef("Bizs", "Count").IsEmpty();
+    return !personDb->getMetaDef("Bizs", "Count").isEmpty();
 }
 
-bool CWizDatabase::IsGroupAdmin()
+bool WizDatabase::isGroupAdmin()
 {
     if (permission() <= WIZ_USERGROUP_ADMIN)
         return true;
@@ -1155,12 +1155,12 @@ bool CWizDatabase::IsGroupAdmin()
     return false;
 }
 
-bool CWizDatabase::IsGroupOwner()
+bool WizDatabase::isGroupOwner()
 {
     return m_info.bOwner;
 }
 
-bool CWizDatabase::IsGroupSuper()
+bool WizDatabase::isGroupSuper()
 {
     if (permission() <= WIZ_USERGROUP_SUPER)
         return true;
@@ -1168,7 +1168,7 @@ bool CWizDatabase::IsGroupSuper()
     return false;
 }
 
-bool CWizDatabase::IsGroupEditor()
+bool WizDatabase::isGroupEditor()
 {
     if (permission() <= WIZ_USERGROUP_EDITOR)
         return true;
@@ -1176,7 +1176,7 @@ bool CWizDatabase::IsGroupEditor()
     return false;
 }
 
-bool CWizDatabase::IsGroupAuthor()
+bool WizDatabase::isGroupAuthor()
 {
     if (permission() <= WIZ_USERGROUP_AUTHOR)
         return true;
@@ -1184,7 +1184,7 @@ bool CWizDatabase::IsGroupAuthor()
     return false;
 }
 
-bool CWizDatabase::IsGroupReader()
+bool WizDatabase::isGroupReader()
 {
     if (permission() <= WIZ_USERGROUP_READER)
         return true;
@@ -1192,27 +1192,27 @@ bool CWizDatabase::IsGroupReader()
     return false;
 }
 
-bool CWizDatabase::CanEditDocument(const WIZDOCUMENTDATA& data)
+bool WizDatabase::canEditDocument(const WIZDOCUMENTDATA& data)
 {
     if (permission() < WIZ_USERGROUP_AUTHOR ||
-                (permission() == WIZ_USERGROUP_AUTHOR && data.strOwner == GetUserId())) {
+                (permission() == WIZ_USERGROUP_AUTHOR && data.strOwner == getUserId())) {
             return true;
     }
 
     return false;
 }
 
-bool CWizDatabase::CanEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
+bool WizDatabase::canEditAttachment(const WIZDOCUMENTATTACHMENTDATAEX& data)
 {
     WIZDOCUMENTDATA doc;
-    if (!DocumentFromGUID(data.strDocumentGUID, doc)) {
+    if (!documentFromGuid(data.strDocumentGUID, doc)) {
         return false;
     }
 
-    return CanEditDocument(doc);
+    return canEditDocument(doc);
 }
 
-bool CWizDatabase::CreateConflictedCopy(const QString& strObjectGUID,
+bool WizDatabase::createConflictedCopy(const QString& strObjectGUID,
                                         const QString& strObjectType)
 {
     // FIXME
@@ -1223,21 +1223,21 @@ bool CWizDatabase::CreateConflictedCopy(const QString& strObjectGUID,
     return false;
 }
 
-bool CWizDatabase::SaveLastSyncTime()
+bool WizDatabase::saveLastSyncTime()
 {
     uint secs = QDateTime::currentDateTime().toTime_t();
-    return SetMeta("SYNC_INFO", "TIME", QString::number(secs));
+    return setMeta("SYNC_INFO", "TIME", QString::number(secs));
 }
 
-COleDateTime CWizDatabase::GetLastSyncTime()
+WizOleDateTime WizDatabase::getLastSyncTime()
 {
-    uint secs = GetMetaDef("SYNC_INFO", "TIME").toUInt();
-    return COleDateTime(secs);
+    uint secs = getMetaDef("SYNC_INFO", "TIME").toUInt();
+    return WizOleDateTime(secs);
 }
 
-bool CWizDatabase::WizDayOnce(const QString& strName)
+bool WizDatabase::WizDayOnce(const QString& strName)
 {
-    CWizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = getPersonalDatabase();
     QString strDate = db->meta("WizDayOnce", strName);
     QDateTime curDt = QDateTime::currentDateTime();
     db->setMeta("WizDayOnce", strName, curDt.toString(Qt::ISODate));
@@ -1249,7 +1249,7 @@ bool CWizDatabase::WizDayOnce(const QString& strName)
     return dt.daysTo(curDt) >= 1;
 }
 
-long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
+long WizDatabase::getLocalFlags(const QString& strObjectGUID,
                                  const QString& strObjectType)
 {
     Q_UNUSED(strObjectGUID);
@@ -1259,7 +1259,7 @@ long CWizDatabase::GetLocalFlags(const QString& strObjectGUID,
     return 0;
 }
 
-bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
+bool WizDatabase::setLocalFlags(const QString& strObjectGUID,
                                  const QString& strObjectType,
                                  long flags)
 {
@@ -1271,31 +1271,31 @@ bool CWizDatabase::SetLocalFlags(const QString& strObjectGUID,
     return false;
 }
 
-void CWizDatabase::GetAccountKeys(CWizStdStringArray& arrayKey)
+void WizDatabase::getAccountKeys(CWizStdStringArray& arrayKey)
 {
-    Q_ASSERT(!IsGroup());
+    Q_ASSERT(!isGroup());
 }
 
-qint64 CWizDatabase::GetAccountLocalValueVersion(const QString& strKey)
+qint64 WizDatabase::getAccountLocalValueVersion(const QString& strKey)
 {
-    return GetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
+    return getMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
 }
 
-void CWizDatabase::SetAccountLocalValue(const QString& strKey,
+void WizDatabase::setAccountLocalValue(const QString& strKey,
                                         const QString& strValue,
                                         qint64 nServerVersion,
                                         bool bSaveVersion)
 {
-    Q_ASSERT(!IsGroup());
+    Q_ASSERT(!isGroup());
 
     if (bSaveVersion) {
-        SetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
+        setMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
     }
 }
 
-void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
+void WizDatabase::getKBKeys(CWizStdStringArray& arrayKey)
 {
-    if (IsGroup())
+    if (isGroup())
     {
         arrayKey.push_back("group_tag_pos");
     }
@@ -1307,26 +1307,26 @@ void CWizDatabase::GetKBKeys(CWizStdStringArray& arrayKey)
     }
 }
 
-bool CWizDatabase::ProcessValue(const QString& key)
+bool WizDatabase::processValue(const QString& key)
 {
     CString strKey(key);
-    strKey.MakeLower();
+    strKey.makeLower();
 
     if (strKey == "folders"
         || strKey == "folders_pos")
     {
-        return !IsGroup();
+        return !isGroup();
     }
 
     return true;
 }
 
-qint64 CWizDatabase::GetLocalValueVersion(const QString& key)
+qint64 WizDatabase::getLocalValueVersion(const QString& key)
 {
     CString strKey(key);
-    strKey.MakeLower();
+    strKey.makeLower();
 
-    return GetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
+    return getMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", 0);
 
     //if (strKey == "folders")
     //{
@@ -1338,26 +1338,26 @@ qint64 CWizDatabase::GetLocalValueVersion(const QString& key)
     //}
 }
 
-QString CWizDatabase::GetLocalValue(const QString& key)
+QString WizDatabase::getLocalValue(const QString& key)
 {
     CString strKey(key);
-    strKey.MakeLower();
+    strKey.makeLower();
 
     if (strKey == "folders")
     {
-        return GetFolders();
+        return getFolders();
     }
     else if (strKey == "folders_pos")
     {
-        return GetFoldersPos();
+        return getFoldersPos();
     }
     else if (strKey == "group_tag_pos")
     {
-        return GetGroupTagsPos();
+        return getGroupTagsPos();
     }
     else if (strKey == "favorites")
     {
-        return GetFavorites();
+        return getFavorites();
     }
     else
     {
@@ -1365,44 +1365,44 @@ QString CWizDatabase::GetLocalValue(const QString& key)
     }
 }
 
-void CWizDatabase::SetLocalValueVersion(const QString& strKey,
+void WizDatabase::setLocalValueVersion(const QString& strKey,
                                         qint64 nServerVersion)
 {
-    SetMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
+    setMetaInt64(WIZ_META_SYNCINFO_SECTION, "KEY_" + strKey + "_VERSION", nServerVersion);
 }
 
-void CWizDatabase::SetLocalValue(const QString& key, const QString& value,
+void WizDatabase::setLocalValue(const QString& key, const QString& value,
                                  qint64 nServerVersion, bool bSaveVersion)
 {
     CString strKey(key);
-    strKey.MakeLower();
+    strKey.makeLower();
 
     if (strKey == "folders")
     {
-        SetFolders(value, nServerVersion, bSaveVersion);
+        setFolders(value, nServerVersion, bSaveVersion);
     }
     else if (strKey == "folders_pos")
     {
-        SetFoldersPos(value, nServerVersion);
+        setFoldersPos(value, nServerVersion);
     }
     else if (strKey == "group_tag_pos")
     {
-        SetGroupTagsPos(value, nServerVersion);
+        setGroupTagsPos(value, nServerVersion);
     }
     else if (strKey == "favorites")
     {
-        SetFavorites(value, nServerVersion);
+        setFavorites(value, nServerVersion);
     }
     else
     {
-        SetLocalValueVersion(key, nServerVersion);
+        setLocalValueVersion(key, nServerVersion);
     }
 }
 
-void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
+void WizDatabase::getAllBizUserIds(CWizStdStringArray& arrayText)
 {
     CWizBizUserDataArray arrayUser;
-    if (!GetAllUsers(arrayUser))
+    if (!getAllUsers(arrayUser))
         return;
 
     CWizBizUserDataArray::const_iterator it;
@@ -1412,12 +1412,12 @@ void CWizDatabase::GetAllBizUserIds(CWizStdStringArray& arrayText)
     }
 }
 
-bool CWizDatabase::GetAllBizUsers(CWizBizUserDataArray& arrayUser)
+bool WizDatabase::getAllBizUsers(CWizBizUserDataArray& arrayUser)
 {
-    return GetAllUsers(arrayUser);
+    return getAllUsers(arrayUser);
 }
 
-void CWizDatabase::ClearLastSyncError()
+void WizDatabase::clearLastSyncError()
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_OK));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), "");
@@ -1427,7 +1427,7 @@ void CWizDatabase::ClearLastSyncError()
         return;
 
     //
-    int bizCount = GetMetaDef("Bizs", "Count").toInt();
+    int bizCount = getMetaDef("Bizs", "Count").toInt();
     for (int i = 0; i < bizCount; i++)
     {
         QString bizSection = "Biz_" + QString::number(i);
@@ -1436,75 +1436,75 @@ void CWizDatabase::ClearLastSyncError()
     }
 }
 
-QString CWizDatabase::GetLastSyncErrorMessage()
+QString WizDatabase::getLastSyncErrorMessage()
 {
     return meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"));
 }
 
-void CWizDatabase::OnTrafficLimit(const QString& strErrorMessage)
+void WizDatabase::onTrafficLimit(const QString& strErrorMessage)
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_TRAFFIC_LIMIT));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnStorageLimit(const QString& strErrorMessage)
+void WizDatabase::onStorageLimit(const QString& strErrorMessage)
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_STORAGE_LIMIT));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnNoteCountLimit(const QString& strErrorMessage)
+void WizDatabase::onNoteCountLimit(const QString& strErrorMessage)
 {
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT));
     setMeta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-void CWizDatabase::OnBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage)
+void WizDatabase::onBizServiceExpr(const QString& strBizGUID, const QString& strErrorMessage)
 {
     if (strBizGUID.isEmpty())
         return;
 
-    CWizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = getPersonalDatabase();
     if (!db)
         return;
 
     QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->getBizMetaName(strBizGUID, strMetaSection))
         return;
     //
     db->setMeta(strMetaSection, _T("LastSyncErrorCode"), QString::number(WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR));
     db->setMeta(strMetaSection, _T("LastSyncErrorMessage"), strErrorMessage);
 }
 
-bool CWizDatabase::IsTrafficLimit()
+bool WizDatabase::isTrafficLimit()
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_TRAFFIC_LIMIT;
 }
 
-bool CWizDatabase::IsStorageLimit()
+bool WizDatabase::isStorageLimit()
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_STORAGE_LIMIT;
 }
 
-bool CWizDatabase::IsNoteCountLimit()
+bool WizDatabase::isNoteCountLimit()
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
     return strLastError.toInt() == WIZKMSYNC_EXIT_NOTE_COUNT_LIMIT;
 }
 
-bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
+bool WizDatabase::isBizServiceExpr(const QString& strBizGUID)
 {
-    CWizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = getPersonalDatabase();
     if (!db)
         return false;
 
     QString strMetaSection;
-    if (!db->GetBizMetaName(strBizGUID, strMetaSection))
+    if (!db->getBizMetaName(strBizGUID, strMetaSection))
         return false;
 
     QString strLastError = db->meta(strMetaSection, _T("LastSyncErrorCode"));
@@ -1512,7 +1512,7 @@ bool CWizDatabase::IsBizServiceExpr(const QString& strBizGUID)
     return strLastError.toInt() == WIZKMSYNC_EXIT_BIZ_SERVICE_EXPR;
 }
 
-bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
+bool WizDatabase::getStorageLimitMessage(QString &strErrorMessage)
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
@@ -1525,7 +1525,7 @@ bool CWizDatabase::GetStorageLimitMessage(QString &strErrorMessage)
     return false;
 }
 
-bool CWizDatabase::GetTrafficLimitMessage(QString& strErrorMessage)
+bool WizDatabase::getTrafficLimitMessage(QString& strErrorMessage)
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
@@ -1538,7 +1538,7 @@ bool CWizDatabase::GetTrafficLimitMessage(QString& strErrorMessage)
     return false;
 }
 
-bool CWizDatabase::GetNoteCountLimit(QString& strErrorMessage)
+bool WizDatabase::getNoteCountLimit(QString& strErrorMessage)
 {
     QString strLastError = meta(WIZKMSYNC_EXIT_INFO, _T("LastSyncErrorCode"));
 
@@ -1551,35 +1551,35 @@ bool CWizDatabase::GetNoteCountLimit(QString& strErrorMessage)
     return false;
 }
 
-bool CWizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
+bool WizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
 {
-    return SetMeta(strSection, strKey, strValue);
+    return setMeta(strSection, strKey, strValue);
 }
 
-QString CWizDatabase::meta(const QString& strSection, const QString& strKey)
+QString WizDatabase::meta(const QString& strSection, const QString& strKey)
 {
-    return GetMetaDef(strSection, strKey);
+    return getMetaDef(strSection, strKey);
 }
 
-void CWizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& strJson)
+void WizDatabase::setBizGroupUsers(const QString& strkbGUID, const QString& strJson)
 {
-    SetBizUsers(strkbGUID, strJson);
+    setBizUsers(strkbGUID, strJson);
 }
 
-void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
+void WizDatabase::setFoldersPos(const QString& foldersPos, qint64 nVersion)
 {
-    SetLocalValueVersion("folders_pos", nVersion);
-    SetMeta("SYNC_INFO", "FOLDERS_POS", foldersPos);
+    setLocalValueVersion("folders_pos", nVersion);
+    setMeta("SYNC_INFO", "FOLDERS_POS", foldersPos);
 
     bool bPositionChanged = false;
 
     CString str(foldersPos);
-    str.Trim();
-    str.Trim('{');
-    str.Trim('}');
-    str.Replace("\n", "");
-    str.Replace("\r", "");
-    if (str.IsEmpty())
+    str.trim();
+    str.trim('{');
+    str.trim('}');
+    str.replace("\n", "");
+    str.replace("\r", "");
+    if (str.isEmpty())
         return;
 
     CWizStdStringArray arrPos;
@@ -1597,8 +1597,8 @@ void CWizDatabase::SetFoldersPos(const QString& foldersPos, qint64 nVersion)
         CString strPos;
         if (!::WizStringSimpleSplit(strLine, ':', strLocation, strPos))
             continue;
-        strLocation.Trim();
-        strLocation.Trim('\"');
+        strLocation.trim();
+        strLocation.trim('\"');
 
         int nPos = _ttoi(strPos);
         if (0 == nPos)
@@ -1975,12 +1975,12 @@ bool CWizDatabase::SetAllBizInfoCore(const CWizBizDataArray& arrayBiz)
     public:
         static __int64 GetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db)
         {
-            return _ttoi64(db.meta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID));
+            return _ttoi64(db.meta(_T("sync"), CString(_T("AvatarChangesVer_")) + strBizGUID));
         }
         //
         static void SetProcessedAvatarVersion(QString strBizGUID, CWizDatabase& db, __int64 v)
         {
-            db.SetMeta(_T("Sync"), CString(_T("AvatarChangesVer_")) + strBizGUID, WizInt64ToStr(v));
+            db.SetMeta(_T("sync"), CString(_T("AvatarChangesVer_")) + strBizGUID, WizInt64ToStr(v));
         }
         //
         static void ProcessBizAvatarVersion(QString strBizGUID, CWizDatabase& db, const std::map<QString, QString>& mapAvatars)
@@ -2000,7 +2000,7 @@ bool CWizDatabase::SetAllBizInfoCore(const CWizBizDataArray& arrayBiz)
                 {
                     newVer = std::max<__int64>(v, newVer);
                     //
-                    TOLOG1("[Sync] User avatar changed : %1", it->second);
+                    TOLOG1("[sync] User avatar changed : %1", it->second);
                     AvatarHost::reload(it->second);
                 }
             }
@@ -2638,7 +2638,7 @@ bool CWizDatabase::SetUserName(const QString& strUserName)
     }
 
     if (!SetMeta(g_strAccountSection, _T("UserName"), strUserName)) {
-        TOLOG("Failed to set user name while SetUserName");
+        TOLOG("Failed to set user name while setUserName");
         return false;
     }
 
@@ -2685,7 +2685,7 @@ bool CWizDatabase::GetPassword(CString& strPassword)
 
     bool bExists = false;
     if (!GetMeta(g_strAccountSection, "Password", strPassword, "", &bExists)) {
-        TOLOG("Failed to get password while GetPassword");
+        TOLOG("Failed to get password while getPassword");
         return false;
     }
 

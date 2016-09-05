@@ -16,10 +16,10 @@ QStyle* WizGetImageButtonStyle(const QString& normalBackgroundFileName, const QS
 
 
 template <typename T>
-class CWizListItemStyle : public QProxyStyle
+class WizListItemStyle : public QProxyStyle
 {
 public:
-    CWizListItemStyle(QStyle *style = 0) : QProxyStyle(style) {}
+    WizListItemStyle(QStyle *style = 0) : QProxyStyle(style) {}
     virtual void drawControl(ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
     {
         switch (element)

@@ -3,19 +3,19 @@
 
 #include "wizapi.h"
 
-class CWizDatabase;
+class WizDatabase;
 class CWizApiEntry;
 class QNetworkAccessManager;
 
-class CWizGroupMessage : public CWizApiBase
+class WizGroupMessage : public CWizApiBase
 {
     Q_OBJECT
 
 public:
-    CWizGroupMessage(CWizDatabase& db, QObject* parent = 0);
+    WizGroupMessage(WizDatabase& db, QObject* parent = 0);
 
 private:
-    CWizDatabase& m_db;
+    WizDatabase& m_db;
     QNetworkAccessManager* m_net;
     QTimer m_timer;
 

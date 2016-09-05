@@ -11,18 +11,18 @@
 #include "wizobject.h"
 #include "wizmd5.h"
 
-class CWizDatabase;
-class CWizDatabaseManager;
-class CWizProgressDialog;
+class WizDatabase;
+class WizDatabaseManager;
+class WizProgressDialog;
 
 #define WIZNOTE_OBSOLETE
 
 QString WizGetEmailPrefix(const QString& strMail);
 
 QString WizGetTimeStamp();
-COleDateTime WizGetCurrentTime();
-bool WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError);
-COleDateTime WizStringToDateTime(const CString& str);
+WizOleDateTime WizGetCurrentTime();
+bool WizStringToDateTime(const QString& str, WizOleDateTime& t, QString& strError);
+WizOleDateTime WizStringToDateTime(const CString& str);
 COLORREF WizStringToColor(const CString& str);
 QColor WizStringToColor2(const CString& str);
 
@@ -40,14 +40,14 @@ CString WizFormatString7(const CString& strFormat, const CString& strParam1, con
 CString WizFormatString8(const CString& strFormat, const CString& strParam1, const CString& strParam2, const CString& strParam3, const CString& strParam4, const CString& strParam5, const CString& strParam6, const CString& strParam7, const CString& strParam8);
 CString WizFormatInt(__int64 n);
 
-COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData = COleDateTime());
-void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime);
+WizOleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, WizOleDateTime defaultData = WizOleDateTime());
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, WizOleDateTime dateTime);
 CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey);
 void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue);
 int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue = 0);
 void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue);
 
-time_t WizTimeGetTimeT(const COleDateTime& t);
+time_t WizTimeGetTimeT(const WizOleDateTime& t);
 
 CString WizIntToStr(int n);
 
@@ -69,7 +69,7 @@ CString WizGetCommandLineValue(const CString& strCommandLine, const CString& str
 
 BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString& strRight);
 
-CString WizDateToLocalString(const COleDateTime& t);
+CString WizDateToLocalString(const WizOleDateTime& t);
 
 void WizGetTranslatedLocales(QStringList& locales);
 bool WizIsChineseLanguage(const QString& local);
@@ -114,18 +114,18 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& str
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QByteArray& strText);
 bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& strText, bool addBom);
 
-CString WizDateTimeToIso8601String(const COleDateTime& t);
-BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError);
-CString WizDateTimeToString(const COleDateTime& t);
+CString WizDateTimeToIso8601String(const WizOleDateTime& t);
+BOOL WizIso8601StringToDateTime(CString str, WizOleDateTime& t, CString& strError);
+CString WizDateTimeToString(const WizOleDateTime& t);
 CString WizStringToSQL(const CString& str);
 CString WizTimeToSQL(const QDateTime &t);
-CString WizTimeToSQL(const COleDateTime& t);
+CString WizTimeToSQL(const WizOleDateTime& t);
 CString WizColorToString(COLORREF cr);
 CString WizColorToString(const QColor& cr);
 CString WizColorToSQL(COLORREF cr);
 CString WizColorToSQL(const QColor& cr);
 
-intptr_t WizStrStrI_Pos(const CString& str, const CString& Find, int nStart = 0);
+intptr_t WizStrStrI_Pos(const CString& str, const CString& find, int nStart = 0);
 
 CString WizInt64ToStr(__int64 n);
 
@@ -194,14 +194,14 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
 
 
 ///  make sure document exist, if not try to download document, show download dialog by default.
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc);
+bool WizMakeSureDocumentExistAndBlockWidthDialog(WizDatabase& db, const WIZDOCUMENTDATA& doc);
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(WizDatabase& db, const WIZDOCUMENTDATA& doc);
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(WizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(WizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData);
 
 //
-void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
+void WizMime2Note(const QByteArray& bMime, WizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument);
 
 //
 void WizCopyNoteAsInternalLink(const WIZDOCUMENTDATA& document);
@@ -240,36 +240,36 @@ QString WizGetLocalUserId(const QList<WizLocalUser>& userList, const QString& st
 QString WizGetLocalFolderName(const QList<WizLocalUser>& userList, const QString& strGuid);
 
 
-class CWizBufferAlloc
+class WizBufferAlloc
 {
 public:
-    CWizBufferAlloc(int nInitSize = 0);
-    ~CWizBufferAlloc();
+    WizBufferAlloc(int nInitSize = 0);
+    ~WizBufferAlloc();
 private:
     BYTE* m_pBuffer;
     int m_nSize;
 public:
-    BYTE* GetBuffer();
-    BOOL SetNewSize(int nNewSize);
+    BYTE* getBuffer();
+    BOOL setNewSize(int nNewSize);
 };
 
 
-class CWaitCursor
+class WizWaitCursor
 {
 public:
-    CWaitCursor();
-    ~CWaitCursor();
+    WizWaitCursor();
+    ~WizWaitCursor();
 };
 
-class CWizIniFileEx
+class WizIniFileEx
 {
 public:
-    CWizIniFileEx();
-    ~CWizIniFileEx();
-    void LoadFromFile(const QString& strFile);
-    void GetSection(const QString& section, CWizStdStringArray& arrayData);
-    void GetSection(const QString& section, QMap<QString, QString>& dataMap);
-    void GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
+    WizIniFileEx();
+    ~WizIniFileEx();
+    void loadFromFile(const QString& strFile);
+    void getSection(const QString& section, CWizStdStringArray& arrayData);
+    void getSection(const QString& section, QMap<QString, QString>& dataMap);
+    void getSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
 
 private:
     QSettings* m_settings;

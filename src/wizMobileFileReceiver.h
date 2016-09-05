@@ -33,11 +33,11 @@ class QUdpSocket;
 class QTcpSocket;
 class QXmlStreamReader;
 
-class CWizMobileXmlProcesser : public QThread
+class WizMobileXmlProcesser : public QThread
 {
     Q_OBJECT
 public:
-    explicit CWizMobileXmlProcesser(QObject *parent = 0);
+    explicit WizMobileXmlProcesser(QObject *parent = 0);
 
     void addNewSegment(QByteArray *ba);
 
@@ -72,12 +72,12 @@ private:
 };
 
 
-class CWizMobileTcpContainer : public QThread
+class WizMobileTcpContainer : public QThread
 {
     Q_OBJECT
 public:
-    explicit CWizMobileTcpContainer(CWizMobileXmlProcesser *xmlProcesser, QObject *parent = 0);
-    ~CWizMobileTcpContainer();
+    explicit WizMobileTcpContainer(WizMobileXmlProcesser *xmlProcesser, QObject *parent = 0);
+    ~WizMobileTcpContainer();
 
     QAbstractSocket::SocketState tcpState();
 
@@ -89,19 +89,19 @@ protected:
     void run();
 
 private:
-    CWizMobileXmlProcesser *m_xmlProcesser;
+    WizMobileXmlProcesser *m_xmlProcesser;
     QTcpSocket *m_tcpSocket;
     QString m_strHost;
 
     void initTcpSocket();
 };
 
-class CWizMobileFileReceiver : public QThread
+class WizMobileFileReceiver : public QThread
 {
     Q_OBJECT
 public:
-    explicit CWizMobileFileReceiver(QObject *parent = 0);
-    ~CWizMobileFileReceiver();
+    explicit WizMobileFileReceiver(QObject *parent = 0);
+    ~WizMobileFileReceiver();
 
     void initSocket();
 
@@ -125,8 +125,8 @@ private:
     bool isUdpSendToCurrentUser(const QString& userID);
 private:
     QUdpSocket *m_udpSocket;
-    CWizMobileXmlProcesser *m_xmlProcesser;
-    CWizMobileTcpContainer *m_tcpContainer;
+    WizMobileXmlProcesser *m_xmlProcesser;
+    WizMobileTcpContainer *m_tcpContainer;
 };
 
 #endif // WIZMOBILEFILERECEIVER_H

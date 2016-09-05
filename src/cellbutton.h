@@ -9,7 +9,7 @@ class QPaintEvent;
 class QString;
 class QPropertyAnimation;
 
-class CellButton : public QToolButton
+class WizCellButton : public QToolButton
 {
     Q_OBJECT
 
@@ -25,7 +25,7 @@ public:
         Badge
     };
 
-    explicit CellButton(ButtonType type, QWidget* parent);
+    explicit WizCellButton(ButtonType type, QWidget* parent);
     void setNormalIcon(const QIcon& icon, const QString& strTips);
     void setCheckedIcon(const QIcon& icon, const QString& strTips);
     void setBadgeIcon(const QIcon& icon, const QString& strTips);
@@ -55,11 +55,11 @@ protected:
     QString countInfo() const;
 };
 
-class RoundCellButton : public CellButton
+class WizRoundCellButton : public WizCellButton
 {
     Q_OBJECT
 public:
-    explicit RoundCellButton(QWidget* parent = 0);
+    explicit WizRoundCellButton(QWidget* parent = 0);
 
     void setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips);
     void setCheckedIcon(const QIcon& icon, const QString& text, const QString& strTips);

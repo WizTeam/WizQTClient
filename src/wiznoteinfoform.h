@@ -5,16 +5,16 @@
 #include "share/wizDatabaseManager.h"
 
 namespace Ui {
-class CWizNoteInfoForm;
+class WizNoteInfoForm;
 }
 
-class CWizNoteInfoForm : public CWizPopupWidget
+class WizNoteInfoForm : public WizPopupWidget
 {
     Q_OBJECT
     
 public:
-    explicit CWizNoteInfoForm(QWidget *parent = 0);
-    ~CWizNoteInfoForm();
+    explicit WizNoteInfoForm(QWidget *parent = 0);
+    ~WizNoteInfoForm();
 
     void setDocument(const WIZDOCUMENTDATA& data);
 
@@ -41,7 +41,7 @@ private slots:
     void on_labelOpenURL_linkActivated(const QString &link);
 
 private:
-    Ui::CWizNoteInfoForm *ui;
+    Ui::WizNoteInfoForm *ui;
     QString m_docKbGuid;
     QString m_docGuid;
     QSize m_size;

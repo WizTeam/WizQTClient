@@ -8,8 +8,8 @@
 
 class QPixmap;
 
-class CWizExplorerApp;
-class CWizDatabase;
+class WizExplorerApp;
+class WizDatabase;
 class CWizUserAvatarDownloaderHost;
 
 enum WizDocumentListItemType
@@ -41,11 +41,11 @@ struct WizDocumentListViewSectionData
 };
 
 
-class CWizDocumentListViewBaseItem : public QObject, public QListWidgetItem
+class WizDocumentListViewBaseItem : public QObject, public QListWidgetItem
 {
     Q_OBJECT
 public:
-    explicit CWizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type);
+    explicit WizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type);
 
     virtual void setSortingType(int type);
     virtual void setLeadInfoState(int state);
@@ -58,12 +58,12 @@ protected:
     int m_nLeadInfoState;
 };
 
-class CWizDocumentListViewDocumentItem;
-class CWizDocumentListViewSectionItem : public CWizDocumentListViewBaseItem
+class WizDocumentListViewDocumentItem;
+class WizDocumentListViewSectionItem : public WizDocumentListViewBaseItem
 {
     Q_OBJECT
 public:
-    explicit CWizDocumentListViewSectionItem(const WizDocumentListViewSectionData& data, const QString& text, int docCount);
+    explicit WizDocumentListViewSectionItem(const WizDocumentListViewSectionData& data, const QString& text, int docCount);
     const WizDocumentListViewSectionData& sectionData() const { return m_data; }
 
     // used for sorting
@@ -72,7 +72,7 @@ public:
     virtual void draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const;
 
 private:
-    bool compareWithDocumentItem(const CWizDocumentListViewDocumentItem* docItem) const;
+    bool compareWithDocumentItem(const WizDocumentListViewDocumentItem* docItem) const;
 
 private:
     WizDocumentListViewSectionData m_data;
@@ -80,7 +80,7 @@ private:
     int m_documentCount;
 };
 
-class CWizDocumentListViewDocumentItem : public CWizDocumentListViewBaseItem
+class WizDocumentListViewDocumentItem : public WizDocumentListViewBaseItem
 {
     Q_OBJECT
 
@@ -91,7 +91,7 @@ public:
         TypeMessage
     };
 
-    explicit CWizDocumentListViewDocumentItem(CWizExplorerApp& app,
+    explicit WizDocumentListViewDocumentItem(WizExplorerApp& app,
                                       const WizDocumentListViewItemData& data);
 
     virtual void setSortingType(int type);
@@ -102,9 +102,9 @@ public:
     int itemType() const { return m_data.nType; }
     int documentSize() const;
     QString documentLocation() const;
-    void reload(CWizDatabase& db);
+    void reload(WizDatabase& db);
 
-    const QImage& avatar(const CWizDatabase& db);
+    const QImage& avatar(const WizDatabase& db);
 
     // called by CWizDocumentListView when thumbCache pool is ready for reading
     void resetAbstract(const WIZABSTRACT& abs);
@@ -147,7 +147,7 @@ private:
 
     //bool adjust(const QListWidgetItem &other) const;
 
-    bool compareWithSectionItem(const CWizDocumentListViewSectionItem* secItem) const;
+    bool compareWithSectionItem(const WizDocumentListViewSectionItem* secItem) const;
 
     void updateDocumentLocationData();
 
@@ -156,7 +156,7 @@ private:
     void updateInfoList();
 
 private:
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
     WizDocumentListViewItemData m_data;   
 
     int m_nSize;

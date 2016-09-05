@@ -5,20 +5,20 @@
 #include <QLineEdit>
 
 namespace Ui {
-    class CWizLineInputDialog;
+    class WizLineInputDialog;
 }
 
-class CWizLineInputDialog : public QDialog
+class WizLineInputDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizLineInputDialog(const QString& strTitle,
+    explicit WizLineInputDialog(const QString& strTitle,
                                  const QString& strHint,
                                  const QString& strDefault = "",
                                  QWidget *parent = 0,
                                  QLineEdit::EchoMode echo = QLineEdit::Normal);
-    ~CWizLineInputDialog();
+    ~WizLineInputDialog();
 
 public:
     QString input();
@@ -34,7 +34,7 @@ signals:
 private slots:
 
 private:
-    Ui::CWizLineInputDialog *ui;
+    Ui::WizLineInputDialog *ui;
     QString m_strDefault;
     std::function<bool(QString)> m_okHandler;
 };

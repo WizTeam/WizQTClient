@@ -3,11 +3,11 @@
 
 #include <QObject>
 
-class NoteComments : public QObject
+class WizNoteComments : public QObject
 {
     Q_OBJECT
 
-    explicit NoteComments();
+    explicit WizNoteComments();
 
 public:
     static void init();

@@ -18,9 +18,9 @@ QString formatLabelLink(const QString& linkHref, const QString& text)
                     "text-decoration:none;\">%2</a>", linkHref, text);
 }
 
-CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
-    : CWizPopupWidget(parent)
-    , ui(new Ui::CWizNoteInfoForm)
+WizNoteInfoForm::WizNoteInfoForm(QWidget *parent)
+    : WizPopupWidget(parent)
+    , ui(new Ui::WizNoteInfoForm)
     , m_size(QSize(370, 370))
 {
     ui->setupUi(this);
@@ -39,42 +39,42 @@ CWizNoteInfoForm::CWizNoteInfoForm(QWidget *parent)
     ui->labelHistory->setText(versionHistory);
 }
 
-CWizNoteInfoForm::~CWizNoteInfoForm()
+WizNoteInfoForm::~WizNoteInfoForm()
 {
     delete ui;
 }
 
-QSize CWizNoteInfoForm::sizeHint() const
+QSize WizNoteInfoForm::sizeHint() const
 {
     return m_size;
 }
 
-void CWizNoteInfoForm::hideEvent(QHideEvent* ev)
+void WizNoteInfoForm::hideEvent(QHideEvent* ev)
 {
     QWidget::hideEvent(ev);
 
     emit widgetStatusChanged();
 }
 
-void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
+void WizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strKbGUID.isEmpty());
     m_docKbGuid = data.strKbGUID;
     m_docGuid = data.strGUID;
 
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(data.strKbGUID);
-    m_size.setHeight(db.IsGroup() ? 320 : 370);
-    setGroupLabelVisible(db.IsGroup());
-    QString doc = db.GetDocumentFileName(data.strGUID);
+    WizDatabase& db = WizDatabaseManager::instance()->db(data.strKbGUID);
+    m_size.setHeight(db.isGroup() ? 320 : 370);
+    setGroupLabelVisible(db.isGroup());
+    QString doc = db.getDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
 
     QFont font;
     QFontMetrics fm(font);
     const int nMaxTextWidth = 280;
-    QString strLocation = db.GetDocumentLocation(data);
+    QString strLocation = db.getDocumentLocation(data);
     // private document
-    if (data.strKbGUID == CWizDatabaseManager::instance()->db().kbGUID()) {
-        QString tags = db.GetDocumentTagsText(data.strGUID);
+    if (data.strKbGUID == WizDatabaseManager::instance()->db().kbGUID()) {
+        QString tags = db.getDocumentTagsText(data.strGUID);
         tags = fm.elidedText(tags, Qt::ElideMiddle, nMaxTextWidth);
         ui->labelTags->setText(tags);
 
@@ -89,7 +89,7 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     strLocation = fm.elidedText(strLocation, Qt::ElideMiddle, nMaxTextWidth);
     ui->labelNotebook->setText(strLocation);
 
-    QString userAlias = db.GetDocumentOwnerAlias(data);
+    QString userAlias = db.getDocumentOwnerAlias(data);
     ui->labelOwner->setText(userAlias);
 
     // common fields
@@ -102,13 +102,13 @@ void CWizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     ui->labelSize->setText(sz);
     ui->checkEncrypted->setChecked(data.nProtected ? true : false);
 
-    bool canEdit = (db.CanEditDocument(data) && !CWizDatabase::IsInDeletedItems(data.strLocation));
+    bool canEdit = (db.canEditDocument(data) && !WizDatabase::isInDeletedItems(data.strLocation));
     ui->editAuthor->setReadOnly(!canEdit);
     ui->editURL->setReadOnly(!canEdit);
-    ui->checkEncrypted->setEnabled(canEdit && !db.IsGroup());
+    ui->checkEncrypted->setEnabled(canEdit && !db.isGroup());
 }
 
-void CWizNoteInfoForm::setGroupLabelVisible(bool isGroupNote)
+void WizNoteInfoForm::setGroupLabelVisible(bool isGroupNote)
 {
     ui->labelEncrypted->setVisible(!isGroupNote);
     ui->checkEncrypted->setVisible(!isGroupNote);
@@ -119,11 +119,11 @@ void CWizNoteInfoForm::setGroupLabelVisible(bool isGroupNote)
     ui->labelOwnerLabel->setVisible(isGroupNote);
 }
 
-void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
+void WizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
 {
     Q_UNUSED(link);
 
-    MainWindow *mainWindow = MainWindow::instance();
+    WizMainWindow *mainWindow = WizMainWindow::instance();
     if (mainWindow)
     {
         mainWindow->locateDocument(m_docKbGuid, m_docGuid);
@@ -131,69 +131,69 @@ void CWizNoteInfoForm::on_labelOpenDocument_linkActivated(const QString &link)
     }
 }
 
-void CWizNoteInfoForm::on_editURL_editingFinished()
+void WizNoteInfoForm::on_editURL_editingFinished()
 {
     WIZDOCUMENTDATA doc;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
-    if (db.DocumentFromGUID(m_docGuid, doc))
+    WizDatabase& db = WizDatabaseManager::instance()->db(m_docKbGuid);
+    if (db.documentFromGuid(m_docGuid, doc))
     {
         if (doc.strURL != ui->editURL->text())
         {
             doc.strURL= ui->editURL->text();
-            db.ModifyDocumentInfo(doc);
+            db.modifyDocumentInfo(doc);
         }
     }
 }
 
-void CWizNoteInfoForm::on_editAuthor_editingFinished()
+void WizNoteInfoForm::on_editAuthor_editingFinished()
 {
     WIZDOCUMENTDATA doc;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
-    if (db.DocumentFromGUID(m_docGuid, doc))
+    WizDatabase& db = WizDatabaseManager::instance()->db(m_docKbGuid);
+    if (db.documentFromGuid(m_docGuid, doc))
     {
         if (doc.strAuthor != ui->editAuthor->text())
         {
             doc.strAuthor = ui->editAuthor->text();
-            db.ModifyDocumentInfo(doc);
+            db.modifyDocumentInfo(doc);
         }
     }
 }
 
-void CWizNoteInfoForm::on_checkEncrypted_clicked(bool checked)
+void WizNoteInfoForm::on_checkEncrypted_clicked(bool checked)
 {
     WIZDOCUMENTDATA doc;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
-    if (db.DocumentFromGUID(m_docGuid, doc))
+    WizDatabase& db = WizDatabaseManager::instance()->db(m_docKbGuid);
+    if (db.documentFromGuid(m_docGuid, doc))
     {
         if (checked)
         {
-            db.EncryptDocument(doc);
+            db.encryptDocument(doc);
         }
         else
         {
             if (doc.nProtected)
             {
-                if (!db.CancelDocumentEncryption(doc))
+                if (!db.cancelDocumentEncryption(doc))
                     return;
             }
         }
     }
 }
 
-void CWizNoteInfoForm::on_labelHistory_linkActivated(const QString &link)
+void WizNoteInfoForm::on_labelHistory_linkActivated(const QString &link)
 {
     Q_UNUSED(link);
 
     WIZDOCUMENTDATA doc;
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(m_docKbGuid);
-    if (db.DocumentFromGUID(m_docGuid, doc))
+    WizDatabase& db = WizDatabaseManager::instance()->db(m_docKbGuid);
+    if (db.documentFromGuid(m_docGuid, doc))
     {
         WizShowDocumentHistory(doc, nullptr);
-        WizGetAnalyzer().LogAction("showVersionHistory");
+        WizGetAnalyzer().logAction("showVersionHistory");
     }
 }
 
-void CWizNoteInfoForm::on_labelOpenURL_linkActivated(const QString &link)
+void WizNoteInfoForm::on_labelOpenURL_linkActivated(const QString &link)
 {
     Q_UNUSED(link);
 
@@ -204,6 +204,6 @@ void CWizNoteInfoForm::on_labelOpenURL_linkActivated(const QString &link)
     }
     else
     {
-        CWizMessageBox::information(nullptr, tr("Info"), tr("Url invalid, can not open!"));
+        WizMessageBox::information(nullptr, tr("Info"), tr("Url invalid, can not open!"));
     }
 }

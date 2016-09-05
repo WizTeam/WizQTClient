@@ -12,7 +12,7 @@
 
 #include "wizmactoolbar.h"
 
-class CWizMacToolBarItem;
+class WizMacToolBarItem;
 
 
 
@@ -24,12 +24,12 @@ class CWizMacToolBarItem;
 {
 @public
     NSToolbar *m_toolbar;
-    CWizMacToolBar* m_qtToolBar;
+    WizMacToolBar* m_qtToolBar;
 
-    QList<CWizMacToolBarItem *> *items;
+    QList<WizMacToolBarItem *> *items;
 }
 
-- (id)initWithToolbar:(NSToolbar*)tb qtToolBar:(CWizMacToolBar*)qtToolBar;
+- (id)initWithToolbar:(NSToolbar*)tb qtToolBar:(WizMacToolBar*)qtToolBar;
 //
 - (NSToolbarItem *) toolbar: (NSToolbar *)toolbar itemForItemIdentifier: (NSString *) itemIdent willBeInsertedIntoToolbar:(BOOL) willBeInserted;
 - (NSArray *)toolbarDefaultItemIdentifiers:(NSToolbar*)tb;
@@ -42,26 +42,26 @@ class CWizMacToolBarItem;
 - (void) searchUsingToolbarSearchField:(id) sender;
 
 - (void)addAction:(QAction *)action;
-- (void)addStandardItem:(CWizMacToolBar::StandardItem)standardItem;
+- (void)addStandardItem:(WizMacToolBar::StandardItem)standardItem;
 - (void)addSearch:(const QString&)label tooltip:(const QString&)tooltip width:(int)width;
-- (void)addCustomView:(CWizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip;
+- (void)addCustomView:(WizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip;
 
 - (void)deleteAllToolBarItem;
 
-- (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
+- (WizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier;
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier;
 
 - (void) viewSizeChanged:(NSNotification*)notification;
 - (IBAction)itemClicked:(id)sender;
 
-- (CWizSearchView*) getSearchWidget;
+- (WizSearchView*) getSearchWidget;
 - (NSToolbarItem*) getSearchToolBarItem;
 @end
 
 
 
 
-class CWizMacToolBarItem : public QObject
+class WizMacToolBarItem : public QObject
 {
 public:
     virtual NSString* itemIdentifier() const = 0;
@@ -71,11 +71,11 @@ public:
 
     virtual bool isGroup() const { return false; }
     virtual int childCount() const { return 0; }
-    virtual CWizMacToolBarItem* childItem(int index) const { Q_UNUSED(index); return NULL; }
-    virtual int indexOf(CWizMacToolBarItem* item) const { Q_UNUSED(item); return -1; }
-    virtual CWizMacToolBarItem* childItemFromItemIdentifier(NSString* itemIdentifier)  { Q_UNUSED(itemIdentifier); return NULL; }
-    virtual void childItemTriggerred(CWizMacToolBarItem* itemChild) { Q_UNUSED(itemChild); }
-    virtual void setChildItemEnabled(CWizMacToolBarItem* itemChild, bool enabled) { Q_UNUSED(itemChild); Q_UNUSED(enabled); }
+    virtual WizMacToolBarItem* childItem(int index) const { Q_UNUSED(index); return NULL; }
+    virtual int indexOf(WizMacToolBarItem* item) const { Q_UNUSED(item); return -1; }
+    virtual WizMacToolBarItem* childItemFromItemIdentifier(NSString* itemIdentifier)  { Q_UNUSED(itemIdentifier); return NULL; }
+    virtual void childItemTriggerred(WizMacToolBarItem* itemChild) { Q_UNUSED(itemChild); }
+    virtual void setChildItemEnabled(WizMacToolBarItem* itemChild, bool enabled) { Q_UNUSED(itemChild); Q_UNUSED(enabled); }
 };
 
 

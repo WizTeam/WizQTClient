@@ -6,115 +6,115 @@
 #include "wizqthelper.h"
 
 
-class CWizXMLNode
+class WizXMLNode
 {
 public:
-    CWizXMLNode() {}
-    CWizXMLNode(const QDomNode& node) { m_node = node; }
-    CWizXMLNode(const CWizXMLNode& nodeSrc);
+    WizXMLNode() {}
+    WizXMLNode(const QDomNode& node) { m_node = node; }
+    WizXMLNode(const WizXMLNode& nodeSrc);
 
-    CWizXMLNode& operator = (const CWizXMLNode& right);
+    WizXMLNode& operator = (const WizXMLNode& right);
 
 protected:
     QDomNode m_node;
 
 public:
     bool isNull() const { return m_node.isNull(); }
-    QDomNode& GetNode() { return m_node; }
+    QDomNode& getNode() { return m_node; }
 
-    bool GetName(QString& strName);
-    QString GetName();
-    QString GetType();
+    bool getName(QString& strName);
+    QString getName();
+    QString getType();
 
-    QString GetText(const QString& strDefault = "");
-    bool GetText(QString& strText);
-    bool SetText(const QString& strText);
+    QString getText(const QString& strDefault = "");
+    bool getText(QString& strText);
+    bool setText(const QString& strText);
 
-    bool GetAttributeText(const QString& strName, QString& strVal);
-    bool GetAttributeInt(const QString& strName, int& nVal);
-    bool GetAttributeInt64(const QString& strName, qint64& nVal);
-    bool GetAttributeUINT(const QString& strName, quint32& nVal);
-    bool GetAttributeTimeT(const QString& strName, time_t& nVal);
-    bool GetAttributeTimeString(const QString& strName, COleDateTime& t);
-    bool GetAttributeBool(const QString& strName, bool& bVal);
-    bool GetAttributeDWORD(const QString& strName, DWORD& dwVal);
-    QString GetAttributeTextDef(const QString& strName, const QString& strDefault);
-    int GetAttributeIntDef(const QString& strName, int nDefault);
-    __int64 GetAttributeInt64Def(const QString& strName, __int64 Default);
-    bool GetAttributeBoolDef(const QString& strName, bool bDefault);
+    bool getAttributeText(const QString& strName, QString& strVal);
+    bool getAttributeInt(const QString& strName, int& nVal);
+    bool getAttributeInt64(const QString& strName, qint64& nVal);
+    bool getAttributeUINT(const QString& strName, quint32& nVal);
+    bool getAttributeTimeT(const QString& strName, time_t& nVal);
+    bool getAttributeTimeString(const QString& strName, WizOleDateTime& t);
+    bool getAttributeBool(const QString& strName, bool& bVal);
+    bool getAttributeDWORD(const QString& strName, DWORD& dwVal);
+    QString getAttributeTextDef(const QString& strName, const QString& strDefault);
+    int getAttributeIntDef(const QString& strName, int nDefault);
+    __int64 getAttributeInt64Def(const QString& strName, __int64 Default);
+    bool getAttributeBoolDef(const QString& strName, bool bDefault);
 
-    bool SetAttributeText(const QString& strName, const QString& strText);
-    bool SetAttributeInt(const QString& strName, int nVal);
-    bool SetAttributeInt64(const QString& strName, __int64 nVal);
-    bool SetAttributeBool(const QString& strName, bool bVal);
-    bool SetAttributeTime(const QString& strName, const COleDateTime& t);
+    bool setAttributeText(const QString& strName, const QString& strText);
+    bool setAttributeInt(const QString& strName, int nVal);
+    bool setAttributeInt64(const QString& strName, __int64 nVal);
+    bool setAttributeBool(const QString& strName, bool bVal);
+    bool setAttributeTime(const QString& strName, const WizOleDateTime& t);
 
-    bool FindChildNode(const QString& strNodeName, CWizXMLNode& nodeChild);
-    bool AppendChild(const QString& strNodeName, CWizXMLNode& nodeChild);
-    bool AppendChild(const QString& strNodeName, const QString& strChildNodeText);
-    bool GetChildNode(const QString& strNodeName, CWizXMLNode& nodeChild);
-    bool SetChildNodeText(const QString& strNodeName, const QString& strText);
-    bool GetChildNodeText(const QString& strNodeName, QString& strText);
-    QString GetChildNodeTextDef(const QString& strNodeName, const QString& strDef);
+    bool findChildNode(const QString& strNodeName, WizXMLNode& nodeChild);
+    bool appendChild(const QString& strNodeName, WizXMLNode& nodeChild);
+    bool appendChild(const QString& strNodeName, const QString& strChildNodeText);
+    bool getChildNode(const QString& strNodeName, WizXMLNode& nodeChild);
+    bool setChildNodeText(const QString& strNodeName, const QString& strText);
+    bool getChildNodeText(const QString& strNodeName, QString& strText);
+    QString getChildNodeTextDef(const QString& strNodeName, const QString& strDef);
 
-    bool GetAllChildNodes(CWizStdStringArray& arrayNodeName);
-    bool GetAllChildNodes(std::deque<CWizXMLNode>& arrayNodes);
-    bool GetFirstChildNode(CWizXMLNode& nodeChild);
-    QString GetFirstChildNodeText(const QString& strDef = "");
+    bool getAllChildNodes(CWizStdStringArray& arrayNodeName);
+    bool getAllChildNodes(std::deque<WizXMLNode>& arrayNodes);
+    bool getFirstChildNode(WizXMLNode& nodeChild);
+    QString getFirstChildNodeText(const QString& strDef = "");
 
-    bool DeleteChild(const QString& strChildName);
-    bool DeleteChild(CWizXMLNode& nodeChild);
-    bool DeleteAllChild(const QString& strExceptNodeName1 = "", \
+    bool deleteChild(const QString& strChildName);
+    bool deleteChild(WizXMLNode& nodeChild);
+    bool deleteAllChild(const QString& strExceptNodeName1 = "", \
                         const QString& strExceptNodeName2 = "", \
                         const QString& strExceptNodeName3 = "");
 
-    bool HasChildNode();
-    int GetChildNodesCount();
+    bool hasChildNode();
+    int getChildNodesCount();
 
-    bool AppendNodeByPath(const QString& strPath, CWizXMLNode& nodeRet);
-    bool AppendNodeSetTextByPath(const QString& strPath, const QString& strText);
+    bool appendNodeByPath(const QString& strPath, WizXMLNode& nodeRet);
+    bool appendNodeSetTextByPath(const QString& strPath, const QString& strText);
 
-    bool FindNodeByPath(const QString& strPath, CWizXMLNode& nodeRet);
-    bool FindNodeTextByPath(const QString& strPath, QString& strRet);
+    bool findNodeByPath(const QString& strPath, WizXMLNode& nodeRet);
+    bool findNodeTextByPath(const QString& strPath, QString& strRet);
 
-    bool GetElementNodeByValue(const QString& strElementName, \
+    bool getElementNodeByValue(const QString& strElementName, \
                                const QString& strValueName, \
                                const QString& strValue, \
-                               CWizXMLNode& nodeRet);
+                               WizXMLNode& nodeRet);
 
-    bool GetElementOtherNodeByValue(const QString& strElementName, \
+    bool getElementOtherNodeByValue(const QString& strElementName, \
                                     const QString& strValueName, \
                                     const QString& strValue, \
                                     const QString& strOtherNodePath, \
-                                    CWizXMLNode& nodeRet);
+                                    WizXMLNode& nodeRet);
 
-    bool GetElementOtherNodeByValueReturnString(const QString& strElementName, \
+    bool getElementOtherNodeByValueReturnString(const QString& strElementName, \
                                                 const QString& strValueName, \
                                                 const QString& strValue, \
                                                 const QString& strOtherNodePath, \
                                                 QString& strRet);
 
-    bool GetElementOtherNodeByValueReturnInt(const QString& strElementName, \
+    bool getElementOtherNodeByValueReturnInt(const QString& strElementName, \
                                              const QString& strValueName, \
                                              const QString& strValue, \
                                              const QString& strOtherNodePath, \
                                              int& nRet);
 
-    bool GetElementOtherNodeByValueReturnBool(const QString& strElementName, \
+    bool getElementOtherNodeByValueReturnBool(const QString& strElementName, \
                                               const QString& strValueName, \
                                               const QString& strValue, \
                                               const QString& strOtherNodePath, \
                                               bool& bRet);
 
 public:
-    static bool FindChildNode(const QDomNodeList& nodes, const QString& strName, QDomNode& nodeRet);
+    static bool findChildNode(const QDomNodeList& nodes, const QString& strName, QDomNode& nodeRet);
 };
 
 
-class CWizXMLDocument
+class WizXMLDocument
 {
 public:
-    CWizXMLDocument() {}
+    WizXMLDocument() {}
 
 protected:
     QDomDocument m_doc;
@@ -122,49 +122,49 @@ protected:
     QString m_strErrorSrcText;
 
 public:
-    QDomDocument* GetDoc() { return &m_doc; }
+    QDomDocument* getDoc() { return &m_doc; }
 
-    bool LoadXML(const QString& strXML);
-    bool LoadFromFile(const QString& strFileName, bool bPromptError = true);
-    void Clear();
+    bool loadXML(const QString& strXML);
+    bool loadFromFile(const QString& strFileName, bool bPromptError = true);
+    void clear();
 
-    bool ToXML(QString& strText, bool bFormatText);
-    bool ToUnicodeFile(const QString& strFileName);
+    bool toXML(QString& strText, bool bFormatText);
+    bool toUnicodeFile(const QString& strFileName);
 
-    bool IsFail();
-    QString GetErrorMessage() const { return m_strErrorMessage; }
-    QString GetErrorSrcText() const { return m_strErrorSrcText; }
+    bool isFail();
+    QString getErrorMessage() const { return m_strErrorMessage; }
+    QString getErrorSrcText() const { return m_strErrorSrcText; }
 
-    bool FindChildNode(const QString& strName, CWizXMLNode& nodeChild);
-    bool AppendChild(const QString& strNodeName, CWizXMLNode& nodeChild);
-    bool GetChildNode(const QString& strName, CWizXMLNode& nodeChild);
+    bool findChildNode(const QString& strName, WizXMLNode& nodeChild);
+    bool appendChild(const QString& strNodeName, WizXMLNode& nodeChild);
+    bool getChildNode(const QString& strName, WizXMLNode& nodeChild);
 
-    bool GetAllChildNodes(CWizStdStringArray& arrayNodeName);
-    bool GetAllChildNodes(std::deque<CWizXMLNode>& arrayNodes);
+    bool getAllChildNodes(CWizStdStringArray& arrayNodeName);
+    bool getAllChildNodes(std::deque<WizXMLNode>& arrayNodes);
 
-    bool FindNodeByPath(const QString& strPath, CWizXMLNode& nodeRet);
-    bool GetNodeTextByPath(const QString& strPath, QString& strRet);
+    bool findNodeByPath(const QString& strPath, WizXMLNode& nodeRet);
+    bool getNodeTextByPath(const QString& strPath, QString& strRet);
 
-    bool SettingsGetSectionNode(const QString& strRootName, \
+    bool settingsGetSectionNode(const QString& strRootName, \
                                 const QString& strNodeName, \
-                                CWizXMLNode& node);
+                                WizXMLNode& node);
 
-    bool SettingsFindSectionNode(const QString& strRootName, \
+    bool settingsFindSectionNode(const QString& strRootName, \
                                  const QString& strNodeName, \
-                                 CWizXMLNode& node);
+                                 WizXMLNode& node);
 
-    bool SettingsGetChildNode(const QString& strRootName, \
+    bool settingsGetChildNode(const QString& strRootName, \
                               const QString& strNodeName, \
                               const QString& strSubNodeName, \
-                              CWizXMLNode& node);
+                              WizXMLNode& node);
 
-    bool SettingsGetStringValue(const QString& strRootName, \
+    bool settingsGetStringValue(const QString& strRootName, \
                                 const QString& strNodeName, \
                                 const QString& strSubNodeName, \
                                 const QString& strDefault, \
                                 QString& strValue);
 
-    bool SettingsSetStringValue(const QString& strRootName, \
+    bool settingsSetStringValue(const QString& strRootName, \
                                 const QString& strNodeName, \
                                 const QString& strSubNodeName, \
                                 const QString& strValue);

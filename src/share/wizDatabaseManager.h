@@ -15,20 +15,20 @@ struct WIZDOCUMENTDATA;
 struct WIZDOCUMENTATTACHMENTDATA;
 struct WIZGROUPDATA;
 struct WIZMESSAGEDATA;
-class CWizDatabase;
+class WizDatabase;
 struct WIZDATABASEINFO;
 
 typedef std::deque<WIZGROUPDATA> CWizGroupDataArray;
 
-class CWizDatabaseManager : public QObject
+class WizDatabaseManager : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizDatabaseManager(const QString& strAccountFolderName);
-    ~CWizDatabaseManager();
+    WizDatabaseManager(const QString& strAccountFolderName);
+    ~WizDatabaseManager();
 
-    static CWizDatabaseManager* instance();
+    static WizDatabaseManager* instance();
 
     // open private db if strKbGUID is empty, otherwise open groups db
     bool open(const QString& strKbGUID = "");
@@ -37,15 +37,15 @@ public:
     bool isOpened(const QString& strKbGUID = "");
 
     // get db reference by strKbGUID (include private), or null to get private
-    CWizDatabase& db(const QString& strKbGUID = "");
-    CWizDatabase& addDb(const QString& strKbGUID, const WIZDATABASEINFO& info);
+    WizDatabase& db(const QString& strKbGUID = "");
+    WizDatabase& addDb(const QString& strKbGUID, const WIZDATABASEINFO& info);
 
     // get all group guid list, exclude private
     //void Guids(QStringList& strings);
     // get group db count, exclude private
     int count();
     // get group db reference by index
-    CWizDatabase& at(int i);
+    WizDatabase& at(int i);
 
     //bool removeKb(const QString& strKbGUID);
 
@@ -55,13 +55,13 @@ public:
 private:
     QMutex m_mutex;
     QString m_strAccountFolderName;
-    QPointer<CWizDatabase> m_dbPrivate;
-    QMap<QString, CWizDatabase*> m_mapGroups;
+    QPointer<WizDatabase> m_dbPrivate;
+    QMap<QString, WizDatabase*> m_mapGroups;
 
-    void initSignals(CWizDatabase* db);
+    void initSignals(WizDatabase* db);
 
 private Q_SLOTS:
-    void on_groupDatabaseOpened(CWizDatabase* db, const QString& strKbGUID);
+    void on_groupDatabaseOpened(WizDatabase* db, const QString& strKbGUID);
     void on_groupsInfoDownloaded(const CWizGroupDataArray& arrayGroups);
 
 Q_SIGNALS:

@@ -1,7 +1,7 @@
 #include "wizGlobal.h"
 #include <QSettings>
 
-static MainWindow* g_mainWindow = NULL;
+static WizMainWindow* g_mainWindow = NULL;
 static QSettings* g_settings = NULL;
 static QSettings* g_globalSettings = NULL;
 
@@ -23,12 +23,12 @@ WizGlobal* WizGlobal::instance()
     return &instance;
 }
 
-void WizGlobal::setMainWindow(MainWindow* mw)
+void WizGlobal::setMainWindow(WizMainWindow* mw)
 {
     g_mainWindow = mw;
 }
 
-MainWindow* WizGlobal::mainWindow()
+WizMainWindow* WizGlobal::mainWindow()
 {
     return g_mainWindow;
 }
@@ -68,19 +68,19 @@ QSettings *WizGlobal::globalSettings()
 }
 
 
-void WizGlobal::emitViewNoteRequested(CWizDocumentView* view,
+void WizGlobal::emitViewNoteRequested(WizDocumentView* view,
                                   const WIZDOCUMENTDATA& doc, bool forceEditing)
 {
     Q_EMIT instance()->viewNoteRequested(view, doc, forceEditing);
 }
 
-void WizGlobal::emitViewNoteLoaded(CWizDocumentView* view,
+void WizGlobal::emitViewNoteLoaded(WizDocumentView* view,
                                const WIZDOCUMENTDATA& doc, bool bOk)
 {
     Q_EMIT instance()->viewNoteLoaded(view, doc, bOk);
 }
 
-void WizGlobal::emitCloseNoteRequested(CWizDocumentView *view)
+void WizGlobal::emitCloseNoteRequested(WizDocumentView *view)
 {
     Q_EMIT instance()->closeNoteRequested(view);
 }

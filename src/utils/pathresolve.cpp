@@ -7,14 +7,14 @@
 
 namespace Utils {
 
-QString PathResolve::appPath()
+QString WizPathResolve::appPath()
 {
     QString strPath = QApplication::applicationDirPath();
     addBackslash(strPath);
     return strPath;
 }
 
-QString PathResolve::resourcesPath()
+QString WizPathResolve::resourcesPath()
 {
 #ifdef Q_OS_MAC
     QDir dir(appPath());
@@ -35,23 +35,23 @@ QString PathResolve::resourcesPath()
 #endif
 }
 
-QString PathResolve::themePath(const QString& strThemeName)
+QString WizPathResolve::themePath(const QString& strThemeName)
 {
     return resourcesPath() + "skins/" + strThemeName + "/";
 }
 
-QString PathResolve::skinResourcesPath(const QString &strSkinName)
+QString WizPathResolve::skinResourcesPath(const QString &strSkinName)
 {
     Q_ASSERT(!strSkinName.isEmpty());
     return resourcesPath() + "skins/" + strSkinName + "/";
 }
 
-QString PathResolve::builtinTemplatePath()
+QString WizPathResolve::builtinTemplatePath()
 {
     return resourcesPath() + "templates/";
 }
 
-QString PathResolve::customNoteTemplatesPath()
+QString WizPathResolve::customNoteTemplatesPath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
@@ -67,22 +67,22 @@ QString PathResolve::customNoteTemplatesPath()
     return strPath;
 }
 
-QString PathResolve::wizTemplateJsFilePath()
+QString WizPathResolve::wizTemplateJsFilePath()
 {
-    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.js";
+    return Utils::WizPathResolve::customNoteTemplatesPath() + "wiz_template.js";
 }
 
-QString PathResolve::wizTemplateJsonFilePath()
+QString WizPathResolve::wizTemplateJsonFilePath()
 {
-    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_template.json";
+    return Utils::WizPathResolve::customNoteTemplatesPath() + "wiz_template.json";
 }
 
-QString PathResolve::wizTemplatePurchaseRecordFile()
+QString WizPathResolve::wizTemplatePurchaseRecordFile()
 {
-    return Utils::PathResolve::customNoteTemplatesPath() + "wiz_templateRecord.json";
+    return Utils::WizPathResolve::customNoteTemplatesPath() + "wiz_templateRecord.json";
 }
 
-QString PathResolve::customMarkdownTemplatesPath()
+QString WizPathResolve::customMarkdownTemplatesPath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
@@ -98,7 +98,7 @@ QString PathResolve::customMarkdownTemplatesPath()
     return strPath;
 }
 
-QString PathResolve::dataStorePath()
+QString WizPathResolve::dataStorePath()
 {
     QString strPath;
     strPath= QDir::homePath();
@@ -116,7 +116,7 @@ QString PathResolve::dataStorePath()
     return strPath;
 }
 
-QString PathResolve::cachePath()
+QString WizPathResolve::cachePath()
 {
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
@@ -137,14 +137,14 @@ QString PathResolve::cachePath()
     return strCachePath;
 }
 
-QString PathResolve::avatarPath()
+QString WizPathResolve::avatarPath()
 {
     QString strPath = cachePath() + "avatar/";
     ensurePathExists(strPath);
     return strPath;
 }
 
-QString PathResolve::logFilePath()
+QString WizPathResolve::logFilePath()
 {
     QString strPath;
 #ifdef Q_OS_MAC
@@ -161,14 +161,14 @@ QString PathResolve::logFilePath()
     return strPath;
 }
 
-QString PathResolve::logFile()
+QString WizPathResolve::logFile()
 {
     QString strLogfile = logFilePath() + "wiznote.log";
     return strLogfile;
 }
 
 
-QString PathResolve::tempPath()
+QString WizPathResolve::tempPath()
 {
     QString path = QDir::tempPath() + "/WizNote/";
 
@@ -176,7 +176,7 @@ QString PathResolve::tempPath()
     return path;
 }
 
-QString PathResolve::tempDocumentFolder(const QString& strGuid)
+QString WizPathResolve::tempDocumentFolder(const QString& strGuid)
 {
     QString strTempFolder = tempPath() + strGuid + "/";
     ensurePathExists(strTempFolder);
@@ -184,14 +184,14 @@ QString PathResolve::tempDocumentFolder(const QString& strGuid)
     return strTempFolder;
 }
 
-QString PathResolve::upgradePath()
+QString WizPathResolve::upgradePath()
 {
     QString strPath = dataStorePath() + "/update/";
     ensurePathExists(strPath);
     return strPath;
 }
 
-QString PathResolve::globalSettingsFile()
+QString WizPathResolve::globalSettingsFile()
 {
     QString strConfigHome = dataStorePath();
 
@@ -199,27 +199,27 @@ QString PathResolve::globalSettingsFile()
     return strConfigHome + "wiznote.ini";
 }
 
-QString PathResolve::userSettingsFile(const QString strAccountFolderName)
+QString WizPathResolve::userSettingsFile(const QString strAccountFolderName)
 {
     return dataStorePath() + strAccountFolderName + "/wiznote.ini";
 }
 
-QString PathResolve::qtLocaleFileName(const QString &strLocale)
+QString WizPathResolve::qtLocaleFileName(const QString &strLocale)
 {
     return resourcesPath() + "locales/qt_" + strLocale + ".qm";
 }
 
-QString PathResolve::localeFileName(const QString &strLocale)
+QString WizPathResolve::localeFileName(const QString &strLocale)
 {
     return resourcesPath() + "locales/wiznote_" + strLocale + ".qm";
 }
 
-QString PathResolve::introductionNotePath()
+QString WizPathResolve::introductionNotePath()
 {
     return resourcesPath() + "files/introduction/";
 }
 
-void PathResolve::addBackslash(QString& strPath)
+void WizPathResolve::addBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');
 
@@ -229,7 +229,7 @@ void PathResolve::addBackslash(QString& strPath)
     strPath += '/';
 }
 
-void PathResolve::ensurePathExists(const QString& path)
+void WizPathResolve::ensurePathExists(const QString& path)
 {
     QDir dir;
     dir.mkpath(path);

@@ -2,12 +2,12 @@
 #include "ui_wizLineInputDialog.h"
 #include <QPushButton>
 
-CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
+WizLineInputDialog::WizLineInputDialog(const QString& strTitle,
                                          const QString& strHint,
                                          const QString& strDefault /* = "" */,
                                          QWidget *parent /* = 0 */, QLineEdit::EchoMode echo)
     : QDialog(parent)
-    , ui(new Ui::CWizLineInputDialog)
+    , ui(new Ui::WizLineInputDialog)
 {
     ui->setupUi(this);
     setFixedSize(size());
@@ -26,12 +26,12 @@ CWizLineInputDialog::CWizLineInputDialog(const QString& strTitle,
     connect(ui->editInput, SIGNAL(textChanged(QString)), SIGNAL(textChanged(QString)));
 }
 
-CWizLineInputDialog::~CWizLineInputDialog()
+WizLineInputDialog::~WizLineInputDialog()
 {
     delete ui;
 }
 
-QString CWizLineInputDialog::input()
+QString WizLineInputDialog::input()
 {
     QString strText = ui->editInput->text();
 
@@ -44,11 +44,11 @@ QString CWizLineInputDialog::input()
     return strText;
 }
 
-void CWizLineInputDialog::setOKButtonEnable(bool enable)
+void WizLineInputDialog::setOKButtonEnable(bool enable)
 {
     ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(enable);
 }
-void CWizLineInputDialog::accept()
+void WizLineInputDialog::accept()
 {
     if (m_okHandler)
     {

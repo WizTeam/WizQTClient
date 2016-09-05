@@ -3,27 +3,27 @@
 
 #include <QDialog>
 
-class CWizExplorerApp;
+class WizExplorerApp;
 class QByteArray;
 
 namespace Ui {
-    class CWizConsoleDialog;
+    class WizConsoleDialog;
 }
 
-class CWizConsoleDialog: public QDialog
+class WizConsoleDialog: public QDialog
 {
     Q_OBJECT
 
 public:
-    CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent = 0);
-    ~CWizConsoleDialog();
+    WizConsoleDialog(WizExplorerApp& app, QWidget* parent = 0);
+    ~WizConsoleDialog();
 
 protected:
     virtual void showEvent(QShowEvent *event);
 
 private:
-    CWizExplorerApp& m_app;
-    Ui::CWizConsoleDialog* m_ui;
+    WizExplorerApp& m_app;
+    Ui::WizConsoleDialog* m_ui;
 
     bool m_bAutoScroll;
     qint64 m_nPos;

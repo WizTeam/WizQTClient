@@ -4,16 +4,16 @@
 #include <QDialog>
 
 namespace Ui {
-class CWizEditorInsertTableForm;
+class WizEditorInsertTableForm;
 }
 
-class CWizEditorInsertTableForm : public QDialog
+class WizEditorInsertTableForm : public QDialog
 {
     Q_OBJECT
     
 public:
-    explicit CWizEditorInsertTableForm(QWidget *parent = 0);
-    ~CWizEditorInsertTableForm();
+    explicit WizEditorInsertTableForm(QWidget *parent = 0);
+    ~WizEditorInsertTableForm();
 
     int getRows();
     int getCols();
@@ -25,7 +25,7 @@ private slots:
     void on_pushButton_ok_clicked();
 
 private:
-    Ui::CWizEditorInsertTableForm *ui;
+    Ui::WizEditorInsertTableForm *ui;
 };
 
 #endif // WIZEDITORINSERTTABLEFORM_H

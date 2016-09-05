@@ -7,7 +7,7 @@
 
 #include "share/wizanimateaction.h"
 
-CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
+WizDocumentTransitionView::WizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)
   , m_mode(-1)
   , m_objGUID(QString())
@@ -17,7 +17,7 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
     m_toolButton = new QToolButton(this);
     m_toolButton->setFixedSize(50,36);
 
-    m_animation = new CWizAnimateAction(this);
+    m_animation = new WizAnimateAction(this);
     m_animation->setToolButton(m_toolButton);
 
     m_animation->setSingleIcons("transitionViewDownloading");
@@ -40,7 +40,7 @@ CWizDocumentTransitionView::CWizDocumentTransitionView(QWidget *parent) :
 
 }
 
-void CWizDocumentTransitionView::showAsMode(const QString& strObjGUID, TransitionMode mode)
+void WizDocumentTransitionView::showAsMode(const QString& strObjGUID, TransitionMode mode)
 {
     m_mode = mode;
     if (m_mode == Downloading) {
@@ -58,7 +58,7 @@ void CWizDocumentTransitionView::showAsMode(const QString& strObjGUID, Transitio
     show();
 }
 
-void CWizDocumentTransitionView::onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded)
+void WizDocumentTransitionView::onDownloadProgressChanged(QString strObjGUID, int ntotal, int nloaded)
 {
     if (isVisible() && strObjGUID == m_objGUID && m_mode == Downloading)
     {
@@ -67,7 +67,7 @@ void CWizDocumentTransitionView::onDownloadProgressChanged(QString strObjGUID, i
     }
 }
 
-void CWizDocumentTransitionView::hideEvent(QHideEvent* ev)
+void WizDocumentTransitionView::hideEvent(QHideEvent* ev)
 {
     m_animation->stopPlay();
     m_toolButton->setVisible(false);

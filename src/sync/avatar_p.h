@@ -9,15 +9,15 @@
 
 class QNetworkReply;
 class QNetworkAccessManager;
-class AvatarHost;
+class WizAvatarHost;
 
 
-class AvatarDownloader : public QObject
+class WizAvatarDownloader : public QObject
 {
     Q_OBJECT
 
 public:
-    AvatarDownloader(QObject* parent = 0);
+    WizAvatarDownloader(QObject* parent = 0);
     Q_INVOKABLE void download(const QString& strUserGUID, bool isSystemAvatar);
 
 private:
@@ -39,12 +39,12 @@ Q_SIGNALS:
 };
 
 
-class AvatarHostPrivate: public QObject
+class WizAvatarHostPrivate: public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AvatarHostPrivate(AvatarHost* avatarHost);
+    explicit WizAvatarHostPrivate(WizAvatarHost* avatarHost);
     void load(const QString& strUserID, bool isSystem);
     void reload(const QString& strUserID);
     bool avatar(const QString& strUserID, QPixmap* pixmap);
@@ -62,7 +62,7 @@ public:
 private:
     QThread* m_thread;
     QMutex m_mutex;
-    AvatarDownloader* m_downloader;
+    WizAvatarDownloader* m_downloader;
 
 
     struct DownloadingUser
@@ -87,7 +87,7 @@ private:
     void appendUserID(const QString& strUserID, bool isSystem);
     void peekUserID(DownloadingUser& user);
 
-    AvatarHost* q;
+    WizAvatarHost* q;
 
 private Q_SLOTS:
     void on_downloaded(QString strUserID, bool bSucceed);

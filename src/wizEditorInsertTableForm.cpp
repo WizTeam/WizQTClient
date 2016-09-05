@@ -3,9 +3,9 @@
 
 #include <QtGui>
 
-CWizEditorInsertTableForm::CWizEditorInsertTableForm(QWidget *parent) :
+WizEditorInsertTableForm::WizEditorInsertTableForm(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CWizEditorInsertTableForm)
+    ui(new Ui::WizEditorInsertTableForm)
 {
     ui->setupUi(this);
 
@@ -16,34 +16,34 @@ CWizEditorInsertTableForm::CWizEditorInsertTableForm(QWidget *parent) :
     ui->editCols->setValidator(validator);
 }
 
-CWizEditorInsertTableForm::~CWizEditorInsertTableForm()
+WizEditorInsertTableForm::~WizEditorInsertTableForm()
 {
     delete ui;
 }
 
-int CWizEditorInsertTableForm::getRows()
+int WizEditorInsertTableForm::getRows()
 {
     return ui->editRows->text().toInt();
 }
 
-int CWizEditorInsertTableForm::getCols()
+int WizEditorInsertTableForm::getCols()
 {
     return ui->editCols->text().toInt();
 }
 
-void CWizEditorInsertTableForm::clear()
+void WizEditorInsertTableForm::clear()
 {
     ui->editRows->setFocus();
     ui->editRows->clear();
     ui->editCols->clear();
 }
 
-void CWizEditorInsertTableForm::on_pushButton_cancel_clicked()
+void WizEditorInsertTableForm::on_pushButton_cancel_clicked()
 {
     reject();
 }
 
-void CWizEditorInsertTableForm::on_pushButton_ok_clicked()
+void WizEditorInsertTableForm::on_pushButton_ok_clicked()
 {
     accept();
 }

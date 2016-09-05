@@ -51,11 +51,11 @@ private:
 #include <QSharedMemory>
 #include <QLocalServer>
 
-class CWizSingleApplication : public QApplication
+class WizSingleApplication : public QApplication
 {
     Q_OBJECT
 public:
-    CWizSingleApplication(int &argc, char *argv[], const QString uniqueKey);
+    WizSingleApplication(int &argc, char *argv[], const QString uniqueKey);
 
     bool isRunning();
     bool sendMessage(const QString &message);

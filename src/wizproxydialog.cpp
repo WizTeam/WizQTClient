@@ -8,21 +8,21 @@
 
 #include <QNetworkProxy>
 
-ProxyDialog::ProxyDialog(QWidget *parent) :
+WizProxyDialog::WizProxyDialog(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::ProxyDialog)
+    ui(new Ui::WizProxyDialog)
 {
     ui->setupUi(this);
 
-    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
-    ui->editAddress->setText(settings.GetProxyHost());
-    ui->editPort->setText(WizIntToStr(settings.GetProxyPort()));
-    ui->editUserName->setText(settings.GetProxyUserName());
-    ui->editPassword->setText(settings.GetProxyPassword());
+    WizSettings settings(Utils::WizPathResolve::globalSettingsFile());
+    ui->editAddress->setText(settings.getProxyHost());
+    ui->editPort->setText(WizIntToStr(settings.getProxyPort()));
+    ui->editUserName->setText(settings.getProxyUserName());
+    ui->editPassword->setText(settings.getProxyPassword());
     ui->editPassword->setEchoMode(QLineEdit::Password);
-    ui->comboBox->setCurrentIndex((int)settings.GetProxyType());
+    ui->comboBox->setCurrentIndex((int)settings.getProxyType());
 
-    bool proxyStatus = settings.GetProxyStatus();
+    bool proxyStatus = settings.getProxyStatus();
     ui->checkProxyStatus->setChecked(proxyStatus);
 
     enableControl(proxyStatus);
@@ -30,17 +30,17 @@ ProxyDialog::ProxyDialog(QWidget *parent) :
     connect(ui->checkProxyStatus, SIGNAL(stateChanged(int)), SLOT(proxyStatusChanged(int)));
 }
 
-ProxyDialog::~ProxyDialog()
+WizProxyDialog::~WizProxyDialog()
 {
     delete ui;
 }
 
-void ProxyDialog::proxyStatusChanged(int state)
+void WizProxyDialog::proxyStatusChanged(int state)
 {
     enableControl(Qt::Checked == state);
 }
 
-void ProxyDialog::enableControl(bool b)
+void WizProxyDialog::enableControl(bool b)
 {
     ui->editAddress->setEnabled(b);
     ui->editPort->setEnabled(b);
@@ -49,7 +49,7 @@ void ProxyDialog::enableControl(bool b)
     ui->comboBox->setEnabled(b);
 }
 
-void ProxyDialog::setApplicationProxy()
+void WizProxyDialog::setApplicationProxy()
 {
     if (ui->checkProxyStatus->checkState() == Qt::Checked)
     {
@@ -67,7 +67,7 @@ void ProxyDialog::setApplicationProxy()
     }
 }
 
-QNetworkProxy::ProxyType ProxyDialog::getProxyType()
+QNetworkProxy::ProxyType WizProxyDialog::getProxyType()
 {
     if (ui->comboBox->currentIndex() == WizProxy_HttpProxy)
     {
@@ -81,15 +81,15 @@ QNetworkProxy::ProxyType ProxyDialog::getProxyType()
     return QNetworkProxy::NoProxy;
 }
 
-void ProxyDialog::accept()
+void WizProxyDialog::accept()
 {
-    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
-    settings.SetProxyType((WizProxyType)ui->comboBox->currentIndex());
-    settings.SetProxyHost(ui->editAddress->text());
-    settings.SetProxyPort(ui->editPort->text().toInt());
-    settings.SetProxyUserName(ui->editUserName->text());
-    settings.SetProxyPassword(ui->editPassword->text());
-    settings.SetProxyStatus(ui->checkProxyStatus->isChecked());
+    WizSettings settings(Utils::WizPathResolve::globalSettingsFile());
+    settings.setProxyType((WizProxyType)ui->comboBox->currentIndex());
+    settings.setProxyHost(ui->editAddress->text());
+    settings.setProxyPort(ui->editPort->text().toInt());
+    settings.setProxyUserName(ui->editUserName->text());
+    settings.setProxyPassword(ui->editPassword->text());
+    settings.setProxyStatus(ui->checkProxyStatus->isChecked());
 
     setApplicationProxy();
 

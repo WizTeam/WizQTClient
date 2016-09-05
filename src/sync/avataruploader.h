@@ -8,12 +8,12 @@ class QNetworkAccessManager;
 class QNetworkReply;
 
 
-class AvatarUploader : public QObject
+class WizAvatarUploader : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AvatarUploader(QObject *parent);
+    explicit WizAvatarUploader(QObject *parent);
     void upload(const QString& strFileName);
     QString lastErrorMessage() { return m_strError; }
 

@@ -28,32 +28,32 @@
 
 /* ------------------------- CWizXmlRpcValue ------------------------- */
 // Abstract base class for all XML-RPC return
-class CWizXmlRpcValue
+class WizXmlRpcValue
 {
 public:
-    virtual ~CWizXmlRpcValue() {}
+    virtual ~WizXmlRpcValue() {}
 
-    virtual bool Write(CWizXMLNode& nodeParent) = 0;
-    virtual bool Read(CWizXMLNode& nodeParent) = 0;
-    virtual QString ToString() const = 0;
-
-    template <class TData>
-    bool ToData(TData& data);
+    virtual bool write(WizXMLNode& nodeParent) = 0;
+    virtual bool read(WizXMLNode& nodeParent) = 0;
+    virtual QString toString() const = 0;
 
     template <class TData>
-    bool ToArray(std::deque<TData>& arrayData);
+    bool toData(TData& data);
+
+    template <class TData>
+    bool toArray(std::deque<TData>& arrayData);
 };
 
 
 /* ------------------------- CWizXmlRpcIntValue ------------------------- */
-class CWizXmlRpcIntValue  : public CWizXmlRpcValue
+class WizXmlRpcIntValue  : public WizXmlRpcValue
 {
 public:
-    CWizXmlRpcIntValue(int n = 0);
+    WizXmlRpcIntValue(int n = 0);
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
     operator int();
 
@@ -63,14 +63,14 @@ private:
 
 
 /* ------------------------- CWizXmlRpcBoolValue ------------------------- */
-class CWizXmlRpcBoolValue : public CWizXmlRpcValue
+class WizXmlRpcBoolValue : public WizXmlRpcValue
 {
 public:
-    CWizXmlRpcBoolValue(bool b = false);
+    WizXmlRpcBoolValue(bool b = false);
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
     operator bool();
 
@@ -80,14 +80,14 @@ private:
 
 
 /* ------------------------- CWizXmlRpcStringValue ------------------------- */
-class CWizXmlRpcStringValue : public CWizXmlRpcValue
+class WizXmlRpcStringValue : public WizXmlRpcValue
 {
 public:
-    CWizXmlRpcStringValue(const QString& strDef = "");
+    WizXmlRpcStringValue(const QString& strDef = "");
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
     operator QString ();
 
@@ -97,34 +97,34 @@ private:
 
 
 /* ------------------------- CWizXmlRpcTimeValue ------------------------- */
-class CWizXmlRpcTimeValue : public CWizXmlRpcValue
+class WizXmlRpcTimeValue : public WizXmlRpcValue
 {
 public:
-    CWizXmlRpcTimeValue();
-    CWizXmlRpcTimeValue(const COleDateTime& t);
+    WizXmlRpcTimeValue();
+    WizXmlRpcTimeValue(const WizOleDateTime& t);
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
-    operator COleDateTime();
+    operator WizOleDateTime();
 
 private:
-    COleDateTime m_t;
+    WizOleDateTime m_t;
 };
 
 
 /* ------------------------- CWizXmlRpcBase64Value ------------------------- */
-class CWizXmlRpcBase64Value : public CWizXmlRpcValue
+class WizXmlRpcBase64Value : public WizXmlRpcValue
 {
 public:
-    CWizXmlRpcBase64Value(const QByteArray& arrayData = QByteArray());
+    WizXmlRpcBase64Value(const QByteArray& arrayData = QByteArray());
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
-    bool GetStream(QByteArray& arrayData);
+    bool getStream(QByteArray& arrayData);
 
 private:
     QByteArray m_arrayData;
@@ -132,164 +132,164 @@ private:
 
 
 /* ------------------------- CWizXmlRpcArrayValue ------------------------- */
-class CWizXmlRpcArrayValue  : public CWizXmlRpcValue
+class WizXmlRpcArrayValue  : public WizXmlRpcValue
 {
 public:
-	CWizXmlRpcArrayValue();
-	CWizXmlRpcArrayValue(const CWizStdStringArray& arrayData);
-    virtual ~CWizXmlRpcArrayValue ();
+	WizXmlRpcArrayValue();
+	WizXmlRpcArrayValue(const CWizStdStringArray& arrayData);
+    virtual ~WizXmlRpcArrayValue ();
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
 	template <class TData>
-    bool ToArray(std::deque<TData>& arrayRet);
+    bool toArray(std::deque<TData>& arrayRet);
 
     template <class TData>
-    bool ToArray(std::vector<TData>& arrayRet);
+    bool toArray(std::vector<TData>& arrayRet);
 
-    void Add(CWizXmlRpcValue* pValue);
-    bool ToStringArray(CWizStdStringArray& arrayRet);
+    void add(WizXmlRpcValue* pValue);
+    bool toStringArray(CWizStdStringArray& arrayRet);
     //
-    std::deque<CWizXmlRpcValue*> value() const { return m_array; }
+    std::deque<WizXmlRpcValue*> value() const { return m_array; }
 
 private:
-    std::deque<CWizXmlRpcValue*> m_array;
+    std::deque<WizXmlRpcValue*> m_array;
 
-    void Clear();
-    bool SetStringArray(const CWizStdStringArray& arrayData);
+    void clear();
+    bool setStringArray(const CWizStdStringArray& arrayData);
 };
 
 
 /* ------------------------- CWizXmlRpcStructValue ------------------------- */
-class CWizXmlRpcStructValue  : public CWizXmlRpcValue
+class WizXmlRpcStructValue  : public WizXmlRpcValue
 {
 public:
-	virtual ~CWizXmlRpcStructValue();
+	virtual ~WizXmlRpcStructValue();
 
-    virtual bool Write(CWizXMLNode& nodeValue);
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue);
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
     // compose method
-    void AddInt(const QString& strName, int n);
-    void AddString(const QString& strName, const QString& str);
-    void AddStruct(const QString& strName, CWizXmlRpcStructValue* pStruct);
-    void AddArray(const QString& strName, CWizXmlRpcValue* pArray);
-    void AddBool(const QString& strName, bool b);
-    void AddTime(const QString& strName, const COleDateTime& t);
-    void AddBase64(const QString& strName, const QByteArray& arrayData);
-    void AddInt64(const QString& strName, __int64 n);
-    void AddColor(const QString& strName, COLORREF cr);
-    void AddStringArray(const QString& strName, const CWizStdStringArray& arrayData);
+    void addInt(const QString& strName, int n);
+    void addString(const QString& strName, const QString& str);
+    void addStruct(const QString& strName, WizXmlRpcStructValue* pStruct);
+    void addArray(const QString& strName, WizXmlRpcValue* pArray);
+    void addBool(const QString& strName, bool b);
+    void addTime(const QString& strName, const WizOleDateTime& t);
+    void addBase64(const QString& strName, const QByteArray& arrayData);
+    void addInt64(const QString& strName, __int64 n);
+    void addColor(const QString& strName, COLORREF cr);
+    void addStringArray(const QString& strName, const CWizStdStringArray& arrayData);
 
     template <class TData>
-    bool AddArray(const QString& strName, const std::deque<TData>& arrayData);
+    bool addArray(const QString& strName, const std::deque<TData>& arrayData);
 
     // parse method
-    bool GetBool(const QString& strName, bool& b) const;
-    bool GetInt(const QString& strName, int& n) const;
-    bool GetInt(const QString& strName, long& n) const;
+    bool getBool(const QString& strName, bool& b) const;
+    bool getInt(const QString& strName, int& n) const;
+    bool getInt(const QString& strName, long& n) const;
     //bool GetInt(const QString& strName, quint32& n) const;
-    bool GetInt64(const QString& strName, qint64& n) const;
+    bool getInt64(const QString& strName, qint64& n) const;
     //bool GetInt64(const QString& strName, quint64& n) const;
-    bool GetString(const QString& strName, QString& str) const;
-    bool GetStr(const QString& strName, QString& str) const { return GetString(strName, str); }
-    bool GetTime(const QString& strName, COleDateTime& t) const;
-    bool GetStream(const QString& strName, QByteArray& arrayData) const;
-    CWizXmlRpcStructValue* GetStruct(const QString& strName) const;
-    CWizXmlRpcArrayValue* GetArray(const QString& strName) const;
-    bool GetColor(const QString& strName, COLORREF& cr) const;
-    bool GetStringArray(const QString& strName, CWizStdStringArray& arrayData) const;
+    bool getString(const QString& strName, QString& str) const;
+    bool getStr(const QString& strName, QString& str) const { return getString(strName, str); }
+    bool getTime(const QString& strName, WizOleDateTime& t) const;
+    bool getStream(const QString& strName, QByteArray& arrayData) const;
+    WizXmlRpcStructValue* getStruct(const QString& strName) const;
+    WizXmlRpcArrayValue* getArray(const QString& strName) const;
+    bool getColor(const QString& strName, COLORREF& cr) const;
+    bool getStringArray(const QString& strName, CWizStdStringArray& arrayData) const;
     //
-    bool ToStringMap(std::map<QString, QString>& ret) const;
+    bool toStringMap(std::map<QString, QString>& ret) const;
 
 
 	template <class TData>
-    bool GetArray(const QString& strName, std::deque<TData>& arrayData);
+    bool getArray(const QString& strName, std::deque<TData>& arrayData);
 
 private:
-    std::map<QString, CWizXmlRpcValue*> m_map;
+    std::map<QString, WizXmlRpcValue*> m_map;
 
     // map management methods
-    void Clear();
-    void RemoveValue(const QString& strName);
-    void DeleteValue(CWizXmlRpcValue* pValue);
-    void AddValue(const QString& strzName, CWizXmlRpcValue* pValue);
-    CWizXmlRpcValue* GetMappedValue(const QString& strName) const;
+    void clear();
+    void removeValue(const QString& strName);
+    void deleteValue(WizXmlRpcValue* pValue);
+    void addValue(const QString& strzName, WizXmlRpcValue* pValue);
+    WizXmlRpcValue* getMappedValue(const QString& strName) const;
 
     template<class T>
-    T* GetValue(const QString& strName) const { return dynamic_cast<T*>(GetMappedValue(strName)); }
+    T* getValue(const QString& strName) const { return dynamic_cast<T*>(getMappedValue(strName)); }
 };
 
 
 /* ------------------------- CWizXmlRpcFaultValue ------------------------- */
-class CWizXmlRpcFaultValue : public CWizXmlRpcValue
+class WizXmlRpcFaultValue : public WizXmlRpcValue
 {
 public:
-    ~CWizXmlRpcFaultValue();
+    ~WizXmlRpcFaultValue();
 
-    virtual bool Write(CWizXMLNode& nodeValue) { Q_UNUSED(nodeValue); ATLASSERT(FALSE); return FALSE; }
-    virtual bool Read(CWizXMLNode& nodeValue);
-    virtual QString ToString() const;
+    virtual bool write(WizXMLNode& nodeValue) { Q_UNUSED(nodeValue); ATLASSERT(FALSE); return FALSE; }
+    virtual bool read(WizXMLNode& nodeValue);
+    virtual QString toString() const;
 
-    int GetFaultCode() const;
-    QString GetFaultString() const;
+    int getFaultCode() const;
+    QString getFaultString() const;
 
 private:
-    CWizXmlRpcStructValue m_val;
+    WizXmlRpcStructValue m_val;
 };
 
 
 /* ------------------------- CWizXmlRpcRequest ------------------------- */
 // XML-RPC request class
-class CWizXmlRpcRequest
+class WizXmlRpcRequest
 {
 public:
-    CWizXmlRpcRequest(const QString& strMethodName);
-    void addParam(CWizXmlRpcValue* pParam);
+    WizXmlRpcRequest(const QString& strMethodName);
+    void addParam(WizXmlRpcValue* pParam);
     QByteArray toData();
 
 protected:
-    CWizXMLDocument m_doc;
+    WizXMLDocument m_doc;
 };
 
 
 // XML-RPC server use this function to parse the dom tree
-bool WizXmlRpcResultFromXml(CWizXMLDocument& doc, CWizXmlRpcValue** ppRet);
+bool WizXmlRpcResultFromXml(WizXMLDocument& doc, WizXmlRpcValue** ppRet);
 
 
 // template methods
 
 template <class TData>
-inline bool CWizXmlRpcValue::ToData(TData& data)
+inline bool WizXmlRpcValue::toData(TData& data)
 {
-    if (CWizXmlRpcStructValue* pStruct = dynamic_cast<CWizXmlRpcStructValue*>(this))
+    if (WizXmlRpcStructValue* pStruct = dynamic_cast<WizXmlRpcStructValue*>(this))
     {
-        return data.LoadFromXmlRpc(*pStruct);
+        return data.loadFromXmlRpc(*pStruct);
     }
 
     return false;
 }
 
 template <class TData>
-inline bool CWizXmlRpcValue::ToArray(std::deque<TData>& arrayData)
+inline bool WizXmlRpcValue::toArray(std::deque<TData>& arrayData)
 {
-    if (CWizXmlRpcArrayValue* pArray = dynamic_cast<CWizXmlRpcArrayValue*>(this))
+    if (WizXmlRpcArrayValue* pArray = dynamic_cast<WizXmlRpcArrayValue*>(this))
     {
-        return pArray->ToArray<TData>(arrayData);
+        return pArray->toArray<TData>(arrayData);
     }
 
     return false;
 }
 
 template <class TData>
-inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet)
+inline bool WizXmlRpcArrayValue::toArray(std::deque<TData>& arrayRet)
 {
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++) {
-        CWizXmlRpcValue* pValue = *it;
+        WizXmlRpcValue* pValue = *it;
         if (!pValue)
         {
             //TOLOG(_T("Fault error: element of array is null"));
@@ -297,7 +297,7 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet)
         }
 
         TData data;
-        if (!pValue->ToData<TData>(data))
+        if (!pValue->toData<TData>(data))
         {
             //TOLOG(_T("Failed load data form value"));
             return false;
@@ -311,11 +311,11 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::deque<TData>& arrayRet)
 
 
 template <class TData>
-inline bool CWizXmlRpcArrayValue::ToArray(std::vector<TData>& arrayRet)
+inline bool WizXmlRpcArrayValue::toArray(std::vector<TData>& arrayRet)
 {
-    std::deque<CWizXmlRpcValue*>::const_iterator it;
+    std::deque<WizXmlRpcValue*>::const_iterator it;
     for (it = m_array.begin(); it != m_array.end(); it++) {
-        CWizXmlRpcValue* pValue = *it;
+        WizXmlRpcValue* pValue = *it;
         if (!pValue)
         {
             //TOLOG(_T("Fault error: element of array is null"));
@@ -323,7 +323,7 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::vector<TData>& arrayRet)
         }
 
         TData data;
-        if (!pValue->ToData<TData>(data))
+        if (!pValue->toData<TData>(data))
         {
             //TOLOG(_T("Failed load data form value"));
             return false;
@@ -337,64 +337,64 @@ inline bool CWizXmlRpcArrayValue::ToArray(std::vector<TData>& arrayRet)
 
 
 template <class TData>
-inline bool CWizXmlRpcStructValue::GetArray(const QString& strName,
+inline bool WizXmlRpcStructValue::getArray(const QString& strName,
                                             std::deque<TData>& arrayData)
 {
-    CWizXmlRpcArrayValue* pArray = GetArray(strName);
+    WizXmlRpcArrayValue* pArray = getArray(strName);
     if (!pArray)
     {
         //TOLOG(_T("Failed to get array data in struct"));
         return false;
     }
 
-    return pArray->ToArray<TData>(arrayData);
+    return pArray->toArray<TData>(arrayData);
 }
 
 template <class TData>
-inline bool CWizXmlRpcStructValue::AddArray(const QString& strName, const std::deque<TData>& arrayData)
+inline bool WizXmlRpcStructValue::addArray(const QString& strName, const std::deque<TData>& arrayData)
 {
-    CWizXmlRpcArrayValue* pArray = new CWizXmlRpcArrayValue();
-    AddArray(strName, pArray);
+    WizXmlRpcArrayValue* pArray = new WizXmlRpcArrayValue();
+    addArray(strName, pArray);
 
     for (typename std::deque<TData>::const_iterator it = arrayData.begin();
         it != arrayData.end();
         it++)
     {
-        CWizXmlRpcStructValue* pStruct = new CWizXmlRpcStructValue();
-        it->SaveToXmlRpc(*pStruct);
+        WizXmlRpcStructValue* pStruct = new WizXmlRpcStructValue();
+        it->saveToXmlRpc(*pStruct);
 
-        pArray->Add(pStruct);
+        pArray->add(pStruct);
     }
 
     return true;
 }
 
 
-class CWizXmlRpcResult
+class WizXmlRpcResult
 {
-    CWizXmlRpcValue* m_pResult;
+    WizXmlRpcValue* m_pResult;
     int m_nFaultCode;
     QString m_strFaultString;
     BOOL m_bXmlRpcSucceeded;
     BOOL m_bFault;
 public:
-    CWizXmlRpcResult();
-    ~CWizXmlRpcResult();
+    WizXmlRpcResult();
+    ~WizXmlRpcResult();
 public:
-    void SetResult(const QString& strMethodName, CWizXmlRpcValue* pRet);
+    void setResult(const QString& strMethodName, WizXmlRpcValue* pRet);
     //
-    BOOL IsXmlRpcSucceeded() const;
-    BOOL IsFault() const;
-    BOOL IsNoError() const;
+    BOOL isXmlRpcSucceeded() const;
+    BOOL isFault() const;
+    BOOL isNoError() const;
     //
     template <class T>
-    T* GetResultValue() const
+    T* getResultValue() const
     {
         return dynamic_cast<T*>(m_pResult);
     }
     //
-    BOOL GetString(QString& str) const;
-    BOOL GetBool(BOOL& b) const;
+    BOOL getString(QString& str) const;
+    BOOL getBool(BOOL& b) const;
 };
 
 #endif //WIZXMLRPC_H

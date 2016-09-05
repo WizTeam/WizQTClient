@@ -6,7 +6,7 @@
 
 #ifdef WIZ_OBOSOLETE
 
-class CWizUpgrade;
+class WizUpgrade;
 
 enum UpdateError {
     NetworkError,
@@ -14,19 +14,19 @@ enum UpdateError {
     ParseError
 };
 
-class CWizUpgradeThread : public QThread
+class WizUpgradeThread : public QThread
 {
     Q_OBJECT
 
 public:
-    CWizUpgradeThread(QObject* parent = 0);
+    WizUpgradeThread(QObject* parent = 0);
 
     void abort();
     const QString& whatsNewUrl() const { return m_changelogUrl; }
     QThread* thread() const { return m_currentThread; }
 
 private:
-    QPointer<CWizUpgrade> m_upgradePtr;
+    QPointer<WizUpgrade> m_upgradePtr;
     bool m_bIsStarted;
     QTimer m_timer;
 
@@ -46,12 +46,12 @@ private Q_SLOTS:
 };
 
 
-class CWizUpgrade : public QObject
+class WizUpgrade : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizUpgrade(QObject* parent = 0);
+    WizUpgrade(QObject* parent = 0);
 
     void requestUpgrade();
     void abort();

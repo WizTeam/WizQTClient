@@ -4,10 +4,10 @@
 #include <QWidget>
 
 class QLabel;
-class CWizAnimateAction;
+class WizAnimateAction;
 class QToolButton;
 
-class CWizDocumentTransitionView : public QWidget
+class WizDocumentTransitionView : public QWidget
 {
     Q_OBJECT
 
@@ -19,7 +19,7 @@ public:
         ErrorOccured
     };
 
-    explicit CWizDocumentTransitionView(QWidget *parent = 0);
+    explicit WizDocumentTransitionView(QWidget *parent = 0);
     void showAsMode(const QString& strObjGUID,TransitionMode mode);
 
 public slots:
@@ -32,7 +32,7 @@ private:
     QLabel* m_labelHint;
     int m_mode;
     QString m_objGUID;
-    CWizAnimateAction* m_animation;
+    WizAnimateAction* m_animation;
     QToolButton* m_toolButton;
 };
 

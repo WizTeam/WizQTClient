@@ -18,9 +18,9 @@
 #include "utils/stylehelper.h"
 
 
-CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerApp& app,
+WizDocumentListViewDocumentItem::WizDocumentListViewDocumentItem(WizExplorerApp& app,
                                                    const WizDocumentListViewItemData& data)
-    : CWizDocumentListViewBaseItem(0, WizDocumentListType_Document)
+    : WizDocumentListViewBaseItem(0, WizDocumentListType_Document)
     , m_app(app)
     , m_nSize(0)
     , m_documentUnread(false)
@@ -43,12 +43,12 @@ CWizDocumentListViewDocumentItem::CWizDocumentListViewDocumentItem(CWizExplorerA
     connect(this, SIGNAL(thumbnailReloaded()), SLOT(on_thumbnailReloaded()));
 }
 
-void CWizDocumentListViewDocumentItem::resetAvatar(const QString& strFileName)
+void WizDocumentListViewDocumentItem::resetAvatar(const QString& strFileName)
 {
     Q_EMIT thumbnailReloaded();
 }
 
-bool CWizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFileName)
+bool WizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFileName)
 {
     if (!QFile::exists(strFileName)) {
         return true;
@@ -65,13 +65,13 @@ bool CWizDocumentListViewDocumentItem::isAvatarNeedUpdate(const QString& strFile
     return false;
 }
 
-bool CWizDocumentListViewDocumentItem::isContainsAttachment() const
+bool WizDocumentListViewDocumentItem::isContainsAttachment() const
 {
     //NOTE:不应该从数据中读取附件信息，而是根据当前包含的笔记信息来判断。如果发现笔记信息与实际情况不一致，则问题在笔记信息刷新的部分。
     return m_data.doc.nAttachmentCount > 0;
 }
 
-int CWizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
+int WizDocumentListViewDocumentItem::badgeType(bool isSummaryView) const
 {
     int nType = m_data.doc.nProtected ? (isSummaryView ? DocTypeEncrytedInSummary : DocTypeEncrytedInTitle) : DocTypeNormal;
     nType = isContainsAttachment() ? (DocTypeContainsAttachment | nType) : nType;
@@ -89,7 +89,7 @@ int compareYearAndMothOfDate(const QDate& dateleft, const QDate& dateRight)
    return 0;
 }
 
-bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocumentListViewSectionItem* secItem) const
+bool WizDocumentListViewDocumentItem::compareWithSectionItem(const WizDocumentListViewSectionItem* secItem) const
 {
     switch (m_nSortingType) {
     case SortingByCreatedTime:
@@ -151,18 +151,18 @@ bool CWizDocumentListViewDocumentItem::compareWithSectionItem(const CWizDocument
     return false;
 }
 
-QString CWizDocumentListViewDocumentItem::documentLocation() const
+QString WizDocumentListViewDocumentItem::documentLocation() const
 {
     return m_data.location;
 }
 
-void CWizDocumentListViewDocumentItem::updateDocumentLocationData()
+void WizDocumentListViewDocumentItem::updateDocumentLocationData()
 {
-    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-    m_data.location = db.GetDocumentLocation(m_data.doc);
+    WizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    m_data.location = db.getDocumentLocation(m_data.doc);
 }
 
-bool CWizDocumentListViewDocumentItem::needDrawDocumentLocation() const
+bool WizDocumentListViewDocumentItem::needDrawDocumentLocation() const
 {
     if ((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
             (m_nLeadInfoState & DocumentLeadInfo_GroupRoot) ||
@@ -173,14 +173,14 @@ bool CWizDocumentListViewDocumentItem::needDrawDocumentLocation() const
     return false;
 }
 
-void CWizDocumentListViewDocumentItem::updateInfoList()
+void WizDocumentListViewDocumentItem::updateInfoList()
 {    
-    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    WizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     m_data.infoList.clear();
 
 
     if (m_data.nType == TypeGroupDocument) {
-        QString strAuthor = db.GetDocumentOwnerAlias(m_data.doc);
+        QString strAuthor = db.getDocumentOwnerAlias(m_data.doc);
 //        strAuthor += strAuthor.isEmpty() ? "" : " ";
 
         switch (m_nSortingType) {
@@ -203,15 +203,15 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
         case SortingByLocation:
         case -SortingByLocation:
         {
-            CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
-            m_data.location = db.GetDocumentLocation(m_data.doc);
+            WizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+            m_data.location = db.getDocumentLocation(m_data.doc);
             m_data.infoList << strAuthor << m_data.location;
         }
             break;
         case SortingBySize:
         case -SortingBySize:
         {
-            QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+            QString strFileName = db.getDocumentFileName(m_data.doc.strGUID);
             QFileInfo fi(strFileName);
             if (!fi.exists()) {
                 m_data.infoList << strAuthor << QObject::tr("Unknown");
@@ -251,7 +251,7 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
         case SortingBySize:
         case -SortingBySize:
         {
-            QString strFileName = db.GetDocumentFileName(m_data.doc.strGUID);
+            QString strFileName = db.getDocumentFileName(m_data.doc.strGUID);
             QFileInfo fi(strFileName);
             if (!fi.exists()) {
                 m_data.infoList << QObject::tr("Unknown") << tags();
@@ -268,25 +268,25 @@ void CWizDocumentListViewDocumentItem::updateInfoList()
     }
 }
 
-bool CWizDocumentListViewDocumentItem::isSpecialFocus() const
+bool WizDocumentListViewDocumentItem::isSpecialFocus() const
 {
     return m_specialFocused;
 }
 
-void CWizDocumentListViewDocumentItem::setSpecialFocused(bool bSpecialFocus)
+void WizDocumentListViewDocumentItem::setSpecialFocused(bool bSpecialFocus)
 {
     m_specialFocused = bSpecialFocus;
 }
 
-void CWizDocumentListViewDocumentItem::updateDocumentUnreadCount()
+void WizDocumentListViewDocumentItem::updateDocumentUnreadCount()
 {
-    if (CWizDatabaseManager::instance()->db(m_data.doc.strKbGUID).IsGroup())
+    if (WizDatabaseManager::instance()->db(m_data.doc.strKbGUID).isGroup())
     {
         m_documentUnread = (m_data.doc.nReadCount == 0);
     }
 }
 
-void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
+void WizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
 {
     m_data.thumb.strKbGUID = abs.strKbGUID;
     m_data.thumb.guid= abs.guid;
@@ -296,7 +296,7 @@ void CWizDocumentListViewDocumentItem::resetAbstract(const WIZABSTRACT& abs)
     Q_EMIT thumbnailReloaded();
 }
 
-const QString& CWizDocumentListViewDocumentItem::tags()
+const QString& WizDocumentListViewDocumentItem::tags()
 {
     if (((m_nLeadInfoState & DocumentLeadInfo_PersonalRoot) ||
                                                    (m_nLeadInfoState & DocumentLeadInfo_SearchResult)))
@@ -306,23 +306,23 @@ const QString& CWizDocumentListViewDocumentItem::tags()
     }
 
     if (m_strTags.isEmpty()) {
-        m_strTags = m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagDisplayNameText(m_data.doc.strGUID);
+        m_strTags = m_app.databaseManager().db(m_data.doc.strKbGUID).getDocumentTagDisplayNameText(m_data.doc.strGUID);
     }
 
     return m_strTags;
 }
 
-const QString& CWizDocumentListViewDocumentItem::tagTree()
+const QString& WizDocumentListViewDocumentItem::tagTree()
 {
     if (m_strTags.isEmpty()) {
         m_strTags = "/" + m_app.databaseManager().db(m_data.doc.strKbGUID).name();
-        m_strTags += m_app.databaseManager().db(m_data.doc.strKbGUID).GetDocumentTagTreeDisplayString(m_data.doc.strGUID);
+        m_strTags += m_app.databaseManager().db(m_data.doc.strKbGUID).getDocumentTagTreeDisplayString(m_data.doc.strGUID);
     }
 
     return m_strTags;
 }
 
-void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
+void WizDocumentListViewDocumentItem::reload(WizDatabase& db)
 {
     Q_ASSERT(db.kbGUID() == m_data.doc.strKbGUID);
 
@@ -330,43 +330,43 @@ void CWizDocumentListViewDocumentItem::reload(CWizDatabase& db)
     m_data.thumb = WIZABSTRACT();
     setSortingType(m_nSortingType); // reset info
 
-    db.DocumentFromGUID(m_data.doc.strGUID, m_data.doc);
+    db.documentFromGuid(m_data.doc.strGUID, m_data.doc);
     setText(m_data.doc.strTitle);
     updateDocumentUnreadCount();
 
     Q_EMIT thumbnailReloaded();
 }
 
-void CWizDocumentListViewDocumentItem::setSortingType(int type)
+void WizDocumentListViewDocumentItem::setSortingType(int type)
 {
     m_nSortingType = type;
 
     updateInfoList();
 }
 
-void CWizDocumentListViewDocumentItem::setLeadInfoState(int state)
+void WizDocumentListViewDocumentItem::setLeadInfoState(int state)
 {
-    CWizDocumentListViewBaseItem::setLeadInfoState(state);
+    WizDocumentListViewBaseItem::setLeadInfoState(state);
 
 //    updateInfoList();
 }
 
-int CWizDocumentListViewDocumentItem::documentSize() const
+int WizDocumentListViewDocumentItem::documentSize() const
 {
     return m_nSize;
 }
 
-bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) const
+bool WizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) const
 {
 //    qDebug() << "compare by doc Item ; " << text() << " with : " << other.text();
 
     if (other.type() == WizDocumentListType_Section)
     {
-        const CWizDocumentListViewSectionItem* secItem = dynamic_cast<const CWizDocumentListViewSectionItem*>(&other);
+        const WizDocumentListViewSectionItem* secItem = dynamic_cast<const WizDocumentListViewSectionItem*>(&other);
         return compareWithSectionItem(secItem);
     }
 
-    const CWizDocumentListViewDocumentItem* pOther = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
+    const WizDocumentListViewDocumentItem* pOther = dynamic_cast<const WizDocumentListViewDocumentItem*>(&other);
     Q_ASSERT(pOther && m_nSortingType == pOther->m_nSortingType);
 
 
@@ -443,7 +443,7 @@ bool CWizDocumentListViewDocumentItem::operator <(const QListWidgetItem &other) 
     return true;
 }
 
-void CWizDocumentListViewDocumentItem::on_thumbnailReloaded()
+void WizDocumentListViewDocumentItem::on_thumbnailReloaded()
 {
     QPixmapCache::remove(m_data.doc.strGUID + ":normal");
     QPixmapCache::remove(m_data.doc.strGUID + ":focus");
@@ -456,7 +456,7 @@ void CWizDocumentListViewDocumentItem::on_thumbnailReloaded()
 //        setNeedUpdate();
 //}
 
-void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
+void WizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     int nItemType = itemType();
     draw_impl(p, vopt, nItemType, nViewType);
@@ -464,18 +464,18 @@ void CWizDocumentListViewDocumentItem::draw(QPainter* p, const QStyleOptionViewI
     drawSyncStatus(p, vopt, nViewType);
 }
 
-void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItem* vopt, int nItemType, int nViewType) const
+void WizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionViewItem* vopt, int nItemType, int nViewType) const
 {
-    if (nItemType == CWizDocumentListViewDocumentItem::TypePrivateDocument)
+    if (nItemType == WizDocumentListViewDocumentItem::TypePrivateDocument)
     {
         switch (nViewType) {
-        case CWizDocumentListView::TypeThumbnail:
+        case WizDocumentListView::TypeThumbnail:
             drawPrivateSummaryView_impl(p, vopt);
             return;
-        case CWizDocumentListView::TypeTwoLine:
+        case WizDocumentListView::TypeTwoLine:
             drawPrivateTwoLineView_impl(p, vopt);
             return;
-        case CWizDocumentListView::TypeOneLine:
+        case WizDocumentListView::TypeOneLine:
             drawOneLineView_impl(p, vopt);
             return;
         default:
@@ -483,16 +483,16 @@ void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOption
             return;
         }
     }
-    else if (nItemType == CWizDocumentListViewDocumentItem::TypeGroupDocument)
+    else if (nItemType == WizDocumentListViewDocumentItem::TypeGroupDocument)
     {
         switch (nViewType) {
-        case CWizDocumentListView::TypeThumbnail:
+        case WizDocumentListView::TypeThumbnail:
             drawGroupSummaryView_impl(p, vopt);
             return;
-        case CWizDocumentListView::TypeTwoLine:
+        case WizDocumentListView::TypeTwoLine:
             drawGroupTwoLineView_impl(p, vopt);
             return;
-        case CWizDocumentListView::TypeOneLine:
+        case WizDocumentListView::TypeOneLine:
             drawOneLineView_impl(p, vopt);
             return;
         default:
@@ -503,14 +503,14 @@ void CWizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOption
     Q_ASSERT(0);
 }
 
-void CWizDocumentListViewDocumentItem::setNeedUpdate() const
+void WizDocumentListViewDocumentItem::setNeedUpdate() const
 {
     QPixmapCache::remove(cacheKey());
 }
 
-QString CWizDocumentListViewDocumentItem::cacheKey() const
+QString WizDocumentListViewDocumentItem::cacheKey() const
 {
-    CWizDocumentListView* view = qobject_cast<CWizDocumentListView*>(listWidget());
+    WizDocumentListView* view = qobject_cast<WizDocumentListView*>(listWidget());
     Q_ASSERT(view);
 
     QString stat;
@@ -528,13 +528,13 @@ QString CWizDocumentListViewDocumentItem::cacheKey() const
 
 const int nTextTopMargin = 6;
 
-void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
     WIZABSTRACT thumb;
-    ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
+    WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
@@ -545,35 +545,35 @@ void CWizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, 
 
     rcd.setTop(rcd.top() + nTextTopMargin);
     int nType = badgeType(true);
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
                                                needDrawDocumentLocation() ? documentLocation() : "", thumb.text,
                                               bFocused, bSelected, pmt);
 }
 
 const int nAvatarRightMargin = 8;
-void CWizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizDocumentListViewDocumentItem::drawGroupSummaryView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
 
     WIZABSTRACT thumb;
-    ThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
+    WizThumbCache::instance()->find(m_data.doc.strKbGUID, m_data.doc.strGUID, thumb);
 
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    WizAvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,12, 0, 0);
-    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
+    rcAvatar = Utils::WizStyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
     rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType(true);
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
                                               needDrawDocumentLocation() ? documentLocation() : "", thumb.text, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -582,11 +582,11 @@ void CWizDocumentListViewDocumentItem::drawPrivateTwoLineView_impl(QPainter* p, 
     rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -594,18 +594,18 @@ void CWizDocumentListViewDocumentItem::drawGroupTwoLineView_impl(QPainter* p, co
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     QPixmap pmAvatar;
-    AvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
+    WizAvatarHost::avatar(m_data.strAuthorId, &pmAvatar);
     QRect rcAvatar = rcd.adjusted(8 ,10, 0, 0);
-    rcAvatar = Utils::StyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
+    rcAvatar = Utils::WizStyleHelper::drawAvatar(p, rcAvatar, pmAvatar);
     rcd.setLeft(rcAvatar.right() + nAvatarRightMargin);
     rcd.setTop(rcd.top() + nTextTopMargin);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, m_data.infoList,
                                               needDrawDocumentLocation() ? documentLocation() : "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const
+void WizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  QStyleOptionViewItem* vopt) const
 {
     bool bSelected = vopt->state & QStyle::State_Selected;
     bool bFocused = listWidget()->hasFocus();
@@ -613,30 +613,30 @@ void CWizDocumentListViewDocumentItem::drawOneLineView_impl(QPainter* p, const  
     QRect rcd = drawItemBackground(p, vopt->rect, bSelected, bFocused);
 
     int nType = badgeType();
-    Utils::StyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
+    Utils::WizStyleHelper::drawListViewItemThumb(p, rcd, nType, m_data.doc.strTitle, QStringList(), "", NULL, bFocused, bSelected);
 }
 
-void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
+void WizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     Q_UNUSED(nViewType);
 
     QString strIconPath;
-    CWizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
+    WizDatabase& db = m_app.databaseManager().db(m_data.doc.strKbGUID);
     bool isRetina = WizIsHighPixel();
     strIconPath = ::WizGetSkinResourcePath(m_app.userSettings().skin());
     CWizDocumentAttachmentDataArray arrayAttachment;
-    db.GetDocumentAttachments(m_data.doc.strGUID, arrayAttachment);
+    db.getDocumentAttachments(m_data.doc.strGUID, arrayAttachment);
     bool attachModified = false;
     for (WIZDOCUMENTATTACHMENTDATAEX attachment : arrayAttachment)
     {
-        if (db.IsAttachmentModified(attachment.strGUID))
+        if (db.isAttachmentModified(attachment.strGUID))
             attachModified = true;        
     }
-    if (db.IsDocumentModified(m_data.doc.strGUID) || attachModified)
+    if (db.isDocumentModified(m_data.doc.strGUID) || attachModified)
     {
         strIconPath += isRetina ? "document_needUpload@2x.png" : "document_needUpload.png";
     }
-    else if (!db.IsDocumentDownloaded(m_data.doc.strGUID))
+    else if (!db.isDocumentDownloaded(m_data.doc.strGUID))
     {
         strIconPath += isRetina ? "document_needDownload@2x.png" : "document_needDownload.png";
     }
@@ -662,7 +662,7 @@ void CWizDocumentListViewDocumentItem::drawSyncStatus(QPainter* p, const QStyleO
     return;
 }
 
-QRect CWizDocumentListViewDocumentItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
+QRect WizDocumentListViewDocumentItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
 {
     int index = listWidget()->row(this);
     // if next brother is section item, use full line seperator
@@ -670,24 +670,24 @@ QRect CWizDocumentListViewDocumentItem::drawItemBackground(QPainter* p, const QR
             (listWidget()->item(index + 1)->type() == WizDocumentListType_Section);
     if (selected && focused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,Utils::StyleHelper::ListBGTypeActive, useFullLineSeperator);
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect,Utils::WizStyleHelper::ListBGTypeActive, useFullLineSeperator);
     }
     else if ((selected && !focused) || m_specialFocused)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect,  Utils::StyleHelper::ListBGTypeHalfActive, useFullLineSeperator);
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect,  Utils::WizStyleHelper::ListBGTypeHalfActive, useFullLineSeperator);
     }
     else if (m_documentUnread)
     {
-        return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeUnread, useFullLineSeperator);
+        return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeUnread, useFullLineSeperator);
     }
 
-    return Utils::StyleHelper::initListViewItemPainter(p, rect, Utils::StyleHelper::ListBGTypeNone, useFullLineSeperator);
+    return Utils::WizStyleHelper::initListViewItemPainter(p, rect, Utils::WizStyleHelper::ListBGTypeNone, useFullLineSeperator);
 }
 
 
-CWizDocumentListViewSectionItem::CWizDocumentListViewSectionItem(const WizDocumentListViewSectionData& data,
+WizDocumentListViewSectionItem::WizDocumentListViewSectionItem(const WizDocumentListViewSectionData& data,
                                                                  const QString& text, int docCount)
-    : CWizDocumentListViewBaseItem(0, WizDocumentListType_Section)
+    : WizDocumentListViewBaseItem(0, WizDocumentListType_Section)
     , m_data(data)
     , m_text(text)
     , m_documentCount(docCount)
@@ -695,18 +695,18 @@ CWizDocumentListViewSectionItem::CWizDocumentListViewSectionItem(const WizDocume
 
 }
 
-bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) const
+bool WizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) const
 {
 //    qDebug() << "compare text : " << text() << "  with ; " << other.text();
 
     if (other.type() == WizDocumentListType_Document)
     {
-        const CWizDocumentListViewDocumentItem* docItem = dynamic_cast<const CWizDocumentListViewDocumentItem*>(&other);
+        const WizDocumentListViewDocumentItem* docItem = dynamic_cast<const WizDocumentListViewDocumentItem*>(&other);
         return compareWithDocumentItem(docItem);
     }
     else
     {
-        const CWizDocumentListViewSectionItem* secItem = dynamic_cast<const CWizDocumentListViewSectionItem*>(&other);
+        const WizDocumentListViewSectionItem* secItem = dynamic_cast<const WizDocumentListViewSectionItem*>(&other);
         switch (m_nSortingType) {
         case SortingByCreatedTime:
         case SortingByModifiedTime:
@@ -762,29 +762,29 @@ bool CWizDocumentListViewSectionItem::operator<(const QListWidgetItem& other) co
     return true;
 }
 
-void CWizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
+void WizDocumentListViewSectionItem::draw(QPainter* p, const QStyleOptionViewItem* vopt, int nViewType) const
 {
     p->save();
-    p->fillRect(vopt->rect, Utils::StyleHelper::listViewSectionItemBackground());
+    p->fillRect(vopt->rect, Utils::WizStyleHelper::listViewSectionItemBackground());
 
-    p->setPen(Utils::StyleHelper::listViewSectionItemText());
+    p->setPen(Utils::WizStyleHelper::listViewSectionItemText());
     QFont font;
     font.setPixelSize(12);
     p->setFont(font);
     QRect rc = vopt->rect;
-    rc.setLeft(rc.x() + Utils::StyleHelper::listViewItemHorizontalPadding());
+    rc.setLeft(rc.x() + Utils::WizStyleHelper::listViewItemHorizontalPadding());
     p->drawText(rc, Qt::AlignLeft | Qt::AlignVCenter, m_text);
 
     rc = vopt->rect;
-    rc.setRight(rc.right() - Utils::StyleHelper::listViewItemHorizontalPadding());
+    rc.setRight(rc.right() - Utils::WizStyleHelper::listViewItemHorizontalPadding());
     p->drawText(rc, Qt::AlignRight | Qt::AlignVCenter, QString::number(m_documentCount));
 
-    p->setPen(Utils::StyleHelper::listViewItemSeperator());
+    p->setPen(Utils::WizStyleHelper::listViewItemSeperator());
     p->drawLine(vopt->rect.x(), vopt->rect.bottom(), vopt->rect.right(), vopt->rect.bottom());
     p->restore();
 }
 
-bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocumentListViewDocumentItem* docItem) const
+bool WizDocumentListViewSectionItem::compareWithDocumentItem(const WizDocumentListViewDocumentItem* docItem) const
 {
     switch (m_nSortingType) {
     case SortingByCreatedTime:
@@ -851,7 +851,7 @@ bool CWizDocumentListViewSectionItem::compareWithDocumentItem(const CWizDocument
 }
 
 
-CWizDocumentListViewBaseItem::CWizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type)
+WizDocumentListViewBaseItem::WizDocumentListViewBaseItem(QObject* parent, WizDocumentListItemType type)
     : QListWidgetItem(0, type)
     , QObject(parent)
     , m_nSortingType(SortingByCreatedTime)
@@ -860,12 +860,12 @@ CWizDocumentListViewBaseItem::CWizDocumentListViewBaseItem(QObject* parent, WizD
 
 }
 
-void CWizDocumentListViewBaseItem::setSortingType(int type)
+void WizDocumentListViewBaseItem::setSortingType(int type)
 {
     m_nSortingType = type;
 }
 
-void CWizDocumentListViewBaseItem::setLeadInfoState(int state)
+void WizDocumentListViewBaseItem::setLeadInfoState(int state)
 {
     m_nLeadInfoState = state;
 }

@@ -3,16 +3,16 @@
 
 #include <QFile>
 
-class CWizLockedFile : public QFile
+class WizLockedFile : public QFile
 {
     Q_OBJECT
 
 public:
     enum LockMode { NoLock = 0, ReadLock, WriteLock };
 
-    CWizLockedFile();
-    CWizLockedFile(const QString &name);
-    ~CWizLockedFile();
+    WizLockedFile();
+    WizLockedFile(const QString &name);
+    ~WizLockedFile();
 
     bool lock(LockMode mode, bool block = true);
     bool unlock();

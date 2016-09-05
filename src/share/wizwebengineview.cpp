@@ -109,7 +109,7 @@ void WizWebEngineView::innerLoadFinished(bool ret)
             {
                 page()->runJavaScript(jsWebChannel, [=](const QVariant&){
                     //
-                    QString initFileName = Utils::PathResolve::resourcesPath() + "files/webengine/wizwebengineviewinit.js";
+                    QString initFileName = Utils::WizPathResolve::resourcesPath() + "files/webengine/wizwebengineviewinit.js";
                     QString jsInit;
                     WizLoadUnicodeTextFromFile(initFileName, jsInit);
                     //

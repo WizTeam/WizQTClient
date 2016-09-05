@@ -8,20 +8,20 @@
 #include "share/wizenc.h"
 #include "sync/apientry.h"
 
-InitBizCertDialog::InitBizCertDialog(CWizDatabase* pDatabase, QWidget *parent) :
+WizInitBizCertDialog::WizInitBizCertDialog(WizDatabase* pDatabase, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::InitBizCertDialog),
+    ui(new Ui::WizInitBizCertDialog),
     m_pDb(pDatabase)
 {
     ui->setupUi(this);
 }
 
-InitBizCertDialog::~InitBizCertDialog()
+WizInitBizCertDialog::~WizInitBizCertDialog()
 {
     delete ui;
 }
 
-void InitBizCertDialog::verifyCert()
+void WizInitBizCertDialog::verifyCert()
 {
     QString adminPassword = ui->editAdminPassword->text();
     QString userPassword = ui->editUserPassword->text();
@@ -30,26 +30,26 @@ void InitBizCertDialog::verifyCert()
     //
     if (adminPassword.isEmpty())
     {
-        CWizMessageBox::information(this, tr("Please enter the password of cert created by administrator."));
+        WizMessageBox::information(this, tr("Please enter the password of cert created by administrator."));
         ui->editAdminPassword->setFocus();
         return;
     }
     if (userPassword.isEmpty())
     {
-        CWizMessageBox::information(this, tr("Please enter the user password."));
+        WizMessageBox::information(this, tr("Please enter the user password."));
         ui->editUserPassword->setFocus();
         return;
     }
     if (userPassword != userPassword2)
     {
-        CWizMessageBox::information(this, tr("The passwords does not match."));
+        WizMessageBox::information(this, tr("The passwords does not match."));
         ui->editUserPassword->setFocus();
         return;
     }
     //
-    CWizDatabase* personalDb = m_pDb->getPersonalDatabase();
-    QString userId = personalDb->GetUserId();
-    QString password = personalDb->GetPassword();
+    WizDatabase* personalDb = m_pDb->getPersonalDatabase();
+    QString userId = personalDb->getUserId();
+    QString password = personalDb->getPassword();
     //
     QString bizGuid = m_pDb->bizGuid();
     //
@@ -58,14 +58,14 @@ void InitBizCertDialog::verifyCert()
         bool ret = false;
         QString error;
         //
-        CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
-        if (asServer.Login(userId, password))
+        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        if (asServer.login(userId, password))
         {
             QString n;
             QString e;
             QString encrypted_d;
             QString adminHint;
-            if (asServer.GetAdminBizCert(asServer.GetToken(), bizGuid, n, e, encrypted_d, adminHint))
+            if (asServer.getAdminBizCert(asServer.getToken(), bizGuid, n, e, encrypted_d, adminHint))
             {
                 QString d;
                 if (WizAESDecryptBase64StringToString(adminPassword, encrypted_d, d) && !d.isEmpty())
@@ -74,9 +74,9 @@ void InitBizCertDialog::verifyCert()
                     if (WizAESEncryptStringToBase64String(userPassword, d, newEncrypted_d) && !newEncrypted_d.isEmpty())
                     {
                         //
-                        if (asServer.SetUserBizCert(bizGuid, n, e, newEncrypted_d, hint))
+                        if (asServer.setUserBizCert(bizGuid, n, e, newEncrypted_d, hint))
                         {
-                            if (m_pDb->SetUserCert(n, e, newEncrypted_d, hint))
+                            if (m_pDb->setUserCert(n, e, newEncrypted_d, hint))
                             {
                                 m_userPassword = userPassword;
                                 ret = true;
@@ -88,7 +88,7 @@ void InitBizCertDialog::verifyCert()
                         }
                         else
                         {
-                            error = asServer.GetLastErrorMessage();
+                            error = asServer.getLastErrorMessage();
                         }
 
                     }
@@ -104,12 +104,12 @@ void InitBizCertDialog::verifyCert()
             }
             else
             {
-                error = asServer.GetLastErrorMessage();
+                error = asServer.getLastErrorMessage();
             }
         }
         else
         {
-            error = asServer.GetLastErrorMessage();
+            error = asServer.getLastErrorMessage();
         }
         //
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
@@ -119,14 +119,14 @@ void InitBizCertDialog::verifyCert()
             }
             else
             {
-                CWizMessageBox::critical(this, error);
+                WizMessageBox::critical(this, error);
             }
         });
         //
     });
 }
 
-void InitBizCertDialog::accept()
+void WizInitBizCertDialog::accept()
 {
     verifyCert();
 }

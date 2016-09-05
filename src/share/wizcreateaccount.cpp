@@ -1,11 +1,11 @@
 #include "wizcreateaccount.h"
 
-CWizCreateAccount::CWizCreateAccount(const CString& strAccountsApiURL)
+WizCreateAccount::WizCreateAccount(const CString& strAccountsApiURL)
     : CWizApiBase(strAccountsApiURL)
 {
 }
 
-void CWizCreateAccount::createAccount(const CString& strUserId, \
+void WizCreateAccount::createAccount(const CString& strUserId, \
                                       const CString& strPassword, \
                                       const CString& strInviteCode)
 {
@@ -14,7 +14,7 @@ void CWizCreateAccount::createAccount(const CString& strUserId, \
     callCreateAccount(strUserId, strPassword);
 }
 
-void CWizCreateAccount::onXmlRpcError(const QString& strMethodName, \
+void WizCreateAccount::onXmlRpcError(const QString& strMethodName, \
                                       WizXmlRpcError err, \
                                       int errorCode, \
                                       const QString& errorMessage)
@@ -26,7 +26,7 @@ void CWizCreateAccount::onXmlRpcError(const QString& strMethodName, \
     emit done(false, errorMessage);
 }
 
-void CWizCreateAccount::onCreateAccount()
+void WizCreateAccount::onCreateAccount()
 {
     emit done(true, "");
 }

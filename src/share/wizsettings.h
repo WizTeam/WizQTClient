@@ -23,41 +23,41 @@ enum WizServerType
     EnterpriseServer = 199
 };
 
-class CWizSettings : public QSettings
+class WizSettings : public QSettings
 {
 public:
-    CWizSettings(const QString& strFileName);
+    WizSettings(const QString& strFileName);
 
-    void GetSections(CWizStdStringArray& arrayAction);
-    void GetKeys(const QString& strSection, CWizStdStringArray& arrayAction);
+    void getSections(CWizStdStringArray& arrayAction);
+    void getKeys(const QString& strSection, CWizStdStringArray& arrayAction);
 
-    QString GetString(const QString& strSection, const QString& strKey, const QString& strDef = "");
-    BOOL SetString(const QString& strSection, const QString& strKey, const QString& str);
+    QString getString(const QString& strSection, const QString& strKey, const QString& strDef = "");
+    BOOL setString(const QString& strSection, const QString& strKey, const QString& str);
 
-    int GetInt(const QString& strSection, const QString& strKey, int nDef = 0);
-    BOOL SetInt(const QString& strSection, const QString& strKey, int val);
+    int getInt(const QString& strSection, const QString& strKey, int nDef = 0);
+    BOOL setInt(const QString& strSection, const QString& strKey, int val);
 
-    BOOL GetBool(const QString& strSection, const QString& strKey, bool def = false);
-    BOOL SetBool(const QString& strSection, const QString& strKey, bool def);
+    BOOL getBool(const QString& strSection, const QString& strKey, bool def = false);
+    BOOL setBool(const QString& strSection, const QString& strKey, bool def);
 
-    QColor GetColor(const QString& strSection, const QString& strKey, QColor defColor = "#FFFFFF");
+    QColor getColor(const QString& strSection, const QString& strKey, QColor defColor = "#FFFFFF");
 
-    QString GetEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef = "");
-    BOOL SetEncryptedString(const QString& strSection, const QString& strKey, const QString& str);
+    QString getEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef = "");
+    BOOL setEncryptedString(const QString& strSection, const QString& strKey, const QString& str);
 
     // proxy settings
-    QString GetProxyHost();
-    void SetProxyHost(const QString& val);
-    WizProxyType GetProxyType();
-    void SetProxyType(WizProxyType type);
-    int GetProxyPort();
-    void SetProxyPort(int val);
-    QString GetProxyUserName();
-    void SetProxyUserName(const QString& val);
-    QString GetProxyPassword();
-    void SetProxyPassword(const QString& val);
-    bool GetProxyStatus();
-    void SetProxyStatus(bool val);
+    QString getProxyHost();
+    void setProxyHost(const QString& val);
+    WizProxyType getProxyType();
+    void setProxyType(WizProxyType type);
+    int getProxyPort();
+    void setProxyPort(int val);
+    QString getProxyUserName();
+    void setProxyUserName(const QString& val);
+    QString getProxyPassword();
+    void setProxyPassword(const QString& val);
+    bool getProxyStatus();
+    void setProxyStatus(bool val);
 
 };
 
@@ -82,21 +82,21 @@ enum WizPositionType
     wizPositionRight
 };
 
-class CWizUserSettings
+class WizUserSettings
 {
 public:
 
     // m_db should always 0 if init as this way.
-    CWizUserSettings(const QString& strAccountFolderName);
+    WizUserSettings(const QString& strAccountFolderName);
 
     // m_strUserId should always 0 if init as this way.
-    CWizUserSettings(CWizDatabase& db);
+    WizUserSettings(WizDatabase& db);
 
 private:
     QString m_strAccountFolderName;
     QString m_strSkinName;
     QString m_strLocale;
-    CWizDatabase* m_db;
+    WizDatabase* m_db;
 
 public:
     QString get(const QString& key) const;

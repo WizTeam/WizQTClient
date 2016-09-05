@@ -7,13 +7,13 @@
 #include <QVariant>
 
 namespace Ui {
-class CWizDocTemplateDialog;
+class WizDocTemplateDialog;
 }
 
-class CWizSettings;
-class CWizDatabaseManager;
-class CWizDocumentTransitionView;
-class CWizTemplatePurchaseDialog;
+class WizSettings;
+class WizDatabaseManager;
+class WizDocumentTransitionView;
+class WizTemplatePurchaseDialog;
 
 enum TemplateType
 {
@@ -42,10 +42,10 @@ struct TemplateData
     void fromQVariant(const QVariant& var);
 };
 
-class CWizTemplateFileItem : public QTreeWidgetItem
+class WizTemplateFileItem : public QTreeWidgetItem
 {
 public:
-    explicit CWizTemplateFileItem(const TemplateData& data, QTreeWidgetItem *parent = 0);
+    explicit WizTemplateFileItem(const TemplateData& data, QTreeWidgetItem *parent = 0);
 
     const TemplateData& templateData() const;
 
@@ -54,13 +54,13 @@ private:
 };
 
 
-class CWizDocTemplateDialog : public QDialog
+class WizDocTemplateDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizDocTemplateDialog(CWizDatabaseManager& dbMgr,QWidget *parent = 0);
-    ~CWizDocTemplateDialog();
+    explicit WizDocTemplateDialog(WizDatabaseManager& dbMgr,QWidget *parent = 0);
+    ~WizDocTemplateDialog();
 
 signals:
     void documentTemplateSelected(const TemplateData& tmplData);
@@ -92,17 +92,17 @@ private:
     void createPurchaseDialog();
 
 private:
-    Ui::CWizDocTemplateDialog *ui;
-    CWizDocumentTransitionView* m_transitionView;
-    CWizDatabaseManager& m_dbMgr;
-    CWizTemplatePurchaseDialog* m_purchaseDialog;
+    Ui::WizDocTemplateDialog *ui;
+    WizDocumentTransitionView* m_transitionView;
+    WizDatabaseManager& m_dbMgr;
+    WizTemplatePurchaseDialog* m_purchaseDialog;
 };
 
 void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmplMap);
 
 bool getTemplateListFroNewNoteMenu(QList<TemplateData>& tmplList);
 
-bool isTemplateUsable(const TemplateData& tmplData, CWizDatabaseManager& dbMgr);
+bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr);
 
 enum WizTemplateUpgradeResult {
     UpgradeResult_None,

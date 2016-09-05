@@ -6,20 +6,20 @@
 #include <QPointer>
 #include <QPropertyAnimation>
 
-class CWizExplorerApp;
+class WizExplorerApp;
 
-class CWizStatusBar : public QLabel
+class WizStatusBar : public QLabel
 {
     Q_OBJECT
 
 public:
-    explicit CWizStatusBar(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizStatusBar(WizExplorerApp& app, QWidget *parent = 0);
 
     void adjustPosition();
     void showText(const QString& strText = QString());
 
 private:
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 
     bool isCursorInside();
 

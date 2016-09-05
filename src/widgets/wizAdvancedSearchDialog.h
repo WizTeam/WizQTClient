@@ -8,13 +8,13 @@
 
 
 namespace Ui {
-class CWizAdvancedSearchDialog;
+class WizAdvancedSearchDialog;
 }
 
-class CWizSearchParamItem : public QListWidgetItem
+class WizSearchParamItem : public QListWidgetItem
 {
 public:
-    explicit CWizSearchParamItem(const QString &text, QListWidget *view = 0, int type = Type);
+    explicit WizSearchParamItem(const QString &text, QListWidget *view = 0, int type = Type);
 
     void draw(QPainter* p, const QStyleOptionViewItem* vopt) const;
     QRect drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const;
@@ -28,13 +28,13 @@ private:
 
 class QAbstractButton;
 class QButtonGroup;
-class CWizAdvancedSearchDialog : public QDialog
+class WizAdvancedSearchDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizAdvancedSearchDialog(bool searchOnly, QWidget *parent = 0);
-    ~CWizAdvancedSearchDialog();
+    explicit WizAdvancedSearchDialog(bool searchOnly, QWidget *parent = 0);
+    ~WizAdvancedSearchDialog();
     QString getParams();
     void setParams(const QString& strParam);
 
@@ -59,7 +59,7 @@ private slots:
 
 
 private:
-    Ui::CWizAdvancedSearchDialog *ui;
+    Ui::WizAdvancedSearchDialog *ui;
     QString m_strFolders;
     QString m_strTags;
     QButtonGroup* m_radioGroup;
@@ -70,7 +70,7 @@ private:
     void getFirstLevelFolders(QStringList& folders);
     void getSecondLevelFolders(const QString& firstLevelFolder, QStringList& folders);
     void getAllTags(QStringList& tags);
-    static COleDateTime getDateTimeByInterval(const QString& str);
+    static WizOleDateTime getDateTimeByInterval(const QString& str);
 
 };
 

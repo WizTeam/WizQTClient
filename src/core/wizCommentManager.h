@@ -11,11 +11,11 @@
  */
 
 
-class CWizCommentManager : public QObject
+class WizCommentManager : public QObject
 {
     Q_OBJECT
 public:
-    CWizCommentManager(QObject* parent = 0);
+    WizCommentManager(QObject* parent = 0);
 
     void queryCommentUrl(const QString& kbGUID, const QString& GUID);
     void queryCommentCount(const QString& kbGUID, const QString& GUID, bool removeOtherQueryRequest);
@@ -46,7 +46,7 @@ private:
     void pickData(CountQueryData& data);
 };
 
-class CWizCommentQuerier : public QObject
+class WizCommentQuerier : public QObject
 {
     Q_OBJECT
 public:
@@ -58,7 +58,7 @@ public:
         QueryUrlAndCount
     };
 
-    CWizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject*parent = 0);
+    WizCommentQuerier(const QString& kbGUID, const QString& GUID, QueryType type, QObject*parent = 0);
 
     void run();
 

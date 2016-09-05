@@ -8,13 +8,13 @@ struct WIZUSERINFO;
 class QNetworkAccessManager;
 
 
-class AsyncApi : public QObject
+class WizAsyncApi : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit AsyncApi(QObject *parent = 0);
-    ~AsyncApi();
+    explicit WizAsyncApi(QObject *parent = 0);
+    ~WizAsyncApi();
 
     void login(const QString& strUserId, const QString& strPasswd);
     void getToken(const QString& strUserId, const QString& strPasswd);

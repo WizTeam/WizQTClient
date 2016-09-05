@@ -3,11 +3,11 @@
 
 #include "wizapi.h"
 
-class CWizCreateAccount : public CWizApiBase
+class WizCreateAccount : public CWizApiBase
 {
     Q_OBJECT
 public:
-    CWizCreateAccount(const CString& strAccountsApiURL);
+    WizCreateAccount(const CString& strAccountsApiURL);
 
     void createAccount(const CString& strUserId, const CString& strPassword, const CString& strInviteCode);
 

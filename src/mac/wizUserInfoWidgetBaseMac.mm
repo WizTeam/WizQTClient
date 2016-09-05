@@ -56,18 +56,18 @@ bool isHighPixel()
 // WizSearchField
 @interface WizUserInfoView: NSView
 {
-    CWizUserInfoWidgetBaseMac *m_widget;
+    WizUserInfoWidgetBaseMac *m_widget;
     NSFont* m_font;
     BOOL m_mouseIn;
     NSTrackingRectTag m_oldTracking;
     NSPoint m_menuPos;
 }
-- (id)initWithWidget:(CWizUserInfoWidgetBaseMac*)object;
+- (id)initWithWidget:(WizUserInfoWidgetBaseMac*)object;
 - (NSFont*) font;
 @end
 
 @implementation WizUserInfoView
-- (id)initWithWidget:(CWizUserInfoWidgetBaseMac*)object;
+- (id)initWithWidget:(WizUserInfoWidgetBaseMac*)object;
 {
     self = [super init];
     m_widget = object;
@@ -295,8 +295,8 @@ bool isHighPixel()
 @end
 
 
-CWizUserInfoWidgetBaseMac::CWizUserInfoWidgetBaseMac(QWidget* parent)
-    : CWizCocoaViewContainer()
+WizUserInfoWidgetBaseMac::WizUserInfoWidgetBaseMac(QWidget* parent)
+    : WizCocoaViewContainer()
     , m_menuPopup(NULL)
     , m_textWidth(0)
     , m_textHeight(0)
@@ -311,7 +311,7 @@ CWizUserInfoWidgetBaseMac::CWizUserInfoWidgetBaseMac(QWidget* parent)
     calTextSize();
 }
 
-void CWizUserInfoWidgetBaseMac::calTextSize()
+void WizUserInfoWidgetBaseMac::calTextSize()
 {
     if (m_textWidth <= 0 || m_textHeight <= 0)
     {
@@ -336,17 +336,17 @@ void CWizUserInfoWidgetBaseMac::calTextSize()
     }
 }
 
-int CWizUserInfoWidgetBaseMac::textWidth() const
+int WizUserInfoWidgetBaseMac::textWidth() const
 {
     return m_textWidth;
 }
-int CWizUserInfoWidgetBaseMac::textHeight() const
+int WizUserInfoWidgetBaseMac::textHeight() const
 {
     return m_textHeight;
 }
 
 #if QT_VERSION >= 0x050200
-NSMenu* CWizUserInfoWidgetBaseMac::getNSMewnu()
+NSMenu* WizUserInfoWidgetBaseMac::getNSMewnu()
 {
     if (!m_menuPopup)
         return nil;
@@ -355,7 +355,7 @@ NSMenu* CWizUserInfoWidgetBaseMac::getNSMewnu()
 }
 #endif
 
-void CWizUserInfoWidgetBaseMac::updateUI()
+void WizUserInfoWidgetBaseMac::updateUI()
 {
     WizUserInfoView* view = (WizUserInfoView *)cocoaView();
     if (!view)

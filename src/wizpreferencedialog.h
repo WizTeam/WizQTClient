@@ -11,18 +11,18 @@
 //#include "wizproxydialog.h"
 
 namespace Ui {
-    class CWizPreferenceWindow;
+    class WizPreferenceWindow;
 }
 
-class CWizDatabaseManager;
+class WizDatabaseManager;
 
-class CWizPreferenceWindow: public QDialog
+class WizPreferenceWindow: public QDialog
 {
     Q_OBJECT
 
 public:
-    CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent);
-    CWizUserSettings& userSettings() const { return m_app.userSettings(); }
+    WizPreferenceWindow(WizExplorerApp& app, QWidget* parent);
+    WizUserSettings& userSettings() const { return m_app.userSettings(); }
 
     void showPrintMarginPage();
 
@@ -66,9 +66,9 @@ private slots:
     void on_tabWidget_currentChanged(int index);
 
 private:
-    Ui::CWizPreferenceWindow *ui;
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    Ui::WizPreferenceWindow *ui;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
 
     QStringList m_locales;
     QStringList m_skins;

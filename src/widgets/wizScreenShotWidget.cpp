@@ -5,7 +5,7 @@
 #include <QTimer>
 #include <QScreen>
 
-CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
+WizScreenShotWidget::WizScreenShotWidget(QWidget* parent) :
   QWidget(parent)
 {
     tipWidth = 500;
@@ -16,13 +16,13 @@ CWizScreenShotWidget::CWizScreenShotWidget(QWidget* parent) :
     initCWizScreenShotWidget();
 }
 
-void CWizScreenShotWidget::active()
+void WizScreenShotWidget::active()
 {
     //setWindowState(Qt::WindowActive|Qt::WindowFullScreen);
     showFullScreen();
 }
 
-void CWizScreenShotWidget::initSelectedMenu()
+void WizScreenShotWidget::initSelectedMenu()
 {
     savePixmapAction = new QAction(tr("Save constituency"), this);
     cancelAction = new QAction(tr("Reselect"), this);
@@ -34,19 +34,19 @@ void CWizScreenShotWidget::initSelectedMenu()
     connect(quitAction, SIGNAL(triggered()), this, SLOT(quit()));
 }
 
-void CWizScreenShotWidget::quit()
+void WizScreenShotWidget::quit()
 {
     hideWidget();
     emit shotScreenQuit();
 }
 
-void CWizScreenShotWidget::savePixmap()
+void WizScreenShotWidget::savePixmap()
 {
     hideWidget();
     emit finishPixmap(shotPixmap);
 }
 
-void CWizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap)
+void WizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap)
 {
     int width,height;
     width = QApplication::desktop()->size().width();
@@ -55,7 +55,7 @@ void CWizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap)
     loadBackgroundPixmap(bgPixmap, 0, 0, width, height);
 }
 
-void CWizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap, int x, int y, int width, int height)
+void WizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap, int x, int y, int width, int height)
 {
     loadPixmap = bgPixmap;
     screenx = x;
@@ -65,7 +65,7 @@ void CWizScreenShotWidget::loadBackgroundPixmap(const QPixmap &bgPixmap, int x, 
     initCWizScreenShotWidget();
 }
 
-QPixmap CWizScreenShotWidget::getFullScreenPixmap()
+QPixmap WizScreenShotWidget::getFullScreenPixmap()
 {
     initCWizScreenShotWidget();
     QPixmap result = QPixmap();
@@ -75,7 +75,7 @@ QPixmap CWizScreenShotWidget::getFullScreenPixmap()
     return result;
 }
 
-void CWizScreenShotWidget::paintEvent(QPaintEvent *event)
+void WizScreenShotWidget::paintEvent(QPaintEvent *event)
 {
     QColor shadowColor;
     shadowColor= QColor(0, 0, 0, 100);
@@ -118,7 +118,7 @@ void CWizScreenShotWidget::paintEvent(QPaintEvent *event)
 
 }
 
-void CWizScreenShotWidget::keyPressEvent(QKeyEvent *event)
+void WizScreenShotWidget::keyPressEvent(QKeyEvent *event)
 {
     if (event->key() == Qt::Key_Escape)
     {
@@ -127,7 +127,7 @@ void CWizScreenShotWidget::keyPressEvent(QKeyEvent *event)
     }
 }
 
-void CWizScreenShotWidget::mousePressEvent(QMouseEvent *event)
+void WizScreenShotWidget::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && currentShotState == initShot)
     {
@@ -150,7 +150,7 @@ void CWizScreenShotWidget::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
+void WizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton && currentShotState == beginShot)
     {
@@ -174,7 +174,7 @@ void CWizScreenShotWidget::mouseReleaseEvent(QMouseEvent *event)
     }
 }
 
-void CWizScreenShotWidget::mouseMoveEvent(QMouseEvent *event)
+void WizScreenShotWidget::mouseMoveEvent(QMouseEvent *event)
 {
     if (currentShotState == beginShot)
     {
@@ -192,7 +192,7 @@ void CWizScreenShotWidget::mouseMoveEvent(QMouseEvent *event)
     setMouseTracking(true);
 }
 
-void CWizScreenShotWidget::mouseDoubleClickEvent(QMouseEvent *event)
+void WizScreenShotWidget::mouseDoubleClickEvent(QMouseEvent *event)
 {
     if (currentShotState == finishShot || currentShotState == finishMoveShot || currentShotState == finishControl)
     {
@@ -203,7 +203,7 @@ void CWizScreenShotWidget::mouseDoubleClickEvent(QMouseEvent *event)
     }
 }
 
-QRect CWizScreenShotWidget::getRect(const QPoint &beginPoint, const QPoint &endPoint)
+QRect WizScreenShotWidget::getRect(const QPoint &beginPoint, const QPoint &endPoint)
 {
     int x, y, width, height;
     width = qAbs(beginPoint.x() - endPoint.x());
@@ -214,7 +214,7 @@ QRect CWizScreenShotWidget::getRect(const QPoint &beginPoint, const QPoint &endP
     return QRect(x,y,width,height);
 }
 
-void CWizScreenShotWidget::initCWizScreenShotWidget()
+void WizScreenShotWidget::initCWizScreenShotWidget()
 {
     currentShotState = initShot;
     controlValue = moveControl0;
@@ -236,7 +236,7 @@ void CWizScreenShotWidget::initCWizScreenShotWidget()
     update();
 }
 
-bool CWizScreenShotWidget::isInSelectedRect(const QPoint &point)
+bool WizScreenShotWidget::isInSelectedRect(const QPoint &point)
 {
     int x, y;
     QRect selectedRect;
@@ -250,13 +250,13 @@ bool CWizScreenShotWidget::isInSelectedRect(const QPoint &point)
     return selectedRect.contains(x, y);
 }
 
-void CWizScreenShotWidget::cancelSelectedRect()
+void WizScreenShotWidget::cancelSelectedRect()
 {
     initCWizScreenShotWidget();
     update();
 }
 
-void CWizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
+void WizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
 {
     initSelectedMenu();
 
@@ -273,13 +273,13 @@ void CWizScreenShotWidget::contextMenuEvent(QContextMenuEvent *event)
     contextMenu->exec(event->pos());
 }
 
-void CWizScreenShotWidget::hideWidget()
+void WizScreenShotWidget::hideWidget()
 {
     //setWindowState(Qt::WindowMinimized);
     hide();
 }
 
-void CWizScreenShotWidget::drawTipsText()
+void WizScreenShotWidget::drawTipsText()
 {
     int x = (screenwidth - tipWidth) / 2;
     int y = (screenheight - tipHeight) / 2;
@@ -294,7 +294,7 @@ void CWizScreenShotWidget::drawTipsText()
 
 }
 
-QRect CWizScreenShotWidget::getSelectedRect()
+QRect WizScreenShotWidget::getSelectedRect()
 {
     if (currentShotState == beginMoveShot)
     {
@@ -310,7 +310,7 @@ QRect CWizScreenShotWidget::getSelectedRect()
     }
 }
 
-void CWizScreenShotWidget::updateBeginEndPointValue(const QRect &rect)
+void WizScreenShotWidget::updateBeginEndPointValue(const QRect &rect)
 {
     beginPoint = rect.topLeft();
     endPoint = rect.bottomRight();
@@ -319,7 +319,7 @@ void CWizScreenShotWidget::updateBeginEndPointValue(const QRect &rect)
     moveEndPoint = QPoint(0, 0);
 }
 
-void CWizScreenShotWidget::checkMoveEndPoint()
+void WizScreenShotWidget::checkMoveEndPoint()
 {
     int x,y;
 
@@ -350,7 +350,7 @@ void CWizScreenShotWidget::checkMoveEndPoint()
     }
 }
 
-void CWizScreenShotWidget::draw8ControlPoint(const QRect &rect)
+void WizScreenShotWidget::draw8ControlPoint(const QRect &rect)
 {
     int x, y;
     QColor color= QColor(0, 0, 255);
@@ -394,7 +394,7 @@ void CWizScreenShotWidget::draw8ControlPoint(const QRect &rect)
     painter.fillRect(rcRect, color);
 }
 
-void CWizScreenShotWidget::updateMouseShape(const QPoint &point)
+void WizScreenShotWidget::updateMouseShape(const QPoint &point)
 {
     switch (currentShotState)
     {
@@ -422,7 +422,7 @@ void CWizScreenShotWidget::updateMouseShape(const QPoint &point)
     }
 }
 
-void CWizScreenShotWidget::updateMoveControlMouseShape(controlPointEnum controlValue){
+void WizScreenShotWidget::updateMoveControlMouseShape(controlPointEnum controlValue){
     switch (controlValue)
     {
     case moveControl1:
@@ -447,9 +447,9 @@ void CWizScreenShotWidget::updateMoveControlMouseShape(controlPointEnum controlV
     }
 }
 
-CWizScreenShotWidget::controlPointEnum CWizScreenShotWidget::getMoveControlState(const QPoint &point)
+WizScreenShotWidget::controlPointEnum WizScreenShotWidget::getMoveControlState(const QPoint &point)
 {
-    CWizScreenShotWidget::controlPointEnum result = moveControl0;
+    WizScreenShotWidget::controlPointEnum result = moveControl0;
     if (currentShotState == initShot || currentShotState == beginShot)
     {
         result = moveControl0;
@@ -494,7 +494,7 @@ CWizScreenShotWidget::controlPointEnum CWizScreenShotWidget::getMoveControlState
     return result;
 }
 
-QRect CWizScreenShotWidget::getMoveAllSelectedRect(void)
+QRect WizScreenShotWidget::getMoveAllSelectedRect(void)
 {
     QRect result;
     QPoint tmpBeginPoint, tmpEndPoint;
@@ -511,7 +511,7 @@ QRect CWizScreenShotWidget::getMoveAllSelectedRect(void)
     return result;
 }
 
-QRect CWizScreenShotWidget::getMoveControlSelectedRect(void)
+QRect WizScreenShotWidget::getMoveControlSelectedRect(void)
 {
     int x, y, w, h;
     QRect rect = getRect(beginPoint,endPoint);
@@ -567,12 +567,12 @@ QRect CWizScreenShotWidget::getMoveControlSelectedRect(void)
     return QRect(x, y, w, h);
 }
 
-int CWizScreenShotWidget::getMinValue(int num1, int num2)
+int WizScreenShotWidget::getMinValue(int num1, int num2)
 {
     return num1 < num2 ? num1 : num2;
 }
 
-void CWizScreenShotWidget::drawSelectedPixmap(void)
+void WizScreenShotWidget::drawSelectedPixmap(void)
 {
     painter.drawRect(selectedRect);
     shotPixmap = loadPixmap.copy(selectedRect);
@@ -583,7 +583,7 @@ void CWizScreenShotWidget::drawSelectedPixmap(void)
     draw8ControlPoint(selectedRect);
 }
 
-void CWizScreenShotWidget::drawXYWHInfo(void)
+void WizScreenShotWidget::drawXYWHInfo(void)
 {
     int x, y;
     QColor color = QColor(239, 234, 228, 200);
@@ -612,20 +612,20 @@ void CWizScreenShotWidget::drawXYWHInfo(void)
 }
 
 
-CWizScreenShotHelper::CWizScreenShotHelper()
+WizScreenShotHelper::WizScreenShotHelper()
 {
-    m_widget = new CWizScreenShotWidget();
+    m_widget = new WizScreenShotWidget();
     connect(m_widget, SIGNAL(finishPixmap(QPixmap)), SIGNAL(screenShotCaptured(QPixmap)));
     connect(m_widget, SIGNAL(shotScreenQuit()), SIGNAL(shotScreenQuit()));
 }
 
-CWizScreenShotHelper::~CWizScreenShotHelper()
+WizScreenShotHelper::~WizScreenShotHelper()
 {
     if (m_widget)
         delete m_widget;
 }
 
-void CWizScreenShotHelper::startScreenShot()
+void WizScreenShotHelper::startScreenShot()
 {
     QPixmap pixmap = m_widget->getFullScreenPixmap();
     m_widget->loadBackgroundPixmap(pixmap);

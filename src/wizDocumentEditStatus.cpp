@@ -18,10 +18,10 @@
 
 QString WizKMGetDocumentEditStatusURL()
 {
-    return CommonApiEntry::editStatusUrl();
+    return WizCommonApiEntry::editStatusUrl();
 }
 
-CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* parent)
+WizDocumentEditStatusSyncThread::WizDocumentEditStatusSyncThread(QObject* parent)
     : QThread(parent)
     , m_stop(false)
     , m_sendNow(false)
@@ -33,7 +33,7 @@ CWizDocumentEditStatusSyncThread::CWizDocumentEditStatusSyncThread(QObject* pare
 }
 
 
-void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
+void WizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
@@ -49,7 +49,7 @@ void CWizDocumentEditStatusSyncThread::startEditingDocument(const QString& strUs
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
+void WizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbGUID, \
                                                            const QString& strGUID, bool bModified)
 {
 //    qDebug() << "stop editing document , guid " << strGUID << "  modified : " << bModified;
@@ -74,7 +74,7 @@ void CWizDocumentEditStatusSyncThread::stopEditingDocument(const QString& strKbG
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
+void WizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID)
 {
 //    qDebug() << "EditStatusSyncThread document saved : kbguid : " << strKbGUID << "  guid : " << strGUID;
     QString strObjID = combineObjID(strKbGUID, strGUID);
@@ -91,7 +91,7 @@ void CWizDocumentEditStatusSyncThread::documentSaved(const QString& strUserAlias
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID, const QString& strGUID)
+void WizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID, const QString& strGUID)
 {
     QString strObjID = combineObjID(strKbGUID, strGUID);
     if (strObjID.isEmpty())
@@ -110,14 +110,14 @@ void CWizDocumentEditStatusSyncThread::documentUploaded(const QString& strKbGUID
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::on_timerOut()
+void WizDocumentEditStatusSyncThread::on_timerOut()
 {
     m_mutex.lock();
     m_wait.wakeAll();
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::stop()
+void WizDocumentEditStatusSyncThread::stop()
 {
     //If thread wasn't running, no need to stop. Otherwise will start running ,and cause crash at destructor of program.
     if (!isRunning())
@@ -129,14 +129,14 @@ void CWizDocumentEditStatusSyncThread::stop()
     m_mutex.unlock();
 }
 
-void CWizDocumentEditStatusSyncThread::waitForDone()
+void WizDocumentEditStatusSyncThread::waitForDone()
 {
     stop();
     //
     WizWaitForThread(this);
 }
 
-void CWizDocumentEditStatusSyncThread::run()
+void WizDocumentEditStatusSyncThread::run()
 {
     while (!m_stop)
     {
@@ -157,7 +157,7 @@ void CWizDocumentEditStatusSyncThread::run()
     }
 }
 
-QString CWizDocumentEditStatusSyncThread::combineObjID(const QString& strKbGUID, const QString& strGUID)
+QString WizDocumentEditStatusSyncThread::combineObjID(const QString& strKbGUID, const QString& strGUID)
 {
     QString strObjID = "";
     if (!strKbGUID.isEmpty())
@@ -167,7 +167,7 @@ QString CWizDocumentEditStatusSyncThread::combineObjID(const QString& strKbGUID,
     return strObjID;
 }
 
-void CWizDocumentEditStatusSyncThread::sendEditingMessage()
+void WizDocumentEditStatusSyncThread::sendEditingMessage()
 {
     m_mutex.lock();
     QMap<QString, QString> editingMap(m_editingMap);
@@ -194,14 +194,14 @@ void CWizDocumentEditStatusSyncThread::sendEditingMessage()
     }
 }
 
-bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
+bool WizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
 {
     QString strUrl = ::WizFormatString5(_T("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5"),
                                         WizKMGetDocumentEditStatusURL(),
                                         strObjID,
                                         strUserAlias,
                                         ::WizIntToStr(GetTickCount()),
-                                        Token::token());
+                                        WizToken::token());
 
     if (!m_netManager)
     {
@@ -219,7 +219,7 @@ bool CWizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUser
     return reply->error() == QNetworkReply::NoError;
 }
 
-void CWizDocumentEditStatusSyncThread::sendDoneMessage()
+void WizDocumentEditStatusSyncThread::sendDoneMessage()
 {
     m_mutex.lock();
     QMap<QString, QString> doneList(m_doneMap);
@@ -240,14 +240,14 @@ void CWizDocumentEditStatusSyncThread::sendDoneMessage()
     }
 }
 
-bool CWizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
+bool WizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
 {
     QString strUrl = WizFormatString5(_T("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5"),
                                       WizKMGetDocumentEditStatusURL(),
                                       strObjID,
                                       strUserAlias,
                                       ::WizIntToStr(GetTickCount()),
-                                      Token::token());
+                                      WizToken::token());
 
     if (!m_netManager)
     {
@@ -482,7 +482,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKb
 */
 
 
-CWizDocumentStatusChecker::CWizDocumentStatusChecker(QObject* parent)
+WizDocumentStatusChecker::WizDocumentStatusChecker(QObject* parent)
     : m_timeOutTimer(0)
     //, m_loopCheckTimer(0)
     , m_stop(false)
@@ -490,7 +490,7 @@ CWizDocumentStatusChecker::CWizDocumentStatusChecker(QObject* parent)
 
 }
 
-CWizDocumentStatusChecker::~CWizDocumentStatusChecker()
+WizDocumentStatusChecker::~WizDocumentStatusChecker()
 {
     if (m_timeOutTimer)
         delete m_timeOutTimer;
@@ -499,7 +499,7 @@ CWizDocumentStatusChecker::~CWizDocumentStatusChecker()
 //        delete m_loopCheckTimer;
 }
 
-void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
+void WizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
 //    qDebug() << "CWizDocumentStatusChecker start to check guid : " << strGUID;
     setDocmentGUID(strKbGUID, strGUID);
@@ -507,7 +507,7 @@ void CWizDocumentStatusChecker::checkEditStatus(const QString& strKbGUID, const 
     startCheck();
 }
 
-void CWizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const QString& strGUID)
+void WizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const QString& strGUID)
 {
     m_timeOutTimer->stop();
 //    m_loopCheckTimer->stop();
@@ -519,7 +519,7 @@ void CWizDocumentStatusChecker::stopCheckStatus(const QString& strKbGUID, const 
     m_mutexWait.unlock();
 }
 
-void CWizDocumentStatusChecker::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
+void WizDocumentStatusChecker::setDocmentGUID(const QString& strKbGUID, const QString& strGUID)
 {
     m_mutexWait.lock();
     m_strKbGUID = strKbGUID;
@@ -527,7 +527,7 @@ void CWizDocumentStatusChecker::setDocmentGUID(const QString& strKbGUID, const Q
     m_mutexWait.unlock();
 }
 
-void CWizDocumentStatusChecker::peekDocumentGUID(QString& strKbGUID, QString& strGUID)
+void WizDocumentStatusChecker::peekDocumentGUID(QString& strKbGUID, QString& strGUID)
 {
     m_mutexWait.lock();
     strKbGUID = m_strKbGUID;
@@ -535,7 +535,7 @@ void CWizDocumentStatusChecker::peekDocumentGUID(QString& strKbGUID, QString& st
     m_mutexWait.unlock();
 }
 
-void CWizDocumentStatusChecker::onTimeOut()
+void WizDocumentStatusChecker::onTimeOut()
 {
     qDebug() << "CWizDocumentStatusChecker time out";
     m_timeOutTimer->stop();
@@ -543,13 +543,13 @@ void CWizDocumentStatusChecker::onTimeOut()
     emit checkTimeOut(m_strCurGUID);
 }
 
-void CWizDocumentStatusChecker::recheck()
+void WizDocumentStatusChecker::recheck()
 {
 //    qDebug() << "CWizDocumentStatusChecker  recheck called";
     startRecheck();
 }
 
-void CWizDocumentStatusChecker::initialise()
+void WizDocumentStatusChecker::initialise()
 {
 //    qDebug() << "CWizDocumentStatusChecker thread id : ";
     m_timeOutTimer = new QTimer(this);
@@ -559,19 +559,19 @@ void CWizDocumentStatusChecker::initialise()
 //    connect(m_loopCheckTimer, SIGNAL(timeout()), SLOT(recheck()));
 }
 
-void CWizDocumentStatusChecker::clearTimers()
+void WizDocumentStatusChecker::clearTimers()
 {
     m_timeOutTimer->stop();
 //    m_loopCheckTimer->stop();
 }
 
-void CWizDocumentStatusChecker::startRecheck()
+void WizDocumentStatusChecker::startRecheck()
 {
 //    qDebug() << "CWizDocumentStatusChecker  start recheck";    
     startCheck();
 }
 
-void CWizDocumentStatusChecker::startCheck()
+void WizDocumentStatusChecker::startCheck()
 {
 //    qDebug() << "----------    CWizDocumentStatusChecker::startCheck start";
     m_networkError = false;
@@ -618,39 +618,39 @@ void CWizDocumentStatusChecker::startCheck()
     }
 }
 
-bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
+bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
 {
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(strKbGUID);
+    WizDatabase& db = WizDatabaseManager::instance()->db(strKbGUID);
     WIZDOCUMENTDATA doc;
-    if (!db.DocumentFromGUID(strGUID, doc))
+    if (!db.documentFromGuid(strGUID, doc))
         return false;
 
     if (doc.nVersion == -1)
     {
-        return !db.CanEditDocument(doc);
+        return !db.canEditDocument(doc);
     }
 
     //TEMP: remove me
 
-    WIZUSERINFO userInfo = Token::info();
-    if (db.IsGroup())
+    WIZUSERINFO userInfo = WizToken::info();
+    if (db.isGroup())
     {
         WIZGROUPDATA group;
-        if (!CWizDatabaseManager::instance()->db().GetGroupData(strKbGUID, group))
+        if (!WizDatabaseManager::instance()->db().getGroupData(strKbGUID, group))
             return false;
         userInfo.strKbGUID = group.strGroupGUID;
         userInfo.strDatabaseServer = group.strDatabaseServer;
         if (userInfo.strDatabaseServer.isEmpty())
         {
-            userInfo.strDatabaseServer = CommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
+            userInfo.strDatabaseServer = WizCommonApiEntry::kUrlFromGuid(userInfo.strToken, userInfo.strKbGUID);
         }
     }
-    CWizKMDatabaseServer server(userInfo, NULL);
+    WizKMDatabaseServer server(userInfo, NULL);
     WIZOBJECTVERSION versionServer;
     if (!server.wiz_getVersion(versionServer))
         return false;
 
-    if (versionServer.nDocumentVersion <= db.GetObjectVersion("document"))
+    if (versionServer.nDocumentVersion <= db.getObjectVersion("document"))
         return false;
 
     WIZDOCUMENTDATAEX docOnServer;
@@ -665,7 +665,7 @@ bool CWizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strK
     return false;
 }
 
-bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
+bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
     QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
                                              WizKMGetDocumentEditStatusURL(),
@@ -676,7 +676,7 @@ bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID
     return checkDocumentEditStatus(strRequestUrl);
 }
 
-bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
+bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
 {
     QNetworkAccessManager net;
     QNetworkReply* reply = net.get(QNetworkRequest(strUrl));
@@ -701,7 +701,7 @@ bool CWizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
         for (rapidjson::SizeType i = 0; i < d.Size(); i++)
         {
             const rapidjson::Value& u = d[i];
-            strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
+            strList.append(encoder->toUnicode(u.getString(), u.GetStringLength()));
         }
         //
         {

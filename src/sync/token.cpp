@@ -13,7 +13,7 @@
 // use 5 minutes locally, server use 20 minutes
 #define TOKEN_TIMEOUT_INTERVAL 60 * 5
 
-TokenPrivate::TokenPrivate(Token* token)
+WizTokenPrivate::WizTokenPrivate(WizToken* token)
     : m_bProcessing(false)
     , m_mutex(new QMutex(QMutex::Recursive))
     , q(token)
@@ -21,12 +21,12 @@ TokenPrivate::TokenPrivate(Token* token)
 {
 }
 
-TokenPrivate::~TokenPrivate()
+WizTokenPrivate::~WizTokenPrivate()
 {
     delete m_mutex;
 }
 
-QString TokenPrivate::token()
+QString WizTokenPrivate::token()
 {
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
@@ -35,17 +35,17 @@ QString TokenPrivate::token()
 
     if (m_info.strToken.isEmpty())
     {
-        CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
-        if (asServer.Login(m_strUserId, m_strPasswd))
+        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        if (asServer.login(m_strUserId, m_strPasswd))
         {
-            m_info = asServer.GetUserInfo();
+            m_info = asServer.getUserInfo();
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
         }
         else
         {
-            m_lastErrorCode = asServer.GetLastErrorCode();
-            m_lastErrorMessage = asServer.GetLastErrorMessage();
+            m_lastErrorCode = asServer.getLastErrorCode();
+            m_lastErrorMessage = asServer.getLastErrorMessage();
             return QString();
         }
     }
@@ -59,10 +59,10 @@ QString TokenPrivate::token()
         WIZUSERINFO info;
         info.strToken = m_info.strToken;
         info.strKbGUID = m_info.strKbGUID;
-        CWizKMAccountsServer asServer(CommonApiEntry::syncUrl());
-        asServer.SetUserInfo(info);
+        WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
+        asServer.setUserInfo(info);
 
-        if (asServer.KeepAlive(m_info.strToken))
+        if (asServer.keepAlive(m_info.strToken))
         {
             m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
             return m_info.strToken;
@@ -70,7 +70,7 @@ QString TokenPrivate::token()
         else
         {
             QString strToken;
-            if (asServer.GetToken(m_strUserId, m_strPasswd, strToken))
+            if (asServer.getToken(m_strUserId, m_strPasswd, strToken))
             {
                 m_info.strToken = strToken;
                 m_info.tTokenExpried = QDateTime::currentDateTime().addSecs(TOKEN_TIMEOUT_INTERVAL);
@@ -78,8 +78,8 @@ QString TokenPrivate::token()
             }
             else
             {
-                m_lastErrorCode = asServer.GetLastErrorCode();
-                m_lastErrorMessage = asServer.GetLastErrorMessage();
+                m_lastErrorCode = asServer.getLastErrorCode();
+                m_lastErrorMessage = asServer.getLastErrorMessage();
                 return QString();
             }
         }
@@ -88,7 +88,7 @@ QString TokenPrivate::token()
     Q_ASSERT(0);
 }
 
-void TokenPrivate::requestToken()
+void WizTokenPrivate::requestToken()
 {
     if (m_bProcessing)
     {
@@ -98,9 +98,9 @@ void TokenPrivate::requestToken()
     //
     class GetTokenRunnable : public QObject
     {
-        TokenPrivate* m_p;
+        WizTokenPrivate* m_p;
     public:
-        GetTokenRunnable(TokenPrivate* p)
+        GetTokenRunnable(WizTokenPrivate* p)
             : m_p(p)
         {
         }
@@ -119,28 +119,28 @@ void TokenPrivate::requestToken()
     });
 }
 
-void TokenPrivate::clearToken()
+void WizTokenPrivate::clearToken()
 {
     m_info.strToken.clear();
 }
 
-void TokenPrivate::clearLastError()
+void WizTokenPrivate::clearLastError()
 {
     m_lastErrorCode = 0;
     m_lastErrorMessage.clear();
 }
 
-void TokenPrivate::setUserId(const QString& strUserId)
+void WizTokenPrivate::setUserId(const QString& strUserId)
 {
     m_strUserId = strUserId;
 }
 
-void TokenPrivate::setPasswd(const QString& strPasswd)
+void WizTokenPrivate::setPasswd(const QString& strPasswd)
 {
     m_strPasswd = strPasswd;
 }
 
-WIZUSERINFO TokenPrivate::info()
+WIZUSERINFO WizTokenPrivate::info()
 {
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
@@ -148,7 +148,7 @@ WIZUSERINFO TokenPrivate::info()
     return m_info;
 }
 
-int TokenPrivate::lastErrorCode() const
+int WizTokenPrivate::lastErrorCode() const
 {
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
@@ -156,7 +156,7 @@ int TokenPrivate::lastErrorCode() const
     return m_lastErrorCode;
 }
 
-QString TokenPrivate::lastErrorMessage() const
+QString WizTokenPrivate::lastErrorMessage() const
 {
     QMutexLocker locker(m_mutex);
     Q_UNUSED(locker);
@@ -165,81 +165,81 @@ QString TokenPrivate::lastErrorMessage() const
 }
 
 
-static TokenPrivate* d = 0;
-static Token* m_instance = 0;
+static WizTokenPrivate* d = 0;
+static WizToken* m_instance = 0;
 
-Token::Token(const QString& strUserId, const QString& strPasswd)
+WizToken::WizToken(const QString& strUserId, const QString& strPasswd)
 {
     m_instance = this;
-    d = new TokenPrivate(this);
+    d = new WizTokenPrivate(this);
 
     d->setUserId(strUserId);
     d->setPasswd(strPasswd);
 }
 
-Token::~Token()
+WizToken::~WizToken()
 {
     delete d;
     d = 0;
 }
 
-Token* Token::instance()
+WizToken* WizToken::instance()
 {
     return m_instance;
 }
 
-QString Token::token()
+QString WizToken::token()
 {
     Q_ASSERT(m_instance);
     return d->token();
 }
 
-void Token::requestToken()
+void WizToken::requestToken()
 {
     Q_ASSERT(m_instance);
 
     d->requestToken();
 }
 
-void Token::clearToken()
+void WizToken::clearToken()
 {
     d->clearToken();
 }
 
-void Token::clearLastError()
+void WizToken::clearLastError()
 {
     d->clearLastError();
 }
 
-void Token::setUserId(const QString& strUserId)
+void WizToken::setUserId(const QString& strUserId)
 {
     Q_ASSERT(m_instance);
 
     d->setUserId(strUserId);
 }
 
-void Token::setPasswd(const QString& strPasswd)
+void WizToken::setPasswd(const QString& strPasswd)
 {
     Q_ASSERT(m_instance);
 
     d->setPasswd(strPasswd);
 }
 
-WIZUSERINFO Token::info()
+WIZUSERINFO WizToken::info()
 {
     Q_ASSERT(m_instance);
 
     return d->info();
 }
 
-QString Token::lastErrorMessage()
+QString WizToken::lastErrorMessage()
 {
     Q_ASSERT(m_instance);
 
     return d->lastErrorMessage();
 }
 
-int Token::lastErrorCode()
+int WizToken::lastErrorCode()
 {
     Q_ASSERT(m_instance);
 

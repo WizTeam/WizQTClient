@@ -1,6 +1,6 @@
 #include "wizdownloadobjectdata.h"
 
-CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabaseManager& dbMgr)
+WizDownloadObjectData::WizDownloadObjectData(WizDatabaseManager& dbMgr)
     : CWizApi(dbMgr.db())
     , m_dbMgr(dbMgr)
     , m_bInited(false)
@@ -9,7 +9,7 @@ CWizDownloadObjectData::CWizDownloadObjectData(CWizDatabaseManager& dbMgr)
     connect(this, SIGNAL(processErrorLog(const QString&)), SLOT(processLog(const QString&)));
 }
 
-void CWizDownloadObjectData::setData(const WIZOBJECTDATA& data)
+void WizDownloadObjectData::setData(const WIZOBJECTDATA& data)
 {
     Q_ASSERT(!data.strObjectGUID.isEmpty());
     Q_ASSERT(!data.strKbGUID.isEmpty());
@@ -19,7 +19,7 @@ void CWizDownloadObjectData::setData(const WIZOBJECTDATA& data)
     m_bInited = true;
 }
 
-void CWizDownloadObjectData::startDownload()
+void WizDownloadObjectData::startDownload()
 {
     Q_ASSERT(m_bInited);
     QString strUserId = m_dbMgr.db().getUserId();
@@ -30,7 +30,7 @@ void CWizDownloadObjectData::startDownload()
     //callClientLogin(strUserId, strPasswd);
 }
 
-void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
+void WizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
 {
     Q_UNUSED(userInfo);
 
@@ -52,7 +52,7 @@ void CWizDownloadObjectData::onClientLogin(const WIZUSERINFO& userInfo)
     }
 }
 
-void CWizDownloadObjectData::onGetGroupList(const CWizGroupDataArray& arrayGroup)
+void WizDownloadObjectData::onGetGroupList(const CWizGroupDataArray& arrayGroup)
 {
     CWizGroupDataArray::const_iterator it;
     for (it = arrayGroup.begin(); it != arrayGroup.end(); it++) {
@@ -66,13 +66,13 @@ void CWizDownloadObjectData::onGetGroupList(const CWizGroupDataArray& arrayGroup
     }
 }
 
-void CWizDownloadObjectData::startDownloadObjectData()
+void WizDownloadObjectData::startDownloadObjectData()
 {
     setKbGUID(m_data.strKbGUID);
     downloadObjectData(m_data);
 }
 
-void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
+void WizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& data)
 {
     if (!data.strObjectGUID.isEmpty())
         CWizApi::onDownloadObjectDataCompleted(data);
@@ -85,12 +85,12 @@ void CWizDownloadObjectData::onDownloadObjectDataCompleted(const WIZOBJECTDATA& 
     Q_EMIT downloadDone(true);
 }
 
-void CWizDownloadObjectData::processLog(const QString& strMsg)
+void WizDownloadObjectData::processLog(const QString& strMsg)
 {
     TOLOG(strMsg);
 }
 
-void CWizDownloadObjectData::onXmlRpcError(const QString& strMethodName,
+void WizDownloadObjectData::onXmlRpcError(const QString& strMethodName,
                                            WizXmlRpcError err,
                                            int errorCode,
                                            const QString& errorMessage)

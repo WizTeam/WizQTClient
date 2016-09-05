@@ -6,12 +6,12 @@
 
 const int MAX_BUF_LEN = 255;
 
-CWizUdpClient::CWizUdpClient(QObject* parent)
+WizUdpClient::WizUdpClient(QObject* parent)
     : QObject(parent)
 {    
 }
 
-CWizUdpClient::~CWizUdpClient()
+WizUdpClient::~WizUdpClient()
 {
     QMap<QString, QUdpSocket*>::iterator it;
     for (it = m_udpSocketMap.begin(); it != m_udpSocketMap.end(); it++)
@@ -21,7 +21,7 @@ CWizUdpClient::~CWizUdpClient()
     }
 }
 
-bool CWizUdpClient::GetAllBoardcastAddresses(QMap<QString, QString>& addressMap)
+bool WizUdpClient::getAllBoardcastAddresses(QMap<QString, QString>& addressMap)
 {
     QList<QNetworkInterface> interface = QNetworkInterface::allInterfaces();
     for (int i = 0; i < interface.size(); i++)
@@ -47,10 +47,10 @@ bool CWizUdpClient::GetAllBoardcastAddresses(QMap<QString, QString>& addressMap)
     return true;
 }
 
-void CWizUdpClient::boardcast(int port, const QString& message)
+void WizUdpClient::boardcast(int port, const QString& message)
 {   
     QMap<QString, QString> addressMap;
-    GetAllBoardcastAddresses(addressMap);
+    getAllBoardcastAddresses(addressMap);
     qDebug() << "get address map : " << addressMap << "form thread ; " << QThread::currentThread();
     //
     for (QMap<QString, QString>::const_iterator it = addressMap.begin();
@@ -77,7 +77,7 @@ void CWizUdpClient::boardcast(int port, const QString& message)
     }
 }
 
-void CWizUdpClient::closeUdpConnections()
+void WizUdpClient::closeUdpConnections()
 {
     QMap<QString, QUdpSocket*>::iterator it;
     for (it = m_udpSocketMap.begin(); it != m_udpSocketMap.end(); it++)
@@ -86,7 +86,7 @@ void CWizUdpClient::closeUdpConnections()
     }
 }
 
-void CWizUdpClient::readUdpPendingData()
+void WizUdpClient::readUdpPendingData()
 {
     QUdpSocket* udpSocket = dynamic_cast<QUdpSocket*>(sender());
     while (udpSocket->hasPendingDatagrams())

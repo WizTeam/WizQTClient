@@ -3,16 +3,16 @@
 
 #include "wizqthelper.h"
 
-class CWizCommonUI : public QObject
+class WizCommonUI : public QObject
 {
     Q_OBJECT
 public:
-    CWizCommonUI(QObject* parent);
+    WizCommonUI(QObject* parent);
 
 public slots:
     //interface WizKMControls.WizCommonUI;
-    QString LoadTextFromFile(const QString& strFileName);
-    QString ClipboardToImage(int hwnd, const QString& strOptions);
+    QString loadTextFromFile(const QString& strFileName);
+    QString clipboardToImage(int hwnd, const QString& strOptions);
 
 };
 

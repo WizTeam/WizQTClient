@@ -65,7 +65,7 @@ private:
         (ch>=0xac00 && ch<=0xd7af) ) //korean
 
 public:
-        lucene::analysis::Token* next(lucene::analysis::Token* token)
+        lucene::analysis::WizToken* next(lucene::analysis::WizToken* token)
         {
                 TCHAR ch = 0;
 
@@ -145,7 +145,7 @@ public:
     CJKTokenizer(lucene::util::Reader* in)
 		: Tokenizer(in)
 	{
-		m_tokenType = lucene::analysis::Token::getDefaultType();
+		m_tokenType = lucene::analysis::WizToken::getDefaultType();
 		m_offset = 0;
 		m_bufferIndex = 0;
 		m_dataLen = 0;
@@ -153,12 +153,12 @@ public:
 		m_ignoreSurrogates = true;
 	}
 
-	lucene::analysis::Token* next(lucene::analysis::Token* token)
+	lucene::analysis::WizToken* next(lucene::analysis::WizToken* token)
 	{
 		while (1)
 		{
 			int retTokenLength = 0;
-			lucene::analysis::Token* ret = next1(token, retTokenLength);
+			lucene::analysis::WizToken* ret = next1(token, retTokenLength);
 			if (!ret)
                 return NULL;
 
@@ -167,7 +167,7 @@ public:
 		}
 	}
 
-	lucene::analysis::Token* next1(lucene::analysis::Token* token, int& retTokenLength)
+	lucene::analysis::WizToken* next1(lucene::analysis::WizToken* token, int& retTokenLength)
 	{
 		int32_t length = 0;
 		retTokenLength = 0;
@@ -488,7 +488,7 @@ struct WIZFTSDATA
 //	}
 //};
 
-bool IWizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
+bool WizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle)
 {
     std::wstring strIndexPath(lpszIndexPath);
     WizPathRemoveBackslash(strIndexPath);
@@ -530,7 +530,7 @@ bool IWizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void**
 	}
 }
 
-bool IWizCluceneSearch::endUpdateDocument(void* pHandle)
+bool WizCluceneSearch::endUpdateDocument(void* pHandle)
 {
 	WIZFTSDATA* pData = (WIZFTSDATA*)pHandle;
     if (!pData) {
@@ -554,7 +554,7 @@ bool IWizCluceneSearch::endUpdateDocument(void* pHandle)
 	}
 }
 
-bool IWizCluceneSearch::updateDocument(void* pHandle,
+bool WizCluceneSearch::updateDocument(void* pHandle,
                                        const wchar_t* lpszKbGUID,
                                        const wchar_t* lpszDocumentID,
                                        const wchar_t* lpszTitle,
@@ -615,7 +615,7 @@ bool IWizCluceneSearch::updateDocument(void* pHandle,
     return true;
 }
 
-bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
+bool WizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
                                        const wchar_t* lpszKeywords)
 {
     std::wstring strIndexPath(lpszIndexPath);
@@ -725,7 +725,7 @@ bool IWizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 	}
 }
 
-bool IWizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
+bool WizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
                                        const wchar_t* lpszDocumentID)
 {
     std::wstring strIndexPath(lpszIndexPath);
@@ -790,7 +790,7 @@ void _testCJK(const char* astr, bool ignoreSurrogates = true)
 	CJKTokenizer* tokenizer = _CLNEW CJKTokenizer(&r);
 	tokenizer->setIgnoreSurrogates(ignoreSurrogates);
 	int pos = 0;
-	lucene::analysis::Token tok;
+	lucene::analysis::WizToken tok;
 
 	while (1) {
 		if (tokenizer->next(&tok) == NULL)
@@ -821,7 +821,7 @@ void testLanguageBasedAnalyzer() {
 	CL_NS(util)::StringReader reader(_T("he abhorred accentueren"));
 	reader.setMinBufSize(50);
 	lucene::analysis::TokenStream* ts;
-	lucene::analysis::Token t;
+	lucene::analysis::WizToken t;
 
 	//test with english
 	a.setLanguage(_T("English"));

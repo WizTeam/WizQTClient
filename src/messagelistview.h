@@ -14,9 +14,9 @@
 #include "share/wizpopupwidget.h"
 #include "wizdef.h"
 
-class CWizScrollBar;
-class CWizDatabaseManager;
-class wizImageButton;
+class WizScrollBar;
+class WizDatabaseManager;
+class WizImageButton;
 class CString;
 
 struct WIZMESSAGEDATA;
@@ -26,7 +26,7 @@ typedef std::deque<CString> CWizStdStringArray;
 
 #define WIZNOTE_CUSTOM_SCROLLBAR
 
-class AsyncApi;
+class WizAsyncApi;
 
 
 class MessageListViewItem;
@@ -57,11 +57,11 @@ private:
     QString m_id;
 };
 
-class WizMessageSenderSelector : public CWizPopupWidget
+class WizMessageSenderSelector : public WizPopupWidget
 {
     Q_OBJECT
 public:
-    WizMessageSenderSelector(CWizDatabaseManager& dbMgr, QWidget* parent = 0);
+    WizMessageSenderSelector(WizDatabaseManager& dbMgr, QWidget* parent = 0);
 
     virtual QSize sizeHint() const;
 
@@ -85,7 +85,7 @@ private:
     void adjustWidgetHeight();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QListWidget* m_userList;
     QSet<QString> m_userGUIDSet;
 };
@@ -119,7 +119,7 @@ class WizMessageListTitleBar : public QWidget
 {
     Q_OBJECT
 public:
-    WizMessageListTitleBar(CWizExplorerApp& app, QWidget* parent = 0);
+    WizMessageListTitleBar(WizExplorerApp& app, QWidget* parent = 0);
 
     void setUnreadMode(bool unread, int unreadCount);
     bool isUnreadMode() const;
@@ -147,24 +147,24 @@ private:
     void showTipsWidget();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
-    CWizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
     WizMessageSenderSelector* m_msgSenderSelector;
     WizClickableLabel* m_labelCurrentSender;
     QString m_currentSenderGUID;
     QToolButton* m_btnSelectSender;
     QLabel* m_msgListHintLabel;
-    wizImageButton* m_msgListMarkAllBtn;
+    WizImageButton* m_msgListMarkAllBtn;
     bool m_bUnreadMode;
     int m_nUnreadCount;
 };
 
-class MessageListView : public QListWidget
+class WizMessageListView : public QListWidget
 {
     Q_OBJECT
 
 public:
-    explicit MessageListView(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
+    explicit WizMessageListView(WizDatabaseManager& dbMgr, QWidget *parent = 0);
     virtual QSize sizeHint() const { return QSize(200, 1); }
 
     void setMessages(const CWizMessageDataArray& arrayMsg);
@@ -195,7 +195,7 @@ protected:
 private:
     QMenu* m_menu;
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
-    CWizScrollBar* m_vScroll;
+    WizScrollBar* m_vScroll;
 #endif
 
     MessageListViewItem* m_pCurrentItem;
@@ -204,8 +204,8 @@ private:
     QList<qint64> m_readList;
     QList<qint64> m_deleteList;
     QTimer m_timerTriggerSync;
-    AsyncApi* m_api;
-    CWizDatabaseManager& m_dbMgr;
+    WizAsyncApi* m_api;
+    WizDatabaseManager& m_dbMgr;
 
     void updateTreeItem();
 

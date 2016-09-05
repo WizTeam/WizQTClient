@@ -3,28 +3,28 @@
 
 #ifdef USECOCOATOOLBAR
 #include "mac/wizUserInfoWidgetBaseMac_mm.h"
-#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBaseMac
+#define WIZUSERINFOWIDGETBASE WizUserInfoWidgetBaseMac
 #else
 #include "widgets/wizUserInfoWidgetBase.h"
-#define WIZUSERINFOWIDGETBASE CWizUserInfoWidgetBase
+#define WIZUSERINFOWIDGETBASE WizUserInfoWidgetBase
 #endif
 
-class CWizExplorerApp;
-class CWizDatabase;
+class WizExplorerApp;
+class WizDatabase;
 class QMenu;
-class CWizWebSettingsDialog;
-class CWizIAPHelper;
+class WizWebSettingsDialog;
+class WizIAPHelper;
 
-class CWizUserInfoWidget : public WIZUSERINFOWIDGETBASE
+class WizUserInfoWidget : public WIZUSERINFOWIDGETBASE
 {
     Q_OBJECT
 
 public:
-    explicit CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizUserInfoWidget(WizExplorerApp& app, QWidget *parent = 0);
 
 protected:
-    CWizExplorerApp& m_app;
-    CWizDatabase& m_db;
+    WizExplorerApp& m_app;
+    WizDatabase& m_db;
     QMenu* m_menuMain;
     QIcon m_iconVipIndicator;
     QIcon m_iconArraw;

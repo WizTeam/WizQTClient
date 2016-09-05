@@ -23,19 +23,19 @@ static const char* FIELD_LIST_ABSTRACT = "ABSTRACT_GUID, ABSTRACT_TYPE, ABSTRACT
 
 static const char* TABLE_NAME_ABSTRACT = "WIZ_ABSTRACT";
 
-CThumbIndex::CThumbIndex()
+WizThumbIndex::WizThumbIndex()
 {
     
 }
 
-CThumbIndex::~CThumbIndex()
+WizThumbIndex::~WizThumbIndex()
 {
-    CloseThumb();
+    closeThumb();
 }
 
-bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersion)
+bool WizThumbIndex::openThumb(const CString& strFileName, const QString& strVersion)
 {
-    if (m_dbThumb.IsOpened())
+    if (m_dbThumb.isOpened())
 		return true;
 
 	try {
@@ -49,7 +49,7 @@ bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersio
             }
         }
 
-        if (!InitThumbDB())
+        if (!initThumbDB())
 			return false;
 
 		return true;
@@ -65,9 +65,9 @@ bool CThumbIndex::OpenThumb(const CString& strFileName, const QString& strVersio
 	}
 }
 
-void CThumbIndex::CloseThumb()
+void WizThumbIndex::closeThumb()
 {
-    if (!m_dbThumb.IsOpened())
+    if (!m_dbThumb.isOpened())
 		return;
 
 	try {
@@ -82,12 +82,12 @@ void CThumbIndex::CloseThumb()
 	}
 }
 
-bool CThumbIndex::IsThumbOpened()
+bool WizThumbIndex::isThumbOpened()
 {
-    return m_dbThumb.IsOpened();
+    return m_dbThumb.isOpened();
 }
 
-bool  CThumbIndex::checkThumbTable(const CString& strTableName, const CString& strTableSQL)
+bool  WizThumbIndex::checkThumbTable(const CString& strTableName, const CString& strTableSQL)
 {
     if (m_dbThumb.tableExists(strTableName))
 		return true;
@@ -108,9 +108,9 @@ bool  CThumbIndex::checkThumbTable(const CString& strTableName, const CString& s
 	}
 }
 
-bool CThumbIndex::InitThumbDB()
+bool WizThumbIndex::initThumbDB()
 {
-    if (!m_dbThumb.IsOpened())
+    if (!m_dbThumb.isOpened())
 		return false;
 
     if (!checkThumbTable(TABLE_NAME_ABSTRACT, ABSTRACT_TABLE_SQL))
@@ -119,19 +119,19 @@ bool CThumbIndex::InitThumbDB()
 	return true;
 }
 
-bool CThumbIndex::PadAbstractFromGUID(const CString& guid, WIZABSTRACT &abstract)
+bool WizThumbIndex::padAbstractFromGuid(const CString& guid, WIZABSTRACT &abstract)
 {
-    return AbstractFromGUID(guid, abstract, PAD_TYPE);
+    return abstractFromGuid(guid, abstract, PAD_TYPE);
 }
 
-bool CThumbIndex::PhoneAbstractFromGUID(const CString& guid, WIZABSTRACT &abstract)
+bool WizThumbIndex::phoneAbstractFromGuid(const CString& guid, WIZABSTRACT &abstract)
 {
-    return AbstractFromGUID(guid, abstract, PHONE_TYPE);
+    return abstractFromGuid(guid, abstract, PHONE_TYPE);
 }
 
-bool CThumbIndex::AbstractFromGUID(const CString& guid, WIZABSTRACT &abstract,const CString& type)
+bool WizThumbIndex::abstractFromGuid(const CString& guid, WIZABSTRACT &abstract,const CString& type)
 {
-    if(!m_dbThumb.IsOpened())
+    if(!m_dbThumb.isOpened())
         return false;
 
     CString sql = CString("select ") + FIELD_LIST_ABSTRACT + " from " + TABLE_NAME_ABSTRACT +" where ABSTRACT_GUID='"
@@ -168,19 +168,19 @@ bool CThumbIndex::AbstractFromGUID(const CString& guid, WIZABSTRACT &abstract,co
 	}
 }
 
-bool CThumbIndex::UpdatePadAbstract(const WIZABSTRACT &abstract)
+bool WizThumbIndex::updatePadAbstract(const WIZABSTRACT &abstract)
 {
-    return UpdateAbstract(abstract, PAD_TYPE);
+    return updateAbstract(abstract, PAD_TYPE);
 }
 
-bool CThumbIndex::UpdateIphoneAbstract(const WIZABSTRACT &abstract)
+bool WizThumbIndex::updateIphoneAbstract(const WIZABSTRACT &abstract)
 {
-    return UpdateAbstract(abstract, PHONE_TYPE);
+    return updateAbstract(abstract, PHONE_TYPE);
 }
 
-bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& type)
+bool WizThumbIndex::updateAbstract(const WIZABSTRACT &abstractNew, const CString& type)
 {
-    if(!m_dbThumb.IsOpened()) {
+    if(!m_dbThumb.isOpened()) {
         TOLOG(_T("Fault error: thumb database does not opened"));
         return false;
     }
@@ -225,7 +225,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
 
 
     WIZABSTRACT abstractOld;
-    if (AbstractFromGUID(abstractNew.guid ,abstractOld, type))
+    if (abstractFromGuid(abstractNew.guid ,abstractOld, type))
     {
         CString whereField = CString("ABSTRACT_GUID=%1 and ABSTRACT_TYPE=%2")
                 .arg(STR2SQL(abstractNew.guid))
@@ -284,7 +284,7 @@ bool CThumbIndex::UpdateAbstract(const WIZABSTRACT &abstractNew, const CString& 
 	return true;
 }
 
-bool CThumbIndex::DeleteAbstractByGUID(const CString& guid)
+bool WizThumbIndex::deleteAbstractByGuid(const CString& guid)
 {
     CString sql = CString("delete from ") + TABLE_NAME_ABSTRACT + " where ABSTRACT_GUID='"+guid+"'";
     try {
@@ -303,9 +303,9 @@ bool CThumbIndex::DeleteAbstractByGUID(const CString& guid)
     }
 }
 
-bool CThumbIndex::AbstractIsExist(const CString& guid, const CString& type)
+bool WizThumbIndex::abstractIsExist(const CString& guid, const CString& type)
 {
-    if(!m_dbThumb.IsOpened())
+    if(!m_dbThumb.isOpened())
         return false;
     CString sql = CString("select ") + "ABSTRACT_GUID" + " from " +TABLE_NAME_ABSTRACT+" where ABSTRACT_GUID='"
     +guid+ ("' AND ABSTRACT_TYPE=")
@@ -330,12 +330,12 @@ bool CThumbIndex::AbstractIsExist(const CString& guid, const CString& type)
 	}
 }
 
-bool CThumbIndex::PhoneAbstractExist(const CString& guid)
+bool WizThumbIndex::phoneAbstractExist(const CString& guid)
 {
-    return AbstractIsExist(guid, PHONE_TYPE);
+    return abstractIsExist(guid, PHONE_TYPE);
 }
 
-bool CThumbIndex::PadAbstractExist(const CString& guid)
+bool WizThumbIndex::padAbstractExist(const CString& guid)
 {
-    return AbstractIsExist(guid, PAD_TYPE);
+    return abstractIsExist(guid, PAD_TYPE);
 }

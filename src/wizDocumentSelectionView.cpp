@@ -56,7 +56,7 @@ private:
 };
 
 
-CWizDocumentSelectionView::CWizDocumentSelectionView(CWizExplorerApp& app, QWidget *parent)
+WizDocumentSelectionView::WizDocumentSelectionView(WizExplorerApp& app, QWidget *parent)
     : m_app(app)
     , m_dbMgr(app.databaseManager())
     , QWidget(parent)
@@ -80,14 +80,14 @@ CWizDocumentSelectionView::CWizDocumentSelectionView(CWizExplorerApp& app, QWidg
     layout->addWidget(m_graphicsView);
 }
 
-void CWizDocumentSelectionView::showEvent(QShowEvent* event)
+void WizDocumentSelectionView::showEvent(QShowEvent* event)
 {
     Q_UNUSED(event);
 
     m_graphicsView->scene()->clear();
 }
 
-void CWizDocumentSelectionView::requestDocuments(const CWizDocumentDataArray& arrayDocument)
+void WizDocumentSelectionView::requestDocuments(const CWizDocumentDataArray& arrayDocument)
 {
     int nTotal = qMin((int)arrayDocument.size(), WIZ_SELECTION_ITEM_MAX);
 
@@ -102,14 +102,14 @@ void CWizDocumentSelectionView::requestDocuments(const CWizDocumentDataArray& ar
     }
 }
 
-void CWizDocumentSelectionView::on_thumbCache_loaded(const WIZABSTRACT& abs)
+void WizDocumentSelectionView::on_thumbCache_loaded(const WIZABSTRACT& abs)
 {
     if (!isThumbNeedBuild(abs)) {
         return;
     }
 
     WIZDOCUMENTDATA data;
-    m_dbMgr.db(abs.strKbGUID).DocumentFromGUID(abs.guid, data);
+    m_dbMgr.db(abs.strKbGUID).documentFromGuid(abs.guid, data);
     QPixmap pixmap  = getDocumentPixmap(data, abs);
 
     CWizDocumentGraphicsPixmapItem* item = new CWizDocumentGraphicsPixmapItem(data, pixmap);
@@ -124,7 +124,7 @@ void CWizDocumentSelectionView::on_thumbCache_loaded(const WIZABSTRACT& abs)
     animation->start();
 }
 
-bool CWizDocumentSelectionView::isThumbNeedBuild(const WIZABSTRACT& abs)
+bool WizDocumentSelectionView::isThumbNeedBuild(const WIZABSTRACT& abs)
 {
     bool bFound = false;
     WIZDOCUMENTDATA data;
@@ -149,7 +149,7 @@ bool CWizDocumentSelectionView::isThumbNeedBuild(const WIZABSTRACT& abs)
     return true;
 }
 
-QPoint CWizDocumentSelectionView::getThumbPosition(const WIZABSTRACT& abs)
+QPoint WizDocumentSelectionView::getThumbPosition(const WIZABSTRACT& abs)
 {
     for (int i = 0; i < m_docs.size(); i++) {
         const WIZDOCUMENTDATAEX& doc = m_docs.at(i);
@@ -163,7 +163,7 @@ QPoint CWizDocumentSelectionView::getThumbPosition(const WIZABSTRACT& abs)
     return QPoint(0, 0);
 }
 
-QPixmap CWizDocumentSelectionView::getDocumentPixmap(const WIZDOCUMENTDATA& doc,
+QPixmap WizDocumentSelectionView::getDocumentPixmap(const WIZDOCUMENTDATA& doc,
                                                      const WIZABSTRACT& abs)
 {
     // default values

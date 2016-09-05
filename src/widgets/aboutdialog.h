@@ -3,12 +3,12 @@
 
 #include <QDialog>
 
-class AboutDialog : public QDialog
+class WizAboutDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit AboutDialog(QWidget *parent);
+    explicit WizAboutDialog(QWidget *parent);
 };
 
 

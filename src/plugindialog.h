@@ -45,12 +45,12 @@ class PluginView;
 namespace Core {
 namespace Internal {
 
-class PluginDialog : public QDialog
+class WizPluginDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit PluginDialog(QWidget *parent);
+    explicit WizPluginDialog(QWidget *parent);
 
 private slots:
     void updateRestartRequired();

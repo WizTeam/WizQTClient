@@ -11,7 +11,7 @@
 #include "share/wizMessageBox.h"
 #include "wizFolderView.h"
 
-CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp& app,
+WizFolderSelector::WizFolderSelector(const QString& strTitle, WizExplorerApp& app,
                                        unsigned int nPermission, QWidget *parent)
     : QDialog(parent)
     , m_app(app)
@@ -26,7 +26,7 @@ CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp&
     QVBoxLayout* layout = new QVBoxLayout(this);
     setLayout(layout);
 
-    m_folderView = new CWizFolderView(app, this);
+    m_folderView = new WizFolderView(app, this);
     layout->addWidget(m_folderView);
 
     QDialogButtonBox* buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -37,7 +37,7 @@ CWizFolderSelector::CWizFolderSelector(const QString& strTitle, CWizExplorerApp&
     layout->addWidget(buttonBox);
 }
 
-void CWizFolderSelector::setCopyStyle(bool showKeepTagsOption)
+void WizFolderSelector::setCopyStyle(bool showKeepTagsOption)
 {
     QVBoxLayout* lay = qobject_cast<QVBoxLayout*>(layout());
 
@@ -57,23 +57,23 @@ void CWizFolderSelector::setCopyStyle(bool showKeepTagsOption)
     }
 }
 
-bool CWizFolderSelector::isKeepTime() const
+bool WizFolderSelector::isKeepTime() const
 {
     return m_bKeepTime;
 }
 
-bool CWizFolderSelector::isKeepTag() const
+bool WizFolderSelector::isKeepTag() const
 {
     return m_bKeepTags;
 }
 
-bool CWizFolderSelector::isSelectGroupFolder()
+bool WizFolderSelector::isSelectGroupFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
 
     if (item->type() > QTreeWidgetItem::UserType)
     {
-        CWizCategoryViewItemBase* baseItem = dynamic_cast<CWizCategoryViewItemBase*>(item);
+        WizCategoryViewItemBase* baseItem = dynamic_cast<WizCategoryViewItemBase*>(item);
         if (!baseItem)
             return false;
 
@@ -82,11 +82,11 @@ bool CWizFolderSelector::isSelectGroupFolder()
         {
             if (nPermission >= WIZ_USERGROUP_READER)
             {
-                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create note in this group!"));
+                WizMessageBox::warning(this, tr("Info"), tr("You have no permission to create note in this group!"));
             }
             else if (nPermission >= WIZ_USERGROUP_EDITOR)
             {
-                CWizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
+                WizMessageBox::warning(this, tr("Info"), tr("You have no permission to create folder in this group!"));
             }
             return false;
         }
@@ -101,7 +101,7 @@ bool CWizFolderSelector::isSelectGroupFolder()
             || item->type() == Category_GroupItem;
 }
 
-QString CWizFolderSelector::selectedFolder()
+QString WizFolderSelector::selectedFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
     if (item->type() == Category_AllFoldersItem)
@@ -110,7 +110,7 @@ QString CWizFolderSelector::selectedFolder()
     }
     else if (item->type() == Category_FolderItem)
     {
-        CWizCategoryViewFolderItem* p = dynamic_cast<CWizCategoryViewFolderItem*>(item);
+        WizCategoryViewFolderItem* p = dynamic_cast<WizCategoryViewFolderItem*>(item);
         Q_ASSERT(p);
 
         return p->location();
@@ -119,7 +119,7 @@ QString CWizFolderSelector::selectedFolder()
     return QString();
 }
 
-bool CWizFolderSelector::isSelectPersonalFolder()
+bool WizFolderSelector::isSelectPersonalFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
 
@@ -130,12 +130,12 @@ bool CWizFolderSelector::isSelectPersonalFolder()
     return item->type() == Category_AllFoldersItem || item->type() == Category_FolderItem;
 }
 
-WIZTAGDATA CWizFolderSelector::selectedGroupFolder()
+WIZTAGDATA WizFolderSelector::selectedGroupFolder()
 {
     QTreeWidgetItem* item = m_folderView->currentItem();
     if (item->type() == Category_GroupItem)
     {
-        CWizCategoryViewGroupItem* p = dynamic_cast<CWizCategoryViewGroupItem*>(item);
+        WizCategoryViewGroupItem* p = dynamic_cast<WizCategoryViewGroupItem*>(item);
         if (p)
         {
             return p->tag();
@@ -143,7 +143,7 @@ WIZTAGDATA CWizFolderSelector::selectedGroupFolder()
     }
     else if (item->type() == Category_GroupNoTagItem || item->type() == Category_GroupRootItem)
     {
-        CWizCategoryViewItemBase* p = dynamic_cast<CWizCategoryViewItemBase*>(item);
+        WizCategoryViewItemBase* p = dynamic_cast<WizCategoryViewItemBase*>(item);
         if (p)
         {
             WIZTAGDATA tag;
@@ -156,7 +156,7 @@ WIZTAGDATA CWizFolderSelector::selectedGroupFolder()
     return tag;
 }
 
-void CWizFolderSelector::on_accept()
+void WizFolderSelector::on_accept()
 {
     // accept only if user select folder item.
     if (isSelectPersonalFolder() || isSelectGroupFolder())
@@ -165,7 +165,7 @@ void CWizFolderSelector::on_accept()
     }
 }
 
-void CWizFolderSelector::on_checkKeepTime_stateChanged(int state)
+void WizFolderSelector::on_checkKeepTime_stateChanged(int state)
 {
     if (Qt::Checked == state) {
         m_bKeepTime = true;
@@ -174,7 +174,7 @@ void CWizFolderSelector::on_checkKeepTime_stateChanged(int state)
     }
 }
 
-void CWizFolderSelector::on_checkKeepTags_stateChanged(int state)
+void WizFolderSelector::on_checkKeepTags_stateChanged(int state)
 {
     if (Qt::Checked == state) {
         m_bKeepTags = true;

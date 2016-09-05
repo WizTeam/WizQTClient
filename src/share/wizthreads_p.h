@@ -7,45 +7,45 @@
 
 class QTimer;
 
-class CWizMainQueuedThread
+class WizMainQueuedThread
     : public QObject
     , public IWizThreadPool
 {
     Q_OBJECT
 public:
-    CWizMainQueuedThread();
+    WizMainQueuedThread();
 private:
     QMutex m_cs;
     std::deque<IWizRunable*> m_tasks;
     bool m_bShutingDown;
 public:
-    virtual void AddTask(IWizRunable* task);
-    virtual void ClearTasks();
-    virtual bool IsIdle() { return false; }
-    virtual IWizRunable* PeekOne() { return NULL; }
-    virtual void Shutdown(int timeout)  { Q_UNUSED(timeout);  m_bShutingDown = true; }
-    virtual bool IsShuttingDown()  { return m_bShutingDown; }
-    virtual void SetEventsListener(IWizThreadPoolEvents* pEvents) { Q_UNUSED(pEvents); }
+    virtual void addTask(IWizRunable* task);
+    virtual void clearTasks();
+    virtual bool isIdle() { return false; }
+    virtual IWizRunable* peekOne() { return NULL; }
+    virtual void shutdown(int timeout)  { Q_UNUSED(timeout);  m_bShutingDown = true; }
+    virtual bool isShuttingDown()  { return m_bShutingDown; }
+    virtual void setEventsListener(IWizThreadPoolEvents* pEvents) { Q_UNUSED(pEvents); }
     //
-    virtual void GetTaskCount(int* pnWorking, int* pnWaiting);
+    virtual void getTaskCount(int* pnWorking, int* pnWaiting);
     //
-    virtual IWizThreadPool* GetThreadPool() { return this; }
+    virtual IWizThreadPool* getThreadPool() { return this; }
     //
-    void GetAllTasks(std::deque<IWizRunable*>& tasks);
+    void getAllTasks(std::deque<IWizRunable*>& tasks);
 protected slots:
-    void ExecuteAllActions();
+    void executeAllActions();
 Q_SIGNALS:
-    void TaskAdded();
+    void taskAdded();
 };
 
-class CWizTimeoutRunable
+class WizTimeoutRunable
         : public QObject
         , public IWizRunable
 
 {
     Q_OBJECT
 public:
-    CWizTimeoutRunable(IWizRunable* pAction, int milliseconds, int nTimeoutThreadId, IWizRunable* pTimeoutAction);
+    WizTimeoutRunable(IWizRunable* pAction, int milliseconds, int nTimeoutThreadId, IWizRunable* pTimeoutAction);
 private:
     IWizRunable* m_pRunable;
     int m_nTimeoutThreadId;
@@ -54,13 +54,13 @@ private:
     //
     QMutex m_cs;
 public:
-    virtual void Destroy();
-    virtual void Run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents);
-    virtual QString GetTaskID();
+    virtual void destroy();
+    virtual void run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents);
+    virtual QString getTaskID();
 private:
-    IWizRunable* BeforeTimeout();
+    IWizRunable* beforeTimeout();
 protected slots:
-    void Timeout();
+    void timeout();
 };
 
 

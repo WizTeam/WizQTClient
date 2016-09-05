@@ -3,15 +3,15 @@
 
 #include <QUrl>
 
-CWizEditorInsertLinkForm::CWizEditorInsertLinkForm(QWidget *parent) :
+WizEditorInsertLinkForm::WizEditorInsertLinkForm(QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CWizEditorInsertLinkForm)
+    ui(new Ui::WizEditorInsertLinkForm)
 {
     ui->setupUi(this);
     setWindowModality(Qt::ApplicationModal);
 }
 
-CWizEditorInsertLinkForm::~CWizEditorInsertLinkForm()
+WizEditorInsertLinkForm::~WizEditorInsertLinkForm()
 {
     delete ui;
 }
@@ -26,13 +26,13 @@ CWizEditorInsertLinkForm::~CWizEditorInsertLinkForm()
 //    ui->editContent->setText(strText);
 //}
 
-QString CWizEditorInsertLinkForm::getUrl()
+QString WizEditorInsertLinkForm::getUrl()
 {
     QUrl url(ui->editUrl->text());
     return url.toEncoded();
 }
 
-void CWizEditorInsertLinkForm::setUrl(const QString& strText)
+void WizEditorInsertLinkForm::setUrl(const QString& strText)
 {
     ui->editUrl->setText(strText);
 }
@@ -43,12 +43,12 @@ void CWizEditorInsertLinkForm::setUrl(const QString& strText)
 //    ui->editUrl->clear();
 //}
 
-void CWizEditorInsertLinkForm::on_pushButton_cancel_clicked()
+void WizEditorInsertLinkForm::on_pushButton_cancel_clicked()
 {
     reject();
 }
 
-void CWizEditorInsertLinkForm::on_pushButton_ok_clicked()
+void WizEditorInsertLinkForm::on_pushButton_ok_clicked()
 {
     accept();
 }

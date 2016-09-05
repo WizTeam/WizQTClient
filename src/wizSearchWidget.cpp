@@ -15,7 +15,7 @@
 #include <QMouseEvent>
 #include <QDebug>
 
-CWizSearchView::CWizSearchView(QWidget* parent /* = 0 */)
+WizSearchView::WizSearchView(QWidget* parent /* = 0 */)
     : QWidget(parent)
     , m_widthHint(360)
 {
@@ -23,7 +23,7 @@ CWizSearchView::CWizSearchView(QWidget* parent /* = 0 */)
     setSizePolicy(sizePolicy);
     setContentsMargins(1, 0, 1, 1);
 
-    m_editSearch = new CWizSearchEdit(this);
+    m_editSearch = new WizSearchEdit(this);
     m_editSearch->setTextMargins(25, 1, 0, 1);
 
     m_editSearch->setStyleSheet("QLineEdit{background-color:#eeeeee;border:1px solid #aeaeae; border-radius:10px;}"
@@ -51,33 +51,33 @@ CWizSearchView::CWizSearchView(QWidget* parent /* = 0 */)
             SIGNAL(addCustomSearchRequest()));
 }
 
-void CWizSearchView::clear()
+void WizSearchView::clear()
 {
     m_editSearch->clear();
 }
 
-void CWizSearchView::focus()
+void WizSearchView::focus()
 {
     m_editSearch->selectAll();
     m_editSearch->setFocus();
 }
 
-QSize CWizSearchView::sizeHint() const
+QSize WizSearchView::sizeHint() const
 {
     return QSize(m_widthHint, height());
 }
 
-void CWizSearchView::setWidthHint(int nWidth)
+void WizSearchView::setWidthHint(int nWidth)
 {
     m_widthHint = nWidth;
 }
 
-void CWizSearchView::on_search_returnPressed()
+void WizSearchView::on_search_returnPressed()
 {
     Q_EMIT doSearch(m_editSearch->text());
 }
 
-void CWizSearchView::on_searchTextChanged(QString str)
+void WizSearchView::on_searchTextChanged(QString str)
 {
 //    if (str.isEmpty())
 //    {
@@ -86,13 +86,13 @@ void CWizSearchView::on_searchTextChanged(QString str)
 }
 
 
-CWizSearchEdit::CWizSearchEdit(QWidget* parent)
+WizSearchEdit::WizSearchEdit(QWidget* parent)
     : QLineEdit(parent)
     , m_menu(new QMenu(this))
 {    
-    QString strSearchIcon = Utils::StyleHelper::skinResourceFileName("mactoolbarsearch", true);
+    QString strSearchIcon = Utils::WizStyleHelper::skinResourceFileName("mactoolbarsearch", true);
     m_searchIcon = QPixmap(strSearchIcon);
-    QString strDeleteIcon = Utils::StyleHelper::skinResourceFileName("mactoolbardelete", true);
+    QString strDeleteIcon = Utils::WizStyleHelper::skinResourceFileName("mactoolbardelete", true);
     m_deleteIcon = QPixmap(strDeleteIcon);
 
     m_menu->addAction(tr("Advanced search"), this, SLOT(on_actionAdvancedSearch()));
@@ -100,19 +100,19 @@ CWizSearchEdit::CWizSearchEdit(QWidget* parent)
 
 }
 
-void CWizSearchEdit::on_actionAdvancedSearch()
+void WizSearchEdit::on_actionAdvancedSearch()
 {
-    WizGetAnalyzer().LogAction("advancedSearchOnSearchWidget");
+    WizGetAnalyzer().logAction("advancedSearchOnSearchWidget");
     emit advanceSearchRequest();
 }
 
-void CWizSearchEdit::on_addCustomSearch()
+void WizSearchEdit::on_addCustomSearch()
 {
-    WizGetAnalyzer().LogAction("customSearchOnSearchWidget");
+    WizGetAnalyzer().logAction("customSearchOnSearchWidget");
     emit addCustomSearchRequest();
 }
 
-void CWizSearchEdit::paintEvent(QPaintEvent* event)
+void WizSearchEdit::paintEvent(QPaintEvent* event)
 {
     QLineEdit::paintEvent(event);
 
@@ -133,7 +133,7 @@ void CWizSearchEdit::paintEvent(QPaintEvent* event)
     }
 }
 
-void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
+void WizSearchEdit::mousePressEvent(QMouseEvent* event)
 {
     QRect rcBtnSearch(geometry().topLeft(), m_searchIcon.size());
     if (rcBtnSearch.contains(event->pos()))
@@ -157,7 +157,7 @@ void CWizSearchEdit::mousePressEvent(QMouseEvent* event)
     QLineEdit::mousePressEvent(event);
 }
 
-void CWizSearchEdit::mouseMoveEvent(QMouseEvent* event)
+void WizSearchEdit::mouseMoveEvent(QMouseEvent* event)
 {
     QLineEdit::mouseMoveEvent(event);
 

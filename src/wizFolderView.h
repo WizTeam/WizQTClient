@@ -6,25 +6,25 @@
 #include "share/wizDatabaseManager.h"
 #include "wizCategoryViewItem.h"
 
-class CWizExplorerApp;
-class CWizScrollBar;
+class WizExplorerApp;
+class WizScrollBar;
 
 #define WIZNOTE_CUSTOM_SCROLLBAR
 
 
-class CWizFolderView : public QTreeWidget
+class WizFolderView : public QTreeWidget
 {
     Q_OBJECT
 
 public:
-    explicit CWizFolderView(CWizExplorerApp& app, QWidget *parent = 0, bool showReadOnlyGroup = false);
+    explicit WizFolderView(WizExplorerApp& app, QWidget *parent = 0, bool showReadOnlyGroup = false);
 
 protected:
-    CWizExplorerApp& m_app;
-    CWizDatabaseManager& m_dbMgr;
+    WizExplorerApp& m_app;
+    WizDatabaseManager& m_dbMgr;
 
 #ifdef WIZNOTE_CUSTOM_SCROLLBAR
-    CWizScrollBar* m_vScroll;
+    WizScrollBar* m_vScroll;
 #endif
 
     virtual void resizeEvent(QResizeEvent* event);
@@ -37,21 +37,21 @@ private:
                      const CWizStdStringArray& arrayAllLocation);    
     //
     void initGroups();
-    void initGroup(CWizDatabase& db);
-    void initGroup(CWizDatabase& db, QTreeWidgetItem* pParent,
+    void initGroup(WizDatabase& db);
+    void initGroup(WizDatabase& db, QTreeWidgetItem* pParent,
                    const QString& strParentTagGUID);
 
 
-    CWizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
-    CWizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
-    CWizCategoryViewAllFoldersItem* findAllFolders();
-    CWizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
+    WizCategoryViewFolderItem* addFolder(const QString& strLocation, bool sort);
+    WizCategoryViewFolderItem* findFolder(const QString& strLocation, bool create, bool sort);
+    WizCategoryViewAllFoldersItem* findAllFolders();
+    WizCategoryViewTrashItem* findTrash(const QString& strKbGUID);
 
-    CWizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
-    CWizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
-    CWizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
-    CWizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
-    CWizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
+    WizCategoryViewGroupRootItem* findGroup(const QString& strKbGUID);
+    WizCategoryViewItemBase* findGroupsRootItem(const WIZGROUPDATA& group, bool bCreate = true);
+    WizCategoryViewItemBase* findBizGroupsRootItem(const WIZBIZDATA& biz, bool bCreate = true);
+    WizCategoryViewItemBase* findOwnGroupsRootItem(bool bCreate = true);
+    WizCategoryViewItemBase* findJionedGroupsRootItem(bool bCreate = true);
 
 private:
     bool m_showReadOnlyGroup;

@@ -13,7 +13,7 @@
 #include "share/wizmisc.h"
 
 
-CellButton::CellButton(ButtonType type, QWidget *parent)
+WizCellButton::WizCellButton(ButtonType type, QWidget *parent)
     : QToolButton(parent)
     , m_state(0)
     , m_count(0)
@@ -22,7 +22,7 @@ CellButton::CellButton(ButtonType type, QWidget *parent)
 {    
 }
 
-void CellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
+void WizCellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
 {
     m_iconNomal = icon;
     m_strTipsNormal = strTips;
@@ -30,7 +30,7 @@ void CellButton::setNormalIcon(const QIcon& icon, const QString& strTips)
     setToolTip(strTips);
 }
 
-void CellButton::setCheckedIcon(const QIcon& icon, const QString& strTips)
+void WizCellButton::setCheckedIcon(const QIcon& icon, const QString& strTips)
 {
     m_iconChecked = icon;
     m_strTipsChecked = strTips;
@@ -38,7 +38,7 @@ void CellButton::setCheckedIcon(const QIcon& icon, const QString& strTips)
     setToolTip(strTips);
 }
 
-void CellButton::setBadgeIcon(const QIcon& icon, const QString& strTips)
+void WizCellButton::setBadgeIcon(const QIcon& icon, const QString& strTips)
 {
     m_iconBadge = icon;
     m_strTipsBagde = strTips;
@@ -46,7 +46,7 @@ void CellButton::setBadgeIcon(const QIcon& icon, const QString& strTips)
     setToolTip(strTips);
 }
 
-void CellButton::setState(int state)
+void WizCellButton::setState(int state)
 {
     switch (state) {
     case Normal:
@@ -69,14 +69,14 @@ void CellButton::setState(int state)
     }
 }
 
-void CellButton::setCount(int count)
+void WizCellButton::setCount(int count)
 {
     m_count = count;
     update();
 }
 
 const int nTextWidth = 14;
-void CellButton::paintEvent(QPaintEvent *event)
+void WizCellButton::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 
@@ -116,7 +116,7 @@ void CellButton::paintEvent(QPaintEvent *event)
     }
 }
 
-QSize CellButton::sizeHint() const
+QSize WizCellButton::sizeHint() const
 {
     switch (m_buttonType)
     {
@@ -129,7 +129,7 @@ QSize CellButton::sizeHint() const
     }
 }
 
-QString CellButton::countInfo() const
+QString WizCellButton::countInfo() const
 {
     if (m_count > 99)
         return "99+";
@@ -146,8 +146,8 @@ namespace RoundCellButtonConst {
 }
 
 
-RoundCellButton::RoundCellButton(QWidget* parent)
-    : CellButton(ImageOnly, parent)
+WizRoundCellButton::WizRoundCellButton(QWidget* parent)
+    : WizCellButton(ImageOnly, parent)
 {
     m_iconSize = QSize(iconWidth(), RoundCellButtonConst::iconHeight);
 
@@ -155,25 +155,25 @@ RoundCellButton::RoundCellButton(QWidget* parent)
     m_animation = new QPropertyAnimation(this, "maximumWidth", this);
 }
 
-void RoundCellButton::setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips)
+void WizRoundCellButton::setNormalIcon(const QIcon& icon, const QString& text, const QString& strTips)
 {
-    CellButton::setNormalIcon(icon, strTips);
+    WizCellButton::setNormalIcon(icon, strTips);
     m_textNormal = text;
 }
 
-void RoundCellButton::setCheckedIcon(const QIcon& icon, const QString& text, const QString& strTips)
+void WizRoundCellButton::setCheckedIcon(const QIcon& icon, const QString& text, const QString& strTips)
 {
-    CellButton::setCheckedIcon(icon, strTips);
+    WizCellButton::setCheckedIcon(icon, strTips);
     m_textChecked = text;
 }
 
-void RoundCellButton::setBadgeIcon(const QIcon& icon, const QString& text, const QString& strTips)
+void WizRoundCellButton::setBadgeIcon(const QIcon& icon, const QString& text, const QString& strTips)
 {
-    CellButton::setBadgeIcon(icon, strTips);
+    WizCellButton::setBadgeIcon(icon, strTips);
     m_textBadge = text;
 }
 
-QString RoundCellButton::text() const
+QString WizRoundCellButton::text() const
 {
     switch (m_state) {
     case Normal:
@@ -192,7 +192,7 @@ QString RoundCellButton::text() const
     return "";
 }
 
-int RoundCellButton::iconWidth() const
+int WizRoundCellButton::iconWidth() const
 {
     return 14;
 
@@ -210,7 +210,7 @@ int RoundCellButton::iconWidth() const
 //    }
 }
 
-int RoundCellButton::buttonWidth() const
+int WizRoundCellButton::buttonWidth() const
 {
     QFont f;
     f.setPixelSize(RoundCellButtonConst::fontSize);
@@ -220,14 +220,14 @@ int RoundCellButton::buttonWidth() const
     return width;
 }
 
-void RoundCellButton::setState(int state)
+void WizRoundCellButton::setState(int state)
 {
-    CellButton::setState(state);
+    WizCellButton::setState(state);
 
     applyAnimation();
 }
 
-void RoundCellButton::paintEvent(QPaintEvent* /*event*/)
+void WizRoundCellButton::paintEvent(QPaintEvent* /*event*/)
 {
     QStyleOptionToolButton opt;
     initStyleOption(&opt);
@@ -267,14 +267,14 @@ void RoundCellButton::paintEvent(QPaintEvent* /*event*/)
     p.drawText(rcText,Qt::AlignVCenter | Qt::AlignLeft, text());
 }
 
-QSize RoundCellButton::sizeHint() const
+QSize WizRoundCellButton::sizeHint() const
 {
     //NTOE: 设置一个最大宽度，实际宽度由animation通过maxWidth进行控制
     int maxWidth = 200;
     return QSize(maxWidth, RoundCellButtonConst::buttonHeight);
 }
 
-void RoundCellButton::applyAnimation()
+void WizRoundCellButton::applyAnimation()
 {
     m_animation->stop();
     m_animation->setDuration(150);

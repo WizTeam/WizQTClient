@@ -3,7 +3,7 @@
 #include <QStylePainter>
 #include <QStyleOptionButton>
 
-CWizSegmentedButton::CWizSegmentedButton(QWidget *parent)
+WizSegmentedButton::WizSegmentedButton(QWidget *parent)
     : QPushButton(parent)
     , m_nMargin(5)
     , m_nArcWidth(8)
@@ -12,14 +12,14 @@ CWizSegmentedButton::CWizSegmentedButton(QWidget *parent)
     setIconSize(QSize(16, 16));
 }
 
-QSize CWizSegmentedButton::sizeHint() const
+QSize WizSegmentedButton::sizeHint() const
 {
     // add 2 pixel for drawing
     return QSize(m_cells.size() * (iconSize().width() + m_nSpace * 2) + m_nArcWidth * 2 + 2,
                  iconSize().height() + m_nMargin * 2);
 }
 
-void CWizSegmentedButton::paintEvent(QPaintEvent *)
+void WizSegmentedButton::paintEvent(QPaintEvent *)
 {
     QStylePainter p(this);
     QStyleOptionButton opt;
@@ -89,12 +89,12 @@ void CWizSegmentedButton::paintEvent(QPaintEvent *)
     //}
 }
 
-void CWizSegmentedButton::setCellSpacing(int nSpacing)
+void WizSegmentedButton::setCellSpacing(int nSpacing)
 {
     m_nSpace = nSpacing;
 }
 
-void CWizSegmentedButton::addCell(const QIcon& icon)
+void WizSegmentedButton::addCell(const QIcon& icon)
 {
     m_cells.append(icon);
     update();

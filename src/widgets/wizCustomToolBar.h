@@ -4,11 +4,11 @@
 #include <QWidget>
 #include <QPoint>
 
-class CWizCustomToolBar : public QWidget
+class WizCustomToolBar : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CWizCustomToolBar(QWidget* hostWidget, QWidget *parent = 0);
+    explicit WizCustomToolBar(QWidget* hostWidget, QWidget *parent = 0);
 
 signals:
 

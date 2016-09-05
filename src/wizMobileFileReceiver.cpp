@@ -12,16 +12,16 @@
 #include "utils/pathresolve.h"
 
 
-CWizMobileFileReceiver::CWizMobileFileReceiver(QObject *parent) :
+WizMobileFileReceiver::WizMobileFileReceiver(QObject *parent) :
     QThread(parent)
   , m_udpSocket(0)
-  , m_xmlProcesser(new CWizMobileXmlProcesser(parent))
-  , m_tcpContainer(new CWizMobileTcpContainer(m_xmlProcesser, parent))
+  , m_xmlProcesser(new WizMobileXmlProcesser(parent))
+  , m_tcpContainer(new WizMobileTcpContainer(m_xmlProcesser, parent))
 {
 
 }
 
-CWizMobileFileReceiver::~CWizMobileFileReceiver()
+WizMobileFileReceiver::~WizMobileFileReceiver()
 {
     if (m_udpSocket)
     {
@@ -29,7 +29,7 @@ CWizMobileFileReceiver::~CWizMobileFileReceiver()
     }
 }
 
-void CWizMobileFileReceiver::initSocket()
+void WizMobileFileReceiver::initSocket()
 {   
     m_udpSocket = new QUdpSocket();
     m_udpSocket->bind(QHostAddress::Any, 18695);
@@ -43,7 +43,7 @@ void CWizMobileFileReceiver::initSocket()
     qDebug() << "Mobile file receiver ready.";
 }
 
-void CWizMobileFileReceiver::waitForDone()
+void WizMobileFileReceiver::waitForDone()
 {
     m_xmlProcesser->waitForDone();
     exit();
@@ -51,7 +51,7 @@ void CWizMobileFileReceiver::waitForDone()
     qDebug() << "Mobile file receiver stoped.";
 }
 
-void CWizMobileFileReceiver::readUdpPendingData()
+void WizMobileFileReceiver::readUdpPendingData()
 {
     while (m_udpSocket->hasPendingDatagrams())
     {
@@ -77,19 +77,19 @@ void CWizMobileFileReceiver::readUdpPendingData()
     }
 }
 
-void CWizMobileFileReceiver::run()
+void WizMobileFileReceiver::run()
 {
     initSocket();
     exec();
 }
 
 
-void CWizMobileFileReceiver::getInfoFromUdpData(const QByteArray& udpData, QString& userID)
+void WizMobileFileReceiver::getInfoFromUdpData(const QByteArray& udpData, QString& userID)
 {
     userID = udpData;
 }
 
-void CWizMobileXmlProcesser::processXML(const QByteArray& datagram)
+void WizMobileXmlProcesser::processXML(const QByteArray& datagram)
 {
     QXmlStreamReader xml(datagram);
     while (!xml.atEnd() && !xml.hasError())
@@ -114,7 +114,7 @@ void CWizMobileXmlProcesser::processXML(const QByteArray& datagram)
     xml.clear();
 }
 
-void CWizMobileXmlProcesser::processFileParam(QXmlStreamReader& xml)
+void WizMobileXmlProcesser::processFileParam(QXmlStreamReader& xml)
 {
     xml.readNext();
     UdpSegment newSeg;
@@ -176,12 +176,12 @@ void CWizMobileXmlProcesser::processFileParam(QXmlStreamReader& xml)
     }
 }
 
-QString CWizMobileXmlProcesser::getElementText(QXmlStreamReader& xml)
+QString WizMobileXmlProcesser::getElementText(QXmlStreamReader& xml)
 {
     if(xml.tokenType() == QXmlStreamReader::StartElement)
     {
         xml.readNext();
-        if(xml.tokenType() == QXmlStreamReader::Characters)
+        if(xml.tokenType() == QXmlStreamReader::characters)
         {
             return xml.text().toString();
         }
@@ -189,7 +189,7 @@ QString CWizMobileXmlProcesser::getElementText(QXmlStreamReader& xml)
     return "";
 }
 
-void CWizMobileXmlProcesser::addSegmentIntoDataList(const QString& strGuid, int index, const UdpSegment& newSeg)
+void WizMobileXmlProcesser::addSegmentIntoDataList(const QString& strGuid, int index, const UdpSegment& newSeg)
 {
     if (m_dataMap.contains(strGuid))
     {
@@ -223,12 +223,12 @@ void CWizMobileXmlProcesser::addSegmentIntoDataList(const QString& strGuid, int 
     }
 }
 
-bool CWizMobileXmlProcesser::isSegmentCompleted(const QString& strGuid)
+bool WizMobileXmlProcesser::isSegmentCompleted(const QString& strGuid)
 {
     return m_dataMap.value(strGuid).data.count() == m_dataMap.value(strGuid).totalCount;
 }
 
-bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QString& strFile)
+bool WizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QString& strFile)
 {
     MobileFileData fileData = m_dataMap.value(strGuid);
     if (fileData.totalCount != fileData.data.count())
@@ -249,7 +249,7 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
         QImage image;
         if (image.loadFromData(data))
         {
-            QString strWizPath = Utils::PathResolve::tempPath();
+            QString strWizPath = Utils::WizPathResolve::tempPath();
             strFile = strWizPath + fileData.name;
             return image.save(strFile);
         }
@@ -258,7 +258,7 @@ bool CWizMobileXmlProcesser::combineSegmentToFile(const QString& strGuid, QStrin
     return false;
 }
 
-void CWizMobileXmlProcesser::deleteAllSegments()
+void WizMobileXmlProcesser::deleteAllSegments()
 {
     m_mutex.lock();
 
@@ -272,18 +272,18 @@ void CWizMobileXmlProcesser::deleteAllSegments()
     m_mutex.unlock();
 }
 
-void CWizMobileFileReceiver::addDataToProcesser(QByteArray* ba)
+void WizMobileFileReceiver::addDataToProcesser(QByteArray* ba)
 {
     m_xmlProcesser->addNewSegment(ba);
 }
 
-bool CWizMobileFileReceiver::isUdpSendToCurrentUser(const QString& userID)
+bool WizMobileFileReceiver::isUdpSendToCurrentUser(const QString& userID)
 {
-    CWizDatabaseManager *dbMgr = CWizDatabaseManager::instance();
+    WizDatabaseManager *dbMgr = WizDatabaseManager::instance();
     if (dbMgr)
     {
-        CWizDatabase& db = dbMgr->db();
-        return db.GetUserGUID() == userID;
+        WizDatabase& db = dbMgr->db();
+        return db.getUserGuid() == userID;
     }
 
     return false;
@@ -291,13 +291,13 @@ bool CWizMobileFileReceiver::isUdpSendToCurrentUser(const QString& userID)
 
 
 
-CWizMobileXmlProcesser::CWizMobileXmlProcesser(QObject* parent) : QThread(parent)
+WizMobileXmlProcesser::WizMobileXmlProcesser(QObject* parent) : QThread(parent)
   , m_stop(false)
 {
 
 }
 
-void CWizMobileXmlProcesser::addNewSegment(QByteArray* ba)
+void WizMobileXmlProcesser::addNewSegment(QByteArray* ba)
 {
     if (ba->isEmpty())
         return;
@@ -312,7 +312,7 @@ void CWizMobileXmlProcesser::addNewSegment(QByteArray* ba)
     }
 }
 
-void CWizMobileXmlProcesser::processData()
+void WizMobileXmlProcesser::processData()
 {
     QByteArray *ba = peekData();
     if (ba)
@@ -322,14 +322,14 @@ void CWizMobileXmlProcesser::processData()
     }
 }
 
-void CWizMobileXmlProcesser::waitForDone()
+void WizMobileXmlProcesser::waitForDone()
 {
     stop();
     deleteAllSegments();
     WizWaitForThread(this);
 }
 
-void CWizMobileXmlProcesser::stop()
+void WizMobileXmlProcesser::stop()
 {
     QMutexLocker locker(&m_mutex);
     m_stop = true;
@@ -337,7 +337,7 @@ void CWizMobileXmlProcesser::stop()
 }
 
 
-QByteArray *CWizMobileXmlProcesser::peekData()
+QByteArray *WizMobileXmlProcesser::peekData()
 {
     QByteArray *ba = nullptr;
     m_mutex.lock();
@@ -354,7 +354,7 @@ QByteArray *CWizMobileXmlProcesser::peekData()
     return ba;
 }
 
-void CWizMobileXmlProcesser::run()
+void WizMobileXmlProcesser::run()
 {
     while (!m_stop)
     {
@@ -363,14 +363,14 @@ void CWizMobileXmlProcesser::run()
 }
 
 
-CWizMobileTcpContainer::CWizMobileTcpContainer(CWizMobileXmlProcesser* xmlProcesser, QObject* parent)
+WizMobileTcpContainer::WizMobileTcpContainer(WizMobileXmlProcesser* xmlProcesser, QObject* parent)
     : QThread(parent)
     , m_xmlProcesser(xmlProcesser)
     , m_tcpSocket(0)
 {
 }
 
-CWizMobileTcpContainer::~CWizMobileTcpContainer()
+WizMobileTcpContainer::~WizMobileTcpContainer()
 {
     exit();
     if (m_tcpSocket)
@@ -379,7 +379,7 @@ CWizMobileTcpContainer::~CWizMobileTcpContainer()
     }
 }
 
-QAbstractSocket::SocketState CWizMobileTcpContainer::tcpState()
+QAbstractSocket::SocketState WizMobileTcpContainer::tcpState()
 {
     if (m_tcpSocket)
     {
@@ -389,7 +389,7 @@ QAbstractSocket::SocketState CWizMobileTcpContainer::tcpState()
         return QAbstractSocket::UnconnectedState;
 }
 
-void CWizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
+void WizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
 {
     m_strHost = address;
     if (!isRunning())
@@ -398,7 +398,7 @@ void CWizMobileTcpContainer::connectToHost(const QString& address, quint16 port)
     }
 }
 
-void CWizMobileTcpContainer::readTcpPendingData()
+void WizMobileTcpContainer::readTcpPendingData()
 {
     static QByteArray *strData = 0;
     while (m_tcpSocket->waitForReadyRead())
@@ -437,7 +437,7 @@ void CWizMobileTcpContainer::readTcpPendingData()
     strData = 0;
 }
 
-void CWizMobileTcpContainer::run()
+void WizMobileTcpContainer::run()
 {
     if (!m_tcpSocket)
     {
@@ -452,7 +452,7 @@ void CWizMobileTcpContainer::run()
     exec();
 }
 
-void CWizMobileTcpContainer::initTcpSocket()
+void WizMobileTcpContainer::initTcpSocket()
 {
     m_tcpSocket = new QTcpSocket();
     connect(m_tcpSocket, SIGNAL(readyRead()), this, SLOT(readTcpPendingData()), Qt::DirectConnection);

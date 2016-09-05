@@ -10,9 +10,9 @@
 #include "share/wizmisc.h"
 #include "share/wizsettings.h"
 
-CWizUpdaterDialog::CWizUpdaterDialog(QWidget *parent)
+WizUpdaterDialog::WizUpdaterDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizUpdaterDialog)
+    , ui(new Ui::WizUpdaterDialog)
     , m_isOldDatabase(false)
     , m_bUpdateDatabase(false)
     , m_bUpdateApp(false)
@@ -27,7 +27,7 @@ CWizUpdaterDialog::CWizUpdaterDialog(QWidget *parent)
     ui->labelIcon->setPixmap(pixmap);
 }
 
-void CWizUpdaterDialog::mousePressEvent(QMouseEvent* event)
+void WizUpdaterDialog::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         m_bMovable = true;
@@ -35,21 +35,21 @@ void CWizUpdaterDialog::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void CWizUpdaterDialog::mouseMoveEvent(QMouseEvent* event)
+void WizUpdaterDialog::mouseMoveEvent(QMouseEvent* event)
 {
     if (event->buttons().testFlag(Qt::LeftButton) && m_bMovable) {
         move(pos() + (event->pos() - m_lastPos));
     }
 }
 
-void CWizUpdaterDialog::mouseReleaseEvent(QMouseEvent* event)
+void WizUpdaterDialog::mouseReleaseEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton) {
         m_bMovable = false;
     }
 }
 
-void CWizUpdaterDialog::center()
+void WizUpdaterDialog::center()
 {
     setGeometry(QStyle::alignedRect(
                     Qt::LeftToRight,
@@ -59,18 +59,18 @@ void CWizUpdaterDialog::center()
     ));
 }
 
-void CWizUpdaterDialog::setGuiNotify(const QString& text)
+void WizUpdaterDialog::setGuiNotify(const QString& text)
 {
     ui->label->setText(text);
     ui->progressUpdate->setValue(ui->progressUpdate->value() + 1);
 }
 
-CWizUpdaterDialog::~CWizUpdaterDialog()
+WizUpdaterDialog::~WizUpdaterDialog()
 {
     delete ui;
 }
 
-bool CWizUpdaterDialog::checkNeedUpdate()
+bool WizUpdaterDialog::checkNeedUpdate()
 {
     if (needUpdateDatabase()) {
         return true;
@@ -83,7 +83,7 @@ bool CWizUpdaterDialog::checkNeedUpdate()
     return false;
 }
 
-bool CWizUpdaterDialog::needUpdateDatabase()
+bool WizUpdaterDialog::needUpdateDatabase()
 {
     // from v1.0 to new database structure
     if (detectIsOldDatabaseStruct()) {
@@ -97,7 +97,7 @@ bool CWizUpdaterDialog::needUpdateDatabase()
     return false;
 }
 
-bool CWizUpdaterDialog::needUpdateApp()
+bool WizUpdaterDialog::needUpdateApp()
 {
     // check stub here, created by CWizUpdaterNotifyDialog
     QFile fileUpdate(QDir::homePath() + "/.wiznote/update/WIZNOTE_READY_FOR_UPGRADE");
@@ -108,7 +108,7 @@ bool CWizUpdaterDialog::needUpdateApp()
     return m_bUpdateApp;
 }
 
-void CWizUpdaterDialog::doUpdate()
+void WizUpdaterDialog::doUpdate()
 {
     if (m_isOldDatabase) {
         doOldDatabaseUpgrade();
@@ -125,7 +125,7 @@ void CWizUpdaterDialog::doUpdate()
     QTimer::singleShot(3000, this, SLOT(close()));
 }
 
-void CWizUpdaterDialog::doUpdateAppSetSteps()
+void WizUpdaterDialog::doUpdateAppSetSteps()
 {
     int steps = 0;
 
@@ -137,7 +137,7 @@ void CWizUpdaterDialog::doUpdateAppSetSteps()
     ui->progressUpdate->setMaximum(steps);
 }
 
-void CWizUpdaterDialog::doUpdateApp()
+void WizUpdaterDialog::doUpdateApp()
 {
     // read metadata
     QList<QStringList> files;
@@ -145,10 +145,10 @@ void CWizUpdaterDialog::doUpdateApp()
     setGuiNotify("Prepare upgrade");
 
     QString strConfig = ::WizGetUpgradePath() + "config.txt";
-    CWizSettings* config = new CWizSettings(strConfig);
+    WizSettings* config = new WizSettings(strConfig);
 
     int i = 0;
-    QString strFileEntry = config->GetString("Files", QString::number(i));
+    QString strFileEntry = config->getString("Files", QString::number(i));
     while (!strFileEntry.isEmpty()) {
         QStringList strFileMeta = strFileEntry.split("*");
 
@@ -157,7 +157,7 @@ void CWizUpdaterDialog::doUpdateApp()
         files.append(strFile);
 
         i++;
-        strFileEntry = config->GetString("Files", QString::number(i));
+        strFileEntry = config->getString("Files", QString::number(i));
     }
 
     QList<QStringList>::const_iterator it;
@@ -198,7 +198,7 @@ void CWizUpdaterDialog::doUpdateApp()
     ui->progressUpdate->setValue(ui->progressUpdate->maximum());
 }
 
-bool CWizUpdaterDialog::detectIsOldDatabaseStruct()
+bool WizUpdaterDialog::detectIsOldDatabaseStruct()
 {
     // old structure store on $HOME/WizNote/ on linux/mac/windows
     // do not envoke WizGetDataStorePath()
@@ -217,7 +217,7 @@ bool CWizUpdaterDialog::detectIsOldDatabaseStruct()
     return false;
 }
 
-void CWizUpdaterDialog::doOldDatabaseUpgradeSetSteps()
+void WizUpdaterDialog::doOldDatabaseUpgradeSetSteps()
 {
     int steps = 0;
 
@@ -229,7 +229,7 @@ void CWizUpdaterDialog::doOldDatabaseUpgradeSetSteps()
     ui->progressUpdate->setMaximum(steps + 10);
 }
 
-void CWizUpdaterDialog::doOldDatabaseUpgrade()
+void WizUpdaterDialog::doOldDatabaseUpgrade()
 {
     QDir homeDir(QDir::homePath());
     QString oldDataStorePath = QDir::homePath() + "/WizNote/";
@@ -297,7 +297,7 @@ void CWizUpdaterDialog::doOldDatabaseUpgrade()
     }
 }
 
-void CWizUpdaterDialog::doDatabaseUpgrade()
+void WizUpdaterDialog::doDatabaseUpgrade()
 {
     // stub here
 }

@@ -6,18 +6,18 @@
 
 #include <QObject>
 
-class CWizMacToolBarItem;
+class WizMacToolBarItem;
 class QAction;
 
-class CWizMacActionHelper : public QObject
+class WizMacActionHelper : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizMacActionHelper(CWizMacToolBarItem* item, QAction* action, QObject* parent);
+    WizMacActionHelper(WizMacToolBarItem* item, QAction* action, QObject* parent);
 
 private:
-    CWizMacToolBarItem* m_item;
+    WizMacToolBarItem* m_item;
 
 public Q_SLOTS:
     void on_action_changed();

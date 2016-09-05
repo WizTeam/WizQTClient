@@ -4,11 +4,11 @@
 #include <QMessageBox>
 #include <QList>
 
-class CWizMessageBox
+class WizMessageBox
 {
 public:
-    CWizMessageBox();
-    ~CWizMessageBox();
+    WizMessageBox();
+    ~WizMessageBox();
 
     static QMessageBox::StandardButton critical(QWidget * parent, const QString & title, const QString & text,
                                          QMessageBox::StandardButtons buttons = QMessageBox::Ok,
@@ -51,11 +51,11 @@ private:
 
 };
 
-class CMessageBox : public QMessageBox
+class WizMessageBox : public QMessageBox
 {
     Q_OBJECT
 public:
-    explicit CMessageBox(QWidget *parent = 0) : QMessageBox(parent) { }
+    explicit WizMessageBox(QWidget *parent = 0) : QMessageBox(parent) { }
 
 signals:
     void resized();

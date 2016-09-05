@@ -4,14 +4,14 @@
 #include <QToolButton>
 #include <QIcon>
 
-class CWizExplorerApp;
+class WizExplorerApp;
 
-class CWizButton : public QToolButton
+class WizButton : public QToolButton
 {
     Q_OBJECT
 
 public:
-    explicit CWizButton(QWidget* parent);
+    explicit WizButton(QWidget* parent);
     void setAction(QAction* action);
 
 protected:

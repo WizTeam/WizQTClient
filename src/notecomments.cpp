@@ -8,28 +8,28 @@
 #include "sync/token.h"
 #include "sync/apientry.h"
 
-static NoteCommentsPrivate* g_comments = 0;
+static WizNoteCommentsPrivate* g_comments = 0;
 
-NoteCommentsPrivate::NoteCommentsPrivate()
+WizNoteCommentsPrivate::WizNoteCommentsPrivate()
 {
     //connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)),
     //        SLOT(onViewNoteLoaded(CWizDocumentView*, const WIZDOCUMENTDATA&)));
     //connect(Token::instance(), SIGNAL(tokenAcquired(QString)), SLOT(onTokenAcquired(QString)));
 }
 
-NoteCommentsPrivate::~NoteCommentsPrivate()
+WizNoteCommentsPrivate::~WizNoteCommentsPrivate()
 {
     g_comments = 0;
 }
 
-void NoteCommentsPrivate::onViewNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& note)
+void WizNoteCommentsPrivate::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& note)
 {
     m_map.insert(view, note);
 
-    Token::requestToken();
+    WizToken::requestToken();
 }
 
-void NoteCommentsPrivate::onTokenAcquired(const QString& strToken)
+void WizNoteCommentsPrivate::onTokenAcquired(const QString& strToken)
 {
     if (strToken.isEmpty())
         return;
@@ -37,28 +37,28 @@ void NoteCommentsPrivate::onTokenAcquired(const QString& strToken)
     loadComments(strToken);
 }
 
-void NoteCommentsPrivate::onCommentsButtonClicked()
+void WizNoteCommentsPrivate::onCommentsButtonClicked()
 {
 }
 
-void NoteCommentsPrivate::loadComments(const QString& strToken)
+void WizNoteCommentsPrivate::loadComments(const QString& strToken)
 {
-    QMap<CWizDocumentView*, WIZDOCUMENTDATA>::const_iterator it;
+    QMap<WizDocumentView*, WIZDOCUMENTDATA>::const_iterator it;
     for (it = m_map.begin(); it != m_map.end(); it++) {
-        qDebug() << CommonApiEntry::commentUrl(strToken, it.value().strKbGUID, it.value().strGUID);
+        qDebug() << WizCommonApiEntry::commentUrl(strToken, it.value().strKbGUID, it.value().strGUID);
     }
 }
 
 
 
-NoteComments::NoteComments()
+WizNoteComments::WizNoteComments()
 {
 }
 
-void NoteComments::init()
+void WizNoteComments::init()
 {
     if (!g_comments) {
-        g_comments = new NoteCommentsPrivate();
+        g_comments = new WizNoteCommentsPrivate();
     }
 }
 

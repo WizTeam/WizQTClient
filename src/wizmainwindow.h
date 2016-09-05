@@ -24,78 +24,78 @@ class QComboBox;
 class QActionGroup;
 struct TemplateData;
 
-class CWizProgressDialog;
-class CWizDocumentListView;
-class CWizDocumentSelectionView;
-class CWizDocumentTransitionView;
-class CWizActions;
-class CWizDocumentViewHistory;
-class CWizFixedSpacer;
-class CWizMacFixedSpacer;
-class CWizSplitter;
-class CWizAnimateAction;
-class CWizOptionsWidget;
-class CWizIAPDialog;
-class CWizTemplatePurchaseDialog;
+class WizProgressDialog;
+class WizDocumentListView;
+class WizDocumentSelectionView;
+class WizDocumentTransitionView;
+class WizActions;
+class WizDocumentViewHistory;
+class WizFixedSpacer;
+class WizMacFixedSpacer;
+class WizSplitter;
+class WizAnimateAction;
+class WizOptionsWidget;
+class WizIAPDialog;
+class WizTemplatePurchaseDialog;
 
-class CWizSearchView;
-class CWizSearcher;
-class CWizSearchIndexer;
+class WizSearchView;
+class WizSearcher;
+class WizSearchIndexer;
 
 class QtSegmentControl;
-class CWizObjectDownloaderHost;
+class WizObjectDownloaderHost;
 class CWizUserAvatarDownloaderHost;
-class CWizKMSyncThread;
-class CWizUserVerifyDialog;
-class wizImageButton;
+class WizKMSyncThread;
+class WizUserVerifyDialog;
+class WizImageButton;
 
-class CWizMacToolBar;
+class WizMacToolBar;
 class QNetworkDiskCache;
-class CWizConsoleDialog;
-class CWizUpgradeChecker;
-class CWizCategoryView;
+class WizConsoleDialog;
+class WizUpgradeChecker;
+class WizCategoryView;
 class QListWidgetItem;
-class CWizCategoryViewMessageItem;
-class CWizCategoryViewShortcutItem;
-class CWizDocumentWebView;
-class CWizTrayIcon;
-class CWizMobileFileReceiver;
+class WizCategoryViewMessageItem;
+class WizCategoryViewShortcutItem;
+class WizDocumentWebView;
+class WizTrayIcon;
+class WizMobileFileReceiver;
 class ICore;
 
-class MessageListView;
+class WizMessageListView;
 class WizMessageSelector;
 class WizMessageListTitleBar;
 
-class CWizDocumentView;
-class CWizSingleDocumentViewDelegate;
+class WizDocumentView;
+class WizSingleDocumentViewDelegate;
 
 #ifdef Q_OS_MAC
-class CWizMacToolBarButtonItem;
+class WizMacToolBarButtonItem;
 #endif
 
-class MainWindow
+class WizMainWindow
 #ifdef Q_OS_MAC
     : public QMainWindow
 #else
-    : public CWizShadowWindow<QMainWindow>
+    : public WizShadowWindow<QMainWindow>
 #endif
-    , public CWizExplorerApp
+    , public WizExplorerApp
 {
     Q_OBJECT
 
 #ifdef Q_OS_MAC
     typedef QMainWindow  _baseClass;
 #else
-    typedef CWizShadowWindow<QMainWindow> _baseClass;
+    typedef WizShadowWindow<QMainWindow> _baseClass;
 #endif
 
 public:
-    explicit MainWindow(CWizDatabaseManager& dbMgr, QWidget *parent = 0);
+    explicit WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent = 0);
     virtual void init();
 
     void saveStatus();
     void restoreStatus();
-    ~MainWindow();
+    ~WizMainWindow();
 
     void cleanOnQuit();
 
@@ -105,14 +105,14 @@ public:
 
     bool isLogout() const { return m_bLogoutRestart; }
 
-    CWizSearcher* searcher();
+    WizSearcher* searcher();
     QString searchKeywords() const { return m_strSearchKeywords; }
     void rebuildFTS();
 
-    static MainWindow* instance();
+    static WizMainWindow* instance();
 
     QNetworkDiskCache* webViewNetworkCache();
-    CWizDocumentView* docView();
+    WizDocumentView* docView();
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event);
@@ -133,27 +133,27 @@ protected:
 #endif
 
 private:
-    CWizDatabaseManager& m_dbMgr;
-    CWizProgressDialog* m_progress;
-    CWizUserSettings* m_settings;
-    CWizKMSyncThread* m_sync;
-    CWizUserVerifyDialog* m_userVerifyDialog;
-    CWizConsoleDialog* m_console;
-    CWizUpgradeChecker* m_upgrade;
-    CWizIAPDialog* m_iapDialog;
-    CWizTemplatePurchaseDialog* m_templateIAPDialog;
+    WizDatabaseManager& m_dbMgr;
+    WizProgressDialog* m_progress;
+    WizUserSettings* m_settings;
+    WizKMSyncThread* m_sync;
+    WizUserVerifyDialog* m_userVerifyDialog;
+    WizConsoleDialog* m_console;
+    WizUpgradeChecker* m_upgrade;
+    WizIAPDialog* m_iapDialog;
+    WizTemplatePurchaseDialog* m_templateIAPDialog;
 
     //
-    CWizTrayIcon* m_tray;
+    WizTrayIcon* m_tray;
     QMenu* m_trayMenu;
 
 #ifdef USECOCOATOOLBAR
-    CWizMacToolBar* m_toolBar;
-    CWizMacFixedSpacer* m_spacerForToolButtonAdjust;
-    CWizMacToolBarButtonItem* m_newNoteButton;
+    WizMacToolBar* m_toolBar;
+    WizMacFixedSpacer* m_spacerForToolButtonAdjust;
+    WizMacToolBarButtonItem* m_newNoteButton;
 #else
     QToolBar* m_toolBar;
-    CWizFixedSpacer* m_spacerForToolButtonAdjust;
+    WizFixedSpacer* m_spacerForToolButtonAdjust;
 #endif
 
     QMenuBar* m_menuBar;
@@ -176,34 +176,34 @@ private:
     QAction* m_optionsAction;
 #endif
 
-    CWizActions* m_actions;
-    CWizCategoryView* m_category;
-    CWizDocumentListView* m_documents;
-    MessageListView* m_msgList;
+    WizActions* m_actions;
+    WizCategoryView* m_category;
+    WizDocumentListView* m_documents;
+    WizMessageListView* m_msgList;
     QWidget* m_noteListWidget;
     QWidget* m_msgListWidget;
     WizMessageListTitleBar* m_msgListTitleBar;
 
-    CWizDocumentSelectionView* m_documentSelection;
-    CWizDocumentView* m_doc;
-    std::shared_ptr<CWizSplitter> m_splitter;
+    WizDocumentSelectionView* m_documentSelection;
+    WizDocumentView* m_doc;
+    std::shared_ptr<WizSplitter> m_splitter;
     QWidget* m_docListContainer;
-    CWizSingleDocumentViewDelegate* m_singleViewDelegate;
+    WizSingleDocumentViewDelegate* m_singleViewDelegate;
 
     QLabel* m_labelDocumentsHint;
 //    QLabel* m_labelDocumentsCount;
-    wizImageButton* m_btnMarkDocumentsReaded;
+    WizImageButton* m_btnMarkDocumentsReaded;
 
-    CWizDocumentViewHistory* m_history;
-    CWizAnimateAction* m_animateSync;
+    WizDocumentViewHistory* m_history;
+    WizAnimateAction* m_animateSync;
 
-    CWizSearcher* m_searcher;
+    WizSearcher* m_searcher;
     QString m_strSearchKeywords;
 
-    CWizSearchIndexer* m_searchIndexer;
-    CWizSearchView* m_searchWidget;
+    WizSearchIndexer* m_searchIndexer;
+    WizSearchView* m_searchWidget;
 
-    CWizMobileFileReceiver *m_mobileFileReceiver;    
+    WizMobileFileReceiver *m_mobileFileReceiver;    
 
     bool m_bRestart;
     bool m_bLogoutRestart;
@@ -233,14 +233,14 @@ public:
     // CWizDocument passthrough methods
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
-    CWizDocumentView* documentView() const;
+    WizDocumentView* documentView() const;
 
-    CWizActions* actions() const { return m_actions; }
+    WizActions* actions() const { return m_actions; }
 
     //FIXME: why provide download host and dialog by mainwidnow ???
-    CWizObjectDownloaderHost* downloaderHost() const;
-    CWizProgressDialog* progressDialog() const { return m_progress; }
-    CWizIAPDialog* iapDialog();
+    WizObjectDownloaderHost* downloaderHost() const;
+    WizProgressDialog* progressDialog() const { return m_progress; }
+    WizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
@@ -444,9 +444,9 @@ public:
     // WizExplorerApp pointer
     virtual QWidget* mainWindow();
     virtual QObject* object();
-    virtual CWizDatabaseManager& databaseManager() { return m_dbMgr; }
-    virtual CWizCategoryBaseView& category();
-    virtual CWizUserSettings& userSettings();
+    virtual WizDatabaseManager& databaseManager() { return m_dbMgr; }
+    virtual WizCategoryBaseView& category();
+    virtual WizUserSettings& userSettings();
 
     //WizExplorerApp API:
     QObject* Window() { return this; }
@@ -458,8 +458,8 @@ public:
     QObject* DocumentsCtrl();
     Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
 
-    QObject* DatabaseManager();
-    Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
+    QObject* databaseManager();
+    Q_PROPERTY(QObject* databaseManager READ databaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
@@ -469,7 +469,7 @@ public:
     //NOTE: these functions would called by web page, do not delete
     Q_INVOKABLE QString TranslateString(const QString& string);
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
-    Q_INVOKABLE void GetToken(const QString& strFunctionName);
+    Q_INVOKABLE void getToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
     Q_INVOKABLE void AppStoreIAP();
     Q_INVOKABLE void copyLink(const QString& link);
@@ -501,12 +501,12 @@ private:
     void showCommentWidget();
 
     //
-    CWizDocumentWebView* getActiveEditor();
+    WizDocumentWebView* getActiveEditor();
     //
     void showDocumentList();
-    void showDocumentList(CWizCategoryBaseView* category);
-    void showMessageList(CWizCategoryViewMessageItem* pItem);
-    void viewDocumentByShortcut(CWizCategoryViewShortcutItem *pShortcut);
+    void showDocumentList(WizCategoryBaseView* category);
+    void showMessageList(WizCategoryViewMessageItem* pItem);
+    void viewDocumentByShortcut(WizCategoryViewShortcutItem *pShortcut);
     void searchNotesBySQL(const QString& strSQLWhere);
     void searchNotesBySQLAndKeyword(const QString& strSQLWhere, const QString& strKeyword, int searchScope);
     //

@@ -14,11 +14,11 @@
 
 namespace Utils {
 
-QString Misc::time2humanReadable(const QDateTime& time) {
+QString WizMisc::time2humanReadable(const QDateTime& time) {
     return time2humanReadable(time, "yy-MM-dd");
 }
 
-QString Misc::time2humanReadable(const QDateTime& time, const QString& formate)
+QString WizMisc::time2humanReadable(const QDateTime& time, const QString& formate)
 {
     QDateTime t(QDateTime::currentDateTime());
     int nElapseSecs = time.secsTo(t);
@@ -58,7 +58,7 @@ QString Misc::time2humanReadable(const QDateTime& time, const QString& formate)
     return QString("Error");
 }
 
-bool Misc::loadUnicodeTextFromFile(const QString& strFileName, QString& strText)
+bool WizMisc::loadUnicodeTextFromFile(const QString& strFileName, QString& strText)
 {
     QFile file(strFileName);
     if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -71,7 +71,7 @@ bool Misc::loadUnicodeTextFromFile(const QString& strFileName, QString& strText)
     return true;
 }
 
-void Misc::addBackslash(QString& strPath)
+void WizMisc::addBackslash(QString& strPath)
 {
     strPath.replace('\\', '/');
 
@@ -81,7 +81,7 @@ void Misc::addBackslash(QString& strPath)
     strPath += '/';
 }
 
-void Misc::removeBackslash(CString& strPath)
+void WizMisc::removeBackslash(CString& strPath)
 {
     while (1)
     {
@@ -92,26 +92,26 @@ void Misc::removeBackslash(CString& strPath)
     }
 }
 
-CString Misc::addBackslash2(const CString& strPath)
+CString WizMisc::addBackslash2(const CString& strPath)
 {
     CString str(strPath);
     addBackslash(str);
     return str;
 }
-CString Misc::removeBackslash2(const CString& strPath)
+CString WizMisc::removeBackslash2(const CString& strPath)
 {
     CString str(strPath);
     removeBackslash(str);
     return str;
 }
 
-void Misc::ensurePathExists(const CString& path)
+void WizMisc::ensurePathExists(const CString& path)
 {
     QDir dir;
     dir.mkpath(path);
 }
 
-void Misc::ensureFileExists(const QString& strFileName)
+void WizMisc::ensureFileExists(const QString& strFileName)
 {
     QFile file(strFileName);
     if (!file.exists()) {
@@ -120,10 +120,10 @@ void Misc::ensureFileExists(const QString& strFileName)
     }
 }
 
-CString Misc::extractFilePath(const CString& strFileName)
+CString WizMisc::extractFilePath(const CString& strFileName)
 {
     CString str = strFileName;
-    str.Replace('\\', '/');
+    str.replace('\\', '/');
     int index = str.lastIndexOf('/');
     if (-1 == index)
         return strFileName;
@@ -132,13 +132,13 @@ CString Misc::extractFilePath(const CString& strFileName)
 }
 
 
-CString Misc::extractLastPathName(const CString& strFileName)
+CString WizMisc::extractLastPathName(const CString& strFileName)
 {
     CString strPath = removeBackslash2(strFileName);
     return extractFileName(strPath);
 }
 
-QString Misc::extractFileName(const QString& strFileName)
+QString WizMisc::extractFileName(const QString& strFileName)
 {
     QString str = strFileName;
     str.replace('\\', '/');
@@ -149,7 +149,7 @@ QString Misc::extractFileName(const QString& strFileName)
     return strFileName.right(str.length() - index - 1);
 }
 
-QString Misc::extractFileTitle(const QString &strFileName)
+QString WizMisc::extractFileTitle(const QString &strFileName)
 {
     QString strName = extractFileName(strFileName);
 
@@ -160,12 +160,12 @@ QString Misc::extractFileTitle(const QString &strFileName)
     return strName.left(index);
 }
 
-CString Misc::extractTitleTemplate(const CString& strFileName)
+CString WizMisc::extractTitleTemplate(const CString& strFileName)
 {
     return strFileName;
 }
 
-CString Misc::extractFileExt(const CString& strFileName)
+CString WizMisc::extractFileExt(const CString& strFileName)
 {
     CString strName = extractFileName(strFileName);
     //
@@ -173,22 +173,22 @@ CString Misc::extractFileExt(const CString& strFileName)
     if (-1 == index)
         return "";
     //
-    return strName.right(strName.GetLength() - index);  //include .
+    return strName.right(strName.getLength() - index);  //include .
 }
 
-qint64 Misc::getFileSize(const CString& strFileName)
+qint64 WizMisc::getFileSize(const CString& strFileName)
 {
     QFileInfo info(strFileName);
     return info.size();
 }
 
-void Misc::deleteFile(const CString& strFileName)
+void WizMisc::deleteFile(const CString& strFileName)
 {
     QDir dir(extractFilePath(strFileName));
     dir.remove(extractFileName(strFileName));
 }
 
-QString Misc::getHtmlBodyContent(QString strHtml)
+QString WizMisc::getHtmlBodyContent(QString strHtml)
 {
     QRegExp regex("<body.*>([\\s\\S]*)</body>", Qt::CaseInsensitive);
     QString strBody;
@@ -200,7 +200,7 @@ QString Misc::getHtmlBodyContent(QString strHtml)
     return strBody;
 }
 
-void Misc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
+void WizMisc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
 {
     QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
     if (regh.indexIn(strHtml) != -1) {
@@ -215,7 +215,7 @@ void Misc::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QStr
     }
 }
 
-void Misc::copyTextToClipboard(const QString& text)
+void WizMisc::copyTextToClipboard(const QString& text)
 {
     QClipboard* clip = QApplication::clipboard();
     QMimeData* data = new QMimeData();
@@ -224,12 +224,12 @@ void Misc::copyTextToClipboard(const QString& text)
     clip->setMimeData(data);
 }
 
-bool Misc::isChinese()
+bool WizMisc::isChinese()
 {
     return isSimpChinese() || isTraditionChinese();
 }
 
-bool Misc::isSimpChinese()
+bool WizMisc::isSimpChinese()
 {
     QLocale local;
     QString name = local.name().toLower();
@@ -241,7 +241,7 @@ bool Misc::isSimpChinese()
     return false;
 }
 
-bool Misc::isTraditionChinese()
+bool WizMisc::isTraditionChinese()
 {
     QLocale local;
     QString name = local.name().toLower();
@@ -253,7 +253,7 @@ bool Misc::isTraditionChinese()
     return false;
 }
 
-bool Misc::localeAwareCompare(const QString& s1, const QString& s2)
+bool WizMisc::localeAwareCompare(const QString& s1, const QString& s2)
 {
     static bool isCh = isChinese();
     if (isCh)
@@ -273,7 +273,7 @@ bool Misc::localeAwareCompare(const QString& s1, const QString& s2)
     return s1.compare(s2) < 0;
 }
 
-int Misc::getVersionCode()
+int WizMisc::getVersionCode()
 {
     QString str(WIZ_CLIENT_VERSION);
     QStringList strList = str.split('.');

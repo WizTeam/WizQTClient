@@ -5,7 +5,7 @@
 #include "wizmainwindow.h"
 
 
-CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
+WizStatusBar::WizStatusBar(WizExplorerApp& app, QWidget *parent)
     : QLabel(parent)
     , m_app(app)
 {
@@ -13,14 +13,14 @@ CWizStatusBar::CWizStatusBar(CWizExplorerApp& app, QWidget *parent)
     setAutoFillBackground(true);
 }
 
-void CWizStatusBar::adjustPosition()
+void WizStatusBar::adjustPosition()
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     int y1 = mainWindow->size().height() - size().height();
     move(0, y1);
 }
 
-void CWizStatusBar::showText(const QString& strText /* = QString() */)
+void WizStatusBar::showText(const QString& strText /* = QString() */)
 {
     setText(strText);
     adjustSize();
@@ -29,12 +29,12 @@ void CWizStatusBar::showText(const QString& strText /* = QString() */)
     raise();
 }
 
-bool CWizStatusBar::isCursorInside()
+bool WizStatusBar::isCursorInside()
 {
     int nMargin = 30;
 
     // determine cursor position is inside statusbar frame or not
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     QPoint pos = mainWindow->mapFromGlobal(QCursor::pos());
     int y = mainWindow->size().height() - size().height() - nMargin;
     QRect rect(0, y, size().width(), size().height() + nMargin);

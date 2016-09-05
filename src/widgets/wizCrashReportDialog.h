@@ -10,13 +10,13 @@ class WizCrashReportDialog;
 }
 
 class QPlainTextEdit;
-class CWizCrashReportDialog : public QDialog
+class WizCrashReportDialog : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizCrashReportDialog(const QString& text, QWidget *parent = 0);
-    ~CWizCrashReportDialog();
+    explicit WizCrashReportDialog(const QString& text, QWidget *parent = 0);
+    ~WizCrashReportDialog();
 
 private slots:
     void on_btn_yes_clicked();

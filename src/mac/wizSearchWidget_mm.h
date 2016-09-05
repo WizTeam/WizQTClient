@@ -11,7 +11,7 @@ QT_BEGIN_NAMESPACE
 class QLineEdit;
 class QTimer;
 class QTreeWidget;
-class CWizUserSettings;
+class WizUserSettings;
 QT_END_NAMESPACE
 
 class WizSuggestCompletionon;
@@ -21,19 +21,19 @@ const int NORMALSEARCHWIDGETWIDTH = 292;
 const int HIGHPIXSEARCHWIDGETWIDTH = 270;
 
 
-class CWizSearchView : public CWizCocoaViewContainer
+class WizSearchView : public WizCocoaViewContainer
 {
     Q_OBJECT
 
 public:
-    CWizSearchView();
+    WizSearchView();
     void clear();
     void clearFocus();
     void focus();
     void setText(const QString& text);
     QString currentText();
 
-    void setUserSettings(CWizUserSettings* settings);
+    void setUserSettings(WizUserSettings* settings);
 
     bool isEditing();
 
@@ -66,23 +66,23 @@ private:
     QSize m_sizeHint;
 };
 
-class CWizSuggestiongList : public QTreeWidget
+class WizSuggestiongList : public QTreeWidget
 {
     Q_OBJECT
 
 public:
-    CWizSuggestiongList(QWidget* parent = 0);
+    WizSuggestiongList(QWidget* parent = 0);
 
 protected:
     void mouseMoveEvent(QMouseEvent* event);
     void leaveEvent(QEvent* ev);
 };
 
-class CWizSuggestionSeacher : public QObject
+class WizSuggestionSeacher : public QObject
 {
     Q_OBJECT
 public:
-    CWizSuggestionSeacher(QObject* parent = 0);
+    WizSuggestionSeacher(QObject* parent = 0);
 
     void searchSuggestion(const QString& inputText);
 
@@ -95,10 +95,10 @@ class WizSuggestCompletionon : public QObject
     Q_OBJECT
 
 public:
-    WizSuggestCompletionon(CWizSearchView *parent = 0);
+    WizSuggestCompletionon(WizSearchView *parent = 0);
     ~WizSuggestCompletionon();
 
-    void setUserSettings(CWizUserSettings* settings);
+    void setUserSettings(WizUserSettings* settings);
 
     bool eventFilter(QObject *obj, QEvent *ev) Q_DECL_OVERRIDE;
 
@@ -121,7 +121,7 @@ private:
     void resetContainerSize(int width, int height);
 
 private:
-    CWizSearchView *m_editor;
+    WizSearchView *m_editor;
     QWidget *m_popupWgt;
     QWidget *m_infoWgt;
     QTreeWidget *m_treeWgt;
@@ -130,9 +130,9 @@ private:
     int m_popupWgtWidth;
     bool m_usable;
 
-    CWizSuggestionSeacher* m_searcher;
+    WizSuggestionSeacher* m_searcher;
 
-    CWizUserSettings* m_settings;
+    WizUserSettings* m_settings;
 };
 
 #endif

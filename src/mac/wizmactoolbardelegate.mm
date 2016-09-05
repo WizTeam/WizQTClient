@@ -33,7 +33,7 @@
 
 
 
-CWizMacActionHelper::CWizMacActionHelper(CWizMacToolBarItem* item, QAction* action, QObject* parent)
+WizMacActionHelper::WizMacActionHelper(WizMacToolBarItem* item, QAction* action, QObject* parent)
     : QObject(parent)
     , m_item(item)
 {
@@ -41,14 +41,14 @@ CWizMacActionHelper::CWizMacActionHelper(CWizMacToolBarItem* item, QAction* acti
 }
 
 
-void CWizMacActionHelper::on_action_changed()
+void WizMacActionHelper::on_action_changed()
 {
     m_item->onActionChanged();
 }
 
 
 
-class CWizMacToolBarActionItem : public CWizMacToolBarItem
+class CWizMacToolBarActionItem : public WizMacToolBarItem
 {
 public:
     CWizMacToolBarActionItem(CWizMacToolBarDelegate* delegate, QAction* action)
@@ -67,7 +67,7 @@ public:
     }
 
 private:
-    CWizMacActionHelper m_helper;
+    WizMacActionHelper m_helper;
     CWizMacToolBarDelegate* m_delegate;
     QAction* m_action;
     NSString* m_id;
@@ -151,32 +151,32 @@ private Q_SLOTS:
     }
 };
 
-class CWizMacToolBarStandardItem : public CWizMacToolBarItem
+class CWizMacToolBarStandardItem : public WizMacToolBarItem
 {
 public:
-    CWizMacToolBarStandardItem(CWizMacToolBar::StandardItem item)
+    CWizMacToolBarStandardItem(WizMacToolBar::StandardItem item)
         : m_standardItem(item)
     {
 
     }
 private:
-    CWizMacToolBar::StandardItem m_standardItem;
+    WizMacToolBar::StandardItem m_standardItem;
 public:
     virtual NSString* itemIdentifier() const
     {
-        if (m_standardItem == CWizMacToolBar::Separator)
+        if (m_standardItem == WizMacToolBar::Separator)
             return NSToolbarSeparatorItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::Space)
+        else if (m_standardItem == WizMacToolBar::Space)
             return NSToolbarSpaceItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::FlexibleSpace)
+        else if (m_standardItem == WizMacToolBar::FlexibleSpace)
             return NSToolbarFlexibleSpaceItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::ShowColors)
+        else if (m_standardItem == WizMacToolBar::ShowColors)
             return NSToolbarShowColorsItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::ShowFonts)
+        else if (m_standardItem == WizMacToolBar::ShowFonts)
             return NSToolbarShowFontsItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::CustomizeToolbar)
+        else if (m_standardItem == WizMacToolBar::CustomizeToolbar)
             return NSToolbarCustomizeToolbarItemIdentifier;
-        else if (m_standardItem == CWizMacToolBar::PrintItem)
+        else if (m_standardItem == WizMacToolBar::PrintItem)
             return NSToolbarPrintItemIdentifier;
         //
         assert(false);
@@ -190,10 +190,10 @@ public:
     }
 };
 
-class CWizMacToolBarCustomViewItem : public CWizMacToolBarItem
+class CWizMacToolBarCustomViewItem : public WizMacToolBarItem
 {
 public:
-    CWizMacToolBarCustomViewItem(CWizMacToolBarDelegate* delegate, CWizCocoaViewContainer* container, const QString& label, const QString& tooltip)
+    CWizMacToolBarCustomViewItem(CWizMacToolBarDelegate* delegate, WizCocoaViewContainer* container, const QString& label, const QString& tooltip)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
         , m_container(container)
@@ -239,18 +239,18 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    CWizCocoaViewContainer* m_container;
+    WizCocoaViewContainer* m_container;
     QString m_strLabel;
     QString m_strTooltip;
 };
 
-class CWizMacToolBarSearchItem : public CWizMacToolBarItem
+class CWizMacToolBarSearchItem : public WizMacToolBarItem
 {
 public:
     CWizMacToolBarSearchItem(CWizMacToolBarDelegate* delegate, const QString& label, const QString& tooltip, int width)
         : m_delegate(delegate)
         , m_id(WizGenGUID())
-        , m_searchField(new CWizSearchView())
+        , m_searchField(new WizSearchView())
         , m_strLabel(label)
         , m_strTooltip(tooltip)
         , m_width(width)
@@ -259,12 +259,12 @@ public:
 private:
     CWizMacToolBarDelegate* m_delegate;
     NSString* m_id;
-    CWizSearchView* m_searchField;
+    WizSearchView* m_searchField;
     QString m_strLabel;
     QString m_strTooltip;
     int m_width;
 public:
-    CWizSearchView* widget() const { return m_searchField; }
+    WizSearchView* widget() const { return m_searchField; }
 
     virtual NSString* itemIdentifier() const
     {
@@ -302,11 +302,11 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool cullUnselectable)
+NSMutableArray *itemIdentifiers(const QList<WizMacToolBarItem *> *items, bool cullUnselectable)
 {
     NSMutableArray *array = [[[NSMutableArray alloc] init] autorelease];
 
-    foreach (const CWizMacToolBarItem* item, *items)
+    foreach (const WizMacToolBarItem* item, *items)
     {
         if (!cullUnselectable)
         {
@@ -319,14 +319,14 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 @implementation CWizMacToolBarDelegate
 
--(id)initWithToolbar:(NSToolbar*)tb qtToolBar:(CWizMacToolBar*)qtToolBar
+-(id)initWithToolbar:(NSToolbar*)tb qtToolBar:(WizMacToolBar*)qtToolBar
 {
     m_toolbar = tb;
     m_qtToolBar = qtToolBar;
     //
     self = [super init];
     if (self) {
-        items = new QList<CWizMacToolBarItem *>();
+        items = new QList<WizMacToolBarItem *>();
     }
     return self;
 }
@@ -442,7 +442,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     //
     NSString* itemId = [item itemIdentifier];
     //
-    CWizMacToolBarItem* barItem = [self itemFromItemIdentifier: itemId];
+    WizMacToolBarItem* barItem = [self itemFromItemIdentifier: itemId];
     if (!barItem)
         return;
     //
@@ -457,7 +457,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 - (NSToolbarItem*) getSearchToolBarItem
 {
-    foreach (CWizMacToolBarItem* item, *items)
+    foreach (WizMacToolBarItem* item, *items)
     {
         if (CWizMacToolBarSearchItem* search = dynamic_cast<CWizMacToolBarSearchItem*> (item))
         {
@@ -468,9 +468,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     return NULL;
 }
 
-- (CWizSearchView*) getSearchWidget
+- (WizSearchView*) getSearchWidget
 {
-    foreach (CWizMacToolBarItem* item, *items)
+    foreach (WizMacToolBarItem* item, *items)
     {
         if (CWizMacToolBarSearchItem* search = dynamic_cast<CWizMacToolBarSearchItem*> (item))
         {
@@ -487,7 +487,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 }
 
 
-- (void)addStandardItem:(CWizMacToolBar::StandardItem) standardItem
+- (void)addStandardItem:(WizMacToolBar::StandardItem) standardItem
 {
     items->append(new CWizMacToolBarStandardItem(standardItem));
 }
@@ -498,7 +498,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
     items->append(pItem);
 }
 
-- (void)addCustomView:(CWizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip
+- (void)addCustomView:(WizCocoaViewContainer *)container label:(const QString&)label tooltip:(const QString&)tooltip
 {
     items->append(new CWizMacToolBarCustomViewItem(self, container, label, tooltip));
 }
@@ -512,9 +512,9 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 //    items->clear();
 }
 
-- (CWizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier
+- (WizMacToolBarItem*) itemFromItemIdentifier: (NSString*)itemIdentifier
 {
-    foreach (CWizMacToolBarItem* item, *items)
+    foreach (WizMacToolBarItem* item, *items)
     {
         if ([itemIdentifier isEqualToString:item->itemIdentifier()])
         {
@@ -527,7 +527,7 @@ NSMutableArray *itemIdentifiers(const QList<CWizMacToolBarItem *> *items, bool c
 
 - (NSToolbarItem*) itemIdentifierToItem: (NSString*)itemIdentifier
 {
-    CWizMacToolBarItem* item = [self itemFromItemIdentifier: itemIdentifier];
+    WizMacToolBarItem* item = [self itemFromItemIdentifier: itemIdentifier];
     if (item == NULL)
         return nil;
     //

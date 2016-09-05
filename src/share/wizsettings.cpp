@@ -5,27 +5,27 @@
 #include <QLocale>
 #include <algorithm>
 
-CWizSettings::CWizSettings(const QString& strFileName)
+WizSettings::WizSettings(const QString& strFileName)
     : QSettings(strFileName, QSettings::IniFormat)
 {
     setIniCodec("utf-8");
 }
 
-QString CWizSettings::GetString(const QString& strSection, const QString& strKey, const QString& strDef /*= ""*/)
+QString WizSettings::getString(const QString& strSection, const QString& strKey, const QString& strDef /*= ""*/)
 {
     QVariant v = value(strSection + "/" + strKey, strDef);
     return v.toString();
 }
 
-BOOL CWizSettings::SetString(const QString& strSection, const QString& strKey, const QString& str)
+BOOL WizSettings::setString(const QString& strSection, const QString& strKey, const QString& str)
 {
     setValue(strSection + "/" + strKey, str);
     return TRUE;
 }
 
-int CWizSettings::GetInt(const QString& strSection, const QString& strKey, int nDef /*= 0*/)
+int WizSettings::getInt(const QString& strSection, const QString& strKey, int nDef /*= 0*/)
 {
-    QString str = GetString(strSection, strKey, WizIntToStr(nDef));
+    QString str = getString(strSection, strKey, WizIntToStr(nDef));
     int n = _ttoi(str);
     if (WizIntToStr(n) != str)
         return nDef;
@@ -33,49 +33,49 @@ int CWizSettings::GetInt(const QString& strSection, const QString& strKey, int n
     return n;
 }
 
-BOOL CWizSettings::SetInt(const QString& strSection, const QString& strKey, int val)
+BOOL WizSettings::setInt(const QString& strSection, const QString& strKey, int val)
 {
-    return SetString(strSection, strKey, WizIntToStr(val));
+    return setString(strSection, strKey, WizIntToStr(val));
 }
 
-BOOL CWizSettings::GetBool(const QString& strSection, const QString& strKey, bool def /* = false */)
+BOOL WizSettings::getBool(const QString& strSection, const QString& strKey, bool def /* = false */)
 {
-    return GetInt(strSection, strKey, def ? 1 : 0) != 0;
+    return getInt(strSection, strKey, def ? 1 : 0) != 0;
 }
 
-BOOL CWizSettings::SetBool(const QString& strSection, const QString& strKey, bool val)
+BOOL WizSettings::setBool(const QString& strSection, const QString& strKey, bool val)
 {
-    return SetInt(strSection, strKey, val ? 1 : 0);
+    return setInt(strSection, strKey, val ? 1 : 0);
 }
 
-QColor CWizSettings::GetColor(const QString& strSection,
+QColor WizSettings::getColor(const QString& strSection,
                               const QString& strKey,
                               QColor defColor /* = "FFFFFF" */)
 {
-    QString str = GetString(strSection, strKey, "");
+    QString str = getString(strSection, strKey, "");
     if (str.isEmpty())
         return defColor;
 
     return WizStringToColor2(str);
 }
 
-QString CWizSettings::GetEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef /*= ""*/)
+QString WizSettings::getEncryptedString(const QString& strSection, const QString& strKey, const QString& strDef /*= ""*/)
 {
-    return WizStringFromBase64(GetString(strSection, strKey, strDef));
+    return WizStringFromBase64(getString(strSection, strKey, strDef));
 }
 
-BOOL CWizSettings::SetEncryptedString(const QString& strSection, const QString& strKey, const QString& str)
+BOOL WizSettings::setEncryptedString(const QString& strSection, const QString& strKey, const QString& str)
 {
-    return SetString(strSection, strKey, WizStringToBase64(str));
+    return setString(strSection, strKey, WizStringToBase64(str));
 }
 
-void CWizSettings::GetSections(CWizStdStringArray& arrayAction)
+void WizSettings::getSections(CWizStdStringArray& arrayAction)
 {
     QStringList sl = childGroups();
     arrayAction.assign(sl.begin(), sl.end());
 }
 
-void CWizSettings::GetKeys(const QString& strSection, CWizStdStringArray& arrayAction)
+void WizSettings::getKeys(const QString& strSection, CWizStdStringArray& arrayAction)
 {
     beginGroup(strSection);
     QStringList sl = childKeys();
@@ -84,94 +84,94 @@ void CWizSettings::GetKeys(const QString& strSection, CWizStdStringArray& arrayA
 }
 
 
-QString CWizSettings::GetProxyHost()
+QString WizSettings::getProxyHost()
 {
-    return GetString("Sync", "ProxyHost");
+    return getString("Sync", "ProxyHost");
 }
 
-void CWizSettings::SetProxyHost(const QString& val)
+void WizSettings::setProxyHost(const QString& val)
 {
-    SetString("Sync", "ProxyHost", val);
+    setString("Sync", "ProxyHost", val);
 }
 
-WizProxyType CWizSettings::GetProxyType()
+WizProxyType WizSettings::getProxyType()
 {
-    int port = GetInt("Sync", "ProxyType", -1);
+    int port = getInt("Sync", "ProxyType", -1);
     if (port < 0)
         port = WizProxy_HttpProxy;
 
     return (WizProxyType)port;
 }
 
-void CWizSettings::SetProxyType(WizProxyType type)
+void WizSettings::setProxyType(WizProxyType type)
 {
-    SetInt("Sync", "ProxyType", type);
+    setInt("Sync", "ProxyType", type);
 }
 
-int CWizSettings::GetProxyPort()
+int WizSettings::getProxyPort()
 {
-    int port = GetInt("Sync", "ProxyPort", 0);
+    int port = getInt("Sync", "ProxyPort", 0);
     if (port <= 0)
         port = 80;
 
     return port;
 }
 
-void CWizSettings::SetProxyPort(int val)
+void WizSettings::setProxyPort(int val)
 {
-    SetInt("Sync", "ProxyPort", val);
+    setInt("Sync", "ProxyPort", val);
 }
 
-QString CWizSettings::GetProxyUserName()
+QString WizSettings::getProxyUserName()
 {
-    return GetString("Sync", "ProxyUserName");
+    return getString("Sync", "ProxyUserName");
 }
 
-void CWizSettings::SetProxyUserName(const QString& val)
+void WizSettings::setProxyUserName(const QString& val)
 {
-    SetString("Sync", "ProxyUserName", val);
+    setString("Sync", "ProxyUserName", val);
 }
 
-QString CWizSettings::GetProxyPassword()
+QString WizSettings::getProxyPassword()
 {
-    return GetString("Sync", "ProxyPassword");
+    return getString("Sync", "ProxyPassword");
 }
 
-void CWizSettings::SetProxyPassword(const QString& val)
+void WizSettings::setProxyPassword(const QString& val)
 {
-    SetString("Sync", "ProxyPassword", val);
+    setString("Sync", "ProxyPassword", val);
 }
 
-bool CWizSettings::GetProxyStatus()
+bool WizSettings::getProxyStatus()
 {
-    return GetBool("Sync", "ProxyStatus", false);
+    return getBool("Sync", "ProxyStatus", false);
 }
 
-void CWizSettings::SetProxyStatus(bool val)
+void WizSettings::setProxyStatus(bool val)
 {
-    SetBool("Sync", "ProxyStatus", val);
+    setBool("Sync", "ProxyStatus", val);
 }
 
 
 CString WizGetShortcut(const CString& strName, const CString& strDef /*= ""*/)
 {
-    CWizSettings settings(Utils::PathResolve::globalSettingsFile());
-    return settings.GetString("Shortcut", strName, strDef);
+    WizSettings settings(Utils::WizPathResolve::globalSettingsFile());
+    return settings.getString("Shortcut", strName, strDef);
 }
 
 
-CWizUserSettings::CWizUserSettings(const QString& strAccountFolderName)
+WizUserSettings::WizUserSettings(const QString& strAccountFolderName)
     : m_strAccountFolderName(strAccountFolderName)
     , m_db(NULL)
 {
 }
 
-CWizUserSettings::CWizUserSettings(CWizDatabase& db)
+WizUserSettings::WizUserSettings(WizDatabase& db)
     : m_db(&db)
 {
 }
 
-void CWizUserSettings::setAccountFolderName(const QString& strAccountFolderName)
+void WizUserSettings::setAccountFolderName(const QString& strAccountFolderName)
 {
     if (!m_db) {
         m_strAccountFolderName = strAccountFolderName;
@@ -180,139 +180,139 @@ void CWizUserSettings::setAccountFolderName(const QString& strAccountFolderName)
     }
 }
 
-QString CWizUserSettings::myWizMail() const
+QString WizUserSettings::myWizMail() const
 {
     return get("ACCOUNT", "MYWIZMAIL");
 }
 
-QString CWizUserSettings::get(const QString& section, const QString& strKey) const
+QString WizUserSettings::get(const QString& section, const QString& strKey) const
 {
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            return db.GetMetaDef(section, strKey);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            return db.getMetaDef(section, strKey);
         }
     }
 
     if (m_db) {
-        return m_db->GetMetaDef(section, strKey);
+        return m_db->getMetaDef(section, strKey);
     }
 
     return QString();
 }
 
-void CWizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
+void WizUserSettings::set(const QString& section, const QString& strKey, const QString& strValue)
 {
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            db.SetMeta(section, strKey, strValue);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            db.setMeta(section, strKey, strValue);
             return;
         }
     }
 
     if (m_db) {
-        m_db->SetMeta(section, strKey, strValue);
+        m_db->setMeta(section, strKey, strValue);
         return;
     }
 }
 
-QString CWizUserSettings::userId() const
+QString WizUserSettings::userId() const
 {
     if (m_db)
-        return m_db->GetUserId();
+        return m_db->getUserId();
 
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            return db.GetUserId();
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            return db.getUserId();
         }
     }
 
     return QString();
 }
 
-void CWizUserSettings::setUserId(const QString& strUserId)
+void WizUserSettings::setUserId(const QString& strUserId)
 {
     if (m_db)
     {
-        m_db->SetMeta("Account", "USERID", strUserId);
+        m_db->setMeta("Account", "USERID", strUserId);
     }
     else if (!m_strAccountFolderName.isEmpty())
     {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            db.SetMeta("Account", "USERID", strUserId);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            db.setMeta("Account", "USERID", strUserId);
         }
     }
 }
 
-QString CWizUserSettings::get(const QString& strKey) const
+QString WizUserSettings::get(const QString& strKey) const
 {
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            return db.GetMetaDef(USER_SETTINGS_SECTION, strKey);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            return db.getMetaDef(USER_SETTINGS_SECTION, strKey);
         }
     }
 
     if (m_db) {
-        return m_db->GetMetaDef(USER_SETTINGS_SECTION, strKey);
+        return m_db->getMetaDef(USER_SETTINGS_SECTION, strKey);
     }
 
     return QString();
 }
 
-void CWizUserSettings::set(const QString& strKey, const QString& strValue)
+void WizUserSettings::set(const QString& strKey, const QString& strValue)
 {
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            db.SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            db.setMeta(USER_SETTINGS_SECTION, strKey, strValue);
             return;
         }
     }
 
     if (m_db) {
-        m_db->SetMeta(USER_SETTINGS_SECTION, strKey, strValue);
+        m_db->setMeta(USER_SETTINGS_SECTION, strKey, strValue);
         return;
     }
 }
 
-QString CWizUserSettings::password() const
+QString WizUserSettings::password() const
 {
     QString strPassword;
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            strPassword = db.GetMetaDef("Account", "Password");
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            strPassword = db.getMetaDef("Account", "Password");
         }
     }
 
     if (m_db) {
-        strPassword = m_db->GetMetaDef("Account", "Password");
+        strPassword = m_db->getMetaDef("Account", "Password");
     }
 
     return ::WizDecryptPassword(strPassword);
 }
 
-void CWizUserSettings::setPassword(const QString& strPassword /* = NULL */)
+void WizUserSettings::setPassword(const QString& strPassword /* = NULL */)
 {
     if (!m_strAccountFolderName.isEmpty()) {
-        CWizDatabase db;
-        if (db.Open(m_strAccountFolderName)) {
-            db.SetMeta("Account", "Password", strPassword);
+        WizDatabase db;
+        if (db.open(m_strAccountFolderName)) {
+            db.setMeta("Account", "Password", strPassword);
             return;
         }
     }
 
     if (m_db) {
-        m_db->SetMeta("Account", "Password", strPassword);
+        m_db->setMeta("Account", "Password", strPassword);
         return;
     }
 }
 
-WizServerType CWizUserSettings::serverType() const
+WizServerType WizUserSettings::serverType() const
 {
     QString strServerType = get("ServerType");
     if (strServerType.isEmpty()) {
@@ -322,35 +322,35 @@ WizServerType CWizUserSettings::serverType() const
     return WizServerType(strServerType.toInt());
 }
 
-void CWizUserSettings::setServerType(WizServerType server)
+void WizUserSettings::setServerType(WizServerType server)
 {
     QString strServerType = QString::number(server);
     set("ServerType", strServerType);
 }
 
-QString CWizUserSettings::enterpriseServerIP()
+QString WizUserSettings::enterpriseServerIP()
 {
     QString strServerType = get("EnterpriseServerIP");
     return strServerType;
 }
 
-void CWizUserSettings::setEnterpriseServerIP(const QString& strEnterpriseServerd)
+void WizUserSettings::setEnterpriseServerIP(const QString& strEnterpriseServerd)
 {
     set("EnterpriseServerIP", strEnterpriseServerd);
 }
 
-QString CWizUserSettings::serverLicence()
+QString WizUserSettings::serverLicence()
 {
     QString strServerType = get("ServerLicence");
     return strServerType;
 }
 
-void CWizUserSettings::setServerLicence(const QString& strLicence)
+void WizUserSettings::setServerLicence(const QString& strLicence)
 {
     set("ServerLicence", strLicence);
 }
 
-bool CWizUserSettings::autoLogin() const
+bool WizUserSettings::autoLogin() const
 {
     QString strAutoLogin = get("AutoLogin");
     if (!strAutoLogin.isEmpty()) {
@@ -360,12 +360,12 @@ bool CWizUserSettings::autoLogin() const
     return false;
 }
 
-void CWizUserSettings::setAutoLogin(bool bAutoLogin)
+void WizUserSettings::setAutoLogin(bool bAutoLogin)
 {
     set("AutoLogin", bAutoLogin ? "1" : "0");
 }
 
-bool CWizUserSettings::autoCheckUpdate() const
+bool WizUserSettings::autoCheckUpdate() const
 {
     QString strAutoCheckUpdate = get("AutoCheckUpdate");
     if (!strAutoCheckUpdate.isEmpty()) {
@@ -375,12 +375,12 @@ bool CWizUserSettings::autoCheckUpdate() const
     return true;
 }
 
-void CWizUserSettings::setAutoCheckUpdate(bool bAutoCheckUpdate)
+void WizUserSettings::setAutoCheckUpdate(bool bAutoCheckUpdate)
 {
     set("AutoCheckUpdate", bAutoCheckUpdate ? "1" : "0");
 }
 
-bool CWizUserSettings::showSystemTrayIcon() const
+bool WizUserSettings::showSystemTrayIcon() const
 {
     QString strShowTrayIcon = get("ShowSystemTrayIcon");
     if (!strShowTrayIcon.isEmpty()) {
@@ -390,12 +390,12 @@ bool CWizUserSettings::showSystemTrayIcon() const
     return true;
 }
 
-void CWizUserSettings::setShowSystemTrayIcon(bool bShowTrayIcon)
+void WizUserSettings::setShowSystemTrayIcon(bool bShowTrayIcon)
 {
     set("ShowSystemTrayIcon", bShowTrayIcon ? "1" : "0");
 }
 
-bool CWizUserSettings::useSystemBasedStyle() const
+bool WizUserSettings::useSystemBasedStyle() const
 {
     QString strUseSystemStyle = get("UseSystemBasedStyle");
     if (!strUseSystemStyle.isEmpty()) {
@@ -405,12 +405,12 @@ bool CWizUserSettings::useSystemBasedStyle() const
     return true;
 }
 
-void CWizUserSettings::setUseSystemBasedStyle(bool bSystemStyle)
+void WizUserSettings::setUseSystemBasedStyle(bool bSystemStyle)
 {
     set("UseSystemBasedStyle", bSystemStyle ? "1" : "0");
 }
 
-bool CWizUserSettings::receiveMobileFile() const
+bool WizUserSettings::receiveMobileFile() const
 {
     QString strReceiveMobileFile = get("RecevieMobileFile");
     if (!strReceiveMobileFile.isEmpty()) {
@@ -420,12 +420,12 @@ bool CWizUserSettings::receiveMobileFile() const
     return false;
 }
 
-void CWizUserSettings::setReceiveMobileFile(bool bReceiveFile)
+void WizUserSettings::setReceiveMobileFile(bool bReceiveFile)
 {
     set("RecevieMobileFile", bReceiveFile ? "1" : "0");
 }
 
-double CWizUserSettings::printMarginValue(WizPositionType posType)
+double WizUserSettings::printMarginValue(WizPositionType posType)
 {
     QString strMarginValue = get("PrintMarginValue_" + QString::number(posType));
     if (strMarginValue.isEmpty()) {
@@ -435,12 +435,12 @@ double CWizUserSettings::printMarginValue(WizPositionType posType)
     return strMarginValue.toDouble();
 }
 
-void CWizUserSettings::setPrintMarginValue(WizPositionType posType, double dValue)
+void WizUserSettings::setPrintMarginValue(WizPositionType posType, double dValue)
 {
     set("PrintMarginValue_" + QString::number(posType), QString::number(dValue));
 }
 
-int CWizUserSettings::printMarginUnit()
+int WizUserSettings::printMarginUnit()
 {
     QString strMarginType = get("PrintMarginType");
     if (strMarginType.isEmpty()) {
@@ -450,23 +450,23 @@ int CWizUserSettings::printMarginUnit()
     return strMarginType.toInt();
 }
 
-void CWizUserSettings::setPrintMarginUnit(int nUnit)
+void WizUserSettings::setPrintMarginUnit(int nUnit)
 {
     set("PrintMarginType", QString::number(nUnit));
 }
 
-QString CWizUserSettings::newFeatureGuideVersion()
+QString WizUserSettings::newFeatureGuideVersion()
 {
     QString strGuideVersion = get("NewFeatureGuideVersion");
     return strGuideVersion;
 }
 
-void CWizUserSettings::setNewFeatureGuideVersion(const QString& strGuideVersion)
+void WizUserSettings::setNewFeatureGuideVersion(const QString& strGuideVersion)
 {
     set("NewFeatureGuideVersion", strGuideVersion);
 }
 
-bool CWizUserSettings::needShowMobileFileReceiverUserGuide()
+bool WizUserSettings::needShowMobileFileReceiverUserGuide()
 {
     QString strShowGuide = get("ShowMobileFileReceiverUserGuide");
     if (!strShowGuide.isEmpty()) {
@@ -476,12 +476,12 @@ bool CWizUserSettings::needShowMobileFileReceiverUserGuide()
     return true;
 }
 
-void CWizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
+void WizUserSettings::setNeedShowMobileFileReceiverUserGuide(bool bNeedShow)
 {
     set("ShowMobileFileReceiverUserGuide", bNeedShow ? "1" : "0");
 }
 
-bool CWizUserSettings::searchEncryptedNote()
+bool WizUserSettings::searchEncryptedNote()
 {
     QString strShowGuide = get("SearchEncryptedNote");
     if (!strShowGuide.isEmpty()) {
@@ -491,46 +491,46 @@ bool CWizUserSettings::searchEncryptedNote()
     return false;
 }
 
-void CWizUserSettings::setSearchEncryptedNote(bool bSearchEncryNote)
+void WizUserSettings::setSearchEncryptedNote(bool bSearchEncryNote)
 {
     set("SearchEncryptedNote", bSearchEncryNote ? "1" : "0");
 }
 
-QString CWizUserSettings::encryptedNotePassword()
+QString WizUserSettings::encryptedNotePassword()
 {
     QString strPassword = get("EncryptedNotePassword");
     return ::WizDecryptPassword(strPassword);
 }
 
-void CWizUserSettings::setEncryptedNotePassword(const QString& strPassword)
+void WizUserSettings::setEncryptedNotePassword(const QString& strPassword)
 {
     QString strEncryptPass = ::WizEncryptPassword(strPassword);
     set("EncryptedNotePassword", strEncryptPass);
 }
 
 static bool rememberPasswordForSession = false;
-bool CWizUserSettings::isRememberNotePasswordForSession()
+bool WizUserSettings::isRememberNotePasswordForSession()
 {
     return rememberPasswordForSession;
 }
 
-void CWizUserSettings::setRememberNotePasswordForSession(bool remember)
+void WizUserSettings::setRememberNotePasswordForSession(bool remember)
 {
     rememberPasswordForSession = remember;
 }
 
-QString CWizUserSettings::editorBackgroundColor()
+QString WizUserSettings::editorBackgroundColor()
 {
     QString strColor = get("EditorBackgroundColor");    
     return strColor;
 }
 
-void CWizUserSettings::setEditorBackgroundColor(const QString& strColor)
+void WizUserSettings::setEditorBackgroundColor(const QString& strColor)
 {
     set("EditorBackgroundColor", strColor);
 }
 
-bool CWizUserSettings::isManualSortingEnabled()
+bool WizUserSettings::isManualSortingEnabled()
 {
     QString strManualSortingEnable = get("ManualSortingEnable");
     if (!strManualSortingEnable.isEmpty()) {
@@ -544,12 +544,12 @@ bool CWizUserSettings::isManualSortingEnabled()
 #endif
 }
 
-void CWizUserSettings::setManualSortingEnable(bool bEnable)
+void WizUserSettings::setManualSortingEnable(bool bEnable)
 {
     set("ManualSortingEnable", bEnable ? "1" : "0");
 }
 
-QString CWizUserSettings::skin()
+QString WizUserSettings::skin()
 {
     // just return because no skin selection from v1.4
     return "default";
@@ -580,7 +580,7 @@ QString CWizUserSettings::skin()
     return ::WizGetDefaultSkinName();
 }
 
-void CWizUserSettings::setSkin(const QString& strSkinName)
+void WizUserSettings::setSkin(const QString& strSkinName)
 {
     Q_ASSERT(!strSkinName.isEmpty());
 
@@ -588,7 +588,7 @@ void CWizUserSettings::setSkin(const QString& strSkinName)
     set("Skin", strSkinName);
 }
 
-QString CWizUserSettings::locale()
+QString WizUserSettings::locale()
 {
     if (!m_strLocale.isEmpty()) {
         return m_strLocale;
@@ -610,7 +610,7 @@ QString CWizUserSettings::locale()
     //}
 
     strLocale = QLocale::system().name();
-    if (::PathFileExists(Utils::PathResolve::localeFileName(strLocale))) {
+    if (::PathFileExists(Utils::WizPathResolve::localeFileName(strLocale))) {
         m_strLocale = strLocale;
         return strLocale;
     }
@@ -618,7 +618,7 @@ QString CWizUserSettings::locale()
     return WizGetDefaultTranslatedLocal();
 }
 
-void CWizUserSettings::setLocale(const QString& strLocale)
+void WizUserSettings::setLocale(const QString& strLocale)
 {
     Q_ASSERT(!strLocale.isEmpty());
 
@@ -626,7 +626,7 @@ void CWizUserSettings::setLocale(const QString& strLocale)
     set("Locale", strLocale);
 }
 
-QString CWizUserSettings::defaultFontFamily()
+QString WizUserSettings::defaultFontFamily()
 {
     QString strFont = get("DefaultFontFamily");
     if (!strFont.isEmpty())
@@ -639,12 +639,12 @@ QString CWizUserSettings::defaultFontFamily()
 #endif
 }
 
-void CWizUserSettings::setDefaultFontFamily(const QString& strFont)
+void WizUserSettings::setDefaultFontFamily(const QString& strFont)
 {
     set("DefaultFontFamily", strFont);
 }
 
-int CWizUserSettings::defaultFontSize()
+int WizUserSettings::defaultFontSize()
 {
     int nSize = get("DefaultFontSize").toInt();
     if (nSize)
@@ -653,12 +653,12 @@ int CWizUserSettings::defaultFontSize()
     return 15; // default 15px
 }
 
-void CWizUserSettings::setDefaultFontSize(int nSize)
+void WizUserSettings::setDefaultFontSize(int nSize)
 {
     set("DefaultFontSize", QString::number(nSize));
 }
 
-WizDocumentViewMode CWizUserSettings::noteViewMode() const
+WizDocumentViewMode WizUserSettings::noteViewMode() const
 {
     QString mode = get("NoteViewMode");
 
@@ -669,7 +669,7 @@ WizDocumentViewMode CWizUserSettings::noteViewMode() const
     return viewmodeAlwaysReading;
 }
 
-int CWizUserSettings::syncInterval() const
+int WizUserSettings::syncInterval() const
 {
     int nInterval = get("SyncInterval").toInt();
     if (!nInterval)
@@ -678,12 +678,12 @@ int CWizUserSettings::syncInterval() const
     return nInterval;
 }
 
-void CWizUserSettings::setSyncInterval(int minutes)
+void WizUserSettings::setSyncInterval(int minutes)
 {
     set("SyncInterval", QString::number(minutes));
 }
 
-int CWizUserSettings::syncMethod() const
+int WizUserSettings::syncMethod() const
 {
     int nDays = get("SyncMethod").toInt();
     if (!nDays)
@@ -692,12 +692,12 @@ int CWizUserSettings::syncMethod() const
     return nDays;
 }
 
-void CWizUserSettings::setSyncMethod(int days)
+void WizUserSettings::setSyncMethod(int days)
 {
     set("SyncMethod", QString::number(days));
 }
 
-int CWizUserSettings::syncGroupMethod() const
+int WizUserSettings::syncGroupMethod() const
 {
     int nDays = get("SyncGroupMethod").toInt();
     if (!nDays)
@@ -706,12 +706,12 @@ int CWizUserSettings::syncGroupMethod() const
     return nDays;
 }
 
-void CWizUserSettings::setSyncGroupMethod(int days)
+void WizUserSettings::setSyncGroupMethod(int days)
 {
     set("SyncGroupMethod", QString::number(days));
 }
 
-void CWizUserSettings::appendRecentSearch(const QString& search)
+void WizUserSettings::appendRecentSearch(const QString& search)
 {
     if (search.isEmpty())
         return;
@@ -732,7 +732,7 @@ void CWizUserSettings::appendRecentSearch(const QString& search)
     set("RecentSearches", searches);
 }
 
-QStringList CWizUserSettings::getRecentSearches(bool reverseOrder)
+QStringList WizUserSettings::getRecentSearches(bool reverseOrder)
 {
     QStringList recentSearches = get("RecentSearches").split('/', QString::SkipEmptyParts);
 

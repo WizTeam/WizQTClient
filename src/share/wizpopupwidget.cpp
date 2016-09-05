@@ -10,7 +10,7 @@
 #endif
 
 
-CWizPopupWidget::CWizPopupWidget(QWidget* parent)
+WizPopupWidget::WizPopupWidget(QWidget* parent)
     : QWidget(parent, Qt::Popup | Qt::FramelessWindowHint)
     , m_leftAlign(false)
     , m_triangleMargin(10)
@@ -24,12 +24,12 @@ CWizPopupWidget::CWizPopupWidget(QWidget* parent)
     setPalette(pal);
 }
 
-QSize CWizPopupWidget::sizeHint() const
+QSize WizPopupWidget::sizeHint() const
 {
     return QSize(320, 400);
 }
 
-QRect CWizPopupWidget::getClientRect() const
+QRect WizPopupWidget::getClientRect() const
 {
     QMargins margins = contentsMargins();
     return QRect(margins.left(), margins.top(),
@@ -37,14 +37,14 @@ QRect CWizPopupWidget::getClientRect() const
                  height() - margins.top() - margins.bottom());
 }
 
-void CWizPopupWidget::paintEvent(QPaintEvent* event)
+void WizPopupWidget::paintEvent(QPaintEvent* event)
 {
     Q_UNUSED(event);
 
     setMask(maskRegion());
 }
 
-void CWizPopupWidget::showAtPoint(const QPoint& pt)
+void WizPopupWidget::showAtPoint(const QPoint& pt)
 {
     int xOffset = m_leftAlign ? (m_triangleMargin + m_triangleWidth / 2) : sizeHint().width() - (m_triangleMargin + m_triangleWidth / 2);
     int yOffset = 0;
@@ -77,18 +77,18 @@ void CWizPopupWidget::showAtPoint(const QPoint& pt)
     show();
 }
 
-void CWizPopupWidget::setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight)
+void WizPopupWidget::setTriangleStyle(int triangleMargin, int triangleWidth, int triangleHeight)
 {
     m_triangleMargin = triangleMargin;
     m_triangleWidth = triangleWidth;
     m_triangleHeight = triangleHeight;
 }
 
-QRegion CWizPopupWidget::maskRegion()
+QRegion WizPopupWidget::maskRegion()
 {
 //    QSize sz = size();
 
-    return Utils::StyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size().width(), size().height()), m_leftAlign,
+    return Utils::WizStyleHelper::borderRadiusRegionWithTriangle(QRect(0, 0, size().width(), size().height()), m_leftAlign,
                                                        m_triangleMargin, m_triangleWidth, m_triangleHeight);
 
 //    m_pointsRegion.clear();

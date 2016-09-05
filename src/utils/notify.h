@@ -7,7 +7,7 @@ class QString;
 
 namespace Utils {
 
-class Notify
+class WizNotify
 {
 public:
     static void sendNotify(const QString& strTile, const QString& strText);

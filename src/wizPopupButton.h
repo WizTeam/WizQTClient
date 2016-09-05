@@ -4,19 +4,19 @@
 #include <QToolButton>
 #include <QActionGroup>
 
-class CWizExplorerApp;
+class WizExplorerApp;
 
-class CWizPopupButton : public QToolButton
+class WizPopupButton : public QToolButton
 {
     Q_OBJECT
 
 public:
-    explicit CWizPopupButton(CWizExplorerApp &app, QWidget* parent = 0);
+    explicit WizPopupButton(WizExplorerApp &app, QWidget* parent = 0);
     void createAction(const QString& text, int type, QMenu* menu, QActionGroup* group);
     void setActionChecked(const QMenu* menu, int type);
 
 protected:
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
     QIcon m_iconArraw;
     QSize m_iconSize;
 
@@ -27,13 +27,13 @@ protected Q_SLOTS:
 };
 
 
-class CWizViewTypePopupButton: public CWizPopupButton
+class WizViewTypePopupButton: public WizPopupButton
 {
     Q_OBJECT
 
 public:
 
-    explicit CWizViewTypePopupButton(CWizExplorerApp &app, QWidget* parent = 0);
+    explicit WizViewTypePopupButton(WizExplorerApp &app, QWidget* parent = 0);
 //    void setActionIcon(int type);
 
 public slots:
@@ -54,13 +54,13 @@ Q_SIGNALS:
     void viewTypeChanged(int type);
 };
 
-class CWizSortingPopupButton : public CWizPopupButton
+class WizSortingPopupButton : public WizPopupButton
 {
     Q_OBJECT
 
 public:       
 
-    explicit CWizSortingPopupButton(CWizExplorerApp& app, QWidget *parent = 0);
+    explicit WizSortingPopupButton(WizExplorerApp& app, QWidget *parent = 0);
 
 public slots:
     void on_sortingTypeChanged(int type);

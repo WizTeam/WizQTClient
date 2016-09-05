@@ -4,11 +4,11 @@
 #include <QObject>
 #include "wizobject.h"
 
-class CWizUserSettings;
-class CWizDatabase;
-class CWizProgressDialog;
-class CWizDatabaseManager;
-class CWizObjectDownloaderHost;
+class WizUserSettings;
+class WizDatabase;
+class WizProgressDialog;
+class WizDatabaseManager;
+class WizObjectDownloaderHost;
 
 
 struct OperatorData
@@ -23,12 +23,12 @@ struct OperatorData
     bool combineFolders;
 };
 
-class CWizDocumentOperatorPrivate : public QObject
+class WizDocumentOperatorPrivate : public QObject
 {
     Q_OBJECT
 public:
-    CWizDocumentOperatorPrivate(OperatorData* data, QObject* parent = 0);
-    ~CWizDocumentOperatorPrivate();
+    WizDocumentOperatorPrivate(OperatorData* data, QObject* parent = 0);
+    ~WizDocumentOperatorPrivate();
 
     void copyDocumentToPersonalFolder();
     void copyDocumentToGroupFolder();
@@ -46,7 +46,7 @@ public:
     void moveGroupFolderToGroupDB();
     void movePersonalFolderToGroupDB();
 
-    void bindSignalsToProgressDialog(CWizProgressDialog* progress);
+    void bindSignalsToProgressDialog(WizProgressDialog* progress);
 
 public slots:
     void stop();
@@ -92,7 +92,7 @@ protected:
 };
 
 //
-int documentCount(CWizDatabase& db, const QString& personalFolder);
-int documentCount(CWizDatabase &db, const WIZTAGDATA &groupFolder);
+int documentCount(WizDatabase& db, const QString& personalFolder);
+int documentCount(WizDatabase &db, const WIZTAGDATA &groupFolder);
 
 #endif // CWIZOBJECTOPERATORPRIVATE_H

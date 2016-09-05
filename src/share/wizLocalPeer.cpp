@@ -19,7 +19,7 @@ static PProcessIdToSessionId pProcessIdToSessionId = 0;
 
 static const char ack[] = "ack";
 
-QString CWizLocalPeer::appSessionId(const QString &appId)
+QString WizLocalPeer::appSessionId(const QString &appId)
 {
     QByteArray idc = appId.toUtf8();
     quint16 idNum = qChecksum(idc.constData(), idc.size());
@@ -43,7 +43,7 @@ QString CWizLocalPeer::appSessionId(const QString &appId)
     return res;
 }
 
-CWizLocalPeer::CWizLocalPeer(QObject *parent, const QString &appId)
+WizLocalPeer::WizLocalPeer(QObject *parent, const QString &appId)
     : QObject(parent), id(appId)
 {
     if (id.isEmpty())
@@ -58,12 +58,12 @@ CWizLocalPeer::CWizLocalPeer(QObject *parent, const QString &appId)
     lockFile.open(QIODevice::ReadWrite);
 }
 
-bool CWizLocalPeer::isClient()
+bool WizLocalPeer::isClient()
 {
     if (lockFile.isLocked())
         return false;
 
-    if (!lockFile.lock(CWizLockedFile::WriteLock, false))
+    if (!lockFile.lock(WizLockedFile::WriteLock, false))
         return true;
 
     if (!QLocalServer::removeServer(socketName))
@@ -75,7 +75,7 @@ bool CWizLocalPeer::isClient()
     return false;
 }
 
-bool CWizLocalPeer::sendMessage(const QString &message, int timeout, bool block)
+bool WizLocalPeer::sendMessage(const QString &message, int timeout, bool block)
 {
     if (!isClient())
         return false;
@@ -110,7 +110,7 @@ bool CWizLocalPeer::sendMessage(const QString &message, int timeout, bool block)
     return res;
 }
 
-void CWizLocalPeer::receiveConnection()
+void WizLocalPeer::receiveConnection()
 {
     QLocalSocket* socket = server->nextPendingConnection();
     if (!socket)

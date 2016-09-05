@@ -8,17 +8,17 @@
 #include "share/wizdownloadobjectdata.h"
 
 namespace Ui {
-    class CWizDownloadObjectDataDialog;
+    class WizDownloadObjectDataDialog;
 }
 
-class CWizDownloadObjectDataDialog
+class WizDownloadObjectDataDialog
     : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit CWizDownloadObjectDataDialog(CWizDatabaseManager& db, QWidget *parent = 0);
-    ~CWizDownloadObjectDataDialog();
+    explicit WizDownloadObjectDataDialog(WizDatabaseManager& db, QWidget *parent = 0);
+    ~WizDownloadObjectDataDialog();
 
     // call this method instead of open()/show()/exec()
     void downloadData(const WIZOBJECTDATA& data);
@@ -26,8 +26,8 @@ public:
     bool isUserCancled() const { return m_bUserCancled; }
 
 private:
-    Ui::CWizDownloadObjectDataDialog *ui;
-    QPointer<CWizDownloadObjectData> m_downloader;
+    Ui::WizDownloadObjectDataDialog *ui;
+    QPointer<WizDownloadObjectData> m_downloader;
     bool m_bUserCancled;
 
 public Q_SLOTS:

@@ -5,7 +5,7 @@
 #include <string>
 
 // interface
-class IWizCluceneSearch
+class WizCluceneSearch
 {
 protected:
     bool beginUpdateDocument(const wchar_t* lpszIndexPath, void** ppHandle);

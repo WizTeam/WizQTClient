@@ -16,23 +16,23 @@
 #include <QtCore/qcontiguouscache.h>
 
 class QBuffer;
-class CWizInfo;
+class WizInfo;
 
 namespace Utils {
 
-class Logger : public QObject
+class WizLogger : public QObject
 {
     Q_OBJECT
 
 protected:
-    Logger();
-    ~Logger();
+    WizLogger();
+    ~WizLogger();
 public:
 
     static void messageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg);
     static void writeLog(const QString& strMsg);
     static void getAllLogs(QString& text);
-    static Logger* logger();
+    static WizLogger* logger();
 
 private Q_SLOTS:
     void onBuffer_readRead() { emit readyRead(); }
@@ -56,7 +56,7 @@ private:
 
 #if QT_VERSION < 0x050500
     #if QT_VERSION > 0x050000
-class CWizInfo
+class WizInfo
 {
     struct Stream {
         Stream(QIODevice *device) : ts(device), ref(1), type(QtDebugMsg), space(true), message_output(false), flags(0) {}
@@ -83,26 +83,26 @@ class CWizInfo
         int flags;
     } *stream;
 public:
-    inline CWizInfo(QIODevice *device) : stream(new Stream(device)) {}
-    inline CWizInfo(QString *string) : stream(new Stream(string)) {}
-    inline CWizInfo() : stream(new Stream(QtDebugMsg)) {}
-    inline CWizInfo(const CWizInfo &o):stream(o.stream) { ++stream->ref; }
-    inline CWizInfo &operator=(const CWizInfo &other);
-    ~CWizInfo();
-    inline void swap(CWizInfo &other) { qSwap(stream, other.stream); }
+    inline WizInfo(QIODevice *device) : stream(new Stream(device)) {}
+    inline WizInfo(QString *string) : stream(new Stream(string)) {}
+    inline WizInfo() : stream(new Stream(QtDebugMsg)) {}
+    inline WizInfo(const WizInfo &o):stream(o.stream) { ++stream->ref; }
+    inline WizInfo &operator=(const WizInfo &other);
+    ~WizInfo();
+    inline void swap(WizInfo &other) { qSwap(stream, other.stream); }
 
-    CWizInfo &resetFormat();
+    WizInfo &resetFormat();
 
-    inline CWizInfo &space() { stream->space = true; stream->ts << ' '; return *this; }
-    inline CWizInfo &nospace() { stream->space = false; return *this; }
-    inline CWizInfo &maybeSpace() { if (stream->space) stream->ts << ' '; return *this; }
+    inline WizInfo &space() { stream->space = true; stream->ts << ' '; return *this; }
+    inline WizInfo &nospace() { stream->space = false; return *this; }
+    inline WizInfo &maybeSpace() { if (stream->space) stream->ts << ' '; return *this; }
 
     bool autoInsertSpaces() const { return stream->space; }
     void setAutoInsertSpaces(bool b) { stream->space = b; }
 
-    inline CWizInfo &quote() { stream->unsetFlag(Stream::NoQuotes); return *this; }
-    inline CWizInfo &noquote() { stream->setFlag(Stream::NoQuotes); return *this; }
-    inline CWizInfo &maybeQuote(char c = '"') { if (!(stream->testFlag(Stream::NoQuotes))) stream->ts << c; return *this; }
+    inline WizInfo &quote() { stream->unsetFlag(Stream::NoQuotes); return *this; }
+    inline WizInfo &noquote() { stream->setFlag(Stream::NoQuotes); return *this; }
+    inline WizInfo &maybeQuote(char c = '"') { if (!(stream->testFlag(Stream::NoQuotes))) stream->ts << c; return *this; }
 
     inline CWizInfo &operator<<(QChar t) { maybeQuote('\''); stream->ts << t; maybeQuote('\''); return maybeSpace(); }
     inline CWizInfo &operator<<(bool t) { stream->ts << (t ? "true" : "false"); return maybeSpace(); }

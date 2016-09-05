@@ -63,7 +63,7 @@ GenericName[en_US.UTF-8]=WizNote\n\
 
 void installOnLinux()
 {
-    QString appPath = Utils::PathResolve::appPath();
+    QString appPath = Utils::WizPathResolve::appPath();
     QString strText = WizFormatString3(g_lpszDesktopFileName,
                                        appPath,
                                        QObject::tr("WizNote"),
@@ -110,7 +110,7 @@ int mainCore(int argc, char *argv[])
 
 #ifdef Q_OS_LINUX
     // create single application for linux
-    CWizSingleApplication a(argc, argv, "Special-Message-for-WizNote-SingleApplication");
+    WizSingleApplication a(argc, argv, "Special-Message-for-WizNote-SingleApplication");
     if (a.isRunning())
     {
         a.sendMessage(WIZ_SINGLE_APPLICATION);
@@ -131,12 +131,12 @@ int mainCore(int argc, char *argv[])
     QtWebEngine::initialize();
 
 #ifdef BUILD4APPSTORE
-    CWizIAPHelper helper;
+    WizIAPHelper helper;
     helper.validteReceiptOnLauch();
 #endif
 #endif
 
-   qInstallMessageHandler(Utils::Logger::messageHandler);
+   qInstallMessageHandler(Utils::WizLogger::messageHandler);
    QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
 
     QApplication::setApplicationName(QObject::tr("WizNote"));
@@ -158,7 +158,7 @@ int mainCore(int argc, char *argv[])
     // init sys local for crash report
     QString sysLocal = QLocale::system().name();
     QTranslator translatorSys;
-    QString sysLocalFile = Utils::PathResolve::localeFileName(sysLocal);
+    QString sysLocalFile = Utils::WizPathResolve::localeFileName(sysLocal);
     translatorSys.load(sysLocalFile);
     a.installTranslator(&translatorSys);
 
@@ -184,7 +184,7 @@ int mainCore(int argc, char *argv[])
     // setup settings
     QSettings::setDefaultFormat(QSettings::IniFormat);
     //
-    QSettings* globalSettings = new QSettings(Utils::PathResolve::globalSettingsFile(), QSettings::IniFormat);
+    QSettings* globalSettings = new QSettings(Utils::WizPathResolve::globalSettingsFile(), QSettings::IniFormat);
     WizGlobal::setGlobalSettings(globalSettings);
     //
 
@@ -198,9 +198,9 @@ int mainCore(int argc, char *argv[])
     QString strAccountFolderName = WizGetLocalFolderName(localUsers, strUserGuid);
 
     QString strPassword;
-    CWizUserSettings userSettings(strAccountFolderName);
+    WizUserSettings userSettings(strAccountFolderName);
 
-    QSettings* settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
+    QSettings* settings = new QSettings(Utils::WizPathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
     WizGlobal::setSettings(settings);
     //
     // setup locale for welcome dialog
@@ -208,12 +208,12 @@ int mainCore(int argc, char *argv[])
     QLocale::setDefault(strLocale);
 
     QTranslator translatorWizNote;
-    QString strLocaleFile = Utils::PathResolve::localeFileName(strLocale);
+    QString strLocaleFile = Utils::WizPathResolve::localeFileName(strLocale);
     translatorWizNote.load(strLocaleFile);
     a.installTranslator(&translatorWizNote);
 
     QTranslator translatorQt;
-    strLocaleFile = Utils::PathResolve::qtLocaleFileName(strLocale);
+    strLocaleFile = Utils::WizPathResolve::qtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
@@ -229,7 +229,7 @@ int mainCore(int argc, char *argv[])
     bool bFallback = true;
 
     // FIXME: move to WizService initialize
-    Token token;
+    WizToken token;
 
 
     bool bAutoLogin = userSettings.autoLogin();
@@ -241,15 +241,15 @@ int mainCore(int argc, char *argv[])
 
     //
     //set network proxy
-    CWizSettings wizSettings(Utils::PathResolve::globalSettingsFile());
-    if (wizSettings.GetProxyStatus())
+    WizSettings wizSettings(Utils::WizPathResolve::globalSettingsFile());
+    if (wizSettings.getProxyStatus())
     {
         QNetworkProxy proxy;
         proxy.setType(QNetworkProxy::HttpProxy);
-        proxy.setHostName(wizSettings.GetProxyHost());
-        proxy.setPort(wizSettings.GetProxyPort());
-        proxy.setUser(wizSettings.GetProxyUserName());
-        proxy.setPassword(wizSettings.GetProxyPassword());
+        proxy.setHostName(wizSettings.getProxyHost());
+        proxy.setPort(wizSettings.getProxyPort());
+        proxy.setUser(wizSettings.getProxyUserName());
+        proxy.setPassword(wizSettings.getProxyPassword());
         QNetworkProxy::setApplicationProxy(proxy);
     }
 
@@ -259,7 +259,7 @@ int mainCore(int argc, char *argv[])
     // manually login
     if (bFallback)
     {
-        CWizLoginDialog loginDialog(strLocale, localUsers);
+        WizLoginDialog loginDialog(strLocale, localUsers);
         if (QDialog::Accepted != loginDialog.exec())
             return 0;
 
@@ -272,7 +272,7 @@ int mainCore(int argc, char *argv[])
                 strAccountFolderName = loginDialog.userId();
             }
             qDebug() << "login user id : " << loginDialog.userId();
-            settings = new QSettings(Utils::PathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
+            settings = new QSettings(Utils::WizPathResolve::userSettingsFile(strAccountFolderName), QSettings::IniFormat);
             WizGlobal::setSettings(settings);
         }
         strPassword = loginDialog.password();
@@ -283,12 +283,12 @@ int mainCore(int argc, char *argv[])
     {
         if (userSettings.serverType() == EnterpriseServer)
         {
-            CommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
+            WizCommonApiEntry::setEnterpriseServerIP(userSettings.enterpriseServerIP());
         }
         else if (userSettings.serverType() == WizServer ||
                  (userSettings.serverType() == NoServer && !userSettings.myWizMail().isEmpty()))
         {
-            CommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
+            WizCommonApiEntry::setEnterpriseServerIP(WIZNOTE_API_SERVER);
         }
     }
 
@@ -300,18 +300,18 @@ int mainCore(int argc, char *argv[])
     strLocale = userSettings.locale();
 
     a.removeTranslator(&translatorWizNote);
-    strLocaleFile = Utils::PathResolve::localeFileName(strLocale);
+    strLocaleFile = Utils::WizPathResolve::localeFileName(strLocale);
     translatorWizNote.load(strLocaleFile);
     a.installTranslator(&translatorWizNote);
 
     a.removeTranslator(&translatorQt);
-    strLocaleFile = Utils::PathResolve::qtLocaleFileName(strLocale);
+    strLocaleFile = Utils::WizPathResolve::qtLocaleFileName(strLocale);
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
-    CommonApiEntry::setLanguage(strLocale);
+    WizCommonApiEntry::setLanguage(strLocale);
 
-    CWizDatabaseManager dbMgr(strAccountFolderName);
+    WizDatabaseManager dbMgr(strAccountFolderName);
     if (!dbMgr.openAll()) {
         QMessageBox::critical(NULL, "", QObject::tr("Can not open database"));
         return 0;
@@ -319,19 +319,19 @@ int mainCore(int argc, char *argv[])
 
 
     qDebug() << "set user id for token ; " << strUserId;
-    Token::setUserId(strUserId);
-    Token::setPasswd(strPassword);
+    WizToken::setUserId(strUserId);
+    WizToken::setPasswd(strPassword);
 
-    dbMgr.db().SetPassword(::WizEncryptPassword(strPassword));
-    dbMgr.db().UpdateInvalidData();
+    dbMgr.db().setPassword(::WizEncryptPassword(strPassword));
+    dbMgr.db().updateInvalidData();
 
     // FIXME: move to plugins
-    AvatarHost avatarHost;
+    WizAvatarHost avatarHost;
 
     // FIXME: move to core plugin initialize
-    ThumbCache cache;
+    WizThumbCache cache;
 
-    MainWindow w(dbMgr);
+    WizMainWindow w(dbMgr);
 #ifdef Q_OS_LINUX
     QObject::connect(&a, SIGNAL(messageAvailable(QString)), &w,
                      SLOT(on_application_messageAvailable(QString)));
@@ -345,7 +345,7 @@ int mainCore(int argc, char *argv[])
 #ifdef Q_OS_MAC
     //start and set safari extension
     WIZUSERINFO userInfo;
-    dbMgr.db().GetUserInfo(userInfo);
+    dbMgr.db().getUserInfo(userInfo);
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [strUserId, userInfo](){
         updateShareExtensionAccount(strUserId, userInfo.strUserGUID, userInfo.strMywizEmail ,userInfo.strDisplayName);
         //readShareExtensionAccount();
@@ -353,7 +353,7 @@ int mainCore(int argc, char *argv[])
 #endif
 
     //create introduction note for new register users
-    CWizNoteManager noteManager(dbMgr);
+    WizNoteManager noteManager(dbMgr);
     noteManager.updateTemplateJS(userSettings.locale());
     noteManager.downloadTemplatePurchaseRecord();
     if (isNewRegisterAccount)
@@ -384,7 +384,7 @@ int main(int argc, char *argv[])
 
     WizQueuedThreadsShutdown();
     // clean up
-    QString strTempPath = Utils::PathResolve::tempPath();
+    QString strTempPath = Utils::WizPathResolve::tempPath();
     ::WizDeleteAllFilesInFolder(strTempPath);
 
     return ret;

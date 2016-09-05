@@ -19,19 +19,19 @@
 
 namespace Utils {
 
-Logger::Logger()
+WizLogger::WizLogger()
     : m_buffer(new QBuffer())
     , m_mutex(QMutex::Recursive)
 {
     connect(m_buffer, SIGNAL(readyRead()), SLOT(onBuffer_readRead()));
 }
 
-Logger::~Logger()
+WizLogger::~WizLogger()
 {
 }
 
 
-void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString &msg)
+void WizLogger::messageHandler(QtMsgType type, const QMessageLogContext& context, const QString &msg)
 {
     Q_UNUSED(context);
 
@@ -65,25 +65,25 @@ void Logger::messageHandler(QtMsgType type, const QMessageLogContext& context, c
     }
 }
 
-QString Logger::logFileName()
+QString WizLogger::logFileName()
 {
-    QString strFileName = PathResolve::logFile();
+    QString strFileName = WizPathResolve::logFile();
 
-    if (Misc::getFileSize(strFileName) > 10 * 1024 * 1024)
+    if (WizMisc::getFileSize(strFileName) > 10 * 1024 * 1024)
     {
-        Misc::deleteFile(strFileName);
+        WizMisc::deleteFile(strFileName);
     }
     //
     return strFileName;
 }
 
-QString Logger::msg2LogMsg(const QString& strMsg)
+QString WizLogger::msg2LogMsg(const QString& strMsg)
 {
     QString strTime = QDateTime::currentDateTime().toString(Qt::ISODate);
     return strTime + ": " + strMsg + "\n";
 }
 
-void Logger::saveToLogFile(const QString& strMsg)
+void WizLogger::saveToLogFile(const QString& strMsg)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -94,17 +94,17 @@ void Logger::saveToLogFile(const QString& strMsg)
     logFile.close();
 }
 
-void Logger::addToBuffer(const QString& strMsg)
+void WizLogger::addToBuffer(const QString& strMsg)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    m_buffer->open(QIODevice::Append);
+    m_buffer->open(QIODevice::append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());
     m_buffer->close();
 }
 
-void Logger::getAll(QString &text)
+void WizLogger::getAll(QString &text)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -116,20 +116,20 @@ void Logger::getAll(QString &text)
     m_buffer->setBuffer(NULL);
 }
 
-Logger* Logger::logger()
+WizLogger* WizLogger::logger()
 {
-    static Logger logger;
+    static WizLogger logger;
     return &logger;
 }
 
-void Logger::writeLog(const QString& strMsg)
+void WizLogger::writeLog(const QString& strMsg)
 {
     logger()->saveToLogFile(strMsg);
     logger()->addToBuffer(strMsg);
 
     fprintf(stderr, "[INFO] %s\n", strMsg.toUtf8().constData());
 }
-void Logger::getAllLogs(QString& text)
+void WizLogger::getAllLogs(QString& text)
 {
     logger()->getAll(text);
 }
@@ -137,7 +137,7 @@ void Logger::getAllLogs(QString& text)
 } // namespace Utils
 
 #if QT_VERSION < 0x050500 && QT_VERSION > 0x050000
-CWizInfo::~CWizInfo()
+WizInfo::~WizInfo()
 {
     if (!--stream->ref) {
         if (stream->space && stream->buffer.endsWith(QLatin1Char(' ')))
@@ -146,7 +146,7 @@ CWizInfo::~CWizInfo()
 //            qt_message_output(stream->type,
 //                              stream->context,
 //                              stream->buffer);
-            Utils::Logger::logger()->writeLog(stream->buffer);
+            Utils::WizLogger::logger()->writeLog(stream->buffer);
         }
         delete stream;
     }

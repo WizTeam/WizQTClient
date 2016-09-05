@@ -2,7 +2,7 @@
 
 #include <QtGui>
 
-CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
+WizScrollBar::WizScrollBar(QWidget* parent /* = 0 */)
     : QScrollBar(parent)
     , m_bgColor("transparent")
     , m_handleColor("#C1C1C1")
@@ -21,19 +21,19 @@ CWizScrollBar::CWizScrollBar(QWidget* parent /* = 0 */)
     m_timerScrollTimeout.start(3000);
 }
 
-QSize CWizScrollBar::sizeHint() const
+QSize WizScrollBar::sizeHint() const
 {
     return m_bLeftBorder ? QSize(13, 1) : QSize(12, 1);
 }
 
-void CWizScrollBar::mouseMoveEvent(QMouseEvent* event)
+void WizScrollBar::mouseMoveEvent(QMouseEvent* event)
 {
     m_timerScrollTimeout.start(3000);
 
     QScrollBar::mouseMoveEvent(event);
 }
 
-void CWizScrollBar::syncWith(QScrollBar* source)
+void WizScrollBar::syncWith(QScrollBar* source)
 {
     setMinimum(source->minimum());
     setMaximum(source->maximum());
@@ -48,14 +48,14 @@ void CWizScrollBar::syncWith(QScrollBar* source)
 
 }
 
-void CWizScrollBar::applyStyle(const QString& bgColorName, const QString& handleColorName, bool leftBorder)
+void WizScrollBar::applyStyle(const QString& bgColorName, const QString& handleColorName, bool leftBorder)
 {
     m_bgColor = bgColorName;
     m_handleColor = handleColorName;
     m_bLeftBorder = leftBorder;
 }
 
-void CWizScrollBar::showHandle()
+void WizScrollBar::showHandle()
 {
     if (maximum() == minimum())
         return;
@@ -67,18 +67,18 @@ void CWizScrollBar::showHandle()
     m_timerScrollTimeout.start(1000);
 }
 
-void CWizScrollBar::hideHandle()
+void WizScrollBar::hideHandle()
 {
     setHandleVisible(false);
     update();
 }
 
-void CWizScrollBar::on_sourceValueChanged(int value)
+void WizScrollBar::on_sourceValueChanged(int value)
 {
     setSliderPosition(value);
 }
 
-void CWizScrollBar::on_sourceRangeChanged(int min, int max)
+void WizScrollBar::on_sourceRangeChanged(int min, int max)
 {
     setMinimum(min);
     setMaximum(max);
@@ -86,7 +86,7 @@ void CWizScrollBar::on_sourceRangeChanged(int min, int max)
     setSingleStep(m_scrollSyncSource->singleStep());
 }
 
-void CWizScrollBar::on_valueChanged(int value)
+void WizScrollBar::on_valueChanged(int value)
 {
     if (m_scrollSyncSource) {
         m_scrollSyncSource->setSliderPosition(value);
@@ -95,12 +95,12 @@ void CWizScrollBar::on_valueChanged(int value)
     showHandle();
 }
 
-void CWizScrollBar::on_scrollTimeout()
+void WizScrollBar::on_scrollTimeout()
 {
     hideHandle();
 }
 
-void CWizScrollBar::setHandleVisible(bool visible)
+void WizScrollBar::setHandleVisible(bool visible)
 {
     setStyleSheet(
         QString("QScrollBar {\
@@ -130,16 +130,16 @@ void CWizScrollBar::setHandleVisible(bool visible)
 }
 
 
-CWizListWidgetWithCustomScorllBar::CWizListWidgetWithCustomScorllBar(QWidget* parent)
+WizListWidgetWithCustomScorllBar::WizListWidgetWithCustomScorllBar(QWidget* parent)
     : QListWidget(parent)
 {
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-    m_vScroll = new CWizScrollBar(this);
+    m_vScroll = new WizScrollBar(this);
     m_vScroll->syncWith(verticalScrollBar());
 }
 
-void CWizListWidgetWithCustomScorllBar::resizeEvent(QResizeEvent* event)
+void WizListWidgetWithCustomScorllBar::resizeEvent(QResizeEvent* event)
 {
     // reset scrollbar
     m_vScroll->resize(m_vScroll->sizeHint().width(), event->size().height());

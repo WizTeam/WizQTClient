@@ -8,12 +8,12 @@
 class QMenu;
 
 
-class CWizUserInfoWidgetBase : public QToolButton
+class WizUserInfoWidgetBase : public QToolButton
 {
     Q_OBJECT
 
 public:
-    explicit CWizUserInfoWidgetBase(QWidget *parent = 0);
+    explicit WizUserInfoWidgetBase(QWidget *parent = 0);
 
 protected:
     virtual void paintEvent(QPaintEvent *event);

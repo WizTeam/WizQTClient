@@ -32,21 +32,21 @@ protected:
     bool m_bShuttingDown;
     IWizThreadPoolEvents* m_pEvents;
 public:
-    virtual void AddTask(IWizRunable* task);
-    virtual void ClearTasks();
-    virtual IWizRunable* PeekOne();    //execute on worker
+    virtual void addTask(IWizRunable* task);
+    virtual void clearTasks();
+    virtual IWizRunable* peekOne();    //execute on worker
     //
-    virtual bool IsShuttingDown();
-    virtual void Shutdown(int timeout);
-    virtual bool IsIdle();
-    virtual void SetEventsListener(IWizThreadPoolEvents* pEvents);
-    virtual void GetTaskCount(int* pnWorking, int* pnWaiting);
+    virtual bool isShuttingDown();
+    virtual void shutdown(int timeout);
+    virtual bool isIdle();
+    virtual void setEventsListener(IWizThreadPoolEvents* pEvents);
+    virtual void getTaskCount(int* pnWorking, int* pnWaiting);
     //
-    virtual void AddDelayedTask(IWizRunable* task, int delayedSeconds) { Q_UNUSED(task); Q_UNUSED(delayedSeconds); }
-    virtual void ExecuteAllNow() {}
+    virtual void addDelayedTask(IWizRunable* task, int delayedSeconds) { Q_UNUSED(task); Q_UNUSED(delayedSeconds); }
+    virtual void executeAllNow() {}
 public:
-    void BeforeTask(IWizRunable* task);
-    void AfterTask(IWizRunable* task);
+    void beforeTask(IWizRunable* task);
+    void afterTask(IWizRunable* task);
 protected:
     int GetWorkingTaskCount();
     int GetWaitingTaskCount();
@@ -73,24 +73,24 @@ protected:
 protected:
     virtual void run()
     {
-        while (!m_pool->IsShuttingDown())
+        while (!m_pool->isShuttingDown())
         {            
             //
-            IWizRunable* task = m_pool->PeekOne();
+            IWizRunable* task = m_pool->peekOne();
             if (task)
             {
-                m_pool->BeforeTask(task);
+                m_pool->beforeTask(task);
                 n_bWorking = true;
-                task->Run(m_nThreadIndex, m_pool, NULL);
+                task->run(m_nThreadIndex, m_pool, NULL);
                 n_bWorking = false;
-                m_pool->AfterTask(task);
-                task->Destroy();
+                m_pool->afterTask(task);
+                task->destroy();
             }
         }
     }
     //
 public:
-    virtual IWizThreadPool* GetThreadPool()
+    virtual IWizThreadPool* getThreadPool()
     {
         return m_pool;
     }
@@ -138,11 +138,11 @@ CWizThreadPool::~CWizThreadPool()
     m_threads.clear();
 }
 //
-void CWizThreadPool::AddTask(IWizRunable* task)
+void CWizThreadPool::addTask(IWizRunable* task)
 {
     QMutexLocker lock(&m_cs);
     //
-    QString strTaskId = task->GetTaskID();
+    QString strTaskId = task->getTaskID();
     if (!strTaskId.isEmpty())
     {
         //remove exists tasks
@@ -150,7 +150,7 @@ void CWizThreadPool::AddTask(IWizRunable* task)
         for (intptr_t i = count - 1; i >= 0; i--)
         {
             IWizRunable* t = m_tasks[i];
-            if (t->GetTaskID() == strTaskId)
+            if (t->getTaskID() == strTaskId)
             {
                 m_tasks.erase(m_tasks.begin() + i);
             }
@@ -165,14 +165,14 @@ void CWizThreadPool::AddTask(IWizRunable* task)
     m_event.wakeAll();
 }
 
-void CWizThreadPool::ClearTasks()
+void CWizThreadPool::clearTasks()
 {
     QMutexLocker lock(&m_cs);
     //
     m_tasks.clear();
 }
 
-IWizRunable* CWizThreadPool::PeekOne()    //execute on worker
+IWizRunable* CWizThreadPool::peekOne()    //execute on worker
 {
     if (m_bShuttingDown)
         return nullptr;
@@ -220,12 +220,12 @@ IWizRunable* CWizThreadPool::PeekOne()    //execute on worker
     return task;
 }
 //
-bool CWizThreadPool::IsShuttingDown()
+bool CWizThreadPool::isShuttingDown()
 {
     return m_bShuttingDown;
 }
 //
-void CWizThreadPool::Shutdown(int timeout)
+void CWizThreadPool::shutdown(int timeout)
 {
     m_bShuttingDown = true;
     //
@@ -284,7 +284,7 @@ void CWizThreadPool::Shutdown(int timeout)
     }
 }
 //
-void CWizThreadPool::GetTaskCount(int* pnWorking, int* pnWaiting)
+void CWizThreadPool::getTaskCount(int* pnWorking, int* pnWaiting)
 {
     if (pnWorking)
     {
@@ -312,7 +312,7 @@ int CWizThreadPool::GetWorkingTaskCount()
     return count;
 }
 //
-bool CWizThreadPool::IsIdle()
+bool CWizThreadPool::isIdle()
 {
     if (GetWaitingTaskCount() > 0)
         return false;
@@ -327,7 +327,7 @@ bool CWizThreadPool::IsIdle()
     }
     return true;
 }
-void CWizThreadPool::SetEventsListener(IWizThreadPoolEvents* pEvents)
+void CWizThreadPool::setEventsListener(IWizThreadPoolEvents* pEvents)
 {
     m_pEvents = pEvents;
 }
@@ -342,17 +342,17 @@ int CWizThreadPool::GetWaitingTaskCount()
     return count;
 }
 
-void CWizThreadPool::BeforeTask(IWizRunable* task)
+void CWizThreadPool::beforeTask(IWizRunable* task)
 {
     if (!m_pEvents)
         return;
-    m_pEvents->BeforeTask(task);
+    m_pEvents->beforeTask(task);
 }
-void CWizThreadPool::AfterTask(IWizRunable* task)
+void CWizThreadPool::afterTask(IWizRunable* task)
 {
     if (!m_pEvents)
         return;
-    m_pEvents->AfterTask(task);
+    m_pEvents->afterTask(task);
 }
 
 
@@ -373,22 +373,22 @@ public:
     {
     }
 protected:
-    virtual void Run()
+    virtual void run()
     {
         while (1)
         {
-            if (m_pool->IsShuttingDown())
+            if (m_pool->isShuttingDown())
                 return;
             //
-            IWizRunable* task = m_pool->PeekOne();
+            IWizRunable* task = m_pool->peekOne();
             if (task)
             {
-                m_pool->BeforeTask(task);
+                m_pool->beforeTask(task);
                 n_bWorking = true;
-                task->Run(m_nThreadIndex, m_pool, NULL);
+                task->run(m_nThreadIndex, m_pool, NULL);
                 n_bWorking = false;
-                m_pool->AfterTask(task);
-                task->Destroy();
+                m_pool->afterTask(task);
+                task->destroy();
             }
             else
             {
@@ -417,14 +417,14 @@ protected:
     std::map<IWizRunable*, QDateTime> m_mapTasksTime;
 public:
     //
-    virtual void AddTask(IWizRunable* task)
+    virtual void addTask(IWizRunable* task)
     {
-        AddDelayedTask(task, 0);
+        addDelayedTask(task, 0);
     }
     //
-    virtual void AddDelayedTask(IWizRunable* task, int delayedSeconds)
+    virtual void addDelayedTask(IWizRunable* task, int delayedSeconds)
     {
-        CWizThreadPool::AddTask(task);
+        CWizThreadPool::addTask(task);
         //
         QMutexLocker lock(&m_cs);
         //
@@ -433,7 +433,7 @@ public:
         //
         m_mapTasksTime[task] = work;
     }
-    virtual void ExecuteAllNow()
+    virtual void executeAllNow()
     {
         QMutexLocker lock(&m_cs);
         //
@@ -448,7 +448,7 @@ public:
         }
     }
     //
-    virtual IWizRunable* PeekOne()    //execute on worker
+    virtual IWizRunable* peekOne()    //execute on worker
     {
         if (m_bShuttingDown)
             return nullptr;
@@ -489,12 +489,12 @@ IWizDelayedThreadPool* WizCreateDelayedThreadPool(int threadCount, QThread::Prio
 }
 ///////////////////////////////////////////////////////////////////////////////////
 
-CWizMainQueuedThread::CWizMainQueuedThread()
+WizMainQueuedThread::WizMainQueuedThread()
     : m_bShutingDown(false)
 {
-    connect(this, SIGNAL(TaskAdded()), this, SLOT(ExecuteAllActions()), Qt::QueuedConnection);
+    connect(this, SIGNAL(taskAdded()), this, SLOT(executeAllActions()), Qt::QueuedConnection);
 }
-void CWizMainQueuedThread::AddTask(IWizRunable* task)
+void WizMainQueuedThread::addTask(IWizRunable* task)
 {
     //
     {
@@ -502,17 +502,17 @@ void CWizMainQueuedThread::AddTask(IWizRunable* task)
         m_tasks.push_back(task);
     }
     //
-    emit TaskAdded();
+    emit taskAdded();
 }
 //
-void CWizMainQueuedThread::ClearTasks()
+void WizMainQueuedThread::clearTasks()
 {
     QMutexLocker lock(&m_cs);
     m_tasks.clear();
 }
 
 //
-void CWizMainQueuedThread::GetTaskCount(int* pnWorking, int* pnWaiting)
+void WizMainQueuedThread::getTaskCount(int* pnWorking, int* pnWaiting)
 {
     QMutexLocker lock(&m_cs);
     //
@@ -527,32 +527,32 @@ void CWizMainQueuedThread::GetTaskCount(int* pnWorking, int* pnWaiting)
     }
 }
 //
-void CWizMainQueuedThread::GetAllTasks(std::deque<IWizRunable*>& tasks)
+void WizMainQueuedThread::getAllTasks(std::deque<IWizRunable*>& tasks)
 {
     QMutexLocker lock(&m_cs);
     tasks = m_tasks;
     m_tasks.clear();
 }
-void CWizMainQueuedThread::ExecuteAllActions()
+void WizMainQueuedThread::executeAllActions()
 {
     std::deque<IWizRunable*> tasks;
-    GetAllTasks(tasks);
+    getAllTasks(tasks);
     //
     for (auto it = tasks.begin();
         it != tasks.end();
         it++)
     {
-        if (IsShuttingDown())
+        if (isShuttingDown())
             return;
         IWizRunable* pRunable = *it;
-        pRunable->Run(WIZ_THREAD_MAIN, this, NULL);
-        pRunable->Destroy();
+        pRunable->run(WIZ_THREAD_MAIN, this, NULL);
+        pRunable->destroy();
 
     }
 }
 
 
-CWizTimeoutRunable::CWizTimeoutRunable(IWizRunable* pAction, int milliseconds, int nTimeoutThreadId, IWizRunable* pTimeoutAction)
+WizTimeoutRunable::WizTimeoutRunable(IWizRunable* pAction, int milliseconds, int nTimeoutThreadId, IWizRunable* pTimeoutAction)
     : m_pRunable(pAction)
     , m_nTimeoutThreadId(nTimeoutThreadId)
     , m_pTimeoutRunable(pTimeoutAction)
@@ -560,24 +560,24 @@ CWizTimeoutRunable::CWizTimeoutRunable(IWizRunable* pAction, int milliseconds, i
     m_timer = new QTimer(NULL);
     m_timer->setSingleShot(true);
     m_timer->setInterval(milliseconds);
-    connect(m_timer, SIGNAL(timeout()), this, SLOT(Timeout()));
+    connect(m_timer, SIGNAL(timeout()), this, SLOT(timeout()));
 }
-void CWizTimeoutRunable::Destroy()
+void WizTimeoutRunable::destroy()
 {
-    m_pRunable->Destroy();
+    m_pRunable->destroy();
     delete this;
 }
-void CWizTimeoutRunable::Run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents)
+void WizTimeoutRunable::run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents)
 {
-    m_pRunable->Run(threadIndex, pThreadPool, pEvents);
+    m_pRunable->run(threadIndex, pThreadPool, pEvents);
 }
-QString CWizTimeoutRunable::GetTaskID()
+QString WizTimeoutRunable::getTaskID()
 {
-    return m_pRunable->GetTaskID();
+    return m_pRunable->getTaskID();
 }
 
 
-IWizRunable* CWizTimeoutRunable::BeforeTimeout()
+IWizRunable* WizTimeoutRunable::beforeTimeout()
 {
     QMutexLocker lock(&m_cs);
     //
@@ -588,9 +588,9 @@ IWizRunable* CWizTimeoutRunable::BeforeTimeout()
 }
 
 
-void CWizTimeoutRunable::Timeout()
+void WizTimeoutRunable::timeout()
 {
-    if (IWizRunable* pRunable = BeforeTimeout())
+    if (IWizRunable* pRunable = beforeTimeout())
     {
         WizExecuteOnThread<IWizRunable*>(m_nTimeoutThreadId, pRunable);
     }
@@ -613,11 +613,11 @@ private:
     //
     static IWizThreadPool* GetMainThreadPool()
     {
-        static IWizThreadPool* pool = new CWizMainQueuedThread();
+        static IWizThreadPool* pool = new WizMainQueuedThread();
         return pool;
     }
 public:
-    static IWizThreadPool* GetThreadPool(int threadID)
+    static IWizThreadPool* getThreadPool(int threadID)
     {
         QMutex& cs = GetCriticalSection();
         QMutexLocker lock(&cs);
@@ -652,7 +652,7 @@ public:
         for (it = threads.begin(); it != threads.end(); it++)
         {
             IWizThreadPool* threadPool = it->second;
-            threadPool->Shutdown(5);
+            threadPool->shutdown(5);
         }
         threads.clear();
     }
@@ -660,21 +660,21 @@ public:
 
 void WizQueuedThreadsInit()
 {
-    CWizQueuedThreads::GetThreadPool(WIZ_THREAD_MAIN);
+    CWizQueuedThreads::getThreadPool(WIZ_THREAD_MAIN);
 }
 
 void WizQueuedThreadAddAction(int threadID, IWizRunable* action)
 {
-    IWizThreadPool* thread = CWizQueuedThreads::GetThreadPool(threadID);
+    IWizThreadPool* thread = CWizQueuedThreads::getThreadPool(threadID);
     //
-    thread->AddTask(action);
+    thread->addTask(action);
 }
 
 void WizQueuedThreadAddAction(int threadID, IWizRunable* action, int milliseconds, int nTimeoutThreadId, IWizRunable* timeoutAction)
 {
-    IWizThreadPool* thread = CWizQueuedThreads::GetThreadPool(threadID);
+    IWizThreadPool* thread = CWizQueuedThreads::getThreadPool(threadID);
     //
-    thread->AddTask(new CWizTimeoutRunable(action, milliseconds, nTimeoutThreadId, timeoutAction));
+    thread->addTask(new WizTimeoutRunable(action, milliseconds, nTimeoutThreadId, timeoutAction));
 }
 
 

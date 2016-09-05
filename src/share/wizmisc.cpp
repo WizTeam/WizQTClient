@@ -220,15 +220,15 @@ void WizGetNextFileName(CString& strFileName)
     if (!PathFileExists(strFileName))
         return;
     //
-    CString strPath = Utils::Misc::extractFilePath(strFileName);
-    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
-    CString strExt = Utils::Misc::extractFileExt(strFileName);
+    CString strPath = Utils::WizMisc::extractFilePath(strFileName);
+    CString strTitle = Utils::WizMisc::extractFileTitle(strFileName);
+    CString strExt = Utils::WizMisc::extractFileExt(strFileName);
     //
     //
     const UINT nMaxLength = MAX_PATH - 10;
-    if (strFileName.GetLength() >= int(nMaxLength))
+    if (strFileName.getLength() >= int(nMaxLength))
     {
-        int nTitleLength = nMaxLength - (strPath.GetLength() + strExt.GetLength());
+        int nTitleLength = nMaxLength - (strPath.getLength() + strExt.getLength());
         if (nTitleLength <= 0)
         {
             TOLOG1(_T("File name is too long: %1"), strFileName);
@@ -236,10 +236,10 @@ void WizGetNextFileName(CString& strFileName)
         }
         else
         {
-            ATLASSERT(strTitle.GetLength() >= nTitleLength);
-            if (strTitle.GetLength() >= nTitleLength)
+            ATLASSERT(strTitle.getLength() >= nTitleLength);
+            if (strTitle.getLength() >= nTitleLength)
             {
-                strTitle = strTitle.Left(nTitleLength);
+                strTitle = strTitle.left(nTitleLength);
             }
         }
         //
@@ -252,17 +252,17 @@ void WizGetNextFileName(CString& strFileName)
     int nPos = strTitle.lastIndexOf('_');
     if (nPos != -1)
     {
-        CString strTemp = strTitle.Right(strTitle.GetLength() - nPos - 1);
+        CString strTemp = strTitle.right(strTitle.getLength() - nPos - 1);
         if (strTemp == WizIntToStr(_ttoi(strTemp)))
         {
-            strTitle.Delete(nPos, strTitle.GetLength() - nPos);
+            strTitle.Delete(nPos, strTitle.getLength() - nPos);
         }
     }
     //
     int nIndex = 2;
     while (PathFileExists(strFileName))
     {
-        strFileName.Format(_T("%s%s_%d%s"), strPath.utf16(), strTitle.utf16(), nIndex, strExt.utf16());
+        strFileName.format(_T("%s%s_%d%s"), strPath.utf16(), strTitle.utf16(), nIndex, strExt.utf16());
         nIndex++;
     }
 }
@@ -415,7 +415,7 @@ QString WizGetEmailPrefix(const QString& strMail)
 CString WizIntToStr(int n)
 {
     CString str;
-    str.Format("%d", n);
+    str.format("%d", n);
     return str;
 }
 
@@ -424,13 +424,13 @@ QString WizGetTimeStamp()
     return QString::number(QDateTime::currentDateTime().toTime_t());
 }
 
-COleDateTime WizGetCurrentTime()
+WizOleDateTime WizGetCurrentTime()
 {
-    COleDateTime t;
+    WizOleDateTime t;
     return t;
 }
 
-BOOL WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError)
+BOOL WizStringToDateTime(const QString& str, WizOleDateTime& t, QString& strError)
 {
     std::string utf8 = ::WizBSTR2UTF8(str);
     const char* lpsz = utf8.c_str();
@@ -487,15 +487,15 @@ BOOL WizStringToDateTime(const QString& str, COleDateTime& t, QString& strError)
         return TRUE;
     }
     //
-    t = COleDateTime(nYear, nMonth, nDay, nHour, nMin, nSec);
+    t = WizOleDateTime(nYear, nMonth, nDay, nHour, nMin, nSec);
     //
     return TRUE;
 }
 
 
-COleDateTime WizStringToDateTime(const CString& str)
+WizOleDateTime WizStringToDateTime(const CString& str)
 {
-    COleDateTime t;
+    WizOleDateTime t;
     CString strError;
     WizStringToDateTime(str, t, strError);
     return t;
@@ -504,7 +504,7 @@ COleDateTime WizStringToDateTime(const CString& str)
 
 
 
-BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError)
+BOOL WizIso8601StringToDateTime(CString str, WizOleDateTime& t, CString& strError)
 {
     if (str.length() != 17)
     {
@@ -513,16 +513,16 @@ BOOL WizIso8601StringToDateTime(CString str, COleDateTime& t, CString& strError)
     }
     //xxxxxxxxTxx:xx:xx
     //01234567890123456
-    str.SetAt(8, ' ');
-    str.Insert(6, '-');
-    str.Insert(4, '-');
+    str.setAt(8, ' ');
+    str.insert(6, '-');
+    str.insert(4, '-');
     return WizStringToDateTime(str, t, strError);
 }
 
-CString WizDateTimeToIso8601String(const COleDateTime& t)
+CString WizDateTimeToIso8601String(const WizOleDateTime& t)
 {
     CString str;
-    str.Format(_T("%04d%02d%02dT%02d:%02d:%02d"), t.GetYear(), t.GetMonth(), t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond());
+    str.format(_T("%04d%02d%02dT%02d:%02d:%02d"), t.getYear(), t.getMonth(), t.getDay(), t.getHour(), t.getMinute(), t.getSecond());
     //
     return str;
 }
@@ -550,11 +550,11 @@ int WizHexToInt(const CString& str)
     if (strText.startsWith("0x"), Qt::CaseInsensitive)
         strText.Delete(0, 2);
     //
-    strText.Trim();
-    strText.MakeLower();
+    strText.trim();
+    strText.makeLower();
     //
     int nValue = 0;
-    for (int i = 0; i < strText.GetLength(); i++)
+    for (int i = 0; i < strText.getLength(); i++)
     {
         QChar ch = strText[i];
         if (ch >= '0' && ch <= '9')
@@ -602,7 +602,7 @@ COLORREF WizStringToColor(const CString& str)
 QColor WizStringToColor2(const CString& str)
 {
     CString s = str;
-    s.Trim('#');
+    s.trim('#');
     int n = WizHexToInt(s);
     //
     int r = (LOBYTE((n)>>16));
@@ -736,7 +736,7 @@ CString WizFormatInt(__int64 n)
 }
 
 
-time_t WizTimeGetTimeT(const COleDateTime& t)
+time_t WizTimeGetTimeT(const WizOleDateTime& t)
 {
     return t.toTime_t();
 }
@@ -758,15 +758,15 @@ CString WizStringToSQL(const CString& str)
     return strSql;
 }
 
-CString WizDateTimeToString(const COleDateTime& t)
+CString WizDateTimeToString(const WizOleDateTime& t)
 {
     CString str;
-    str.Format(_T("%04d-%02d-%02d %02d:%02d:%02d"), t.GetYear(), t.GetMonth(), t.GetDay(), t.GetHour(), t.GetMinute(), t.GetSecond());
+    str.format(_T("%04d-%02d-%02d %02d:%02d:%02d"), t.getYear(), t.getMonth(), t.getDay(), t.getHour(), t.getMinute(), t.getSecond());
     //
     return str;
 }
 
-CString WizTimeToSQL(const COleDateTime& t)
+CString WizTimeToSQL(const WizOleDateTime& t)
 {
     CString str = WizDateTimeToString(t);
     return CString(_T("'")) + str + _T("'");
@@ -774,7 +774,7 @@ CString WizTimeToSQL(const COleDateTime& t)
 
 CString WizTimeToSQL(const QDateTime& t)
 {
-    COleDateTime t2(t);
+    WizOleDateTime t2(t);
     CString str = WizDateTimeToString(t2);
     return CString(_T("'")) + str + _T("'");
 }
@@ -784,7 +784,7 @@ CString WizTimeToSQL(const QDateTime& t)
 CString WizColorToSQL(COLORREF cr)
 {
     CString str;
-    str.Format("'%s'",
+    str.format("'%s'",
                WizColorToString(cr).utf16()
                );
     return str;
@@ -792,7 +792,7 @@ CString WizColorToSQL(COLORREF cr)
 CString WizColorToSQL(const QColor& cr)
 {
     CString str;
-    str.Format("'%s'",
+    str.format("'%s'",
                WizColorToString(cr).utf16()
                );
     return str;
@@ -844,8 +844,8 @@ CString WizHTMLGetCharsetFromHTMLText(const char* pBuffer)
         if (nPos == -1)
             continue;
         strMeta.Delete(0, nPos + 8);
-        int nPos1 = strMeta.Find("\"");
-        int nPos2 = strMeta.Find(">");
+        int nPos1 = strMeta.find("\"");
+        int nPos2 = strMeta.find(">");
         if (nPos1 == -1)
             nPos = nPos2;
         else if (nPos2 == -1)
@@ -855,11 +855,11 @@ CString WizHTMLGetCharsetFromHTMLText(const char* pBuffer)
         if (nPos == -1)
             return CString();
         //
-        CString strCharset(strMeta.Mid(0, nPos));
-        nPos = strCharset.Find(_T(" "));
+        CString strCharset(strMeta.mid(0, nPos));
+        nPos = strCharset.find(_T(" "));
         if (nPos == -1)
             return strCharset;
-        strCharset = strCharset.Mid(0, nPos);
+        strCharset = strCharset.mid(0, nPos);
         return strCharset;
     }
 }
@@ -888,7 +888,7 @@ CString WizXMLGetCharsetFromXMLText(const char* pBuffer)
     //
     strMark.Delete(0, nPos + 9);
     //
-    strMark.Replace('"', ' ');
+    strMark.replace('"', ' ');
     strMark.Replace('\'', ' ');
     strMark.Replace('?', ' ');
     //
@@ -1889,14 +1889,14 @@ QString WizGetImageHtmlLabelWithLink(const QString& imageFile, const QSize& imgS
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath)
 {
-    Utils::Misc::addBackslash(strDestImagePath);
+    Utils::WizMisc::addBackslash(strDestImagePath);
     //
-    QString srcPath = Utils::Misc::extractFilePath(strImageFile);
+    QString srcPath = Utils::WizMisc::extractFilePath(strImageFile);
     //
     QString strDestFile = strImageFile;
     if (srcPath != strDestImagePath)
     {
-        strDestFile = strDestImagePath + WizGenGUIDLowerCaseLetterOnly() + Utils::Misc::extractFileExt(strImageFile);
+        strDestFile = strDestImagePath + WizGenGUIDLowerCaseLetterOnly() + Utils::WizMisc::extractFileExt(strImageFile);
         //
         qDebug() << "[Editor] copy to: " << strDestFile;
 
@@ -1926,8 +1926,8 @@ void WizDeleteFolder(const CString& strPath)
 
 void WizDeleteFile(const CString& strFileName)
 {
-    QDir dir(::Utils::Misc::extractFilePath(strFileName));
-    dir.remove(Utils::Misc::extractFileName(strFileName));
+    QDir dir(::Utils::WizMisc::extractFilePath(strFileName));
+    dir.remove(Utils::WizMisc::extractFileName(strFileName));
 }
 
 
@@ -2416,7 +2416,7 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
     if (isHighPix)
     {
         // 如果是高分辨率的屏幕，则将坐标放大二倍进行绘制，使用时进行缩放，否则会造成图片模糊。
-        Utils::StyleHelper::initPainterByDevice(&p);
+        Utils::WizStyleHelper::initPainterByDevice(&p);
     }
     QFileIconProvider ip;
     QIcon icon = ip.icon(info);
@@ -2436,7 +2436,7 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
 
     int dateWidth = fm.width(dateInfo);
     infoRect.adjust(dateWidth + 4, 0, 0, 0);
-    QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
+    QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
     QRect rcPix = infoRect.adjusted(0, 6, 0, 0);
     rcPix.setSize(QSize(4, 4));
     p.drawPixmap(rcPix, pixGreyPoint);
@@ -2448,10 +2448,10 @@ bool WizCreateThumbnailForAttachment(QImage& img, const QString& attachFileName,
 }
 
 
-COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime defaultData)
+WizOleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSection, const CString& strKey, WizOleDateTime defaultData)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     QDateTime dt = settings.value(strStr, defaultData).toDateTime();
 
     return dt;
@@ -2461,7 +2461,7 @@ COleDateTime WizIniReadDateTimeDef(const CString& strFile, const CString& strSec
 CString WizIniReadStringDef(const CString& strFile, const CString& strSection, const CString& strKey)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     return settings.value(strStr).toString();
 }
 
@@ -2469,7 +2469,7 @@ CString WizIniReadStringDef(const CString& strFile, const CString& strSection, c
 void WizIniWriteString(const CString& strFile, const CString& strSection, const CString& strKey, const CString& strValue)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     settings.setValue(strStr, strValue);
 }
 
@@ -2477,7 +2477,7 @@ void WizIniWriteString(const CString& strFile, const CString& strSection, const 
 int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CString& strKey, int defaultValue)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     return settings.value(strStr, defaultValue).toInt();
 }
 
@@ -2485,36 +2485,36 @@ int WizIniReadIntDef(const CString& strFile, const CString& strSection, const CS
 void WizIniWriteInt(const CString& strFile, const CString& strSection, const CString& strKey, int nValue)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     settings.setValue(strStr, nValue);
 }
 
 
-void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, COleDateTime dateTime)
+void WizIniWriteDateTime(const CString& strFile, const CString& strSection, const CString& strKey, WizOleDateTime dateTime)
 {
     QSettings settings(strFile, QSettings::IniFormat);
-    QString strStr = strSection.IsEmpty() ? strKey : strSection + "/" + strKey;
+    QString strStr = strSection.isEmpty() ? strKey : strSection + "/" + strKey;
     settings.setValue(strStr, dateTime);
 }
 
 
-CWizIniFileEx::CWizIniFileEx()
+WizIniFileEx::WizIniFileEx()
     : m_settings(0)
 {
 }
 
-CWizIniFileEx::~CWizIniFileEx()
+WizIniFileEx::~WizIniFileEx()
 {
     if (m_settings)
         delete m_settings;
 }
 
-void CWizIniFileEx::LoadFromFile(const QString& strFile)
+void WizIniFileEx::loadFromFile(const QString& strFile)
 {
     m_settings = new QSettings(strFile, QSettings::IniFormat);
 }
 
-void CWizIniFileEx::GetSection(const QString& section, CWizStdStringArray& arrayData)
+void WizIniFileEx::getSection(const QString& section, CWizStdStringArray& arrayData)
 {
     m_settings->beginGroup(section);
     QStringList childList = m_settings->childKeys();
@@ -2526,7 +2526,7 @@ void CWizIniFileEx::GetSection(const QString& section, CWizStdStringArray& array
     m_settings->endGroup();
 }
 
-void CWizIniFileEx::GetSection(const QString& section, QMap<QString, QString>& dataMap)
+void WizIniFileEx::getSection(const QString& section, QMap<QString, QString>& dataMap)
 {
     m_settings->beginGroup(section);
     QStringList childList = m_settings->childKeys();
@@ -2536,7 +2536,7 @@ void CWizIniFileEx::GetSection(const QString& section, QMap<QString, QString>& d
     m_settings->endGroup();
 }
 
-void CWizIniFileEx::GetSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap)
+void WizIniFileEx::getSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap)
 {
     m_settings->beginGroup(section);
     QStringList childList = m_settings->childKeys();
@@ -2551,7 +2551,7 @@ void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* 
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=attachment"),
                                       attach.strGUID, attach.strKbGUID);
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
 
@@ -2563,7 +2563,7 @@ bool WizIsNoteContainsFrameset(const WIZDOCUMENTDATA& doc)
     return fileTypes.contains(doc.strFileType);
 }
 
-void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
+void WizMime2Note(const QByteArray& bMime, WizDatabaseManager& dbMgr, CWizDocumentDataArray& arrayDocument)
 {
     QString strMime(QString::fromUtf8(bMime));
     QStringList lsNotes = strMime.split(";");
@@ -2572,28 +2572,28 @@ void WizMime2Note(const QByteArray& bMime, CWizDatabaseManager& dbMgr, CWizDocum
         //qDebug()<<lsMeta;
         Q_ASSERT(lsMeta.size() == 2);
 
-        CWizDatabase& db = dbMgr.db(lsMeta[0]);
+        WizDatabase& db = dbMgr.db(lsMeta[0]);
 
         WIZDOCUMENTDATA data;
-        if (db.DocumentFromGUID(lsMeta[1], data))
+        if (db.documentFromGuid(lsMeta[1], data))
             arrayDocument.push_back(data);
     }
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
+bool WizMakeSureDocumentExistAndBlockWidthDialog(WizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
 
-    QString strFileName = db.GetDocumentFileName(doc.strGUID);
-    if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
+    QString strFileName = db.getDocumentFileName(doc.strGUID);
+    if (!db.isDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
-        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
+        WizObjectDownloaderHost* downloaderHost = WizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
-        CWizProgressDialog dlg(0, false);
+        WizProgressDialog dlg(0, false);
         dlg.setActionString(QObject::tr("Download Note %1 ...").arg(doc.strTitle));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
@@ -2610,15 +2610,15 @@ bool WizMakeSureDocumentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCU
 }
 
 
-bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTDATA& doc)
+bool WizMakeSureDocumentExistAndBlockWidthEventloop(WizDatabase& db, const WIZDOCUMENTDATA& doc)
 {
     if (doc.strGUID.isEmpty() || db.kbGUID() != doc.strKbGUID)
         return false;
 
-    QString strFileName = db.GetDocumentFileName(doc.strGUID);
-    if (!db.IsDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
+    QString strFileName = db.getDocumentFileName(doc.strGUID);
+    if (!db.isDocumentDownloaded(doc.strGUID) || !PathFileExists(strFileName))
     {
-        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
+        WizObjectDownloaderHost* downloaderHost = WizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2632,15 +2632,15 @@ bool WizMakeSureDocumentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZD
     return PathFileExists(strFileName);
 }
 
-bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
+bool WizMakeSureAttachmentExistAndBlockWidthEventloop(WizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
 
-    QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
-    if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    QString strAttachmentFileName = db.getAttachmentFileName(attachData.strGUID);
+    if (!db.isAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
-        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
+        WizObjectDownloaderHost* downloaderHost = WizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
@@ -2655,19 +2655,19 @@ bool WizMakeSureAttachmentExistAndBlockWidthEventloop(CWizDatabase& db, const WI
 }
 
 
-bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
+bool WizMakeSureAttachmentExistAndBlockWidthDialog(WizDatabase& db, const WIZDOCUMENTATTACHMENTDATAEX& attachData)
 {
     if (attachData.strGUID.isEmpty() || attachData.strKbGUID != db.kbGUID())
         return false;
 
-    QString strAttachmentFileName = db.GetAttachmentFileName(attachData.strGUID);
-    if (!db.IsAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
+    QString strAttachmentFileName = db.getAttachmentFileName(attachData.strGUID);
+    if (!db.isAttachmentDownloaded(attachData.strDocumentGUID) && !PathFileExists(strAttachmentFileName))
     {
-        CWizObjectDownloaderHost* downloaderHost = CWizObjectDownloaderHost::instance();
+        WizObjectDownloaderHost* downloaderHost = WizObjectDownloaderHost::instance();
         if (!downloaderHost)
             return false;
 
-        CWizProgressDialog dlg(0, false);
+        WizProgressDialog dlg(0, false);
         dlg.setActionString(QObject::tr("Download Attachment %1 ...").arg(attachData.strName));
         dlg.setWindowTitle(QObject::tr("Downloading"));
         dlg.setProgress(100,0);
@@ -2686,27 +2686,27 @@ bool WizMakeSureAttachmentExistAndBlockWidthDialog(CWizDatabase& db, const WIZDO
 
 bool WizGetLocalUsers(QList<WizLocalUser>& userList)
 {
-    QString dataPath = Utils::PathResolve::dataStorePath();
+    QString dataPath = Utils::WizPathResolve::dataStorePath();
     QDir dir(dataPath);
     QStringList folderList = dir.entryList(QDir::Dirs | QDir::NoDotAndDotDot);
     for (QString folder : folderList)
     {
         WizLocalUser user;
         QString dataBase = dataPath + folder + "/data/index.db";
-        CWizIndex db;
-        if (!QFile::exists(dataBase) || !db.Open(dataBase))
+        WizIndex db;
+        if (!QFile::exists(dataBase) || !db.open(dataBase))
             continue;
 
         user.strDataFolderName = folder;
-        user.strGuid = db.GetMetaDef("ACCOUNT", "GUID");
+        user.strGuid = db.getMetaDef("ACCOUNT", "GUID");
         if (user.strGuid.isEmpty())
         {
             continue;
         }
-        user.strUserId = db.GetMetaDef("ACCOUNT", "USERID");
+        user.strUserId = db.getMetaDef("ACCOUNT", "USERID");
 //        qDebug() << "load user id ; " << user.strUserId << "  folder : " << folder;
         user.strUserId.isEmpty() ? (user.strUserId = folder) : 0;
-        user.nUserType = db.GetMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
+        user.nUserType = db.getMetaDef("QT_WIZNOTE", "SERVERTYPE").toInt();
         userList.append(user);
     }
     return true;
@@ -2827,9 +2827,9 @@ void WizCopyNotesAsInternalLink(const QList<WIZDOCUMENTDATA>& documents)
 
 QString WizNoteToWizKMURL(const WIZDOCUMENTDATA& document)
 {
-    CWizDatabase& db = CWizDatabaseManager::instance()->db(document.strKbGUID);
+    WizDatabase& db = WizDatabaseManager::instance()->db(document.strKbGUID);
     //
-    if (!db.IsGroup())
+    if (!db.isGroup())
     {
         return WizFormatString3(_T("wiz://open_document?guid=%1&kbguid=%2&private_kbguid=%3"), document.strGUID, "", db.kbGUID());
     }
@@ -2866,7 +2866,7 @@ void WizNotesToHtmlLink(const QList<WIZDOCUMENTDATA>& documents, QString& strHtm
 void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 {
     // https://note.wiz.cn?dc={document_guid}&kb={kb_guid}&cmd=km%2C"}
-    QString url = CommonApiEntry::getUrlByCommand("note_link");
+    QString url = WizCommonApiEntry::getUrlByCommand("note_link");
     url.replace("{document_guid}", document.strGUID);
     url.replace("{kb_guid}", document.strKbGUID);
 
@@ -2880,7 +2880,7 @@ void WizCopyNoteAsWebClientLink(const WIZDOCUMENTDATA& document)
 
 void WizCopyNotesAsWebClientLink(const QList<WIZDOCUMENTDATA>& documents)
 {
-    QString url = CommonApiEntry::getUrlByCommand("note_link");
+    QString url = WizCommonApiEntry::getUrlByCommand("note_link");
     QString link;
     for (int i = 0; i < documents.count(); i++)
     {

@@ -8,20 +8,20 @@
 
 #define WIZ_THREAD_FILE_MONITOR     1024
 
-CWizFileMonitor::CWizFileMonitor(QObject *parent) :
+WizFileMonitor::WizFileMonitor(QObject *parent) :
     QObject(parent)
 {    
     connect(&m_timer, SIGNAL(timeout()), SLOT(on_timerOut()));
     m_timer.start(5 * 1000);
 }
 
-CWizFileMonitor&CWizFileMonitor::instance()
+WizFileMonitor&WizFileMonitor::instance()
 {
-    static CWizFileMonitor instance;
+    static WizFileMonitor instance;
     return instance;
 }
 
-void CWizFileMonitor::addFile(const QString& strKbGUID, const QString& strGUID,
+void WizFileMonitor::addFile(const QString& strKbGUID, const QString& strGUID,
                               const QString& strFileName, const QString& strMD5)
 {
     Q_ASSERT(!strFileName.isEmpty());
@@ -47,7 +47,7 @@ void CWizFileMonitor::addFile(const QString& strKbGUID, const QString& strGUID,
     });
 }
 
-void CWizFileMonitor::on_timerOut()
+void WizFileMonitor::on_timerOut()
 {
     long pid = (long)QCoreApplication::applicationPid();
     //
@@ -72,7 +72,7 @@ void CWizFileMonitor::on_timerOut()
     });
 }
 
-void CWizFileMonitor::checkFiles()
+void WizFileMonitor::checkFiles()
 {
     for (FMData& fileData: m_fileList)
     {

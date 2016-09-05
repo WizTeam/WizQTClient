@@ -13,14 +13,14 @@
 #include "mac/wizmachelper.h"
 #endif
 
-CWizUserInfoWidgetBase::CWizUserInfoWidgetBase(QWidget *parent)
+WizUserInfoWidgetBase::WizUserInfoWidgetBase(QWidget *parent)
     : QToolButton(parent)
 {
     setPopupMode(QToolButton::MenuButtonPopup);
 }
 
 
-void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
+void WizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
 {
     Q_UNUSED(event);
 
@@ -47,7 +47,7 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
 #endif
     //
     QPixmap pixmap = getAvatar(nAvatarWidth, nAvatarWidth);
-    Utils::StyleHelper::drawPixmapWithScreenScaleFactor(&p, rectIcon, pixmap);    
+    Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(&p, rectIcon, pixmap);    
 
     // draw display name
     QRect rectText = rectIcon;
@@ -91,7 +91,7 @@ void CWizUserInfoWidgetBase::paintEvent(QPaintEvent *event)
     }
 }
 
-void CWizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
+void WizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
 {
     // show menu at proper position
     if (hitButton(event->pos())) {
@@ -102,18 +102,18 @@ void CWizUserInfoWidgetBase::mousePressEvent(QMouseEvent* event)
     }
 }
 
-bool CWizUserInfoWidgetBase::hitButton(const QPoint& pos) const
+bool WizUserInfoWidgetBase::hitButton(const QPoint& pos) const
 {
     // FIXME
     QRect rectArrow(32 + 8, 32 - fontMetrics().height() - 4, sizeHint().width() - 32 - 4, fontMetrics().height());
     return rectArrow.contains(pos) ? true : false;
 }
 
-int CWizUserInfoWidgetBase::textWidth() const
+int WizUserInfoWidgetBase::textWidth() const
 {
     return fontMetrics().width(text());
 }
-void CWizUserInfoWidgetBase::updateUI()
+void WizUserInfoWidgetBase::updateUI()
 {
     update();
 }

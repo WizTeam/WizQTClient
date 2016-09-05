@@ -21,16 +21,16 @@ struct WIZZIWHEADER
     unsigned char szReserved[WIZZIWFILE_RESERVED_LENGTH];
 };
 
-class CWizDatabase;
+class WizDatabase;
 
-class CWizZiwReader : public QObject
+class WizZiwReader : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CWizZiwReader(QObject *parent = 0);
+    explicit WizZiwReader(QObject *parent = 0);
     //
-    void setDatabase(CWizDatabase* pDatabase) { m_pDatabase = pDatabase; }
+    void setDatabase(WizDatabase* pDatabase) { m_pDatabase = pDatabase; }
 
     QString certPassword();
     QString certPasswordHint() const { return m_strHint; }
@@ -59,7 +59,7 @@ public:
     static bool isEncryptedFile(const QString& fileName);
 
 private:
-    CWizDatabase* m_pDatabase;
+    WizDatabase* m_pDatabase;
 
     QByteArray m_N;
     QByteArray m_e;

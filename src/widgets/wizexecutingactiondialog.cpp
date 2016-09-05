@@ -20,7 +20,7 @@ WizExecutingActionDialog::WizExecutingActionDialog(QString description, int thre
     //
     ui->setupUi(this);
     //
-    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strThemeName = Utils::WizStyleHelper::themeName();
     QString fileName = ::WizGetSkinResourceFileName(strThemeName, "executing_action");
     QMovie *movie = new QMovie(fileName);
     movie->setScaledSize(QSize(50, 50));

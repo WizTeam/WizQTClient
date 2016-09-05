@@ -18,7 +18,7 @@ init the enc/dec key.
 @param len the key length in bytes, this value can be 16, 24, 32 (128, 196, 256 bits) bytes
 @param iv block size 16 bytes initializaiton vector.
 */
-void CAES::init(const char * key, int len, const unsigned char * iv)
+void WizAES::init(const char * key, int len, const unsigned char * iv)
 {
     enc.SetKeyWithIV((const unsigned char *)key, len, (const unsigned char *)iv);
     dec.SetKeyWithIV((const unsigned char *)key, len, (const unsigned char *)iv);
@@ -30,7 +30,7 @@ get the maximal cipher data length after encrypted.
 @param len the plain data length.
 @return the cipher data length.
 */
-int CAES::getCipherLen(int len)
+int WizAES::getCipherLen(int len)
 {
     // for PKCS#1 v1.5 padding
     // max padding BLOCK_SIZE=16.
@@ -42,7 +42,7 @@ int CAES::getCipherLen(int len)
     return len - pad + 16;
 }
 
-bool CAES::encrypt(QDataStream* pStreamSrc, QDataStream* pStreamDest)
+bool WizAES::encrypt(QDataStream* pStreamSrc, QDataStream* pStreamDest)
 {
     pStreamSrc->device()->seek(0);
     pStreamDest->device()->seek(0);
@@ -137,7 +137,7 @@ the maximal plain data length after decrypted.
 @param len the cipher data length that will be decrypted.
 @return the maximal plain data length.
 */
-int CAES::getPlainLen(int len)
+int WizAES::getPlainLen(int len)
 {
     // for PKCS#1 v1.5 padding
     // len always be times of BLOCK_SIZE=16.
@@ -145,7 +145,7 @@ int CAES::getPlainLen(int len)
 }
 
 
-bool CAES::decrypt(QDataStream* pStreamSrc, QDataStream* pStreamDest)
+bool WizAES::decrypt(QDataStream* pStreamSrc, QDataStream* pStreamDest)
 {
     pStreamSrc->device()->seek(0);
     pStreamDest->device()->seek(0);
@@ -316,7 +316,7 @@ bool encryptAES256CbcPkcs5(const unsigned char* lpszKey, int nKeyLen, \
         return false;
     }
 
-    CAES aes;
+    WizAES aes;
     aes.init(strKey.c_str(), strKey.length(), pIV);
     return aes.encrypt(pStreamSrc, pStreamDest);
 }
@@ -353,7 +353,7 @@ bool decryptAES256CbcPkcs5(const unsigned char* lpszKey, int nKeyLen, \
         return false;
     }
 
-    CAES aes;
+    WizAES aes;
     aes.init(strKey.c_str(), strKey.length(), pIV);
     return aes.decrypt(pStreamSrc, pStreamDest);
 }
@@ -507,7 +507,7 @@ bool WizAESDecryptToFile(const unsigned char* cipher, \
 // CRSA encryption and decryption
 //================================================================================
 
-CRSA::~CRSA()
+WizRSA::~WizRSA()
 {
     if (NULL != enc)
     {
@@ -521,7 +521,7 @@ CRSA::~CRSA()
     }
 }
 
-void CRSA::initPublicKey(const char* N, const char* e)
+void WizRSA::initPublicKey(const char* N, const char* e)
 {
     CryptoPP::Integer big_N(N);
     CryptoPP::Integer big_e(e);
@@ -534,7 +534,7 @@ void CRSA::initPublicKey(const char* N, const char* e)
     enc = new CryptoPP::RSAES_PKCS1v15_Encryptor(pk);
 }
 
-void CRSA::initPrivateKey(const char* N, const char* e, const char* d)
+void WizRSA::initPrivateKey(const char* N, const char* e, const char* d)
 {
     CryptoPP::Integer big_N(N);
     CryptoPP::Integer big_e(e);
@@ -549,23 +549,23 @@ void CRSA::initPrivateKey(const char* N, const char* e, const char* d)
     dec = new CryptoPP::RSAES_PKCS1v15_Decryptor(sk);
 }
 
-int CRSA::getCipherLen(int len)
+int WizRSA::getCipherLen(int len)
 {
     return (int)enc->CiphertextLength(len);
 }
 
-int CRSA::encrypt(const unsigned char* indata, int len, unsigned char* outdata)
+int WizRSA::encrypt(const unsigned char* indata, int len, unsigned char* outdata)
 {
     enc->Encrypt(rng, (const unsigned char *)indata, len, (unsigned char *)outdata);
     return (int)enc->FixedCiphertextLength();
 }
 
-int CRSA::getPlainLen(int len)
+int WizRSA::getPlainLen(int len)
 {
     return (int)dec->MaxPlaintextLength(len);
 }
 
-int CRSA::decrypt(const unsigned char* indata, int len, unsigned char* outdata)
+int WizRSA::decrypt(const unsigned char* indata, int len, unsigned char* outdata)
 {
     const CryptoPP::DecodingResult & res = dec->Decrypt(rng, indata, len, outdata);
     return (int)res.messageLength;
@@ -598,7 +598,7 @@ bool simpleRSAEncrypt(const char* N, const char* e, \
     unsigned char ret[256];
     memset(ret, 0, sizeof(ret));
 
-    CRSA enc;
+    WizRSA enc;
     enc.initPublicKey(N, e);
 
     if (enc.getCipherLen(nSrcLen) >= 256) {
@@ -647,7 +647,7 @@ bool simpleRSADecrypt(const char* N, const char* e, const char* d, \
     unsigned char ret[128];
     memset(ret, 0, sizeof(ret));
 
-    CRSA enc;
+    WizRSA enc;
     try
     {
         enc.initPrivateKey(N, e, d);

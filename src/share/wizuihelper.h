@@ -8,25 +8,25 @@
 
 QBrush WizGetLeftViewBrush();
 
-class CWizSpacer : public QWidget
+class WizSpacer : public QWidget
 {
 public:
-    CWizSpacer(QWidget* parent = 0);
+    WizSpacer(QWidget* parent = 0);
     QSize sizeHint() const { return QSize(1, 1); }
 };
 
-class CWizVerSpacer : public QWidget
+class WizVerSpacer : public QWidget
 {
 public:
-    CWizVerSpacer(QWidget* parent = 0);
+    WizVerSpacer(QWidget* parent = 0);
     QSize sizeHint() const { return QSize(1, 1); }
 };
 
-class CWizFixedSpacer : public QWidget
+class WizFixedSpacer : public QWidget
 {
     QSize m_sz;
 public:
-    CWizFixedSpacer(QSize sz, QWidget* parent = 0)
+    WizFixedSpacer(QSize sz, QWidget* parent = 0)
         : QWidget(parent)
         , m_sz(sz)
     {
@@ -39,10 +39,10 @@ public:
     QSize sizeHint() const { return m_sz; }
 };
 
-class CWizSplitter : public QSplitter
+class WizSplitter : public QSplitter
 {
 public:
-    CWizSplitter(QWidget* parent = 0);
+    WizSplitter(QWidget* parent = 0);
 
 protected:
     virtual QSplitterHandle* createHandle();    

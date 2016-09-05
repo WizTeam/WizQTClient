@@ -11,7 +11,7 @@
 #include "wizmisc.h"
 
 
-CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
+WizTitleBar::WizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
     : QWidget(parent)
     , m_window(window)
     , m_shadowContainerWidget(shadowContainerWidget)
@@ -26,7 +26,7 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     m_close = new QToolButton(this);
 
     // 设置按钮图像的样式
-    QString themeName = Utils::StyleHelper::themeName();
+    QString themeName = Utils::WizStyleHelper::themeName();
     QString strButtonClose = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose");
     QString strButtonCloseOn = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose_on");
     QString strButtonCloseSelected = ::WizGetSkinResourceFileName(themeName, "linuxwindowclose_selected");
@@ -77,7 +77,7 @@ CWizTitleBar::CWizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowCont
     //
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
-void CWizTitleBar::layoutTitleBar()
+void WizTitleBar::layoutTitleBar()
 {
     QHBoxLayout *hbox = new QHBoxLayout(this);
 
@@ -90,7 +90,7 @@ void CWizTitleBar::layoutTitleBar()
     hbox->setSpacing(0);
 }
 
-void CWizTitleBar::windowStateChanged()
+void WizTitleBar::windowStateChanged()
 {
     if (Qt::WindowMaximized == m_window->windowState())
     {
@@ -104,12 +104,12 @@ void CWizTitleBar::windowStateChanged()
     }
 }
 
-void CWizTitleBar::showSmall()
+void WizTitleBar::showSmall()
 {
     m_window->showMinimized();
 }
 
-void CWizTitleBar::showMaxRestore()
+void WizTitleBar::showMaxRestore()
 {
     if (!m_canResize)
         return;
@@ -127,26 +127,26 @@ void CWizTitleBar::showMaxRestore()
     }
 }
 
-void CWizTitleBar::mousePressEvent(QMouseEvent *me)
+void WizTitleBar::mousePressEvent(QMouseEvent *me)
 {
     m_startPos = me->globalPos();
     m_clickPos = mapTo(m_window, me->pos());
 }
-void CWizTitleBar::mouseMoveEvent(QMouseEvent *me)
+void WizTitleBar::mouseMoveEvent(QMouseEvent *me)
 {
     if (Qt::WindowMaximized == m_window->windowState())
         return;
     m_window->move(me->globalPos() - m_clickPos);
 }
 
-void CWizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
+void WizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
 {
     if (event->button() == Qt::LeftButton)
     {
         showMaxRestore();
     }
 }
-void CWizTitleBar::setCanResize(bool b)
+void WizTitleBar::setCanResize(bool b)
 {
     m_canResize = b;
     //
@@ -154,18 +154,18 @@ void CWizTitleBar::setCanResize(bool b)
     m_minimize->setEnabled(b);
 }
 
-void CWizTitleBar::setContentsMargins(QMargins margins)
+void WizTitleBar::setContentsMargins(QMargins margins)
 {
     m_oldContentsMargin = margins;
     QWidget::setContentsMargins(margins);
     layout()->setContentsMargins(margins);
 }
-void CWizTitleBar::setText(QString title)
+void WizTitleBar::setText(QString title)
 {
     m_titleLabel->setText(title);
 }
 
-QString CWizTitleBar::text() const
+QString WizTitleBar::text() const
 {
     return m_titleLabel->text();
 }

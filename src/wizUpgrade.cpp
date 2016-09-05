@@ -17,21 +17,21 @@
 
 #endif // Q_OS_MAC
 
-CWizUpgradeChecker::CWizUpgradeChecker(QObject *parent) :
+WizUpgradeChecker::WizUpgradeChecker(QObject *parent) :
     QObject(parent)
 {
 }
 
-CWizUpgradeChecker::~CWizUpgradeChecker()
+WizUpgradeChecker::~WizUpgradeChecker()
 {
 }
 
-QString CWizUpgradeChecker::getWhatsNewUrl()
+QString WizUpgradeChecker::getWhatsNewUrl()
 {
     return WizApiEntry::standardCommandUrl("changelog");
 }
 
-void CWizUpgradeChecker::checkUpgrade()
+void WizUpgradeChecker::checkUpgrade()
 {
     QString strApiUrl = WizApiEntry::standardCommandUrl("download_server");
 
@@ -40,7 +40,7 @@ void CWizUpgradeChecker::checkUpgrade()
     }
 
     QNetworkReply* reply = m_net->get(QNetworkRequest(strApiUrl));
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     if (loop.error() != QNetworkReply::NoError)
@@ -55,10 +55,10 @@ void CWizUpgradeChecker::checkUpgrade()
     _check(strCheckUrl);
 }
 
-void CWizUpgradeChecker::_check(const QString& strUrl)
+void WizUpgradeChecker::_check(const QString& strUrl)
 {
     QNetworkReply* reply = m_net->get(QNetworkRequest(strUrl));
-    CWizAutoTimeOutEventLoop loop(reply);
+    WizAutoTimeOutEventLoop loop(reply);
     loop.exec();
 
     QUrl possibleRedirectedUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
@@ -97,7 +97,7 @@ void CWizUpgradeChecker::_check(const QString& strUrl)
     }
 }
 
-QUrl CWizUpgradeChecker::redirectUrl(QUrl const &possible_redirect_url, \
+QUrl WizUpgradeChecker::redirectUrl(QUrl const &possible_redirect_url, \
                               QUrl const &old_redirect_url) const
 {
     QUrl redirect_url;

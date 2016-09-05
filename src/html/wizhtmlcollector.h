@@ -17,63 +17,63 @@ struct WIZHTMLFILEDATA
 };
 
 /* ---------------------------- CWizHtmlFileMap ---------------------------- */
-class CWizHtmlFileMap
+class WizHtmlFileMap
 {
 protected:
     typedef std::map<QString, WIZHTMLFILEDATA> CWizHtmlFileDataMap;
     CWizHtmlFileDataMap m_map;
 
 public:
-    bool Lookup(const QString& strUrl, QString& strFileName);
-    void Add(const QString& strUrl, const QString& strFileName,
+    bool lookup(const QString& strUrl, QString& strFileName);
+    void add(const QString& strUrl, const QString& strFileName,
              WIZHTMLFILEDATA::HtmlFileType eType, bool bProcessed);
-    void GetAll(std::deque<WIZHTMLFILEDATA>& arrayFile);
+    void getAll(std::deque<WIZHTMLFILEDATA>& arrayFile);
 };
 
 
 /*
  * Collect media resources path list from html file
  */
-class CWizHtmlCollector : public IWizHtmlReaderEvents
+class WizHtmlCollector : public WizHtmlReaderEvents
 {
 public:
-    CWizHtmlCollector();
+    WizHtmlCollector();
 
-    bool Collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
-    bool Html2Zip(const QString& strExtResourcePath, const QString& strZipFileName);
-
-protected:
-    virtual void StartTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
-    virtual void EndTag(CWizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
-    virtual void Characters(const CString &rText, DWORD dwAppData, bool &bAbort);
-    virtual void Comment(const CString &rComment, DWORD dwAppData, bool &bAbort);
+    bool collect(const QString &strUrl, QString &strHtml, bool mainPage, const QString& strTempPath);
+    bool html2Zip(const QString& strExtResourcePath, const QString& strZipFileName);
 
 protected:
-    CWizHtmlFileMap m_files;
+    virtual void startTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
+    virtual void endTag(WizHtmlTag *pTag, DWORD dwAppData, bool &bAbort);
+    virtual void characters(const CString &rText, DWORD dwAppData, bool &bAbort);
+    virtual void comment(const CString &rComment, DWORD dwAppData, bool &bAbort);
+
+protected:
+    WizHtmlFileMap m_files;
     bool m_bMainPage;
     QUrl m_url;
     CWizStdStringArray m_ret;
     QString m_strTempPath;
 
-    void ProcessTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
+    void processTagValue(WizHtmlTag *pTag, const QString& strAttributeName,
                          WIZHTMLFILEDATA::HtmlFileType eType);
-    void ProcessImgTagValue(CWizHtmlTag *pTag, const QString& strAttributeName,
+    void processImgTagValue(WizHtmlTag *pTag, const QString& strAttributeName,
                          WIZHTMLFILEDATA::HtmlFileType eType);
-    QString ToResourceFileName(const QString &strFileName);
+    QString toResourceFileName(const QString &strFileName);
 
     //
     bool loadImageFromCache(const QUrl& url, QString& strFileName);
     bool downloadImage(const QString& strUrl, QString& strFileName);
 };
 
-class CWizHtmlToPlainText : public IWizHtmlReaderEvents
+class WizHtmlToPlainText : public WizHtmlReaderEvents
 {
 public:
-    CWizHtmlToPlainText();
+    WizHtmlToPlainText();
     bool toText(const QString& strHtml, QString& strPlainText);
 
 protected:
-    virtual void Characters(const CString& rText, DWORD dwAppData, bool& bAbort);
+    virtual void characters(const CString& rText, DWORD dwAppData, bool& bAbort);
 
 private:
     QString m_strText;

@@ -3,66 +3,66 @@
 #include <QDebug>
 #include <QApplication>
 
-CWizMessageBox::CWizMessageBox()
+WizMessageBox::WizMessageBox()
 {
 
 }
 
-CWizMessageBox::~CWizMessageBox()
+WizMessageBox::~WizMessageBox()
 {
 
 }
 
-QMessageBox::StandardButton CWizMessageBox::critical(QWidget* parent, const QString& title,
+QMessageBox::StandardButton WizMessageBox::critical(QWidget* parent, const QString& title,
                                                      const QString& text, QMessageBox::StandardButtons buttons,
                                                      QMessageBox::StandardButton defaultButton)
 {
     return messageBox(parent, title, text, buttons, defaultButton, QMessageBox::Critical);
 }
 
-QMessageBox::StandardButton CWizMessageBox::information(QWidget* parent, const QString& title,
+QMessageBox::StandardButton WizMessageBox::information(QWidget* parent, const QString& title,
                                                         const QString& text, QMessageBox::StandardButtons buttons,
                                                         QMessageBox::StandardButton defaultButton)
 {
     return messageBox(parent, title, text, buttons, defaultButton, QMessageBox::Information);
 }
 
-QMessageBox::StandardButton CWizMessageBox::question(QWidget* parent, const QString& title,
+QMessageBox::StandardButton WizMessageBox::question(QWidget* parent, const QString& title,
                                                      const QString& text, QMessageBox::StandardButtons buttons,
                                                      QMessageBox::StandardButton defaultButton)
 {
     return messageBox(parent, title, text, buttons, defaultButton, QMessageBox::Question);
 }
 
-QMessageBox::StandardButton CWizMessageBox::warning(QWidget* parent, const QString& title,
+QMessageBox::StandardButton WizMessageBox::warning(QWidget* parent, const QString& title,
                                                     const QString& text, QMessageBox::StandardButtons buttons,
                                                     QMessageBox::StandardButton defaultButton)
 {
     return messageBox(parent, title, text, buttons, defaultButton, QMessageBox::Warning);
 }
 
-QMessageBox::StandardButton CWizMessageBox::critical(QWidget * parent, const QString & text,
+QMessageBox::StandardButton WizMessageBox::critical(QWidget * parent, const QString & text,
                                      QMessageBox::StandardButtons buttons,
                                      QMessageBox::StandardButton defaultButton)
 {
     return critical(parent, QApplication::applicationName(), text, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton CWizMessageBox::information(QWidget * parent, const QString & text,
+QMessageBox::StandardButton WizMessageBox::information(QWidget * parent, const QString & text,
                                         QMessageBox::StandardButtons buttons,
                                         QMessageBox::StandardButton defaultButton)
 {
     return information(parent, QApplication::applicationName(), text, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton CWizMessageBox::question(QWidget * parent, const QString & text,
+QMessageBox::StandardButton WizMessageBox::question(QWidget * parent, const QString & text,
                                      QMessageBox::StandardButtons buttons,
                                      QMessageBox::StandardButton defaultButton)
 {
     return question(parent, QApplication::applicationName(), text, buttons, defaultButton);
 }
 
-QMessageBox::StandardButton CWizMessageBox::warning(QWidget * parent, const QString & text,
+QMessageBox::StandardButton WizMessageBox::warning(QWidget * parent, const QString & text,
                                     QMessageBox::StandardButtons buttons,
                                     QMessageBox::StandardButton defaultButton)
 {
@@ -70,13 +70,13 @@ QMessageBox::StandardButton CWizMessageBox::warning(QWidget * parent, const QStr
 }
 
 
-QString CWizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton button)
+QString WizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton button)
 {
     switch (button) {
     case QMessageBox::Ok:
         return QObject::tr("OK");
         break;
-    case QMessageBox::Open:
+    case QMessageBox::open:
         return QObject::tr("Open");
         break;
     case QMessageBox::Save:
@@ -85,7 +85,7 @@ QString CWizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton
     case QMessageBox::Cancel:
         return QObject::tr("Cancel");
         break;
-    case QMessageBox::Close:
+    case QMessageBox::close:
         return QObject::tr("Close");
         break;
     case QMessageBox::Discard:
@@ -137,14 +137,14 @@ QString CWizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton
     return QObject::tr("Unknown");
 }
 
-void CWizMessageBox::buttonsFromStandardButtons(QMessageBox::StandardButtons buttons,
+void WizMessageBox::buttonsFromStandardButtons(QMessageBox::StandardButtons buttons,
                                                 QList<QMessageBox::StandardButton>& buttonList)
 {
     buttons.testFlag(QMessageBox::Ok) ? buttonList.append(QMessageBox::Ok) : (void)0;
-    buttons.testFlag(QMessageBox::Open) ? buttonList.append(QMessageBox::Open) : (void)0;
+    buttons.testFlag(QMessageBox::open) ? buttonList.append(QMessageBox::open) : (void)0;
     buttons.testFlag(QMessageBox::Save) ? buttonList.append(QMessageBox::Save) : (void)0;
     buttons.testFlag(QMessageBox::Cancel) ? buttonList.append(QMessageBox::Cancel) : (void)0;
-    buttons.testFlag(QMessageBox::Close) ? buttonList.append(QMessageBox::Close) : (void)0;
+    buttons.testFlag(QMessageBox::close) ? buttonList.append(QMessageBox::close) : (void)0;
     buttons.testFlag(QMessageBox::Discard) ? buttonList.append(QMessageBox::Discard) : (void)0;
     buttons.testFlag(QMessageBox::Apply) ? buttonList.append(QMessageBox::Apply) : (void)0;
     buttons.testFlag(QMessageBox::Reset) ? buttonList.append(QMessageBox::Reset) : (void)0;
@@ -159,9 +159,9 @@ void CWizMessageBox::buttonsFromStandardButtons(QMessageBox::StandardButtons but
     buttons.testFlag(QMessageBox::Retry) ? buttonList.append(QMessageBox::Retry) : (void)0;
 }
 
-QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QString& title, const QString& text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon)
+QMessageBox::StandardButton WizMessageBox::messageBox(QWidget* parent, const QString& title, const QString& text, QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton, QMessageBox::Icon icon)
 {
-    CMessageBox msg(parent);
+    WizMessageBox msg(parent);
     msg.setIcon(icon);
     msg.setWindowTitle(title);
     msg.setText(text);
@@ -175,7 +175,7 @@ QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QS
 
     //NOTE: 在Mac系统下，dialog对话框不会在父窗口中居中显示，此处进行居中对齐处理
 #ifdef Q_OS_MAC
-    QObject::connect(&msg, &CMessageBox::resized, [&](){
+    QObject::connect(&msg, &WizMessageBox::resized, [&](){
         if (parent)
         {
             QPoint leftTop = parent->geometry().topLeft();
@@ -193,7 +193,7 @@ QMessageBox::StandardButton CWizMessageBox::messageBox(QWidget* parent, const QS
 
 
 
-void CMessageBox::resizeEvent(QResizeEvent* event)
+void WizMessageBox::resizeEvent(QResizeEvent* event)
 {
     QMessageBox::resizeEvent(event);
     emit resized();

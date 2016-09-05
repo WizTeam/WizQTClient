@@ -7,12 +7,12 @@ class WizWebEngineView;
 class QMovie;
 class QLabel;
 
-class CWizLocalProgressWebView : public QWidget
+class WizLocalProgressWebView : public QWidget
 {
     Q_OBJECT
 public:
-    explicit CWizLocalProgressWebView(QWidget *parent = 0);
-    ~CWizLocalProgressWebView();
+    explicit WizLocalProgressWebView(QWidget *parent = 0);
+    ~WizLocalProgressWebView();
 
     WizWebEngineView* web();
 

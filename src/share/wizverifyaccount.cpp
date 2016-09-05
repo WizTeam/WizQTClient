@@ -1,19 +1,19 @@
 #include "wizverifyaccount.h"
 
-void CWizVerifyAccount::verifyAccount(const QString& strUserId,
+void WizVerifyAccount::verifyAccount(const QString& strUserId,
                                       const QString& strPassword)
 {
     callClientLogin(strUserId, strPassword);
 }
 
-void CWizVerifyAccount::onClientLogin(const WIZUSERINFO& userInfo)
+void WizVerifyAccount::onClientLogin(const WIZUSERINFO& userInfo)
 {
     Q_UNUSED(userInfo);
 
     emit done(true, 0, "");
 }
 
-void CWizVerifyAccount::onXmlRpcError(const QString& strMethodName, \
+void WizVerifyAccount::onXmlRpcError(const QString& strMethodName, \
                                       WizXmlRpcError err, \
                                       int errorCode, \
                                       const QString& errorMessage)

@@ -20,17 +20,17 @@ struct IWizThreadPool;
 //
 struct IWizRunableEvents
 {
-    virtual void ReportProgress(int pos) = 0;
-    virtual void ReportStatus(const QString& strStatus) = 0;
+    virtual void reportProgress(int pos) = 0;
+    virtual void reportStatus(const QString& strStatus) = 0;
 };
 //
 struct IWizRunable
 {
-    virtual void Destroy() {
+    virtual void destroy() {
 //        qDebug() << "IWizRunable Destroy";
         delete this; }
-    virtual void Run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents) = 0;
-    virtual QString GetTaskID() { return QString(); }
+    virtual void run(int threadIndex, IWizThreadPool* pThreadPool, IWizRunableEvents* pEvents) = 0;
+    virtual QString getTaskID() { return QString(); }
     virtual ~IWizRunable() {
 //        qDebug() << "IWizRunable desstruct";
     }
@@ -38,21 +38,21 @@ struct IWizRunable
 
 struct IWizThreadPoolEvents
 {
-    virtual void BeforeTask(IWizRunable* task) = 0;
-    virtual void AfterTask(IWizRunable* task) = 0;
+    virtual void beforeTask(IWizRunable* task) = 0;
+    virtual void afterTask(IWizRunable* task) = 0;
 };
 
 struct IWizThreadPool
 {
-    virtual void AddTask(IWizRunable* task) = 0;
-    virtual void ClearTasks() = 0;
-    virtual IWizRunable* PeekOne() = 0;
-    virtual void Shutdown(int timeout) = 0;
-    virtual bool IsShuttingDown() = 0;
-    virtual bool IsIdle() = 0;
-    virtual void GetTaskCount(int* pnWorking, int* pnWaiting) = 0;
-    virtual void SetEventsListener(IWizThreadPoolEvents* pEvents) = 0;
-    virtual void Destroy() {
+    virtual void addTask(IWizRunable* task) = 0;
+    virtual void clearTasks() = 0;
+    virtual IWizRunable* peekOne() = 0;
+    virtual void shutdown(int timeout) = 0;
+    virtual bool isShuttingDown() = 0;
+    virtual bool isIdle() = 0;
+    virtual void getTaskCount(int* pnWorking, int* pnWaiting) = 0;
+    virtual void setEventsListener(IWizThreadPoolEvents* pEvents) = 0;
+    virtual void destroy() {
         //qDebug() << "IWizThreadPool Destroy";
         delete this; }
     virtual ~IWizThreadPool() {
@@ -62,8 +62,8 @@ struct IWizThreadPool
 
 struct IWizDelayedThreadPool : public IWizThreadPool
 {
-    virtual void AddDelayedTask(IWizRunable* task, int delayedSeconds) = 0;
-    virtual void ExecuteAllNow() = 0;
+    virtual void addDelayedTask(IWizRunable* task, int delayedSeconds) = 0;
+    virtual void executeAllNow() = 0;
 };
 
 IWizThreadPool* WizCreateThreadPool(int threadCount, QThread::Priority priority = QThread::NormalPriority);
@@ -72,16 +72,16 @@ IWizDelayedThreadPool* WizCreateDelayedThreadPool(int threadCount, QThread::Prio
 
 // ***********************************************************************************
 template<class TFun>
-class CWizFunctionalAction
+class WizFunctionalAction
     : public IWizRunable
 {
 public:
-    CWizFunctionalAction(TFun f)
+    WizFunctionalAction(TFun f)
         : m_fun(f)
     {
     }
     //
-    virtual void Run(int threadIndex, IWizThreadPool* pool, IWizRunableEvents* pEvents)
+    virtual void run(int threadIndex, IWizThreadPool* pool, IWizRunableEvents* pEvents)
     {
         Q_UNUSED(threadIndex);
         Q_UNUSED(pool);
@@ -96,21 +96,21 @@ private:
 template <class TFun>
 inline IWizRunable* WizCreateRunable(TFun f)
 {
-    IWizRunable* action = new CWizFunctionalAction<TFun>(f);
+    IWizRunable* action = new WizFunctionalAction<TFun>(f);
     return action;
 }
 
 template<class TFun>
-class CWizFunctionalActionEx
+class WizFunctionalActionEx
     : public IWizRunable
 {
 public:
-    CWizFunctionalActionEx(TFun f)
+    WizFunctionalActionEx(TFun f)
         : m_fun(f)
     {
     }
     //
-    virtual void Run(int threadIndex, IWizThreadPool* pool, IWizRunableEvents* pEvents)
+    virtual void run(int threadIndex, IWizThreadPool* pool, IWizRunableEvents* pEvents)
     {
         m_fun(threadIndex, pool, pEvents);
     }
@@ -122,7 +122,7 @@ private:
 template <class TFun>
 inline IWizRunable* WizCreateRunableEx(TFun f)
 {
-    IWizRunable* action = new CWizFunctionalActionEx<TFun>(f);
+    IWizRunable* action = new WizFunctionalActionEx<TFun>(f);
     return action;
 }
 
@@ -133,7 +133,7 @@ void WizQueuedThreadAddAction(int threadID, IWizRunable* action, int millisecond
 template <class TFun>
 inline void WizExecuteOnThread(int threadID, TFun f)
 {
-    IWizRunable* action = new CWizFunctionalAction<TFun>(f);
+    IWizRunable* action = new WizFunctionalAction<TFun>(f);
     WizQueuedThreadAddAction(threadID, action);
 }
 
@@ -146,8 +146,8 @@ inline void WizExecuteOnThread(int threadID, IWizRunable* pRunable)
 template <class TFun, class TFunTimeout>
 void WizExecuteOnThread(int threadID, TFun f, int milliseconds, int nTimeoutThreadId, TFunTimeout fTimeout)
 {
-    IWizRunable* action = new CWizFunctionalAction<TFun>(f);
-    IWizRunable* actionTimeout = new CWizFunctionalAction<TFunTimeout>(fTimeout);
+    IWizRunable* action = new WizFunctionalAction<TFun>(f);
+    IWizRunable* actionTimeout = new WizFunctionalAction<TFunTimeout>(fTimeout);
     //
     WizQueuedThreadAddAction(threadID, action, milliseconds, nTimeoutThreadId, actionTimeout);
 }

@@ -31,14 +31,14 @@ enum SearchScope {
 
 
 /* --------------------------- CWizSearchIndexer --------------------------- */
-class CWizSearchIndexer
+class WizSearchIndexer
         : public QThread
-        , public IWizCluceneSearch
+        , public WizCluceneSearch
 {
     Q_OBJECT
 
 public:
-    explicit CWizSearchIndexer(CWizDatabaseManager& dbMgr, QObject *parent = 0);
+    explicit WizSearchIndexer(WizDatabaseManager& dbMgr, QObject *parent = 0);
     void waitForDone();
     void rebuild();
 
@@ -55,8 +55,8 @@ protected:
 
 private:
     bool buildFTSIndex();
-    bool buildFTSIndexByDatabase(CWizDatabase& db);
-    void filterDocuments(CWizDatabase& db, CWizDocumentDataArray& arrayDocument,
+    bool buildFTSIndexByDatabase(WizDatabase& db);
+    void filterDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument,
                          bool searchEncryptedDoc);
     bool updateDocument(const WIZDOCUMENTDATAEX& doc);
     bool deleteDocument(const WIZDOCUMENTDATAEX& doc);
@@ -65,12 +65,12 @@ private:
 
     Q_INVOKABLE bool rebuildFTSIndex();
     bool clearAllFTSData();
-    void clearFlags(CWizDatabase& db);
+    void clearFlags(WizDatabase& db);
 
     void stop();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QString m_strIndexPath; // working path
     bool m_stop;
     bool m_buldNow;
@@ -85,14 +85,14 @@ private Q_SLOTS:
 
 
 /* ----------------------------- CWizSearcher ----------------------------- */
-class CWizSearcher
+class WizSearcher
         : public QThread
-        , public IWizCluceneSearch
+        , public WizCluceneSearch
 {
     Q_OBJECT
 
 public:
-    explicit CWizSearcher(CWizDatabaseManager& dbMgr, QObject *parent = 0);
+    explicit WizSearcher(WizDatabaseManager& dbMgr, QObject *parent = 0);
     void waitForDone();
 
     void search(const QString& strKeywords, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
@@ -110,7 +110,7 @@ protected:
     virtual void run();
 
 private:
-    CWizDatabaseManager& m_dbMgr;
+    WizDatabaseManager& m_dbMgr;
     QString m_strIndexPath; // working path
     QString m_strkeywords;
     int m_nMaxResult;
@@ -129,7 +129,7 @@ private:
 
     Q_INVOKABLE void searchKeyword(const QString& strKeywords);
     void searchDatabaseByKeyword(const QString& strKeywords);
-    COleDateTime getDateByInterval(SearchDateInterval dateInterval);
+    WizOleDateTime getDateByInterval(SearchDateInterval dateInterval);
 
     void emitSearchProcess(const QString& strKeywords);
 

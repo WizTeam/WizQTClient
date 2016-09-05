@@ -28,9 +28,9 @@
 #define APPSTORE_IAP "APPSTORE_IAP"
 #define APPSTORE_UNFINISHEDTRANSATION  "UNFINISHED_TRANSATION"
 
-CWizIAPDialog::CWizIAPDialog(QWidget *parent)
+WizIAPDialog::WizIAPDialog(QWidget *parent)
   : QDialog(parent)
-  , ui(new Ui::CWizIAPDialog)
+  , ui(new Ui::WizIAPDialog)
   , m_waitingMsgBox(new QMessageBox(this))
   , m_iAPhelper(0)
   , m_net(new QNetworkAccessManager(this))
@@ -42,7 +42,7 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent)
 
     initStyles();
     //
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(WizGlobal::mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(WizGlobal::mainWindow());
     if (mainWindow) {
         ui->webView->addToJavaScriptWindowObject("WizExplorerApp", mainWindow->object());
     }
@@ -56,12 +56,12 @@ CWizIAPDialog::CWizIAPDialog(QWidget *parent)
             SLOT(onCheckReceiptRequest(QByteArray,QString)), Qt::QueuedConnection);
 }
 
-CWizIAPDialog::~CWizIAPDialog()
+WizIAPDialog::~WizIAPDialog()
 {
     delete ui;
 }
 
-void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
+void WizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 {
     QTimer::singleShot(0, this, SLOT(stopWaitTimer()));
     qDebug() << "load product list finished: " << productList.size();
@@ -83,7 +83,7 @@ void CWizIAPDialog::onProductsLoaded(const QList<CWizIAPProduct>& productList)
     QTimer::singleShot(0, this, SLOT(checkUnfinishedTransation()));
 }
 
-void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
+void WizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
 {
     m_waitingMsgBox->done(ok);    
 
@@ -100,18 +100,18 @@ void CWizIAPDialog::onPurchaseFinished(bool ok, const QByteArray& receipt, const
     }
 }
 
-void CWizIAPDialog::loadUserInfo()
+void WizIAPDialog::loadUserInfo()
 {
     setWindowTitle(tr("Account settings"));
     ui->stackedWidget->setCurrentIndex(0);
-    QString extInfo = CommonApiEntry::appstoreParam(false);
-    QString strToken = Token::token();
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
+    QString extInfo = WizCommonApiEntry::appstoreParam(false);
+    QString strToken = WizToken::token();
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("user_info", strToken, extInfo);
     qDebug() << "load user info : " << strUrl;
     ui->webView->load(QUrl(strUrl));
 }
 
-void CWizIAPDialog::loadIAPPage()
+void WizIAPDialog::loadIAPPage()
 {
     setWindowTitle(tr("Upgrade VIP"));
     ui->stackedWidget->setCurrentIndex(1);
@@ -122,7 +122,7 @@ void CWizIAPDialog::loadIAPPage()
     }
 }
 
-int CWizIAPDialog::exec()
+int WizIAPDialog::exec()
 {
     if (ui->stackedWidget->currentIndex() == 1)
     {
@@ -135,9 +135,9 @@ int CWizIAPDialog::exec()
     return QDialog::exec();
 }
 
-void CWizIAPDialog::initStyles()
+void WizIAPDialog::initStyles()
 {
-    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strThemeName = Utils::WizStyleHelper::themeName();
 
     ui->btn_goBack->setText("");
     QString strBack= ::WizGetSkinResourceFileName(strThemeName, "iap_back");
@@ -170,27 +170,27 @@ void CWizIAPDialog::initStyles()
                                            "background-position: left center; background-repeat: no-repeat; margin-right: 80px; font:16px #5e5e5e; padding-left: 40px;}").arg(strIcon4));
 }
 
-void CWizIAPDialog::createIAPHelper()
+void WizIAPDialog::createIAPHelper()
 {
     if (m_iAPhelper == 0)
-        m_iAPhelper = new CWizIAPHelper(this);
+        m_iAPhelper = new WizIAPHelper(this);
 }
 
-void CWizIAPDialog::setPurchaseAvailable(bool b)
+void WizIAPDialog::setPurchaseAvailable(bool b)
 {
     ui->label_downloading->setVisible(!b);
     ui->btn_month->setEnabled(b);
     ui->btn_year->setEnabled(b);
 }
 
-void CWizIAPDialog::hideInfoLabel()
+void WizIAPDialog::hideInfoLabel()
 {
     ui->label_downloading->setVisible(false);
     ui->label_success->setVisible(false);
     ui->label_failed->setVisible(false);
 }
 
-void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID)
+void WizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& strTransationID)
 {
     m_transationID = strTransationID;
 
@@ -200,13 +200,13 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
 #else
     strPlat = "linux";
 #endif
-    QString asServerUrl = CommonApiEntry::asServerUrl();
+    QString asServerUrl = WizCommonApiEntry::asServerUrl();
     QString checkUrl = asServerUrl + "/a/pay2/ios";
     //    QString checkUrl = "https://sandbox.itunes.apple.com/verifyReceipt";
     //    QString checkUrl = "https://buy.itunes.apple.com/verifyReceipt";
-    CWizDatabase& db = CWizDatabaseManager::instance()->db();
-    QString userID = db.GetUserId();
-    QString userGUID = db.GetUserGUID();
+    WizDatabase& db = WizDatabaseManager::instance()->db();
+    QString userID = db.getUserId();
+    QString userGUID = db.getUserGuid();
     QString receiptBase64 = receipt.toBase64();
     receiptBase64 = QString(QUrl::toPercentEncoding(receiptBase64));
     QString strExtInfo = QString("client_type=%1&user_id=%2&user_guid=%3&transaction_id=%4&receipt=%5")
@@ -221,7 +221,7 @@ void CWizIAPDialog::checkReceiptInfo(const QByteArray& receipt, const QString& s
     m_net->post(request, strExtInfo.toUtf8());
 }
 
-void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& strTransationID)
+void WizIAPDialog::parseCheckResult(const QString& strResult, const QString& strTransationID)
 {
     if (strResult.isEmpty())
         return;
@@ -231,14 +231,14 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
 
     if (d.HasMember("error_code"))
     {
-        QString strError = QString::fromUtf8(d.FindMember("error")->value.GetString());
+        QString strError = QString::fromUtf8(d.FindMember("error")->value.getString());
         qDebug() << strError;
         on_purchase_failed(strError);
         return;
     }
 
     if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.GetInt();
+        int nCode = d.FindMember("return_code")->value.getInt();
         if (nCode == 200)
         {
             qDebug() <<"IAP purchase successed!";
@@ -250,7 +250,7 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
         }
         else
         {
-            QString message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
+            QString message = QString::fromUtf8(d.FindMember("return_message")->value.getString());
             qDebug() << "check on server failed , code :  " << nCode << "  message : " << message;
             on_purchase_failed(message);
             return;
@@ -258,27 +258,27 @@ void CWizIAPDialog::parseCheckResult(const QString& strResult, const QString& st
     }
 }
 
-QStringList CWizIAPDialog::getUnfinishedTransations()
+QStringList WizIAPDialog::getUnfinishedTransations()
 {
-    QString transation = CWizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
+    QString transation = WizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
     return transation.split(';', QString::SkipEmptyParts);
 }
 
-void CWizIAPDialog::saveUnfinishedTransation(const QString& strTransationID)
+void WizIAPDialog::saveUnfinishedTransation(const QString& strTransationID)
 {
-    QString transation = CWizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
+    QString transation = WizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
     QStringList list = transation.split(';', QString::SkipEmptyParts);
     if (!list.contains(strTransationID))
     {
         list.append(strTransationID);
     }
     transation = list.join(';');
-    CWizDatabaseManager::instance()->db().setMeta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION, transation);
+    WizDatabaseManager::instance()->db().setMeta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION, transation);
 }
 
-void CWizIAPDialog::removeTransationFromUnfinishedList(const QString& strTransationID)
+void WizIAPDialog::removeTransationFromUnfinishedList(const QString& strTransationID)
 {
-    QString transation = CWizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
+    QString transation = WizDatabaseManager::instance()->db().meta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION);
     QStringList list = transation.split(';', QString::SkipEmptyParts);
     if (!list.contains(strTransationID))
     {
@@ -286,15 +286,15 @@ void CWizIAPDialog::removeTransationFromUnfinishedList(const QString& strTransat
     }
     list.removeOne(strTransationID);
     transation = list.join(';');
-    CWizDatabaseManager::instance()->db().setMeta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION, transation);
+    WizDatabaseManager::instance()->db().setMeta(APPSTORE_IAP, APPSTORE_UNFINISHEDTRANSATION, transation);
 }
 
-void CWizIAPDialog::on_btn_goBack_clicked()
+void WizIAPDialog::on_btn_goBack_clicked()
 {
     loadUserInfo();
 }
 
-void CWizIAPDialog::on_btn_month_clicked()
+void WizIAPDialog::on_btn_month_clicked()
 {
 
     hideInfoLabel();
@@ -307,7 +307,7 @@ void CWizIAPDialog::on_btn_month_clicked()
     m_iAPhelper->purchaseProduct(WIZ_PRODUCT_MONTH);
 }
 
-void CWizIAPDialog::on_btn_year_clicked()
+void WizIAPDialog::on_btn_year_clicked()
 {
     hideInfoLabel();
     m_waitingMsgBox->setModal(true);
@@ -318,10 +318,10 @@ void CWizIAPDialog::on_btn_year_clicked()
     m_iAPhelper->purchaseProduct(WIZ_PRODUCT_YEAR);
 }
 
-void CWizIAPDialog::loadProducts()
+void WizIAPDialog::loadProducts()
 {
     if (m_iAPhelper == 0)
-        m_iAPhelper = new CWizIAPHelper(this);
+        m_iAPhelper = new WizIAPHelper(this);
 
 
     QList<QString> productList;
@@ -332,12 +332,12 @@ void CWizIAPDialog::loadProducts()
     ui->label_downloading->setVisible(true);
 }
 
-void CWizIAPDialog::stopWaitTimer()
+void WizIAPDialog::stopWaitTimer()
 {
     m_timer.stop();
 }
 
-void CWizIAPDialog::onWaitingTimeOut()
+void WizIAPDialog::onWaitingTimeOut()
 {
     m_timer.stop();
     m_waitingMsgBox->close();    
@@ -347,7 +347,7 @@ void CWizIAPDialog::onWaitingTimeOut()
     accept();
 }
 
-void CWizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID)
+void WizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QString& strTransationID)
 {
     m_waitingMsgBox->close();
     m_waitingMsgBox->setModal(true);
@@ -358,7 +358,7 @@ void CWizIAPDialog::onCheckReceiptRequest(const QByteArray& receipt, const QStri
     checkReceiptInfo(receipt, strTransationID);
 }
 
-void CWizIAPDialog::checkUnfinishedTransation()
+void WizIAPDialog::checkUnfinishedTransation()
 {
     qDebug() << "Check unfinished transations";
     QStringList idList = getUnfinishedTransations();
@@ -369,12 +369,12 @@ void CWizIAPDialog::checkUnfinishedTransation()
     m_iAPhelper->loadLocalReceipt(receipt);
     if (receipt.isEmpty())
     {
-        CWizMessageBox::warning(this, tr("Info"), tr("Can not load receipt!"));
+        WizMessageBox::warning(this, tr("Info"), tr("Can not load receipt!"));
         qDebug() << "local receipt load failed";
         return;
     }
 
-    int result = CWizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
+    int result = WizMessageBox::information(this, tr("Info"), tr("You have unfinished transation, continue to process it?"),
                              QMessageBox::Cancel | QMessageBox::Ok, QMessageBox::Ok);
     if (QMessageBox::Ok == result)
     {
@@ -382,7 +382,7 @@ void CWizIAPDialog::checkUnfinishedTransation()
     }
 }
 
-void CWizIAPDialog::checkReceiptFinished(QNetworkReply* reply)
+void WizIAPDialog::checkReceiptFinished(QNetworkReply* reply)
 {
     m_waitingMsgBox->done(0);
 
@@ -398,13 +398,13 @@ void CWizIAPDialog::checkReceiptFinished(QNetworkReply* reply)
     parseCheckResult(strResult, m_transationID);
 }
 
-void CWizIAPDialog::on_purchase_successed()
+void WizIAPDialog::on_purchase_successed()
 {
     hideInfoLabel();
     ui->label_success->setVisible(true);
 }
 
-void CWizIAPDialog::on_purchase_failed(const QString& errorMsg)
+void WizIAPDialog::on_purchase_failed(const QString& errorMsg)
 {
     hideInfoLabel();
     ui->label_failed->setVisible(true);

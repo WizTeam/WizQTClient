@@ -22,9 +22,9 @@
 
 namespace Utils {
 
-CWizSettings* StyleHelper::m_settings = 0;
+WizSettings* WizStyleHelper::m_settings = 0;
 
-void StyleHelper::initPainterByDevice(QPainter* p)
+void WizStyleHelper::initPainterByDevice(QPainter* p)
 {
 #ifdef Q_OS_MAC
     float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
@@ -35,7 +35,7 @@ void StyleHelper::initPainterByDevice(QPainter* p)
 #endif
 }
 
-QPixmap StyleHelper::pixmapFromDevice(const QSize& sz)
+QPixmap WizStyleHelper::pixmapFromDevice(const QSize& sz)
 {
 #ifdef Q_OS_MAC
     float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
@@ -47,7 +47,7 @@ QPixmap StyleHelper::pixmapFromDevice(const QSize& sz)
     return QPixmap(sz2);
 }
 
-QSize StyleHelper::applyScreenScaleFactor(const QSize& sz)
+QSize WizStyleHelper::applyScreenScaleFactor(const QSize& sz)
 {
 #ifdef Q_OS_MAC
     float factor = qt_mac_get_scalefactor(0); // factor == 2 on retina
@@ -59,7 +59,7 @@ QSize StyleHelper::applyScreenScaleFactor(const QSize& sz)
     return sz2;
 }
 
-QString StyleHelper::themeName()
+QString WizStyleHelper::themeName()
 {
     QSettings* st = WizGlobal::settings();
     QString strTheme = st->value("Theme/Name").toString();
@@ -71,14 +71,14 @@ QString StyleHelper::themeName()
     return strTheme;
 }
 
-QString StyleHelper::skinResourceFileName(const QString& strName, bool need2x)
+QString WizStyleHelper::skinResourceFileName(const QString& strName, bool need2x)
 {
     bool use2x = need2x && ::WizIsHighPixel();
     return ::WizGetSkinResourceFileName(themeName(),
                                         (use2x ? strName + "@2x" : strName));
 }
 
-QIcon StyleHelper::loadIcon(const QString& strName)
+QIcon WizStyleHelper::loadIcon(const QString& strName)
 {
     QString strThemeName = themeName();
     QString strIconNormal = ::WizGetSkinResourceFileName(strThemeName, strName);
@@ -106,7 +106,7 @@ QIcon StyleHelper::loadIcon(const QString& strName)
     return icon;
 }
 
-QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
+QRegion WizStyleHelper::borderRadiusRegion(const QRect& rect)
 {
     QVector<QPoint> points;
     int nBorderInterval = 2;
@@ -128,7 +128,7 @@ QRegion StyleHelper::borderRadiusRegion(const QRect& rect)
     return QRegion(polygon);
 }
 
-QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
+QRegion WizStyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool triangleAlginLeft,
                                                     int nTriangleMargin, int nTriangleWidth, int nTriangleHeight)
 {    
     QVector<QPoint> pointsRegion;
@@ -169,13 +169,13 @@ QRegion StyleHelper::borderRadiusRegionWithTriangle(const QRect& rect, bool tria
     return QRegion(polygon);
 }
 
-QColor StyleHelper::splitterLineColor()
+QColor WizStyleHelper::splitterLineColor()
 {
     return QColor("#DBDBDB");
 }
 
 
-QString StyleHelper::wizCommonListViewStyleSheet()
+QString WizStyleHelper::wizCommonListViewStyleSheet()
 {
     return QString("QListView{ border-width: 1px; \
         background-color:#FFFFFF; \
@@ -186,9 +186,9 @@ QString StyleHelper::wizCommonListViewStyleSheet()
         border-bottom-color:#E0E0E0;}");
 }
 
-QString StyleHelper::wizCommonStyleSheet()
+QString WizStyleHelper::wizCommonStyleSheet()
 {
-    QString location = Utils::PathResolve::skinResourcesPath(themeName()) + "style.qss";
+    QString location = Utils::WizPathResolve::skinResourcesPath(themeName()) + "style.qss";
     QString style;
     QFile qss(location);
     if (qss.exists())
@@ -208,7 +208,7 @@ QString StyleHelper::wizCommonStyleSheet()
     return style;
 }
 
-QString StyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
+QString WizStyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
 {
     return QString("QScrollBar {\
             background: #FFFFFF;\
@@ -235,22 +235,22 @@ QString StyleHelper::wizCommonScrollBarStyleSheet(int marginTop)
         }").arg(marginTop);
 }
 
-QSize StyleHelper::treeViewItemIconSize()
+QSize WizStyleHelper::treeViewItemIconSize()
 {
     return QSize(WizSmartScaleUI(14), WizSmartScaleUI(14));
 }
 
-int StyleHelper::treeViewItemHeight()
+int WizStyleHelper::treeViewItemHeight()
 {
     return WizSmartScaleUI(28);
 }
 
-QColor StyleHelper::treeViewBackground()
+QColor WizStyleHelper::treeViewBackground()
 {
     return QColor(getValue("Category/Background", "#F2F0EE").toString());
 }
 
-QColor StyleHelper::treeViewItemBackground(int stat)
+QColor WizStyleHelper::treeViewItemBackground(int stat)
 {    
     if (stat == Selected) {
         return QColor(getValue("Category/ItemSelectedNoFocus", "#cecece").toString());
@@ -262,38 +262,38 @@ QColor StyleHelper::treeViewItemBackground(int stat)
     return QColor();
 }
 
-QColor StyleHelper::treeViewItemCategoryBackground()
+QColor WizStyleHelper::treeViewItemCategoryBackground()
 {    
     QColor co(getValue("Category/ItemCategory", "#ffffff").toString());
     co.setAlpha(15);
     return co;
 }
 
-QColor StyleHelper::treeViewItemCategoryText()
+QColor WizStyleHelper::treeViewItemCategoryText()
 {
     return QColor(getValue("Category/ItemCategoryText", "#777775").toString());
 }
-QColor StyleHelper::treeViewItemLinkText()
+QColor WizStyleHelper::treeViewItemLinkText()
 {    
     return QColor(getValue("Category/ItemLinkText", "#448aff").toString());
 }
 
-QColor StyleHelper::treeViewItemBottomLine()
+QColor WizStyleHelper::treeViewItemBottomLine()
 {    
     return QColor(getValue("Category/ItemBottomLine", "#DFDFD7").toString());
 }
 
-QColor StyleHelper::treeViewItemMessageBackground()
+QColor WizStyleHelper::treeViewItemMessageBackground()
 {    
     return QColor(getValue("Category/ItemMessageBackground", "#3498DB").toString());
 }
 
-QColor StyleHelper::treeViewItemMessageText()
+QColor WizStyleHelper::treeViewItemMessageText()
 {    
     return QColor(getValue("Category/ItemMessageText", "#FFFFFF").toString());
 }
 
-QColor StyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
+QColor WizStyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
 {    
     if (bSelected) {
         return QColor(getValue("Category/TextSelected", "#ffffff").toString());
@@ -306,7 +306,7 @@ QColor StyleHelper::treeViewItemText(bool bSelected, bool bSecondLevel)
     }
 }
 
-QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
+QColor WizStyleHelper::treeViewItemTextExtend(bool bSelected)
 {    
     if (bSelected) {
         return QColor(getValue("Category/TextExtendSelected", "#e6e6e6").toString());
@@ -315,12 +315,12 @@ QColor StyleHelper::treeViewItemTextExtend(bool bSelected)
     }
 }
 
-QColor StyleHelper::treeViewSectionItemText()
+QColor WizStyleHelper::treeViewSectionItemText()
 {
     return QColor(getValue("Category/SectionItemText", "#C1C1C1").toString());
 }
 
-void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)
+void WizStyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool bFocused)
 {
     QRect rcd(rc);
     QColor bg1 = treeViewItemBackground(Active);
@@ -333,7 +333,7 @@ void StyleHelper::drawTreeViewItemBackground(QPainter* p, const QRect& rc, bool 
     }
 }
 
-void StyleHelper::drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected)
+void WizStyleHelper::drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon& icn, bool bSelected)
 {
     if (bSelected) {
         icn.paint(p, rc, Qt::AlignCenter, QIcon::Selected);
@@ -342,7 +342,7 @@ void StyleHelper::drawTreeViewItemIcon(QPainter* p, const QRect& rc, const QIcon
     }
 }
 
-void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str)
+void WizStyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString& str)
 {
     QFont f;
     f.setPixelSize(11);
@@ -370,7 +370,7 @@ void StyleHelper::drawTreeViewBadge(QPainter* p, const QRect& rc, const QString&
     p->restore();
 }
 
-void StyleHelper::drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOrign, const QPixmap& pix)
+void WizStyleHelper::drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOrign, const QPixmap& pix)
 {
     if (pix.isNull())
         return;
@@ -398,18 +398,18 @@ void StyleHelper::drawPixmapWithScreenScaleFactor(QPainter* p, const QRect& rcOr
 #endif
 }
 
-int StyleHelper::listViewSortControlWidgetHeight()
+int WizStyleHelper::listViewSortControlWidgetHeight()
 {    
     int val = getValue("Documents/SortControlWidgetHeight", 30).toInt();
     return WizSmartScaleUI(val);
 }
 
-int StyleHelper::messageViewItemHeight()
+int WizStyleHelper::messageViewItemHeight()
 {
     return WizSmartScaleUI(83);
 }
 
-int StyleHelper::listViewItemHeight(int nType)
+int WizStyleHelper::listViewItemHeight(int nType)
 {
 //    QFont f;
     switch (nType) {
@@ -431,32 +431,32 @@ int StyleHelper::listViewItemHeight(int nType)
 }
 
 
-QColor StyleHelper::listViewBackground()
+QColor WizStyleHelper::listViewBackground()
 {    
     return QColor(getValue("Documents/Background", "#ffffff").toString());
 }
 
-int StyleHelper::listViewItemHorizontalPadding()
+int WizStyleHelper::listViewItemHorizontalPadding()
 {
     return WizSmartScaleUI(6);
 }
 
-QColor StyleHelper::listViewItemSeperator()
+QColor WizStyleHelper::listViewItemSeperator()
 {    
     return QColor(getValue("Documents/Line", "#e7e7e7").toString());
 }
 
-QColor StyleHelper::listViewSectionItemText()
+QColor WizStyleHelper::listViewSectionItemText()
 {    
     return QColor(getValue("Documents/SectionItemText", "#a7a7a7").toString());
 }
 
-QColor StyleHelper::listViewSectionItemBackground()
+QColor WizStyleHelper::listViewSectionItemBackground()
 {    
     return QColor(getValue("Documents/SectionItemBackground", "#f7f7f7").toString());
 }
 
-QColor StyleHelper::listViewItemBackground(int stat)
+QColor WizStyleHelper::listViewItemBackground(int stat)
 {    
     if (stat == Normal) {
         return QColor(getValue("Documents/ItemLoseFocusBackground", "#D3E4ED").toString());
@@ -471,7 +471,7 @@ QColor StyleHelper::listViewItemBackground(int stat)
     return QColor();
 }
 
-QColor StyleHelper::listViewItemType(bool bSelected, bool bFocused)
+QColor WizStyleHelper::listViewItemType(bool bSelected, bool bFocused)
 {
 //    if (bSelected) {
 //        if (bFocused) {
@@ -484,7 +484,7 @@ QColor StyleHelper::listViewItemType(bool bSelected, bool bFocused)
 //    }
 }
 
-QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
+QColor WizStyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 {    
 //    if (bSelected) {
 //        if (bFocused) {
@@ -497,7 +497,7 @@ QColor StyleHelper::listViewItemTitle(bool bSelected, bool bFocused)
 //    }
 }
 
-QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
+QColor WizStyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 {
 //    if (bSelected) {
 //        if (bFocused) {
@@ -510,7 +510,7 @@ QColor StyleHelper::listViewItemLead(bool bSelected, bool bFocused)
 //    }
 }
 
-QColor StyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
+QColor WizStyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 {   
 //    if (bSelected) {
 //        if (bFocused) {
@@ -523,7 +523,7 @@ QColor StyleHelper::listViewItemLocation(bool bSelected, bool bFocused)
 //    }
 }
 
-QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
+QColor WizStyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 {    
 //    if (bSelected) {
 //        if (bFocused) {
@@ -536,7 +536,7 @@ QColor StyleHelper::listViewItemSummary(bool bSelected, bool bFocused)
 //    }
 }
 
-QColor StyleHelper::listViewMultiLineFirstLine(bool bSelected)
+QColor WizStyleHelper::listViewMultiLineFirstLine(bool bSelected)
 {    
     if (bSelected) {
         return QColor(getValue("MultiLineList/FirstSelected", "#000000").toString());
@@ -545,7 +545,7 @@ QColor StyleHelper::listViewMultiLineFirstLine(bool bSelected)
     }
 }
 
-QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
+QColor WizStyleHelper::listViewMultiLineOtherLine(bool bSelected)
 {    
     if (bSelected) {
         return QColor(getValue("MultiLineList/OtherSelected", "#666666").toString());
@@ -554,7 +554,7 @@ QColor StyleHelper::listViewMultiLineOtherLine(bool bSelected)
     }
 }
 
-QIcon StyleHelper::listViewBadge(int type)
+QIcon WizStyleHelper::listViewBadge(int type)
 {
     switch (type) {
     case BadgeAttachment:
@@ -586,7 +586,7 @@ void drawSelectBorder(QPainter* p, const QRect& rc, const QColor& color, int wid
     p->restore();
 }
 
-void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
+void WizStyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool bFocus, bool bSelect)
 {
     int borderMargin = WizIsHighPixel() ? 3 : 2;
     QRect rcBg = rc.adjusted(1, 1, -14, -borderMargin);
@@ -603,7 +603,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, bool 
 }
 
 
-void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, StyleHelper::ListViewBGType bgType)
+void WizStyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, WizStyleHelper::ListViewBGType bgType)
 {
     int borderMargin = 2;
 
@@ -634,7 +634,7 @@ void StyleHelper::drawListViewItemBackground(QPainter* p, const QRect& rc, Style
     }
 }
 
-void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType,
+void WizStyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListViewBGType bgType,
                                             bool useFullSeperatorLine)
 {
     QRect rcLine = rc;
@@ -672,13 +672,13 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc, ListVi
     p->restore();
 }
 
-QSize StyleHelper::avatarSize(bool bNoScreenFactor)
+QSize WizStyleHelper::avatarSize(bool bNoScreenFactor)
 {
     int nHeight = avatarHeight(bNoScreenFactor);
     return QSize(nHeight, nHeight);
 }
 
-int StyleHelper::avatarHeight(bool bNoScreenFactor)
+int WizStyleHelper::avatarHeight(bool bNoScreenFactor)
 {
     QFont f;
     int nHeight = WizSmartScaleUI(36);//fontHead(f) + fontNormal(f) + margin() * 3 ;
@@ -693,7 +693,7 @@ int StyleHelper::avatarHeight(bool bNoScreenFactor)
 #endif
 }
 
-QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
+QRect WizStyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 {
     QRect rectAvatar = rc;
     rectAvatar.setSize(avatarSize(true));
@@ -701,7 +701,7 @@ QRect StyleHelper::drawAvatar(QPainter* p, const QRect& rc, const QPixmap& pm)
 
     return rectAvatar;
 }
-int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, int nFlags, const QColor& color, const QFont& font)
+int WizStyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, int nFlags, const QColor& color, const QFont& font)
 {
     QPen oldpen = p->pen();
     QFont oldFont = p->font();
@@ -717,7 +717,7 @@ int StyleHelper::drawSingleLineText(QPainter* p, const QRect& rc, QString& str, 
     return out.right();
 }
 
-void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
+void WizStyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
 {
     QRect rcLine = rc;
     rcLine.adjust(WizSmartScaleUI(12), 0, 0, 0);
@@ -727,7 +727,7 @@ void StyleHelper::drawListViewItemSeperator(QPainter* p, const QRect& rc)
     p->restore();
 }
 
-QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
+QRect WizStyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLines,
                           int nFlags, const QColor& color, const QFont& font, bool bElided,
                             Qt::TextElideMode elidedMode)
 {
@@ -798,7 +798,7 @@ QRect StyleHelper::drawText(QPainter* p, const QRect& rc, QString& str, int nLin
     return rcRet;
 }
 
-QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm)
+QRect WizStyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixmap& pm)
 {
     if (pm.isNull()) {
         qDebug() << "[WARNING]pixmap is null when drawing thumbnail";
@@ -829,7 +829,7 @@ QRect StyleHelper::drawThumbnailPixmap(QPainter* p, const QRect& rc, const QPixm
     return rcd;
 }
 
-QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect)
+QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int type, bool bFocus, bool bSelect)
 {
     QIcon badge(listViewBadge(type));
     QRect rcb = rc.adjusted(margin(), margin(), 0, 0);
@@ -843,7 +843,7 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, int height, int t
     return rcb;
 }
 
-QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
+QRect WizStyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType,  bool bFocus, bool bSelect)
 {
     QIcon attachIcon(listViewBadge(nType));
     QList<QSize> sizes = attachIcon.availableSizes();
@@ -866,28 +866,28 @@ QRect StyleHelper::drawBadgeIcon(QPainter* p, const QRect& rc, BadgeType nType, 
     return rcb;
 }
 
-int StyleHelper::lineSpacing()
+int WizStyleHelper::lineSpacing()
 {
     return WizSmartScaleUI(4);
 }
 
-int StyleHelper::leading()
+int WizStyleHelper::leading()
 {
     return WizSmartScaleUI(3);
 }
 
-int StyleHelper::margin()
+int WizStyleHelper::margin()
 {
     return WizSmartScaleUI(5);
 }
 
-int StyleHelper::thumbnailHeight()
+int WizStyleHelper::thumbnailHeight()
 {
     QFont f;
     return fontHead(f) + fontNormal(f) * 3 + margin() * 5;
 }
 
-QPolygonF StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLeft)
+QPolygonF WizStyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLeft)
 {
     Q_ASSERT(sz.width() > 31);
     Q_ASSERT(sz.height() > 11);
@@ -930,7 +930,7 @@ QPolygonF StyleHelper::bubbleFromSize(const QSize& sz, int nAngle, bool bAlignLe
     return QPolygonF(ps);
 }
 
-int StyleHelper::fontHead(QFont& f)
+int WizStyleHelper::fontHead(QFont& f)
 {
 
 #ifdef Q_OS_MAC
@@ -949,7 +949,7 @@ int StyleHelper::fontHead(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::fontNormal(QFont& f)
+int WizStyleHelper::fontNormal(QFont& f)
 {
 #ifdef Q_OS_MAC
 //    QSettings* st = WizGlobal::settings();
@@ -965,7 +965,7 @@ int StyleHelper::fontNormal(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::fontThumb(QFont& f)
+int WizStyleHelper::fontThumb(QFont& f)
 {
 #ifdef Q_OS_MAC
     f.setPixelSize(12);
@@ -973,7 +973,7 @@ int StyleHelper::fontThumb(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::fontExtend(QFont& f)
+int WizStyleHelper::fontExtend(QFont& f)
 {
     QSettings* st = WizGlobal::settings();
     QString strFont = st->value("Theme/FontFamily").toString();
@@ -987,7 +987,7 @@ int StyleHelper::fontExtend(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::fontCategoryItem(QFont& f)
+int WizStyleHelper::fontCategoryItem(QFont& f)
 {
 #ifdef Q_OS_MAC
     f.setPixelSize(13);
@@ -995,7 +995,7 @@ int StyleHelper::fontCategoryItem(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::fontSection(QFont& f)
+int WizStyleHelper::fontSection(QFont& f)
 {
 #ifdef Q_OS_MAC
     f.setPixelSize(11);
@@ -1003,70 +1003,70 @@ int StyleHelper::fontSection(QFont& f)
     return QFontMetrics(f).height();
 }
 
-int StyleHelper::editorButtonHeight()
+int WizStyleHelper::editorButtonHeight()
 {
     return 28;
 }
 
-QMargins StyleHelper::editorBarMargins()
+QMargins WizStyleHelper::editorBarMargins()
 {
     return QMargins(WizSmartScaleUI(14), 0, WizSmartScaleUI(14), 0);
 }
 
-int StyleHelper::titleEditorHeight()
+int WizStyleHelper::titleEditorHeight()
 {
     return WizSmartScaleUI(30);
 }
 
-int StyleHelper::editToolBarHeight()
+int WizStyleHelper::editToolBarHeight()
 {
     return 30;
 }
 
-int StyleHelper::infoBarHeight()
+int WizStyleHelper::infoBarHeight()
 {
     return 34;
 }
 
-int StyleHelper::tagBarHeight()
+int WizStyleHelper::tagBarHeight()
 {
     return editToolBarHeight();
 }
 
-int StyleHelper::notifyBarHeight()
+int WizStyleHelper::notifyBarHeight()
 {
     return WizSmartScaleUI(32);
 }
 
-QVariant StyleHelper::getValue(const QString& key, const QVariant& defaultValue)
+QVariant WizStyleHelper::getValue(const QString& key, const QVariant& defaultValue)
 {
     if (!m_settings) {
-        m_settings = new CWizSettings(PathResolve::themePath(themeName()) + "skin.ini");
+        m_settings = new WizSettings(WizPathResolve::themePath(themeName()) + "skin.ini");
     }
 
     return m_settings->value(key, defaultValue);
 }
 
-QRect StyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine)
+QRect WizStyleHelper::initListViewItemPainter(QPainter* p, const QRect& lrc, ListViewBGType bgType, bool useFullSeperatorLine)
 {
     QRect rc = lrc;
 
-    Utils::StyleHelper::drawListViewItemBackground(p, rc, bgType);
+    Utils::WizStyleHelper::drawListViewItemBackground(p, rc, bgType);
 
-    Utils::StyleHelper::drawListViewItemSeperator(p, rc, bgType, useFullSeperatorLine);
+    Utils::WizStyleHelper::drawListViewItemSeperator(p, rc, bgType, useFullSeperatorLine);
 
-    int nMargin = Utils::StyleHelper::margin();
+    int nMargin = Utils::WizStyleHelper::margin();
     return rc.adjusted(nMargin, nMargin, -nMargin, -nMargin);
 }
 
-void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
+void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadgeType,
                                         const QString& title, const QStringList& lead, const QString& location,
                                         const QString& abs, bool bFocused, bool bSelected, QPixmap thumbPix)
 {
     QRect rcd = rc.adjusted(2, 0, 0, 0); //
 
     QFont fontTitle = p->font();
-    int nFontHeight = Utils::StyleHelper::fontHead(fontTitle);
+    int nFontHeight = Utils::WizStyleHelper::fontHead(fontTitle);
 
     if (!title.isEmpty()) {
         bool drawEncrpytIconInTitle = nBadgeType & DocTypeEncrytedInTitle;
@@ -1077,8 +1077,8 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         if (nBadgeType & DocTypeAlwaysOnTop)
         {
             QString strBadgeText(QObject::tr("[ Top ]"));
-            QColor colorType = Utils::StyleHelper::listViewItemType(bSelected, bFocused);
-            rcTitle = Utils::StyleHelper::drawText(p, rcTitle, strBadgeText, 1, Qt::AlignVCenter | Qt::AlignLeft, colorType, fontTitle);
+            QColor colorType = Utils::WizStyleHelper::listViewItemType(bSelected, bFocused);
+            rcTitle = Utils::WizStyleHelper::drawText(p, rcTitle, strBadgeText, 1, Qt::AlignVCenter | Qt::AlignLeft, colorType, fontTitle);
             rcTitle.setCoords(rcTitle.right(), rcTitle.y(), rcd.right(), rcd.bottom());
         }
 
@@ -1087,27 +1087,27 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         strTitle.replace("\n", "");
         strTitle.replace("\r", " ");
         rcTitle.adjust(0, 0, - nSpace4AttachIcon, 0);
-        QColor colorTitle = Utils::StyleHelper::listViewItemTitle(bSelected, bFocused);
-        QRect rcAttach = Utils::StyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
+        QColor colorTitle = Utils::WizStyleHelper::listViewItemTitle(bSelected, bFocused);
+        QRect rcAttach = Utils::WizStyleHelper::drawText(p, rcTitle, strTitle, 1, Qt::AlignVCenter, colorTitle, fontTitle);
         int titleHeight = rcAttach.height();
 
         rcAttach.setCoords(rcAttach.right(), rcAttach.top(), rcd.right(), rcTitle.bottom());
         rcAttach.setHeight(nFontHeight);
         if (drawEncrpytIconInTitle) {
-            QRect rcEncrypt = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
+            QRect rcEncrypt = Utils::WizStyleHelper::drawBadgeIcon(p, rcAttach, BadgeEncryptedInTitle, bFocused, false);
             rcAttach.setCoords(rcEncrypt.right() + 4, rcAttach.top(), rcd.right(), rcTitle.bottom());
         }
 
         if (drawAttachmentInTitle) {
-            rcAttach = Utils::StyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
+            rcAttach = Utils::WizStyleHelper::drawBadgeIcon(p, rcAttach, BadgeAttachment, bFocused, false);
         }
 
         rcd.adjust(0, titleHeight, 0, 0);
     }
 
     QFont fontThumb;
-    nFontHeight = Utils::StyleHelper::fontThumb(fontThumb);
-    QPixmap pixGreyPoint(Utils::StyleHelper::skinResourceFileName("document_grey_point", true));
+    nFontHeight = Utils::WizStyleHelper::fontThumb(fontThumb);
+    QPixmap pixGreyPoint(Utils::WizStyleHelper::skinResourceFileName("document_grey_point", true));
     QRect rcLead = rcd;   //排序类型或标签等
     int nLeadHeight;
     if (!lead.isEmpty()) {
@@ -1120,12 +1120,12 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
                 QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
                 rcGreyPoint.setWidth(4);
                 rcGreyPoint.setHeight(4);
-                Utils::StyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
+                Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
                 rcLead.adjust(6, 0, 0, 0);
             }
 
-            QColor colorDate = Utils::StyleHelper::listViewItemLead(bSelected, bFocused);
-            rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
+            QColor colorDate = Utils::WizStyleHelper::listViewItemLead(bSelected, bFocused);
+            rcLead = Utils::WizStyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorDate, fontThumb);
             nLeadHeight = rcLead.height();
             rcLead = rcd.adjusted(rcLead.width() + rcLead.x() - rcd.x(), 0, 0, 0);
         }
@@ -1135,12 +1135,12 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
         QRect rcGreyPoint = rcLead.adjusted(0, 8, 0, 0);
         rcGreyPoint.setWidth(4);
         rcGreyPoint.setHeight(4);
-        Utils::StyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
+        Utils::WizStyleHelper::drawPixmapWithScreenScaleFactor(p, rcGreyPoint, pixGreyPoint);
         rcLead.adjust(4, 0, 0, 0);
 
-        QColor colorLocation = Utils::StyleHelper::listViewItemLocation(bSelected, bFocused);
+        QColor colorLocation = Utils::WizStyleHelper::listViewItemLocation(bSelected, bFocused);
         QString strInfo(location);
-        rcLead = Utils::StyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorLocation,
+        rcLead = Utils::WizStyleHelper::drawText(p, rcLead, strInfo, 1, Qt::AlignVCenter, colorLocation,
                                               fontThumb, true, Qt::ElideMiddle);
         nLeadHeight = rcLead.height();
     }
@@ -1168,9 +1168,9 @@ void StyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBadge
             QString strText(abs);
             rcSummary.adjust(0, -4, 0, 0);
             p->setClipRect(rcSummary);
-            QColor colorSummary = Utils::StyleHelper::listViewItemSummary(bSelected, bFocused);
+            QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
             if (!strText.isEmpty()) {
-                Utils::StyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
+                Utils::WizStyleHelper::drawText(p, rcSummary, strText, 2, Qt::AlignVCenter, colorSummary, fontThumb);
             }
             p->setClipRect(rc);
         }

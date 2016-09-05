@@ -8,8 +8,8 @@
 class QAction;
 class QMenuBar;
 class QMenu;
-class CWizSettings;
-class CWizAnimateAction;
+class WizSettings;
+class WizAnimateAction;
 struct WIZACTION;
 class QShortcut;
 
@@ -77,12 +77,12 @@ class QShortcut;
 //NOTE：因为Linux版本没有menubar，qaction在隐藏后快捷键无法触发，此处创建一个shortcut并与app的槽函数绑定
 //作为程序的全局快捷键，禁用qaction时同时禁用shortcut
 **/
-class CWizShortcutAction : public QAction
+class WizShortcutAction : public QAction
 {
 public:
-    explicit CWizShortcutAction(QObject* parent) : QAction(parent), m_shortcut(0){}
-    CWizShortcutAction(const QString &text, QObject* parent) : QAction(text, parent), m_shortcut(0){}
-    CWizShortcutAction(const QIcon &icon, const QString &text, QObject* parent) : QAction(icon, text, parent), m_shortcut(0){}
+    explicit WizShortcutAction(QObject* parent) : QAction(parent), m_shortcut(0){}
+    WizShortcutAction(const QString &text, QObject* parent) : QAction(text, parent), m_shortcut(0){}
+    WizShortcutAction(const QIcon &icon, const QString &text, QObject* parent) : QAction(icon, text, parent), m_shortcut(0){}
 
     void setShortcut(QShortcut* shortcut);
     void setShortcut(const QKeySequence &shortcut);
@@ -92,29 +92,29 @@ private:
 };
 
 
-class CWizActions : public QObject
+class WizActions : public QObject
 {
     Q_OBJECT
 public:
-    CWizActions(CWizExplorerApp& app, QObject* parent);
+    WizActions(WizExplorerApp& app, QObject* parent);
 
 private:
     QObject* m_parent;
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 
-    std::map<QString, CWizShortcutAction*> m_actions;
+    std::map<QString, WizShortcutAction*> m_actions;
     WIZACTION* actionsData();
-    CWizShortcutAction* addAction(WIZACTION& action, bool bUseExtraShortcut);
+    WizShortcutAction* addAction(WIZACTION& action, bool bUseExtraShortcut);
 
 public:
     void init(bool bUseExtraShortcut = false);
-    CWizShortcutAction* actionFromName(const QString& strActionName);
+    WizShortcutAction* actionFromName(const QString& strActionName);
     void toggleActionText(const QString& strActionName);
-    CWizAnimateAction* animateActionFromName(const QString& strActionName);
+    WizAnimateAction* animateActionFromName(const QString& strActionName);
 
 
-    QMenu* toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection);
-    void buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar);
+    QMenu* toMenu(QWidget* parent, WizSettings& settings, const QString& strSection);
+    void buildMenu(QMenu* pMenu, WizSettings& settings, const QString& strSection, bool bMenuBar);
     void buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu);
     void buildMenu(QMenu* menu, const QString& strFileName);
     //

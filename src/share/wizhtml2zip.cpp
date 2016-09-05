@@ -18,23 +18,23 @@ bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
 {
     Q_UNUSED(flags);
 
-    CWizHtmlCollector collector;
+    WizHtmlCollector collector;
 
     //
-    QString strTempPath = Utils::PathResolve::tempPath();
+    QString strTempPath = Utils::WizPathResolve::tempPath();
     //
     QString strMainHtml(strHtml);
-    if (!collector.Collect(strUrl, strMainHtml, true, strTempPath)) {
+    if (!collector.collect(strUrl, strMainHtml, true, strTempPath)) {
         return false;
     }
 
-    return collector.Html2Zip(strResourcePath, strZipFileName);
+    return collector.html2Zip(strResourcePath, strZipFileName);
 }
 
 bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource, \
                  const QString& strZipFileName)
 {
-    CWizZipFile zip;
+    WizZipFile zip;
     if (!zip.open(strZipFileName))
         return false;
 
@@ -43,7 +43,7 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     {
         strHtmlText = "<!DOCTYPE html>" + strHtmlText;
     }
-    CString strIndexFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".html";
+    CString strIndexFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".html";
     //if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
     if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtmlText))
         return false;
@@ -58,7 +58,7 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
         it++)
     {
         CString strFileName = *it;
-        CString strNameInZip = "index_files/" + Utils::Misc::extractFileName(strFileName);
+        CString strNameInZip = "index_files/" + Utils::WizMisc::extractFileName(strFileName);
         if (!zip.compressFile(strFileName, strNameInZip))
         {
             failed++;
@@ -73,7 +73,7 @@ bool WizFolder2Zip(const QString &strFolder,    \
                    const QString &strZipFileName, const QString &indexFile /*= "index.html"*/, \
                    const QString &strResourceFolder /*= "index_files"*/)
 {
-    CWizZipFile zip;
+    WizZipFile zip;
     if (!zip.open(strZipFileName))
         return false;
 
@@ -89,7 +89,7 @@ bool WizFolder2Zip(const QString &strFolder,    \
     for (QStringList::const_iterator it = strResourceList.begin(); it != strResourceList.end(); it++)
     {
         QString strFileName =dir.path() +"/" + *it;
-        QString strNameInZip = "index_files/" + Utils::Misc::extractFileName(strFileName);
+        QString strNameInZip = "index_files/" + Utils::WizMisc::extractFileName(strFileName);
         if (!zip.compressFile(strFileName, strNameInZip))
         {
             failed++;

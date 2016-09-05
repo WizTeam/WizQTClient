@@ -5,13 +5,13 @@
 #include <memory>
 
 
-class CWizUpgradeChecker : public QObject
+class WizUpgradeChecker : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit CWizUpgradeChecker(QObject *parent = 0);
-    ~CWizUpgradeChecker();
+    explicit WizUpgradeChecker(QObject *parent = 0);
+    ~WizUpgradeChecker();
     void startCheck();
 
     static QString getWhatsNewUrl();

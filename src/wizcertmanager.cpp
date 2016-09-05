@@ -4,7 +4,7 @@
 
 #include "share/wizDatabaseManager.h"
 
-CWizCertManager::CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
+WizCertManager::WizCertManager(WizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
     : CWizApiBase(strAccountsApiURL)
     , m_app(app)
     , m_db(app.databaseManager().db())
@@ -12,7 +12,7 @@ CWizCertManager::CWizCertManager(CWizExplorerApp& app, const QString& strAccount
 {
 }
 
-void CWizCertManager::onXmlRpcError(const QString& strMethodName, \
+void WizCertManager::onXmlRpcError(const QString& strMethodName, \
                                     WizXmlRpcError err, \
                                     int errorCode, \
                                     const QString& errorMessage)
@@ -25,10 +25,10 @@ void CWizCertManager::onXmlRpcError(const QString& strMethodName, \
     Q_EMIT done(false, errorMessage);
 }
 
-void CWizCertManager::onGetUserCert(const WIZUSERCERT& data)
+void WizCertManager::onGetUserCert(const WIZUSERCERT& data)
 {
     // save to database
-    if(!m_db.SetUserCert(data.strN, \
+    if(!m_db.setUserCert(data.strN, \
                          data.stre, \
                          data.strd, \
                          data.strHint)) {
@@ -41,14 +41,14 @@ void CWizCertManager::onGetUserCert(const WIZUSERCERT& data)
     Q_EMIT done(true, QString());
 }
 
-void CWizCertManager::loadUserCert()
+void WizCertManager::loadUserCert()
 {
     if (m_bCertInited) {
         Q_EMIT done(true, QString());
         return;
     }
 
-    bool ret = m_db.GetUserCert(m_cert.strN, m_cert.stre, m_cert.strd, m_cert.strHint);
+    bool ret = m_db.getUserCert(m_cert.strN, m_cert.stre, m_cert.strd, m_cert.strHint);
 
     if (!ret) {
         downloadUserCert();
@@ -58,9 +58,9 @@ void CWizCertManager::loadUserCert()
     }
 }
 
-bool CWizCertManager::downloadUserCert()
+bool WizCertManager::downloadUserCert()
 {
-    return callGetUserCert(m_db.getUserId(), m_db.GetPassword());
+    return callGetUserCert(m_db.getUserId(), m_db.getPassword());
 }
 
 #endif // 0

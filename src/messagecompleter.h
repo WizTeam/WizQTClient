@@ -7,24 +7,24 @@ class QLineEdit;
 
 struct WIZDOCUMENTDATA;
 
-class CWizDocumentView;
+class WizDocumentView;
 class INoteView;
 
 
-class MessageCompleter : public QCompleter
+class WizMessageCompleter : public QCompleter
 {
     Q_OBJECT
 
 public:
-    explicit MessageCompleter(QWidget* parent);
+    explicit WizMessageCompleter(QWidget* parent);
 
 private:
     QLineEdit* m_title;
-    CWizDocumentView* noteView();
+    WizDocumentView* noteView();
     void update(const QString& strKbGUID);
 
 private Q_SLOTS:
-    void onNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok);
+    void onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok);
 };
 
 

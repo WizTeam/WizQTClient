@@ -4,16 +4,16 @@
 #include <QObject>
 #include "wizobject.h"
 
-class CWizUserSettings;
-class CWizDatabase;
-class CWizProgressDialog;
-class CWizDatabaseManager;
+class WizUserSettings;
+class WizDatabase;
+class WizProgressDialog;
+class WizDatabaseManager;
 
-class CWizDocumentOperator : public QObject
+class WizDocumentOperator : public QObject
 {
     Q_OBJECT
 public:
-    CWizDocumentOperator(CWizDatabaseManager& dbMgr, QObject* parent = 0);
+    WizDocumentOperator(WizDatabaseManager& dbMgr, QObject* parent = 0);
 
     void copyDocumentsToPersonalFolder(const CWizDocumentDataArray& arrayDocument, const QString& targetFolder,
                                      bool keepDocTime, bool keepTag, bool showProgressDialog = true);
@@ -43,14 +43,14 @@ public:
                                          bool showProgressDialog = true);
 
 private:
-    CWizDatabaseManager* m_dbMgr;
+    WizDatabaseManager* m_dbMgr;
 };
 
 
 //  ask user cipher to operate encrypted notes, after operation need to clear cipher.
-bool WizAskUserCipherToOperateEncryptedNotes(const QString& sourceFolder, CWizDatabase& db);
-bool WizAskUserCipherToOperateEncryptedNote(const CWizDocumentDataArray& arrayDocument, CWizDatabase& db);
-void WizClearUserCipher(CWizDatabase& db, CWizUserSettings& settings);
+bool WizAskUserCipherToOperateEncryptedNotes(const QString& sourceFolder, WizDatabase& db);
+bool WizAskUserCipherToOperateEncryptedNote(const CWizDocumentDataArray& arrayDocument, WizDatabase& db);
+void WizClearUserCipher(WizDatabase& db, WizUserSettings& settings);
 
 
 #endif // CWIZOBJECTOPERATOR_H

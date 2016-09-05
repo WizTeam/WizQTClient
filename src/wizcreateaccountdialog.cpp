@@ -7,9 +7,9 @@
 
 
 
-CreateAccountDialog::CreateAccountDialog(QWidget *parent)
+WizCreateAccountDialog::WizCreateAccountDialog(QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CreateAccountDialog)
+    , ui(new Ui::WizCreateAccountDialog)
 {
     ui->setupUi(this);
     //connect(this, SIGNAL(registerAccount(const QString&, const QString&, const QString&)),
@@ -17,26 +17,26 @@ CreateAccountDialog::CreateAccountDialog(QWidget *parent)
     //connect(CWizCloudPool::instance(), SIGNAL(accountRegistered(bool)), SLOT(accountRegistered_done(bool)));
 }
 
-CreateAccountDialog::~CreateAccountDialog()
+WizCreateAccountDialog::~WizCreateAccountDialog()
 {
     delete ui;
 }
 
-QString CreateAccountDialog::userId() const
+QString WizCreateAccountDialog::userId() const
 {
     return ui->editUserId->text();
 }
-QString CreateAccountDialog::password() const
+QString WizCreateAccountDialog::password() const
 {
     return ui->editPassword->text();
 }
 
-QString CreateAccountDialog::password2() const
+QString WizCreateAccountDialog::password2() const
 {
     return ui->editPassword2->text();
 }
 
-void CreateAccountDialog::accept()
+void WizCreateAccountDialog::accept()
 {
     if (userId().isEmpty()) {
         QMessageBox::critical(this, "", tr("Please enter user id"));
@@ -63,14 +63,14 @@ void CreateAccountDialog::accept()
 //    QString strCode = "8480c6d7";
 //#endif
 
-    AsyncApi* api = new AsyncApi(this);
+    WizAsyncApi* api = new WizAsyncApi(this);
     connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
     api->registerAccount(userId(), password(), "");
 }
 
-void CreateAccountDialog::onRegisterAccountFinished(bool bOk)
+void WizCreateAccountDialog::onRegisterAccountFinished(bool bOk)
 {
-    AsyncApi* api = dynamic_cast<AsyncApi*>(sender());
+    WizAsyncApi* api = dynamic_cast<WizAsyncApi*>(sender());
     enableControls(true);
 
     if (bOk) {
@@ -93,7 +93,7 @@ void CreateAccountDialog::onRegisterAccountFinished(bool bOk)
 //    }
 //}
 
-void CreateAccountDialog::enableControls(bool b)
+void WizCreateAccountDialog::enableControls(bool b)
 {
     ui->editUserId->setEnabled(b);
     ui->editPassword->setEnabled(b);

@@ -8,15 +8,15 @@
 
 
 
-CWizShadowEffect::CWizShadowEffect()
+WizShadowEffect::WizShadowEffect()
     : m_shadowSize(10)
-    , m_shadow(new CWizSkin9GridImage())
+    , m_shadow(new WizSkin9GridImage())
 {
-    QString strShadow = Utils::StyleHelper::skinResourceFileName("shadow");
-    m_shadow->SetImage(strShadow, QPoint(m_shadowSize + 5, m_shadowSize + 5));
+    QString strShadow = Utils::WizStyleHelper::skinResourceFileName("shadow");
+    m_shadow->setImage(strShadow, QPoint(m_shadowSize + 5, m_shadowSize + 5));
 }
 
-void CWizShadowEffect::draw(QPainter *painter)
+void WizShadowEffect::draw(QPainter *painter)
 {
     PixmapPadMode mode = PadToEffectiveBoundingRect;
     if (painter->paintEngine()->type() == QPaintEngine::OpenGL2)
@@ -35,13 +35,13 @@ void CWizShadowEffect::draw(QPainter *painter)
     painter->drawPixmap(offset.x(), offset.y(), pixmap);
     //
     QRect rcBound(offset.x() - 1, offset.y() - 1, sz.width() + 1, sz.height() + 1);
-    m_shadow->DrawBorder(painter, rcBound);
+    m_shadow->drawBorder(painter, rcBound);
     //
     painter->setWorldTransform(restoreTransform);
 
 }
 
-QRectF CWizShadowEffect::boundingRectFor(const QRectF &rect) const
+QRectF WizShadowEffect::boundingRectFor(const QRectF &rect) const
 {
     QRectF rc = rect;
     rc.adjust(-m_shadowSize, -m_shadowSize, m_shadowSize + 1, m_shadowSize + 1);
@@ -49,16 +49,16 @@ QRectF CWizShadowEffect::boundingRectFor(const QRectF &rect) const
 }
 
 
-CWizShadowWidget::CWizShadowWidget(QWidget* parent)
+WizShadowWidget::WizShadowWidget(QWidget* parent)
     : QWidget(parent)
-    , m_shadow(new CWizSkin9GridImage())
+    , m_shadow(new WizSkin9GridImage())
 {
-    QString strShadow = Utils::StyleHelper::skinResourceFileName("shadow");
-    m_shadow->SetImage(strShadow, QPoint(12, 12));
+    QString strShadow = Utils::WizStyleHelper::skinResourceFileName("shadow");
+    m_shadow->setImage(strShadow, QPoint(12, 12));
 }
 
-void CWizShadowWidget::paintEvent(QPaintEvent *)
+void WizShadowWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
-    m_shadow->DrawBorder(&painter, rect());
+    m_shadow->drawBorder(&painter, rect());
 }

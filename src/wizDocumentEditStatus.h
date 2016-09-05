@@ -13,11 +13,11 @@ class QNetworkAccessManager;
 
 
 
-class CWizDocumentEditStatusSyncThread : public QThread
+class WizDocumentEditStatusSyncThread : public QThread
 {
     Q_OBJECT
 public:
-    CWizDocumentEditStatusSyncThread(QObject* parent = 0);
+    WizDocumentEditStatusSyncThread(QObject* parent = 0);
     //
     void startEditingDocument(const QString& strUserAlias, const QString& strKbGUID, const QString& strGUID);
     void stopEditingDocument(const QString& strKbGUID ,const QString& strGUID, bool bModified);
@@ -58,12 +58,12 @@ private:
     QTimer m_timer;
 };
 
-class CWizDocumentStatusChecker : public QObject
+class WizDocumentStatusChecker : public QObject
 {
     Q_OBJECT
 public:
-    CWizDocumentStatusChecker(QObject* parent = 0);
-    ~CWizDocumentStatusChecker();
+    WizDocumentStatusChecker(QObject* parent = 0);
+    ~WizDocumentStatusChecker();
 
 public slots:
     void onTimeOut();

@@ -12,20 +12,20 @@ class QTimer;
 class QAction;
 class QToolButton;
 
-class CWizAnimateContainerBase : public QObject
+class WizAnimateContainerBase : public QObject
 {
 public:
-    CWizAnimateContainerBase(QObject* parent);
+    WizAnimateContainerBase(QObject* parent);
 
     virtual QIcon icon() = 0;
     virtual void setIcon(const QIcon &icon) = 0;
     virtual bool setProperty(const char *name, const QVariant &value) = 0;
 };
 
-class CWizAnimateActionContainer : public CWizAnimateContainerBase
+class WizAnimateActionContainer : public WizAnimateContainerBase
 {
 public:
-    explicit CWizAnimateActionContainer(QAction* action, QObject* parent);
+    explicit WizAnimateActionContainer(QAction* action, QObject* parent);
 
     virtual QIcon icon();
     virtual void setIcon(const QIcon &icon);
@@ -35,10 +35,10 @@ private:
     QAction* m_action;
 };
 
-class CWizAnimateButtonContainer : public CWizAnimateContainerBase
+class WizAnimateButtonContainer : public WizAnimateContainerBase
 {
 public:
-    explicit CWizAnimateButtonContainer(QToolButton* button, QObject* parent);
+    explicit WizAnimateButtonContainer(QToolButton* button, QObject* parent);
 
     virtual QIcon icon();
     virtual void setIcon(const QIcon &icon);
@@ -48,12 +48,12 @@ private:
     QToolButton* m_button;
 };
 
-class CWizAnimateAction : public QObject
+class WizAnimateAction : public QObject
 {
     Q_OBJECT
 
 public:
-    CWizAnimateAction(QObject* parent);
+    WizAnimateAction(QObject* parent);
     void setAction(QAction* action);
     void setToolButton(QToolButton* button);
     void setSingleIcons(const QString& strIconBaseName);
@@ -63,7 +63,7 @@ public:
     bool isPlaying();
 
 private:    
-    CWizAnimateContainerBase* m_target;
+    WizAnimateContainerBase* m_target;
     int m_nIconIndex;
     QIcon m_iconDefault;
     QList<QIcon> m_icons;

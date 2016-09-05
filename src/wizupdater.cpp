@@ -9,7 +9,7 @@
 
 const QString WIZ_UPGRADE_URL = "http://api.wiz.cn/";
 
-CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
+WizUpgradeThread::WizUpgradeThread(QObject* parent /* = 0 */)
     : QThread(parent)
     , m_bIsStarted(false)
     , m_currentThread(0)
@@ -31,13 +31,13 @@ CWizUpgradeThread::CWizUpgradeThread(QObject* parent /* = 0 */)
 #endif // Q_OS_MAC
 }
 
-void CWizUpgradeThread::abort()
+void WizUpgradeThread::abort()
 {
     if (m_currentThread)
         m_upgradePtr->abort();
 }
 
-void CWizUpgradeThread::checkUpgradeBegin()
+void WizUpgradeThread::checkUpgradeBegin()
 {
     if (m_bIsStarted)
         return;
@@ -48,7 +48,7 @@ void CWizUpgradeThread::checkUpgradeBegin()
     start();
 }
 
-void CWizUpgradeThread::checkUpgradeFinished()
+void WizUpgradeThread::checkUpgradeFinished()
 {
     m_upgradePtr->deleteLater();
     m_currentThread = 0;
@@ -62,13 +62,13 @@ void CWizUpgradeThread::checkUpgradeFinished()
     m_bIsStarted = false;
 }
 
-void CWizUpgradeThread::run()
+void WizUpgradeThread::run()
 {
     m_currentThread = QThread::currentThread();
 
     TOLOG(tr("Check update online"));
 
-    m_upgradePtr = new CWizUpgrade();
+    m_upgradePtr = new WizUpgrade();
 
     qRegisterMetaType<UpdateError>("UpdateError");
 
@@ -80,7 +80,7 @@ void CWizUpgradeThread::run()
     exec();
 }
 
-void CWizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
+void WizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
 {
     TOLOG1(tr("Check upgrade done, need upgrade: %1"), QString::number(bNeedUpgrade));
 
@@ -97,7 +97,7 @@ void CWizUpgradeThread::on_prepareDone(bool bNeedUpgrade)
     m_currentThread->exit();
 }
 
-void CWizUpgradeThread::on_upgradeError(UpdateError error)
+void WizUpgradeThread::on_upgradeError(UpdateError error)
 {
     Q_UNUSED(error);
 
@@ -108,14 +108,14 @@ void CWizUpgradeThread::on_upgradeError(UpdateError error)
 
 
 
-CWizUpgrade::CWizUpgrade(QObject* parent /* = 0 */)
+WizUpgrade::WizUpgrade(QObject* parent /* = 0 */)
     : QObject(parent)
     , m_nProcessTimes(0)
     , m_bNewVersion(false)
 {
 }
 
-void CWizUpgrade::abort()
+void WizUpgrade::abort()
 {
     TOLOG(tr("cancle upgrade check"));
 
@@ -123,7 +123,7 @@ void CWizUpgrade::abort()
     Q_EMIT prepareDone(false);
 }
 
-QString CWizUpgrade::getUpgradeUrl()
+QString WizUpgrade::getUpgradeUrl()
 {
     QString strProduct = "wiznote_qt";
     QString strCommand = "updatev2";
@@ -149,7 +149,7 @@ QString CWizUpgrade::getUpgradeUrl()
     return strUrl;
 }
 
-QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
+QUrl WizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
                               QUrl const &old_redirect_url) const
 {
     QUrl redirect_url;
@@ -163,13 +163,13 @@ QUrl CWizUpgrade::redirectUrl(QUrl const &possible_redirect_url, \
     return redirect_url;
 }
 
-void CWizUpgrade::requestUpgrade()
+void WizUpgrade::requestUpgrade()
 {
     // send request to download upgrade tarball
     requestUpgrade_impl(getUpgradeUrl());
 }
 
-void CWizUpgrade::requestUpgrade_impl(QString const& url)
+void WizUpgrade::requestUpgrade_impl(QString const& url)
 {
     QNetworkReply* reply = m_net.get(QNetworkRequest(url));
     connect(reply, SIGNAL(finished()), SLOT(on_requestUpgrade_finished()));
@@ -177,7 +177,7 @@ void CWizUpgrade::requestUpgrade_impl(QString const& url)
             SLOT(on_request_error(QNetworkReply::NetworkError)));
 }
 
-void CWizUpgrade::on_requestUpgrade_finished()
+void WizUpgrade::on_requestUpgrade_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -210,11 +210,11 @@ void CWizUpgrade::on_requestUpgrade_finished()
     reply->deleteLater();
 }
 
-void CWizUpgrade::processTarball()
+void WizUpgrade::processTarball()
 {
     // unzip
     QString strZip = ::WizGetUpgradePath() + "update.zip";
-    if (!CWizUnzipFile::extractZip(strZip, ::WizGetUpgradePath())) {
+    if (!WizUnzipFile::extractZip(strZip, ::WizGetUpgradePath())) {
         TOLOG("tarball data is not correct! please contect wiz support team");
         Q_EMIT upgradeError(UnzipError);
         return;
@@ -225,15 +225,15 @@ void CWizUpgrade::processTarball()
     generateDownloadQueue();
 }
 
-void CWizUpgrade::readMetadata()
+void WizUpgrade::readMetadata()
 {
     // read metadata to memory
-    CWizSettings* config = new CWizSettings(::WizGetUpgradePath() + "config.txt");
-    m_strDownloadFileUrl = config->GetString("Common", "DownloadFileURL");
-    m_strWhatsNewUrl = config->GetString("Common", "WhatsNewURL");
+    WizSettings* config = new WizSettings(::WizGetUpgradePath() + "config.txt");
+    m_strDownloadFileUrl = config->getString("Common", "DownloadFileURL");
+    m_strWhatsNewUrl = config->getString("Common", "WhatsNewURL");
 
     int i = 0;
-    QString strFileEntry = config->GetString("Files", QString::number(i));
+    QString strFileEntry = config->getString("Files", QString::number(i));
     while (!strFileEntry.isEmpty()) {
         QStringList strFileMeta = strFileEntry.split("*");
 
@@ -251,11 +251,11 @@ void CWizUpgrade::readMetadata()
         }
 
         i++;
-        strFileEntry = config->GetString("Files", QString::number(i));
+        strFileEntry = config->getString("Files", QString::number(i));
     }
 }
 
-void CWizUpgrade::generateDownloadQueue()
+void WizUpgrade::generateDownloadQueue()
 {
     QList<QStringList>::const_iterator i;
     for (i = m_files.constBegin(); i != m_files.constEnd(); i++) {
@@ -311,7 +311,7 @@ void CWizUpgrade::generateDownloadQueue()
     processDownload();
 }
 
-void CWizUpgrade::processDownload()
+void WizUpgrade::processDownload()
 {
     if (m_nProcessTimes >= m_nNeedProcess) {
         if (!m_downloadQueue.isEmpty()) {
@@ -340,7 +340,7 @@ void CWizUpgrade::processDownload()
             SLOT(on_request_error(QNetworkReply::NetworkError)));
 }
 
-void CWizUpgrade::on_downloadFile_finished()
+void WizUpgrade::on_downloadFile_finished()
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -367,7 +367,7 @@ void CWizUpgrade::on_downloadFile_finished()
     // unzip
     WizEnsurePathExists(strDownloadFilePath);
     QFile fileZip(strWorkingPath + strDownloadFileName + ".zip");
-    if (!CWizUnzipFile::extractZip(strWorkingPath + strDownloadFileName + ".zip", \
+    if (!WizUnzipFile::extractZip(strWorkingPath + strDownloadFileName + ".zip", \
                                    strDownloadFilePath)) {
         fileZip.remove();
         TOLOG1("upzip failed: %1", strDownloadFileName);
@@ -398,7 +398,7 @@ void CWizUpgrade::on_downloadFile_finished()
     processDownload();
 }
 
-void CWizUpgrade::on_request_error(QNetworkReply::NetworkError error)
+void WizUpgrade::on_request_error(QNetworkReply::NetworkError error)
 {
     QNetworkReply* reply = qobject_cast<QNetworkReply *>(sender());
 
@@ -416,7 +416,7 @@ void CWizUpgrade::on_request_error(QNetworkReply::NetworkError error)
     TOLOG3("Download %1 error [code %2]: %3", strFile, QString::number(error), reply->errorString());
 }
 
-void CWizUpgrade::moveToEnd()
+void WizUpgrade::moveToEnd()
 {
     if (!m_downloadQueue.isEmpty()) {
         m_downloadQueue.swap(0, m_downloadQueue.count() - 1);

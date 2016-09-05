@@ -5,14 +5,14 @@
 
 struct WIZDOCUMENTDATA;
 class QLabel;
-class CWizExplorerApp;
+class WizExplorerApp;
 
-class InfoBar : public QWidget
+class WizInfoBar : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit InfoBar(CWizExplorerApp& app, QWidget *parent);
+    explicit WizInfoBar(WizExplorerApp& app, QWidget *parent);
     void setDocument(const WIZDOCUMENTDATA& data);
 
 private:
@@ -20,7 +20,7 @@ private:
     QLabel* m_labelModifiedTime;
     QLabel* m_labelOwner;
     QLabel* m_labelSize;
-    CWizExplorerApp& m_app;
+    WizExplorerApp& m_app;
 };
 
 

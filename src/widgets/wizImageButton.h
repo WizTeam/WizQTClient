@@ -7,11 +7,11 @@
 class QPaintEvent;
 class QMouseEvent;
 
-class wizImageButton : public QPushButton
+class WizImageButton : public QPushButton
 {
     Q_OBJECT
 public:
-    explicit wizImageButton(QWidget* parent = 0);
+    explicit WizImageButton(QWidget* parent = 0);
 
     void setIcon(const QIcon& icon);
     void setIconNormal(const QString& icoFile);

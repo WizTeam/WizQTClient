@@ -9,7 +9,7 @@
 #include <QAction>
 #include <QToolButton>
 
-CWizAnimateAction::CWizAnimateAction(QObject* parent)
+WizAnimateAction::WizAnimateAction(QObject* parent)
     : QObject(parent)
     , m_target(NULL)
     , m_nIconIndex(-1)
@@ -19,24 +19,24 @@ CWizAnimateAction::CWizAnimateAction(QObject* parent)
     m_timer->setInterval(100);
 }
 
-void CWizAnimateAction::setAction(QAction* action)
+void WizAnimateAction::setAction(QAction* action)
 {
-    m_target = new CWizAnimateActionContainer(action, this);
+    m_target = new WizAnimateActionContainer(action, this);
     m_iconDefault = m_target->icon();
 }
 
-void CWizAnimateAction::setToolButton(QToolButton* button)
+void WizAnimateAction::setToolButton(QToolButton* button)
 {
-    m_target = new CWizAnimateButtonContainer(button, this);
+    m_target = new WizAnimateButtonContainer(button, this);
     m_iconDefault = m_target->icon();
 }
 
-void CWizAnimateAction::setSingleIcons(const QString& strIconBaseName)
+void WizAnimateAction::setSingleIcons(const QString& strIconBaseName)
 {
     int index = 1;
     while (1)
     {
-        CString strFileName = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName + WizIntToStr(index));
+        CString strFileName = ::WizGetSkinResourceFileName(Utils::WizStyleHelper::themeName(), strIconBaseName + WizIntToStr(index));
         if (strFileName.isEmpty())
             return;
         QIcon icon(strFileName);
@@ -49,16 +49,16 @@ void CWizAnimateAction::setSingleIcons(const QString& strIconBaseName)
     }
 }
 
-void CWizAnimateAction::setTogetherIcon(const QString& strIconBaseName)
+void WizAnimateAction::setTogetherIcon(const QString& strIconBaseName)
 {
     CString strFileName;
     if (WizIsHighPixel()) {
-        strFileName  = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName + "@2x");
+        strFileName  = ::WizGetSkinResourceFileName(Utils::WizStyleHelper::themeName(), strIconBaseName + "@2x");
     } else {
-        strFileName  = ::WizGetSkinResourceFileName(Utils::StyleHelper::themeName(), strIconBaseName);
+        strFileName  = ::WizGetSkinResourceFileName(Utils::WizStyleHelper::themeName(), strIconBaseName);
     }
 
-    if (strFileName.IsEmpty())
+    if (strFileName.isEmpty())
         return;
 
     QPixmap pix(strFileName);
@@ -79,7 +79,7 @@ void CWizAnimateAction::setTogetherIcon(const QString& strIconBaseName)
     }
 }
 
-void CWizAnimateAction::nextIcon()
+void WizAnimateAction::nextIcon()
 {
     if (!m_target)
         return;
@@ -95,12 +95,12 @@ void CWizAnimateAction::nextIcon()
     m_target->setIcon(m_icons.at(index));
 }
 
-bool CWizAnimateAction::isPlaying()
+bool WizAnimateAction::isPlaying()
 {
     return m_timer->isActive();
 }
 
-void CWizAnimateAction::startPlay()
+void WizAnimateAction::startPlay()
 {
     if (!m_target)
         return;
@@ -115,7 +115,7 @@ void CWizAnimateAction::startPlay()
     m_timer->start();
 }
 
-void CWizAnimateAction::stopPlay()
+void WizAnimateAction::stopPlay()
 {
     if (!m_target)
         return;
@@ -126,60 +126,60 @@ void CWizAnimateAction::stopPlay()
     m_timer->stop();
 }
 
-void CWizAnimateAction::on_timer_timeout()
+void WizAnimateAction::on_timer_timeout()
 {
     nextIcon();
 }
 
 
-CWizAnimateActionContainer::CWizAnimateActionContainer(QAction* action, QObject* parent)
+WizAnimateActionContainer::WizAnimateActionContainer(QAction* action, QObject* parent)
     : m_action(action)
-    , CWizAnimateContainerBase(parent)
+    , WizAnimateContainerBase(parent)
 {
 
 }
 
-QIcon CWizAnimateActionContainer::icon()
+QIcon WizAnimateActionContainer::icon()
 {
     return m_action->icon();
 }
 
-void CWizAnimateActionContainer::setIcon(const QIcon& icon)
+void WizAnimateActionContainer::setIcon(const QIcon& icon)
 {
     m_action->setIcon(icon);
 }
 
-bool CWizAnimateActionContainer::setProperty(const char* name, const QVariant& value)
+bool WizAnimateActionContainer::setProperty(const char* name, const QVariant& value)
 {
     return m_action->setProperty(name, value);
 }
 
 
-CWizAnimateContainerBase::CWizAnimateContainerBase(QObject* parent)
+WizAnimateContainerBase::WizAnimateContainerBase(QObject* parent)
     : QObject(parent)
 {
 
 }
 
 
-CWizAnimateButtonContainer::CWizAnimateButtonContainer(QToolButton* button, QObject* parent)
+WizAnimateButtonContainer::WizAnimateButtonContainer(QToolButton* button, QObject* parent)
     : m_button(button)
-    , CWizAnimateContainerBase(parent)
+    , WizAnimateContainerBase(parent)
 {
 
 }
 
-QIcon CWizAnimateButtonContainer::icon()
+QIcon WizAnimateButtonContainer::icon()
 {
     return m_button->icon();
 }
 
-void CWizAnimateButtonContainer::setIcon(const QIcon& icon)
+void WizAnimateButtonContainer::setIcon(const QIcon& icon)
 {
     m_button->setIcon(icon);
 }
 
-bool CWizAnimateButtonContainer::setProperty(const char* name, const QVariant& value)
+bool WizAnimateButtonContainer::setProperty(const char* name, const QVariant& value)
 {
     return m_button->setProperty(name, value);
 }

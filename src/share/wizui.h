@@ -9,33 +9,33 @@ class QPainter;
 class QLineEdit;
 class QLabel;
 
-class CWizSkin9GridImage
+class WizSkin9GridImage
 {
 protected:
     QImage m_img;
     QRect m_arrayImageGrid[9];
     //
-    BOOL Clear();
+    BOOL clear();
 public:
-    static BOOL SplitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount);
-    BOOL SetImage(const CString& strImageFileName, QPoint ptTopLeft);
+    static BOOL splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount);
+    BOOL setImage(const CString& strImageFileName, QPoint ptTopLeft);
     //
-    void Draw(QPainter* p, QRect rc, int nAlpha) const;
-    void DrawBorder(QPainter* p, QRect rc) const;
-    BOOL Valid() const;
+    void draw(QPainter* p, QRect rc, int nAlpha) const;
+    void drawBorder(QPainter* p, QRect rc) const;
+    BOOL valid() const;
     //
     QSize actualSize() const { return m_img.size(); }
 };
 
 
-class CWizIconLineEditContainer : public QWidget
+class WizIconLineEditContainer : public QWidget
 {
     Q_OBJECT
 public:
-    CWizIconLineEditContainer(QWidget* parent);
-    ~CWizIconLineEditContainer();
+    WizIconLineEditContainer(QWidget* parent);
+    ~WizIconLineEditContainer();
 private:
-    CWizSkin9GridImage* m_background;
+    WizSkin9GridImage* m_background;
     QLayout* m_layout;
     QLineEdit* m_edit;
     QLabel* m_leftIcon;
@@ -60,10 +60,10 @@ private slots:
     void cleanRightIcon();
 };
 
-class CWizImageButton : public QPushButton
+class WizImageButton : public QPushButton
 {
 public:
-    CWizImageButton(QWidget* parent);
+    WizImageButton(QWidget* parent);
 public:
     void setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
                         const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,

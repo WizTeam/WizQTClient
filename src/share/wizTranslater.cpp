@@ -2,16 +2,16 @@
 #include <QObject>
 
 
-CWizTranslater::CWizTranslater()
+WizTranslater::WizTranslater()
 {
 }
 
-CWizTranslater::~CWizTranslater()
+WizTranslater::~WizTranslater()
 {
 
 }
 
-WizTranslateItem*CWizTranslater::itemsData()
+WizTranslateItem*WizTranslater::itemsData()
 {
     static WizTranslateItem itemGroup[] =
     {
@@ -28,7 +28,7 @@ WizTranslateItem*CWizTranslater::itemsData()
 
 QString WizTranlateString(const QString& strString)
 {
-    CWizTranslater translater;
+    WizTranslater translater;
     WizTranslateItem* arrayData = translater.itemsData();
     int index = 0;
     while (1)

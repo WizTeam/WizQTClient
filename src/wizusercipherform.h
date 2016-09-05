@@ -5,16 +5,16 @@
 #include "wizdef.h"
 
 namespace Ui {
-class CWizUserCipherForm;
+class WizUserCipherForm;
 }
 
 class QPropertyAnimation;
-class CWizUserCipherForm : public QWidget
+class WizUserCipherForm : public QWidget
 {
     Q_OBJECT
     
 public:
-    explicit CWizUserCipherForm(CWizExplorerApp& app, QWidget *parent);
+    explicit WizUserCipherForm(WizExplorerApp& app, QWidget *parent);
 
     void setHint(const QString& strHint);
 
@@ -32,8 +32,8 @@ protected:
     virtual void showEvent(QShowEvent* event);
     
 private:
-    Ui::CWizUserCipherForm *ui;
-    CWizExplorerApp& m_app;
+    Ui::WizUserCipherForm *ui;
+    WizExplorerApp& m_app;
 
     bool m_bSaveForSession;
     QString m_userCipher;

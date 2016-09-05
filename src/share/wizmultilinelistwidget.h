@@ -3,10 +3,10 @@
 
 #include <QListWidget>
 
-class CWizMultiLineListWidget : public QListWidget
+class WizMultiLineListWidget : public QListWidget
 {
 public:
-    CWizMultiLineListWidget(int lineCount, QWidget* parent);
+    WizMultiLineListWidget(int lineCount, QWidget* parent);
 public:
     virtual int wrapTextLineIndex() const;
     virtual bool imageAlignLeft() const;

@@ -9,12 +9,12 @@
 class QUdpSocket;
 
 
-class CWizUdpClient : public QObject
+class WizUdpClient : public QObject
 {
     Q_OBJECT
 public:
-    CWizUdpClient(QObject *parent = 0);
-    ~CWizUdpClient();
+    WizUdpClient(QObject *parent = 0);
+    ~WizUdpClient();
 
 signals:
     void udpResponse(const QString& boardAddress, const QString& serverAddress,
@@ -28,7 +28,7 @@ private slots:
     void readUdpPendingData();
 
 private:
-    static bool GetAllBoardcastAddresses(QMap<QString, QString>& addressMap);
+    static bool getAllBoardcastAddresses(QMap<QString, QString>& addressMap);
 
 private:
 //    QList<QUdpSocket*> m_udpSocketList;

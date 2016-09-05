@@ -51,7 +51,7 @@ public:
         case Qt::DecorationRole:
         {
             QPixmap pm;
-            AvatarHost::avatar(m_users[index.row()].strUserId, &pm);
+            WizAvatarHost::avatar(m_users[index.row()].strUserId, &pm);
             return pm.scaled(20, 20, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
         }
         case Qt::ToolTipRole:
@@ -169,7 +169,7 @@ public:
         : QListView(parent)
     {        
         setStyleSheet("QListView::item:selected {background-color:#5990EF;}");
-        verticalScrollBar()->setStyleSheet(Utils::StyleHelper::wizCommonScrollBarStyleSheet(2));
+        verticalScrollBar()->setStyleSheet(Utils::WizStyleHelper::wizCommonScrollBarStyleSheet(2));
     }
 
     virtual int sizeHintForRow (int row) const
@@ -187,12 +187,12 @@ protected:
     {
         QListView::showEvent(ev);
 
-        setMask(Utils::StyleHelper::borderRadiusRegion(rect()));
+        setMask(Utils::WizStyleHelper::borderRadiusRegion(rect()));
     }
 };
 
 
-MessageCompleter::MessageCompleter(QWidget *parent)
+WizMessageCompleter::WizMessageCompleter(QWidget *parent)
     : QCompleter(parent)
 {
     m_title = qobject_cast<QLineEdit*>(parent);
@@ -207,15 +207,15 @@ MessageCompleter::MessageCompleter(QWidget *parent)
     setFilterMode(Qt::MatchContains);
 #endif
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onNoteLoaded(CWizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
+            SLOT(onNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
 }
 
-CWizDocumentView* MessageCompleter::noteView()
+WizDocumentView* WizMessageCompleter::noteView()
 {
     QWidget* pParent = m_title->parentWidget();
     while (pParent) {
-        CWizDocumentView* view = dynamic_cast<CWizDocumentView*>(pParent);
+        WizDocumentView* view = dynamic_cast<WizDocumentView*>(pParent);
         if (view) {
             return view;
         }
@@ -227,7 +227,7 @@ CWizDocumentView* MessageCompleter::noteView()
     return 0;
 }
 
-void MessageCompleter::onNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
+void WizMessageCompleter::onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
 {
     if (view != noteView())
         return;
@@ -238,10 +238,10 @@ void MessageCompleter::onNoteLoaded(CWizDocumentView* view, const WIZDOCUMENTDAT
     update(doc.strKbGUID);
 }
 
-void MessageCompleter::update(const QString& strKbGUID)
+void WizMessageCompleter::update(const QString& strKbGUID)
 {
     CWizBizUserDataArray arrayUser;
-    if (CWizDatabaseManager::instance()->db().users(strKbGUID, arrayUser)) {
+    if (WizDatabaseManager::instance()->db().users(strKbGUID, arrayUser)) {
         MessageCompleterModel* model = new MessageCompleterModel(arrayUser, this);
         setModel(model);
 

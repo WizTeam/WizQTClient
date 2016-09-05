@@ -114,7 +114,7 @@ void CWizMacSearchWidget::onEndEditing(const char* utf8)
 
 /////////////////////////////////////////////////////////////////////
 
-CWizSearchBox::CWizSearchBox(CWizExplorerApp& app, QWidget *parent)
+CWizSearchBox::CWizSearchBox(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
@@ -177,7 +177,7 @@ QSize CWizMacSplitterHandle::sizeHint() const
 }
 
 
-QSplitterHandle *CWizSplitter::createHandle()
+QSplitterHandle *WizSplitter::createHandle()
 {
     return new CWizMacSplitterHandle(orientation(), this);
 }

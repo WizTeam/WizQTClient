@@ -117,7 +117,7 @@ enum WizLinkType {
 //}
 
 
-CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* parent)
+WizDocumentWebEngine::WizDocumentWebEngine(WizExplorerApp& app, QWidget* parent)
     : QWebEngineView(parent)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
@@ -129,10 +129,10 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     , m_searchReplaceWidget(0)
     , m_bInSeperateWindow(false)
 {
-    m_parentView = dynamic_cast<CWizDocumentView*>(parent);
+    m_parentView = dynamic_cast<WizDocumentView*>(parent);
     Q_ASSERT(m_parentView);
 
-    WebEnginePage *webPage = new WebEnginePage(this);
+    WizWebEnginePage *webPage = new WizWebEnginePage(this);
     setPage(webPage);
 
 //    connect(webPage, SIGNAL(urlChanged(QUrl)), SLOT(onEditorLinkClicked(QUrl)));
@@ -141,15 +141,15 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     setAcceptDrops(true);
 
     // refers
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
 
     m_transitionView = mainWindow->transitionView();
 
-    m_docLoadThread = new CWizDocumentWebViewLoaderThread(m_dbMgr, this);
+    m_docLoadThread = new WizDocumentWebViewLoaderThread(m_dbMgr, this);
     connect(m_docLoadThread, SIGNAL(loaded(const QString&, const QString, const QString)),
             SLOT(onDocumentReady(const QString&, const QString, const QString)), Qt::QueuedConnection);
     //
-    m_docSaverThread = new CWizDocumentWebViewSaverThread(m_dbMgr, this);
+    m_docSaverThread = new WizDocumentWebViewSaverThread(m_dbMgr, this);
     connect(m_docSaverThread, SIGNAL(saved(const QString, const QString,bool)),
             SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
 
@@ -158,12 +158,12 @@ CWizDocumentWebEngine::CWizDocumentWebEngine(CWizExplorerApp& app, QWidget* pare
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
 }
 
-CWizDocumentWebEngine::~CWizDocumentWebEngine()
+WizDocumentWebEngine::~WizDocumentWebEngine()
 {
     if (m_searchReplaceWidget)
         delete m_searchReplaceWidget;
 }
-void CWizDocumentWebEngine::waitForDone()
+void WizDocumentWebEngine::waitForDone()
 {
     if (m_docLoadThread) {
         m_docLoadThread->waitForDone();
@@ -214,7 +214,7 @@ void CWizDocumentWebEngine::waitForDone()
 //}
 
 
-void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
+void WizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 {
     qDebug() << "key pressed : " << event;
 //    sendEventToChildWidgets(event);
@@ -260,7 +260,7 @@ void CWizDocumentWebEngine::keyPressEvent(QKeyEvent* event)
 }
 
 
-void CWizDocumentWebEngine::focusInEvent(QFocusEvent *event)
+void WizDocumentWebEngine::focusInEvent(QFocusEvent *event)
 {
     focusInEditor();
 
@@ -269,7 +269,7 @@ void CWizDocumentWebEngine::focusInEvent(QFocusEvent *event)
     applySearchKeywordHighlight();
 }
 
-void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
+void WizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
 {
     // because qt will clear focus when context menu popup, we need keep focus there.
     if (event->reason() == Qt::PopupFocusReason)
@@ -288,13 +288,13 @@ void CWizDocumentWebEngine::focusOutEvent(QFocusEvent *event)
     QWebEngineView::focusOutEvent(event);
 }
 
-bool CWizDocumentWebEngine::event(QEvent* event)
+bool WizDocumentWebEngine::event(QEvent* event)
 {
 //    qDebug() << "webengine event called ,  event type : " << event->type();
     return QWebEngineView::event(event);
 }
 
-bool CWizDocumentWebEngine::eventFilter(QObject* watched, QEvent* event)
+bool WizDocumentWebEngine::eventFilter(QObject* watched, QEvent* event)
 {
     switch (event->type()) {
     case QEvent::FocusIn:
@@ -330,7 +330,7 @@ bool CWizDocumentWebEngine::eventFilter(QObject* watched, QEvent* event)
     return QWebEngineView::eventFilter(watched, event);
 }
 
-void CWizDocumentWebEngine::childEvent(QChildEvent* event)
+void WizDocumentWebEngine::childEvent(QChildEvent* event)
 {
     if (event->type() == QEvent::ChildAdded)
     {
@@ -346,7 +346,7 @@ void CWizDocumentWebEngine::childEvent(QChildEvent* event)
     QWebEngineView::childEvent(event);
 }
 
-void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
+void WizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
 {
     if (!m_bEditorInited)
         return;
@@ -355,7 +355,7 @@ void CWizDocumentWebEngine::contextMenuEvent(QContextMenuEvent *event)
     Q_EMIT showContextMenuRequest(mapToGlobal(event->pos()));
 }
 
-void CWizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
+void WizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
 {
     if (!isEditing())
         return;
@@ -382,7 +382,7 @@ void CWizDocumentWebEngine::dragEnterEvent(QDragEnterEvent *event)
     }
 }
 
-void CWizDocumentWebEngine::dragMoveEvent(QDragMoveEvent* event)
+void WizDocumentWebEngine::dragMoveEvent(QDragMoveEvent* event)
 {
     if (event->mimeData()->hasFormat(WIZNOTE_MIMEFORMAT_DOCUMENTS)) {
             if (!event->mimeData()->data(WIZNOTE_MIMEFORMAT_DOCUMENTS).isEmpty()) {
@@ -392,13 +392,13 @@ void CWizDocumentWebEngine::dragMoveEvent(QDragMoveEvent* event)
     }
 }
 
-void CWizDocumentWebEngine::onActionTriggered(QWebEnginePage::WebAction act)
+void WizDocumentWebEngine::onActionTriggered(QWebEnginePage::WebAction act)
 {
     if (act == QWebEnginePage::Paste)
         tryResetTitle();
 }
 
-void CWizDocumentWebEngine::tryResetTitle()
+void WizDocumentWebEngine::tryResetTitle()
 {
     if (m_bNewNoteTitleInited)
         return;
@@ -418,7 +418,7 @@ void CWizDocumentWebEngine::tryResetTitle()
     });
 }
 
-void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
+void WizDocumentWebEngine::dropEvent(QDropEvent* event)
 {
     const QMimeData* mimeData = event->mimeData();
 
@@ -452,10 +452,10 @@ void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
             else
             {
                 WIZDOCUMENTDATA doc = view()->note();
-                CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
                 WIZDOCUMENTATTACHMENTDATA data;
                 data.strKbGUID = doc.strKbGUID; // needed by under layer
-                if (!db.AddAttachment(doc, strFileName, data))
+                if (!db.addAttachment(doc, strFileName, data))
                 {
                     TOLOG1("[drop] add attachment failed %1", strFileName);
                     continue;
@@ -476,8 +476,8 @@ void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
                 if (docIds.count() == 2)
                 {
                     WIZDOCUMENTDATA document;
-                    CWizDatabase& db = m_dbMgr.db(docIds.first());
-                    if (db.DocumentFromGUID(docIds.last(), document))
+                    WizDatabase& db = m_dbMgr.db(docIds.first());
+                    if (db.documentFromGuid(docIds.last(), document))
                     {
                         QString strHtml, strLink;
                         db.DocumentToHtmlLink(document, strHtml, strLink);
@@ -498,29 +498,29 @@ void CWizDocumentWebEngine::dropEvent(QDropEvent* event)
     }
 }
 
-CWizDocumentView* CWizDocumentWebEngine::view() const
+WizDocumentView* WizDocumentWebEngine::view() const
 {
     return m_parentView;
 }
 
-void CWizDocumentWebEngine::onTimerAutoSaveTimout()
+void WizDocumentWebEngine::onTimerAutoSaveTimout()
 {
     saveDocument(view()->note(), false);
 }
 
-void CWizDocumentWebEngine::onTitleEdited(QString strTitle)
+void WizDocumentWebEngine::onTitleEdited(QString strTitle)
 {
     WIZDOCUMENTDATA document = view()->note();
     document.strTitle = strTitle;
     // Only sync when contents unchanged. If contents changed would sync after document saved.
     if (!isContentsChanged())
     {
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+        WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
         mainWindow->quickSyncKb(document.strKbGUID);
     }
 }
 
-void CWizDocumentWebEngine::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName)
+void WizDocumentWebEngine::onDocumentReady(const QString kbGUID, const QString strGUID, const QString strFileName)
 {
 
     qDebug() << "onDocumentReady";
@@ -534,7 +534,7 @@ void CWizDocumentWebEngine::onDocumentReady(const QString kbGUID, const QString 
     }
 }
 
-void CWizDocumentWebEngine::onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok)
+void WizDocumentWebEngine::onDocumentSaved(const QString kbGUID, const QString strGUID, bool ok)
 {
     if (!ok)
     {
@@ -543,11 +543,11 @@ void CWizDocumentWebEngine::onDocumentSaved(const QString kbGUID, const QString 
     //
     view()->sendDocumentSavedSignal(strGUID, kbGUID);
     //
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
     mainWindow->quickSyncKb(kbGUID);
 }
 
-void CWizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
+void WizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editing)
 {
     qDebug() << "view document called, init editor , guid " << doc.strGUID << "  editing mode : " << editing;
 
@@ -569,7 +569,7 @@ void CWizDocumentWebEngine::viewDocument(const WIZDOCUMENTDATA& doc, bool editin
     m_docLoadThread->load(doc);
 }
 
-void CWizDocumentWebEngine::reloadNoteData(const WIZDOCUMENTDATA& data)
+void WizDocumentWebEngine::reloadNoteData(const WIZDOCUMENTDATA& data)
 {
     Q_ASSERT(!data.strGUID.isEmpty());
 
@@ -581,7 +581,7 @@ void CWizDocumentWebEngine::reloadNoteData(const WIZDOCUMENTDATA& data)
     m_docLoadThread->load(data);
 }
 
-void CWizDocumentWebEngine::closeDocument(const WIZDOCUMENTDATA& data)
+void WizDocumentWebEngine::closeDocument(const WIZDOCUMENTDATA& data)
 {
     bool isSourceMode = editorCommandQueryCommandState("source");
     if (isSourceMode)
@@ -590,7 +590,7 @@ void CWizDocumentWebEngine::closeDocument(const WIZDOCUMENTDATA& data)
     }
 }
 
-bool CWizDocumentWebEngine::resetDefaultCss()
+bool WizDocumentWebEngine::resetDefaultCss()
 {
     QFile f(":/default.css");
     if (!f.open(QIODevice::ReadOnly)) {
@@ -610,8 +610,8 @@ bool CWizDocumentWebEngine::resetDefaultCss()
     strCss.replace("/*default-background-color*/", QString("background-color:%1;").arg(
                    m_app.userSettings().editorBackgroundColor()));
 
-    QString strPath = Utils::PathResolve::cachePath() + "editor/"+m_dbMgr.db().GetUserId()+"/";
-    Utils::PathResolve::ensurePathExists(strPath);
+    QString strPath = Utils::WizPathResolve::cachePath() + "editor/"+m_dbMgr.db().getUserId()+"/";
+    Utils::WizPathResolve::ensurePathExists(strPath);
 
     m_strDefaultCssFilePath = strPath + "default.css";
 
@@ -629,19 +629,19 @@ bool CWizDocumentWebEngine::resetDefaultCss()
     return true;
 }
 
-void CWizDocumentWebEngine::editorResetFont()
+void WizDocumentWebEngine::editorResetFont()
 {
     resetDefaultCss();
     page()->runJavaScript("updateCss();");
 }
 
-void CWizDocumentWebEngine::editorFocus()
+void WizDocumentWebEngine::editorFocus()
 {
     page()->runJavaScript("editor.focus();");
     emit focusIn();
 }
 
-void CWizDocumentWebEngine::setEditorEnable(bool enalbe)
+void WizDocumentWebEngine::setEditorEnable(bool enalbe)
 {
     if (enalbe)
     {
@@ -655,7 +655,7 @@ void CWizDocumentWebEngine::setEditorEnable(bool enalbe)
     }
 }
 
-void CWizDocumentWebEngine::on_ueditorInitFinished()
+void WizDocumentWebEngine::on_ueditorInitFinished()
 {
     qDebug() << "on init ueditor finished";
     if (!resetDefaultCss())
@@ -666,13 +666,13 @@ void CWizDocumentWebEngine::on_ueditorInitFinished()
     return;
 }
 
-void CWizDocumentWebEngine::on_viewDocumentFinished(bool ok)
+void WizDocumentWebEngine::on_viewDocumentFinished(bool ok)
 {
     // show client
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* window = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     if (!ok) {
         window->showClient(false);
-        window->transitionView()->showAsMode(m_strCurrentNoteGUID, CWizDocumentTransitionView::ErrorOccured);
+        window->transitionView()->showAsMode(m_strCurrentNoteGUID, WizDocumentTransitionView::ErrorOccured);
         return;
     }
 
@@ -687,19 +687,19 @@ void CWizDocumentWebEngine::on_viewDocumentFinished(bool ok)
     emit viewDocumentFinished();
 }
 
-void CWizDocumentWebEngine::runJavaScript(const QString& js, const QWebEngineCallback<const QVariant &> &resultCallback)
+void WizDocumentWebEngine::runJavaScript(const QString& js, const QWebEngineCallback<const QVariant &> &resultCallback)
 {
     page()->runJavaScript(js, resultCallback);
 }
 
-void CWizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand,
+void WizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand,
                                                            const QWebEngineCallback<const QVariant&>& resultCallback)
 {
     QString strExec = "editor.queryCommandState('" + strCommand +"');";
     page()->runJavaScript(strExec, resultCallback);
 }
 
-void CWizDocumentWebEngine::loadEditor()
+void WizDocumentWebEngine::loadEditor()
 {
     qDebug() << "initEditor called";
     if (m_bEditorInited)
@@ -707,7 +707,7 @@ void CWizDocumentWebEngine::loadEditor()
 
 
 
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/editor/index.html";
+    QString strFileName = Utils::WizPathResolve::resourcesPath() + "files/editor/index.html";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     QUrl url = QUrl::fromLocalFile(strFileName);
@@ -738,7 +738,7 @@ void CWizDocumentWebEngine::loadEditor()
 //    load(url);
 }
 
-void CWizDocumentWebEngine::registerJavaScriptWindowObject()
+void WizDocumentWebEngine::registerJavaScriptWindowObject()
 {
     QWebSocketServer *server = new QWebSocketServer(QStringLiteral("Wiz Socket Server"), QWebSocketServer::NonSecureMode, this);
     if (!server->listen(QHostAddress::LocalHost, 0)) {
@@ -760,7 +760,7 @@ void CWizDocumentWebEngine::registerJavaScriptWindowObject()
     page()->runJavaScript(QString("initializeJSObject('%1');").arg(strUrl));
 }
 
-void CWizDocumentWebEngine::resetCheckListEnvironment()
+void WizDocumentWebEngine::resetCheckListEnvironment()
 {
     if (!m_bEditingMode)
     {
@@ -769,7 +769,7 @@ void CWizDocumentWebEngine::resetCheckListEnvironment()
     }
 }
 
-void CWizDocumentWebEngine::initCheckListEnvironment()
+void WizDocumentWebEngine::initCheckListEnvironment()
 {
     if (m_bEditingMode)
     {
@@ -804,22 +804,22 @@ void CWizDocumentWebEngine::initCheckListEnvironment()
     }
 }
 
-bool CWizDocumentWebEngine::speakHelloWorld()
+bool WizDocumentWebEngine::speakHelloWorld()
 {
     qDebug() << "Hello world from web engine";
     return true;
 }
 
-void CWizDocumentWebEngine::setWindowVisibleOnScreenShot(bool bVisible)
+void WizDocumentWebEngine::setWindowVisibleOnScreenShot(bool bVisible)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     if (mainWindow)
     {
         bVisible ? mainWindow->show() : mainWindow->hide();
     }
 }
 
-bool CWizDocumentWebEngine::insertImage(const QString& strFileName, bool bCopyFile)
+bool WizDocumentWebEngine::insertImage(const QString& strFileName, bool bCopyFile)
 {
     QString strHtml;
     if (WizImage2Html(strFileName, strHtml, bCopyFile)) {
@@ -828,7 +828,7 @@ bool CWizDocumentWebEngine::insertImage(const QString& strFileName, bool bCopyFi
     return false;
 }
 
-QVariant CWizDocumentWebEngine::synchronousRunJavaScript(const QString& strExec)
+QVariant WizDocumentWebEngine::synchronousRunJavaScript(const QString& strExec)
 {
     QVariant returnValue;
     QEventLoop loop;
@@ -843,41 +843,41 @@ QVariant CWizDocumentWebEngine::synchronousRunJavaScript(const QString& strExec)
     return returnValue;
 }
 
-QString CWizDocumentWebEngine::getSkinResourcePath() const
+QString WizDocumentWebEngine::getSkinResourcePath() const
 {
     return ::WizGetSkinResourcePath(m_app.userSettings().skin());
 
 }
 
-QString CWizDocumentWebEngine::getUserAvatarFile(int size) const
+QString WizDocumentWebEngine::getUserAvatarFile(int size) const
 {
     QString strFileName;
-    QString strUserID = m_dbMgr.db().GetUserId();
-    if (WizService::AvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
+    QString strUserID = m_dbMgr.db().getUserId();
+    if (WizService::WizAvatarHost::customSizeAvatar(strUserID, size, size, strFileName))
         return strFileName;
 
     return QString();
 }
 
-QString CWizDocumentWebEngine::getUserAlias() const
+QString WizDocumentWebEngine::getUserAlias() const
 {
     QString strKbGUID = view()->note().strKbGUID;
-    return m_dbMgr.db(strKbGUID).GetUserAlias();
+    return m_dbMgr.db(strKbGUID).getUserAlias();
 
 }
 
-bool CWizDocumentWebEngine::isPersonalDocument() const
+bool WizDocumentWebEngine::isPersonalDocument() const
 {
     QString strKbGUID = view()->note().strKbGUID;
     QString dbKbGUID = m_dbMgr.db().kbGUID();
     return strKbGUID.isEmpty() || (strKbGUID == dbKbGUID);
 }
 
-QString CWizDocumentWebEngine::getCurrentNoteHtml() const
+QString WizDocumentWebEngine::getCurrentNoteHtml() const
 {
-    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
-    QString strFolder = Utils::PathResolve::tempDocumentFolder(view()->note().strGUID);
-    if (db.ExtractZiwFileToFolder(view()->note(), strFolder))
+    WizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    QString strFolder = Utils::WizPathResolve::tempDocumentFolder(view()->note().strGUID);
+    if (db.extractZiwFileToFolder(view()->note(), strFolder))
     {
         QString strHtmlFile = strFolder + "index.html";
         QString strHtml;
@@ -888,16 +888,16 @@ QString CWizDocumentWebEngine::getCurrentNoteHtml() const
     return QString();
 }
 
-bool CWizDocumentWebEngine::hasEditPermissionOnCurrentNote() const
+bool WizDocumentWebEngine::hasEditPermissionOnCurrentNote() const
 {
     WIZDOCUMENTDATA docData = view()->note();
-    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    return db.CanEditDocument(docData) && !CWizDatabase::IsInDeletedItems(docData.strLocation);
+    WizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    return db.canEditDocument(docData) && !WizDatabase::isInDeletedItems(docData.strLocation);
 }
 
-bool CWizDocumentWebEngine::shareNoteByEmail()
+bool WizDocumentWebEngine::shareNoteByEmail()
 {
-    CWizEmailShareDialog dlg(m_app);
+    WizEmailShareDialog dlg(m_app);
     dlg.setNote(view()->note());
 
     dlg.exec();
@@ -927,42 +927,42 @@ void copyFileToFolder(const QString& strFileFoler, const QString& strIndexFile, 
     }
 }
 
-void CWizDocumentWebEngine::saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource)
+void WizDocumentWebEngine::saveHtmlToCurrentNote(const QString& strHtml, const QString& strResource)
 {
     qDebug() << "save html to current note called : " << strHtml << "   resources  :  " << strResource;
     if (strHtml.isEmpty())
         return;
 
     WIZDOCUMENTDATA docData = view()->note();
-    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
-    QString strFolder = Utils::PathResolve::tempDocumentFolder(docData.strGUID);
+    WizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    QString strFolder = Utils::WizPathResolve::tempDocumentFolder(docData.strGUID);
     //
     QString strHtmlFile = strFolder + "index.html";
     ::WizSaveUnicodeTextToUtf8File(strHtmlFile, strHtml);
     QStringList strResourceList = strResource.split('*');
     copyFileToFolder(strFolder, strHtmlFile, strResourceList);
 
-    db.CompressFolderToZiwFile(docData, strFolder);
+    db.compressFolderToZiwFile(docData, strFolder);
     bool bNotify = false;
-    QString strZiwFile = db.GetDocumentFileName(docData.strGUID);
-    db.UpdateDocumentDataMD5(docData, strZiwFile, bNotify);
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    QString strZiwFile = db.getDocumentFileName(docData.strGUID);
+    db.updateDocumentDataMD5(docData, strZiwFile, bNotify);
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
     mainWindow->quickSyncKb(docData.strKbGUID);
 
     updateNoteHtml();
 }
 
-void CWizDocumentWebEngine::setCurrentDocumentType(const QString& strType)
+void WizDocumentWebEngine::setCurrentDocumentType(const QString& strType)
 {
     WIZDOCUMENTDATA docData = view()->note();
-    CWizDatabase& db = m_dbMgr.db(docData.strKbGUID);
+    WizDatabase& db = m_dbMgr.db(docData.strKbGUID);
     docData.strType = strType;
-    db.ModifyDocumentInfoEx(docData);
+    db.modifyDocumentInfoEx(docData);
 }
 
-bool CWizDocumentWebEngine::checkListClickable()
+bool WizDocumentWebEngine::checkListClickable()
 {
-    if (!m_dbMgr.db(view()->note().strKbGUID).IsGroup())
+    if (!m_dbMgr.db(view()->note().strKbGUID).isGroup())
     {
         emit clickingTodoCallBack(false, false);
         return true;
@@ -979,14 +979,14 @@ bool CWizDocumentWebEngine::checkListClickable()
     return false;
 }
 
-void CWizDocumentWebEngine::insertCssForCode()
+void WizDocumentWebEngine::insertCssForCode()
 {
-    QString strCss = "file://" + Utils::PathResolve::resourcesPath() + "files/wiz_code_highlight.css";
+    QString strCss = "file://" + Utils::WizPathResolve::resourcesPath() + "files/wiz_code_highlight.css";
     page()->runJavaScript(QString("WizAddCssForCode('%1');").arg(strCss));
 //    synchronousRunJavaScript(QString("WizAddCssForCode(%1);").arg(strCss));
 }
 
-void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
+void WizDocumentWebEngine::onEditorLoadFinished(bool ok)
 {
     qDebug() << "on editor load finished , ok : " << ok;
     if (ok)
@@ -998,19 +998,19 @@ void CWizDocumentWebEngine::onEditorLoadFinished(bool ok)
     TOLOG("Wow, loading editor failed!");
 }
 
-void CWizDocumentWebEngine::onEditorContentChanged()
+void WizDocumentWebEngine::onEditorContentChanged()
 {
     setContentsChanged(true);
     //
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebEngine::onEditorSelectionChanged()
+void WizDocumentWebEngine::onEditorSelectionChanged()
 {
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebEngine::onEditorLinkClicked(const QUrl& url)
+void WizDocumentWebEngine::onEditorLinkClicked(const QUrl& url)
 {
     if (isInternalUrl(url))
     {
@@ -1031,22 +1031,22 @@ void CWizDocumentWebEngine::onEditorLinkClicked(const QUrl& url)
     QDesktopServices::openUrl(url);
 }
 
-bool CWizDocumentWebEngine::isInternalUrl(const QUrl& url)
+bool WizDocumentWebEngine::isInternalUrl(const QUrl& url)
 {
     return url.scheme().toLower() == "wiz";
 }
 
-void CWizDocumentWebEngine::viewDocumentByUrl(const QUrl& url)
+void WizDocumentWebEngine::viewDocumentByUrl(const QUrl& url)
 {
     if (!url.isValid())
         return;
 
     QString strUrl = url.toString();
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     mainWindow->viewDocumentByWizKMURL(strUrl);
 }
 
-void CWizDocumentWebEngine::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
+void WizDocumentWebEngine::splitHtmlToHeadAndBody(const QString& strHtml, QString& strHead, QString& strBody)
 {
     QRegExp regh("<head.*>([\\s\\S]*)</head>", Qt::CaseInsensitive);
     if (regh.indexIn(strHtml) != -1) {
@@ -1061,7 +1061,7 @@ void CWizDocumentWebEngine::splitHtmlToHeadAndBody(const QString& strHtml, QStri
     }
 }
 
-void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
+void WizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
     qDebug() << "save editing veiw document , guid : " <<  data.strGUID <<  " \n from thread : " << thread();
     //FIXME: remove me, just for find a image losses bug.
@@ -1071,7 +1071,7 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
         return;
 
     // check note permission
-    if (!m_dbMgr.db(data.strKbGUID).CanEditDocument(data)) {
+    if (!m_dbMgr.db(data.strKbGUID).canEditDocument(data)) {
         return;
     }
 
@@ -1111,7 +1111,7 @@ void CWizDocumentWebEngine::saveEditingViewDocument(const WIZDOCUMENTDATA &data,
     qDebug() << "quit save editing view document ";
 }
 
-void CWizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
+void WizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bool force)
 {
     Q_UNUSED(force);
 
@@ -1130,30 +1130,30 @@ void CWizDocumentWebEngine::saveReadingViewDocument(const WIZDOCUMENTDATA &data,
     loop.exec(QEventLoop::ExcludeUserInputEvents);
 }
 
-QString CWizDocumentWebEngine::currentNoteGUID()
+QString WizDocumentWebEngine::currentNoteGUID()
 {
     qDebug() << "currentNoteGUID called ; " << m_strCurrentNoteGUID;
     return m_strCurrentNoteGUID;
 }
-QString CWizDocumentWebEngine::currentNoteHtml()
+QString WizDocumentWebEngine::currentNoteHtml()
 {
     return m_strCurrentNoteHtml;
 }
-QString CWizDocumentWebEngine::currentNoteHead()
+QString WizDocumentWebEngine::currentNoteHead()
 {
     return m_strCurrentNoteHead;
 }
-bool CWizDocumentWebEngine::currentIsEditing()
+bool WizDocumentWebEngine::currentIsEditing()
 {
     return m_bCurrentEditing;
 }
 
-void CWizDocumentWebEngine::updateNoteHtml()
+void WizDocumentWebEngine::updateNoteHtml()
 {
     WIZDOCUMENTDATA doc = view()->note();
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
     QString strFileName;
-    if (db.DocumentToTempHtmlFile(doc, strFileName))
+    if (db.documentToTempHtmlFile(doc, strFileName))
     {
         QString strHtml;
         if (!WizLoadUnicodeTextFromFile(strFileName, strHtml))
@@ -1170,9 +1170,9 @@ void CWizDocumentWebEngine::updateNoteHtml()
     }
 }
 
-void CWizDocumentWebEngine::applySearchKeywordHighlight()
+void WizDocumentWebEngine::applySearchKeywordHighlight()
 {
-    MainWindow* window = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* window = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     QString strKeyWords = window->searchKeywords();
     if (!strKeyWords.isEmpty() && (!m_bCurrentEditing || !hasFocus()))
     {
@@ -1188,12 +1188,12 @@ void CWizDocumentWebEngine::applySearchKeywordHighlight()
     }
 }
 
-void CWizDocumentWebEngine::clearSearchKeywordHighlight()
+void WizDocumentWebEngine::clearSearchKeywordHighlight()
 {
     findText("");
 }
 
-void CWizDocumentWebEngine::on_insertCodeHtml_requset(QString strCodeHtml)
+void WizDocumentWebEngine::on_insertCodeHtml_requset(QString strCodeHtml)
 {
 //    QString strHtml = strCodeHtml;
 //    if (WizGetBodyContentFromHtml(strHtml, false))
@@ -1203,7 +1203,7 @@ void CWizDocumentWebEngine::on_insertCodeHtml_requset(QString strCodeHtml)
 //    }
 }
 
-void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
+void WizDocumentWebEngine::viewDocumentInEditor(bool editing)
 {
     Q_ASSERT(m_bEditorInited);
 
@@ -1267,12 +1267,12 @@ void CWizDocumentWebEngine::viewDocumentInEditor(bool editing)
 //    });
 }
 
-void CWizDocumentWebEngine::onNoteLoadFinished()
+void WizDocumentWebEngine::onNoteLoadFinished()
 {
     ICore::instance()->emitViewNoteLoaded(view(), view()->note(), true);
 }
 
-void CWizDocumentWebEngine::setEditingDocument(bool editing)
+void WizDocumentWebEngine::setEditingDocument(bool editing)
 {
     //Q_ASSERT(m_bEditorInited);      //
     if(!m_bEditorInited)
@@ -1288,8 +1288,8 @@ void CWizDocumentWebEngine::setEditingDocument(bool editing)
     }
 
     WIZDOCUMENTDATA docData;
-    CWizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
-    if (!db.DocumentFromGUID(view()->note().strGUID, docData))
+    WizDatabase& db = m_dbMgr.db(view()->note().strKbGUID);
+    if (!db.documentFromGuid(view()->note().strGUID, docData))
         return;
 
     saveDocument(docData, false);
@@ -1310,7 +1310,7 @@ void CWizDocumentWebEngine::setEditingDocument(bool editing)
     });
 }
 
-void CWizDocumentWebEngine::saveDocument(const WIZDOCUMENTDATA& data, bool force)
+void WizDocumentWebEngine::saveDocument(const WIZDOCUMENTDATA& data, bool force)
 {
     qDebug() << "web engne save document, guid :  " << data.strGUID << "  editor inited : " << m_bEditorInited << "  noteloaded : " << view()->noteLoaded() << "  editing mode : " << m_bEditingMode;
     if (!m_bEditorInited)
@@ -1329,19 +1329,19 @@ void CWizDocumentWebEngine::saveDocument(const WIZDOCUMENTDATA& data, bool force
     }
 }
 
-QString CWizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCommand)
+QString WizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCommand)
 {
     QString strExec = "editor.queryCommandValue('" + strCommand +"');";
     return synchronousRunJavaScript(strExec).toString();
 }
 
-int CWizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand)
+int WizDocumentWebEngine::editorCommandQueryCommandState(const QString& strCommand)
 {
     QString strExec = "editor.queryCommandState('" + strCommand +"');";
     return synchronousRunJavaScript(strExec).toInt();
 }
 
-void CWizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCommand,
+void WizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCommand,
                                                            const QWebEngineCallback<const QVariant&>& resultCallback)
 {
     QString strExec = "editor.queryCommandValue('" + strCommand +"');";
@@ -1353,7 +1353,7 @@ void CWizDocumentWebEngine::editorCommandQueryCommandValue(const QString& strCom
  * All commands execute from client which may modify document MUST invoke this
  * instead of use frame's evaluateJavascript.
  */
-bool CWizDocumentWebEngine::editorCommandExecuteCommand(const QString& strCommand,
+bool WizDocumentWebEngine::editorCommandExecuteCommand(const QString& strCommand,
                                                       const QString& arg1 /* = QString() */,
                                                       const QString& arg2 /* = QString() */,
                                                       const QString& arg3 /* = QString() */)
@@ -1385,7 +1385,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteCommand(const QString& strComman
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandQueryLink()
+bool WizDocumentWebEngine::editorCommandQueryLink()
 {
     QString strUrl = synchronousRunJavaScript("WizGetLinkUrl();").toString();
     if (strUrl.isEmpty())
@@ -1394,18 +1394,18 @@ bool CWizDocumentWebEngine::editorCommandQueryLink()
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandQueryMobileFileReceiverState()
+bool WizDocumentWebEngine::editorCommandQueryMobileFileReceiverState()
 {
     return m_app.userSettings().receiveMobileFile();
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
+bool WizDocumentWebEngine::editorCommandExecuteInsertHtml(const QString& strHtml, bool bNotSerialize)
 {
     QString s = bNotSerialize ? "true" : "false";
     return editorCommandExecuteCommand("insertHtml", "'" + strHtml + "'", s);
 }
 
-void CWizDocumentWebEngine::setPastePlainTextEnable(bool bEnable)
+void WizDocumentWebEngine::setPastePlainTextEnable(bool bEnable)
 {
     //TODO:  需要同步执行插叙程序
     editorCommandQueryCommandState("pasteplain", [&](const QVariant& varState) {
@@ -1419,20 +1419,20 @@ void CWizDocumentWebEngine::setPastePlainTextEnable(bool bEnable)
 
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteIndent()
+bool WizDocumentWebEngine::editorCommandExecuteIndent()
 {
     return editorCommandExecuteCommand("indent");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteOutdent()
+bool WizDocumentWebEngine::editorCommandExecuteOutdent()
 {
     return editorCommandExecuteCommand("outdent");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteLinkInsert()
+bool WizDocumentWebEngine::editorCommandExecuteLinkInsert()
 {
     if (!m_editorInsertLinkForm) {
-        m_editorInsertLinkForm = new CWizEditorInsertLinkForm(window());
+        m_editorInsertLinkForm = new WizEditorInsertLinkForm(window());
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
 
@@ -1445,7 +1445,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteLinkInsert()
     return true;
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteLinkInsert_accepted()
+void WizDocumentWebEngine::on_editorCommandExecuteLinkInsert_accepted()
 {
     // append http if not exist
     QString strUrl = m_editorInsertLinkForm->getUrl();
@@ -1455,16 +1455,16 @@ void CWizDocumentWebEngine::on_editorCommandExecuteLinkInsert_accepted()
     editorCommandExecuteCommand("link", QString("{href: '%1'}").arg(strUrl));
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteLinkRemove()
+bool WizDocumentWebEngine::editorCommandExecuteLinkRemove()
 {
     return editorCommandExecuteCommand("unlink");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteFindReplace()
+bool WizDocumentWebEngine::editorCommandExecuteFindReplace()
 {
     if (!m_searchReplaceWidget)
     {
-        m_searchReplaceWidget = new CWizSearchReplaceWidget();
+        m_searchReplaceWidget = new WizSearchReplaceWidget();
     }
     connect(m_searchReplaceWidget, SIGNAL(findPre(QString,bool)), SLOT(findPre(QString,bool)));
     connect(m_searchReplaceWidget, SIGNAL(findNext(QString,bool)), SLOT(findNext(QString,bool)));
@@ -1479,7 +1479,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteFindReplace()
     return true;
 }
 
-void CWizDocumentWebEngine::findPre(QString strTxt, bool bCasesensitive)
+void WizDocumentWebEngine::findPre(QString strTxt, bool bCasesensitive)
 {
     if (bCasesensitive)
     {
@@ -1491,7 +1491,7 @@ void CWizDocumentWebEngine::findPre(QString strTxt, bool bCasesensitive)
     }
 }
 
-void CWizDocumentWebEngine::findNext(QString strTxt, bool bCasesensitive)
+void WizDocumentWebEngine::findNext(QString strTxt, bool bCasesensitive)
 {
     if (bCasesensitive)
     {
@@ -1503,13 +1503,13 @@ void CWizDocumentWebEngine::findNext(QString strTxt, bool bCasesensitive)
     }
 }
 
-void CWizDocumentWebEngine::replaceCurrent(QString strSource, QString strTarget)
+void WizDocumentWebEngine::replaceCurrent(QString strSource, QString strTarget)
 {
     QString strExec = QString("WizReplaceText('%1', '%2', true)").arg(strSource).arg(strTarget);
     page()->runJavaScript(strExec);
 }
 
-void CWizDocumentWebEngine::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
+void WizDocumentWebEngine::replaceAndFindNext(QString strSource, QString strTarget, bool bCasesensitive)
 {
     QString strExec = QString("WizReplaceText('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
     synchronousRunJavaScript(strExec);
@@ -1518,7 +1518,7 @@ void CWizDocumentWebEngine::replaceAndFindNext(QString strSource, QString strTar
     setContentsChanged(true);
 }
 
-void CWizDocumentWebEngine::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
+void WizDocumentWebEngine::replaceAll(QString strSource, QString strTarget, bool bCasesensitive)
 {
     QString strExec = QString("WizRepalceAll('%1', '%2', %3)").arg(strSource).arg(strTarget).arg(bCasesensitive);
     page()->runJavaScript(strExec, [&](const QVariant&) {
@@ -1526,17 +1526,17 @@ void CWizDocumentWebEngine::replaceAll(QString strSource, QString strTarget, boo
     });
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteFontFamily(const QString& strFamily)
+bool WizDocumentWebEngine::editorCommandExecuteFontFamily(const QString& strFamily)
 {
     return editorCommandExecuteCommand("fontFamily", "'" + strFamily + "'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteFontSize(const QString& strSize)
+bool WizDocumentWebEngine::editorCommandExecuteFontSize(const QString& strSize)
 {
     return editorCommandExecuteCommand("fontSize", "'" + strSize + "'");
 }
 
-void CWizDocumentWebEngine::editorCommandExecuteBackColor()
+void WizDocumentWebEngine::editorCommandExecuteBackColor()
 {
     if (!m_colorDialog) {
         m_colorDialog = new QColorDialog(this);
@@ -1552,12 +1552,12 @@ void CWizDocumentWebEngine::editorCommandExecuteBackColor()
     m_colorDialog->exec();
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteBackColor_accepted(const QColor& color)
+void WizDocumentWebEngine::on_editorCommandExecuteBackColor_accepted(const QColor& color)
 {
     editorCommandExecuteCommand("backColor", "'" + color.name() + "'");
 }
 
-void CWizDocumentWebEngine::editorCommandExecuteForeColor()
+void WizDocumentWebEngine::editorCommandExecuteForeColor()
 {
     if (!m_colorDialog) {
         m_colorDialog = new QColorDialog(this);
@@ -1572,65 +1572,65 @@ void CWizDocumentWebEngine::editorCommandExecuteForeColor()
     m_colorDialog->exec();
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteForeColor_accepted(const QColor& color)
+void WizDocumentWebEngine::on_editorCommandExecuteForeColor_accepted(const QColor& color)
 {
     editorCommandExecuteCommand("foreColor", "'" + color.name() + "'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteBold()
+bool WizDocumentWebEngine::editorCommandExecuteBold()
 {
     return editorCommandExecuteCommand("bold");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteItalic()
+bool WizDocumentWebEngine::editorCommandExecuteItalic()
 {
     return editorCommandExecuteCommand("italic");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteUnderLine()
+bool WizDocumentWebEngine::editorCommandExecuteUnderLine()
 {
     return editorCommandExecuteCommand("underline");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteStrikeThrough()
+bool WizDocumentWebEngine::editorCommandExecuteStrikeThrough()
 {
     return editorCommandExecuteCommand("strikethrough");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteJustifyLeft()
+bool WizDocumentWebEngine::editorCommandExecuteJustifyLeft()
 {
     return editorCommandExecuteCommand("justify", "'left'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteJustifyRight()
+bool WizDocumentWebEngine::editorCommandExecuteJustifyRight()
 {
     return editorCommandExecuteCommand("justify", "'right'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteJustifyCenter()
+bool WizDocumentWebEngine::editorCommandExecuteJustifyCenter()
 {
     return editorCommandExecuteCommand("justify", "'center'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteJustifyJustify()
+bool WizDocumentWebEngine::editorCommandExecuteJustifyJustify()
 {
     return editorCommandExecuteCommand("justify", "'justify'");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertOrderedList()
+bool WizDocumentWebEngine::editorCommandExecuteInsertOrderedList()
 {
     return editorCommandExecuteCommand("insertOrderedList");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertUnorderedList()
+bool WizDocumentWebEngine::editorCommandExecuteInsertUnorderedList()
 {
     return editorCommandExecuteCommand("insertUnorderedList");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsert()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsert()
 {
     if (!m_editorInsertTableForm) {
-        m_editorInsertTableForm = new CWizEditorInsertTableForm(window());
+        m_editorInsertTableForm = new WizEditorInsertTableForm(window());
         connect(m_editorInsertTableForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteTableInsert_accepted()));
     }
 
@@ -1640,7 +1640,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteTableInsert()
     return true;
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteTableInsert_accepted()
+void WizDocumentWebEngine::on_editorCommandExecuteTableInsert_accepted()
 {
     int nRows = m_editorInsertTableForm->getRows();
     int nCols = m_editorInsertTableForm->getCols();
@@ -1651,7 +1651,7 @@ void CWizDocumentWebEngine::on_editorCommandExecuteTableInsert_accepted()
     editorCommandExecuteCommand("insertTable", QString("{numRows:%1, numCols:%2, border:1, borderStyle:'1px solid #dddddd;'}").arg(nRows).arg(nCols));
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
+void WizDocumentWebEngine::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap pix)
 {
     QObject *ssSender = qobject_cast<QObject*>(sender());
     if (ssSender)
@@ -1662,7 +1662,7 @@ void CWizDocumentWebEngine::on_editorCommandExecuteScreenShot_imageAccepted(QPix
     if (pix.isNull())
         return;
 
-    QString strTempPath = Utils::PathResolve::tempPath();
+    QString strTempPath = Utils::WizPathResolve::tempPath();
     CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
     if (!pix.save(strFileName)) {
         TOLOG("ERROR: Can't save clipboard image to file");
@@ -1672,7 +1672,7 @@ void CWizDocumentWebEngine::on_editorCommandExecuteScreenShot_imageAccepted(QPix
     insertImage(strFileName, false);
 }
 
-void CWizDocumentWebEngine::on_editorCommandExecuteScreenShot_finished()
+void WizDocumentWebEngine::on_editorCommandExecuteScreenShot_finished()
 {
     QObject *ssSender = qobject_cast<QObject*>(sender());
     if (ssSender)
@@ -1681,12 +1681,12 @@ void CWizDocumentWebEngine::on_editorCommandExecuteScreenShot_finished()
     setWindowVisibleOnScreenShot(true);
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertHorizontal()
+bool WizDocumentWebEngine::editorCommandExecuteInsertHorizontal()
 {
     return editorCommandExecuteCommand("horizontal");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertCheckList()
+bool WizDocumentWebEngine::editorCommandExecuteInsertCheckList()
 {
     // before insert first checklist, should manual notify editor to save current sence for undo.
     page()->runJavaScript("editor.execCommand('saveScene');", [this](const QVariant&) {
@@ -1705,7 +1705,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteInsertCheckList()
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertImage()
+bool WizDocumentWebEngine::editorCommandExecuteInsertImage()
 {
     QStringList strImgFileList = QFileDialog::getOpenFileNames(0, tr("Image File"), QDir::homePath(), tr("Images (*.png *.bmp *.gif *.jpg)"));
     if (strImgFileList.isEmpty())
@@ -1719,22 +1719,22 @@ bool CWizDocumentWebEngine::editorCommandExecuteInsertImage()
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertDate()
+bool WizDocumentWebEngine::editorCommandExecuteInsertDate()
 {
     return editorCommandExecuteCommand("date");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertTime()
+bool WizDocumentWebEngine::editorCommandExecuteInsertTime()
 {
     return editorCommandExecuteCommand("time");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteRemoveFormat()
+bool WizDocumentWebEngine::editorCommandExecuteRemoveFormat()
 {
     return editorCommandExecuteCommand("removeFormat");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecutePlainText()
+bool WizDocumentWebEngine::editorCommandExecutePlainText()
 {
     page()->runJavaScript("editor.getPlainTxt()", [this](const QVariant& retTxt) {
         QString strText = retTxt.toString();
@@ -1756,17 +1756,17 @@ bool CWizDocumentWebEngine::editorCommandExecutePlainText()
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteFormatMatch()
+bool WizDocumentWebEngine::editorCommandExecuteFormatMatch()
 {
     return editorCommandExecuteCommand("formatMatch");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteViewSource()
+bool WizDocumentWebEngine::editorCommandExecuteViewSource()
 {
     return editorCommandExecuteCommand("source");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteInsertCode()
+bool WizDocumentWebEngine::editorCommandExecuteInsertCode()
 {
     QString strSelectHtml = page()->selectedText();
     WizCodeEditorDialog *dialog = new WizCodeEditorDialog(m_app, this);
@@ -1778,9 +1778,9 @@ bool CWizDocumentWebEngine::editorCommandExecuteInsertCode()
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteMobileImage(bool bReceiveImage)
+bool WizDocumentWebEngine::editorCommandExecuteMobileImage(bool bReceiveImage)
 {
-    MainWindow* mainWindow = qobject_cast<MainWindow *>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     if (bReceiveImage && m_app.userSettings().needShowMobileFileReceiverUserGuide())
     {
         mainWindow->showMobileFileReceiverUserGuide();
@@ -1792,9 +1792,9 @@ bool CWizDocumentWebEngine::editorCommandExecuteMobileImage(bool bReceiveImage)
     return true;
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteScreenShot()
+bool WizDocumentWebEngine::editorCommandExecuteScreenShot()
 {
-    CWizScreenShotHelper* helper = new CWizScreenShotHelper();
+    WizScreenShotHelper* helper = new WizScreenShotHelper();
 
     connect(helper, SIGNAL(screenShotCaptured(QPixmap)),
             SLOT(on_editorCommandExecuteScreenShot_imageAccepted(QPixmap)));
@@ -1806,7 +1806,7 @@ bool CWizDocumentWebEngine::editorCommandExecuteScreenShot()
 }
 
 #ifdef Q_OS_MAC
-bool CWizDocumentWebEngine::editorCommandExecuteRemoveStartOfLine()
+bool WizDocumentWebEngine::editorCommandExecuteRemoveStartOfLine()
 {
 //    triggerPageAction(QWebEnginePage::SelectStartOfLine);
     QKeyEvent delKeyPress(QEvent::KeyPress, Qt::Key_Delete, Qt::NoModifier, QString());
@@ -1814,102 +1814,102 @@ bool CWizDocumentWebEngine::editorCommandExecuteRemoveStartOfLine()
 }
 #endif
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableDelete()
+bool WizDocumentWebEngine::editorCommandExecuteTableDelete()
 {
     return editorCommandExecuteCommand("deletetable");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableDeleteRow()
+bool WizDocumentWebEngine::editorCommandExecuteTableDeleteRow()
 {
     return editorCommandExecuteCommand("deleterow");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableDeleteCol()
+bool WizDocumentWebEngine::editorCommandExecuteTableDeleteCol()
 {
     return editorCommandExecuteCommand("deletecol");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertRow()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertRow()
 {
     return editorCommandExecuteCommand("insertrow");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertRowNext()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertRowNext()
 {
     return editorCommandExecuteCommand("insertrownext");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertCol()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertCol()
 {
     return editorCommandExecuteCommand("insertcol");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertColNext()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertColNext()
 {
     return editorCommandExecuteCommand("insertcolnext");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertCaption()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertCaption()
 {
     return editorCommandExecuteCommand("insertcaption");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableDeleteCaption()
+bool WizDocumentWebEngine::editorCommandExecuteTableDeleteCaption()
 {
     return editorCommandExecuteCommand("deletecaption");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableInsertTitle()
+bool WizDocumentWebEngine::editorCommandExecuteTableInsertTitle()
 {
     return editorCommandExecuteCommand("inserttitle");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableDeleteTitle()
+bool WizDocumentWebEngine::editorCommandExecuteTableDeleteTitle()
 {
     return editorCommandExecuteCommand("deletetitle");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableMergeCells()
+bool WizDocumentWebEngine::editorCommandExecuteTableMergeCells()
 {
     return editorCommandExecuteCommand("mergecells");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTalbeMergeRight()
+bool WizDocumentWebEngine::editorCommandExecuteTalbeMergeRight()
 {
     return editorCommandExecuteCommand("mergeright");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableMergeDown()
+bool WizDocumentWebEngine::editorCommandExecuteTableMergeDown()
 {
     return editorCommandExecuteCommand("mergedown");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableSplitCells()
+bool WizDocumentWebEngine::editorCommandExecuteTableSplitCells()
 {
     return editorCommandExecuteCommand("splittocells");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableSplitRows()
+bool WizDocumentWebEngine::editorCommandExecuteTableSplitRows()
 {
     return editorCommandExecuteCommand("splittorows");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableSplitCols()
+bool WizDocumentWebEngine::editorCommandExecuteTableSplitCols()
 {
     return editorCommandExecuteCommand("splittocols");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableAverageRows()
+bool WizDocumentWebEngine::editorCommandExecuteTableAverageRows()
 {
     return editorCommandExecuteCommand("averagedistributerow");
 }
 
-bool CWizDocumentWebEngine::editorCommandExecuteTableAverageCols()
+bool WizDocumentWebEngine::editorCommandExecuteTableAverageCols()
 {
     return editorCommandExecuteCommand("averagedistributecol");
 }
 
-void CWizDocumentWebEngine::saveAsPDF()
+void WizDocumentWebEngine::saveAsPDF()
 {        //
     page()->runJavaScript("editor.getAllHtml()", [this](const QVariant& html) {
         QString strHtml = html.toString();
@@ -1942,14 +1942,14 @@ void CWizDocumentWebEngine::saveAsPDF()
     });
 }
 
-void CWizDocumentWebEngine::saveAsHtml(const QString& strDirPath)
+void WizDocumentWebEngine::saveAsHtml(const QString& strDirPath)
 {
     const WIZDOCUMENTDATA& doc = view()->note();
-    CWizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-    db.ExportToHtmlFile(doc, strDirPath);
+    WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+    db.exportToHtmlFile(doc, strDirPath);
 }
 
-void CWizDocumentWebEngine::printDocument()
+void WizDocumentWebEngine::printDocument()
 {
 //    if (QWebFrame* frame = noteFrame())
 //    {
@@ -1981,7 +1981,7 @@ void CWizDocumentWebEngine::printDocument()
 //    }
 }
 
-bool CWizDocumentWebEngine::findIMGElementAt(QPoint point, QString& strSrc)
+bool WizDocumentWebEngine::findIMGElementAt(QPoint point, QString& strSrc)
 {
     //TODO: 需要使用同步查询方式
     QPoint ptPos = mapFromGlobal(point);
@@ -1995,20 +1995,20 @@ bool CWizDocumentWebEngine::findIMGElementAt(QPoint point, QString& strSrc)
     return true;
 }
 
-void CWizDocumentWebEngine::undo()
+void WizDocumentWebEngine::undo()
 {
     page()->runJavaScript("editor.execCommand('undo')");
     emit statusChanged();
 }
 
-void CWizDocumentWebEngine::redo()
+void WizDocumentWebEngine::redo()
 {
     page()->runJavaScript("editor.execCommand('redo')");
     emit statusChanged();
 }
 
 
-void CWizDocumentWebEngine::focusInEditor()
+void WizDocumentWebEngine::focusInEditor()
 {
     if (m_bEditingMode) {
         Q_EMIT focusIn();
@@ -2016,13 +2016,13 @@ void CWizDocumentWebEngine::focusInEditor()
     }
 }
 
-void CWizDocumentWebEngine::focusOutEditor()
+void WizDocumentWebEngine::focusOutEditor()
 {
     Q_EMIT focusOut();
     Q_EMIT statusChanged();
 }
 
-void CWizDocumentWebEngine::sendEventToChildWidgets(QEvent* event)
+void WizDocumentWebEngine::sendEventToChildWidgets(QEvent* event)
 {
     foreach (QObject* obj, m_childWidgets)
     {
@@ -2030,46 +2030,46 @@ void CWizDocumentWebEngine::sendEventToChildWidgets(QEvent* event)
     }
 }
 
-void CWizDocumentWebEngine::setInSeperateWindow(bool inSeperateWindow)
+void WizDocumentWebEngine::setInSeperateWindow(bool inSeperateWindow)
 {
     m_bInSeperateWindow = inSeperateWindow;
 
     if (inSeperateWindow)
     {
-        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+        QUrl url = QUrl::fromLocalFile(Utils::WizPathResolve::skinResourcesPath(Utils::WizStyleHelper::themeName())
                                        + "webkit_separate_scrollbar.css");
         settings()->setUserStyleSheetUrl(url);
     }
     else
     {
-        QUrl url = QUrl::fromLocalFile(Utils::PathResolve::skinResourcesPath(Utils::StyleHelper::themeName())
+        QUrl url = QUrl::fromLocalFile(Utils::WizPathResolve::skinResourcesPath(Utils::WizStyleHelper::themeName())
                                        + "webkit_scrollbar.css");
         settings()->setUserStyleSheetUrl(url);
     }
 }
 
-WebEnginePage::WebEnginePage(QObject* parent)
+WizWebEnginePage::WizWebEnginePage(QObject* parent)
     : QWebEnginePage(parent)
 {
     connect(this, SIGNAL(urlChanged(QUrl)), SLOT(on_urlChanged(QUrl)));
 }
 
-WebEnginePage::~WebEnginePage()
+WizWebEnginePage::~WizWebEnginePage()
 {
 
 }
 
-void WebEnginePage::on_urlChanged(const QUrl& url)
+void WizWebEnginePage::on_urlChanged(const QUrl& url)
 {
     qDebug() << "web page url changed : " << url;
 }
 
-void WebEnginePage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
+void WizWebEnginePage::javaScriptConsoleMessage(QWebEnginePage::JavaScriptConsoleMessageLevel level, const QString& message, int lineNumber, const QString& sourceID)
 {
     qDebug() << "console at line : " << lineNumber << "  message :  " << message << " source id : " << sourceID.left(200);
 }
 
-void WebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked)
+void WizWebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked)
 {
     if (action == QWebEnginePage::Reload)
     {
@@ -2098,7 +2098,7 @@ void WebEnginePage::triggerAction(QWebEnginePage::WebAction action, bool checked
     QWebEnginePage::triggerAction(action, checked);
 }
 
-void WebEnginePage::load(const QUrl& url)
+void WizWebEnginePage::load(const QUrl& url)
 {
     qDebug() << "web page load called : " << url;
 }

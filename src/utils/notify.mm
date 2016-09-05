@@ -5,7 +5,7 @@
 
 using namespace Utils;
 
-void Notify::sendNotify(const QString& strTile, const QString& strText)
+void WizNotify::sendNotify(const QString& strTile, const QString& strText)
 {
     /*
     NSUserNotification* userNotification = [[[NSUserNotification alloc] init] autorelease];
@@ -17,7 +17,7 @@ void Notify::sendNotify(const QString& strTile, const QString& strText)
     */
 }
 
-void Notify::setDockBadge(int nCount)
+void WizNotify::setDockBadge(int nCount)
 {
     if (nCount)
         [[NSApp dockTile] setBadgeLabel:[NSString stringWithFormat:@"%d", nCount]];

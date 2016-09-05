@@ -17,7 +17,7 @@ bool DeleteFile(const CString& strFileName)
     return true;
 }
 
-QString COleDateTime::toHumanFriendlyString() const
+QString WizOleDateTime::toHumanFriendlyString() const
 {
     QDateTime t(QDateTime::currentDateTime());
     int nElapseSecs = secsTo(t);
@@ -57,7 +57,7 @@ QString COleDateTime::toHumanFriendlyString() const
     return QString("Error");
 }
 
-QString COleDateTime::toLocalLongDate() const
+QString WizOleDateTime::toLocalLongDate() const
 {
     QLocale local;
     if (local.language() == QLocale::Chinese)
@@ -69,14 +69,14 @@ QString COleDateTime::toLocalLongDate() const
     return QDateTime::currentDateTime().toString("MMM d,yyyy");
 }
 
-COleDateTime &COleDateTime::operator=(const QDateTime &other)
+WizOleDateTime &WizOleDateTime::operator=(const QDateTime &other)
 {
     setDate(other.date());
     setTime(other.time());
     return *this;
 }
 
-COleDateTime &COleDateTime::operator=(const COleDateTime &other)
+WizOleDateTime &WizOleDateTime::operator=(const WizOleDateTime &other)
 {
     setDate(other.date());
     setTime(other.time());
@@ -91,7 +91,7 @@ int GetTickCount()
 }
 
 
-void CString::Trim(char ch)
+void CString::trim(char ch)
 {
     while (startsWith(ch))
     {
@@ -103,7 +103,7 @@ void CString::Trim(char ch)
         remove(length() - 1, 1);
     }
 }
-void CString::TrimLeft()
+void CString::trimLeft()
 {
     while (!isEmpty())
     {
@@ -118,7 +118,7 @@ void CString::TrimLeft()
     }
 }
 
-void CString::TrimRight()
+void CString::trimRight()
 {
     while (!isEmpty())
     {
@@ -133,23 +133,23 @@ void CString::TrimRight()
     }
 }
 
-void CString::Insert(int index, const CString& str)
+void CString::insert(int index, const CString& str)
 {
     insert(index, str);
 }
 
-void CString::Insert(int index, QChar ch)
+void CString::insert(int index, QChar ch)
 {
     insert(index, ch);
 }
 
-void CString::SetAt(int index, QChar ch)
+void CString::setAt(int index, QChar ch)
 {
     replace(index, 1, ch);
 }
 
 
-void CString::Format(QString strFormat, ...)
+void CString::format(QString strFormat, ...)
 {
     CString strFormat2 = strFormat;
     strFormat2.replace("%s", "%ls");
@@ -160,7 +160,7 @@ void CString::Format(QString strFormat, ...)
     va_end( argList );
 }
 
-int CString::FindOneOf(const CString& strFind) const
+int CString::findOneOf(const CString& strFind) const
 {
     std::set<QChar> chars;
     for (int i = 0; i < strFind.length(); i++)
@@ -179,14 +179,14 @@ int CString::FindOneOf(const CString& strFind) const
 
 int _tcsicmp(const CString& str1, const CString& str2)
 {
-    return str1.CompareNoCase(str2);
+    return str1.compareNoCase(str2);
 }
 
 int _tcsnicmp(const CString& str1, const CString& str2, int count)
 {
-    CString s1 = (str1.length() > count) ? str1.Left(count) : str1;
-    CString s2 = (str2.length() > count) ? str2.Left(count) : str2;
-    return s1.CompareNoCase(s2);
+    CString s1 = (str1.length() > count) ? str1.left(count) : str1;
+    CString s2 = (str2.length() > count) ? str2.left(count) : str2;
+    return s1.compareNoCase(s2);
 }
 
 int _ttoi(const CString& str)

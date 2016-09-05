@@ -1,9 +1,9 @@
 #include "wizupgradenotifydialog.h"
 #include "ui_wizupgradenotifydialog.h"
 
-CWizUpgradeNotifyDialog::CWizUpgradeNotifyDialog(const QString& changelogUrl, QWidget *parent)
+WizUpgradeNotifyDialog::WizUpgradeNotifyDialog(const QString& changelogUrl, QWidget *parent)
     : QDialog(parent)
-    , ui(new Ui::CWizUpgradeNotifyDialog)
+    , ui(new Ui::WizUpgradeNotifyDialog)
 {
     ui->setupUi(this);
 
@@ -13,7 +13,7 @@ CWizUpgradeNotifyDialog::CWizUpgradeNotifyDialog(const QString& changelogUrl, QW
     connect(ui->buttonNow, SIGNAL(clicked()), SLOT(accept()));
 }
 
-CWizUpgradeNotifyDialog::~CWizUpgradeNotifyDialog()
+WizUpgradeNotifyDialog::~WizUpgradeNotifyDialog()
 {
     delete ui;
 }

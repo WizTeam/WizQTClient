@@ -5,7 +5,7 @@ class QString;
 
 namespace Utils {
 
-class PathResolve
+class WizPathResolve
 {
 public:
     static QString appPath();

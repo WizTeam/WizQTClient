@@ -167,7 +167,7 @@ void CWizSingleApplication::activateWindow()
 #include <QLocalSocket>
 #include <QDebug>
 
-CWizSingleApplication::CWizSingleApplication(int &argc, char *argv[], const QString uniqueKey) : QApplication(argc, argv), _uniqueKey(uniqueKey)
+WizSingleApplication::WizSingleApplication(int &argc, char *argv[], const QString uniqueKey) : QApplication(argc, argv), _uniqueKey(uniqueKey)
 {
     sharedMemory.setKey(_uniqueKey);
     if (sharedMemory.attach())
@@ -192,7 +192,7 @@ CWizSingleApplication::CWizSingleApplication(int &argc, char *argv[], const QStr
 
 // public slots.
 
-void CWizSingleApplication::receiveMessage()
+void WizSingleApplication::receiveMessage()
 {
     QLocalSocket *localSocket = localServer->nextPendingConnection();
     if (!localSocket->waitForReadyRead(timeout))
@@ -208,12 +208,12 @@ void CWizSingleApplication::receiveMessage()
 
 // public functions.
 
-bool CWizSingleApplication::isRunning()
+bool WizSingleApplication::isRunning()
 {
     return _isRunning;
 }
 
-bool CWizSingleApplication::sendMessage(const QString &message)
+bool WizSingleApplication::sendMessage(const QString &message)
 {
     if (!_isRunning)
         return false;

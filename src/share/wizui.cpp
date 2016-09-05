@@ -10,7 +10,7 @@
 #include "wizsettings.h"
 #include "wiznotestyle.h"
 
-BOOL CWizSkin9GridImage::Clear()
+BOOL WizSkin9GridImage::clear()
 {
     if (!m_img.isNull())
     {
@@ -19,7 +19,7 @@ BOOL CWizSkin9GridImage::Clear()
     return TRUE;
 }
 
-BOOL CWizSkin9GridImage::SplitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount)
+BOOL WizSkin9GridImage::splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount)
 {
     ATLASSERT(nArrayCount == 9);
     //
@@ -62,9 +62,9 @@ BOOL CWizSkin9GridImage::SplitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* 
     return TRUE;
 }
 
-BOOL CWizSkin9GridImage::SetImage(const CString& strImageFileName, QPoint ptTopLeft)
+BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLeft)
 {
-    Clear();
+    clear();
     //
     if (FAILED(m_img.load(strImageFileName)))
         return FALSE;
@@ -72,19 +72,19 @@ BOOL CWizSkin9GridImage::SetImage(const CString& strImageFileName, QPoint ptTopL
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();
     //
-    return SplitRect(QRect(0, 0, nImageWidth, nImageHeight), ptTopLeft, m_arrayImageGrid, 9);
+    return splitRect(QRect(0, 0, nImageWidth, nImageHeight), ptTopLeft, m_arrayImageGrid, 9);
 }
 
-BOOL CWizSkin9GridImage::Valid() const
+BOOL WizSkin9GridImage::valid() const
 {
     return m_img.width() > 0 && m_img.height() > 0;
 }
 
-void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
+void WizSkin9GridImage::draw(QPainter* p, QRect rc, int nAlpha) const
 {
     QRect arrayDest[9];
     //
-    SplitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
+    splitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
     //
     for (int i = 0; i < 9; i++)
     {
@@ -101,11 +101,11 @@ void CWizSkin9GridImage::Draw(QPainter* p, QRect rc, int nAlpha) const
         }
     }
 }
-void CWizSkin9GridImage::DrawBorder(QPainter* p, QRect rc) const
+void WizSkin9GridImage::drawBorder(QPainter* p, QRect rc) const
 {
     QRect arrayDest[9];
     //
-    SplitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
+    splitRect(rc, m_arrayImageGrid[0].bottomRight(), arrayDest, 9);
     //
     for (int i = 0; i < 9; i++)
     {
@@ -122,7 +122,7 @@ void CWizSkin9GridImage::DrawBorder(QPainter* p, QRect rc) const
 
 
 
-CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
+WizIconLineEditContainer::WizIconLineEditContainer(QWidget* parent)
     : QWidget(parent)
     , m_background(NULL)
     , m_layout(NULL)
@@ -147,32 +147,32 @@ CWizIconLineEditContainer::CWizIconLineEditContainer(QWidget* parent)
 
 }
 
-CWizIconLineEditContainer::~CWizIconLineEditContainer()
+WizIconLineEditContainer::~WizIconLineEditContainer()
 {
     if (m_background)
         delete m_background;
 }
-void CWizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
+void WizIconLineEditContainer::setBackgroundImage(QString fileName, QPoint pt)
 {
-    m_background = new CWizSkin9GridImage();
-    m_background->SetImage(fileName, pt);
+    m_background = new WizSkin9GridImage();
+    m_background->setImage(fileName, pt);
 }
 
-void CWizIconLineEditContainer::setLeftIcon(QString fileName)
+void WizIconLineEditContainer::setLeftIcon(QString fileName)
 {
     m_leftIcon->setPixmap(QPixmap(fileName));
 }
-void CWizIconLineEditContainer::setRightIcon(QString fileName)
+void WizIconLineEditContainer::setRightIcon(QString fileName)
 {
     m_rightIcon->setPixmap(QPixmap(fileName));
 }
 
-void CWizIconLineEditContainer::setPlaceholderText(const QString &strText)
+void WizIconLineEditContainer::setPlaceholderText(const QString &strText)
 {
     m_edit->setPlaceholderText(strText);
 }
 
-void CWizIconLineEditContainer::setAutoClearRightIcon(bool bAutoClean)
+void WizIconLineEditContainer::setAutoClearRightIcon(bool bAutoClean)
 {
     if (bAutoClean)
     {
@@ -184,12 +184,12 @@ void CWizIconLineEditContainer::setAutoClearRightIcon(bool bAutoClean)
     }
 }
 
-void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
+void WizIconLineEditContainer::paintEvent(QPaintEvent *event)
 {
-    if (m_background && m_background->Valid())
+    if (m_background && m_background->valid())
     {
         QPainter paint(this);
-        m_background->Draw(&paint, rect(), 0);
+        m_background->draw(&paint, rect(), 0);
     }
     else
     {
@@ -198,7 +198,7 @@ void CWizIconLineEditContainer::paintEvent(QPaintEvent *event)
 }
 
 
-void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
+void WizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
 {
     if (m_rightIcon->geometry().contains(event->pos()))
     {
@@ -206,18 +206,18 @@ void CWizIconLineEditContainer::mousePressEvent(QMouseEvent *event)
     }
 }
 
-void CWizIconLineEditContainer::cleanRightIcon()
+void WizIconLineEditContainer::cleanRightIcon()
 {
     m_rightIcon->setPixmap(QPixmap());
 }
 
 
-CWizImageButton::CWizImageButton(QWidget *parent)
+WizImageButton::WizImageButton(QWidget *parent)
     :QPushButton(parent)
 {
 }
 
-void CWizImageButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+void WizImageButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
                                      const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
                                      const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor)
 {
@@ -234,11 +234,11 @@ void WizInitWidgetMargins(const QString& strSkinName, QWidget* widget, const QSt
 {
     QMargins def = widget->contentsMargins();
 
-    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
-    int clientMarginLeft = settings.GetInt(name, "MarginLeft", def.left());
-    int clientMarginTop = settings.GetInt(name, "MarginTop", def.top());
-    int clientMarginRight = settings.GetInt(name, "MarginRight", def.right());
-    int clientMarginBottom = settings.GetInt(name, "MarginBottom", def.bottom());
+    WizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
+    int clientMarginLeft = settings.getInt(name, "MarginLeft", def.left());
+    int clientMarginTop = settings.getInt(name, "MarginTop", def.top());
+    int clientMarginRight = settings.getInt(name, "MarginRight", def.right());
+    int clientMarginBottom = settings.getInt(name, "MarginBottom", def.bottom());
     widget->setContentsMargins(clientMarginLeft, clientMarginTop, clientMarginRight, clientMarginBottom);
 }
 

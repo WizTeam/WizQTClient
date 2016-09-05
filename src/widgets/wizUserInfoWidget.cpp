@@ -20,15 +20,15 @@
 #include "wizOEMSettings.h"
 
 
-CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
+WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)
     : WIZUSERINFOWIDGETBASE(parent)
     , m_app(app)
     , m_db(app.databaseManager().db())
 {
-    connect(AvatarHost::instance(), SIGNAL(loaded(const QString&)),
+    connect(WizAvatarHost::instance(), SIGNAL(loaded(const QString&)),
             SLOT(on_userAvatar_loaded(const QString&)));
 
-    AvatarHost::load(m_db.GetUserId(), false);
+    WizAvatarHost::load(m_db.getUserId(), false);
 
     resetUserInfo();
 
@@ -61,10 +61,10 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     m_menuMain->addAction(actionAccountInfo);
     m_menuMain->addAction(actionAccountSetup);
     m_menuMain->addAction(actionChangeAvatar);
-    CWizOEMSettings oemSettings(m_db.GetAccountPath());
+    WizOEMSettings oemSettings(m_db.getAccountPath());
     if (!oemSettings.isHideBuyVip())
     {
-        CWizAccountManager manager(m_app.databaseManager());
+        WizAccountManager manager(m_app.databaseManager());
         QAction* actionUpgradeVIP = new QAction(manager.isVip() ? tr("Renewal Vip...") : tr("Upgrade VIP..."), m_menuMain);
         connect(actionUpgradeVIP, SIGNAL(triggered()), SLOT(on_action_upgradeVip_triggered()));
         m_menuMain->addAction(actionUpgradeVIP);
@@ -83,14 +83,14 @@ CWizUserInfoWidget::CWizUserInfoWidget(CWizExplorerApp& app, QWidget *parent)
     setMenu(m_menuMain);
 }
 
-void CWizUserInfoWidget::resetUserInfo()
+void WizUserInfoWidget::resetUserInfo()
 {
     WIZUSERINFO info;
-    if (!m_db.GetUserInfo(info))
+    if (!m_db.getUserInfo(info))
         return;
 
     if (info.strDisplayName.isEmpty()) {
-        setText(::WizGetEmailPrefix(m_db.GetUserId()));
+        setText(::WizGetEmailPrefix(m_db.getUserId()));
     } else {
         QString strName = info.strDisplayName;
         //QString strName = fontMetrics().elidedText(info.strDisplayName, Qt::ElideRight, 150);
@@ -116,52 +116,52 @@ void CWizUserInfoWidget::resetUserInfo()
     updateUI();
 }
 
-void CWizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
+void WizUserInfoWidget::on_userAvatar_loaded(const QString& strGUID)
 {
-    if (strGUID != m_db.GetUserId())
+    if (strGUID != m_db.getUserId())
         return;
 
     updateUI();
 }
 
-void CWizUserInfoWidget::on_action_accountInfo_triggered()
+void WizUserInfoWidget::on_action_accountInfo_triggered()
 {
 
 }
 
-void CWizUserInfoWidget::on_action_accountSettings_triggered()
+void WizUserInfoWidget::on_action_accountSettings_triggered()
 {    
-    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
 #ifndef BUILD4APPSTORE
-    QString extInfo = CommonApiEntry::appstoreParam(false);
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("user_info",
+    QString extInfo = WizCommonApiEntry::appstoreParam(false);
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("user_info",
                                                               WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Account settings"), strUrl, window);
 #else
-    CWizIAPDialog* dlg = window->iapDialog();
+    WizIAPDialog* dlg = window->iapDialog();
     dlg->loadUserInfo();
     dlg->exec();
 #endif
     // 用户可能会在设置页面中修改信息，此处清除token以便重新同步
-    Token::clearToken();
+    WizToken::clearToken();
 }
 
-void CWizUserInfoWidget::on_action_upgradeVip_triggered()
+void WizUserInfoWidget::on_action_upgradeVip_triggered()
 {
 #ifndef BUILD4APPSTORE
-    QString strToken = Token::token();
-    QString extInfo = CommonApiEntry::appstoreParam(false);
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
+    QString strToken = WizToken::token();
+    QString extInfo = WizCommonApiEntry::appstoreParam(false);
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("vip", strToken, extInfo);
     QDesktopServices::openUrl(strUrl);
 #else
-    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
-    CWizIAPDialog* dlg = window->iapDialog();
+    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
+    WizIAPDialog* dlg = window->iapDialog();
     dlg->loadIAPPage();
     dlg->exec();
 #endif
 }
 
-void CWizUserInfoWidget::on_action_changeAvatar_triggered()
+void WizUserInfoWidget::on_action_changeAvatar_triggered()
 {
     QFileDialog dialog;
     dialog.setAcceptMode(QFileDialog::AcceptOpen);
@@ -179,65 +179,65 @@ void CWizUserInfoWidget::on_action_changeAvatar_triggered()
 
     QString fileName = listFiles[0];
     WizExecuteOnThread(WIZ_THREAD_NETWORK, [=](){
-        AvatarUploader* uploader = new AvatarUploader(nullptr);
+        WizAvatarUploader* uploader = new WizAvatarUploader(nullptr);
         connect(uploader, SIGNAL(uploaded(bool)), SLOT(on_action_changeAvatar_uploaded(bool)));
         uploader->upload(fileName);
     });
 }
 
-void CWizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
+void WizUserInfoWidget::on_action_changeAvatar_uploaded(bool ok)
 {
-    AvatarUploader* uploader = qobject_cast<AvatarUploader*>(sender());    
+    WizAvatarUploader* uploader = qobject_cast<WizAvatarUploader*>(sender());    
 
     if (ok) {
-        AvatarHost::reload(m_db.GetUserId());
+        WizAvatarHost::reload(m_db.getUserId());
     } else {
-        MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+        WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
         QMessageBox::warning(window, tr("Upload Avatar"), uploader->lastErrorMessage());
     }
 
     uploader->deleteLater();
 }
 
-void CWizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
+void WizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
 {
-    QString strToken = Token::token();
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("service", strToken);
+    QString strToken = WizToken::token();
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("service", strToken);
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
-void CWizUserInfoWidget::on_action_mySharedNotes_triggered()
+void WizUserInfoWidget::on_action_mySharedNotes_triggered()
 {
-    QString strToken = Token::token();
-    QString strUrl = CommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
+    QString strToken = WizToken::token();
+    QString strUrl = WizCommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
 
     qDebug() << "open dialog with token ："  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 
-void CWizUserInfoWidget::on_action_logout_triggered()
+void WizUserInfoWidget::on_action_logout_triggered()
 {
-    MainWindow* window = dynamic_cast<MainWindow*>(m_app.mainWindow());
+    WizMainWindow* window = dynamic_cast<WizMainWindow*>(m_app.mainWindow());
     window->on_actionLogout_triggered();
 }
 
-void CWizUserInfoWidget::on_userInfo_changed()
+void WizUserInfoWidget::on_userInfo_changed()
 {
     resetUserInfo();
 }
-QString CWizUserInfoWidget::userId()
+QString WizUserInfoWidget::userId()
 {
-    return m_db.GetUserId();
+    return m_db.getUserId();
 }
-void CWizUserInfoWidget::updateUI()
+void WizUserInfoWidget::updateUI()
 {
     m_circleAvatar = QPixmap();
     WIZUSERINFOWIDGETBASE::updateUI();
 }
 
-QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
+QPixmap WizUserInfoWidget::getCircleAvatar(int width, int height)
 {
     if (width <= 0 || height <= 0)
         return QPixmap();
@@ -250,27 +250,27 @@ QPixmap CWizUserInfoWidget::getCircleAvatar(int width, int height)
         m_circleAvatar = QPixmap();
     }
 
-    QPixmap org = AvatarHost::orgAvatar(userId());
+    QPixmap org = WizAvatarHost::orgAvatar(userId());
     if (org.isNull())
         return org;
     //
-    m_circleAvatar = AvatarHost::circleImage(org, width, height);
+    m_circleAvatar = WizAvatarHost::circleImage(org, width, height);
     return m_circleAvatar;
 }
 
 
 
-QPixmap CWizUserInfoWidget::getAvatar(int width, int height)
+QPixmap WizUserInfoWidget::getAvatar(int width, int height)
 {
     return getCircleAvatar(width, width);
 }
 
-QIcon CWizUserInfoWidget::getVipIcon()
+QIcon WizUserInfoWidget::getVipIcon()
 {
     return m_iconVipIndicator;
 }
 
-QSize CWizUserInfoWidget::sizeHint() const
+QSize WizUserInfoWidget::sizeHint() const
 {
     // FIXME: builtin avatar size (36, 36), margin = 4 * 2, arraw width = 10
     int vipIconWidth = 35;

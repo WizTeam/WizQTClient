@@ -8,12 +8,12 @@
 
 class QTimer;
 
-class CWizPopupWidget : public QWidget
+class WizPopupWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    CWizPopupWidget(QWidget* parent);
+    WizPopupWidget(QWidget* parent);
 
     virtual QSize sizeHint() const;
     virtual QRect getClientRect() const;

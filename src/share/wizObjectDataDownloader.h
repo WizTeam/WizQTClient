@@ -11,8 +11,8 @@
 #include "wizobject.h"
 
 class CWizApi;
-class CWizDatabase;
-class CWizDatabaseManager;
+class WizDatabase;
+class WizDatabaseManager;
 struct IWizThreadPool;
 
 enum DownloadType
@@ -24,12 +24,12 @@ enum DownloadType
 /* ---------------------- CWizObjectDataDownloaderHost ---------------------- */
 // host running in main thread and manage downloader
 
-class CWizObjectDownloaderHost : public QObject
+class WizObjectDownloaderHost : public QObject
 {
     Q_OBJECT
 
 public:
-    static CWizObjectDownloaderHost* instance();
+    static WizObjectDownloaderHost* instance();
 
     void downloadData(const WIZOBJECTDATA& data);
     void downloadData(const WIZOBJECTDATA& data, std::function<void(void)> callback);
@@ -38,8 +38,8 @@ public:
 
     void waitForDone();
 
-    CWizObjectDownloaderHost(QObject* parent = 0);
-    ~CWizObjectDownloaderHost();
+    WizObjectDownloaderHost(QObject* parent = 0);
+    ~WizObjectDownloaderHost();
 Q_SIGNALS:
     void downloadDone(const WIZOBJECTDATA& data, bool bSucceed);
     void finished();
@@ -54,17 +54,17 @@ private:
 
 private:
     QMap<QString, WIZOBJECTDATA> m_mapObject;   // download pool
-    static std::shared_ptr<CWizObjectDownloaderHost> m_instance;
+    static std::shared_ptr<WizObjectDownloaderHost> m_instance;
     IWizThreadPool* m_threadPool;
     QMutex m_mutex;
 };
 
 
-class CWizObjectDownloader : public QObject
+class WizObjectDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type);
+    WizObjectDownloader(const WIZOBJECTDATA& data, DownloadType type);
     virtual void run();
 
 private:
@@ -83,11 +83,11 @@ Q_SIGNALS:
     void downloadProgress(QString objectGuid, int totalSize, int loadedSize);
 };
 
-class CWizFileDownloader : public QObject
+class WizFileDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizFileDownloader(const QString& strUrl, const QString& strFileName,
+    WizFileDownloader(const QString& strUrl, const QString& strFileName,
                        const QString& strPath, bool isImage);
     void startDownload();
 

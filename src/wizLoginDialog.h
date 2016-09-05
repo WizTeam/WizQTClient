@@ -15,15 +15,15 @@
 class QLabel;
 class QState;
 class QHistoryState;
-class CWizSkin9GridImage;
-class CWizImageButton;
-class CWizUdpClient;
+class WizSkin9GridImage;
+class WizImageButton;
+class WizUdpClient;
 
-class CWizOEMDownloader : public QObject
+class WizOEMDownloader : public QObject
 {
     Q_OBJECT
 public:
-    CWizOEMDownloader(QObject* parent);
+    WizOEMDownloader(QObject* parent);
 
     QString serverIp() const;
 public slots:
@@ -44,11 +44,11 @@ private:
     QString m_server;
 };
 
-class CWizActionWidget : public QWidget
+class WizActionWidget : public QWidget
 {
     Q_OBJECT
 public:
-    CWizActionWidget(const QString& text, QWidget* parent);
+    WizActionWidget(const QString& text, QWidget* parent);
     void setSelected(bool selected);
 
 protected:
@@ -69,11 +69,11 @@ private:
     QPushButton *m_deleteButton;
 };
 
-class CWizUserItemAction : public QWidgetAction
+class WizUserItemAction : public QWidgetAction
 {
     Q_OBJECT
 public:
-    explicit CWizUserItemAction(const WizLocalUser& localUser, QMenu *parent);
+    explicit WizUserItemAction(const WizLocalUser& localUser, QMenu *parent);
     WizLocalUser getUserData();
     void setSelected(bool selected);
 
@@ -88,7 +88,7 @@ private slots:
 private:
     WizLocalUser m_userData;
     QMenu* m_menu;
-    CWizActionWidget* m_widget;
+    WizActionWidget* m_widget;
 };
 
 
@@ -96,18 +96,18 @@ namespace Ui {
 class wizLoginWidget;
 }
 
-class CWizLoginDialog
+class WizLoginDialog
 #ifdef Q_OS_MAC
         : public QDialog
 #else
-        : public CWizShadowWindow<QDialog>
+        : public WizShadowWindow<QDialog>
 #endif
 {
     Q_OBJECT
 
 public:
-    explicit CWizLoginDialog(const QString& strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent = 0);
-    ~CWizLoginDialog();
+    explicit WizLoginDialog(const QString& strLocale, const QList<WizLocalUser>& localUsers, QWidget *parent = 0);
+    ~WizLoginDialog();
 
     QString userId() const;
     QString loginUserGuid() const;
@@ -229,7 +229,7 @@ private:
     QMenu* m_menuUsers;
     QMenu* m_menuServers;
     QDialog* m_animationWaitingDialog;
-    CWizUdpClient* m_udpClient;
+    WizUdpClient* m_udpClient;
     QThread* m_udpThread;
     WizServerType m_serverType;
     WizServerType m_currentUserServerType;
@@ -240,11 +240,11 @@ private:
     QLineEdit* m_lineEditUserName;
     QLineEdit* m_lineEditPassword;
     QLineEdit* m_lineEditServer;
-    CWizImageButton* m_buttonLogin;
+    WizImageButton* m_buttonLogin;
     QLineEdit* m_lineEditNewUserName;
     QLineEdit* m_lineEditNewPassword;
     QLineEdit* m_lineEditRepeatPassword;
-    CWizImageButton* m_buttonSignUp;
+    WizImageButton* m_buttonSignUp;
 
     //
     QState* m_stateWizLogIn;
@@ -256,7 +256,7 @@ private:
 
     //
     QMap<QString, QString> m_oemLogoMap;
-    CWizOEMDownloader* m_oemDownloader;
+    WizOEMDownloader* m_oemDownloader;
 
     QList<WizLocalUser> m_userList;
     QString m_loginUserGuid;

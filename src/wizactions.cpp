@@ -17,14 +17,14 @@ struct WIZACTION
 };
 
 
-CWizActions::CWizActions(CWizExplorerApp& app, QObject* parent)
+WizActions::WizActions(WizExplorerApp& app, QObject* parent)
     : QObject(parent)
     , m_parent(parent)
     , m_app(app)
 {
 }
 
-WIZACTION* CWizActions::actionsData()
+WIZACTION* WizActions::actionsData()
 {
     // useless, just for translation
     static WIZACTION arrayRoot[] =
@@ -154,14 +154,14 @@ WIZACTION* CWizActions::actionsData()
     return arrayActions;
 }
 
-CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShortcut)
+WizShortcutAction *WizActions::addAction(WIZACTION& action, bool bUseExtraShortcut)
 {   
     QString strText = action.strText;
     QString strIconName = action.strName;
     QKeySequence strShortcut = action.strShortcut;
     QString strSlot = "1on_" + action.strName + "_triggered()";
 
-    CWizShortcutAction* pAction = new CWizShortcutAction(strText, m_parent);
+    WizShortcutAction* pAction = new WizShortcutAction(strText, m_parent);
 
     if (!strIconName.isEmpty()) {
         pAction->setIcon(::WizLoadSkinIcon(m_app.userSettings().skin(), strIconName));
@@ -194,7 +194,7 @@ CWizShortcutAction *CWizActions::addAction(WIZACTION& action, bool bUseExtraShor
     return pAction;
 }
 
-void CWizActions::init(bool bUseExtraShortcut)
+void WizActions::init(bool bUseExtraShortcut)
 {
     int index = 0;
     WIZACTION* arrayData = actionsData();
@@ -209,9 +209,9 @@ void CWizActions::init(bool bUseExtraShortcut)
     }
 }
 
-CWizShortcutAction *CWizActions::actionFromName(const QString& strActionName)
+WizShortcutAction *WizActions::actionFromName(const QString& strActionName)
 {
-    CWizShortcutAction* pAction = m_actions[strActionName];
+    WizShortcutAction* pAction = m_actions[strActionName];
     if (pAction) {
         return pAction;
     }
@@ -221,7 +221,7 @@ CWizShortcutAction *CWizActions::actionFromName(const QString& strActionName)
     return addAction(data, false);
 }
 
-void CWizActions::toggleActionText(const QString& strActionName)
+void WizActions::toggleActionText(const QString& strActionName)
 {
     int i = 0;
     WIZACTION* action;
@@ -253,12 +253,12 @@ void CWizActions::toggleActionText(const QString& strActionName)
     }
 }
 
-CWizAnimateAction* CWizActions::animateActionFromName(const QString& strActionName)
+WizAnimateAction* WizActions::animateActionFromName(const QString& strActionName)
 {
-    return dynamic_cast<CWizAnimateAction*>(actionFromName(strActionName));
+    return dynamic_cast<WizAnimateAction*>(actionFromName(strActionName));
 }
 
-QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QString& strSection)
+QMenu* WizActions::toMenu(QWidget* parent, WizSettings& settings, const QString& strSection)
 {
     if (strSection == "Table")
     {
@@ -287,13 +287,13 @@ QMenu* CWizActions::toMenu(QWidget* parent, CWizSettings& settings, const QStrin
     }
 }
 
-void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString& strSection, bool bMenuBar)
+void WizActions::buildMenu(QMenu* pMenu, WizSettings& settings, const QString& strSection, bool bMenuBar)
 {
     int index = 0;
     while (true)
     {
         QString strKey = WizIntToStr(index);
-        QString strAction = settings.GetString(strSection, strKey);
+        QString strAction = settings.getString(strSection, strKey);
 
         if (strAction.isEmpty())
             break;
@@ -329,15 +329,15 @@ void CWizActions::buildMenu(QMenu* pMenu, CWizSettings& settings, const QString&
     }
 }
 
-void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu)
+void WizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QMenu*& windowsMenu)
 {
-    CWizSettings settings(strFileName);
+    WizSettings settings(strFileName);
 
     int index = 0;
     while (true)
     {
         QString strKey = WizIntToStr(index);
-        QString strAction = settings.GetString("MainMenu", strKey);
+        QString strAction = settings.getString("MainMenu", strKey);
 
         if (strAction.isEmpty())
             break;
@@ -375,15 +375,15 @@ void CWizActions::buildMenuBar(QMenuBar* menuBar, const QString& strFileName, QM
     }
 }
 
-void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
+void WizActions::buildMenu(QMenu* menu, const QString& strFileName)
 {
-    CWizSettings settings(strFileName);
+    WizSettings settings(strFileName);
 
     int index = 0;
     while (true)
     {
         QString strKey = WizIntToStr(index);
-        QString strAction = settings.GetString("MainMenu", strKey);
+        QString strAction = settings.getString("MainMenu", strKey);
 
         if (strAction.isEmpty())
             break;
@@ -418,17 +418,17 @@ void CWizActions::buildMenu(QMenu* menu, const QString& strFileName)
 }
 
 
-void CWizShortcutAction::setShortcut(QShortcut *shortcut)
+void WizShortcutAction::setShortcut(QShortcut *shortcut)
 {
     m_shortcut = shortcut;
 }
 
-void CWizShortcutAction::setShortcut(const QKeySequence &shortcut)
+void WizShortcutAction::setShortcut(const QKeySequence &shortcut)
 {
     QAction::setShortcut(shortcut);
 }
 
-void CWizShortcutAction::setEnabled(bool enable)
+void WizShortcutAction::setEnabled(bool enable)
 {
     QAction::setEnabled(enable);
     if (m_shortcut)

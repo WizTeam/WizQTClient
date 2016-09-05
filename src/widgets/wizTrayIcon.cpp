@@ -5,32 +5,32 @@
 #include "share/wizSyncableDatabase.h"
 #include "wizdef.h"
 
-CWizTrayIcon::CWizTrayIcon(CWizExplorerApp& app, QObject* parent)
+WizTrayIcon::WizTrayIcon(WizExplorerApp& app, QObject* parent)
     : QSystemTrayIcon(parent)
     , m_app(app)
 {
     connect(this, SIGNAL(messageClicked()), SLOT(onMessageClicked()));
 }
 
-CWizTrayIcon::CWizTrayIcon(CWizExplorerApp& app, const QIcon& icon, QObject* parent)
+WizTrayIcon::WizTrayIcon(WizExplorerApp& app, const QIcon& icon, QObject* parent)
     : QSystemTrayIcon(icon, parent)
     , m_app(app)
 {
     connect(this, SIGNAL(messageClicked()), SLOT(onMessageClicked()));
 }
 
-CWizTrayIcon::~CWizTrayIcon()
+WizTrayIcon::~WizTrayIcon()
 {
 }
 
-void CWizTrayIcon::showMessage(const QString& title, const QString& msg, QSystemTrayIcon::MessageIcon icon, int msecs)
+void WizTrayIcon::showMessage(const QString& title, const QString& msg, QSystemTrayIcon::MessageIcon icon, int msecs)
 {
     m_messageType = wizBubbleNormal;
     m_messageData.clear();
     QSystemTrayIcon::showMessage(title, msg, icon, msecs);
 }
 
-void CWizTrayIcon::showMessage(const QVariant& param)
+void WizTrayIcon::showMessage(const QVariant& param)
 {
     QList<QVariant> paramList = param.toList();
     if (paramList.count() < 2)
@@ -49,7 +49,7 @@ void CWizTrayIcon::showMessage(const QVariant& param)
     }
 }
 
-void CWizTrayIcon::onMessageClicked()
+void WizTrayIcon::onMessageClicked()
 {
     m_app.mainWindow()->raise();
     if (m_messageType == wizBubbleMessageCenter)

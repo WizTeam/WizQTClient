@@ -6,9 +6,9 @@
 #include "../share/wizthreads.h"
 #include <QTimer>
 
-bool CWizFramelessWebDialog::m_bVisibling = false;
+bool WizFramelessWebDialog::m_bVisibling = false;
 
-CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
+WizFramelessWebDialog::WizFramelessWebDialog(QWidget *parent) :
     QDialog(parent)
 {
     setFixedSize(800, 600);
@@ -29,13 +29,13 @@ CWizFramelessWebDialog::CWizFramelessWebDialog(QWidget *parent) :
     layout->addWidget(view);
 }
 
-void CWizFramelessWebDialog::loadAndShow(const QString& strUrl)
+void WizFramelessWebDialog::loadAndShow(const QString& strUrl)
 {
     m_url = strUrl;
     m_frame->load(QUrl(m_url));
 }
 
-void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
+void WizFramelessWebDialog::execute(const QString& strFunction, QVariant param1,
                                               QVariant param2, QVariant param3, QVariant param4)
 {
     if (strFunction == "close")
@@ -59,7 +59,7 @@ void CWizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1
 }
 
 
-void CWizFramelessWebDialog::onPageLoadFinished(bool ok)
+void WizFramelessWebDialog::onPageLoadFinished(bool ok)
 {
     if (ok)
     {

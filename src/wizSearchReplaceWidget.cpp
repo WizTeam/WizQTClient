@@ -1,22 +1,22 @@
 #include "wizSearchReplaceWidget.h"
 #include "ui_wizSearchReplaceWidget.h"
 
-CWizSearchReplaceWidget::CWizSearchReplaceWidget(QWidget* parent) :
+WizSearchReplaceWidget::WizSearchReplaceWidget(QWidget* parent) :
     QDialog(parent),
-    ui(new Ui::CWizSearchReplaceWidget)
+    ui(new Ui::WizSearchReplaceWidget)
 {
     ui->setupUi(this);
 
     //setWindowFlags(Qt::WindowStaysOnTopHint);  //could cause window fullscreen on mac
 }
 
-CWizSearchReplaceWidget::~CWizSearchReplaceWidget()
+WizSearchReplaceWidget::~WizSearchReplaceWidget()
 {
     emit findNext("", false);
     delete ui;
 }
 
-void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
+void WizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
 {
     QPoint pos;
     pos.setX(rcEditor.x() + (rcEditor.width() - width()) / 2);
@@ -31,40 +31,40 @@ void CWizSearchReplaceWidget::showInEditor(const QRect& rcEditor)
     raise();
 }
 
-void CWizSearchReplaceWidget::closeEvent(QCloseEvent* event)
+void WizSearchReplaceWidget::closeEvent(QCloseEvent* event)
 {
     clearAllText();
     QWidget::closeEvent(event);
 }
 
-void CWizSearchReplaceWidget::on_btn_pre_clicked()
+void WizSearchReplaceWidget::on_btn_pre_clicked()
 {
     emit findPre(ui->lineEdit_source->text(), ui->checkBox_casesenitive->checkState() == Qt::Checked);
 }
 
-void CWizSearchReplaceWidget::on_btn_next_clicked()
+void WizSearchReplaceWidget::on_btn_next_clicked()
 {
     emit findNext(ui->lineEdit_source->text(), ui->checkBox_casesenitive->checkState() == Qt::Checked);
 }
 
-void CWizSearchReplaceWidget::on_btn_replace_clicked()
+void WizSearchReplaceWidget::on_btn_replace_clicked()
 {
     emit replaceAndFindNext(ui->lineEdit_source->text(), ui->lineEdit_repalce->text(),
                             ui->checkBox_casesenitive->checkState() == Qt::Checked);
 }
 
-void CWizSearchReplaceWidget::on_btn_replaceAll_clicked()
+void WizSearchReplaceWidget::on_btn_replaceAll_clicked()
 {
     emit replaceAll(ui->lineEdit_source->text(), ui->lineEdit_repalce->text(),
                     ui->checkBox_casesenitive->checkState() == Qt::Checked);
 }
 
-void CWizSearchReplaceWidget::on_lineEdit_source_returnPressed()
+void WizSearchReplaceWidget::on_lineEdit_source_returnPressed()
 {
     emit findNext(ui->lineEdit_source->text(), ui->checkBox_casesenitive->checkState() == Qt::Checked);
 }
 
-void CWizSearchReplaceWidget::clearAllText()
+void WizSearchReplaceWidget::clearAllText()
 {
     emit findNext("", false);
     ui->lineEdit_repalce->clear();

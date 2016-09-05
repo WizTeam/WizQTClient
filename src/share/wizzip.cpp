@@ -559,18 +559,18 @@ QStringList JlCompress::getFileList(QString fileCompressed) {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-CWizZipFile::CWizZipFile()
+WizZipFile::WizZipFile()
     : m_zip(NULL)
 {
 
 }
 
-CWizZipFile::~CWizZipFile()
+WizZipFile::~WizZipFile()
 {
     close();
 }
 
-bool CWizZipFile::open(const CString& strFileName)
+bool WizZipFile::open(const CString& strFileName)
 {
     close();
     //
@@ -578,7 +578,7 @@ bool CWizZipFile::open(const CString& strFileName)
     return m_zip ? true : false;
 }
 
-bool CWizZipFile::compressFile(const CString& strFileName, const CString& strNameInZip)
+bool WizZipFile::compressFile(const CString& strFileName, const CString& strNameInZip)
 {
     if (!m_zip)
         return false;
@@ -586,7 +586,7 @@ bool CWizZipFile::compressFile(const CString& strFileName, const CString& strNam
     return JlCompress::compressFile(m_zip, strFileName, strNameInZip);
 }
 
-bool CWizZipFile::close()
+bool WizZipFile::close()
 {
     if (!m_zip)
         return false;
@@ -600,18 +600,18 @@ bool CWizZipFile::close()
 
 
 
-CWizUnzipFile::CWizUnzipFile()
+WizUnzipFile::WizUnzipFile()
     : m_zip(NULL)
 {
 
 }
 
-CWizUnzipFile::~CWizUnzipFile()
+WizUnzipFile::~WizUnzipFile()
 {
     close();
 }
 
-bool CWizUnzipFile::open(const CString& strFileName)
+bool WizUnzipFile::open(const CString& strFileName)
 {
     close();
     //
@@ -624,7 +624,7 @@ bool CWizUnzipFile::open(const CString& strFileName)
     return m_zip ? true : false;
 }
 
-int CWizUnzipFile::count()
+int WizUnzipFile::count()
 {
     if (!m_zip)
         return -1;
@@ -632,7 +632,7 @@ int CWizUnzipFile::count()
     return m_names.count();
 }
 
-CString CWizUnzipFile::fileName(int index)
+CString WizUnzipFile::fileName(int index)
 {
     if (!m_zip)
         return CString();
@@ -642,7 +642,7 @@ CString CWizUnzipFile::fileName(int index)
     //
     return m_names[index];
 }
-int CWizUnzipFile::fileNameToIndex(const CString& strNameInZip)
+int WizUnzipFile::fileNameToIndex(const CString& strNameInZip)
 {
     if (!m_zip)
         return -1;
@@ -650,7 +650,7 @@ int CWizUnzipFile::fileNameToIndex(const CString& strNameInZip)
     return m_names.indexOf(strNameInZip);
 }
 
-bool CWizUnzipFile::extractFile(int index, const CString& strFileName)
+bool WizUnzipFile::extractFile(int index, const CString& strFileName)
 {
     if (!m_zip)
         return false;
@@ -661,14 +661,14 @@ bool CWizUnzipFile::extractFile(int index, const CString& strFileName)
     return JlCompress::extractFile(m_zip, fileName(index), strFileName);
 }
 
-bool CWizUnzipFile::extractFile(const CString& strNameInZip, const CString& strFileName)
+bool WizUnzipFile::extractFile(const CString& strNameInZip, const CString& strFileName)
 {
     if (!m_zip)
         return false;
     //
     return JlCompress::extractFile(m_zip, strNameInZip, strFileName);
 }
-bool CWizUnzipFile::extractAll(const CString& strDestPath)
+bool WizUnzipFile::extractAll(const CString& strDestPath)
 {
     if (!m_zip)
         return false;
@@ -686,7 +686,7 @@ bool CWizUnzipFile::extractAll(const CString& strDestPath)
 }
 
 
-bool CWizUnzipFile::close()
+bool WizUnzipFile::close()
 {
     if (!m_zip)
         return false;
@@ -700,7 +700,7 @@ bool CWizUnzipFile::close()
     return ret;
 }
 
-bool CWizUnzipFile::extractZip(const CString& strZipFileName, const CString& strDestPath)
+bool WizUnzipFile::extractZip(const CString& strZipFileName, const CString& strDestPath)
 {
     QStringList sl = JlCompress::extractDir(strZipFileName, strDestPath);
     return !sl.empty();

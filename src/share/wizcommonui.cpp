@@ -7,19 +7,19 @@
 #include "utils/pathresolve.h"
 
 
-CWizCommonUI::CWizCommonUI(QObject* parent)
+WizCommonUI::WizCommonUI(QObject* parent)
     : QObject(parent)
 {
 }
 
-QString CWizCommonUI::LoadTextFromFile(const QString& strFileName)
+QString WizCommonUI::loadTextFromFile(const QString& strFileName)
 {
     QString strText;
     ::WizLoadUnicodeTextFromFile(strFileName, strText);
     return strText;
 }
 
-QString CWizCommonUI::ClipboardToImage(int hwnd, const QString& strOptions)
+QString WizCommonUI::clipboardToImage(int hwnd, const QString& strOptions)
 {
     Q_UNUSED(hwnd);
     //
@@ -33,9 +33,9 @@ QString CWizCommonUI::ClipboardToImage(int hwnd, const QString& strOptions)
         return CString();
     //
     CString strTempPath = ::WizGetCommandLineValue(strOptions, "TempPath");
-    if (strTempPath.IsEmpty())
+    if (strTempPath.isEmpty())
     {
-        strTempPath = Utils::PathResolve::tempPath();
+        strTempPath = Utils::WizPathResolve::tempPath();
     }
     else
     {

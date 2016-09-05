@@ -8,7 +8,7 @@
 
 #include <sync/token.h>
 
-CWizUserVerifyDialog::CWizUserVerifyDialog(const QString& strUser,
+WizUserVerifyDialog::WizUserVerifyDialog(const QString& strUser,
                                            const QString& strHint,
                                            QWidget *parent)
     : QDialog(parent)
@@ -46,15 +46,15 @@ CWizUserVerifyDialog::CWizUserVerifyDialog(const QString& strUser,
     setFixedSize(sizeHint());
 }
 
-QString CWizUserVerifyDialog::password()
+QString WizUserVerifyDialog::password()
 {
     return m_editPasswd->text();
 }
 
-void CWizUserVerifyDialog::on_btnAccept_clicked()
+void WizUserVerifyDialog::on_btnAccept_clicked()
 {
     if (!m_editPasswd->text().isEmpty()) {
-        Token::setPasswd(m_editPasswd->text());
+        WizToken::setPasswd(m_editPasswd->text());
         accept();
     }
 }

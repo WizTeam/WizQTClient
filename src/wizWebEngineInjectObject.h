@@ -4,11 +4,11 @@
 #include <QObject>
 
 class WizCodeEditorDialog;
-class CWizCodeExternal : public QObject
+class WizCodeExternal : public QObject
 {
     Q_OBJECT
 public:
-    explicit CWizCodeExternal(WizCodeEditorDialog* editor, QObject* parent);
+    explicit WizCodeExternal(WizCodeEditorDialog* editor, QObject* parent);
 
     Q_INVOKABLE void accept();
     Q_INVOKABLE void reject();
@@ -20,11 +20,11 @@ private:
     WizCodeEditorDialog* m_editor;
 };
 
-class CWizCommentsExternal : public QObject
+class WizCommentsExternal : public QObject
 {
     Q_OBJECT
 public:
-    explicit CWizCommentsExternal(QObject* parent);
+    explicit WizCommentsExternal(QObject* parent);
 
     Q_INVOKABLE void openUrl(const QString& strUrl);
 };

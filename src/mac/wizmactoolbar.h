@@ -15,15 +15,15 @@
 
 
 class CWizMacToolBarPrivate;
-class CWizMacToolBarItem;
-class CWizSearchView;
+class WizMacToolBarItem;
+class WizSearchView;
 
 
-class CWizMacToolBarButtonItem : public CWizCocoaViewContainer
+class WizMacToolBarButtonItem : public WizCocoaViewContainer
 {
     Q_OBJECT
 public:
-    CWizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent = 0);
+    WizMacToolBarButtonItem(const QString& title, const QPixmap& extraMenuIcon, int width, QWidget* parent = 0);
 
     QSize sizeHint() const;
 
@@ -39,24 +39,24 @@ private:
     int m_width;
 };
 
-class CWizMacFixedSpacer : public CWizCocoaViewContainer
+class WizMacFixedSpacer : public WizCocoaViewContainer
 {
     QSize m_sz;
 public:
-    CWizMacFixedSpacer(QSize sz, QWidget* parent = 0);
+    WizMacFixedSpacer(QSize sz, QWidget* parent = 0);
 
     void adjustWidth(int width);
 
     QSize sizeHint() const { return m_sz; }
 };
 
-class CWizMacToolBar
+class WizMacToolBar
     : public QWidget
 {
     Q_OBJECT
 public:
-    CWizMacToolBar(QWidget *parent = 0);
-    ~CWizMacToolBar();
+    WizMacToolBar(QWidget *parent = 0);
+    ~WizMacToolBar();
 public:
     enum DisplayMode
     {
@@ -101,13 +101,13 @@ public:
     void addAction(QAction* action);
     void addStandardItem(StandardItem standardItem);
     void addSearch(const QString& label, const QString& tooltip,int width = 250);
-    void addWidget(CWizCocoaViewContainer* widget, const QString& label, const QString& tooltip);
+    void addWidget(WizCocoaViewContainer* widget, const QString& label, const QString& tooltip);
 
     void deleteAllToolBarItems();
 
     void onSearchEndEditing(const QString& str);
     //
-    CWizSearchView* getSearchWidget();    
+    WizSearchView* getSearchWidget();    
     void adjustSearchWidgetWidth(int nWidth);
     //void adjustWidgetToolBarItemWidth(QWidget* widget, int nWidth);
 
@@ -121,7 +121,7 @@ Q_SIGNALS:
 
 private:
     bool m_showText;
-    QList<CWizMacToolBarItem *> m_items;
+    QList<WizMacToolBarItem *> m_items;
     CWizMacToolBarPrivate *d;
 };
 

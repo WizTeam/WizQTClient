@@ -6,14 +6,14 @@
 #include "wizobject.h"
 #include "utils/logger.h"
 
-static CWizDatabaseManager* m_instance = 0;
+static WizDatabaseManager* m_instance = 0;
 
-CWizDatabaseManager* CWizDatabaseManager::instance()
+WizDatabaseManager* WizDatabaseManager::instance()
 {
     return m_instance;
 }
 
-CWizDatabaseManager::CWizDatabaseManager(const QString& strAccountFolderName)
+WizDatabaseManager::WizDatabaseManager(const QString& strAccountFolderName)
     : m_strAccountFolderName(strAccountFolderName)
     , m_mutex(QMutex::Recursive)
 {
@@ -22,37 +22,37 @@ CWizDatabaseManager::CWizDatabaseManager(const QString& strAccountFolderName)
     m_instance = this;
 }
 
-CWizDatabaseManager::~CWizDatabaseManager()
+WizDatabaseManager::~WizDatabaseManager()
 {
     m_instance = 0;
     closeAll();
 }
 
-bool CWizDatabaseManager::openWithInfo(const QString& strKbGUID, const WIZDATABASEINFO* pInfo)
+bool WizDatabaseManager::openWithInfo(const QString& strKbGUID, const WIZDATABASEINFO* pInfo)
 {
     Q_ASSERT(!m_strAccountFolderName.isEmpty());
 
     if (isOpened(strKbGUID))
         return true;
 
-    CWizDatabase* db = new CWizDatabase();
+    WizDatabase* db = new WizDatabase();
 
-    if (!db->Open(m_strAccountFolderName, strKbGUID)) {
+    if (!db->open(m_strAccountFolderName, strKbGUID)) {
         delete db;
         return false;
     }
     //
     if (pInfo)
     {
-        db->InitDatabaseInfo(*pInfo);
+        db->initDatabaseInfo(*pInfo);
     }
 
     if (strKbGUID.isEmpty()) {
         m_dbPrivate = db;
 
         // take ownership immediately
-        connect(db, SIGNAL(databaseOpened(CWizDatabase*, const QString&)),
-                SLOT(on_groupDatabaseOpened(CWizDatabase*, const QString&)),
+        connect(db, SIGNAL(databaseOpened(WizDatabase*, const QString&)),
+                SLOT(on_groupDatabaseOpened(WizDatabase*, const QString&)),
                 Qt::BlockingQueuedConnection);
     } else {
         m_mapGroups[strKbGUID] = db;
@@ -63,12 +63,12 @@ bool CWizDatabaseManager::openWithInfo(const QString& strKbGUID, const WIZDATABA
     Q_EMIT databaseOpened(strKbGUID);
     return true;
 }
-bool CWizDatabaseManager::open(const QString& strKbGUID)
+bool WizDatabaseManager::open(const QString& strKbGUID)
 {
     return openWithInfo(strKbGUID, NULL);
 }
 
-bool CWizDatabaseManager::openAll()
+bool WizDatabaseManager::openAll()
 {
     // first, open private db
     if (!open()) {
@@ -78,7 +78,7 @@ bool CWizDatabaseManager::openAll()
 
     // second, get groups info
     CWizGroupDataArray arrayGroup;
-    if (!m_dbPrivate->GetAllGroupInfo(arrayGroup)) {
+    if (!m_dbPrivate->getAllGroupInfo(arrayGroup)) {
         TOLOG("Failed to get user group info");
         return true;
     }
@@ -95,19 +95,19 @@ bool CWizDatabaseManager::openAll()
     return true;
 }
 
-bool CWizDatabaseManager::isOpened(const QString& strKbGUID)
+bool WizDatabaseManager::isOpened(const QString& strKbGUID)
 {
     if (m_dbPrivate && (strKbGUID.isEmpty() || m_dbPrivate->kbGUID() == strKbGUID)) {
         return true;
     }
 
-    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
+    QMap<QString, WizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
     if (it != m_mapGroups.end())
         return true;
 
     return false;
 }
-CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATABASEINFO& info)
+WizDatabase& WizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATABASEINFO& info)
 {
 //    QMutexLocker locker(&m_mutex);
 //    Q_UNUSED(locker);
@@ -115,15 +115,15 @@ CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATA
     Q_ASSERT(m_dbPrivate);
 
     if (strKbGUID.isEmpty() || m_dbPrivate->kbGUID() == strKbGUID) {
-        CWizDatabase& db = *m_dbPrivate;
-        db.SetDatabaseInfo(info);
+        WizDatabase& db = *m_dbPrivate;
+        db.setDatabaseInfo(info);
         return db;
     }
 
-    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
+    QMap<QString, WizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
     if (it != m_mapGroups.end()) {
-        CWizDatabase& db = *(it.value());
-        db.SetDatabaseInfo(info);
+        WizDatabase& db = *(it.value());
+        db.setDatabaseInfo(info);
         return db;
     }
 
@@ -136,7 +136,7 @@ CWizDatabase& CWizDatabaseManager::addDb(const QString& strKbGUID, const WIZDATA
     return db(strKbGUID);
 }
 
-CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
+WizDatabase& WizDatabaseManager::db(const QString& strKbGUID)
 {
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
@@ -147,7 +147,7 @@ CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
         return *m_dbPrivate;
     }
 
-    QMap<QString, CWizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
+    QMap<QString, WizDatabase*>::iterator it = m_mapGroups.find(strKbGUID);
     if (it != m_mapGroups.end()) {
         return *(it.value());
     }
@@ -170,16 +170,16 @@ CWizDatabase& CWizDatabaseManager::db(const QString& strKbGUID)
 //    }
 //}
 
-int CWizDatabaseManager::count()
+int WizDatabaseManager::count()
 {
     return m_mapGroups.size();
 }
 
-CWizDatabase& CWizDatabaseManager::at(int i)
+WizDatabase& WizDatabaseManager::at(int i)
 {
     Q_ASSERT(i < count() && i >= 0);
 
-    CWizDatabase* db = m_mapGroups.values().value(i);
+    WizDatabase* db = m_mapGroups.values().value(i);
     return *db;
 }
 
@@ -189,13 +189,13 @@ CWizDatabase& CWizDatabaseManager::at(int i)
 //    return false;
 //}
 
-bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
+bool WizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
 {
     // should close all groups db before close user db.
     if (strKbGUID.isEmpty()) {
         Q_ASSERT(m_mapGroups.isEmpty());
 
-        m_dbPrivate->Close();
+        m_dbPrivate->close();
         m_dbPrivate->deleteLater();
         return true;
     }
@@ -204,9 +204,9 @@ bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
              << "kb_guid: " << m_mapGroups.value(strKbGUID)->kbGUID()
              << " name: " << m_mapGroups.value(strKbGUID)->name();
 
-    QMap<QString, CWizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
+    QMap<QString, WizDatabase*>::const_iterator it = m_mapGroups.find(strKbGUID);
     if (it != m_mapGroups.end()) {
-        it.value()->Close();
+        it.value()->close();
         it.value()->deleteLater();
         m_mapGroups.remove(strKbGUID);
     } else {
@@ -220,13 +220,13 @@ bool CWizDatabaseManager::close(const QString& strKbGUID, bool bNotify)
     return true;
 }
 
-void CWizDatabaseManager::closeAll()
+void WizDatabaseManager::closeAll()
 {
     qDebug() << "[CWizDatabaseManager] total " << m_mapGroups.size() << " database needed close";
 
-    QList<CWizDatabase*> dbs = m_mapGroups.values();
+    QList<WizDatabase*> dbs = m_mapGroups.values();
     for (int i = 0; i < dbs.size(); i++) {
-        CWizDatabase* db = dbs.at(i);
+        WizDatabase* db = dbs.at(i);
 
         close(db->kbGUID());
     }
@@ -235,7 +235,7 @@ void CWizDatabaseManager::closeAll()
     close();
 }
 
-void CWizDatabaseManager::initSignals(CWizDatabase* db)
+void WizDatabaseManager::initSignals(WizDatabase* db)
 {
     connect(db, SIGNAL(groupsInfoDownloaded(const CWizGroupDataArray&)),
             SLOT(on_groupsInfoDownloaded(const CWizGroupDataArray&)),
@@ -323,7 +323,7 @@ void CWizDatabaseManager::initSignals(CWizDatabase* db)
             SIGNAL(favoritesChanged(QString)));
 }
 
-void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QString& strKbGUID)
+void WizDatabaseManager::on_groupDatabaseOpened(WizDatabase* pDb, const QString& strKbGUID)
 {
     // check if this group is already opened, to avoid memory leak!
     if (isOpened(strKbGUID)) {
@@ -336,7 +336,7 @@ void CWizDatabaseManager::on_groupDatabaseOpened(CWizDatabase* pDb, const QStrin
     Q_EMIT databaseOpened(strKbGUID);
 }
 
-void CWizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
+void WizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arrayGroups)
 {
     qDebug() << "[CWizDatabaseManager] Group info downloaded...";
 
@@ -353,7 +353,7 @@ void CWizDatabaseManager::on_groupsInfoDownloaded(const CWizGroupDataArray& arra
         info.bEncryptData = group.bEncryptData;
         //
         addDb(group.strGroupGUID, info);
-        db(group.strGroupGUID).SetDatabaseInfo(info);
+        db(group.strGroupGUID).setDatabaseInfo(info);
     }
 
     // FIXME : close database not inside group list

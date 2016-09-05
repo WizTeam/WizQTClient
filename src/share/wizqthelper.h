@@ -86,65 +86,65 @@ public:
     CString(const unsigned short* pUtf16) { *this = fromUtf16(pUtf16); }
     CString(const unsigned short* pUtf16, int size) { *this = fromUtf16(pUtf16, size); }
     //
-    bool IsEmpty() const { return isEmpty(); }
+    bool isEmpty() const { return isEmpty(); }
     operator const unsigned short*() const { return utf16(); }
     //
     //QString &Format(const char *format, ...) { va_list p; return vsprintf(format, p); }
     //
     void Delete(int index, int len) { remove(index, len); }
-    void Trim() { *this = trimmed(); }
-    void Trim(char ch);
-    void TrimLeft();
-    void TrimRight();
-    CString MakeLower() { *this = toLower(); return *this; }
-    CString MakeUpper() { *this = toUpper(); return *this; }
-    int GetLength() const { return length(); }
-    int CompareNoCase(const CString& strOther) const { return compare(strOther, Qt::CaseInsensitive); }
-    int Compare(const CString& strOther) const { return compare(strOther, Qt::CaseSensitive); }
-    void Format(QString strFormat, ... );
-    void Empty() { clear(); }
-    int Find(char ch) const { return indexOf(ch); }
-    int Find(char ch, int start) const { return indexOf(ch, start); }
-    int Find(const CString& str) const { return indexOf(str); }
-    CString Left(int count) const { return left(count); }
-    CString Right(int count) const { return right(count); }
-    void Append(const CString& str) { append(str); }
-    void AppendChar(char ch) { append(ch); }
-    void Insert(int index, const CString& str);
-    void Insert(int index, QChar ch);
-    void SetAt(int index, QChar ch);
-    CString Mid(int iFirst, int nCount) const { return mid(iFirst, nCount); }
-    CString Mid(int iFirst) const { return mid(iFirst); }
-    void Remove(QChar ch) { remove(ch); }
-    void Replace(QChar chFind, QChar chReplace) { replace(chFind, chReplace); }
-    void Replace(const CString& strFind, const CString& strReplace) { replace(strFind, strReplace); }
-    int FindOneOf(const CString& strFind) const;
+    void trim() { *this = trimmed(); }
+    void trim(char ch);
+    void trimLeft();
+    void trimRight();
+    CString makeLower() { *this = toLower(); return *this; }
+    CString makeUpper() { *this = toUpper(); return *this; }
+    int getLength() const { return length(); }
+    int compareNoCase(const CString& strOther) const { return compare(strOther, Qt::CaseInsensitive); }
+    int compare(const CString& strOther) const { return compare(strOther, Qt::CaseSensitive); }
+    void format(QString strFormat, ... );
+    void empty() { clear(); }
+    int find(char ch) const { return indexOf(ch); }
+    int find(char ch, int start) const { return indexOf(ch, start); }
+    int find(const CString& str) const { return indexOf(str); }
+    CString left(int count) const { return left(count); }
+    CString right(int count) const { return right(count); }
+    void append(const CString& str) { append(str); }
+    void appendChar(char ch) { append(ch); }
+    void insert(int index, const CString& str);
+    void insert(int index, QChar ch);
+    void setAt(int index, QChar ch);
+    CString mid(int iFirst, int nCount) const { return mid(iFirst, nCount); }
+    CString mid(int iFirst) const { return mid(iFirst); }
+    void remove(QChar ch) { remove(ch); }
+    void replace(QChar chFind, QChar chReplace) { replace(chFind, chReplace); }
+    void replace(const CString& strFind, const CString& strReplace) { replace(strFind, strReplace); }
+    int findOneOf(const CString& strFind) const;
 };
 
 
-class COleDateTime: public QDateTime
+class WizOleDateTime: public QDateTime
 {
 public:
-    COleDateTime() :QDateTime() { *this = QDateTime::currentDateTime(); }
-    COleDateTime(const QDateTime& other) { *this = other; }
-    COleDateTime(int year, int month, int day, int hour, int minute, int second) : QDateTime(QDate(year, month, day), QTime(hour, minute, second))  {}
+    WizOleDateTime() :QDateTime() { *this = QDateTime::currentDateTime(); }
+    WizOleDateTime(const QDateTime& other) { *this = other; }
+    WizOleDateTime(int year, int month, int day, int hour, int minute, int second) : QDateTime(QDate(year, month, day), QTime(hour, minute, second))  {}
     //
-    COleDateTime(time_t t) { this->setTime_t(t);}
+    WizOleDateTime(time_t t) { this->setTime_t(t);}
     //
-    int GetYear() const { return date().year(); }
-    int GetMonth() const { return date().month(); }
-    int GetDay() const { return date().day(); }
-    int GetHour() const { return time().hour(); }
-    int GetMinute() const { return time().minute(); }
-    int GetSecond() const { return time().second(); }
-    int GetDayOfYear() const { return date().dayOfYear(); }
-    int GetDayOfWeek() const { return date().dayOfWeek(); }
+    int getYear() const { return date().year(); }
+    int getMonth() const { return date().month(); }
+    int getDay() const { return date().day(); }
+    int getHour() const { return time().hour(); }
+    int getMinute() const { return time().minute(); }
+    int getSecond() const { return time().second(); }
+    int getDayOfYear() const { return date().dayOfYear(); }
+    int getDayOfWeek() const { return date().dayOfWeek(); }
 
     QString toHumanFriendlyString() const;
     QString toLocalLongDate() const;
     //
-    COleDateTime &operator=(const QDateTime &other);
-    COleDateTime &operator=(const COleDateTime &other);
+    WizOleDateTime &operator=(const QDateTime &other);
+    WizOleDateTime &operator=(const WizOleDateTime &other);
 };
 
 int GetTickCount();

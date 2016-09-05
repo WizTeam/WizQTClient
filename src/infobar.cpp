@@ -11,14 +11,14 @@
 #include "wizdef.h"
 
 
-InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
+WizInfoBar::WizInfoBar(WizExplorerApp& app, QWidget *parent)
     : QWidget(parent)
     , m_app(app)
 {
     setStyleSheet("font-size: 12px; color: #a2a2a2;");
     setContentsMargins(0, 0, 0, 6);
 
-    int nHeight = Utils::StyleHelper::infoBarHeight();
+    int nHeight = Utils::WizStyleHelper::infoBarHeight();
     setFixedHeight(nHeight);
 
     QHBoxLayout* layout = new QHBoxLayout();
@@ -38,7 +38,7 @@ InfoBar::InfoBar(CWizExplorerApp& app, QWidget *parent)
     layout->addStretch();
 }
 
-void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
+void WizInfoBar::setDocument(const WIZDOCUMENTDATA& data)
 {
     QString strCreateTime = QObject::tr("Create time: ") + data.tCreated.toString("yyyy/M/d");
     m_labelCreatedTime->setText(strCreateTime);
@@ -47,10 +47,10 @@ void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
     m_labelModifiedTime->setText(strModifiedTime);
 
 
-    CWizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
-    if (db.IsGroup())
+    WizDatabase& db = m_app.databaseManager().db(data.strKbGUID);
+    if (db.isGroup())
     {
-        QString strOwner = db.GetDocumentOwnerAlias(data);
+        QString strOwner = db.getDocumentOwnerAlias(data);
         strOwner = QObject::tr("Owner: ") + (strOwner.isEmpty() ? data.strOwner : strOwner);
         strOwner = fontMetrics().elidedText(strOwner, Qt::ElideRight, 150);
         m_labelOwner->setVisible(true);
@@ -61,7 +61,7 @@ void InfoBar::setDocument(const WIZDOCUMENTDATA& data)
         m_labelOwner->setVisible(false);
     }
 
-    QString strFile = db.GetDocumentFileName(data.strGUID);
+    QString strFile = db.getDocumentFileName(data.strGUID);
     QString strSize = QObject::tr("Size: ") + ::WizGetFileSizeHumanReadalbe(strFile);
     m_labelSize->setText(strSize);
 }

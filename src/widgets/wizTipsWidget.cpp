@@ -9,10 +9,10 @@ static void emptyFunction()
 {
 }
 
-QSet<QString> CWizTipsWidget::m_tipsList = QSet<QString>();
+QSet<QString> WizTipsWidget::m_tipsList = QSet<QString>();
 
-CWizTipsWidget::CWizTipsWidget(const QString& id, QWidget *parent)
-    : CWizPopupWidget(parent)
+WizTipsWidget::WizTipsWidget(const QString& id, QWidget *parent)
+    : WizPopupWidget(parent)
     , m_hintSize(318, 82)
     , m_showFunction(emptyFunction)
     , m_hideFunction(emptyFunction)
@@ -68,12 +68,12 @@ CWizTipsWidget::CWizTipsWidget(const QString& id, QWidget *parent)
     setSizeHint(m_hintSize);
 }
 
-CWizTipsWidget::~CWizTipsWidget()
+WizTipsWidget::~WizTipsWidget()
 {
     m_tipsList.remove(m_id);
 }
 
-void CWizTipsWidget::setSizeHint(const QSize& hintSize)
+void WizTipsWidget::setSizeHint(const QSize& hintSize)
 {
     m_hintSize = hintSize;
 
@@ -81,39 +81,39 @@ void CWizTipsWidget::setSizeHint(const QSize& hintSize)
     setTriangleStyle(triangleMargin, m_triangleWidth, m_triangleHeight);
 }
 
-QSize CWizTipsWidget::sizeHint() const
+QSize WizTipsWidget::sizeHint() const
 {
     return m_hintSize;
 }
 
-bool CWizTipsWidget::isTipsExists(const QString& id)
+bool WizTipsWidget::isTipsExists(const QString& id)
 {
     return m_tipsList.contains(id);
 }
 
-void CWizTipsWidget::setAutoAdjustPosition(bool autoAdjust)
+void WizTipsWidget::setAutoAdjustPosition(bool autoAdjust)
 {
     m_autoAdjustPosition = autoAdjust;
 }
 
-bool CWizTipsWidget::isAutoAdjustPosition() const
+bool WizTipsWidget::isAutoAdjustPosition() const
 {
     return m_autoAdjustPosition;
 }
 
-void CWizTipsWidget::setText(const QString& title, const QString& info, const QString& buttonText)
+void WizTipsWidget::setText(const QString& title, const QString& info, const QString& buttonText)
 {
     m_labelTitle->setText(title);
     m_labelInfo->setText(info);
     m_btnOK->setText(buttonText);
 }
 
-void CWizTipsWidget::setButtonVisible(bool visible)
+void WizTipsWidget::setButtonVisible(bool visible)
 {
     m_btnOK->setVisible(visible);
 }
 
-bool CWizTipsWidget::bindTargetWidget(QWidget* targetWidget, int nXOff, int nYOff)
+bool WizTipsWidget::bindTargetWidget(QWidget* targetWidget, int nXOff, int nYOff)
 {
     if (!targetWidget)
         return false;
@@ -127,22 +127,22 @@ bool CWizTipsWidget::bindTargetWidget(QWidget* targetWidget, int nXOff, int nYOf
     return true;
 }
 
-void CWizTipsWidget::bindShowFunction(const std::function<void ()>& f)
+void WizTipsWidget::bindShowFunction(const std::function<void ()>& f)
 {
     m_showFunction = f;
 }
 
-void CWizTipsWidget::bindHideFunction(const std::function<void ()>& f)
+void WizTipsWidget::bindHideFunction(const std::function<void ()>& f)
 {
     m_hideFunction = f;
 }
 
-void CWizTipsWidget::bindCloseFunction(const std::function<void ()>& f)
+void WizTipsWidget::bindCloseFunction(const std::function<void ()>& f)
 {
     m_closeFunction = f;
 }
 
-void CWizTipsWidget::hide()
+void WizTipsWidget::hide()
 {
     m_hideFunction();
 
@@ -151,12 +151,12 @@ void CWizTipsWidget::hide()
     deleteLater();
 }
 
-void CWizTipsWidget::on_targetWidgetClicked()
+void WizTipsWidget::on_targetWidgetClicked()
 {
     closeTip();
 }
 
-void CWizTipsWidget::on_timerOut()
+void WizTipsWidget::on_timerOut()
 {
     if (m_targetWidget->isVisible())
     {
@@ -169,7 +169,7 @@ void CWizTipsWidget::on_timerOut()
     }
 }
 
-void CWizTipsWidget::on_showRequest()
+void WizTipsWidget::on_showRequest()
 {
     if (!m_targetWidget->isVisible())
         return;
@@ -179,14 +179,14 @@ void CWizTipsWidget::on_showRequest()
     showAtPoint(pt);
 }
 
-void CWizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
+void WizTipsWidget::mouseReleaseEvent(QMouseEvent* ev)
 {
     m_timer.stop();
     QWidget::mouseReleaseEvent(ev);
     closeTip();
 }
 
-void CWizTipsWidget::showEvent(QShowEvent* ev)
+void WizTipsWidget::showEvent(QShowEvent* ev)
 {
     m_showFunction();
 
@@ -198,7 +198,7 @@ void CWizTipsWidget::showEvent(QShowEvent* ev)
     }
 }
 
-void CWizTipsWidget::closeTip()
+void WizTipsWidget::closeTip()
 {
     m_closeFunction();
 

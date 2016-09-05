@@ -7,11 +7,11 @@
 
 class QWebEnginePage;
 
-class CWizFramelessWebDialog : public QDialog
+class WizFramelessWebDialog : public QDialog
 {
     Q_OBJECT
 public:
-    explicit CWizFramelessWebDialog(QWidget *parent = 0);
+    explicit WizFramelessWebDialog(QWidget *parent = 0);
 
     void loadAndShow(const QString& strUrl);
 
@@ -19,7 +19,7 @@ signals:
     void doNotShowThisAgain(bool bAgain);
 
 public slots:
-    void Execute(const QString& strFunction, QVariant param1, QVariant param2,
+    void execute(const QString& strFunction, QVariant param1, QVariant param2,
                                   QVariant param3, QVariant param4);
     void onPageLoadFinished(bool ok);
 

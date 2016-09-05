@@ -13,9 +13,9 @@
 #include "wizproxydialog.h"
 
 
-CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent)
+WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
-    , ui(new Ui::CWizPreferenceWindow)
+    , ui(new Ui::WizPreferenceWindow)
     , m_app(app)
     , m_dbMgr(app.databaseManager())
 {
@@ -99,7 +99,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
             ui->comboSyncInterval->setCurrentIndex(1);
     }
 
-    switch (m_dbMgr.db().GetObjectSyncTimeline()) {
+    switch (m_dbMgr.db().getObjectSyncTimeline()) {
         case -1:
             ui->comboSyncMethod->setCurrentIndex(0);
             break;
@@ -121,7 +121,7 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
 
     int nDays = 1;
     if (m_dbMgr.count()) {
-        nDays = m_dbMgr.at(0).GetObjectSyncTimeline();
+        nDays = m_dbMgr.at(0).getObjectSyncTimeline();
     }
 
     switch (nDays) {
@@ -184,12 +184,12 @@ CWizPreferenceWindow::CWizPreferenceWindow(CWizExplorerApp& app, QWidget* parent
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
 }
 
-void CWizPreferenceWindow::showPrintMarginPage()
+void WizPreferenceWindow::showPrintMarginPage()
 {
     ui->tabWidget->setCurrentWidget(ui->tabPrint);
 }
 
-void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
+void WizPreferenceWindow::on_radioAuto_clicked(bool chcked)
 {
     if (!chcked)
         return;
@@ -198,7 +198,7 @@ void CWizPreferenceWindow::on_radioAuto_clicked(bool chcked)
     Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
-void CWizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
+void WizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
 {
     if (!chcked)
         return;
@@ -207,7 +207,7 @@ void CWizPreferenceWindow::on_radioAlwaysReading_clicked(bool chcked)
     Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
-void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
+void WizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
 {
     if (!chcked)
         return;
@@ -216,7 +216,7 @@ void CWizPreferenceWindow::on_radioAlwaysEditing_clicked(bool chcked)
     Q_EMIT settingsChanged(wizoptionsNoteView);
 }
 
-void CWizPreferenceWindow::on_comboSyncInterval_activated(int index)
+void WizPreferenceWindow::on_comboSyncInterval_activated(int index)
 {
     switch (index) {
         case 0:
@@ -241,23 +241,23 @@ void CWizPreferenceWindow::on_comboSyncInterval_activated(int index)
     Q_EMIT settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
+void WizPreferenceWindow::on_comboSyncMethod_activated(int index)
 {
     switch (index) {
         case 0:
-            m_dbMgr.db().SetObjectSyncTimeLine(-1);
+            m_dbMgr.db().setObjectSyncTimeLine(-1);
             break;
         case 1:
-            m_dbMgr.db().SetObjectSyncTimeLine(1);
+            m_dbMgr.db().setObjectSyncTimeLine(1);
             break;
         case 2:
-            m_dbMgr.db().SetObjectSyncTimeLine(7);
+            m_dbMgr.db().setObjectSyncTimeLine(7);
             break;
         case 3:
-            m_dbMgr.db().SetObjectSyncTimeLine(30);
+            m_dbMgr.db().setObjectSyncTimeLine(30);
             break;
         case 4:
-            m_dbMgr.db().SetObjectSyncTimeLine(99999);
+            m_dbMgr.db().setObjectSyncTimeLine(99999);
             break;
         default:
             Q_ASSERT(0);
@@ -266,7 +266,7 @@ void CWizPreferenceWindow::on_comboSyncMethod_activated(int index)
     Q_EMIT settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
+void WizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
 {
     switch (index) {
     case 0:
@@ -291,24 +291,24 @@ void CWizPreferenceWindow::on_comboSyncGroupMethod_activated(int index)
     Q_EMIT settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::setSyncGroupTimeLine(int nDays)
+void WizPreferenceWindow::setSyncGroupTimeLine(int nDays)
 {
     for (int i = 0; i < m_dbMgr.count(); i++) {
-        m_dbMgr.at(i).SetObjectSyncTimeLine(nDays);
+        m_dbMgr.at(i).setObjectSyncTimeLine(nDays);
     }
 }
 
-void CWizPreferenceWindow::labelProxy_linkActivated(const QString& link)
+void WizPreferenceWindow::labelProxy_linkActivated(const QString& link)
 {
     Q_UNUSED(link);
 
-    ProxyDialog dlg(this);
+    WizProxyDialog dlg(this);
     if (QDialog::Accepted != dlg.exec()) {
         Q_EMIT settingsChanged(wizoptionsSync);
     }
 }
 
-void CWizPreferenceWindow::onButtonFontSelect_clicked()
+void WizPreferenceWindow::onButtonFontSelect_clicked()
 {
     if (!m_fontDialog) {
         m_fontDialog = new QFontDialog(this);
@@ -327,7 +327,7 @@ void CWizPreferenceWindow::onButtonFontSelect_clicked()
     m_fontDialog->exec();
 }
 
-void CWizPreferenceWindow::onButtonFontSelect_confirmed()
+void WizPreferenceWindow::onButtonFontSelect_confirmed()
 {
     QFont font = m_fontDialog->currentFont();
     QString str = font.family() + " " + QString::number(font.pointSize());
@@ -339,68 +339,68 @@ void CWizPreferenceWindow::onButtonFontSelect_confirmed()
     Q_EMIT settingsChanged(wizoptionsFont);
 }
 
-void CWizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
+void WizPreferenceWindow::on_comboLang_currentIndexChanged(int index)
 {
     QString strLocaleName = m_locales[index];
     if (strLocaleName.compare(userSettings().locale())) {
         userSettings().setLocale(strLocaleName);
 
-        CWizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
+        WizMessageBox::information(this, tr("Info"), tr("Language will be changed after restart WizNote."));
     }
 }
 
-void CWizPreferenceWindow::on_checkBox_stateChanged(int arg1)
+void WizPreferenceWindow::on_checkBox_stateChanged(int arg1)
 {
     bool autoUpdate = (arg1 == Qt::Checked);
     m_app.userSettings().setAutoCheckUpdate(autoUpdate);
 
     if (autoUpdate) {
-        MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+        WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
         mainWindow->checkWizUpdate();
     }
 }
 
-void CWizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
+void WizPreferenceWindow::on_checkBoxTrayIcon_toggled(bool checked)
 {
     m_app.userSettings().setShowSystemTrayIcon(checked);
-    MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
     mainWindow->setSystemTrayIconVisible(checked);
 }
 
-void CWizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
+void WizPreferenceWindow::on_comboBox_unit_currentIndexChanged(int index)
 {
     m_app.userSettings().setPrintMarginUnit(index);
 }
 
-void CWizPreferenceWindow::on_spinBox_top_valueChanged(double arg1)
+void WizPreferenceWindow::on_spinBox_top_valueChanged(double arg1)
 {
     m_app.userSettings().setPrintMarginValue(wizPositionTop, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_bottom_valueChanged(double arg1)
+void WizPreferenceWindow::on_spinBox_bottom_valueChanged(double arg1)
 {
     m_app.userSettings().setPrintMarginValue(wizPositionBottom, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_left_valueChanged(double arg1)
+void WizPreferenceWindow::on_spinBox_left_valueChanged(double arg1)
 {
     m_app.userSettings().setPrintMarginValue(wizPositionLeft, arg1);
 }
 
-void CWizPreferenceWindow::on_spinBox_right_valueChanged(double arg1)
+void WizPreferenceWindow::on_spinBox_right_valueChanged(double arg1)
 {
     m_app.userSettings().setPrintMarginValue(wizPositionRight, arg1);
 }
 
 
-void CWizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
+void WizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
 {
     m_app.userSettings().setUseSystemBasedStyle(checked);
 
-    CWizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."));
+    WizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."));
 }
 
-void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
+void WizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 {
     m_app.userSettings().setSearchEncryptedNote(checked);
     if (!checked)
@@ -418,13 +418,13 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
 //        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
 //                       "Do you want to rebuild full text search?"));
 
-        QMessageBox::StandardButton clickedButton = CWizMessageBox::warning(this, tr("Cancel search encrypted note"),
+        QMessageBox::StandardButton clickedButton = WizMessageBox::warning(this, tr("Cancel search encrypted note"),
                                                                                 tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
                                                                                  "Do you want to rebuild full text search?") ,QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
 
         if (QMessageBox::Ok == clickedButton)
         {
-            MainWindow* mainWindow = qobject_cast<MainWindow*>(m_app.mainWindow());
+            WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
             Q_ASSERT(mainWindow);
             mainWindow->rebuildFTS();
         }
@@ -432,12 +432,12 @@ void CWizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
     ui->lineEditNotePassword->setEnabled(checked);
 }
 
-void CWizPreferenceWindow::on_lineEditNotePassword_editingFinished()
+void WizPreferenceWindow::on_lineEditNotePassword_editingFinished()
 {
     m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
 }
 
-void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
+void WizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 {
     QColorDialog dlg;
     dlg.setCurrentColor(m_app.userSettings().editorBackgroundColor());
@@ -448,12 +448,12 @@ void CWizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
     }
 }
 
-void CWizPreferenceWindow::on_pushButtonClearBackground_clicked()
+void WizPreferenceWindow::on_pushButtonClearBackground_clicked()
 {
     updateEditorBackgroundColor("");
 }
 
-void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
+void WizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorName)
 {
     m_app.userSettings().setEditorBackgroundColor(strColorName);
     ui->pushButtonBackgroundColor->setStyleSheet(QString("QPushButton "
@@ -464,13 +464,13 @@ void CWizPreferenceWindow::updateEditorBackgroundColor(const QString& strColorNa
     Q_EMIT settingsChanged(wizoptionsFont);
 }
 
-void CWizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
+void WizPreferenceWindow::on_checkBoxManuallySort_toggled(bool checked)
 {
     m_app.userSettings().setManualSortingEnable(checked);
     emit settingsChanged(wizoptionsFolders);
 }
 
-void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
+void WizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
 {
     switch (index) {
     case 0:
@@ -486,7 +486,7 @@ void CWizPreferenceWindow::on_comboDownloadAttachments_activated(int index)
     Q_EMIT settingsChanged(wizoptionsSync);
 }
 
-void CWizPreferenceWindow::on_tabWidget_currentChanged(int index)
+void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 {
 //    if (index == 1)
 //    {

@@ -67,10 +67,10 @@ void adjustSubViews(QWidget* wgt);
 
 Q_FORWARD_DECLARE_OBJC_CLASS(NSView);
 
-class CWizCocoaViewContainer : public QObject
+class WizCocoaViewContainer : public QObject
 {
 public:
-    CWizCocoaViewContainer();
+    WizCocoaViewContainer();
     //
     void setCocoaView(NSView* view);
     NSView* cocoaView() { return m_view; }

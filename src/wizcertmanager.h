@@ -6,19 +6,19 @@
 #include "share/wizapi.h"
 #include "wizdef.h"
 
-class CWizCertManager : public CWizApiBase
+class WizCertManager : public CWizApiBase
 {
     Q_OBJECT
 
 public:
-    CWizCertManager(CWizExplorerApp& app, const QString& strAccountsApiURL = WIZ_API_URL);
+    WizCertManager(WizExplorerApp& app, const QString& strAccountsApiURL = WIZ_API_URL);
 
     void loadUserCert();
     bool downloadUserCert();
 
 private:
-    CWizExplorerApp& m_app;
-    CWizDatabase& m_db;
+    WizExplorerApp& m_app;
+    WizDatabase& m_db;
 
     WIZUSERCERT m_cert;
     bool m_bCertInited;

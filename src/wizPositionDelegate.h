@@ -7,13 +7,13 @@
 
 class QWidget;
 
-class CWizPositionDelegate : public QObject
+class WizPositionDelegate : public QObject
 {
     Q_OBJECT
 public:
-    static CWizPositionDelegate& instance()
+    static WizPositionDelegate& instance()
     {
-        static CWizPositionDelegate _instance;   //局部静态变量
+        static WizPositionDelegate _instance;   //局部静态变量
         return _instance;
     }
 
@@ -28,9 +28,9 @@ public slots:
     void on_WidgetDeleted(QObject * obj);
 
 private:
-    explicit CWizPositionDelegate() {}
-    CWizPositionDelegate(const CWizPositionDelegate &) {}
-    CWizPositionDelegate& operator= (const CWizPositionDelegate &) { return *this; }
+    explicit WizPositionDelegate() {}
+    WizPositionDelegate(const WizPositionDelegate &) {}
+    WizPositionDelegate& operator= (const WizPositionDelegate &) { return *this; }
 
 private:
     QList<QWidget*> m_widgetList;

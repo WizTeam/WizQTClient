@@ -3,10 +3,10 @@
 
 #include <QChar>
 
-const COLORREF CWizHtmlElemAttr::_clrInvalid = (COLORREF)0xFFFFFFFF;
-const unsigned short CWizHtmlElemAttr::_percentMax = USHRT_MAX;
+const COLORREF WizHtmlElemAttr::_clrInvalid = (COLORREF)0xFFFFFFFF;
+const unsigned short WizHtmlElemAttr::_percentMax = USHRT_MAX;
 
-CWizHtmlElemAttr::CNamedColors CWizHtmlElemAttr::_namedColors;
+WizHtmlElemAttr::CNamedColors WizHtmlElemAttr::_namedColors;
 
 
 class CWizHtmlEntityResolver
@@ -182,38 +182,38 @@ public:
 
             // because some character entity references are
             // case-sensitive, we must fix them manually
-            if (!strKey.CompareNoCase(_T("eth")) ||
-                !strKey.CompareNoCase(_T("thorn")))
+            if (!strKey.compareNoCase(_T("eth")) ||
+                !strKey.compareNoCase(_T("thorn")))
             {
                 if (::wiz_isupper(strKey[0]))
-                    strKey.MakeUpper();
+                    strKey.makeUpper();
                 else
-                    strKey.MakeLower();
+                    strKey.makeLower();
             }
-            else if (!strKey.CompareNoCase(_T("Oslash")))
+            else if (!strKey.compareNoCase(_T("Oslash")))
             {
-                strKey.MakeLower();
-                strKey.SetAt(0, _T('O'));
+                strKey.makeLower();
+                strKey.setAt(0, _T('O'));
             }
-            else if (!strKey.CompareNoCase(_T("AElig")))
+            else if (!strKey.compareNoCase(_T("AElig")))
             {
-                strKey.MakeLower();
-                strKey.SetAt(0, _T('A'));
-                strKey.SetAt(1, _T('E'));
+                strKey.makeLower();
+                strKey.setAt(0, _T('A'));
+                strKey.setAt(1, _T('E'));
             }
             else
             {
-                CString	strT = strKey.Mid(1);
-                strKey.MakeLower();
-                if (strT.CompareNoCase(_T("grave")) == 0 ||
-                    strT.CompareNoCase(_T("acute")) == 0 ||
-                    strT.CompareNoCase(_T("circ"))  == 0 ||
-                    strT.CompareNoCase(_T("uml"))   == 0 ||
-                    strT.CompareNoCase(_T("tilde")) == 0 ||
-                    strT.CompareNoCase(_T("cedil")) == 0 ||
-                    strT.CompareNoCase(_T("ring"))  == 0)
+                CString	strT = strKey.mid(1);
+                strKey.makeLower();
+                if (strT.compareNoCase(_T("grave")) == 0 ||
+                    strT.compareNoCase(_T("acute")) == 0 ||
+                    strT.compareNoCase(_T("circ"))  == 0 ||
+                    strT.compareNoCase(_T("uml"))   == 0 ||
+                    strT.compareNoCase(_T("tilde")) == 0 ||
+                    strT.compareNoCase(_T("cedil")) == 0 ||
+                    strT.compareNoCase(_T("ring"))  == 0)
                 {
-                    strKey.SetAt(0, strT[0]);
+                    strKey.setAt(0, strT[0]);
                 }
             }
 
@@ -246,20 +246,20 @@ CWizHtmlEntityResolver::CCharEntityRefs CWizHtmlEntityResolver::m_CharEntityRefs
 
 
 
-CWizHtmlElemAttr::CWizHtmlElemAttr(const CString& strAttribName, const CString& strAttribValue )
+WizHtmlElemAttr::WizHtmlElemAttr(const CString& strAttribName, const CString& strAttribValue )
 {
-    Init();
+    init();
     m_strAttrName = strAttribName;
     m_strAttrValue = strAttribValue;
 }
 
-CWizHtmlElemAttr::CWizHtmlElemAttr(const CWizHtmlElemAttr &rSource)
+WizHtmlElemAttr::WizHtmlElemAttr(const WizHtmlElemAttr &rSource)
 {
-    Init();
+    init();
     m_strAttrName = rSource.m_strAttrName;
     m_strAttrValue = rSource.m_strAttrValue;
 }
-void CWizHtmlElemAttr::Init(void)
+void WizHtmlElemAttr::init(void)
 {
     if (_namedColors.size())
         return;
@@ -439,27 +439,27 @@ void CWizHtmlElemAttr::Init(void)
     _namedColors["aliceblue"]			= RGB(0xF0, 0xF8, 0xFF);
 }
 
-bool CWizHtmlElemAttr::isNamedColorValue(void) const
+bool WizHtmlElemAttr::isNamedColorValue(void) const
 {
-    if ( (m_strAttrValue.GetLength()) && (::wiz_isalpha(m_strAttrValue[0])) )
+    if ( (m_strAttrValue.getLength()) && (::wiz_isalpha(m_strAttrValue[0])) )
     {
         CString		strKey(m_strAttrValue);
 
-        strKey.MakeLower();
+        strKey.makeLower();
         if (_namedColors.find(m_strAttrValue) != _namedColors.end())
             return (true);
     }
     return (false);
 }
 
-bool CWizHtmlElemAttr::isSysColorValue(void) const
+bool WizHtmlElemAttr::isSysColorValue(void) const
 {
-    if ( (m_strAttrValue.GetLength()) && (::wiz_isalpha(m_strAttrValue[0])) )
+    if ( (m_strAttrValue.getLength()) && (::wiz_isalpha(m_strAttrValue[0])) )
     {
         COLORREF	crTemp = _clrInvalid;
         CString		strKey(m_strAttrValue);
 
-        strKey.MakeLower();
+        strKey.makeLower();
         CNamedColors::const_iterator it = _namedColors.find(strKey);
         if (it != _namedColors.end())
         {
@@ -470,17 +470,17 @@ bool CWizHtmlElemAttr::isSysColorValue(void) const
     return (false);
 }
 
-bool CWizHtmlElemAttr::isHexColorValue(void) const
+bool WizHtmlElemAttr::isHexColorValue(void) const
 {
     // zero-length attribute value?
-    if (m_strAttrValue.IsEmpty())
+    if (m_strAttrValue.isEmpty())
         return (false);
 
     if (m_strAttrValue[0] == _T('#'))
     {
-        if (m_strAttrValue.GetLength() > 1)
+        if (m_strAttrValue.getLength() > 1)
         {
-            for (int i = 1; i < m_strAttrValue.GetLength(); i++)
+            for (int i = 1; i < m_strAttrValue.getLength(); i++)
             {
                 if (!::wiz_isxdigit(m_strAttrValue[i]))
                     return (false);
@@ -492,13 +492,13 @@ bool CWizHtmlElemAttr::isHexColorValue(void) const
     return (false);
 }
 
-COLORREF CWizHtmlElemAttr::getColorValue(void) const
+COLORREF WizHtmlElemAttr::getColorValue(void) const
 {
     COLORREF crTemp = _clrInvalid;
     if (isNamedColorValue())
     {
         CString	strKey(m_strAttrValue);
-        strKey.MakeLower();
+        strKey.makeLower();
         if (WizMapLookup(_namedColors, strKey, crTemp))
         {
             /*
@@ -510,24 +510,24 @@ COLORREF CWizHtmlElemAttr::getColorValue(void) const
         }
     }
     else if (isHexColorValue())
-        crTemp = ::wiz_strtoul(m_strAttrValue.Mid(1), NULL, 16);
+        crTemp = ::wiz_strtoul(m_strAttrValue.mid(1), NULL, 16);
     return (crTemp);
 }
 
-CString CWizHtmlElemAttr::getColorHexValue(void) const
+CString WizHtmlElemAttr::getColorHexValue(void) const
 {
     CString	strColorHex;
     if (isHexColorValue())
-        strColorHex = m_strAttrValue.Mid(1);
+        strColorHex = m_strAttrValue.mid(1);
     else
     {
         COLORREF crTemp = getColorValue();
         if (crTemp != _clrInvalid)
-            strColorHex.Format(_T("#%06x"), crTemp);
+            strColorHex.format(_T("#%06x"), crTemp);
     }
     return (strColorHex);
 }
-unsigned short CWizHtmlElemAttr::getPercentValue(unsigned short max ) const
+unsigned short WizHtmlElemAttr::getPercentValue(unsigned short max ) const
 {
     ATLASSERT(max > 0);
     if (!isPercentValue())	return (0);
@@ -535,7 +535,7 @@ unsigned short CWizHtmlElemAttr::getPercentValue(unsigned short max ) const
     return ((percentVal > max ? max : percentVal));
 }
 
-short CWizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
+short WizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
 {
     static const char _szUnits[][4] =
     {
@@ -545,15 +545,15 @@ short CWizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
         _T("in"), _T("cm"), _T("mm"), _T("pt"), _T("pc")
     };
 
-    if (m_strAttrValue.IsEmpty())
+    if (m_strAttrValue.isEmpty())
         return (0);
 
     //
     size_t i = 0;
     for (i = 0; i < sizeof(_szUnits)/sizeof(_szUnits[0]); i++)
     {
-        if (m_strAttrValue.Right(::strlen(_szUnits[i])). \
-            CompareNoCase(_szUnits[i]) == 0)
+        if (m_strAttrValue.right(::strlen(_szUnits[i])). \
+            compareNoCase(_szUnits[i]) == 0)
         {
             rUnit = (LengthUnitsEnum)i;
             break;
@@ -564,42 +564,42 @@ short CWizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
     return (*this);
 }
 
-CWizHtmlElemAttr::operator bool () const
+WizHtmlElemAttr::operator bool () const
 {
-    if (!m_strAttrValue.CompareNoCase(_T("true")))
+    if (!m_strAttrValue.compareNoCase(_T("true")))
         return (true);
-    if (!m_strAttrValue.CompareNoCase(_T("false")))
+    if (!m_strAttrValue.compareNoCase(_T("false")))
         return (false);
     return (((short)*this ? true : false));
 }
 
-void CWizHtmlElemAttr::putValue(const CString& strValue)
+void WizHtmlElemAttr::putValue(const CString& strValue)
 {
     m_strAttrValue = strValue;
 
-    m_strAttrValue.Trim();
+    m_strAttrValue.trim();
 
     // ignore line feeds
-    m_strAttrValue.Remove(_T('\n'));
+    m_strAttrValue.remove(_T('\n'));
 
     // replace tab and carriage-return with a single space
-    m_strAttrValue.Replace(_T('\r'), _T(' '));
-    m_strAttrValue.Replace(_T('\t'), _T(' '));
+    m_strAttrValue.replace(_T('\r'), _T(' '));
+    m_strAttrValue.replace(_T('\t'), _T(' '));
 
     /** resolve entity reference(s) */
     int		iCurPos = -1, iParseLen = 0;
     unsigned short	chSubst = 0;
     do
     {
-        if ((iCurPos = m_strAttrValue.Find(_T('&'), ++iCurPos)) == -1)
+        if ((iCurPos = m_strAttrValue.find(_T('&'), ++iCurPos)) == -1)
             break;
 
-        iParseLen = CWizHtmlEntityResolver::resolveEntity(m_strAttrValue.Mid(iCurPos), chSubst);
+        iParseLen = CWizHtmlEntityResolver::resolveEntity(m_strAttrValue.mid(iCurPos), chSubst);
         if (iParseLen)
         {
-            m_strAttrValue.Replace
+            m_strAttrValue.replace
                     (
-                            m_strAttrValue.Mid(iCurPos, iParseLen),
+                            m_strAttrValue.mid(iCurPos, iParseLen),
                             CString(chSubst)
                             );
         }
@@ -608,7 +608,7 @@ void CWizHtmlElemAttr::putValue(const CString& strValue)
 }
 
 
-UINT CWizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
+UINT WizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
 {
     const unsigned short*	lpszBegin = lpszString;
     const unsigned short*	lpszEnd;
@@ -660,7 +660,7 @@ UINT CWizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
     if (*lpszEnd != _T('='))
     {
         m_strAttrName = strAttrName;
-        m_strAttrValue.Empty();
+        m_strAttrValue.empty();
         return (lpszEnd - lpszString);
     }
     else
@@ -737,7 +737,7 @@ CString CWizHtmlElemAttr::toString()const
 
 
 
-CWizHtmlAttributes::CWizHtmlAttributes(CWizHtmlAttributes &rSource, bool bCopy)
+WizHtmlAttributes::WizHtmlAttributes(WizHtmlAttributes &rSource, bool bCopy)
     : m_parrAttrib(NULL)
 {
     if (!bCopy)
@@ -752,12 +752,12 @@ CWizHtmlAttributes::CWizHtmlAttributes(CWizHtmlAttributes &rSource, bool bCopy)
         {
             m_parrAttrib = new CElemAttrArray();
 
-            CWizHtmlElemAttr	*pItem = NULL;
+            WizHtmlElemAttr	*pItem = NULL;
 
             /** DEEP COPY BEGIN */
             for (int iElem = 0; iElem < nElemCount; iElem++)
             {
-                if ((pItem = new CWizHtmlElemAttr(rSource[iElem])) == NULL)
+                if ((pItem = new WizHtmlElemAttr(rSource[iElem])) == NULL)
                 {
                     removeAll();
                     return;
@@ -772,41 +772,41 @@ CWizHtmlAttributes::CWizHtmlAttributes(CWizHtmlAttributes &rSource, bool bCopy)
 
 UINT parseFromStr(const unsigned short* lpszString);
 
-int CWizHtmlAttributes::getCount(void) const
+int WizHtmlAttributes::getCount(void) const
 {
     if (m_parrAttrib != NULL)
         return (m_parrAttrib->size());
     return (0);
 }
 
-int CWizHtmlAttributes::getIndexFromName(const CString& strAttributeName) const
+int WizHtmlAttributes::getIndexFromName(const CString& strAttributeName) const
 {
-    CWizHtmlElemAttr	*pItem = NULL;
+    WizHtmlElemAttr	*pItem = NULL;
     for (int iElem = 0; iElem < getCount(); iElem++)
     {
         if ((pItem = (*m_parrAttrib)[iElem]) == NULL)	// just in case
             continue;
 
         // perform a CASE-INSENSITIVE search
-        if (pItem->m_strAttrName.CompareNoCase(strAttributeName) == 0)
+        if (pItem->m_strAttrName.compareNoCase(strAttributeName) == 0)
             return (iElem);
     }
     return (-1);
 }
 
-CWizHtmlElemAttr CWizHtmlAttributes::operator[](int nIndex) const
+WizHtmlElemAttr WizHtmlAttributes::operator[](int nIndex) const
 {
     if (!(nIndex >= 0 && nIndex < getCount()))
     {
-        return (CWizHtmlElemAttr());
+        return (WizHtmlElemAttr());
     }
     //
     return ( *((*m_parrAttrib)[nIndex]) );
 }
 
-CWizHtmlElemAttr* CWizHtmlAttributes::addAttribute(const CString& strName, const CString& strValue)
+WizHtmlElemAttr* WizHtmlAttributes::addAttribute(const CString& strName, const CString& strValue)
 {
-    CWizHtmlElemAttr	*pItem = new CWizHtmlElemAttr(strName, strValue);
+    WizHtmlElemAttr	*pItem = new WizHtmlElemAttr(strName, strValue);
     if (pItem != NULL)
     {
         if (m_parrAttrib == NULL)
@@ -824,18 +824,18 @@ CWizHtmlElemAttr* CWizHtmlAttributes::addAttribute(const CString& strName, const
     return (pItem);
 }
 
-void CWizHtmlAttributes::setValueToName(const CString& strAttributeName, const CString& strValue)
+void WizHtmlAttributes::setValueToName(const CString& strAttributeName, const CString& strValue)
 {
     removeAttribute(strAttributeName);
     addAttribute(strAttributeName, strValue);
 }
 
 
-bool CWizHtmlAttributes::removeAttribute(int nIndex)
+bool WizHtmlAttributes::removeAttribute(int nIndex)
 {
     if (!(nIndex >= 0 && nIndex < getCount()))
         return (false);
-    CWizHtmlElemAttr	*pItem = NULL;
+    WizHtmlElemAttr	*pItem = NULL;
 
     WIZ_SAFE_DELETE_POINTER(pItem);
     //
@@ -843,14 +843,14 @@ bool CWizHtmlAttributes::removeAttribute(int nIndex)
     //
     return (true);
 }
-bool CWizHtmlAttributes::removeAttribute(const CString& strAttributeName)
+bool WizHtmlAttributes::removeAttribute(const CString& strAttributeName)
 {
     return removeAttribute(getIndexFromName(strAttributeName));
 }
 
-bool CWizHtmlAttributes::removeAll(void)
+bool WizHtmlAttributes::removeAll(void)
 {
-    CWizHtmlElemAttr	*pItem = NULL;
+    WizHtmlElemAttr	*pItem = NULL;
     for (int iElem = 0; iElem < getCount(); iElem++)
     {
 
@@ -860,10 +860,10 @@ bool CWizHtmlAttributes::removeAll(void)
     return (true);
 }
 
-UINT CWizHtmlAttributes::parseFromStr(const unsigned short* lpszString)
+UINT WizHtmlAttributes::parseFromStr(const unsigned short* lpszString)
 {
     CElemAttrArray		*pcoll = NULL;
-    CWizHtmlElemAttr	oElemAttr;
+    WizHtmlElemAttr	oElemAttr;
     const UINT			nStrLen = ::wiz_strlen(lpszString);
     UINT				nRetVal = 0U,
     nTemp = 0U;
@@ -892,7 +892,7 @@ UINT CWizHtmlAttributes::parseFromStr(const unsigned short* lpszString)
         }
 
         // add attribute/value pair to collection
-        pcoll->push_back(new CWizHtmlElemAttr(oElemAttr));
+        pcoll->push_back(new WizHtmlElemAttr(oElemAttr));
 
         // advance seek pointer
         nRetVal += nTemp;
@@ -1136,7 +1136,7 @@ const unsigned short* GetScriptSource(const unsigned short* lpszUnparsed, CStrin
                     if (*p == _T('-') && *(p + 1) == _T('>'))
                     {
                         CString strLine = CString(lpszCommentsBegin, p - lpszCommentsBegin);
-                        if (-1 == strLine.Find(_T("<!--")))
+                        if (-1 == strLine.find(_T("<!--")))
                         {
                             p++;
                             break;
@@ -1173,7 +1173,7 @@ const unsigned short* GetScriptSource(const unsigned short* lpszUnparsed, CStrin
 }
 
 
-CWizHtmlTag::CWizHtmlTag(CWizHtmlTag &rSource, bool bCopy)
+WizHtmlTag::WizHtmlTag(WizHtmlTag &rSource, bool bCopy)
     : m_pcollAttr(NULL)
     , m_strTagName(rSource.m_strTagName)
     , m_strTag(rSource.m_strTag)
@@ -1188,18 +1188,18 @@ CWizHtmlTag::CWizHtmlTag(CWizHtmlTag &rSource, bool bCopy)
     }
     else if (rSource.m_pcollAttr != NULL)
     {
-        m_pcollAttr = new CWizHtmlAttributes(*(rSource.m_pcollAttr), true);
+        m_pcollAttr = new WizHtmlAttributes(*(rSource.m_pcollAttr), true);
     }
 }
 
-UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
+UINT WizHtmlTag::parseFromStr(const unsigned short* lpszString,
                                       bool &bIsOpeningTag,
                                       bool &bIsClosingTag,
                                       bool bParseAttrib /* = true */)
 {
     bool				bClosingTag = false;
     bool				bOpeningTag = false;
-    CWizHtmlAttributes	*pcollAttr = NULL;
+    WizHtmlAttributes	*pcollAttr = NULL;
     CString				strTagName;
     UINT				nRetVal = 0U,
     nTemp = 0U;
@@ -1222,7 +1222,7 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
     // optimization for empty opening tags
     if (*lpszBegin == _T('>'))
     {
-        ATLASSERT(strTagName.IsEmpty());
+        ATLASSERT(strTagName.isEmpty());
         ATLASSERT(pcollAttr == NULL);
         ATLASSERT(!bClosingTag);
         nRetVal = lpszBegin - lpszString;
@@ -1321,7 +1321,7 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
         // skip tag's ending delimeter
         lpszEnd = ::wiz_strinc(lpszEnd);
 
-        ATLASSERT(strTagName.GetLength());
+        ATLASSERT(strTagName.getLength());
         ATLASSERT(pcollAttr == NULL);
         nRetVal = lpszEnd - lpszString;
         goto LUpdateAndExit;
@@ -1342,7 +1342,7 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
         {
             ATLASSERT(pcollAttr == NULL);
             // instantiate collection ...
-            pcollAttr = new CWizHtmlAttributes;
+            pcollAttr = new WizHtmlAttributes;
 
             // ... and delegate parsing process
             nTemp = pcollAttr->parseFromStr(lpszBegin);
@@ -1401,17 +1401,17 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
 
     LUpdateAndExit:
 
-    strTagName.Trim();
+    strTagName.trim();
     if (nRetVal
         && bOpeningTag)
     {
-        if (0 == strTagName.CompareNoCase("script"))
+        if (0 == strTagName.compareNoCase("script"))
         {
             lpszEnd = ::GetScriptSource(lpszEnd, NULL, false);
             //
             nRetVal = lpszEnd - lpszString;
         }
-        else if (0 == strTagName.CompareNoCase("style"))
+        else if (0 == strTagName.compareNoCase("style"))
         {
             lpszEnd = ::GetStyleSource(lpszEnd, NULL);
             //
@@ -1422,8 +1422,8 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
     m_bIsClosingTag = bIsClosingTag = bClosingTag;
     m_bIsOpeningTag = bIsOpeningTag = bOpeningTag;
     m_strTagName = strTagName;
-    m_strTagName.TrimLeft();
-    m_strTagName.TrimRight();	// just-in-case!
+    m_strTagName.trimLeft();
+    m_strTagName.trimRight();	// just-in-case!
     m_strTag = CString(lpszString, nRetVal);
     WIZ_SAFE_DELETE_POINTER(m_pcollAttr);
     m_pcollAttr = pcollAttr;
@@ -1433,7 +1433,7 @@ UINT CWizHtmlTag::parseFromStr(const unsigned short* lpszString,
     return (nRetVal);
 }
 
-CString CWizHtmlTag::getTag(void)
+CString WizHtmlTag::getTag(void)
 {
     if (isClosing()
         && !isOpening())
@@ -1462,11 +1462,11 @@ CString CWizHtmlTag::getTag(void)
     return m_strTag;
 }
 
-void CWizHtmlTag::setValueToName(const CString& strAttributeName, const CString& strValue)
+void WizHtmlTag::setValueToName(const CString& strAttributeName, const CString& strValue)
 {
     if (!m_pcollAttr)
     {
-        m_pcollAttr = new CWizHtmlAttributes();
+        m_pcollAttr = new WizHtmlAttributes();
     }
     //
     m_bModified = true;
@@ -1474,7 +1474,7 @@ void CWizHtmlTag::setValueToName(const CString& strAttributeName, const CString&
     m_pcollAttr->setValueToName(strAttributeName, strValue);
 }
 
-void CWizHtmlTag::removeAttribute(const CString& strAttributeName)
+void WizHtmlTag::removeAttribute(const CString& strAttributeName)
 {
     if (!m_pcollAttr)
         return;
@@ -1487,7 +1487,7 @@ void CWizHtmlTag::removeAttribute(const CString& strAttributeName)
 
 /////////////////////////////////////////////////////////////////
 
-CWizHtmlReader::CWizHtmlReader()
+WizHtmlReader::WizHtmlReader()
 {
     m_bResolveEntities = false;	    // entities are resolved, by default
     m_dwAppData = 0L;	// reasonable default!
@@ -1506,14 +1506,14 @@ CWizHtmlReader::CWizHtmlReader()
 }
 
 
-CWizHtmlReader::EventMaskEnum CWizHtmlReader::setEventMask(DWORD dwNewEventMask)
+WizHtmlReader::EventMaskEnum WizHtmlReader::setEventMask(DWORD dwNewEventMask)
 {
     EventMaskEnum	oldMask = m_eventMask;
     m_eventMask = (EventMaskEnum)dwNewEventMask;
     return (oldMask);
 }
 
-CWizHtmlReader::EventMaskEnum CWizHtmlReader::setEventMask(DWORD addFlags, DWORD removeFlags)
+WizHtmlReader::EventMaskEnum WizHtmlReader::setEventMask(DWORD addFlags, DWORD removeFlags)
 {
     DWORD	dwOldMask = (DWORD)m_eventMask;
     DWORD	dwNewMask = (dwOldMask | addFlags) & ~removeFlags;
@@ -1522,20 +1522,20 @@ CWizHtmlReader::EventMaskEnum CWizHtmlReader::setEventMask(DWORD addFlags, DWORD
 }
 
 
-DWORD CWizHtmlReader::setAppData(DWORD dwNewAppData)
+DWORD WizHtmlReader::setAppData(DWORD dwNewAppData)
 {
     DWORD	dwOldAppData = m_dwAppData;
     m_dwAppData = dwNewAppData;
     return (dwOldAppData);
 }
-IWizHtmlReaderEvents* CWizHtmlReader::setEventHandler(IWizHtmlReaderEvents* pNewHandler)
+WizHtmlReaderEvents* WizHtmlReader::setEventHandler(WizHtmlReaderEvents* pNewHandler)
 {
-    IWizHtmlReaderEvents *pOldHandler = m_pEventHandler;
+    WizHtmlReaderEvents *pOldHandler = m_pEventHandler;
     m_pEventHandler = pNewHandler;
     return (pOldHandler);
 }
 
-void CWizHtmlReader::NormalizeCharacters(CString &rCharacters)
+void WizHtmlReader::normalizeCharacters(CString &rCharacters)
 {
     //rCharacters.Replace(_T("\r\n"), _T(""));
     //rCharacters.Remove(_T('\n'));
@@ -1545,7 +1545,7 @@ void CWizHtmlReader::NormalizeCharacters(CString &rCharacters)
 }
 
 
-const unsigned short CWizHtmlReader::ReadChar(void)
+const unsigned short WizHtmlReader::readChar(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos >= m_dwBufLen)
@@ -1553,14 +1553,14 @@ const unsigned short CWizHtmlReader::ReadChar(void)
     return (m_lpszBuffer[m_dwBufPos++]);
 }
 
-const unsigned short CWizHtmlReader::UngetChar(void)
+const unsigned short WizHtmlReader::ungetChar(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     ATLASSERT(m_dwBufPos);
     return (m_lpszBuffer[--m_dwBufPos]);
 }
 
-bool CWizHtmlReader::getEventNotify(DWORD dwEvent) const
+bool WizHtmlReader::getEventNotify(DWORD dwEvent) const
 {
     ATLASSERT(dwEvent == notifyStartStop  ||
               dwEvent == notifyTagStart   ||
@@ -1572,7 +1572,7 @@ bool CWizHtmlReader::getEventNotify(DWORD dwEvent) const
     return ((m_eventMask & dwEvent) == dwEvent);
 }
 
-bool CWizHtmlReader::getBoolOption(ReaderOptionsEnum option, bool& bCurVal) const
+bool WizHtmlReader::getBoolOption(ReaderOptionsEnum option, bool& bCurVal) const
 {
     bool bSuccess = false;
 
@@ -1593,7 +1593,7 @@ bool CWizHtmlReader::getBoolOption(ReaderOptionsEnum option, bool& bCurVal) cons
     return (bSuccess);
 }
 
-bool CWizHtmlReader::setBoolOption(ReaderOptionsEnum option, bool bNewVal)
+bool WizHtmlReader::setBoolOption(ReaderOptionsEnum option, bool bNewVal)
 {
     bool bSuccess = false;
 
@@ -1614,7 +1614,7 @@ bool CWizHtmlReader::setBoolOption(ReaderOptionsEnum option, bool bNewVal)
     return (bSuccess);
 }
 
-bool CWizHtmlReader::parseComment(QString &rComment)
+bool WizHtmlReader::parseComment(QString &rComment)
 {
     ATLASSERT(m_lpszBuffer != NULL);
     if (m_dwBufPos + 4 >= m_dwBufLen)
@@ -1659,7 +1659,7 @@ bool CWizHtmlReader::parseComment(QString &rComment)
     return (true);
 }
 
-bool CWizHtmlReader::parseTag(CWizHtmlTag &rTag,
+bool WizHtmlReader::parseTag(WizHtmlTag &rTag,
                               bool &bIsOpeningTag,
                               bool &bIsClosingTag)
 {
@@ -1682,7 +1682,7 @@ bool CWizHtmlReader::parseTag(CWizHtmlTag &rTag,
 
 
 
-UINT CWizHtmlReader::parseDocument(void)
+UINT WizHtmlReader::parseDocument(void)
 {
     ATLASSERT(m_lpszBuffer != NULL);
 
@@ -1695,28 +1695,28 @@ UINT CWizHtmlReader::parseDocument(void)
 	DWORD	dwCharDataLen = 0L;		// length of character data
     long lTemp = 0L;				// temporary storage
     unsigned short ch = 0;					// character at current buffer position
-    CWizHtmlTag oTag;			// tag information
+    WizHtmlTag oTag;			// tag information
 
 	if ( (!m_lpszBuffer) || (!m_dwBufLen) )
 		return (0U);
 
 	// reset seek pointer to beginning
-	ResetSeekPointer();
+	resetSeekPointer();
 
 	// notify event handler about parsing startup
 	if (getEventNotify(notifyStartStop))
 	{
 		bAbort = false;
-		m_pEventHandler->BeginParse(m_dwAppData, bAbort);
+		m_pEventHandler->beginParse(m_dwAppData, bAbort);
 		if (bAbort)	goto LEndParse;
 	}
 
 	// skip leading white-space characters
-	while (isWhiteSpace(ReadChar()))
+	while (isWhiteSpace(readChar()))
 		;
 	
-	ch = UngetChar();
-    while ((ch = ReadChar()) != 0)
+	ch = ungetChar();
+    while ((ch = readChar()) != 0)
 	{
 		switch (ch)
 		{
@@ -1724,7 +1724,7 @@ UINT CWizHtmlReader::parseDocument(void)
             // tag starting delimeter?
 		case _T('<'):
 			{
-				UngetChar();
+				ungetChar();
                 //
 				
                 strComment.clear();
@@ -1739,7 +1739,7 @@ UINT CWizHtmlReader::parseDocument(void)
 						// manually advance buffer position
 						// because the last call to UngetChar()
 						// moved it back one character
-						ch = ReadChar();
+						ch = readChar();
 
 						break;
 					}
@@ -1755,7 +1755,7 @@ UINT CWizHtmlReader::parseDocument(void)
 						 (getEventNotify(notifyCharacters)) )
 					{
 						bAbort = false;
-						m_pEventHandler->Characters(strCharacters, m_dwAppData, bAbort);
+						m_pEventHandler->characters(strCharacters, m_dwAppData, bAbort);
 						if (bAbort)	goto LEndParse;
 					}
 
@@ -1770,7 +1770,7 @@ UINT CWizHtmlReader::parseDocument(void)
 					if (getEventNotify(notifyComment))
 					{
 						bAbort = false;
-                        m_pEventHandler->Comment("<!--" + strComment + "-->", m_dwAppData, bAbort);
+                        m_pEventHandler->comment("<!--" + strComment + "-->", m_dwAppData, bAbort);
 						if (bAbort)	goto LEndParse;
 					}
 				}
@@ -1779,14 +1779,14 @@ UINT CWizHtmlReader::parseDocument(void)
                     if ( (bIsOpeningTag) && (getEventNotify(notifyTagStart)) )
 					{
 						bAbort = false;
-						m_pEventHandler->StartTag(&oTag, m_dwAppData, bAbort);
+						m_pEventHandler->startTag(&oTag, m_dwAppData, bAbort);
 						if (bAbort)	goto LEndParse;
 					}
 
 					if ( (bIsClosingTag) && (getEventNotify(notifyTagEnd)) )
 					{
 						bAbort = false;
-						m_pEventHandler->EndTag(&oTag, m_dwAppData, bAbort);
+						m_pEventHandler->endTag(&oTag, m_dwAppData, bAbort);
 						if (bAbort)	goto LEndParse;
 					}
 				}
@@ -1797,7 +1797,7 @@ UINT CWizHtmlReader::parseDocument(void)
             // entity reference beginning delimeter?
 		case _T('&'):
 			{
-				UngetChar();
+				ungetChar();
 
 				lTemp = 0;
 				if (m_bResolveEntities)
@@ -1813,7 +1813,7 @@ UINT CWizHtmlReader::parseDocument(void)
 				}
 				else
 				{
-					ch = ReadChar();
+					ch = readChar();
 					++dwCharDataLen;
 				}
 				
@@ -1840,7 +1840,7 @@ UINT CWizHtmlReader::parseDocument(void)
 			 (getEventNotify(notifyCharacters)) )
 		{
 			bAbort = false;
-			m_pEventHandler->Characters(strCharacters, m_dwAppData, bAbort);
+			m_pEventHandler->characters(strCharacters, m_dwAppData, bAbort);
 			if (bAbort)	goto LEndParse;
 		}
 	}
@@ -1848,14 +1848,14 @@ UINT CWizHtmlReader::parseDocument(void)
     LEndParse:
 	// notify event handler about parsing completion
 	if (getEventNotify(notifyStartStop))
-		m_pEventHandler->EndParse(m_dwAppData, bAbort);
+		m_pEventHandler->endParse(m_dwAppData, bAbort);
 
 	m_lpszBuffer = NULL;
 	m_dwBufLen = 0L;
 	return (m_dwBufPos);
 }
 
-UINT CWizHtmlReader::Read(const QString& strHtml)
+UINT WizHtmlReader::read(const QString& strHtml)
 {
     const unsigned short* lpszString = strHtml.utf16();
 
@@ -1887,7 +1887,7 @@ void WizHtmlRemoveStyle(QString& strHtml, const QString& styleId)
         //
         QString strTag = strHtml.mid(tagStart, tagEnd - tagStart + 1);
         //
-        CWizHtmlTag tag;
+        WizHtmlTag tag;
         bool bIsOpeningTag = false;
         bool bIsClosingTag = false;
         tag.parseFromStr(strTag.utf16(), bIsOpeningTag, bIsClosingTag, true);

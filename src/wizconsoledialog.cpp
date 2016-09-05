@@ -20,10 +20,10 @@
 #include "mac/wizmachelper.h"
 #endif
 
-CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
+WizConsoleDialog::WizConsoleDialog(WizExplorerApp& app, QWidget* parent)
     : QDialog(parent)
     , m_app(app)
-    , m_ui(new Ui::CWizConsoleDialog)
+    , m_ui(new Ui::WizConsoleDialog)
     , m_bAutoScroll(true)
     , m_nPos(0)
 {
@@ -33,7 +33,7 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     m_ui->editConsole->setReadOnly(true);
     m_ui->btnCopyToClipboard->setEnabled(false);
 
-    connect(Utils::Logger::logger(), SIGNAL(readyRead()), SLOT(onLogBufferReadyRead()));
+    connect(Utils::WizLogger::logger(), SIGNAL(readyRead()), SLOT(onLogBufferReadyRead()));
     connect(m_ui->btnSaveAs, SIGNAL(clicked()), SLOT(onBtnSaveAsClicked()));
     connect(m_ui->editConsole, SIGNAL(copyAvailable(bool)), SLOT(onConsoleCopyAvailable(bool)));
     connect(m_ui->btnCopyToClipboard, SIGNAL(clicked()), SLOT(onBtnCopyToClipboardClicked()));
@@ -46,11 +46,11 @@ CWizConsoleDialog::CWizConsoleDialog(CWizExplorerApp& app, QWidget* parent)
     load();
 }
 
-CWizConsoleDialog::~CWizConsoleDialog()
+WizConsoleDialog::~WizConsoleDialog()
 {
 }
 
-void CWizConsoleDialog::showEvent(QShowEvent *event)
+void WizConsoleDialog::showEvent(QShowEvent *event)
 {
     QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
     vScroll->setValue(vScroll->maximum());
@@ -60,26 +60,26 @@ void CWizConsoleDialog::showEvent(QShowEvent *event)
     QDialog::showEvent(event);
 }
 
-void CWizConsoleDialog::insertLog(const QString& text)
+void WizConsoleDialog::insertLog(const QString& text)
 {
     QTextCursor cursor = m_ui->editConsole->textCursor();
     cursor.movePosition(QTextCursor::End);
     cursor.insertText(text);
 }
 
-void CWizConsoleDialog::load()
+void WizConsoleDialog::load()
 {
     QString text;
-    Utils::Logger::getAllLogs(text);
+    Utils::WizLogger::getAllLogs(text);
     insertLog(text);
 }
 
-void CWizConsoleDialog::onLogBufferReadyRead()
+void WizConsoleDialog::onLogBufferReadyRead()
 {
     load();
 }
 
-void CWizConsoleDialog::onConsoleSliderMoved(int value)
+void WizConsoleDialog::onConsoleSliderMoved(int value)
 {
     QScrollBar* scroll = qobject_cast<QScrollBar *>(sender());
     if (value == scroll->maximum()) {
@@ -89,7 +89,7 @@ void CWizConsoleDialog::onConsoleSliderMoved(int value)
     }
 }
 
-void CWizConsoleDialog::onConsoleTextChanged()
+void WizConsoleDialog::onConsoleTextChanged()
 {
     if (m_bAutoScroll) {
         QScrollBar* vScroll = m_ui->editConsole->verticalScrollBar();
@@ -99,16 +99,16 @@ void CWizConsoleDialog::onConsoleTextChanged()
     resetCount();
 }
 
-void CWizConsoleDialog::onBtnClearClicked()
+void WizConsoleDialog::onBtnClearClicked()
 {
     m_ui->editConsole->clear();
 }
 
-void CWizConsoleDialog::resetCount()
+void WizConsoleDialog::resetCount()
 {
 }
 
-void CWizConsoleDialog::onBtnSaveAsClicked()
+void WizConsoleDialog::onBtnSaveAsClicked()
 {
     QString strToday = QDate::currentDate().toString(Qt::ISODate);
     QString strFileName = QString("WizNote_%1_%2.txt").arg(GetTickCount()).arg(strToday);
@@ -130,12 +130,12 @@ void CWizConsoleDialog::onBtnSaveAsClicked()
     file.close();
 }
 
-void CWizConsoleDialog::onConsoleCopyAvailable(bool yes)
+void WizConsoleDialog::onConsoleCopyAvailable(bool yes)
 {
     m_ui->btnCopyToClipboard->setEnabled(yes);
 }
 
-void CWizConsoleDialog::onBtnCopyToClipboardClicked()
+void WizConsoleDialog::onBtnCopyToClipboardClicked()
 {
     m_ui->editConsole->copy();
 
@@ -149,7 +149,7 @@ void CWizConsoleDialog::onBtnCopyToClipboardClicked()
 #elif defined(Q_OS_LINUX)
     // FIXME: add distribution, release number, etc..
 #endif
-    strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().GetUserId());
+    strOutput += QString("Username: %1\n").arg(m_app.databaseManager().db().getUserId());
     strOutput += QString("Time: %1 %2\n").arg(QDate::currentDate().toString(Qt::ISODate)).arg(QTime::currentTime().toString(Qt::ISODate));
     strOutput += "\n";
     strOutput += strText;

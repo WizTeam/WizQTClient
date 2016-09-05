@@ -37,7 +37,7 @@
     class CWizIAPHelperPrivate
     {
     public:
-        CWizIAPHelperPrivate(CWizIAPHelper* container);
+        CWizIAPHelperPrivate(WizIAPHelper* container);
         ~CWizIAPHelperPrivate();
 
         void requestProducts(const QList<QString>& productIdList);
@@ -49,7 +49,7 @@
 
     private:
         IAPHelper* m_helper;
-        CWizIAPHelper* m_container;
+        WizIAPHelper* m_container;
     };
 
 
@@ -277,7 +277,7 @@
 
 @end
 
-CWizIAPHelperPrivate::CWizIAPHelperPrivate(CWizIAPHelper* container)
+CWizIAPHelperPrivate::CWizIAPHelperPrivate(WizIAPHelper* container)
 {    
     m_helper = [[IAPHelper alloc] init];
     m_helper.container = this;
@@ -327,50 +327,50 @@ void CWizIAPHelperPrivate::validteReceiptOnLauch()
     [m_helper validteReceiptOnLauch];
 }
 
-CWizIAPHelper::CWizIAPHelper()
+WizIAPHelper::WizIAPHelper()
     : m_helper(new CWizIAPHelperPrivate(this))
     , m_caller(0)
 {
 
 }
 
-CWizIAPHelper::CWizIAPHelper(CWizIAPCaller* caller)
+WizIAPHelper::WizIAPHelper(WizIAPCaller* caller)
     : m_helper(new CWizIAPHelperPrivate(this))
     , m_caller(caller)
 {
 }
 
-CWizIAPHelper::~CWizIAPHelper()
+WizIAPHelper::~WizIAPHelper()
 {
     delete m_helper;
 }
 
-void CWizIAPHelper::purchaseProduct(const QString& strID)
+void WizIAPHelper::purchaseProduct(const QString& strID)
 {
     m_helper->purchaseProduct(strID);
 }
 
-void CWizIAPHelper::requestProducts(const QList<QString>& productIdList)
+void WizIAPHelper::requestProducts(const QList<QString>& productIdList)
 {
     m_helper->requestProducts(productIdList);
 }
 
-void CWizIAPHelper::loadLocalReceipt(QByteArray& receipt)
+void WizIAPHelper::loadLocalReceipt(QByteArray& receipt)
 {
     m_helper->loadLocalReceipt(receipt);
 }
 
-void CWizIAPHelper::onProductsLoaded(const QList<CWizIAPProduct>& productList)
+void WizIAPHelper::onProductsLoaded(const QList<CWizIAPProduct>& productList)
 {
     m_caller->onProductsLoaded(productList);
 }
 
-void CWizIAPHelper::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
+void WizIAPHelper::onPurchaseFinished(bool ok, const QByteArray& receipt, const QString& strTransationID)
 {
     m_caller->onPurchaseFinished(ok, receipt, strTransationID);
 }
 
-void CWizIAPHelper::validteReceiptOnLauch()
+void WizIAPHelper::validteReceiptOnLauch()
 {
     m_helper->validteReceiptOnLauch();
 }

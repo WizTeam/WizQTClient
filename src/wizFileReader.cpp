@@ -14,25 +14,25 @@
 #include "core/wizNoteManager.h"
 #include "mac/wizmachelper.h"
 
-CWizFileImporter::CWizFileImporter(CWizDatabaseManager& dbMgr, QObject *parent)
+WizFileImporter::WizFileImporter(WizDatabaseManager& dbMgr, QObject *parent)
     : QObject(parent)
     , m_dbMgr(dbMgr)
 {
 }
 
-void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strTargetFolderLocation)
+void WizFileImporter::importFiles(const QStringList& strFiles, const QString& strTargetFolderLocation)
 {
     WIZTAGDATA tag;
     importFiles(strFiles, "", strTargetFolderLocation, tag);
 }
 
-void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID, const WIZTAGDATA& tag)
+void WizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID, const WIZTAGDATA& tag)
 {
-    QString location = m_dbMgr.db(strKbGUID).GetDefaultNoteLocation();
+    QString location = m_dbMgr.db(strKbGUID).getDefaultNoteLocation();
     importFiles(strFiles, strKbGUID, location, tag);
 }
 
-void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID,
+void WizFileImporter::importFiles(const QStringList& strFiles, const QString& strKbGUID,
                                    const QString& strTargetFolderLocation, const WIZTAGDATA& tag)
 {
     int nTotal = strFiles.count();
@@ -54,7 +54,7 @@ void CWizFileImporter::importFiles(const QStringList& strFiles, const QString& s
     emit importFinished(nFailed == 0, text, m_strKbGuid);
 }
 
-QString CWizFileImporter::loadHtmlFileToHtml(const QString& strFileName)
+QString WizFileImporter::loadHtmlFileToHtml(const QString& strFileName)
 {
     QFile file(strFileName);
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
@@ -66,7 +66,7 @@ QString CWizFileImporter::loadHtmlFileToHtml(const QString& strFileName)
     return ret;
 }
 
-QString CWizFileImporter::loadTextFileToHtml(const QString& strFileName)
+QString WizFileImporter::loadTextFileToHtml(const QString& strFileName)
 {
     QFile file(strFileName);
     if(!file.open(QIODevice::ReadOnly|QIODevice::Text))
@@ -81,13 +81,13 @@ QString CWizFileImporter::loadTextFileToHtml(const QString& strFileName)
     return ret;
 }
 
-QString CWizFileImporter::loadImageFileToHtml(const QString& strFileName)
+QString WizFileImporter::loadImageFileToHtml(const QString& strFileName)
 {
     return QString("<img border=\"0\" src=\"file://%1\" />").arg(strFileName);
 }
 
 
-bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGUID,
+bool WizFileImporter::importFile(const QString& strFile, const QString& strKbGUID,
                                   const QString& strLocation, const WIZTAGDATA& tag)
 {
     m_strKbGuid = strKbGUID;
@@ -154,9 +154,9 @@ bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGU
         addAttach = true;
     }
 #endif
-    QString strTitle = Utils::Misc::extractFileName(strFile);
+    QString strTitle = Utils::WizMisc::extractFileName(strFile);
 
-    CWizNoteManager manager(m_dbMgr);
+    WizNoteManager manager(m_dbMgr);
     WIZDOCUMENTDATA doc;
     bool ret = manager.createNote(doc, strKbGUID, strTitle, strHtml, strLocation, tag);
     if (!ret)
@@ -165,11 +165,11 @@ bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGU
         return false;
     }
 
-    CWizDatabase& db = m_dbMgr.db(strKbGUID);
+    WizDatabase& db = m_dbMgr.db(strKbGUID);
     if (addAttach)
     {
         WIZDOCUMENTATTACHMENTDATA attach;
-        if (!db.AddAttachment(doc, strFile, attach))
+        if (!db.addAttachment(doc, strFile, attach))
         {
             qWarning() << "add attachment failed , " << strFile;
         }
@@ -177,7 +177,7 @@ bool CWizFileImporter::importFile(const QString& strFile, const QString& strKbGU
     else if (containsImage)
     {
         //为了提取和file路径相关联的图片，在创建之后更新笔记内容
-        db.UpdateDocumentData(doc, strHtml, strFile, 0);
+        db.updateDocumentData(doc, strHtml, strFile, 0);
     }
 
     return true;

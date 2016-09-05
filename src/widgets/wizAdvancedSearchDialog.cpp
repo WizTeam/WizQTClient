@@ -42,9 +42,9 @@
 
 
 
-CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *parent) :
+WizAdvancedSearchDialog::WizAdvancedSearchDialog(bool searchOnly, QWidget *parent) :
     QDialog(parent),
-    ui(new Ui::CWizAdvancedSearchDialog)
+    ui(new Ui::WizAdvancedSearchDialog)
   , m_radioGroup(new QButtonGroup(this))
 {
     ui->setupUi(this);
@@ -53,7 +53,7 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
     ui->lineEdit_name->setAttribute(Qt::WA_MacShowFocusRect, false);
     ui->listWidget->setAttribute(Qt::WA_MacShowFocusRect, false);
 
-    CWizListItemStyle<CWizSearchParamItem>* listStyle = new CWizListItemStyle<CWizSearchParamItem>();
+    WizListItemStyle<WizSearchParamItem>* listStyle = new WizListItemStyle<WizSearchParamItem>();
     ui->listWidget->setStyle(listStyle);
 
     ui->lineEdit_name->setVisible(!searchOnly);
@@ -79,19 +79,19 @@ CWizAdvancedSearchDialog::CWizAdvancedSearchDialog(bool searchOnly, QWidget *par
     connect(m_radioGroup, SIGNAL(buttonClicked(QAbstractButton*)),
             SLOT(onRadioButtonClicked(QAbstractButton*)));
 
-    ui->listWidget->setStyleSheet(Utils::StyleHelper::wizCommonListViewStyleSheet());    
+    ui->listWidget->setStyleSheet(Utils::WizStyleHelper::wizCommonListViewStyleSheet());    
 
     //
 //    ui->label_5->setVisible(false);
 //    ui->groupBox->setVisible(false);
 }
 
-CWizAdvancedSearchDialog::~CWizAdvancedSearchDialog()
+WizAdvancedSearchDialog::~WizAdvancedSearchDialog()
 {
     delete ui;
 }
 
-QString CWizAdvancedSearchDialog::getParams()
+QString WizAdvancedSearchDialog::getParams()
 {
     int scope = m_radioGroup->checkedId();
     QString strParam = PARAM_NAME + ui->lineEdit_name->text() + "/" + PARAM_KEYWORD + ui->lineEdit_keyword->text()
@@ -104,7 +104,7 @@ QString CWizAdvancedSearchDialog::getParams()
     return strParam;
 }
 
-void CWizAdvancedSearchDialog::setParams(const QString& strParam)
+void WizAdvancedSearchDialog::setParams(const QString& strParam)
 {
     QStringList paramList = strParam.split('/');
     foreach (QString strParam, paramList) {
@@ -127,13 +127,13 @@ void CWizAdvancedSearchDialog::setParams(const QString& strParam)
         else if (strParam.startsWith(PARAM_PARAM))
         {
             QString param = strParam.remove(PARAM_PARAM);
-            CWizSearchParamItem* item = new CWizSearchParamItem(param, ui->listWidget);
+            WizSearchParamItem* item = new WizSearchParamItem(param, ui->listWidget);
             ui->listWidget->addItem(item);
         }
     }
 }
 
-bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWhere,
+bool WizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWhere,
                                           QString& keyword, QString& name, int& scope)
 {
     QStringList paramList = param.split('/');
@@ -200,7 +200,7 @@ bool CWizAdvancedSearchDialog::paramToSQL(const QString& param, QString& sqlWher
     return true;
 }
 
-void CWizAdvancedSearchDialog::onRadioButtonClicked(QAbstractButton* button)
+void WizAdvancedSearchDialog::onRadioButtonClicked(QAbstractButton* button)
 {
     ui->comboBox_first->setCurrentIndex(0);
     ui->comboBox_second->clear();
@@ -225,7 +225,7 @@ void CWizAdvancedSearchDialog::onRadioButtonClicked(QAbstractButton* button)
     }
 }
 
-void CWizAdvancedSearchDialog::getDateList(QStringList& dateList)
+void WizAdvancedSearchDialog::getDateList(QStringList& dateList)
 {
     dateList.clear();
     dateList.append(PARAM_DATE_TODAY);
@@ -236,11 +236,11 @@ void CWizAdvancedSearchDialog::getDateList(QStringList& dateList)
     dateList.append(PARAM_DATE_LASTYEAR);
 }
 
-void CWizAdvancedSearchDialog::getFirstLevelFolders(QStringList& folders)
+void WizAdvancedSearchDialog::getFirstLevelFolders(QStringList& folders)
 {
     if (m_strFolders.isEmpty())
     {
-        m_strFolders = CWizDatabaseManager::instance()->db().GetFolders();
+        m_strFolders = WizDatabaseManager::instance()->db().getFolders();
     }
 
     QStringList folderList = m_strFolders.split('*', QString::SkipEmptyParts);
@@ -253,11 +253,11 @@ void CWizAdvancedSearchDialog::getFirstLevelFolders(QStringList& folders)
     }    
 }
 
-void CWizAdvancedSearchDialog::getSecondLevelFolders(const QString& firstLevelFolder, QStringList& folders)
+void WizAdvancedSearchDialog::getSecondLevelFolders(const QString& firstLevelFolder, QStringList& folders)
 {
     if (m_strFolders.isEmpty())
     {
-        m_strFolders = CWizDatabaseManager::instance()->db().GetFolders();
+        m_strFolders = WizDatabaseManager::instance()->db().getFolders();
     }
 
     QStringList folderList = m_strFolders.split('*', QString::SkipEmptyParts);
@@ -271,12 +271,12 @@ void CWizAdvancedSearchDialog::getSecondLevelFolders(const QString& firstLevelFo
     }
 }
 
-void CWizAdvancedSearchDialog::getAllTags(QStringList& tags)
+void WizAdvancedSearchDialog::getAllTags(QStringList& tags)
 {
     if (m_strTags.isEmpty())
     {
         CWizTagDataArray arrayTag;
-        CWizDatabaseManager::instance()->db().GetAllTags(arrayTag);
+        WizDatabaseManager::instance()->db().getAllTags(arrayTag);
         CWizTagDataArray::const_iterator it;
         for (it = arrayTag.begin(); it != arrayTag.end(); it++) {
             m_strTags.append(it->strName + ",");
@@ -287,9 +287,9 @@ void CWizAdvancedSearchDialog::getAllTags(QStringList& tags)
         tags = m_strTags.split(",", QString::SkipEmptyParts);
 }
 
-COleDateTime CWizAdvancedSearchDialog::getDateTimeByInterval(const QString& str)
+WizOleDateTime WizAdvancedSearchDialog::getDateTimeByInterval(const QString& str)
 {
-    COleDateTime dt;
+    WizOleDateTime dt;
     if (str == PARAM_DATE_TODAY)
     {
         dt = dt.addDays(-1);
@@ -317,7 +317,7 @@ COleDateTime CWizAdvancedSearchDialog::getDateTimeByInterval(const QString& str)
     return dt;
 }
 
-void CWizAdvancedSearchDialog::on_comboBox_first_activated(const QString &arg1)
+void WizAdvancedSearchDialog::on_comboBox_first_activated(const QString &arg1)
 {
     ui->comboBox_second->setVisible(true);
     ui->comboBox_third->setVisible(false);
@@ -383,7 +383,7 @@ void CWizAdvancedSearchDialog::on_comboBox_first_activated(const QString &arg1)
     }
 }
 
-void CWizAdvancedSearchDialog::initFirstCombox(bool bSearchGroup)
+void WizAdvancedSearchDialog::initFirstCombox(bool bSearchGroup)
 {
     ui->comboBox_first->clear();
 
@@ -400,7 +400,7 @@ void CWizAdvancedSearchDialog::initFirstCombox(bool bSearchGroup)
     ui->comboBox_first->setCurrentIndex(0);
 }
 
-void CWizAdvancedSearchDialog::on_comboBox_second_activated(const QString &arg1)
+void WizAdvancedSearchDialog::on_comboBox_second_activated(const QString &arg1)
 {
     ui->comboBox_third->setVisible(false);
     QString firstParam = ui->comboBox_first->currentText();
@@ -426,12 +426,12 @@ void CWizAdvancedSearchDialog::on_comboBox_second_activated(const QString &arg1)
     }
 }
 
-void CWizAdvancedSearchDialog::on_pushButton_cancel_clicked()
+void WizAdvancedSearchDialog::on_pushButton_cancel_clicked()
 {
     reject();
 }
 
-void CWizAdvancedSearchDialog::on_pushButton_ok_clicked()
+void WizAdvancedSearchDialog::on_pushButton_ok_clicked()
 {
     if (ui->listWidget->count() == 0 && ui->lineEdit_keyword->text().isEmpty())
     {
@@ -441,7 +441,7 @@ void CWizAdvancedSearchDialog::on_pushButton_ok_clicked()
     accept();
 }
 
-void CWizAdvancedSearchDialog::on_toolButton_add_clicked()
+void WizAdvancedSearchDialog::on_toolButton_add_clicked()
 {
     if (ui->comboBox_first->currentText() != PARAM_SELECT_PARAM)
     {
@@ -452,21 +452,21 @@ void CWizAdvancedSearchDialog::on_toolButton_add_clicked()
             strThird.clear();
         }
         QString strItem = strFirst + "," + strSecond + (strSecond.isEmpty() ? "" : "," + strThird);
-        CWizSearchParamItem* item = new CWizSearchParamItem(strItem, ui->listWidget);
+        WizSearchParamItem* item = new WizSearchParamItem(strItem, ui->listWidget);
         ui->listWidget->addItem(item);
     }
 }
 
 
-CWizSearchParamItem::CWizSearchParamItem(const QString& text, QListWidget* view, int type)
+WizSearchParamItem::WizSearchParamItem(const QString& text, QListWidget* view, int type)
     : QListWidgetItem(text, view, type)
 {
-    QString strThemeName = Utils::StyleHelper::themeName();
+    QString strThemeName = Utils::WizStyleHelper::themeName();
 
     m_pix = QPixmap(::WizGetSkinResourceFileName(strThemeName, "listItem_delete"));
 }
 
-void CWizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) const
+void WizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) const
 {
     p->save();
 
@@ -482,7 +482,7 @@ void CWizSearchParamItem::draw(QPainter* p, const QStyleOptionViewItem* vopt) co
      p->restore();
 }
 
-QRect CWizSearchParamItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
+QRect WizSearchParamItem::drawItemBackground(QPainter* p, const QRect& rect, bool selected, bool focused) const
 {
     QBrush brush;
     selected ? brush.setColor(Qt::blue) : brush.setColor(Qt::white);
@@ -501,7 +501,7 @@ QRect CWizSearchParamItem::drawItemBackground(QPainter* p, const QRect& rect, bo
     return rect;
 }
 
-bool CWizSearchParamItem::removeIconClicked()
+bool WizSearchParamItem::removeIconClicked()
 {
     QPoint pos = QCursor::pos();
     pos = listWidget()->mapFromGlobal(pos);
@@ -511,9 +511,9 @@ bool CWizSearchParamItem::removeIconClicked()
     return pixRect.contains(pos);
 }
 
-void CWizAdvancedSearchDialog::on_listWidget_itemClicked(QListWidgetItem *item)
+void WizAdvancedSearchDialog::on_listWidget_itemClicked(QListWidgetItem *item)
 {
-    CWizSearchParamItem* paramItem = dynamic_cast<CWizSearchParamItem*>(item);
+    WizSearchParamItem* paramItem = dynamic_cast<WizSearchParamItem*>(item);
     Q_ASSERT(paramItem);
     if (paramItem)
     {

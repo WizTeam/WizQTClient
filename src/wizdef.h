@@ -21,18 +21,18 @@
 
 class QWidget;
 class QObject;
-class CWizDatabaseManager;
-class CWizCategoryBaseView;
-class CWizUserSettings;
+class WizDatabaseManager;
+class WizCategoryBaseView;
+class WizUserSettings;
 
-class CWizExplorerApp
+class WizExplorerApp
 {
 public:
     virtual QWidget* mainWindow() = 0;
     virtual QObject* object() = 0;
-    virtual CWizDatabaseManager& databaseManager() = 0;
-    virtual CWizCategoryBaseView& category() = 0;
-    virtual CWizUserSettings& userSettings() = 0;
+    virtual WizDatabaseManager& databaseManager() = 0;
+    virtual WizCategoryBaseView& category() = 0;
+    virtual WizUserSettings& userSettings() = 0;
 };
 
 #endif // WIZDEF_H

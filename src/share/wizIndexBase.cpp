@@ -7,7 +7,7 @@
 #include "utils/pathresolve.h"
 
 
-CWizIndexBase::CWizIndexBase(void)
+WizIndexBase::WizIndexBase(void)
     : m_bUpdating(false)
 {
     qRegisterMetaType<WIZTAGDATA>("WIZTAGDATA");
@@ -19,12 +19,12 @@ CWizIndexBase::CWizIndexBase(void)
     qRegisterMetaType<WIZBIZUSER>("WIZBIZUSER");
 }
 
-CWizIndexBase::~CWizIndexBase(void)
+WizIndexBase::~WizIndexBase(void)
 {
-    Close();
+    close();
 }
 
-bool CWizIndexBase::Open(const CString& strFileName)
+bool WizIndexBase::open(const CString& strFileName)
 {
     m_strFileName = strFileName;
     //m_strDatabasePath = WizExtractFilePath(strFileName);
@@ -39,11 +39,11 @@ bool CWizIndexBase::Open(const CString& strFileName)
             }
         }
     } catch (const CppSQLite3Exception& e) {
-        return LogSQLException(e, _T("open database"));
+        return logSQLException(e, _T("open database"));
     }
 
     for (int i = 0; i < TABLE_COUNT; i++) {
-        if (!CheckTable(g_arrayTableName[i]))
+        if (!checkTable(g_arrayTableName[i]))
             return false;
     }
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
@@ -51,52 +51,52 @@ bool CWizIndexBase::Open(const CString& strFileName)
     return true;
 }
 
-bool CWizIndexBase::IsOpened()
+bool WizIndexBase::isOpened()
 {
-    return m_db.IsOpened();
+    return m_db.isOpened();
 }
 
-void CWizIndexBase::Close()
+void WizIndexBase::close()
 {
     m_db.close();
 }
 
-bool CWizIndexBase::CheckTable(const QString& strTableName)
+bool WizIndexBase::checkTable(const QString& strTableName)
 {
     if (m_db.tableExists(strTableName))
         return true;
 
     // create table if not exist
-    CString strFileName = WizPathAddBackslash2(Utils::PathResolve::resourcesPath() + "sql") + strTableName.toLower() + ".sql";
+    CString strFileName = WizPathAddBackslash2(Utils::WizPathResolve::resourcesPath() + "sql") + strTableName.toLower() + ".sql";
     CString strSQL;
     if (!WizLoadUnicodeTextFromFile(strFileName, strSQL))
         return false;
 
-    bool result = ExecSQL(strSQL);
+    bool result = execSQL(strSQL);
     return result;
 }
 
-bool CWizIndexBase::ExecSQL(const CString& strSQL)
+bool WizIndexBase::execSQL(const CString& strSQL)
 {
     try {
         m_db.execDML(strSQL);
         return true;
     } catch (const CppSQLite3Exception& e) {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-CppSQLite3Query CWizIndexBase::Query(const CString& strSQL)
+CppSQLite3Query WizIndexBase::Query(const CString& strSQL)
 {
     return m_db.execQuery(strSQL);
 }
 
-int CWizIndexBase::Exec(const CString& strSQL)
+int WizIndexBase::exec(const CString& strSQL)
 {
     return m_db.execDML(strSQL);
 }
 
-bool CWizIndexBase::HasRecord(const CString& strSQL)
+bool WizIndexBase::hasRecord(const CString& strSQL)
 {
     try
     {
@@ -105,11 +105,11 @@ bool CWizIndexBase::HasRecord(const CString& strSQL)
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::GetFirstRowFieldValue(const CString& strSQL, int nFieldIndex, CString& strValue)
+bool WizIndexBase::getFirstRowFieldValue(const CString& strSQL, int nFieldIndex, CString& strValue)
 {
     try
     {
@@ -123,48 +123,48 @@ bool CWizIndexBase::GetFirstRowFieldValue(const CString& strSQL, int nFieldIndex
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::LogSQLException(const CppSQLite3Exception& e, const CString& strSQL)
+bool WizIndexBase::logSQLException(const CppSQLite3Exception& e, const CString& strSQL)
 {
     TOLOG(e.errorMessage());
     TOLOG(strSQL);
     return false;
 }
 
-bool CWizIndexBase::Repair(const QString& strDestFileName)
+bool WizIndexBase::repair(const QString& strDestFileName)
 {
     return CppSQLite3DB::repair(m_strFileName, strDestFileName) ? true : false;
 }
 
-bool CWizIndexBase::updateTableStructure(int oldVersion)
+bool WizIndexBase::updateTableStructure(int oldVersion)
 {
     qDebug() << "table structure version : " << oldVersion << "  update to version " << WIZ_TABLE_STRUCTURE_VERSION;
     if (oldVersion < 1) {
-        Exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
+        exec("ALTER TABLE 'WIZ_TAG' ADD 'TAG_POS' int64; ");
     }
     //
     if (oldVersion < 2) {
-        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
-        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
+        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'DELETE_STATUS' int;");
+        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'LOCAL_CHANGED' int;");
     }
 
     if (oldVersion < 3) {
-        Exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
+        exec("ALTER TABLE 'WIZ_MESSAGE' ADD 'MESSAGE_NOTE' varchar(2048);");
     }
     //
     if (oldVersion < 4) {
-        Exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
-        Exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
+        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'INFO_CHANGED' int default 1;");
+        exec("ALTER TABLE 'WIZ_DOCUMENT' ADD 'DATA_CHANGED' int default 1;");
     }
     //
     setTableStructureVersion(WIZ_TABLE_STRUCTURE_VERSION);
     return true;
 }
 
-CString CWizIndexBase::FormatCanonicSQL(const CString& strTableName,
+CString WizIndexBase::formatCanonicSQL(const CString& strTableName,
                                         const CString& strFieldList,
                                         const CString& strExt)
 {
@@ -174,7 +174,7 @@ CString CWizIndexBase::FormatCanonicSQL(const CString& strTableName,
                             strExt);
 }
 
-CString CWizIndexBase::FormatQuerySQL(const CString& strTableName,
+CString WizIndexBase::formatQuerySQL(const CString& strTableName,
                                       const CString& strFieldList)
 {
     return WizFormatString2(_T("select %1 from %2"),
@@ -182,7 +182,7 @@ CString CWizIndexBase::FormatQuerySQL(const CString& strTableName,
                             strTableName);
 }
 
-CString CWizIndexBase::FormatQuerySQL(const CString& strTableName,
+CString WizIndexBase::formatQuerySQL(const CString& strTableName,
                                       const CString& strFieldList,
                                       const CString& strWhere)
 {
@@ -192,7 +192,7 @@ CString CWizIndexBase::FormatQuerySQL(const CString& strTableName,
                             strWhere);
 }
 
-CString CWizIndexBase::FormatInsertSQLFormat(const CString& strTableName,
+CString WizIndexBase::formatInsertSQLFormat(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strParamList)
 {
@@ -202,7 +202,7 @@ CString CWizIndexBase::FormatInsertSQLFormat(const CString& strTableName,
                             strParamList);
 }
 
-CString CWizIndexBase::FormatUpdateSQLFormat(const CString& strTableName,
+CString WizIndexBase::formatUpdateSQLFormat(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strKey)
 {
@@ -212,7 +212,7 @@ CString CWizIndexBase::FormatUpdateSQLFormat(const CString& strTableName,
                             strKey);
 }
 
-CString CWizIndexBase::FormatUpdateSQLByWhere(const CString& strTableName,
+CString WizIndexBase::formatUpdateSQLByWhere(const CString& strTableName,
                                               const CString& strFieldList,
                                               const CString& strWhere)
 {
@@ -222,7 +222,7 @@ CString CWizIndexBase::FormatUpdateSQLByWhere(const CString& strTableName,
                             strWhere);
 }
 
-CString CWizIndexBase::FormatDeleteSQLFormat(const CString& strTableName,
+CString WizIndexBase::formatDeleteSQLFormat(const CString& strTableName,
                                              const CString& strKey)
 {
     return WizFormatString2(_T("delete from %1 where %2=%s"),
@@ -230,17 +230,17 @@ CString CWizIndexBase::FormatDeleteSQLFormat(const CString& strTableName,
                             strKey);
 }
 
-CString CWizIndexBase::FormatDeleteSQLByWhere(const CString& strTableName, const CString& strWhere)
+CString WizIndexBase::formatDeleteSQLByWhere(const CString& strTableName, const CString& strWhere)
 {
     return WizFormatString2(_T("delete from %1 where %2"),
                             strTableName,
                             strWhere);
 }
 
-CString CWizIndexBase::FormatQuerySQLByTime(const CString& strTableName,
+CString WizIndexBase::formatQuerySQLByTime(const CString& strTableName,
                                             const CString& strFieldList,
                                             const CString& strFieldName,
-                                            const COleDateTime& t)
+                                            const WizOleDateTime& t)
 {
     return WizFormatString4(_T("select %1 from %2 where %3 >= %4"),
                             strFieldList,
@@ -248,11 +248,11 @@ CString CWizIndexBase::FormatQuerySQLByTime(const CString& strTableName,
                             strFieldName,
                             TIME2SQL(t));
 }
-CString CWizIndexBase::FormatQuerySQLByTime2(const CString& strTableName,
+CString WizIndexBase::formatQuerySQLByTime2(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strInfoFieldName,
                                              const CString& strDataFieldName,
-                                             const COleDateTime& t)
+                                             const WizOleDateTime& t)
 {
     return WizFormatString5(_T("select %1 from %2 where %3 >= %5 or %4 >= %5"),
                             strFieldList,
@@ -261,7 +261,7 @@ CString CWizIndexBase::FormatQuerySQLByTime2(const CString& strTableName,
                             strDataFieldName,
                             TIME2SQL(t));
 }
-CString CWizIndexBase::FormatQuerySQLByTime3(const CString& strTableName,
+CString WizIndexBase::formatQuerySQLByTime3(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strInfoFieldName,
                                              const CString& strDataFieldName,
@@ -277,7 +277,7 @@ CString CWizIndexBase::FormatQuerySQLByTime3(const CString& strTableName,
                             TIME2SQL(t));
 }
 
-CString CWizIndexBase::FormatModifiedQuerySQL(const CString& strTableName,
+CString WizIndexBase::formatModifiedQuerySQL(const CString& strTableName,
                                               const CString& strFieldList)
 {
     return WizFormatString2(_T("select %1 from %2 where WIZ_VERSION = -1"),
@@ -285,7 +285,7 @@ CString CWizIndexBase::FormatModifiedQuerySQL(const CString& strTableName,
                             strTableName);
 }
 
-CString CWizIndexBase::FormatModifiedQuerySQL2(const CString& strTableName,
+CString WizIndexBase::formatModifiedQuerySQL2(const CString& strTableName,
                                                const CString& strFieldList,
                                                int nCount)
 {
@@ -295,7 +295,7 @@ CString CWizIndexBase::FormatModifiedQuerySQL2(const CString& strTableName,
                             WizIntToStr(nCount));
 }
 
-bool CWizIndexBase::SQLToSize(const CString& strSQL, int& size)
+bool WizIndexBase::sqlToSize(const CString& strSQL, int& size)
 {
     try
     {
@@ -305,11 +305,11 @@ bool CWizIndexBase::SQLToSize(const CString& strSQL, int& size)
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToTagDataArray(const CString& strSQL, CWizTagDataArray& arrayTag)
+bool WizIndexBase::sqlToTagDataArray(const CString& strSQL, CWizTagDataArray& arrayTag)
 {
     try
     {
@@ -335,11 +335,11 @@ bool CWizIndexBase::SQLToTagDataArray(const CString& strSQL, CWizTagDataArray& a
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToStyleDataArray(const CString& strSQL, CWizStyleDataArray& arrayStyle)
+bool WizIndexBase::sqlToStyleDataArray(const CString& strSQL, CWizStyleDataArray& arrayStyle)
 {
     try
     {
@@ -367,11 +367,11 @@ bool CWizIndexBase::SQLToStyleDataArray(const CString& strSQL, CWizStyleDataArra
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToMetaDataArray(const CString& strSQL, CWizMetaDataArray& arrayMeta)
+bool WizIndexBase::sqlToMetaDataArray(const CString& strSQL, CWizMetaDataArray& arrayMeta)
 {
     try
     {
@@ -392,11 +392,11 @@ bool CWizIndexBase::SQLToMetaDataArray(const CString& strSQL, CWizMetaDataArray&
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToDeletedGUIDDataArray(const CString& strSQL, CWizDeletedGUIDDataArray& arrayGUID)
+bool WizIndexBase::sqlToDeletedGuidDataArray(const CString& strSQL, CWizDeletedGUIDDataArray& arrayGUID)
 {
     try
     {
@@ -406,7 +406,7 @@ bool CWizIndexBase::SQLToDeletedGUIDDataArray(const CString& strSQL, CWizDeleted
             WIZDELETEDGUIDDATA data;
             data.strKbGUID = kbGUID();
             data.strGUID = query.getStringField(deletedguidDELETED_GUID);
-            data.eType = WIZOBJECTDATA::IntToObjectType(query.getIntField(deletedguidGUID_TYPE));
+            data.eType = WIZOBJECTDATA::intToObjectType(query.getIntField(deletedguidGUID_TYPE));
             data.tDeleted = query.getTimeField(deletedguidDT_DELETED);
 
             arrayGUID.push_back(data);
@@ -416,11 +416,11 @@ bool CWizIndexBase::SQLToDeletedGUIDDataArray(const CString& strSQL, CWizDeleted
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToStringArray(const CString& strSQL, int nFieldIndex, CWizStdStringArray& arrayString)
+bool WizIndexBase::sqlToStringArray(const CString& strSQL, int nFieldIndex, CWizStdStringArray& arrayString)
 {
     try
     {
@@ -436,12 +436,12 @@ bool CWizIndexBase::SQLToStringArray(const CString& strSQL, int nFieldIndex, CWi
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
 
-bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
+bool WizIndexBase::sqlToDocumentDataArray(const CString& strSQL, CWizDocumentDataArray& arrayDocument)
 {
     try
     {
@@ -482,11 +482,11 @@ bool CWizIndexBase::SQLToDocumentDataArray(const CString& strSQL, CWizDocumentDa
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToDocumentAttachmentDataArray(const CString& strSQL,
+bool WizIndexBase::sqlToDocumentAttachmentDataArray(const CString& strSQL,
                                                      CWizDocumentAttachmentDataArray& arrayAttachment)
 {
     try
@@ -516,11 +516,11 @@ bool CWizIndexBase::SQLToDocumentAttachmentDataArray(const CString& strSQL,
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
+bool WizIndexBase::sqlToMessageDataArray(const QString& strSQL,
                                           CWizMessageDataArray& arrayMessage)
 {
     try
@@ -557,11 +557,11 @@ bool CWizIndexBase::SQLToMessageDataArray(const QString& strSQL,
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::SQLToBizUserDataArray(const QString& strSQL,
+bool WizIndexBase::sqlToBizUserDataArray(const QString& strSQL,
                                           CWizBizUserDataArray& arrayUser)
 {
     try
@@ -584,20 +584,20 @@ bool CWizIndexBase::SQLToBizUserDataArray(const QString& strSQL,
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
+bool WizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
 {
     qDebug() << "create message, id: " << data.nId;
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_MESSAGE,
                                               FIELD_LIST_WIZ_MESSAGE,
                                               PARAM_LIST_WIZ_MESSAGE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
                   WizInt64ToStr(data.nId).utf16(),
                   STR2SQL(data.bizGUID).utf16(),
                   STR2SQL(data.kbGUID).utf16(),
@@ -620,7 +620,7 @@ bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
         );
 
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -630,19 +630,19 @@ bool CWizIndexBase::createMessageEx(const WIZMESSAGEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
+bool WizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
 {
     qDebug() << "modify message, id: " << data.nId;
 
     WIZMESSAGEDATA dataOld;
     messageFromId(data.nId, dataOld);
 
-    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+    CString strFormat = formatUpdateSQLFormat(TABLE_NAME_WIZ_MESSAGE,
                                               FIELD_LIST_WIZ_MESSAGE_MODIFY,
                                               TABLE_KEY_WIZ_MESSAGE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
                   data.nReadStatus,
                   data.nDeleteStatus,
                   WizInt64ToStr(data.nVersion).utf16(),
@@ -650,7 +650,7 @@ bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
                   WizInt64ToStr(data.nId).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     WIZMESSAGEDATA dataNew;
@@ -663,19 +663,19 @@ bool CWizIndexBase::modifyMessageEx(const WIZMESSAGEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::deleteMessageEx(const WIZMESSAGEDATA& data)
+bool WizIndexBase::deleteMessageEx(const WIZMESSAGEDATA& data)
 {
     qDebug() << "delete message, id: " << data.nId;
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_MESSAGE,
+    CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_MESSAGE,
                                               TABLE_KEY_WIZ_MESSAGE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         WizInt64ToStr(data.nId).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -685,18 +685,18 @@ bool CWizIndexBase::deleteMessageEx(const WIZMESSAGEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::createUserEx(const WIZBIZUSER& data)
+bool WizIndexBase::createUserEx(const WIZBIZUSER& data)
 {
     qDebug() << "create user, alias: " << data.alias;
 
     Q_ASSERT(!data.bizGUID.isEmpty() && !data.userGUID.isEmpty());
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_USER,
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER,
                                               PARAM_LIST_WIZ_USER);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
                   STR2SQL(data.bizGUID).utf16(),
                   STR2SQL(data.userId).utf16(),
                   STR2SQL(data.userGUID).utf16(),
@@ -705,7 +705,7 @@ bool CWizIndexBase::createUserEx(const WIZBIZUSER& data)
         );
 
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -715,7 +715,7 @@ bool CWizIndexBase::createUserEx(const WIZBIZUSER& data)
     return true;
 }
 
-bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
+bool WizIndexBase::modifyUserEx(const WIZBIZUSER& user)
 {
     qDebug() << "modify user, alias: " << user.alias;
 
@@ -728,18 +728,18 @@ bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
     CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
     strWhere = strWhere.arg(STR2SQL(user.bizGUID)).arg(STR2SQL(user.userGUID));
 
-    CString strFormat = FormatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
+    CString strFormat = formatUpdateSQLByWhere(TABLE_NAME_WIZ_USER,
                                               FIELD_LIST_WIZ_USER_MODIFY,
                                               strWhere);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
                   STR2SQL(user.userId).utf16(),
                   STR2SQL(user.alias).utf16(),
                   STR2SQL(user.pinyin).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     // read new user info
@@ -753,7 +753,7 @@ bool CWizIndexBase::modifyUserEx(const WIZBIZUSER& user)
     return true;
 }
 
-bool CWizIndexBase::deleteUserEx(const WIZBIZUSER& data)
+bool WizIndexBase::deleteUserEx(const WIZBIZUSER& data)
 {
     qDebug() << "delete user, alias: " << data.alias;
 
@@ -762,7 +762,7 @@ bool CWizIndexBase::deleteUserEx(const WIZBIZUSER& data)
     return true;
 }
 
-bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
+bool WizIndexBase::createTagEx(const WIZTAGDATA& d)
 {
     qDebug() << "create tag, name: " << d.strName;
 
@@ -773,10 +773,10 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
         data.strParentGUID.clear();
     }
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, PARAM_LIST_WIZ_TAG);
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, PARAM_LIST_WIZ_TAG);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16(),
         STR2SQL(data.strParentGUID).utf16(),
         STR2SQL(data.strName).utf16(),
@@ -787,7 +787,7 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
         );
 
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -797,24 +797,24 @@ bool CWizIndexBase::CreateTagEx(const WIZTAGDATA& d)
     return true;
 }
 
-bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
+bool WizIndexBase::modifyTagEx(const WIZTAGDATA& d)
 {
     qDebug() << "modify tag, name: " << d.strName;
 
     Q_ASSERT(d.strKbGUID == m_strKbGUID);
 
     WIZTAGDATA dataOld;
-    TagFromGUID(d.strGUID, dataOld);
+    tagFromGuid(d.strGUID, dataOld);
 
     WIZTAGDATA data = d;
     if (data.strGUID == data.strParentGUID) {
-        data.strParentGUID.Empty();
+        data.strParentGUID.empty();
     }
 
-    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG_MODIFY, TABLE_KEY_WIZ_TAG);
+    CString strFormat = formatUpdateSQLFormat(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG_MODIFY, TABLE_KEY_WIZ_TAG);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strParentGUID).utf16(),
         STR2SQL(data.strName).utf16(),
         STR2SQL(data.strDescription).utf16(),
@@ -824,11 +824,11 @@ bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     WIZTAGDATA dataNew;
-    TagFromGUID(d.strGUID, dataNew);
+    tagFromGuid(d.strGUID, dataNew);
 
     if (!m_bUpdating) {
         emit tagModified(dataOld, dataNew);
@@ -837,20 +837,20 @@ bool CWizIndexBase::ModifyTagEx(const WIZTAGDATA& d)
     return true;
 }
 
-bool CWizIndexBase::DeleteTagEx(const WIZTAGDATA& data)
+bool WizIndexBase::deleteTagEx(const WIZTAGDATA& data)
 {
     qDebug() << "delete tag, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_TAG, TABLE_KEY_WIZ_TAG);
+    CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_TAG, TABLE_KEY_WIZ_TAG);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -860,16 +860,16 @@ bool CWizIndexBase::DeleteTagEx(const WIZTAGDATA& data)
     return true;
 }
 
-bool CWizIndexBase::CreateStyleEx(const WIZSTYLEDATA& data)
+bool WizIndexBase::createStyleEx(const WIZSTYLEDATA& data)
 {
     qDebug() << "create style, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE, PARAM_LIST_WIZ_STYLE);
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE, PARAM_LIST_WIZ_STYLE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16(),
         STR2SQL(data.strName).utf16(),
         STR2SQL(data.strDescription).utf16(),
@@ -882,7 +882,7 @@ bool CWizIndexBase::CreateStyleEx(const WIZSTYLEDATA& data)
         );
 
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -892,19 +892,19 @@ bool CWizIndexBase::CreateStyleEx(const WIZSTYLEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::ModifyStyleEx(const WIZSTYLEDATA& data)
+bool WizIndexBase::modifyStyleEx(const WIZSTYLEDATA& data)
 {
     qDebug() << "modify style, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
     WIZSTYLEDATA dataOld;
-    StyleFromGUID(data.strGUID, dataOld);
+    styleFromGuid(data.strGUID, dataOld);
 
-    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE_MODIFY, TABLE_KEY_WIZ_STYLE);
+    CString strFormat = formatUpdateSQLFormat(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE_MODIFY, TABLE_KEY_WIZ_STYLE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strName).utf16(),
         STR2SQL(data.strDescription).utf16(),
         COLOR2SQL(data.crTextColor).utf16(),
@@ -916,11 +916,11 @@ bool CWizIndexBase::ModifyStyleEx(const WIZSTYLEDATA& data)
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     WIZSTYLEDATA dataNew;
-    StyleFromGUID(data.strGUID, dataNew);
+    styleFromGuid(data.strGUID, dataNew);
 
     if (!m_bUpdating) {
         emit styleModified(dataOld, dataNew);
@@ -929,20 +929,20 @@ bool CWizIndexBase::ModifyStyleEx(const WIZSTYLEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::DeleteStyleEx(const WIZSTYLEDATA& data)
+bool WizIndexBase::deleteStyleEx(const WIZSTYLEDATA& data)
 {
     qDebug() << "delete style, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_STYLE, TABLE_KEY_WIZ_STYLE);
+    CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_STYLE, TABLE_KEY_WIZ_STYLE);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -952,7 +952,7 @@ bool CWizIndexBase::DeleteStyleEx(const WIZSTYLEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
+bool WizIndexBase::createDocumentEx(const WIZDOCUMENTDATA& dataNew)
 {
     qDebug() << "create document, title: " << dataNew.strTitle;
 
@@ -967,14 +967,14 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
     }
 
     if (data.strLocation.isEmpty()) {
-        data.strLocation = GetDefaultNoteLocation();
+        data.strLocation = getDefaultNoteLocation();
         TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
     }
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, PARAM_LIST_WIZ_DOCUMENT);
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, PARAM_LIST_WIZ_DOCUMENT);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16(),
         STR2SQL(data.strTitle).utf16(),
         STR2SQL(data.strLocation).utf16(),
@@ -1010,7 +1010,7 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
         (int)data.nDataChanged
     );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -1020,14 +1020,14 @@ bool CWizIndexBase::CreateDocumentEx(const WIZDOCUMENTDATA& dataNew)
     return true;
 }
 
-bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
+bool WizIndexBase::modifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 {
     qDebug() << "modify document, title: " << dataCur.strTitle;
 
     Q_ASSERT(dataCur.strKbGUID == m_strKbGUID);
 
     WIZDOCUMENTDATA dataOld;
-    DocumentFromGUID(dataCur.strGUID, dataOld);
+    documentFromGuid(dataCur.strGUID, dataOld);
 
     WIZDOCUMENTDATA data = dataCur;
 
@@ -1046,7 +1046,7 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         if (!dataOld.strLocation.isEmpty()) {
             data.strLocation = dataOld.strLocation;
         } else {
-            data.strLocation = GetDefaultNoteLocation();
+            data.strLocation = getDefaultNoteLocation();
         }
 
         TOLOG2("Document Location is empty: %1, Try to relocation to the %2", data.strTitle, data.strLocation);
@@ -1062,10 +1062,10 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         }
     }
 
-    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT);
+    CString strFormat = formatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strTitle).utf16(),
         STR2SQL(data.strLocation).utf16(),
         STR2SQL(data.strName).utf16(),
@@ -1102,11 +1102,11 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
         STR2SQL(data.strGUID).utf16()
     );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     WIZDOCUMENTDATA dataNew;
-    DocumentFromGUID(data.strGUID, dataNew);
+    documentFromGuid(data.strGUID, dataNew);
 
     if (!m_bUpdating) {
         emit documentModified(dataOld, dataNew);
@@ -1115,20 +1115,20 @@ bool CWizIndexBase::ModifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
     return true;
 }
 
-bool CWizIndexBase::DeleteDocumentEx(const WIZDOCUMENTDATA& data)
+bool WizIndexBase::deleteDocumentEx(const WIZDOCUMENTDATA& data)
 {
     qDebug() << "delete document, title: " << data.strTitle;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT, TABLE_KEY_WIZ_DOCUMENT);
+    CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT, TABLE_KEY_WIZ_DOCUMENT);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -1138,7 +1138,7 @@ bool CWizIndexBase::DeleteDocumentEx(const WIZDOCUMENTDATA& data)
     return true;
 }
 
-bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
+bool WizIndexBase::createAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     qDebug() << "create attachment, name: " << data.strName;
 
@@ -1149,10 +1149,10 @@ bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
     //    TOLOG2(_T("Warning: Attachment info md5 does not match: %1, %2"), strInfoMD5, data.strInfoMD5);
     //}
 
-    CString strFormat = FormatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT, PARAM_LIST_WIZ_DOCUMENT_ATTACHMENT);
+    CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT, PARAM_LIST_WIZ_DOCUMENT_ATTACHMENT);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16(),
         STR2SQL(data.strDocumentGUID).utf16(),
         STR2SQL(data.strName).utf16(),
@@ -1165,7 +1165,7 @@ bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
         WizInt64ToStr(data.nVersion).utf16()
     );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -1175,19 +1175,19 @@ bool CWizIndexBase::CreateAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
     return true;
 }
 
-bool CWizIndexBase::ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data)
+bool WizIndexBase::modifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     qDebug() << "modify attachment, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
     WIZDOCUMENTATTACHMENTDATA dataOld;
-    AttachmentFromGUID(data.strGUID, dataOld);
+    attachmentFromGuid(data.strGUID, dataOld);
 
-    CString strFormat = FormatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT);
+    CString strFormat = formatUpdateSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT_MODIFY, TABLE_KEY_WIZ_DOCUMENT_ATTACHMENT);
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strName).utf16(),
         STR2SQL(data.strURL).utf16(),
         STR2SQL(data.strDescription).utf16(),
@@ -1199,11 +1199,11 @@ bool CWizIndexBase::ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data
         STR2SQL(data.strGUID).utf16()
     );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     WIZDOCUMENTATTACHMENTDATA dataNew;
-    AttachmentFromGUID(data.strGUID, dataNew);
+    attachmentFromGuid(data.strGUID, dataNew);
 
     if (!m_bUpdating) {
         emit attachmentModified(dataOld, dataNew);
@@ -1212,21 +1212,21 @@ bool CWizIndexBase::ModifyAttachmentInfoEx(const WIZDOCUMENTATTACHMENTDATA& data
     return true;
 }
 
-bool CWizIndexBase::DeleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
+bool WizIndexBase::deleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     qDebug() << "delete attachment, name: " << data.strName;
 
     Q_ASSERT(data.strKbGUID == m_strKbGUID);
 
-    CString strFormat = FormatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT,
+    CString strFormat = formatDeleteSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT,
                                               "ATTACHMENT_GUID");
 
     CString strSQL;
-    strSQL.Format(strFormat,
+    strSQL.format(strFormat,
         STR2SQL(data.strGUID).utf16()
         );
 
-    if (!ExecSQL(strSQL))
+    if (!execSQL(strSQL))
         return false;
 
     if (!m_bUpdating) {
@@ -1236,15 +1236,15 @@ bool CWizIndexBase::DeleteAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
     return true;
 }
 
-bool CWizIndexBase::GetAllTags(CWizTagDataArray& arrayTag)
+bool WizIndexBase::getAllTags(CWizTagDataArray& arrayTag)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
-    return SQLToTagDataArray(strSQL, arrayTag);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
+    return sqlToTagDataArray(strSQL, arrayTag);
 }
 
-bool CWizIndexBase::GetAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
+bool WizIndexBase::getAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG);
     try
     {
         CppSQLite3Query query = m_db.execQuery(strSQL);
@@ -1268,80 +1268,80 @@ bool CWizIndexBase::GetAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
     }
     catch (const CppSQLite3Exception& e)
     {
-        return LogSQLException(e, strSQL);
+        return logSQLException(e, strSQL);
     }
 }
 
-bool CWizIndexBase::GetRootTags(CWizTagDataArray& arrayTag)
+bool WizIndexBase::getRootTags(CWizTagDataArray& arrayTag)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG,
                                     _T("(TAG_GROUP_GUID = '' or TAG_GROUP_GUID is null)"));
 
-    return SQLToTagDataArray(strSQL, arrayTag);
+    return sqlToTagDataArray(strSQL, arrayTag);
 }
 
-bool CWizIndexBase::GetChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag)
+bool WizIndexBase::getChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag)
 {
     CString strWhere = strParentTagGUID.isEmpty() ?
                        WizFormatString0(_T("TAG_GROUP_GUID is null")) :
                        WizFormatString1(_T("TAG_GROUP_GUID='%1'"), strParentTagGUID);
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
-    return SQLToTagDataArray(strSQL, arrayTag);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
+    return sqlToTagDataArray(strSQL, arrayTag);
 }
 
-bool CWizIndexBase::GetAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag)
+bool WizIndexBase::getAllChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag)
 {
     CWizTagDataArray arrayTagCurrent;
-    GetChildTags(strParentTagGUID, arrayTagCurrent);
+    getChildTags(strParentTagGUID, arrayTagCurrent);
 
     arrayTag.insert(arrayTag.begin(), arrayTagCurrent.begin(), arrayTagCurrent.end());
 
     CWizTagDataArray::const_iterator it;
     for (it = arrayTagCurrent.begin(); it != arrayTagCurrent.end(); it++) {
-        GetAllChildTags(it->strGUID, arrayTag);
+        getAllChildTags(it->strGUID, arrayTag);
     }
 
     return true;
 }
 
-bool CWizIndexBase::GetAllTagsWithErrorParent(CWizTagDataArray& arrayTag)
+bool WizIndexBase::getAllTagsWithErrorParent(CWizTagDataArray& arrayTag)
 {
     CString strWhere = QString("TAG_GROUP_GUID is not null and TAG_GROUP_GUID "
                                "not in (select distinct TAG_GUID from %1)").arg(TABLE_NAME_WIZ_TAG);
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
-    return SQLToTagDataArray(strSQL, arrayTag);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
+    return sqlToTagDataArray(strSQL, arrayTag);
 }
 
-bool CWizIndexBase::GetChildTagsSize(const CString &strParentTagGUID, int &size)
+bool WizIndexBase::getChildTagsSize(const CString &strParentTagGUID, int &size)
 {
     CString strWhere = strParentTagGUID.isEmpty() ?
                        WizFormatString0(_T("TAG_GROUP_GUID is null")) :
                        WizFormatString1(_T("TAG_GROUP_GUID='%1'"), strParentTagGUID);
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, "COUNT(*)", strWhere);
-    return SQLToSize(strSQL, size);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, "COUNT(*)", strWhere);
+    return sqlToSize(strSQL, size);
 }
 
-bool CWizIndexBase::GetAllChildTagsSize(const CString& strParentTagGUID, int& size)
+bool WizIndexBase::getAllChildTagsSize(const CString& strParentTagGUID, int& size)
 {
     int nSizeCurrent;
-    GetChildTagsSize(strParentTagGUID, nSizeCurrent);
+    getChildTagsSize(strParentTagGUID, nSizeCurrent);
     size += nSizeCurrent;
 
     CWizTagDataArray arrayTagCurrent;
-    GetChildTags(strParentTagGUID, arrayTagCurrent);
+    getChildTags(strParentTagGUID, arrayTagCurrent);
 
     CWizTagDataArray::const_iterator it;
     for (it = arrayTagCurrent.begin(); it != arrayTagCurrent.end(); it++) {
-        GetAllChildTagsSize(it->strGUID, size);
+        getAllChildTagsSize(it->strGUID, size);
     }
 
     return true;
 }
 
-bool CWizIndexBase::TagFromGUID(const CString& strTagGUID, WIZTAGDATA& data)
+bool WizIndexBase::tagFromGuid(const CString& strTagGUID, WIZTAGDATA& data)
 {
     if (!strTagGUID || !*strTagGUID) {
         TOLOG(_T("TagGUID is empty"));
@@ -1349,14 +1349,14 @@ bool CWizIndexBase::TagFromGUID(const CString& strTagGUID, WIZTAGDATA& data)
     }
 
     CString strWhere;
-    strWhere.Format(_T("TAG_GUID=%s"),
+    strWhere.format(_T("TAG_GUID=%s"),
         STR2SQL(strTagGUID).utf16()
         );
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
 
     CWizTagDataArray arrayTag;
-    if (!SQLToTagDataArray(strSQL, arrayTag)) {
+    if (!sqlToTagDataArray(strSQL, arrayTag)) {
         TOLOG(_T("Failed to get tag by guid"));
         return false;
     }
@@ -1370,13 +1370,13 @@ bool CWizIndexBase::TagFromGUID(const CString& strTagGUID, WIZTAGDATA& data)
     return true;
 }
 
-bool CWizIndexBase::GetStyles(CWizStyleDataArray& arrayStyle)
+bool WizIndexBase::getStyles(CWizStyleDataArray& arrayStyle)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE);
-    return SQLToStyleDataArray(strSQL, arrayStyle);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE);
+    return sqlToStyleDataArray(strSQL, arrayStyle);
 }
 
-bool CWizIndexBase::StyleFromGUID(const CString& strStyleGUID, WIZSTYLEDATA& data)
+bool WizIndexBase::styleFromGuid(const CString& strStyleGUID, WIZSTYLEDATA& data)
 {
     if (!strStyleGUID || !*strStyleGUID) {
         TOLOG(_T("StyleGUID is empty"));
@@ -1384,14 +1384,14 @@ bool CWizIndexBase::StyleFromGUID(const CString& strStyleGUID, WIZSTYLEDATA& dat
     }
 
     CString strWhere;
-    strWhere.Format(_T("STYLE_GUID=%s"),
+    strWhere.format(_T("STYLE_GUID=%s"),
         STR2SQL(strStyleGUID).utf16()
         );
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE, strWhere);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_STYLE, FIELD_LIST_WIZ_STYLE, strWhere);
 
     CWizStyleDataArray arrayStyle;
-    if (!SQLToStyleDataArray(strSQL, arrayStyle)) {
+    if (!sqlToStyleDataArray(strSQL, arrayStyle)) {
         TOLOG(_T("Failed to get style by guid"));
         return false;
     }
@@ -1405,41 +1405,41 @@ bool CWizIndexBase::StyleFromGUID(const CString& strStyleGUID, WIZSTYLEDATA& dat
     return true;
 }
 
-bool CWizIndexBase::GetMetas(CWizMetaDataArray& arrayMeta)
+bool WizIndexBase::getMetas(CWizMetaDataArray& arrayMeta)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_META, FIELD_LIST_WIZ_META);
-    return SQLToMetaDataArray(strSQL, arrayMeta);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_META, FIELD_LIST_WIZ_META);
+    return sqlToMetaDataArray(strSQL, arrayMeta);
 }
 
-bool CWizIndexBase::GetAllDocumentsSize(int& count, bool bIncludeTrash /* = false */)
+bool WizIndexBase::getAllDocumentsSize(int& count, bool bIncludeTrash /* = false */)
 {
     CString strSQL;
     if (bIncludeTrash) {
-        strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)");
+        strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)");
     } else {
         CString strWhere;
-        strWhere.Format("DOCUMENT_LOCATION not like %s",
+        strWhere.format("DOCUMENT_LOCATION not like %s",
                         STR2SQL(QString(LOCATION_DELETED_ITEMS) + _T("%")).utf16());
 
-        strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
+        strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
     }
 
-    return SQLToSize(strSQL, count);
+    return sqlToSize(strSQL, count);
 }
 
-bool CWizIndexBase::GetAllDocuments(CWizDocumentDataArray& arrayDocument)
+bool WizIndexBase::getAllDocuments(CWizDocumentDataArray& arrayDocument)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
-    return SQLToDocumentDataArray(strSQL, arrayDocument);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT);
+    return sqlToDocumentDataArray(strSQL, arrayDocument);
 }
 
-bool CWizIndexBase::GetDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument)
+bool WizIndexBase::getDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocumentDataArray& arrayDocument)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strSQLWhere);
-    return SQLToDocumentDataArray(strSQL, arrayDocument);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strSQLWhere);
+    return sqlToDocumentDataArray(strSQL, arrayDocument);
 }
 
-bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
+bool WizIndexBase::documentFromGuid(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
 {
     if (!strDocumentGUID || !*strDocumentGUID) {
         TOLOG(_T("DocumentGUID is empty"));
@@ -1447,14 +1447,14 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     }
 
     CString strWhere;
-    strWhere.Format(_T("DOCUMENT_GUID=%s"),
+    strWhere.format(_T("DOCUMENT_GUID=%s"),
         STR2SQL(strDocumentGUID).utf16()
         );
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
 
     CWizDocumentDataArray arrayDocument;
-    if (!SQLToDocumentDataArray(strSQL, arrayDocument)) {
+    if (!sqlToDocumentDataArray(strSQL, arrayDocument)) {
         TOLOG(_T("Failed to get document by guid"));
         return false;
     }
@@ -1468,29 +1468,29 @@ bool CWizIndexBase::DocumentFromGUID(const CString& strDocumentGUID, WIZDOCUMENT
     return true;
 }
 
-bool CWizIndexBase::GetAttachments(CWizDocumentAttachmentDataArray& arrayAttachment)
+bool WizIndexBase::getAttachments(CWizDocumentAttachmentDataArray& arrayAttachment)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
-    return SQLToDocumentAttachmentDataArray(strSQL, arrayAttachment);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT);
+    return sqlToDocumentAttachmentDataArray(strSQL, arrayAttachment);
 }
 
-bool CWizIndexBase::AttachmentFromGUID(const CString& strAttachcmentGUID,
+bool WizIndexBase::attachmentFromGuid(const CString& strAttachcmentGUID,
                                        WIZDOCUMENTATTACHMENTDATA& data)
 {
-    if (strAttachcmentGUID.IsEmpty()) {
+    if (strAttachcmentGUID.isEmpty()) {
         TOLOG(_T("AttahcmentGUID is empty"));
         return false;
     }
 
     CString strWhere;
-    strWhere.Format(_T("ATTACHMENT_GUID=%s"),
+    strWhere.format(_T("ATTACHMENT_GUID=%s"),
         STR2SQL(strAttachcmentGUID).utf16()
         );
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT, strWhere);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT, strWhere);
 
     CWizDocumentAttachmentDataArray arrayDocumentAttachment;
-    if (!SQLToDocumentAttachmentDataArray(strSQL, arrayDocumentAttachment)) {
+    if (!sqlToDocumentAttachmentDataArray(strSQL, arrayDocumentAttachment)) {
         TOLOG(_T("Failed to get attachment attachment by guid"));
         return false;
     }
@@ -1504,17 +1504,17 @@ bool CWizIndexBase::AttachmentFromGUID(const CString& strAttachcmentGUID,
     return true;
 }
 
-bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
+bool WizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
 {
     CString strWhere;
-    strWhere.Format("MESSAGE_ID=%s", WizInt64ToStr(nId).utf16());
+    strWhere.format("MESSAGE_ID=%s", WizInt64ToStr(nId).utf16());
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
                                     FIELD_LIST_WIZ_MESSAGE,
                                     strWhere);
 
     CWizMessageDataArray arrayMessage;
-    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+    if (!sqlToMessageDataArray(strSQL, arrayMessage)) {
         TOLOG("[messageFromId] failed to get message by id");
         return false;
     }
@@ -1526,16 +1526,16 @@ bool CWizIndexBase::messageFromId(qint64 nId, WIZMESSAGEDATA& data)
     return true;
 }
 
-bool CWizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+bool WizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
 {
     CString strWhere;
-    strWhere.Format("SENDER_GUID=%s", STR2SQL(userGUID).utf16());
+    strWhere.format("SENDER_GUID=%s", STR2SQL(userGUID).utf16());
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
                                     FIELD_LIST_WIZ_MESSAGE,
                                     strWhere);
 
-    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+    if (!sqlToMessageDataArray(strSQL, arrayMessage)) {
         TOLOG1("[messageFromId] failed to get message by user guid : %1", userGUID);
         return false;
     }
@@ -1543,16 +1543,16 @@ bool CWizIndexBase::messageFromUserGUID(const QString& userGUID, CWizMessageData
     return !arrayMessage.empty();
 }
 
-bool CWizIndexBase::unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
+bool WizIndexBase::unreadMessageFromUserGUID(const QString& userGUID, CWizMessageDataArray& arrayMessage)
 {
     CString strWhere;
-    strWhere.Format("SENDER_GUID=%s and READ_STATUS=0", STR2SQL(userGUID).utf16());
+    strWhere.format("SENDER_GUID=%s and READ_STATUS=0", STR2SQL(userGUID).utf16());
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
                                     FIELD_LIST_WIZ_MESSAGE,
                                     strWhere);
 
-    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+    if (!sqlToMessageDataArray(strSQL, arrayMessage)) {
         TOLOG1("[messageFromId] failed to get unread message by user guid : %1", userGUID);
         return false;
     }
@@ -1560,17 +1560,17 @@ bool CWizIndexBase::unreadMessageFromUserGUID(const QString& userGUID, CWizMessa
     return !arrayMessage.empty();
 }
 
-bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data)
+bool WizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDATA& data)
 {
     CString strWhere;
-    strWhere.Format("DOCUMENT_GUID=%s", STR2SQL(strGUID).utf16());
+    strWhere.format("DOCUMENT_GUID=%s", STR2SQL(strGUID).utf16());
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_MESSAGE,
                                     FIELD_LIST_WIZ_MESSAGE,
                                     strWhere);
 
     CWizMessageDataArray arrayMessage;
-    if (!SQLToMessageDataArray(strSQL, arrayMessage)) {
+    if (!sqlToMessageDataArray(strSQL, arrayMessage)) {
         TOLOG1("[messageFromId] failed to get message by document guid : %1", strGUID);
         return false;
     }
@@ -1583,23 +1583,23 @@ bool CWizIndexBase::messageFromDocumentGUID(const QString& strGUID, WIZMESSAGEDA
     return true;
 }
 
-bool CWizIndexBase::GetAllUsers(CWizBizUserDataArray& arrayUser)
+bool WizIndexBase::getAllUsers(CWizBizUserDataArray& arrayUser)
 {
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER, FIELD_LIST_WIZ_USER);
-    return SQLToBizUserDataArray(strSQL, arrayUser);
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_USER, FIELD_LIST_WIZ_USER);
+    return sqlToBizUserDataArray(strSQL, arrayUser);
 }
 
-bool CWizIndexBase::userFromGUID(const QString& strUserGUID,
+bool WizIndexBase::userFromGUID(const QString& strUserGUID,
                                  CWizBizUserDataArray& arrayUser)
 {
     CString strWhere;
-    strWhere.Format("USER_GUID=%s", STR2SQL(strUserGUID).utf16());
+    strWhere.format("USER_GUID=%s", STR2SQL(strUserGUID).utf16());
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_USER,
                                     FIELD_LIST_WIZ_USER,
                                     strWhere);
 
-    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+    if (!sqlToBizUserDataArray(strSQL, arrayUser)) {
         TOLOG("[userFromGUID] failed to get user by user guid");
         return false;
     }
@@ -1610,19 +1610,19 @@ bool CWizIndexBase::userFromGUID(const QString& strUserGUID,
     return true;
 }
 
-bool CWizIndexBase::userFromGUID(const QString& strKbGUID,
+bool WizIndexBase::userFromGUID(const QString& strKbGUID,
                                  const QString& userGUID,
                                  WIZBIZUSER& user)
 {
     CString strWhere = "BIZ_GUID=%1 AND USER_GUID=%2";
     strWhere = strWhere.arg(STR2SQL(strKbGUID)).arg(STR2SQL(userGUID));
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_USER,
                                     FIELD_LIST_WIZ_USER,
                                     strWhere);
 
     CWizBizUserDataArray arrayUser;
-    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+    if (!sqlToBizUserDataArray(strSQL, arrayUser)) {
         TOLOG("[userFromGUID] failed to get user by user guid");
         return false;
     }
@@ -1634,16 +1634,16 @@ bool CWizIndexBase::userFromGUID(const QString& strKbGUID,
     return true;
 }
 
-bool CWizIndexBase::users(const QString& strKbGUID, CWizBizUserDataArray& arrayUser)
+bool WizIndexBase::users(const QString& strKbGUID, CWizBizUserDataArray& arrayUser)
 {
     CString strWhere = "BIZ_GUID=%1";
     strWhere = strWhere.arg(STR2SQL(strKbGUID));
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_USER,
                                     FIELD_LIST_WIZ_USER,
                                     strWhere);
 
-    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+    if (!sqlToBizUserDataArray(strSQL, arrayUser)) {
         TOLOG("[users] failed to get users");
         return false;
     }
@@ -1656,17 +1656,17 @@ bool CWizIndexBase::users(const QString& strKbGUID, CWizBizUserDataArray& arrayU
     return true;
 }
 
-bool CWizIndexBase::userFromID(const QString& strKbGUID, const QString& userID, WIZBIZUSER& user)
+bool WizIndexBase::userFromID(const QString& strKbGUID, const QString& userID, WIZBIZUSER& user)
 {
     CString strWhere = "BIZ_GUID=%1 AND USER_ID=%2";
     strWhere = strWhere.arg(STR2SQL(strKbGUID)).arg(STR2SQL(userID));
 
-    CString strSQL = FormatQuerySQL(TABLE_NAME_WIZ_USER,
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_USER,
                                     FIELD_LIST_WIZ_USER,
                                     strWhere);
 
     CWizBizUserDataArray arrayUser;
-    if (!SQLToBizUserDataArray(strSQL, arrayUser)) {
+    if (!sqlToBizUserDataArray(strSQL, arrayUser)) {
         TOLOG("[userFromGUID] failed to get user by user guid");
         return false;
     }
