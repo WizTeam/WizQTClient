@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizUserCipherForm</class>
- <widget class="QWidget" name="CWizUserCipherForm">
+ <class>WizUserCipherForm</class>
+ <widget class="QWidget" name="WizUserCipherForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -144,7 +144,7 @@
           </spacer>
          </item>
          <item>
-          <widget class="wizImageButton" name="buttonOk">
+          <widget class="WizImageButton" name="buttonOk">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -212,7 +212,7 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>wizImageButton</class>
+   <class>WizImageButton</class>
    <extends>QPushButton</extends>
    <header>widgets/wizImageButton.h</header>
   </customwidget>

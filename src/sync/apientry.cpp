@@ -419,8 +419,8 @@ void WizCommonApiEntry::getEndPoints()
             continue;
         }
 
-        QString key = (iter->name).getString();
-        QString url = (iter->value).getString();
+        QString key = (iter->name).GetString();
+        QString url = (iter->value).GetString();
 #ifdef QT_DEBUG
         qDebug() << "key: " << key << " url : " << url;
 #endif

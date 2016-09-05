@@ -26,7 +26,7 @@
 void getBoolValueFromJSON(const rapidjson::Document& d, const char* strMember, QSettings* settings)
 {
     if (d.HasMember(strMember)) {
-        bool b = d.FindMember(strMember)->value.getBool();
+        bool b = d.FindMember(strMember)->value.GetBool();
         qDebug() << strMember << " : " << b;
         settings->setValue(strMember, b);
     }

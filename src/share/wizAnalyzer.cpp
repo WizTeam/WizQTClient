@@ -234,7 +234,7 @@ void WizAnalyzer::postBlocked(IWizSyncableDatabase* db)
         return;
     }
 
-    int returnCode = d.FindMember("return_code")->value.getInt();
+    int returnCode = d.FindMember("return_code")->value.GetInt();
     if (returnCode != 200)
     {
         qDebug() << "[Analyzer]Return code was not 200, error :  " << returnCode << loop.result();
@@ -286,7 +286,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
 
     rapidjson::Value versionName(rapidjson::kStringType);
-    versionName.setString(WIZ_CLIENT_VERSION);
+    versionName.SetString(WIZ_CLIENT_VERSION);
     dd.AddMember("versionName", versionName, allocator);
 
     dd.AddMember("versionCode", Utils::WizMisc::getVersionCode(), allocator);
@@ -417,7 +417,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
     dd.Accept(writer);
 
-    return buffer.getString();
+    return buffer.GetString();
 }
 
 

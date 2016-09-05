@@ -246,7 +246,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_usercontainer" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_usercontainer" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
@@ -262,7 +262,7 @@
               </widget>
              </item>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_passwordcontainer" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_passwordcontainer" native="true">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Maximum">
                  <horstretch>0</horstretch>
@@ -278,7 +278,7 @@
               </widget>
              </item>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_serveroptioncontainer" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_serveroptioncontainer" native="true">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -379,7 +379,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="CWizImageButton" name="btn_login">
+              <widget class="WizStyleButton" name="btn_login">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -467,7 +467,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_newUser" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_newUser" native="true">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -477,7 +477,7 @@
               </widget>
              </item>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_newPassword" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_newPassword" native="true">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -487,7 +487,7 @@
               </widget>
              </item>
              <item>
-              <widget class="CWizIconLineEditContainer" name="wgt_passwordRepeat" native="true">
+              <widget class="WizIconLineEditContainer" name="wgt_passwordRepeat" native="true">
                <property name="minimumSize">
                 <size>
                  <width>0</width>
@@ -517,7 +517,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="CWizImageButton" name="btn_singUp">
+              <widget class="WizStyleButton" name="btn_singUp">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
                  <horstretch>0</horstretch>
@@ -776,12 +776,12 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>CWizImageButton</class>
+   <class>WizStyleButton</class>
    <extends>QPushButton</extends>
    <header>share/wizui.h</header>
   </customwidget>
   <customwidget>
-   <class>CWizIconLineEditContainer</class>
+   <class>WizIconLineEditContainer</class>
    <extends>QWidget</extends>
    <header>share/wizui.h</header>
    <container>1</container>

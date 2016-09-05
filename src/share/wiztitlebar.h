@@ -6,11 +6,11 @@
 class QToolButton;
 class QLabel;
 
-class WizTitleBar : public QWidget
+class WizWindowTitleBar : public QWidget
 {
     Q_OBJECT
 public:
-    WizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget);
+    WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget);
 private:
     QWidget* m_window;
     QWidget* m_shadowContainerWidget;

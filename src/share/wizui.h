@@ -60,10 +60,10 @@ private slots:
     void cleanRightIcon();
 };
 
-class WizImageButton : public QPushButton
+class WizStyleButton : public QPushButton
 {
 public:
-    WizImageButton(QWidget* parent);
+    WizStyleButton(QWidget* parent);
 public:
     void setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
                         const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizEmailShareDialog</class>
- <widget class="QDialog" name="CWizEmailShareDialog">
+ <class>WizEmailShareDialog</class>
+ <widget class="QDialog" name="WizEmailShareDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

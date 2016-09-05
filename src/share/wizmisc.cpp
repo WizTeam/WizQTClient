@@ -255,7 +255,7 @@ void WizGetNextFileName(CString& strFileName)
         CString strTemp = strTitle.right(strTitle.getLength() - nPos - 1);
         if (strTemp == WizIntToStr(_ttoi(strTemp)))
         {
-            strTitle.Delete(nPos, strTitle.getLength() - nPos);
+            strTitle.remove(nPos, strTitle.getLength() - nPos);
         }
     }
     //
@@ -548,7 +548,7 @@ int WizHexToInt(const CString& str)
 {
     CString strText(str);
     if (strText.startsWith("0x"), Qt::CaseInsensitive)
-        strText.Delete(0, 2);
+        strText.remove(0, 2);
     //
     strText.trim();
     strText.makeLower();
@@ -843,7 +843,7 @@ CString WizHTMLGetCharsetFromHTMLText(const char* pBuffer)
         int nPos = (int)WizStrStrI_Pos(strMeta, "charset=");
         if (nPos == -1)
             continue;
-        strMeta.Delete(0, nPos + 8);
+        strMeta.remove(0, nPos + 8);
         int nPos1 = strMeta.find("\"");
         int nPos2 = strMeta.find(">");
         if (nPos1 == -1)
@@ -886,7 +886,7 @@ CString WizXMLGetCharsetFromXMLText(const char* pBuffer)
     if (nPos == -1)
         return strCharset;
     //
-    strMark.Delete(0, nPos + 9);
+    strMark.remove(0, nPos + 9);
     //
     strMark.replace('"', ' ');
     strMark.replace('\'', ' ');
@@ -1427,7 +1427,7 @@ BOOL WizFormatXML(CString& strXML)
                 strNew.Trim();
                 if (strNew != strOld)
                 {
-                    strXML.Delete(nBegin, strOld.GetLength());
+                    strXML.remove(nBegin, strOld.GetLength());
                     if (!strNew.IsEmpty())
                     {
                         strXML.Insert(nBegin, strNew);
@@ -1470,7 +1470,7 @@ BOOL WizFormatXML(CString& strXML)
         //
         if (bCloseTag || bSelfClose)
         {
-            strOffset.Delete(strOffset.GetLength() - 1);
+            strOffset.remove(strOffset.GetLength() - 1);
             //
             if (bCloseTag)
             {

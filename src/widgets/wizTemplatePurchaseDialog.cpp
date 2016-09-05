@@ -231,14 +231,14 @@ void WizTemplatePurchaseDialog::parseCheckResult(const QString& strResult, const
 
     if (d.HasMember("error_code"))
     {
-        QString strError = QString::fromUtf8(d.FindMember("error")->value.getString());
+        QString strError = QString::fromUtf8(d.FindMember("error")->value.GetString());
         qDebug() << strError;
         on_purchase_failed(strError);
         return;
     }
 
     if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.getInt();
+        int nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode == 200)
         {
             qDebug() <<"IAP purchase successed!";
@@ -250,7 +250,7 @@ void WizTemplatePurchaseDialog::parseCheckResult(const QString& strResult, const
         }
         else
         {
-            QString message = QString::fromUtf8(d.FindMember("return_message")->value.getString());
+            QString message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
             qDebug() << "check on server failed , code :  " << nCode << "  message : " << message;
             on_purchase_failed(message);
             return;

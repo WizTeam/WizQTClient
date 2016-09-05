@@ -4,12 +4,20 @@
 #include <QMessageBox>
 #include <QList>
 
-class WizMessageBox
-{
-public:
-    WizMessageBox();
-    ~WizMessageBox();
 
+class WizMessageBox : public QMessageBox
+{
+    Q_OBJECT
+public:
+    explicit WizMessageBox(QWidget *parent = 0) : QMessageBox(parent) { }
+
+signals:
+    void resized();
+
+protected:
+    void resizeEvent(QResizeEvent* event);
+
+public:
     static QMessageBox::StandardButton critical(QWidget * parent, const QString & title, const QString & text,
                                          QMessageBox::StandardButtons buttons = QMessageBox::Ok,
                                          QMessageBox::StandardButton defaultButton = QMessageBox::NoButton);
@@ -48,20 +56,6 @@ private:
                                          QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton,
                                                 QMessageBox::Icon icon);
 
-
-};
-
-class WizMessageBox : public QMessageBox
-{
-    Q_OBJECT
-public:
-    explicit WizMessageBox(QWidget *parent = 0) : QMessageBox(parent) { }
-
-signals:
-    void resized();
-
-protected:
-    void resizeEvent(QResizeEvent* event);
 };
 
 #endif // CWIZMESSAGEBOX_H

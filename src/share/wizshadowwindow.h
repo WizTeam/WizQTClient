@@ -61,7 +61,7 @@ public:
         //m_shadowWidget->setGraphicsEffect(effect);
         m_shadowWidget->setCursor(QCursor(Qt::ArrowCursor));
         //
-        m_titleBar = new WizTitleBar(m_shadowWidget, this, m_rootWidget);
+        m_titleBar = new WizWindowTitleBar(m_shadowWidget, this, m_rootWidget);
         shadowLayout->addWidget(m_titleBar);
         //
         m_clientWidget = new QWidget(m_shadowWidget);
@@ -82,7 +82,7 @@ public:
     QWidget *clientWidget() const { return m_clientWidget; }
     QLayout* clientLayout() const { return m_clientLayout; }
     QWidget* shadowWidget() const { return m_shadowWidget; }
-    WizTitleBar* titleBar() const { return m_titleBar; }
+    WizWindowTitleBar* titleBar() const { return m_titleBar; }
     bool canResize() const { return m_canResize; }
     void setCanResize(bool b) { m_canResize = b; m_titleBar->setCanResize(b); }
     void setTitleText(QString title) { m_titleBar->setText(title); }
@@ -97,7 +97,7 @@ private:
     QWidget* m_shadowWidget;
     QWidget* m_clientWidget;
     QLayout* m_clientLayout;
-    WizTitleBar* m_titleBar;
+    WizWindowTitleBar* m_titleBar;
     bool m_canResize;
 protected:
     virtual WizWindowHitTestResult hitTest(const QPoint& posOfWindow)

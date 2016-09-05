@@ -342,7 +342,7 @@ public:
 
     //QString getPassword() const { return m_strPassword; }
     QString getUserAlias();
-    WizDatabase* getPersonalDatabase();
+    WizDatabase* personalDatabase();
 
 
     QString getEncryptedPassword();

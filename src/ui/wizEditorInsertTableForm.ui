@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizEditorInsertTableForm</class>
- <widget class="QDialog" name="CWizEditorInsertTableForm">
+ <class>WizEditorInsertTableForm</class>
+ <widget class="QDialog" name="WizEditorInsertTableForm">
   <property name="geometry">
    <rect>
     <x>0</x>

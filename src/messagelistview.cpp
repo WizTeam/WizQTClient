@@ -879,7 +879,7 @@ void WizMessageListView::on_itemSelectionChanged()
             QTextCodec* codec = QTextCodec::codecForName("UTF-8");
             QTextDecoder* encoder = codec->makeDecoder();
             const rapidjson::Value& u = d["link"];
-            QString str = encoder->toUnicode(u.getString(), u.GetStringLength());
+            QString str = encoder->toUnicode(u.GetString(), u.GetStringLength());
             WizExecuteOnThread(WIZ_THREAD_NETWORK, [str](){
                 QString link = str;
                 if (link.contains("{token}"))

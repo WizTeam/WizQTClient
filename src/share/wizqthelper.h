@@ -86,12 +86,10 @@ public:
     CString(const unsigned short* pUtf16) { *this = fromUtf16(pUtf16); }
     CString(const unsigned short* pUtf16, int size) { *this = fromUtf16(pUtf16, size); }
     //
-    bool isEmpty() const { return isEmpty(); }
     operator const unsigned short*() const { return utf16(); }
     //
     //QString &Format(const char *format, ...) { va_list p; return vsprintf(format, p); }
     //
-    void Delete(int index, int len) { remove(index, len); }
     void trim() { *this = trimmed(); }
     void trim(char ch);
     void trimLeft();
@@ -99,25 +97,18 @@ public:
     CString makeLower() { *this = toLower(); return *this; }
     CString makeUpper() { *this = toUpper(); return *this; }
     int getLength() const { return length(); }
+    //
+    using QString::compare;
     int compareNoCase(const CString& strOther) const { return compare(strOther, Qt::CaseInsensitive); }
     int compare(const CString& strOther) const { return compare(strOther, Qt::CaseSensitive); }
+
     void format(QString strFormat, ... );
     void empty() { clear(); }
     int find(char ch) const { return indexOf(ch); }
     int find(char ch, int start) const { return indexOf(ch, start); }
     int find(const CString& str) const { return indexOf(str); }
-    CString left(int count) const { return left(count); }
-    CString right(int count) const { return right(count); }
-    void append(const CString& str) { append(str); }
     void appendChar(char ch) { append(ch); }
-    void insert(int index, const CString& str);
-    void insert(int index, QChar ch);
     void setAt(int index, QChar ch);
-    CString mid(int iFirst, int nCount) const { return mid(iFirst, nCount); }
-    CString mid(int iFirst) const { return mid(iFirst); }
-    void remove(QChar ch) { remove(ch); }
-    void replace(QChar chFind, QChar chReplace) { replace(chFind, chReplace); }
-    void replace(const CString& strFind, const CString& strReplace) { replace(strFind, strReplace); }
     int findOneOf(const CString& strFind) const;
 };
 

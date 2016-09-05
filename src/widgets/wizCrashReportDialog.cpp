@@ -82,7 +82,7 @@ void WizCrashReportDialog::on_btn_yes_clicked()
             return;
         }
 
-        int returnCode = d.FindMember("return_code")->value.getInt();
+        int returnCode = d.FindMember("return_code")->value.GetInt();
         if (returnCode != 200)
         {
             qDebug() << "[Crash report]Return code was not 200, error :  " << returnCode << loop.result();

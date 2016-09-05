@@ -99,7 +99,7 @@ void WizLogger::addToBuffer(const QString& strMsg)
     QMutexLocker locker(&m_mutex);
     Q_UNUSED(locker);
     //
-    m_buffer->open(QIODevice::append);
+    m_buffer->open(QIODevice::Append);
     m_buffer->write(msg2LogMsg(strMsg).toUtf8());
     m_buffer->close();
 }

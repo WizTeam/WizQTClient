@@ -276,7 +276,7 @@ bool WizMainWindow::eventFilter(QObject* watched, QEvent* event)
     // Qt issue: issue? User quit for mac dock send close event to qApp?
     // I was throught close event only send to widget.
     if (watched == qApp) {
-        if (event->type() == QEvent::close)
+        if (event->type() == QEvent::Close)
         {
             qApp->quit();
             return true;
@@ -1497,7 +1497,7 @@ void WizMainWindow::OpenURLInDefaultBrowser(const QString& strUrl)
  * @brief MainWindow::GetToken
  * @param strFunctionName
  */
-void WizMainWindow::getToken(const QString& strFunctionName)
+void WizMainWindow::GetToken(const QString& strFunctionName)
 {
     QString strToken = WizToken::token();
     QString strExec = strFunctionName + QString("('%1')").arg(strToken);
@@ -3429,7 +3429,7 @@ QObject* WizMainWindow::DocumentsCtrl()
     return m_documents;
 }
 
-QObject* WizMainWindow::databaseManager()
+QObject* WizMainWindow::DatabaseManager()
 {
     return &m_dbMgr;
 }

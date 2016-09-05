@@ -16,7 +16,7 @@ class QLabel;
 class QState;
 class QHistoryState;
 class WizSkin9GridImage;
-class WizImageButton;
+class WizStyleButton;
 class WizUdpClient;
 
 class WizOEMDownloader : public QObject
@@ -240,11 +240,11 @@ private:
     QLineEdit* m_lineEditUserName;
     QLineEdit* m_lineEditPassword;
     QLineEdit* m_lineEditServer;
-    WizImageButton* m_buttonLogin;
+    WizStyleButton* m_buttonLogin;
     QLineEdit* m_lineEditNewUserName;
     QLineEdit* m_lineEditNewPassword;
     QLineEdit* m_lineEditRepeatPassword;
-    WizImageButton* m_buttonSignUp;
+    WizStyleButton* m_buttonSignUp;
 
     //
     QState* m_stateWizLogIn;

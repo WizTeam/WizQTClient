@@ -11,7 +11,7 @@
 #include "wizmisc.h"
 
 
-WizTitleBar::WizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
+WizWindowTitleBar::WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
     : QWidget(parent)
     , m_window(window)
     , m_shadowContainerWidget(shadowContainerWidget)
@@ -77,7 +77,7 @@ WizTitleBar::WizTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContai
     //
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
 }
-void WizTitleBar::layoutTitleBar()
+void WizWindowTitleBar::layoutTitleBar()
 {
     QHBoxLayout *hbox = new QHBoxLayout(this);
 
@@ -90,7 +90,7 @@ void WizTitleBar::layoutTitleBar()
     hbox->setSpacing(0);
 }
 
-void WizTitleBar::windowStateChanged()
+void WizWindowTitleBar::windowStateChanged()
 {
     if (Qt::WindowMaximized == m_window->windowState())
     {
@@ -104,12 +104,12 @@ void WizTitleBar::windowStateChanged()
     }
 }
 
-void WizTitleBar::showSmall()
+void WizWindowTitleBar::showSmall()
 {
     m_window->showMinimized();
 }
 
-void WizTitleBar::showMaxRestore()
+void WizWindowTitleBar::showMaxRestore()
 {
     if (!m_canResize)
         return;
@@ -127,26 +127,26 @@ void WizTitleBar::showMaxRestore()
     }
 }
 
-void WizTitleBar::mousePressEvent(QMouseEvent *me)
+void WizWindowTitleBar::mousePressEvent(QMouseEvent *me)
 {
     m_startPos = me->globalPos();
     m_clickPos = mapTo(m_window, me->pos());
 }
-void WizTitleBar::mouseMoveEvent(QMouseEvent *me)
+void WizWindowTitleBar::mouseMoveEvent(QMouseEvent *me)
 {
     if (Qt::WindowMaximized == m_window->windowState())
         return;
     m_window->move(me->globalPos() - m_clickPos);
 }
 
-void WizTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
+void WizWindowTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
 {
     if (event->button() == Qt::LeftButton)
     {
         showMaxRestore();
     }
 }
-void WizTitleBar::setCanResize(bool b)
+void WizWindowTitleBar::setCanResize(bool b)
 {
     m_canResize = b;
     //
@@ -154,18 +154,18 @@ void WizTitleBar::setCanResize(bool b)
     m_minimize->setEnabled(b);
 }
 
-void WizTitleBar::setContentsMargins(QMargins margins)
+void WizWindowTitleBar::setContentsMargins(QMargins margins)
 {
     m_oldContentsMargin = margins;
     QWidget::setContentsMargins(margins);
     layout()->setContentsMargins(margins);
 }
-void WizTitleBar::setText(QString title)
+void WizWindowTitleBar::setText(QString title)
 {
     m_titleLabel->setText(title);
 }
 
-QString WizTitleBar::text() const
+QString WizWindowTitleBar::text() const
 {
     return m_titleLabel->text();
 }

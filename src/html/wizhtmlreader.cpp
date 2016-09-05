@@ -510,7 +510,7 @@ COLORREF WizHtmlElemAttr::getColorValue(void) const
         }
     }
     else if (isHexColorValue())
-        crTemp = ::wiz_strtoul(m_strAttrValue.mid(1), NULL, 16);
+        crTemp = ::wiz_strtoul(CString(m_strAttrValue.mid(1)), NULL, 16);
     return (crTemp);
 }
 
@@ -594,7 +594,7 @@ void WizHtmlElemAttr::putValue(const CString& strValue)
         if ((iCurPos = m_strAttrValue.find(_T('&'), ++iCurPos)) == -1)
             break;
 
-        iParseLen = CWizHtmlEntityResolver::resolveEntity(m_strAttrValue.mid(iCurPos), chSubst);
+        iParseLen = CWizHtmlEntityResolver::resolveEntity(CString(m_strAttrValue.mid(iCurPos)), chSubst);
         if (iParseLen)
         {
             m_strAttrValue.replace

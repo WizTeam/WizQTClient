@@ -796,7 +796,7 @@ bool WIZMESSAGEDATA::isAd()
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
-    QString type = encoder->toUnicode(d["type"].getString(), d["type"].GetStringLength());
+    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
 
     return type == "ad";
 }

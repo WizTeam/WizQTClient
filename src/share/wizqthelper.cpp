@@ -133,16 +133,6 @@ void CString::trimRight()
     }
 }
 
-void CString::insert(int index, const CString& str)
-{
-    insert(index, str);
-}
-
-void CString::insert(int index, QChar ch)
-{
-    insert(index, ch);
-}
-
 void CString::setAt(int index, QChar ch)
 {
     replace(index, 1, ch);

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizUpgradeNotifyDialog</class>
- <widget class="QDialog" name="CWizUpgradeNotifyDialog">
+ <class>WizUpgradeNotifyDialog</class>
+ <widget class="QDialog" name="WizUpgradeNotifyDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

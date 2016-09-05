@@ -1403,29 +1403,29 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     if (d.HasParseError())
         return;
     //
-    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].getString());
-    CString strForeColor = QString::fromUtf8(d["foreColor"].getString());
-    CString strBackColor = QString::fromUtf8(d["backColor"].getString());
+    CString strBlockFormat = QString::fromUtf8(d["blockFormat"].GetString());
+    CString strForeColor = QString::fromUtf8(d["foreColor"].GetString());
+    CString strBackColor = QString::fromUtf8(d["backColor"].GetString());
     //
-    CString strFontName = QString::fromUtf8(d["fontName"].getString());
-    CString strFontSize = QString::fromUtf8(d["fontSize"].getString());
+    CString strFontName = QString::fromUtf8(d["fontName"].GetString());
+    CString strFontSize = QString::fromUtf8(d["fontSize"].GetString());
     //
-    bool subscript = QString::fromUtf8(d["subscript"].getString()) == "1";
-    bool superscript = QString::fromUtf8(d["superscript"].getString()) == "1";
+    bool subscript = QString::fromUtf8(d["subscript"].GetString()) == "1";
+    bool superscript = QString::fromUtf8(d["superscript"].GetString()) == "1";
     //
-    bool bold = QString::fromUtf8(d["bold"].getString()) == "1";
-    bool italic = QString::fromUtf8(d["italic"].getString()) == "1";
-    bool underline = QString::fromUtf8(d["underline"].getString()) == "1";
-    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].getString()) == "1";
+    bool bold = QString::fromUtf8(d["bold"].GetString()) == "1";
+    bool italic = QString::fromUtf8(d["italic"].GetString()) == "1";
+    bool underline = QString::fromUtf8(d["underline"].GetString()) == "1";
+    bool strikeThrough = QString::fromUtf8(d["strikeThrough"].GetString()) == "1";
     //
-    bool justifyleft = QString::fromUtf8(d["justifyleft"].getString()) == "1";
-    bool justifycenter = QString::fromUtf8(d["justifycenter"].getString()) == "1";
-    bool justifyright = QString::fromUtf8(d["justifyright"].getString()) == "1";
-    bool justifyfull = QString::fromUtf8(d["justifyfull"].getString()) == "1";
+    bool justifyleft = QString::fromUtf8(d["justifyleft"].GetString()) == "1";
+    bool justifycenter = QString::fromUtf8(d["justifycenter"].GetString()) == "1";
+    bool justifyright = QString::fromUtf8(d["justifyright"].GetString()) == "1";
+    bool justifyfull = QString::fromUtf8(d["justifyfull"].GetString()) == "1";
     //
-    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].getString()) == "1";
-    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].getString()) == "1";
-    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].getString()) == "1";
+    bool InsertOrderedList = QString::fromUtf8(d["InsertOrderedList"].GetString()) == "1";
+    bool InsertUnorderedList = QString::fromUtf8(d["InsertUnorderedList"].GetString()) == "1";
+    bool canInsertTable = QString::fromUtf8(d["canCreateTable"].GetString()) == "1";
 
     //
     bool blockFormatSetted = false;

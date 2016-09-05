@@ -701,7 +701,7 @@ bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strUrl)
         for (rapidjson::SizeType i = 0; i < d.Size(); i++)
         {
             const rapidjson::Value& u = d[i];
-            strList.append(encoder->toUnicode(u.getString(), u.GetStringLength()));
+            strList.append(encoder->toUnicode(u.GetString(), u.GetStringLength()));
         }
         //
         {

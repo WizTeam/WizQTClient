@@ -123,7 +123,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     ui->btn_min->setVisible(false);
     ui->btn_close->setVisible(false);
     //
-    WizTitleBar* title = titleBar();
+    WizWindowTitleBar* title = titleBar();
     title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
 #endif
@@ -544,7 +544,7 @@ void WizLoginDialog::applyElementStyles(const QString &strLocal)
     ui->btn_min->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); padding:0px; height: 13px; width: 13px;}").arg(strGrayButton));
     ui->btn_max->setStyleSheet(QString("QToolButton{ border:none; image:url(%1); padding:0px; height: 13px; width: 13px;}").arg(strGrayButton));
 #else
-    WizTitleBar* m_titleBar = qobject_cast<WizTitleBar*>(titleBar());
+    WizWindowTitleBar* m_titleBar = titleBar();
     if (m_titleBar)
     {
         QString strBtnCloseNormal = ::WizGetSkinResourceFileName(strThemeName, "linuxlogindialoclose");
@@ -1408,8 +1408,8 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
     if (d.FindMember("ip")->value.IsNull())
         return;
 
-    QString ip = QString::fromUtf8(d.FindMember("ip")->value.getString());
-    QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.getString());
+    QString ip = QString::fromUtf8(d.FindMember("ip")->value.GetString());
+    QString iptype = QString::fromUtf8(d.FindMember("iptype")->value.GetString());
     if (ip.isEmpty())
     {
         TOLOG(CString(responseMessage));
@@ -1458,10 +1458,10 @@ bool WizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
     d.Parse<0>(settings.toUtf8().constData());
 
     if (d.HasMember("LogoConfig") && d.FindMember("LogoConfig")->value.HasMember("enable")
-            && d.FindMember("LogoConfig")->value.FindMember("enable")->value.getBool())
+            && d.FindMember("LogoConfig")->value.FindMember("enable")->value.GetBool())
     {
         QString strUrl = d.FindMember("LogoConfig")->value.HasMember("common") ?
-                    d.FindMember("LogoConfig")->value.FindMember("common")->value.getString() : "";
+                    d.FindMember("LogoConfig")->value.FindMember("common")->value.GetString() : "";
         if (strUrl.isEmpty())
         {
             qDebug() << "Can not found logo path in oem settings";
@@ -1814,7 +1814,7 @@ void WizOEMDownloader::checkServerLicence(const QString& licence)
 
     if (d.HasMember("licence"))
     {
-        QString newLicence = QString::fromUtf8(d.FindMember("licence")->value.getString());
+        QString newLicence = QString::fromUtf8(d.FindMember("licence")->value.GetString());
 
         QString strOldLicence = licence;
         // check wheather licence changed

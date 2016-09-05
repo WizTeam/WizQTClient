@@ -53,17 +53,17 @@ void WizCommentQuerier::parseReplyData(const QString& reply)
 
     if (d.HasMember("error_code")) {
         qDebug() << "Failed to get comment count: "
-                 << QString::fromUtf8(d.FindMember("error")->value.getString())
-                 << " code: " << d.FindMember("error_code")->value.getInt();
+                 << QString::fromUtf8(d.FindMember("error")->value.GetString())
+                 << " code: " << d.FindMember("error_code")->value.GetInt();
         setCommentsCount(0);
         return;
     }
 
     if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.getInt();
+        int nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode != 200) {
             qDebug() << "Failed to get comment count, need 200, but return "
-                     << d.FindMember("return_code")->value.getInt();
+                     << d.FindMember("return_code")->value.GetInt();
             setCommentsCount(0);
             return;
         }
@@ -71,7 +71,7 @@ void WizCommentQuerier::parseReplyData(const QString& reply)
 
     if (d.HasMember("comment_count"))
     {
-        int count = d.FindMember("comment_count")->value.getInt();
+        int count = d.FindMember("comment_count")->value.GetInt();
         setCommentsCount(count);
     }
 }

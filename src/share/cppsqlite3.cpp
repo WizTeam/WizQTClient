@@ -293,22 +293,22 @@ double CppSQLite3Query::getFloatField(const CString& szField, double fNullValue/
 }
 
 
-COleDateTime CppSQLite3Query::getTimeField(int nField, time_t tNullValue /*= 0*/)
+WizOleDateTime CppSQLite3Query::getTimeField(int nField, time_t tNullValue /*= 0*/)
 {
     CString str = getStringField(nField);
-	if (str.IsEmpty())
+    if (str.isEmpty())
 	{
 		if (0 == tNullValue)
             return WizGetCurrentTime();
 		else
-            return COleDateTime(tNullValue);
+            return WizOleDateTime(tNullValue);
 	}
 	else
 	{
 		return WizStringToDateTime(str);
 	}
 }
-COleDateTime CppSQLite3Query::getTimeField(const CString& szField, time_t tNullValue /*= 0*/)
+WizOleDateTime CppSQLite3Query::getTimeField(const CString& szField, time_t tNullValue /*= 0*/)
 {
 	int nField = fieldIndex(szField);
 	return getTimeField(nField, tNullValue);
@@ -317,7 +317,7 @@ COleDateTime CppSQLite3Query::getTimeField(const CString& szField, time_t tNullV
 COLORREF CppSQLite3Query::getColorField(int nField, COLORREF crNullValue /*= 0*/)
 {
     CString str = getStringField(nField);
-	if (str.IsEmpty())
+    if (str.isEmpty())
 	{
 		return crNullValue;
 	}
@@ -407,7 +407,7 @@ int CppSQLite3Query::fieldIndex(const CString& szField)
 		{
 			const char* szTemp = sqlite3_column_name(mpVM, nField);
 
-            if (szField.CompareNoCase(szTemp) == 0)
+            if (szField.compareNoCase(szTemp) == 0)
 			{
 				return nField;
 			}
@@ -868,7 +868,7 @@ void CppSQLite3DB::setBusyTimeout(int nMillisecs)
 	sqlite3_busy_timeout(mpDB, mnBusyTimeoutMs);
 }
 
-BOOL CppSQLite3DB::IsOpened()
+BOOL CppSQLite3DB::isOpened()
 {
 	try
 	{
@@ -1637,7 +1637,7 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 {
 	try
 	{
-        CString strTempFileName = Utils::PathResolve::tempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
+        CString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
 		//
 		CppSQLite3DB dbSrc;
         dbSrc.open(strDBFileName);

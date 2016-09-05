@@ -248,8 +248,8 @@ bool WizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwor
         {
             if (localD.HasMember("template_js_version") && d.HasMember("template_js_version"))
             {
-                needUpdateJs = (localD.FindMember("template_js_version")->value.getString() !=
-                        d.FindMember("template_js_version")->value.getString());
+                needUpdateJs = (localD.FindMember("template_js_version")->value.GetString() !=
+                        d.FindMember("template_js_version")->value.GetString());
             }
         }
 
@@ -262,7 +262,7 @@ bool WizNoteManager::updateLocalTemplates(const QByteArray& newJsonData, QNetwor
         QString link;
         if (d.HasMember("template_js_link"))
         {
-            link = d.FindMember("template_js_link")->value.getString();
+            link = d.FindMember("template_js_link")->value.GetString();
         }
         if (!link.isEmpty())
         {

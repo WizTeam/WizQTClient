@@ -1078,10 +1078,9 @@ void WizDatabase::closeGroupDatabase(IWizSyncableDatabase* pDatabase)
 
 IWizSyncableDatabase* WizDatabase::getPersonalDatabase()
 {
-    return getPersonalDatabase();
+    return personalDatabase();
 }
-
-WizDatabase *WizDatabase::getPersonalDatabase()
+WizDatabase *WizDatabase::personalDatabase()
 {
     WizDatabase* db = &WizDatabaseManager::instance()->db();
     return db;
@@ -1133,7 +1132,7 @@ bool WizDatabase::isPersonalGroup()
     if (!isGroup())
         return false;
 
-    WizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = personalDatabase();
 
     WIZGROUPDATA group;
     personDb->getGroupData(kbGUID(), group);
@@ -1142,7 +1141,7 @@ bool WizDatabase::isPersonalGroup()
 
 bool WizDatabase::hasBiz()
 {
-    WizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = personalDatabase();
 
     return !personDb->getMetaDef("Bizs", "Count").isEmpty();
 }
@@ -1237,7 +1236,7 @@ WizOleDateTime WizDatabase::getLastSyncTime()
 
 bool WizDatabase::WizDayOnce(const QString& strName)
 {
-    WizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = personalDatabase();
     QString strDate = db->meta("WizDayOnce", strName);
     QDateTime curDt = QDateTime::currentDateTime();
     db->setMeta("WizDayOnce", strName, curDt.toString(Qt::ISODate));
@@ -1464,7 +1463,7 @@ void WizDatabase::onBizServiceExpr(const QString& strBizGUID, const QString& str
     if (strBizGUID.isEmpty())
         return;
 
-    WizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = personalDatabase();
     if (!db)
         return;
 
@@ -1499,7 +1498,7 @@ bool WizDatabase::isNoteCountLimit()
 
 bool WizDatabase::isBizServiceExpr(const QString& strBizGUID)
 {
-    WizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = personalDatabase();
     if (!db)
         return false;
 
@@ -1553,7 +1552,7 @@ bool WizDatabase::getNoteCountLimit(QString& strErrorMessage)
 
 bool WizDatabase::setMeta(const QString& strSection, const QString& strKey, const QString& strValue)
 {
-    return setMeta(strSection, strKey, strValue);
+    return WizIndex::setMeta(strSection, strKey, strValue);
 }
 
 QString WizDatabase::meta(const QString& strSection, const QString& strKey)
@@ -1877,14 +1876,14 @@ bool WizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
     d.Parse<0>(strJsonRaw.toUtf8().constData());
 
     if (d.HasMember("error_code")) {
-        qDebug() << QString::fromUtf8(d.FindMember("error")->value.getString());
+        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
         return false;
     }
 
     if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.getInt();
+        int nCode = d.FindMember("return_code")->value.GetInt();
         if (nCode != 200) {
-            qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.getString()) << ", code = " << nCode;
+            qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.GetString()) << ", code = " << nCode;
             return false;
         }
     }
@@ -1907,10 +1906,10 @@ bool WizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
         }
 
         WIZBIZUSER user;
-        user.alias = encoder->toUnicode(u["alias"].getString(), u["alias"].GetStringLength());
-        user.pinyin = encoder->toUnicode(u["pinyin"].getString(), u["pinyin"].GetStringLength());
-        user.userGUID = encoder->toUnicode(u["user_guid"].getString(), u["user_guid"].GetStringLength());
-        user.userId = encoder->toUnicode(u["user_id"].getString(), u["user_id"].GetStringLength());
+        user.alias = encoder->toUnicode(u["alias"].GetString(), u["alias"].GetStringLength());
+        user.pinyin = encoder->toUnicode(u["pinyin"].GetString(), u["pinyin"].GetStringLength());
+        user.userGUID = encoder->toUnicode(u["user_guid"].GetString(), u["user_guid"].GetStringLength());
+        user.userId = encoder->toUnicode(u["user_id"].GetString(), u["user_id"].GetStringLength());
         user.bizGUID = strBizGUID;
 
         arrayUser.push_back(user);
@@ -2073,7 +2072,7 @@ bool WizDatabase::getBizData(const QString& bizGUID, WIZBIZDATA& biz)
     if (bizGUID.isEmpty())
         return false;
 
-    WizDatabase* db = getPersonalDatabase();
+    WizDatabase* db = personalDatabase();
     if (!db)
         return false;
 
@@ -2576,7 +2575,7 @@ QString WizDatabase::getDocumentAuthorAlias(const WIZDOCUMENTDATA& doc)
     if (!doc.strAuthor.isEmpty())
         return doc.strAuthor;
 
-    WizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = personalDatabase();
     if (!personDb)
         return QString();
 
@@ -2600,7 +2599,7 @@ QString WizDatabase::getDocumentAuthorAlias(const WIZDOCUMENTDATA& doc)
 
 QString WizDatabase::getDocumentOwnerAlias(const WIZDOCUMENTDATA& doc)
 {
-    WizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = personalDatabase();
     if (!personDb)
         return QString();
 
@@ -2653,7 +2652,7 @@ bool WizDatabase::getUserDisplayName(QString &strDisplayName)
 
 QString WizDatabase::getUserAlias()
 {
-    WizDatabase* personDb = getPersonalDatabase();
+    WizDatabase* personDb = personalDatabase();
     if (!personDb)
         return QString();
 
@@ -2728,7 +2727,7 @@ bool WizDatabase::getUserCert(QString& strN, QString& stre, QString& strd, QStri
     {
         Q_ASSERT(!m_info.bizGUID.isEmpty());
         //
-        WizDatabase* pDatabase = getPersonalDatabase();
+        WizDatabase* pDatabase = personalDatabase();
         QString key = QString(g_strCertSection) + "/" + m_info.bizGUID;
         strN = pDatabase->getMetaDef(key, "N");
         stre = pDatabase->getMetaDef(key, "E");
@@ -2755,7 +2754,7 @@ bool WizDatabase::setUserCert(const QString& strN, const QString& stre, const QS
     {
         Q_ASSERT(!m_info.bizGUID.isEmpty());
         //
-        WizDatabase* pDatabase = getPersonalDatabase();
+        WizDatabase* pDatabase = personalDatabase();
         QString key = QString(g_strCertSection) + "/" + m_info.bizGUID;
         return pDatabase->setMeta(key, "N", strN) \
                 && pDatabase->setMeta(key, "E", stre) \
@@ -3361,7 +3360,7 @@ bool WizDatabase::getAllObjectsNeedToBeDownloaded(CWizObjectDataArray& arrayData
                 continue;
             }
 
-            WizDatabase* privateDB = getPersonalDatabase();
+            WizDatabase* privateDB = personalDatabase();
             if (!privateDB->getDownloadAttachmentsAtSync())
             {
                 if (arrayData[i].eObjectType == wizobjectDocumentAttachment) {
@@ -3531,7 +3530,7 @@ bool WizDatabase::refreshCertFromServer()
     auto refreshCore = [&]{
         if (isGroup())
         {
-            WizDatabase* db = getPersonalDatabase();
+            WizDatabase* db = personalDatabase();
             WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
             if (!server.login(db->getUserId(), db->getPassword()))
                 return false;

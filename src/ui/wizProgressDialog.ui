@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizProgressDialog</class>
- <widget class="QDialog" name="CWizProgressDialog">
+ <class>WizProgressDialog</class>
+ <widget class="QDialog" name="WizProgressDialog">
   <property name="geometry">
    <rect>
     <x>0</x>

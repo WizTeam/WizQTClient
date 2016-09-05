@@ -191,7 +191,7 @@ bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QStrin
 
     doc.Accept(writer);
 
-    QByteArray ba = buffer.getString();
+    QByteArray ba = buffer.GetString();
     //
     QString json = QString::fromUtf8(ba);
     //
@@ -215,10 +215,10 @@ bool WizKMAccountsServer::getUserBizCert(const QString& strBizGuid, QString& str
     d.Parse<0>(json.toUtf8().constData());
     //
     try {
-        strN = QString::fromUtf8(d.FindMember("n")->value.getString());
-        stre = QString::fromUtf8(d.FindMember("e")->value.getString());
-        strd = QString::fromUtf8(d.FindMember("d")->value.getString());
-        strHint = QString::fromUtf8(d.FindMember("hint")->value.getString());
+        strN = QString::fromUtf8(d.FindMember("n")->value.GetString());
+        stre = QString::fromUtf8(d.FindMember("e")->value.GetString());
+        strd = QString::fromUtf8(d.FindMember("d")->value.GetString());
+        strHint = QString::fromUtf8(d.FindMember("hint")->value.GetString());
     }
     catch (...) {
         return false;
@@ -634,7 +634,7 @@ QString getStringFromRapidValue(const rapidjson::Value& u, const QString& member
 
     QTextCodec* codec = QTextCodec::codecForName("UTF-8");
     QTextDecoder* encoder = codec->makeDecoder();
-    return encoder->toUnicode(u[memberName.toUtf8().constData()].getString(), u[memberName.toUtf8().constData()].GetStringLength());
+    return encoder->toUnicode(u[memberName.toUtf8().constData()].GetString(), u[memberName.toUtf8().constData()].GetStringLength());
 }
 
 bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
@@ -666,7 +666,7 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
         }
 
         WIZUSERMESSAGEDATA data;
-        data.nMessageID = (__int64)u["id"].getInt64();
+        data.nMessageID = (__int64)u["id"].GetInt64();
         data.strBizGUID = getStringFromRapidValue(u, "biz_guid");
         data.strKbGUID = getStringFromRapidValue(u, "kb_guid");
         data.strDocumentGUID = getStringFromRapidValue(u, "document_guid");
@@ -681,12 +681,12 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
         data.strTitle = getStringFromRapidValue(u, "title");
         data.strNote = getStringFromRapidValue(u, "note");
         //
-        data.nMessageType = u["message_type"].getInt();
-        data.nReadStatus = u["read_status"].getInt();
-        data.nDeletedStatus = u["delete_status"].getInt();
-        data.nVersion = (__int64)u["version"].getInt64();
+        data.nMessageType = u["message_type"].GetInt();
+        data.nReadStatus = u["read_status"].GetInt();
+        data.nDeletedStatus = u["delete_status"].GetInt();
+        data.nVersion = (__int64)u["version"].GetInt64();
         //
-        time_t dateCreated = __int64(u["dt_created"].getInt64()) / 1000;
+        time_t dateCreated = __int64(u["dt_created"].GetInt64()) / 1000;
         data.tCreated = WizOleDateTime(dateCreated);
 
         arrayMessage.push_back(data);

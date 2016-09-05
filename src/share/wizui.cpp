@@ -212,12 +212,12 @@ void WizIconLineEditContainer::cleanRightIcon()
 }
 
 
-WizImageButton::WizImageButton(QWidget *parent)
+WizStyleButton::WizStyleButton(QWidget *parent)
     :QPushButton(parent)
 {
 }
 
-void WizImageButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
+void WizStyleButton::setButtonStyle(const QString& normalBackgroundFileName, const QString& hotBackgroundFileName,
                                      const QString& downBackgroundFileName, const QString& disabledBackgroundFileName,
                                      const QColor& normalTextColor, const QColor& activeTextColor, const QColor& disableTextColor)
 {

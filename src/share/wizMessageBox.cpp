@@ -3,16 +3,6 @@
 #include <QDebug>
 #include <QApplication>
 
-WizMessageBox::WizMessageBox()
-{
-
-}
-
-WizMessageBox::~WizMessageBox()
-{
-
-}
-
 QMessageBox::StandardButton WizMessageBox::critical(QWidget* parent, const QString& title,
                                                      const QString& text, QMessageBox::StandardButtons buttons,
                                                      QMessageBox::StandardButton defaultButton)
@@ -76,7 +66,7 @@ QString WizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton 
     case QMessageBox::Ok:
         return QObject::tr("OK");
         break;
-    case QMessageBox::open:
+    case QMessageBox::Open:
         return QObject::tr("Open");
         break;
     case QMessageBox::Save:
@@ -85,7 +75,7 @@ QString WizMessageBox::buttonTextFromStandardButton(QMessageBox::StandardButton 
     case QMessageBox::Cancel:
         return QObject::tr("Cancel");
         break;
-    case QMessageBox::close:
+    case QMessageBox::Close:
         return QObject::tr("Close");
         break;
     case QMessageBox::Discard:
@@ -141,10 +131,10 @@ void WizMessageBox::buttonsFromStandardButtons(QMessageBox::StandardButtons butt
                                                 QList<QMessageBox::StandardButton>& buttonList)
 {
     buttons.testFlag(QMessageBox::Ok) ? buttonList.append(QMessageBox::Ok) : (void)0;
-    buttons.testFlag(QMessageBox::open) ? buttonList.append(QMessageBox::open) : (void)0;
+    buttons.testFlag(QMessageBox::Open) ? buttonList.append(QMessageBox::Open) : (void)0;
     buttons.testFlag(QMessageBox::Save) ? buttonList.append(QMessageBox::Save) : (void)0;
     buttons.testFlag(QMessageBox::Cancel) ? buttonList.append(QMessageBox::Cancel) : (void)0;
-    buttons.testFlag(QMessageBox::close) ? buttonList.append(QMessageBox::close) : (void)0;
+    buttons.testFlag(QMessageBox::Close) ? buttonList.append(QMessageBox::Close) : (void)0;
     buttons.testFlag(QMessageBox::Discard) ? buttonList.append(QMessageBox::Discard) : (void)0;
     buttons.testFlag(QMessageBox::Apply) ? buttonList.append(QMessageBox::Apply) : (void)0;
     buttons.testFlag(QMessageBox::Reset) ? buttonList.append(QMessageBox::Reset) : (void)0;

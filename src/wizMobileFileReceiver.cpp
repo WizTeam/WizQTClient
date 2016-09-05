@@ -181,7 +181,7 @@ QString WizMobileXmlProcesser::getElementText(QXmlStreamReader& xml)
     if(xml.tokenType() == QXmlStreamReader::StartElement)
     {
         xml.readNext();
-        if(xml.tokenType() == QXmlStreamReader::characters)
+        if(xml.tokenType() == QXmlStreamReader::Characters)
         {
             return xml.text().toString();
         }

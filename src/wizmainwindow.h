@@ -458,8 +458,8 @@ public:
     QObject* DocumentsCtrl();
     Q_PROPERTY(QObject* DocumentsCtrl READ DocumentsCtrl)
 
-    QObject* databaseManager();
-    Q_PROPERTY(QObject* databaseManager READ databaseManager)
+    QObject* DatabaseManager();
+    Q_PROPERTY(QObject* DatabaseManager READ DatabaseManager)
 
     Q_INVOKABLE QObject* CreateWizObject(const QString& strObjectID);
     Q_INVOKABLE void SetSavingDocument(bool saving);
@@ -469,7 +469,7 @@ public:
     //NOTE: these functions would called by web page, do not delete
     Q_INVOKABLE QString TranslateString(const QString& string);
     Q_INVOKABLE void OpenURLInDefaultBrowser(const QString& strUrl);
-    Q_INVOKABLE void getToken(const QString& strFunctionName);
+    Q_INVOKABLE void GetToken(const QString& strFunctionName);
     Q_INVOKABLE void SetDialogResult(int nResult);
     Q_INVOKABLE void AppStoreIAP();
     Q_INVOKABLE void copyLink(const QString& link);

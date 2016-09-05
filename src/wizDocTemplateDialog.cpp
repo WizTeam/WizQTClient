@@ -232,7 +232,7 @@ bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
         if (!templateObj.HasMember("templateId"))
             continue;
 
-        if (templateObj.FindMember("templateId")->value.getInt() == tmplData.id)
+        if (templateObj.FindMember("templateId")->value.GetInt() == tmplData.id)
             return true;
     }
 
@@ -457,13 +457,13 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
     if (d.HasMember("preview_link"))
     {
         //  http://sandbox.wiz.cn/libs/templates/demo/{file_name}/index.html
-        demoUrl = d.FindMember("preview_link")->value.getString();
+        demoUrl = d.FindMember("preview_link")->value.GetString();
     }
 
     QString thumbUrl;
     if (d.HasMember("thumb_link"))
     {
-        thumbUrl = d.FindMember("thumb_link")->value.getString();
+        thumbUrl = d.FindMember("thumb_link")->value.GetString();
     }
 
     const rapidjson::Value& templates = d.FindMember("templates")->value;
@@ -478,34 +478,34 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
 
         if (templateObj.HasMember("fileName"))
         {
-            data.strFileName = templateObj.FindMember("fileName")->value.getString();
+            data.strFileName = templateObj.FindMember("fileName")->value.GetString();
             data.strThumbUrl.replace("{file_name}", data.strFileName);
             data.strDemoUrl.replace("{file_name}",data.strFileName);
             data.strFileName = Utils::WizPathResolve::customNoteTemplatesPath() + data.strFileName + ".ziw";
         }
         if (templateObj.HasMember("folder"))
         {
-            data.strFolder = templateObj.FindMember("folder")->value.getString();
+            data.strFolder = templateObj.FindMember("folder")->value.GetString();
         }
         if (templateObj.HasMember("id"))
         {
-            data.id = templateObj.FindMember("id")->value.getInt();
+            data.id = templateObj.FindMember("id")->value.GetInt();
         }
         if (templateObj.HasMember("name"))
         {
-            data.strName = templateObj.FindMember("name")->value.getString();
+            data.strName = templateObj.FindMember("name")->value.GetString();
         }
         if (templateObj.HasMember("title"))
         {
-            data.strTitle = templateObj.FindMember("title")->value.getString();
+            data.strTitle = templateObj.FindMember("title")->value.GetString();
         }
         if (templateObj.HasMember("version"))
         {
-            data.strVersion = templateObj.FindMember("version")->value.getString();
+            data.strVersion = templateObj.FindMember("version")->value.GetString();
         }
         if (templateObj.HasMember("isFree"))
         {
-            data.isFree = templateObj.FindMember("isFree")->value.getBool();
+            data.isFree = templateObj.FindMember("isFree")->value.GetBool();
         }        
 
         tmplMap.insert(data.id, data);

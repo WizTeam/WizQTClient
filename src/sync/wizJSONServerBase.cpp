@@ -78,7 +78,7 @@ bool WizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
         return false;
     }
 
-    returnCode = d.FindMember("return_code")->value.getInt();
+    returnCode = d.FindMember("return_code")->value.GetInt();
 
     if (!d.HasMember("return_message"))
     {
@@ -86,7 +86,7 @@ bool WizJSONServerBase::getReturnCodeAndMessageFromJSON(const QString& strJSON,
         return false;
     }
 
-    returnMessage = d.FindMember("return_message")->value.getString();
+    returnMessage = d.FindMember("return_message")->value.GetString();
 
     return true;
 }

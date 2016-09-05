@@ -2330,7 +2330,7 @@ CString DateToSQL(const CString& strFieldName, CString strValue)
     QChar charOpera = strValue[0];
 	if (charOpera == '>')
 	{
-		strValue.Delete(0, 1);
+        strValue.remove(0, 1);
 		//
 		WizOleDateTime t;
 		if (!WizDateStringToDateTimeOfBegin(strValue, t))
@@ -2340,7 +2340,7 @@ CString DateToSQL(const CString& strFieldName, CString strValue)
 	}
 	else if (charOpera == '<')
 	{
-		strValue.Delete(0, 1);
+        strValue.remove(0, 1);
 		//
 		WizOleDateTime t;
 		if (!WizDateStringToDateTimeOfEnd(strValue, t))
@@ -2350,7 +2350,7 @@ CString DateToSQL(const CString& strFieldName, CString strValue)
 	}
 	else if (charOpera == '=')
 	{
-		strValue.Delete(0, 1);
+        strValue.remove(0, 1);
 	}
 	else
 	{
@@ -3528,13 +3528,13 @@ void WizIndex::setExtraFolder(const CWizStdStringArray& arrayLocation)
 {
     CString strText;
     ::WizStringArrayToText(arrayLocation, strText, "\\");
-    SetMeta("FOLDERS", "EXTRA", strText);
+    setMeta("FOLDERS", "EXTRA", strText);
 }
 
-void CWizIndex::AddExtraFolder(const QString& strLocation)
+void WizIndex::addExtraFolder(const QString& strLocation)
 {
     CWizStdStringArray arrayLocation;
-    GetExtraFolder(arrayLocation);
+    getExtraFolder(arrayLocation);
     if (-1 != ::WizFindInArray(arrayLocation, strLocation)) {
         return;
     }

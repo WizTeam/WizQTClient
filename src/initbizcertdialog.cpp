@@ -47,7 +47,7 @@ void WizInitBizCertDialog::verifyCert()
         return;
     }
     //
-    WizDatabase* personalDb = m_pDb->getPersonalDatabase();
+    WizDatabase* personalDb = m_pDb->personalDatabase();
     QString userId = personalDb->getUserId();
     QString password = personalDb->getPassword();
     //

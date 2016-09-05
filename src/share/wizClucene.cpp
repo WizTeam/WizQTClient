@@ -65,7 +65,7 @@ private:
         (ch>=0xac00 && ch<=0xd7af) ) //korean
 
 public:
-        lucene::analysis::WizToken* next(lucene::analysis::WizToken* token)
+        lucene::analysis::Token* next(lucene::analysis::Token* token)
         {
                 TCHAR ch = 0;
 
@@ -145,7 +145,7 @@ public:
     CJKTokenizer(lucene::util::Reader* in)
 		: Tokenizer(in)
 	{
-		m_tokenType = lucene::analysis::WizToken::getDefaultType();
+        m_tokenType = lucene::analysis::Token::getDefaultType();
 		m_offset = 0;
 		m_bufferIndex = 0;
 		m_dataLen = 0;
@@ -153,12 +153,12 @@ public:
 		m_ignoreSurrogates = true;
 	}
 
-	lucene::analysis::WizToken* next(lucene::analysis::WizToken* token)
+    lucene::analysis::Token* next(lucene::analysis::Token* token)
 	{
 		while (1)
 		{
 			int retTokenLength = 0;
-			lucene::analysis::WizToken* ret = next1(token, retTokenLength);
+            lucene::analysis::Token* ret = next1(token, retTokenLength);
 			if (!ret)
                 return NULL;
 
@@ -167,7 +167,7 @@ public:
 		}
 	}
 
-	lucene::analysis::WizToken* next1(lucene::analysis::WizToken* token, int& retTokenLength)
+    lucene::analysis::Token* next1(lucene::analysis::Token* token, int& retTokenLength)
 	{
 		int32_t length = 0;
 		retTokenLength = 0;
@@ -790,7 +790,7 @@ void _testCJK(const char* astr, bool ignoreSurrogates = true)
 	CJKTokenizer* tokenizer = _CLNEW CJKTokenizer(&r);
 	tokenizer->setIgnoreSurrogates(ignoreSurrogates);
 	int pos = 0;
-	lucene::analysis::WizToken tok;
+    lucene::analysis::Token tok;
 
 	while (1) {
 		if (tokenizer->next(&tok) == NULL)
@@ -821,7 +821,7 @@ void testLanguageBasedAnalyzer() {
 	CL_NS(util)::StringReader reader(_T("he abhorred accentueren"));
 	reader.setMinBufSize(50);
 	lucene::analysis::TokenStream* ts;
-	lucene::analysis::WizToken t;
+    lucene::analysis::Token t;
 
 	//test with english
 	a.setLanguage(_T("English"));

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizVerificationCodeDialog</class>
- <widget class="QDialog" name="CWizVerificationCodeDialog">
+ <class>WizVerificationCodeDialog</class>
+ <widget class="QDialog" name="WizVerificationCodeDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -30,7 +30,7 @@
       </spacer>
      </item>
      <item>
-      <widget class="wizImageButton" name="btn_image">
+      <widget class="WizImageButton" name="btn_image">
        <property name="minimumSize">
         <size>
          <width>100</width>
