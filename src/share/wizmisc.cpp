@@ -1934,14 +1934,14 @@ void WizDeleteFile(const CString& strFileName)
 
 
 
-#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>\r\n\t,%\'\\"
+#define WIZ_INVALID_CHAR_OF_FILE_NAME		"/\"?:*|<>,%\'\\\r\n\t"
 
 BOOL WizIsValidFileNameNoPath(const CString& strFileName)
 {
-    if (strFileName.GetLength() >= MAX_PATH)
+    if (strFileName.getLength() >= MAX_PATH)
         return FALSE;
     //
-    return -1 == strFileName.FindOneOf(WIZ_INVALID_CHAR_OF_FILE_NAME);
+    return -1 == strFileName.findOneOf(WIZ_INVALID_CHAR_OF_FILE_NAME);
 }
 
 
@@ -1950,37 +1950,37 @@ void WizMakeValidFileNameNoPath(CString& strFileName)
     if (WizIsValidFileNameNoPath(strFileName))
         return;
     //
-    if (strFileName.GetLength() >= MAX_PATH)
-        strFileName = strFileName.Left(MAX_PATH - 1);
+    if (strFileName.getLength() >= MAX_PATH)
+        strFileName = strFileName.left(MAX_PATH - 1);
     //
     while (1)
     {
-        int nPos = strFileName.FindOneOf(WIZ_INVALID_CHAR_OF_FILE_NAME);
+        int nPos = strFileName.findOneOf(WIZ_INVALID_CHAR_OF_FILE_NAME);
         if (-1 == nPos)
             break;
         //
-        strFileName.SetAt(nPos,  _T('-'));
+        strFileName.setAt(nPos,  _T('-'));
     }
     //
-    while (strFileName.Find(_T("--")) != -1)
+    while (strFileName.find(_T("--")) != -1)
     {
-        strFileName.Replace(_T("--"), _T("-"));
+        strFileName.replace(_T("--"), _T("-"));
     }
     //
-    strFileName.Trim();
-    strFileName.Trim('-');
+    strFileName.trim();
+    strFileName.trim('-');
 }
 
 void WizMakeValidFileNameNoPathLimitLength(CString& strFileName, int nMaxTitleLength)
 {
     WizMakeValidFileNameNoPath(strFileName);
     //
-    CString strTitle = Utils::Misc::extractFileTitle(strFileName);
-    CString strExt = Utils::Misc::extractFileExt(strFileName);
+    CString strTitle = Utils::WizMisc::extractFileTitle(strFileName);
+    CString strExt = Utils::WizMisc::extractFileExt(strFileName);
     //
-    if (strTitle.GetLength() > nMaxTitleLength)
+    if (strTitle.getLength() > nMaxTitleLength)
     {
-        strFileName = strTitle.Left(nMaxTitleLength) + strExt;
+        strFileName = strTitle.left(nMaxTitleLength) + strExt;
     }
 }
 
@@ -1988,12 +1988,12 @@ void WizMakeValidFileNameNoPathLimitFullNameLength(CString& strFileName, int nMa
 {
     WizMakeValidFileNameNoPath(strFileName);
     //
-    if (strFileName.GetLength() <= nMaxFullNameLength)
+    if (strFileName.getLength() <= nMaxFullNameLength)
         return;
     //
-    CString strExt = Utils::Misc::extractFileExt(strFileName);
+    CString strExt = Utils::WizMisc::extractFileExt(strFileName);
     //
-    int nMaxTitleLength = nMaxFullNameLength - strExt.GetLength();
+    int nMaxTitleLength = nMaxFullNameLength - strExt.getLength();
     //
     WizMakeValidFileNameNoPathLimitLength(strFileName, nMaxTitleLength);
 }
@@ -2009,7 +2009,7 @@ CString WizMakeValidFileNameNoPathReturn(const CString& strFileName)
 CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CString& valueName)
 {
     CString strValueName = valueName + "=";
-    int nValueNameLen = strValueName.GetLength();
+    int nValueNameLen = strValueName.getLength();
     //
     size_t nCount = arrayText.size();
     for (size_t i = 0; i < nCount; i++)
@@ -2017,8 +2017,8 @@ CString WizStringArrayGetValue(const CWizStdStringArray& arrayText, const CStrin
         CString strLine = arrayText[i];
         if (strLine.startsWith(strValueName))
         {
-            CString str = strLine.Right(strLine.GetLength() - nValueNameLen);
-            str.Trim();
+            CString str = strLine.right(strLine.getLength() - nValueNameLen);
+            str.trim();
             return str;
         }
     }
@@ -2030,7 +2030,7 @@ void WizCommandLineToStringArray(const CString& commandLine, CWizStdStringArray&
 {
     CString strCommandLine(commandLine);
     //
-    strCommandLine.Insert(0, ' ');
+    strCommandLine.insert(0, ' ');
     //
     WizSplitTextToArray(strCommandLine, _T(" /"), FALSE, arrayLine);
 }
@@ -2083,12 +2083,12 @@ bool WizLoadDataFromFile(const QString& strFileName, QByteArray& arrayData)
     return true;
 }
 
-CWaitCursor::CWaitCursor()
+WizWaitCursor::WizWaitCursor()
 {
     QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
 }
 
-CWaitCursor::~CWaitCursor()
+WizWaitCursor::~WizWaitCursor()
 {
     QApplication::restoreOverrideCursor();
 }
@@ -2099,9 +2099,9 @@ void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, Q
 {
     QString strFuncName = windowTitle;
     strFuncName = "Dialog"+strFuncName.replace(" ", "");
-    CWizFunctionDurationLogger logger(strFuncName);
+    WizFunctionDurationLogger logger(strFuncName);
 
-    CWizWebSettingsWithTokenDialog pDlg(url, sz, parent);
+    WizWebSettingsWithTokenDialog pDlg(url, sz, parent);
     if (dialogResizable)
     {
         pDlg.setMaximumSize(QSize(QWIDGETSIZE_MAX, QWIDGETSIZE_MAX));
@@ -2295,7 +2295,7 @@ void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
     CString strExt = WizFormatString2(_T("obj_guid=%1&kb_guid=%2&obj_type=document"),
                                       doc.strGUID, doc.strKbGUID);
-    QString strUrl = CommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
+    QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
 
