@@ -552,7 +552,7 @@ short WizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
     size_t i = 0;
     for (i = 0; i < sizeof(_szUnits)/sizeof(_szUnits[0]); i++)
     {
-        if (m_strAttrValue.right(::strlen(_szUnits[i])). \
+        if (CString(m_strAttrValue.right(::strlen(_szUnits[i]))).
             compareNoCase(_szUnits[i]) == 0)
         {
             rUnit = (LengthUnitsEnum)i;

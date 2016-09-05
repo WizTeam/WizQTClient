@@ -174,8 +174,8 @@ int _tcsicmp(const CString& str1, const CString& str2)
 
 int _tcsnicmp(const CString& str1, const CString& str2, int count)
 {
-    CString s1 = (str1.length() > count) ? str1.left(count) : str1;
-    CString s2 = (str2.length() > count) ? str2.left(count) : str2;
+    CString s1 = (str1.length() > count) ? CString(str1.left(count)) : str1;
+    CString s2 = (str2.length() > count) ? CString(str2.left(count)) : str2;
     return s1.compareNoCase(s2);
 }
 
