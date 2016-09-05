@@ -104,53 +104,53 @@ public:
     inline WizInfo &noquote() { stream->setFlag(Stream::NoQuotes); return *this; }
     inline WizInfo &maybeQuote(char c = '"') { if (!(stream->testFlag(Stream::NoQuotes))) stream->ts << c; return *this; }
 
-    inline CWizInfo &operator<<(QChar t) { maybeQuote('\''); stream->ts << t; maybeQuote('\''); return maybeSpace(); }
-    inline CWizInfo &operator<<(bool t) { stream->ts << (t ? "true" : "false"); return maybeSpace(); }
-    inline CWizInfo &operator<<(char t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(signed short t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(unsigned short t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(signed int t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(unsigned int t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(signed long t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(unsigned long t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(qint64 t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(quint64 t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(float t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(double t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(const char* t) { stream->ts << QString::fromUtf8(t); return maybeSpace(); }
-    inline CWizInfo &operator<<(const QString & t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
-    inline CWizInfo &operator<<(const QStringRef & t) { return operator<<(t.toString()); }
-    inline CWizInfo &operator<<(QLatin1String t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
-    inline CWizInfo &operator<<(const QByteArray & t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
-    inline CWizInfo &operator<<(const void * t) { stream->ts << t; return maybeSpace(); }
-    inline CWizInfo &operator<<(QTextStreamFunction f) {
+    inline WizInfo &operator<<(QChar t) { maybeQuote('\''); stream->ts << t; maybeQuote('\''); return maybeSpace(); }
+    inline WizInfo &operator<<(bool t) { stream->ts << (t ? "true" : "false"); return maybeSpace(); }
+    inline WizInfo &operator<<(char t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(signed short t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(unsigned short t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(signed int t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(unsigned int t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(signed long t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(unsigned long t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(qint64 t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(quint64 t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(float t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(double t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(const char* t) { stream->ts << QString::fromUtf8(t); return maybeSpace(); }
+    inline WizInfo &operator<<(const QString & t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
+    inline WizInfo &operator<<(const QStringRef & t) { return operator<<(t.toString()); }
+    inline WizInfo &operator<<(QLatin1String t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
+    inline WizInfo &operator<<(const QByteArray & t) { maybeQuote(); stream->ts << t; maybeQuote(); return maybeSpace(); }
+    inline WizInfo &operator<<(const void * t) { stream->ts << t; return maybeSpace(); }
+    inline WizInfo &operator<<(QTextStreamFunction f) {
         stream->ts << f;
         return *this;
     }
 
-    inline CWizInfo &operator<<(QTextStreamManipulator m)
+    inline WizInfo &operator<<(QTextStreamManipulator m)
     { stream->ts << m; return *this; }
 };
 
 
 
-        #define qInfo CWizInfo
+        #define qInfo WizInfo
     #else
         #define qInfo   qDebug
     #endif
 #endif
 
 // obsolete, should remove
-#define TOLOG(x)                            Utils::Logger::writeLog(x)
-#define TOLOG1(x, p1)                       Utils::Logger::writeLog(WizFormatString1(x, p1))
-#define TOLOG2(x, p1, p2)                   Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
-#define TOLOG3(x, p1, p2, p3)               Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
-#define TOLOG4(x, p1, p2, p3, p4)           Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
-#define DEBUG_TOLOG(x)                      Utils::Logger::writeLog(x)
-#define DEBUG_TOLOG1(x, p1)                 Utils::Logger::writeLog(WizFormatString1(x, p1))
-#define DEBUG_TOLOG2(x, p1, p2)             Utils::Logger::writeLog(WizFormatString2(x, p1, p2))
-#define DEBUG_TOLOG3(x, p1, p2, p3)         Utils::Logger::writeLog(WizFormatString3(x, p1, p2, p3))
-#define DEBUG_TOLOG4(x, p1, p2, p3, p4)     Utils::Logger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
+#define TOLOG(x)                            Utils::WizLogger::writeLog(x)
+#define TOLOG1(x, p1)                       Utils::WizLogger::writeLog(WizFormatString1(x, p1))
+#define TOLOG2(x, p1, p2)                   Utils::WizLogger::writeLog(WizFormatString2(x, p1, p2))
+#define TOLOG3(x, p1, p2, p3)               Utils::WizLogger::writeLog(WizFormatString3(x, p1, p2, p3))
+#define TOLOG4(x, p1, p2, p3, p4)           Utils::WizLogger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
+#define DEBUG_TOLOG(x)                      Utils::WizLogger::writeLog(x)
+#define DEBUG_TOLOG1(x, p1)                 Utils::WizLogger::writeLog(WizFormatString1(x, p1))
+#define DEBUG_TOLOG2(x, p1, p2)             Utils::WizLogger::writeLog(WizFormatString2(x, p1, p2))
+#define DEBUG_TOLOG3(x, p1, p2, p3)         Utils::WizLogger::writeLog(WizFormatString3(x, p1, p2, p3))
+#define DEBUG_TOLOG4(x, p1, p2, p3, p4)     Utils::WizLogger::writeLog(WizFormatString4(x, p1, p2, p3, p4))
 
 
 #endif // UTILS_LOGGER_H

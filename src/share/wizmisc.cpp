@@ -889,18 +889,18 @@ CString WizXMLGetCharsetFromXMLText(const char* pBuffer)
     strMark.Delete(0, nPos + 9);
     //
     strMark.replace('"', ' ');
-    strMark.Replace('\'', ' ');
-    strMark.Replace('?', ' ');
+    strMark.replace('\'', ' ');
+    strMark.replace('?', ' ');
     //
-    strMark.Trim();
+    strMark.trim();
     //
     strCharset = CString(strMark);
     //
-    int nPosEnd = strCharset.Find(' ');
+    int nPosEnd = strCharset.find(' ');
     if (-1 == nPosEnd)
         return strCharset;
     //
-    return strCharset.Left(nPosEnd);
+    return strCharset.left(nPosEnd);
 }
 
 CString WizAnsiToUnicode(const CString& strCharset, const char* lpszText)
@@ -917,7 +917,7 @@ CString WizAnsiToUnicode(const CString& strCharset, const char* lpszText)
 bool WizHtmlAnsiToUnicode(const char* lpszText, QString& strText)
 {
     CString strCharset = WizHTMLGetCharsetFromHTMLText(lpszText);
-    if (strCharset.IsEmpty())
+    if (strCharset.isEmpty())
     {
         strText = QString::fromLocal8Bit(lpszText);
     }
@@ -931,7 +931,7 @@ bool WizHtmlAnsiToUnicode(const char* lpszText, QString& strText)
 bool WizXmlAnsiToUnicode(const char* lpszText, QString& strText)
 {
     CString strCharset = WizXMLGetCharsetFromXMLText(lpszText);
-    if (strCharset.IsEmpty())
+    if (strCharset.isEmpty())
     {
         strText = QString::fromLocal8Bit(lpszText);
     }
@@ -1053,8 +1053,8 @@ bool WizLoadUnicodeTextFromBuffer2(char* pBuffer, size_t nLen, QString& strText,
         }
         else
         {
-            CString strExt = Utils::Misc::extractFileExt(CString(strFileName));
-            strExt.MakeLower();
+            CString strExt = Utils::WizMisc::extractFileExt(CString(strFileName));
+            strExt.makeLower();
             if (bForceHTML || strExt.startsWith(".htm"))
             {
                 bRet = WizHtmlAnsiToUnicode(pBuffer, strText);
@@ -1223,9 +1223,9 @@ BOOL WizSplitTextToArray(CString strText, const CString& strSplitterText, BOOL b
 void WizStringArrayToText(const CWizStdStringArray& arrayText, CString& strText, const CString& strSplitter)
 {
     size_t nSplitterLen = 0;
-    if (!strSplitter.IsEmpty())
+    if (!strSplitter.isEmpty())
     {
-        nSplitterLen = strSplitter.GetLength();
+        nSplitterLen = strSplitter.getLength();
     }
     //
     int nTextLen = 0;
@@ -1234,15 +1234,15 @@ void WizStringArrayToText(const CWizStdStringArray& arrayText, CString& strText,
     //
     for (int i = 0; i < nLineCount; i++)
     {
-        nTextLen += arrayText[i].GetLength();
+        nTextLen += arrayText[i].getLength();
     }
     //
     size_t nCharCount = nSplitterLen * nLineCount + nTextLen + 1024;
     //
     int nBufferSize = int(nCharCount * sizeof(unsigned short));
     //
-    CWizBufferAlloc ba(nBufferSize);
-    unsigned short* pBuffer = (unsigned short *)ba.GetBuffer();
+    WizBufferAlloc ba(nBufferSize);
+    unsigned short* pBuffer = (unsigned short *)ba.getBuffer();
     if (!pBuffer)
         return;
     //
@@ -1255,9 +1255,9 @@ void WizStringArrayToText(const CWizStdStringArray& arrayText, CString& strText,
         const CString& strLine = arrayText[i];
         //
         ATLASSERT(p < pBufferEnd);
-        memcpy(p, strLine.utf16(), strLine.GetLength() * sizeof(unsigned short));
+        memcpy(p, strLine.utf16(), strLine.getLength() * sizeof(unsigned short));
         //
-        p += strLine.GetLength();
+        p += strLine.getLength();
         //
         if (i < nLineCount - 1)
         {
@@ -1275,7 +1275,7 @@ int WizFindInArray(const CWizStdStringArray& arrayText, const CString& strFind)
 {
     int nCount = (int)arrayText.size();
     for (int i = 0; i < nCount; i++) {
-        if (0 == arrayText[i].Compare(strFind))
+        if (0 == arrayText[i].compare(strFind))
             return i;
     }
 
@@ -1287,7 +1287,7 @@ int WizFindInArrayNoCase(const CWizStdStringArray& arrayText, const CString& str
     int nCount = (int)arrayText.size();
     for (int i = 0; i < nCount; i++)
     {
-        if (0 == arrayText[i].CompareNoCase(strFind))
+        if (0 == arrayText[i].compareNoCase(strFind))
             return i;
     }
     return -1;
@@ -1299,8 +1299,8 @@ void WizStringArrayEraseEmptyLine(CWizStdStringArray& arrayText)
     for (int i = nCount - 1; i >= 0; i--)
     {
         CString strLine = arrayText[i];
-        strLine.Trim();
-        if (strLine.IsEmpty())
+        strLine.trim();
+        if (strLine.isEmpty())
         {
             arrayText.erase(arrayText.begin() + i);
         }
@@ -1348,25 +1348,25 @@ void WizStringArrayRemoveMultiElementNoCase(CWizStdStringArray& arrayText)
     size_t nCount = arrayText.size();
     for (intptr_t i = nCount - 1; i > 0; i--)
     {
-        if (0 == arrayText[i].CompareNoCase(arrayText[i - 1]))
+        if (0 == arrayText[i].compareNoCase(arrayText[i - 1]))
             arrayText.erase(arrayText.begin() + i);
     }
 }
 
 BOOL WizStringSimpleSplit(const CString& str, char ch, CString& strLeft, CString& strRight)
 {
-    int nPos = str.Find(ch);
+    int nPos = str.find(ch);
     if (-1 == nPos)
         return FALSE;
     //
-    strLeft = str.Left(nPos);
-    strRight = str.Right(str.GetLength() - nPos - 1);
+    strLeft = str.left(nPos);
+    strRight = str.right(str.getLength() - nPos - 1);
     return TRUE;
 }
 
-CString WizDateToLocalString(const COleDateTime& t)
+CString WizDateToLocalString(const WizOleDateTime& t)
 {
-    COleDateTime localDateTime = t.toLocalTime();
+    WizOleDateTime localDateTime = t.toLocalTime();
     return localDateTime.toString(Qt::DefaultLocaleShortDate);
 }
 
@@ -1378,7 +1378,7 @@ intptr_t WizStrStrI_Pos(const CString& str, const CString& strFind, int nStart /
 CString WizInt64ToStr(__int64 n)
 {
     CString str;
-    str.Format("%lld", n);
+    str.format("%lld", n);
     return str;
 }
 
@@ -1386,8 +1386,8 @@ CString WizGenGUIDLowerCaseLetterOnly()
 {
     QUuid guid = QUuid::createUuid();
     CString str = guid.toString();
-    str.Trim('{');
-    str.Trim('}');
+    str.trim('{');
+    str.trim('}');
     return str;
 }
 
@@ -1523,7 +1523,7 @@ BOOL WizFormatXML(CString& strXML)
 */
 
 
-CWizBufferAlloc::CWizBufferAlloc(int nInitSize)
+WizBufferAlloc::WizBufferAlloc(int nInitSize)
 {
     m_nSize = 0;
     m_pBuffer = NULL;
@@ -1534,7 +1534,7 @@ CWizBufferAlloc::CWizBufferAlloc(int nInitSize)
         m_nSize = nInitSize;
     }
 }
-CWizBufferAlloc::~CWizBufferAlloc()
+WizBufferAlloc::~WizBufferAlloc()
 {
     if (m_pBuffer)
     {
@@ -1543,12 +1543,12 @@ CWizBufferAlloc::~CWizBufferAlloc()
     m_pBuffer = NULL;
 }
 
-BYTE* CWizBufferAlloc::GetBuffer()
+BYTE* WizBufferAlloc::getBuffer()
 {
     return m_pBuffer;
 }
 
-BOOL CWizBufferAlloc::SetNewSize(int nNewSize)
+BOOL WizBufferAlloc::setNewSize(int nNewSize)
 {
     if (!m_pBuffer)
     {
@@ -1610,13 +1610,13 @@ QString WizGetDefaultSkinName()
 
 QString WizGetSkinResourcePath(const QString& strSkinName)
 {
-    return Utils::PathResolve::skinResourcesPath(strSkinName);
+    return Utils::WizPathResolve::skinResourcesPath(strSkinName);
 }
 
 void WizGetSkins(QStringList& skins)
 {
     CWizStdStringArray folders;
-    ::WizEnumFolders(Utils::PathResolve::resourcesPath() + "skins/", folders, 0);
+    ::WizEnumFolders(Utils::WizPathResolve::resourcesPath() + "skins/", folders, 0);
 
     foreach (const CString& path, folders)
     {
@@ -1624,7 +1624,7 @@ void WizGetSkins(QStringList& skins)
         if (!PathFileExists(strSkinFileName))
             continue;
 
-        skins.append(Utils::Misc::extractLastPathName(path));
+        skins.append(Utils::WizMisc::extractLastPathName(path));
     }
 }
 
@@ -1633,14 +1633,14 @@ void WizGetSkins(QStringList& skins)
 // FIXME: remove from wizmisc!
 QString WizGetSkinDisplayName(const QString& strSkinName, const QString& strLocale)
 {
-    CWizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
+    WizSettings settings(::WizGetSkinResourcePath(strSkinName) + "skin.ini");
 
-    QString strSkinDisplayName = settings.GetString("Common", "Name_" + strLocale);
+    QString strSkinDisplayName = settings.getString("Common", "Name_" + strLocale);
     if (!strSkinDisplayName.isEmpty()) {
         return strSkinDisplayName;
     }
 
-    strSkinDisplayName = settings.GetString("Common", "Name");
+    strSkinDisplayName = settings.getString("Common", "Name");
     if (!strSkinDisplayName.isEmpty()) {
         return strSkinDisplayName;
     }

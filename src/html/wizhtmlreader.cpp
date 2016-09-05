@@ -706,7 +706,7 @@ UINT WizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
 
         m_strAttrName = strAttrName;
         if (lpszEnd == lpszBegin)	// empty attribute value?
-            m_strAttrValue.Empty();
+            m_strAttrValue.empty();
         else
             // use putValue() instead of direct assignment;
             // this will automatically normalize data before
@@ -721,9 +721,9 @@ UINT WizHtmlElemAttr::parseFromStr(const unsigned short* lpszString)
 
     return (0U);
 }
-CString CWizHtmlElemAttr::toString()const
+CString WizHtmlElemAttr::toString()const
 {
-    if (-1 == m_strAttrValue.Find('"'))
+    if (-1 == m_strAttrValue.find('"'))
     {
         return m_strAttrName + "=\"" + m_strAttrValue + "\"";
     }
