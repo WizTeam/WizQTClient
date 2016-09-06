@@ -1,4 +1,4 @@
-#include "wizScreenShotWidget.h"
+#include "WizScreenShotWidget.h"
 #include <QMenu>
 #include <QApplication>
 #include <QDesktopWidget>

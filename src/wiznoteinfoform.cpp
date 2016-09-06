@@ -1,16 +1,16 @@
-#include "wiznoteinfoform.h"
-#include "ui_wiznoteinfoform.h"
+#include "WizNoteInfoForm.h"
+#include "ui_WizNoteInfoForm.h"
 
 #include <QFile>
 
-#include "share/wizobject.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
+#include "share/WizObject.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
 #include "utils/logger.h"
-#include "wizmainwindow.h"
-#include "wizLineInputDialog.h"
-#include "share/wizAnalyzer.h"
-#include "share/wizMessageBox.h"
+#include "WizMainWindow.h"
+#include "WizLineInputDialog.h"
+#include "share/WizAnalyzer.h"
+#include "share/WizMessageBox.h"
 
 QString formatLabelLink(const QString& linkHref, const QString& text)
 {

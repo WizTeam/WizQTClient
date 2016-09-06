@@ -4,7 +4,7 @@
 #include <map>
 #include <set>
 
-#include "wizIndexBase.h"
+#include "WizIndexBase.h"
 
 #define WIZ_DATABASE_VERSION "1.0"
 #define WIZ_NO_OBSOLETE

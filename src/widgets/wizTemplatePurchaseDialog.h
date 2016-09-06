@@ -6,7 +6,7 @@
 
 #ifdef Q_OS_MAC
 
-#include "mac/wizIAPHelper.h"
+#include "mac/WizIAPHelper.h"
 
 class QNetworkReply;
 class QNetworkAccessManager;

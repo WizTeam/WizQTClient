@@ -1,4 +1,4 @@
-#include "wizmultilinelistwidget.h"
+#include "WizMultiLineListWidget.h"
 
 #include <QStyledItemDelegate>
 

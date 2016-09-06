@@ -1,10 +1,10 @@
-#include "wizhtml2zip.h"
+#include "WizHtml2Zip.h"
 
-#include "html/wizhtmlcollector.h"
+#include "html/WizHtmlCollector.h"
 
-#include "../share/wizzip.h"
+#include "../share/WizZip.h"
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include <QDir>

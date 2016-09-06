@@ -1,7 +1,7 @@
 #ifndef CWIZACCOUNTMANAGER_H
 #define CWIZACCOUNTMANAGER_H
 
-#include "share/wizDatabaseManager.h"
+#include "share/WizDatabaseManager.h"
 
 class WizAccountManager
 {

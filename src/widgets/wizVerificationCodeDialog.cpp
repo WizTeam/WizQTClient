@@ -1,5 +1,5 @@
-#include "wizVerificationCodeDialog.h"
-#include "ui_wizVerificationCodeDialog.h"
+#include "WizVerificationCodeDialog.h"
+#include "ui_WizVerificationCodeDialog.h"
 
 #include <QIcon>
 #include <QPixmap>
@@ -10,10 +10,10 @@
 
 #include "sync/apientry.h"
 #include "utils/pathresolve.h"
-#include "share/wizmisc.h"
-#include "share/wizMessageBox.h"
-#include "share/wizthreads.h"
-#include "share/wizEventLoop.h"
+#include "share/WizMisc.h"
+#include "share/WizMessageBox.h"
+#include "share/WizThreads.h"
+#include "share/WizEventLoop.h"
 
 WizVerificationCodeDialog::WizVerificationCodeDialog(QWidget *parent)
     : QDialog(parent)

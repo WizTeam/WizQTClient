@@ -1,6 +1,6 @@
-#include "wizClucene.h"
+#include "WizClucene.h"
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #ifdef _T
 #undef _T
 #endif

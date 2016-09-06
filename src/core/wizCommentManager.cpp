@@ -1,4 +1,4 @@
-#include "wizCommentManager.h"
+#include "WizCommentManager.h"
 
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
@@ -8,8 +8,8 @@
 #include "rapidjson/document.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
-#include "share/wizEventLoop.h"
-#include "share/wizthreads.h"
+#include "share/WizEventLoop.h"
+#include "share/WizThreads.h"
 
 #define QUERY_DELAY 3
 

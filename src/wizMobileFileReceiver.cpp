@@ -1,4 +1,4 @@
-#include "wizMobileFileReceiver.h"
+#include "WizMobileFileReceiver.h"
 #include <QUdpSocket>
 #include <QTcpSocket>
 #include <QXmlStreamReader>
@@ -6,9 +6,9 @@
 #include <QDebug>
 #include <QDir>
 
-#include "share/wizmisc.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
+#include "share/WizMisc.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
 #include "utils/pathresolve.h"
 
 

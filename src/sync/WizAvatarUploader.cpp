@@ -10,7 +10,7 @@
 
 #include "apientry.h"
 #include "token.h"
-#include "share/wizEventLoop.h"
+#include "share/WizEventLoop.h"
 
 WizAvatarUploader::WizAvatarUploader(QObject* parent)
     : QObject(parent)

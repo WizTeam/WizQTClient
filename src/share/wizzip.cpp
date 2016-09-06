@@ -1,4 +1,4 @@
-#include "wizzip.h"
+#include "WizZip.h"
 
 #include <QString>
 #include <QDir>

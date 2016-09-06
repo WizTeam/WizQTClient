@@ -1,4 +1,4 @@
-#include "wizDatabase.h"
+#include "WizDatabase.h"
 
 #include <QDir>
 #include <QUrl>
@@ -12,29 +12,29 @@
 #include <QClipboard>
 #include <QDateTime>
 
-#include "wizhtml2zip.h"
-#include "share/wizzip.h"
-#include "share/wizGlobal.h"
+#include "WizHtml2Zip.h"
+#include "share/WizZip.h"
+#include "share/WizGlobal.h"
 
-#include "html/wizhtmlcollector.h"
+#include "html/WizHtmlCollector.h"
 #include "rapidjson/document.h"
 
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "utils/logger.h"
 #include "sync/avatar.h"
-#include "wizObjectDataDownloader.h"
-#include "wizProgressDialog.h"
-#include "wizusercipherform.h"
-#include "wizDatabaseManager.h"
-#include "wizLineInputDialog.h"
+#include "WizObjectDataDownloader.h"
+#include "WizProgressDialog.h"
+#include "WizUserCipherForm.h"
+#include "WizDatabaseManager.h"
+#include "WizLineInputDialog.h"
 #include "initbizcertdialog.h"
-#include "wizenc.h"
-#include "widgets/wizexecutingactiondialog.h"
-#include "sync/wizKMServer.h"
+#include "WizEnc.h"
+#include "widgets/WizExecutingActionDialog.h"
+#include "sync/WizKMServer.h"
 #include "sync/apientry.h"
-#include "share/wizthreads.h"
-#include "wizMessageBox.h"
+#include "share/WizThreads.h"
+#include "WizMessageBox.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
 

@@ -6,12 +6,12 @@
 #include <QScrollBar>
 #include <QDebug>
 
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "wizDocumentView.h"
-#include "wizmainwindow.h"
-#include "wizDocumentWebView.h"
-#include "wizDocumentWebEngine.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "WizDocumentView.h"
+#include "WizMainWindow.h"
+#include "WizDocumentWebView.h"
+#include "WizDocumentWebEngine.h"
 
 WizTitleEdit::WizTitleEdit(QWidget *parent)
     : QLineEdit(parent)

@@ -1,7 +1,7 @@
 #ifndef WIZDRAWTEXTHELPER_H
 #define WIZDRAWTEXTHELPER_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 class QPainter;
 class QRect;

@@ -5,7 +5,7 @@
 #include <QMessageBox>
 
 #include "sync.h"
-#include "wizKMServer.h"
+#include "WizKMServer.h"
 
 class WizDatabase;
 

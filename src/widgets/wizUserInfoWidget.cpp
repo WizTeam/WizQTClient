@@ -1,23 +1,23 @@
 #include <QtGlobal>
-#include "wizUserInfoWidget.h"
+#include "WizUserInfoWidget.h"
 #include <QMenu>
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "wizdef.h"
-#include "share/wizsettings.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizthreads.h"
+#include "WizDef.h"
+#include "share/WizSettings.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizThreads.h"
 #include "sync/apientry.h"
-#include "sync/wizKMServer.h"
+#include "sync/WizKMServer.h"
 #include "sync/avataruploader.h"
-#include "core/wizAccountManager.h"
+#include "core/WizAccountManager.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
-#include "widgets/wizIAPDialog.h"
-#include "wizWebSettingsDialog.h"
-#include "wizmainwindow.h"
-#include "wizOEMSettings.h"
+#include "widgets/WizIAPDialog.h"
+#include "WizWebSettingsDialog.h"
+#include "WizMainWindow.h"
+#include "WizOEMSettings.h"
 
 
 WizUserInfoWidget::WizUserInfoWidget(WizExplorerApp& app, QWidget *parent)

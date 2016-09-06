@@ -11,8 +11,8 @@
 #include <QToolButton>
 #include <QStyledItemDelegate>
 #include <QSortFilterProxyModel>
-#include "share/wizpopupwidget.h"
-#include "wizdef.h"
+#include "share/WizPopupWidget.h"
+#include "WizDef.h"
 
 class WizScrollBar;
 class WizDatabaseManager;

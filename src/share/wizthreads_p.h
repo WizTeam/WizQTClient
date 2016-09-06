@@ -3,7 +3,7 @@
 
 #include <deque>
 #include <QMutex>
-#include "wizthreads.h"
+#include "WizThreads.h"
 
 class QTimer;
 

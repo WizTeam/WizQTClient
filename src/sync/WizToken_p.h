@@ -2,7 +2,7 @@
 #define WIZSERVICE_TOKEN_P_H
 
 #include <QObject>
-#include "../share/wizobject.h"
+#include "../share/WizObject.h"
 
 class QString;
 class QDateTime;

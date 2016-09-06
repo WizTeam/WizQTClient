@@ -1,7 +1,7 @@
 #ifndef WIZMD5_H
 #define WIZMD5_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 CString WizMd5String(const unsigned char* pBuffer, DWORD dwLen);
 CString WizMd5StringNoSpace(const unsigned char* pBuffer, DWORD dwLen);

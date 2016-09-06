@@ -1,8 +1,8 @@
-#include "wizexecutingactiondialog.h"
-#include "ui_wizexecutingactiondialog.h"
+#include "WizExecutingActionDialog.h"
+#include "ui_WizExecutingActionDialog.h"
 
-#include "share/wizmisc.h"
-#include "share/wizthreads.h"
+#include "share/WizMisc.h"
+#include "share/WizThreads.h"
 #include "utils/stylehelper.h"
 
 #include <QMovie>

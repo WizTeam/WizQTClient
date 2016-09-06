@@ -1,4 +1,4 @@
-#include "wizNoteManager.h"
+#include "WizNoteManager.h"
 #include <QFileInfo>
 #include <QSettings>
 #include <QNetworkAccessManager>
@@ -13,13 +13,13 @@
 #include "utils/misc.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
-#include "share/wizobject.h"
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizthreads.h"
-#include "share/wizEventLoop.h"
-#include "wizDocTemplateDialog.h"
-#include "share/wizObjectDataDownloader.h"
+#include "share/WizObject.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizThreads.h"
+#include "share/WizEventLoop.h"
+#include "WizDocTemplateDialog.h"
+#include "share/WizObjectDataDownloader.h"
 
 void WizNoteManager::createIntroductionNoteForNewRegisterAccount()
 {

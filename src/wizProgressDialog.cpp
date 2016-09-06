@@ -1,5 +1,5 @@
-#include "wizProgressDialog.h"
-#include "ui_wizProgressDialog.h"
+#include "WizProgressDialog.h"
+#include "ui_WizProgressDialog.h"
 #include<QDebug>
 
 WizProgressDialog::WizProgressDialog(QWidget *parent, bool showStop) :

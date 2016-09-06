@@ -1,7 +1,7 @@
 #ifndef WIZOPTIONSWIDGET_H
 #define WIZOPTIONSWIDGET_H
 
-#include "share/wizpopupwidget.h"
+#include "share/WizPopupWidget.h"
 #include "wiznotesettings.h"
 
 #ifndef Q_OS_MAC

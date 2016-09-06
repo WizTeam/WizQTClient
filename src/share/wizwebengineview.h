@@ -1,8 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "websocketclientwrapper.h"
-#include "websockettransport.h"
+#include "WebSocketClientWrapper.h"
+#include "WebSocketTransport.h"
 #include <QWebEngineView>
 #include <QWebEnginePage>
 

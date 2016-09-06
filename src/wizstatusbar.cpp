@@ -1,8 +1,8 @@
-#include "wizstatusbar.h"
+#include "WizStatusBar.h"
 
 #include <QCursor>
 
-#include "wizmainwindow.h"
+#include "WizMainWindow.h"
 
 
 WizStatusBar::WizStatusBar(WizExplorerApp& app, QWidget *parent)

@@ -1,4 +1,4 @@
-#include "wizDocumentWebView.h"
+#include "WizDocumentWebView.h"
 
 #include <QRunnable>
 #include <QList>
@@ -25,41 +25,41 @@
 #include <QMacPasteboardMime>
 #endif
 
-#include "share/wizGlobal.h"
+#include "share/WizGlobal.h"
 
-#include "wizdef.h"
+#include "WizDef.h"
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "utils/misc.h"
 #include "utils/stylehelper.h"
 
-#include "share/wizmisc.h"
-#include "share/wizAnalyzer.h"
-#include "share/wizMessageBox.h"
-#include "share/wizObjectDataDownloader.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizthreads.h"
+#include "share/WizMisc.h"
+#include "share/WizAnalyzer.h"
+#include "share/WizMessageBox.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizThreads.h"
 #include "sync/avatar.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "core/wizAccountManager.h"
-#include "core/wizNoteManager.h"
+#include "core/WizAccountManager.h"
+#include "core/WizNoteManager.h"
 #include "widgets/WizCodeEditorDialog.h"
-#include "widgets/wizScreenShotWidget.h"
-#include "widgets/wizEmailShareDialog.h"
-#include "widgets/wizShareLinkDialog.h"
-#include "widgets/wizScrollBar.h"
-#include "widgets/wizexecutingactiondialog.h"
-#include "mac/wizmachelper.h"
+#include "widgets/WizScreenShotWidget.h"
+#include "widgets/WizEmailShareDialog.h"
+#include "widgets/WizShareLinkDialog.h"
+#include "widgets/WizScrollBar.h"
+#include "widgets/WizExecutingActionDialog.h"
+#include "mac/WizMacHelper.h"
 
-#include "wizmainwindow.h"
-#include "wizEditorInsertLinkForm.h"
-#include "wizEditorInsertTableForm.h"
-#include "wizDocumentTransitionView.h"
-#include "wizDocumentView.h"
-#include "wizSearchReplaceWidget.h"
+#include "WizMainWindow.h"
+#include "WizEditorInsertLinkForm.h"
+#include "WizEditorInsertTableForm.h"
+#include "WizDocumentTransitionView.h"
+#include "WizDocumentView.h"
+#include "WizSearchReplaceWidget.h"
 
-#include "html/wizhtmlreader.h"
+#include "html/WizHtmlReader.h"
 
 #include "titlebar.h"
 

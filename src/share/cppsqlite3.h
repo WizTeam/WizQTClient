@@ -31,7 +31,7 @@
 #include "sqlite3.h"
 #include <cstdio>
 #include <cstring>
-#include "wizmisc.h"
+#include "WizMisc.h"
 
 #define CPPSQLITE_ERROR 1000
 

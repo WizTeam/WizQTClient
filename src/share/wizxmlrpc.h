@@ -1,7 +1,7 @@
 #ifndef WIZXMLRPC_H
 #define WIZXMLRPC_H
 
-#include "wizxml.h"
+#include "WizXml.h"
 
 
 //enum WizXmlRpcError

@@ -8,7 +8,7 @@
 #include <memory>
 #include <functional>
 
-#include "wizobject.h"
+#include "WizObject.h"
 
 class CWizApi;
 class WizDatabase;

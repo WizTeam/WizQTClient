@@ -10,7 +10,7 @@
 #include <QPropertyAnimation>
 
 #include "utils/stylehelper.h"
-#include "share/wizmisc.h"
+#include "share/WizMisc.h"
 
 
 WizCellButton::WizCellButton(ButtonType type, QWidget *parent)

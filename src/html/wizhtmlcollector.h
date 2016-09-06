@@ -1,8 +1,8 @@
 #ifndef WIZHTMLCOLLECTOR_H
 #define WIZHTMLCOLLECTOR_H
 
-#include "wizhtmlreader.h"
-#include "../share/wizmisc.h"
+#include "WizHtmlReader.h"
+#include "../share/WizMisc.h"
 #include <QUrl>
 
 struct WIZHTMLFILEDATA

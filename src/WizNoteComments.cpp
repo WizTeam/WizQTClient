@@ -3,8 +3,8 @@
 
 #include <QDebug>
 
-#include "wizDocumentView.h"
-#include "share/wizobject.h"
+#include "WizDocumentView.h"
+#include "share/WizObject.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 

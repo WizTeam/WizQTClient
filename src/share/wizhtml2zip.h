@@ -1,7 +1,7 @@
 #ifndef WIZHTML2ZIP_H
 #define WIZHTML2ZIP_H
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 
 bool WizHtml2Zip(const QString& strUrl, const QString& strHtml, \
                  const QString& strResourcePath, long flags, \

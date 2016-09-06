@@ -1,9 +1,9 @@
-#include "wizDatabaseManager.h"
+#include "WizDatabaseManager.h"
 
 #include <QDebug>
 
-#include "wizDatabase.h"
-#include "wizobject.h"
+#include "WizDatabase.h"
+#include "WizObject.h"
 #include "utils/logger.h"
 
 static WizDatabaseManager* m_instance = 0;

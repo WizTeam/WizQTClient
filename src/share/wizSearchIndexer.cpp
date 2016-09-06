@@ -1,4 +1,4 @@
-#include "wizSearchIndexer.h"
+#include "WizSearchIndexer.h"
 
 #include <QFile>
 #include <QMetaType>
@@ -7,11 +7,11 @@
 
 #include <unistd.h>
 
-#include "wizdef.h"
-#include "wizmisc.h"
-#include "wizsettings.h"
-#include "html/wizhtmlcollector.h"
-#include "wizDatabase.h"
+#include "WizDef.h"
+#include "WizMisc.h"
+#include "WizSettings.h"
+#include "html/WizHtmlCollector.h"
+#include "WizDatabase.h"
 #include "utils/logger.h"
 #include "utils/pathresolve.h"
 

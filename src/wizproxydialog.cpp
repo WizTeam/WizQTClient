@@ -1,8 +1,8 @@
-#include "wizproxydialog.h"
-#include "ui_wizproxydialog.h"
+#include "WizProxyDialog.h"
+#include "ui_WizProxyDialog.h"
 
-#include "share/wizsettings.h"
-#include "share/wizmisc.h"
+#include "share/WizSettings.h"
+#include "share/WizMisc.h"
 
 #include "utils/pathresolve.h"
 

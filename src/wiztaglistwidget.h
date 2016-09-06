@@ -4,8 +4,8 @@
 #include <QPointer>
 #include <deque>
 
-#include "share/wizpopupwidget.h"
-#include "share/wizobject.h"
+#include "share/WizPopupWidget.h"
+#include "share/WizObject.h"
 
 class QLineEdit;
 class QListWidget;

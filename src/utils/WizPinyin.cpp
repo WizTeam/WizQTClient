@@ -4,8 +4,8 @@
 #include <stdlib.h>
 #include <QDebug>
 
-#include "../share/wizqthelper.h"
-#include "../share/wizmisc.h"
+#include "../share/WizQtHelper.h"
+#include "../share/WizMisc.h"
 //#pragma warning( disable: 4996)
 
 typedef char TCHAR;

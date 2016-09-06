@@ -31,11 +31,11 @@
 **
 ****************************************************************************/
 
-#include "websocketclientwrapper.h"
+#include "WebSocketClientWrapper.h"
 
 #include <QtWebSockets/QWebSocketServer>
 
-#include "websockettransport.h"
+#include "WebSocketTransport.h"
 
 /*!
     \brief Wrapps connected QWebSockets clients in WebSocketTransport objects.

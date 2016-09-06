@@ -1,5 +1,5 @@
-#include "wizconsoledialog.h"
-#include "ui_wizconsoledialog.h"
+#include "WizConsoleDialog.h"
+#include "ui_WizConsoleDialog.h"
 
 #include <QScrollBar>
 #include <QTextCodec>
@@ -9,15 +9,15 @@
 #include <QTextStream>
 #include <QMessageBox>
 
-#include "wizdef.h"
-#include "share/wizmisc.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
+#include "WizDef.h"
+#include "share/WizMisc.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
 
 #include "utils/logger.h"
 
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #endif
 
 WizConsoleDialog::WizConsoleDialog(WizExplorerApp& app, QWidget* parent)

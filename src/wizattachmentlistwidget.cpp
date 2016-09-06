@@ -1,4 +1,4 @@
-#include "wizattachmentlistwidget.h"
+#include "WizAttachmentListWidget.h"
 
 #include <QBoxLayout>
 #include <QFile>
@@ -9,22 +9,22 @@
 #include <QDebug>
 #include <QEventLoop>
 
-#include "share/wizGlobal.h"
+#include "share/WizGlobal.h"
 
-#include "wizdef.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizFileMonitor.h"
-#include "share/wizmisc.h"
-#include "share/wizuihelper.h"
-#include "share/wizObjectDataDownloader.h"
-#include "share/wizMessageBox.h"
+#include "WizDef.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizFileMonitor.h"
+#include "share/WizMisc.h"
+#include "share/WizUIHelper.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WizMessageBox.h"
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
-#include "wiznotestyle.h"
-#include "wizButton.h"
-#include "wizmainwindow.h"
-#include "share/wizthreads.h"
+#include "WizNoteStyle.h"
+#include "WizButton.h"
+#include "WizMainWindow.h"
+#include "share/WizThreads.h"
 
 
 const int nAttachmentListViewItemHeight  = 40;

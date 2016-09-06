@@ -1,9 +1,9 @@
-#include "wizFramelessWebDialog.h"
+#include "WizFramelessWebDialog.h"
 #include <QVBoxLayout>
 #include <QDesktopServices>
 #include <QWebEnginePage>
-#include "../share/wizwebengineview.h"
-#include "../share/wizthreads.h"
+#include "../share/WizWebEngineView.h"
+#include "../share/WizThreads.h"
 #include <QTimer>
 
 bool WizFramelessWebDialog::m_bVisibling = false;

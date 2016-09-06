@@ -1,11 +1,11 @@
-#include "wizLocalProgressWebView.h"
+#include "WizLocalProgressWebView.h"
 #include <QMovie>
 #include <QWebEngineView>
 #include <QWebEngineSettings>
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QPalette>
-#include "share/wizwebengineview.h"
+#include "share/WizWebEngineView.h"
 
 WizLocalProgressWebView::WizLocalProgressWebView(QWidget *parent) : QWidget(parent)
 {

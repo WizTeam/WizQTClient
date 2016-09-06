@@ -1,9 +1,9 @@
-#include "wizusercipherform.h"
-#include "ui_wizusercipherform.h"
+#include "WizUserCipherForm.h"
+#include "ui_WizUserCipherForm.h"
 
 #include <QGraphicsDropShadowEffect>
 
-#include "wizmainwindow.h"
+#include "WizMainWindow.h"
 #include "utils/stylehelper.h"
 
 

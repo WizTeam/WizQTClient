@@ -1,7 +1,7 @@
 #ifndef WIZRTFREADER_H
 #define WIZRTFREADER_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 class CWizRtfReader
 {

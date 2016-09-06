@@ -12,13 +12,13 @@
 #include <QDebug>
 
 #include "sync/avatar.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizGlobal.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizGlobal.h"
 #include "utils/pinyin.h"
 #include "utils/stylehelper.h"
 
-#include "wizDocumentView.h"
+#include "WizDocumentView.h"
 
 class MessageCompleterModel : public QAbstractListModel
 {

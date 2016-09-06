@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QtWebEngine>
 #include <QPropertyAnimation>
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 #include <QWebEngineView>
 
 

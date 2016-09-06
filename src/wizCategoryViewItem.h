@@ -3,7 +3,7 @@
 
 #include <QTreeWidgetItem>
 
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 
 enum ItemType
 {

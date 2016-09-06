@@ -1,10 +1,10 @@
-#include "wizXmlRpcServer.h"
+#include "WizXmlRpcServer.h"
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QNetworkProxy>
 #include <QTimer>
 
-#include "share/wizEventLoop.h"
+#include "share/WizEventLoop.h"
 
 
 WizXmlRpcServerBase::WizXmlRpcServerBase(const QString& strUrl, QObject* parent)

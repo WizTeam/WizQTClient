@@ -3,10 +3,10 @@
 
 #include <QSettings>
 
-#include "wizqthelper.h"
-#include "wizmisc.h"
+#include "WizQtHelper.h"
+#include "WizMisc.h"
 
-#include "wizDatabase.h"
+#include "WizDatabase.h"
 
 enum WizProxyType
 {

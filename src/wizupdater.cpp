@@ -1,11 +1,11 @@
-#include "wizupdater.h"
+#include "WizUpdater.h"
 
 #ifdef WIZ_OBOSOLETE
 
-#include "wizdef.h"
-#include "share/wizmisc.h"
-#include "share/wizsettings.h"
-#include "zip/wizzip.h"
+#include "WizDef.h"
+#include "share/WizMisc.h"
+#include "share/WizSettings.h"
+#include "zip/WizZip.h"
 
 const QString WIZ_UPGRADE_URL = "http://api.wiz.cn/";
 

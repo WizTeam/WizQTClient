@@ -1,5 +1,5 @@
-#include "wizUserInfoWidgetBaseMac_mm.h"
-#include "wizmachelper_mm.h"
+#include "WizUserInfoWidgetBaseMac_mm.h"
+#include "WizMacHelper_mm.h"
 
 #ifdef USECOCOATOOLBAR
 #include <QWidget>

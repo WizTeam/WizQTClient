@@ -2,8 +2,8 @@
 #define WIZEMAILSHAREDIALOG_H
 
 #include <QDialog>
-#include "wizdef.h"
-#include "share/wizobject.h"
+#include "WizDef.h"
+#include "share/WizObject.h"
 
 namespace Ui {
 class WizEmailShareDialog;

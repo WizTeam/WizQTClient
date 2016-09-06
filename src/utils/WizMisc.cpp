@@ -10,7 +10,7 @@
 #include <QMimeData>
 #include <QTextCodec>
 
-#include "wizdef.h"
+#include "WizDef.h"
 
 namespace Utils {
 

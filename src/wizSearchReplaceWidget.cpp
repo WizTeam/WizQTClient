@@ -1,5 +1,5 @@
-#include "wizSearchReplaceWidget.h"
-#include "ui_wizSearchReplaceWidget.h"
+#include "WizSearchReplaceWidget.h"
+#include "ui_WizSearchReplaceWidget.h"
 
 WizSearchReplaceWidget::WizSearchReplaceWidget(QWidget* parent) :
     QDialog(parent),

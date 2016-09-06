@@ -1,7 +1,7 @@
 #ifndef WIZFILEREADER_H
 #define WIZFILEREADER_H
 
-#include "share/wizDatabaseManager.h"
+#include "share/WizDatabaseManager.h"
 
 class WIZTAGDATA;
 

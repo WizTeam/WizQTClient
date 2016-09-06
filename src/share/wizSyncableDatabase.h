@@ -1,7 +1,7 @@
 #ifndef WIZSYNCABLEDATABASE_H
 #define WIZSYNCABLEDATABASE_H
 
-#include "wizobject.h"
+#include "WizObject.h"
 
 
 struct IWizSyncableDatabase

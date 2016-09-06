@@ -1,9 +1,9 @@
-#include "wizNotificationCenter.h"
+#include "WizNotificationCenter.h"
 
 #import <AppKit/AppKit.h>
 
-#include "share/wizobject.h"
-#include "mac/wizmachelper_mm.h"
+#include "share/WizObject.h"
+#include "mac/WizMacHelper_mm.h"
 
 #define NOTIFICATION_KEY_VALUE   "key"
 #define NOTIFICATION_USER_VALUE   "user"

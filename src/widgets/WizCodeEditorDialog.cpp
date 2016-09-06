@@ -1,8 +1,8 @@
 #include "WizCodeEditorDialog.h"
-#include "wizdef.h"
+#include "WizDef.h"
 #include "utils/pathresolve.h"
-#include "share/wizsettings.h"
-#include "wizDocumentWebView.h"
+#include "share/WizSettings.h"
+#include "WizDocumentWebView.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -21,9 +21,9 @@
 #include <QWebEnginePage>
 #include <QApplication>
 
-#include "share/wizGlobal.h"
-#include "share/wizwebengineview.h"
-#include "share/wizthreads.h"
+#include "share/WizGlobal.h"
+#include "share/WizWebEngineView.h"
+#include "share/WizThreads.h"
 
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 

@@ -4,7 +4,7 @@
 
 #ifdef USECOCOATOOLBAR
 
-#include "wizmachelper.h"
+#include "WizMacHelper.h"
 #include <QTreeWidget>
 
 QT_BEGIN_NAMESPACE

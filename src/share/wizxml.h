@@ -3,7 +3,7 @@
 
 #include <QtXml>
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 
 class WizXMLNode

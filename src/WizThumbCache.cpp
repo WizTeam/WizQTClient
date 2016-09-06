@@ -1,8 +1,8 @@
 #include "thumbcache.h"
 #include "thumbcache_p.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizthreads.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizThreads.h"
 
 
 #define THUMB_CACHE_MAX 10000

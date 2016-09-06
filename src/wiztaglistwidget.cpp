@@ -1,4 +1,4 @@
-#include "wiztaglistwidget.h"
+#include "WizTagListWidget.h"
 
 #include <QLineEdit>
 #include <QListWidget>
@@ -6,12 +6,12 @@
 #include <QVBoxLayout>
 #include <QLabel>
 
-#include "share/wizDatabaseManager.h"
-#include "share/wizuihelper.h"
-#include "share/wizkmcore.h"
-#include "share/wizobject.h"
-#include "share/wizDatabase.h"
-#include "widgets/wizScrollBar.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizUIHelper.h"
+#include "share/WizKMCore.h"
+#include "share/WizObject.h"
+#include "share/WizDatabase.h"
+#include "widgets/WizScrollBar.h"
 
 
 class CWizTagListWidgetItem: public QListWidgetItem

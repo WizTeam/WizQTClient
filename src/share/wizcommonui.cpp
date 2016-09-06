@@ -1,9 +1,9 @@
-#include "wizcommonui.h"
+#include "WizCommonUI.h"
 
 #include <QClipboard>
 #include <QApplication>
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "utils/pathresolve.h"
 
 

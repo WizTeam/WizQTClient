@@ -1,8 +1,8 @@
-#include "wizShareLinkDialog.h"
+#include "WizShareLinkDialog.h"
 #include "sync/token.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
-#include "share/wizsettings.h"
+#include "share/WizSettings.h"
 #include <QVBoxLayout>
 #include <QWebEngineView>
 #include <QWebEnginePage>
@@ -12,7 +12,7 @@
 #include <QDesktopServices>
 #include <QMessageBox>
 #include <QDebug>
-#include "share/wizwebengineview.h"
+#include "share/WizWebEngineView.h"
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 

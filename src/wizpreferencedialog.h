@@ -5,10 +5,10 @@
 #include <QPointer>
 #include <QFontDialog>
 
-#include "wizdef.h"
-#include "share/wizsettings.h"
-#include "share/wizmisc.h"
-//#include "wizproxydialog.h"
+#include "WizDef.h"
+#include "share/WizSettings.h"
+#include "share/WizMisc.h"
+//#include "WizProxyDialog.h"
 
 namespace Ui {
     class WizPreferenceWindow;

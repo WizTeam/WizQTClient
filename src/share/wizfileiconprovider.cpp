@@ -1,4 +1,4 @@
-#include "wizfileiconprovider.h"
+#include "WizFileIconProvider.h"
 #include <QPixmapCache>
 #include <QDir>
 
@@ -17,7 +17,7 @@
 #endif
 
 #ifdef Q_OS_MAC
-#include "wizmisc.h"
+#include "WizMisc.h"
 #endif
 
 #include "utils/pathresolve.h"

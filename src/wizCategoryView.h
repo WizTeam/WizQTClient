@@ -4,7 +4,7 @@
 #include <QPointer>
 #include <memory>
 #include <QTreeView>
-#include "wizCategoryViewItem.h"
+#include "WizCategoryViewItem.h"
 
 class WizFolder;
 class WizScrollBar;

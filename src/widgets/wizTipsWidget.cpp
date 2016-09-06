@@ -1,4 +1,4 @@
-#include "wizTipsWidget.h"
+#include "WizTipsWidget.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QLabel>

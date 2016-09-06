@@ -1,5 +1,5 @@
-#include "wizCrashReportDialog.h"
-#include "ui_wizCrashReportDialog.h"
+#include "WizCrashReportDialog.h"
+#include "ui_WizCrashReportDialog.h"
 
 #ifdef Q_OS_MAC
 #include <QUrlQuery>
@@ -10,10 +10,10 @@
 #include <QHttpMultiPart>
 #include <QPlainTextEdit>
 #include "rapidjson/document.h"
-#include "wizdef.h"
-#include "share/wizEventLoop.h"
-#include "share/wizmisc.h"
-#include "share/wizthreads.h"
+#include "WizDef.h"
+#include "share/WizEventLoop.h"
+#include "share/WizMisc.h"
+#include "share/WizThreads.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
 

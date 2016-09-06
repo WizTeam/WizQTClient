@@ -1,4 +1,4 @@
-#include "wizcreateaccount.h"
+#include "WizCreateAccount.h"
 
 WizCreateAccount::WizCreateAccount(const CString& strAccountsApiURL)
     : CWizApiBase(strAccountsApiURL)

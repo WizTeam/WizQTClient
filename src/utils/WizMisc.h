@@ -2,7 +2,7 @@
 #define UTILS_MISC_H
 
 #include <QtGlobal>
-#include "share/wizqthelper.h"
+#include "share/WizQtHelper.h"
 
 class QString;
 class QDateTime;

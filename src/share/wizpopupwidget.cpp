@@ -1,12 +1,12 @@
-#include "wizpopupwidget.h"
+#include "WizPopupWidget.h"
 
 #include <QtGui>
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "utils/stylehelper.h"
 
 #ifdef Q_OS_WIN
-//#include "wizwindowshelper.h"
+//#include "WizWindowsHelper.h"
 #endif
 
 

@@ -1,4 +1,4 @@
-#include "wizDocumentView.h"
+#include "WizDocumentView.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -10,35 +10,35 @@
 #include <QWebEnginePage>
 #include <QWebEngineSettings>
 
-#include "share/wizGlobal.h"
+#include "share/WizGlobal.h"
 
-#include "share/wizObjectDataDownloader.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizsettings.h"
-#include "share/wizuihelper.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizSettings.h"
+#include "share/WizUIHelper.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "sync/wizKMServer.h"
-#include "widgets/wizScrollBar.h"
-#include "widgets/wizLocalProgressWebView.h"
-#include "widgets/wizSegmentedButton.h"
-#include "widgets/wizTipsWidget.h"
-#include "wizDocumentWebView.h"
-#include "wizEditorToolBar.h"
-#include "wiznotestyle.h"
-#include "wizDocumentTransitionView.h"
-#include "wizDocumentWebView.h"
-#include "wizButton.h"
-#include "wizusercipherform.h"
-#include "wizDocumentEditStatus.h"
+#include "sync/WizKMServer.h"
+#include "widgets/WizScrollBar.h"
+#include "widgets/WizLocalProgressWebView.h"
+#include "widgets/WizSegmentedButton.h"
+#include "widgets/WizTipsWidget.h"
+#include "WizDocumentWebView.h"
+#include "WizEditorToolBar.h"
+#include "WizNoteStyle.h"
+#include "WizDocumentTransitionView.h"
+#include "WizDocumentWebView.h"
+#include "WizButton.h"
+#include "WizUserCipherForm.h"
+#include "WizDocumentEditStatus.h"
 #include "notifybar.h"
-#include "wizmainwindow.h"
+#include "WizMainWindow.h"
 
 #include "titlebar.h"
 
-#include "share/wizthreads.h"
-#include "share/wizwebengineview.h"
-#include "share/wizenc.h"
+#include "share/WizThreads.h"
+#include "share/WizWebEngineView.h"
+#include "share/WizEnc.h"
 
 
 #define DOCUMENT_STATUS_NOSTATUS            0x0000

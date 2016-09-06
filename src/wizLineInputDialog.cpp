@@ -1,5 +1,5 @@
-#include "wizLineInputDialog.h"
-#include "ui_wizLineInputDialog.h"
+#include "WizLineInputDialog.h"
+#include "ui_WizLineInputDialog.h"
 #include <QPushButton>
 
 WizLineInputDialog::WizLineInputDialog(const QString& strTitle,

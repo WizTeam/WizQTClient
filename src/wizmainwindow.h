@@ -7,11 +7,11 @@
 #include <QSystemTrayIcon>
 #include <memory>
 
-#include "wizdef.h"
-#include "share/wizuihelper.h"
-#include "share/wizsettings.h"
+#include "WizDef.h"
+#include "share/WizUIHelper.h"
+#include "share/WizSettings.h"
 #ifndef Q_OS_MAC
-#include "share/wizshadowwindow.h"
+#include "share/WizShadowWindow.h"
 #endif
 
 

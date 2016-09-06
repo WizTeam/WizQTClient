@@ -1,5 +1,5 @@
-#include "wizDocTemplateDialog.h"
-#include "ui_wizDocTemplateDialog.h"
+#include "WizDocTemplateDialog.h"
+#include "ui_WizDocTemplateDialog.h"
 
 #include <QFile>
 #include <QTextStream>
@@ -14,20 +14,20 @@
 #include "rapidjson/document.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
-#include "share/wizmisc.h"
-#include "share/wizzip.h"
-#include "share/wizsettings.h"
-#include "share/wizthreads.h"
-#include "share/wizEventLoop.h"
-#include "share/wizMessageBox.h"
-#include "share/wizObjectDataDownloader.h"
-#include "widgets/wizTemplatePurchaseDialog.h"
+#include "share/WizMisc.h"
+#include "share/WizZip.h"
+#include "share/WizSettings.h"
+#include "share/WizThreads.h"
+#include "share/WizEventLoop.h"
+#include "share/WizMessageBox.h"
+#include "share/WizObjectDataDownloader.h"
+#include "widgets/WizTemplatePurchaseDialog.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
-#include "core/wizAccountManager.h"
-#include "core/wizNoteManager.h"
-#include "wizDocumentTransitionView.h"
-#include "wizmainwindow.h"
+#include "core/WizAccountManager.h"
+#include "core/WizNoteManager.h"
+#include "WizDocumentTransitionView.h"
+#include "WizMainWindow.h"
 
 /*
  * 服务器的模板列表会在本地缓存一份，允许用户离线状况下使用

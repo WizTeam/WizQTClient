@@ -1,4 +1,4 @@
-#include "wizLockedFile.h"
+#include "WizLockedFile.h"
 #include <string.h>
 #include <errno.h>
 #include <unistd.h>

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QIcon>
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 
 class QString;
 class QMenu;

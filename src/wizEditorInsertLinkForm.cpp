@@ -1,5 +1,5 @@
-#include "wizEditorInsertLinkForm.h"
-#include "ui_wizEditorInsertLinkForm.h"
+#include "WizEditorInsertLinkForm.h"
+#include "ui_WizEditorInsertLinkForm.h"
 
 #include <QUrl>
 

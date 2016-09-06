@@ -1,5 +1,5 @@
-#include "wizEditorInsertTableForm.h"
-#include "ui_wizEditorInsertTableForm.h"
+#include "WizEditorInsertTableForm.h"
+#include "ui_WizEditorInsertTableForm.h"
 
 #include <QtGui>
 

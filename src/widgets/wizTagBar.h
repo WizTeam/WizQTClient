@@ -10,7 +10,7 @@
 #include <QStringListModel>
 #include <memory>
 #include <map>
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 
 class WizExplorerApp;
 class WizDatabaseManager;

@@ -1,16 +1,16 @@
-#include "wizObjectDataDownloader.h"
+#include "WizObjectDataDownloader.h"
 
 #include <QDebug>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
 #include "utils/pathresolve.h"
-#include "share/wizthreads.h"
-#include "sync/wizKMServer.h"
+#include "share/WizThreads.h"
+#include "sync/WizKMServer.h"
 #include "sync/token.h"
 #include "sync/apientry.h"
-#include "wizmisc.h"
-#include "wizDatabaseManager.h"
-#include "wizDatabase.h"
+#include "WizMisc.h"
+#include "WizDatabaseManager.h"
+#include "WizDatabase.h"
 
 // to avoid to much load for remote serser
 #define WIZ_OBJECTDATA_DOWNLOADER_MAX 1

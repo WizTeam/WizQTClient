@@ -1,16 +1,16 @@
-#include "wizpreferencedialog.h"
-#include "ui_wizpreferencedialog.h"
+#include "WizPreferenceDialog.h"
+#include "ui_WizPreferenceDialog.h"
 
 #include <QMessageBox>
 #include <QFontDialog>
 #include <QColorDialog>
 
-#include "share/wizGlobal.h"
+#include "share/WizGlobal.h"
 #include "utils/pathresolve.h"
-#include "share/wizMessageBox.h"
-#include "share/wizDatabaseManager.h"
-#include "wizmainwindow.h"
-#include "wizproxydialog.h"
+#include "share/WizMessageBox.h"
+#include "share/WizDatabaseManager.h"
+#include "WizMainWindow.h"
+#include "WizProxyDialog.h"
 
 
 WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)

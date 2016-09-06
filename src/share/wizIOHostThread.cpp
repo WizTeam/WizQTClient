@@ -1,4 +1,4 @@
-#include "wizIOHostThread.h"
+#include "WizIOHostThread.h"
 
 WizIOHostThread::WizIOHostThread(QObject *parent)
     : QThread(parent)

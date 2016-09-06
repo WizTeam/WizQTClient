@@ -5,10 +5,10 @@
 #include <QMap>
 #include <QMutex>
 
-#include "wizIndex.h"
-#include "wizthumbindex.h"
-#include "wizziwreader.h"
-#include "wizSyncableDatabase.h"
+#include "WizIndex.h"
+#include "WizThumbIndex.h"
+#include "WizZiwReader.h"
+#include "WizSyncableDatabase.h"
 
 class WizDatabase;
 class WizFolder;

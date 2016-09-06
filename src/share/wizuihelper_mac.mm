@@ -1,4 +1,4 @@
-#include "wizuihelper.h"
+#include "WizUIHelper.h"
 
 #ifdef Q_OS_MAC
 

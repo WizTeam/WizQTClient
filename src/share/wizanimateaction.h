@@ -1,12 +1,12 @@
 #ifndef WIZANIMATEACTION_H
 #define WIZANIMATEACTION_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 #include <QIcon>
 #include <QList>
 
-#include "wizdef.h"
+#include "WizDef.h"
 
 class QTimer;
 class QAction;

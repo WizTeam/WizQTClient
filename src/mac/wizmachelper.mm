@@ -1,5 +1,5 @@
-#include "wizmachelper.h"
-#include "wizmachelper_mm.h"
+#include "WizMacHelper.h"
+#include "WizMacHelper_mm.h"
 
 
 #include <QLocale>
@@ -9,7 +9,7 @@
 #include <QStringList>
 #include <QEventLoop>
 #include <QDebug>
-#include "html/wizhtmlcollector.h"
+#include "html/WizHtmlCollector.h"
 
 #import <WebKit/WebKit.h>
 
@@ -19,11 +19,11 @@
 #import <CrashReporter/PLCrashReportTextFormatter.h>
 #endif
 
-#include "wizmainwindow.h"
+#include "WizMainWindow.h"
 
-#include "share/wizRtfReader.h"
+#include "share/WizRtfReader.h"
 #include "utils/pathresolve.h"
-#include "widgets/wizCrashReportDialog.h"
+#include "widgets/WizCrashReportDialog.h"
 
 #if QT_VERSION >= 0x050200
 #include <qmacfunctions.h>

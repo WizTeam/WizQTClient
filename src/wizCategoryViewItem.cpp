@@ -1,4 +1,4 @@
-#include "wizCategoryViewItem.h"
+#include "WizCategoryViewItem.h"
 
 #include <QTextCodec>
 #include <QPainter>
@@ -13,21 +13,21 @@
 #include "utils/logger.h"
 #include "utils/misc.h"
 
-#include "wizCategoryView.h"
-#include "wizmainwindow.h"
-#include "wizDocumentTransitionView.h"
-#include "share/wizObjectDataDownloader.h"
-#include "share/wizObjectOperator.h"
-#include "wizProgressDialog.h"
-#include "widgets/wizTipsWidget.h"
+#include "WizCategoryView.h"
+#include "WizMainWindow.h"
+#include "WizDocumentTransitionView.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WizObjectOperator.h"
+#include "WizProgressDialog.h"
+#include "widgets/WizTipsWidget.h"
 
-#include "wizdef.h"
-#include "wiznotestyle.h"
+#include "WizDef.h"
+#include "WizNoteStyle.h"
 
-#include "share/wizsettings.h"
-#include "share/wizGlobal.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizmisc.h"
+#include "share/WizSettings.h"
+#include "share/WizGlobal.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizMisc.h"
 
 #define PREDEFINED_TRASH            QObject::tr("Trash")
 #define PREDEFINED_UNCLASSIFIED     QObject::tr("Unclassified")

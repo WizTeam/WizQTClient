@@ -14,9 +14,9 @@
 #include <QtWebEngineWidgets/QWebEnginePage>
 #include <QtWebEngineWidgets/QWebEngineView>
 
-//#include "wizdownloadobjectdatadialog.h"
-#include "wizdef.h"
-#include "share/wizobject.h"
+//#include "WizDownloadObjectDataDialog.h"
+#include "WizDef.h"
+#include "share/WizObject.h"
 
 class CWizObjectDataDownloaderHost;
 class WizEditorInsertLinkForm;

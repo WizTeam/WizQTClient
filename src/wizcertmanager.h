@@ -4,7 +4,7 @@
 #if 0
 
 #include "share/wizapi.h"
-#include "wizdef.h"
+#include "WizDef.h"
 
 class WizCertManager : public CWizApiBase
 {

@@ -1,6 +1,6 @@
-#include "wizxml.h"
+#include "WizXml.h"
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "../utils/logger.h"
 
 

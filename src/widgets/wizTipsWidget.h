@@ -4,7 +4,7 @@
 #include <functional>
 #include <QList>
 #include <QTimer>
-#include "share/wizpopupwidget.h"
+#include "share/WizPopupWidget.h"
 
 class QLabel;
 class QPushButton;

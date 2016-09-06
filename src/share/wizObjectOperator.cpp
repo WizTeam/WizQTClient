@@ -1,18 +1,18 @@
-#include "wizObjectOperator_p.h"
-#include "wizObjectOperator.h"
+#include "WizObjectOperator_p.h"
+#include "WizObjectOperator.h"
 #include <QThread>
 #include <QDebug>
 #include <QTimer>
 #include <QApplication>
-#include "share/wizMessageBox.h"
-#include "share/wizsettings.h"
-#include "share/wizthreads.h"
-#include "sync/wizkmsync.h"
-#include "wizProgressDialog.h"
-#include "wizObjectDataDownloader.h"
-#include "wizDatabaseManager.h"
-#include "wizDatabase.h"
-#include "wizLineInputDialog.h"
+#include "share/WizMessageBox.h"
+#include "share/WizSettings.h"
+#include "share/WizThreads.h"
+#include "sync/WizKMSync.h"
+#include "WizProgressDialog.h"
+#include "WizObjectDataDownloader.h"
+#include "WizDatabaseManager.h"
+#include "WizDatabase.h"
+#include "WizLineInputDialog.h"
 
 WizDocumentOperatorPrivate::WizDocumentOperatorPrivate(OperatorData* data, QObject* parent)
     : QObject(parent)

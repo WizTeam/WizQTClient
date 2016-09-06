@@ -1,21 +1,21 @@
-#include "wiznotestyle.h"
+#include "WizNoteStyle.h"
 
 #include <QProxyStyle>
 #include <QPainter>
 #include <QScrollBar>
 #include <QApplication>
 
-#include "wizCategoryView.h"
-#include "wizDocumentListView.h"
-#include "wizDocumentListViewItem.h"
-#include "wizattachmentlistwidget.h"
-#include "share/wizdrawtexthelper.h"
-#include "share/wizqthelper.h"
-#include "share/wizsettings.h"
-#include "share/wizuihelper.h"
-#include "share/wizui.h"
-#include "share/wizmultilinelistwidget.h"
-#include "share/wizmisc.h"
+#include "WizCategoryView.h"
+#include "WizDocumentListView.h"
+#include "WizDocumentListViewItem.h"
+#include "WizAttachmentListWidget.h"
+#include "share/WizDrawTextHelper.h"
+#include "share/WizQtHelper.h"
+#include "share/WizSettings.h"
+#include "share/WizUIHelper.h"
+#include "share/WizUI.h"
+#include "share/WizMultiLineListWidget.h"
+#include "share/WizMisc.h"
 //#include "share/wizimagepushbutton.h"
 
 #include "messagelistview.h"
@@ -24,7 +24,7 @@
 #include "sync/avatar.h"
 
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #endif
 
 

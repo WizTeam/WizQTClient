@@ -4,7 +4,7 @@
 #include <QWidget>
 //#include <QPropertyAnimation>
 
-//#include "wizui.h"
+//#include "WizUI.h"
 
 class QTimer;
 

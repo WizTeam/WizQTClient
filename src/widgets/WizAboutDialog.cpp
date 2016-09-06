@@ -1,5 +1,5 @@
 #include "aboutdialog.h"
-#include "../wizdef.h"
+#include "../WizDef.h"
 
 #include <QApplication>
 #include <QLabel>

@@ -1,4 +1,4 @@
-#include "wizPositionDelegate.h"
+#include "WizPositionDelegate.h"
 #include <QWidget>
 #include <algorithm>
 #include <QDebug>

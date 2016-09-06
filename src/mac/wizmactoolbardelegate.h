@@ -10,7 +10,7 @@
 #include <QtCore/QHash>
 #include <QAction>
 
-#include "wizmactoolbar.h"
+#include "WizMacToolBar.h"
 
 class WizMacToolBarItem;
 

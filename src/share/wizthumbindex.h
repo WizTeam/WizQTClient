@@ -4,7 +4,7 @@
 #include <QImage>
 
 #include "cppsqlite3.h"
-#include "wizobject.h"
+#include "WizObject.h"
 
 const int nThumbnailPixmapMaxWidth = 50;
 

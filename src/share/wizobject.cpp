@@ -1,7 +1,7 @@
-#include "wizobject.h"
+#include "WizObject.h"
 
-#include "wizxmlrpc.h"
-#include "wizmisc.h"
+#include "WizXmlRpc.h"
+#include "WizMisc.h"
 #include "utils/logger.h"
 #include "rapidjson/document.h"
 

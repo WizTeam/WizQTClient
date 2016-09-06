@@ -19,9 +19,9 @@
 #include "../utils/pathresolve.h"
 #include "../utils/stylehelper.h"
 
-#include "../share/wizmisc.h"
-#include "share/wizthreads.h"
-#include "share/wizEventLoop.h"
+#include "../share/WizMisc.h"
+#include "share/WizThreads.h"
+#include "share/WizEventLoop.h"
 
 /* ----------------------- AvatarDownloader ----------------------- */
 WizAvatarDownloader::WizAvatarDownloader(QObject* parent)

@@ -1,4 +1,4 @@
-#include "wizUserVerifyDialog.h"
+#include "WizUserVerifyDialog.h"
 
 #include <QLabel>
 #include <QLineEdit>

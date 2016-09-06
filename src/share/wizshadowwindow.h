@@ -10,8 +10,8 @@
 #include <QDebug>
 #include <QBoxLayout>
 #include <QTimer>
-#include "wiztitlebar.h"
-#include "wizshadoweffect.h"
+#include "WizTitleBar.h"
+#include "WizShadowEffect.h"
 
 template <class Base>
 class WizShadowWindow

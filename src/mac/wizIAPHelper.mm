@@ -1,5 +1,5 @@
-#include "wizIAPHelper.h"
-#include "wizmachelper_mm.h"
+#include "WizIAPHelper.h"
+#include "WizMacHelper_mm.h"
 #include <QByteArray>
 
 #import <Foundation/Foundation.h>

@@ -1,8 +1,8 @@
-#include "wizxmlrpc.h"
+#include "WizXmlRpc.h"
 
 #include <QUrl>
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "../utils/logger.h"
 
 

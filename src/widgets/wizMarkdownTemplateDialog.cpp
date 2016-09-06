@@ -1,10 +1,10 @@
-#include "wizMarkdownTemplateDialog.h"
-#include "ui_wizMarkdownTemplateDialog.h"
+#include "WizMarkdownTemplateDialog.h"
+#include "ui_WizMarkdownTemplateDialog.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"
-#include "share/wizmisc.h"
+#include "share/WizMisc.h"
 #include "extensionsystem/pluginmanager.h"
-#include "wiznotestyle.h"
+#include "WizNoteStyle.h"
 #include <QSettings>
 #include <QFileDialog>
 #include <QFontMetrics>

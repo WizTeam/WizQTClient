@@ -1,4 +1,4 @@
-#include "wizSearchWidget_mm.h"
+#include "WizSearchWidget_mm.h"
 
 #ifdef USECOCOATOOLBAR
 
@@ -16,11 +16,11 @@
 #include <QStyledItemDelegate>
 #include <QPainter>
 #include "utils/stylehelper.h"
-#include "share/wizthreads.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizsettings.h"
-#include "wizPositionDelegate.h"
+#include "share/WizThreads.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizSettings.h"
+#include "WizPositionDelegate.h"
 
 
 class WizSuggestionItemDelegate :  public QStyledItemDelegate

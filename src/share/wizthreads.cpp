@@ -1,5 +1,5 @@
-#include "wizthreads.h"
-#include "wizthreads_p.h"
+#include "WizThreads.h"
+#include "WizThreads_p.h"
 
 #include <QThread>
 #include <QMutex>

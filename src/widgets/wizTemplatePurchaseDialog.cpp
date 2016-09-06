@@ -1,14 +1,14 @@
-#include "wizTemplatePurchaseDialog.h"
-#include "ui_wizTemplatePurchaseDialog.h"
+#include "WizTemplatePurchaseDialog.h"
+#include "ui_WizTemplatePurchaseDialog.h"
 
 #ifdef Q_OS_MAC
 
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include "rapidjson/document.h"
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizMessageBox.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizMessageBox.h"
 #include "sync/apientry.h"
 
 #define WIZ_PRODUCT_TEMPLATE   "cn.wiz.wiznotemac.templates"

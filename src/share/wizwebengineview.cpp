@@ -1,8 +1,8 @@
 #include <QWebEngineView>
 #include <QWebSocketServer>
 #include <QWebChannel>
-#include "wizwebengineview.h"
-#include "wizmisc.h"
+#include "WizWebEngineView.h"
+#include "WizMisc.h"
 #include "utils/pathresolve.h"
 
 WizWebEnginePage::WizWebEnginePage(QObject* parent)

@@ -11,13 +11,13 @@
 #include <QApplication>
 
 #include "pathresolve.h"
-#include "../share/wizmisc.h"
-#include "../share/wizsettings.h"
-#include "../share/wizGlobal.h"
+#include "../share/WizMisc.h"
+#include "../share/WizSettings.h"
+#include "../share/WizGlobal.h"
 
 
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #endif
 
 namespace Utils {

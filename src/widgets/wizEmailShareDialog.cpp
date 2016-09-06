@@ -1,5 +1,5 @@
-#include "wizEmailShareDialog.h"
-#include "ui_wizEmailShareDialog.h"
+#include "WizEmailShareDialog.h"
+#include "ui_WizEmailShareDialog.h"
 #include <QListWidget>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -9,11 +9,11 @@
 #include <QVBoxLayout>
 #include <QDebug>
 
-#include "share/wizMessageBox.h"
+#include "share/WizMessageBox.h"
 #include "sync/apientry.h"
 #include "sync/token.h"
-#include "share/wizsettings.h"
-#include "share/wizDatabaseManager.h"
+#include "share/WizSettings.h"
+#include "share/WizDatabaseManager.h"
 #include "rapidjson/document.h"
 #include "utils/stylehelper.h"
 

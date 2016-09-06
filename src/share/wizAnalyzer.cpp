@@ -1,4 +1,4 @@
-#include "wizAnalyzer.h"
+#include "WizAnalyzer.h"
 #include <QMutexLocker>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -10,16 +10,16 @@
 #include <QFile>
 #include <QDataStream>
 #include <QDebug>
-#include "wizdef.h"
-#include "wizmisc.h"
+#include "WizDef.h"
+#include "WizMisc.h"
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
 #include "sync/apientry.h"
-#include "share/wizEventLoop.h"
-#include "share/wizthreads.h"
-#include "wizmainwindow.h"
-#include "wizDatabase.h"
-#include "wizDatabaseManager.h"
+#include "share/WizEventLoop.h"
+#include "share/WizThreads.h"
+#include "WizMainWindow.h"
+#include "WizDatabase.h"
+#include "WizDatabaseManager.h"
 
 WizAnalyzer::WizAnalyzer(const CString& strRecordFileName)
     : m_strRecordFileName(strRecordFileName)

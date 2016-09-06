@@ -1,11 +1,11 @@
 #include "initbizcertdialog.h"
 #include "ui_initbizcertdialog.h"
-#include "share/wizMessageBox.h"
-#include "sync/wizKMServer.h"
-#include "widgets/wizexecutingactiondialog.h"
-#include "share/wizthreads.h"
-#include "share/wizDatabase.h"
-#include "share/wizenc.h"
+#include "share/WizMessageBox.h"
+#include "sync/WizKMServer.h"
+#include "widgets/WizExecutingActionDialog.h"
+#include "share/WizThreads.h"
+#include "share/WizDatabase.h"
+#include "share/WizEnc.h"
 #include "sync/apientry.h"
 
 WizInitBizCertDialog::WizInitBizCertDialog(WizDatabase* pDatabase, QWidget *parent) :

@@ -1,9 +1,9 @@
-#include "wizSingleApplication.h"
+#include "WizSingleApplication.h"
 
 /*
 
-#include "wizLocalPeer.h"
-#include "wizLockedFile.h"
+#include "WizLocalPeer.h"
+#include "WizLockedFile.h"
 
 #include <QDir>
 #include <QFileOpenEvent>

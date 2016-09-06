@@ -1,5 +1,5 @@
-#include "wizupdaterprogressdialog.h"
-#include "ui_wizupdaterprogressdialog.h"
+#include "WizUpdaterProgressDialog.h"
+#include "ui_WizUpdaterProgressDialog.h"
 
 #include <QMouseEvent>
 #include <QDesktopWidget>
@@ -7,8 +7,8 @@
 #include <QTimer>
 #include <QMessageBox>
 
-#include "share/wizmisc.h"
-#include "share/wizsettings.h"
+#include "share/WizMisc.h"
+#include "share/WizSettings.h"
 
 WizUpdaterDialog::WizUpdaterDialog(QWidget *parent)
     : QDialog(parent)

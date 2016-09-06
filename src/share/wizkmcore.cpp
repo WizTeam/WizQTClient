@@ -1,4 +1,4 @@
-#include "wizkmcore.h"
+#include "WizKMCore.h"
 
 
 

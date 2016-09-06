@@ -5,7 +5,7 @@
 #include <QPropertyAnimation>
 #include <QDebug>
 
-#include "widgets/wizImageButton.h"
+#include "widgets/WizImageButton.h"
 #include "utils/stylehelper.h"
 
 

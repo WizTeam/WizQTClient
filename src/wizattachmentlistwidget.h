@@ -1,10 +1,10 @@
 #ifndef WIZATTACHMENTLISTWIDGET_H
 #define WIZATTACHMENTLISTWIDGET_H
 
-#include "share/wizobject.h"
-#include "share/wizmultilinelistwidget.h"
-#include "share/wizpopupwidget.h"
-#include "share/wizfileiconprovider.h"
+#include "share/WizObject.h"
+#include "share/WizMultiLineListWidget.h"
+#include "share/WizPopupWidget.h"
+#include "share/WizFileIconProvider.h"
 
 class QMenu;
 

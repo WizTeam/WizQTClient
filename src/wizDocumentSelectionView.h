@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 
 class QGraphicsView;
 

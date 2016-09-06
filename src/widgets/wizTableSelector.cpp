@@ -1,8 +1,8 @@
-#include "wizTableSelector.h"
+#include "WizTableSelector.h"
 #include <QGridLayout>
 #include <QMenu>
 #include <QApplication>
-#include "share/wizthreads.h"
+#include "share/WizThreads.h"
 #include <QStyleOption>
 #include <QPainter>
 #include <QStyle>

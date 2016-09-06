@@ -1,8 +1,8 @@
 #ifndef WIZDOWNLOADOBJECTDATA_H
 #define WIZDOWNLOADOBJECTDATA_H
 
-#include "wizDatabaseManager.h"
-#include "../sync/wizXmlRpcServer.h"
+#include "WizDatabaseManager.h"
+#include "../sync/WizXmlRpcServer.h"
 
 class WizDownloadObjectData
 {

@@ -1,4 +1,4 @@
-#include "wizui.h"
+#include "WizUI.h"
 
 #include <QPainter>
 #include <QWidget>
@@ -7,8 +7,8 @@
 #include <QLineEdit>
 #include <QMouseEvent>
 
-#include "wizsettings.h"
-#include "wiznotestyle.h"
+#include "WizSettings.h"
+#include "WizNoteStyle.h"
 
 BOOL WizSkin9GridImage::clear()
 {

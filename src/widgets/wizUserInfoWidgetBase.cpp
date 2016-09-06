@@ -1,4 +1,4 @@
-#include "wizUserInfoWidgetBase.h"
+#include "WizUserInfoWidgetBase.h"
 
 //#ifndef Q_OS_MAC
 
@@ -10,7 +10,7 @@
 #include <QMouseEvent>
 #include "utils/stylehelper.h"
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #endif
 
 WizUserInfoWidgetBase::WizUserInfoWidgetBase(QWidget *parent)

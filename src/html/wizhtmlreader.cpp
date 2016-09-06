@@ -1,5 +1,5 @@
-#include "wizhtmlreader.h"
-#include "share/wizmisc.h"
+#include "WizHtmlReader.h"
+#include "share/WizMisc.h"
 
 #include <QChar>
 

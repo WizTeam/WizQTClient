@@ -1,11 +1,11 @@
-#include "wizDocumentTransitionView.h"
+#include "WizDocumentTransitionView.h"
 
 #include <QLabel>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QToolButton>
 
-#include "share/wizanimateaction.h"
+#include "share/WizAnimateAction.h"
 
 WizDocumentTransitionView::WizDocumentTransitionView(QWidget *parent) :
     QWidget(parent)

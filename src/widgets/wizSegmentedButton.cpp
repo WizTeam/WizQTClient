@@ -1,4 +1,4 @@
-#include "wizSegmentedButton.h"
+#include "WizSegmentedButton.h"
 
 #include <QStylePainter>
 #include <QStyleOptionButton>

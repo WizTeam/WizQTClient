@@ -1,4 +1,4 @@
-#include "wizSearchWidget_mm.h"
+#include "WizSearchWidget_mm.h"
 
 #include <QWidget>
 #include <QApplication>
@@ -6,9 +6,9 @@
 #ifdef USECOCOATOOLBAR
 
 #import <Cocoa/Cocoa.h>
-#include "share/wizsettings.h"
-#include "wizmachelper_mm.h"
-#include "wizmactoolbar.h"
+#include "share/WizSettings.h"
+#include "WizMacHelper_mm.h"
+#include "WizMacToolBar.h"
 
 // WizSearchField
 

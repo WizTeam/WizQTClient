@@ -2,9 +2,9 @@
 
 //#include "WizKMDatabase.h"
 
-#include "wizqthelper.h"
-#include "wizDatabase.h"
-#include "wizdef.h"
+#include "WizQtHelper.h"
+#include "WizDatabase.h"
+#include "WizDef.h"
 #include <QDir>
 #include <QMutex>
 #include "rapidjson/document.h"

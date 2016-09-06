@@ -1,8 +1,8 @@
-#include "wizshadoweffect.h"
+#include "WizShadowEffect.h"
 
-#include "wizui.h"
+#include "WizUI.h"
 #include "utils/stylehelper.h"
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include <QPainter>
 #include <QPaintEngine>
 

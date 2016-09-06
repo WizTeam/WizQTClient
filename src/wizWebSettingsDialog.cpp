@@ -1,9 +1,9 @@
-#include "wizWebSettingsDialog.h"
+#include "WizWebSettingsDialog.h"
 #include "sync/token.h"
-#include "wizmainwindow.h"
-#include "share/wizGlobal.h"
+#include "WizMainWindow.h"
+#include "share/WizGlobal.h"
 #include "utils/pathresolve.h"
-#include "widgets/wizLocalProgressWebView.h"
+#include "widgets/WizLocalProgressWebView.h"
 
 #include <QMovie>
 #include <QVBoxLayout>
@@ -12,7 +12,7 @@
 #include <QApplication>
 #include <QNetworkReply>
 #include <QWebEngineView>
-#include "share/wizwebengineview.h"
+#include "share/WizWebEngineView.h"
 
 
 WizWebSettingsDialog::WizWebSettingsDialog(QString url, QSize sz, QWidget *parent)

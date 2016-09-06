@@ -1,7 +1,7 @@
-#include "wizGroupMessage.h"
+#include "WizGroupMessage.h"
 
-#include "wizDatabase.h"
-#include "wizApiEntry.h"
+#include "WizDatabase.h"
+#include "WizApiEntry.h"
 #include "rapidjson/document.h"
 
 WizGroupMessage::WizGroupMessage(WizDatabase& db, QObject* parent /* = 0 */)

@@ -4,7 +4,7 @@
 #include <QDialog>
 #include <QWebEngineView>
 #include <QPointer>
-#include "wizdef.h"
+#include "WizDef.h"
 
 class WizExplorerApp;
 class QComboBox;

@@ -1,7 +1,7 @@
 #ifndef WIZCOMMONUI_H
 #define WIZCOMMONUI_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 class WizCommonUI : public QObject
 {

@@ -1,4 +1,4 @@
-#include "wizTagBar.h"
+#include "WizTagBar.h"
 #include <QPalette>
 #include <QFontMetrics>
 #include <QPainter>
@@ -10,13 +10,13 @@
 #include <QDebug>
 #include "utils/stylehelper.h"
 #include "utils/logger.h"
-#include "share/wizmisc.h"
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
-#include "wizdef.h"
-#include "wizLineInputDialog.h"
-#include "wiztaglistwidget.h"
-#include "share/wizAnalyzer.h"
+#include "share/WizMisc.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+#include "WizDef.h"
+#include "WizLineInputDialog.h"
+#include "WizTagListWidget.h"
+#include "share/WizAnalyzer.h"
 
 const int TAGITEM_MARGIN = 16;
 const int TAGITEM_HEIGHT  = 16;

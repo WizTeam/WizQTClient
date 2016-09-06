@@ -6,7 +6,7 @@
 
 #include <QIcon>
 #include <QtGlobal>
-#include "wizmachelper.h"
+#include "WizMacHelper.h"
 
 class QMenu;
 #ifdef Q_OS_OSX

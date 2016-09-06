@@ -1,5 +1,5 @@
-#include "wizIAPDialog.h"
-#include "ui_wizIAPDialog.h"
+#include "WizIAPDialog.h"
+#include "ui_WizIAPDialog.h"
 #include <QMessageBox>
 #include <QTextBrowser>
 #include <QNetworkAccessManager>
@@ -13,14 +13,14 @@
 #include "rapidjson/document.h"
 #include "utils/stylehelper.h"
 #include "sync/token.h"
-#include "share/wizmisc.h"
-#include "share/wizMessageBox.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
+#include "share/WizMisc.h"
+#include "share/WizMessageBox.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
 #include "sync/apientry.h"
-#include "share/wizGlobal.h"
-#include "mac/wizIAPHelper.h"
-#include "wizmainwindow.h"
+#include "share/WizGlobal.h"
+#include "mac/WizIAPHelper.h"
+#include "WizMainWindow.h"
 
 #define WIZ_PRODUCT_MONTH "cn.wiz.wiznote.mac.pro.monthly"
 #define WIZ_PRODUCT_YEAR "cn.wiz.wiznote.mac.pro.yearly"

@@ -1,4 +1,4 @@
-#include "wizenc.h"
+#include "WizEnc.h"
 
 #include <cassert>
 #include <exception>
@@ -7,8 +7,8 @@
 #include <QFile>
 #include <QDebug>
 
-#include "wizmd5.h"
-#include "wizmisc.h"
+#include "WizMd5.h"
+#include "WizMisc.h"
 #include "utils/logger.h"
 
 

@@ -1,12 +1,12 @@
-#include "wizactions.h"
+#include "WizActions.h"
 #include <QMenuBar>
 #include <QKeySequence>
 #include <QShortcut>
 #include <QWidgetAction>
-#include "share/wizmisc.h"
-#include "share/wizsettings.h"
-#include "share/wizanimateaction.h"
-#include "widgets/wizTableSelector.h"
+#include "share/WizMisc.h"
+#include "share/WizSettings.h"
+#include "share/WizAnimateAction.h"
+#include "widgets/WizTableSelector.h"
 
 struct WIZACTION
 {

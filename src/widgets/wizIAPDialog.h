@@ -5,7 +5,7 @@
 #include <QDialog>
 #include <QTimer>
 #if defined Q_OS_MAC
-#include "mac/wizIAPHelper.h"
+#include "mac/WizIAPHelper.h"
 
 namespace Ui {
 class WizIAPDialog;

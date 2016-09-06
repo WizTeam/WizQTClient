@@ -1,9 +1,9 @@
-#include "wizanimateaction.h"
+#include "WizAnimateAction.h"
 
 #include "utils/stylehelper.h"
 
-#include "wizmisc.h"
-#include "wizsettings.h"
+#include "WizMisc.h"
+#include "WizSettings.h"
 
 #include <QTimer>
 #include <QAction>

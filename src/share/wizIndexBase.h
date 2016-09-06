@@ -4,9 +4,9 @@
 #include <QObject>
 #include <QMetaType>
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 #include "cppsqlite3.h"
-#include "wizobject.h"
+#include "WizObject.h"
 
 /*
 Base class for database operation of sqlite layer

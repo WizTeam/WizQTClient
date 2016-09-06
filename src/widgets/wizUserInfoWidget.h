@@ -2,10 +2,10 @@
 #define WIZUSERINFOWIDGET_H
 
 #ifdef USECOCOATOOLBAR
-#include "mac/wizUserInfoWidgetBaseMac_mm.h"
+#include "mac/WizUserInfoWidgetBaseMac_mm.h"
 #define WIZUSERINFOWIDGETBASE WizUserInfoWidgetBaseMac
 #else
-#include "widgets/wizUserInfoWidgetBase.h"
+#include "widgets/WizUserInfoWidgetBase.h"
 #define WIZUSERINFOWIDGETBASE WizUserInfoWidgetBase
 #endif
 

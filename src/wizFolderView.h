@@ -3,8 +3,8 @@
 
 #include <QTreeWidget>
 
-#include "share/wizDatabaseManager.h"
-#include "wizCategoryViewItem.h"
+#include "share/WizDatabaseManager.h"
+#include "WizCategoryViewItem.h"
 
 class WizExplorerApp;
 class WizScrollBar;

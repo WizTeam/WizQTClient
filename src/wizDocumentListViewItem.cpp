@@ -1,4 +1,4 @@
-#include "wizDocumentListViewItem.h"
+#include "WizDocumentListViewItem.h"
 
 #include <QFile>
 #include <QFileInfo>
@@ -7,11 +7,11 @@
 #include <QPainter>
 #include <QStyleOptionViewItem>
 
-#include "wizDocumentListView.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizsettings.h"
-#include "wizPopupButton.h"
+#include "WizDocumentListView.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizSettings.h"
+#include "WizPopupButton.h"
 
 #include "thumbcache.h"
 #include "sync/avatar.h"

@@ -4,7 +4,7 @@
 #include <QListWidgetItem>
 #include <QObject>
 
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 
 class QPixmap;
 

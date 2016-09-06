@@ -8,9 +8,9 @@
 #include "avatar.h"
 #include "rapidjson/document.h"
 
-#include "share/wizSyncableDatabase.h"
-#include "share/wizAnalyzer.h"
-#include "share/wizEventLoop.h"
+#include "share/WizSyncableDatabase.h"
+#include "share/WizAnalyzer.h"
+#include "share/WizEventLoop.h"
 
 #define IDS_BIZ_SERVICE_EXPR    "Your {p} business service has expired."
 #define IDS_BIZ_NOTE_COUNT_LIMIT     QObject::tr("Group notes count limit exceeded!")

@@ -1,4 +1,4 @@
-#include "wizMessageBox.h"
+#include "WizMessageBox.h"
 #include <QPushButton>
 #include <QDebug>
 #include <QApplication>

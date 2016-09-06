@@ -1,22 +1,22 @@
-#include "wizSingleDocumentView.h"
+#include "WizSingleDocumentView.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QAction>
 #include <QPainter>
 #include <QDebug>
 #include "utils/stylehelper.h"
-#include "share/wizmisc.h"
-#include "share/wizthreads.h"
-#include "widgets/wizLocalProgressWebView.h"
+#include "share/WizMisc.h"
+#include "share/WizThreads.h"
+#include "widgets/WizLocalProgressWebView.h"
 #include "titlebar.h"
-#include "wizDocumentView.h"
-#include "wizDocumentWebView.h"
-#include "wizmainwindow.h"
-#include "wizEditorToolBar.h"
-#include "wizDocumentWebEngine.h"
+#include "WizDocumentView.h"
+#include "WizDocumentWebView.h"
+#include "WizMainWindow.h"
+#include "WizEditorToolBar.h"
+#include "WizDocumentWebEngine.h"
 
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #endif
 
 QRegion creteRoundMask(const QRectF& rect)

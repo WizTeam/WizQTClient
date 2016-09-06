@@ -1,4 +1,4 @@
-#include "wizoptionswidget.h"
+#include "WizOptionsWidget.h"
 
 #include <QBoxLayout>
 #include <QGroupBox>
@@ -8,7 +8,7 @@
 #include <QLabel>
 
 #include "wiznotesettings.h"
-#include "share/wizmisc.h"
+#include "share/WizMisc.h"
 
 #include "proxydialog.h"
 

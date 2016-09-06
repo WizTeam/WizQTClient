@@ -4,7 +4,7 @@
 #include <QMetaType>
 #include <QImage>
 #include <QMap>
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 const UINT WIZ_USERGROUP_ADMIN = 0;
 const UINT WIZ_USERGROUP_SUPER = 10;

@@ -1,4 +1,4 @@
-#include "wizdocumenthistory.h"
+#include "WizDocumentHistory.h"
 
 
 

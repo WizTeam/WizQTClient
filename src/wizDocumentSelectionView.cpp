@@ -1,12 +1,12 @@
-#include "wizDocumentSelectionView.h"
+#include "WizDocumentSelectionView.h"
 
 #include <QGraphicsView>
 #include <QGraphicsObject>
 #include <QVBoxLayout>
 
-#include "wizdef.h"
-#include "wizmainwindow.h"
-#include "share/wizDatabaseManager.h"
+#include "WizDef.h"
+#include "WizMainWindow.h"
+#include "share/WizDatabaseManager.h"
 
 
 #define WIZ_SELECTION_ITEM_MAX 5

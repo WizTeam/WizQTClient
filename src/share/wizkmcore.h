@@ -1,7 +1,7 @@
 #ifndef WIZKMCORE_H
 #define WIZKMCORE_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 
 
 template<class T>

@@ -7,12 +7,12 @@
 
 #include "utils/pathresolve.h"
 #include "utils/misc.h"
-#include "html/wizhtmlcollector.h"
-#include "share/wizmisc.h"
-#include "share/wizRtfReader.h"
-#include "share/wizDatabase.h"
-#include "core/wizNoteManager.h"
-#include "mac/wizmachelper.h"
+#include "html/WizHtmlCollector.h"
+#include "share/WizMisc.h"
+#include "share/WizRtfReader.h"
+#include "share/WizDatabase.h"
+#include "core/WizNoteManager.h"
+#include "mac/WizMacHelper.h"
 
 WizFileImporter::WizFileImporter(WizDatabaseManager& dbMgr, QObject *parent)
     : QObject(parent)

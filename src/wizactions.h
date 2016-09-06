@@ -1,8 +1,8 @@
 #ifndef WIZACTIONS_H
 #define WIZACTIONS_H
 
-#include "wizdef.h"
-#include "share/wizqthelper.h"
+#include "WizDef.h"
+#include "share/WizQtHelper.h"
 #include <QAction>
 
 class QAction;

@@ -1,10 +1,10 @@
-#include "wizOEMSettings.h"
+#include "WizOEMSettings.h"
 #include <QVariant>
 #include <QFile>
 #include <QDebug>
 #include "utils/pathresolve.h"
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
 #include "rapidjson/document.h"
 
 

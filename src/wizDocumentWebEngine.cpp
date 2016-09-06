@@ -1,6 +1,6 @@
 #if 0
-#include "wizDocumentWebEngine.h"
-#include "wizDocumentWebView.h"
+#include "WizDocumentWebEngine.h"
+#include "WizDocumentWebView.h"
 #include <QRunnable>
 #include <QThreadPool>
 #include <QList>
@@ -32,27 +32,27 @@
 
 #include <coreplugin/icore.h>
 
-#include "wizdef.h"
-#include "wizDocumentView.h"
-#include "wizmainwindow.h"
-#include "share/wizmisc.h"
-#include "wizEditorInsertLinkForm.h"
-#include "wizEditorInsertTableForm.h"
-#include "share/wizObjectDataDownloader.h"
-#include "share/websocketclientwrapper.h"
-#include "share/websockettransport.h"
-#include "share/wizDatabaseManager.h"
-#include "wizDocumentTransitionView.h"
-#include "wizSearchReplaceWidget.h"
+#include "WizDef.h"
+#include "WizDocumentView.h"
+#include "WizMainWindow.h"
+#include "share/WizMisc.h"
+#include "WizEditorInsertLinkForm.h"
+#include "WizEditorInsertTableForm.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WebSocketClientWrapper.h"
+#include "share/WebSocketTransport.h"
+#include "share/WizDatabaseManager.h"
+#include "WizDocumentTransitionView.h"
+#include "WizSearchReplaceWidget.h"
 #include "widgets/WizCodeEditorDialog.h"
-#include "widgets/wizScreenShotWidget.h"
-#include "widgets/wizEmailShareDialog.h"
+#include "widgets/WizScreenShotWidget.h"
+#include "widgets/WizEmailShareDialog.h"
 #include "sync/avatar.h"
 
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 
 using namespace Core;
 using namespace Core::Internal;

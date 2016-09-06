@@ -1,12 +1,12 @@
-#include "wizIndex.h"
+#include "WizIndex.h"
 
 #include <QDebug>
 
 #include <algorithm>
-#include "wizkmcore.h"
+#include "WizKMCore.h"
 #include "utils/logger.h"
 #include "utils/misc.h"
-#include "wizmisc.h"
+#include "WizMisc.h"
 
 
 WizIndex::WizIndex(void)

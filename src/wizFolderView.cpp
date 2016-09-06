@@ -1,14 +1,14 @@
-#include "wizFolderView.h"
+#include "WizFolderView.h"
 
 #include <QHeaderView>
 
 
-#include "widgets/wizScrollBar.h"
+#include "widgets/WizScrollBar.h"
 
-#include "wizdef.h"
-#include "share/wizsettings.h"
-#include "share/wizuihelper.h"
-#include "wiznotestyle.h"
+#include "WizDef.h"
+#include "share/WizSettings.h"
+#include "share/WizUIHelper.h"
+#include "WizNoteStyle.h"
 
 WizFolderView::WizFolderView(WizExplorerApp& app, QWidget *parent, bool showReadOnlyGroup)
     : QTreeWidget(parent)

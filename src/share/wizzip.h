@@ -1,7 +1,7 @@
 #ifndef WIZZIP_H
 #define WIZZIP_H
 
-#include "../share/wizqthelper.h"
+#include "../share/WizQtHelper.h"
 #include <QStringList>
 
 class QuaZip;

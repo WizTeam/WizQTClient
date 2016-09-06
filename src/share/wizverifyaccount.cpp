@@ -1,4 +1,4 @@
-#include "wizverifyaccount.h"
+#include "WizVerifyAccount.h"
 
 void WizVerifyAccount::verifyAccount(const QString& strUserId,
                                       const QString& strPassword)

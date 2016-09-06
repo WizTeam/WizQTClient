@@ -1,7 +1,7 @@
 #ifndef WIZUI_H
 #define WIZUI_H
 
-#include "wizqthelper.h"
+#include "WizQtHelper.h"
 #include <QImage>
 #include <QPushButton>
 

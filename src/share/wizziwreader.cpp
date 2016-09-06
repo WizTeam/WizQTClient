@@ -1,12 +1,12 @@
-#include "wizziwreader.h"
+#include "WizZiwReader.h"
 
 #include <QDataStream>
 #include <QFile>
 
-#include "wizmisc.h"
-#include "wizenc.h"
+#include "WizMisc.h"
+#include "WizEnc.h"
 #include "utils/logger.h"
-#include "wizDatabase.h"
+#include "WizDatabase.h"
 
 
 WizZiwReader::WizZiwReader(QObject *parent)

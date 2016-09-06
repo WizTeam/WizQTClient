@@ -1,4 +1,4 @@
-#include "wiztitlebar.h"
+#include "WizTitleBar.h"
 
 #include <QPixmap>
 #include <QStyle>
@@ -8,7 +8,7 @@
 #include <QMouseEvent>
 
 #include "utils/stylehelper.h"
-#include "wizmisc.h"
+#include "WizMisc.h"
 
 
 WizWindowTitleBar::WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)

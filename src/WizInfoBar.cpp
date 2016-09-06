@@ -4,11 +4,11 @@
 #include <QHBoxLayout>
 
 #include "utils/stylehelper.h"
-#include "share/wizobject.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizmisc.h"
-#include "wizdef.h"
+#include "share/WizObject.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizMisc.h"
+#include "WizDef.h"
 
 
 WizInfoBar::WizInfoBar(WizExplorerApp& app, QWidget *parent)

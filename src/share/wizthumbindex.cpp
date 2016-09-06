@@ -1,11 +1,11 @@
-#include "wizthumbindex.h"
+#include "WizThumbIndex.h"
 
 #include <QBuffer>
 #include <QDebug>
 
-#include "wizdef.h"
-#include "wizmisc.h"
-#include "wizIndex.h"
+#include "WizDef.h"
+#include "WizMisc.h"
+#include "WizIndex.h"
 #include "utils/logger.h"
 
 static const char* PAD_TYPE = "PAD";

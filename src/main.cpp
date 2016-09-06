@@ -18,27 +18,27 @@
 #include "utils/pathresolve.h"
 #include "utils/logger.h"
 #include "utils/stylehelper.h"
-#include "share/wizsettings.h"
-#include "share/wizwin32helper.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizSingleApplication.h"
-#include "share/wizthreads.h"
-#include "share/wizGlobal.h"
+#include "share/WizSettings.h"
+#include "share/WizWin32Helper.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizSingleApplication.h"
+#include "share/WizThreads.h"
+#include "share/WizGlobal.h"
 
-#include "core/wizNoteManager.h"
+#include "core/WizNoteManager.h"
 
 #ifdef Q_OS_MAC
-#include "mac/wizmachelper.h"
-#include "mac/wizIAPHelper.h"
+#include "mac/WizMacHelper.h"
+#include "mac/WizIAPHelper.h"
 #endif
 
 #include "sync/token.h"
 #include "sync/apientry.h"
 #include "sync/avatar.h"
 #include "thumbcache.h"
-#include "wizmainwindow.h"
-#include "wizDocumentWebEngine.h"
-#include "wizLoginDialog.h"
+#include "WizMainWindow.h"
+#include "WizDocumentWebEngine.h"
+#include "WizLoginDialog.h"
 
 
 #ifdef Q_OS_MAC

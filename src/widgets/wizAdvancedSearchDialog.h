@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QListWidgetItem>
-#include "share/wizqthelper.h"
+#include "share/WizQtHelper.h"
 
 
 

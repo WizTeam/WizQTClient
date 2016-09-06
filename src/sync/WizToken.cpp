@@ -5,10 +5,10 @@
 #include <QString>
 #include <QDebug>
 
-#include "wizKMServer.h"
+#include "WizKMServer.h"
 #include "asyncapi.h"
 #include "apientry.h"
-#include "share/wizthreads.h"
+#include "share/WizThreads.h"
 
 // use 5 minutes locally, server use 20 minutes
 #define TOKEN_TIMEOUT_INTERVAL 60 * 5

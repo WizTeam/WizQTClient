@@ -1,11 +1,11 @@
-#include "wizSearchWidget.h"
+#include "WizSearchWidget.h"
 
 #ifdef USECOCOATOOLBAR
-#include "mac/wizSearchWidget_mm.h"
+#include "mac/WizSearchWidget_mm.h"
 #else
-#include "share/wizsettings.h"
-#include "share/wizAnalyzer.h"
-#include "wizdef.h"
+#include "share/WizSettings.h"
+#include "share/WizAnalyzer.h"
+#include "WizDef.h"
 #include "utils/stylehelper.h"
 
 #include <QGraphicsDropShadowEffect>

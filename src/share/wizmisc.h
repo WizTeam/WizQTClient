@@ -8,8 +8,8 @@
 #include <QByteArray>
 #include <QSettings>
 
-#include "wizobject.h"
-#include "wizmd5.h"
+#include "WizObject.h"
+#include "WizMd5.h"
 
 class WizDatabase;
 class WizDatabaseManager;

@@ -2,7 +2,7 @@
 #define __WIZHTMLREADER_H__
 
 #ifndef WIZQTHELPER_H
-#include "../share/wizqthelper.h"
+#include "../share/WizQtHelper.h"
 #endif //WIZQTHELPER_H
 
 #define WIZ_SAFE_DELETE_POINTER(_P)  (void)(_P != NULL ? delete _P, _P = NULL : 0)

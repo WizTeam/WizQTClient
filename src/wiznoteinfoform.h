@@ -1,8 +1,8 @@
 #ifndef WIZNOTEINFOFORM_H
 #define WIZNOTEINFOFORM_H
 
-#include "share/wizpopupwidget.h"
-#include "share/wizDatabaseManager.h"
+#include "share/WizPopupWidget.h"
+#include "share/WizDatabaseManager.h"
 
 namespace Ui {
 class WizNoteInfoForm;

@@ -42,11 +42,11 @@
 #include <QApplication>
 #include <QtCore>
 #include <QAction>
-#include "wizmachelper.h"
-#include "wizmactoolbar.h"
-#include "wizmactoolbardelegate.h"
-#include "wizmachelper_mm.h"
-#include "wizSearchWidget_mm.h"
+#include "WizMacHelper.h"
+#include "WizMacToolBar.h"
+#include "WizMacToolBarDelegate.h"
+#include "WizMacHelper_mm.h"
+#include "WizSearchWidget_mm.h"
 
 #import <AppKit/AppKit.h>
 

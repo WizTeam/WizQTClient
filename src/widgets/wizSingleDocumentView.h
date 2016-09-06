@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QMap>
-#include "wizdef.h"
+#include "WizDef.h"
 
 class WIZDOCUMENTDATA;
 class WizDocumentWebEngine;

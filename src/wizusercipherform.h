@@ -2,7 +2,7 @@
 #define WIZUSERCIPHERFORM_H
 
 #include <QWidget>
-#include "wizdef.h"
+#include "WizDef.h"
 
 namespace Ui {
 class WizUserCipherForm;

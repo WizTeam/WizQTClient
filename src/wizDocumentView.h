@@ -1,7 +1,7 @@
 #ifndef CORE_WIZDOCUMENTVIEW_H
 #define CORE_WIZDOCUMENTVIEW_H
 
-#include "share/wizobject.h"
+#include "share/WizObject.h"
 #include <QSharedPointer>
 #include <QWidget>
 

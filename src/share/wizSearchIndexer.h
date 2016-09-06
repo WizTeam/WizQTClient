@@ -7,9 +7,9 @@
 #include  <deque>
 #include <QWaitCondition>
 
-#include "wizClucene.h"
-#include "wizDatabaseManager.h"
-#include "share/wizqthelper.h"
+#include "WizClucene.h"
+#include "WizDatabaseManager.h"
+#include "share/WizQtHelper.h"
 
 struct WIZDOCUMENTDATAEX;
 typedef std::deque<WIZDOCUMENTDATAEX> CWizDocumentDataArray;

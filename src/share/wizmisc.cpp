@@ -1,5 +1,5 @@
-#include "wizsettings.h"
-#include "wizWebSettingsDialog.h"
+#include "WizSettings.h"
+#include "WizWebSettingsDialog.h"
 
 #include <algorithm>
 #include <fstream>
@@ -25,13 +25,13 @@
 #include "utils/pathresolve.h"
 #include "utils/stylehelper.h"
 #include "utils/misc.h"
-#include "mac/wizmachelper.h"
+#include "mac/WizMacHelper.h"
 #include "sync/apientry.h"
-#include "share/wizAnalyzer.h"
-#include "share/wizObjectOperator.h"
-#include "wizDatabaseManager.h"
-#include "wizObjectDataDownloader.h"
-#include "wizProgressDialog.h"
+#include "share/WizAnalyzer.h"
+#include "share/WizObjectOperator.h"
+#include "WizDatabaseManager.h"
+#include "WizObjectDataDownloader.h"
+#include "WizProgressDialog.h"
 
 
 #ifndef MAX_PATH

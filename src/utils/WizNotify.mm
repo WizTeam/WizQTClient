@@ -1,7 +1,7 @@
 #include "notify.h"
 #import <Cocoa/Cocoa.h>
 
-#include "../mac/wizmachelper_mm.h"
+#include "../mac/WizMacHelper_mm.h"
 
 using namespace Utils;
 

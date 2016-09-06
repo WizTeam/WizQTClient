@@ -1,11 +1,11 @@
-#include "wizButton.h"
+#include "WizButton.h"
 
 #include <QStyleOptionToolButton>
 #include <QPainter>
 
-#include "wizdef.h"
-#include "share/wizmisc.h"
-#include "share/wizsettings.h"
+#include "WizDef.h"
+#include "share/WizMisc.h"
+#include "share/WizSettings.h"
 
 
 WizButton::WizButton(QWidget* parent)

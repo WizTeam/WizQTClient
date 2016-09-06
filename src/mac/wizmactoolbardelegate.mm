@@ -3,10 +3,10 @@
 #include <QDebug>
 #include <QPixmap>
 
-#include "wizmactoolbardelegate.h"
-#include "wizmachelper_mm.h"
-#include "wizmacactionhelper.h"
-#include "wizSearchWidget_mm.h"
+#include "WizMacToolBarDelegate.h"
+#include "WizMacHelper_mm.h"
+#include "WizMacActionHelper.h"
+#include "WizSearchWidget_mm.h"
 
 
 

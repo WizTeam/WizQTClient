@@ -1,7 +1,7 @@
-#include "wizsettings.h"
+#include "WizSettings.h"
 #include "utils/pathresolve.h"
 
-#include "wizdef.h"
+#include "WizDef.h"
 #include <QLocale>
 #include <algorithm>
 

@@ -1,4 +1,4 @@
-#include "wizEditorToolBar.h"
+#include "WizEditorToolBar.h"
 
 #include <QStylePainter>
 #include <QToolButton>
@@ -20,21 +20,21 @@
 #include <QWidgetAction>
 #include <QActionGroup>
 
-#include "share/wizmisc.h"
-#include "wizdef.h"
-#include "share/wizsettings.h"
-#include "wizDocumentWebEngine.h"
-#include "wizDocumentWebView.h"
-#include "wizactions.h"
+#include "share/WizMisc.h"
+#include "WizDef.h"
+#include "share/WizSettings.h"
+#include "WizDocumentWebEngine.h"
+#include "WizDocumentWebView.h"
+#include "WizActions.h"
 #include "utils/logger.h"
-#include "share/wizObjectDataDownloader.h"
-#include "share/wizAnalyzer.h"
-#include "wizdef.h"
+#include "share/WizObjectDataDownloader.h"
+#include "share/WizAnalyzer.h"
+#include "WizDef.h"
 #include "utils/stylehelper.h"
-#include "wizDocumentView.h"
-#include "widgets/wizTipsWidget.h"
-#include "wizmainwindow.h"
-#include "widgets/wizTableSelector.h"
+#include "WizDocumentView.h"
+#include "widgets/WizTipsWidget.h"
+#include "WizMainWindow.h"
+#include "widgets/WizTableSelector.h"
 
 const int WizCheckStateRole = (int)Qt::UserRole + 5;
 const int WizFontFamilyHelperRole = WizCheckStateRole + 1;

@@ -8,7 +8,7 @@
 #include <QtCore/QString>
 #include <QtCore/QUrl>
 #include <QAction>
-#include "wizmachelper.h"
+#include "WizMacHelper.h"
 
 //#include <QtDeclarative/QDeclarativeListProperty>
 //#include <QtDeclarative/QDeclarativeParserStatus>

@@ -23,24 +23,24 @@
 #include "sync/apientry.h"
 #include "sync/token.h"
 
-#include "share/wizDatabaseManager.h"
-#include "share/wizDatabase.h"
-#include "share/wizobject.h"
-#include "share/wizsettings.h"
-#include "share/wizsettings.h"
-#include "share/wizthreads.h"
-#include "share/wizGlobal.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDatabase.h"
+#include "share/WizObject.h"
+#include "share/WizSettings.h"
+#include "share/WizSettings.h"
+#include "share/WizThreads.h"
+#include "share/WizGlobal.h"
 
-#include "widgets/wizScrollBar.h"
-#include "widgets/wizImageButton.h"
-#include "widgets/wizTipsWidget.h"
+#include "widgets/WizScrollBar.h"
+#include "widgets/WizImageButton.h"
+#include "widgets/WizTipsWidget.h"
 
-#include "core/wizAccountManager.h"
+#include "core/WizAccountManager.h"
 
-#include "wiznotestyle.h"
-#include "wizCategoryView.h"
-#include "wizCategoryViewItem.h"
-#include "wizmainwindow.h"
+#include "WizNoteStyle.h"
+#include "WizCategoryView.h"
+#include "WizCategoryViewItem.h"
+#include "WizMainWindow.h"
 
 #define ALLMENBERS QObject::tr("All Members")
 

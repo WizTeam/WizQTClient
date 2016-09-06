@@ -1,10 +1,10 @@
-#include "wizPopupButton.h"
+#include "WizPopupButton.h"
 
 #include <QMenu>
 
-#include "wizdef.h"
-#include "share/wizsettings.h"
-#include "wizDocumentListView.h"
+#include "WizDef.h"
+#include "share/WizSettings.h"
+#include "WizDocumentListView.h"
 #include <QApplication>
 
 WizPopupButton::WizPopupButton(WizExplorerApp& app, QWidget *parent)

@@ -1,4 +1,4 @@
-#include "wizkmsync.h"
+#include "WizKMSync.h"
 
 #include <QDebug>
 #include <QApplication>
@@ -6,7 +6,7 @@
 #include "apientry.h"
 #include "token.h"
 
-#include "../share/wizDatabase.h"
+#include "../share/WizDatabase.h"
 #include "sync_p.h"
 
 

@@ -4,10 +4,10 @@
 #include <QListWidget>
 #include <memory>
 
-#include "wizdef.h"
-#include "share/wizobject.h"
-#include "share/wizuihelper.h"
-#include "wizDocumentListViewItem.h"
+#include "WizDef.h"
+#include "share/WizObject.h"
+#include "share/WizUIHelper.h"
+#include "WizDocumentListViewItem.h"
 
 class WizTagListWidget;
 class WizFolderSelector;

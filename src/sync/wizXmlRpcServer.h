@@ -5,9 +5,9 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 
-#include "share/wizxmlrpc.h"
+#include "share/WizXmlRpc.h"
 #include "utils/logger.h"
-#include "share/wizmisc.h"
+#include "share/WizMisc.h"
 
 
 

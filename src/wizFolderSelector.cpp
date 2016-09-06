@@ -1,4 +1,4 @@
-#include "wizFolderSelector.h"
+#include "WizFolderSelector.h"
 
 #include <QVBoxLayout>
 #include <QDialogButtonBox>
@@ -6,10 +6,10 @@
 #include <QPushButton>
 #include <QDebug>
 
-#include "wizdef.h"
-#include "share/wizDatabase.h"
-#include "share/wizMessageBox.h"
-#include "wizFolderView.h"
+#include "WizDef.h"
+#include "share/WizDatabase.h"
+#include "share/WizMessageBox.h"
+#include "WizFolderView.h"
 
 WizFolderSelector::WizFolderSelector(const QString& strTitle, WizExplorerApp& app,
                                        unsigned int nPermission, QWidget *parent)

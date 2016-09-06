@@ -10,10 +10,10 @@
 #include <QThread>
 #include <QWaitCondition>
 
-//#include "wizdownloadobjectdatadialog.h"
-#include "wizdef.h"
-#include "share/wizobject.h"
-#include "share/wizwebengineview.h"
+//#include "WizDownloadObjectDataDialog.h"
+#include "WizDef.h"
+#include "share/WizObject.h"
+#include "share/WizWebEngineView.h"
 
 
 class WizObjectDownloaderHost;

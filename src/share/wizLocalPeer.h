@@ -1,7 +1,7 @@
 #ifndef WIZLOCALPEER_H
 #define WIZLOCALPEER_H
 
-#include "wizLockedFile.h"
+#include "WizLockedFile.h"
 #include <QLocalServer>
 #include <QLocalSocket>
 #include <QDir>

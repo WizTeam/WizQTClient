@@ -1,8 +1,8 @@
-#include "wizcertmanager.h"
+#include "WizCertManager.h"
 
 #if 0
 
-#include "share/wizDatabaseManager.h"
+#include "share/WizDatabaseManager.h"
 
 WizCertManager::WizCertManager(WizExplorerApp& app, const QString& strAccountsApiURL /* = WIZ_API_URL*/)
     : CWizApiBase(strAccountsApiURL)

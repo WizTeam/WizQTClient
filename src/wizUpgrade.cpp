@@ -1,9 +1,9 @@
-#include "wizUpgrade.h"
+#include "WizUpgrade.h"
 
-#include "share/wizmisc.h"
+#include "share/WizMisc.h"
 #include "utils/logger.h"
 #include "sync/apientry.h"
-#include "share/wizEventLoop.h"
+#include "share/WizEventLoop.h"
 
 #if defined(Q_OS_MAC)
 #define strUpgradeUrlParam "/download?product=wiznote&client=macos"

@@ -2,7 +2,7 @@
 #define CWIZOBJECTOPERATOR_H
 
 #include <QObject>
-#include "wizobject.h"
+#include "WizObject.h"
 
 class WizUserSettings;
 class WizDatabase;

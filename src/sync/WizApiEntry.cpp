@@ -12,9 +12,9 @@
 #include <QUrl>
 
 #include "token.h"
-#include "wizKMServer.h"
-#include "wizdef.h"
-#include "share/wizEventLoop.h"
+#include "WizKMServer.h"
+#include "WizDef.h"
+#include "share/WizEventLoop.h"
 #include "rapidjson/document.h"
 
 /*

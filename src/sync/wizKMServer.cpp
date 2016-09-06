@@ -1,4 +1,4 @@
-#include "wizKMServer.h"
+#include "WizKMServer.h"
 #include "apientry.h"
 #include "token.h"
 #include "rapidjson/document.h"

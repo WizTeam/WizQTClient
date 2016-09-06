@@ -1,7 +1,7 @@
 #ifndef WIZSERVICE_SYNC_P_H
 #define WIZSERVICE_SYNC_P_H
 
-#include "wizKMServer.h"
+#include "WizKMServer.h"
 
 class WizKMSync
 {

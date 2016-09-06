@@ -1,9 +1,9 @@
-#include "wizmd5.h"
+#include "WizMd5.h"
 
 #include <stdexcept>
 #include <QFile>
 
-#include "wizmisc.h"
+#include "WizMisc.h"
 #include "../utils/logger.h"
 #include "utils/misc.h"
 

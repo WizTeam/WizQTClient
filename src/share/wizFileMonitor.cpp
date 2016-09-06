@@ -1,10 +1,10 @@
-#include "wizFileMonitor.h"
-#include "wizmisc.h"
+#include "WizFileMonitor.h"
+#include "WizMisc.h"
 #include "../utils/logger.h"
 #include <QFileInfo>
 #include <QDebug>
 #include <QCoreApplication>
-#include "wizthreads.h"
+#include "WizThreads.h"
 
 #define WIZ_THREAD_FILE_MONITOR     1024
 

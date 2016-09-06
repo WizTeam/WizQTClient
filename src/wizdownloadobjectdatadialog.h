@@ -4,8 +4,8 @@
 #include <QDialog>
 #include <QPointer>
 
-#include "share/wizDatabaseManager.h"
-#include "share/wizdownloadobjectdata.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizDownloadObjectData.h"
 
 namespace Ui {
     class WizDownloadObjectDataDialog;

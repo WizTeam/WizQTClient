@@ -1,5 +1,5 @@
-#include "wizAdvancedSearchDialog.h"
-#include "ui_wizAdvancedSearchDialog.h"
+#include "WizAdvancedSearchDialog.h"
+#include "ui_WizAdvancedSearchDialog.h"
 #include <QCursor>
 #include <QLineEdit>
 #include <QGroupBox>
@@ -7,10 +7,10 @@
 #include <QPainter>
 #include <QButtonGroup>
 #include <QDebug>
-#include "share/wizDatabase.h"
-#include "share/wizDatabaseManager.h"
-#include "share/wizmisc.h"
-#include "wiznotestyle.h"
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+#include "share/WizMisc.h"
+#include "WizNoteStyle.h"
 #include "utils/stylehelper.h"
 
 #define PARAM_SELECT_PARAM    QObject::tr("Select search param")
