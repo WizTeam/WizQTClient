@@ -50,8 +50,8 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "share/wizqthelper.h"
-#include "share/wizmisc.h"
+#include "share/WizQtHelper.h"
+#include "share/WizMisc.h"
 
 
 int GetTabSize()

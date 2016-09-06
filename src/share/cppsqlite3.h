@@ -31,7 +31,7 @@
 #include "sqlite3.h"
 #include <cstdio>
 #include <cstring>
-#include "wizmisc.h"
+#include "WizMisc.h"
 
 #define CPPSQLITE_ERROR 1000
 
@@ -96,8 +96,8 @@ public:
     double getFloatField(int nField, double fNullValue=0.0);
     double getFloatField(const CString& szField, double fNullValue=0.0);
 
-    COleDateTime getTimeField(int nField, time_t tNullValue = 0);
-    COleDateTime getTimeField(const CString& szField, time_t tNullValue = 0);
+    WizOleDateTime getTimeField(int nField, time_t tNullValue = 0);
+    WizOleDateTime getTimeField(const CString& szField, time_t tNullValue = 0);
 
     COLORREF getColorField(int nField, COLORREF crNullValue = 0);
     COLORREF getColorField(const CString& szField, COLORREF crNullValue = 0);
@@ -200,7 +200,7 @@ public:
 
     static const char* SQLiteVersion() { return SQLITE_VERSION; }
 	//
-    BOOL IsOpened();
+    BOOL isOpened();
 	//
     int updateBlob(const CString& szTableName, const CString& szFieldName, const unsigned char* data, int dataLength, const CString& szWhere);
     int insertBlob(const CString& szSQL, const unsigned char* data, int dataLength);
