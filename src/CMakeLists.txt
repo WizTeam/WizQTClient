@@ -100,7 +100,7 @@ set(wiznote_SOURCES
     widgets/WizCrashReportDialog.cpp
     widgets/WizCustomToolBar.cpp
     widgets/WizTipsWidget.cpp
-    widgets/WizSingleDocumentView.cppg.cpp
+    widgets/WizSingleDocumentView.cpp
     widgets/WizShareLinkDialog.cpp
     share/WizAnalyzer.cpp
     share/WizTranslater.cpp
@@ -142,7 +142,7 @@ set(wiznote_SOURCES
     WizProxyDialog.cpp
     WizCreateAccountDialog.cpp
     WizMainWindow.cpp
-    WizMoteComments.cpp
+    WizNoteComments.cpp
     WizCellButton.cpp
     WizTitleBar.cpp
     WizInfoBar.cpp
@@ -158,7 +158,7 @@ set(wiznote_SOURCES
     WizButton.cpp
     WizEditorToolBar.cpp
     WizEditorInsertTableForm.cpp
-    wizFileReader.cpp
+    WizFileImporter.cpp
     WizFolderSelector.cpp
     WizProgressDialog.cpp
     WizFolderView.cpp
@@ -273,7 +273,7 @@ set(wiznote_HEADERS
     WizNotifyBar.h
     WizTitleEdit.h
     sync/WizSync.h
-    sync/WizSync_p.h
+    sync/WizKMSync_p.h
     WizStatusBar.h
     WizUpgradeNotifyDialog.h
     WizUserCipherForm.h
@@ -288,7 +288,7 @@ set(wiznote_HEADERS
     WizDocumentTransitionView.h
     WizButton.h
     WizEditorInsertTableForm.h
-    wizFileReader.h
+    WizFileImporter.h
     WizFolderSelector.h
     WizProgressDialog.h
     WizFolderView.h
