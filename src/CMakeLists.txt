@@ -15,6 +15,7 @@ set(wiznote_SOURCES_MAC
     mac/rmstore/RMAppReceipt.mm
     mac/rmstore/RMStoreAppReceiptVerificator.mm
     mac/WizNotificationCenter.mm
+    widgets/WizIAPDialog.cpp
 )
 
 set(wiznote_HEADERS_MAC
@@ -29,6 +30,12 @@ set(wiznote_HEADERS_MAC
     mac/rmstore/RMAppReceipt.h
     mac/rmstore/RMStoreAppReceiptVerificator.h
     mac/WizNotificationCenter.h
+    widgets/WizIAPDialog.h
+)
+
+
+set(wiznote_FORMS_MAC
+    ui/WizIAPDialog.ui
 )
 
 set(wiznote_SOURCES
@@ -104,7 +111,6 @@ set(wiznote_SOURCES
     widgets/WizShareLinkDialog.cpp
     share/WizAnalyzer.cpp
     share/WizTranslater.cpp
-    widgets/WizIAPDialog.cpp
     widgets/WizAdvancedSearchDialog.cpp
     share/WizUdpClient.cpp
     share/WizMessageBox.cpp
@@ -324,7 +330,6 @@ set(wiznote_HEADERS
     widgets/WizShareLinkDialog.h
     share/WizAnalyzer.h
     share/WizTranslater.h
-    widgets/WizIAPDialog.h
     widgets/WizAdvancedSearchDialog.h
     share/WizUdpClient.h
     share/WizMessageBox.h
@@ -368,7 +373,6 @@ set(wiznote_FORMS
     ui/WizDocTemplateDialog.ui
     ui/WizVerificationCodeDialog.ui
     ui/WizEmailShareDialog.ui
-    ui/WizIAPDialog.ui
     ui/WizAdvancedSearchDialog.ui
     ui/WizCrashReportDialog.ui
     ui/WizTemplatePurchaseDialog.ui
@@ -397,6 +401,8 @@ message("WizNote whll compiling as ${CMAKE_BUILD_TYPE}, use Qt: ${QT_VERSION}")
 # build
 if(UNIX)
     if(APPLE)
+        qt_add_ui(wiznote_FORM_HEADERS ${wiznote_FORMS_MAC})
+
         set(wiznote_LOGO ${CMAKE_SOURCE_DIR}/build/common/logo/wiznote.icns)
 
         # we should copy qt internal qm files, otherwise qt can't translate some internal resources
