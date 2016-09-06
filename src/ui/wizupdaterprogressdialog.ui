@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>CWizUpdaterDialog</class>
- <widget class="QDialog" name="CWizUpdaterDialog">
+ <class>WizUpdaterDialog</class>
+ <widget class="QDialog" name="WizUpdaterDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
