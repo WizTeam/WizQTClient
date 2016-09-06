@@ -16,8 +16,8 @@
 #include "share/WizDatabaseManager.h"
 #include "share/WizSettings.h"
 #include "share/WizUIHelper.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
 #include "sync/WizKMServer.h"
 #include "widgets/WizScrollBar.h"
 #include "widgets/WizLocalProgressWebView.h"
@@ -31,10 +31,10 @@
 #include "WizButton.h"
 #include "WizUserCipherForm.h"
 #include "WizDocumentEditStatus.h"
-#include "notifybar.h"
+#include "WizNotifyBar.h"
 #include "WizMainWindow.h"
 
-#include "titlebar.h"
+#include "WizTitleBar.h"
 
 #include "share/WizThreads.h"
 #include "share/WizWebEngineView.h"

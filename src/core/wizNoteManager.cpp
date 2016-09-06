@@ -9,10 +9,10 @@
 #include <QDebug>
 
 #include "rapidjson/document.h"
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "share/WizObject.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"

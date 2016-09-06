@@ -1,8 +1,8 @@
 #include "WizWebSettingsDialog.h"
-#include "sync/token.h"
+#include "sync/WizToken.h"
 #include "WizMainWindow.h"
 #include "share/WizGlobal.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "widgets/WizLocalProgressWebView.h"
 
 #include <QMovie>

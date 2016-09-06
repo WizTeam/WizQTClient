@@ -1,4 +1,4 @@
-#include "apientry.h"
+#include "WizApiEntry.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
@@ -11,7 +11,7 @@
 #include <QDebug>
 #include <QUrl>
 
-#include "token.h"
+#include "WizToken.h"
 #include "WizKMServer.h"
 #include "WizDef.h"
 #include "share/WizEventLoop.h"

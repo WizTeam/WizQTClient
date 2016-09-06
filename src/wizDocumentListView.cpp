@@ -5,16 +5,16 @@
 #include <QMenu>
 #include <QSet>
 
-#include "utils/stylehelper.h"
-#include "utils/logger.h"
-#include "utils/pathresolve.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizLogger.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizSettings.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
 #include "share/WizThreads.h"
-#include "sync/apientry.h"
-#include "sync/avatar.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizAvatarHost.h"
 #include "widgets/WizScrollBar.h"
 #include "WizLineInputDialog.h"
 #include "WizWebSettingsDialog.h"
@@ -28,7 +28,7 @@
 
 #include "sync/WizKMSync.h"
 
-#include "thumbcache.h"
+#include "WizThumbCache.h"
 
 
 // Document actions

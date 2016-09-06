@@ -14,7 +14,7 @@
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
 
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"

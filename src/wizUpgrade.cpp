@@ -1,8 +1,8 @@
 #include "WizUpgrade.h"
 
 #include "share/WizMisc.h"
-#include "utils/logger.h"
-#include "sync/apientry.h"
+#include "utils/WizLogger.h"
+#include "sync/WizApiEntry.h"
 #include "share/WizEventLoop.h"
 
 #if defined(Q_OS_MAC)

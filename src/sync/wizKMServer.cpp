@@ -1,6 +1,6 @@
 #include "WizKMServer.h"
-#include "apientry.h"
-#include "token.h"
+#include "WizApiEntry.h"
+#include "WizToken.h"
 #include "rapidjson/document.h"
 #include "rapidjson/writer.h"
 #include "rapidjson/stringbuffer.h"

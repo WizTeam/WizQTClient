@@ -12,8 +12,8 @@
 #include <QNetworkReply>
 
 #include "rapidjson/document.h"
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
 #include "share/WizMisc.h"
 #include "share/WizZip.h"
 #include "share/WizSettings.h"
@@ -22,8 +22,8 @@
 #include "share/WizMessageBox.h"
 #include "share/WizObjectDataDownloader.h"
 #include "widgets/WizTemplatePurchaseDialog.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "core/WizAccountManager.h"
 #include "core/WizNoteManager.h"
 #include "WizDocumentTransitionView.h"

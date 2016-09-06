@@ -20,8 +20,8 @@
 #include "WizMisc.h"
 #endif
 
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
 
 
 WizFileIconProvider::WizFileIconProvider()

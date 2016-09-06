@@ -6,7 +6,7 @@
 #include "share/WizSettings.h"
 #include "share/WizAnalyzer.h"
 #include "WizDef.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #include <QGraphicsDropShadowEffect>
 #include <QPainter>

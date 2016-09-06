@@ -1,4 +1,4 @@
-#include "notify.h"
+#include "WizNotify.h"
 #import <Cocoa/Cocoa.h>
 
 #include "../mac/WizMacHelper_mm.h"

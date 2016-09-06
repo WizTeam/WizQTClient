@@ -4,11 +4,11 @@
 #include <QAction>
 #include <QPainter>
 #include <QDebug>
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "share/WizMisc.h"
 #include "share/WizThreads.h"
 #include "widgets/WizLocalProgressWebView.h"
-#include "titlebar.h"
+#include "WizTitleBar.h"
 #include "WizDocumentView.h"
 #include "WizDocumentWebView.h"
 #include "WizMainWindow.h"

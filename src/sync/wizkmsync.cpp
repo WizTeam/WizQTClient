@@ -3,11 +3,11 @@
 #include <QDebug>
 #include <QApplication>
 
-#include "apientry.h"
-#include "token.h"
+#include "WizApiEntry.h"
+#include "WizToken.h"
 
 #include "../share/WizDatabase.h"
-#include "sync_p.h"
+#include "WizKMSync_p.h"
 
 
 /* ---------------------------- CWizKMSyncThead ---------------------------- */

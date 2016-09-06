@@ -1,7 +1,7 @@
 #include "WizHtmlCollector.h"
 #include "../share/WizHtml2Zip.h"
 #include "../share/WizObjectDataDownloader.h"
-#include "utils/misc.h"
+#include "utils/WizMisc.h"
 #include "WizMainWindow.h"
 #include <QEventLoop>
 #include <QFile>

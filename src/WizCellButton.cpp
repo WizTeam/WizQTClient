@@ -1,4 +1,4 @@
-#include "cellbutton.h"
+#include "WizCellButton.h"
 
 #include <QString>
 #include <QPainter>
@@ -9,7 +9,7 @@
 #include <QFontMetrics>
 #include <QPropertyAnimation>
 
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "share/WizMisc.h"
 
 

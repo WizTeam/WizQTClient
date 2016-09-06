@@ -12,9 +12,9 @@
 #include <QDebug>
 #include "WizDef.h"
 #include "WizMisc.h"
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
-#include "sync/apientry.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
+#include "sync/WizApiEntry.h"
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
 #include "WizMainWindow.h"

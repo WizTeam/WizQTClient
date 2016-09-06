@@ -3,7 +3,7 @@
 
 #include "share/WizMisc.h"
 #include "share/WizThreads.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #include <QMovie>
 

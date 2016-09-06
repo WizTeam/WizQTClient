@@ -3,7 +3,7 @@
 #include <QWebChannel>
 #include "WizWebEngineView.h"
 #include "WizMisc.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 
 WizWebEnginePage::WizWebEnginePage(QObject* parent)
     : QWebEnginePage(parent)

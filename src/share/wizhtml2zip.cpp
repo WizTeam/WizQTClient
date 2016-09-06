@@ -5,8 +5,8 @@
 #include "../share/WizZip.h"
 
 #include "WizMisc.h"
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
 #include <QDir>
 
 

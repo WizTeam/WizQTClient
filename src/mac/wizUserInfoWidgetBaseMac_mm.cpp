@@ -2,9 +2,9 @@
 #ifdef USECOCOATOOLBAR
 
 #include <QPainter>
-#include "sync/avataruploader.h"
-#include "sync/avatar.h"
-#include "utils/stylehelper.h"
+#include "sync/WizAvatarUploader.h"
+#include "sync/WizAvatarHost.h"
+#include "utils/WizStyleHelper.h"
 
 
 QString WizUserInfoWidgetBaseMac::text() const

@@ -1,12 +1,12 @@
-#include "wizFileReader.h"
+#include "WizFileImporter.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>
 #include <QTextStream>
 #include <QDebug>
 
-#include "utils/pathresolve.h"
-#include "utils/misc.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizMisc.h"
 #include "html/WizHtmlCollector.h"
 #include "share/WizMisc.h"
 #include "share/WizRtfReader.h"

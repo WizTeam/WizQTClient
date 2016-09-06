@@ -1,5 +1,5 @@
-#include "thumbcache.h"
-#include "thumbcache_p.h"
+#include "WizThumbCache.h"
+#include "WizThumbCache_p.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
 #include "share/WizThreads.h"

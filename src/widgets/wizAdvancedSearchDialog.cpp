@@ -11,7 +11,7 @@
 #include "share/WizDatabaseManager.h"
 #include "share/WizMisc.h"
 #include "WizNoteStyle.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #define PARAM_SELECT_PARAM    QObject::tr("Select search param")
 #define PARAM_SELECT_FOLDER  QObject::tr("Folder")

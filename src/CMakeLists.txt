@@ -167,7 +167,7 @@ set(wiznote_SOURCES
     WizPopupButton.cpp
     WizWebSettingsDialog.cpp
     WizUserVerifyDialog.cpp
-    WizMessageListview.cpp
+    WizMessageListView.cpp
     WizThumbCache.cpp
     WizMessageCompleter.cpp
     WizDocumentEditStatus.cpp

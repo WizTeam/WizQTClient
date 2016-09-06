@@ -3,7 +3,7 @@
 #include <QtWidgets>
 
 #include "share/WizMisc.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include <QLabel>
 
 QBrush WizGetLeftViewBrush()

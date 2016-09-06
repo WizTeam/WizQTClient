@@ -3,11 +3,11 @@
 #include <QDebug>
 #include <QEventLoop>
 #include <QNetworkAccessManager>
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizThreads.h"
 #include "sync/WizKMServer.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
 #include "WizMisc.h"
 #include "WizDatabaseManager.h"
 #include "WizDatabase.h"

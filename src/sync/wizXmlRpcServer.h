@@ -6,7 +6,7 @@
 #include <QNetworkReply>
 
 #include "share/WizXmlRpc.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 #include "share/WizMisc.h"
 
 

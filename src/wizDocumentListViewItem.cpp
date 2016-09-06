@@ -13,9 +13,9 @@
 #include "share/WizSettings.h"
 #include "WizPopupButton.h"
 
-#include "thumbcache.h"
-#include "sync/avatar.h"
-#include "utils/stylehelper.h"
+#include "WizThumbCache.h"
+#include "sync/WizAvatarHost.h"
+#include "utils/WizStyleHelper.h"
 
 
 WizDocumentListViewDocumentItem::WizDocumentListViewDocumentItem(WizExplorerApp& app,

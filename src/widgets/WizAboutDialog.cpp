@@ -1,4 +1,4 @@
-#include "aboutdialog.h"
+#include "WizAboutDialog.h"
 #include "../WizDef.h"
 
 #include <QApplication>

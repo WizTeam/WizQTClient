@@ -11,13 +11,13 @@
 
 #if defined Q_OS_MAC
 #include "rapidjson/document.h"
-#include "utils/stylehelper.h"
-#include "sync/token.h"
+#include "utils/WizStyleHelper.h"
+#include "sync/WizToken.h"
 #include "share/WizMisc.h"
 #include "share/WizMessageBox.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
-#include "sync/apientry.h"
+#include "sync/WizApiEntry.h"
 #include "share/WizGlobal.h"
 #include "mac/WizIAPHelper.h"
 #include "WizMainWindow.h"

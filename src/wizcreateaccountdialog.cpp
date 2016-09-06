@@ -3,7 +3,7 @@
 
 #include <QMessageBox>
 
-#include "sync/asyncapi.h"
+#include "sync/WizAsyncApi.h"
 
 
 

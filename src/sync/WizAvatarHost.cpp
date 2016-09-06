@@ -1,5 +1,5 @@
-#include "avatar.h"
-#include "avatar_p.h"
+#include "WizAvatarHost.h"
+#include "WizAvatarHost_p.h"
 
 #include <QThread>
 #include <QImage>
@@ -15,9 +15,9 @@
 #include <QDateTime>
 #include <QPainter>
 
-#include "apientry.h"
-#include "../utils/pathresolve.h"
-#include "../utils/stylehelper.h"
+#include "WizApiEntry.h"
+#include "../utils/WizPathResolve.h"
+#include "../utils/WizStyleHelper.h"
 
 #include "../share/WizMisc.h"
 #include "share/WizThreads.h"

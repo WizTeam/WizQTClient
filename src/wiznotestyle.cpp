@@ -18,10 +18,10 @@
 #include "share/WizMisc.h"
 //#include "share/wizimagepushbutton.h"
 
-#include "messagelistview.h"
+#include "WizMessageListView.h"
 
-#include "utils/stylehelper.h"
-#include "sync/avatar.h"
+#include "utils/WizStyleHelper.h"
+#include "sync/WizAvatarHost.h"
 
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"

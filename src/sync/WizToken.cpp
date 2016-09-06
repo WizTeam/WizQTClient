@@ -1,13 +1,13 @@
-#include "token.h"
-#include "token_p.h"
+#include "WizToken.h"
+#include "WizToken_p.h"
 
 #include <QMutexLocker>
 #include <QString>
 #include <QDebug>
 
 #include "WizKMServer.h"
-#include "asyncapi.h"
-#include "apientry.h"
+#include "WizAsyncApi.h"
+#include "WizApiEntry.h"
 #include "share/WizThreads.h"
 
 // use 5 minutes locally, server use 20 minutes

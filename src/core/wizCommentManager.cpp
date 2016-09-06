@@ -6,8 +6,8 @@
 #include <QDebug>
 
 #include "rapidjson/document.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
 

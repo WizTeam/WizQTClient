@@ -6,7 +6,7 @@
 #include "WizDef.h"
 #include "WizMisc.h"
 #include "WizIndex.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 
 static const char* PAD_TYPE = "PAD";
 static const char* PHONE_TYPE = "PHONE";

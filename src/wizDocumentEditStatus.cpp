@@ -1,11 +1,11 @@
 #include "WizDocumentEditStatus.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "share/WizMisc.h"
 #include "rapidjson/document.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
-#include "sync/token.h"
+#include "sync/WizToken.h"
 #include "sync/WizKMServer.h"
 
 #include <QNetworkAccessManager>

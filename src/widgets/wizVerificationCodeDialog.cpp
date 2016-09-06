@@ -8,8 +8,8 @@
 #include <QNetworkRequest>
 #include <QNetworkAccessManager>
 
-#include "sync/apientry.h"
-#include "utils/pathresolve.h"
+#include "sync/WizApiEntry.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizMisc.h"
 #include "share/WizMessageBox.h"
 #include "share/WizThreads.h"

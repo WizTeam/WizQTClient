@@ -1,4 +1,4 @@
-#include "WizTitleBar.h"
+#include "WizWindowTitleBar.h"
 
 #include <QPixmap>
 #include <QStyle>
@@ -7,7 +7,7 @@
 #include <QHBoxLayout>
 #include <QMouseEvent>
 
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "WizMisc.h"
 
 

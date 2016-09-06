@@ -1,4 +1,4 @@
-#include "notifybar.h"
+#include "WizNotifyBar.h"
 
 #include <QHBoxLayout>
 #include <QLabel>
@@ -6,7 +6,7 @@
 #include <QDebug>
 
 #include "widgets/WizImageButton.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 
 

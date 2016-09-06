@@ -21,12 +21,12 @@
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>
 #include <QNetworkReply>
-#include "utils/logger.h"
-#include "utils/pathresolve.h"
-#include "utils/stylehelper.h"
-#include "utils/misc.h"
+#include "utils/WizLogger.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizMisc.h"
 #include "mac/WizMacHelper.h"
-#include "sync/apientry.h"
+#include "sync/WizApiEntry.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
 #include "WizDatabaseManager.h"

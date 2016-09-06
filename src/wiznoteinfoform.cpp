@@ -6,7 +6,7 @@
 #include "share/WizObject.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 #include "WizMainWindow.h"
 #include "WizLineInputDialog.h"
 #include "share/WizAnalyzer.h"

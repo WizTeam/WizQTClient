@@ -1,4 +1,4 @@
-#include "messagecompleter.h"
+#include "WizMessageCompleter.h"
 
 #include <QLineEdit>
 #include <QStringList>
@@ -11,12 +11,12 @@
 #include <QScrollBar>
 #include <QDebug>
 
-#include "sync/avatar.h"
+#include "sync/WizAvatarHost.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
 #include "share/WizGlobal.h"
-#include "utils/pinyin.h"
-#include "utils/stylehelper.h"
+#include "utils/WizPinyin.h"
+#include "utils/WizStyleHelper.h"
 
 #include "WizDocumentView.h"
 

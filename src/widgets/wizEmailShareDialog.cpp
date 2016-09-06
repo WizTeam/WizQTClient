@@ -10,12 +10,12 @@
 #include <QDebug>
 
 #include "share/WizMessageBox.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "share/WizSettings.h"
 #include "share/WizDatabaseManager.h"
 #include "rapidjson/document.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
 

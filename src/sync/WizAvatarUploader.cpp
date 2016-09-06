@@ -1,4 +1,4 @@
-#include "avataruploader.h"
+#include "WizAvatarUploader.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
@@ -8,8 +8,8 @@
 #include <QDir>
 #include <QDebug>
 
-#include "apientry.h"
-#include "token.h"
+#include "WizApiEntry.h"
+#include "WizToken.h"
 #include "share/WizEventLoop.h"
 
 WizAvatarUploader::WizAvatarUploader(QObject* parent)

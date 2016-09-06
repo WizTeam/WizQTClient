@@ -9,7 +9,7 @@
 #include "share/WizMisc.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 
 
 WizMobileFileReceiver::WizMobileFileReceiver(QObject *parent) :

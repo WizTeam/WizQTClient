@@ -9,7 +9,7 @@
 
 #include "WizMd5.h"
 #include "WizMisc.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 
 
 /**

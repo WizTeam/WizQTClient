@@ -8,8 +8,8 @@
 #include <QStyledItemDelegate>
 #include <QAbstractItemView>
 #include <QDebug>
-#include "utils/stylehelper.h"
-#include "utils/logger.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizLogger.h"
 #include "share/WizMisc.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"

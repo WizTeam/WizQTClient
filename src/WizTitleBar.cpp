@@ -1,4 +1,4 @@
-#include "titlebar.h"
+#include "WizTitleBar.h"
 
 #include <QVBoxLayout>
 #include <QUrl>
@@ -10,10 +10,10 @@
 #include <QLabel>
 
 #include "widgets/WizTagBar.h"
-#include "titleedit.h"
-#include "cellbutton.h"
-#include "infobar.h"
-#include "notifybar.h"
+#include "WizTitleEdit.h"
+#include "WizCellButton.h"
+#include "WizInfoBar.h"
+#include "WizNotifyBar.h"
 #include "WizEditorToolBar.h"
 #include "WizDocumentView.h"
 #include "WizTagListWidget.h"
@@ -27,12 +27,12 @@
 #include "share/WizAnimateAction.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizGlobal.h"
-#include "utils/stylehelper.h"
-#include "utils/pathresolve.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizPathResolve.h"
 #include "widgets/WizLocalProgressWebView.h"
 #include "widgets/WizTipsWidget.h"
 
-#include "messagecompleter.h"
+#include "WizMessageCompleter.h"
 #include "WizOEMSettings.h"
 #include "WizMainWindow.h"
 #include "share/WizSettings.h"

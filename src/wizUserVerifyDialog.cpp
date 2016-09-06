@@ -6,7 +6,7 @@
 #include <QGridLayout>
 #include <QDialogButtonBox>
 
-#include <sync/token.h>
+#include <sync/WizToken.h>
 
 WizUserVerifyDialog::WizUserVerifyDialog(const QString& strUser,
                                            const QString& strHint,

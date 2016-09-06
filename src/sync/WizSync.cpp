@@ -1,11 +1,11 @@
-#include "sync.h"
-#include "sync_p.h"
+#include "WizSync.h"
+#include "WizKMSync_p.h"
 
 #include <QString>
 
-#include "utils/pathresolve.h"
-#include "apientry.h"
-#include "avatar.h"
+#include "utils/WizPathResolve.h"
+#include "WizApiEntry.h"
+#include "WizAvatarHost.h"
 #include "rapidjson/document.h"
 
 #include "share/WizSyncableDatabase.h"

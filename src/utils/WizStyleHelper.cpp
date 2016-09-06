@@ -1,4 +1,4 @@
-#include "stylehelper.h"
+#include "WizStyleHelper.h"
 
 #include <QFontMetrics>
 #include <QSize>
@@ -10,7 +10,7 @@
 #include <QDebug>
 #include <QApplication>
 
-#include "pathresolve.h"
+#include "WizPathResolve.h"
 #include "../share/WizMisc.h"
 #include "../share/WizSettings.h"
 #include "../share/WizGlobal.h"

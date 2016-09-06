@@ -2,7 +2,7 @@
 #include <QVariant>
 #include <QFile>
 #include <QDebug>
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
 #include "rapidjson/document.h"

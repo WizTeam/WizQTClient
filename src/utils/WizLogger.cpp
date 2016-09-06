@@ -1,4 +1,4 @@
-#include "logger.h"
+#include "WizLogger.h"
 
 #include <QString>
 #include <QStringList>
@@ -10,8 +10,8 @@
 #include <QTextStream>
 #include <iostream>
 #include <fstream>
-#include "misc.h"
-#include "pathresolve.h"
+#include "WizMisc.h"
+#include "WizPathResolve.h"
 
 #define LOG_LINES_MAX 30000
 #define LOG_DAYS_MAX 10

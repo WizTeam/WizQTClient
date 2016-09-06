@@ -1,7 +1,7 @@
 #include "WizXml.h"
 
 #include "WizMisc.h"
-#include "../utils/logger.h"
+#include "../utils/WizLogger.h"
 
 
 WizXMLNode::WizXMLNode(const WizXMLNode& nodeSrc)

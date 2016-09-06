@@ -1,6 +1,6 @@
 #include "WizAnimateAction.h"
 
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #include "WizMisc.h"
 #include "WizSettings.h"

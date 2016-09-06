@@ -28,10 +28,10 @@
 #include "share/WizGlobal.h"
 
 #include "WizDef.h"
-#include "utils/pathresolve.h"
-#include "utils/logger.h"
-#include "utils/misc.h"
-#include "utils/stylehelper.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizLogger.h"
+#include "utils/WizMisc.h"
+#include "utils/WizStyleHelper.h"
 
 #include "share/WizMisc.h"
 #include "share/WizAnalyzer.h"
@@ -39,9 +39,9 @@
 #include "share/WizObjectDataDownloader.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizThreads.h"
-#include "sync/avatar.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "sync/WizAvatarHost.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
 #include "core/WizAccountManager.h"
 #include "core/WizNoteManager.h"
 #include "widgets/WizCodeEditorDialog.h"
@@ -61,7 +61,7 @@
 
 #include "html/WizHtmlReader.h"
 
-#include "titlebar.h"
+#include "WizTitleBar.h"
 
 
 enum WizLinkType {

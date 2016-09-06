@@ -4,7 +4,7 @@
 
 #include "WizDatabase.h"
 #include "WizObject.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 
 static WizDatabaseManager* m_instance = 0;
 

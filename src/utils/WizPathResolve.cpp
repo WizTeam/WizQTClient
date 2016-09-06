@@ -1,4 +1,4 @@
-#include "pathresolve.h"
+#include "WizPathResolve.h"
 
 #include <QtGlobal>
 #include <QApplication>

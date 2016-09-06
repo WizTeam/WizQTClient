@@ -1,5 +1,5 @@
 #include "WizSettings.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 
 #include "WizDef.h"
 #include <QLocale>

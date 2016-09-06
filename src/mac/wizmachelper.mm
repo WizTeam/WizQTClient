@@ -22,7 +22,7 @@
 #include "WizMainWindow.h"
 
 #include "share/WizRtfReader.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "widgets/WizCrashReportDialog.h"
 
 #if QT_VERSION >= 0x050200

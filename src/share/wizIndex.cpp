@@ -4,8 +4,8 @@
 
 #include <algorithm>
 #include "WizKMCore.h"
-#include "utils/logger.h"
-#include "utils/misc.h"
+#include "utils/WizLogger.h"
+#include "utils/WizMisc.h"
 #include "WizMisc.h"
 
 

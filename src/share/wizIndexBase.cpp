@@ -3,8 +3,8 @@
 
 #include <QDebug>
 
-#include "utils/logger.h"
-#include "utils/pathresolve.h"
+#include "utils/WizLogger.h"
+#include "utils/WizPathResolve.h"
 
 
 WizIndexBase::WizIndexBase(void)

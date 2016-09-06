@@ -9,8 +9,8 @@
 #include <QFileDialog>
 
 #include "WizDef.h"
-#include "utils/stylehelper.h"
-#include "utils/misc.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizMisc.h"
 #include "share/WizDrawTextHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizDatabaseManager.h"
@@ -22,8 +22,8 @@
 #include "share/WizGlobal.h"
 #include "sync/WizKMSync.h"
 #include "sync/WizKMServer.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 #include "widgets/WizScrollBar.h"
 #include "widgets/WizAdvancedSearchDialog.h"
 #include "widgets/WizExecutingActionDialog.h"
@@ -35,7 +35,7 @@
 #include "WizFolderSelector.h"
 #include "WizLineInputDialog.h"
 #include "WizWebSettingsDialog.h"
-#include "wizFileReader.h"
+#include "WizFileImporter.h"
 #include "WizOEMSettings.h"
 
 

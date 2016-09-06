@@ -12,8 +12,8 @@
 #include "WizSettings.h"
 #include "html/WizHtmlCollector.h"
 #include "WizDatabase.h"
-#include "utils/logger.h"
-#include "utils/pathresolve.h"
+#include "utils/WizLogger.h"
+#include "utils/WizPathResolve.h"
 
 #define TIMEINTERVAL  60 * 1000
 

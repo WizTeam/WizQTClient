@@ -29,8 +29,8 @@
 #include <cstdlib>
 #include <assert.h>
 
-#include "../utils/pathresolve.h"
-#include "../utils/logger.h"
+#include "../utils/WizPathResolve.h"
+#include "../utils/WizLogger.h"
 
 
 // Named constant for passing to CppSQLite3Exception when passing it a string

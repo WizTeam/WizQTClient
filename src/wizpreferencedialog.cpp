@@ -6,7 +6,7 @@
 #include <QColorDialog>
 
 #include "share/WizGlobal.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizMessageBox.h"
 #include "share/WizDatabaseManager.h"
 #include "WizMainWindow.h"

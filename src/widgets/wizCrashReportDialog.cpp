@@ -14,8 +14,8 @@
 #include "share/WizEventLoop.h"
 #include "share/WizMisc.h"
 #include "share/WizThreads.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
 
 WizCrashReportDialog::WizCrashReportDialog(const QString& text, QWidget *parent)
     : QDialog(parent)

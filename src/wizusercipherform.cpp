@@ -4,7 +4,7 @@
 #include <QGraphicsDropShadowEffect>
 
 #include "WizMainWindow.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 
 WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)

@@ -8,7 +8,7 @@
 #include <QStyleOption>
 #include <QPainter>
 #include <QMouseEvent>
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"
 #endif

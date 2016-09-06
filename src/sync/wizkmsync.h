@@ -4,7 +4,7 @@
 #include <QThread>
 #include <QMessageBox>
 
-#include "sync.h"
+#include "WizSync.h"
 #include "WizKMServer.h"
 
 class WizDatabase;

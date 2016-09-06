@@ -1,6 +1,6 @@
 #include "WizCodeEditorDialog.h"
 #include "WizDef.h"
-#include "utils/pathresolve.h"
+#include "utils/WizPathResolve.h"
 #include "share/WizSettings.h"
 #include "WizDocumentWebView.h"
 

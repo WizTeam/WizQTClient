@@ -5,7 +5,7 @@
 
 #include "WizMisc.h"
 #include "WizEnc.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 #include "WizDatabase.h"
 
 

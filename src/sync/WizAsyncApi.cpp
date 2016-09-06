@@ -1,4 +1,4 @@
-#include "asyncapi.h"
+#include "WizAsyncApi.h"
 
 #include <QtGlobal>
 #include <QNetworkAccessManager>
@@ -7,9 +7,9 @@
 #include <rapidjson/document.h>
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
-#include "apientry.h"
+#include "WizApiEntry.h"
 #include "WizKMServer.h"
-#include "token.h"
+#include "WizToken.h"
 
 
 WizAsyncApi::WizAsyncApi(QObject *parent) : QObject(parent)

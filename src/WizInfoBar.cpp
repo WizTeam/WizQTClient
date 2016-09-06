@@ -1,9 +1,9 @@
-#include "infobar.h"
+#include "WizInfoBar.h"
 
 #include <QLabel>
 #include <QHBoxLayout>
 
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "share/WizObject.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"

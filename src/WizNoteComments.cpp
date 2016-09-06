@@ -1,12 +1,12 @@
-#include "notecomments.h"
-#include "notecomments_p.h"
+#include "WizNoteComments.h"
+#include "WizNoteComments_p.h"
 
 #include <QDebug>
 
 #include "WizDocumentView.h"
 #include "share/WizObject.h"
-#include "sync/token.h"
-#include "sync/apientry.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
 
 static WizNoteCommentsPrivate* g_comments = 0;
 

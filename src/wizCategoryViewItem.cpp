@@ -7,11 +7,11 @@
 #include <QStyle>
 #include <QDebug>
 
-#include "utils/pinyin.h"
-#include "utils/stylehelper.h"
-#include "utils/notify.h"
-#include "utils/logger.h"
-#include "utils/misc.h"
+#include "utils/WizPinyin.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizNotify.h"
+#include "utils/WizLogger.h"
+#include "utils/WizMisc.h"
 
 #include "WizCategoryView.h"
 #include "WizMainWindow.h"

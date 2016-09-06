@@ -1,7 +1,7 @@
 #include "WizShadowEffect.h"
 
 #include "WizUI.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "WizMisc.h"
 #include <QPainter>
 #include <QPaintEngine>

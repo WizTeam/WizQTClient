@@ -3,7 +3,7 @@
 #include <QtGui>
 
 #include "WizMisc.h"
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 
 #ifdef Q_OS_WIN
 //#include "WizWindowsHelper.h"

@@ -15,9 +15,9 @@
 
 #include <sys/stat.h>
 
-#include "utils/pathresolve.h"
-#include "utils/logger.h"
-#include "utils/stylehelper.h"
+#include "utils/WizPathResolve.h"
+#include "utils/WizLogger.h"
+#include "utils/WizStyleHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizWin32Helper.h"
 #include "share/WizDatabaseManager.h"
@@ -32,10 +32,10 @@
 #include "mac/WizIAPHelper.h"
 #endif
 
-#include "sync/token.h"
-#include "sync/apientry.h"
-#include "sync/avatar.h"
-#include "thumbcache.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizAvatarHost.h"
+#include "WizThumbCache.h"
 #include "WizMainWindow.h"
 #include "WizDocumentWebEngine.h"
 #include "WizLoginDialog.h"

@@ -9,7 +9,7 @@
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizMessageBox.h"
-#include "sync/apientry.h"
+#include "sync/WizApiEntry.h"
 
 #define WIZ_PRODUCT_TEMPLATE   "cn.wiz.wiznotemac.templates"
 

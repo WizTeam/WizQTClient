@@ -2,7 +2,7 @@
 
 #include "WizXmlRpc.h"
 #include "WizMisc.h"
-#include "utils/logger.h"
+#include "utils/WizLogger.h"
 #include "rapidjson/document.h"
 
 WIZUSERINFO::WIZUSERINFO()

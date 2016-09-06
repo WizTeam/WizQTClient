@@ -4,8 +4,8 @@
 #include <QFile>
 
 #include "WizMisc.h"
-#include "../utils/logger.h"
-#include "utils/misc.h"
+#include "../utils/WizLogger.h"
+#include "utils/WizMisc.h"
 
 
 namespace wizmd5

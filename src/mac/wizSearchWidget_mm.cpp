@@ -15,7 +15,7 @@
 #include <QMouseEvent>
 #include <QStyledItemDelegate>
 #include <QPainter>
-#include "utils/stylehelper.h"
+#include "utils/WizStyleHelper.h"
 #include "share/WizThreads.h"
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"

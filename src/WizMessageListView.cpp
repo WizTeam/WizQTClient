@@ -1,4 +1,4 @@
-#include "messagelistview.h"
+#include "WizMessageListView.h"
 
 #include <QListWidgetItem>
 #include <QScrollBar>
@@ -16,12 +16,12 @@
 
 #include "rapidjson/document.h"
 
-#include "utils/stylehelper.h"
-#include "utils/misc.h"
-#include "sync/avatar.h"
-#include "sync/asyncapi.h"
-#include "sync/apientry.h"
-#include "sync/token.h"
+#include "utils/WizStyleHelper.h"
+#include "utils/WizMisc.h"
+#include "sync/WizAvatarHost.h"
+#include "sync/WizAsyncApi.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizToken.h"
 
 #include "share/WizDatabaseManager.h"
 #include "share/WizDatabase.h"
