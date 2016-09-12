@@ -28,6 +28,9 @@ WizFileIconProvider::WizFileIconProvider()
 {
 }
 
+#if QT_VERSION >= 0x050000
+extern Q_GUI_EXPORT QPixmap qt_pixmapFromWinHICON(HICON);
+#endif
 
 QIcon WizFileIconProvider::icon(const QString& strFilePath) const
 {
@@ -47,12 +50,12 @@ QIcon WizFileIconProvider::icon(const QString& strFilePath) const
         //
         SHFILEINFO info;
         memset(&info, 0, sizeof(SHFILEINFO));
-        unsigned long val = SHGetFileInfo((const wchar_t *)QDir::toNativeSeparators(strFileName).utf16(), 0, &info,
+        unsigned long val = SHGetFileInfo((const wchar_t *)QDir::toNativeSeparators(strFilePath).utf16(), 0, &info,
                             sizeof(SHFILEINFO), flags);
         //
         if (val && info.hIcon)
         {
-            QPixmap pixmap = QPixmap::fromWinHICON(info.hIcon);
+            QPixmap pixmap = qt_pixmapFromWinHICON(info.hIcon);
             if (!pixmap.isNull())
             {
                 retIcon.addPixmap(pixmap);

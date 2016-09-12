@@ -3,6 +3,8 @@ project (QuaZip)
 file(GLOB SRCS "*.c" "*.cpp")
 file(GLOB PUBLIC_HEADERS "*.h")
 
+add_definitions(-DQUAZIP_STATIC=YES)
+
 include(../../cmake/QtChooser.cmake)
 add_library(quazip STATIC ${SRCS} ${PUBLIC_HEADERS})
 qt_use_modules(quazip)
@@ -17,3 +19,4 @@ include_directories(
 
 # Link against ZLIB_LIBRARIES if needed (on Windows this variable is empty)
 target_link_libraries(quazip ${ZLIB_LIBRARY})
+

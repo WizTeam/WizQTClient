@@ -1561,10 +1561,10 @@ static int process_input(struct callback_data *p, FILE *in){
 
 bool CppSQLite3DB::dump(const CString& strNewFileName)
 {
-    FILE* fp = fopen(strNewFileName.toLocal8Bit(), _T("wb"));
+    FILE* fp = fopen(strNewFileName.toLocal8Bit(), "wb");
     if (!fp)
 	{
-                TOLOG1(_T("Failed to open file: %1"), strNewFileName);
+        TOLOG1("Failed to open file: %1", strNewFileName);
 		return false;
 	}
 	//
@@ -1609,10 +1609,10 @@ bool CppSQLite3DB::dump(const CString& strNewFileName)
 
 bool CppSQLite3DB::read(const CString& strNewFileName)
 {
-    FILE* fp = fopen(::WizBSTR2UTF8(strNewFileName).c_str(), _T("rb"));
+    FILE* fp = fopen(::WizBSTR2UTF8(strNewFileName).c_str(), "rb");
     if (!fp)
 	{
-        TOLOG1(_T("Failed to open file: %1"), strNewFileName);
+        TOLOG1("Failed to open file: %1", strNewFileName);
 		return false;
 	}
 	//
@@ -1637,7 +1637,7 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 {
 	try
 	{
-        CString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + _T(".tmp");
+        CString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
 		//
 		CppSQLite3DB dbSrc;
         dbSrc.open(strDBFileName);
@@ -1649,9 +1649,9 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 		//
 		dbSrc.close();
 		//
-        if (PathFileExists(strRetFileName))
+        if (WizPathFileExists(strRetFileName))
 		{
-            DeleteFile(strRetFileName);
+            WizDeleteFile(strRetFileName);
 		}
 		//
 		CppSQLite3DB dbDest;
@@ -1665,14 +1665,14 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 		dbDest.close();
 		//
 #ifdef Q_OS_WIN32
-                _flushall();
+        _flushall();
 #endif
 		//
 		return true;
 	}
 	catch (CppSQLite3Exception& e)
 	{
-                TOLOG(e.errorMessage());
+         TOLOG(e.errorMessage());
 		return false;
 	}
 	//

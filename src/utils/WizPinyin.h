@@ -10,6 +10,7 @@ enum {
 };
 
 int WizToolsChinese2PinYin(const wchar_t* lpszText, unsigned int flags, QString& pbstrTextResult);
+int WizToolsChinese2PinYin(QString text, unsigned int flags, QString& pbstrTextResult);
 int chinese2pinyin(const QString& strChinese, QString& strPinYin, unsigned int flags);
 
 

@@ -1401,7 +1401,7 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
 
     if (!d.HasMember("ip"))
     {
-        TOLOG(_T("no ip field"));
+        TOLOG("no ip field");
         return;
     }
     //
@@ -1413,14 +1413,14 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
     if (ip.isEmpty())
     {
         TOLOG(CString(responseMessage));
-        TOLOG(_T("no ip field"));
+        TOLOG("no ip field");
         return;
     }
 
     if (iptype.isEmpty())
     {
         TOLOG(CString(responseMessage));
-        TOLOG(_T("no iptype field"));
+        TOLOG("no iptype field");
         return;
     }
 

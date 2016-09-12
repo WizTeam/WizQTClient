@@ -3,7 +3,7 @@
 
 #include "share/WizDatabaseManager.h"
 
-class WIZTAGDATA;
+struct WIZTAGDATA;
 
 class WizFileImporter : public QObject
 {

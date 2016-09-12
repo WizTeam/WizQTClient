@@ -5,7 +5,9 @@
 #include <QDebug>
 #include <QCoreApplication>
 
+#ifndef _WIN32
 #include <unistd.h>
+#endif
 
 #include "WizDef.h"
 #include "WizMisc.h"

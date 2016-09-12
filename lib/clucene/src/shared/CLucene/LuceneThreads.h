@@ -7,7 +7,9 @@
 #ifndef _LuceneThreads_h
 #define  _LuceneThreads_h
 
+#ifndef _WIN32
 #include <pthread.h>
+#endif
 
 CL_NS_DEF(util)
 class CLuceneThreadIdCompare;

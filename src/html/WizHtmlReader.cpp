@@ -18,108 +18,108 @@ private:
         CCharEntityRefs()
         {
             /** C0 Controls and Basic Latin */
-            (*this)[_T("quot")]		= _T('\x22');
-            (*this)[_T("amp")]		= _T('\x26');
-            (*this)[_T("apos")]		= _T('\x27');
-            (*this)[_T("lt")]		= _T('\x3C');
-            (*this)[_T("gt")]		= _T('\x3E');
+            (*this)["quot"]		= _T('\x22');
+            (*this)["amp"]		= _T('\x26');
+            (*this)["apos"]		= _T('\x27');
+            (*this)["lt"]		= _T('\x3C');
+            (*this)["gt"]		= _T('\x3E');
             /** ISO 8859-1 (Latin-1) characters */
-            (*this)[_T("nbsp")]		= _T('\xA0');
-            (*this)[_T("iexcl")]	= _T('\xA1');
-            (*this)[_T("cent")]		= _T('\xA2');
-            (*this)[_T("pound")]	= _T('\xA3');
-            (*this)[_T("current")]	= _T('\xA4');
-            (*this)[_T("yen")]		= _T('\xA5');
-            (*this)[_T("brvbar")]	= _T('\xA6');
-            (*this)[_T("sect")]		= _T('\xA7');
-            (*this)[_T("uml")]		= _T('\xA8');
-            (*this)[_T("copy")]		= _T('\xA9');
-            (*this)[_T("ordf")]		= _T('\xAA');
-            (*this)[_T("laquo")]	= _T('\xAB');
-            (*this)[_T("not")]		= _T('\xAC');
-            (*this)[_T("shy")]		= _T('\xAD');
-            (*this)[_T("reg")]		= _T('\xAE');
-            (*this)[_T("macr")]		= _T('\xAF');
-            (*this)[_T("deg")]		= _T('\xB0');
-            (*this)[_T("plusmn")]	= _T('\xB1');
-            (*this)[_T("sup2")]		= _T('\xB2');
-            (*this)[_T("sup3")]		= _T('\xB3');
-            (*this)[_T("acute")]	= _T('\xB4');
-            (*this)[_T("micro")]	= _T('\xB5');
-            (*this)[_T("para")]		= _T('\xB6');
-            (*this)[_T("middot")]	= _T('\xB7');
-            (*this)[_T("cedil")]	= _T('\xB8');
-            (*this)[_T("sup1")]		= _T('\xB9');
-            (*this)[_T("ordm")]		= _T('\xBA');
-            (*this)[_T("raquo")]	= _T('\xBB');
-            (*this)[_T("frac14")]	= _T('\xBC');
-            (*this)[_T("frac12")]	= _T('\xBD');
-            (*this)[_T("frac34")]	= _T('\xBE');
-            (*this)[_T("iquest")]	= _T('\xBF');
-            (*this)[_T("Agrave")]	= _T('\xC0');
-            (*this)[_T("Aacute")]	= _T('\xC1');
-            (*this)[_T("Acirc")]	= _T('\xC2');
-            (*this)[_T("Atilde")]	= _T('\xC3');
-            (*this)[_T("Auml")]		= _T('\xC4');
-            (*this)[_T("Aring")]	= _T('\xC5');
-            (*this)[_T("AElig")]	= _T('\xC6');
-            (*this)[_T("Ccedil")]	= _T('\xC7');
-            (*this)[_T("Egrave")]	= _T('\xC8');
-            (*this)[_T("Eacute")]	= _T('\xC9');
-            (*this)[_T("Ecirc")]	= _T('\xCA');
-            (*this)[_T("Euml")]		= _T('\xCB');
-            (*this)[_T("Igrave")]	= _T('\xCC');
-            (*this)[_T("Iacute")]	= _T('\xCD');
-            (*this)[_T("Icirc")]	= _T('\xCE');
-            (*this)[_T("Iuml")]		= _T('\xCF');
-            (*this)[_T("ETH")]		= _T('\xD0');
-            (*this)[_T("Ntilde")]	= _T('\xD1');
-            (*this)[_T("Ograve")]	= _T('\xD2');
-            (*this)[_T("Oacute")]	= _T('\xD3');
-            (*this)[_T("Ocirc")]	= _T('\xD4');
-            (*this)[_T("Otilde")]	= _T('\xD5');
-            (*this)[_T("Ouml")]		= _T('\xD6');
-            (*this)[_T("times")]	= _T('\xD7');
-            (*this)[_T("Oslash")]	= _T('\xD8');
-            (*this)[_T("Ugrave")]	= _T('\xD9');
-            (*this)[_T("Uacute")]	= _T('\xDA');
-            (*this)[_T("Ucirc")]	= _T('\xDB');
-            (*this)[_T("Uuml")]		= _T('\xDC');
-            (*this)[_T("Yacute")]	= _T('\xDD');
-            (*this)[_T("THORN")]	= _T('\xDE');
-            (*this)[_T("szlig")]	= _T('\xDF');
-            (*this)[_T("agrave")]	= _T('\xE0');
-            (*this)[_T("aacute")]	= _T('\xE1');
-            (*this)[_T("acirc")]	= _T('\xE2');
-            (*this)[_T("atilde")]	= _T('\xE3');
-            (*this)[_T("auml")]		= _T('\xE4');
-            (*this)[_T("aring")]	= _T('\xE5');
-            (*this)[_T("aelig")]	= _T('\xE6');
-            (*this)[_T("ccedil")]	= _T('\xE7');
-            (*this)[_T("egrave")]	= _T('\xE8');
-            (*this)[_T("eacute")]	= _T('\xE9');
-            (*this)[_T("ecirc")]	= _T('\xEA');
-            (*this)[_T("euml")]		= _T('\xEB');
-            (*this)[_T("igrave")]	= _T('\xEC');
-            (*this)[_T("iacute")]	= _T('\xED');
-            (*this)[_T("icirc")]	= _T('\xEE');
-            (*this)[_T("iuml")]		= _T('\xEF');
-            (*this)[_T("eth")]		= _T('\xF0');
-            (*this)[_T("ntilde")]	= _T('\xF1');
-            (*this)[_T("ograve")]	= _T('\xF2');
-            (*this)[_T("oacute")]	= _T('\xF3');
-            (*this)[_T("ocirc")]	= _T('\xF4');
-            (*this)[_T("otilde")]	= _T('\xF5');
-            (*this)[_T("ouml")]		= _T('\xF6');
-            (*this)[_T("divide")]	= _T('\xF7');
-            (*this)[_T("oslash")]	= _T('\xF8');
-            (*this)[_T("ugrave")]	= _T('\xF9');
-            (*this)[_T("uacute")]	= _T('\xFA');
-            (*this)[_T("ucirc")]	= _T('\xFB');
-            (*this)[_T("uuml")]		= _T('\xFC');
-            (*this)[_T("yacute")]	= _T('\xFD');
-            (*this)[_T("thorn")]	= _T('\xFE');
-            (*this)[_T("yuml")]		= _T('\xFF');
+            (*this)["nbsp"]		= _T('\xA0');
+            (*this)["iexcl"]	= _T('\xA1');
+            (*this)["cent"]		= _T('\xA2');
+            (*this)["pound"]	= _T('\xA3');
+            (*this)["current"]	= _T('\xA4');
+            (*this)["yen"]		= _T('\xA5');
+            (*this)["brvbar"]	= _T('\xA6');
+            (*this)["sect"]		= _T('\xA7');
+            (*this)["uml"]		= _T('\xA8');
+            (*this)["copy"]		= _T('\xA9');
+            (*this)["ordf"]		= _T('\xAA');
+            (*this)["laquo"]	= _T('\xAB');
+            (*this)["not"]		= _T('\xAC');
+            (*this)["shy"]		= _T('\xAD');
+            (*this)["reg"]		= _T('\xAE');
+            (*this)["macr"]		= _T('\xAF');
+            (*this)["deg"]		= _T('\xB0');
+            (*this)["plusmn"]	= _T('\xB1');
+            (*this)["sup2"]		= _T('\xB2');
+            (*this)["sup3"]		= _T('\xB3');
+            (*this)["acute"]	= _T('\xB4');
+            (*this)["micro"]	= _T('\xB5');
+            (*this)["para"]		= _T('\xB6');
+            (*this)["middot"]	= _T('\xB7');
+            (*this)["cedil"]	= _T('\xB8');
+            (*this)["sup1"]		= _T('\xB9');
+            (*this)["ordm"]		= _T('\xBA');
+            (*this)["raquo"]	= _T('\xBB');
+            (*this)["frac14"]	= _T('\xBC');
+            (*this)["frac12"]	= _T('\xBD');
+            (*this)["frac34"]	= _T('\xBE');
+            (*this)["iquest"]	= _T('\xBF');
+            (*this)["Agrave"]	= _T('\xC0');
+            (*this)["Aacute"]	= _T('\xC1');
+            (*this)["Acirc"]	= _T('\xC2');
+            (*this)["Atilde"]	= _T('\xC3');
+            (*this)["Auml"]		= _T('\xC4');
+            (*this)["Aring"]	= _T('\xC5');
+            (*this)["AElig"]	= _T('\xC6');
+            (*this)["Ccedil"]	= _T('\xC7');
+            (*this)["Egrave"]	= _T('\xC8');
+            (*this)["Eacute"]	= _T('\xC9');
+            (*this)["Ecirc"]	= _T('\xCA');
+            (*this)["Euml"]		= _T('\xCB');
+            (*this)["Igrave"]	= _T('\xCC');
+            (*this)["Iacute"]	= _T('\xCD');
+            (*this)["Icirc"]	= _T('\xCE');
+            (*this)["Iuml"]		= _T('\xCF');
+            (*this)["ETH"]		= _T('\xD0');
+            (*this)["Ntilde"]	= _T('\xD1');
+            (*this)["Ograve"]	= _T('\xD2');
+            (*this)["Oacute"]	= _T('\xD3');
+            (*this)["Ocirc"]	= _T('\xD4');
+            (*this)["Otilde"]	= _T('\xD5');
+            (*this)["Ouml"]		= _T('\xD6');
+            (*this)["times"]	= _T('\xD7');
+            (*this)["Oslash"]	= _T('\xD8');
+            (*this)["Ugrave"]	= _T('\xD9');
+            (*this)["Uacute"]	= _T('\xDA');
+            (*this)["Ucirc"]	= _T('\xDB');
+            (*this)["Uuml"]		= _T('\xDC');
+            (*this)["Yacute"]	= _T('\xDD');
+            (*this)["THORN"]	= _T('\xDE');
+            (*this)["szlig"]	= _T('\xDF');
+            (*this)["agrave"]	= _T('\xE0');
+            (*this)["aacute"]	= _T('\xE1');
+            (*this)["acirc"]	= _T('\xE2');
+            (*this)["atilde"]	= _T('\xE3');
+            (*this)["auml"]		= _T('\xE4');
+            (*this)["aring"]	= _T('\xE5');
+            (*this)["aelig"]	= _T('\xE6');
+            (*this)["ccedil"]	= _T('\xE7');
+            (*this)["egrave"]	= _T('\xE8');
+            (*this)["eacute"]	= _T('\xE9');
+            (*this)["ecirc"]	= _T('\xEA');
+            (*this)["euml"]		= _T('\xEB');
+            (*this)["igrave"]	= _T('\xEC');
+            (*this)["iacute"]	= _T('\xED');
+            (*this)["icirc"]	= _T('\xEE');
+            (*this)["iuml"]		= _T('\xEF');
+            (*this)["eth"]		= _T('\xF0');
+            (*this)["ntilde"]	= _T('\xF1');
+            (*this)["ograve"]	= _T('\xF2');
+            (*this)["oacute"]	= _T('\xF3');
+            (*this)["ocirc"]	= _T('\xF4');
+            (*this)["otilde"]	= _T('\xF5');
+            (*this)["ouml"]		= _T('\xF6');
+            (*this)["divide"]	= _T('\xF7');
+            (*this)["oslash"]	= _T('\xF8');
+            (*this)["ugrave"]	= _T('\xF9');
+            (*this)["uacute"]	= _T('\xFA');
+            (*this)["ucirc"]	= _T('\xFB');
+            (*this)["uuml"]		= _T('\xFC');
+            (*this)["yacute"]	= _T('\xFD');
+            (*this)["thorn"]	= _T('\xFE');
+            (*this)["yuml"]		= _T('\xFF');
         }
     };
 
@@ -182,20 +182,20 @@ public:
 
             // because some character entity references are
             // case-sensitive, we must fix them manually
-            if (!strKey.compareNoCase(_T("eth")) ||
-                !strKey.compareNoCase(_T("thorn")))
+            if (!strKey.compareNoCase("eth") ||
+                !strKey.compareNoCase("thorn"))
             {
                 if (::wiz_isupper(strKey[0]))
                     strKey.makeUpper();
                 else
                     strKey.makeLower();
             }
-            else if (!strKey.compareNoCase(_T("Oslash")))
+            else if (!strKey.compareNoCase("Oslash"))
             {
                 strKey.makeLower();
                 strKey.setAt(0, _T('O'));
             }
-            else if (!strKey.compareNoCase(_T("AElig")))
+            else if (!strKey.compareNoCase("AElig"))
             {
                 strKey.makeLower();
                 strKey.setAt(0, _T('A'));
@@ -205,13 +205,13 @@ public:
             {
                 CString	strT = strKey.mid(1);
                 strKey.makeLower();
-                if (strT.compareNoCase(_T("grave")) == 0 ||
-                    strT.compareNoCase(_T("acute")) == 0 ||
-                    strT.compareNoCase(_T("circ"))  == 0 ||
-                    strT.compareNoCase(_T("uml"))   == 0 ||
-                    strT.compareNoCase(_T("tilde")) == 0 ||
-                    strT.compareNoCase(_T("cedil")) == 0 ||
-                    strT.compareNoCase(_T("ring"))  == 0)
+                if (strT.compareNoCase("grave") == 0 ||
+                    strT.compareNoCase("acute") == 0 ||
+                    strT.compareNoCase("circ")  == 0 ||
+                    strT.compareNoCase("uml")   == 0 ||
+                    strT.compareNoCase("tilde") == 0 ||
+                    strT.compareNoCase("cedil") == 0 ||
+                    strT.compareNoCase("ring")  == 0)
                 {
                     strKey.setAt(0, strT[0]);
                 }
@@ -523,7 +523,7 @@ CString WizHtmlElemAttr::getColorHexValue(void) const
     {
         COLORREF crTemp = getColorValue();
         if (crTemp != _clrInvalid)
-            strColorHex.format(_T("#%06x"), crTemp);
+            strColorHex.format("#%06x", crTemp);
     }
     return (strColorHex);
 }
@@ -540,9 +540,9 @@ short WizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
     static const char _szUnits[][4] =
     {
         /** relative length units */
-        _T("em"), _T("ex"), _T("px"), _T("%"),
+        "em", "ex", "px", "%",
         /** absolute length units */
-        _T("in"), _T("cm"), _T("mm"), _T("pt"), _T("pc")
+        "in", "cm", "mm", "pt", "pc"
     };
 
     if (m_strAttrValue.isEmpty())
@@ -566,9 +566,9 @@ short WizHtmlElemAttr::getLengthValue(LengthUnitsEnum &rUnit) const
 
 WizHtmlElemAttr::operator bool () const
 {
-    if (!m_strAttrValue.compareNoCase(_T("true")))
+    if (!m_strAttrValue.compareNoCase("true"))
         return (true);
-    if (!m_strAttrValue.compareNoCase(_T("false")))
+    if (!m_strAttrValue.compareNoCase("false"))
         return (false);
     return (((short)*this ? true : false));
 }
@@ -1001,7 +1001,7 @@ const unsigned short* GetStyleSource(const unsigned short* lpszUnparsed, CString
     {
         if (*p == _T('<'))
         {
-            if (p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && wiz_strnicmp(p + 1, _T("/style"), 6) == 0)
+            if (p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && wiz_strnicmp(p + 1, "/style", 6) == 0)
             {
                 p += 7;
                 while (*p && *p != _T('>'))
@@ -1068,9 +1068,9 @@ const unsigned short* GetScriptSource(const unsigned short* lpszUnparsed, CStrin
     {
         if (*p == _T('<'))
         {
-            if ((p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && wiz_strnicmp(p + 1, _T("/script"), 7) == 0)
+            if ((p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && wiz_strnicmp(p + 1, "/script", 7) == 0)
                 ||
-                (p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && p[8] && wiz_strnicmp(p + 1, _T("\\/script"), 8) == 0))
+                (p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && p[8] && wiz_strnicmp(p + 1, "\\/script", 8) == 0))
             {//
                 p += 8;
                 while (*p && *p != _T('>'))
@@ -1136,13 +1136,13 @@ const unsigned short* GetScriptSource(const unsigned short* lpszUnparsed, CStrin
                     if (*p == _T('-') && *(p + 1) == _T('>'))
                     {
                         CString strLine = CString(lpszCommentsBegin, p - lpszCommentsBegin);
-                        if (-1 == strLine.find(_T("<!--")))
+                        if (-1 == strLine.find("<!--"))
                         {
                             p++;
                             break;
                         }
                     }
-                    else if (p[0] && p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && wiz_strnicmp(p, _T("</script"), 8) == 0)
+                    else if (p[0] && p[1] && p[2] && p[3] && p[4] && p[5] && p[6] && p[7] && wiz_strnicmp(p, "</script", 8) == 0)
                     {
                         p--;	//跳出行注释尾部，因为最后有一个p++，所以需要先减1。
                         break;
@@ -1353,7 +1353,7 @@ UINT WizHtmlTag::parseFromStr(const unsigned short* lpszString,
             // attribute/value pairs could not be parsed?
         {
             WIZ_SAFE_DELETE_POINTER(pcollAttr);
-            if ((lpszEnd = ::wiz_strstr(lpszBegin, _T("/>"))) == NULL)
+            if ((lpszEnd = ::wiz_strstr(lpszBegin, "/>")) == NULL)
             {
                 if ((lpszEnd = ::wiz_strchr(lpszBegin, _T('>'))) == NULL)
                     return (0U);
@@ -1537,7 +1537,7 @@ WizHtmlReaderEvents* WizHtmlReader::setEventHandler(WizHtmlReaderEvents* pNewHan
 
 void WizHtmlReader::normalizeCharacters(CString &rCharacters)
 {
-    //rCharacters.Replace(_T("\r\n"), _T(""));
+    //rCharacters.Replace("\r\n", "");
     //rCharacters.Remove(_T('\n'));
     //rCharacters.Replace(_T('\r'), _T(' '));
     //rCharacters.Replace(_T('\t'), _T(' '));
@@ -1622,12 +1622,12 @@ bool WizHtmlReader::parseComment(QString &rComment)
 
     // HTML comments begin with '<!' delimeter and
     // are immediately followed by two hyphens '--'
-    if (::wiz_strncmp(&m_lpszBuffer[m_dwBufPos], _T("<!--"), 4))
+    if (::wiz_strncmp(&m_lpszBuffer[m_dwBufPos], "<!--", 4))
         return (false);
 
     const unsigned short*	lpszBegin = &m_lpszBuffer[m_dwBufPos + 4];
     // HTML comments end with two hyphen symbols '--'
-    const unsigned short*	lpszEnd = ::wiz_strstr(lpszBegin, _T("--"));
+    const unsigned short*	lpszEnd = ::wiz_strstr(lpszBegin, "--");
 
     // comment ending delimeter could not be found?
     if (lpszEnd == NULL)

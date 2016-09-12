@@ -163,7 +163,9 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
+#ifdef Q_OS_LINUX
     setWindowStyleForLinux(m_useSystemBasedStyle);
+#endif
     connect(qApp, SIGNAL(lastWindowClosed()), qApp, SLOT(quit())); // Qt bug: Qt5 bug
 #endif
     windowInstance = this;
@@ -1518,7 +1520,7 @@ void WizMainWindow::SetDialogResult(int nResult)
         if (doc.strKbGUID.isEmpty())
             return;
 
-        m_dbMgr.db(doc.strKbGUID).setObjectDataDownloaded(doc.strGUID, _T("document"), false);
+        m_dbMgr.db(doc.strKbGUID).setObjectDataDownloaded(doc.strGUID, "document", false);
         m_doc->viewNote(doc, false);
     }
 }
@@ -3556,7 +3558,7 @@ void WizMainWindow::viewAttachmentByWizKMURL(const QString& strKbGUID, const QSt
     {
         bool bIsLocal = db.isObjectDataDownloaded(attachment.strGUID, "attachment");
         QString strFileName = db.getAttachmentFileName(attachment.strGUID);
-        bool bExists = PathFileExists(strFileName);
+        bool bExists = WizPathFileExists(strFileName);
         if (!bIsLocal || !bExists)
         {
             downloadAttachment(attachment);

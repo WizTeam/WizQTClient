@@ -248,7 +248,7 @@ void WizAttachmentListView::openAttachment(WizAttachmentListViewItem* item)
     WizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
     bool bIsLocal = db.isObjectDataDownloaded(attachment.strGUID, "attachment");
     QString strFileName = db.getAttachmentFileName(item->attachment().strGUID);
-    bool bExists = PathFileExists(strFileName);
+    bool bExists = WizPathFileExists(strFileName);
     if (!bIsLocal || !bExists) {        
         item->setIsDownloading(true);
         forceRepaint();
@@ -292,7 +292,7 @@ void WizAttachmentListView::downloadAttachment(WizAttachmentListViewItem* item)
     WizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
     bool bIsLocal = db.isObjectDataDownloaded(attachment.strGUID, "attachment");
     QString strFileName = db.getAttachmentFileName(item->attachment().strGUID);
-    bool bExists = PathFileExists(strFileName);
+    bool bExists = WizPathFileExists(strFileName);
     if (!bIsLocal || !bExists) {
         startDownload(item);
     }
@@ -342,7 +342,7 @@ void WizAttachmentListView::resetPermission()
                 WizDatabase& db = m_dbMgr.db(attachment.strKbGUID);
                 bool bIsLocal = db.isObjectDataDownloaded(attachment.strGUID, "attachment");
                 QString strFileName = db.getAttachmentFileName(attachment.strGUID);
-                bool bExists = PathFileExists(strFileName);
+                bool bExists = WizPathFileExists(strFileName);
                 if (!bIsLocal || !bExists)
                 {
                     bDownloadEnable = bDownloadEnable | true;
@@ -452,7 +452,7 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
         {
             WizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
             bool bIsLocal = db.isObjectDataDownloaded(item->attachment().strGUID, "attachment");
-            bool bExists = PathFileExists(db.getAttachmentFileName(item->attachment().strGUID));
+            bool bExists = WizPathFileExists(db.getAttachmentFileName(item->attachment().strGUID));
             if (!bIsLocal || !bExists) {
                 item->setIsDownloading(true);
                 forceRepaint();
@@ -499,7 +499,7 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
             {
                 WizDatabase& db = m_dbMgr.db(item->attachment().strKbGUID);
                 bool bIsLocal = db.isObjectDataDownloaded(item->attachment().strGUID, "attachment");
-                bool bExists = PathFileExists(db.getAttachmentFileName(item->attachment().strGUID));
+                bool bExists = WizPathFileExists(db.getAttachmentFileName(item->attachment().strGUID));
                 if (!bIsLocal || !bExists)
                 {
                     item->setIsDownloading(true);

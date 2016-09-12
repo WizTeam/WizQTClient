@@ -163,7 +163,6 @@ QString WizText2Html(const QString& text);
 void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML);
 
 void WizDeleteFolder(const CString& strPath);
-void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath);

@@ -685,11 +685,11 @@ int WizStyleHelper::avatarHeight(bool bNoScreenFactor)
     if (bNoScreenFactor)
         return nHeight;
 
-#ifdef Q_OS_LINUX
-    return nHeight;
-#else
+#ifdef Q_OS_MAC
     float factor = qt_mac_get_scalefactor(0); 
     return nHeight * factor;
+#else
+    return nHeight;
 #endif
 }
 

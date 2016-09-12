@@ -1448,7 +1448,7 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
     m_comboFontFamily->setFontName(strFontName);
     //
     strFontSize.remove("px");
-    int fontSizeInPx = _ttoi(strFontSize);
+    int fontSizeInPx = wiz_ttoi(strFontSize);
     if (0 != fontSizeInPx)
     {
         CString strsFontsizeInPx = WizIntToStr(fontSizeInPx);
@@ -1924,7 +1924,7 @@ void WizEditorToolBar::saveImage(QString strFileName)
     QPixmap pix(info.filePath());
     if (pix.isNull())
     {
-        TOLOG(_T("[Save] : image is null"));
+        TOLOG("[Save] : image is null");
         return;
     }
 
@@ -1937,7 +1937,7 @@ void WizEditorToolBar::copyImage(QString strFileName)
     QPixmap pix(info.filePath());
     if (pix.isNull())
     {
-        TOLOG(_T("[Copy] : image is null"));
+        TOLOG("[Copy] : image is null");
         return;
     }
 
@@ -2233,7 +2233,7 @@ void WizEditorToolBar::savePixmap(QPixmap& pix, const QString& strType, bool bUs
             return;
 
         bool ret = pix.save(strFilePath, strType.toUtf8());
-        TOLOG2(_T("[Save] : save image to %1, result : %2"), strFilePath,
+        TOLOG2("[Save] : save image to %1, result : %2", strFilePath,
                ret ? "OK" : "Failed");    //pix formart should use ascii or capital letter.
     }
     else

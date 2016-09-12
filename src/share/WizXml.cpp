@@ -130,7 +130,7 @@ bool WizXMLNode::getAttributeInt(const QString& strName, int& nVal)
     if (!getAttributeText(strName, strRet))
         return false;
 
-    nVal = _ttoi(strRet);
+    nVal = wiz_ttoi(strRet);
     return true;
 }
 
@@ -140,7 +140,7 @@ bool WizXMLNode::getAttributeInt64(const QString& strName, qint64& nVal)
     if (!getAttributeText(strName, strRet))
         return false;
 
-    nVal = _ttoi64(strRet);
+    nVal = wiz_ttoi64(strRet);
     return true;
 }
 
@@ -150,7 +150,7 @@ __int64 WizXMLNode::getAttributeInt64Def(const QString& strName, __int64 nDefaul
     if (!getAttributeText(strName, strRet))
         return nDefault;
 
-    return _ttoi64(strRet);
+    return wiz_ttoi64(strRet);
 }
 
 bool WizXMLNode::getAttributeUINT(const QString& strName, quint32& nVal)
@@ -270,7 +270,7 @@ bool WizXMLNode::setAttributeTime(const QString& strName, const WizOleDateTime& 
 
 bool WizXMLNode::setAttributeBool(const QString& strName, bool bVal)
 {
-    return setAttributeText(strName, bVal ? _T("1") : _T("0"));
+    return setAttributeText(strName, bVal ? "1" : "0");
 }
 
 bool WizXMLNode::findChildNode(const QString& strNodeName, WizXMLNode& nodeChild)
@@ -321,7 +321,7 @@ bool WizXMLNode::getFirstChildNode(WizXMLNode& nodeChild)
     WizXMLNode node = nodes.item(0);
 
     QString str = node.getType();
-    if (str != _T("element"))
+    if (str != "element")
         return false;
 
     nodeChild = node;
@@ -557,14 +557,14 @@ bool WizXMLNode::appendNodeSetTextByPath(const QString& strPath, const QString& 
     WizXMLNode nodeRet;
     if (!appendNodeByPath(strPath, nodeRet))
     {
-        TOLOG1(_T("Failed to append node by path: %!"), strPath);
+        TOLOG1("Failed to append node by path: %!", strPath);
         return false;
     }
 
     bool bRet = nodeRet.setText(strText);
     if (!bRet)
     {
-        TOLOG(_T("Failed to set node text"));
+        TOLOG("Failed to set node text");
         return false;
     }
 
@@ -651,7 +651,7 @@ bool WizXMLNode::getElementOtherNodeByValueReturnInt(const QString& strElementNa
 
     strRet = strRet.trimmed();
 
-    int nTemp = _ttoi(strRet);
+    int nTemp = wiz_ttoi(strRet);
     if (WizIntToStr(nTemp) == strRet)
     {
         nRet = nTemp;
@@ -674,15 +674,15 @@ bool WizXMLNode::getElementOtherNodeByValueReturnBool(const QString& strElementN
     strRet = strRet.trimmed();
     strRet = strRet.toLower();
 
-    if (strRet == _T("0")
-        || strRet == _T("false"))
+    if (strRet == "0"
+        || strRet == "false")
     {
         bRet = false;
 
         return true;
     }
-    else if (strRet == _T("1")
-        || strRet == _T("true"))
+    else if (strRet == "1"
+        || strRet == "true")
     {
         bRet = true;
 
@@ -713,7 +713,7 @@ bool WizXMLDocument::loadFromFile(const QString& strFileName, bool bPromptError 
 {
     Q_UNUSED(bPromptError);
 
-    if (!PathFileExists(strFileName))
+    if (!WizPathFileExists(strFileName))
         return false;
 
     QString strXml;
@@ -880,13 +880,13 @@ bool WizXMLDocument::settingsGetSectionNode(const QString& strRootName, const QS
     WizXMLNode nodeRoot;
     if (!getChildNode(strRootName, nodeRoot))
     {
-        //TOLOG1(_T("Failed to get root node by name: %1"), strRootName);
+        //TOLOG1("Failed to get root node by name: %1", strRootName);
         return false;
     }
 
     if (!nodeRoot.getChildNode(strNodeName, node))
     {
-        //TOLOG1(_T("Failed to get section node by name: %1"), strNodeName);
+        //TOLOG1("Failed to get section node by name: %1", strNodeName);
         return false;
     }
 
@@ -898,13 +898,13 @@ bool WizXMLDocument::settingsFindSectionNode(const QString& strRootName, const Q
     WizXMLNode nodeRoot;
     if (!findChildNode(strRootName, nodeRoot))
     {
-        //TOLOG1(_T("Failed to get root node by name: %1"), strRootName);
+        //TOLOG1("Failed to get root node by name: %1", strRootName);
         return false;
     }
 
     if (!nodeRoot.findChildNode(strNodeName, node))
     {
-        //TOLOG1(_T("Failed to get section node by name: %1"), strNodeName);
+        //TOLOG1("Failed to get section node by name: %1", strNodeName);
         return false;
     }
 
@@ -919,20 +919,20 @@ bool WizXMLDocument::settingsGetChildNode(const QString& strRootName, \
     WizXMLNode nodeRoot;
     if (!getChildNode(strRootName, nodeRoot))
     {
-        //TOLOG1(_T("Failed to get root node by name: %1"), strRootName);
+        //TOLOG1("Failed to get root node by name: %1", strRootName);
         return false;
     }
 
     WizXMLNode nodeParent;
     if (!nodeRoot.getChildNode(strNodeName, nodeParent))
     {
-        //TOLOG1(_T("Failed to get section node by name: %1"), strNodeName);
+        //TOLOG1("Failed to get section node by name: %1", strNodeName);
         return false;
     }
 
     if (!nodeParent.getChildNode(strSubNodeName, node))
     {
-        TOLOG1(_T("Failed to get key node by name: %1"), strSubNodeName);
+        TOLOG1("Failed to get key node by name: %1", strSubNodeName);
         return false;
     }
 
@@ -948,7 +948,7 @@ bool WizXMLDocument::settingsGetStringValue(const QString& strRootName, \
     WizXMLNode node;
     if (!settingsGetChildNode(strRootName, strNodeName, strSubNodeName, node))
     {
-        TOLOG(_T("Failed to get value node"));
+        TOLOG("Failed to get value node");
         return false;
     }
 
@@ -965,7 +965,7 @@ bool WizXMLDocument::settingsSetStringValue(const QString& strRootName, \
     WizXMLNode node;
     if (!settingsGetChildNode(strRootName, strNodeName, strSubNodeName, node))
     {
-        TOLOG(_T("Failed to get value node"));
+        TOLOG("Failed to get value node");
         return false;
     }
 

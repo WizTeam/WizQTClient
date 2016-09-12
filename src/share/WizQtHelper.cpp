@@ -4,18 +4,18 @@
 #include <QtGui>
 #include <QApplication>
 
-
-bool PathFileExists(const CString& strPath)
+bool WizPathFileExists(const CString& strPath)
 {
     return QFile::exists(strPath);
 }
 
-bool DeleteFile(const CString& strFileName)
+bool WizDeleteFile(const CString& strFileName)
 {
     QDir dir(strFileName);
     dir.remove(strFileName);
     return true;
 }
+
 
 QString WizOleDateTime::toHumanFriendlyString() const
 {
@@ -84,11 +84,13 @@ WizOleDateTime &WizOleDateTime::operator=(const WizOleDateTime &other)
 }
 
 
+#ifndef _WIN32
 int GetTickCount()
 {
     QTime time = QTime::currentTime();
     return time.msecsSinceStartOfDay();
 }
+#endif
 
 
 void CString::trim(char ch)
@@ -167,28 +169,27 @@ int CString::findOneOf(const CString& strFind) const
     return -1;
 }
 
-int _tcsicmp(const CString& str1, const CString& str2)
+int wiz_tcsicmp(const CString& str1, const CString& str2)
 {
     return str1.compareNoCase(str2);
 }
 
-int _tcsnicmp(const CString& str1, const CString& str2, int count)
+int wiz_tcsnicmp(const CString& str1, const CString& str2, int count)
 {
     CString s1 = (str1.length() > count) ? CString(str1.left(count)) : str1;
     CString s2 = (str2.length() > count) ? CString(str2.left(count)) : str2;
     return s1.compareNoCase(s2);
 }
 
-int _ttoi(const CString& str)
+int wiz_ttoi(const CString& str)
 {
     return str.toInt();
 }
 
-__int64 _ttoi64(const CString& str)
+__int64 wiz_ttoi64(const CString& str)
 {
     return str.toLongLong();
 }
-
 
 unsigned short* wiz_strinc(const unsigned short* current)
 {

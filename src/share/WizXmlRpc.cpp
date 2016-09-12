@@ -806,7 +806,7 @@ bool WizXmlRpcStructValue::getStringArray(const QString& strName, CWizStdStringA
 
 
 
-BOOL WizXmlRpcStructValue::toStringMap(std::map<QString, QString>& ret) const
+bool WizXmlRpcStructValue::toStringMap(std::map<QString, QString>& ret) const
 {
     for (std::map<QString, WizXmlRpcValue*>::const_iterator it = m_map.begin();
         it != m_map.end();
@@ -834,15 +834,18 @@ bool WizXmlRpcFaultValue::read(WizXMLNode& nodeValue)
 
 QString WizXmlRpcFaultValue::toString() const
 {
-    return WizFormatString2(_T("Fault error: %1, %2"), WizIntToStr(getFaultCode()), getFaultString());
+    return WizFormatString2("Fault error: %1, %2", WizIntToStr(getFaultCode()), getFaultString());
 }
 
 int WizXmlRpcFaultValue::getFaultCode() const
 {
 	int nCode = 0;
-	m_val.getInt(_T("faultCode"), nCode);
-    /* 此处不能返回Wiz服务器定义的 301,因为QT将 301 定义为连接协议无效.现在需要通过错误代码判断连接状态.
-    NOTE：如果Wiz服务器错误代码变更,或者QT错误代码变更,需要修改此处*/
+	m_val.getInt("faultCode", nCode);
+    ////
+    /// ///
+    /////* 此处不能返回Wiz服务器定义的 301,因为QT将 301 定义为连接协议无效.现在需要通过错误代码判断连接状态.
+    ////NOTE：如果Wiz服务器错误代码变更,或者QT错误代码变更,需要修改此处*/
+
     if (301 == nCode) {
         return WIZKM_XMLRPC_ERROR_INVALID_TOKEN;
     } else if (302 == nCode) {
@@ -857,7 +860,7 @@ int WizXmlRpcFaultValue::getFaultCode() const
 QString WizXmlRpcFaultValue::getFaultString() const
 {
     QString str;
-	m_val.getString(_T("faultString"), str);
+	m_val.getString("faultString", str);
 	return str;
 }
 
@@ -886,7 +889,7 @@ void WizXmlRpcResult::setResult(const QString& strMethodName, WizXmlRpcValue* pR
     m_pResult = pRet;
     if (!m_pResult)
     {
-        TOLOG1(_T("Can not execute xml-rpc: %1"), strMethodName);
+        TOLOG1("Can not execute xml-rpc: %1", strMethodName);
         m_bXmlRpcSucceeded = FALSE;
         m_bFault = FALSE;
         return;
@@ -900,7 +903,7 @@ void WizXmlRpcResult::setResult(const QString& strMethodName, WizXmlRpcValue* pR
         //
         m_nFaultCode = pFault->getFaultCode();
         m_strFaultString = pFault->getFaultString();
-        TOLOG3(_T("Failed to call xml rpc %1: %2, %3"), strMethodName, WizIntToStr(m_nFaultCode), m_strFaultString);
+        TOLOG3("Failed to call xml rpc %1: %2, %3", strMethodName, WizIntToStr(m_nFaultCode), m_strFaultString);
     }
 }
 //
@@ -936,3 +939,4 @@ BOOL WizXmlRpcResult::getBool(BOOL& b) const
     //
     return FALSE;
 }
+

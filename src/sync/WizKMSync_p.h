@@ -82,12 +82,12 @@ private:
         {
             std::deque<TData> arrayPageData;
             //
-            //QString strProgress = WizFormatString1(::WizTranslationsTranslateString(_T("Start Version: %1")), WizInt64ToStr(nNextVersion));
+            //QString strProgress = WizFormatString1(::WizTranslationsTranslateString("Start Version: %1"), WizInt64ToStr(nNextVersion));
             //m_pProgress->OnText(wizhttpstatustypeNormal, strProgress);
             //
             if (!m_server.getList<TData>(nCountPerPage, nNextVersion, arrayPageData))
             {
-                TOLOG2(_T("Failed to get object list: CountPerPage=%1, Version=%2"), WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
+                TOLOG2("Failed to get object list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
                 return FALSE;
             }
             //

@@ -33,7 +33,7 @@ public:
 class WizHtmlElemAttr
 {
 public:
-    WizHtmlElemAttr(const CString& strAttribName = _T(""), const CString& strAttribValue = _T(""));
+    WizHtmlElemAttr(const CString& strAttribName = "", const CString& strAttribValue = "");
     WizHtmlElemAttr(const WizHtmlElemAttr &rSource);
 
 // Initialization Helpers
@@ -50,7 +50,7 @@ public:
     bool isColorValue(void) const { return (isNamedColorValue() || isHexColorValue()); }
     COLORREF getColorValue(void) const;
     CString getColorHexValue(void) const;
-    bool isPercentValue(void) const { return (m_strAttrValue.right(1) == _T("%") ? true : false); }
+    bool isPercentValue(void) const { return (m_strAttrValue.right(1) == "%" ? true : false); }
 
     unsigned short getPercentValue(unsigned short max = _percentMax) const;
 

@@ -257,8 +257,8 @@ struct WIZTAGDATA : public WIZOBJECTBASE
     virtual BOOL loadFromXmlRpc(WizXmlRpcStructValue& data);
     virtual BOOL saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
-    static CString versionName() { return CString(_T("tag_version")); }
-    static CString objectName() { return CString(_T("tag")); }
+    static CString versionName() { return CString("tag_version"); }
+    static CString objectName() { return CString("tag"); }
 };
 
 bool operator< ( const WIZTAGDATA& data1, const WIZTAGDATA& data2 ) throw();
@@ -274,8 +274,8 @@ struct WIZSTYLEDATA : public WIZOBJECTBASE
     virtual bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
 
     bool equalForSync(const WIZSTYLEDATA& data) const;
-    static CString versionName() { return CString(_T("style_version")); }
-    static CString objectName() { return CString(_T("style")); }
+    static CString versionName() { return CString("style_version"); }
+    static CString objectName() { return CString("style"); }
 
     CString strGUID;
     CString strName;
@@ -467,8 +467,8 @@ struct WIZDELETEDGUIDDATA : public WIZOBJECTBASE
     virtual bool loadFromXmlRpc(WizXmlRpcStructValue& data);
     bool saveToXmlRpc(WizXmlRpcStructValue& data) const;
     bool equalForSync(const WIZDELETEDGUIDDATA& data) const;
-    static CString versionName() { return CString(_T("deleted_guid_version")); }
-    static CString objectName() { return CString(_T("deleted_guid")); }
+    static CString versionName() { return CString("deleted_guid_version"); }
+    static CString objectName() { return CString("deleted_guid"); }
 
     CString strGUID;
     WizObjectType eType;

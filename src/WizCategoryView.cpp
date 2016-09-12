@@ -20,6 +20,7 @@
 #include "share/WizMessageBox.h"
 #include "share/WizThreads.h"
 #include "share/WizGlobal.h"
+#include "share/WizDatabase.h"
 #include "sync/WizKMSync.h"
 #include "sync/WizKMServer.h"
 #include "sync/WizApiEntry.h"
@@ -3204,7 +3205,7 @@ void WizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     QString extInfo = "biz=" + bizGUID;
     if (bUpgrade)
     {
-        extInfo += _T("&p=payment");
+        extInfo += "&p=payment";
     }
     extInfo += WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);

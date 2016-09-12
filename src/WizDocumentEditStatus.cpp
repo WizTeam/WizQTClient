@@ -196,7 +196,7 @@ void WizDocumentEditStatusSyncThread::sendEditingMessage()
 
 bool WizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = ::WizFormatString5(_T("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5"),
+    QString strUrl = ::WizFormatString5("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5",
                                         WizKMGetDocumentEditStatusURL(),
                                         strObjID,
                                         strUserAlias,
@@ -242,7 +242,7 @@ void WizDocumentEditStatusSyncThread::sendDoneMessage()
 
 bool WizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = WizFormatString5(_T("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5"),
+    QString strUrl = WizFormatString5("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5",
                                       WizKMGetDocumentEditStatusURL(),
                                       strObjID,
                                       strUserAlias,
@@ -470,7 +470,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
 
 bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
-    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+    QString strRequestUrl = WizFormatString4("%1/get?obj_id=%2/%3&t=%4",
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,
@@ -667,7 +667,7 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
 
 bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
-    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+    QString strRequestUrl = WizFormatString4("%1/get?obj_id=%2/%3&t=%4",
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,

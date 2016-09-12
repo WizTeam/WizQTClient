@@ -6,16 +6,19 @@
 #include "share/WizEventLoop.h"
 
 #if defined(Q_OS_MAC)
-#define strUpgradeUrlParam "/download?product=wiznote&client=macos"
+    #define strUpgradeUrlParam "/download?product=wiznote&client=macos"
 #elif defined(Q_OS_LINUX)
 
-#if defined(_M_X64) || defined(__amd64)
-#define strUpgradeUrlParam "/download?product=wiznote&client=linux-x64"
+    #if defined(_M_X64) || defined(__amd64)
+        #define strUpgradeUrlParam "/download?product=wiznote&client=linux-x64"
+    #else
+        #define strUpgradeUrlParam "/download?product=wiznote&client=linux-x86"
+    #endif // __amd64
 #else
-#define strUpgradeUrlParam "/download?product=wiznote&client=linux-x86"
-#endif // __amd64
-
+    #define strUpgradeUrlParam ""
 #endif // Q_OS_MAC
+
+
 
 WizUpgradeChecker::WizUpgradeChecker(QObject *parent) :
     QObject(parent)

@@ -162,7 +162,7 @@ private:
     QMenu* m_newNoteExtraMenu;
     QActionGroup* m_viewTypeActions;
     QActionGroup* m_sortTypeActions;
-#ifdef Q_OS_LINUX
+#ifndef Q_OS_MAC
     QMenu* m_menu;
     QToolButton* m_menuButton;    
 #endif

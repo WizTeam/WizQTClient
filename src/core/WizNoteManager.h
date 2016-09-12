@@ -6,10 +6,10 @@
 /*
  * CWizNoteManager用于管理笔记相关的操作，例如创建、删除等。需要在程序启动时进行初始化
  */
-class WIZDOCUMENTDATA;
-class WIZTAGDATA;
-class QNetworkAccessManager;
+struct WIZDOCUMENTDATA;
+struct WIZTAGDATA;
 struct TemplateData;
+class QNetworkAccessManager;
 
 #define WIZ_DOCUMENT_TYPE_NORMAL    "document"
 

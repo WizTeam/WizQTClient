@@ -101,8 +101,8 @@ public:
 };
 
 
-const wchar_t* tokenTypeSingle = _T("single");
-const wchar_t* tokenTypeDouble = _T("double");
+const wchar_t* tokenTypeSingle = L"single";
+const wchar_t* tokenTypeDouble = L"double";
 
 class CJKTokenizer: public lucene::analysis::Tokenizer
 {
@@ -352,11 +352,11 @@ public:
 
 class LanguageBasedAnalyzer: public lucene::analysis::Analyzer
 {
-    TCHAR lang[100];
+    wchar_t lang[100];
     bool stem;
 
 public:
-    LanguageBasedAnalyzer(const TCHAR* language=NULL, bool stem=true)
+    LanguageBasedAnalyzer(const wchar_t* language=NULL, bool stem=true)
     {
         if (language == NULL)
             memset(lang, 0, 100);
@@ -366,7 +366,7 @@ public:
         this->stem = stem;
     }
 
-    void setLanguage(const TCHAR* language)
+    void setLanguage(const wchar_t* language)
     {
         wcsncpy(lang, language, 100);
     }
@@ -376,14 +376,14 @@ public:
         this->stem = stem;
     }
 
-    lucene::analysis::TokenStream* tokenStream(const TCHAR* fieldName, lucene::util::Reader* reader)
+    lucene::analysis::TokenStream* tokenStream(const wchar_t* fieldName, lucene::util::Reader* reader)
     {
         lucene::analysis::TokenStream* ret = NULL;
-        if (wcscmp(lang, _T("cjk"))==0)
+        if (wcscmp(lang, L"cjk")==0)
         {
             ret = new CJKTokenizer(reader);
         }
-        else if (wcscmp(lang, _T("cjk3"))==0)
+        else if (wcscmp(lang, L"cjk3")==0)
         {
             ret = new CJKTokenizer3(reader);
         }
@@ -411,13 +411,14 @@ public:
 
 static std::vector<std::wstring> _arrayLog;
 
-void TOLOG(const TCHAR* lpsz)
+void TOLOG(const wchar_t* lpsz)
 {
 	if(_arrayLog.size() > 10)
 		_arrayLog.clear();
 	//
 	_arrayLog.push_back(lpsz);
 }
+
 
 void WizPathRemoveBackslash(std::wstring& strPath)
 {
@@ -454,8 +455,8 @@ struct WIZFTSDATA
 
         WIZFTSDATA() : writer(NULL)
         {
-                an.setLanguage(_T("cjk"));
-                an3.setLanguage(_T("cjk3"));
+                an.setLanguage(L"cjk");
+                an3.setLanguage(L"cjk3");
         }
 
         ~WIZFTSDATA()
@@ -500,7 +501,7 @@ bool WizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** 
         if (lucene::index::IndexReader::indexExists(strIndexPathA.c_str()) ) {
 			//open exists
             if ( lucene::index::IndexReader::isLocked(strIndexPathA.c_str()) ) {
-				TOLOG(_T("Index was locked... unlocking it."));
+                TOLOG(L"Index was locked... unlocking it.");
 				lucene::index::IndexReader::unlock(strIndexPathA.c_str());
 			}
 			pData->writer = _CLNEW lucene::index::IndexWriter(strIndexPathA.c_str(), &pData->an, false);
@@ -515,17 +516,17 @@ bool WizCluceneSearch::beginUpdateDocument(const wchar_t* lpszIndexPath, void** 
             return true;
         } else {
 			delete pData;
-			TOLOG(_T("Failed to get writer!"));
+            TOLOG(L"Failed to get writer!");
             return false;
         }
 
     } catch (CLuceneError& e) {
-		TOLOG(_T("Indexing exception in WizToolsFTSUpdateDocument"));
+        TOLOG(L"Indexing exception in WizToolsFTSUpdateDocument");
 		TOLOG(e.twhat());
         return false;
 
     } catch (...) {
-		TOLOG(_T("Unknown exception in WizToolsFTSUpdateDocument"));
+        TOLOG(L"Unknown exception in WizToolsFTSUpdateDocument");
         return false;
 	}
 }
@@ -544,12 +545,12 @@ bool WizCluceneSearch::endUpdateDocument(void* pHandle)
         return true;
 
     } catch (CLuceneError& e) {
-		TOLOG(_T("Indexing exception in WizFTSEndUpdateDocument3"));
+        TOLOG(L"Indexing exception in WizFTSEndUpdateDocument3");
 		TOLOG(e.twhat());
         return false;
 
     } catch (...) {
-		TOLOG(_T("Unknown exception in WizFTSEndUpdateDocument3"));
+        TOLOG(L"Unknown exception in WizFTSEndUpdateDocument3");
         return false;
 	}
 }
@@ -574,7 +575,7 @@ bool WizCluceneSearch::updateDocument(void* pHandle,
     try {
 
         {
-            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strDocumentID.c_str());
+            lucene::index::Term* term = _CLNEW lucene::index::Term(L"documentid", strDocumentID.c_str());
             if (term)
             {
                 pData->writer->deleteDocuments(term);
@@ -582,7 +583,7 @@ bool WizCluceneSearch::updateDocument(void* pHandle,
         }
 
         {
-            lucene::index::Term* term2 = _CLNEW lucene::index::Term(_T("documentid2"), strDocumentID.c_str());
+            lucene::index::Term* term2 = _CLNEW lucene::index::Term(L"documentid2", strDocumentID.c_str());
             if (term2)
             {
                 pData->writer->deleteDocuments(term2);
@@ -590,25 +591,25 @@ bool WizCluceneSearch::updateDocument(void* pHandle,
         }
 
     } catch (CLuceneError& e) {
-		TOLOG(_T("Indexing exception in deleteDocuments"));
+        TOLOG(L"Indexing exception in deleteDocuments");
 		TOLOG(e.twhat());
     } catch (...) {
-		TOLOG(_T("Unknown exception in deleteDocuments"));
+        TOLOG(L"Unknown exception in deleteDocuments");
     }
 
     {
         lucene::document::Document doc;
-        doc.add( *_CLNEW lucene::document::Field(_T("documentid"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-        doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-        doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+        doc.add( *_CLNEW lucene::document::Field(L"documentid", strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(L"kbguid", strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(L"contents", strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
         pData->writer->addDocument(&doc, &pData->an);
     }
 
     {
         lucene::document::Document doc;
-        doc.add( *_CLNEW lucene::document::Field(_T("documentid2"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-        doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-        doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+        doc.add( *_CLNEW lucene::document::Field(L"documentid2", strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(L"kbguid", strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+        doc.add( *_CLNEW lucene::document::Field(L"contents", strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
         pData->writer->addDocument(&doc, &pData->an3);
     }
 
@@ -671,10 +672,10 @@ bool WizCluceneSearch::searchDocument(const wchar_t* lpszIndexPath,
 
                 for (size_t j = 0;j < hits->length(); j++ ) {
                     lucene::document::Document* doc = &hits->doc(j);
-                    const TCHAR* kbid = doc->get(_T("kbguid"));
-                    const TCHAR* docid = doc->get(_T("documentid"));
+                    const TCHAR* kbid = doc->get(L"kbguid");
+                    const TCHAR* docid = doc->get(L"documentid");
                     if (!docid) {
-                        docid = doc->get(_T("documentid2"));
+                        docid = doc->get(L"documentid2");
                     }
 
                     if (docid) {
@@ -741,12 +742,12 @@ bool WizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
 		
         lucene::index::IndexReader* reader = lucene::index::IndexReader::open(strIndexPathA.c_str());
         if (!reader) {
-            TOLOG(_T("Failed to get index reader!"));
+            TOLOG(L"Failed to get index reader!");
             return false;
         }
 
         {
-            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid"), strWizDocumentID.c_str());
+            lucene::index::Term* term = _CLNEW lucene::index::Term(L"documentid", strWizDocumentID.c_str());
             if (term)
             {
                 reader->deleteDocuments(term);
@@ -754,7 +755,7 @@ bool WizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
         }
 
         {
-            lucene::index::Term* term = _CLNEW lucene::index::Term(_T("documentid2"), strWizDocumentID.c_str());
+            lucene::index::Term* term = _CLNEW lucene::index::Term(L"documentid2", strWizDocumentID.c_str());
             if (term)
             {
                 reader->deleteDocuments(term);
@@ -766,12 +767,12 @@ bool WizCluceneSearch::deleteDocument(const wchar_t* lpszIndexPath,
         return true;
 
     } catch (CLuceneError& e) {
-		TOLOG(_T("Indexing exception in WizToolsFTSDeleteDocument"));
+        TOLOG(L"Indexing exception in WizToolsFTSDeleteDocument");
 		TOLOG(e.twhat());
         return false;
 
     } catch (...) {
-		TOLOG(_T("Unknown exception in WizToolsFTSDeleteDocument"));
+        TOLOG(L"Unknown exception in WizToolsFTSDeleteDocument");
         return false;
 	}
 }
@@ -818,40 +819,40 @@ void testCJK()
 
 void testLanguageBasedAnalyzer() {
 	LanguageBasedAnalyzer a;
-	CL_NS(util)::StringReader reader(_T("he abhorred accentueren"));
+	CL_NS(util)::StringReader reader("he abhorred accentueren");
 	reader.setMinBufSize(50);
 	lucene::analysis::TokenStream* ts;
     lucene::analysis::Token t;
 
 	//test with english
-	a.setLanguage(_T("English"));
+	a.setLanguage("English");
 	a.setStem(false);
-	ts = a.tokenStream(_T("contents"), &reader);
+	ts = a.tokenStream("contents", &reader);
 
 	//CLUCENE_ASSERT(ts->next(&t) != NULL);
-	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), _T("he")) == 0);
+	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), "he") == 0);
 	//CLUCENE_ASSERT(ts->next(&t) != NULL);
-	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), _T("abhorred")) == 0);
+	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), "abhorred") == 0);
 	//_CLDELETE(ts);
 
 	//now test with dutch
 	reader.reset(0);
-	a.setLanguage(_T("Dutch"));
+	a.setLanguage("Dutch");
 	a.setStem(true);
-	ts = a.tokenStream(_T("contents"), &reader);
+	ts = a.tokenStream("contents", &reader);
 
 	//CLUCENE_ASSERT(ts->next(&t) != NULL);
-	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), _T("he")) == 0);
+	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), "he") == 0);
 	//CLUCENE_ASSERT(ts->next(&t) != NULL);
-	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), _T("abhorred")) == 0);
+	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), "abhorred") == 0);
 	//CLUCENE_ASSERT(ts->next(&t) != NULL);
-	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), _T("accentuer")) == 0);
+	//CLUCENE_ASSERT(_tcscmp(t.termBuffer(), "accentuer") == 0);
 	//_CLDELETE(ts);
 }
 
 int WizTest()
 {
-    const wchar_t* lpszIndexPath = _T("/Users/Albert/test/");
+    const wchar_t* lpszIndexPath = "/Users/Albert/test/";
 	WIZFTSDATA* pData = new WIZFTSDATA();
 	//
 	try
@@ -866,7 +867,7 @@ int WizTest()
 			//open exists
 			if ( lucene::index::IndexReader::isLocked(strIndexPathA.c_str()) )
 			{
-				TOLOG(_T("Index was locked... unlocking it."));
+				TOLOG("Index was locked... unlocking it.");
 				lucene::index::IndexReader::unlock(strIndexPathA.c_str());
 			}
 			pData->writer = _CLNEW lucene::index::IndexWriter(strIndexPathA.c_str(), &pData->an, false);
@@ -884,19 +885,19 @@ int WizTest()
 		else
 		{
 			delete pData;
-			TOLOG(_T("Failed to get writer!"));
+			TOLOG("Failed to get writer!");
             return false;
 		}
 	}
 	catch (CLuceneError& e)
 	{
-		TOLOG(_T("Indexing exception in WizToolsFTSUpdateDocument"));
+		TOLOG("Indexing exception in WizToolsFTSUpdateDocument");
 		TOLOG(e.twhat());
         return false;
 	}
 	catch (...)
 	{
-		TOLOG(_T("Unknown exception in WizToolsFTSUpdateDocument"));
+		TOLOG("Unknown exception in WizToolsFTSUpdateDocument");
         return false;
 	}
 
@@ -914,7 +915,7 @@ int WizTest()
 	try
 	{
 		{
-			lucene::index::Term* term = _CLNEW lucene::index::Term(_T("wizdocumentid"), strWizDocumentID.c_str());
+			lucene::index::Term* term = _CLNEW lucene::index::Term("wizdocumentid", strWizDocumentID.c_str());
 			if (term)
 			{
 				pData->writer->deleteDocuments(term);
@@ -922,7 +923,7 @@ int WizTest()
 		}
 		//
 		{
-			lucene::index::Term* term2 = _CLNEW lucene::index::Term(_T("wizdocumentid_2"), strWizDocumentID.c_str());
+			lucene::index::Term* term2 = _CLNEW lucene::index::Term("wizdocumentid_2", strWizDocumentID.c_str());
 			if (term2)
 			{
 				pData->writer->deleteDocuments(term2);
@@ -931,23 +932,23 @@ int WizTest()
 	}
 	catch (CLuceneError& e)
 	{
-		TOLOG(_T("Indexing exception in deleteDocuments"));
+		TOLOG("Indexing exception in deleteDocuments");
 		TOLOG(e.twhat());
 	}
 	catch (...)
 	{
-		TOLOG(_T("Unknown exception in deleteDocuments"));
+		TOLOG("Unknown exception in deleteDocuments");
 	}
 
 	//
 	{
 		lucene::document::Document doc;
-		doc.add( *_CLNEW lucene::document::Field(_T("wizdocumentid"), strWizDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("documentid"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("url"), strURL.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("wizdocumentid", strWizDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("documentid", strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("kbguid", strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("url", strURL.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
 		//
-        doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+        doc.add( *_CLNEW lucene::document::Field("contents", strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
 		//
 		pData->writer->addDocument(&doc, &pData->an);
 	}
@@ -958,12 +959,12 @@ int WizTest()
 #ifdef WIZ_FTS_ENABLE_CJK2	
 	{
 		lucene::document::Document doc;
-		doc.add( *_CLNEW lucene::document::Field(_T("wizdocumentid_2"), strWizDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("documentid"), strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("kbguid"), strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
-		doc.add( *_CLNEW lucene::document::Field(_T("url"), strURL.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("wizdocumentid_2", strWizDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("documentid", strDocumentID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("kbguid", strKbGUID.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
+		doc.add( *_CLNEW lucene::document::Field("url", strURL.c_str(), lucene::document::Field::STORE_YES | lucene::document::Field::INDEX_UNTOKENIZED ) );
 		//
-		doc.add( *_CLNEW lucene::document::Field(_T("contents"), strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
+		doc.add( *_CLNEW lucene::document::Field("contents", strText.c_str(), lucene::document::Field::STORE_NO | lucene::document::Field::INDEX_TOKENIZED) );
 		//
 		pData->writer->addDocument(&doc, &pData->an2);
 	}
@@ -981,13 +982,13 @@ int WizTest()
 	}
 	catch (CLuceneError& e)
 	{
-		TOLOG(_T("Indexing exception in WizFTSEndUpdateDocument3"));
+		TOLOG("Indexing exception in WizFTSEndUpdateDocument3");
 		TOLOG(e.twhat());
         return false;
 	}
 	catch (...)
 	{
-		TOLOG(_T("Unknown exception in WizFTSEndUpdateDocument3"));
+		TOLOG("Unknown exception in WizFTSEndUpdateDocument3");
         return false;
 	}
 
@@ -1007,9 +1008,9 @@ int WizTest()
 		//
         const TCHAR* arrAnalyzer[] = {
 #ifdef WIZ_FTS_ENABLE_CJK2	
-			_T("cjk2"),
+			"cjk2",
 #endif
-			_T("cjk"), 
+			"cjk", 
 			NULL
 		};
 		//
@@ -1019,7 +1020,7 @@ int WizTest()
 				break;
 			//
 			LanguageBasedAnalyzer analyzer(arrAnalyzer[i]);
-			lucene::search::Query* q = lucene::queryParser::QueryParser::parse(strKeywords.c_str(), _T("contents"), &analyzer);
+			lucene::search::Query* q = lucene::queryParser::QueryParser::parse(strKeywords.c_str(), "contents", &analyzer);
 			if (q)
 			{
 				lucene::search::Hits* h = s.search(q);
@@ -1029,9 +1030,9 @@ int WizTest()
 					{
 						lucene::document::Document* doc = &h->doc(i);
 						//
-						const TCHAR* url = doc->get(_T("url"));
-						const TCHAR* docid = doc->get(_T("documentid"));
-						const TCHAR* kbid = doc->get(_T("kbguid"));
+						const TCHAR* url = doc->get("url");
+						const TCHAR* docid = doc->get("documentid");
+						const TCHAR* kbid = doc->get("kbguid");
 						//
 						if (docid)
 						{

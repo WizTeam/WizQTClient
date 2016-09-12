@@ -15,58 +15,58 @@ WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strUrl, QObject* par
 {
 }
 
-BOOL WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion)
+bool WizKMXmlRpcServerBase::getValueVersion(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, __int64& nVersion)
 {
     CWizKMTokenOnlyParam param(strToken, strKbGUID);
     //
-    param.addString(_T("key"), strKey);
+    param.addString("key", strKey);
     //
     QString strVersion;
     //
-    if (!call(QString(strMethodPrefix) + _T(".getValueVersion"), _T("version"), strVersion, &param))
+    if (!call(QString(strMethodPrefix) + ".getValueVersion", "version", strVersion, &param))
     {
-        TOLOG1(_T("Failed to get value version: key=%1"), strKey);
+        TOLOG1("Failed to get value version: key=%1", strKey);
         return FALSE;
     }
     //
-    nVersion = _ttoi64(strVersion);
+    nVersion = wiz_ttoi64(strVersion);
     //
     return TRUE;
 }
-BOOL WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion)
+bool WizKMXmlRpcServerBase::getValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, QString& strValue, __int64& nVersion)
 {
     CWizKMTokenOnlyParam param(strToken, strKbGUID);
     //
-    param.addString(_T("key"), strKey);
+    param.addString("key", strKey);
     //
     QString strVersion;
     //
-    if (!call(QString(strMethodPrefix) + _T(".getValue"),  _T("value_of_key"), strValue, _T("version"), strVersion, &param))
+    if (!call(QString(strMethodPrefix) + ".getValue",  "value_of_key", strValue, "version", strVersion, &param))
     {
-        TOLOG1(_T("Failed to get value: key=%1"), strKey);
+        TOLOG1("Failed to get value: key=%1", strKey);
         return FALSE;
     }
     //
-    nVersion = _ttoi64(strVersion);
+    nVersion = wiz_ttoi64(strVersion);
     //
     return TRUE;
 }
-BOOL WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMXmlRpcServerBase::setValue(const QString& strMethodPrefix, const QString& strToken, const QString& strKbGUID, const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
     CWizKMTokenOnlyParam param(strToken, strKbGUID);
     //
-    param.addString(_T("key"), strKey);
-    param.addString(_T("value_of_key"), strValue);
+    param.addString("key", strKey);
+    param.addString("value_of_key", strValue);
     //
     QString strRetVersion;
     //
-    if (!call(QString(strMethodPrefix) + _T(".setValue"), _T("version"), strRetVersion, &param))
+    if (!call(QString(strMethodPrefix) + ".setValue", "version", strRetVersion, &param))
     {
-        TOLOG1(_T("Failed to set value: key=%1"), strKey);
+        TOLOG1("Failed to set value: key=%1", strKey);
         return FALSE;
     }
     //
-    nRetVersion = _ttoi64(strRetVersion);
+    nRetVersion = wiz_ttoi64(strRetVersion);
     //
     return TRUE;
 }
@@ -97,7 +97,7 @@ void WizKMAccountsServer::onXmlRpcError()
 {
 }
 
-BOOL WizKMAccountsServer::login(const QString& strUserName, const QString& strPassword, const QString& strType)
+bool WizKMAccountsServer::login(const QString& strUserName, const QString& strPassword, const QString& strType)
 {
     if (m_bLogin)
     {
@@ -108,7 +108,7 @@ BOOL WizKMAccountsServer::login(const QString& strUserName, const QString& strPa
     //
     return m_bLogin;
 }
-BOOL WizKMAccountsServer::logout()
+bool WizKMAccountsServer::logout()
 {
     if (!m_bLogin)
         return FALSE;
@@ -116,36 +116,36 @@ BOOL WizKMAccountsServer::logout()
         return FALSE;
     //
     m_bLogin = FALSE;
-    BOOL bRet = accounts_clientLogout(m_userInfo.strToken);
+    bool bRet = accounts_clientLogout(m_userInfo.strToken);
     m_userInfo.strToken.clear();
     return bRet;
 }
 
 
-BOOL WizKMAccountsServer::changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
+bool WizKMAccountsServer::changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
 {
     return accounts_changePassword(strUserName, strOldPassword, strNewPassword);
 }
 
-BOOL WizKMAccountsServer::changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
+bool WizKMAccountsServer::changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
 {
     return accounts_changeUserId(strUserName, strPassword, strNewUserId);
 }
 
-BOOL WizKMAccountsServer::createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
+bool WizKMAccountsServer::createAccount(const QString& strUserName, const QString& strPassword, const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
     return accounts_createAccount(strUserName, strPassword, strInviteCode, strCaptchaID, strCaptcha);
 }
 
-BOOL WizKMAccountsServer::getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
+bool WizKMAccountsServer::getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
 {
     return accounts_getToken(strUserName, strPassword, strToken);
 }
-BOOL WizKMAccountsServer::getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
+bool WizKMAccountsServer::getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
 {
     return accounts_getCert(strUserName, strPassword, strN, stre, strd, strHint);
 }
-BOOL WizKMAccountsServer::setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+bool WizKMAccountsServer::setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
     return accounts_setCert(strUserName, strPassword, strN, stre, strd, strHint);
 }
@@ -153,12 +153,12 @@ BOOL WizKMAccountsServer::setCert(const QString& strUserName, const QString& str
 bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
 {
     CWizKMBaseParam param;
-    param.addString(_T("token"), strToken);
-    param.addString(_T("biz_guid"), strBizGuid);
+    param.addString("token", strToken);
+    param.addString("biz_guid", strBizGuid);
     //
-    if (!call(_T("accounts.getBizCert"), _T("n"), strN, _T("e"), stre, _T("d"), strd, _T("hint"), strHint, &param))
+    if (!call("accounts.getBizCert", "n", strN, "e", stre, "d", strd, "hint", strHint, &param))
     {
-        TOLOG(_T("Failed to get biz cert!"));
+        TOLOG("Failed to get biz cert!");
         return false;
     }
     //
@@ -195,7 +195,7 @@ bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QStrin
     //
     QString json = QString::fromUtf8(ba);
     //
-    QString key = WizFormatString1(_T("BizCert/%1"), strBizGuid);
+    QString key = WizFormatString1("BizCert/%1", strBizGuid);
     //
     __int64 version = -1;
     return setValue(key, json, version);
@@ -203,7 +203,7 @@ bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QStrin
 
 bool WizKMAccountsServer::getUserBizCert(const QString& strBizGuid, QString& strN, QString& stre, QString& strd, QString& strHint)
 {
-    QString key = WizFormatString1(_T("BizCert/%1"),strBizGuid);
+    QString key = WizFormatString1("BizCert/%1",strBizGuid);
     QString json;
     __int64 version = -1;
     if (!getValue(key, json, version))
@@ -229,7 +229,7 @@ bool WizKMAccountsServer::getUserBizCert(const QString& strBizGuid, QString& str
 }
 
 /*
-BOOL CWizKMAccountsServer::GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile)
+bool CWizKMAccountsServer::GetWizKMDatabaseServer(QString& strServer, int& nPort, QString& strXmlRpcFile)
 {
     if (!m_bLogin)
         return FALSE;
@@ -253,31 +253,31 @@ QString WizKMAccountsServer::getKbGuid()
     return m_userInfo.strKbGUID;
 }
 
-BOOL WizKMAccountsServer::shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
+bool WizKMAccountsServer::shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
 {
     return document_shareSNS(strToken, strSNS, strComment, strURL, strDocumentGUID);
 }
 
-BOOL WizKMAccountsServer::getGroupList(CWizGroupDataArray& arrayGroup)
+bool WizKMAccountsServer::getGroupList(CWizGroupDataArray& arrayGroup)
 {
     return accounts_getGroupList(arrayGroup);
 }
 
-BOOL WizKMAccountsServer::getBizList(CWizBizDataArray& arrayBiz)
+bool WizKMAccountsServer::getBizList(CWizBizDataArray& arrayBiz)
 {
     return accounts_getBizList(arrayBiz);
 }
 
-BOOL WizKMAccountsServer::createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
+bool WizKMAccountsServer::createTempGroup(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
 {
     return accounts_createTempGroupKb(strEmails, strAccessControl, strSubject, strEmailText, group);
 }
 
-BOOL WizKMAccountsServer::keepAlive(const QString& strToken)
+bool WizKMAccountsServer::keepAlive(const QString& strToken)
 {
     return accounts_keepAlive(strToken);
 }
-BOOL WizKMAccountsServer::getMessages(__int64 nVersion, CWizUserMessageDataArray& arrayRet)
+bool WizKMAccountsServer::getMessages(__int64 nVersion, CWizUserMessageDataArray& arrayRet)
 {
     int nCountPerPage = 100;
     //
@@ -289,7 +289,7 @@ BOOL WizKMAccountsServer::getMessages(__int64 nVersion, CWizUserMessageDataArray
         //
         if (!accounts_getMessagesByJson(nCountPerPage, nNextVersion, arrayPageData))
         {
-            TOLOG2(_T("Failed to get message list: CountPerPage=%1, Version=%2"), WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
+            TOLOG2("Failed to get message list: CountPerPage=%1, Version=%2", WizIntToStr(nCountPerPage), WizInt64ToStr(nVersion));
             return FALSE;
         }
         //
@@ -311,17 +311,17 @@ BOOL WizKMAccountsServer::getMessages(__int64 nVersion, CWizUserMessageDataArray
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int nStatus)
+bool WizKMAccountsServer::setMessageReadStatus(const QString& strMessageIDs, int nStatus)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("token"), getToken());
-    param.addString(_T("ids"), strMessageIDs);
-    param.addInt(_T("status"), nStatus);
+    param.addString("token", getToken());
+    param.addString("ids", strMessageIDs);
+    param.addInt("status", nStatus);
     //
-    if (!call(_T("accounts.setReadStatus"), &param))
+    if (!call("accounts.setReadStatus", &param))
     {
-        TOLOG(_T("accounts.setReadStatus failure!"));
+        TOLOG("accounts.setReadStatus failure!");
         return FALSE;
     }
     //
@@ -337,24 +337,24 @@ bool WizKMAccountsServer::setMessageDeleteStatus(const QString& strMessageIDs, i
     return deleteResource(strUrl);
 }
 
-BOOL WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
+bool WizKMAccountsServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion(_T("accounts"), getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMXmlRpcServerBase::getValueVersion("accounts", getToken(), getKbGuid(), strKey, nVersion);
 }
-BOOL WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
+bool WizKMAccountsServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue(_T("accounts"), getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMXmlRpcServerBase::getValue("accounts", getToken(), getKbGuid(), strKey, strValue, nVersion);
 }
-BOOL WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue(_T("accounts"), getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMXmlRpcServerBase::setValue("accounts", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
 
 
 QString WizKMAccountsServer::makeXmlRpcPassword(const QString& strPassword)
 {
-    if (strPassword.startsWith(_T("md5.")))
+    if (strPassword.startsWith("md5."))
         return QString(strPassword);
     //
     return strPassword;
@@ -363,75 +363,75 @@ QString WizKMAccountsServer::makeXmlRpcPassword(const QString& strPassword)
 
 
 
-BOOL WizKMAccountsServer::accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret)
+bool WizKMAccountsServer::accounts_clientLogin(const QString& strUserName, const QString& strPassword, const QString& strType, WIZUSERINFO& ret)
 {
-    DEBUG_TOLOG(_T("Start Login"));
+    DEBUG_TOLOG("Start Login");
     //
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
-    param.addString(_T("program_type"), strType);
-//    param.AddString(_T("protocol"), "https");
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
+    param.addString("program_type", strType);
+//    param.AddString("protocol", "https");
     //
-    if (!call(_T("accounts.clientLogin"), ret, &param))
+    if (!call("accounts.clientLogin", ret, &param))
     {
-        TOLOG(_T("Failed to login!"));
+        TOLOG("Failed to login!");
         return FALSE;
     }
     //
-    DEBUG_TOLOG1(_T("Login: token=%1"), ret.strToken);
+    DEBUG_TOLOG1("Login: token=%1", ret.strToken);
     //
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
+bool WizKMAccountsServer::accounts_createAccount(const QString& strUserName, const QString& strPassword,
                                                   const QString& strInviteCode, const QString& strCaptchaID, const QString& strCaptcha)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
-    param.addString(_T("invite_code"), strInviteCode);
-    param.addString(_T("product_name"), "WizNoteQT");
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
+    param.addString("invite_code", strInviteCode);
+    param.addString("product_name", "WizNoteQT");
     if (!strCaptchaID.isEmpty())
     {
-        param.addString(_T("captcha_id"), strCaptchaID);
-        param.addString(_T("captcha"), strCaptcha);
+        param.addString("captcha_id", strCaptchaID);
+        param.addString("captcha", strCaptcha);
     }
     //
     WizXmlRpcResult ret;
-    if (!call(_T("accounts.createAccount"), ret, &param))
+    if (!call("accounts.createAccount", ret, &param))
     {
-        TOLOG(_T("Failed to create account!"));
+        TOLOG("Failed to create account!");
         return FALSE;
     }
     //
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::accounts_clientLogout(const QString& strToken)
+bool WizKMAccountsServer::accounts_clientLogout(const QString& strToken)
 {
     CWizKMTokenOnlyParam param(strToken, getKbGuid());
     //
     WizXmlRpcResult callRet;
-    if (!call(_T("accounts.clientLogout"), callRet, &param))
+    if (!call("accounts.clientLogout", callRet, &param))
     {
-        TOLOG(_T("Logout failure!"));
+        TOLOG("Logout failure!");
         return FALSE;
     }
     //
     return TRUE;
 }
-BOOL WizKMAccountsServer::accounts_keepAlive(const QString& strToken)
+bool WizKMAccountsServer::accounts_keepAlive(const QString& strToken)
 {
     qDebug() << "keepAlive: " << strToken << "kb: " << getKbGuid();
     CWizKMTokenOnlyParam param(strToken, getKbGuid());
 
     WizXmlRpcResult callRet;
-    if (!call(_T("accounts.keepAlive"), callRet, &param))
+    if (!call("accounts.keepAlive", callRet, &param))
     {
-        TOLOG(_T("Keep alive failure!"));
+        TOLOG("Keep alive failure!");
         return FALSE;
     }
     //
@@ -440,106 +440,106 @@ BOOL WizKMAccountsServer::accounts_keepAlive(const QString& strToken)
 
 
 
-BOOL WizKMAccountsServer::accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
+bool WizKMAccountsServer::accounts_changePassword(const QString& strUserName, const QString& strOldPassword, const QString& strNewPassword)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("old_password"), makeXmlRpcPassword(strOldPassword));
-    param.addString(_T("new_password"), makeXmlRpcPassword(strNewPassword));
+    param.addString("user_id", strUserName);
+    param.addString("old_password", makeXmlRpcPassword(strOldPassword));
+    param.addString("new_password", makeXmlRpcPassword(strNewPassword));
     //
     WizXmlRpcResult callRet;
-    if (!call(_T("accounts.changePassword"), callRet, &param))
+    if (!call("accounts.changePassword", callRet, &param))
     {
-        TOLOG(_T("Change password failure!"));
+        TOLOG("Change password failure!");
         return FALSE;
     }
     //
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
+bool WizKMAccountsServer::accounts_changeUserId(const QString& strUserName, const QString& strPassword, const QString& strNewUserId)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
-    param.addString(_T("new_user_id"), strNewUserId);
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
+    param.addString("new_user_id", strNewUserId);
     //
     WizXmlRpcResult callRet;
-    if (!call(_T("accounts.changeAccount"), callRet, &param))
+    if (!call("accounts.changeAccount", callRet, &param))
     {
-        TOLOG(_T("Change password failure!"));
+        TOLOG("Change password failure!");
         return FALSE;
     }
     //
     return TRUE;
 }
-BOOL WizKMAccountsServer::accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
+bool WizKMAccountsServer::accounts_getToken(const QString& strUserName, const QString& strPassword, QString& strToken)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
 
     //
-    if (!call(_T("accounts.getToken"), _T("token"), strToken, &param))
+    if (!call("accounts.getToken", "token", strToken, &param))
     {
-        TOLOG(_T("Failed to get token!"));
+        TOLOG("Failed to get token!");
         return FALSE;
     }
-    DEBUG_TOLOG1(_T("Get token: %1"), strToken);
+    DEBUG_TOLOG1("Get token: %1", strToken);
 
     return TRUE;
 }
-BOOL WizKMAccountsServer::accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
+bool WizKMAccountsServer::accounts_getCert(const QString& strUserName, const QString& strPassword, QString& strN, QString& stre, QString& strd, QString& strHint)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
     //
-    if (!call(_T("accounts.getCert"), _T("n"), strN, _T("e"), stre, _T("d"), strd, _T("hint"), strHint, &param))
+    if (!call("accounts.getCert", "n", strN, "e", stre, "d", strd, "hint", strHint, &param))
     {
-        TOLOG(_T("Failed to get cert!"));
+        TOLOG("Failed to get cert!");
         return FALSE;
     }
     //
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
+bool WizKMAccountsServer::accounts_setCert(const QString& strUserName, const QString& strPassword, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("user_id"), strUserName);
-    param.addString(_T("password"), makeXmlRpcPassword(strPassword));
-    param.addString(_T("n"), strN);
-    param.addString(_T("e"), stre);
-    param.addString(_T("d"), strd);
-    param.addString(_T("hint"), strHint);
+    param.addString("user_id", strUserName);
+    param.addString("password", makeXmlRpcPassword(strPassword));
+    param.addString("n", strN);
+    param.addString("e", stre);
+    param.addString("d", strd);
+    param.addString("hint", strHint);
     //
-    if (!call(_T("accounts.setCert"), &param))
+    if (!call("accounts.setCert", &param))
     {
-        TOLOG(_T("Failed to set cert!"));
+        TOLOG("Failed to set cert!");
         return FALSE;
     }
     //
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
+bool WizKMAccountsServer::document_shareSNS(const QString& strToken, const QString& strSNS, const QString& strComment, const QString& strURL, const QString& strDocumentGUID)
 {
     CWizKMTokenOnlyParam param(strToken, getKbGuid());
-    param.addString(_T("sns_list"), strSNS);
-    param.addString(_T("content"), strComment);
-    param.addString(_T("url"), strURL);
-    param.addString(_T("document_guid"), strDocumentGUID);
+    param.addString("sns_list", strSNS);
+    param.addString("content", strComment);
+    param.addString("url", strURL);
+    param.addString("document_guid", strDocumentGUID);
     //
     WizXmlRpcResult callRet;
-    if (!call(_T("document.shareSNS"), callRet, &param))
+    if (!call("document.shareSNS", callRet, &param))
     {
-        TOLOG(_T("share note by sns failed!"));
+        TOLOG("share note by sns failed!");
         return FALSE;
     }
     //
@@ -547,17 +547,17 @@ BOOL WizKMAccountsServer::document_shareSNS(const QString& strToken, const QStri
 }
 
 
-BOOL WizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
+bool WizKMAccountsServer::accounts_getGroupList(CWizGroupDataArray& arrayGroup)
 {
     CWizKMTokenOnlyParam param(getToken(), getKbGuid());    
     //
-    param.addString(_T("kb_type"), _T("group"));
-//    param.AddString(_T("protocol"), "https");
+    param.addString("kb_type", "group");
+//    param.AddString("protocol", "https");
     //
     std::deque<WIZGROUPDATA> arrayWrap;
-    if (!call(_T("accounts.getGroupKbList"), arrayWrap, &param))
+    if (!call("accounts.getGroupKbList", arrayWrap, &param))
     {
-        TOLOG(_T("accounts.getGroupKbList failure!"));
+        TOLOG("accounts.getGroupKbList failure!");
         return FALSE;
     }
     //
@@ -570,9 +570,9 @@ bool WizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
     CWizKMTokenOnlyParam param(getToken(), getKbGuid());    
     //
     std::deque<WIZBIZDATA> arrayWrap;
-    if (!call(_T("accounts.getUserBizs"), arrayWrap, &param))
+    if (!call("accounts.getUserBizs", arrayWrap, &param))
     {
-        TOLOG(_T("accounts.getUserBizs failure!"));
+        TOLOG("accounts.getUserBizs failure!");
         return FALSE;
     }
     //
@@ -581,18 +581,18 @@ bool WizKMAccountsServer::accounts_getBizList(CWizBizDataArray& arrayBiz)
     return TRUE;
 }
 
-BOOL WizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
+bool WizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, const QString& strAccessControl, const QString& strSubject, const QString& strEmailText, WIZGROUPDATA& group)
 {
     CWizKMTokenOnlyParam param(getToken(), getKbGuid());
-    param.addString(_T("kb_name"), strSubject);
-    param.addString(_T("user_ids"), strEmails);
-    param.addString(_T("group_role"), strAccessControl);
-    param.addString(_T("email_ext_text"), strEmailText);
+    param.addString("kb_name", strSubject);
+    param.addString("user_ids", strEmails);
+    param.addString("group_role", strAccessControl);
+    param.addString("email_ext_text", strEmailText);
     //
     WIZGROUPDATA wrap;
-    if (!call(_T("accounts.createTempGroupKb"), wrap, &param))
+    if (!call("accounts.createTempGroupKb", wrap, &param))
     {
-        TOLOG(_T("document.getGroupKbList failure!"));
+        TOLOG("document.getGroupKbList failure!");
         return FALSE;
     }
     //
@@ -607,18 +607,18 @@ BOOL WizKMAccountsServer::accounts_createTempGroupKb(const QString& strEmails, c
 
 
 
-BOOL WizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
+bool WizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
     CWizKMBaseParam param;
 
-    param.addString(_T("token"), getToken());
-    param.addString(_T("version"), WizInt64ToStr(nVersion));
-    param.addInt(_T("count"), nCountPerPage);
+    param.addString("token", getToken());
+    param.addString("version", WizInt64ToStr(nVersion));
+    param.addInt("count", nCountPerPage);
     //
     std::deque<WIZUSERMESSAGEDATA> arrayWrap;
-    if (!call(_T("accounts.getMessages"), arrayWrap, &param))
+    if (!call("accounts.getMessages", arrayWrap, &param))
     {
-        TOLOG(_T("document.getMessage failure!"));
+        TOLOG("document.getMessage failure!");
         return FALSE;
     }
     //
@@ -728,7 +728,7 @@ void WizKMDatabaseServer::setKBInfo(const WIZKBINFO& info)
 int WizKMDatabaseServer::getCountPerPage()
 {
     /*
-    static int nCountPerPage = WizKMGetPrivateInt(_T("Sync"), _T("CountPerPage"), 200);
+    static int nCountPerPage = WizKMGetPrivateInt("Sync", "CountPerPage", 200);
     */
     static int nCountPerPage = 200;
     //
@@ -741,13 +741,13 @@ int WizKMDatabaseServer::getCountPerPage()
 }
 
 //
-BOOL WizKMDatabaseServer::wiz_getInfo()
+bool WizKMDatabaseServer::wiz_getInfo()
 {
     CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
     //
-    if (!call(_T("wiz.getInfo"), m_kbInfo, &param))
+    if (!call("wiz.getInfo", m_kbInfo, &param))
     {
-        TOLOG(_T("getInfo failure!"));
+        TOLOG("getInfo failure!");
         return FALSE;
     }
     //
@@ -756,30 +756,30 @@ BOOL WizKMDatabaseServer::wiz_getInfo()
 
 struct WIZOBJECTVERSION_XMLRPC : public WIZOBJECTVERSION
 {
-    BOOL loadFromXmlRpc(WizXmlRpcStructValue& data)
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data)
     {
         QString strType;
         //
-        BOOL bRet = data.getInt64(_T("document_version"), nDocumentVersion)
-            && data.getInt64(_T("tag_version"), nTagVersion)
-            && data.getInt64(_T("style_version"), nStyleVersion)
-            && data.getInt64(_T("attachment_version"), nAttachmentVersion)
-            && data.getInt64(_T("deleted_version"), nDeletedGUIDVersion);
+        bool bRet = data.getInt64("document_version", nDocumentVersion)
+            && data.getInt64("tag_version", nTagVersion)
+            && data.getInt64("style_version", nStyleVersion)
+            && data.getInt64("attachment_version", nAttachmentVersion)
+            && data.getInt64("deleted_version", nDeletedGUIDVersion);
         //
         return bRet;
     }
 };
 
-BOOL WizKMDatabaseServer::wiz_getVersion(WIZOBJECTVERSION& version, BOOL bAuto)
+bool WizKMDatabaseServer::wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto)
 {
     CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
     //
-    param.addBool(_T("auto"), bAuto);
+    param.addBool("auto", bAuto);
     //
     WIZOBJECTVERSION_XMLRPC wrap;
-    if (!call(_T("wiz.getVersion"), wrap, &param))
+    if (!call("wiz.getVersion", wrap, &param))
     {
-        TOLOG(_T("GetVersion failure!"));
+        TOLOG("GetVersion failure!");
         return FALSE;
     }
     //
@@ -789,24 +789,24 @@ BOOL WizKMDatabaseServer::wiz_getVersion(WIZOBJECTVERSION& version, BOOL bAuto)
 }
 //
 
-BOOL WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
+bool WizKMDatabaseServer::getValueVersion(const QString& strKey, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValueVersion(_T("kb"), getToken(), getKbGuid(), strKey, nVersion);
+    return WizKMXmlRpcServerBase::getValueVersion("kb", getToken(), getKbGuid(), strKey, nVersion);
 }
-BOOL WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
+bool WizKMDatabaseServer::getValue(const QString& strKey, QString& strValue, __int64& nVersion)
 {
-    return WizKMXmlRpcServerBase::getValue(_T("kb"), getToken(), getKbGuid(), strKey, strValue, nVersion);
+    return WizKMXmlRpcServerBase::getValue("kb", getToken(), getKbGuid(), strKey, strValue, nVersion);
 }
-BOOL WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
+bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValue, __int64& nRetVersion)
 {
-    return WizKMXmlRpcServerBase::setValue(_T("kb"), getToken(), getKbGuid(), strKey, strValue, nRetVersion);
+    return WizKMXmlRpcServerBase::setValue("kb", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
-BOOL WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret)
+bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret)
 {
-    if (!data_download(ret.strGUID, _T("document"), ret.arrayData, ret.strTitle))
+    if (!data_download(ret.strGUID, "document", ret.arrayData, ret.strTitle))
     {
-        TOLOG1(_T("Failed to download attachment data: %1"), ret.strTitle);
+        TOLOG1("Failed to download attachment data: %1", ret.strTitle);
         return FALSE;
     }
     //
@@ -826,48 +826,48 @@ struct CWizKMDocumentPostDataParam
         //
         Q_ASSERT(strDocumentGUID == infodata.strGUID);
 
-        addString(_T("document_guid"), strDocumentGUID);
-        addString(_T("document_title"), infodata.strTitle);
-        addString(_T("document_category"), infodata.strLocation);
-        addString(_T("document_filename"), infodata.strName);
-        addString(_T("document_seo"), infodata.strSEO);
-        addString(_T("document_url"), infodata.strURL);
-        addString(_T("document_author"), infodata.strAuthor);
-        addString(_T("document_keywords"), infodata.strKeywords);
-        addString(_T("document_type"), infodata.strType);
-        addString(_T("document_owner"), infodata.strOwner);
-        addString(_T("document_filetype"), infodata.strFileType);
-        addString(_T("document_styleguid"), infodata.strStyleGUID);
-        addTime(_T("dt_created"), infodata.tCreated);
-        addTime(_T("dt_modified"), infodata.tModified);
-        addTime(_T("dt_accessed"), infodata.tAccessed);
-        addInt(_T("document_protected"), infodata.nProtected);
-        addInt(_T("document_readcount"), infodata.nReadCount);
-        addInt(_T("document_attachment_count"), infodata.nAttachmentCount);
-        addTime(_T("dt_data_modified"), infodata.tDataModified);
-        addString(_T("data_md5"), infodata.strDataMD5);
+        addString("document_guid", strDocumentGUID);
+        addString("document_title", infodata.strTitle);
+        addString("document_category", infodata.strLocation);
+        addString("document_filename", infodata.strName);
+        addString("document_seo", infodata.strSEO);
+        addString("document_url", infodata.strURL);
+        addString("document_author", infodata.strAuthor);
+        addString("document_keywords", infodata.strKeywords);
+        addString("document_type", infodata.strType);
+        addString("document_owner", infodata.strOwner);
+        addString("document_filetype", infodata.strFileType);
+        addString("document_styleguid", infodata.strStyleGUID);
+        addTime("dt_created", infodata.tCreated);
+        addTime("dt_modified", infodata.tModified);
+        addTime("dt_accessed", infodata.tAccessed);
+        addInt("document_protected", infodata.nProtected);
+        addInt("document_readcount", infodata.nReadCount);
+        addInt("document_attachment_count", infodata.nAttachmentCount);
+        addTime("dt_data_modified", infodata.tDataModified);
+        addString("data_md5", infodata.strDataMD5);
         addString("document_zip_md5", strObjMd5);
         //
         CString strTagGuids;
         ::WizStringArrayToText(tags, strTagGuids, "*");
         //
-        addString(_T("document_tag_guids"), strTagGuids);
+        addString("document_tag_guids", strTagGuids);
     }
 };
 
 
-BOOL WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
     ATLASSERT(!ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
     {
-        TOLOG(_T("fault error: ret.arrayData is not null!"));
+        TOLOG("fault error: ret.arrayData is not null!");
         return FALSE;
     }
     //
-    if (!data_download(strAttachmentGUID, _T("attachment"), ret.arrayData, ret.strName))
+    if (!data_download(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
     {
-        TOLOG1(_T("Failed to download attachment data: %1"), ret.strName);
+        TOLOG1("Failed to download attachment data: %1", ret.strName);
         return FALSE;
     }
     //
@@ -883,19 +883,19 @@ struct CWizKMAttachmentPostDataParam
         changeApiVersion(nApiVersion);
 
         Q_ASSERT(strAttachmentGUID == infodata.strGUID);
-        addString(_T("attachment_guid"), strAttachmentGUID);
-        addString(_T("attachment_document_guid"), infodata.strDocumentGUID);
-        addString(_T("attachment_name"), infodata.strName);
-        addString(_T("attachment_url"), infodata.strURL);
-        addString(_T("attachment_description"), infodata.strDescription);
-        addTime(_T("dt_info_modified"), infodata.tInfoModified);
-        addString(_T("info_md5"), infodata.strInfoMD5);
-        addTime(_T("dt_data_modified"), infodata.tDataModified);
-        addString(_T("data_md5"), infodata.strDataMD5);
+        addString("attachment_guid", strAttachmentGUID);
+        addString("attachment_document_guid", infodata.strDocumentGUID);
+        addString("attachment_name", infodata.strName);
+        addString("attachment_url", infodata.strURL);
+        addString("attachment_description", infodata.strDescription);
+        addTime("dt_info_modified", infodata.tInfoModified);
+        addString("info_md5", infodata.strInfoMD5);
+        addTime("dt_data_modified", infodata.tDataModified);
+        addString("data_md5", infodata.strDataMD5);
         //
-        addTime(_T("dt_data_modified"), infodata.tDataModified);
-        addString(_T("data_md5"), infodata.strDataMD5);
-        addString(_T("attachment_zip_md5"), strObjMd5);
+        addTime("dt_data_modified", infodata.tDataModified);
+        addString("data_md5", infodata.strDataMD5);
+        addString("attachment_zip_md5", strObjMd5);
         //
         addBool("attachment_info", true);
         addBool("attachment_data", true);
@@ -908,11 +908,11 @@ struct CWizKMDataDownloadParam
     CWizKMDataDownloadParam(const QString& strToken, const QString& strBookGUID, const QString& strObjectGUID, const QString& strObjectType, int pos, int size)
         : CWizKMTokenOnlyParam(strToken, strBookGUID)
     {
-        addString(_T("obj_guid"), strObjectGUID);
-        addString(_T("obj_type"), strObjectType);
+        addString("obj_guid", strObjectGUID);
+        addString("obj_type", strObjectType);
         //
-        addInt64(_T("start_pos"), pos);
-        addInt64(_T("part_size"), size);
+        addInt64("start_pos", pos);
+        addInt64("part_size", size);
     }
 };
 
@@ -931,38 +931,38 @@ struct WIZKMDATAPART
         , nPartSize(0)
     {
     }
-    BOOL loadFromXmlRpc(WizXmlRpcStructValue& data)
+    bool loadFromXmlRpc(WizXmlRpcStructValue& data)
     {
-        data.getInt64(_T("obj_size"), nObjectSize);
-        data.getInt(_T("eof"), bEOF);
-        data.getInt64(_T("part_size"), nPartSize);
-        data.getString(_T("part_md5"), strPartMD5);
-        return data.getStream(_T("data"), stream);
+        data.getInt64("obj_size", nObjectSize);
+        data.getInt("eof", bEOF);
+        data.getInt64("part_size", nPartSize);
+        data.getString("part_md5", strPartMD5);
+        return data.getStream("data", stream);
     }
 };
 
-BOOL WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, BOOL& bEOF)
+bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, int pos, int size, QByteArray& stream, int& nAllSize, bool& bEOF)
 {
     CWizKMDataDownloadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, pos, size);
     //
     WIZKMDATAPART part;
-    if (!call(_T("data.download"), part, &param))
+    if (!call("data.download", part, &param))
     {
-        TOLOG(_T("data.download failure!"));
+        TOLOG("data.download failure!");
         return FALSE;
     }
     //
     __int64 nStreamSize = part.stream.size();
     if (part.nPartSize != nStreamSize)
     {
-        TOLOG2(_T("part size does not match: stream_size=%1, part_size=%2"), WizInt64ToStr(nStreamSize), WizInt64ToStr(part.nPartSize));
+        TOLOG2("part size does not match: stream_size=%1, part_size=%2", WizInt64ToStr(nStreamSize), WizInt64ToStr(part.nPartSize));
         return FALSE;
     }
     //
     QString strStreamMD5 = WizMd5StringNoSpaceJava(part.stream);
     if (0 != strStreamMD5.compare(part.strPartMD5, Qt::CaseInsensitive))
     {
-        TOLOG2(_T("part md5 does not match, stream_md5=%1, part_md5=%2"), strStreamMD5, part.strPartMD5);
+        TOLOG2("part md5 does not match, stream_md5=%1, part_md5=%2", strStreamMD5, part.strPartMD5);
         return FALSE;
     }
     //
@@ -982,34 +982,34 @@ struct CWizKMDataUploadParam
     CWizKMDataUploadParam(const QString& strToken, const QString& strBookGUID, const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, const QByteArray& stream)
         : CWizKMTokenOnlyParam(strToken, strBookGUID)
     {
-        addString(_T("obj_guid"), strObjectGUID);
-        addString(_T("obj_type"), strObjectType);
-        addString(_T("obj_md5"), strObjectMD5);
-        addInt(_T("obj_size"), allSize);
-        addInt(_T("part_count"), partCount);
-        addInt(_T("part_sn"), partIndex);
-        addInt64(_T("part_size"), stream.size());
-        addString(_T("part_md5"), ::WizMd5StringNoSpaceJava(stream));
-        addBase64(_T("data"), stream);
+        addString("obj_guid", strObjectGUID);
+        addString("obj_type", strObjectType);
+        addString("obj_md5", strObjectMD5);
+        addInt("obj_size", allSize);
+        addInt("part_count", partCount);
+        addInt("part_sn", partIndex);
+        addInt64("part_size", stream.size());
+        addString("part_md5", ::WizMd5StringNoSpaceJava(stream));
+        addBase64("data", stream);
     }
 };
 
 
 
-BOOL WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream)
+bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QString& strObjectMD5, int allSize, int partCount, int partIndex, int partSize, const QByteArray& stream)
 {
     __int64 nStreamSize = stream.size();
     if (partSize != (int)nStreamSize)
     {
-        TOLOG2(_T("Fault error: stream_size=%1, part_size=%2"), WizIntToStr(int(nStreamSize)), WizIntToStr(partSize));
+        TOLOG2("Fault error: stream_size=%1, part_size=%2", WizIntToStr(int(nStreamSize)), WizIntToStr(partSize));
         return FALSE;
     }
     //
     CWizKMDataUploadParam param(m_userInfo.strToken, m_userInfo.strKbGUID, strObjectGUID, strObjectType, strObjectMD5, allSize, partCount, partIndex, stream);
     //
-    if (!call(_T("data.upload"), &param))
+    if (!call("data.upload", &param))
     {
-        TOLOG(_T("Can not upload object part data!"));
+        TOLOG("Can not upload object part data!");
         return FALSE;
     }
     //
@@ -1017,7 +1017,7 @@ BOOL WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 }
 
 
-BOOL WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
+bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
 {
     stream.clear();
     //
@@ -1027,10 +1027,10 @@ BOOL WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QStr
     {
         int partSize = 500 * 1000;
         //
-        BOOL bEOF = FALSE;
+        bool bEOF = FALSE;
         if (!data_download(strObjectGUID, strObjectType, startPos, partSize, stream, nAllSize, bEOF))
         {
-            TOLOG(WizFormatString1(_T("Failed to download object part data: %1"), strDisplayName));
+            TOLOG(WizFormatString1("Failed to download object part data: %1", strDisplayName));
             return FALSE;
         }
         //
@@ -1047,18 +1047,18 @@ BOOL WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QStr
     __int64 nStreamSize = stream.size();
     if (nStreamSize != nAllSize)
     {
-        TOLOG3(_T("Failed to download object data: %1, stream_size=%2, object_size=%3"), strDisplayName, WizInt64ToStr(nStreamSize), WizInt64ToStr(nAllSize));
+        TOLOG3("Failed to download object data: %1, stream_size=%2, object_size=%3", strDisplayName, WizInt64ToStr(nStreamSize), WizInt64ToStr(nAllSize));
         return FALSE;
     }
     //
     return TRUE;
 }
-BOOL WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName)
+bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName)
 {
     __int64 nStreamSize = stream.size();
     if (0 == nStreamSize)
     {
-        TOLOG(_T("fault error: stream is zero"));
+        TOLOG("fault error: stream is zero");
         return FALSE;
     }
     //
@@ -1092,7 +1092,7 @@ BOOL WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
         //
         if (!data_upload(strObjectGUID, strObjectType, strMD5, (int)nStreamSize, partCount, i, curPartSize, spPartStream))
         {
-            TOLOG1(_T("Failed to upload part data: %1"), strDisplayName);
+            TOLOG1("Failed to upload part data: %1", strDisplayName);
             return FALSE;
         }
     }
@@ -1104,11 +1104,11 @@ BOOL WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 
 //////////////////////////////////////////////////////////////////////////////////////
 //
-BOOL WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
+bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
     if (!data.arrayData.isEmpty() && data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
-        TOLOG1(_T("%1 is too large, skip it"), data.strTitle);
+        TOLOG1("%1 is too large, skip it", data.strTitle);
         return FALSE;
     }
     //
@@ -1117,9 +1117,9 @@ BOOL WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool 
     if (!data.arrayData.isEmpty() && bWithDocumentData)
     {
         strObjMd5 = WizMd5StringNoSpaceJava(data.arrayData);
-        if (!data_upload(data.strGUID, _T("document"), data.arrayData, strObjMd5, data.strTitle))
+        if (!data_upload(data.strGUID, "document", data.arrayData, strObjMd5, data.strTitle))
         {
-            TOLOG1(_T("Failed to upload note data: %1"), data.strTitle);
+            TOLOG1("Failed to upload note data: %1", data.strTitle);
             return FALSE;
         }
     }
@@ -1131,61 +1131,61 @@ BOOL WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool 
     CWizKMDocumentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, bWithDocumentData, data, data.arrayTagGUID, strObjMd5);
     //
     WizXmlRpcResult ret;
-    if (!call(_T("document.postSimpleData"), ret, &param))
+    if (!call("document.postSimpleData", ret, &param))
     {
-        TOLOG(_T("document.postSimpleData failure!"));
+        TOLOG("document.postSimpleData failure!");
         return FALSE;
     }
     //
     if (WizXmlRpcStructValue* pRet = ret.getResultValue<WizXmlRpcStructValue>())
     {
-        pRet->getInt64(_T("version"), nServerVersion);
+        pRet->getInt64("version", nServerVersion);
     }
     //
     return TRUE;
 }
 
 
-BOOL WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
+bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
 {
     if (data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
-        TOLOG1(_T("%1 is too large, skip it"), data.strName);
+        TOLOG1("%1 is too large, skip it", data.strName);
         return TRUE;
     }
     //
     QString strObjMd5 = ::WizMd5StringNoSpaceJava(data.arrayData);
     //
-    if (!data_upload(data.strGUID, _T("attachment"), data.arrayData, strObjMd5, data.strName))
+    if (!data_upload(data.strGUID, "attachment", data.arrayData, strObjMd5, data.strName))
     {
-        TOLOG1(_T("Failed to upload attachment data: %1"), data.strName);
+        TOLOG1("Failed to upload attachment data: %1", data.strName);
         return FALSE;
     }
     //
     CWizKMAttachmentPostDataParam param(WIZKM_WEBAPI_VERSION, m_userInfo.strToken, m_userInfo.strKbGUID, data.strGUID, data, strObjMd5);
     //
     WizXmlRpcResult ret;
-    if (!call(_T("attachment.postSimpleData"), ret, &param))
+    if (!call("attachment.postSimpleData", ret, &param))
     {
-        TOLOG(_T("attachment.postSimpleData failure!"));
+        TOLOG("attachment.postSimpleData failure!");
         return FALSE;
     }
     //
     if (WizXmlRpcStructValue* pRet = ret.getResultValue<WizXmlRpcStructValue>())
     {
-        pRet->getInt64(_T("version"), nServerVersion);
+        pRet->getInt64("version", nServerVersion);
     }
     //
     return TRUE;
 }
 
 
-BOOL WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+bool WizKMDatabaseServer::document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
 {
-   return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>(_T("document.downloadInfoList"), _T("document_guids"), arrayDocumentGUID, arrayRet);
+   return downloadList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>("document.downloadInfoList", "document_guids", arrayDocumentGUID, arrayRet);
 }
 
-BOOL WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc)
+bool WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc)
 {
     CWizStdStringArray guids;
     guids.push_back(strDocumentGuid);
@@ -1202,51 +1202,51 @@ BOOL WizKMDatabaseServer::document_getInfo(const QString& strDocumentGuid, WIZDO
 }
 
 
-BOOL WizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
+bool WizKMDatabaseServer::document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet)
 {
-    return getList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>(_T("document.getSimpleList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZDOCUMENTDATAEX, WIZDOCUMENTDATAEX>("document.getSimpleList", nCountPerPage, nVersion, arrayRet);
 }
 
-BOOL WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
+bool WizKMDatabaseServer::attachment_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTATTACHMENTDATAEX>& arrayRet)
 {
-    return getList<WIZDOCUMENTATTACHMENTDATAEX, WIZDOCUMENTATTACHMENTDATAEX>(_T("attachment.getList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZDOCUMENTATTACHMENTDATAEX, WIZDOCUMENTATTACHMENTDATAEX>("attachment.getList", nCountPerPage, nVersion, arrayRet);
 }
 
-BOOL WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet)
+bool WizKMDatabaseServer::tag_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZTAGDATA>& arrayRet)
 {
-    return getList<WIZTAGDATA, WIZTAGDATA>(_T("tag.getList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZTAGDATA, WIZTAGDATA>("tag.getList", nCountPerPage, nVersion, arrayRet);
 }
 
-BOOL WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZSTYLEDATA>& arrayRet)
+bool WizKMDatabaseServer::style_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZSTYLEDATA>& arrayRet)
 {
-    return getList<WIZSTYLEDATA, WIZSTYLEDATA>(_T("style.getList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZSTYLEDATA, WIZSTYLEDATA>("style.getList", nCountPerPage, nVersion, arrayRet);
 }
 
 
-BOOL WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
+bool WizKMDatabaseServer::deleted_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDELETEDGUIDDATA>& arrayRet)
 {
-    return getList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>(_T("deleted.getList"), nCountPerPage, nVersion, arrayRet);
+    return getList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.getList", nCountPerPage, nVersion, arrayRet);
 }
-BOOL WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
+bool WizKMDatabaseServer::tag_postList(std::deque<WIZTAGDATA>& arrayTag)
 {
-    return postList<WIZTAGDATA, WIZTAGDATA>(_T("tag.postList"), _T("tags"), arrayTag);
+    return postList<WIZTAGDATA, WIZTAGDATA>("tag.postList", "tags", arrayTag);
 }
-BOOL WizKMDatabaseServer::style_postList(std::deque<WIZSTYLEDATA>& arrayStyle)
+bool WizKMDatabaseServer::style_postList(std::deque<WIZSTYLEDATA>& arrayStyle)
 {
-    return postList<WIZSTYLEDATA, WIZSTYLEDATA>(_T("style.postList"), _T("styles"), arrayStyle);
+    return postList<WIZSTYLEDATA, WIZSTYLEDATA>("style.postList", "styles", arrayStyle);
 }
-BOOL WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
+bool WizKMDatabaseServer::deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID)
 {
-    return postList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>(_T("deleted.postList"), _T("deleteds"), arrayDeletedGUID);
+    return postList<WIZDELETEDGUIDDATA, WIZDELETEDGUIDDATA>("deleted.postList", "deleteds", arrayDeletedGUID);
 }
 
-BOOL WizKMDatabaseServer::category_getAll(QString& str)
+bool WizKMDatabaseServer::category_getAll(QString& str)
 {
     CWizKMTokenOnlyParam param(m_userInfo.strToken, m_userInfo.strKbGUID);
     //
-    if (!call(_T("category.getAll"), _T("categories"), str, &param))
+    if (!call("category.getAll", "categories", str, &param))
     {
-        TOLOG(_T("category.getList failure!"));
+        TOLOG("category.getList failure!");
         return FALSE;
     }
     //
@@ -1258,7 +1258,7 @@ QByteArray WizKMDatabaseServer::downloadDocumentData(const QString& strDocumentG
     WIZDOCUMENTDATAEX ret;
     if (!document_downloadData(strDocumentGUID, ret))
     {
-        TOLOG1(_T("Failed to download note data: %1"), strDocumentGUID);
+        TOLOG1("Failed to download note data: %1", strDocumentGUID);
         return QByteArray();
     }
     //
@@ -1274,7 +1274,7 @@ QByteArray WizKMDatabaseServer::downloadAttachmentData(const QString& strAttachm
     WIZDOCUMENTATTACHMENTDATAEX ret;
     if (!attachment_downloadData(strAttachmentGUID, ret))
     {
-        TOLOG1(_T("Failed to download attachment data: %1"), strAttachmentGUID);
+        TOLOG1("Failed to download attachment data: %1", strAttachmentGUID);
         return QByteArray();
     }
     //

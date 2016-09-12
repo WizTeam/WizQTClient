@@ -111,14 +111,14 @@ WIZKBINFO::WIZKBINFO()
 
 bool WIZKBINFO::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.getInt64(_T("storage_limit"), nStorageLimit);
-    data.getInt64(_T("storage_usage"), nStorageUsage);
-    data.getStr(_T("storage_limit_string"), strStorageLimit);
-    data.getStr(_T("storage_usage_string"), strStorageUsage);
-    data.getInt64(_T("traffic_limit"), nTrafficLimit);
-    data.getInt64(_T("traffic_usage"), nTrafficUsage);
-    data.getStr(_T("traffic_limit_string"), strTrafficLimit);
-    data.getStr(_T("traffic_usage_string"), strTrafficUsage);
+    data.getInt64("storage_limit", nStorageLimit);
+    data.getInt64("storage_usage", nStorageUsage);
+    data.getStr("storage_limit_string", strStorageLimit);
+    data.getStr("storage_usage_string", strStorageUsage);
+    data.getInt64("traffic_limit", nTrafficLimit);
+    data.getInt64("traffic_usage", nTrafficUsage);
+    data.getStr("traffic_limit_string", strTrafficLimit);
+    data.getStr("traffic_usage_string", strTrafficUsage);
     data.getInt64("upload_size_limit", nUploadSizeLimit);
     data.getString("upload_size_limit_string", strUploadSizeLimitString);
     data.getInt64("notes_count", nNotesCount);
@@ -206,23 +206,23 @@ WizObjectType WIZOBJECTDATA::typeStringToObjectType(const CString& strType)
 {
     if (strType.isEmpty())
     {
-        TOLOG1(_T("Unknown guid type: %1"), strType);
+        TOLOG1("Unknown guid type: %1", strType);
         ATLASSERT(FALSE);
         return wizobjectError;
     }
     //
-    if (0 == _tcsicmp(strType, _T("tag")))
+    if (0 == wiz_tcsicmp(strType, "tag"))
         return wizobjectTag;
-    if (0 == _tcsicmp(strType, _T("tag_group")))
+    if (0 == wiz_tcsicmp(strType, "tag_group"))
         return wizobjectTag;
-    else if (0 == _tcsicmp(strType, _T("style")))
+    else if (0 == wiz_tcsicmp(strType, "style"))
         return wizobjectStyle;
-    else if (0 == _tcsicmp(strType, _T("attachment")))
+    else if (0 == wiz_tcsicmp(strType, "attachment"))
         return wizobjectDocumentAttachment;
-    else if (0 == _tcsicmp(strType, _T("document")))
+    else if (0 == wiz_tcsicmp(strType, "document"))
         return wizobjectDocument;
     //
-    TOLOG1(_T("Unknown guid type: %1"), strType);
+    TOLOG1("Unknown guid type: %1", strType);
     ATLASSERT(FALSE);
     return wizobjectError;
 }
@@ -273,22 +273,22 @@ BOOL WIZTAGDATA::equalForSync(const WIZTAGDATA& data) const
 
 BOOL WIZTAGDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    return data.getStr(_T("tag_guid"), strGUID)
-            && data.getStr(_T("tag_group_guid"), strParentGUID)
-            && data.getStr(_T("tag_name"), strName)
-            && data.getStr(_T("tag_description"), strDescription)
-            && data.getTime(_T("dt_info_modified"), tModified)
-            && data.getInt64(_T("version"), nVersion);
+    return data.getStr("tag_guid", strGUID)
+            && data.getStr("tag_group_guid", strParentGUID)
+            && data.getStr("tag_name", strName)
+            && data.getStr("tag_description", strDescription)
+            && data.getTime("dt_info_modified", tModified)
+            && data.getInt64("version", nVersion);
 }
 
 BOOL WIZTAGDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
 {
-    data.addString(_T("tag_guid"), strGUID);
-    data.addString(_T("tag_group_guid"), strParentGUID);
-    data.addString(_T("tag_name"), strName);
-    data.addString(_T("tag_description"), strDescription);
-    data.addTime(_T("dt_info_modified"), tModified);
-    data.addInt64(_T("version"), nVersion);
+    data.addString("tag_guid", strGUID);
+    data.addString("tag_group_guid", strParentGUID);
+    data.addString("tag_name", strName);
+    data.addString("tag_description", strDescription);
+    data.addTime("dt_info_modified", tModified);
+    data.addInt64("version", nVersion);
 
     return TRUE;
 }
@@ -311,7 +311,7 @@ WIZSTYLEDATA::WIZSTYLEDATA()
     nVersion = -1;
 }
 
-BOOL WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
+bool WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
 {
     ATLASSERT(strGUID == data.strGUID);
     return strName == data.strName
@@ -322,32 +322,32 @@ BOOL WIZSTYLEDATA::equalForSync(const WIZSTYLEDATA& data) const
             && nFlagIndex == data.nFlagIndex;
 }
 
-BOOL WIZSTYLEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZSTYLEDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.getStr(_T("style_description"), strDescription);
+    data.getStr("style_description", strDescription);
 
-    return data.getStr(_T("style_guid"), strGUID)
-        && data.getStr(_T("style_name"), strName)
-        && data.getColor(_T("style_textcolor"), crTextColor)
-        && data.getColor(_T("style_backcolor"), crBackColor)
-        && data.getBool(_T("style_text_bold"), bTextBold)
-        && data.getInt(_T("style_flagindex"), nFlagIndex)
-        && data.getTime(_T("dt_info_modified"), tModified)
-        && data.getInt64(_T("version"), nVersion);
+    return data.getStr("style_guid", strGUID)
+        && data.getStr("style_name", strName)
+        && data.getColor("style_textcolor", crTextColor)
+        && data.getColor("style_backcolor", crBackColor)
+        && data.getBool("style_text_bold", bTextBold)
+        && data.getInt("style_flagindex", nFlagIndex)
+        && data.getTime("dt_info_modified", tModified)
+        && data.getInt64("version", nVersion);
 }
 
-BOOL WIZSTYLEDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
+bool WIZSTYLEDATA::saveToXmlRpc(WizXmlRpcStructValue& data) const
 {
-    data.addString(_T("style_description"), strDescription);;
+    data.addString("style_description", strDescription);;
 
-    data.addString(_T("style_guid"), strGUID);
-    data.addString(_T("style_name"), strName);
-    data.addColor(_T("style_textcolor"), crTextColor);
-    data.addColor(_T("style_backcolor"), crBackColor);
-    data.addBool(_T("style_text_bold"), bTextBold);
-    data.addInt(_T("style_flagindex"), nFlagIndex);
-    data.addTime(_T("dt_info_modified"), tModified);
-    data.addInt64(_T("version"), nVersion);;
+    data.addString("style_guid", strGUID);
+    data.addString("style_name", strName);
+    data.addColor("style_textcolor", crTextColor);
+    data.addColor("style_backcolor", crBackColor);
+    data.addBool("style_text_bold", bTextBold);
+    data.addInt("style_flagindex", nFlagIndex);
+    data.addTime("dt_info_modified", tModified);
+    data.addInt64("version", nVersion);;
 
     return TRUE;
 }
@@ -376,11 +376,11 @@ bool WIZDELETEDGUIDDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
     CString strType;
 
     // this field maybe "nil"
-    data.getTime(_T("dt_deleted"), tDeleted);
+    data.getTime("dt_deleted", tDeleted);
 
-    bool bRet = data.getStr(_T("deleted_guid"), strGUID)
-        && data.getStr(_T("guid_type"), strType)
-        && data.getInt64(_T("version"), nVersion);
+    bool bRet = data.getStr("deleted_guid", strGUID)
+        && data.getStr("guid_type", strType)
+        && data.getInt64("version", nVersion);
 
     eType = WIZOBJECTDATA::typeStringToObjectType(strType);
 
@@ -488,7 +488,7 @@ WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
     return *this;
 }
 
-BOOL WIZDOCUMENTDATAEX::loadFromXmlRpc(WizXmlRpcStructValue& data)
+bool WIZDOCUMENTDATAEX::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
     nInfoChanged = 0;
     nDataChanged = 0;
@@ -668,13 +668,13 @@ WIZBIZDATA::WIZBIZDATA(const WIZBIZDATA& data)
 
 bool WIZBIZDATA::loadFromXmlRpc(WizXmlRpcStructValue& data)
 {
-    data.getStr(_T("biz_name"), bizName);
-    data.getStr(_T("biz_guid"), bizGUID);
-    data.getInt(_T("user_group"), bizUserRole);
-    data.getInt(_T("biz_level"), bizLevel);
-    data.getBool(_T("is_due"), bizIsDue);
+    data.getStr("biz_name", bizName);
+    data.getStr("biz_guid", bizGUID);
+    data.getInt("user_group", bizUserRole);
+    data.getInt("biz_level", bizLevel);
+    data.getBool("is_due", bizIsDue);
 
-    WizXmlRpcStructValue* structData = data.getStruct(_T("avatar_changes"));
+    WizXmlRpcStructValue* structData = data.getStruct("avatar_changes");
     if (structData)
     {
         structData->toStringMap(mapAvatarChanges);
@@ -812,26 +812,26 @@ bool WIZKVRETURN::loadFromXmlRpc(WizXmlRpcStructValue& data)
 }
 
 
-BOOL WIZUSERMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue &data)
+bool WIZUSERMESSAGEDATA::loadFromXmlRpc(WizXmlRpcStructValue &data)
 {
-    data.getInt64(_T("id"), nMessageID);
-    data.getStr(_T("biz_guid"), strBizGUID);
-    data.getStr(_T("kb_guid"), strKbGUID);
-    data.getStr(_T("document_guid"), strDocumentGUID);
-    data.getStr(_T("sender_guid"), strSenderGUID);
-    data.getStr(_T("sender_id"), strSenderID);
-    data.getStr(_T("receiver_guid"), strReceiverGUID);
-    data.getStr(_T("receiver_id"), strReceiverID);
-    data.getInt(_T("message_type"), nMessageType);
-    data.getInt(_T("read_status"), nReadStatus);
-    data.getInt(_T("delete_status"), nDeletedStatus);
-    data.getTime(_T("dt_created"), tCreated);
-    data.getStr(_T("message_body"), strMessageText);
-    data.getInt64(_T("version"), nVersion);
-    data.getStr(_T("sender_alias"), strSender);
-    data.getStr(_T("receiver_alias"), strReceiver);
-    data.getStr(_T("sender_alias"), strSender);
-    data.getStr(_T("title"), strTitle);
-    data.getStr(_T("note"), strNote);
+    data.getInt64("id", nMessageID);
+    data.getStr("biz_guid", strBizGUID);
+    data.getStr("kb_guid", strKbGUID);
+    data.getStr("document_guid", strDocumentGUID);
+    data.getStr("sender_guid", strSenderGUID);
+    data.getStr("sender_id", strSenderID);
+    data.getStr("receiver_guid", strReceiverGUID);
+    data.getStr("receiver_id", strReceiverID);
+    data.getInt("message_type", nMessageType);
+    data.getInt("read_status", nReadStatus);
+    data.getInt("delete_status", nDeletedStatus);
+    data.getTime("dt_created", tCreated);
+    data.getStr("message_body", strMessageText);
+    data.getInt64("version", nVersion);
+    data.getStr("sender_alias", strSender);
+    data.getStr("receiver_alias", strReceiver);
+    data.getStr("sender_alias", strSender);
+    data.getStr("title", strTitle);
+    data.getStr("note", strNote);
     return 	TRUE;
 }
