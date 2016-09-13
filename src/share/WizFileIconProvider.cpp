@@ -28,8 +28,10 @@ WizFileIconProvider::WizFileIconProvider()
 {
 }
 
+#ifdef Q_OS_WIN
 #if QT_VERSION >= 0x050000
 extern Q_GUI_EXPORT QPixmap qt_pixmapFromWinHICON(HICON);
+#endif
 #endif
 
 QIcon WizFileIconProvider::icon(const QString& strFilePath) const

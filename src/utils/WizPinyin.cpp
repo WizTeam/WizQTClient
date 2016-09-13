@@ -126,7 +126,7 @@ int WizToolsChinese2PinYinEx(const wchar_t* lpszText, UINT flags, const char* lp
 		int polyphoneCount = 0;
 		//
 		std::vector<CWizStdStringArray > arrayPinYin;
-		LPCWSTR p = lpszText;
+        const wchar_t* p = lpszText;
 		while (*p)
 		{
             wchar_t ch = *p;
@@ -167,7 +167,7 @@ int WizToolsChinese2PinYinEx(const wchar_t* lpszText, UINT flags, const char* lp
 	{
 		CWizStdStringArray arr;
 		//
-		LPCWSTR p = lpszText;
+        const wchar_t* p = lpszText;
 		while (*p)
 		{
             wchar_t ch = *p;

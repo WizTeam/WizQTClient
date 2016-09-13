@@ -262,7 +262,7 @@ void WizGetNextFileName(CString& strFileName)
     int nIndex = 2;
     while (WizPathFileExists(strFileName))
     {
-        strFileName.format("%s%s_%d%s", strPath.toUtf8(), strTitle.toUtf8(), nIndex, strExt.toUtf8());
+        strFileName.format("%s%s_%d%s", strPath.toUtf8().constData(), strTitle.toUtf8().constData(), nIndex, strExt.toUtf8().constData());
         nIndex++;
     }
 }

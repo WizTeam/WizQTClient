@@ -1637,7 +1637,7 @@ bool CppSQLite3DB::repair(const CString& strDBFileName, const CString& strRetFil
 {
 	try
 	{
-        CString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+        CString strTempFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + ".tmp";
 		//
 		CppSQLite3DB dbSrc;
         dbSrc.open(strDBFileName);

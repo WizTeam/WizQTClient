@@ -506,14 +506,17 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
     ${CMAKE_SOURCE_DIR}/lib/openssl/include
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
-    if(APPLE)
-        ~/Library/Frameeorks
-    endif()
-    if (WIN32)
+    )
+
+if (APPLE)
+    include_directories(~/Library/Frameeorks)
+elseif(WIN32)
+    include_directories(
         ${CMAKE_SOURCE_DIR}/lib/zlib
         ${CMAKE_BINARY_DIR}/lib/zlib
-    endif
-)
+        )
+endif()
+
 
 link_directories(
     ${CMAKE_BINARY_DIR}/bin
