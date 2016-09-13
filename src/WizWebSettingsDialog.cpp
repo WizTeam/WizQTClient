@@ -1,4 +1,4 @@
-#include "WizWebSettingsDialog.h"
+﻿#include "WizWebSettingsDialog.h"
 #include "sync/WizToken.h"
 #include "WizMainWindow.h"
 #include "share/WizGlobal.h"

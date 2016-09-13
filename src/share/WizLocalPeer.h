@@ -1,4 +1,4 @@
-#ifndef WIZLOCALPEER_H
+﻿#ifndef WIZLOCALPEER_H
 #define WIZLOCALPEER_H
 
 #include "WizLockedFile.h"

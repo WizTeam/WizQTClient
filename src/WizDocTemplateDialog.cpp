@@ -1,4 +1,4 @@
-#include "WizDocTemplateDialog.h"
+﻿#include "WizDocTemplateDialog.h"
 #include "ui_WizDocTemplateDialog.h"
 
 #include <QFile>

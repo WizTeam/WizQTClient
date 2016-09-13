@@ -1,4 +1,4 @@
-#ifndef CWIZEVENTLOOP_H
+﻿#ifndef CWIZEVENTLOOP_H
 #define CWIZEVENTLOOP_H
 
 #include <QEventLoop>

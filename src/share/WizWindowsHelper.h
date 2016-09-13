@@ -1,4 +1,4 @@
-#ifndef WIZWINDOWSHELPER_H
+﻿#ifndef WIZWINDOWSHELPER_H
 #define WIZWINDOWSHELPER_H
 
 #include <QtGlobal>

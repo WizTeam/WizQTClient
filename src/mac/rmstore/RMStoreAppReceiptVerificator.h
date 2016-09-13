@@ -1,4 +1,4 @@
-//
+﻿//
 //  RMStoreAppReceiptVerificator.h
 //  RMStore
 //

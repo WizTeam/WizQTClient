@@ -1,4 +1,4 @@
-#include <QtGlobal>
+﻿#include <QtGlobal>
 #include <QApplication>
 #include <QTreeWidget>
 #include <QMessageBox>
@@ -61,6 +61,7 @@ GenericName[en_US.UTF-8]=WizNote\n\
 ";
 
 
+#ifdef Q_OS_LINUX
 void installOnLinux()
 {
     QString appPath = Utils::WizPathResolve::appPath();
@@ -104,6 +105,7 @@ void installOnLinux()
     //
     chmod(desktopFileName.toUtf8(), ACCESSPERMS);
 }
+#endif
 
 int mainCore(int argc, char *argv[])
 {
@@ -134,6 +136,11 @@ int mainCore(int argc, char *argv[])
     WizIAPHelper helper;
     helper.validteReceiptOnLauch();
 #endif
+#endif
+
+#ifdef Q_OS_WIN
+    QFont appFont = WizCreateWindowsUIFont(a, WizGetWindowsFontName());
+    QApplication::setFont(appFont);
 #endif
 
    qInstallMessageHandler(Utils::WizLogger::messageHandler);
@@ -217,7 +224,7 @@ int mainCore(int argc, char *argv[])
     translatorQt.load(strLocaleFile);
     a.installTranslator(&translatorQt);
 
-#ifndef Q_OS_MAC
+#ifdef Q_OS_LINUX
     if (globalSettings->value("Common/Installed", 0).toInt() == 0)
     {
         globalSettings->setValue("Common/Installed", 1);
@@ -377,6 +384,7 @@ int mainCore(int argc, char *argv[])
 
     return ret;
 }
+
 
 int main(int argc, char *argv[])
 {

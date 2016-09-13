@@ -1,4 +1,4 @@
-#ifndef WIZHTML2ZIP_H
+﻿#ifndef WIZHTML2ZIP_H
 #define WIZHTML2ZIP_H
 
 #include "WizMisc.h"

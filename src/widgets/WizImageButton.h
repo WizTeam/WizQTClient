@@ -1,4 +1,4 @@
-#ifndef WIZIMAGEBUTTON_H
+﻿#ifndef WIZIMAGEBUTTON_H
 #define WIZIMAGEBUTTON_H
 
 #include <QPushButton>

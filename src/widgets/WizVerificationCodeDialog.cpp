@@ -1,4 +1,4 @@
-#include "WizVerificationCodeDialog.h"
+﻿#include "WizVerificationCodeDialog.h"
 #include "ui_WizVerificationCodeDialog.h"
 
 #include <QIcon>

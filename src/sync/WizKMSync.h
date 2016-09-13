@@ -1,4 +1,4 @@
-#ifndef WIZKMSYNC_H
+﻿#ifndef WIZKMSYNC_H
 #define WIZKMSYNC_H
 
 #include <QThread>

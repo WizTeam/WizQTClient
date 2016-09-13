@@ -1,4 +1,4 @@
-#include "WizTranslater.h"
+﻿#include "WizTranslater.h"
 #include <QObject>
 
 

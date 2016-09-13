@@ -1,4 +1,4 @@
-#include "WizMobileFileReceiver.h"
+﻿#include "WizMobileFileReceiver.h"
 #include <QUdpSocket>
 #include <QTcpSocket>
 #include <QXmlStreamReader>

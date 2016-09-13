@@ -1,4 +1,4 @@
-//
+﻿//
 //  RMAppReceipt.h
 //  RMStore
 //

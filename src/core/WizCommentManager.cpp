@@ -1,4 +1,4 @@
-#include "WizCommentManager.h"
+﻿#include "WizCommentManager.h"
 
 #include <QMutexLocker>
 #include <QNetworkAccessManager>

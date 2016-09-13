@@ -1,4 +1,4 @@
-#ifndef WIZZIP_H
+﻿#ifndef WIZZIP_H
 #define WIZZIP_H
 
 #include "../share/WizQtHelper.h"

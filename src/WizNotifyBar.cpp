@@ -1,4 +1,4 @@
-#include "WizNotifyBar.h"
+﻿#include "WizNotifyBar.h"
 
 #include <QHBoxLayout>
 #include <QLabel>

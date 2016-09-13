@@ -1,4 +1,4 @@
-#include "WizNoteManager.h"
+﻿#include "WizNoteManager.h"
 #include <QFileInfo>
 #include <QSettings>
 #include <QNetworkAccessManager>

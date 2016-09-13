@@ -1,4 +1,4 @@
-#ifndef WIZTABLESELECTOR_H
+﻿#ifndef WIZTABLESELECTOR_H
 #define WIZTABLESELECTOR_H
 
 #include <QWidget>

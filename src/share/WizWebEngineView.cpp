@@ -1,4 +1,4 @@
-#include <QWebEngineView>
+﻿#include <QWebEngineView>
 #include <QWebSocketServer>
 #include <QWebChannel>
 #include "WizWebEngineView.h"

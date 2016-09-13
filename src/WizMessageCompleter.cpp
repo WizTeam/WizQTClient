@@ -1,4 +1,4 @@
-#include "WizMessageCompleter.h"
+﻿#include "WizMessageCompleter.h"
 
 #include <QLineEdit>
 #include <QStringList>
@@ -87,13 +87,10 @@ MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUs
     for (; it != arrayUser.end(); it++) {
         const WIZBIZUSER& user = *it;
 
-        wchar_t name[user.alias.size()];
-        user.alias.toWCharArray(name);
-        //
         QString part1 = user.alias;
 
         QString part2;
-        WizToolsChinese2PinYin(name, WIZ_C2P_POLYPHONE, part2); // FIXME
+        WizToolsChinese2PinYin(user.alias, WIZ_C2P_POLYPHONE, part2); // FIXME
         if (!part2.isEmpty())
         {
             part2 = part2.replace(",", "");
@@ -101,7 +98,7 @@ MessageCompleterModel::MessageCompleterModel(const CWizBizUserDataArray& arrayUs
         //
 #if QT_VERSION >= 0x050200
         QString part3;
-        WizToolsChinese2PinYin(name, WIZ_C2P_FIRST_LETTER_ONLY | WIZ_C2P_POLYPHONE, part3);
+        WizToolsChinese2PinYin(user.alias, WIZ_C2P_FIRST_LETTER_ONLY | WIZ_C2P_POLYPHONE, part3);
         if (!part3.isEmpty())
         {
             part3 = part3.replace(",", "");

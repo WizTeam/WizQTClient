@@ -1,4 +1,4 @@
-#include "WizZip.h"
+﻿#include "WizZip.h"
 
 #include <QString>
 #include <QDir>
@@ -367,7 +367,7 @@ bool JlCompress::compressDir(QString fileCompressed, QString dir, bool recursive
     }
 
     // Aggiungo i file e le sotto cartelle
-    if (!compressSubDir(zip,dir,dir,recursive)<0) {
+    if (!compressSubDir(zip,dir,dir,recursive)) {
         delete zip;
         QFile::remove(fileCompressed);
         return false;

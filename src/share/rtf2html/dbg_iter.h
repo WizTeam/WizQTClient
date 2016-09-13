@@ -1,4 +1,4 @@
-template <class T>
+﻿template <class T>
 class dbg_iter_mixin : public virtual T
 {
  public:

@@ -1,4 +1,4 @@
-#ifndef CORE_INFOBAR_H
+﻿#ifndef CORE_INFOBAR_H
 #define CORE_INFOBAR_H
 
 #include <QWidget>

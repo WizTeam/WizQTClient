@@ -1,4 +1,4 @@
-#ifndef WIZTITLEBAR_H
+﻿#ifndef WIZTITLEBAR_H
 #define WIZTITLEBAR_H
 
 #include <QWidget>

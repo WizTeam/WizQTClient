@@ -1,4 +1,4 @@
-#ifndef WIZEDITORTOOLBAR_H
+﻿#ifndef WIZEDITORTOOLBAR_H
 #define WIZEDITORTOOLBAR_H
 
 #include <QWidget>
@@ -76,7 +76,11 @@ private:
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     QString m_currentStyle;
-    __int64_t m_lastUpdateUIRequest;
+#ifdef Q_OS_WIN
+    __int64 m_lastUpdateUIRequest;
+#else
+    int64_t m_lastUpdateUIRequest;
+#endif
     QTimer m_delayUpdateUITimer;
 
     // editor status reflect

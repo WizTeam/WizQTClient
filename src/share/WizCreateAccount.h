@@ -1,4 +1,4 @@
-#ifndef WIZCREATEACCOUNT_H
+﻿#ifndef WIZCREATEACCOUNT_H
 #define WIZCREATEACCOUNT_H
 
 #include "wizapi.h"

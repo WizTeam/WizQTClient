@@ -1,4 +1,4 @@
-#include "WizTitleEdit.h"
+﻿#include "WizTitleEdit.h"
 
 #include <QCompleter>
 #include <QAbstractItemView>

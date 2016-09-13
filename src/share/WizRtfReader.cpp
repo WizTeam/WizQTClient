@@ -1,4 +1,4 @@
-#include "WizRtfReader.h"
+﻿#include "WizRtfReader.h"
 #include <QFile>
 #include <QTextCodec>
 #include <QDebug>

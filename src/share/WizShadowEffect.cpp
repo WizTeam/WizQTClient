@@ -1,4 +1,4 @@
-#include "WizShadowEffect.h"
+﻿#include "WizShadowEffect.h"
 
 #include "WizUI.h"
 #include "utils/WizStyleHelper.h"

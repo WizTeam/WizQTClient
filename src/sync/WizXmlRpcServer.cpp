@@ -1,4 +1,4 @@
-#include "WizXmlRpcServer.h"
+﻿#include "WizXmlRpcServer.h"
 #include <QEventLoop>
 #include <QNetworkReply>
 #include <QNetworkProxy>
@@ -94,7 +94,7 @@ bool WizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, WizXmlRpcResu
         if (WizXmlRpcFaultValue* pFault = dynamic_cast<WizXmlRpcFaultValue *>(pRet)) {
             m_nLastErrorCode = pFault->getFaultCode();
             m_strLastErrorMessage = pFault->getFaultString();
-            TOLOG2(_T("XmlRpcCall failed : %1, %2"), QString::number(m_nLastErrorCode), m_strLastErrorMessage);
+            TOLOG2("XmlRpcCall failed : %1, %2", QString::number(m_nLastErrorCode), m_strLastErrorMessage);
             return false;
         }
         //
@@ -110,7 +110,7 @@ BOOL WizXmlRpcServerBase::call(const QString& strMethodName, WizXmlRpcValue* pPa
     WizXmlRpcResult ret;
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
-        TOLOG3(_T("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3")
+        TOLOG3("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3"
                , strMethodName, QString::number(m_nLastErrorCode), m_strLastErrorMessage);
         return FALSE;
     }
@@ -123,7 +123,7 @@ BOOL WizXmlRpcServerBase::call(const QString& strMethodName, WizXmlRpcResult& re
 {
     if (!xmlRpcCall(strMethodName, ret, pParam1, pParam2, pParam3, pParam4))
     {
-        TOLOG3(_T("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3")
+        TOLOG3("Failed to call xml-rpc method: %1 , error code : %2 , error message : %3"
                , strMethodName, QString::number(m_nLastErrorCode), m_strLastErrorMessage);
         return FALSE;
     }
@@ -140,7 +140,7 @@ BOOL WizXmlRpcServerBase::call(const QString& strMethodName, std::map<QString, Q
     WizXmlRpcStructValue* pValue = ret.getResultValue<WizXmlRpcStructValue>();
     if (!pValue)
     {
-        TOLOG1(_T("The return value of XmpRpc method %1 is not a struct!"), strMethodName);
+        TOLOG1("The return value of XmpRpc method %1 is not a struct!", strMethodName);
         return FALSE;
     }
     //
@@ -152,7 +152,7 @@ BOOL WizXmlRpcServerBase::getReturnValueInStringMap(const QString& strMethodName
     std::map<QString, QString>::const_iterator it = mapRet.find(strName);
     if (it == mapRet.end())
     {
-        TOLOG2(_T("Can not find member of %1 in the return value of xml-rpc method %2"), strName, strMethodName);
+        TOLOG2("Can not find member of %1 in the return value of xml-rpc method %2", strName, strMethodName);
         return FALSE;
     }
     //

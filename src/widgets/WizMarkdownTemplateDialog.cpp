@@ -1,4 +1,4 @@
-#include "WizMarkdownTemplateDialog.h"
+﻿#include "WizMarkdownTemplateDialog.h"
 #include "ui_WizMarkdownTemplateDialog.h"
 #include "utils/stylehelper.h"
 #include "utils/pathresolve.h"

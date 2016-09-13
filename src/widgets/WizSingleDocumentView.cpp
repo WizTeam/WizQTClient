@@ -1,4 +1,4 @@
-#include "WizSingleDocumentView.h"
+﻿#include "WizSingleDocumentView.h"
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 #include <QAction>

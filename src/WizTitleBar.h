@@ -1,4 +1,4 @@
-#ifndef CORE_TITLEBAR_H
+﻿#ifndef CORE_TITLEBAR_H
 #define CORE_TITLEBAR_H
 
 #include <QWidget>

@@ -1,4 +1,4 @@
-#include "WizHtmlCollector.h"
+﻿#include "WizHtmlCollector.h"
 #include "../share/WizHtml2Zip.h"
 #include "../share/WizObjectDataDownloader.h"
 #include "utils/WizMisc.h"
@@ -168,7 +168,7 @@ void WizHtmlCollector::processTagValue(WizHtmlTag *pTag,
     QString strFileName;
     if (!m_files.lookup(url.toString(), strFileName)) {
         strFileName = url.toLocalFile();
-        if (!strFileName.isEmpty() && !PathFileExists(strFileName)) {
+        if (!strFileName.isEmpty() && !WizPathFileExists(strFileName)) {
             strFileName.clear();
         }
 
@@ -294,7 +294,7 @@ bool WizHtmlCollector::collect(const QString& strUrl, \
     m_bMainPage = mainPage;
     m_strTempPath = strTempPath;
     //
-    if (PathFileExists(strUrl))
+    if (WizPathFileExists(strUrl))
     {
         m_url = QUrl::fromLocalFile(strUrl);
     }

@@ -1,4 +1,4 @@
-#include "WizAsyncApi.h"
+﻿#include "WizAsyncApi.h"
 
 #include <QtGlobal>
 #include <QNetworkAccessManager>

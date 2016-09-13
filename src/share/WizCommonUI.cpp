@@ -1,4 +1,4 @@
-#include "WizCommonUI.h"
+﻿#include "WizCommonUI.h"
 
 #include <QClipboard>
 #include <QApplication>
@@ -43,7 +43,7 @@ QString WizCommonUI::clipboardToImage(int hwnd, const QString& strOptions)
         ::WizEnsurePathExists(strTempPath);
     }
     //
-    CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+    CString strFileName = strTempPath + WizIntToStr(WizGetTickCount()) + ".png";
     if (!image.save(strFileName))
         return CString();
     //

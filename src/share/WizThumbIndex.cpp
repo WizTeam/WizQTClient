@@ -1,4 +1,4 @@
-#include "WizThumbIndex.h"
+﻿#include "WizThumbIndex.h"
 
 #include <QBuffer>
 #include <QDebug>
@@ -181,7 +181,7 @@ bool WizThumbIndex::updateIphoneAbstract(const WIZABSTRACT &abstract)
 bool WizThumbIndex::updateAbstract(const WIZABSTRACT &abstractNew, const CString& type)
 {
     if(!m_dbThumb.isOpened()) {
-        TOLOG(_T("Fault error: thumb database does not opened"));
+        TOLOG("Fault error: thumb database does not opened");
         return false;
     }
 
@@ -209,7 +209,7 @@ bool WizThumbIndex::updateAbstract(const WIZABSTRACT &abstractNew, const CString
 
         if (img.isNull())
         {
-            TOLOG(_T("Failed to scale image to abstract"));
+            TOLOG("Failed to scale image to abstract");
             return false;
         }
         //
@@ -217,7 +217,7 @@ bool WizThumbIndex::updateAbstract(const WIZABSTRACT &abstractNew, const CString
         buffer.open(QIODevice::WriteOnly);
         if (!img.save(&buffer, "PNG"))
         {
-            TOLOG(_T("Failed to save abstract image data to buffer"));
+            TOLOG("Failed to save abstract image data to buffer");
             return false;
         }
         buffer.close();

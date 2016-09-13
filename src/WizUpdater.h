@@ -1,4 +1,4 @@
-#ifndef CWIZUPDATER_H
+﻿#ifndef CWIZUPDATER_H
 #define CWIZUPDATER_H
 
 #include <QtNetwork>

@@ -1,4 +1,4 @@
-#include "WizImageButton.h"
+﻿#include "WizImageButton.h"
 #include <QStylePainter>
 #include <QStyleOptionButton>
 #include <QPixmap>

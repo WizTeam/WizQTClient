@@ -1,4 +1,4 @@
-#include "WizLoginDialog.h"
+﻿#include "WizLoginDialog.h"
 #include "ui_WizLoginDialog.h"
 #include <QPainter>
 #include <QMouseEvent>
@@ -100,7 +100,6 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     , m_userList(localUsers)
     , m_newRegisterAccount(false)
 {
-
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
@@ -124,7 +123,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     ui->btn_close->setVisible(false);
     //
     WizWindowTitleBar* title = titleBar();
-    title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
+    title->setPalette(QPalette(QColor::fromRgb(0x44, 0x8A, 0xFF)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
 #endif
 
@@ -189,7 +188,16 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     QSize totalSizeHint = layout()->totalSizeHint();
     //
     QSize minSize = QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10));
+    //
+    if (minSize.height() > minSize.width() * 1.5)
+    {
+        minSize.setWidth(int(minSize.height() / 1.5));
+        //
+        int buttonMinimumWidth = minSize.width() - 2 * ::WizSmartScaleUI(32);
+        ui->btn_login->setMinimumWidth(buttonMinimumWidth);
+    }
     setMinimumSize(minSize);
+    //
     //
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
         //
@@ -1401,7 +1409,7 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
 
     if (!d.HasMember("ip"))
     {
-        TOLOG(_T("no ip field"));
+        TOLOG("no ip field");
         return;
     }
     //
@@ -1413,14 +1421,14 @@ void WizLoginDialog::onWizBoxResponse(const QString& boardAddress, const QString
     if (ip.isEmpty())
     {
         TOLOG(CString(responseMessage));
-        TOLOG(_T("no ip field"));
+        TOLOG("no ip field");
         return;
     }
 
     if (iptype.isEmpty())
     {
         TOLOG(CString(responseMessage));
-        TOLOG(_T("no iptype field"));
+        TOLOG("no iptype field");
         return;
     }
 

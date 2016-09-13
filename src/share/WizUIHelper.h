@@ -1,4 +1,4 @@
-#ifndef WIZMACHELPER_H
+﻿#ifndef WIZMACHELPER_H
 #define WIZMACHELPER_H
 
 #include <QtGui>

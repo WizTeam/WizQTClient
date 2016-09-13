@@ -1,4 +1,4 @@
-#include "WizCellButton.h"
+﻿#include "WizCellButton.h"
 
 #include <QString>
 #include <QPainter>
@@ -123,9 +123,11 @@ QSize WizCellButton::sizeHint() const
     case ImageOnly:
         return QSize(28, 26);
     case WithCountInfo:
-    {
         return QSize(28 + nTextWidth, 26);
-    }
+#ifdef Q_OS_WIN
+    default:
+        return QSize(28, 26);
+#endif
     }
 }
 

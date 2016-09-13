@@ -1,4 +1,4 @@
-#include "WizIndexBase.h"
+﻿#include "WizIndexBase.h"
 #include "WizDef.h"
 
 #include <QDebug>
@@ -39,7 +39,7 @@ bool WizIndexBase::open(const CString& strFileName)
             }
         }
     } catch (const CppSQLite3Exception& e) {
-        return logSQLException(e, _T("open database"));
+        return logSQLException(e, "open database");
     }
 
     for (int i = 0; i < TABLE_COUNT; i++) {
@@ -177,7 +177,7 @@ CString WizIndexBase::formatCanonicSQL(const CString& strTableName,
 CString WizIndexBase::formatQuerySQL(const CString& strTableName,
                                       const CString& strFieldList)
 {
-    return WizFormatString2(_T("select %1 from %2"),
+    return WizFormatString2("select %1 from %2",
                             strFieldList,
                             strTableName);
 }
@@ -186,7 +186,7 @@ CString WizIndexBase::formatQuerySQL(const CString& strTableName,
                                       const CString& strFieldList,
                                       const CString& strWhere)
 {
-    return WizFormatString3(_T("select %1 from %2 where %3"),
+    return WizFormatString3("select %1 from %2 where %3",
                             strFieldList,
                             strTableName,
                             strWhere);
@@ -196,7 +196,7 @@ CString WizIndexBase::formatInsertSQLFormat(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strParamList)
 {
-    return WizFormatString3(_T("insert into %1 (%2) values (%3)"),
+    return WizFormatString3("insert into %1 (%2) values (%3)",
                             strTableName,
                             strFieldList,
                             strParamList);
@@ -206,7 +206,7 @@ CString WizIndexBase::formatUpdateSQLFormat(const CString& strTableName,
                                              const CString& strFieldList,
                                              const CString& strKey)
 {
-    return WizFormatString3(_T("update %1 set %2 where %3=%s"),
+    return WizFormatString3("update %1 set %2 where %3=%s",
                             strTableName,
                             strFieldList,
                             strKey);
@@ -225,14 +225,14 @@ CString WizIndexBase::formatUpdateSQLByWhere(const CString& strTableName,
 CString WizIndexBase::formatDeleteSQLFormat(const CString& strTableName,
                                              const CString& strKey)
 {
-    return WizFormatString2(_T("delete from %1 where %2=%s"),
+    return WizFormatString2("delete from %1 where %2=%s",
                             strTableName,
                             strKey);
 }
 
 CString WizIndexBase::formatDeleteSQLByWhere(const CString& strTableName, const CString& strWhere)
 {
-    return WizFormatString2(_T("delete from %1 where %2"),
+    return WizFormatString2("delete from %1 where %2",
                             strTableName,
                             strWhere);
 }
@@ -242,7 +242,7 @@ CString WizIndexBase::formatQuerySQLByTime(const CString& strTableName,
                                             const CString& strFieldName,
                                             const WizOleDateTime& t)
 {
-    return WizFormatString4(_T("select %1 from %2 where %3 >= %4"),
+    return WizFormatString4("select %1 from %2 where %3 >= %4",
                             strFieldList,
                             strTableName,
                             strFieldName,
@@ -254,7 +254,7 @@ CString WizIndexBase::formatQuerySQLByTime2(const CString& strTableName,
                                              const CString& strDataFieldName,
                                              const WizOleDateTime& t)
 {
-    return WizFormatString5(_T("select %1 from %2 where %3 >= %5 or %4 >= %5"),
+    return WizFormatString5("select %1 from %2 where %3 >= %5 or %4 >= %5",
                             strFieldList,
                             strTableName,
                             strInfoFieldName,
@@ -268,7 +268,7 @@ CString WizIndexBase::formatQuerySQLByTime3(const CString& strTableName,
                                              const CString& strParamFieldName,
                                              const QDateTime& t)
 {
-    return WizFormatString6(_T("select %1 from %2 where %3 >= %6 or %4 >= %6 or %5 >= %6"),
+    return WizFormatString6("select %1 from %2 where %3 >= %6 or %4 >= %6 or %5 >= %6",
                             strFieldList,
                             strTableName,
                             strInfoFieldName,
@@ -280,7 +280,7 @@ CString WizIndexBase::formatQuerySQLByTime3(const CString& strTableName,
 CString WizIndexBase::formatModifiedQuerySQL(const CString& strTableName,
                                               const CString& strFieldList)
 {
-    return WizFormatString2(_T("select %1 from %2 where WIZ_VERSION = -1"),
+    return WizFormatString2("select %1 from %2 where WIZ_VERSION = -1",
                             strFieldList,
                             strTableName);
 }
@@ -289,7 +289,7 @@ CString WizIndexBase::formatModifiedQuerySQL2(const CString& strTableName,
                                                const CString& strFieldList,
                                                int nCount)
 {
-    return WizFormatString3(_T("select %1 from %2 where WIZ_VERSION = -1 limit 0, %3"),
+    return WizFormatString3("select %1 from %2 where WIZ_VERSION = -1 limit 0, %3",
                             strFieldList,
                             strTableName,
                             WizIntToStr(nCount));
@@ -1146,7 +1146,7 @@ bool WizIndexBase::createAttachmentEx(const WIZDOCUMENTATTACHMENTDATA& data)
 
     //CString strInfoMD5 = CalDocumentAttachmentInfoMD5(data);
     //if (strInfoMD5 != data.strInfoMD5) {
-    //    TOLOG2(_T("Warning: Attachment info md5 does not match: %1, %2"), strInfoMD5, data.strInfoMD5);
+    //    TOLOG2("Warning: Attachment info md5 does not match: %1, %2", strInfoMD5, data.strInfoMD5);
     //}
 
     CString strFormat = formatInsertSQLFormat(TABLE_NAME_WIZ_DOCUMENT_ATTACHMENT, FIELD_LIST_WIZ_DOCUMENT_ATTACHMENT, PARAM_LIST_WIZ_DOCUMENT_ATTACHMENT);
@@ -1275,7 +1275,7 @@ bool WizIndexBase::getAllTags(std::multimap<CString, WIZTAGDATA>& mapTag)
 bool WizIndexBase::getRootTags(CWizTagDataArray& arrayTag)
 {
     CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG,
-                                    _T("(TAG_GROUP_GUID = '' or TAG_GROUP_GUID is null)"));
+                                    "(TAG_GROUP_GUID = '' or TAG_GROUP_GUID is null)");
 
     return sqlToTagDataArray(strSQL, arrayTag);
 }
@@ -1283,8 +1283,8 @@ bool WizIndexBase::getRootTags(CWizTagDataArray& arrayTag)
 bool WizIndexBase::getChildTags(const CString& strParentTagGUID, CWizTagDataArray& arrayTag)
 {
     CString strWhere = strParentTagGUID.isEmpty() ?
-                       WizFormatString0(_T("TAG_GROUP_GUID is null")) :
-                       WizFormatString1(_T("TAG_GROUP_GUID='%1'"), strParentTagGUID);
+                       WizFormatString0("TAG_GROUP_GUID is null") :
+                       WizFormatString1("TAG_GROUP_GUID='%1'", strParentTagGUID);
 
     CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, FIELD_LIST_WIZ_TAG, strWhere);
     return sqlToTagDataArray(strSQL, arrayTag);
@@ -1317,8 +1317,8 @@ bool WizIndexBase::getAllTagsWithErrorParent(CWizTagDataArray& arrayTag)
 bool WizIndexBase::getChildTagsSize(const CString &strParentTagGUID, int &size)
 {
     CString strWhere = strParentTagGUID.isEmpty() ?
-                       WizFormatString0(_T("TAG_GROUP_GUID is null")) :
-                       WizFormatString1(_T("TAG_GROUP_GUID='%1'"), strParentTagGUID);
+                       WizFormatString0("TAG_GROUP_GUID is null") :
+                       WizFormatString1("TAG_GROUP_GUID='%1'", strParentTagGUID);
 
     CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_TAG, "COUNT(*)", strWhere);
     return sqlToSize(strSQL, size);
@@ -1344,12 +1344,12 @@ bool WizIndexBase::getAllChildTagsSize(const CString& strParentTagGUID, int& siz
 bool WizIndexBase::tagFromGuid(const CString& strTagGUID, WIZTAGDATA& data)
 {
     if (!strTagGUID || !*strTagGUID) {
-        TOLOG(_T("TagGUID is empty"));
+        TOLOG("TagGUID is empty");
         return false;
     }
 
     CString strWhere;
-    strWhere.format(_T("TAG_GUID=%s"),
+    strWhere.format("TAG_GUID=%s",
         STR2SQL(strTagGUID).utf16()
         );
 
@@ -1357,12 +1357,12 @@ bool WizIndexBase::tagFromGuid(const CString& strTagGUID, WIZTAGDATA& data)
 
     CWizTagDataArray arrayTag;
     if (!sqlToTagDataArray(strSQL, arrayTag)) {
-        TOLOG(_T("Failed to get tag by guid"));
+        TOLOG("Failed to get tag by guid");
         return false;
     }
 
     if (arrayTag.empty()) {
-        //TOLOG(_T("Failed to get tag by guid, result is empty"));
+        //TOLOG("Failed to get tag by guid, result is empty");
         return false;
     }
 
@@ -1379,12 +1379,12 @@ bool WizIndexBase::getStyles(CWizStyleDataArray& arrayStyle)
 bool WizIndexBase::styleFromGuid(const CString& strStyleGUID, WIZSTYLEDATA& data)
 {
     if (!strStyleGUID || !*strStyleGUID) {
-        TOLOG(_T("StyleGUID is empty"));
+        TOLOG("StyleGUID is empty");
         return false;
     }
 
     CString strWhere;
-    strWhere.format(_T("STYLE_GUID=%s"),
+    strWhere.format("STYLE_GUID=%s",
         STR2SQL(strStyleGUID).utf16()
         );
 
@@ -1392,12 +1392,12 @@ bool WizIndexBase::styleFromGuid(const CString& strStyleGUID, WIZSTYLEDATA& data
 
     CWizStyleDataArray arrayStyle;
     if (!sqlToStyleDataArray(strSQL, arrayStyle)) {
-        TOLOG(_T("Failed to get style by guid"));
+        TOLOG("Failed to get style by guid");
         return false;
     }
 
     if (arrayStyle.empty()) {
-        //TOLOG(_T("Failed to get style by guid, result is empty"));
+        //TOLOG("Failed to get style by guid, result is empty");
         return false;
     }
 
@@ -1419,7 +1419,7 @@ bool WizIndexBase::getAllDocumentsSize(int& count, bool bIncludeTrash /* = false
     } else {
         CString strWhere;
         strWhere.format("DOCUMENT_LOCATION not like %s",
-                        STR2SQL(QString(LOCATION_DELETED_ITEMS) + _T("%")).utf16());
+                        STR2SQL(QString(LOCATION_DELETED_ITEMS) + "%").utf16());
 
         strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, "COUNT(*)", strWhere);
     }
@@ -1442,12 +1442,12 @@ bool WizIndexBase::getDocumentsBySQLWhere(const CString& strSQLWhere, CWizDocume
 bool WizIndexBase::documentFromGuid(const CString& strDocumentGUID, WIZDOCUMENTDATA& data)
 {
     if (!strDocumentGUID || !*strDocumentGUID) {
-        TOLOG(_T("DocumentGUID is empty"));
+        TOLOG("DocumentGUID is empty");
         return false;
     }
 
     CString strWhere;
-    strWhere.format(_T("DOCUMENT_GUID=%s"),
+    strWhere.format("DOCUMENT_GUID=%s",
         STR2SQL(strDocumentGUID).utf16()
         );
 
@@ -1455,12 +1455,12 @@ bool WizIndexBase::documentFromGuid(const CString& strDocumentGUID, WIZDOCUMENTD
 
     CWizDocumentDataArray arrayDocument;
     if (!sqlToDocumentDataArray(strSQL, arrayDocument)) {
-        TOLOG(_T("Failed to get document by guid"));
+        TOLOG("Failed to get document by guid");
         return false;
     }
 
     if (arrayDocument.empty()) {
-        //TOLOG(_T("Failed to get document by guid, result is empty"));
+        //TOLOG("Failed to get document by guid, result is empty");
         return false;
     }
 
@@ -1478,12 +1478,12 @@ bool WizIndexBase::attachmentFromGuid(const CString& strAttachcmentGUID,
                                        WIZDOCUMENTATTACHMENTDATA& data)
 {
     if (strAttachcmentGUID.isEmpty()) {
-        TOLOG(_T("AttahcmentGUID is empty"));
+        TOLOG("AttahcmentGUID is empty");
         return false;
     }
 
     CString strWhere;
-    strWhere.format(_T("ATTACHMENT_GUID=%s"),
+    strWhere.format("ATTACHMENT_GUID=%s",
         STR2SQL(strAttachcmentGUID).utf16()
         );
 
@@ -1491,12 +1491,12 @@ bool WizIndexBase::attachmentFromGuid(const CString& strAttachcmentGUID,
 
     CWizDocumentAttachmentDataArray arrayDocumentAttachment;
     if (!sqlToDocumentAttachmentDataArray(strSQL, arrayDocumentAttachment)) {
-        TOLOG(_T("Failed to get attachment attachment by guid"));
+        TOLOG("Failed to get attachment attachment by guid");
         return false;
     }
 
     if (arrayDocumentAttachment.empty()) {
-        //TOLOG(_T("Failed to get attachment by guid, result is empty"));
+        //TOLOG("Failed to get attachment by guid, result is empty");
         return false;
     }
 

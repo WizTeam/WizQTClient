@@ -1,4 +1,4 @@
-#ifndef WIZRTFREADER_H
+﻿#ifndef WIZRTFREADER_H
 #define WIZRTFREADER_H
 
 #include "WizQtHelper.h"

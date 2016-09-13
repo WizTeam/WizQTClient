@@ -1,4 +1,4 @@
-#include "WizObjectDataDownloader.h"
+﻿#include "WizObjectDataDownloader.h"
 
 #include <QDebug>
 #include <QEventLoop>

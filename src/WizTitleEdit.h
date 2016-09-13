@@ -1,4 +1,4 @@
-#ifndef CORE_TITLEEDIT_H
+﻿#ifndef CORE_TITLEEDIT_H
 #define CORE_TITLEEDIT_H
 
 #include <QLineEdit>

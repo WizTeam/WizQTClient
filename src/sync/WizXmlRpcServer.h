@@ -1,4 +1,4 @@
-#ifndef WIZXMLRPCSERVER_H
+﻿#ifndef WIZXMLRPCSERVER_H
 #define WIZXMLRPCSERVER_H
 
 #include <QString>
@@ -49,14 +49,14 @@ protected:
         WizXmlRpcResult result;
         if (!call(strMethodName, result, pParam1, pParam2, pParam3, pParam4))
         {
-            TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+            TOLOG1("Failed to call xml-rpc method: %1", strMethodName);
             return FALSE;
         }
         //
         WizXmlRpcValue* pValue = result.getResultValue<WizXmlRpcValue>();
         if (!pValue)
         {
-            TOLOG1(_T("Failed to call xml-rpc method, can not get result value: %1"), strMethodName);
+            TOLOG1("Failed to call xml-rpc method, can not get result value: %1", strMethodName);
             return FALSE;
         }
         //
@@ -68,14 +68,14 @@ protected:
         WizXmlRpcResult result;
         if (!call(strMethodName, result, pParam1, pParam2, pParam3, pParam4))
         {
-            TOLOG1(_T("Failed to call xml-rpc method: %1"), strMethodName);
+            TOLOG1("Failed to call xml-rpc method: %1", strMethodName);
             return FALSE;
         }
         //
         WizXmlRpcArrayValue* pArray = result.getResultValue<WizXmlRpcArrayValue>();
         if (!pArray)
         {
-            TOLOG1(_T("Failed to call xml-rpc method, can not get result value: %1"), strMethodName);
+            TOLOG1("Failed to call xml-rpc method, can not get result value: %1", strMethodName);
             return FALSE;
         }
         //

@@ -1,4 +1,4 @@
-#ifndef WIZQTHELPER_H
+﻿#ifndef WIZQTHELPER_H
 #define WIZQTHELPER_H
 
 #include <QtGlobal>
@@ -14,6 +14,12 @@
 #include <QString>
 #include <QDateTime>
 #include <QSharedPointer>
+
+#ifdef Q_OS_WIN
+#include <windows.h>
+#include <tchar.h>
+//#include <shlwapi.h>
+#else
 
 #ifndef BOOL
     #define BOOL bool
@@ -66,6 +72,8 @@ typedef long HRESULT;
 #define GetGValue(rgb)      (LOBYTE(((WORD)(rgb)) >> 8))
 #define GetBValue(rgb)      (LOBYTE((rgb)>>16))
 
+#endif
+
 #define ATLASSERT(x)        assert(x)
 
 class CString: public QString
@@ -85,6 +93,7 @@ public:
     //
     CString(const unsigned short* pUtf16) { *this = fromUtf16(pUtf16); }
     CString(const unsigned short* pUtf16, int size) { *this = fromUtf16(pUtf16, size); }
+    CString(const wchar_t* pUtf16) { *this = fromWCharArray(pUtf16); }
     //
     operator const unsigned short*() const { return utf16(); }
     //
@@ -138,14 +147,14 @@ public:
     WizOleDateTime &operator=(const WizOleDateTime &other);
 };
 
-int GetTickCount();
-bool PathFileExists(const CString& strPath);
-bool DeleteFile(const CString& strFileName);
+int WizGetTickCount();
+bool WizPathFileExists(const CString& strPath);
+bool WizDeleteFile(const CString& strFileName);
 
-int _tcsicmp(const CString& str1, const CString& str2);
-int _tcsnicmp(const CString& str1, const CString& str2, int count);
-int _ttoi(const CString& str);
-__int64 _ttoi64(const CString& str);
+int wiz_tcsicmp(const CString& str1, const CString& str2);
+int wiz_tcsnicmp(const CString& str1, const CString& str2, int count);
+int wiz_ttoi(const CString& str);
+__int64 wiz_ttoi64(const CString& str);
 
 
 #define UNUSED_ALWAYS(x)        Q_UNUSED(x)

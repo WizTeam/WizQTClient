@@ -1,4 +1,4 @@
-#ifndef WIZXMLRPC_H
+﻿#ifndef WIZXMLRPC_H
 #define WIZXMLRPC_H
 
 #include "WizXml.h"
@@ -292,14 +292,14 @@ inline bool WizXmlRpcArrayValue::toArray(std::deque<TData>& arrayRet)
         WizXmlRpcValue* pValue = *it;
         if (!pValue)
         {
-            //TOLOG(_T("Fault error: element of array is null"));
+            //TOLOG("Fault error: element of array is null");
             return false;
         }
 
         TData data;
         if (!pValue->toData<TData>(data))
         {
-            //TOLOG(_T("Failed load data form value"));
+            //TOLOG("Failed load data form value");
             return false;
         }
 
@@ -318,14 +318,14 @@ inline bool WizXmlRpcArrayValue::toArray(std::vector<TData>& arrayRet)
         WizXmlRpcValue* pValue = *it;
         if (!pValue)
         {
-            //TOLOG(_T("Fault error: element of array is null"));
+            //TOLOG("Fault error: element of array is null");
             return false;
         }
 
         TData data;
         if (!pValue->toData<TData>(data))
         {
-            //TOLOG(_T("Failed load data form value"));
+            //TOLOG("Failed load data form value");
             return false;
         }
 
@@ -343,7 +343,7 @@ inline bool WizXmlRpcStructValue::getArray(const QString& strName,
     WizXmlRpcArrayValue* pArray = getArray(strName);
     if (!pArray)
     {
-        //TOLOG(_T("Failed to get array data in struct"));
+        //TOLOG("Failed to get array data in struct");
         return false;
     }
 

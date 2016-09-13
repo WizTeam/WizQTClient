@@ -1,4 +1,4 @@
-#include "WizTitleBar.h"
+﻿#include "WizTitleBar.h"
 
 #include <QVBoxLayout>
 #include <QUrl>

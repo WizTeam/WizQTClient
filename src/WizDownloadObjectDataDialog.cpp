@@ -1,4 +1,4 @@
-#include "WizDownloadObjectDataDialog.h"
+﻿#include "WizDownloadObjectDataDialog.h"
 #include "ui_WizDownloadObjectDataDialog.h"
 
 #include "QMessageBox"

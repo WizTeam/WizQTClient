@@ -1,4 +1,4 @@
-#include "WizGlobal.h"
+﻿#include "WizGlobal.h"
 #include <QSettings>
 
 static WizMainWindow* g_mainWindow = NULL;

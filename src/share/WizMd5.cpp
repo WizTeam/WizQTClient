@@ -1,4 +1,4 @@
-#include "WizMd5.h"
+﻿#include "WizMd5.h"
 
 #include <stdexcept>
 #include <QFile>
@@ -555,7 +555,7 @@ CString WizMd5String(const unsigned char* pBuffer, DWORD dwLen)
     WizMd5(pBuffer, dwLen, (BYTE *)&dwBuffer);
     //
     CString str;
-    str.format(_T("%8x%8x%8x%8x"), dwBuffer[0], dwBuffer[1], dwBuffer[2], dwBuffer[3]);
+    str.format("%8x%8x%8x%8x", dwBuffer[0], dwBuffer[1], dwBuffer[2], dwBuffer[3]);
     //
     return str;
 }
@@ -570,7 +570,7 @@ CString WizMd5StringNoSpace(const unsigned char* pBuffer, DWORD dwLen)
     WizMd5(pBuffer, dwLen, (BYTE *)&dwBuffer);
     //
     CString str;
-    str.format(_T("%08x%08x%08x%08x"), dwBuffer[0], dwBuffer[1], dwBuffer[2], dwBuffer[3]);
+    str.format("%08x%08x%08x%08x", dwBuffer[0], dwBuffer[1], dwBuffer[2], dwBuffer[3]);
     //
     return str;
 }
@@ -585,7 +585,7 @@ CString WizMd5StringNoSpaceJava(const unsigned char* pBuffer, DWORD dwLen)
     WizMd5(pBuffer, dwLen, szBuffer);
     //
     CString str;
-    str.format(_T("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"),
+    str.format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
                szBuffer[0], szBuffer[1], szBuffer[2], szBuffer[3],
                szBuffer[4], szBuffer[5], szBuffer[6], szBuffer[7],
                szBuffer[8], szBuffer[9], szBuffer[10], szBuffer[11],
@@ -610,7 +610,7 @@ CString WizMd5StringNoSpaceJava(const QByteArray& arr)
     WizMd5(arr, szBuffer);
     //
     CString str;
-    str.format(_T("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"),
+    str.format("%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
                szBuffer[0], szBuffer[1], szBuffer[2], szBuffer[3],
                szBuffer[4], szBuffer[5], szBuffer[6], szBuffer[7],
                szBuffer[8], szBuffer[9], szBuffer[10], szBuffer[11],
@@ -699,7 +699,7 @@ CString WizMd5FileString(const CString& strFileName)
         return CString();
     //
     CString str;
-    str.format(_T("%08x%08x%08x%08x"), arrayMd5[0], arrayMd5[1], arrayMd5[2], arrayMd5[3]);
+    str.format("%08x%08x%08x%08x", arrayMd5[0], arrayMd5[1], arrayMd5[2], arrayMd5[3]);
     return str;
 }
 

@@ -1,4 +1,4 @@
-#include "WizCategoryViewItem.h"
+﻿#include "WizCategoryViewItem.h"
 
 #include <QTextCodec>
 #include <QPainter>

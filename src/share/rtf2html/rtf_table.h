@@ -1,4 +1,4 @@
-#ifndef __RTF_H__
+﻿#ifndef __RTF_H__
 #define __RTF_H__
 
 #include "config.h"

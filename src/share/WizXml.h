@@ -1,4 +1,4 @@
-#ifndef WIZXML_H
+﻿#ifndef WIZXML_H
 #define WIZXML_H
 
 #include <QtXml>

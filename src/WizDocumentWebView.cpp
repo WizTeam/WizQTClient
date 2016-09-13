@@ -1,4 +1,4 @@
-#include "WizDocumentWebView.h"
+﻿#include "WizDocumentWebView.h"
 
 #include <QRunnable>
 #include <QList>
@@ -197,7 +197,7 @@ bool WizDocumentWebView::onPasteCommand()
     if (!clip->image().isNull()) {
         // save clipboard image to
         QString strImagePath = noteResourcesPath();
-        CString strFileName = strImagePath + WizIntToStr(GetTickCount()) + ".png";
+        CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
         if (!clip->image().save(strFileName)) {
             TOLOG("ERROR: Can't save clipboard image to file");
             return false;
@@ -1073,7 +1073,7 @@ void WizDocumentWebView::saveEditingViewDocument(const WIZDOCUMENTDATA &data, bo
         /*
         CString strResourcePath = m_browser.GetResourceFilePath();
         CString strResourcePathParam = strResourcePath;
-        strResourcePathParam.Replace(_T("\\"), _T("\\\\"));
+        strResourcePathParam.Replace("\\", "\\\\");
         //
         //
         CString strScript = WizFormatString1(CString(
@@ -1194,8 +1194,8 @@ void WizDocumentWebView::getAllEditorScriptAndStypeFileName(QStringList& arrayFi
     QString strResourcePath = Utils::WizPathResolve::resourcesPath();
     QString strHtmlEditorPath = strResourcePath + "files/wizeditor/";
     //
-    QString strEditorJS = strHtmlEditorPath + _T("wizEditorForMac.js");
-    QString strInit = strHtmlEditorPath + _T("editorHelper.js");
+    QString strEditorJS = strHtmlEditorPath + "wizEditorForMac.js";
+    QString strInit = strHtmlEditorPath + "editorHelper.js";
     //
     arrayFile.empty();
     arrayFile.push_back(strEditorJS);
@@ -1209,7 +1209,7 @@ void WizDocumentWebView::insertScriptAndStyleCore(QString& strHtml, const QStrin
     Q_ASSERT(!arrayFiles.empty());
     for (auto it : arrayFiles)
     {
-        Q_ASSERT(PathFileExists(it));
+        Q_ASSERT(WizPathFileExists(it));
         //
         QString strFileName(it);
         QString strExt = Utils::WizMisc::extractFileExt(strFileName);
@@ -1608,8 +1608,8 @@ void WizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 {
     WizGetAnalyzer().logAction(QString("editorSetFontSize : %1pt").arg(strSize));
     //
-    CString strStyle = WizFormatString1(_T("{\\\"font-size\\\" : \\\"%1pt\\\"}"), strSize);
-    CString strScript = WizFormatString1(_T("WizEditor.modifySelectionDom(JSON.parse(\"%1\"));"), strStyle);
+    CString strStyle = WizFormatString1("{\\\"font-size\\\" : \\\"%1pt\\\"}", strSize);
+    CString strScript = WizFormatString1("WizEditor.modifySelectionDom(JSON.parse(\"%1\");)", strStyle);
 
     page()->runJavaScript(strScript);
     setModified(true);
@@ -1728,7 +1728,7 @@ void WizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap
     if (pix.isNull())
         return;
 
-    CString strFileName = noteResourcesPath() + WizIntToStr(GetTickCount()) + ".png";
+    CString strFileName = noteResourcesPath() + WizIntToStr(WizGetTickCount()) + ".png";
     if (!pix.save(strFileName)) {
         TOLOG("ERROR: Can't save clipboard image to file");
         return;
@@ -1859,9 +1859,9 @@ void WizDocumentWebView::saveAsPDF()
 {
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
                                                        QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
-    if (::PathFileExists(strFileName))
+    if (::WizPathFileExists(strFileName))
     {
-        ::DeleteFile(strFileName);
+        ::WizDeleteFile(strFileName);
     }
     QPrinter::Unit marginUnit =  (QPrinter::Unit)m_app.userSettings().printMarginUnit();
     double marginTop = m_app.userSettings().printMarginValue(wizPositionTop);

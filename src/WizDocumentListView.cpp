@@ -1,4 +1,4 @@
-#include "WizDocumentListView.h"
+﻿#include "WizDocumentListView.h"
 
 #include <QPixmapCache>
 #include <QApplication>

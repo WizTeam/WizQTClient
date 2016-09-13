@@ -1,4 +1,4 @@
-#ifndef WIZSEARCHWIDGET_H
+﻿#ifndef WIZSEARCHWIDGET_H
 #define WIZSEARCHWIDGET_H
 
 #include <QtGlobal>

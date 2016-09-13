@@ -1,4 +1,4 @@
-#include "WizUserInfoWidgetBase.h"
+﻿#include "WizUserInfoWidgetBase.h"
 
 //#ifndef Q_OS_MAC
 

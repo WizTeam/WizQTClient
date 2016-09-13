@@ -1,4 +1,4 @@
-#ifndef WIZDEF_H
+﻿#ifndef WIZDEF_H
 #define WIZDEF_H
 
 #include <QtGlobal>

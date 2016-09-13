@@ -1,4 +1,4 @@
-#include "WizAvatarUploader.h"
+﻿#include "WizAvatarUploader.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkReply>

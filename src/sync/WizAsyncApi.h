@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_ASYNCAPI_H
+﻿#ifndef WIZSERVICE_ASYNCAPI_H
 #define WIZSERVICE_ASYNCAPI_H
 
 #include <QObject>

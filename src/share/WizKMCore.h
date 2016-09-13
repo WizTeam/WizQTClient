@@ -1,4 +1,4 @@
-#ifndef WIZKMCORE_H
+﻿#ifndef WIZKMCORE_H
 #define WIZKMCORE_H
 
 #include "WizQtHelper.h"
@@ -47,17 +47,17 @@ BOOL WizKMStringArrayIsEqual(const std::deque<T>& arrayData1, const std::deque<T
 }
 
 
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_PART		_T("Calendar_")
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_PART		"Calendar_"
 
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_START			_T("Calendar_Start")
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_END				_T("Calendar_End")
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_INFO				_T("Calendar_Info")
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_RECURRENCE		_T("Calendar_Recurrence")
-#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_END_RECURRENCE	_T("Calendar_EndRecurrence")
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_START			"Calendar_Start"
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_END				"Calendar_End"
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_INFO				"Calendar_Info"
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_RECURRENCE		"Calendar_Recurrence"
+#define DOCUMENT_PARAM_NAME_CALENDAR_EVENT_END_RECURRENCE	"Calendar_EndRecurrence"
 
-#define CALENDAR_EVENT_PARAM_LINE_COLOR				_T("b")
-#define CALENDAR_EVENT_PARAM_LINE_REMINDER			_T("r")
-#define CALENDAR_EVENT_PARAM_LINE_COMPLETED			_T("c")
+#define CALENDAR_EVENT_PARAM_LINE_COLOR				"b"
+#define CALENDAR_EVENT_PARAM_LINE_REMINDER			"r"
+#define CALENDAR_EVENT_PARAM_LINE_COMPLETED			"c"
 
 struct IWizToolsSearchDocumentsEvents
 {

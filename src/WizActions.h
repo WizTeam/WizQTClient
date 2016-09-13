@@ -1,4 +1,4 @@
-#ifndef WIZACTIONS_H
+﻿#ifndef WIZACTIONS_H
 #define WIZACTIONS_H
 
 #include "WizDef.h"

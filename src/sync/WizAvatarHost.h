@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_AVATAR_H
+﻿#ifndef WIZSERVICE_AVATAR_H
 #define WIZSERVICE_AVATAR_H
 
 #include <QObject>

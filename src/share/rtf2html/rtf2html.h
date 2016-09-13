@@ -1,4 +1,4 @@
-#ifndef RTF2HTML_H
+﻿#ifndef RTF2HTML_H
 #define RTF2HTML_H
 
 #include <string>

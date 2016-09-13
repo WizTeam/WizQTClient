@@ -1,4 +1,4 @@
-#include "WizMessageListView.h"
+﻿#include "WizMessageListView.h"
 
 #include <QListWidgetItem>
 #include <QScrollBar>

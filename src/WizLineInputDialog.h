@@ -1,4 +1,4 @@
-#ifndef WIZLINEINPUTDIALOG_H
+﻿#ifndef WIZLINEINPUTDIALOG_H
 #define WIZLINEINPUTDIALOG_H
 
 #include <QDialog>

@@ -1,4 +1,4 @@
-#include "WizCrashReportDialog.h"
+﻿#include "WizCrashReportDialog.h"
 #include "ui_WizCrashReportDialog.h"
 
 #ifdef Q_OS_MAC

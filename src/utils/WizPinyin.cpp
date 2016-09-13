@@ -1,4 +1,4 @@
-#include "WizPinyin.h"
+﻿#include "WizPinyin.h"
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,24 +6,13 @@
 
 #include "../share/WizQtHelper.h"
 #include "../share/WizMisc.h"
-//#pragma warning( disable: 4996)
 
-typedef char TCHAR;
-typedef wchar_t WCHAR;
-typedef const TCHAR* LPCTSTR;
-typedef const WCHAR* LPCWSTR;
-
-#define BOOL bool
-#define FLASE false
-#define TRUE true
-
-#define STDMETHODIMP int
 
 struct WIZCHINESEWORDPINYINDATA
 {
 	const char* pinyin;
 	int yindiao;
-	WCHAR chWord;
+    wchar_t chWord;
 };
 
 WIZCHINESEWORDPINYINDATA* GetPinYinArray();
@@ -31,7 +20,7 @@ WIZCHINESEWORDPINYINDATA* GetPinYinArray();
 
 class CWizPinYin
 {
-	std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA> m_data;
+    std::multimap<wchar_t, WIZCHINESEWORDPINYINDATA> m_data;
 	//
 	void init()
 	{
@@ -54,25 +43,25 @@ class CWizPinYin
 		}
 	}
 public:
-	const char* GetPinYin(WCHAR ch)
+    const char* GetPinYin(wchar_t ch)
 	{
 		init();
 		//
-		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator it = m_data.find(ch);
+        std::multimap<wchar_t, WIZCHINESEWORDPINYINDATA>::const_iterator it = m_data.find(ch);
 		if (it == m_data.end())
 			return NULL;
 		//
 		return it->second.pinyin;
 	}
-	BOOL GetPinYin(WCHAR ch, bool firstLetterOnly, CWizStdStringArray& arrayText)
+    BOOL GetPinYin(wchar_t ch, bool firstLetterOnly, CWizStdStringArray& arrayText)
 	{
 		init();
 		//
-		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator itLower = m_data.lower_bound(ch);
-		std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator itUpper = m_data.upper_bound(ch);
+        std::multimap<wchar_t, WIZCHINESEWORDPINYINDATA>::const_iterator itLower = m_data.lower_bound(ch);
+        std::multimap<wchar_t, WIZCHINESEWORDPINYINDATA>::const_iterator itUpper = m_data.upper_bound(ch);
 		//
 		BOOL bFound = FALSE;
-		for (std::multimap<WCHAR, WIZCHINESEWORDPINYINDATA>::const_iterator it = itLower;
+        for (std::multimap<wchar_t, WIZCHINESEWORDPINYINDATA>::const_iterator it = itLower;
 			it != itUpper;
 			it++)
 		{
@@ -92,7 +81,7 @@ public:
 static CWizPinYin g_pinyin;
 
 
-void MultiplyArray(const CWizStdStringArray& arr1,  const CWizStdStringArray& arr2, LPCTSTR lpszSplitter, CWizStdStringArray& arrayRet)
+void MultiplyArray(const CWizStdStringArray& arr1,  const CWizStdStringArray& arr2, const char* lpszSplitter, CWizStdStringArray& arrayRet)
 {
 	if (arr1.empty())
 	{
@@ -104,6 +93,8 @@ void MultiplyArray(const CWizStdStringArray& arr1,  const CWizStdStringArray& ar
 	}
 	else
 	{
+        CString splitter(lpszSplitter);
+        //
 		for (CWizStdStringArray::const_iterator it1 = arr1.begin();
 			it1 != arr1.end();
 			it1++)
@@ -112,14 +103,14 @@ void MultiplyArray(const CWizStdStringArray& arr1,  const CWizStdStringArray& ar
 				it2 != arr2.end();
 				it2++)
 			{
-				CString strRet = *it1 + lpszSplitter + *it2;
+                CString strRet = *it1 + splitter + *it2;
 				arrayRet.push_back(strRet);
 			}
 		}
 	}
 }
 
-extern "C" STDMETHODIMP WizToolsChinese2PinYinEx(LPCWSTR lpszText, UINT flags, LPCTSTR lpszSplitter, QString& pbstrTextResult)
+int WizToolsChinese2PinYinEx(const wchar_t* lpszText, UINT flags, const char* lpszSplitter, QString& pbstrTextResult)
 {
 	if (!lpszText)
 		return E_POINTER;
@@ -135,10 +126,10 @@ extern "C" STDMETHODIMP WizToolsChinese2PinYinEx(LPCWSTR lpszText, UINT flags, L
 		int polyphoneCount = 0;
 		//
 		std::vector<CWizStdStringArray > arrayPinYin;
-		LPCWSTR p = lpszText;
+        const wchar_t* p = lpszText;
 		while (*p)
 		{
-			WCHAR ch = *p;
+            wchar_t ch = *p;
 			//
 			CWizStdStringArray arrayWordPinYin;
 			g_pinyin.GetPinYin(ch, firstLetterOnly, arrayWordPinYin);
@@ -166,7 +157,7 @@ extern "C" STDMETHODIMP WizToolsChinese2PinYinEx(LPCWSTR lpszText, UINT flags, L
 		}
 		//
 		CString strText;
-		::WizStringArrayToText(arrayRet, strText, _T("\n"));
+		::WizStringArrayToText(arrayRet, strText, "\n");
         pbstrTextResult = strText;
         //*pbstrTextResult = strText.AllocSysString();
 		//
@@ -176,10 +167,10 @@ extern "C" STDMETHODIMP WizToolsChinese2PinYinEx(LPCWSTR lpszText, UINT flags, L
 	{
 		CWizStdStringArray arr;
 		//
-		LPCWSTR p = lpszText;
+        const wchar_t* p = lpszText;
 		while (*p)
 		{
-			WCHAR ch = *p;
+            wchar_t ch = *p;
 			//
 			const char* pinyin = g_pinyin.GetPinYin(ch);
 			if (pinyin)
@@ -213,33 +204,22 @@ extern "C" STDMETHODIMP WizToolsChinese2PinYinEx(LPCWSTR lpszText, UINT flags, L
 }
 
 
-STDMETHODIMP WizToolsChinese2PinYin(LPCWSTR lpszText, UINT flags, QString& pbstrTextResult)
+int WizToolsChinese2PinYin(const wchar_t* lpszText, UINT flags, QString& strTextResult)
 {
-	return WizToolsChinese2PinYinEx(lpszText, flags, _T(","), pbstrTextResult);
+    return WizToolsChinese2PinYinEx(lpszText, flags, ",", strTextResult);
 }
 
-int chinese2pinyin(const QString& strChinese, QString& strPinYin, UINT flags)
+int WizToolsChinese2PinYin(QString text, UINT flags, QString& strTextResult)
 {
-    wchar_t str[strChinese.size()];
-    strChinese.toWCharArray(str);
-    return WizToolsChinese2PinYin(str, flags, strPinYin);
+    int len = text.length() + 1;
+    wchar_t* buffer = new wchar_t[len];
+    memset(buffer, 0, len * sizeof(wchar_t));
+    text.toWCharArray(buffer);
+    int ret = WizToolsChinese2PinYin(buffer, flags, strTextResult);
+    delete [] buffer;
+    return ret;
 }
 
-void TestPinYin()
-{
-
-    const wchar_t* str = L"董朝的董朝的";
-    QString strRet;
-	//
-	//
-    //CComBSTR bstrRet;
-    WizToolsChinese2PinYinEx(str, WIZ_C2P_POLYPHONE | WIZ_C2P_FIRST_LETTER_ONLY, _T(""), strRet);
-    qDebug() << strRet;
-	//
-    //WizMessageBox(CString(bstrRet));
-	//
-	
-}
 
 
 static WIZCHINESEWORDPINYINDATA g_PinYinData [] =

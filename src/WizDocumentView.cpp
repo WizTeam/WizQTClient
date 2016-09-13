@@ -1,4 +1,4 @@
-#include "WizDocumentView.h"
+﻿#include "WizDocumentView.h"
 
 #include <QLineEdit>
 #include <QLabel>
@@ -378,7 +378,7 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         WizDatabase& db = m_dbMgr.db(data.strKbGUID);
         QString strDocumentFileName = db.getDocumentFileName(data.strGUID);
         if (!db.isObjectDataDownloaded(data.strGUID, "document") || \
-                !PathFileExists(strDocumentFileName))
+                !WizPathFileExists(strDocumentFileName))
         {
             m_web->clear();
 
@@ -430,7 +430,7 @@ void WizDocumentView::reviewCurrentNote()
     WizDatabase& db = m_dbMgr.db(m_note.strKbGUID);
     QString strDocumentFileName = db.getDocumentFileName(m_note.strGUID);
     if (!db.isObjectDataDownloaded(m_note.strGUID, "document") || \
-            !PathFileExists(strDocumentFileName))
+            !WizPathFileExists(strDocumentFileName))
     {
         downloadNoteFromServer(m_note);
 

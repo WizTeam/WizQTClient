@@ -1,4 +1,4 @@
-#ifndef CWizMacToolBar_H
+﻿#ifndef CWizMacToolBar_H
 #define CWizMacToolBar_H
 
 #ifdef USECOCOATOOLBAR

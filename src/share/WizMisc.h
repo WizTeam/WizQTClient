@@ -1,4 +1,4 @@
-#ifndef WIZMISC_H
+﻿#ifndef WIZMISC_H
 #define WIZMISC_H
 
 #include <stdint.h>
@@ -163,7 +163,6 @@ QString WizText2Html(const QString& text);
 void WizHTMLAppendTextInHead(const QString& strText, QString& strHTML);
 
 void WizDeleteFolder(const CString& strPath);
-void WizDeleteFile(const CString& strFileName);
 BOOL WizDeleteAllFilesInFolder(const CString& strPath);
 
 bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDestImagePath);
@@ -269,7 +268,6 @@ public:
     void loadFromFile(const QString& strFile);
     void getSection(const QString& section, CWizStdStringArray& arrayData);
     void getSection(const QString& section, QMap<QString, QString>& dataMap);
-    void getSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
 
 private:
     QSettings* m_settings;

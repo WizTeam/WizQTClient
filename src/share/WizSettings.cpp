@@ -1,4 +1,4 @@
-#include "WizSettings.h"
+﻿#include "WizSettings.h"
 #include "utils/WizPathResolve.h"
 
 #include "WizDef.h"
@@ -26,7 +26,7 @@ BOOL WizSettings::setString(const QString& strSection, const QString& strKey, co
 int WizSettings::getInt(const QString& strSection, const QString& strKey, int nDef /*= 0*/)
 {
     QString str = getString(strSection, strKey, WizIntToStr(nDef));
-    int n = _ttoi(str);
+    int n = wiz_ttoi(str);
     if (WizIntToStr(n) != str)
         return nDef;
 
@@ -560,7 +560,7 @@ QString WizUserSettings::skin()
     QString strSkinName = get("Skin");
 
     if (!strSkinName.isEmpty()) {
-        if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+        if (WizPathFileExists(::WizGetSkinResourcePath(strSkinName))) {
             m_strSkinName = strSkinName;
             return strSkinName;
         }
@@ -570,7 +570,7 @@ QString WizUserSettings::skin()
     //strSkinName = settings.GetString("Common", "Skin");
 
     //if (!strSkinName.isEmpty()) {
-    //    if (PathFileExists(::WizGetSkinResourcePath(strSkinName))) {
+    //    if (WizPathFileExists(::WizGetSkinResourcePath(strSkinName))) {
     //        m_strSkinName = strSkinName;
     //        return strSkinName;
     //    }
@@ -610,7 +610,7 @@ QString WizUserSettings::locale()
     //}
 
     strLocale = QLocale::system().name();
-    if (::PathFileExists(Utils::WizPathResolve::localeFileName(strLocale))) {
+    if (::WizPathFileExists(Utils::WizPathResolve::localeFileName(strLocale))) {
         m_strLocale = strLocale;
         return strLocale;
     }

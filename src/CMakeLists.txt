@@ -396,7 +396,7 @@ qt_add_ui(wiznote_FORM_HEADERS ${wiznote_FORMS})
 qt_add_resources(wiznote_RC ${wiznote_RCS})
 qt_add_translation(wiznote_QM ${wiznote_TRANSLATIONS})
 
-message("WizNote whll compiling as ${CMAKE_BUILD_TYPE}, use Qt: ${QT_VERSION}")
+message("WizNote whill compiling as ${CMAKE_BUILD_TYPE}, use Qt: ${QT_VERSION}")
 
 # build
 if(UNIX)
@@ -474,6 +474,25 @@ if(UNIX)
                 COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/locales/)
         endforeach()
     endif()
+else()
+    add_definitions(-DUNICODE=TRUE)
+    add_definitions(-D_UNICODE=TRUE)
+    add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+    set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
+
+    install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+    install(DIRECTORY ${CMAKE_SOURCE_DIR}/share/ DESTINATION share/wiznote PATTERN ".DS_Store" EXCLUDE)
+    install(FILES ${wiznote_QM} DESTINATION share/wiznote/locales)
+    install(FILES ${CMAKE_SOURCE_DIR}/LICENSE DESTINATION share/licenses/wiznote)
+
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/share/ ${CMAKE_BINARY_DIR}/share/wiznote)
+
+    foreach(_file ${wiznote_QM})
+        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+            COMMAND ${CMAKE_COMMAND} -E make_directory ${CMAKE_BINARY_DIR}/share/wiznote/locales/
+            COMMAND ${CMAKE_COMMAND} -E copy ${_file} ${CMAKE_BINARY_DIR}/share/wiznote/locales/)
+    endforeach()
 endif()
 
 qt_use_modules(WizNote)
@@ -487,52 +506,70 @@ include_directories(
     ${CMAKE_SOURCE_DIR}/lib/clucene/src/shared
     ${CMAKE_SOURCE_DIR}/lib/openssl/include
     ${CMAKE_BINARY_DIR}/lib/clucene/src/shared
-    if(APPLE)
-        ~/Library/Frameeorks
-    endif()
-)
+    )
+
+if (APPLE)
+    include_directories(~/Library/Frameeorks)
+elseif(WIN32)
+    include_directories(
+        ${CMAKE_SOURCE_DIR}/lib/zlib
+        ${CMAKE_BINARY_DIR}/lib/zlib
+        )
+endif()
+
 
 link_directories(
     ${CMAKE_BINARY_DIR}/bin
 )
 
-
-
-if(APPLE)
-    if(APPSTORE_BUILD)
-        target_link_libraries(${PROJECT_NAME}
-            quazip
-            cryptlib
-            clucene-core-static
-            clucene-shared-static
-            Qt5::WebEngine
-            Qt5::WebEngineWidgets
-            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
-            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
-            ${CMAKE_DL_LIBS}
-        )
-    else(APPSTORE_BUILD)
-        target_link_libraries(${PROJECT_NAME}
-            quazip
-            cryptlib
-            clucene-core-static
-            clucene-shared-static
-            Qt5::WebEngine
-            Qt5::WebEngineWidgets
-            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
-            ${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
-            ${CMAKE_DL_LIBS}
-        )
-    endif(APPSTORE_BUILD)
-else(APPLE) #linux
-    target_link_libraries(${PROJECT_NAME}
-        X11
-        quazip
-        cryptlib
-        clucene-core-static
-        clucene-shared-static
-        Qt5::WebEngine
-        Qt5::WebEngineWidgets
-        ${CMAKE_DL_LIBS}
-    )
-endif(APPLE)
+if(UNIX)
+	if(APPLE)
+		if(APPSTORE_BUILD)
+			target_link_libraries(${PROJECT_NAME}
+				quazip
+				cryptlib
+				clucene-core-static
+				clucene-shared-static
+				Qt5::WebEngine
+				Qt5::WebEngineWidgets
+				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
+				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
+				${CMAKE_DL_LIBS}
+			)
+		else(APPSTORE_BUILD)
+			target_link_libraries(${PROJECT_NAME}
+				quazip
+				cryptlib
+				clucene-core-static
+				clucene-shared-static
+				Qt5::WebEngine
+				Qt5::WebEngineWidgets
+				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libcrypto.a
+				${CMAKE_SOURCE_DIR}/lib/openssl/lib/libssl.a
+				${CMAKE_DL_LIBS}
+			)
+		endif(APPSTORE_BUILD)
+	else(APPLE) #linux
+		target_link_libraries(${PROJECT_NAME}
+			X11
+			quazip
+			cryptlib
+			clucene-core-static
+			clucene-shared-static
+			Qt5::WebEngine
+			Qt5::WebEngineWidgets
+			${CMAKE_DL_LIBS}
+		)
+	endif(APPLE)
+else(NOT UNIX)
+	target_link_libraries(${PROJECT_NAME}
+		quazip
+		cryptlib
+		clucene-core-static
+		clucene-shared-static
+		Qt5::WebEngine
+		Qt5::WebEngineWidgets
+		${CMAKE_DL_LIBS}
+                Qt5::WinMain
+	)
+endif()

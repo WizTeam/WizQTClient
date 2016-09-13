@@ -1,4 +1,4 @@
-#ifndef CORE_NOTIFYBAR_H
+﻿#ifndef CORE_NOTIFYBAR_H
 #define CORE_NOTIFYBAR_H
 
 #include <QWidget>

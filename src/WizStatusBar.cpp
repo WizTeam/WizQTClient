@@ -1,4 +1,4 @@
-#include "WizStatusBar.h"
+﻿#include "WizStatusBar.h"
 
 #include <QCursor>
 

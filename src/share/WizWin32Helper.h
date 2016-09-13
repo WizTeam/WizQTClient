@@ -1,4 +1,4 @@
-#ifndef WIZWIN32HELPER_H
+﻿#ifndef WIZWIN32HELPER_H
 #define WIZWIN32HELPER_H
 
 #include <QtGlobal>
@@ -8,6 +8,7 @@
 #include <QFont>
 
 int WizGetWindowsFontHeight();
+QString WizGetWindowsFontName();
 
 class QApplication;
 class QString;

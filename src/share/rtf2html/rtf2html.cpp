@@ -1,4 +1,4 @@
-/*  This is RTF to HTML converter, implemented as a text filter, generally.
+﻿/*  This is RTF to HTML converter, implemented as a text filter, generally.
     Copyright (C) 2003 Valentin Lavrinenko, vlavrinenko@users.sourceforge.net
 
     This library is free software; you can redistribute it and/or

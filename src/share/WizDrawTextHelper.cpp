@@ -1,4 +1,4 @@
-#include "WizDrawTextHelper.h"
+﻿#include "WizDrawTextHelper.h"
 
 #include <QPainter>
 #include <QTextLayout>

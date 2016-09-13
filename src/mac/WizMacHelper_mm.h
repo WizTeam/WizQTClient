@@ -1,4 +1,4 @@
-#ifndef WIZMACHELPER_MM_H
+﻿#ifndef WIZMACHELPER_MM_H
 #define WIZMACHELPER_MM_H
 
 #include <QList>

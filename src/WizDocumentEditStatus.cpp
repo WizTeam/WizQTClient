@@ -1,4 +1,4 @@
-#include "WizDocumentEditStatus.h"
+﻿#include "WizDocumentEditStatus.h"
 #include "sync/WizApiEntry.h"
 #include "sync/WizToken.h"
 #include "share/WizMisc.h"
@@ -196,11 +196,11 @@ void WizDocumentEditStatusSyncThread::sendEditingMessage()
 
 bool WizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = ::WizFormatString5(_T("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5"),
+    QString strUrl = ::WizFormatString5("%1/add?obj_id=%2&user_id=%3&t=%4&token=%5",
                                         WizKMGetDocumentEditStatusURL(),
                                         strObjID,
                                         strUserAlias,
-                                        ::WizIntToStr(GetTickCount()),
+                                        ::WizIntToStr(WizGetTickCount()),
                                         WizToken::token());
 
     if (!m_netManager)
@@ -242,11 +242,11 @@ void WizDocumentEditStatusSyncThread::sendDoneMessage()
 
 bool WizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlias, const QString& strObjID)
 {
-    QString strUrl = WizFormatString5(_T("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5"),
+    QString strUrl = WizFormatString5("%1/delete?obj_id=%2&user_id=%3&t=%4&token=%5",
                                       WizKMGetDocumentEditStatusURL(),
                                       strObjID,
                                       strUserAlias,
-                                      ::WizIntToStr(GetTickCount()),
+                                      ::WizIntToStr(WizGetTickCount()),
                                       WizToken::token());
 
     if (!m_netManager)
@@ -470,11 +470,11 @@ bool CWizDocumentStatusCheckThread::checkDocumentChangedOnServer(const QString& 
 
 bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
-    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+    QString strRequestUrl = WizFormatString4("%1/get?obj_id=%2/%3&t=%4",
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,
-                                             ::WizIntToStr(GetTickCount()));
+                                             ::WizIntToStr(WizGetTickCount()));
 
     downloadData(strRequestUrl);
     return true;
@@ -492,8 +492,8 @@ WizDocumentStatusChecker::WizDocumentStatusChecker(QObject* parent)
 
 WizDocumentStatusChecker::~WizDocumentStatusChecker()
 {
-    if (m_timeOutTimer)
-        delete m_timeOutTimer;
+    //if (m_timeOutTimer)
+    //    delete m_timeOutTimer;
 
 //    if (m_loopCheckTimer)
 //        delete m_loopCheckTimer;
@@ -667,11 +667,11 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
 
 bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID)
 {
-    QString strRequestUrl = WizFormatString4(_T("%1/get?obj_id=%2/%3&t=%4"),
+    QString strRequestUrl = WizFormatString4("%1/get?obj_id=%2/%3&t=%4",
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,
-                                             ::WizIntToStr(GetTickCount()));
+                                             ::WizIntToStr(WizGetTickCount()));
 
     return checkDocumentEditStatus(strRequestUrl);
 }

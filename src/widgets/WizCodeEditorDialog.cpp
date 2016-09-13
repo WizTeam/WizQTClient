@@ -1,4 +1,4 @@
-#include "WizCodeEditorDialog.h"
+﻿#include "WizCodeEditorDialog.h"
 #include "WizDef.h"
 #include "utils/WizPathResolve.h"
 #include "share/WizSettings.h"

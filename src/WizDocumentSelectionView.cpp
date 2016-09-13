@@ -1,4 +1,4 @@
-#include "WizDocumentSelectionView.h"
+﻿#include "WizDocumentSelectionView.h"
 
 #include <QGraphicsView>
 #include <QGraphicsObject>

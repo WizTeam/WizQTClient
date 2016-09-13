@@ -1,9 +1,9 @@
-#ifndef WIZFILEREADER_H
+﻿#ifndef WIZFILEREADER_H
 #define WIZFILEREADER_H
 
 #include "share/WizDatabaseManager.h"
 
-class WIZTAGDATA;
+struct WIZTAGDATA;
 
 class WizFileImporter : public QObject
 {

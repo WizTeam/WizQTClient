@@ -1,4 +1,4 @@
-#ifndef WIZTRANSLATER_H
+﻿#ifndef WIZTRANSLATER_H
 #define WIZTRANSLATER_H
 
 #include <QString>

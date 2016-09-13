@@ -1,4 +1,4 @@
-#include "WizApiEntry.h"
+﻿#include "WizApiEntry.h"
 
 #include <QNetworkAccessManager>
 #include <QNetworkRequest>

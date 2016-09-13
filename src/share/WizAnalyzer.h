@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 //#include "WizKMDatabase.h"
 
@@ -76,11 +76,11 @@ public:\
 usage:
 void buttonClicked()
 {
-	LOG_ACTION(_T("NewNote"));
+	LOG_ACTION("NewNote");
 }
 //
 class COptionsDialog : public CDialog
 {
-	LOG_FUNCTION_DURATION(_T("Options"));
+	LOG_FUNCTION_DURATION("Options");
 };
 */

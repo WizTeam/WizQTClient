@@ -1,21 +1,26 @@
-#include "WizQtHelper.h"
+﻿#include "WizQtHelper.h"
 
 #include <QtCore>
 #include <QtGui>
 #include <QApplication>
 
+#ifdef Q_OS_WIN
+#include "qt_windows.h"
+#include "psapi.h"
+#endif
 
-bool PathFileExists(const CString& strPath)
+bool WizPathFileExists(const CString& strPath)
 {
     return QFile::exists(strPath);
 }
 
-bool DeleteFile(const CString& strFileName)
+bool WizDeleteFile(const CString& strFileName)
 {
     QDir dir(strFileName);
     dir.remove(strFileName);
     return true;
 }
+
 
 QString WizOleDateTime::toHumanFriendlyString() const
 {
@@ -84,11 +89,18 @@ WizOleDateTime &WizOleDateTime::operator=(const WizOleDateTime &other)
 }
 
 
-int GetTickCount()
+#ifdef Q_OS_WIN
+int WizGetTickCount()
+{
+    return GetTickCount();
+}
+#else
+int WizGetTickCount()
 {
     QTime time = QTime::currentTime();
     return time.msecsSinceStartOfDay();
 }
+#endif
 
 
 void CString::trim(char ch)
@@ -167,28 +179,27 @@ int CString::findOneOf(const CString& strFind) const
     return -1;
 }
 
-int _tcsicmp(const CString& str1, const CString& str2)
+int wiz_tcsicmp(const CString& str1, const CString& str2)
 {
     return str1.compareNoCase(str2);
 }
 
-int _tcsnicmp(const CString& str1, const CString& str2, int count)
+int wiz_tcsnicmp(const CString& str1, const CString& str2, int count)
 {
     CString s1 = (str1.length() > count) ? CString(str1.left(count)) : str1;
     CString s2 = (str2.length() > count) ? CString(str2.left(count)) : str2;
     return s1.compareNoCase(s2);
 }
 
-int _ttoi(const CString& str)
+int wiz_ttoi(const CString& str)
 {
     return str.toInt();
 }
 
-__int64 _ttoi64(const CString& str)
+__int64 wiz_ttoi64(const CString& str)
 {
     return str.toLongLong();
 }
-
 
 unsigned short* wiz_strinc(const unsigned short* current)
 {
@@ -589,5 +600,53 @@ QList<WizWindowInfo> WizGetActiveWindows()
 {
     linux_x11 x11;
     return x11.getActiveWindows();
+}
+#endif
+
+#ifdef Q_OS_WIN
+
+QList<WizWindowInfo> WizGetActiveWindows()
+{
+    QList<WizWindowInfo> windowTitles;
+    HWND foregroundWindow = GetForegroundWindow();
+    DWORD* processID = new DWORD;
+    TCHAR buf[255];
+    GetWindowText(foregroundWindow, buf, 255);
+    GetWindowThreadProcessId(foregroundWindow, processID);
+    DWORD p = *processID;
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
+                                  PROCESS_VM_READ,
+                                  FALSE, p);
+    TCHAR szProcessName[MAX_PATH];
+
+    if (NULL != hProcess )
+    {
+        HMODULE hMod;
+        DWORD cbNeeded;
+
+        if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod),
+                                 &cbNeeded) )
+        {
+            GetModuleBaseName( hProcess, hMod, szProcessName,
+                               sizeof(szProcessName)/sizeof(TCHAR) );
+        }
+    }
+    CloseHandle(hProcess);
+    long pid = (long)p;
+    QString windowTitle, processName;
+#ifdef UNICODE
+    windowTitle = QString::fromUtf16((ushort*)buf);
+    processName = QString::fromUtf16((ushort*)szProcessName);
+#else
+    windowTitle = QString::fromLocal8Bit(buf);
+    processName = QString::fromLocal8Bit(szProcessName);
+#endif
+
+    WizWindowInfo wi;
+    wi.pid = pid;
+    wi.windowTitle = windowTitle;
+    wi.processName = processName;
+    windowTitles.append(wi);
+    return windowTitles;
 }
 #endif

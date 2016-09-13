@@ -1,4 +1,4 @@
-#include "WizMisc.h"
+﻿#include "WizMisc.h"
 
 #include <QDateTime>
 #include <QDir>

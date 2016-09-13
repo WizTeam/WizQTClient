@@ -1,4 +1,4 @@
-#include "WizKMSync.h"
+﻿#include "WizKMSync.h"
 
 #include <QDebug>
 #include <QApplication>

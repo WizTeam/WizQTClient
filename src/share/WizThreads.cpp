@@ -1,4 +1,4 @@
-#include "WizThreads.h"
+﻿#include "WizThreads.h"
 #include "WizThreads_p.h"
 
 #include <QThread>
@@ -237,7 +237,7 @@ void CWizThreadPool::shutdown(int timeout)
     //
     //
     Q_UNUSED(timeout);
-    //while ((int)GetTickCount() - start >= timeout)
+    //while ((int)WizGetTickCount() - start >= timeout)
     while (true)
     {
         int count = (int)m_threads.size();

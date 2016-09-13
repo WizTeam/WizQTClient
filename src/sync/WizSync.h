@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_SYNC_H
+﻿#ifndef WIZSERVICE_SYNC_H
 #define WIZSERVICE_SYNC_H
 
 #include "../share/WizSyncableDatabase.h"

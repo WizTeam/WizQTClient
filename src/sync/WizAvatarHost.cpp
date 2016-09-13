@@ -1,4 +1,4 @@
-#include "WizAvatarHost.h"
+﻿#include "WizAvatarHost.h"
 #include "WizAvatarHost_p.h"
 
 #include <QThread>
@@ -234,7 +234,7 @@ bool WizAvatarHostPrivate::deleteAvatar(const QString& strUserID)
     qDebug() << "[AvatarHost]remove user avatar: " << strUserID;
     QPixmapCache::remove(keyFromUserID(strUserID));
     QString strAvatarPath = Utils::WizPathResolve::avatarPath();
-    return DeleteFile(strAvatarPath + strUserID + _T(".png"));
+    return WizDeleteFile(strAvatarPath + strUserID + ".png");
 }
 
 bool WizAvatarHostPrivate::avatar(const QString& strUserID, QPixmap* pixmap)

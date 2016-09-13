@@ -1,4 +1,4 @@
-#ifndef WIZOPTIONSWIDGET_H
+﻿#ifndef WIZOPTIONSWIDGET_H
 #define WIZOPTIONSWIDGET_H
 
 #include "share/WizPopupWidget.h"

@@ -1,4 +1,4 @@
-#ifndef WIZSEARCHINDEXER_H
+﻿#ifndef WIZSEARCHINDEXER_H
 #define WIZSEARCHINDEXER_H
 
 #include <QTimer>

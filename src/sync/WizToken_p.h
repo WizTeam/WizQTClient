@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_TOKEN_P_H
+﻿#ifndef WIZSERVICE_TOKEN_P_H
 #define WIZSERVICE_TOKEN_P_H
 
 #include <QObject>

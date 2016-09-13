@@ -1,4 +1,4 @@
-#include "WizUI.h"
+﻿#include "WizUI.h"
 
 #include <QPainter>
 #include <QWidget>

@@ -1,4 +1,4 @@
-#include "WizFolderView.h"
+﻿#include "WizFolderView.h"
 
 #include <QHeaderView>
 

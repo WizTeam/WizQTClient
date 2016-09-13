@@ -1,11 +1,11 @@
-#ifndef CWIZSINGLEDOCUMENTVIEW_H
+﻿#ifndef CWIZSINGLEDOCUMENTVIEW_H
 #define CWIZSINGLEDOCUMENTVIEW_H
 
 #include <QWidget>
 #include <QMap>
 #include "WizDef.h"
 
-class WIZDOCUMENTDATA;
+struct WIZDOCUMENTDATA;
 class WizDocumentWebEngine;
 
 class WizDocumentView;

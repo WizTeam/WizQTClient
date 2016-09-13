@@ -1,4 +1,4 @@
-#include <QtGlobal>
+﻿#include <QtGlobal>
 #include "WizUserInfoWidget.h"
 #include <QMenu>
 #include <QFileDialog>
@@ -142,7 +142,9 @@ void WizUserInfoWidget::on_action_accountSettings_triggered()
     dlg->loadUserInfo();
     dlg->exec();
 #endif
-    // 用户可能会在设置页面中修改信息，此处清除token以便重新同步
+    //
+    //// 用户可能会在设置页面中修改信息，此处清除token以便重新同步
+    //
     WizToken::clearToken();
 }
 
@@ -204,7 +206,8 @@ void WizUserInfoWidget::on_action_viewNotesOnWeb_triggered()
     QString strToken = WizToken::token();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("service", strToken);
 
-    qDebug() << "open dialog with token ："  << strUrl;
+    qDebug() << "open dialog with token: "  << strUrl;
+    //
     QDesktopServices::openUrl(strUrl);
 }
 
@@ -213,7 +216,7 @@ void WizUserInfoWidget::on_action_mySharedNotes_triggered()
     QString strToken = WizToken::token();
     QString strUrl = WizCommonApiEntry::newStandardCommandUrl("my_share", strToken, "");
 
-    qDebug() << "open dialog with token ："  << strUrl;
+    qDebug() << "open dialog with token: "  << strUrl;
     QDesktopServices::openUrl(strUrl);
 }
 

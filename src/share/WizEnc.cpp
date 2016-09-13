@@ -1,4 +1,4 @@
-#include "WizEnc.h"
+﻿#include "WizEnc.h"
 
 #include <cassert>
 #include <exception>
