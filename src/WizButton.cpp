@@ -18,7 +18,7 @@ QSize WizButton::sizeHint() const
 #ifdef Q_OS_LINUX
     return QSize(32, 32);
 #else
-    return QSize(24, 24);
+    return QSize(WizSmartScaleUI(24), WizSmartScaleUI(24));
 #endif
 }
 

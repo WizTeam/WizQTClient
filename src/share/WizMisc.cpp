@@ -2532,17 +2532,6 @@ void WizIniFileEx::getSection(const QString& section, QMap<QString, QString>& da
     m_settings->endGroup();
 }
 
-void WizIniFileEx::getSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap)
-{
-    m_settings->beginGroup(section);
-    QStringList childList = m_settings->childKeys();
-    foreach (QString child, childList) {
-        dataMap.insert(child.toUtf8(), m_settings->value(child).toString().toUtf8());
-    }
-    m_settings->endGroup();
-}
-
-
 void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent)
 {
     CString strExt = WizFormatString2("obj_guid=%1&kb_guid=%2&obj_type=attachment",

@@ -188,7 +188,16 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     QSize totalSizeHint = layout()->totalSizeHint();
     //
     QSize minSize = QSize(totalSizeHint.width(), totalSizeHint.height() + ::WizSmartScaleUI(10));
+    //
+    if (minSize.height() > minSize.width() * 1.5)
+    {
+        minSize.setWidth(int(minSize.height() / 1.5));
+        //
+        int buttonMinimumWidth = minSize.width() - 2 * ::WizSmartScaleUI(32);
+        ui->btn_login->setMinimumWidth(buttonMinimumWidth);
+    }
     setMinimumSize(minSize);
+    //
     //
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
         //

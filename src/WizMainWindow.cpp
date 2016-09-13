@@ -139,7 +139,11 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_toolBar(new QToolBar("Main", titleBar()))
     , m_menu(new QMenu(clientWidget()))
     , m_spacerForToolButtonAdjust(nullptr)
+    #ifdef Q_OS_WIN
+    , m_useSystemBasedStyle(false)
+    #else
     , m_useSystemBasedStyle(m_settings->useSystemBasedStyle())
+    #endif
 #endif
     , m_actions(new WizActions(*this, this))
     , m_category(new WizCategoryView(*this, this))
@@ -1557,7 +1561,8 @@ void WizMainWindow::layoutTitleBar()
     layoutTitle->setContentsMargins(0, 0, 0, 0);
     //
     QLayout* layoutTitleBar = new QHBoxLayout();
-    layoutTitleBar->setContentsMargins(10, 10, 10, 10);
+    int margin = WizSmartScaleUI(10);
+    layoutTitleBar->setContentsMargins(margin, margin, margin, margin);
     layoutTitleBar->addWidget(m_toolBar);
     layoutTitle->addItem(layoutTitleBar);
     //
@@ -1565,8 +1570,8 @@ void WizMainWindow::layoutTitleBar()
     layoutTitle->addItem(layoutRight);
     //
     QLayout* layoutBox = new QHBoxLayout();
-    layoutBox->setContentsMargins(0, 6, 6, 0);
-    layoutBox->setSpacing(6);
+    layoutBox->setContentsMargins(0, WizSmartScaleUI(6), WizSmartScaleUI(6), 0);
+    layoutBox->setSpacing(WizSmartScaleUI(6));
     layoutRight->addItem(layoutBox);
     //
     m_menuButton = new QToolButton(this);
@@ -1585,8 +1590,14 @@ void WizMainWindow::layoutTitleBar()
                                    "QToolButton:hover{border-image:url(%2); background:none;}"
                                    "QToolButton::pressed{border-image:url(%3); background:none;}")
                            .arg(strButtonMenu).arg(strButtonMenuOn).arg(strButtonMenuSelected));
-    m_menuButton->setFixedSize(16, 16);
-    if (m_settings->useSystemBasedStyle())
+    //
+    QSize buttonSize = QSize(WizSmartScaleUI(16), WizSmartScaleUI(16));
+    m_menuButton->setFixedSize(buttonSize);
+    title->minButton()->setFixedSize(buttonSize);
+    title->maxButton()->setFixedSize(buttonSize);
+    title->closeButton()->setFixedSize(buttonSize);
+
+    if (m_useSystemBasedStyle)
         m_menuButton->setVisible(false);
     //
     layoutRight->addStretch();
@@ -1690,7 +1701,8 @@ void WizMainWindow::initToolBar()
 #else
     layoutTitleBar();
     //
-    m_toolBar->setIconSize(QSize(24, 24));
+    QSize iconSize = QSize(WizSmartScaleUI(24), WizSmartScaleUI(24));
+    m_toolBar->setIconSize(iconSize);
     m_toolBar->setContextMenuPolicy(Qt::PreventContextMenu);
     m_toolBar->setMovable(false);
     m_toolBar->setToolButtonStyle(Qt::ToolButtonIconOnly);
@@ -1699,16 +1711,19 @@ void WizMainWindow::initToolBar()
     m_toolBar->addWidget(new WizFixedSpacer(QSize(3, 1), m_toolBar));
 
     WizButton* buttonBack = new WizButton(m_toolBar);
+    buttonBack->setIconSize(iconSize);
     buttonBack->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOBACK));
     m_toolBar->addWidget(buttonBack);
 
     WizButton* buttonForward = new WizButton(m_toolBar);
+    buttonForward->setIconSize(iconSize);
     buttonForward->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_GOFORWARD));
     m_toolBar->addWidget(buttonForward);
 
     m_toolBar->addWidget(new WizFixedSpacer(QSize(20, 1), m_toolBar));
 
     WizButton* buttonSync = new WizButton(m_toolBar);
+    buttonSync->setIconSize(iconSize);
     buttonSync->setAction(m_actions->actionFromName(WIZACTION_GLOBAL_SYNC));
     m_toolBar->addWidget(buttonSync);
 

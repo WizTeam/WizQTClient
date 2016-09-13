@@ -335,14 +335,14 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
 
     //
 
-    QMap<QByteArray, QByteArray> firstActionMap;
+    QMap<QString, QString> firstActionMap;
     for (int i = 0; i < 10; i++)
     {
         CString strFirstAction = getFirstAction(i);
         if (!strFirstAction.isEmpty())
         {
             CString strKey = keyOfFirstAction(i);
-            firstActionMap.insert(strKey.toUtf8(), strFirstAction.toUtf8());
+            firstActionMap.insert(strKey, strFirstAction);
         }
         else
         {
@@ -350,10 +350,14 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         }
     }
 
-    for (int i = 0; i < firstActionMap.count(); i++)
+    for (QMap<QString, QString>::iterator it = firstActionMap.begin();
+        it != firstActionMap.end();
+        it++)
     {
-        const QByteArray& baKey = firstActionMap.keys().at(i);
-        const QByteArray& baValue = firstActionMap[baKey];
+        QString key = it.key();
+        QString value = it.value();
+        QByteArray baValue = value.toUtf8();
+        QByteArray baKey = key.toUtf8();
         rapidjson::Value fistAction(baValue.constData(), baValue.size());
         rapidjson::Value vKey(baKey.constData(), baKey.size());
         dd.AddMember(vKey, fistAction, allocator);
@@ -367,14 +371,17 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     rapidjson::Value actions(rapidjson::kObjectType);
     actions.SetObject();
     //
-    QMap<QByteArray, QByteArray> actionMap;
+    QMap<QString, QString> actionMap;
     iniFile.getSection("Actions", actionMap);
-    for (QMap<QByteArray, QByteArray>::iterator it = actionMap.begin();
+    for (QMap<QString, QString>::iterator it = actionMap.begin();
         it != actionMap.end();
         it++)
     {
-        const QByteArray& baKey = it.key();
-        rapidjson::Value vValue(it.value().toInt());
+        QString key = it.key();
+        QString value = it.value();
+        QByteArray baKey = key.toUtf8();
+        //
+        rapidjson::Value vValue(value.toInt());
         rapidjson::Value vKey(baKey.constData(), baKey.size());
         actions.AddMember(vKey, vValue, allocator);
     }
@@ -387,10 +394,10 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
     QMap<QString, QString> seconds;
     iniFile.getSection("Durations", seconds);
     //
-    QMap<QByteArray, QByteArray> functionMap;
+    QMap<QString, QString> functionMap;
 
     iniFile.getSection("Functions", functionMap);
-    for (QMap<QByteArray, QByteArray>::const_iterator it = functionMap.begin();
+    for (QMap<QString, QString>::const_iterator it = functionMap.begin();
         it != functionMap.end();
         it++)
     {
@@ -405,7 +412,9 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         elem.AddMember("totalTime", sec, allocator);
         elem.AddMember("count", it.value().toInt(), allocator);
         //
-        rapidjson::Value vKey(it.key().constData(), it.key().size());
+        QByteArray baKey = strKey.toUtf8();
+        //
+        rapidjson::Value vKey(baKey.constData(), baKey.size());
         durations.AddMember(vKey, elem, allocator);
     }
     //

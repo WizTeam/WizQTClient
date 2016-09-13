@@ -268,7 +268,6 @@ public:
     void loadFromFile(const QString& strFile);
     void getSection(const QString& section, CWizStdStringArray& arrayData);
     void getSection(const QString& section, QMap<QString, QString>& dataMap);
-    void getSection(const QString& section, QMap<QByteArray, QByteArray>& dataMap);
 
 private:
     QSettings* m_settings;

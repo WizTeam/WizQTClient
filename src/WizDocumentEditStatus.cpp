@@ -492,8 +492,8 @@ WizDocumentStatusChecker::WizDocumentStatusChecker(QObject* parent)
 
 WizDocumentStatusChecker::~WizDocumentStatusChecker()
 {
-    if (m_timeOutTimer)
-        delete m_timeOutTimer;
+    //if (m_timeOutTimer)
+    //    delete m_timeOutTimer;
 
 //    if (m_loopCheckTimer)
 //        delete m_loopCheckTimer;

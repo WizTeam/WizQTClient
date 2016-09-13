@@ -76,7 +76,11 @@ private:
 
     //text input would call resetToolbar and cause input delay, lock to ignore reset request
     QString m_currentStyle;
+#ifdef Q_OS_WIN
+    __int64 m_lastUpdateUIRequest;
+#else
     int64_t m_lastUpdateUIRequest;
+#endif
     QTimer m_delayUpdateUITimer;
 
     // editor status reflect
