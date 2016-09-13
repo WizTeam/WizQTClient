@@ -477,7 +477,7 @@ if(UNIX)
 else()
     add_definitions(-DUNICODE=TRUE)
     add_definitions(-D_UNICODE=TRUE)
-    add_executable(WizNote ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
+    add_executable(WizNote WIN32 ${wiznote_SOURCES} ${wiznote_HEADERS} ${wiznote_FORM_HEADERS} ${wiznote_QM} ${wiznote_RC})
     set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_WIN32")
 
     install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
