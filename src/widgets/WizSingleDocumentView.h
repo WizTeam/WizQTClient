@@ -5,7 +5,7 @@
 #include <QMap>
 #include "WizDef.h"
 
-class WIZDOCUMENTDATA;
+struct WIZDOCUMENTDATA;
 class WizDocumentWebEngine;
 
 class WizDocumentView;

@@ -74,6 +74,29 @@ WizLockedFile::WizLockedFile(const QString &name)
     m_lock_mode = NoLock;
 }
 
+
+/*!
+    Returns \e true if this object has a in read or write lock;
+    otherwise returns \e false.
+
+    \sa lockMode()
+*/
+bool WizLockedFile::isLocked() const
+{
+    return m_lock_mode != NoLock;
+}
+
+/*!
+    Returns the type of lock currently held by this object, or \e CWizLockedFile::NoLock.
+
+    \sa isLocked()
+*/
+WizLockedFile::LockMode WizLockedFile::lockMode() const
+{
+    return m_lock_mode;
+}
+
+
 #ifdef _WIN32
 
 #define SEMAPHORE_PREFIX "QtLockedFile semaphore "
@@ -234,26 +257,6 @@ WizLockedFile::~WizLockedFile()
 }
 #else
 
-/*!
-    Returns \e true if this object has a in read or write lock;
-    otherwise returns \e false.
-
-    \sa lockMode()
-*/
-bool WizLockedFile::isLocked() const
-{
-    return m_lock_mode != NoLock;
-}
-
-/*!
-    Returns the type of lock currently held by this object, or \e CWizLockedFile::NoLock.
-
-    \sa isLocked()
-*/
-WizLockedFile::LockMode WizLockedFile::lockMode() const
-{
-    return m_lock_mode;
-}
 
 /*!
     \fn bool CWizLockedFile::lock(LockMode mode, bool block = true)

@@ -23,15 +23,13 @@ QString WizPathResolve::resourcesPath()
     QString strPath = dir.path();
     addBackslash(strPath);
     return strPath;
-#elif defined(Q_OS_LINUX)
+#else
     QDir dir(appPath());
     dir.cdUp();
     dir.cd("share/wiznote");
     QString strPath = dir.path();
     addBackslash(strPath);
     return strPath;
-#else
-    return appPath();
 #endif
 }
 
@@ -109,7 +107,11 @@ QString WizPathResolve::dataStorePath()
         strPath += "/.wiznote/";
     #endif
 #else
+#ifdef Q_OS_WIN
+    strPath += "/WizNote/";
+#else
     strPath += "/.wiznote/";
+#endif
 #endif
     ensurePathExists(strPath);
     //
@@ -118,6 +120,9 @@ QString WizPathResolve::dataStorePath()
 
 QString WizPathResolve::cachePath()
 {
+#ifdef Q_OS_WIN
+    QString strCachePath = dataStorePath() + "cache/";
+#else
     QString strCachePath = qgetenv("XDG_CACHE_HOME");
     if (strCachePath.isEmpty()) {
 #ifdef Q_OS_MAC
@@ -133,6 +138,7 @@ QString WizPathResolve::cachePath()
         strCachePath += "/wiznote/";
     }
 
+#endif
     ensurePathExists(strCachePath);
     return strCachePath;
 }

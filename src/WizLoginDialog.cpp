@@ -100,7 +100,6 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     , m_userList(localUsers)
     , m_newRegisterAccount(false)
 {
-
 #ifdef Q_OS_MAC
     setWindowFlags(Qt::CustomizeWindowHint);
     ui->setupUi(this);
@@ -124,7 +123,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     ui->btn_close->setVisible(false);
     //
     WizWindowTitleBar* title = titleBar();
-    title->setPalette(QPalette(QColor::fromRgb(0x43, 0xA6, 0xE8)));
+    title->setPalette(QPalette(QColor::fromRgb(0x44, 0x8A, 0xFF)));
     title->setContentsMargins(QMargins(0, 2, 2 ,0));
 #endif
 

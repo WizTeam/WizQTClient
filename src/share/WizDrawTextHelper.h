@@ -7,6 +7,6 @@ class QPainter;
 class QRect;
 class QColor;
 
-int WizDrawTextSingleLine(QPainter* p, const QRect& rc, QString& str, int flags, QColor color, BOOL elidedText);
+int WizDrawTextSingleLine(QPainter* p, const QRect& rc, QString& str, int flags, QColor color, bool elidedText);
 
 #endif // WIZDRAWTEXTHELPER_H

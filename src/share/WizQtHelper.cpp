@@ -4,6 +4,11 @@
 #include <QtGui>
 #include <QApplication>
 
+#ifdef _WIN32
+#include "qt_windows.h"
+#include "psapi.h"
+#endif
+
 bool WizPathFileExists(const CString& strPath)
 {
     return QFile::exists(strPath);
@@ -590,5 +595,53 @@ QList<WizWindowInfo> WizGetActiveWindows()
 {
     linux_x11 x11;
     return x11.getActiveWindows();
+}
+#endif
+
+#ifdef _WIN32
+
+QList<WizWindowInfo> WizGetActiveWindows()
+{
+    QList<WizWindowInfo> windowTitles;
+    HWND foregroundWindow = GetForegroundWindow();
+    DWORD* processID = new DWORD;
+    TCHAR buf[255];
+    GetWindowText(foregroundWindow, buf, 255);
+    GetWindowThreadProcessId(foregroundWindow, processID);
+    DWORD p = *processID;
+    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION |
+                                  PROCESS_VM_READ,
+                                  FALSE, p);
+    TCHAR szProcessName[MAX_PATH];
+
+    if (NULL != hProcess )
+    {
+        HMODULE hMod;
+        DWORD cbNeeded;
+
+        if ( EnumProcessModules( hProcess, &hMod, sizeof(hMod),
+                                 &cbNeeded) )
+        {
+            GetModuleBaseName( hProcess, hMod, szProcessName,
+                               sizeof(szProcessName)/sizeof(TCHAR) );
+        }
+    }
+    CloseHandle(hProcess);
+    long pid = (long)p;
+    QString windowTitle, processName;
+#ifdef UNICODE
+    windowTitle = QString::fromUtf16((ushort*)buf);
+    processName = QString::fromUtf16((ushort*)szProcessName);
+#else
+    windowTitle = QString::fromLocal8Bit(buf);
+    processName = QString::fromLocal8Bit(szProcessName);
+#endif
+
+    WizWindowInfo wi;
+    wi.pid = pid;
+    wi.windowTitle = windowTitle;
+    wi.processName = processName;
+    windowTitles.append(wi);
+    return windowTitles;
 }
 #endif

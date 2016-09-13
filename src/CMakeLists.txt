@@ -567,5 +567,6 @@ else(NOT UNIX)
 		Qt5::WebEngine
 		Qt5::WebEngineWidgets
 		${CMAKE_DL_LIBS}
+                Qt5::WinMain
 	)
 endif()
