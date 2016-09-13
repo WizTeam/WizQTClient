@@ -1,4 +1,4 @@
-#ifndef CWIZIPAMANAGER_H
+﻿#ifndef CWIZIPAMANAGER_H
 #define CWIZIPAMANAGER_H
 
 #include <QList>

@@ -1,4 +1,4 @@
-#ifndef COCOAHELP_H
+﻿#ifndef COCOAHELP_H
 #define COCOAHELP_H
 
 #include <QtGlobal>

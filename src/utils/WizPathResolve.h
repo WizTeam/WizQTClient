@@ -1,4 +1,4 @@
-#ifndef UTILS_PATHRESOLVE_H
+﻿#ifndef UTILS_PATHRESOLVE_H
 #define UTILS_PATHRESOLVE_H
 
 class QString;

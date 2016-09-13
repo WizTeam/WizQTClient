@@ -1,4 +1,4 @@
-#include "WizMessageCompleter.h"
+﻿#include "WizMessageCompleter.h"
 
 #include <QLineEdit>
 #include <QStringList>

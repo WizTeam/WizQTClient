@@ -1,4 +1,4 @@
-#include "WizOptionsWidget.h"
+﻿#include "WizOptionsWidget.h"
 
 #include <QBoxLayout>
 #include <QGroupBox>

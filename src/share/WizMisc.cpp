@@ -1,4 +1,4 @@
-#include "WizSettings.h"
+﻿#include "WizSettings.h"
 #include "WizWebSettingsDialog.h"
 
 #include <algorithm>
@@ -232,7 +232,7 @@ void WizGetNextFileName(CString& strFileName)
         if (nTitleLength <= 0)
         {
             TOLOG1("File name is too long: %1", strFileName);
-            strTitle = WizIntToStr(GetTickCount());
+            strTitle = WizIntToStr(WizGetTickCount());
         }
         else
         {
@@ -810,7 +810,7 @@ const char* strncasestr(const char* str, const char* subStr)
     while(*str)
     {
 #ifdef WIN32
-        if(strnicmp(str, subStr, len) == 0)
+        if(_strnicmp(str, subStr, len) == 0)
 #else
         if(strncasecmp(str, subStr, len) == 0)
 #endif

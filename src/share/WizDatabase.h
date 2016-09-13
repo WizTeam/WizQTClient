@@ -1,4 +1,4 @@
-#ifndef WIZDATABASE_H
+﻿#ifndef WIZDATABASE_H
 #define WIZDATABASE_H
 
 #include <QPointer>

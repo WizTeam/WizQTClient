@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_WIZAPIENTRY_H
+﻿#ifndef WIZSERVICE_WIZAPIENTRY_H
 #define WIZSERVICE_WIZAPIENTRY_H
 
 #define WIZNOTE_API_SERVER      "http://api.wiz.cn/"

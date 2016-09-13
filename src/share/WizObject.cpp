@@ -1,4 +1,4 @@
-#include "WizObject.h"
+﻿#include "WizObject.h"
 
 #include "WizXmlRpc.h"
 #include "WizMisc.h"

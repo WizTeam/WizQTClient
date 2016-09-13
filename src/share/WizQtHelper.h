@@ -1,4 +1,4 @@
-#ifndef WIZQTHELPER_H
+﻿#ifndef WIZQTHELPER_H
 #define WIZQTHELPER_H
 
 #include <QtGlobal>
@@ -15,7 +15,7 @@
 #include <QDateTime>
 #include <QSharedPointer>
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 #include <windows.h>
 #include <tchar.h>
 //#include <shlwapi.h>

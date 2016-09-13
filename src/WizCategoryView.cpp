@@ -1,4 +1,4 @@
-#include "WizCategoryView.h"
+﻿#include "WizCategoryView.h"
 
 #include <QHeaderView>
 #include <QAction>

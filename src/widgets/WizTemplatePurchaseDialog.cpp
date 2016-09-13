@@ -1,4 +1,4 @@
-#include "WizTemplatePurchaseDialog.h"
+﻿#include "WizTemplatePurchaseDialog.h"
 #include "ui_WizTemplatePurchaseDialog.h"
 
 #ifdef Q_OS_MAC

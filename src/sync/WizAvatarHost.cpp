@@ -1,4 +1,4 @@
-#include "WizAvatarHost.h"
+﻿#include "WizAvatarHost.h"
 #include "WizAvatarHost_p.h"
 
 #include <QThread>

@@ -1,4 +1,4 @@
-#include "WizDocumentWebView.h"
+﻿#include "WizDocumentWebView.h"
 
 #include <QRunnable>
 #include <QList>
@@ -197,7 +197,7 @@ bool WizDocumentWebView::onPasteCommand()
     if (!clip->image().isNull()) {
         // save clipboard image to
         QString strImagePath = noteResourcesPath();
-        CString strFileName = strImagePath + WizIntToStr(GetTickCount()) + ".png";
+        CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
         if (!clip->image().save(strFileName)) {
             TOLOG("ERROR: Can't save clipboard image to file");
             return false;
@@ -1728,7 +1728,7 @@ void WizDocumentWebView::on_editorCommandExecuteScreenShot_imageAccepted(QPixmap
     if (pix.isNull())
         return;
 
-    CString strFileName = noteResourcesPath() + WizIntToStr(GetTickCount()) + ".png";
+    CString strFileName = noteResourcesPath() + WizIntToStr(WizGetTickCount()) + ".png";
     if (!pix.save(strFileName)) {
         TOLOG("ERROR: Can't save clipboard image to file");
         return;

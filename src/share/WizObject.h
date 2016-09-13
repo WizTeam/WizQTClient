@@ -1,4 +1,4 @@
-#ifndef WIZOBJECT_H
+﻿#ifndef WIZOBJECT_H
 #define WIZOBJECT_H
 
 #include <QMetaType>

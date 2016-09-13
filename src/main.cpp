@@ -1,4 +1,4 @@
-#include <QtGlobal>
+﻿#include <QtGlobal>
 #include <QApplication>
 #include <QTreeWidget>
 #include <QMessageBox>
@@ -136,6 +136,11 @@ int mainCore(int argc, char *argv[])
     WizIAPHelper helper;
     helper.validteReceiptOnLauch();
 #endif
+#endif
+
+#ifdef Q_OS_WIN
+    QFont appFont = WizCreateWindowsUIFont(a, WizGetWindowsFontName());
+    QApplication::setFont(appFont);
 #endif
 
    qInstallMessageHandler(Utils::WizLogger::messageHandler);

@@ -1,4 +1,4 @@
-#include "WizSingleApplication.h"
+﻿#include "WizSingleApplication.h"
 
 /*
 

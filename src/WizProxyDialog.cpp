@@ -1,4 +1,4 @@
-#include "WizProxyDialog.h"
+﻿#include "WizProxyDialog.h"
 #include "ui_WizProxyDialog.h"
 
 #include "share/WizSettings.h"

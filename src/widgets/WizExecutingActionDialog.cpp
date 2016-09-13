@@ -1,4 +1,4 @@
-#include "WizExecutingActionDialog.h"
+﻿#include "WizExecutingActionDialog.h"
 #include "ui_WizExecutingActionDialog.h"
 
 #include "share/WizMisc.h"

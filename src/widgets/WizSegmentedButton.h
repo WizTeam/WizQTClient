@@ -1,4 +1,4 @@
-#ifndef WIZSEGMENTEDBUTTON_H
+﻿#ifndef WIZSEGMENTEDBUTTON_H
 #define WIZSEGMENTEDBUTTON_H
 
 #include <QPushButton>

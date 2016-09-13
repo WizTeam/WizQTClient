@@ -1,4 +1,4 @@
-#include "WizLoginDialog.h"
+﻿#include "WizLoginDialog.h"
 #include "ui_WizLoginDialog.h"
 #include <QPainter>
 #include <QMouseEvent>

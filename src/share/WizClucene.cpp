@@ -1,4 +1,4 @@
-#include "WizClucene.h"
+﻿#include "WizClucene.h"
 
 #include "WizMisc.h"
 #ifdef _T

@@ -1,4 +1,4 @@
-#include "WizDocumentView.h"
+﻿#include "WizDocumentView.h"
 
 #include <QLineEdit>
 #include <QLabel>

@@ -1,4 +1,4 @@
-#ifndef WIZSERVICE_SYNC_P_H
+﻿#ifndef WIZSERVICE_SYNC_P_H
 #define WIZSERVICE_SYNC_P_H
 
 #include "WizKMServer.h"

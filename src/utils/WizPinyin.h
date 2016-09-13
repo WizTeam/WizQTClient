@@ -1,4 +1,4 @@
-#ifndef PINYIN_H
+﻿#ifndef PINYIN_H
 #define PINYIN_H
 
 class QString;

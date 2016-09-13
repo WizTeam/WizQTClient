@@ -1,4 +1,4 @@
-#include "WizScrollBar.h"
+﻿#include "WizScrollBar.h"
 
 #include <QtGui>
 

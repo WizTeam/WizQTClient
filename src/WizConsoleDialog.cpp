@@ -1,4 +1,4 @@
-#include "WizConsoleDialog.h"
+﻿#include "WizConsoleDialog.h"
 #include "ui_WizConsoleDialog.h"
 
 #include <QScrollBar>
@@ -111,7 +111,7 @@ void WizConsoleDialog::resetCount()
 void WizConsoleDialog::onBtnSaveAsClicked()
 {
     QString strToday = QDate::currentDate().toString(Qt::ISODate);
-    QString strFileName = QString("WizNote_%1_%2.txt").arg(GetTickCount()).arg(strToday);
+    QString strFileName = QString("WizNote_%1_%2.txt").arg(WizGetTickCount()).arg(strToday);
 
     QString strFilePath = QFileDialog::getSaveFileName(this, tr("Save log"), QDir::home().filePath(strFileName));
     if (strFilePath.isEmpty())

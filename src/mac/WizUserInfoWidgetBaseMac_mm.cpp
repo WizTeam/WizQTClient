@@ -1,4 +1,4 @@
-#include "WizUserInfoWidgetBaseMac_mm.h"
+﻿#include "WizUserInfoWidgetBaseMac_mm.h"
 #ifdef USECOCOATOOLBAR
 
 #include <QPainter>

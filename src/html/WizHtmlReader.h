@@ -1,4 +1,4 @@
-#ifndef __WIZHTMLREADER_H__
+﻿#ifndef __WIZHTMLREADER_H__
 #define __WIZHTMLREADER_H__
 
 #ifndef WIZQTHELPER_H

@@ -1,4 +1,4 @@
-#include "WizWindowTitleBar.h"
+﻿#include "WizWindowTitleBar.h"
 
 #include <QPixmap>
 #include <QStyle>

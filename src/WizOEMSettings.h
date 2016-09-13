@@ -1,4 +1,4 @@
-#ifndef CWIZOEMSETTINGS_H
+﻿#ifndef CWIZOEMSETTINGS_H
 #define CWIZOEMSETTINGS_H
 
 #include <QSettings>

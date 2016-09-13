@@ -1,4 +1,4 @@
-#include "WizMainWindow.h"
+﻿#include "WizMainWindow.h"
 
 #include <QToolBar>
 #include <QMenuBar>
@@ -3475,7 +3475,7 @@ void WizMainWindow::ProcessClipboardBeforePaste(const QVariantMap& data)
 //    if (!clipboard->image().isNull()) {
 //        // save clipboard image to $TMPDIR
 //        QString strTempPath = WizGlobal()->GetTempPath();
-//        CString strFileName = strTempPath + WizIntToStr(GetTickCount()) + ".png";
+//        CString strFileName = strTempPath + WizIntToStr(WizGetTickCount()) + ".png";
 //        if (!clipboard->image().save(strFileName)) {
 //            TOLOG("ERROR: Can't save clipboard image to file");
 //            return;

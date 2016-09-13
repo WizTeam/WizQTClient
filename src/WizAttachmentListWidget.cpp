@@ -1,4 +1,4 @@
-#include "WizAttachmentListWidget.h"
+﻿#include "WizAttachmentListWidget.h"
 
 #include <QBoxLayout>
 #include <QFile>

@@ -1,4 +1,4 @@
-#include "WizSync.h"
+﻿#include "WizSync.h"
 #include "WizKMSync_p.h"
 
 #include <QString>

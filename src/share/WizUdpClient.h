@@ -1,4 +1,4 @@
-#ifndef CWIZUDPCLIENT_H
+﻿#ifndef CWIZUDPCLIENT_H
 #define CWIZUDPCLIENT_H
 
 #include <QString>

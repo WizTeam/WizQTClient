@@ -1,4 +1,4 @@
-#include "WizNoteComments.h"
+﻿#include "WizNoteComments.h"
 #include "WizNoteComments_p.h"
 
 #include <QDebug>

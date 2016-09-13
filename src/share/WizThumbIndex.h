@@ -1,4 +1,4 @@
-#ifndef WIZTHUMBINDEX_H
+﻿#ifndef WIZTHUMBINDEX_H
 #define WIZTHUMBINDEX_H
 
 #include <QImage>

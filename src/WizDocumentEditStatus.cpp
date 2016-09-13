@@ -1,4 +1,4 @@
-#include "WizDocumentEditStatus.h"
+﻿#include "WizDocumentEditStatus.h"
 #include "sync/WizApiEntry.h"
 #include "sync/WizToken.h"
 #include "share/WizMisc.h"
@@ -200,7 +200,7 @@ bool WizDocumentEditStatusSyncThread::sendEditingMessage(const QString& strUserA
                                         WizKMGetDocumentEditStatusURL(),
                                         strObjID,
                                         strUserAlias,
-                                        ::WizIntToStr(GetTickCount()),
+                                        ::WizIntToStr(WizGetTickCount()),
                                         WizToken::token());
 
     if (!m_netManager)
@@ -246,7 +246,7 @@ bool WizDocumentEditStatusSyncThread::sendDoneMessage(const QString& strUserAlia
                                       WizKMGetDocumentEditStatusURL(),
                                       strObjID,
                                       strUserAlias,
-                                      ::WizIntToStr(GetTickCount()),
+                                      ::WizIntToStr(WizGetTickCount()),
                                       WizToken::token());
 
     if (!m_netManager)
@@ -474,7 +474,7 @@ bool CWizDocumentStatusCheckThread::checkDocumentEditStatus(const QString& strKb
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,
-                                             ::WizIntToStr(GetTickCount()));
+                                             ::WizIntToStr(WizGetTickCount()));
 
     downloadData(strRequestUrl);
     return true;
@@ -671,7 +671,7 @@ bool WizDocumentStatusChecker::checkDocumentEditStatus(const QString& strKbGUID,
                                              WizKMGetDocumentEditStatusURL(),
                                              strKbGUID,
                                              strGUID,
-                                             ::WizIntToStr(GetTickCount()));
+                                             ::WizIntToStr(WizGetTickCount()));
 
     return checkDocumentEditStatus(strRequestUrl);
 }

@@ -1,4 +1,4 @@
-#ifndef WIZCATEGORYCTRL_H
+﻿#ifndef WIZCATEGORYCTRL_H
 #define WIZCATEGORYCTRL_H
 
 #include <QPointer>

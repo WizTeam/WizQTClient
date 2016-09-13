@@ -1,4 +1,4 @@
-#ifndef WIZPROGRESSDIALOG_H
+﻿#ifndef WIZPROGRESSDIALOG_H
 #define WIZPROGRESSDIALOG_H
 
 #include <QDialog>

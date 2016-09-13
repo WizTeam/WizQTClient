@@ -1,4 +1,4 @@
-#include "WizAccountManager.h"
+﻿#include "WizAccountManager.h"
 #include "share/WizDatabase.h"
 #include "share/WizMessageBox.h"
 

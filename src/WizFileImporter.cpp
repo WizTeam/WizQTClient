@@ -1,4 +1,4 @@
-#include "WizFileImporter.h"
+﻿#include "WizFileImporter.h"
 #include <QFile>
 #include <QFileInfo>
 #include <QDir>

@@ -1,4 +1,4 @@
-#include "WizButton.h"
+﻿#include "WizButton.h"
 
 #include <QStyleOptionToolButton>
 #include <QPainter>

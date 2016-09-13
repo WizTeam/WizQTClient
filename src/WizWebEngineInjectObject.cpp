@@ -1,4 +1,4 @@
-#include "WizWebEngineInjectObject.h"
+﻿#include "WizWebEngineInjectObject.h"
 #include "widgets/WizCodeEditorDialog.h"
 #include <QDesktopServices>
 

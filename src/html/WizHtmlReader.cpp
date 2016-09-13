@@ -1,4 +1,4 @@
-#include "WizHtmlReader.h"
+﻿#include "WizHtmlReader.h"
 #include "share/WizMisc.h"
 
 #include <QChar>

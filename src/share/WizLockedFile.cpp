@@ -1,7 +1,7 @@
-#include "WizLockedFile.h"
+﻿#include "WizLockedFile.h"
 #include <string.h>
 #include <errno.h>
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 #include <qt_windows.h>
 #include <QtCore/QFileInfo>
 #else
@@ -97,7 +97,7 @@ WizLockedFile::LockMode WizLockedFile::lockMode() const
 }
 
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 
 #define SEMAPHORE_PREFIX "QtLockedFile semaphore "
 #define MUTEX_PREFIX "QtLockedFile mutex "

@@ -1,4 +1,4 @@
-#ifndef WIZPOPUPWIDGET_H
+﻿#ifndef WIZPOPUPWIDGET_H
 #define WIZPOPUPWIDGET_H
 
 #include <QWidget>

@@ -1,4 +1,4 @@
-#ifndef WIZEDITORTOOLBAR_H
+﻿#ifndef WIZEDITORTOOLBAR_H
 #define WIZEDITORTOOLBAR_H
 
 #include <QWidget>

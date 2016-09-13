@@ -1,4 +1,4 @@
-#ifndef WIZANIMATEACTION_H
+﻿#ifndef WIZANIMATEACTION_H
 #define WIZANIMATEACTION_H
 
 #include "WizQtHelper.h"

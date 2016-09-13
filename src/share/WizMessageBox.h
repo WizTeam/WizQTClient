@@ -1,4 +1,4 @@
-#ifndef CWIZMESSAGEBOX_H
+﻿#ifndef CWIZMESSAGEBOX_H
 #define CWIZMESSAGEBOX_H
 
 #include <QMessageBox>

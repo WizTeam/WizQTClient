@@ -1,4 +1,4 @@
-#include "WizUIHelper.h"
+﻿#include "WizUIHelper.h"
 
 #include <QtWidgets>
 

@@ -1,4 +1,4 @@
-#include "WizHtmlCollector.h"
+﻿#include "WizHtmlCollector.h"
 #include "../share/WizHtml2Zip.h"
 #include "../share/WizObjectDataDownloader.h"
 #include "utils/WizMisc.h"

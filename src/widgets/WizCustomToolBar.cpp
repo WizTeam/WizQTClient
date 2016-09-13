@@ -1,4 +1,4 @@
-#include "WizCustomToolBar.h"
+﻿#include "WizCustomToolBar.h"
 #include <QMouseEvent>
 
 WizCustomToolBar::WizCustomToolBar(QWidget* hostWidget, QWidget *parent)

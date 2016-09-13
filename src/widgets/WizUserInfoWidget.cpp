@@ -1,4 +1,4 @@
-#include <QtGlobal>
+﻿#include <QtGlobal>
 #include "WizUserInfoWidget.h"
 #include <QMenu>
 #include <QFileDialog>

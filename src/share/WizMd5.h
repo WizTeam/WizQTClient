@@ -1,4 +1,4 @@
-#ifndef WIZMD5_H
+﻿#ifndef WIZMD5_H
 #define WIZMD5_H
 
 #include "WizQtHelper.h"

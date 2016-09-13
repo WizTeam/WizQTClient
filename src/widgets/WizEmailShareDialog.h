@@ -1,4 +1,4 @@
-#ifndef WIZEMAILSHAREDIALOG_H
+﻿#ifndef WIZEMAILSHAREDIALOG_H
 #define WIZEMAILSHAREDIALOG_H
 
 #include <QDialog>

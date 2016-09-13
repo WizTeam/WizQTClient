@@ -1,4 +1,4 @@
-#include "WizXml.h"
+﻿#include "WizXml.h"
 
 #include "WizMisc.h"
 #include "../utils/WizLogger.h"

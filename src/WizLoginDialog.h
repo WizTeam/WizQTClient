@@ -1,4 +1,4 @@
-#ifndef WIZLOGINWIDGET_H
+﻿#ifndef WIZLOGINWIDGET_H
 #define WIZLOGINWIDGET_H
 
 #include <QDialog>

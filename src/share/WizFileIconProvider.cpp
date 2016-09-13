@@ -1,4 +1,4 @@
-#include "WizFileIconProvider.h"
+﻿#include "WizFileIconProvider.h"
 #include <QPixmapCache>
 #include <QDir>
 

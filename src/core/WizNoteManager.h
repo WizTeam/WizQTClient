@@ -1,4 +1,4 @@
-#ifndef CWIZNOTEMANAGER_H
+﻿#ifndef CWIZNOTEMANAGER_H
 #define CWIZNOTEMANAGER_H
 
 #include "WizDef.h"

@@ -1,4 +1,4 @@
-#include "WizSearchWidget_mm.h"
+﻿#include "WizSearchWidget_mm.h"
 
 #ifdef USECOCOATOOLBAR
 

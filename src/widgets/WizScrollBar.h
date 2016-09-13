@@ -1,4 +1,4 @@
-#ifndef WIZSCROLLBAR_H
+﻿#ifndef WIZSCROLLBAR_H
 #define WIZSCROLLBAR_H
 
 #include <QScrollBar>

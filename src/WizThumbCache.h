@@ -1,4 +1,4 @@
-#ifndef CORE_THUMBCACHE_H
+﻿#ifndef CORE_THUMBCACHE_H
 #define CORE_THUMBCACHE_H
 
 #include <QObject>

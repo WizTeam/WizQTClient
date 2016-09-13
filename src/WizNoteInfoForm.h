@@ -1,4 +1,4 @@
-#ifndef WIZNOTEINFOFORM_H
+﻿#ifndef WIZNOTEINFOFORM_H
 #define WIZNOTEINFOFORM_H
 
 #include "share/WizPopupWidget.h"

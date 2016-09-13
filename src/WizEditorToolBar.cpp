@@ -1,4 +1,4 @@
-#include "WizEditorToolBar.h"
+﻿#include "WizEditorToolBar.h"
 
 #include <QStylePainter>
 #include <QToolButton>
@@ -1621,7 +1621,7 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
 void WizEditorToolBar::on_delegate_selectionChanged(const QString& currentStyle)
 {
     m_currentStyle = currentStyle;
-    m_lastUpdateUIRequest = GetTickCount();
+    m_lastUpdateUIRequest = WizGetTickCount();
     //
     if (!m_delayUpdateUITimer.isActive())
     {
@@ -1636,7 +1636,7 @@ void WizEditorToolBar::on_delay_updateToolbar()
     if (0 == m_lastUpdateUIRequest)
         return;
     //
-    int delay = GetTickCount() - m_lastUpdateUIRequest;
+    int delay = WizGetTickCount() - m_lastUpdateUIRequest;
     if (delay < 250)
         return;
     //

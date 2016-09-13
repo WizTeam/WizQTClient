@@ -1,4 +1,4 @@
-#include "WizStyleHelper.h"
+﻿#include "WizStyleHelper.h"
 
 #include <QFontMetrics>
 #include <QSize>

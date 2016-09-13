@@ -1,4 +1,4 @@
-#include "WizUpdater.h"
+﻿#include "WizUpdater.h"
 
 #ifdef WIZ_OBOSOLETE
 

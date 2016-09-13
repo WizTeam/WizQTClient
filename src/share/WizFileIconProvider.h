@@ -1,4 +1,4 @@
-#ifndef WIZFILEICONPROVIDER_H
+﻿#ifndef WIZFILEICONPROVIDER_H
 #define WIZFILEICONPROVIDER_H
 
 #include <QFileIconProvider>

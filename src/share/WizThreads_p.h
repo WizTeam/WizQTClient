@@ -1,4 +1,4 @@
-#ifndef WIZTHREADS_P_H
+﻿#ifndef WIZTHREADS_P_H
 #define WIZTHREADS_P_H
 
 #include <deque>

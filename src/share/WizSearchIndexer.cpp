@@ -1,11 +1,11 @@
-#include "WizSearchIndexer.h"
+﻿#include "WizSearchIndexer.h"
 
 #include <QFile>
 #include <QMetaType>
 #include <QDebug>
 #include <QCoreApplication>
 
-#ifndef _WIN32
+#ifndef Q_OS_WIN
 #include <unistd.h>
 #endif
 

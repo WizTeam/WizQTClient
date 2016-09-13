@@ -1,4 +1,4 @@
-#ifndef WIZKMXMLRPC_H
+﻿#ifndef WIZKMXMLRPC_H
 #define WIZKMXMLRPC_H
 
 #include "WizXmlRpcServer.h"

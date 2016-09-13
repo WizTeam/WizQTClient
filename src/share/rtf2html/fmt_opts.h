@@ -1,4 +1,4 @@
-#ifndef __FMT_OPTS_H__
+﻿#ifndef __FMT_OPTS_H__
 #define __FMT_OPTS_H__
 
 #include "config.h"

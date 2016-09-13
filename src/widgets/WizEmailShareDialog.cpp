@@ -1,4 +1,4 @@
-#include "WizEmailShareDialog.h"
+﻿#include "WizEmailShareDialog.h"
 #include "ui_WizEmailShareDialog.h"
 #include <QListWidget>
 #include <QNetworkAccessManager>

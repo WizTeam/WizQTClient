@@ -1,4 +1,4 @@
-#ifndef CORE_CELLBUTTON_H
+﻿#ifndef CORE_CELLBUTTON_H
 #define CORE_CELLBUTTON_H
 
 #include <QToolButton>

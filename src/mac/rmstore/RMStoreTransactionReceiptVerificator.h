@@ -1,4 +1,4 @@
-//
+﻿//
 //  RMStoreTransactionReceiptVerificator.h
 //  RMStore
 //

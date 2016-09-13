@@ -1,4 +1,4 @@
-#ifndef WIZFOLDERSELECTOR_H
+﻿#ifndef WIZFOLDERSELECTOR_H
 #define WIZFOLDERSELECTOR_H
 
 #include <QDialog>

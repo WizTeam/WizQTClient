@@ -1,4 +1,4 @@
-#ifndef CWIZTIPSWIDGET_H
+﻿#ifndef CWIZTIPSWIDGET_H
 #define CWIZTIPSWIDGET_H
 
 #include <functional>

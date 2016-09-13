@@ -1,4 +1,4 @@
-#include "WizProgressDialog.h"
+﻿#include "WizProgressDialog.h"
 #include "ui_WizProgressDialog.h"
 #include<QDebug>
 

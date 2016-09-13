@@ -1,4 +1,4 @@
-#ifndef WIZCOMMONUI_H
+﻿#ifndef WIZCOMMONUI_H
 #define WIZCOMMONUI_H
 
 #include "WizQtHelper.h"

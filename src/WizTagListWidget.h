@@ -1,4 +1,4 @@
-#ifndef WIZTAGLISTWIDGET_H
+﻿#ifndef WIZTAGLISTWIDGET_H
 #define WIZTAGLISTWIDGET_H
 
 #include <QPointer>

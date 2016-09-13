@@ -1,4 +1,4 @@
-#include "WizUserCipherForm.h"
+﻿#include "WizUserCipherForm.h"
 #include "ui_WizUserCipherForm.h"
 
 #include <QGraphicsDropShadowEffect>

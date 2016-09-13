@@ -1,4 +1,4 @@
-#include "WizLocalPeer.h"
+﻿#include "WizLocalPeer.h"
 
 #include <QCoreApplication>
 #include <QTime>

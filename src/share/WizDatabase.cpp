@@ -1,4 +1,4 @@
-#include "WizDatabase.h"
+﻿#include "WizDatabase.h"
 
 #include <QDir>
 #include <QUrl>
@@ -3840,7 +3840,7 @@ bool WizDatabase::loadCompressedAttachmentData(const QString& strGUID, QByteArra
     {
         return false;
     }
-    CString strTempZipFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    CString strTempZipFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + ".tmp";
     WizZipFile zip;
     if (!zip.open(strTempZipFileName))
     {
@@ -3869,7 +3869,7 @@ bool WizDatabase::loadCompressedAttachmentData(const QString& strGUID, QByteArra
 
 bool WizDatabase::saveCompressedAttachmentData(const CString& strGUID, const QByteArray& arrayData)
 {
-    CString strTempZipFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".tmp";
+    CString strTempZipFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + ".tmp";
     if (!WizSaveDataToFile(strTempZipFileName, arrayData))
     {
         Q_EMIT updateError("Failed to save attachment data to temp file: " + strTempZipFileName);

@@ -1,4 +1,4 @@
-#include "WizEventLoop.h"
+﻿#include "WizEventLoop.h"
 
 #include <QTimer>
 #include <QDebug>

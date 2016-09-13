@@ -1,4 +1,4 @@
-#ifndef WIZDOCUMENTWEBVIEW_H
+﻿#ifndef WIZDOCUMENTWEBVIEW_H
 #define WIZDOCUMENTWEBVIEW_H
 
 #include <QWebEngineView>

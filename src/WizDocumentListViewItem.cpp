@@ -1,4 +1,4 @@
-#include "WizDocumentListViewItem.h"
+﻿#include "WizDocumentListViewItem.h"
 
 #include <QFile>
 #include <QFileInfo>

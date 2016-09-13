@@ -1,4 +1,4 @@
-#ifndef CWIZCERTMANAGER_H
+﻿#ifndef CWIZCERTMANAGER_H
 #define CWIZCERTMANAGER_H
 
 #if 0

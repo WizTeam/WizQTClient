@@ -1,4 +1,4 @@
-#ifndef WIZDRAWTEXTHELPER_H
+﻿#ifndef WIZDRAWTEXTHELPER_H
 #define WIZDRAWTEXTHELPER_H
 
 #include "WizQtHelper.h"

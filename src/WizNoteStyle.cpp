@@ -1,4 +1,4 @@
-#include "WizNoteStyle.h"
+﻿#include "WizNoteStyle.h"
 
 #include <QProxyStyle>
 #include <QPainter>

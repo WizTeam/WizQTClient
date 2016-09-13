@@ -1,4 +1,4 @@
-#include "WizSettings.h"
+﻿#include "WizSettings.h"
 #include "utils/WizPathResolve.h"
 
 #include "WizDef.h"

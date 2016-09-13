@@ -1,4 +1,4 @@
-#include "WizObjectOperator_p.h"
+﻿#include "WizObjectOperator_p.h"
 #include "WizObjectOperator.h"
 #include <QThread>
 #include <QDebug>

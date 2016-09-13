@@ -1,4 +1,4 @@
-#ifndef __RTF_KEYWORD_H__
+﻿#ifndef __RTF_KEYWORD_H__
 #define __RTF_KEYWORD_H__
 
 

@@ -1,4 +1,4 @@
-#include "WizHtml2Zip.h"
+﻿#include "WizHtml2Zip.h"
 
 #include "html/WizHtmlCollector.h"
 
@@ -43,7 +43,7 @@ bool WizHtml2Zip(const QString& strHtml, const CWizStdStringArray& arrayResource
     {
         strHtmlText = "<!DOCTYPE html>" + strHtmlText;
     }
-    CString strIndexFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(GetTickCount()) + ".html";
+    CString strIndexFileName = Utils::WizPathResolve::tempPath() + WizIntToStr(WizGetTickCount()) + ".html";
     //if (!::WizSaveUnicodeTextToUnicodeFile(strIndexFileName, strHtml))
     if (!::WizSaveUnicodeTextToUtf8File(strIndexFileName, strHtmlText))
         return false;

@@ -1,4 +1,4 @@
-#include "WizInfoBar.h"
+﻿#include "WizInfoBar.h"
 
 #include <QLabel>
 #include <QHBoxLayout>

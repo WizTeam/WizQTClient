@@ -1,4 +1,4 @@
-#ifndef WIZKMCORE_H
+﻿#ifndef WIZKMCORE_H
 #define WIZKMCORE_H
 
 #include "WizQtHelper.h"

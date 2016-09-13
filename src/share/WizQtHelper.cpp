@@ -1,10 +1,10 @@
-#include "WizQtHelper.h"
+﻿#include "WizQtHelper.h"
 
 #include <QtCore>
 #include <QtGui>
 #include <QApplication>
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 #include "qt_windows.h"
 #include "psapi.h"
 #endif
@@ -89,8 +89,13 @@ WizOleDateTime &WizOleDateTime::operator=(const WizOleDateTime &other)
 }
 
 
-#ifndef _WIN32
-int GetTickCount()
+#ifdef Q_OS_WIN
+int WizGetTickCount()
+{
+    return GetTickCount();
+}
+#else
+int WizGetTickCount()
 {
     QTime time = QTime::currentTime();
     return time.msecsSinceStartOfDay();
@@ -598,7 +603,7 @@ QList<WizWindowInfo> WizGetActiveWindows()
 }
 #endif
 
-#ifdef _WIN32
+#ifdef Q_OS_WIN
 
 QList<WizWindowInfo> WizGetActiveWindows()
 {

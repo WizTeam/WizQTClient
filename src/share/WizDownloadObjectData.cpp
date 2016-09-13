@@ -1,4 +1,4 @@
-#include "WizDownloadObjectData.h"
+﻿#include "WizDownloadObjectData.h"
 
 WizDownloadObjectData::WizDownloadObjectData(WizDatabaseManager& dbMgr)
     : CWizApi(dbMgr.db())
