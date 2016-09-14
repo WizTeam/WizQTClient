@@ -3389,10 +3389,26 @@ void WizMainWindow::checkWizUpdate()
 
 void WizMainWindow:: adjustToolBarLayout()
 {
-#ifdef Q_OS_LINUX
     if (!m_toolBar)
         return;
+#ifdef Q_OS_MAC
     //
+    #ifndef USECOCOATOOLBAR
+    //
+    QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
+    //
+    QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
+    QPoint ptSpacerBeforeSearch = m_spacerForToolButtonAdjust->mapToGlobal(QPoint(0, 0));
+    //
+    int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
+    spacerWidth += list->size().width();
+    if (spacerWidth < 0)
+        return;
+    //
+    m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
+    //
+    #endif
+#else
     QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
     //
     QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
@@ -3413,25 +3429,6 @@ void WizMainWindow:: adjustToolBarLayout()
     {
         m_searchWidget->setFixedWidth(searchWidth);
     }
-#else
-    if (!m_toolBar)
-        return;
-
-#ifndef USECOCOATOOLBAR
-    //
-    QWidget* list = m_documents->isVisible() ? (QWidget*)m_documents : (QWidget*)m_msgList;
-    //
-    QPoint ptSearch = list->mapToGlobal(QPoint(0, 0));
-    QPoint ptSpacerBeforeSearch = m_spacerForToolButtonAdjust->mapToGlobal(QPoint(0, 0));
-    //
-    int spacerWidth = ptSearch.x() - ptSpacerBeforeSearch.x();
-    spacerWidth += list->size().width();
-    if (spacerWidth < 0)
-        return;
-    //
-    m_spacerForToolButtonAdjust->adjustWidth(spacerWidth);
-#else
-#endif
 #endif
 }
 
