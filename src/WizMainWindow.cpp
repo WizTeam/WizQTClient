@@ -107,7 +107,11 @@
 static WizMainWindow* windowInstance = 0;
 
 WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
+#ifdef Q_OS_MAC
     : _baseClass(parent)
+#else
+    : _baseClass(parent, true)
+#endif
     , m_dbMgr(dbMgr)
     , m_progress(new WizProgressDialog(this))
     , m_settings(new WizUserSettings(dbMgr.db()))

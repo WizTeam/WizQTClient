@@ -88,7 +88,7 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
 #ifdef Q_OS_MAC
     : QDialog(parent)
 #else
-    : WizShadowWindow<QDialog>(parent)
+    : WizShadowWindow<QDialog>(parent, false)
 #endif
     , ui(new Ui::wizLoginWidget)
     , m_menuUsers(new QMenu(this))
@@ -105,8 +105,6 @@ WizLoginDialog::WizLoginDialog(const QString &strLocale, const QList<WizLocalUse
     ui->setupUi(this);
 #else
     layoutTitleBar();
-    //
-    setCanResize(false);
     //
     QWidget* uiWidget = new QWidget(clientWidget());
     clientLayout()->addWidget(uiWidget);

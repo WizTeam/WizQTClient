@@ -34,14 +34,31 @@ private:
 #endif
 
 
+enum WizWindowHitTestResult {wizTopLeft, wizTop, wizTopRight, wizLeft, wizClient, wizRight, wizBottomLeft, wizBottom, wizBottomRight};
+
 class WizShadowWidget : public QWidget
 {
 public:
-    WizShadowWidget(QWidget* parent, int shadowSize);
+    WizShadowWidget(QWidget* parent, int shadowSize, bool canResize);
 private:
     WizSkin9GridImage* m_shadow;
+    int m_shadowSize;
+    bool m_canResize;
+    //
+    WizWindowHitTestResult m_oldHitCode;
+    QPoint m_oldPressPos;
+    QRect m_oldGeometry;
+    bool m_mousePressed;
 protected:
-    virtual void paintEvent(QPaintEvent *);
+    void paintEvent(QPaintEvent *) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void mousePressEvent(QMouseEvent *event) override;
+    void mouseReleaseEvent(QMouseEvent *event) override;
+    //
+    virtual WizWindowHitTestResult hitTest(const QPoint& posOfWindow);
+public:
+    bool canResize() const { return m_canResize; }
+    void setCanResize(bool b) { m_canResize = b; }
 };
 
 #endif // WIZSHADOWEFFECT_H

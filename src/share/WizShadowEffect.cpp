@@ -5,6 +5,7 @@
 #include "WizMisc.h"
 #include <QPainter>
 #include <QPaintEngine>
+#include <QMouseEvent>
 
 #if 0
 WizCustomShadowEffect::WizCustomShadowEffect(QObject *parent) :
@@ -95,7 +96,7 @@ inline unsigned char WizMakeAlpha(int i, double f, int nSize)
     return int(abs((i * f) * f2));
 }
 
-QImage WizMakeShadow(int shadowSize, bool activated)
+QImage WizMakeShadowImage(int shadowSize, bool activated)
 {
     int size = shadowSize * 2 + 10;
     QImage image(size, size, QImage::Format_ARGB32);
@@ -269,9 +270,13 @@ QImage WizMakeShadow(int shadowSize, bool activated)
 
 
 
-WizShadowWidget::WizShadowWidget(QWidget* parent, int shadowSize)
+WizShadowWidget::WizShadowWidget(QWidget* parent, int shadowSize, bool canResize)
     : QWidget(parent)
     , m_shadow(new WizSkin9GridImage())
+    , m_shadowSize(shadowSize)
+    , m_canResize(canResize)
+    , m_oldHitCode(wizClient)
+    , m_mousePressed(false)
 {
 
 #if 0
@@ -283,7 +288,12 @@ WizShadowWidget::WizShadowWidget(QWidget* parent, int shadowSize)
     setGraphicsEffect(bodyShadow);
 #endif
 
-    QImage image = WizMakeShadow(shadowSize, true);
+    if (m_canResize)
+    {
+        setMouseTracking(true);
+    }
+    //
+    QImage image = WizMakeShadowImage(shadowSize, true);
     m_shadow->setImage(image, QPoint(shadowSize + 1, shadowSize + 1));
 }
 
@@ -291,4 +301,163 @@ void WizShadowWidget::paintEvent(QPaintEvent *)
 {
     QPainter painter(this);
     m_shadow->drawBorder(&painter, rect());
+}
+
+
+WizWindowHitTestResult WizShadowWidget::hitTest(const QPoint& posOfWindow)
+{
+    if (!m_canResize)
+        return wizClient;
+    //
+    QPoint pos = posOfWindow;
+    if (pos.x() < m_shadowSize)
+    {
+        if (pos.y() < m_shadowSize)
+        {
+            return wizTopLeft;
+        }
+        else if (pos.y() >= height() - m_shadowSize)
+        {
+            return wizBottomLeft;
+        }
+        else
+        {
+            return wizLeft;
+        }
+    }
+    else if (pos.x() > width() - m_shadowSize)
+    {
+        if (pos.y() < m_shadowSize)
+        {
+            return wizTopRight;
+        }
+        else if (pos.y() >= height() - m_shadowSize)
+        {
+            return wizBottomRight;
+        }
+        else
+        {
+            return wizRight;
+        }
+    }
+    else if (pos.y() < m_shadowSize)
+    {
+        return wizTop;
+    }
+    else if (pos.y() > height() - m_shadowSize)
+    {
+        return wizBottom;
+    }
+    else
+    {
+        return wizClient;
+    }
+}
+
+void WizShadowWidget::mouseMoveEvent(QMouseEvent *event)
+{
+    if (m_mousePressed)
+    {
+        if (m_oldHitCode == wizClient)
+            return;
+        //
+        QPoint pos = event->globalPos();
+        int offsetX = pos.x() - m_oldPressPos.x();
+        int offsetY = pos.y() - m_oldPressPos.y();
+        //
+        QRect rc = m_oldGeometry;
+        //
+        switch (m_oldHitCode)
+        {
+        case wizTopLeft:
+            rc.adjust(offsetX, offsetY, 0, 0);
+            break;
+        case wizTop:
+            rc.adjust(0, offsetY, 0, 0);
+            break;
+        case wizTopRight:
+            rc.adjust(0, offsetY, offsetX, 0);
+            break;
+        case wizLeft:
+            rc.adjust(offsetX, 0, 0, 0);
+            break;
+        case wizRight:
+            rc.adjust(0, 0, offsetX, 0);
+            break;
+        case wizBottomLeft:
+            rc.adjust(offsetX, 0, 0, offsetY);
+            break;
+        case wizBottom:
+            rc.adjust(0, 0, 0, offsetY);
+            break;
+        case wizBottomRight:
+            rc.adjust(0, 0, offsetX, offsetY);
+            break;
+        default:
+            Q_ASSERT(false);
+            break;
+        }
+        //
+        parentWidget()->setGeometry(rc);
+    }
+    else
+    {
+        QPoint pos = event->pos();
+        WizWindowHitTestResult hit = hitTest(pos);
+        if (hit != wizClient)
+        {
+            event->accept();
+        }
+        //
+        switch (hit)
+        {
+        case wizTopLeft:
+            setCursor(QCursor(Qt::SizeFDiagCursor));
+            break;
+        case wizTop:
+            setCursor(QCursor(Qt::SizeVerCursor));
+            break;
+        case wizTopRight:
+            setCursor(QCursor(Qt::SizeBDiagCursor));
+            break;
+        case wizLeft:
+            setCursor(QCursor(Qt::SizeHorCursor));
+            break;
+        case wizClient:
+            setCursor(QCursor(Qt::ArrowCursor));
+            break;
+        case wizRight:
+            setCursor(QCursor(Qt::SizeHorCursor));
+            break;
+        case wizBottomLeft:
+            setCursor(QCursor(Qt::SizeBDiagCursor));
+            break;
+        case wizBottom:
+            setCursor(QCursor(Qt::SizeVerCursor));
+            break;
+        case wizBottomRight:
+            setCursor(QCursor(Qt::SizeFDiagCursor));
+            break;
+        }
+    }
+}
+
+void WizShadowWidget::mousePressEvent(QMouseEvent *event)
+{
+    QPoint pos = event->pos();
+    WizWindowHitTestResult hit = hitTest(pos);
+    //
+    m_oldHitCode = hit;
+    m_oldPressPos = event->globalPos();
+    m_mousePressed = true;
+    m_oldGeometry = parentWidget()->geometry();
+    //
+    QWidget::mousePressEvent(event);
+}
+
+void WizShadowWidget::mouseReleaseEvent(QMouseEvent *event)
+{
+    m_mousePressed = false;
+    //
+    QWidget::mouseReleaseEvent(event);
 }

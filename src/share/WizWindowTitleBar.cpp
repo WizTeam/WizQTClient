@@ -11,12 +11,12 @@
 #include "WizMisc.h"
 
 
-WizWindowTitleBar::WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget)
+WizWindowTitleBar::WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget, bool canResize)
     : QWidget(parent)
     , m_window(window)
     , m_shadowContainerWidget(shadowContainerWidget)
     , m_oldContentsMargin(10, 10, 10, 10)
-    , m_canResize(true)
+    , m_canResize(canResize)
 {
     // 不继承父组件的背景色
     setAutoFillBackground(true);
@@ -76,7 +76,11 @@ WizWindowTitleBar::WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* 
     connect(m_maximize, SIGNAL( clicked() ), this, SLOT(showMaxRestore() ) );
     //
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    //
+    m_maximize->setEnabled(m_canResize);
+    m_minimize->setEnabled(m_canResize);
 }
+
 void WizWindowTitleBar::layoutTitleBar()
 {
     QHBoxLayout *hbox = new QHBoxLayout(this);
@@ -146,13 +150,7 @@ void WizWindowTitleBar::mouseDoubleClickEvent ( QMouseEvent * event )
         showMaxRestore();
     }
 }
-void WizWindowTitleBar::setCanResize(bool b)
-{
-    m_canResize = b;
-    //
-    m_maximize->setEnabled(b);
-    m_minimize->setEnabled(b);
-}
+
 
 void WizWindowTitleBar::setContentsMargins(QMargins margins)
 {

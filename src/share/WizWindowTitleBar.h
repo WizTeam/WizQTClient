@@ -10,7 +10,7 @@ class WizWindowTitleBar : public QWidget
 {
     Q_OBJECT
 public:
-    WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget);
+    WizWindowTitleBar(QWidget *parent, QWidget* window, QWidget* shadowContainerWidget, bool canResize);
 private:
     QWidget* m_window;
     QWidget* m_shadowContainerWidget;
@@ -24,9 +24,6 @@ public:
     QToolButton* minButton() const { return m_minimize; }
     QToolButton* closeButton() const { return m_close; }
     QLabel* titleLabel() const { return m_titleLabel; }
-    //
-    void setCanResize(bool b);
-    bool canResize() const { return m_canResize; }
     //
     void setContentsMargins(QMargins margins);
     //
