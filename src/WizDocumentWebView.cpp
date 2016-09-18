@@ -173,8 +173,6 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
 
 WizDocumentWebView::~WizDocumentWebView()
 {
-    if (m_searchReplaceWidget)
-        delete m_searchReplaceWidget;
 }
 void WizDocumentWebView::waitForDone()
 {

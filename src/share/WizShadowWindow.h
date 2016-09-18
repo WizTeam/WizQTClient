@@ -39,8 +39,9 @@ public:
         windowLayout->setContentsMargins(0, 0, 0, 0);
         windowLayout->setSpacing(0);
         //
-        m_rootWidget = new WizShadowWidget(this);
-        m_rootWidget->setContentsMargins(10, 10, 10, 10);
+        int shadowSize = WizSmartScaleUI(20);
+        m_rootWidget = new WizShadowWidget(this, shadowSize);
+        m_rootWidget->setContentsMargins(shadowSize, shadowSize, shadowSize, shadowSize);
         windowLayout->addWidget(m_rootWidget);
         //
         QLayout* rootLayout = new QBoxLayout(QBoxLayout::TopToBottom);

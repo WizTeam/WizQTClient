@@ -80,6 +80,9 @@ private:
         //
         while (1)
         {
+            if (m_pEvents->isStop())
+                return FALSE;
+            //
             std::deque<TData> arrayPageData;
             //
             //QString strProgress = WizFormatString1(::WizTranslationsTranslateString("Start Version: %1"), WizInt64ToStr(nNextVersion));

@@ -19,6 +19,7 @@ protected:
 public:
     static BOOL splitRect(const QRect& rcSrc, QPoint ptTopLeft, QRect* parrayRect, int nArrayCount);
     BOOL setImage(const CString& strImageFileName, QPoint ptTopLeft);
+    BOOL setImage(const QImage& image, QPoint ptTopLeft);
     //
     void draw(QPainter* p, QRect rc, int nAlpha) const;
     void drawBorder(QPainter* p, QRect rc) const;

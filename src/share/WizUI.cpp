@@ -66,8 +66,20 @@ BOOL WizSkin9GridImage::setImage(const CString& strImageFileName, QPoint ptTopLe
 {
     clear();
     //
-    if (FAILED(m_img.load(strImageFileName)))
+    if (!m_img.load(strImageFileName))
         return FALSE;
+    //
+    int nImageWidth = m_img.width();
+    int nImageHeight = m_img.height();
+    //
+    return splitRect(QRect(0, 0, nImageWidth, nImageHeight), ptTopLeft, m_arrayImageGrid, 9);
+}
+
+BOOL WizSkin9GridImage::setImage(const QImage& image, QPoint ptTopLeft)
+{
+    clear();
+    //
+    m_img = image;
     //
     int nImageWidth = m_img.width();
     int nImageHeight = m_img.height();

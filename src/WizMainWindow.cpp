@@ -3026,7 +3026,7 @@ void WizMainWindow::on_menuButtonClicked()
 
 void WizMainWindow::on_client_splitterMoved(int pos, int index)
 {
-#ifdef Q_OS_LINUX
+#ifndef Q_OS_MAC
     adjustToolBarLayout();
 #endif
 }
