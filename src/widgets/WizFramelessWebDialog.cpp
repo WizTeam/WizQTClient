@@ -15,18 +15,18 @@ WizFramelessWebDialog::WizFramelessWebDialog(QWidget *parent) :
     setWindowFlags(Qt::FramelessWindowHint);
     setAttribute(Qt::WA_DeleteOnClose);
 
-    WizWebEngineView *view = new WizWebEngineView(this);
+    m_web = new WizWebEngineView(this);
     //
-    view->addToJavaScriptWindowObject("customObject", this);
+    m_web->addToJavaScriptWindowObject("customObject", this);
     //
-    m_frame = view->page();
-    connect(view, SIGNAL(loadFinishedEx(bool)), SLOT(onPageLoadFinished(bool)));
+    m_frame = m_web->page();
+    connect(m_web, SIGNAL(loadFinishedEx(bool)), SLOT(onPageLoadFinished(bool)));
     //
-    view->setContextMenuPolicy(Qt::NoContextMenu);
+    m_web->setContextMenuPolicy(Qt::NoContextMenu);
 
     QVBoxLayout *layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
-    layout->addWidget(view);
+    layout->addWidget(m_web);
 }
 
 void WizFramelessWebDialog::loadAndShow(const QString& strUrl)
@@ -35,13 +35,15 @@ void WizFramelessWebDialog::loadAndShow(const QString& strUrl)
     m_frame->load(QUrl(m_url));
 }
 
-void WizFramelessWebDialog::execute(const QString& strFunction, QVariant param1,
+void WizFramelessWebDialog::Execute(const QString& strFunction, QVariant param1,
                                               QVariant param2, QVariant param3, QVariant param4)
 {
     if (strFunction == "close")
     {
         ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
             hide();
+            m_web->closeAll();
+            //
             QTimer::singleShot(1000, Qt::PreciseTimer, [=]{
                 deleteLater();
             });

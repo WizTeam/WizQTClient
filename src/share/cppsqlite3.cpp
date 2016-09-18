@@ -870,15 +870,7 @@ void CppSQLite3DB::setBusyTimeout(int nMillisecs)
 
 BOOL CppSQLite3DB::isOpened()
 {
-	try
-	{
-		checkDB();
-		return TRUE;
-	}
-	catch (const CppSQLite3Exception& )
-	{
-		return FALSE;
-	}
+    return mpDB ? TRUE : FALSE;
 }
 
 void CppSQLite3DB::checkDB()

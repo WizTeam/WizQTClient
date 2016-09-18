@@ -5,6 +5,7 @@
 #include <QString>
 #include <QList>
 
+class WizWebEngineView;
 class QWebEnginePage;
 
 class WizFramelessWebDialog : public QDialog
@@ -19,12 +20,13 @@ signals:
     void doNotShowThisAgain(bool bAgain);
 
 public slots:
-    void execute(const QString& strFunction, QVariant param1, QVariant param2,
+    void Execute(const QString& strFunction, QVariant param1, QVariant param2,
                                   QVariant param3, QVariant param4);
     void onPageLoadFinished(bool ok);
 
 
 private:
+    WizWebEngineView* m_web;
     QWebEnginePage *m_frame;
     QString m_url;
     QList<int> m_timerIDList;

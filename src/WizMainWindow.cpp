@@ -3636,16 +3636,23 @@ void WizMainWindow::createNoteWithText(const QString& strText)
 
 void WizMainWindow::showNewFeatureGuide()
 {
+#ifdef Q_OS_WIN
+    return;
+#else
     QString strUrl = WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=newfeature-mac.html";
 
     WizFramelessWebDialog *dlg = new WizFramelessWebDialog();
     dlg->loadAndShow(strUrl);
+#endif
 }
 
 void WizMainWindow::showMobileFileReceiverUserGuide()
 {
+#ifdef Q_OS_WIN
+    return;
+#else
     QString strUrl = WizApiEntry::standardCommandUrl("link");
     strUrl = strUrl + "&site=" + (m_settings->locale() == WizGetDefaultTranslatedLocal() ? "wiznote" : "blog" );
     strUrl += "&name=guidemap_sendimage.html";
@@ -3655,6 +3662,7 @@ void WizMainWindow::showMobileFileReceiverUserGuide()
     connect(dlg, SIGNAL(doNotShowThisAgain(bool)),
             SLOT(setDoNotShowMobileFileReceiverUserGuideAgain(bool)));
     dlg->loadAndShow(strUrl);
+#endif
 }
 
 void WizMainWindow::setDoNotShowMobileFileReceiverUserGuideAgain(bool bNotAgain)

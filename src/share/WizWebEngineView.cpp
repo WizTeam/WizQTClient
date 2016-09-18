@@ -37,7 +37,7 @@ WizWebEngineView::WizWebEngineView(QWidget* parent)
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
     //
     // setup the QWebSocketServer
-    m_server = new QWebSocketServer(QStringLiteral("QWebChannel Standalone Example Server"), QWebSocketServer::NonSecureMode);
+    m_server = new QWebSocketServer(QStringLiteral("WizNote QWebChannel Server"), QWebSocketServer::NonSecureMode);
     //
     if (!m_server->listen(QHostAddress::LocalHost)) {
         qFatal("Failed to open web socket server.");

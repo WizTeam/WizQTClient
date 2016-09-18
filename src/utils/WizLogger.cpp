@@ -61,7 +61,7 @@ void WizLogger::messageHandler(QtMsgType type, const QMessageLogContext& context
         break;
     case QtFatalMsg:
         fprintf(stderr, "[FATAL]: %s (%s:%u, %s)\n", msg.toUtf8().constData(), context.file, context.line, context.function);
-        abort();
+        break;
     }
 }
 
