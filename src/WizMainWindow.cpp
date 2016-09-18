@@ -1565,7 +1565,7 @@ void WizMainWindow::layoutTitleBar()
     layoutTitle->setContentsMargins(0, 0, 0, 0);
     //
     QLayout* layoutTitleBar = new QHBoxLayout();
-    int margin = WizSmartScaleUI(10);
+    int margin = WizSmartScaleUI(m_useSystemBasedStyle ? 4 : 10);
     layoutTitleBar->setContentsMargins(margin, margin, margin, margin);
     layoutTitleBar->addWidget(m_toolBar);
     layoutTitle->addItem(layoutTitleBar);
@@ -3718,10 +3718,12 @@ void WizMainWindow::setWindowStyleForLinux(bool bUseSystemStyle)
     if (bUseSystemStyle)
     {
         setAttribute(Qt::WA_TranslucentBackground, false); //enable MainWindow to be transparent
+        //
         {
-        QMainWindow window;
-        setWindowFlags(window.windowFlags());
+            QMainWindow window;
+            setWindowFlags(window.windowFlags());
         }
+        //
         rootWidget()->setContentsMargins(0, 0, 0, 0);
         titleBar()->maxButton()->setVisible(false);
         titleBar()->minButton()->setVisible(false);

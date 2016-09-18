@@ -67,8 +67,6 @@ public:
         //
         m_clientLayout->setSpacing(0);
         m_clientLayout->setContentsMargins(0, 0, 0, 0);
-        //
-        pT->setMouseTracking(true);
     }
 public:
     QWidget* rootWidget() const { return m_shadowWidget; }
