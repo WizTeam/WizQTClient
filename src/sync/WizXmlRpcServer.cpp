@@ -44,11 +44,13 @@ bool WizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, WizXmlRpcResu
     {
         data.addParam(pParam4);
     }
+    //
+    QUrl url(m_strUrl + "?methodName=" + strMethodName);
 
     QNetworkRequest request;
-    request.setUrl(QUrl(m_strUrl));
+    request.setUrl(url);
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
-    //
+    request.setHeader(QNetworkRequest::UserAgentHeader, QVariant(QString("WizQT_") + WIZ_CLIENT_VERSION));
 
     int nCounter = 0;
     while (true)
