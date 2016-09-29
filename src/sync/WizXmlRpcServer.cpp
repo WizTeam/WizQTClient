@@ -5,6 +5,7 @@
 #include <QTimer>
 
 #include "share/WizEventLoop.h"
+#include "WizDef.h"
 
 
 WizXmlRpcServerBase::WizXmlRpcServerBase(const QString& strUrl, QObject* parent)

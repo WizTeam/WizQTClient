@@ -7,6 +7,8 @@
 #include <QPaintEngine>
 #include <QMouseEvent>
 
+#include <math.h>
+
 #if 0
 WizCustomShadowEffect::WizCustomShadowEffect(QObject *parent) :
     QGraphicsEffect(parent),
@@ -93,7 +95,7 @@ inline unsigned char WizMakeAlpha(int i, double f, int nSize)
 
     double f2 = 1 - cos((double)i / nSize * 3.14 / 2);
     //
-    return int(abs((i * f) * f2));
+    return int(fabs((i * f) * f2));
 }
 
 QImage WizMakeShadowImage(int shadowSize, bool activated)

@@ -415,7 +415,7 @@ if(UNIX)
         set_target_properties(${PROJECT_NAME} PROPERTIES AUTOMOC_MOC_OPTIONS "-DQ_OS_MAC")
 
         # this should be issue of cmake, refer: http://public.kitware.com/Bug/bug_revision_view_page.php?rev_id=958
-        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-F /Library/Frameworks")
+        set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-F /System/Library/Frameworks")
 
         # qmake will do this automatically
         set_target_properties(${PROJECT_NAME} PROPERTIES COMPILE_FLAGS "-mmacosx-version-min=10.7")
@@ -509,7 +509,7 @@ include_directories(
     )
 
 if (APPLE)
-    include_directories(~/Library/Frameeorks)
+    include_directories(~/Library/Frameworks)
 elseif(WIN32)
     include_directories(
         ${CMAKE_SOURCE_DIR}/lib/zlib

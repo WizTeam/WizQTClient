@@ -189,7 +189,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
         setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
-#endif    
+#endif
 
     // search and full text search
     m_searchIndexer->start(QThread::IdlePriority);
@@ -255,7 +255,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     restoreStatus();
 
     // upgrade check
-#ifndef BUILD4APPSTORE    
+#ifndef BUILD4APPSTORE
     if (userSettings().autoCheckUpdate())
     {
         checkWizUpdate();
@@ -381,7 +381,7 @@ void WizMainWindow::cleanOnQuit()
 }
 
 WizSearcher*WizMainWindow::searcher()
-{    
+{
     return m_searcher;
 }
 
@@ -527,7 +527,7 @@ void WizMainWindow::on_actionClose_triggered()
         {
             wgt->setWindowState(wgt->windowState() & ~Qt::WindowFullScreen);
         }
-       wgt->close();       
+       wgt->close();
        wgt->deleteLater();
     }
     else
@@ -555,7 +555,7 @@ void WizMainWindow::on_actionClose_triggered()
 void WizMainWindow::resizeEvent(QResizeEvent *event)
 {
     QMainWindow::resizeEvent(event);
-    update();    
+    update();
 }
 
 void WizMainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
@@ -575,7 +575,7 @@ void WizMainWindow::on_checkUpgrade_finished(bool bUpgradeAvaliable)
         Q_ASSERT(0);
 #endif
         QDesktopServices::openUrl(QUrl(url));
-    }    
+    }
 }
 
 bool isXMLRpcErrorCodeRelatedWithUserAccount(int nErrorCode)
@@ -723,7 +723,7 @@ void WizMainWindow::on_dockMenuAction_triggered()
         {
             WizSingleDocumentViewer* viewer = m_singleViewDelegate->getDocumentViewer(guid);
             if (viewer)
-            {                
+            {
                 bringWidgetToFront(viewer);
             }
         }
@@ -754,7 +754,7 @@ void WizMainWindow::on_trayIcon_actived(QSystemTrayIcon::ActivationReason reason
     case QSystemTrayIcon::DoubleClick:
     {
         trayTimer.stop();
-        qDebug() << "trayicon double clicked";        
+        qDebug() << "trayicon double clicked";
     }
         break;
     case QSystemTrayIcon::Trigger:
@@ -1769,7 +1769,7 @@ void WizMainWindow::initToolBar()
 
 void WizMainWindow::initClient()
 {
-#ifdef Q_OS_MAC    
+#ifdef Q_OS_MAC
 
     m_clienWgt = new QWidget(this);
     setCentralWidget(m_clienWgt);
@@ -1805,7 +1805,7 @@ void WizMainWindow::initClient()
     QVBoxLayout* layout = new QVBoxLayout(m_clienWgt);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);
-    m_clienWgt->setLayout(layout);    
+    m_clienWgt->setLayout(layout);
 
     m_splitter = std::make_shared<WizSplitter>();
     layout->addWidget(m_splitter.get());
@@ -1826,11 +1826,11 @@ void WizMainWindow::initClient()
     layoutDocument->addWidget(m_doc);
     layoutDocument->addWidget(m_documentSelection);
     m_documentSelection->hide();
-    // append after client   
+    // append after client
 
     m_splitter->addWidget(m_category);
 
-    m_docListContainer = new QWidget(this);   
+    m_docListContainer = new QWidget(this);
     m_docListContainer->setPalette(pal);
     m_docListContainer->setAutoFillBackground(true);
     QHBoxLayout* layoutList = new QHBoxLayout();
@@ -1926,7 +1926,7 @@ QWidget* WizMainWindow::createNoteListView()
     m_btnMarkDocumentsReaded->setFixedSize(QSize(18, 18));
     m_btnMarkDocumentsReaded->setToolTip(tr("Mark all documents read"));
     connect(m_btnMarkDocumentsReaded, SIGNAL(clicked()), SLOT(on_btnMarkDocumentsRead_triggered()));
-    layoutActions->addWidget(m_btnMarkDocumentsReaded);    
+    layoutActions->addWidget(m_btnMarkDocumentsReaded);
 
     m_labelDocumentsHint->setVisible(false);
     m_btnMarkDocumentsReaded->setVisible(false);
@@ -2176,8 +2176,8 @@ void WizMainWindow::on_syncStarted(bool syncAll)
 }
 
 void WizMainWindow::on_syncDone(int nErrorCode, const QString& strErrorMsg, bool isBackground)
-{    
-    m_animateSync->stopPlay();    
+{
+    m_animateSync->stopPlay();
 
     //
     if (isXMLRpcErrorCodeRelatedWithUserAccount(nErrorCode))
@@ -2239,7 +2239,7 @@ void WizMainWindow::on_bubbleNotification_request(const QVariant& param)
 }
 
 void WizMainWindow::on_actionNewNote_triggered()
-{    
+{
     WizGetAnalyzer().logAction("newNote");
 
     initVariableBeforCreateNote();
@@ -2265,7 +2265,7 @@ void WizMainWindow::on_actionNewNoteByTemplate_triggered()
 }
 
 void WizMainWindow::on_actionEditingUndo_triggered()
-{    
+{
     if (WizCodeEditorDialog::undo())
         return;
     //
@@ -2381,7 +2381,7 @@ void WizMainWindow::on_actionViewToggleCategory_triggered()
     } else {
         category->show();
         m_docListContainer->show();
-    }    
+    }
 
     m_actions->toggleActionText(WIZACTION_GLOBAL_TOGGLE_CATEGORY);
 }
@@ -2897,7 +2897,7 @@ void WizMainWindow::on_actionAddCustomSearch_triggered()
 }
 
 void WizMainWindow::on_actionFindReplace_triggered()
-{    
+{
     getActiveEditor()->editorCommandExecuteFindReplace();
     WizGetAnalyzer().logAction("MenuBarFindReplace");
 }
@@ -3678,7 +3678,7 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     connect(actionShow, SIGNAL(triggered()), SLOT(shiftVisableStatus()));
 
     QAction* actionNewNote = m_trayMenu->addAction(tr("New Note"));
-    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));    
+    connect(actionNewNote, SIGNAL(triggered()), SLOT(on_trayIcon_newDocument_clicked()));
 
     //
     m_trayMenu->addSeparator();
@@ -3694,29 +3694,19 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     connect(m_tray, SIGNAL(viewMessageRequest(qint64)),
             SLOT(on_viewMessage_request(qint64)));
 
-#ifdef Q_OS_MAC
-    trayIcon->setContextMenu(m_trayMenu);
     //
+    trayIcon->setContextMenu(m_trayMenu);
+#ifdef Q_OS_MAC
     QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon");
     QString selected = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_selected");
     QIcon icon;
+    icon.setIsMask(true);
     icon.addFile(normal, QSize(), QIcon::Normal, QIcon::Off);
     icon.addFile(selected, QSize(), QIcon::Selected, QIcon::Off);
     if (!icon.isNull())
     {
         trayIcon->setIcon(icon);
     }
-#else
-    trayIcon->setContextMenu(m_trayMenu);
-//    connect(trayIcon, SIGNAL(activated(QSystemTrayIcon::ActivationReason)),
-//            SLOT(on_trayIcon_actived(QSystemTrayIcon::ActivationReason)));
-
-//    QString normal = WizGetSkinResourceFileName(userSettings().skin(), "trayIcon_grey");
-//    QIcon icon(normal);
-//    if (!icon.isNull())
-//    {
-//        trayIcon->setIcon(icon);
-//    }
 #endif
 }
 
