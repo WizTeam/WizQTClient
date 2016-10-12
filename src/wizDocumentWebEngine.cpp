@@ -1916,7 +1916,7 @@ void CWizDocumentWebEngine::saveAsPDF()
         if (strHtml.isEmpty())
             return;
 
-        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
+        QString	fileName = QFileDialog::getSaveFileName (this, QString(), QDir::homePath() + "/untitled.pdf", tr("PDF Files (*.pdf)"));
         if (!fileName.isEmpty())
         {
             if (::PathFileExists(fileName))
