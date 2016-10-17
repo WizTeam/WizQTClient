@@ -1242,6 +1242,8 @@ void WizDocumentListView::resetItemsViewType(int type)
         int nHeight = Utils::WizStyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : (int)Utils::WizStyleHelper::ListTypeSection);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
+    //
+    m_app.userSettings().set("VIEW_TYPE", QString::number(type));
 }
 
 QSize WizDocumentListView::itemSizeFromViewType(ViewType type)
