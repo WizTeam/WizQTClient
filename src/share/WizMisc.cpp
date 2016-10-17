@@ -1869,14 +1869,164 @@ void WizHtml2Text(const QString& strHtml, QString& strText)
     return;
 }
 
+
+
+
+inline bool WizConvertTextToHTML_ForPaste_ProcessSpaceBeginEnd(int nBegin, QString& strLine, const QString& strTab)
+{
+    bool bRet = false;
+    //
+    int i = nBegin;
+    while (1)
+    {
+        if (i >= strLine.length())
+            return bRet;
+        //
+        QChar ch = strLine[i];
+        //
+        QChar chNext = 0;
+        if (i < strLine.length() - 1)
+        {
+            chNext = strLine[i + 1];
+        }
+        //
+        if (ch == ' ')
+        {
+            if (chNext != ' ' && chNext != '\t' && bRet)
+            {
+                return bRet;
+            }
+            //
+            strLine.remove(i, 1);
+            strLine.insert(i, "&nbsp;");
+            i += 6;
+            //
+            bRet = true;
+        }
+        else if (ch == '\t')
+        {
+            strLine.remove(i, 1);
+            strLine.insert(i, strTab);
+            i += strTab.length();
+            //
+            bRet = true;
+        }
+        else
+        {
+            return bRet;
+        }
+    }
+}
+
+inline bool WizConvertTextToHTML_ForPaste_ProcessBeginSpace(QString& strLine, const QString& strTab)
+{
+    return WizConvertTextToHTML_ForPaste_ProcessSpaceBeginEnd(0, strLine, strTab);
+}
+inline bool WizConvertTextToHTML_ForPaste_ProcessEndSpace(QString& strLine, const QString& strTab)
+{
+    int nPos = -1;
+    //
+    int nLen = strLine.length();
+    for (int i = nLen - 1; i >= 0; i--)
+    {
+        QChar ch = strLine[i];
+        if (ch == '\t' || ch == ' ')
+        {
+            nPos = i;
+        }
+        else
+        {
+            break;
+        }
+    }
+    //
+    if (-1 == nPos)
+        return false;
+    //
+    return WizConvertTextToHTML_ForPaste_ProcessSpaceBeginEnd(nPos, strLine, strTab);
+}
+
+inline bool WizConvertTextToHTML_ForPaste_Line(QString& strLine, const QString& strTab, const QString& strMidTab)
+{
+    strLine.replace("&", "&amp;");
+    strLine.replace("<", "&lt;");
+    strLine.replace(">", "&gt;");
+    //
+    WizConvertTextToHTML_ForPaste_ProcessBeginSpace(strLine, strTab);
+    WizConvertTextToHTML_ForPaste_ProcessEndSpace(strLine, strTab);
+    //
+    strLine.replace("\t", strMidTab);
+    //
+    return true;
+}
+
+inline bool WizConvertTextToHTML_ForPaste(QString& strText, int nTabSize)
+{
+    CWizStdStringArray arrayText;
+    WizSplitTextToArray(strText, '\n', arrayText);
+    //
+    QString strTab;
+    for (int i = 0; i < nTabSize; i++)
+    {
+        strTab += "&nbsp;";
+    }
+    //
+    QString strMidTab;
+    for (int i = 0; i < nTabSize - 1; i++)
+    {
+        strMidTab += "&nbsp;";
+    }
+    strMidTab += _T(" ");
+    //
+    size_t nCount = arrayText.size();
+    for (size_t i = 0; i < nCount; i++)
+    {
+        QString strLine = arrayText[i];
+        //
+        QString strTestLine = strLine;
+        strTestLine = strTestLine.trimmed();
+        //
+        if (strLine.isEmpty() || strTestLine.isEmpty())
+        {
+            if (i != nCount - 1)
+            {
+                arrayText[i] = "<br />";//_T("<div>&nbsp;</div>");
+            }
+        }
+        else
+        {
+            WizConvertTextToHTML_ForPaste_Line(strLine, strTab, strMidTab);
+            //
+            if (i != nCount - 1)
+            {
+                strLine += "<br />";
+            }
+            //
+            arrayText[i] = strLine;
+        }
+    }
+    //
+    CString ret;
+    WizStringArrayToText(arrayText, ret, CString("\r\n"));
+    strText = ret;
+    //
+    return true;
+}
+
 QString WizText2Html(const QString& text)
 {
+    QString temp = text;
+    WizConvertTextToHTML_ForPaste(temp, 4);
+    return temp;
+    /*
     QString html = text;
     html.replace("&", "&amp;");
     html.replace("<", "&lt;");
     html.replace(">", "&gt;");
+    html.replace("\n", "<br />");
     //
     return "<pre>" + html + "</pre>";
+    */
 }
 
 
