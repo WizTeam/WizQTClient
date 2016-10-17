@@ -1616,7 +1616,7 @@ void WizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
 void WizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 {
     if (color == QColor(Qt::transparent)) {
-        editorCommandExecuteCommand("backColor", "false", "'default'");
+       //editorCommandExecuteCommand("backColor", "false", "'default'");
     }
     else {
         editorCommandExecuteCommand("backColor", "false", "'" + color.name() + "'");
@@ -1628,7 +1628,7 @@ void WizDocumentWebView::editorCommandExecuteBackColor(const QColor& color)
 void WizDocumentWebView::editorCommandExecuteForeColor(const QColor& color)
 {
     if (color == QColor(Qt::transparent)) {
-        editorCommandExecuteCommand("foreColor", "false", "'default'");
+        //editorCommandExecuteCommand("foreColor", "false", "'default'");
     }
     else {
         editorCommandExecuteCommand("foreColor", "false", "'" + color.name() + "'");
