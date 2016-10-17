@@ -279,6 +279,14 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
         m_settings->setNewFeatureGuideVersion(WIZ_NEW_FEATURE_GUIDE_VERSION);
         QTimer::singleShot(3000, this, SLOT(showNewFeatureGuide()));
     }
+    //
+    if (dbMgr.db().hasBiz())
+    {
+        QTimer* syncMessageTimer = new QTimer(this);
+        connect(syncMessageTimer, SIGNAL(timeout()), m_sync, SLOT(quickDownloadMesages()));
+        syncMessageTimer->setInterval(3 * 1000 * 60);
+        syncMessageTimer->start(3 * 1000 * 60);
+    }
 }
 
 bool WizMainWindow::eventFilter(QObject* watched, QEvent* event)

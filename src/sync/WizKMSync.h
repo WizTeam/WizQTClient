@@ -50,11 +50,12 @@ public:
     //
     void addQuickSyncKb(const QString& kbGuid);
     //
-    void quickDownloadMesages();
-
     bool clearCurrentToken();
     //
     void waitForDone();
+
+public slots:
+    void quickDownloadMesages();
 
 public:
     static void quickSyncKb(const QString& kbGuid); //thread safe
