@@ -1295,6 +1295,8 @@ void WizDocumentListView::resetItemsSortingType(int type)
             WizDocumentListViewBaseItem* pItem = dynamic_cast<WizDocumentListViewBaseItem*>(item(i));
             pItem->setSortingType(type);
         }
+        //
+        m_app.userSettings().set("SORT_TYPE", QString::number(type));
     }
 
     sortItems();
