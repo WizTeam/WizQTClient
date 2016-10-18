@@ -28,7 +28,7 @@
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
 WizCodeEditorDialog::WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView* external, QWidget *parent) :
-    QDialog(parent)
+    WizWebEngineViewContainerDialog(parent)
   , m_app(app)
   , m_external(external)
   , m_codeBrowser(new WizWebEngineView(this))

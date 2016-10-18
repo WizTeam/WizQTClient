@@ -5,6 +5,7 @@
 #include "WebSocketTransport.h"
 #include <QWebEngineView>
 #include <QWebEnginePage>
+#include <QDialog>
 
 class QWebChannel;
 
@@ -46,6 +47,16 @@ private:
     WebSocketClientWrapper* m_clientWrapper;
     QWebChannel* m_channel;
     QString m_objectNames;
+};
+
+bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev);
+
+class WizWebEngineViewContainerDialog: public QDialog
+{
+public:
+    WizWebEngineViewContainerDialog(QWidget *parent = Q_NULLPTR, Qt::WindowFlags f = Qt::WindowFlags());
+protected:
+    virtual void keyPressEvent(QKeyEvent* ev);
 };
 
 #endif // MAINWINDOW_H

@@ -158,6 +158,15 @@ bool WizSingleDocumentViewer::event(QEvent* ev)
     return QWidget::event(ev);
 }
 
+void WizSingleDocumentViewer::keyPressEvent(QKeyEvent* ev)
+{
+    if (WizWebEngineViewProgressKeyEvents(ev))
+        return;
+    //
+    QWidget::keyPressEvent(ev);
+}
+
+
 void WizSingleDocumentViewer::applyWidgetBackground(bool isFullScreen)
 {
     QPalette pal = palette();

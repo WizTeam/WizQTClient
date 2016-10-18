@@ -6,13 +6,14 @@
 #include <QPropertyAnimation>
 #include "share/WizObject.h"
 #include <QWebEngineView>
+#include "share/WizWebEngineView.h"
 
 
 
 class WizUserSettings;
 class WizWebEngineView;
 
-class WizShareLinkDialog : public QDialog
+class WizShareLinkDialog : public WizWebEngineViewContainerDialog
 {
     Q_OBJECT
 public:

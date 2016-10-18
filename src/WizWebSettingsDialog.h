@@ -2,6 +2,7 @@
 #define WIZWEBSETTINGSDIALOG_H
 
 #include <QDialog>
+#include "share/WizWebEngineView.h"
 
 class QUrl;
 class QLabel;
@@ -11,7 +12,7 @@ class QPushButton;
 class QNetworkReply;
 class WizLocalProgressWebView;
 
-class WizWebSettingsDialog : public QDialog
+class WizWebSettingsDialog : public WizWebEngineViewContainerDialog
 {
     Q_OBJECT
 

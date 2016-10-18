@@ -4,11 +4,12 @@
 #include <QDialog>
 #include <QString>
 #include <QList>
+#include "share/WizWebEngineView.h"
 
 class WizWebEngineView;
 class QWebEnginePage;
 
-class WizFramelessWebDialog : public QDialog
+class WizFramelessWebDialog : public WizWebEngineViewContainerDialog
 {
     Q_OBJECT
 public:

@@ -31,6 +31,7 @@ protected:
     void resizeEvent(QResizeEvent* ev);
     void closeEvent(QCloseEvent *ev);
     bool event(QEvent *ev);
+    virtual void keyPressEvent(QKeyEvent* ev);
 
 private:
     void applyWidgetBackground(bool isFullScreen);

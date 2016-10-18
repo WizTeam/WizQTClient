@@ -16,7 +16,7 @@
 
 
 WizWebSettingsDialog::WizWebSettingsDialog(QString url, QSize sz, QWidget *parent)
-    : QDialog(parent)
+    : WizWebEngineViewContainerDialog(parent)
     , m_url(url)
 {
     setContentsMargins(0, 0, 0, 0);

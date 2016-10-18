@@ -493,40 +493,8 @@ void WizMainWindow::moveEvent(QMoveEvent* ev)
 
 void WizMainWindow::keyPressEvent(QKeyEvent* ev)
 {
-    if (ev->modifiers() && ev->key()) {
-        if (QWebEngineView* web = getActiveWeb()) {
-            if (ev->matches(QKeySequence::Copy))
-            {
-                web->page()->triggerAction(QWebEnginePage::Copy);
-                return;
-            }
-            else if (ev->matches(QKeySequence::Cut))
-            {
-                web->page()->triggerAction(QWebEnginePage::Cut);
-                return;
-            }
-            else if (ev->matches(QKeySequence::Paste))
-            {
-                web->page()->triggerAction(QWebEnginePage::Paste);
-                return;
-            }
-            else if (ev->matches(QKeySequence::Undo))
-            {
-                web->page()->triggerAction(QWebEnginePage::Undo);
-                return;
-            }
-            else if (ev->matches(QKeySequence::Redo))
-            {
-                web->page()->triggerAction(QWebEnginePage::Redo);
-                return;
-            }
-            else if (ev->matches(QKeySequence::SelectAll))
-            {
-                web->page()->triggerAction(QWebEnginePage::SelectAll);
-                return;
-            }
-        }
-    }
+    if (WizWebEngineViewProgressKeyEvents(ev))
+        return;
     //
     _baseClass::keyPressEvent(ev);
 }
@@ -3885,22 +3853,6 @@ WizDocumentWebView* WizMainWindow::getActiveEditor()
     }
 
     return editor;
-}
-
-QWebEngineView* WizMainWindow::getActiveWeb()
-{
-    QWidget* focusWidget = qApp->focusWidget();
-    if (!focusWidget)
-        return nullptr;
-    //
-    while (focusWidget) {
-        QWebEngineView* web =  dynamic_cast<QWebEngineView *>(focusWidget);
-        if (web)
-            return web;
-        //
-        focusWidget = focusWidget->parentWidget();
-    }
-    return nullptr;
 }
 
 void WizMainWindow::showDocumentList()

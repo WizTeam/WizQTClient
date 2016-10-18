@@ -504,7 +504,6 @@ private:
 
     //
     WizDocumentWebView* getActiveEditor();
-    QWebEngineView* getActiveWeb();
     //
     void showDocumentList();
     void showDocumentList(WizCategoryBaseView* category);

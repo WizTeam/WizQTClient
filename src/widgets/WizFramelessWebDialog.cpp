@@ -9,7 +9,7 @@
 bool WizFramelessWebDialog::m_bVisibling = false;
 
 WizFramelessWebDialog::WizFramelessWebDialog(QWidget *parent) :
-    QDialog(parent)
+    WizWebEngineViewContainerDialog(parent)
 {
     setFixedSize(800, 600);
     setWindowFlags(Qt::FramelessWindowHint);

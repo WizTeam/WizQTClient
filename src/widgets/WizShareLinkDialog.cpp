@@ -17,7 +17,7 @@
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 
 WizShareLinkDialog::WizShareLinkDialog(WizUserSettings& settings, QWidget* parent, Qt::WindowFlags f)
-    : QDialog(parent, f)
+    : WizWebEngineViewContainerDialog(parent, f)
     , m_settings(settings)
     , m_view(new WizWebEngineView(this))
 {

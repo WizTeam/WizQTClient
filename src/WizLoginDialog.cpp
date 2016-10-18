@@ -43,7 +43,6 @@
 #include "WizProxyDialog.h"
 #include "WizNoteStyle.h"
 #include "WizOEMSettings.h"
-#include "share/WizWebEngineView.h"
 
 
 #define WIZ_SERVERACTION_CONNECT_WIZSERVER     "CONNECT_TO_WIZSERVER"

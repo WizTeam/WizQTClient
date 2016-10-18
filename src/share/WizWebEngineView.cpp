@@ -4,6 +4,8 @@
 #include "WizWebEngineView.h"
 #include "WizMisc.h"
 #include "utils/WizPathResolve.h"
+#include <QKeyEvent>
+#include <QApplication>
 
 WizWebEnginePage::WizWebEnginePage(QObject* parent)
     : QWebEnginePage(parent)
@@ -137,4 +139,74 @@ void WizWebEngineView::innerLoadFinished(bool ret)
     }
 }
 
+
+
+static QWebEngineView* getActiveWeb()
+{
+    QWidget* focusWidget = qApp->focusWidget();
+    if (!focusWidget)
+        return nullptr;
+    //
+    while (focusWidget) {
+        QWebEngineView* web =  dynamic_cast<QWebEngineView *>(focusWidget);
+        if (web)
+            return web;
+        //
+        focusWidget = focusWidget->parentWidget();
+    }
+    return nullptr;
+}
+
+bool WizWebEngineViewProgressKeyEvents(QKeyEvent* ev)
+{
+    if (ev->modifiers() && ev->key()) {
+        if (QWebEngineView* web = getActiveWeb()) {
+            if (ev->matches(QKeySequence::Copy))
+            {
+                web->page()->triggerAction(QWebEnginePage::Copy);
+                return true;
+            }
+            else if (ev->matches(QKeySequence::Cut))
+            {
+                web->page()->triggerAction(QWebEnginePage::Cut);
+                return true;
+            }
+            else if (ev->matches(QKeySequence::Paste))
+            {
+                web->page()->triggerAction(QWebEnginePage::Paste);
+                return true;
+            }
+            else if (ev->matches(QKeySequence::Undo))
+            {
+                web->page()->triggerAction(QWebEnginePage::Undo);
+                return true;
+            }
+            else if (ev->matches(QKeySequence::Redo))
+            {
+                web->page()->triggerAction(QWebEnginePage::Redo);
+                return true;
+            }
+            else if (ev->matches(QKeySequence::SelectAll))
+            {
+                web->page()->triggerAction(QWebEnginePage::SelectAll);
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
+WizWebEngineViewContainerDialog::WizWebEngineViewContainerDialog(QWidget *parent, Qt::WindowFlags f)
+    : QDialog(parent, f)
+{
+
+}
+
+void WizWebEngineViewContainerDialog::keyPressEvent(QKeyEvent* ev)
+{
+    if (WizWebEngineViewProgressKeyEvents(ev))
+        return;
+    //
+    QDialog::keyPressEvent(ev);
+}
 

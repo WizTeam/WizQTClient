@@ -5,6 +5,7 @@
 #include <QWebEngineView>
 #include <QPointer>
 #include "WizDef.h"
+#include "share/WizWebEngineView.h"
 
 class WizExplorerApp;
 class QComboBox;
@@ -14,7 +15,7 @@ class QPlainTextEdit;
 class WizDocumentWebView;
 class WizWebEngineView;
 
-class WizCodeEditorDialog : public QDialog
+class WizCodeEditorDialog : public WizWebEngineViewContainerDialog
 {
     Q_OBJECT
 public:
