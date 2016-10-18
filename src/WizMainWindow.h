@@ -68,6 +68,7 @@ class WizMessageListTitleBar;
 
 class WizDocumentView;
 class WizSingleDocumentViewDelegate;
+class QWebEngineView;
 
 #ifdef Q_OS_MAC
 class WizMacToolBarButtonItem;
@@ -123,6 +124,7 @@ protected:
     void mouseReleaseEvent(QMouseEvent* event);
     void changeEvent(QEvent *event);
     void moveEvent(QMoveEvent* ev);
+    void keyPressEvent(QKeyEvent* ev);
 
 #ifdef Q_OS_MAC
     virtual void paintEvent(QPaintEvent* event);
@@ -502,6 +504,7 @@ private:
 
     //
     WizDocumentWebView* getActiveEditor();
+    QWebEngineView* getActiveWeb();
     //
     void showDocumentList();
     void showDocumentList(WizCategoryBaseView* category);

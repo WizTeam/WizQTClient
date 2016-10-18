@@ -491,6 +491,47 @@ void WizMainWindow::moveEvent(QMoveEvent* ev)
     delegate.mainwindowPositionChanged(ev->oldPos(), ev->pos());
 }
 
+void WizMainWindow::keyPressEvent(QKeyEvent* ev)
+{
+    if (ev->modifiers() && ev->key()) {
+        if (QWebEngineView* web = getActiveWeb()) {
+            if (ev->matches(QKeySequence::Copy))
+            {
+                web->page()->triggerAction(QWebEnginePage::Copy);
+                return;
+            }
+            else if (ev->matches(QKeySequence::Cut))
+            {
+                web->page()->triggerAction(QWebEnginePage::Cut);
+                return;
+            }
+            else if (ev->matches(QKeySequence::Paste))
+            {
+                web->page()->triggerAction(QWebEnginePage::Paste);
+                return;
+            }
+            else if (ev->matches(QKeySequence::Undo))
+            {
+                web->page()->triggerAction(QWebEnginePage::Undo);
+                return;
+            }
+            else if (ev->matches(QKeySequence::Redo))
+            {
+                web->page()->triggerAction(QWebEnginePage::Redo);
+                return;
+            }
+            else if (ev->matches(QKeySequence::SelectAll))
+            {
+                web->page()->triggerAction(QWebEnginePage::SelectAll);
+                return;
+            }
+        }
+    }
+    //
+    _baseClass::keyPressEvent(ev);
+}
+
+
 #ifdef Q_OS_MAC
 void WizMainWindow::paintEvent(QPaintEvent*event)
 {
@@ -3831,7 +3872,7 @@ void WizMainWindow::showCommentWidget()
     }
 }
 
-WizDocumentWebView*WizMainWindow::getActiveEditor()
+WizDocumentWebView* WizMainWindow::getActiveEditor()
 {
     WizDocumentWebView* editor = m_doc->web();
     QWidget* activeWgt = qApp->activeWindow();
@@ -3844,6 +3885,22 @@ WizDocumentWebView*WizMainWindow::getActiveEditor()
     }
 
     return editor;
+}
+
+QWebEngineView* WizMainWindow::getActiveWeb()
+{
+    QWidget* focusWidget = qApp->focusWidget();
+    if (!focusWidget)
+        return nullptr;
+    //
+    while (focusWidget) {
+        QWebEngineView* web =  dynamic_cast<QWebEngineView *>(focusWidget);
+        if (web)
+            return web;
+        //
+        focusWidget = focusWidget->parentWidget();
+    }
+    return nullptr;
 }
 
 void WizMainWindow::showDocumentList()

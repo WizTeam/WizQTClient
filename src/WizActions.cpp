@@ -89,14 +89,14 @@ WIZACTION* WizActions::actionsData()
         {WIZACTION_EDITOR_FIND_REPLACE,        QObject::tr("Find and Replace..."), "",          QKeySequence("Ctrl+F")},
 
         // editing
-        {WIZACTION_EDITOR_UNDO,                  QObject::tr("Undo"),        "",       QKeySequence("Ctrl+Z")},
-        {WIZACTION_EDITOR_REDO,                   QObject::tr("Redo"),       "",        QKeySequence("Shift+Ctrl+Z")},
-        {WIZACTION_EDITOR_CUT,                       QObject::tr("Cut"),         "",        QKeySequence("Ctrl+X")},
-        {WIZACTION_EDITOR_COPY,                    QObject::tr("Copy"),      "",        QKeySequence("Ctrl+C")},
-        {WIZACTION_EDITOR_PASTE,                  QObject::tr("Paste"),      "",        QKeySequence("Ctrl+V")},
+        {WIZACTION_EDITOR_UNDO,                  QObject::tr("Undo"),        "",       QKeySequence()},
+        {WIZACTION_EDITOR_REDO,                   QObject::tr("Redo"),       "",        QKeySequence()},
+        {WIZACTION_EDITOR_CUT,                       QObject::tr("Cut"),         "",        QKeySequence()},
+        {WIZACTION_EDITOR_COPY,                    QObject::tr("Copy"),      "",        QKeySequence()},
+        {WIZACTION_EDITOR_PASTE,                  QObject::tr("Paste"),      "",        QKeySequence()},
         {WIZACTION_EDITOR_PASTE_PLAIN,      QObject::tr("Paste as Plain Text"), "", QKeySequence("Shift+Ctrl+V")},
         {WIZACTION_EDITOR_DELETE,                QObject::tr("Delete"),    "",          QKeySequence()},
-        {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select All"), "",         QKeySequence("Ctrl+A")},
+        {WIZACTION_EDITOR_SELECT_ALL,        QObject::tr("Select All"), "",         QKeySequence()},
 
         // view
         {WIZACTION_GLOBAL_TOGGLE_CATEGORY,      QObject::tr("Hide Sidebar"),   QObject::tr("Show Sidebar"),    QKeySequence("Alt+Ctrl+S")},
