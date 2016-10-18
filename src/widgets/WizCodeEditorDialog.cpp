@@ -74,8 +74,6 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
     QString strHtml = strResultDiv;
-    strHtml.replace("\\", "\\\\");
-    strHtml.replace("'", "\\'");
     //
     emit insertHtmlRequest(strHtml);
 }
