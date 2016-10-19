@@ -6,6 +6,54 @@
 #include "utils/WizPathResolve.h"
 #include <QKeyEvent>
 #include <QApplication>
+#include <QDesktopServices>
+
+class WizInvisibleWebEngineView : public QWebEngineView
+{
+    class WizInvisibleWebEnginePage : public QWebEnginePage
+    {
+        WizWebEnginePage* m_ownerPage;
+    public:
+        explicit WizInvisibleWebEnginePage(WizWebEnginePage* ownerPage, QObject *parent = Q_NULLPTR)
+            : QWebEnginePage(parent)
+            , m_ownerPage(ownerPage)
+        {
+
+        }
+
+        bool acceptNavigationRequest(const QUrl &url, QWebEnginePage::NavigationType type, bool isMainFrame)
+        {
+            emit m_ownerPage->openLinkInNewWindow(url);
+            //
+            parent()->deleteLater();
+            //
+            return false;
+        }
+
+    };
+
+public:
+    explicit WizInvisibleWebEngineView(WizWebEnginePage* ownerPage, QWidget* parent = Q_NULLPTR)
+        : QWebEngineView(parent)
+    {
+        WizInvisibleWebEnginePage* page = new WizInvisibleWebEnginePage(ownerPage, this);
+        setPage(page);
+    }
+    virtual ~WizInvisibleWebEngineView()
+    {
+
+    }
+
+public:
+    static QWebEnginePage* create(WizWebEnginePage* ownerPage)
+    {
+        WizInvisibleWebEngineView* web = new WizInvisibleWebEngineView(ownerPage, nullptr);
+        //
+        web->setVisible(false);
+        //
+        return web->page();
+    }
+};
 
 WizWebEnginePage::WizWebEnginePage(QObject* parent)
     : QWebEnginePage(parent)
@@ -28,6 +76,10 @@ bool WizWebEnginePage::acceptNavigationRequest(const QUrl &url, QWebEnginePage::
 
     return m_continueNavigate;
 }
+QWebEnginePage *WizWebEnginePage::createWindow(WebWindowType type)
+{
+    return WizInvisibleWebEngineView::create(this);
+}
 
 
 WizWebEngineView::WizWebEngineView(QWidget* parent)
@@ -36,6 +88,11 @@ WizWebEngineView::WizWebEngineView(QWidget* parent)
     , m_clientWrapper(NULL)
     , m_channel(NULL)
 {
+    WizWebEnginePage* p = new WizWebEnginePage(this);
+    setPage(p);
+    //
+    connect(p, SIGNAL(openLinkInNewWindow(QUrl)), this, SLOT(openLinkInDefaultBrowser(QUrl)));
+    //
     connect(this, SIGNAL(loadFinished(bool)), this, SLOT(innerLoadFinished(bool)));
     //
     // setup the QWebSocketServer
@@ -139,6 +196,10 @@ void WizWebEngineView::innerLoadFinished(bool ret)
     }
 }
 
+void WizWebEngineView::openLinkInDefaultBrowser(QUrl url)
+{
+    QDesktopServices::openUrl(url);
+}
 
 
 static QWebEngineView* getActiveWeb()

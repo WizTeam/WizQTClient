@@ -14,8 +14,6 @@ WizLocalProgressWebView::WizLocalProgressWebView(QWidget *parent) : QWidget(pare
     m_web = new WizWebEngineView(this);
     m_web->settings()->setAttribute(QWebEngineSettings::LocalStorageEnabled, true);
     //
-    m_web->setPage(new WizWebEnginePage());
-
     QVBoxLayout* layout = new QVBoxLayout;
     layout->setContentsMargins(0, 0, 0, 0);
     layout->setSpacing(0);

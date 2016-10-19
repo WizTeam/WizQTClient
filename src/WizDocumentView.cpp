@@ -117,7 +117,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     //m_web->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     m_title->setEditor(m_web);
     //
-    connect(m_comments->page(), SIGNAL(linkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)), m_web, SLOT(onEditorLinkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)));
+    QWebEnginePage* commentsPage = m_comments->page();
+    connect(commentsPage, SIGNAL(linkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)), m_web, SLOT(onEditorLinkClicked(QUrl, QWebEnginePage::NavigationType, bool, WizWebEnginePage*)));
 
     QVBoxLayout* layoutEditor = new QVBoxLayout(wgtEditor);
     layoutEditor->setSpacing(0);
