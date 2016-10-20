@@ -1216,6 +1216,7 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
             emit wizBoxServerSelected();
             searchWizBoxServer();
 
+            /*
             QList<QAction*> actionList = m_menuServers->actions();
             for (QAction* act : actionList)
             {
@@ -1225,6 +1226,7 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
                     break;
                 }
             }
+            */
         }
         else if (strActionData == WIZ_SERVERACTION_HELP)
         {

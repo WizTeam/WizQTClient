@@ -84,6 +84,7 @@ void WizUdpClient::closeUdpConnections()
     {
         it.value()->close();
     }
+    m_udpSocketMap.clear();
 }
 
 void WizUdpClient::readUdpPendingData()
