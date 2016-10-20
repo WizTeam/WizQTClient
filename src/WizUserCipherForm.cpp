@@ -20,7 +20,8 @@ WizUserCipherForm::WizUserCipherForm(WizExplorerApp& app, QWidget *parent)
     setAutoFillBackground(true);
     setAttribute(Qt::WA_MacShowFocusRect, false);
     setBackgroundRole(QPalette::Midlight);
-
+    //
+    ui->checkSave->setVisible(false);
 
 
     QString strIconNormal = Utils::WizStyleHelper::skinResourceFileName("mac_icons_password_done", true); // ::WizGetSkinResourcePath(m_app.userSettings().skin())

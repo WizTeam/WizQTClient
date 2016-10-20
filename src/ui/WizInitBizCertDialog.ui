@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>This is the first time to encrypt note data in team, the cert must be initialized.</string>
+        <string>This is a encrypted group, notes have been auto-encrypted. To read or create notes, please ask for the key to group administrator and initialize password first.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -157,4 +157,4 @@
    </hints>
   </connection>
  </connections>
- </ui>
+</ui>
