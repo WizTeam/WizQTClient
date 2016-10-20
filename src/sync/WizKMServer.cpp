@@ -167,12 +167,10 @@ bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString
 
 inline void AddJsonMemeber(rapidjson::Document& doc, rapidjson::Document::AllocatorType& allocator, const QString& name, const QString& str)
 {
-    QByteArray baName = name.toUtf8();
-    rapidjson::Value valueName(baName.constData(), baName.size());
-    //
-    QByteArray baValue = str.toUtf8();
-    rapidjson::Value value(baValue.constData(), baValue.size());
-    doc.AddMember(valueName, value, allocator);
+    rapidjson::Value n(name.toUtf8().constData(), allocator);
+    rapidjson::Value v(str.toUtf8().constData(), allocator);
+
+    doc.AddMember(n, v, allocator);
 }
 
 bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
@@ -188,9 +186,9 @@ bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QStrin
     //
     rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
     rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
-
+    //
     doc.Accept(writer);
-
+    //
     QByteArray ba = buffer.GetString();
     //
     QString json = QString::fromUtf8(ba);

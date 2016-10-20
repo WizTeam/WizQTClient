@@ -358,8 +358,8 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         QString value = it.value();
         QByteArray baValue = value.toUtf8();
         QByteArray baKey = key.toUtf8();
-        rapidjson::Value fistAction(baValue.constData(), baValue.size());
-        rapidjson::Value vKey(baKey.constData(), baKey.size());
+        rapidjson::Value fistAction(baValue.constData(), allocator);
+        rapidjson::Value vKey(baKey.constData(), allocator);
         dd.AddMember(vKey, fistAction, allocator);
     }
 
@@ -382,7 +382,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         QByteArray baKey = key.toUtf8();
         //
         rapidjson::Value vValue(value.toInt());
-        rapidjson::Value vKey(baKey.constData(), baKey.size());
+        rapidjson::Value vKey(baKey.constData(), allocator);
         actions.AddMember(vKey, vValue, allocator);
     }
     //
@@ -414,7 +414,7 @@ QByteArray WizAnalyzer::constructUploadData(IWizSyncableDatabase* db)
         //
         QByteArray baKey = strKey.toUtf8();
         //
-        rapidjson::Value vKey(baKey.constData(), baKey.size());
+        rapidjson::Value vKey(baKey.constData(), allocator);
         durations.AddMember(vKey, elem, allocator);
     }
     //
