@@ -1024,7 +1024,10 @@ bool WizIndexBase::modifyDocumentInfoEx(const WIZDOCUMENTDATA& dataCur)
 {
     qDebug() << "modify document, title: " << dataCur.strTitle;
 
-    Q_ASSERT(dataCur.strKbGUID == m_strKbGUID);
+    if (dataCur.strKbGUID != m_strKbGUID)
+    {
+        Q_ASSERT(false);
+    }
 
     WIZDOCUMENTDATA dataOld;
     documentFromGuid(dataCur.strGUID, dataOld);

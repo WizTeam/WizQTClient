@@ -177,16 +177,8 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     connect(m_title, SIGNAL(notifyBar_link_clicked(QString)), SLOT(on_notifyBar_link_clicked(QString)));
     connect(m_title, SIGNAL(loadComment_request(QString)), SLOT(on_loadComment_request(QString)), Qt::QueuedConnection);
 
-//    connect(m_editStatusCheckThread, SIGNAL(checkFinished(QString,QStringList)),
-//            SLOT(on_checkEditStatus_finished(QString,QStringList)));
-//    connect(m_editStatusCheckThread, SIGNAL(checkDocumentChangedFinished(QString,bool)),
-//            SLOT(on_checkDocumentChanged_finished(QString,bool)));
-//    connect(m_editStatusCheckThread, SIGNAL(checkTimeOut(QString)),
-//            SLOT(on_checkEditStatus_timeout(QString)));
-
     //
     m_editStatusSyncThread->start(QThread::IdlePriority);
-//    m_editStatusCheckThread->start(QThread::IdlePriority);
 
     m_editStatusChecker = new WizDocumentStatusChecker();
     connect(this, SIGNAL(checkDocumentEditStatusRequest(QString,QString)), m_editStatusChecker,
@@ -625,7 +617,10 @@ void WizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool e
             if (db.canEditDocument(doc) && !WizDatabase::isInDeletedItems(doc.strLocation))
             {
                 //            qDebug() << "document editable , hide message tips.";
-                m_title->hideMessageTips(true);
+                if (0 == (m_editStatus & DOCUMENT_STATUS_NEWVERSIONFOUNDED))
+                {
+                    m_title->hideMessageTips(true);
+                }
                 m_title->setEditButtonEnabled(true);
                 m_bLocked = false;
             }

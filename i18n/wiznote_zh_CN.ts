@@ -1954,13 +1954,15 @@
         <location filename="../src/share/WizDatabase.cpp" line="4178"/>
         <source>Please enter the password of team cert: %1
 Password hint: %2</source>
-        <translation>请输入团队证书密码：%1\n密码提示:%2</translation>
+        <translation>请输入团队证书密码：%1
+密码提示:%2</translation>
     </message>
     <message>
         <location filename="../src/share/WizDatabase.cpp" line="4182"/>
         <source>Please enter the password of cert:
 Password hint: %1</source>
-        <translation>请输入证书密码\n密码提示%1</translation>
+        <translation>请输入证书密码
+密码提示%1</translation>
     </message>
     <message>
         <location filename="../src/share/WizDatabase.cpp" line="4185"/>

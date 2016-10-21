@@ -187,11 +187,16 @@ bool WizObjectDownloader::downloadDocument()
     WIZDOCUMENTDATAEX document;
     if (!db.documentFromGuid(m_data.strObjectGUID, document))
         return false;
+    //
+    if (!ksServer.document_getInfo(m_data.strObjectGUID, document))
+        return false;
 
     if (!ksServer.document_downloadData(m_data.strObjectGUID, document))
     {
         return false;
     }
+    //
+    document.strKbGUID = m_data.strKbGUID;
 
     // check update of attachment
     WIZOBJECTVERSION versionServer;
