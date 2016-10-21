@@ -1459,8 +1459,8 @@ void WizEditorToolBar::resetToolbar(const QString& currentStyle)
         m_comboFontSize->setText("");
     }
 
-    m_btnForeColor->setColor(QColor(strForeColor));
-    m_btnBackColor->setColor(QColor(strBackColor));
+    //m_btnForeColor->setColor(QColor(strForeColor));
+    //m_btnBackColor->setColor(QColor(strBackColor));
 
     m_btnBold->setChecked(bold);
     m_btnItalic->setChecked(italic);
