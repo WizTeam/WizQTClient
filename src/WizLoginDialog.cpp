@@ -297,7 +297,7 @@ void WizLoginDialog::setUser(const QString &strUserGuid)
     m_newRegisterAccount = false;
 
     if (strUserGuid.isEmpty())
-        return;    
+        return;
 
     QString strAccountFolder;
     QString strUserId;
@@ -729,7 +729,7 @@ QAction *WizLoginDialog::findActionInMenu(const QString &strActData)
 bool WizLoginDialog::doVerificationCodeCheck(QString& strCaptchaID, QString& strCaptcha)
 {
     strCaptchaID = QString::number(QDateTime::currentMSecsSinceEpoch()).right(8);
-    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().right(6);    
+    strCaptchaID += WizGenGUIDLowerCaseLetterOnly().right(6);
 
     WizVerificationCodeDialog dlg(this);
     if (dlg.verificationRequest(strCaptchaID) == QDialog::Accepted)
@@ -996,7 +996,7 @@ void WizLoginDialog::checkLocalUser(const QString& strAccountFolder, const QStri
     qDebug() << "do account verify , server type : " << m_serverType << userId() << password().isEmpty();
     // FIXME: should verify password if network is available to avoid attack?
     if (password() != userSettings.password())
-    {       
+    {
         // check server licence and update oem settings
         if (EnterpriseServer == m_serverType)
         {
@@ -1087,7 +1087,7 @@ void WizLoginDialog::on_btn_login_clicked()
 void WizLoginDialog::on_btn_singUp_clicked()
 {
     if (checkSignMessage())
-    {        
+    {
         WizAsyncApi* api = new WizAsyncApi(this);
         connect(api, SIGNAL(registerAccountFinished(bool)), SLOT(onRegisterAccountFinished(bool)));
         api->registerAccount(m_lineEditNewUserName->text(), m_lineEditNewPassword->text(), "");
@@ -1198,13 +1198,13 @@ void WizLoginDialog::serverListMenuClicked(QAction* action)
     {
         QString strActionData = action->data().toString();
         if (strActionData == WIZ_SERVERACTION_CONNECT_WIZSERVER)
-        {            
+        {
             m_serverType = WizServer;
             emit wizServerSelected();
             action->setChecked(true);
         }
         else if (strActionData == WIZ_SERVERACTION_CONNECT_BIZSERVER)
-        {            
+        {
             m_serverType = EnterpriseServer;
             emit wizBoxServerSelected();
             searchWizBoxServer();
@@ -1453,7 +1453,11 @@ void WizLoginDialog::onWizBoxSearchingTimeOut()
     m_wizBoxSearchingTimer.stop();
     m_animationWaitingDialog->reject();
     closeWizBoxUdpClient();
-    WizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
+    //
+    ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+        WizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
+
+    });
 }
 
 bool WizLoginDialog::onOEMSettingsDownloaded(const QString& settings)
@@ -1552,7 +1556,7 @@ void WizLoginDialog::onWizLogInStateEntered()
     setSwicthServerSelectedAction(WIZ_SERVERACTION_CONNECT_WIZSERVER);
     setSwicthServerActionEnable(WIZ_SERVERACTION_SEARCH_SERVER, false);
 
-    setLogo(m_wizLogoPath);    
+    setLogo(m_wizLogoPath);
 }
 
 void WizLoginDialog::onWizBoxLogInStateEntered()
@@ -1814,7 +1818,7 @@ void WizOEMDownloader::checkServerLicence(const QString& licence)
     if (settings.isEmpty())
     {
         return;
-    }    
+    }
     //
     rapidjson::Document d;
     d.Parse<0>(settings.toUtf8().constData());
@@ -1944,7 +1948,7 @@ void WizActionWidget::paintEvent(QPaintEvent * event)
 {
     QStyleOption opt;
     opt.init(this);
-    QPainter p(this);    
+    QPainter p(this);
 
     QRect rcText = opt.rect;
     rcText.setRight(rcText.right() - 40);
