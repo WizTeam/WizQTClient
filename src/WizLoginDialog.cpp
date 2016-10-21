@@ -1456,7 +1456,6 @@ void WizLoginDialog::onWizBoxSearchingTimeOut()
     //
     ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
         WizMessageBox::information(this, tr("Info"), tr("There is no server address, please input it."));
-
     });
 }
 

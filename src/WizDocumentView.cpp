@@ -751,6 +751,8 @@ void WizDocumentView::onCipherCheckRequest()
     if (!db.verifyCertPassword(password))
     {
         m_passwordView->cipherError();
+        WizMessageBox::information(qApp->activeWindow(), tr("WizNote"), tr("Invalid password."));
+
         return;
     }
     //
