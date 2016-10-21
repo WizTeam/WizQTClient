@@ -431,6 +431,9 @@ void WizMainWindow::closeEvent(QCloseEvent* event)
 
         setVisible(false);
         event->ignore();
+        //
+        WizDatabase::clearCertPassword();
+        //
         return;
     }
 #else
@@ -472,6 +475,13 @@ void WizMainWindow::changeEvent(QEvent* event)
             && isActiveWindow())
     {
         QTimer::singleShot(0, this, SLOT(windowActived()));
+    }
+    else if (event->type() == QEvent::WindowStateChange)
+    {
+        if (isMinimized())
+        {
+            WizDatabase::clearCertPassword();
+        }
     }
     //
     if (m_useSystemBasedStyle)

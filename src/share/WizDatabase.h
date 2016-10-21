@@ -494,6 +494,8 @@ public:
     bool verifyCertPassword(QString password);
     QString getCertPassword();
     QString getCertPasswordHint();
+    //
+    static void clearCertPassword();
 
     //
     bool tryAccessDocument(const WIZDOCUMENTDATA &doc);

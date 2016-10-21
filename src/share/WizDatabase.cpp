@@ -4113,6 +4113,10 @@ bool WizDatabase::initBizCert()
     return false;
 }
 
+void WizDatabase::clearCertPassword()
+{
+    WizUserCertPassword::Instance().clear();
+}
 
 QString WizDatabase::getCertPassword()
 {
