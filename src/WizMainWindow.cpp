@@ -3720,7 +3720,7 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
 
     connect(m_tray, SIGNAL(viewMessageRequest(qint64)),
             SLOT(on_viewMessage_request(qint64)));
-
+    //
     //
     trayIcon->setContextMenu(m_trayMenu);
 #ifdef Q_OS_MAC
@@ -3734,6 +3734,16 @@ void WizMainWindow::initTrayIcon(QSystemTrayIcon* trayIcon)
     {
         trayIcon->setIcon(icon);
     }
+    //
+    connect(m_trayMenu, &QMenu::aboutToHide, [=]{
+        m_tray->setIcon(icon);
+    });
+    connect(m_trayMenu, &QMenu::aboutToShow, [=]{
+        QIcon iconSelected;
+        iconSelected.addFile(selected, QSize(), QIcon::Normal, QIcon::Off);
+        m_tray->setIcon(iconSelected);
+    });
+
 #endif
 }
 
