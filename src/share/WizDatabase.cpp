@@ -4159,6 +4159,7 @@ bool WizDatabase::verifyCertPassword(QString password)
     if (WizAESDecryptBase64StringToString(password, encrypted_d, d)
             && d.length() > 0)
     {
+        loadUserCert();
         WizUserCertPassword::Instance().setPassword(m_info.bizGUID, password);
         return true;
     }
