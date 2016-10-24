@@ -84,7 +84,7 @@ private:
     void peekDocumentGUID(QString& strKbGUID, QString& strGUID);
     void startRecheck();
     void startCheck();
-    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID);
+    bool checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, bool& isGroup);
     bool checkDocumentEditStatus(const QString& strKbGUID, const QString& strGUID);
     bool checkDocumentEditStatus(const QString& strUrl);
 

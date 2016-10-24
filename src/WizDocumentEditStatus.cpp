@@ -580,7 +580,8 @@ void WizDocumentStatusChecker::startCheck()
     // start timer
     m_timeOutTimer->start(5000);
 
-    bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID);
+    bool isGroup = false;
+    bool changed = checkDocumentChangedOnServer(m_strCurKbGUID, m_strCurGUID, isGroup);
     if (m_stop)
     {
         emit checkEditStatusFinished(m_strCurGUID, false);
@@ -595,12 +596,18 @@ void WizDocumentStatusChecker::startCheck()
         return;
     }
 
-    bool editingByOthers = checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+    bool editingByOthers = false;
+    if (isGroup)
+    {
+        editingByOthers = checkDocumentEditStatus(m_strCurKbGUID, m_strCurGUID);
+    }
+    //
     if (m_stop)
     {
         emit checkEditStatusFinished(m_strCurGUID, false);
         return;
     }
+
 
     m_timeOutTimer->stop();
 
@@ -618,7 +625,7 @@ void WizDocumentStatusChecker::startCheck()
     }
 }
 
-bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID)
+bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKbGUID, const QString& strGUID, bool& isGroup)
 {
     WizDatabase& db = WizDatabaseManager::instance()->db(strKbGUID);
     WIZDOCUMENTDATA doc;
@@ -630,11 +637,11 @@ bool WizDocumentStatusChecker::checkDocumentChangedOnServer(const QString& strKb
         return !db.canEditDocument(doc);
     }
 
-    //TEMP: remove me
-
+    isGroup = false;
     WIZUSERINFO userInfo = WizToken::info();
     if (db.isGroup())
     {
+        isGroup = true;
         WIZGROUPDATA group;
         if (!WizDatabaseManager::instance()->db().getGroupData(strKbGUID, group))
             return false;

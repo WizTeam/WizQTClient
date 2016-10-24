@@ -339,6 +339,9 @@ void WizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 
     m_title->setLocked(m_bLocked, nLockReason, bGroup);
+    //
+    //   个人笔记检查笔记是否已经更新了
+    //暂时禁止，等待服务器优化速度
     if (WizNotifyBar::LockForGruop == nLockReason)
     {
         startCheckDocumentEditStatus();
@@ -499,6 +502,10 @@ void WizDocumentView::setEditorMode(WizEditorMode editorMode)
             stopDocumentEditingStatus();
             startCheckDocumentEditStatus();
         }
+    }
+    else
+    {
+        startCheckDocumentEditStatus();
     }
 }
 
