@@ -1577,10 +1577,20 @@ WizCategoryViewGroupRootItem::WizCategoryViewGroupRootItem(WizExplorerApp& app,
     , m_nUnread(0)
 {
     QIcon icon;
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
-                 Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Normal);
-    icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
-                 Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Selected);
+    if (group.bEncryptData)
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal_enc"),
+                     Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected_enc"),
+                     Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Selected);
+    }
+    else
+    {
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_normal"),
+                     Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Normal);
+        icon.addFile(WizGetSkinResourceFileName(app.userSettings().skin(), "category_group_selected"),
+                     Utils::WizStyleHelper::treeViewItemIconSize(), QIcon::Selected);
+    }
     setIcon(0, icon);
     setText(0, m_strName);
 }
