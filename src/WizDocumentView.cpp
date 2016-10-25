@@ -503,10 +503,6 @@ void WizDocumentView::setEditorMode(WizEditorMode editorMode)
             startCheckDocumentEditStatus();
         }
     }
-    else
-    {
-        startCheckDocumentEditStatus();
-    }
 }
 
 void WizDocumentView::setDefaultViewMode(WizDocumentViewMode mode)
