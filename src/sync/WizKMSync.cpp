@@ -115,6 +115,7 @@ WizKMSyncThread::WizKMSyncThread(WizDatabase& db, QObject* parent)
     , m_nFullSyncSecondsInterval(DEFAULT_FULL_SYNC_SECONDS_INTERVAL)
     , m_bBusy(false)
     , m_bPause(false)
+    , m_bNeedResetGroups(false)
 {
     m_tLastSyncAll = QDateTime::currentDateTime();
     //
@@ -207,7 +208,13 @@ bool WizKMSyncThread::prepareToken()
 
 bool WizKMSyncThread::doSync()
 {
-    if (needSyncAll())
+    if (needResetGroups())
+    {
+        m_bNeedResetGroups = false;
+        resetGroups();
+        return true;
+    }
+    else if (needSyncAll())
     {
         qDebug() << "[Sync] syncing all started, thread:" << QThread::currentThreadId();
 
@@ -377,6 +384,29 @@ bool WizKMSyncThread::downloadMesages()
     return true;
 }
 
+bool WizKMSyncThread::resetGroups()
+{
+    if (!prepareToken())
+        return false;
+    //
+    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    server.setUserInfo(m_info);
+    //
+    CWizBizDataArray bizs;
+    if (!server.getBizList(bizs))
+        return false;
+    //
+    m_db.onDownloadBizs(bizs);
+    //
+    CWizGroupDataArray groups;
+    if (!server.getGroupList(groups))
+        return false;
+    //
+    m_db.onDownloadGroups(groups);
+    //
+    return true;
+}
+
 
 
 // FIXME: remove this to syncing flow
@@ -384,8 +414,8 @@ void WizKMSyncThread::syncUserCert()
 {
     QString strN, stre, strd, strHint;
 
-    WizKMAccountsServer serser(WizCommonApiEntry::syncUrl());
-    if (serser.getCert(m_db.getUserId(), m_db.getPassword(), strN, stre, strd, strHint)) {
+    WizKMAccountsServer server(WizCommonApiEntry::syncUrl());
+    if (server.getCert(m_db.getUserId(), m_db.getPassword(), strN, stre, strd, strHint)) {
         m_db.setUserCert(strN, stre, strd, strHint);
     }
 }
@@ -399,6 +429,10 @@ bool WizKMSyncThread::needQuickSync()
         return false;
     //
     return true;
+}
+bool WizKMSyncThread::needResetGroups()
+{
+    return m_bNeedResetGroups;
 }
 
 bool WizKMSyncThread::needDownloadMessage()

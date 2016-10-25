@@ -3082,6 +3082,8 @@ void WizCategoryView::createGroup()
     QString strExtInfo = WizCommonApiEntry::appstoreParam(false);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("create_group", WIZ_TOKEN_IN_URL_REPLACE_PART, strExtInfo);
     WizShowWebDialogWithToken(tr("Create Team for Free"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
@@ -3089,6 +3091,8 @@ void WizCategoryView::viewPersonalGroupInfo(const QString& groupGUID)
     QString extInfo = "kb=" + groupGUID + WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& bizGUID)
@@ -3096,6 +3100,8 @@ void WizCategoryView::viewBizGroupInfo(const QString& groupGUID, const QString& 
     QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View group info"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::managePersonalGroup(const QString& groupGUID)
@@ -3103,6 +3109,8 @@ void WizCategoryView::managePersonalGroup(const QString& groupGUID)
     QString extInfo = "kb=" + groupGUID + WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_personal_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bizGUID)
@@ -3110,6 +3118,8 @@ void WizCategoryView::manageBizGroup(const QString& groupGUID, const QString& bi
     QString extInfo = "kb=" + groupGUID + "&biz=" + bizGUID + WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_biz_group", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage group"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::promptGroupLimitMessage(const QString &groupGUID, const QString &/*bizGUID*/)
@@ -3198,6 +3208,8 @@ void WizCategoryView::viewBizInfo(const QString& bizGUID)
     QString extInfo = "biz=" + bizGUID + WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("view_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("View team info"), strUrl, window());
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 void WizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
@@ -3210,7 +3222,8 @@ void WizCategoryView::manageBiz(const QString& bizGUID, bool bUpgrade)
     extInfo += WizCommonApiEntry::appstoreParam();
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("manage_biz", WIZ_TOKEN_IN_URL_REPLACE_PART, extInfo);
     WizShowWebDialogWithToken(tr("Manage team"), strUrl, window());
-
+    //
+    WizMainWindow::instance()->sync()->setNeedResetGroups();
 }
 
 

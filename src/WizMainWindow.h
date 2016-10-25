@@ -236,6 +236,7 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     WizDocumentView* documentView() const;
+    WizKMSyncThread* sync() const { return m_sync; }
 
     WizActions* actions() const { return m_actions; }
 

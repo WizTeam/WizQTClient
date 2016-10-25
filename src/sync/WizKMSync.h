@@ -45,6 +45,7 @@ public:
     void startSyncAll(bool bBackground = true);
     bool isBackground() const;
     void stopSync();
+    void setNeedResetGroups() { m_bNeedResetGroups = true; }
     //
     void setFullSyncInterval(int nMinutes);
     //
@@ -81,6 +82,7 @@ private:
     WizKMSyncEvents* m_pEvents;
     bool m_bNeedSyncAll;
     bool m_bNeedDownloadMessages;
+    bool m_bNeedResetGroups;
     QDateTime m_tLastSyncAll;
     int m_nFullSyncSecondsInterval;
     bool m_bBusy;
@@ -98,10 +100,12 @@ private:
     bool prepareToken();
     bool needSyncAll();
     bool needQuickSync();
+    bool needResetGroups();
     bool needDownloadMessage();
     bool syncAll();
     bool quickSync();
     bool downloadMesages();
+    bool resetGroups();
 
     void syncUserCert();
     //
