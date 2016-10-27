@@ -47,6 +47,7 @@
 #  define SHARE_PATH "/../share/wiznote"
 #endif
 
+
 const char* g_lpszDesktopFileName = "\
 [Desktop Entry]\n\
 Exec=%1WizNote\n\
@@ -384,8 +385,6 @@ int mainCore(int argc, char *argv[])
 
     return ret;
 }
-
-
 
 int main(int argc, char *argv[])
 {
