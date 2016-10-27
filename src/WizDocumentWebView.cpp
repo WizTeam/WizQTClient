@@ -1607,7 +1607,7 @@ void WizDocumentWebView::editorCommandExecuteFontSize(const QString& strSize)
     WizGetAnalyzer().logAction(QString("editorSetFontSize : %1pt").arg(strSize));
     //
     CString strStyle = WizFormatString1("{\\\"font-size\\\" : \\\"%1pt\\\"}", strSize);
-    CString strScript = WizFormatString1("WizEditor.modifySelectionDom(JSON.parse(\"%1\");)", strStyle);
+    CString strScript = WizFormatString1("WizEditor.modifySelectionDom(JSON.parse(\"%1\"))", strStyle);
 
     page()->runJavaScript(strScript);
     setModified(true);
