@@ -584,6 +584,16 @@ void WizDocumentView::showCoachingTips()
     }
 }
 
+void WizDocumentView::wordCount(std::function<void(const QString&)> callback)
+{
+    m_web->page()->runJavaScript("WizReader.getWordCount()", [=](const QVariant& vRet){
+        if (vRet.type() == QVariant::String) {
+            QString json = vRet.toString();
+            callback(json);
+        }
+    });
+}
+
 void WizDocumentView::setEditorFocus()
 {
     m_web->setFocus(Qt::MouseFocusReason);

@@ -67,6 +67,7 @@ void WizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     setGroupLabelVisible(db.isGroup());
     QString doc = db.getDocumentFileName(data.strGUID);
     QString sz = ::WizGetFileSizeHumanReadalbe(doc);
+    m_sizeText = sz;
 
     QFont font;
     QFontMetrics fm(font);
@@ -107,6 +108,16 @@ void WizNoteInfoForm::setDocument(const WIZDOCUMENTDATA& data)
     ui->editURL->setReadOnly(!canEdit);
     ui->checkEncrypted->setEnabled(canEdit && !db.isGroup());
 }
+
+void WizNoteInfoForm::setWordCount(int nWords, int nChars, int nCharsWithSpace, int nNonAsianWords, int nAsianChars)
+{
+    QString textFormat = tr("Words: %1\nCharacters (no spaces): %2\nCharacters (with spaces): %3\nNon-Asianwords: %4\nAsian characters: %5");
+    //
+    QString text = textFormat.arg(nWords).arg(nChars).arg(nCharsWithSpace).arg(nNonAsianWords).arg(nAsianChars);
+    //
+    ui->labelSize->setText(m_sizeText + "\n" + text);
+}
+
 
 void WizNoteInfoForm::setGroupLabelVisible(bool isGroupNote)
 {

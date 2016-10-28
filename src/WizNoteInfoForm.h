@@ -17,6 +17,7 @@ public:
     ~WizNoteInfoForm();
 
     void setDocument(const WIZDOCUMENTDATA& data);
+    void setWordCount(int nWords, int nChars, int nCharsWithSpace, int nNonAsianWords, int nAsianChars);
 
     void setGroupLabelVisible(bool isGroupNote);
 
@@ -45,6 +46,7 @@ private:
     QString m_docKbGuid;
     QString m_docGuid;
     QSize m_size;
+    QString m_sizeText;
 };
 
 

@@ -8,6 +8,7 @@
 #include <QSplitter>
 #include <QList>
 #include <QLabel>
+#include "rapidjson/document.h"
 
 #include "widgets/WizTagBar.h"
 #include "WizTitleEdit.h"
@@ -621,6 +622,26 @@ void WizTitleBar::onInfoButtonClicked()
     }
 
     m_info->setDocument(noteView()->note());
+    //
+    noteView()->wordCount([=](const QString& json){
+        //
+        rapidjson::Document d;
+        d.Parse(json.toUtf8().constData());
+
+        try {
+            int nWords = d.FindMember("nWords")->value.GetInt();
+            int nChars = d.FindMember("nChars")->value.GetInt();
+            int nCharsWithSpace = d.FindMember("nCharsWithSpace")->value.GetInt();
+            int nNonAsianWords = d.FindMember("nNonAsianWords")->value.GetInt();
+            int nAsianChars = d.FindMember("nAsianChars")->value.GetInt();
+            //
+            m_info->setWordCount(nWords, nChars, nCharsWithSpace, nNonAsianWords, nAsianChars);
+
+
+        } catch (...) {
+
+        }
+    });
 
     QRect rc = m_infoBtn->rect();
     QPoint pt = m_infoBtn->mapToGlobal(QPoint(rc.width()/2, rc.height()));

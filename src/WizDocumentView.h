@@ -116,6 +116,8 @@ public:
     void setStatusToEditingByCheckList();
     //
     void showCoachingTips();
+    //
+    void wordCount(std::function<void(const QString&)> callback);
 
 signals:
     void documentSaved(const QString& strGUID, WizDocumentView* viewer);
