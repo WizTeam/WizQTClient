@@ -1949,7 +1949,7 @@ void WizDocumentListView::wheelEvent(QWheelEvent* event)
     switch (m_nViewType)
     {
     case TypeThumbnail:
-        delta = delta / 3;
+        //delta = delta / 3;
         break;
     case TypeTwoLine:
         delta = int(delta / 1.5);
