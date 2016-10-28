@@ -1952,7 +1952,7 @@ void WizDocumentListView::wheelEvent(QWheelEvent* event)
         //delta = delta / 3;
         break;
     case TypeTwoLine:
-        delta = int(delta / 1.5);
+        //delta = int(delta / 1.5);
         break;
     default:
         break;
