@@ -4118,7 +4118,7 @@ Characters (no spaces): %2
 Characters (with spaces): %3
 Non-Asianwords: %4
 Asian characters: %5</source>
-        <translation>单词: %1
+        <translation>字数: %1
 字符 (不包含空白): %2
 字符 (包含空白): %3
 非亚洲单词: %4
