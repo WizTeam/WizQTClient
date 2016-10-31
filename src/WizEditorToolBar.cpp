@@ -1652,6 +1652,7 @@ void WizEditorToolBar::on_delay_updateToolbar()
 
 QMenu* WizEditorToolBar::createColorMenu(const char *slot, const char *slotColorBoard)
 {
+    /*
     // 设置透明色
     QAction *pActionTransparent = new QAction(this);
     pActionTransparent->setData(QColor(0, 0, 0, 0));
@@ -1661,6 +1662,7 @@ QMenu* WizEditorToolBar::createColorMenu(const char *slot, const char *slotColor
     pBtnTransparent->setFixedSize(QSize(110, 20));
     pBtnTransparent->setText(tr("transparent"));
     pBtnTransparent->setDefaultAction(pActionTransparent);
+    */
 
     // 选择其他颜色
     QToolButton *pBtnOtherColor = new QToolButton(this);
@@ -1701,7 +1703,7 @@ QMenu* WizEditorToolBar::createColorMenu(const char *slot, const char *slotColor
 
     QVBoxLayout *pVLayout = new QVBoxLayout;
     pVLayout->setContentsMargins(5, 5, 5, 5);
-    pVLayout->addWidget(pBtnTransparent);
+    //pVLayout->addWidget(pBtnTransparent);
     pVLayout->addWidget(widget);
     pVLayout->addWidget(pBtnOtherColor);
     //
