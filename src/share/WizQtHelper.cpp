@@ -193,7 +193,8 @@ int wiz_tcsnicmp(const CString& str1, const CString& str2, int count)
 
 int wiz_ttoi(const CString& str)
 {
-    return str.toInt();
+    return atoi(str.toUtf8().constData());
+    //return str.toInt();
 }
 
 __int64 wiz_ttoi64(const CString& str)
