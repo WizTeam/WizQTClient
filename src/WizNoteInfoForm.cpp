@@ -8,7 +8,6 @@
 #include "share/WizDatabase.h"
 #include "utils/WizLogger.h"
 #include "WizMainWindow.h"
-#include "WizLineInputDialog.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizMessageBox.h"
 
