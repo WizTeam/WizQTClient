@@ -1620,6 +1620,9 @@ void WizEditorToolBar::on_delegate_showContextMenuRequest(const QPoint& pos)
  */
 void WizEditorToolBar::on_delegate_selectionChanged(const QString& currentStyle)
 {
+    if (m_currentStyle == currentStyle)
+        return;
+    //
     m_currentStyle = currentStyle;
     m_lastUpdateUIRequest = WizGetTickCount();
     //
