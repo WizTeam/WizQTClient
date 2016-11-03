@@ -1320,16 +1320,19 @@ void WizDocumentWebView::setEditorMode(WizEditorMode editorMode)
     if (!db.documentFromGuid(view()->note().strGUID, docData))
         return;
 
-    trySaveDocument(docData, false, [=](const QVariant&){});
+    trySaveDocument(docData, false, [=](const QVariant&){
+        //
+        enableEditor(editing);
+        //
+        if (editing) {
+            setFocus(Qt::MouseFocusReason);
+            editorFocus();
+        }
+        //
+    });
 
     m_currentEditorMode = editorMode;
     //
-    enableEditor(editing);
-    //
-    if (editing) {
-        setFocus(Qt::MouseFocusReason);
-        editorFocus();
-    }
 }
 
 void WizDocumentWebView::trySaveDocument(const WIZDOCUMENTDATA& data, bool force, std::function<void(const QVariant &)> callback)
