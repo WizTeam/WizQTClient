@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include "share/WizWebEngineView.h"
+#include "sync/WizApiEntry.h"
 
 #define ShareLinkFirstTips "ShareLinkFirstTips"
 
@@ -164,9 +165,11 @@ QString WizShareLinkDialog::formateISO8601String()
 
 void WizShareLinkDialog::loadHtml()
 {
+    QUrlQuery query;
+    query.addQueryItem("share_server", WizCommonApiEntry::shareServer());
     QString strFile = Utils::WizPathResolve::resourcesPath() + "files/share_link/index.html";
     QUrl url = QUrl::fromLocalFile(strFile);
+    url.setQuery(query);
     m_view->load(url);
 }
-
 

@@ -27,11 +27,26 @@
             external.writeToLog(log);
 	}
 
+        function getParameterByName(name, url) {
+            if (!url) {
+              url = window.location.href;
+            }
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        var share_server = getParameterByName("share_server");
 	var kbGuid;
 	var documentGuid;
 	var documentTitle;
-	var url = 'http://fromwiz.com/share/api/shares';
+        var url = share_server + "/api/shares";
 	var token;
+        //
+        alert(url);
 
 	var tokenRefreshed = false;
 
@@ -492,7 +507,7 @@
 			if (!info.shareId)
 				return null;
 			//
-			return "http://fromwiz.com/share/s/" + info.shareId;
+                        return share_server + "/s/" + info.shareId;
 		}
 		//
 		function getPassword() {

@@ -281,6 +281,12 @@ QString WizCommonApiEntry::editStatusUrl()
     return strUrl;
 }
 
+QString WizCommonApiEntry::shareServer()
+{
+    QString url = getUrlByCommand("share_server");
+    return url;
+}
+
 QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand, const QString& strToken)
 {
     QString strExt = QString("token=%1").arg(strToken);
