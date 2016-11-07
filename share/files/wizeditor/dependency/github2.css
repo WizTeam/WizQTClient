@@ -365,8 +365,7 @@
 
 .markdown-body code, .markdown-body tt {
     margin: 0 2px;
-    padding: 0 5px;
-    border: 1px solid #eaeaea;
+    padding: 2px 4px;
     white-space: normal;
     color: #c7254e;
     background-color: #f9f2f4;
@@ -381,6 +380,7 @@
     max-width: 100%;
     border: none;
     background: transparent;
+    color: #666;
 }
 
 .markdown-body pre {
@@ -482,18 +482,20 @@
 /* Put a border around prettyprinted code snippets. */
 .markdown-body pre.prettyprint {
     background-color: #F7F7F9;
-    padding: 10px;
+    padding: 0;
     border: 1px solid #E1E1E8;
 }
 
 .markdown-body pre.prettyprint.linenums {
-    box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Specify class=linenums on a pre to get line numbering */
 .markdown-body pre.prettyprint.linenums ol.linenums {
+    box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset;
+    padding: 10px 10px 10px 40px !important;
     color: #1E347B;
-    padding-left: 30px !important;
     margin-top: 0;
     margin-bottom: 0;
 }
