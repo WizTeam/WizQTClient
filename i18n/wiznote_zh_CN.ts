@@ -664,7 +664,7 @@
     <message>
         <location filename="../src/WizCategoryView.cpp" line="68"/>
         <source>Empty Deleted Items</source>
-        <translation>清空已删除</translation>
+        <translation>清空回收站</translation>
     </message>
     <message>
         <location filename="../src/WizCategoryView.cpp" line="69"/>
@@ -1246,7 +1246,7 @@
     <message>
         <location filename="../src/share/WizMisc.cpp" line="346"/>
         <source>/Deleted Items/</source>
-        <translation>/已删除/</translation>
+        <translation>/回收站/</translation>
     </message>
     <message>
         <location filename="../src/share/WizMisc.cpp" line="350"/>
