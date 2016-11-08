@@ -1107,7 +1107,7 @@
     <message>
         <location filename="../src/WizCategoryViewItem.cpp" line="32"/>
         <source>Trash</source>
-        <translation>已删除</translation>
+        <translation type="unfinished">回收站</translation>
     </message>
     <message>
         <location filename="../src/WizCategoryViewItem.cpp" line="33"/>
