@@ -1155,19 +1155,19 @@ Reason: %3</source>
     </message>
     <message>
         <location filename="../src/share/WizObjectOperator.cpp" line="973"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1150"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1186"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1223"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1156"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1192"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1229"/>
         <source>Move notes to %1</source>
         <translation>移動筆記到 %1</translation>
     </message>
     <message>
         <location filename="../src/share/WizObjectOperator.cpp" line="897"/>
         <location filename="../src/share/WizObjectOperator.cpp" line="927"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1021"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1052"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1083"/>
-        <location filename="../src/share/WizObjectOperator.cpp" line="1120"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1027"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1058"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1089"/>
+        <location filename="../src/share/WizObjectOperator.cpp" line="1126"/>
         <source>Copy notes to %1</source>
         <translation>複製筆記到 %1</translation>
     </message>
@@ -3252,37 +3252,47 @@ Password hint: %1</source>
 <context>
     <name>WizDocumentView</name>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="571"/>
+        <location filename="../src/WizDocumentView.cpp" line="401"/>
+        <source>Encrypted group password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizDocumentView.cpp" line="403"/>
+        <source>Personal notes certificate password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/WizDocumentView.cpp" line="579"/>
         <source>You have occupied this note by clicking checklist !  Switch to other notes to free this note.</source>
         <translation type="unfinished">您點擊了閱讀狀態的清單項，目前筆記正被您佔用！如需解除，請切換到其他筆記。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="762"/>
+        <location filename="../src/WizDocumentView.cpp" line="770"/>
         <source>WizNote</source>
         <translation type="unfinished">為知筆記</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="762"/>
+        <location filename="../src/WizDocumentView.cpp" line="770"/>
         <source>Invalid password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="841"/>
+        <location filename="../src/WizDocumentView.cpp" line="849"/>
         <source>%1 is currently editing this note. Note has been locked.</source>
         <translation type="unfinished">目前筆記正在被 %1 編輯，筆記已處於鎖定狀態。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="845"/>
+        <location filename="../src/WizDocumentView.cpp" line="853"/>
         <source>%1 is currently editing this note.</source>
         <translation type="unfinished">目前筆記正在被 %1 編輯。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="869"/>
+        <location filename="../src/WizDocumentView.cpp" line="877"/>
         <source>The current network in poor condition, you are &lt;b&gt; offline editing mode &lt;/b&gt;.</source>
         <translation type="unfinished">目前網路狀況不佳，您正處於 &lt;b&gt; 離線編輯模式 &lt;/b&gt;。</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentView.cpp" line="884"/>
+        <location filename="../src/WizDocumentView.cpp" line="892"/>
         <source>New version on server avalible. &lt;a href=&apos;%1&apos;&gt;Click to download new version.&lt;a&gt;</source>
         <translation type="unfinished">伺服器上有新版本 &lt;a href=&apos;%1&apos;&gt;點擊下載新版本&lt;a&gt;</translation>
     </message>
@@ -3340,17 +3350,17 @@ Password hint: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1766"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1769"/>
         <source>Image File</source>
         <translation type="unfinished">圖片檔案</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1766"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1769"/>
         <source>Images (*.png *.bmp *.gif *.jpg)</source>
         <translation type="unfinished">圖片 (*.png *.bmp *.gif *.jpg)</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="1859"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="1862"/>
         <source>PDF Files (*.pdf)</source>
         <translation type="unfinished">PDF 檔案 (*.pdf)</translation>
     </message>
@@ -3358,12 +3368,12 @@ Password hint: %1</source>
 <context>
     <name>WizDocumentWebViewLoaderThread</name>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2145"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2148"/>
         <source>Error</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentWebView.cpp" line="2145"/>
+        <location filename="../src/WizDocumentWebView.cpp" line="2148"/>
         <source>Can&apos;t view note: (Can&apos;t unzip note data)</source>
         <translation type="unfinished"></translation>
     </message>
@@ -3586,34 +3596,28 @@ Password hint: %1</source>
         <translation type="unfinished">插入代碼 %1%2C</translation>
     </message>
     <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="1658"/>
-        <location filename="../src/WizEditorToolBar.cpp" line="1662"/>
-        <source>transparent</source>
-        <translation type="unfinished">清除顏色</translation>
-    </message>
-    <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="1667"/>
-        <location filename="../src/WizEditorToolBar.cpp" line="1670"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="1672"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="1675"/>
         <source>show more colors...</source>
         <translation type="unfinished">顯示更多顏色...</translation>
     </message>
     <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="2104"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="2109"/>
         <source>More tool items</source>
         <translation type="unfinished">更多工具</translation>
     </message>
     <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="2104"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="2109"/>
         <source>Use to show or hide extra tool items.</source>
         <translation type="unfinished">可以顯示或收起更多編輯工具</translation>
     </message>
     <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="2230"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="2235"/>
         <source>Save as...</source>
         <translation type="unfinished">另存為...</translation>
     </message>
     <message>
-        <location filename="../src/WizEditorToolBar.cpp" line="2231"/>
+        <location filename="../src/WizEditorToolBar.cpp" line="2236"/>
         <source>Image Files (*.%1)</source>
         <translation type="unfinished">圖片檔案 (*.%1)</translation>
     </message>
@@ -3892,17 +3896,17 @@ Password hint: %1</source>
     </message>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="22"/>
-        <source>This is a encrypted group, notes have been auto-encrypted. To read or create notes, please ask for the key to group administrator and initialize password first.</source>
+        <source>This is a encrypted group, notes have been auto-encrypted. To read or create notes, please ask for the initial key to team administrator and set personal password.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="47"/>
-        <source>Password from Administrator:</source>
+        <source>Encrypted group initial key:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="64"/>
-        <source>Your own password:</source>
+        <source>Your own encrypted group password:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -4538,12 +4542,12 @@ Password hint: %1</source>
         <translation type="unfinished">打開鏈接</translation>
     </message>
     <message>
-        <location filename="../src/WizNoteInfoForm.cpp" line="36"/>
+        <location filename="../src/WizNoteInfoForm.cpp" line="35"/>
         <source>Locate</source>
         <translation type="unfinished">定位</translation>
     </message>
     <message>
-        <location filename="../src/WizNoteInfoForm.cpp" line="38"/>
+        <location filename="../src/WizNoteInfoForm.cpp" line="37"/>
         <source>Click to view version history</source>
         <translation type="unfinished">點擊查看版本歷史</translation>
     </message>
