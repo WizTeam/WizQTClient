@@ -1663,7 +1663,11 @@ void WizDocumentListView::on_action_moveDocument()
     //
     m_menuDocument->hide();
 
-    WIZKM_CHECK_SYNCING(this);
+    CWizDocumentDataArray arrayDocument;
+    getSelectedDocuments(arrayDocument);
+    if (arrayDocument.size() > 1) {
+        WIZKM_CHECK_SYNCING(this);
+    }
     //
     ::WizGetAnalyzer().logAction("documentListMenuMoveDocument");
     WizFolderSelector* selector = new WizFolderSelector(tr("Move notes"), m_app, WIZ_USERGROUP_AUTHOR, this);

@@ -3461,12 +3461,12 @@ Password hint: %1</source>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="47"/>
         <source>Encrypted group initial key:</source>
-        <translation>绝密群组初始密钥:</translation>
+        <translation>绝密群组初始密钥：</translation>
     </message>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="64"/>
         <source>Your own encrypted group password:</source>
-        <translation>自定义绝密群组密码:</translation>
+        <translation>自定义绝密群组密码：</translation>
     </message>
     <message>
         <location filename="../src/ui/WizInitBizCertDialog.ui" line="81"/>
