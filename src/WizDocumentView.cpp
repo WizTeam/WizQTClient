@@ -394,8 +394,16 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
             if(!db.loadUserCert()) {
                 return;
             }
-
+            //
             if (db.getCertPassword().isEmpty()) {
+                //
+                if (db.isGroup()) {
+                    m_passwordView->setPasswordText(tr("Encrypted group password"));
+                } else {
+                    m_passwordView->setPasswordText(tr("Personal notes certificate password"));
+                }
+                //
+
                 m_passwordView->setHint(db.getCertPasswordHint());
                 m_tab->setCurrentWidget(m_passwordView);
                 m_passwordView->setCipherEditorFocus();

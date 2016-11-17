@@ -150,6 +150,11 @@ void WizUserCipherForm::onCipher_changed(const QString &text)
     }
 }
 
+void WizUserCipherForm::setPasswordText(const QString &strPasswordText)
+{
+    ui->labelPassword->setText(strPasswordText);
+}
+
 void WizUserCipherForm::setHint(const QString& strHint)
 {
     if (strHint.isEmpty()) {

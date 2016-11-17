@@ -16,6 +16,7 @@ class WizUserCipherForm : public QWidget
 public:
     explicit WizUserCipherForm(WizExplorerApp& app, QWidget *parent);
 
+    void setPasswordText(const QString& strPasswordText);
     void setHint(const QString& strHint);
 
     const QString& userCipher() const { return m_userCipher; }

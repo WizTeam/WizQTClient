@@ -19,7 +19,7 @@
      <item>
       <widget class="QLabel" name="label_5">
        <property name="text">
-        <string>This is a encrypted group, notes have been auto-encrypted. To read or create notes, please ask for the key to group administrator and initialize password first.</string>
+        <string>This is a encrypted group, notes have been auto-encrypted. To read or create notes, please ask for the initial key to team administrator and set personal password.</string>
        </property>
        <property name="wordWrap">
         <bool>true</bool>
@@ -44,7 +44,7 @@
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="text">
-          <string>Password from Administrator:</string>
+          <string>Encrypted group initial key:</string>
          </property>
         </widget>
        </item>
@@ -61,7 +61,7 @@
        <item row="1" column="0">
         <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Your own password:</string>
+          <string>Your own encrypted group password:</string>
          </property>
         </widget>
        </item>
