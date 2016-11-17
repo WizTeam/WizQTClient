@@ -951,7 +951,7 @@ void WizDocumentOperator::moveDocumentsToPersonalFolder(const CWizDocumentDataAr
     optData->targetFolder = targetFolder;
     WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
         //
-        if (waitForSync)
+        if (waitForSync && arrayDocument.size() > 1)
         {
             WIZKM_WAIT_AND_PAUSE_SYNC();
         }
@@ -974,7 +974,10 @@ void WizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArray
 
         WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=, &dlg]() {
             //
-            WIZKM_WAIT_AND_PAUSE_SYNC();
+            if (arrayDocument.size() > 1)
+            {
+                WIZKM_WAIT_AND_PAUSE_SYNC();
+            }
             //
             WizDocumentOperatorPrivate helper(optData);
             helper.bindSignalsToProgressDialog(&dlg);
@@ -987,7 +990,10 @@ void WizDocumentOperator::moveDocumentsToGroupFolder(const CWizDocumentDataArray
     {
         WizExecuteOnThread(WIZ_THREAD_DEFAULT, [=](){
             //
-            WIZKM_WAIT_AND_PAUSE_SYNC();
+            if (arrayDocument.size() > 1)
+            {
+                WIZKM_WAIT_AND_PAUSE_SYNC();
+            }
             //
             WizDocumentOperatorPrivate helper(optData);
             helper.moveDocumentToGroupFolder();
