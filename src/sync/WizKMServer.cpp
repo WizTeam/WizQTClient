@@ -352,9 +352,6 @@ bool WizKMAccountsServer::setValue(const QString& strKey, const QString& strValu
 
 QString WizKMAccountsServer::makeXmlRpcPassword(const QString& strPassword)
 {
-    if (strPassword.startsWith("md5."))
-        return QString(strPassword);
-    //
     return strPassword;
 }
 
