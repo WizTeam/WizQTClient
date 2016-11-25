@@ -1858,7 +1858,7 @@ void CWizDocumentWebView::editorCommandExecuteScreenShot()
 void CWizDocumentWebView::saveAsPDF()
 {
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
-                                                       QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
+                                                       QDir::homePath() + "/untitled.pdf", tr("PDF Files (*.pdf)"));
     if (::PathFileExists(strFileName))
     {
         ::DeleteFile(strFileName);
