@@ -27,11 +27,25 @@
             external.writeToLog(log);
 	}
 
+        function getParameterByName(name, url) {
+            if (!url) {
+              url = window.location.href;
+            }
+            name = name.replace(/[\[\]]/g, "\\$&");
+            var regex = new RegExp("[?&]" + name + "(=([^&#]*)|&|#|$)"),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, " "));
+        }
+
+        var share_server = getParameterByName("share_server");
 	var kbGuid;
 	var documentGuid;
 	var documentTitle;
-	var url = 'http://fromwiz.com/share/api/shares';
+        var url = share_server + "/api/shares";
 	var token;
+        //
 
 	var tokenRefreshed = false;
 
@@ -119,8 +133,9 @@
 			"readCount": null,
 			"expiredAt": null,
 			"expiredDaysSet": null,
-			"readCountSet": null
-		};
+                        "readCountSet": null,
+                        "shareUrl" : null
+                };
 
 		var tempInfo = {
 			"password": null,
@@ -129,7 +144,8 @@
 			"readCount": null,
 			"expiredAt": null,
 			"expiredDaysSet": null,
-			"readCountSet": null
+                        "readCountSet": null,
+                        "shareUrl" : null
 		};
 
 		var callback = {
@@ -148,6 +164,7 @@
 			tempInfo.expiredAt = info.expiredAt;
 			tempInfo.expiredDaysSet = info.expiredDaysSet;
 			tempInfo.readCountSet = info.readCountSet;
+                        tempInfo.shareUrl = info.shareUrl;
 		}
 
 		function _updateInfo() {
@@ -158,6 +175,7 @@
 			info.expiredAt = tempInfo.expiredAt;
 			info.expiredDaysSet = tempInfo.expiredDaysSet;
 			info.readCountSet = tempInfo.readCountSet;
+                        info.shareUrl = tempInfo.shareUrl;
 		}
 
 		function _share(callback) {
@@ -423,7 +441,8 @@
 								info.readCountSet = resp.readCountSet;
 							}
 							//
-							callback.shareCallback(requestSucceeded);
+                                                        info.shareUrl = resp.shareUrl;
+                                                        callback.shareCallback(requestSucceeded);
 							break;
 						case 301:
 							// invalid token;
@@ -466,7 +485,8 @@
 								info.readCountSet = resp.readCountSet;
 							}
 							//
-							callback.shareCallback(requestSucceeded);
+                                                        info.shareUrl = resp.shareUrl;
+                                                        callback.shareCallback(requestSucceeded);
 							break;
 						case 3379:
 							// non vip can't set read limit
@@ -489,10 +509,11 @@
 		}		
 		//
 		function getLink() {
-			if (!info.shareId)
-				return null;
+                        return info.shareUrl;
+                        //if (!info.shareId)
+                        //	return null;
 			//
-			return "http://fromwiz.com/share/s/" + info.shareId;
+                        //return share_server + "/s/" + info.shareId;
 		}
 		//
 		function getPassword() {

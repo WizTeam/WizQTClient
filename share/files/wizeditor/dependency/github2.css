@@ -25,6 +25,10 @@
 
 .markdown-body a {
     color: #448aff;
+    text-decoration: none;
+}
+.markdown-body a:hover {
+    text-decoration: underline;
 }
 
 .markdown-body a.absent {
@@ -117,11 +121,9 @@
 }
 
 .markdown-body hr {
-    background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAECAYAAACtBE5DAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6OENDRjNBN0E2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6OENDRjNBN0I2NTZBMTFFMEI3QjRBODM4NzJDMjlGNDgiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo4Q0NGM0E3ODY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo4Q0NGM0E3OTY1NkExMUUwQjdCNEE4Mzg3MkMyOUY0OCIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PqqezsUAAAAfSURBVHjaYmRABcYwBiM2QSA4y4hNEKYDQxAEAAIMAHNGAzhkPOlYAAAAAElFTkSuQmCC) repeat-x 0 0;
-    border: 0 none;
-    color: #cccccc;
-    height: 4px;
-    padding: 0;
+    border: 0;
+    border-bottom: 1px dashed #cfcfcf;
+    margin: 30px 0;
 }
 
 .markdown-body > h2:first-child {
@@ -266,6 +268,13 @@
     max-width: 100%;
 }
 
+.markdown-body .footnote {
+    vertical-align: top;
+    position: relative;
+    top: -0.5em;
+    font-size: .8em
+}
+
 .markdown-body span.frame {
     display: block;
     overflow: hidden;
@@ -355,14 +364,12 @@
 }
 
 .markdown-body code, .markdown-body tt {
-
     margin: 0 2px;
-    padding: 0 5px;
-    border: 1px solid #eaeaea;
-    background-color: #f8f8f8;
-    border-radius: 3px;
+    padding: 2px 4px;
     white-space: normal;
-
+    color: #c7254e;
+    background-color: #f9f2f4;
+    border-radius: 4px;
 }
 
 .markdown-body pre code {
@@ -373,6 +380,7 @@
     max-width: 100%;
     border: none;
     background: transparent;
+    color: #666;
 }
 
 .markdown-body pre {
@@ -474,18 +482,20 @@
 /* Put a border around prettyprinted code snippets. */
 .markdown-body pre.prettyprint {
     background-color: #F7F7F9;
-    padding: 10px;
+    padding: 0;
     border: 1px solid #E1E1E8;
 }
 
 .markdown-body pre.prettyprint.linenums {
-    box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Specify class=linenums on a pre to get line numbering */
 .markdown-body pre.prettyprint.linenums ol.linenums {
+    box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset;
+    padding: 10px 10px 10px 40px !important;
     color: #1E347B;
-    padding-left: 30px !important;
     margin-top: 0;
     margin-bottom: 0;
 }

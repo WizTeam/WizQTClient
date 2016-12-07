@@ -1,4 +1,4 @@
-//
+﻿//
 //  RMStoreUserDefaultsPersistence.h
 //  RMStore
 //

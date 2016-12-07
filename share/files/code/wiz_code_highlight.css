@@ -1,60 +1,4 @@
-﻿code, tt {
-
-  margin: 0 2px;
-  padding: 0 5px;
-  border: 1px solid #eaeaea;
-  background-color: #f8f8f8;
-  border-radius: 3px; 
-  white-space: normal;
-
-}
-
-pre code {
-  margin: 0;
-  padding: 0;
-  white-space: pre;
-  word-wrap:break-word;
-  max-width:100%;
-  border: none;
-  background: transparent; }
-
-.highlight pre {
-  background-color: #f8f8f8;
-  border: 1px solid #cccccc;
-  font-size: 13px;
-  line-height: 19px;
-  overflow: auto;
-  padding: 6px 10px;
-  border-radius: 3px; }
-
-pre {
-  background-color: #f8f8f8;
-  border: 1px solid #cccccc;
-  font-size: 13px;
-  line-height: 19px;
-  overflow: auto;
-  padding: 6px 10px;
-  border-radius: 3px; 
-}
-pre code, pre tt {
-  background-color: transparent;
-  border: none; 
-}
-
-@media screen {
-  pre {
-    word-wrap: break-word;
-  }
-}
-@media print {
-  table, pre {
-    page-break-inside: avoid;
-  }
-  pre {
-    word-wrap: break-word;
-  }
-}
-
+﻿
 /*
 
 Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiacs.Org>
@@ -209,11 +153,13 @@ Original style from softwaremaniacs.org (c) Ivan Sagalaev <Maniac@SoftwareManiac
   opacity: 0.5;
 }
 
+pre {
+  font-size: 13px;
+}
+
 pre, code {
   font-family: Consolas, "Liberation Mono", Menlo, Courier, monospace;
-}
-pre ol.linenums {
-    margin-left: 0;
+  word-wrap: break-word;
 }
 
 .pln {
@@ -264,28 +210,39 @@ pre ol.linenums {
 /* Put a border around prettyprinted code snippets. */
 pre.prettyprint {
   background-color: #F7F7F9;
-  padding: 10px;
-  border: 1px solid #E1E1E8; }
+  padding: 0px;
+  border: 1px solid #E1E1E8;
+  tab-size: 4; }
 
 pre.prettyprint.linenums {
-  box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset; }
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
 
 /* Specify class=linenums on a pre to get line numbering */
-ol.linenums {
+pre.prettyprint.linenums ol.linenums {
+  box-shadow: 40px 0 0 #FBFBFC inset, 41px 0 0 #ECECF0 inset;
   color: #1E347B;
-  margin: 0 0 0 40px; }
+  padding: 10px 10px 10px 40px !important;
+  margin-top: 0;
+  margin-bottom: 0;
+}
 
-ol.linenums li {
+pre.prettyprint.linenums ol.linenums li {
   color: #BEBEC5;
   line-height: 18px;
-  padding-left: 12px; }
+  padding-left: 12px !important;
+}
 
-li.L0,
-li.L1,
-li.L2,
-li.L3,
-li.L5,
-li.L6,
-li.L7,
-li.L8 {
-  list-style-type: normal; }
+pre.prettyprint.linenums ol.linenums li.L0,
+pre.prettyprint.linenums ol.linenums li.L1,
+pre.prettyprint.linenums ol.linenums li.L2,
+pre.prettyprint.linenums ol.linenums li.L3,
+pre.prettyprint.linenums ol.linenums li.L4,
+pre.prettyprint.linenums ol.linenums li.L5,
+pre.prettyprint.linenums ol.linenums li.L6,
+pre.prettyprint.linenums ol.linenums li.L7,
+pre.prettyprint.linenums ol.linenums li.L8,
+pre.prettyprint.linenums ol.linenums li.L9 {
+  list-style-type: decimal !important;
+}

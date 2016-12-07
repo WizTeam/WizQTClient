@@ -152,9 +152,9 @@ if (MSVC)
     COMPILE_DEFINITIONS "${_CRYPTOPP_COMPILE_DEFINITIONS}")
   # Setup precompiled headers and use intrinsics; the latter fixes MSVC8 linker
   # errors
-  set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES COMPILE_FLAGS
-    "-Yupch.h -Oi")
-  set_source_files_properties (pch.cpp PROPERTIES COMPILE_FLAGS -Yc)
+  #set_target_properties (${_CRYPTOPP_INSTALL_TARGETS} PROPERTIES COMPILE_FLAGS
+  #  "-Yupch.h -Oi")
+  #set_source_files_properties (pch.cpp PROPERTIES COMPILE_FLAGS -Yc)
   # These files don't use precompiled headers
   set_source_files_properties (dll.cpp cryptlib_bds.cpp iterhash.cpp
     PROPERTIES COMPILE_FLAGS -Y-)

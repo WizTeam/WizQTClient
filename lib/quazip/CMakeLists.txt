@@ -17,3 +17,4 @@ include_directories(
 
 # Link against ZLIB_LIBRARIES if needed (on Windows this variable is empty)
 target_link_libraries(quazip ${ZLIB_LIBRARY})
+

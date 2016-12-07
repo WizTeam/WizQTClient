@@ -1,24 +1,25 @@
-#ifndef WIZCODEEDITORDIALOG_H
+﻿#ifndef WIZCODEEDITORDIALOG_H
 #define WIZCODEEDITORDIALOG_H
 
 #include <QDialog>
 #include <QWebEngineView>
 #include <QPointer>
-#include "wizdef.h"
+#include "WizDef.h"
+#include "share/WizWebEngineView.h"
 
-class CWizExplorerApp;
+class WizExplorerApp;
 class QComboBox;
 class QWebView;
 class QMenu;
 class QPlainTextEdit;
-class CWizDocumentWebView;
+class WizDocumentWebView;
 class WizWebEngineView;
 
-class WizCodeEditorDialog : public QDialog
+class WizCodeEditorDialog : public WizWebEngineViewContainerDialog
 {
     Q_OBJECT
 public:
-    explicit WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView *external, QWidget *parent = 0);
+    explicit WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView *external, QWidget *parent = 0);
     void setCode(const QString& strCode);
     //
 
@@ -44,8 +45,8 @@ protected:
 
 private:
     WizWebEngineView *m_codeBrowser;
-    CWizExplorerApp& m_app;
-    CWizDocumentWebView *m_external;
+    WizExplorerApp& m_app;
+    WizDocumentWebView *m_external;
 };
 
 #endif // WIZCODEEDITORDIALOG_H

@@ -1,8 +1,8 @@
-#include "WizCodeEditorDialog.h"
-#include "wizdef.h"
-#include "utils/pathresolve.h"
-#include "share/wizsettings.h"
-#include "wizDocumentWebView.h"
+﻿#include "WizCodeEditorDialog.h"
+#include "WizDef.h"
+#include "utils/WizPathResolve.h"
+#include "share/WizSettings.h"
+#include "WizDocumentWebView.h"
 
 #include <QVBoxLayout>
 #include <QHBoxLayout>
@@ -21,14 +21,14 @@
 #include <QWebEnginePage>
 #include <QApplication>
 
-#include "share/wizGlobal.h"
-#include "share/wizwebengineview.h"
-#include "share/wizthreads.h"
+#include "share/WizGlobal.h"
+#include "share/WizWebEngineView.h"
+#include "share/WizThreads.h"
 
 #define LASTUSEDCODETYPE "LASTUSEDCODETYPE"
 
-WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebView* external, QWidget *parent) :
-    QDialog(parent)
+WizCodeEditorDialog::WizCodeEditorDialog(WizExplorerApp& app, WizDocumentWebView* external, QWidget *parent) :
+    WizWebEngineViewContainerDialog(parent)
   , m_app(app)
   , m_external(external)
   , m_codeBrowser(new WizWebEngineView(this))
@@ -49,7 +49,7 @@ WizCodeEditorDialog::WizCodeEditorDialog(CWizExplorerApp& app, CWizDocumentWebVi
 
     verticalLayout->addWidget(m_codeBrowser);
 
-    QString strFileName = Utils::PathResolve::resourcesPath() + "files/code/insert_code.htm";
+    QString strFileName = Utils::WizPathResolve::resourcesPath() + "files/code/insert_code.htm";
     QString strHtml;
     ::WizLoadUnicodeTextFromFile(strFileName, strHtml);
     strHtml.replace("Wiz_Language_Replace", tr("Language"));
@@ -74,8 +74,6 @@ void WizCodeEditorDialog::setCode(const QString& strCode)
 void WizCodeEditorDialog::insertHtml(const QString& strResultDiv)
 {
     QString strHtml = strResultDiv;
-    strHtml.replace("\\", "\\\\");
-    strHtml.replace("'", "\\'");
     //
     emit insertHtmlRequest(strHtml);
 }
