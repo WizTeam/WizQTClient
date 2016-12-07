@@ -1859,13 +1859,8 @@ void WizDocumentWebView::editorCommandExecuteScreenShot()
 void WizDocumentWebView::saveAsPDF()
 {
     QString strFileName = QFileDialog::getSaveFileName(this, QString(),
-<<<<<<< HEAD:src/wizDocumentWebView.cpp
                                                        QDir::homePath() + "/untitled.pdf", tr("PDF Files (*.pdf)"));
-    if (::PathFileExists(strFileName))
-=======
-                                                       QDir::homePath() + "/untited.pdf", tr("PDF Files (*.pdf)"));
     if (::WizPathFileExists(strFileName))
->>>>>>> v2.4.0:src/WizDocumentWebView.cpp
     {
         ::WizDeleteFile(strFileName);
     }
