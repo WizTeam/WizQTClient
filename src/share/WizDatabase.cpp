@@ -3121,8 +3121,11 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
 
+    if (isEncryptAllData())
+        data.nProtected = 1;
+    //
     WizDocument doc(*this, data);
-
+    //
     CString strZipFileName = getDocumentFileName(data.strGUID);
     if (!data.nProtected) {
         bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName);

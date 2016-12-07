@@ -387,7 +387,7 @@ void WizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
         // ask user cipher if needed
         //
         data.nProtected = WizZiwReader::isEncryptedFile(strDocumentFileName) ? 1 : 0;
-        if (data.nProtected) {
+        if (data.nProtected || db.isEncryptAllData()) {
             //
             db.initCert(false);
             //
