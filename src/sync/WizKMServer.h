@@ -10,6 +10,8 @@
 #define WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT		3032
 #define WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR		380
 
+#define WIZKM_XMLRPC_ERROR_USER_SERVICE_EXPR    10000
+
 class WizKMXmlRpcServerBase : public WizXmlRpcServerBase
 {
 public:

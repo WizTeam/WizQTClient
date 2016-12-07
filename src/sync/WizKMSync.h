@@ -24,6 +24,7 @@ class WizKMSyncEvents : public QObject , public IWizKMSyncEvents
     virtual void onStorageLimit(IWizSyncableDatabase* pDatabase);
     virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase);
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase);
+    virtual void onUserServiceExpr();
     virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone);
     virtual void onBeginKb(const QString& strKbGUID);
     virtual void onEndKb(const QString& strKbGUID);
@@ -32,6 +33,7 @@ Q_SIGNALS:
     void messageReady(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
+    void promptUserServiceExpr();
 };
 
 
@@ -119,6 +121,7 @@ Q_SIGNALS:
     void processLog(const QString& strStatus);
     void promptMessageRequest(int nType, const QString& strTitle, const QString& strMsg);
     void bubbleNotificationRequest(const QVariant& param);
+    void promptUserServiceExpr();
 };
 
 class WizKMWaitAndPauseSyncHelper

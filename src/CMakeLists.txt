@@ -130,6 +130,7 @@ set(wiznote_SOURCES
     share/WebSocketTransport.cpp
     share/WizWebEngineView.cpp
     widgets/WizTableSelector.cpp
+    widgets/WizUserServiceExprDialog.cpp
 
     WizCategoryView.cpp
     WizCategoryViewItem.cpp
@@ -347,6 +348,7 @@ set(wiznote_HEADERS
     widgets/WizSingleDocumentView.h
     widgets/WizTemplatePurchaseDialog.h
     widgets/WizExecutingActionDialog.h
+    widgets/WizUserServiceExprDialog.h
     WizPositionDelegate.h
     core/WizAccountManager.h
     core/WizCommentManager.h
@@ -378,6 +380,7 @@ set(wiznote_FORMS
     ui/WizTemplatePurchaseDialog.ui
     ui/WizExecutingActionDialog.ui
     ui/WizInitBizCertDialog.ui
+    ui/WizUserServiceExprDialog.ui
 )
 
 set(wiznote_TRANSLATIONS

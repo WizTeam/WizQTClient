@@ -76,6 +76,10 @@ void WizKMSyncEvents::onBizNoteCountLimit(IWizSyncableDatabase* pDatabase)
     // FIXME
     Q_UNUSED(pDatabase);
 }
+void WizKMSyncEvents::onUserServiceExpr()
+{
+}
+
 
 void WizKMSyncEvents::onUploadDocument(const QString& strDocumentGUID, bool bDone)
 {
@@ -124,6 +128,7 @@ WizKMSyncThread::WizKMSyncThread(WizDatabase& db, QObject* parent)
     connect(m_pEvents, SIGNAL(messageReady(const QString&)), SIGNAL(processLog(const QString&)));
     connect(m_pEvents, SIGNAL(promptMessageRequest(int, QString, QString)), SIGNAL(promptMessageRequest(int, QString, QString)));
     connect(m_pEvents, SIGNAL(bubbleNotificationRequest(const QVariant&)), SIGNAL(bubbleNotificationRequest(const QVariant&)));
+    connect(m_pEvents, SIGNAL(promptUserServiceExpr()), SIGNAL(promptUserServiceExpr()));
 
     m_timer.setSingleShot(true);
     connect(this, SIGNAL(startTimer(int)), &m_timer, SLOT(start(int)));

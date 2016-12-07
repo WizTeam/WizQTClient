@@ -100,6 +100,7 @@
 #include "share/WizWebEngineView.h"
 #include "rapidjson/document.h"
 #include "widgets/WizExecutingActionDialog.h"
+#include "widgets/WizUserServiceExprDialog.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -200,6 +201,9 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
+    connect(m_sync, SIGNAL(promptUserServiceExpr()),
+            SLOT(on_promptUserServiceExpr()));
+
     connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
@@ -2259,6 +2263,31 @@ void WizMainWindow::on_promptMessage_request(int nType, const QString& strTitle,
         break;
     }
 }
+
+void WizMainWindow::on_promptUserServiceExpr()
+{
+    static int lastPrompt = 0;
+    if (lastPrompt != 0)
+    {
+        int now = WizGetTickCount();
+        int span = now - lastPrompt;
+        if (span < 60 * 60 * 1000)
+            return;
+    }
+    //
+    static bool in = false;
+    if (in)
+        return;
+    //
+    in = true;
+    //
+    lastPrompt = WizGetTickCount();
+    //
+    WizUserServiceExprDialog dlg(NULL);
+    dlg.exec();
+    in  = false;
+}
+
 
 void WizMainWindow::on_bubbleNotification_request(const QVariant& param)
 {
