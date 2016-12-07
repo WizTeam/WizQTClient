@@ -201,6 +201,11 @@ bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
     if (WizServerTemplate != tmplData.type || tmplData.isFree)
         return true;
 
+    //开放给所有用户使用
+    return true;
+    //
+    //不再限制用户使用模版
+    /*
     WizAccountManager account(dbMgr);
     if (account.isVip())
         return true;
@@ -237,6 +242,7 @@ bool isTemplateUsable(const TemplateData& tmplData, WizDatabaseManager& dbMgr)
     }
 
     return false;
+    */
 }
 
 void WizDocTemplateDialog::createPurchaseDialog()
