@@ -3867,6 +3867,10 @@ bool WizDatabase::loadCompressedAttachmentData(const QString& strGUID, QByteArra
         return false;
 
     arrayData = file.readAll();
+    //
+    file.close();
+    //
+    QFile::remove(strTempZipFileName);
 
     return !arrayData.isEmpty();
 }
@@ -3894,7 +3898,9 @@ bool WizDatabase::saveCompressedAttachmentData(const CString& strGUID, const QBy
     }
 
     zip.close();
-
+    //
+    QFile::remove(strTempZipFileName);
+    //
     return true;
 }
 
