@@ -4138,9 +4138,15 @@ void WizMainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachme
 
 void WizMainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
 {
-    m_singleViewDelegate->viewDocument(data);
-    // update dock menu
-    resetDockMenu();
+    m_doc->web()->trySaveDocument(m_doc->note(), false, [=](const QVariant&){
+
+        m_doc->setEditorMode(modeReader);
+        //
+        m_singleViewDelegate->viewDocument(data);
+        // update dock menu
+        resetDockMenu();
+        //
+    });
 }
 
 void WizMainWindow::viewCurrentNoteInSeparateWindow()
