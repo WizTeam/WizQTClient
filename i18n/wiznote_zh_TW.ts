@@ -846,6 +846,7 @@ Reason: %3</source>
     </message>
     <message>
         <location filename="../src/WizActions.cpp" line="48"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="20"/>
         <location filename="../src/share/WizMessageBox.cpp" line="94"/>
         <source>Help</source>
         <translation>說明</translation>
@@ -2176,6 +2177,7 @@ Reason: %3</source>
     </message>
     <message>
         <location filename="../src/WizDocTemplateDialog.cpp" line="615"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="19"/>
         <location filename="../src/share/WizMessageBox.cpp" line="76"/>
         <source>Cancel</source>
         <translation>取消</translation>
@@ -5711,32 +5713,32 @@ w: %3  h: %4</translation>
 <context>
     <name>WizUserServiceExprDialog</name>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="28"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="30"/>
         <source>The free trial period has expired, please upgrade to VIP for uploading new personal notes and modification of personal notes, which make sure your data can be accessed on any device. (This has no influence on the business service.)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="32"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="34"/>
         <source>The period of VIP service has expired, please renew for uploading new personal notes and modification of personal notes, which make sure your data can be accessed on any device. (This has no influence on the business service.)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="39"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="41"/>
         <source>The free trial period has expired, please upgrade to VIP for uploading new personal notes and modification of personal notes, which make sure your data can be accessed on any device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="43"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="45"/>
         <source>The period of VIP service has expired, please renew for uploading new personal notes and modification of personal notes, which make sure your data can be accessed on any device.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="49"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="51"/>
         <source>Upgrade to VIP</source>
         <translation type="unfinished">现在升级</translation>
     </message>
     <message>
-        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="53"/>
+        <location filename="../src/widgets/WizUserServiceExprDialog.cpp" line="55"/>
         <source>Renew VIP</source>
         <translation type="unfinished"></translation>
     </message>

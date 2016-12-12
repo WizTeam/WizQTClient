@@ -16,6 +16,8 @@ WizUserServiceExprDialog::WizUserServiceExprDialog(QWidget *parent)
     //
     connect(ui->buttonBox, SIGNAL(accepted()), this, SLOT(okClicked()));
     connect(ui->buttonBox, SIGNAL(helpRequested()), this, SLOT(helpClicked()));
+    ui->buttonBox->button(QDialogButtonBox::Cancel)->setText(QObject::tr("Cancel"));
+    ui->buttonBox->button(QDialogButtonBox::Help)->setText(QObject::tr("Help"));
 }
 
 void WizUserServiceExprDialog::setUserInfo(bool free, bool biz)
