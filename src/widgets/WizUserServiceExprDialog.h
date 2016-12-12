@@ -15,7 +15,11 @@ class WizUserServiceExprDialog : public QDialog
 
 public:
     explicit WizUserServiceExprDialog(QWidget *parent);
-
+    //
+    void setUserInfo(bool free, bool biz);
+public Q_SLOTS:
+    void helpClicked();
+    void okClicked();
 private:
     Ui::WizUserServiceExprDialog *ui;
 };

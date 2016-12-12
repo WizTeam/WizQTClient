@@ -201,8 +201,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
-    connect(m_sync, SIGNAL(promptUserServiceExpr()),
-            SLOT(on_promptUserServiceExpr()));
+    connect(m_sync, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_sync, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
 
     connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
@@ -2264,7 +2264,9 @@ void WizMainWindow::on_promptMessage_request(int nType, const QString& strTitle,
     }
 }
 
-void WizMainWindow::on_promptUserServiceExpr()
+
+
+void WizMainWindow::promptServiceExpr(bool free)
 {
     static int lastPrompt = 0;
     if (lastPrompt != 0)
@@ -2282,10 +2284,28 @@ void WizMainWindow::on_promptUserServiceExpr()
     in = true;
     //
     lastPrompt = WizGetTickCount();
+
+    WizDatabase& db = m_dbMgr.db("");
+    bool biz = db.hasBiz();
     //
     WizUserServiceExprDialog dlg(NULL);
-    dlg.exec();
+    dlg.setUserInfo(free, biz);
+    if (0 != dlg.exec())
+    {
+        showVipUpgradePage();
+    }
     in  = false;
+}
+
+void WizMainWindow::on_promptFreeServiceExpr()
+{
+    promptServiceExpr(true);
+}
+
+
+void WizMainWindow::on_promptVipServiceExpr()
+{
+    promptServiceExpr(false);
 }
 
 

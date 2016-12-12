@@ -230,6 +230,8 @@ private:
 
     QWidget* createNoteListView();
     QWidget* createMessageListView();
+    //
+    void promptServiceExpr(bool free);
 
 public:
     // CWizDocument passthrough methods
@@ -381,7 +383,8 @@ public Q_SLOTS:
 
     void on_syncProcessLog(const QString& strMsg);
     void on_promptMessage_request(int nType, const QString& strTitle, const QString& strMsg);
-    void on_promptUserServiceExpr();
+    void on_promptFreeServiceExpr();
+    void on_promptVipServiceExpr();
     void on_bubbleNotification_request(const QVariant& param);
 
     void on_TokenAcquired(const QString& strToken);

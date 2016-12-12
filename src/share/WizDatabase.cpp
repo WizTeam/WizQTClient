@@ -1143,7 +1143,8 @@ bool WizDatabase::hasBiz()
 {
     WizDatabase* personDb = personalDatabase();
 
-    return !personDb->getMetaDef("Bizs", "Count").isEmpty();
+    QString count = personDb->getMetaDef("Bizs", "Count");
+    return atoi(count.toUtf8()) != 0;
 }
 
 bool WizDatabase::isGroupAdmin()

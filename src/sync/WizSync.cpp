@@ -599,9 +599,14 @@ void SaveServerError(const WIZKBINFO& kbInfo, const WizKMDatabaseServer& server,
         pEvents->onBizNoteCountLimit(pDatabase);
         break;
     }
-    case WIZKM_XMLRPC_ERROR_USER_SERVICE_EXPR:
+    case WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR:
     {
-        pEvents->onUserServiceExpr();
+        pEvents->onFreeServiceExpr();
+        break;
+    }
+    case WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR:
+    {
+        pEvents->onVipServiceExpr();
         break;
     }
     default:
@@ -892,10 +897,16 @@ bool UploadList(const WIZKBINFO& kbInfo, IWizKMSyncEvents* pEvents, IWizSyncable
                 QString error = pEvents->getLastErrorMessage() + QObject::tr("Team service of ' %1 ' has expired, temporarily unable to sync the new and edited notes, please renew on time.").arg(bizData.bizName) +"\n";
                 pEvents->setLastErrorMessage(error);
             }
-            case WIZKM_XMLRPC_ERROR_USER_SERVICE_EXPR:
+            case WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR:
             {
-                pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_USER_SERVICE_EXPR);
+                pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
                 QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+                pEvents->setLastErrorMessage(error);
+            }
+            case WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR:
+            {
+                pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+                QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
                 pEvents->setLastErrorMessage(error);
             }
             case WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT:
