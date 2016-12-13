@@ -4110,6 +4110,21 @@ bool WizDatabase::isEncryptAllData()
     return false;
 }
 
+bool WizDatabase::prepareBizCert()
+{
+    bool encrypt = isEncryptAllData();
+    if (!encrypt)
+        return true;
+    //
+    if (!initCert(true))
+        return false;
+    //
+    if (!initZiwReaderForEncryption())
+        return false;
+    //
+    return true;
+}
+
 
 bool WizDatabase::initBizCert()
 {

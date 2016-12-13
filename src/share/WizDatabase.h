@@ -489,6 +489,7 @@ public:
     bool initCert(bool queryPassword);
     //
     bool isEncryptAllData();
+    bool prepareBizCert();
     bool initBizCert();
     bool QueryCertPassword();
     bool verifyCertPassword(QString password);
