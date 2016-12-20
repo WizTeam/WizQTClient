@@ -1,6 +1,6 @@
 # Maintainer: Albert.Zhou <albert.zhou@wiz.cn>
 pkgname=wiznote
-pkgver=2.3.3
+pkgver=2.5.0
 pkgrel=1
 pkgdesc="Opensource cross-platform cloud based note-taking client"
 arch=('i686' 'x86_64')
@@ -12,16 +12,16 @@ install=wiznote.install
 #source=("$pkgname::git+https://github.com/WizTeam/WizQTClient.git#tag=v2.0.38") # Use git is too slow
 #md5sums=('SKIP')
 _wiznote_project_name="WizQTClient"
-source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.3.3_webengine.zip")
-md5sums=('85efa99e3e8d5d414402f16242494bb6')
+source=("$pkgname.tar.gz::https://github.com/WizTeam/WizQTClient/archive/v2.5.0.zip")
+md5sums=('ad5d5a1c7dec5d054fb125106935c62d')
 
 build() {
-	cd "$srcdir/$_wiznote_project_name-${pkgver}_webengine"
+	cd "$srcdir/$_wiznote_project_name-${pkgver}"
     cmake -DWIZNOTE_USE_QT5=YES -DCMAKE_INSTALL_PREFIX=/usr/ .
 	make
 }
 
 package() {
-	cd "$srcdir/$_wiznote_project_name-${pkgver}_webengine"
+	cd "$srcdir/$_wiznote_project_name-${pkgver}"
 	make DESTDIR="$pkgdir/" install
 }
