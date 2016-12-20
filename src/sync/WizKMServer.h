@@ -116,7 +116,7 @@ struct CWizKMBaseParam: public WizXmlRpcStructValue
 #else
         addString("client_type", "linux");
 #endif
-        addString("client_version", "2.0");
+        addString("client_version", WIZ_CLIENT_VERSION);
     }
     //
     void changeApiVersion(int nApiVersion)
