@@ -4,6 +4,7 @@
 #include "WizXmlRpcServer.h"
 #include "WizJSONServerBase.h"
 #include "share/WizMessageBox.h"
+#include "WizDef.h"
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
