@@ -50,19 +50,7 @@ function WizEditorInit(basePath, browserLang, userGUID, userAlias, ignoreTable, 
             userInfo: user,
             clientType: "mac",
             ignoreTable : ignoreTable,
-            dependencyCss: {
-                fonts: basePath + 'dependency/fonts.css',
-                github2: basePath + 'dependency/github2.css',
-                wizToc: basePath + 'dependency/wizToc.css',
-            },
-            dependencyJs: {
-                jquery: basePath + 'dependency/jquery-1.11.3.js',
-                prettify: basePath + 'dependency/prettify.js',
-                raphael: basePath + 'dependency/raphael.js',
-                underscore: basePath + 'dependency/underscore.js',
-                flowchart: basePath + 'dependency/flowchart.js',
-                sequence: basePath + 'dependency/sequence-diagram.js'
-            }
+            dependencyUrl: basePath + 'dependency'
         }
         //
         WizEditor.init(editorOptions);
