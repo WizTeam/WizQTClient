@@ -191,6 +191,8 @@ public:
     virtual void onStorageLimit(IWizSyncableDatabase* pDatabase) {}
     virtual void onBizServiceExpr(IWizSyncableDatabase* pDatabase) {}
     virtual void onBizNoteCountLimit(IWizSyncableDatabase* pDatabase) {}
+    virtual void onFreeServiceExpr() {}
+    virtual void onVipServiceExpr() {}
     virtual void onUploadDocument(const QString& strDocumentGUID, bool bDone) {}
     virtual void onBeginKb(const QString& strKbGUID) {}
     virtual void onEndKb(const QString& strKbGUID) {}

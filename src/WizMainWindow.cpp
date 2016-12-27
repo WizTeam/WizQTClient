@@ -100,6 +100,7 @@
 #include "share/WizWebEngineView.h"
 #include "rapidjson/document.h"
 #include "widgets/WizExecutingActionDialog.h"
+#include "widgets/WizUserServiceExprDialog.h"
 
 #define MAINWINDOW  "MainWindow"
 
@@ -200,6 +201,9 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
     connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
+    connect(m_sync, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_sync, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+
     connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
     connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
@@ -2260,6 +2264,51 @@ void WizMainWindow::on_promptMessage_request(int nType, const QString& strTitle,
     }
 }
 
+
+
+void WizMainWindow::promptServiceExpr(bool free)
+{
+    static int lastPrompt = 0;
+    if (lastPrompt != 0)
+    {
+        int now = WizGetTickCount();
+        int span = now - lastPrompt;
+        if (span < 60 * 60 * 1000)
+            return;
+    }
+    //
+    static bool in = false;
+    if (in)
+        return;
+    //
+    in = true;
+    //
+    lastPrompt = WizGetTickCount();
+
+    WizDatabase& db = m_dbMgr.db("");
+    bool biz = db.hasBiz();
+    //
+    WizUserServiceExprDialog dlg(NULL);
+    dlg.setUserInfo(free, biz);
+    if (0 != dlg.exec())
+    {
+        showVipUpgradePage();
+    }
+    in  = false;
+}
+
+void WizMainWindow::on_promptFreeServiceExpr()
+{
+    promptServiceExpr(true);
+}
+
+
+void WizMainWindow::on_promptVipServiceExpr()
+{
+    promptServiceExpr(false);
+}
+
+
 void WizMainWindow::on_bubbleNotification_request(const QVariant& param)
 {
     m_tray->showMessage(param);
@@ -4089,9 +4138,15 @@ void WizMainWindow::downloadAttachment(const WIZDOCUMENTATTACHMENTDATA& attachme
 
 void WizMainWindow::viewNoteInSeparateWindow(const WIZDOCUMENTDATA& data)
 {
-    m_singleViewDelegate->viewDocument(data);
-    // update dock menu
-    resetDockMenu();
+    m_doc->web()->trySaveDocument(m_doc->note(), false, [=](const QVariant&){
+
+        m_doc->setEditorMode(modeReader);
+        //
+        m_singleViewDelegate->viewDocument(data);
+        // update dock menu
+        resetDockMenu();
+        //
+    });
 }
 
 void WizMainWindow::viewCurrentNoteInSeparateWindow()

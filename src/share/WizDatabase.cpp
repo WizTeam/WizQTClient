@@ -1143,7 +1143,8 @@ bool WizDatabase::hasBiz()
 {
     WizDatabase* personDb = personalDatabase();
 
-    return !personDb->getMetaDef("Bizs", "Count").isEmpty();
+    QString count = personDb->getMetaDef("Bizs", "Count");
+    return atoi(count.toUtf8()) != 0;
 }
 
 bool WizDatabase::isGroupAdmin()
@@ -3121,8 +3122,11 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
     }
     m_mtxTempFile.unlock();
 
+    if (isEncryptAllData())
+        data.nProtected = 1;
+    //
     WizDocument doc(*this, data);
-
+    //
     CString strZipFileName = getDocumentFileName(data.strGUID);
     if (!data.nProtected) {
         bool bZip = ::WizHtml2Zip(strURL, strProcessedHtml, strResourcePath, nFlags, strZipFileName);
@@ -3863,6 +3867,10 @@ bool WizDatabase::loadCompressedAttachmentData(const QString& strGUID, QByteArra
         return false;
 
     arrayData = file.readAll();
+    //
+    file.close();
+    //
+    QFile::remove(strTempZipFileName);
 
     return !arrayData.isEmpty();
 }
@@ -3890,7 +3898,9 @@ bool WizDatabase::saveCompressedAttachmentData(const CString& strGUID, const QBy
     }
 
     zip.close();
-
+    //
+    QFile::remove(strTempZipFileName);
+    //
     return true;
 }
 
@@ -4098,6 +4108,21 @@ bool WizDatabase::isEncryptAllData()
         return m_info.bEncryptData;
     //
     return false;
+}
+
+bool WizDatabase::prepareBizCert()
+{
+    bool encrypt = isEncryptAllData();
+    if (!encrypt)
+        return true;
+    //
+    if (!initCert(true))
+        return false;
+    //
+    if (!initZiwReaderForEncryption())
+        return false;
+    //
+    return true;
 }
 
 

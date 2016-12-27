@@ -18,56 +18,32 @@ freedom, means knowledge, means PKM, means this WizNote client.
 if you are windows or portable platform users, we have WizNote for windows, ios, android from our [Homepage](http://www.wiznote.com)
 
 
-## Compile
+## Compile (Windows, macOS, Linux)
 
-visit: (http://wiznote-qt.com)
+visit: (https://note.wiz.cn/pages/manage/biz/payRead.html?kb=4e2d9734-b669-4b6f-91ad-e056be317cea)
 
-Different distributions or platforms
+
 ---
 
-### Mac OSX
+### Install on Mac macOS
 
-[Download](http://www.wiz.cn/wiznote-maclinux.html) from our homepage or install from [AppStore](https://itunes.apple.com/cn/app/wiznote/id863771545?l=zh&ls=1&mt=12).
-
-### Ubuntu
-
-install from [PPA](https://launchpad.net/~wiznote-team/+archive/ppa) is much more convenient:
-
-    $ sudo add-apt-repository ppa:wiznote-team
-    $ sudo apt-get update
-    $ sudo apt-get install wiznote
+[Download](http://www.wiz.cn/wiznote-maclinux.html)
 
 
-### Fedora 22+
+### Install on Linux, Windows
 
-    $ dnf install dnf-plugins-core
-    $ dnf copr enable mosquito/wiznote
-    $ dnf install wiznote   # Stable version 
-    Or
-    $ dnf install wiznote-beta    # Development version
+Please compile from source.
 
-Thanks for mosquito's contribution, [more Fedora/CentOS soft.](https://copr.fedorainfracloud.org/coprs/mosquito/)
-
-
-### Fedora 21/RHEL/CentOS 7
-
-    $ yum install yum-plugin-copr 
-    $ yum copr enable mosquito/wiznote
-    $ yum install wiznote     # Stable version  
-    Or
-    $ yum install wiznote-beta    # Development version
-
-If it comes with an error that cannot install yum-plugin-copr, you need to add [repo info](https://copr.fedorainfracloud.org/coprs/mosquito/wiznote/repo/epel-7/mosquito-wiznote-epel-7.repo) to your repo list in file `/etc/yum.repos.d/epel.repo`, or download the repo file to repos directory.
-Here is the way of download the repo file:
-
-	$ cd /etc/yum.repos.d/
-	$ sudo wget https://copr.fedorainfracloud.org/coprs/mosquito/wiznote/repo/epel-7/mosquito-wiznote-epel-7.repo
-	$ sudo yum install wiznote
-
-
-### others
-
-Read the compile section and compile for your own flavor!
 
 
 *All things done, enjoy!*
+
+-------
+
+### 在Windows／macOS／Linux上面编译：
+
+请访问: (https://note.wiz.cn/pages/manage/biz/payRead.html?kb=4e2d9734-b669-4b6f-91ad-e056be317cea)
+
+### 在macOS上面安装：
+
+[Download](http://www.wiz.cn/wiznote-maclinux.html)

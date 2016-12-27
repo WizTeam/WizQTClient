@@ -4,11 +4,15 @@
 #include "WizXmlRpcServer.h"
 #include "WizJSONServerBase.h"
 #include "share/WizMessageBox.h"
+#include "WizDef.h"
 
 #define WIZKM_XMLRPC_ERROR_TRAFFIC_LIMIT		304
 #define WIZKM_XMLRPC_ERROR_STORAGE_LIMIT		305
 #define WIZKM_XMLRPC_ERROR_NOTE_COUNT_LIMIT		3032
 #define WIZKM_XMLRPC_ERROR_BIZ_SERVICE_EXPR		380
+
+#define WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR    30321
+#define WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR     30322
 
 class WizKMXmlRpcServerBase : public WizXmlRpcServerBase
 {
@@ -113,7 +117,7 @@ struct CWizKMBaseParam: public WizXmlRpcStructValue
 #else
         addString("client_type", "linux");
 #endif
-        addString("client_version", "2.0");
+        addString("client_version", WIZ_CLIENT_VERSION);
     }
     //
     void changeApiVersion(int nApiVersion)

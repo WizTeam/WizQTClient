@@ -917,6 +917,12 @@ void WizDocumentOperator::copyDocumentsToGroupFolder(const CWizDocumentDataArray
                                                       const WIZTAGDATA& targetTag, bool keepDocTime,
                                                       bool showProgressDialog)
 {
+    WizDatabaseManager* dbMgr = WizDatabaseManager::instance();
+    WizDatabase& db = dbMgr->db(targetTag.strKbGUID);
+    //
+    if (!db.prepareBizCert())
+        return;
+
     OperatorData* optData = new OperatorData();
     optData->arrayDocument =  arrayDocument;
     optData->targetTag = targetTag;

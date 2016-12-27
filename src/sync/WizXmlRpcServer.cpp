@@ -46,7 +46,7 @@ bool WizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, WizXmlRpcResu
         data.addParam(pParam4);
     }
     //
-    QUrl url(m_strUrl + "?methodName=" + strMethodName);
+    QUrl url(m_strUrl + "?methodName=" + strMethodName + "&version=" + WIZ_CLIENT_VERSION);
 
     QNetworkRequest request;
     request.setUrl(url);
