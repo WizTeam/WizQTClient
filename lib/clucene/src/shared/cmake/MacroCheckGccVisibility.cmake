@@ -15,7 +15,7 @@ macro(MACRO_CHECK_GCC_VISIBILITY GccVisibility)
    # get the gcc version
    exec_program(${CMAKE_C_COMPILER} ARGS --version OUTPUT_VARIABLE _gcc_version_info)
 
-   string (REGEX MATCH "[345]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
+   string (REGEX MATCH "[3-9]\\.[0-9]\\.[0-9]" _gcc_version "${_gcc_version_info}")
    if (NOT _gcc_version)
    
       # clang reports: clang version 1.1 (trunk 95754)
