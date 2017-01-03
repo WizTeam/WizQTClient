@@ -375,7 +375,6 @@
 .markdown-body pre code {
     margin: 0;
     padding: 0;
-    white-space: pre;
     word-wrap: break-word;
     max-width: 100%;
     border: none;

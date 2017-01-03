@@ -644,6 +644,22 @@ bool UploadDocument(const WIZKBINFO& kbInfo, int size, int start, int total, int
     //check data size
     if (!local.arrayData.isEmpty())
     {
+        int maxFileSize = server.getMaxFileSize();
+        if (maxFileSize == 1)
+        {
+            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+            QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+            pEvents->setLastErrorMessage(error);
+            return FALSE;
+        }
+        else if (maxFileSize == 2)
+        {
+            pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+            QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+            pEvents->setLastErrorMessage(error);
+            return FALSE;
+        }
+        //
         __int64 nDataSize = local.arrayData.size();
         if (nDataSize > server.getMaxFileSize())
         {
@@ -751,6 +767,22 @@ bool UploadAttachment(const WIZKBINFO& kbInfo, int size, int start, int total, i
     if (local.arrayData.isEmpty())
     {
         pEvents->onError(_TR("No attachment data"));
+        return FALSE;
+    }
+    //
+    int maxFileSize = server.getMaxFileSize();
+    if (maxFileSize == 1)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_FREE_SERVICE_EXPR);
+        QString error = QObject::tr("User service of has expired, please upgrade to VIP.");
+        pEvents->setLastErrorMessage(error);
+        return FALSE;
+    }
+    else if (maxFileSize == 2)
+    {
+        pEvents->setLastErrorCode(WIZKM_XMLRPC_ERROR_VIP_SERVICE_EXPR);
+        QString error = QObject::tr("VIP service of has expired, please renew to VIP.");
+        pEvents->setLastErrorMessage(error);
         return FALSE;
     }
     //
