@@ -186,7 +186,7 @@ struct WIZKBINFO
     //
     int getMaxFileSize() const
     {
-        return std::max<int>(30 * 1024 * 1024, nUploadSizeLimit);
+        return nUploadSizeLimit;
     }
 
     qint64 nStorageLimit;

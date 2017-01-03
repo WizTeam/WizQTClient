@@ -107,6 +107,7 @@ WIZKBINFO::WIZKBINFO()
     nStorageUsage = 0;
     nTrafficLimit = 0;
     nTrafficUsage = 0;
+    nUploadSizeLimit = 30 * 1024 * 1024;
 }
 
 bool WIZKBINFO::loadFromXmlRpc(WizXmlRpcStructValue& data)
