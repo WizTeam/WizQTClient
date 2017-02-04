@@ -318,6 +318,7 @@ public Q_SLOTS:
     void on_actionCategoryBizGroups_triggered();
     void on_actionCategoryPersonalGroups_triggered();
     void on_actionThumbnailView_triggered();
+    void on_actionSearchResultView_triggered();
     void on_actionTwoLineView_triggered();
     void on_actionOneLineView_triggered();
     void on_actionSortByCreatedTime_triggered();

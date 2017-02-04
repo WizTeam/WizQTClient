@@ -984,6 +984,10 @@ void WizMainWindow::initMenuBar()
     action->setCheckable(true);
     action->setData(WizDocumentListView::TypeThumbnail);
     m_viewTypeActions->addAction(action);
+    action = m_actions->actionFromName(WIZCATEGORY_OPTION_SEARCHRESULTVIEW);
+    action->setCheckable(true);
+    action->setData(WizDocumentListView::TypeSearchResult);
+    m_viewTypeActions->addAction(action);
     action = m_actions->actionFromName(WIZCATEGORY_OPTION_TWOLINEVIEW);
     action->setCheckable(true);
     action->setData(WizDocumentListView::TypeTwoLine);
@@ -2591,6 +2595,17 @@ void WizMainWindow::on_actionCategoryPersonalGroups_triggered()
 }
 
 void WizMainWindow::on_actionThumbnailView_triggered()
+{
+    QAction* action = qobject_cast<QAction*>(sender());
+    if (action)
+    {
+        int type = action->data().toInt();
+        m_documents->resetItemsViewType(type);
+        emit documentsViewTypeChanged(type);
+    }
+}
+
+void WizMainWindow::on_actionSearchResultView_triggered()
 {
     QAction* action = qobject_cast<QAction*>(sender());
     if (action)

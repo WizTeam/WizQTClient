@@ -45,7 +45,8 @@ public:
     enum ViewType {
         TypeThumbnail,
         TypeTwoLine,
-        TypeOneLine
+        TypeOneLine,
+        TypeSearchResult
     };
 
 public:
@@ -54,7 +55,6 @@ public:
 
     int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
-    QSize itemSizeFromViewType(WizDocumentListView::ViewType type);
 
     void setLeadInfoState(int state);
 

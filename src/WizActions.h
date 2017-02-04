@@ -64,6 +64,7 @@ class QShortcut;
 #define WIZCATEGORY_OPTION_BIZGROUPS                   "actionCategoryBizGroups"
 #define WIZCATEGORY_OPTION_PERSONALGROUPS     "actionCategoryPersonalGroups"
 #define WIZCATEGORY_OPTION_THUMBNAILVIEW           "actionThumbnailView"
+#define WIZCATEGORY_OPTION_SEARCHRESULTVIEW           "actionSearchResultView"
 #define WIZCATEGORY_OPTION_TWOLINEVIEW               "actionTwoLineView"
 #define WIZCATEGORY_OPTION_ONELINEVIEW               "actionOneLineView"
 #define WIZDOCUMENT_SORTBY_CREATEDTIME              "actionSortByCreatedTime"

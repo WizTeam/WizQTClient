@@ -1246,25 +1246,6 @@ void WizDocumentListView::resetItemsViewType(int type)
     m_app.userSettings().set("VIEW_TYPE", QString::number(type));
 }
 
-QSize WizDocumentListView::itemSizeFromViewType(ViewType type)
-{
-    QSize sz = sizeHint();
-    switch (type) {
-    case WizDocumentListView::TypeOneLine:
-        sz.setHeight(fontMetrics().height() + 12);
-        return sz;
-    case WizDocumentListView::TypeTwoLine:
-        sz.setHeight(fontMetrics().height() * 2 + 15);
-        return sz;
-    case WizDocumentListView::TypeThumbnail:
-        sz.setHeight(Utils::WizStyleHelper::thumbnailHeight());
-        return sz;
-    default:
-        Q_ASSERT(0);
-    }
-
-    return sz;
-}
 
 void WizDocumentListView::setLeadInfoState(int state)
 {

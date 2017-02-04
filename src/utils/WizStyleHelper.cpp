@@ -421,6 +421,8 @@ int WizStyleHelper::listViewItemHeight(int nType)
 //        return fontHead(f) + fontNormal(f) + margin() * 5;
     case ListTypeThumb:
         return WizSmartScaleUI(122);
+    case ListTypeSearchResult:
+        return WizSmartScaleUI(160);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return WizSmartScaleUI(20);

@@ -671,13 +671,6 @@ void WizSearcher::searchByKeywordAndWhere(const QString& strKeywords,
     m_mapDocumentSearched.clear();
     searchDatabaseByKeyword(strKeywords);
 
-    if (m_nResults < m_nMaxResult)
-    {
-        // NOTE: make sure convert keyword to lower case
-        searchDocument(m_strIndexPath.toStdWString().c_str(),
-                       strKeywords.toLower().toStdWString().c_str());
-    }
-
     // search by where
     QSet<QString> whereSet; // = mapDocByWhere.keys().toSet();
     CWizDocumentDataArray arrayDocument;

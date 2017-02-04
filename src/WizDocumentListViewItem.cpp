@@ -472,6 +472,9 @@ void WizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionV
         case WizDocumentListView::TypeThumbnail:
             drawPrivateSummaryView_impl(p, vopt);
             return;
+        case WizDocumentListView::TypeSearchResult:
+            drawPrivateSummaryView_impl(p, vopt);
+            return;
         case WizDocumentListView::TypeTwoLine:
             drawPrivateTwoLineView_impl(p, vopt);
             return;
@@ -487,6 +490,9 @@ void WizDocumentListViewDocumentItem::draw_impl(QPainter* p, const QStyleOptionV
     {
         switch (nViewType) {
         case WizDocumentListView::TypeThumbnail:
+            drawGroupSummaryView_impl(p, vopt);
+            return;
+        case WizDocumentListView::TypeSearchResult:
             drawGroupSummaryView_impl(p, vopt);
             return;
         case WizDocumentListView::TypeTwoLine:

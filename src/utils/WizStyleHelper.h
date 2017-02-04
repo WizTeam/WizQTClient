@@ -43,6 +43,7 @@ public:
         ListTypeThumb,
         ListTypeTwoLine,
         ListTypeOneLine,
+        ListTypeSearchResult,
         ListTypeSection
     };
 

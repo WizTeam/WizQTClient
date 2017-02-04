@@ -102,6 +102,7 @@ WizViewTypePopupButton::WizViewTypePopupButton(WizExplorerApp& app, QWidget* par
     createAction(tr("Thumbnail view"), WizDocumentListView::TypeThumbnail, menu, group);
     createAction(tr("Two line view"), WizDocumentListView::TypeTwoLine, menu, group);
     createAction(tr("One line view"), WizDocumentListView::TypeOneLine, menu, group);
+    createAction(tr("Search result view"), WizDocumentListView::TypeSearchResult, menu, group);
     setMenu(menu);
 
 //    QString strSkinPath = ::WizGetSkinResourcePath(app.userSettings().skin());
