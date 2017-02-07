@@ -11,4 +11,11 @@ bool WizQuickDownloadMessage(const WIZUSERINFO& info,
                              IWizKMSyncEvents* pEvents,
                              IWizSyncableDatabase* pDatabase);
 
+bool WizDownloadDocumentsByGuids(const WIZUSERINFO& info,
+                                 IWizSyncableDatabase* pDatabase,
+                                 const QString& kbGuid,
+                                 const CWizStdStringArray& guids,
+                                 CWizDocumentDataArray& arrayDocument);
+
+
 #endif // WIZSERVICE_SYNC_H

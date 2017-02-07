@@ -2964,14 +2964,19 @@ void WizMainWindow::on_actionSearch_triggered()
     WizGetAnalyzer().logAction("MenuBarSearch");
 }
 
-void WizMainWindow::on_actionResetSearch_triggered()
+void WizMainWindow::resetSearchStatus()
 {
     quitSearchStatus();
     m_searchWidget->clear();
     m_searchWidget->focus();
     m_category->restoreSelection();
     m_doc->web()->applySearchKeywordHighlight();
+}
 
+void WizMainWindow::on_actionResetSearch_triggered()
+{
+    resetSearchStatus();
+    //
     WizGetAnalyzer().logAction("MenuBarResetSearch");
 }
 
@@ -3045,9 +3050,10 @@ void WizMainWindow::on_actionPrintMargin_triggered()
 
 void WizMainWindow::on_search_doSearch(const QString& keywords)
 {
+    m_category->saveSelection();
     m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
-        on_actionResetSearch_triggered();
+        resetSearchStatus();
         return;
     }
     //
@@ -3057,16 +3063,30 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
         viewDocumentByWizKMURL(strUrl);
         return;
     }
-
-    m_category->saveSelection();
-    m_documents->clear();
     //
     m_noteListWidget->show();
     m_msgListWidget->hide();
     //
     m_settings->appendRecentSearch(keywords);
-    m_searcher->search(keywords, 500);
+    //m_searcher->search(keywords, 500);
     startSearchStatus();
+    //
+    QString kbGuid = m_category->storedSelectedItemKbGuid();
+    QString key = keywords;
+    //
+    ::WizExecutingActionDialog::executeAction(tr("Searching..."), WIZ_THREAD_SEARCH, [=]{
+
+        CWizDocumentDataArray arrayDocument;
+        m_searcher->onlineSearch(kbGuid, key, arrayDocument);
+        //
+        ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=]{
+
+            m_documents->clear();
+            m_documents->setDocuments(arrayDocument, true);
+            //
+        });
+    });
+    //
 }
 
 

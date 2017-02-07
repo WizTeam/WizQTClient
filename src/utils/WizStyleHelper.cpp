@@ -9,6 +9,7 @@
 #include <QTextLayout>
 #include <QDebug>
 #include <QApplication>
+#include <QTextDocument>
 
 #include "WizPathResolve.h"
 #include "../share/WizMisc.h"
@@ -422,7 +423,7 @@ int WizStyleHelper::listViewItemHeight(int nType)
     case ListTypeThumb:
         return WizSmartScaleUI(122);
     case ListTypeSearchResult:
-        return WizSmartScaleUI(160);
+        return WizSmartScaleUI(200);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return WizSmartScaleUI(20);
@@ -1177,6 +1178,45 @@ void WizStyleHelper::drawListViewItemThumb(QPainter* p, const QRect& rc, int nBa
             p->setClipRect(rc);
         }
     }
+}
+
+
+
+void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, const QString& title, const QString& info,
+                                  const QString& abs, bool bFocused, bool bSelected)
+{
+    QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
+    QString summaryHtmlColor = "#" + ::WizColorToString(colorSummary);
+    //
+    QString summaryHtmlColorHtml = "<font color='" + summaryHtmlColor + "'>";
+    QString summaryHtmlColorHtmlEnd = "</font>";
+    //
+    QString info2 = summaryHtmlColorHtml + info + summaryHtmlColorHtmlEnd;
+    QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
+    //
+    QString html = title + "<br />" + info2  + "<br />" + abs2;
+    //
+    html = html.replace("<em>", "<font color='red'>");
+    html = html.replace("</em>", "</font>");
+    //
+    QRect rcd = rc.adjusted(2, 0, 0, 0); //
+    //
+    QTextDocument* doc = new QTextDocument(NULL);
+    doc->setUndoRedoEnabled(false);
+    doc->setHtml(html);
+    doc->setTextWidth(rcd.width());
+    doc->setUseDesignMetrics(true);
+    ////doc->setDefaultTextOption ( QTextOption (Qt::AlignHCenter )  );
+    //// height from doc QTextDocument
+    //// http://fop-miniscribus.googlecode.com/svn/trunk/fop_miniscribus.1.0.0/src/floating_box/floatdiagram.cpp
+    //////setMaximumHeight(DocumentHighgtActual());
+
+    p->translate(rcd.topLeft());
+    QRect rc2(0, 0, rcd.width(), rcd.height());
+    doc->drawContents(p, rc2);
+    p->translate(QPointF(0, 0));
+    //
+    doc->deleteLater();
 }
 
 

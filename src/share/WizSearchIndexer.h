@@ -102,6 +102,8 @@ public:
     void searchBySQLWhere(const QString& strWhere, int nMaxSize = -1, SearchScope scope = Scope_AllNotes);
     void searchByKeywordAndWhere(const QString& strKeywords, const QString& strWhere, int nMaxSize = -1
             , SearchScope scope = Scope_AllNotes);
+    //
+    bool onlineSearch(const QString& kbGuid, const QString& keywords, CWizDocumentDataArray& arrayResult);
 
 protected:
     virtual bool onSearchProcess(const std::string& lpszKbGUID, const std::string& lpszDocumentID, const std::string& lpszURL);

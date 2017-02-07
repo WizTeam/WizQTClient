@@ -732,6 +732,19 @@ QString WizCategoryBaseView::selectedItemKbGUID()
     return QString();
 }
 
+QString WizCategoryBaseView::storedSelectedItemKbGuid()
+{
+    if (!m_selectedItem)
+        return QString();
+    //
+    WizCategoryViewItemBase* pItem = dynamic_cast<WizCategoryViewItemBase*>(m_selectedItem);
+    if (!pItem)
+        return QString();
+
+    return pItem->kbGUID();
+}
+
+
 void WizCategoryBaseView::getDocuments(CWizDocumentDataArray& arrayDocument)
 {
     QList<QTreeWidgetItem*> items = selectedItems();
@@ -810,7 +823,12 @@ bool WizCategoryView::setCurrentIndex(const WIZDOCUMENTDATA& document)
 
 void WizCategoryBaseView::saveSelection()
 {
-    m_selectedItem = currentItem();
+    QTreeWidgetItem* item = currentItem();
+    if (item)
+    {
+        m_selectedItem = item;
+    }
+    //
     clearSelection();
 }
 

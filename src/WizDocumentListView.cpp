@@ -74,6 +74,7 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
     , m_nLeadInfoState(DocumentLeadInfo_None)
     , m_nAddedDocumentCount(0)
     , m_bSortDocumentsAfterAdded(false)
+    , m_searchResult(false)
 {
     setFrameStyle(QFrame::NoFrame);
     setAttribute(Qt::WA_MacShowFocusRect, false);
@@ -267,16 +268,34 @@ void WizDocumentListView::resizeEvent(QResizeEvent* event)
     QListWidget::resizeEvent(event);
 }
 
-void WizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument)
+void WizDocumentListView::setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult /*= false*/)
 {
     //reset
     clear();
     m_sectionItems.clear();
-
+    //
+    m_searchResult = searchResult;
 
     verticalScrollBar()->setValue(0);
 
-    appendDocuments(arrayDocument);
+    if (searchResult)
+    {
+        appendDocumentsNoSort(arrayDocument);
+    }
+    else
+    {
+        appendDocuments(arrayDocument);
+    }
+}
+
+void WizDocumentListView::appendDocumentsNoSort(const CWizDocumentDataArray& arrayDocument)
+{
+    CWizDocumentDataArray::const_iterator it;
+    for (it = arrayDocument.begin(); it != arrayDocument.end(); it++) {
+        addDocument(*it);
+    }
+
+    Q_EMIT documentCountChanged();
 }
 
 void WizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocument)
@@ -293,7 +312,7 @@ void WizDocumentListView::appendDocuments(const CWizDocumentDataArray& arrayDocu
     Q_EMIT documentCountChanged();
 }
 
-int WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
+int WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc, bool sort)
 {
     addDocument(doc);
 #ifdef QT_DEBUG
@@ -341,7 +360,7 @@ int WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc, bool sort)
     return nCount;
 }
 
-void WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
+void WizDocumentListView::addDocument(const WIZDOCUMENTDATAEX& doc)
 {
     WizDocumentListViewItemData data;
     data.doc = doc;
@@ -355,7 +374,7 @@ void WizDocumentListView::addDocument(const WIZDOCUMENTDATA& doc)
 
 
     WizDocumentListViewDocumentItem* pItem = new WizDocumentListViewDocumentItem(m_app, data);
-    pItem->setSizeHint(QSize(sizeHint().width(), Utils::WizStyleHelper::listViewItemHeight(m_nViewType)));
+    pItem->setSizeHint(QSize(sizeHint().width(), Utils::WizStyleHelper::listViewItemHeight(viewType())));
     pItem->setLeadInfoState(m_nLeadInfoState);
     pItem->setSortingType(m_nSortingType);
 
@@ -1239,7 +1258,7 @@ void WizDocumentListView::resetItemsViewType(int type)
         if (item(i)->type() != WizDocumentListType_Document)
             continue;
 
-        int nHeight = Utils::WizStyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? m_nViewType : (int)Utils::WizStyleHelper::ListTypeSection);
+        int nHeight = Utils::WizStyleHelper::listViewItemHeight((item(i)->type() == WizDocumentListType_Document) ? viewType() : (int)Utils::WizStyleHelper::ListTypeSection);
         item(i)->setSizeHint(QSize(sizeHint().width(), nHeight));
     }
     //
@@ -2076,7 +2095,7 @@ void WizDocumentListView::drawItem(QPainter* p, const QStyleOptionViewItem* vopt
         int nRightMargin = 12;
         QStyleOptionViewItem newVopt(*vopt);
         newVopt.rect.setRight(newVopt.rect.right() - nRightMargin);
-        pItem->draw(p, &newVopt, m_nViewType);
+        pItem->draw(p, &newVopt, viewType());
 
         p->restore();
     }

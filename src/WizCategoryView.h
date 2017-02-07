@@ -33,6 +33,7 @@ public:
     ~WizCategoryBaseView();
 
     QString selectedItemKbGUID();
+    QString storedSelectedItemKbGuid();
     void getDocuments(CWizDocumentDataArray& arrayDocument);
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void updateItem(QTreeWidgetItem* pItem) { update(indexFromItem(pItem, 0)); }

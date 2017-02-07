@@ -13,8 +13,8 @@ class WizExecutingActionDialog : public QDialog
 {
     Q_OBJECT
 
-public:
     explicit WizExecutingActionDialog(QString description, int threadId, std::function<void(void)> fun, QWidget *parent = 0);
+public:
     ~WizExecutingActionDialog();
 
     virtual void reject();

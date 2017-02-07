@@ -21,7 +21,7 @@ public:
 public:
     QNetworkReply::NetworkError error() const { return m_error; }
     QString errorString() const { return m_errorString; }
-    QByteArray result() const { return m_result; }
+    const QByteArray& result() const { return m_result; }
     bool timeOut() const { return m_timeOut; }
     QNetworkReply* networkReply() const;
 

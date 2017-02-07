@@ -393,6 +393,9 @@ struct WIZDOCUMENTDATAEX : public WIZDOCUMENTDATA
     CWizStdStringArray arrayTagGUID;
     //
     QByteArray arrayData;
+    //
+    QString strHighlightTitle;
+    QString strHighlightText;
 
     bool bSkipped;
 };

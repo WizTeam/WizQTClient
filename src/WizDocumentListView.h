@@ -53,7 +53,6 @@ public:
     explicit WizDocumentListView(WizExplorerApp& app, QWidget *parent = 0);
     virtual ~WizDocumentListView();
 
-    int viewType() const { return m_nViewType; }
     void resetItemsViewType(int type);
 
     void setLeadInfoState(int state);
@@ -97,6 +96,7 @@ private:
     WizDocumentListView::ViewType m_nViewType;
     int m_nSortingType;
     int m_nLeadInfoState;
+    bool m_searchResult;
 
     QMenu* m_menuDocument;
     WizTagListWidget* m_tagList;
@@ -133,11 +133,15 @@ private:
     bool isDocumentsWithDeleted(const CWizDocumentDataArray& arrayDocument);
 
 public:
-    void setDocuments(const CWizDocumentDataArray& arrayDocument);
+    void setDocuments(const CWizDocumentDataArray& arrayDocument, bool searchResult = false);
     void appendDocuments(const CWizDocumentDataArray& arrayDocument);
+    void appendDocumentsNoSort(const CWizDocumentDataArray& arrayDocument);
 
     bool acceptDocument(const WIZDOCUMENTDATA& document);
     void addAndSelectDocument(const WIZDOCUMENTDATA& document);
+    //
+    bool isSearchResult() const { return m_searchResult; }
+    ViewType viewType() const { if (m_searchResult) return TypeSearchResult; return m_nViewType; }
 
 public:
     void getSelectedDocuments(CWizDocumentDataArray& arrayDocument);
@@ -229,8 +233,8 @@ private:
     int numOfEncryptedDocuments(const CWizDocumentDataArray& docArray);
     void setEncryptDocumentActionEnable(bool enable);
     //    
-    int addDocument(const WIZDOCUMENTDATA& data, bool sort);
-    void addDocument(const WIZDOCUMENTDATA &doc);
+    int addDocument(const WIZDOCUMENTDATAEX& data, bool sort);
+    void addDocument(const WIZDOCUMENTDATAEX &doc);
 
     bool acceptDocumentChange(const WIZDOCUMENTDATA &document);
 

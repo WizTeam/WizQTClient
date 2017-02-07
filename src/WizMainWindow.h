@@ -496,6 +496,7 @@ private:
     //
     void startSearchStatus();
     void quitSearchStatus();
+    void resetSearchStatus();
 
     //
     void initVariableBeforCreateNote();

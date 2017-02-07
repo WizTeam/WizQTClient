@@ -485,6 +485,9 @@ WIZDOCUMENTDATAEX& WIZDOCUMENTDATAEX::operator= (const WIZDOCUMENTDATAEX& right)
     arrayData = right.arrayData;
 
     bSkipped = right.bSkipped;
+    //
+    strHighlightTitle = right.strHighlightTitle;
+    strHighlightText = right.strHighlightText;
 
     return *this;
 }

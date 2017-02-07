@@ -4,6 +4,8 @@
 #include <QMetaType>
 #include <QDebug>
 #include <QCoreApplication>
+#include <QNetworkAccessManager>
+#include <QUrlQuery>
 
 #ifndef Q_OS_WIN
 #include <unistd.h>
@@ -16,6 +18,12 @@
 #include "WizDatabase.h"
 #include "utils/WizLogger.h"
 #include "utils/WizPathResolve.h"
+#include "sync/WizApiEntry.h"
+#include "sync/WizSync.h"
+#include "share/WizEventLoop.h"
+#include "rapidjson/document.h"
+#include "sync/WizToken.h"
+
 
 #define TIMEINTERVAL  60 * 1000
 
@@ -846,3 +854,191 @@ void WizSearcher::run()
         }
     }
 }
+
+QString JsonValueToText(const rapidjson::Value& value)
+{
+    if (value.IsArray())
+    {
+        CWizStdStringArray arr;
+        for (int i = 0; i < value.Size(); i++)
+        {
+            const rapidjson::Value& elem = value[i];
+            arr.push_back(elem.GetString());
+        }
+        //
+        CString text;
+        ::WizStringArrayToText(arr, text, " ");
+        return text;
+    }
+    else if (value.IsString())
+    {
+        return value.GetString();
+    }
+    else
+    {
+        return "";
+    }
+}
+
+bool WizSearcher::onlineSearch(const QString& kbGuid, const QString& keywords, CWizDocumentDataArray& arrayResult)
+{
+    QString token = WizToken::token();
+    if (token.isEmpty())
+        return false;
+    //
+    QUrlQuery postData;
+    postData.addQueryItem("token", token);
+    postData.addQueryItem("ss", keywords);
+    if (kbGuid.isEmpty())
+    {
+        postData.addQueryItem("kb_guid", WizToken::info().strKbGUID);
+    }
+    else
+    {
+        postData.addQueryItem("kb_guid", kbGuid);
+    }
+    //
+    QString urlString = WizCommonApiEntry::searchUrl();
+    if (urlString.isEmpty())
+        return false;
+    //
+    QUrl url(urlString);
+    url.setQuery(postData);
+    //
+    qDebug() << url.toString();
+    //
+    int start = WizGetTickCount();
+    qDebug() << "start search";
+    //
+    QNetworkRequest request(url);
+    QNetworkAccessManager net;
+    QNetworkReply* reply = net.get(request);
+    //
+    WizAutoTimeOutEventLoop loop(reply);
+    loop.exec();
+    //
+    int end = WizGetTickCount();
+    qDebug() << "search time: " << end - start;
+
+    if (loop.error() != QNetworkReply::NoError || loop.result().isEmpty())
+    {
+        qDebug() << "[Search] Search failed! error: " << loop.errorString();
+        return false;
+    }
+    //
+    rapidjson::Document d;
+    d.Parse<0>(loop.result().constData());
+
+    if (!d.HasMember("return_code"))
+    {
+        qDebug() << "[Search] Can not get return code";
+        return false;
+    }
+
+    int returnCode = d.FindMember("return_code")->value.GetInt();
+    if (returnCode != 200)
+    {
+        qDebug() << "[Search] Return code was not 200, error:  " << returnCode << loop.result();
+        return false;
+    }
+    //
+    if (!d.HasMember("result"))
+    {
+        qDebug() << "[Search] Can not get result";
+        return false;
+    }
+    //
+    const rapidjson::Value& result = d.FindMember("result")->value;
+    if (!result.IsArray())
+    {
+        qDebug() << "[Search] Result is not an array";
+        return false;
+    }
+    //
+    CWizStdStringArray docs;
+    std::set<QString> guids;
+    //
+    std::map<QString, QString> highlightTitle;
+    std::map<QString, QString> highlightText;
+    //
+    for (int i = 0; i < result.Size(); i++)
+    {
+        const rapidjson::Value& elem = result[i];
+        //
+        QString docGuid = elem["doc_guid"].GetString();
+        //
+        QString title;
+        QString text;
+        if (elem.HasMember("title"))
+        {
+            const rapidjson::Value& titleVal = elem["title"];
+            title = JsonValueToText(titleVal);
+        }
+        if (elem.HasMember("text"))
+        {
+            const rapidjson::Value& textVal = elem["text"];
+            text = JsonValueToText(textVal);
+        }
+        //
+        //
+        highlightTitle[docGuid] = title;
+        highlightText[docGuid] = text;
+        //
+        docs.push_back(docGuid);
+        guids.insert(docGuid);
+    }
+    //
+    WizDatabase& db = m_dbMgr.db(kbGuid);
+    //
+    CWizDocumentDataArray arrayDocument;
+    if (!db.getDocumentsByGuids(docs, arrayDocument))
+        return false;
+    //
+    CWizStdStringArray downloadDocGuids;
+    //
+    for (const WIZDOCUMENTDATAEX& doc : arrayDocument)
+    {
+        if (guids.find(doc.strGUID) == guids.end())
+        {
+            //not found in local
+            //
+            downloadDocGuids.push_back(doc.strGUID);
+        }
+    }
+    //
+    if (!downloadDocGuids.empty())
+    {
+        WIZUSERINFO userInfo = WizToken::info();
+        CWizDocumentDataArray downloadedArrayDocument;
+        WizDownloadDocumentsByGuids(userInfo,
+                                         &db,
+                                         kbGuid,
+                                         downloadDocGuids,
+                                         downloadedArrayDocument);
+        //
+        arrayDocument.clear();
+        if (!db.getDocumentsByGuids(docs, arrayDocument))
+            return false;
+    }
+    //
+    std::map<QString, WIZDOCUMENTDATAEX> docMaps;
+    for (const WIZDOCUMENTDATAEX& doc : arrayDocument)
+    {
+        docMaps[doc.strGUID] = doc;
+    }
+    //
+    for (const QString& guid : docs)
+    {
+        auto it = docMaps.find(guid);
+        if (it != docMaps.end())
+        {
+            WIZDOCUMENTDATAEX doc = it->second;
+            doc.strHighlightTitle = highlightTitle[guid];
+            doc.strHighlightText = highlightText[guid];
+            arrayResult.push_back(doc);
+        }
+    }
+    //
+    return true;
+}
+
