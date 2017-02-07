@@ -14,7 +14,7 @@
 #include "share/WizDrawTextHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizDatabaseManager.h"
-#include "share/WizSearchIndexer.h"
+#include "share/WizSearch.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
 #include "share/WizMessageBox.h"

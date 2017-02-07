@@ -40,7 +40,6 @@ class WizTemplatePurchaseDialog;
 
 class WizSearchView;
 class WizSearcher;
-class WizSearchIndexer;
 
 class QtSegmentControl;
 class WizObjectDownloaderHost;
@@ -108,7 +107,6 @@ public:
 
     WizSearcher* searcher();
     QString searchKeywords() const { return m_strSearchKeywords; }
-    void rebuildFTS();
 
     static WizMainWindow* instance();
 
@@ -202,7 +200,6 @@ private:
     WizSearcher* m_searcher;
     QString m_strSearchKeywords;
 
-    WizSearchIndexer* m_searchIndexer;
     WizSearchView* m_searchWidget;
 
     WizMobileFileReceiver *m_mobileFileReceiver;    
@@ -278,7 +275,6 @@ public Q_SLOTS:
     void on_actionLogout_triggered();
     void on_actionAbout_triggered();
     void on_actionPreference_triggered();
-    void on_actionRebuildFTS_triggered();
     void on_actionFeedback_triggered();
     void on_actionSupport_triggered();
     void on_actionManual_triggered();

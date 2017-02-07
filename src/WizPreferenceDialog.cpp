@@ -172,11 +172,6 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
     ui->spinBox_right->setValue(m_app.userSettings().printMarginValue(wizPositionRight));
     ui->spinBox_top->setValue(m_app.userSettings().printMarginValue(wizPositionTop));
 
-    bool searchEncryptedNote = m_app.userSettings().searchEncryptedNote();
-    ui->checkBoxSearchEncryNote->setChecked(searchEncryptedNote);
-    ui->lineEditNotePassword->setEnabled(searchEncryptedNote);
-    ui->lineEditNotePassword->setText(m_app.userSettings().encryptedNotePassword());
-
     QString strColor = m_app.userSettings().editorBackgroundColor();
     updateEditorBackgroundColor(strColor);
 
@@ -400,42 +395,6 @@ void WizPreferenceWindow::on_checkBoxSystemStyle_toggled(bool checked)
     WizMessageBox::information(m_app.mainWindow(), tr("Info"), tr("Application style will be changed after restart WizNote."));
 }
 
-void WizPreferenceWindow::on_checkBoxSearchEncryNote_toggled(bool checked)
-{
-    m_app.userSettings().setSearchEncryptedNote(checked);
-    if (!checked)
-    {
-        ui->lineEditNotePassword->blockSignals(true);
-        ui->lineEditNotePassword->clear();
-        ui->lineEditNotePassword->blockSignals(false);
-        m_app.userSettings().setEncryptedNotePassword("");
-
-//        QMessageBox msg;
-//        msg.setIcon(QMessageBox::Information);
-//        msg.setWindowTitle(tr("Cancel search encrypted note"));
-//        msg.addButton(QMessageBox::Ok);
-//        msg.addButton(QMessageBox::Cancel);
-//        msg.setText(tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
-//                       "Do you want to rebuild full text search?"));
-
-        QMessageBox::StandardButton clickedButton = WizMessageBox::warning(this, tr("Cancel search encrypted note"),
-                                                                                tr("Cancel search encrypted note need to rebuild full text search, this would be quite slow if you have quite a few notes or attachments. "
-                                                                                 "Do you want to rebuild full text search?") ,QMessageBox::Ok | QMessageBox::Cancel, QMessageBox::Ok);
-
-        if (QMessageBox::Ok == clickedButton)
-        {
-            WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
-            Q_ASSERT(mainWindow);
-            mainWindow->rebuildFTS();
-        }
-    }
-    ui->lineEditNotePassword->setEnabled(checked);
-}
-
-void WizPreferenceWindow::on_lineEditNotePassword_editingFinished()
-{
-    m_app.userSettings().setEncryptedNotePassword(ui->lineEditNotePassword->text());
-}
 
 void WizPreferenceWindow::on_pushButtonBackgroundColor_clicked()
 {

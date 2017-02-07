@@ -7,7 +7,6 @@
 #include  <deque>
 #include <QWaitCondition>
 
-#include "WizClucene.h"
 #include "WizDatabaseManager.h"
 #include "share/WizQtHelper.h"
 
@@ -30,64 +29,9 @@ enum SearchScope {
 };
 
 
-/* --------------------------- CWizSearchIndexer --------------------------- */
-class WizSearchIndexer
-        : public QThread
-        , public WizCluceneSearch
-{
-    Q_OBJECT
-
-public:
-    explicit WizSearchIndexer(WizDatabaseManager& dbMgr, QObject *parent = 0);
-    void waitForDone();
-    void rebuild();
-
-signals:
-    void startTimer(int interval);
-    void stopTimer();
-
-public slots:
-    void on_timerOut();
-    void start(Priority priority = InheritPriority);
-
-protected:
-    virtual void run();
-
-private:
-    bool buildFTSIndex();
-    bool buildFTSIndexByDatabase(WizDatabase& db);
-    void filterDocuments(WizDatabase& db, CWizDocumentDataArray& arrayDocument,
-                         bool searchEncryptedDoc);
-    bool updateDocument(const WIZDOCUMENTDATAEX& doc);
-    bool deleteDocument(const WIZDOCUMENTDATAEX& doc);
-
-    bool _updateDocumentImpl(void *pHandle, const WIZDOCUMENTDATAEX& doc);
-
-    Q_INVOKABLE bool rebuildFTSIndex();
-    bool clearAllFTSData();
-    void clearFlags(WizDatabase& db);
-
-    void stop();
-
-private:
-    WizDatabaseManager& m_dbMgr;
-    QString m_strIndexPath; // working path
-    bool m_stop;
-    bool m_buldNow;
-    QMutex m_mutex;
-    QTimer m_timer;
-    QWaitCondition m_wait;
-
-private Q_SLOTS:
-    void on_document_deleted(const WIZDOCUMENTDATA& doc);
-    void on_attachment_deleted(const WIZDOCUMENTATTACHMENTDATA& attach);
-};
-
-
 /* ----------------------------- CWizSearcher ----------------------------- */
 class WizSearcher
         : public QThread
-        , public WizCluceneSearch
 {
     Q_OBJECT
 
@@ -113,7 +57,6 @@ protected:
 
 private:
     WizDatabaseManager& m_dbMgr;
-    QString m_strIndexPath; // working path
     QString m_strkeywords;
     int m_nMaxResult;
     SearchScope m_scope;
@@ -129,7 +72,6 @@ private:
 
     void doSearch();
 
-    Q_INVOKABLE void searchKeyword(const QString& strKeywords);
     void searchDatabaseByKeyword(const QString& strKeywords);
     WizOleDateTime getDateByInterval(SearchDateInterval dateInterval);
 

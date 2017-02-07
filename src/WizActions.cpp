@@ -79,7 +79,6 @@ WIZACTION* WizActions::actionsData()
         {WIZACTION_GLOBAL_GOBACK,                    QObject::tr("Back"),                        "",       QKeySequence()},
         {WIZACTION_GLOBAL_GOFORWARD,                 QObject::tr("Forward"), "",                   QKeySequence()},
         {"actionConsole",                              QObject::tr("Console..."),                                   "",      QKeySequence()},
-        {"actionRebuildFTS",                        QObject::tr("Rebuild Full Text Search Index"),    "",        QKeySequence()},
         {"actionSearch",                                QObject::tr("Search Note"),                             "",         QKeySequence("Alt+Ctrl+F")},
         {"actionAdvancedSearch",                QObject::tr("Advanced Search"),                     "",         QKeySequence("Alt+Ctrl+A")},
         {"actionResetSearch",                       QObject::tr("Reset Search"),                           "",         QKeySequence("Ctrl+R")},

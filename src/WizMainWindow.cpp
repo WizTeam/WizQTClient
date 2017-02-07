@@ -52,7 +52,7 @@
 #include "share/WizUIHelper.h"
 #include "share/WizSettings.h"
 #include "share/WizAnimateAction.h"
-#include "share/WizSearchIndexer.h"
+#include "share/WizSearch.h"
 #include "share/WizObjectDataDownloader.h"
 #include "utils/WizPathResolve.h"
 #include "utils/WizStyleHelper.h"
@@ -117,7 +117,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_progress(new WizProgressDialog(this))
     , m_settings(new WizUserSettings(dbMgr.db()))
     , m_sync(new WizKMSyncThread(dbMgr.db(), this))
-    , m_searchIndexer(new WizSearchIndexer(m_dbMgr, this))
     , m_searcher(new WizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
@@ -193,7 +192,6 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
 #endif
 
     // search and full text search
-    m_searchIndexer->start(QThread::IdlePriority);
     m_searcher->start(QThread::HighPriority);
 
     // syncing thread
@@ -380,7 +378,6 @@ void WizMainWindow::cleanOnQuit()
     //
     m_sync->waitForDone();
     //
-    m_searchIndexer->waitForDone();
     m_searcher->waitForDone();
     //
     m_doc->waitForDone();
@@ -395,11 +392,6 @@ void WizMainWindow::cleanOnQuit()
 WizSearcher*WizMainWindow::searcher()
 {
     return m_searcher;
-}
-
-void WizMainWindow::rebuildFTS()
-{
-    m_searchIndexer->rebuild();
 }
 
 WizMainWindow*WizMainWindow::instance()
@@ -2934,25 +2926,6 @@ void WizMainWindow::on_actionManual_triggered()
     QDesktopServices::openUrl(strUrl);
 
     WizGetAnalyzer().logAction("MenuBarManual");
-}
-
-void WizMainWindow::on_actionRebuildFTS_triggered()
-{
-    WizGetAnalyzer().logAction("rebuildFTS");
-
-    QMessageBox msg;
-    msg.setIcon(QMessageBox::Warning);
-    msg.setWindowTitle(tr("Rebuild full text search index"));
-    msg.addButton(QMessageBox::Ok);
-    msg.addButton(QMessageBox::Cancel);
-    msg.setText(tr("Rebuild full text search is quit slow if you have quite a few notes or attachments, you do not have to use this function while search should work as expected."));
-
-    if (QMessageBox::Ok == msg.exec())
-    {
-        WizGetAnalyzer().logAction("rebuildFTSConfirm");
-
-        rebuildFTS();
-    }
 }
 
 void WizMainWindow::on_actionSearch_triggered()

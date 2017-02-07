@@ -56,8 +56,6 @@ private slots:
     void on_spinBox_left_valueChanged(double arg1);
     void on_spinBox_right_valueChanged(double arg1);
     void on_checkBoxSystemStyle_toggled(bool checked);
-    void on_checkBoxSearchEncryNote_toggled(bool checked);
-    void on_lineEditNotePassword_editingFinished();
     void on_pushButtonBackgroundColor_clicked();
     void on_pushButtonClearBackground_clicked();
 
