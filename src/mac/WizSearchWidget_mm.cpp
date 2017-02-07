@@ -103,26 +103,6 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_treeWgt->setItemDelegate(suggestionDelegate);
 
 
-    QPushButton* button = new QPushButton(m_popupWgt);
-    button->setFocusPolicy(Qt::NoFocus);
-    button->setFocusProxy(m_popupWgt);
-    button->setText(tr("Advanced Search"));
-    button->setStyleSheet("QPushButton { background-color:#FFFFFF; border-width: 1px; \
-                          padding: 0px 4px; border-style: solid; border-color: #ECECEC; \
-                          border-radius: 2px; border-bottom-color:#E0E0E0; }");
-
-    connect(button, SIGNAL(clicked(bool)), parent, SLOT(on_advanced_buttonClicked()));
-
-    QWidget* buttonContainer = new QWidget(m_popupWgt);
-    buttonContainer->setFixedHeight(35);
-    buttonContainer->setStyleSheet("background-color:#F7F7F7; border-top:1px solid #E7E7E7;");
-    QHBoxLayout* buttonLayout = new QHBoxLayout(buttonContainer);
-    buttonLayout->setContentsMargins(8, 6, 0, 6);
-    buttonLayout->setSpacing(0);
-    buttonContainer->setLayout(buttonLayout);
-    buttonLayout->addWidget(button);
-    buttonLayout->addStretch(0);
-
     m_infoWgt = new QWidget(m_popupWgt);
     m_infoWgt->setFixedHeight(135);
     m_infoWgt->setStyleSheet("background-color:#FFFFFF;");
@@ -138,7 +118,6 @@ WizSuggestCompletionon::WizSuggestCompletionon(WizSearchView *parent)
     m_popupWgt->setLayout(layout);
     layout->addWidget(m_treeWgt);
     layout->addWidget(m_infoWgt);
-    layout->addWidget(buttonContainer);
 
     m_infoWgt->setVisible(false);
 

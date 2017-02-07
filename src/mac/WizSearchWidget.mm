@@ -360,12 +360,5 @@ void WizSearchView::clearSearchFocus()
     [pSearchField.window makeFirstResponder:nil];
 }
 
-void WizSearchView::on_advanced_buttonClicked()
-{
-    clearSearchFocus();
-
-    emit advancedSearchRequest();
-    m_completer->hide();
-}
 
 #endif

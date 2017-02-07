@@ -63,7 +63,6 @@ private:
     int m_widthHint;
 
 Q_SIGNALS:
-    void advancedSearchRequest();
     void addCustomSearchRequest();
     void doSearch(const QString& keywords);
 };

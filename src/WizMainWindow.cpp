@@ -1798,8 +1798,6 @@ void WizMainWindow::initToolBar()
 #endif
     //
     connect(m_searchWidget, SIGNAL(doSearch(const QString&)), SLOT(on_search_doSearch(const QString&)));
-    connect(m_searchWidget, SIGNAL(advancedSearchRequest()), SLOT(on_actionAdvancedSearch_triggered()));
-//    connect(m_searchWidget, SIGNAL(addCustomSearchRequest()), SLOT(on_actionAddCustomSearch_triggered()));
 }
 
 void WizMainWindow::initClient()
@@ -2978,18 +2976,6 @@ void WizMainWindow::on_actionResetSearch_triggered()
     resetSearchStatus();
     //
     WizGetAnalyzer().logAction("MenuBarResetSearch");
-}
-
-void WizMainWindow::on_actionAdvancedSearch_triggered()
-{
-    m_category->on_action_advancedSearch();
-    WizGetAnalyzer().logAction("MenuBarAdvancedSearch");
-}
-
-void WizMainWindow::on_actionAddCustomSearch_triggered()
-{
-    m_category->on_action_addCustomSearch();
-    WizGetAnalyzer().logAction("MenuBarAddCustomSearch");
 }
 
 void WizMainWindow::on_actionFindReplace_triggered()

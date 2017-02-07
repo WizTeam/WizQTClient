@@ -1399,11 +1399,6 @@ void WizCategoryView::initMenus()
     addAction(actionRemoveShortcut);
     connect(actionRemoveShortcut, SIGNAL(triggered()), SLOT(on_action_removeShortcut()));
 
-    QAction* actionAdvancedSearch = new QAction(tr("Advanced search"), this);
-    actionAdvancedSearch->setData(ActionAdvancedSearch);
-    addAction(actionAdvancedSearch);
-    connect(actionAdvancedSearch, SIGNAL(triggered()), SLOT(on_action_advancedSearch()));
-
     QAction* actionAddCustomSearch = new QAction(tr("Add custom search"), this);
     actionAddCustomSearch->setData(ActionAddCustomSearch);
     addAction(actionAddCustomSearch);
@@ -1426,8 +1421,6 @@ void WizCategoryView::initMenus()
 
     // custom search menu
     m_menuCustomSearch = std::make_shared<QMenu>();
-    m_menuCustomSearch->addAction(actionAdvancedSearch);
-    m_menuCustomSearch->addSeparator();
     m_menuCustomSearch->addAction(actionAddCustomSearch);
     m_menuCustomSearch->addAction(actionEditCustomSearch);
     m_menuCustomSearch->addAction(actionRemoveCustomSearch);
@@ -2763,17 +2756,6 @@ void WizCategoryView::on_action_addToShortcuts()
     }
 }
 
-void WizCategoryView::on_action_advancedSearch()
-{
-    ::WizGetAnalyzer().logAction("categoryMenuAdvancedSearch");
-    bool bSearchOnly = true;
-    WizAdvancedSearchDialog dlg(bSearchOnly);
-    if (dlg.exec() == QDialog::Accepted)
-    {
-        QString strParam = dlg.getParams();
-        advancedSearchByCustomParam(strParam);
-    }
-}
 
 void WizCategoryView::on_action_addCustomSearch()
 {

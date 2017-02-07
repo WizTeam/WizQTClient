@@ -45,8 +45,6 @@ WizSearchView::WizSearchView(QWidget* parent /* = 0 */)
             SLOT(on_search_returnPressed()));
     connect(m_editSearch, SIGNAL(textChanged(QString)), \
             SLOT(on_searchTextChanged(QString)), Qt::QueuedConnection);
-    connect(m_editSearch, SIGNAL(advanceSearchRequest()), this,
-            SIGNAL(advancedSearchRequest()));
     connect(m_editSearch, SIGNAL(addCustomSearchRequest()),
             SIGNAL(addCustomSearchRequest()));
 }

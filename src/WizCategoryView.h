@@ -423,7 +423,6 @@ public Q_SLOTS:
     void on_action_removeShortcut();
     void on_action_addToShortcuts();
 
-    void on_action_advancedSearch();
     void on_action_addCustomSearch();
     void on_action_editCustomSearch();
     void on_action_removeCustomSearch();
