@@ -1,5 +1,5 @@
-﻿#ifndef WIZSEARCHINDEXER_H
-#define WIZSEARCHINDEXER_H
+﻿#ifndef WIZSEARCH_H
+#define WIZSEARCH_H
 
 #include <QTimer>
 #include <QMap>
@@ -83,4 +83,4 @@ Q_SIGNALS:
     void searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart,  bool bEnd);
 };
 
-#endif // WIZSEARCHINDEXER_H
+#endif // WIZSEARCH_H
