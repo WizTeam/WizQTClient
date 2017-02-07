@@ -423,7 +423,7 @@ int WizStyleHelper::listViewItemHeight(int nType)
     case ListTypeThumb:
         return WizSmartScaleUI(122);
     case ListTypeSearchResult:
-        return WizSmartScaleUI(200);
+        return WizSmartScaleUI(210);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return WizSmartScaleUI(20);
@@ -1188,13 +1188,22 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     QColor colorSummary = Utils::WizStyleHelper::listViewItemSummary(bSelected, bFocused);
     QString summaryHtmlColor = "#" + ::WizColorToString(colorSummary);
     //
+    QColor colorInfo = Utils::WizStyleHelper::listViewItemLocation(bSelected, bFocused);
+    QString infoHtmlColor = "#" + ::WizColorToString(colorInfo);
+
+    //
+    QString infoHtmlColorHtml = "<font color='" + infoHtmlColor + "'>";
+    QString infoHtmlColorHtmlEnd = "</font>";
+    //
     QString summaryHtmlColorHtml = "<font color='" + summaryHtmlColor + "'>";
     QString summaryHtmlColorHtmlEnd = "</font>";
     //
-    QString info2 = summaryHtmlColorHtml + info + summaryHtmlColorHtmlEnd;
+    QString title2 = "<font>" + title + "</font>";
+    //
+    QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
     QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
     //
-    QString html = title + "<br />" + info2  + "<br />" + abs2;
+    QString html = title2 + "<br />" + info2  + "<br />" + abs2;
     //
     html = html.replace("<em>", "<font color='red'>");
     html = html.replace("</em>", "</font>");
