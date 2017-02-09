@@ -423,7 +423,7 @@ int WizStyleHelper::listViewItemHeight(int nType)
     case ListTypeThumb:
         return WizSmartScaleUI(122);
     case ListTypeSearchResult:
-        return WizSmartScaleUI(210);
+        return WizSmartScaleUI(160);
 //        return thumbnailHeight() + margin() * 2;
     case ListTypeSection:
         return WizSmartScaleUI(20);
@@ -1207,6 +1207,8 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     //
     html = html.replace("<em>", "<font color='red'>");
     html = html.replace("</em>", "</font>");
+    //
+    html = "<div style='line-height:130%'>" + html + "</div>";
     //
     QRect rcd = rc.adjusted(2, 0, 0, 0); //
     //
