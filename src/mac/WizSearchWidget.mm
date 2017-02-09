@@ -188,6 +188,14 @@
      m_pSearchWidget->on_search_textChanging();
 }
 
+- (void) changePlaceHolderString:(NSString*)text;
+{
+    [self setPlaceholderString:text];
+    NSString* currentSearchStringValue = self.stringValue;
+    self.stringValue = @"-";
+    self.stringValue = currentSearchStringValue;
+}
+
 - (void)textDidEndEditing:(NSNotification *)aNotification
 {
     NSDictionary* dict = [aNotification userInfo];
@@ -202,7 +210,8 @@
     self->m_isEditing = NO;
     //
     QString search = QObject::tr("Search");
-    [self setPlaceholderString:WizToNSString(search)];
+    [self changePlaceHolderString:WizToNSString(search)];
+    //[self setPlaceholderString:WizToNSString(search)];
     //
     QTimer::singleShot(300, [=]{
         if (!m_pSearchWidget->hasFocus()) {
@@ -314,7 +323,8 @@ void WizSearchView::setCurrentKb(const QString &kbGuid)
 void WizSearchView::setSearchPlaceHolder(const QString& placeHolder)
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
-    [pSearchField setPlaceholderString:WizToNSString(placeHolder)];
+    [pSearchField changePlaceHolderString:WizToNSString(placeHolder)];
+    //[pSearchField setPlaceholderString:WizToNSString(placeHolder)];
 }
 
 void WizSearchView::setUserSettings(WizUserSettings* settings)

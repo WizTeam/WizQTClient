@@ -245,7 +245,7 @@ public:
     WizIAPDialog* iapDialog();
 
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
-    void viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory);  
+    void viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistory);
     //
     static void quickSyncKb(const QString& kbGuid);
 

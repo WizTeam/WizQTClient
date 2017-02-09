@@ -930,7 +930,7 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     QString userGUID = m_dbMgr.db().getUserGuid();
     QString userAlias = m_dbMgr.db().getUserAlias();
     //
-    const WIZDOCUMENTDATA& doc = view()->note();
+    const WIZDOCUMENTDATAEX& doc = view()->note();
     bool ignoreTable = doc.strURL.startsWith("http");
     //
     QString noteType = getNoteType();
@@ -947,6 +947,13 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     else
     {
         strCode += "WizEditor.off();";
+        //
+        ::WizMainWindow::instance()->searchKeywords();
+        strCode =
+"WizEditor.off(null, function(){\nsetInterval(function(){\n\
+    WizReader.highlight.on(['测试']);\nconsole.log('highlight');\n\
+}, 10000); });";
+
     }
     //
     page()->runJavaScript(strCode);
@@ -1138,6 +1145,7 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
 
 void WizDocumentWebView::applySearchKeywordHighlight()
 {
+    /*
     WizMainWindow* window = qobject_cast<WizMainWindow *>(m_app.mainWindow());
     QString strKeyWords = window->searchKeywords();
     if (!strKeyWords.isEmpty() && !hasFocus())
@@ -1152,6 +1160,7 @@ void WizDocumentWebView::applySearchKeywordHighlight()
     {
         findText("");
     }
+    */
 }
 
 void WizDocumentWebView::clearSearchKeywordHighlight()

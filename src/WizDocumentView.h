@@ -83,7 +83,7 @@ protected:
     virtual void resizeEvent(QResizeEvent* ev);
 
 private:
-    WIZDOCUMENTDATA m_note;
+    WIZDOCUMENTDATAEX m_note;
     bool m_bLocked; // note is force locked as readonly status
     WizEditorMode m_editorMode;
     WizDocumentViewMode m_defaultViewMode; // user defined editing mode
@@ -93,7 +93,7 @@ private:
     QSize m_sizeHint;
 
 public:
-    const WIZDOCUMENTDATA& note() const { return m_note; }
+    const WIZDOCUMENTDATAEX& note() const { return m_note; }
     bool isLocked() const { return m_bLocked; }
     bool isEditing() const { return m_editorMode == modeEditor; }
     WizEditorMode editorMode() const { return m_editorMode; }
@@ -103,7 +103,7 @@ public:
     bool noteLoaded() const { return m_noteLoaded; }
 
     void initStat(const WIZDOCUMENTDATA& data, bool forceEdit);
-    void viewNote(const WIZDOCUMENTDATA& data, bool forceEdit);
+    void viewNote(const WIZDOCUMENTDATAEX& data, bool forceEdit);
     void reviewCurrentNote();
     void setEditorMode(WizEditorMode editorMode);
     void setDefaultViewMode(WizDocumentViewMode mode);
@@ -125,8 +125,8 @@ signals:
     void stopCheckDocumentEditStatusRequest(const QString& strKbGUID, const QString& strGUID);
 
 public Q_SLOTS:
-    void onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    void onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool);
+    void onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool forceEditing);
+    void onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool);
     void onCloseNoteRequested(WizDocumentView* view);
 
     void onCipherCheckRequest();
@@ -156,7 +156,7 @@ public Q_SLOTS:
     void on_commentWidget_statusChanged();
 
 private:
-    void loadNote(const WIZDOCUMENTDATA &doc);
+    void loadNote(const WIZDOCUMENTDATAEX &doc);
     void downloadNoteFromServer(const WIZDOCUMENTDATA& note);
     void sendDocumentEditingStatus();
     void stopDocumentEditingStatus();

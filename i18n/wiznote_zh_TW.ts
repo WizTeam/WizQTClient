@@ -1539,6 +1539,8 @@ Reason: %3</source>
     </message>
     <message>
         <location filename="../src/WizCategoryViewItem.cpp" line="40"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="354"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="363"/>
         <source>Personal Notes</source>
         <translation>個人筆記</translation>
     </message>
@@ -2393,6 +2395,16 @@ Password hint: %1</source>
     <message>
         <location filename="../src/share/WizDatabase.cpp" line="4215"/>
         <source>Cert Password</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="347"/>
+        <source>Search</source>
+        <translation type="unfinished">搜尋</translation>
+    </message>
+    <message>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="367"/>
+        <source>Search in [%1]</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -4197,7 +4209,7 @@ Password hint: %1</source>
         <location filename="../src/WizMainWindow.cpp" line="2248"/>
         <location filename="../src/WizMainWindow.cpp" line="2251"/>
         <location filename="../src/WizMainWindow.cpp" line="2254"/>
-        <location filename="../src/WizMainWindow.cpp" line="3669"/>
+        <location filename="../src/WizMainWindow.cpp" line="3674"/>
         <source>Info</source>
         <translation type="unfinished">提示</translation>
     </message>
@@ -4273,7 +4285,7 @@ Password hint: %1</source>
     </message>
     <message>
         <location filename="../src/WizMainWindow.cpp" line="1674"/>
-        <location filename="../src/WizMainWindow.cpp" line="3750"/>
+        <location filename="../src/WizMainWindow.cpp" line="3755"/>
         <source>New Note</source>
         <translation type="unfinished">新增筆記</translation>
     </message>
@@ -4303,42 +4315,42 @@ Password hint: %1</source>
         <translation type="unfinished">選擇資料夾</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3036"/>
+        <location filename="../src/WizMainWindow.cpp" line="3038"/>
         <source>Searching...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3669"/>
+        <location filename="../src/WizMainWindow.cpp" line="3674"/>
         <source>Can&apos;t find the specified attachment, may be it has been deleted.</source>
         <translation type="unfinished">找不到指定附件，該附件可能已被刪除。</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3747"/>
+        <location filename="../src/WizMainWindow.cpp" line="3752"/>
         <source>Show/Hide MainWindow</source>
         <translation type="unfinished">顯示/隱藏主視窗</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3755"/>
+        <location filename="../src/WizMainWindow.cpp" line="3760"/>
         <source>Hide TrayIcon</source>
         <translation type="unfinished">隱藏系統匣圖示</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3759"/>
+        <location filename="../src/WizMainWindow.cpp" line="3764"/>
         <source>Logout</source>
         <translation type="unfinished">登出</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="3761"/>
+        <location filename="../src/WizMainWindow.cpp" line="3766"/>
         <source>Exit</source>
         <translation type="unfinished">退出</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4121"/>
+        <location filename="../src/WizMainWindow.cpp" line="4126"/>
         <source>Downloading attachment file  %1 ...</source>
         <translation type="unfinished">下載附件 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/WizMainWindow.cpp" line="4122"/>
+        <location filename="../src/WizMainWindow.cpp" line="4127"/>
         <source>Downloading</source>
         <translation type="unfinished">正在下載</translation>
     </message>
@@ -5202,18 +5214,23 @@ w: %3  h: %4</translation>
 <context>
     <name>WizSuggestCompletionon</name>
     <message>
-        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="111"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="114"/>
+        <source>Advanced Search</source>
+        <translation type="unfinished">進階搜尋</translation>
+    </message>
+    <message>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="137"/>
         <source>Suggestion will be showed here</source>
         <translation>這裏顯示搜索建議</translation>
     </message>
     <message>
-        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="219"/>
-        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="323"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="249"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="417"/>
         <source>Recent Searches</source>
         <translation>近期搜索</translation>
     </message>
     <message>
-        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="219"/>
+        <location filename="../src/mac/WizSearchWidget_mm.cpp" line="249"/>
         <source>Suggestions</source>
         <translation>建議</translation>
     </message>

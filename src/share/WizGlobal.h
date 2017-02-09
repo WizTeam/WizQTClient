@@ -4,7 +4,7 @@
 #include <QObject>
 
 
-struct WIZDOCUMENTDATA;
+struct WIZDOCUMENTDATAEX;
 class QSettings;
 
 class WizDocumentView;
@@ -26,8 +26,8 @@ public:
     static void setMainWindow(WizMainWindow* mw);
     static WizMainWindow* mainWindow();
 
-    static void emitViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    static void emitViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    static void emitViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool forceEditing);
+    static void emitViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool bOk);
     static void emitCloseNoteRequested(WizDocumentView* view);
     static void emitMarkdownSettingChanged();
     //
@@ -40,8 +40,8 @@ private:
     //
     friend class WizMainWindow;
 Q_SIGNALS:
-    void viewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing);
-    void viewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk);
+    void viewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool forceEditing);
+    void viewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool bOk);
     void closeNoteRequested(WizDocumentView* view);
     void markdownSettingChanged();
 };

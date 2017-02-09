@@ -3363,7 +3363,7 @@ void WizMainWindow::resetPermission(const QString& strKbGUID, const QString& str
     }
 }
 
-void WizMainWindow::viewDocument(const WIZDOCUMENTDATA& data, bool addToHistory)
+void WizMainWindow::viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistory)
 {
     Q_ASSERT(!data.strGUID.isEmpty());
 

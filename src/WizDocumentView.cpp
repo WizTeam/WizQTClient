@@ -163,11 +163,11 @@ WizDocumentView::WizDocumentView(WizExplorerApp& app, QWidget* parent)
     connect(&m_dbMgr, SIGNAL(documentUploaded(QString,QString)), \
             m_editStatusSyncThread, SLOT(documentUploaded(QString,QString)));
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onViewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)),
+            SLOT(onViewNoteRequested(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)));
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,WIZDOCUMENTDATA,bool)),
-            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,WIZDOCUMENTDATAEX,bool)),
+            SLOT(onViewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)));
 
     connect(WizGlobal::instance(), SIGNAL(closeNoteRequested(WizDocumentView*)),
             SLOT(onCloseNoteRequested(WizDocumentView*)));
@@ -273,7 +273,7 @@ void WizDocumentView::resizeEvent(QResizeEvent* ev)
     m_title->editorToolBar()->adjustButtonPosition();
 }
 
-void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool forceEditing)
+void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool forceEditing)
 {
     if (view != this)
         return;
@@ -287,7 +287,7 @@ void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUME
     }
 }
 
-void WizDocumentView::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool bOk)
+void WizDocumentView::onViewNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool bOk)
 {
 }
 
@@ -353,13 +353,13 @@ void WizDocumentView::initStat(const WIZDOCUMENTDATA& data, bool forceEdit)
     }
 }
 
-void WizDocumentView::viewNote(const WIZDOCUMENTDATA& wizDoc, bool forceEdit)
+void WizDocumentView::viewNote(const WIZDOCUMENTDATAEX& wizDoc, bool forceEdit)
 {
-    WIZDOCUMENTDATA dataTemp = wizDoc;
+    WIZDOCUMENTDATAEX dataTemp = wizDoc;
     //
     m_web->trySaveDocument(m_note, false, [=](const QVariant& ret){
         //
-        WIZDOCUMENTDATA data = dataTemp;
+        WIZDOCUMENTDATAEX data = dataTemp;
 
         if (m_dbMgr.db(m_note.strKbGUID).isGroup())
         {
@@ -650,7 +650,7 @@ void WizDocumentView::on_checkEditStatus_finished(const QString& strGUID, bool e
     }
 }
 
-void WizDocumentView::loadNote(const WIZDOCUMENTDATA& doc)
+void WizDocumentView::loadNote(const WIZDOCUMENTDATAEX& doc)
 {
     m_web->viewDocument(doc, m_editorMode);
     m_title->setNote(doc, m_editorMode, m_bLocked);

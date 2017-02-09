@@ -69,13 +69,13 @@ QSettings *WizGlobal::globalSettings()
 
 
 void WizGlobal::emitViewNoteRequested(WizDocumentView* view,
-                                  const WIZDOCUMENTDATA& doc, bool forceEditing)
+                                  const WIZDOCUMENTDATAEX& doc, bool forceEditing)
 {
     Q_EMIT instance()->viewNoteRequested(view, doc, forceEditing);
 }
 
 void WizGlobal::emitViewNoteLoaded(WizDocumentView* view,
-                               const WIZDOCUMENTDATA& doc, bool bOk)
+                               const WIZDOCUMENTDATAEX& doc, bool bOk)
 {
     Q_EMIT instance()->viewNoteLoaded(view, doc, bOk);
 }
