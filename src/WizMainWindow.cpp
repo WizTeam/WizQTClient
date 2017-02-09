@@ -3009,6 +3009,9 @@ void WizMainWindow::on_actionPrintMargin_triggered()
 
 void WizMainWindow::on_search_doSearch(const QString& keywords)
 {
+    QString kbGuid = m_category->storedSelectedItemKbGuid();
+    m_searchWidget->setCurrentKb(kbGuid);
+    //
     m_category->saveSelection();
     m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
@@ -3030,7 +3033,6 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
     //m_searcher->search(keywords, 500);
     startSearchStatus();
     //
-    QString kbGuid = m_category->storedSelectedItemKbGuid();
     QString key = keywords;
     //
     ::WizExecutingActionDialog::executeAction(tr("Searching..."), WIZ_THREAD_SEARCH, [=]{
@@ -3230,6 +3232,9 @@ void WizMainWindow::on_category_itemSelectionChanged()
         showDocumentList(category);
         break;
     }
+    //
+    QString kbGuid = m_category->selectedItemKbGUID();
+    m_searchWidget->setCurrentKb(kbGuid);
 }
 
 void WizMainWindow::on_documents_itemSelectionChanged()
