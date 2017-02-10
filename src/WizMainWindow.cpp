@@ -2941,7 +2941,6 @@ void WizMainWindow::resetSearchStatus()
     m_searchWidget->clear();
     m_searchWidget->focus();
     m_category->restoreSelection();
-    m_doc->web()->applySearchKeywordHighlight();
 }
 
 void WizMainWindow::on_actionResetSearch_triggered()
@@ -3053,15 +3052,6 @@ void WizMainWindow::on_search_doSearch(const QString& keywords)
 
 void WizMainWindow::on_searchProcess(const QString& strKeywords, const CWizDocumentDataArray& arrayDocument, bool bStart, bool bEnd)
 {
-    if (bEnd) {
-        m_doc->web()->clearSearchKeywordHighlight(); //need clear hightlight first
-        m_doc->web()->applySearchKeywordHighlight();
-    }
-
-//    if (strKeywords != m_strSearchKeywords) {
-//        return;
-//    }
-
     if (bStart) {
         m_documents->setLeadInfoState(DocumentLeadInfo_SearchResult);
         m_documents->setDocuments(arrayDocument);
@@ -3851,7 +3841,6 @@ void WizMainWindow::quitSearchStatus()
         m_searchWidget->clear();
         m_searchWidget->clearFocus();
         m_strSearchKeywords.clear();
-        m_doc->web()->applySearchKeywordHighlight();
     }
 
     m_documents->setAcceptAllSearchItems(false);

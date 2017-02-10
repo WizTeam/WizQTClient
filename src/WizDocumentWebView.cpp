@@ -331,8 +331,6 @@ void WizDocumentWebView::focusInEvent(QFocusEvent *event)
     }
 
     QWebEngineView::focusInEvent(event);
-
-    applySearchKeywordHighlight();
 }
 
 void WizDocumentWebView::focusOutEvent(QFocusEvent *event)
@@ -919,6 +917,44 @@ QString WizDocumentWebView::getNoteType()
     return "common";
 }
 
+
+QString WizDocumentWebView::getHighlightKeywords()
+{
+    const WIZDOCUMENTDATAEX& doc = view()->note();
+    CWizStdStringArray texts;
+    texts.push_back(doc.strHighlightText);
+    texts.push_back(doc.strHighlightTitle);
+    //
+    std::set<QString> keywords;
+    for (auto it : texts)
+    {
+        QString text = it;
+        int begin = 0;
+        while (true) {
+            int start = text.indexOf("<em>",  begin);
+            if (start == -1)
+                break;
+            start += 4;
+            int end = text.indexOf("</em>", start);
+            if (end == -1)
+                break;
+            //
+            QString keyword = text.mid(start, end - start);
+            keywords.insert("'" + keyword + "'");
+            //
+            begin = end + 5;
+        }
+    }
+    //
+    CWizStdStringArray arr;
+    arr.assign(keywords.begin(), keywords.end());
+    //
+    CString ret;
+    ::WizStringArrayToText(arr, ret, ",");
+    return ret;
+}
+
+
 void WizDocumentWebView::onEditorLoadFinished(bool ok)
 {
     if (!ok)
@@ -946,18 +982,23 @@ void WizDocumentWebView::onEditorLoadFinished(bool ok)
     }
     else
     {
-        strCode += "WizEditor.off();";
-        //
-        ::WizMainWindow::instance()->searchKeywords();
-        strCode =
-"WizEditor.off(null, function(){\nsetInterval(function(){\n\
-    WizReader.highlight.on(['测试']);\nconsole.log('highlight');\n\
-}, 10000); });";
 
+        QString keywords = getHighlightKeywords();
+        if (keywords.isEmpty()) {
+            //
+            strCode += "WizEditor.off();";
+            //
+        } else {
+            strCode +=
+QString("WizEditor.off(null, function(){\n\
+    WizReader.highlight.on([%1]);\nconsole.log('highlight');\n\
+});").arg(keywords);
+        }
     }
     //
     page()->runJavaScript(strCode);
 }
+
 
 void WizDocumentWebView::onEditorLinkClicked(QUrl url, QWebEnginePage::NavigationType navigationType, bool isMainFrame, WizWebEnginePage* page)
 {
@@ -1140,32 +1181,6 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
         //
         callback(true);
     });
-}
-
-
-void WizDocumentWebView::applySearchKeywordHighlight()
-{
-    /*
-    WizMainWindow* window = qobject_cast<WizMainWindow *>(m_app.mainWindow());
-    QString strKeyWords = window->searchKeywords();
-    if (!strKeyWords.isEmpty() && !hasFocus())
-    {
-        QStringList keyList = strKeyWords.split(getWizSearchSplitChar());
-        foreach (QString strText, keyList)
-        {
-            findText(strText);
-        }
-    }
-    else
-    {
-        findText("");
-    }
-    */
-}
-
-void WizDocumentWebView::clearSearchKeywordHighlight()
-{
-    findText("");
 }
 
 void WizDocumentWebView::on_insertCodeHtml_requset(QString strOldHtml)
