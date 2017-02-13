@@ -1222,10 +1222,12 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     //// http://fop-miniscribus.googlecode.com/svn/trunk/fop_miniscribus.1.0.0/src/floating_box/floatdiagram.cpp
     //////setMaximumHeight(DocumentHighgtActual());
 
+    //
+    p->save();
     p->translate(rcd.topLeft());
     QRect rc2(0, 0, rcd.width(), rcd.height());
     doc->drawContents(p, rc2);
-    p->translate(QPointF(0, 0));
+    p->restore();
     //
     doc->deleteLater();
 }
