@@ -1198,17 +1198,17 @@ void WizStyleHelper::drawListViewItemSearchResult(QPainter* p, const QRect& rc, 
     QString summaryHtmlColorHtml = "<font color='" + summaryHtmlColor + "'>";
     QString summaryHtmlColorHtmlEnd = "</font>";
     //
-    QString title2 = "<font>" + title + "</font>";
+    QString title2 = "<div style='font-size:14px;line-height:130%'>" + title + "</div>";
     //
     QString info2 = infoHtmlColorHtml + info + infoHtmlColorHtmlEnd;
     QString abs2 = summaryHtmlColorHtml + abs + summaryHtmlColorHtmlEnd;
     //
-    QString html = title2 + "<br />" + info2  + "<br />" + abs2;
+    QString other = "<div style='font-size:12px;line-height:140%'>" + info2  + "<br />" + abs2 + "</div>";
+
+    QString html = title2 + other;
     //
     html = html.replace("<em>", "<font color='red'>");
     html = html.replace("</em>", "</font>");
-    //
-    html = "<div style='line-height:130%'>" + html + "</div>";
     //
     QRect rcd = rc.adjusted(2, 0, 0, 0); //
     //
