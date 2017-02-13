@@ -1162,7 +1162,7 @@ void WizDocumentWebView::saveReadingViewDocument(const WIZDOCUMENTDATA &data, bo
     //
     const WIZDOCUMENTDATA doc = data;
 
-    QString strScript = QString("WizReader.todo.closeDocument();");
+    QString strScript = QString("WizReader.closeDocument();");
     page()->runJavaScript(strScript, [=](const QVariant& vRet) {
         //
         QString strHtml = vRet.toString();
