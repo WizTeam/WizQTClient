@@ -106,7 +106,7 @@ void WizDocumentWebViewPage::triggerAction(QWebEnginePage::WebAction typeAction,
         return;
     }
 
-    QWebEnginePage::triggerAction(typeAction, checked);
+    WizWebEnginePage::triggerAction(typeAction, checked);
 
     Q_EMIT actionTriggered(typeAction);
 }
