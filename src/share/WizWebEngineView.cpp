@@ -11,6 +11,7 @@
 #ifdef Q_OS_MAC
 #include "mac/WizMacHelper.h"
 #include <QTimer>
+#include <QMimeData>
 #endif
 
 class WizInvisibleWebEngineView : public QWebEngineView
@@ -102,9 +103,23 @@ void WizWebEnginePage::triggerAction(WizWebEnginePage::WebAction action, bool ch
         QTimer::singleShot(500, [=]{
             //
             QClipboard* clipboard = QApplication::clipboard();
-            QString text = clipboard->text();
-            clipboard->clear();
-            clipboard->setText(text);
+            const QMimeData *mimeData = clipboard->mimeData();
+            QMimeData* newData = new QMimeData();
+            for (auto format : mimeData->formats()) {
+                //
+                if (format == "text/html") {
+                    //
+                    QByteArray htmlData = mimeData->data(format);
+                    QString html = QString::fromUtf8(htmlData);
+                    html = "<meta content=\"text/html; charset=utf-8\" http-equiv=\"Content-Type\">" + html;
+                    newData->setHtml(html);
+                    //
+                } else {
+                    newData->setData(format, mimeData->data(format));
+                }
+            }
+            //
+            clipboard->setMimeData(newData);
         });
 #endif
     }
