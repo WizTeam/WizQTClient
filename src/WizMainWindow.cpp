@@ -3008,10 +3008,11 @@ void WizMainWindow::on_actionPrintMargin_triggered()
 
 void WizMainWindow::on_search_doSearch(const QString& keywords)
 {
+    m_category->saveSelection();
+    //
     QString kbGuid = m_category->storedSelectedItemKbGuid();
     m_searchWidget->setCurrentKb(kbGuid);
     //
-    m_category->saveSelection();
     m_strSearchKeywords = keywords;
     if (keywords.isEmpty()) {
         resetSearchStatus();
