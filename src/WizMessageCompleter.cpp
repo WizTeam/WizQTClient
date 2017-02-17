@@ -204,8 +204,8 @@ WizMessageCompleter::WizMessageCompleter(QWidget *parent)
     setFilterMode(Qt::MatchContains);
 #endif
 
-    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)),
-            SLOT(onNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATA&,bool)));
+    connect(WizGlobal::instance(), SIGNAL(viewNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)),
+            SLOT(onNoteLoaded(WizDocumentView*,const WIZDOCUMENTDATAEX&,bool)));
 }
 
 WizDocumentView* WizMessageCompleter::noteView()
@@ -224,7 +224,7 @@ WizDocumentView* WizMessageCompleter::noteView()
     return 0;
 }
 
-void WizMessageCompleter::onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok)
+void WizMessageCompleter::onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool ok)
 {
     if (view != noteView())
         return;

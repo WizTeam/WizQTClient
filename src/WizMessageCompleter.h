@@ -5,7 +5,7 @@
 
 class QLineEdit;
 
-struct WIZDOCUMENTDATA;
+struct WIZDOCUMENTDATAEX;
 
 class WizDocumentView;
 class INoteView;
@@ -24,7 +24,7 @@ private:
     void update(const QString& strKbGUID);
 
 private Q_SLOTS:
-    void onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATA& doc, bool ok);
+    void onNoteLoaded(WizDocumentView* view, const WIZDOCUMENTDATAEX& doc, bool ok);
 };
 
 
