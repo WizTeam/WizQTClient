@@ -290,7 +290,7 @@ bool WizSearchView::hasFocus()
 void WizSearchView::focus()
 {
     WizSearchField* pSearchField = reinterpret_cast<WizSearchField *>(cocoaView());
-//    [pSearchField.window makeFirstResponder:pSearchField];
+    [pSearchField.window makeFirstResponder:pSearchField];
 }
 
 void WizSearchView::onFocused(bool focused)
