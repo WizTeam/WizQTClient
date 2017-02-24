@@ -446,6 +446,8 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
     if (items.isEmpty())
         return;
     //
+    QString lastPath = WizMainWindow::instance()->userSettings().lastAttachmentPath();
+    //
     if (items.size() == 1)
     {
         if (WizAttachmentListViewItem* item = dynamic_cast<WizAttachmentListViewItem*>(items[0]))
@@ -462,9 +464,17 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
                 QString attachName = item->attachment().strName;
                 m_downloaderHost->downloadData(item->attachment(), [=](){
                     WizExecuteOnThread(WIZ_THREAD_MAIN, [=](){
-                        QString strFileName = QFileDialog::getSaveFileName(this, QString(), attachName);
+                        //
+                        QString newName = attachName;
+                        if (!lastPath.isEmpty()) {
+                            newName = lastPath + newName;
+                        }
+                        //
+                        QString strFileName = QFileDialog::getSaveFileName(this, QString(), newName);
                         if (strFileName.isEmpty())
                             return;
+                        //
+                        WizMainWindow::instance()->userSettings().setLastAttachmentPath(Utils::WizMisc::extractFilePath(strFileName));
 
                         if (!::WizCopyFile(m_dbMgr.db(kbGUID).getAttachmentFileName(guid), strFileName, FALSE))
                         {
@@ -476,10 +486,17 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
             }
             else
             {
-                QString strFileName = QFileDialog::getSaveFileName(this, QString(), item->attachment().strName);
+                QString newName = item->attachment().strName;
+                if (!lastPath.isEmpty()) {
+                    newName = lastPath + newName;
+                }
+                //
+                QString strFileName = QFileDialog::getSaveFileName(this, QString(), newName);
                 if (strFileName.isEmpty())
                     return;
 
+                WizMainWindow::instance()->userSettings().setLastAttachmentPath(Utils::WizMisc::extractFilePath(strFileName));
+                //
                 if (!::WizCopyFile(db.getAttachmentFileName(item->attachment().strGUID), strFileName, FALSE))
                 {
                     QMessageBox::critical(this, qApp->applicationName(), tr("Can not save attachment to %1").arg(strFileName));
@@ -490,8 +507,10 @@ void WizAttachmentListView::on_action_saveAttachmentAs()
     }
     else
     {
-        CString strDir = QFileDialog::getExistingDirectory(this, tr("Save attachments to"));
+        CString strDir = QFileDialog::getExistingDirectory(this, tr("Save attachments to"), lastPath);
         ::WizPathAddBackslash(strDir);
+        //
+        WizMainWindow::instance()->userSettings().setLastAttachmentPath(strDir);
 
         foreach (QListWidgetItem* it, items)
         {

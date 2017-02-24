@@ -644,6 +644,22 @@ void WizUserSettings::setDefaultFontFamily(const QString& strFont)
     set("DefaultFontFamily", strFont);
 }
 
+void WizUserSettings::setLastAttachmentPath(const QString& path)
+{
+    set("LastAttachmentPath", path);
+}
+
+QString WizUserSettings::lastAttachmentPath() const
+{
+    QString path = get("LastAttachmentPath");
+    if (path.isEmpty())
+        return path;
+    //
+    ::WizPathAddBackslash(path);
+    return path;
+}
+
+
 int WizUserSettings::defaultFontSize()
 {
     int nSize = get("DefaultFontSize").toInt();
