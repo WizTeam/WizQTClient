@@ -52,7 +52,7 @@ public:
     void setEditButtonEnabled(bool enable);
     void updateEditButton(WizEditorMode editorMode);
     void resetTitle(const QString& strTitle);
-    void moveTitileTextToPlaceHolder();
+    void clearAndSetPlaceHolderText(const QString& text);
     void clearPlaceHolderText();
 
     void startEditButtonAnimation();

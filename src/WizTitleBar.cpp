@@ -427,9 +427,9 @@ void WizTitleBar::resetTitle(const QString& strTitle)
 
 }
 
-void WizTitleBar::moveTitileTextToPlaceHolder()
+void WizTitleBar::clearAndSetPlaceHolderText(const QString& text)
 {
-    m_editTitle->setPlaceholderText(m_editTitle->text());
+    m_editTitle->setPlaceholderText(text);
     m_editTitle->clear();
 }
 

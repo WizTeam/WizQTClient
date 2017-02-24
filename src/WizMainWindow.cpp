@@ -2939,13 +2939,13 @@ void WizMainWindow::resetSearchStatus()
 {
     quitSearchStatus();
     m_searchWidget->clear();
-    m_searchWidget->focus();
     m_category->restoreSelection();
 }
 
 void WizMainWindow::on_actionResetSearch_triggered()
 {
     resetSearchStatus();
+    m_searchWidget->focus();
     //
     WizGetAnalyzer().logAction("MenuBarResetSearch");
 }

@@ -279,8 +279,9 @@ void WizDocumentView::onViewNoteRequested(WizDocumentView* view, const WIZDOCUME
         return;
 
     if (doc.tCreated.secsTo(QDateTime::currentDateTime()) <= 1) {
+        //new note
         viewNote(doc, forceEditing);
-        m_title->moveTitileTextToPlaceHolder();
+        m_title->clearAndSetPlaceHolderText(doc.strTitle);
     } else {
         m_title->clearPlaceHolderText();
         viewNote(doc, forceEditing);
