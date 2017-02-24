@@ -3859,6 +3859,9 @@ void WizMainWindow::initVariableBeforCreateNote()
 
 bool WizMainWindow::needShowNewFeatureGuide()
 {
+    if (m_settings->serverType() == EnterpriseServer)
+        return false;
+    //
     QString strGuideVserion = m_settings->newFeatureGuideVersion();
     if (strGuideVserion.isEmpty())
         return true;
