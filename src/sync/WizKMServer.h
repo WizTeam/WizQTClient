@@ -175,6 +175,9 @@ protected:
     WIZUSERINFOBASE m_userInfo;
     WIZKBINFO m_kbInfo;
 
+private:
+    bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+    bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
 public:
     QString getToken() const { return m_userInfo.strToken; }
     QString getKbGuid() const { return m_userInfo.strKbGUID; }
@@ -187,6 +190,7 @@ public:
     bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
     //
     bool document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+
     bool attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion);
     //
     bool document_getList(int nCountPerPage, __int64 nVersion, std::deque<WIZDOCUMENTDATAEX>& arrayRet);

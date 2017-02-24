@@ -3,6 +3,7 @@
 
 #include "../share/WizQtHelper.h"
 #include <QStringList>
+#include <QBuffer>
 
 class QuaZip;
 
@@ -28,8 +29,10 @@ public:
 protected:
     QuaZip* m_zip;
     QStringList m_names;
+    QBuffer m_buffer;
 public:
     bool open(const CString& strFileName);
+    bool open(const QByteArray& data);
     int count();
     CString fileName(int index);
     int fileNameToIndex(const CString& strNameInZip);
@@ -37,6 +40,9 @@ public:
     bool extractFile(const CString& strNameInZip, const CString& strFileName);
     bool extractAll(const CString& strDestPath);
     bool close();
+    //
+    bool extractFile(const CString& strNameInZip, QByteArray& data);
+    bool readMainHtmlAndResources(QString& html, CWizStdStringArray& resources);
 
 public:
     static bool extractZip(const CString& strZipFileName, const CString& strDestPath);

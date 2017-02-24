@@ -131,6 +131,8 @@ set(wiznote_SOURCES
     widgets/WizTableSelector.cpp
     widgets/WizUserServiceExprDialog.cpp
 
+    share/jsoncpp/jsoncpp.cpp
+
     WizCategoryView.cpp
     WizCategoryViewItem.cpp
     WizDocumentListView.cpp
@@ -252,6 +254,9 @@ set(wiznote_HEADERS
     share/WizShadowWindow.h
     share/WizShadowEffect.h
     widgets/WizTableSelector.h
+
+    share/jsoncpp/json/json.h
+    share/jsoncpp/json/json-forwards.h
 
     WizDef.h
     WizActions.h
