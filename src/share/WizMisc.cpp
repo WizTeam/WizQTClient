@@ -1207,6 +1207,17 @@ bool WizSaveUnicodeTextToUtf8File(const QString& strFileName, const QString& str
     return true;
 }
 
+bool WizSaveUnicodeTextToData(QByteArray& data, const QString& strText, bool addBom)
+{
+    QTextStream stream(&data);
+    stream.setCodec("UTF-8");
+    stream.setGenerateByteOrderMark(addBom ? true : false);
+    stream << strText;
+    stream.flush();
+    return true;
+}
+
+
 BOOL WizSplitTextToArray(const CString& strText, QChar ch, CWizStdStringArray& arrayResult)
 {
     QStringList strings = strText.split(ch, QString::SkipEmptyParts);
@@ -2893,6 +2904,28 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
     file.write(byData);
     file.close();
 
+    return true;
+}
+
+bool WizURLDownloadToData(const QString& url, QByteArray& data)
+{
+    QString newUrl = url;
+    QNetworkAccessManager netCtrl;
+    QNetworkReply* reply;
+    do
+    {
+        QNetworkRequest request(newUrl);
+        QEventLoop loop;
+        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        reply = netCtrl.get(request);
+        loop.exec();
+
+        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+        newUrl = redirectUrl.toString();
+    }
+    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+
+    data = reply->readAll();
     return true;
 }
 

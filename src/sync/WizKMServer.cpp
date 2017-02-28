@@ -11,11 +11,119 @@
 
 #include "utils/WizMisc.h"
 
+#include "share/WizDatabase.h"
+#include "share/WizDatabaseManager.h"
+
+#include "utils/WizPathResolve.h"
+
 #include <QHttpPart>
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
 
+
+
+
+bool execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
+{
+    method = method.toUpper();
+
+    QNetworkAccessManager net;
+    QNetworkRequest request;
+    request.setUrl(url);
+    //
+    QNetworkReply* reply = NULL;
+    if (method == "POST")
+    {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        reply = net.post(request, reqBody);
+    }
+    else if (method == "GET")
+    {
+        reply = net.get(request);
+    }
+    else if (method == "PUT")
+    {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        reply = net.put(request, reqBody);
+    }
+    else if (method == "DELETE")
+    {
+        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        reply = net.deleteResource(request);
+    }
+    else
+    {
+        return false;
+    }
+
+    WizAutoTimeOutEventLoop loop(reply);
+    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+    loop.exec();
+    //
+    if (loop.error() != QNetworkReply::NoError)
+    {
+        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+        return false;
+    }
+    //
+    resBody = loop.result();
+    //
+    return true;
+}
+
+bool execJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, QByteArray &resBody)
+{
+    Json::FastWriter writer;
+    std::string body = writer.write(reqBody);
+    QByteArray buffer(body.c_str());
+    //
+    return execJsonRequest(url, method, buffer, resBody);
+}
+
+bool execJsonRequest(const QString &url, QByteArray &resBody)
+{
+    return execJsonRequest(url, "GET", QByteArray(), resBody);
+}
+
+bool execStandardJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, Json::Value& res)
+{
+    QByteArray resData;
+    if (!execJsonRequest(url, method, reqBody, resData))
+        return false;
+    //
+    try {
+        std::string resultString = resData.toStdString();
+        //
+        Json::Reader reader;
+        if (!reader.parse(resultString, res))
+        {
+            qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
+            return false;
+        }
+        //
+        Json::Value returnCode = res["return_code"];
+        if (returnCode.asInt() != 200)
+        {
+            Json::Value returnMessage = res["return_message"];
+            qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
+            return false;
+        }
+        //
+        return true;
+    }
+    catch (std::exception& err)
+    {
+        qDebug() << "josn error: " << err.what();
+        return false;
+    }
+}
+
+bool execStandardJsonRequest(const QString &url, Json::Value& res)
+{
+    Json::Value nullValue;
+    return execStandardJsonRequest(url, "GET", nullValue, res);
+}
 
 
 WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent)
@@ -805,15 +913,167 @@ bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValu
     return WizKMXmlRpcServerBase::setValue("kb", getToken(), getKbGuid(), strKey, strValue, nRetVersion);
 }
 
-bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret)
+bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
 {
     if (!data_download(ret.strGUID, "document", ret.arrayData, ret.strTitle))
     {
         TOLOG1("Failed to download attachment data: %1", ret.strTitle);
-        return FALSE;
+        return false;
     }
     //
-    return TRUE;
+    return true;
+}
+
+class WizTempFileGuard
+{
+    QString m_fileName;
+public:
+    WizTempFileGuard(const QString& fileName)
+        : m_fileName(fileName)
+    {
+    }
+    WizTempFileGuard()
+    {
+        m_fileName = Utils::WizPathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly();
+    }
+
+    ~WizTempFileGuard()
+    {
+        WizDeleteFile(m_fileName);
+        if (WizPathFileExists(m_fileName))
+        {
+            TOLOG1(_T("Failed to delete temp file: %1"), m_fileName);
+        }
+    }
+    //
+    QString fileName()
+    {
+        return m_fileName;
+    }
+};
+
+bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
+{
+    QString url = "http://localhost:4001/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?download_data=1";
+    //
+    Json::Value doc;
+    if (!execStandardJsonRequest(url, doc))
+    {
+        TOLOG1("Failed to download document data: %1", ret.strTitle);
+        return false;
+    }
+    //
+    QString html = QString::fromUtf8(doc["html"].asString().c_str());
+    if (html.isEmpty())
+        return false;
+    //
+    Json::Value resourcesObj = doc["resources"];
+    //
+    struct RESDATA : public WIZZIPENTRYDATA
+    {
+        QString url;
+    };
+
+    //
+    std::vector<RESDATA> serverResources;
+    if (resourcesObj.isArray())
+    {
+        int resourceCount = resourcesObj.size();
+        for (int i = 0; i < resourceCount; i++)
+        {
+            Json::Value resObj = resourcesObj[i];
+            RESDATA data;
+            data.name = QString::fromUtf8(resObj["name"].asString().c_str());
+            data.url = QString::fromUtf8(resObj["url"].asString().c_str());
+            data.size = resObj["size"].asInt64();
+            data.time = QDateTime::fromTime_t(resObj["time"].asInt64() / 1000);
+            serverResources.push_back(data);
+        }
+    }
+    //
+    WizTempFileGuard tempFile;
+    WizZipFile newZip;
+    if (!newZip.open(tempFile.fileName()))
+    {
+        TOLOG1("Failed to create temp file: %1", tempFile.fileName());
+        return false;
+    }
+    //
+    QByteArray htmlData;
+    WizSaveUnicodeTextToData(htmlData, html, true);
+    if (!newZip.compressFile(htmlData, "index.html"))
+    {
+        TOLOG("Failed to add index.html to zip file");
+        return false;
+    }
+    //
+    WizUnzipFile oldZip;
+    bool hasOldZip = false;
+    if (WizPathFileExists(oldFileName))
+    {
+        if (!oldZip.open(oldFileName))
+        {
+            TOLOG1("Failed to open old file: %1", oldFileName);
+        }
+        else
+        {
+            hasOldZip = true;
+        }
+    }
+    //
+    for (auto res : serverResources)
+    {
+        QString resName = "index_files/" + res.name;
+        if (hasOldZip)
+        {
+            int index = oldZip.fileNameToIndex(resName);
+            if (-1 != index)
+            {
+                QByteArray data;
+                if (oldZip.extractFile(index, data))
+                {
+                    if (newZip.compressFile(data, resName))
+                    {
+                        continue;
+                    }
+                }
+            }
+        }
+        //
+        QByteArray data;
+        if (!WizURLDownloadToData(res.url, data))
+        {
+            TOLOG1("Failed to download res: %1", res.url);
+            return false;
+        }
+        //
+        if (!newZip.compressFile(data, resName))
+        {
+            TOLOG("Failed to add data to zip file");
+            return false;
+            //
+        }
+    }
+    //
+    //
+    if (!newZip.close())
+    {
+        TOLOG("Failed to close zip file");
+        return false;
+    }
+    //
+    if (!WizLoadDataFromFile(tempFile.fileName(), ret.arrayData))
+    {
+        TOLOG1("Failed to load data from file: %1", tempFile.fileName());
+        return false;
+    }
+    //
+    return true;
+}
+
+bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
+{
+    return document_downloadDataNew(strDocumentGUID, ret, fileName);
 }
 //
 
@@ -859,7 +1119,7 @@ struct CWizKMDocumentPostDataParam
 };
 
 
-bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret, const QString& fileName)
 {
     ATLASSERT(!ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
@@ -1149,72 +1409,8 @@ bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bo
 }
 
 //
-bool execJsonRequest(const QString& url, const QByteArray& reqBody, QByteArray& resBody)
-{
-    QNetworkAccessManager net;
-    QNetworkRequest request;
-    request.setUrl(url);
-    request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-    QNetworkReply* reply = net.post(request, reqBody);
 
-    WizAutoTimeOutEventLoop loop(reply);
-    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
-    loop.exec();
-    //
-    if (loop.error() != QNetworkReply::NoError)
-    {
-        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
-        return false;
-    }
-    //
-    resBody = loop.result();
-    //
-    return true;
-}
-
-bool execJsonRequest(const QString &url, const Json::Value &reqBody, QByteArray &resBody)
-{
-    Json::FastWriter writer;
-    std::string body = writer.write(reqBody);
-    QByteArray buffer(body.c_str());
-    //
-    return execJsonRequest(url, buffer, resBody);
-}
-
-bool execStandardJsonRequest(const QString &url, const Json::Value &reqBody, Json::Value& res)
-{
-    QByteArray resData;
-    if (!execJsonRequest(url, reqBody, resData))
-        return false;
-    //
-    try {
-        std::string resultString = resData.toStdString();
-        //
-        Json::Reader reader;
-        if (!reader.parse(resultString, res))
-        {
-            qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
-            return false;
-        }
-        //
-        Json::Value returnCode = res["return_code"];
-        if (returnCode.asInt() != 200)
-        {
-            Json::Value returnMessage = res["return_message"];
-            qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
-            return false;
-        }
-        //
-        return true;
-    }
-    catch (std::exception& err)
-    {
-        qDebug() << "josn error: " << err.what();
-        return false;
-    }
-}
-
-bool uploadFile(const QString& url, const QString& key, const QString& fileName, const QByteArray& data, bool isLast, Json::Value& res)
+bool uploadFile(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& fileName, const QByteArray& data, bool isLast, Json::Value& res)
 {
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     //
@@ -1222,17 +1418,27 @@ bool uploadFile(const QString& url, const QString& key, const QString& fileName,
     keyPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"key\""));
     keyPart.setBody(key.toUtf8());
 
+    QHttpPart kbGuidPart;
+    kbGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"kbGuid\""));
+    kbGuidPart.setBody(kbGuid.toUtf8());
+
+    QHttpPart docGuidPart;
+    docGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"docGuid\""));
+    docGuidPart.setBody(docGuid.toUtf8());
+
     QHttpPart isLastPart;
     isLastPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"isLast\""));
     isLastPart.setBody(isLast ? "1" : "0");
 
     QHttpPart filePart;
-    QString filePartHeader = QString("form-data; name=\"file\"; filename=\"%1\"").arg(fileName);
+    QString filePartHeader = QString("form-data; name=\"files\"; filename=\"%1\"").arg(fileName);
     filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
     filePart.setBody(data);
 
     //
     multiPart->append(keyPart);
+    multiPart->append(kbGuidPart);
+    multiPart->append(docGuidPart);
     multiPart->append(isLastPart);
     multiPart->append(filePart);
     //
@@ -1320,7 +1526,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
         }
         //
         QString html;
-        CWizStdStringArray resources;
+        std::vector<WIZZIPENTRYDATA> resources;
         if (!zip.readMainHtmlAndResources(html, resources))
         {
             qDebug() << "Can't load html and resources";
@@ -1330,9 +1536,13 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
         doc["html"] = html.toUtf8().data();
         //
         Json::Value res;
-        for (auto elem : resources)
+        for (auto data : resources)
         {
-            res.append(elem.toUtf8().data());
+            Json::Value elemObj;
+            elemObj["name"] = data.name.toUtf8().data();
+            elemObj["time"] = (long long)data.time.toTime_t() * 1000;
+            elemObj["size"] = (long long)data.size;
+            res.append(elemObj);
         }
         //
         doc["resources"] = res;
@@ -1340,7 +1550,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
 
     //
     Json::Value ret;
-    if (!execStandardJsonRequest(url_main, doc, ret))
+    if (!execStandardJsonRequest(url_main, "POST", doc, ret))
     {
         qDebug() << "Failed to upload note";
         return false;
@@ -1372,7 +1582,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
                 QString name = Utils::WizMisc::extractFileName(resName);
                 //
                 Json::Value res;
-                if (!uploadFile(url_res, key, name, resData, isLast, res))
+                if (!uploadFile(url_res, key, m_userInfo.strKbGUID, data.strGUID, name, resData, isLast, res))
                 {
                     qDebug() << "Failed to upload note res";
                     return false;
@@ -1508,33 +1718,3 @@ bool WizKMDatabaseServer::category_getAll(QString& str)
     return TRUE;
 }
 
-QByteArray WizKMDatabaseServer::downloadDocumentData(const QString& strDocumentGUID)
-{
-    WIZDOCUMENTDATAEX ret;
-    if (!document_downloadData(strDocumentGUID, ret))
-    {
-        TOLOG1("Failed to download note data: %1", strDocumentGUID);
-        return QByteArray();
-    }
-    //
-    if (ret.arrayData.isEmpty())
-        return QByteArray();
-    //
-    return ret.arrayData;
-}
-//
-
-QByteArray WizKMDatabaseServer::downloadAttachmentData(const QString& strAttachmentGUID)
-{
-    WIZDOCUMENTATTACHMENTDATAEX ret;
-    if (!attachment_downloadData(strAttachmentGUID, ret))
-    {
-        TOLOG1("Failed to download attachment data: %1", strAttachmentGUID);
-        return QByteArray();
-    }
-    //
-    if (ret.arrayData.isEmpty())
-        return QByteArray();
-    //
-    return ret.arrayData;
-}

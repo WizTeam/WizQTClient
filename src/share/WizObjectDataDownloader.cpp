@@ -190,8 +190,10 @@ bool WizObjectDownloader::downloadDocument()
     //
     if (!ksServer.document_getInfo(m_data.strObjectGUID, document))
         return false;
+    //
+    QString fileName = db.getDocumentFileName(m_data.strObjectGUID);
 
-    if (!ksServer.document_downloadData(m_data.strObjectGUID, document))
+    if (!ksServer.document_downloadData(m_data.strObjectGUID, document, fileName))
     {
         return false;
     }

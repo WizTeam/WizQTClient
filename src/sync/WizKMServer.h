@@ -178,6 +178,9 @@ protected:
 private:
     bool document_postDataOld(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
     bool document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
+    //
+    bool document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
+    bool document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
 public:
     QString getToken() const { return m_userInfo.strToken; }
     QString getKbGuid() const { return m_userInfo.strKbGUID; }
@@ -186,8 +189,8 @@ public:
     bool wiz_getInfo();
     bool wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto = FALSE);
 
-    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret);
-    bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
+    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
+    bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret, const QString& fileName);
     //
     bool document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
 
@@ -202,8 +205,6 @@ public:
     bool tag_postList(std::deque<WIZTAGDATA>& arrayTag);
     bool style_postList(std::deque<WIZSTYLEDATA>& arrayStyle);
     bool deleted_postList(std::deque<WIZDELETEDGUIDDATA>& arrayDeletedGUID);
-    QByteArray downloadDocumentData(const QString& strDocumentGUID);
-    QByteArray downloadAttachmentData(const QString& strAttachmentGUID);
     //
     bool document_getListByGuids(const CWizStdStringArray& arrayDocumentGUID, std::deque<WIZDOCUMENTDATAEX>& arrayRet);
     bool document_getInfo(const QString& strDocumentGuid, WIZDOCUMENTDATAEX& doc);
@@ -350,25 +351,6 @@ protected:
         return TRUE;
     }
     //
-    /////////////////////////////////////////////////////////
-    ////下载对象数据/////////////////
-
-    template <class TData>
-    bool downloadObjectData(TData& data)
-    {
-        return TRUE;
-    }
-    template <class TData>
-    bool downloadObjectData(WIZDOCUMENTDATAEX& data)
-    {
-        return document_downloadData(data.strGUID, data);
-    }
-    template <class TData>
-    bool downloadObjectData(WIZDOCUMENTATTACHMENTDATAEX& data)
-    {
-        return attachment_downloadData(data.strGUID, data);
-    }
-
 
     /////////////////////////////////////////////
     //getList
