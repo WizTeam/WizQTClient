@@ -21,9 +21,6 @@
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
 
-
-
-
 bool execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
 {
     method = method.toUpper();
@@ -915,7 +912,7 @@ bool WizKMDatabaseServer::setValue(const QString& strKey, const QString& strValu
 
 bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
 {
-    if (!data_download(ret.strGUID, "document", ret.arrayData, ret.strTitle))
+    if (!data_downloadOld(strDocumentGUID, "document", ret.arrayData, ret.strTitle))
     {
         TOLOG1("Failed to download attachment data: %1", ret.strTitle);
         return false;
@@ -924,33 +921,6 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
     return true;
 }
 
-class WizTempFileGuard
-{
-    QString m_fileName;
-public:
-    WizTempFileGuard(const QString& fileName)
-        : m_fileName(fileName)
-    {
-    }
-    WizTempFileGuard()
-    {
-        m_fileName = Utils::WizPathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly();
-    }
-
-    ~WizTempFileGuard()
-    {
-        WizDeleteFile(m_fileName);
-        if (WizPathFileExists(m_fileName))
-        {
-            TOLOG1(_T("Failed to delete temp file: %1"), m_fileName);
-        }
-    }
-    //
-    QString fileName()
-    {
-        return m_fileName;
-    }
-};
 
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
@@ -1119,7 +1089,7 @@ struct CWizKMDocumentPostDataParam
 };
 
 
-bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret, const QString& fileName)
+bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
     ATLASSERT(!ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
@@ -1128,7 +1098,7 @@ bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGU
         return FALSE;
     }
     //
-    if (!data_download(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
+    if (!data_downloadOld(strAttachmentGUID, "attachment", ret.arrayData, ret.strName))
     {
         TOLOG1("Failed to download attachment data: %1", ret.strName);
         return FALSE;
@@ -1280,7 +1250,7 @@ bool WizKMDatabaseServer::data_upload(const QString& strObjectGUID, const QStrin
 }
 
 
-bool WizKMDatabaseServer::data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
+bool WizKMDatabaseServer::data_downloadOld(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName)
 {
     stream.clear();
     //

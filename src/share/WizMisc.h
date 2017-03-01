@@ -262,6 +262,17 @@ public:
     ~WizWaitCursor();
 };
 
+
+class WizTempFileGuard
+{
+    QString m_fileName;
+public:
+    WizTempFileGuard(const QString& fileName);
+    WizTempFileGuard();
+    ~WizTempFileGuard();
+    QString fileName();
+};
+
 class WizIniFileEx
 {
 public:

@@ -1060,20 +1060,41 @@ bool WizKMSync::downloadObjectData()
         m_pEvents->onStatus(strStatus);
         //
         QByteArray stream;
-        if (m_server.data_download(data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream, data.strDisplayName))
+        if (data.eObjectType == wizobjectDocument)
         {
-            if (m_pDatabase->updateObjectData(data.strDisplayName, data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream))
+            WIZDOCUMENTDATAEX ret;
+            ret.strGUID = data.strObjectGUID;
+            ret.strKbGUID = data.strKbGUID;
+            ret.strTitle = data.strDisplayName;
+            QString fileName = m_pDatabase->getDocumentFileName(ret.strGUID);
+            if (!m_server.document_downloadData(data.strObjectGUID, ret, fileName))
             {
-                succeeded++;
+                m_pEvents->onError(WizFormatString1("Cannot download note data from server: %1", data.strDisplayName));
+                return false;
             }
-            else
-            {
-                m_pEvents->onError(WizFormatString1("Cannot save object data to local: %1!", data.strDisplayName));
-            }
+            stream = ret.arrayData;
         }
         else
         {
-            m_pEvents->onError(WizFormatString1("Cannot download object data from server: %1", data.strDisplayName));
+            WIZDOCUMENTATTACHMENTDATAEX ret;
+            ret.strGUID = data.strObjectGUID;
+            ret.strKbGUID = data.strKbGUID;
+            ret.strName = data.strDisplayName;
+            if (!m_server.attachment_downloadData(data.strObjectGUID, ret))
+            {
+                m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
+                return false;
+            }
+            stream = ret.arrayData;
+        }
+        //
+        if (m_pDatabase->updateObjectData(data.strDisplayName, data.strObjectGUID, WIZOBJECTDATA::objectTypeToTypeString(data.eObjectType), stream))
+        {
+            succeeded++;
+        }
+        else
+        {
+            m_pEvents->onError(WizFormatString1("Cannot save object data to local: %1!", data.strDisplayName));
         }
         //
         //

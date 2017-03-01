@@ -2251,6 +2251,29 @@ WizWaitCursor::~WizWaitCursor()
 }
 
 
+WizTempFileGuard::WizTempFileGuard(const QString& fileName)
+    : m_fileName(fileName)
+{
+}
+WizTempFileGuard::WizTempFileGuard()
+{
+    m_fileName = Utils::WizPathResolve::tempPath() + ::WizGenGUIDLowerCaseLetterOnly();
+}
+
+WizTempFileGuard::~WizTempFileGuard()
+{
+    WizDeleteFile(m_fileName);
+    if (WizPathFileExists(m_fileName))
+    {
+        TOLOG1(_T("Failed to delete temp file: %1"), m_fileName);
+    }
+}
+//
+QString WizTempFileGuard::fileName()
+{
+    return m_fileName;
+}
+
 
 void WizShowWebDialogWithToken(const QString& windowTitle, const QString& url, QWidget* parent, const QSize& sz, bool dialogResizable)
 {

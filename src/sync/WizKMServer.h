@@ -181,6 +181,8 @@ private:
     //
     bool document_downloadDataOld(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
     bool document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
+    //
+    bool data_downloadOld(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName);
 public:
     QString getToken() const { return m_userInfo.strToken; }
     QString getKbGuid() const { return m_userInfo.strKbGUID; }
@@ -189,8 +191,8 @@ public:
     bool wiz_getInfo();
     bool wiz_getVersion(WIZOBJECTVERSION& version, bool bAuto = FALSE);
 
-    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName);
-    bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret, const QString& fileName);
+    bool document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName);
+    bool attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret);
     //
     bool document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion);
 
@@ -211,7 +213,6 @@ public:
 
     bool category_getAll(QString& str);
 
-    bool data_download(const QString& strObjectGUID, const QString& strObjectType, QByteArray& stream, const QString& strDisplayName);
     bool data_upload(const QString& strObjectGUID, const QString& strObjectType, const QByteArray& stream, const QString& strObjMD5, const QString& strDisplayName);
     //
     bool getValueVersion(const QString& strKey, __int64& nVersion);

@@ -153,13 +153,34 @@ bool WizObjectDownloader::downloadNormalData()
     WizKMDatabaseServer ksServer(info);
     connect(&ksServer, SIGNAL(downloadProgress(int, int)), SLOT(on_downloadProgress(int,int)));
 
-    // FIXME: should we query object before download data?
-    if (!ksServer.data_download(m_data.strObjectGUID,
-                                WIZOBJECTDATA::objectTypeToTypeString(m_data.eObjectType),
-                                m_data.arrayData, m_data.strDisplayName)) {
-        return false;
+    if (m_data.eObjectType == wizobjectDocument)
+    {
+        WIZDOCUMENTDATAEX ret;
+        ret.strGUID = m_data.strObjectGUID;
+        ret.strKbGUID = m_data.strKbGUID;
+        ret.strTitle = m_data.strDisplayName;
+        QString fileName = ::WizDatabaseManager::instance()->db(ret.strKbGUID).getDocumentFileName(ret.strGUID);
+        if (!ksServer.document_downloadData(m_data.strObjectGUID, ret, fileName))
+        {
+            qDebug() << WizFormatString1("Cannot download note data from server: %1", m_data.strDisplayName);
+            return false;
+        }
+        m_data.arrayData = ret.arrayData;
     }
-
+    else
+    {
+        WIZDOCUMENTATTACHMENTDATAEX ret;
+        ret.strGUID = m_data.strObjectGUID;
+        ret.strKbGUID = m_data.strKbGUID;
+        ret.strName = m_data.strDisplayName;
+        if (!ksServer.attachment_downloadData(m_data.strObjectGUID, ret))
+        {
+            qDebug() << WizFormatString1("Cannot download attachment data from server: %1", m_data.strDisplayName);
+            return false;
+        }
+        m_data.arrayData = ret.arrayData;
+    }
+    //
     if (WizDatabaseManager* dbMgr = WizDatabaseManager::instance())
     {
         return dbMgr->db(m_data.strKbGUID).updateObjectData(m_data.strDisplayName, m_data.strObjectGUID,
