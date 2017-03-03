@@ -2899,22 +2899,37 @@ bool WizURLDownloadToFile(const QString& url, const QString& fileName, bool isIm
     QString newUrl = url;
     QNetworkAccessManager netCtrl;
     QNetworkReply* reply;
+    //
+    bool redirect = false;
+    QByteArray byData;
     do
     {
         QNetworkRequest request(newUrl);
-        QEventLoop loop;
-        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        //
         reply = netCtrl.get(request);
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
         loop.exec();
 
-        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-        newUrl = redirectUrl.toString();
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            return false;
+        }
+        //
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301) {
+            redirect = true;
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            newUrl = redirectUrl.toString();
+        } else {
+            redirect = false;
+            byData = loop.result();
+        }
+        //
     }
-    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+    while (redirect);
 
     WizDeleteFile(fileName);
 
-    QByteArray byData = reply->readAll();
     if (isImage)
     {
         QPixmap pix;
@@ -2964,14 +2979,6 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data)
         //
     }
     while (redirect);
-    //
-    QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
-    int length = contentLength.toInt();
-    if (length > 0)
-    if (length != data.length())
-    {
-        return false;
-    }
     //
     return true;
 }
