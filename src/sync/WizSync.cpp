@@ -1080,7 +1080,7 @@ bool WizKMSync::downloadObjectData()
             ret.strGUID = data.strObjectGUID;
             ret.strKbGUID = data.strKbGUID;
             ret.strName = data.strDisplayName;
-            if (!m_server.attachment_downloadData(data.strObjectGUID, ret))
+            if (!m_server.attachment_downloadData(data.strDocumentGuid, data.strObjectGUID, ret))
             {
                 m_pEvents->onError(WizFormatString1("Cannot download attachment data from server: %1", data.strDisplayName));
                 return false;

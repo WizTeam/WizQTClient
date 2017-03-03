@@ -173,7 +173,7 @@ bool WizObjectDownloader::downloadNormalData()
         ret.strGUID = m_data.strObjectGUID;
         ret.strKbGUID = m_data.strKbGUID;
         ret.strName = m_data.strDisplayName;
-        if (!ksServer.attachment_downloadData(m_data.strObjectGUID, ret))
+        if (!ksServer.attachment_downloadData(m_data.strDocumentGuid, m_data.strObjectGUID, ret))
         {
             qDebug() << WizFormatString1("Cannot download attachment data from server: %1", m_data.strDisplayName);
             return false;

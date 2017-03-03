@@ -1092,7 +1092,7 @@ struct CWizKMDocumentPostDataParam
 };
 
 
-bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
     ATLASSERT(!ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
@@ -1108,6 +1108,16 @@ bool WizKMDatabaseServer::attachment_downloadData(const QString& strAttachmentGU
     }
     //
     return TRUE;
+}
+
+bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+{
+    //
+}
+
+bool WizKMDatabaseServer::attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
+{
+    return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
 }
 
 struct CWizKMAttachmentPostDataParam
@@ -1594,6 +1604,57 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
 }
 
 
+bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
+{
+    QString url_main = "http://localhost:4001/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID;
+    QString url_data = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
+    //
+    Json::Value att;
+    att["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
+    att["docGuid"] = data.strDocumentGUID.toUtf8().data();
+    att["attGuid"] = data.strGUID.toUtf8().data();
+    att["dataMd5"] = data.strDataMD5.toUtf8().data();
+    att["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
+    att["name"] = data.strName.toUtf8().data();
+    att["url"] = data.strURL.toUtf8().data();
+    att["withData"] = withData;
+    //
+    if (withData)
+    {
+        att["dataSize"] = data.arrayData.size();
+    }
+    //
+    Json::Value ret;
+    if (!execStandardJsonRequest(url_main, "POST", att, ret))
+    {
+        qDebug() << "Failed to upload note";
+        return false;
+    }
+    //
+    long long newVersion = -1;
+    //
+    if (withData)
+    {
+        QString key = QString::fromUtf8(ret["key"].asString().c_str());
+        Json::Value res;
+        if (!uploadObject(url_data, key, m_userInfo.strKbGUID, data.strDocumentGUID, "attachment", data.strGUID, data.arrayData, true, res))
+        {
+            qDebug() << "Failed to upload attachment data";
+            return false;
+        }
+        newVersion = res["version"].asInt64();
+    }
+    //
+    if (newVersion == -1)
+    {
+        newVersion = ret["version"].asInt64();
+    }
+    //
+    nServerVersion = newVersion;
+    return true;
+}
+
+
 bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
     //
@@ -1819,7 +1880,7 @@ bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool 
 }
 
 
-bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, __int64& nServerVersion)
+bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
     if (data.arrayData.size() > m_kbInfo.getMaxFileSize())
     {
@@ -1850,6 +1911,11 @@ bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data,
     }
     //
     return TRUE;
+}
+
+bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
+{
+    return attachment_postDataNew(data, withData, nServerVersion);
 }
 
 

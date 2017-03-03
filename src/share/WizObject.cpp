@@ -166,6 +166,7 @@ WIZOBJECTDATA::WIZOBJECTDATA()
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
 {
     strDisplayName = data.strDisplayName;
+    strDocumentGuid = data.strDocumentGuid;
     strObjectGUID = data.strObjectGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tTime;
@@ -176,6 +177,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZOBJECTDATA& data)
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
 {
     strDisplayName = data.strTitle;
+    strDocumentGuid = data.strGUID;
     strObjectGUID = data.strGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;
@@ -185,6 +187,7 @@ WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTDATA& data)
 WIZOBJECTDATA::WIZOBJECTDATA(const WIZDOCUMENTATTACHMENTDATA& data)
 {
     strDisplayName = data.strName;
+    strDocumentGuid = data.strDocumentGUID;
     strObjectGUID = data.strGUID;
     strKbGUID = data.strKbGUID;
     tTime = data.tDataModified;

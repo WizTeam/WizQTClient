@@ -413,7 +413,6 @@ struct WIZDOCUMENTATTACHMENTDATA : public WIZOBJECTBASE
     static QString versionName() { return "attachment_version"; }
     static QString objectName() { return "attachment"; }
 
-    QString strKbGUID;
     QString strGUID;
     QString strDocumentGUID;
     QString strName;
@@ -456,6 +455,7 @@ struct WIZOBJECTDATA : public WIZOBJECTBASE
 
     WizOleDateTime tTime;
     CString strDisplayName;
+    CString strDocumentGuid;
     CString strObjectGUID;
     WizObjectType eObjectType;
 
