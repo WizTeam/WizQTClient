@@ -1010,6 +1010,9 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
             }
         }
         //
+#ifdef QT_DEBUG
+        qDebug() << res.url;
+#endif
         QByteArray data;
         if (!WizURLDownloadToData(res.url, data))
         {
@@ -1379,9 +1382,16 @@ bool WizKMDatabaseServer::document_postDataOld(const WIZDOCUMENTDATAEX& data, bo
 }
 
 //
-
-bool uploadFile(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& fileName, const QByteArray& data, bool isLast, Json::Value& res)
+struct WIZRESOURCEDATA
 {
+    QString name;
+    QByteArray data;
+};
+
+bool uploadResources(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const std::vector<WIZRESOURCEDATA>& files, bool isLast, Json::Value& res)
+{
+    QString objType = "resource";
+    //
     QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
     //
     QHttpPart keyPart;
@@ -1396,23 +1406,29 @@ bool uploadFile(const QString& url, const QString& key, const QString& kbGuid, c
     docGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"docGuid\""));
     docGuidPart.setBody(docGuid.toUtf8());
 
+    QHttpPart objTypePart;
+    objTypePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objType\""));
+    objTypePart.setBody(objType.toUtf8());
+
     QHttpPart isLastPart;
     isLastPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"isLast\""));
     isLastPart.setBody(isLast ? "1" : "0");
 
-    QHttpPart filePart;
-    QString filePartHeader = QString("form-data; name=\"files\"; filename=\"%1\"").arg(fileName);
-    filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
-    filePart.setBody(data);
-
-    //
     multiPart->append(keyPart);
     multiPart->append(kbGuidPart);
     multiPart->append(docGuidPart);
+    multiPart->append(objTypePart);
     multiPart->append(isLastPart);
-    multiPart->append(filePart);
     //
-
+    for (auto file: files)
+    {
+        QHttpPart filePart;
+        QString filePartHeader = QString("form-data; name=\"data\"; filename=\"%1\"").arg(file.name);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
+        filePart.setBody(file.data);
+        multiPart->append(filePart);
+    }
+    //
     QNetworkRequest request(url);
 
     QNetworkAccessManager networkManager;
@@ -1459,11 +1475,130 @@ bool uploadFile(const QString& url, const QString& key, const QString& kbGuid, c
 }
 
 
+bool uploadObject(const QString& url, const QString& key, const QString& kbGuid, const QString& docGuid, const QString& objType, const QString& objId, const QByteArray& data, bool isLast, Json::Value& res)
+{
+    int partSize = 1024 * 1024; //1M
+    int partCount = (data.length() + partSize - 1) / partSize;
+    for (int i = 0; i < partCount; i++)
+    {
+        QHttpMultiPart *multiPart = new QHttpMultiPart(QHttpMultiPart::FormDataType);
+        //
+        QHttpPart keyPart;
+        keyPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"key\""));
+        keyPart.setBody(key.toUtf8());
+
+        QHttpPart kbGuidPart;
+        kbGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"kbGuid\""));
+        kbGuidPart.setBody(kbGuid.toUtf8());
+
+        QHttpPart docGuidPart;
+        docGuidPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"docGuid\""));
+        docGuidPart.setBody(docGuid.toUtf8());
+
+        QHttpPart objIdPart;
+        objIdPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objId\""));
+        objIdPart.setBody(objId.toUtf8());
+
+        QHttpPart objTypePart;
+        objTypePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"objType\""));
+        objTypePart.setBody(objType.toUtf8());
+
+        QHttpPart indexPart;
+        indexPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"partIndex\""));
+        indexPart.setBody(WizIntToStr(i).toUtf8());
+
+        QHttpPart countPart;
+        countPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"partCount\""));
+        countPart.setBody(WizIntToStr(partCount).toUtf8());
+
+        QHttpPart isLastPart;
+        isLastPart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant("form-data; name=\"isLast\""));
+        isLastPart.setBody(isLast ? "1" : "0");
+
+        QHttpPart filePart;
+        QString filePartHeader = QString("form-data; name=\"data\"; filename=\"%1\"").arg(objId);
+        filePart.setHeader(QNetworkRequest::ContentDispositionHeader, QVariant(filePartHeader));
+        //
+        int extra = 0;
+        int partEnd = i * partSize + partSize;
+        if (partEnd > data.length()) {
+            extra = partEnd = data.length();
+        }
+        QByteArray partData = data.mid(i * partSize, partSize - extra);
+        filePart.setBody(partData);
+        //
+        multiPart->append(keyPart);
+        multiPart->append(kbGuidPart);
+        multiPart->append(docGuidPart);
+        multiPart->append(objIdPart);
+        multiPart->append(objTypePart);
+        multiPart->append(indexPart);
+        multiPart->append(countPart);
+        multiPart->append(isLastPart);
+        multiPart->append(filePart);
+        //
+        QNetworkRequest request(url);
+
+        QNetworkAccessManager networkManager;
+        QNetworkReply* reply = networkManager.post(request, multiPart);
+        multiPart->setParent(reply); // delete the multiPart with the reply
+        //
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
+        loop.exec();
+        //
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
+            return false;
+        }
+        //
+        QByteArray resData = loop.result();
+        //
+        try {
+            std::string resultString = resData.toStdString();
+            //
+            Json::Reader reader;
+            Json::Value partRes;
+            if (!reader.parse(resultString, partRes))
+            {
+                qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
+                return false;
+            }
+            //
+            Json::Value returnCode = partRes["return_code"];
+            if (returnCode.asInt() != 200)
+            {
+                Json::Value returnMessage = partRes["return_message"];
+                qDebug() << "Can't upload note data, ret code=" <<returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
+                return false;
+            }
+            //
+            if (i == partCount - 1)
+            {
+                res = partRes;
+                return true;
+            }
+            //
+            continue;
+        }
+        catch (std::exception& err)
+        {
+            qDebug() << "josn error: " << err.what();
+            return false;
+        }
+    }
+    //
+    qDebug() << "Should not come here";
+    return false;
+}
+
+
 bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
     //
     QString url_main = "http://localhost:4001/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
-    QString url_res = "http://localhost:4001/ks/note/upload_res/" + m_userInfo.strKbGUID + "/" + data.strGUID;
+    QString url_res = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
     //
     Json::Value doc;
     doc["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
@@ -1486,6 +1621,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
     doc["author"] = data.strAuthor.toUtf8().data();
     doc["keywords"] = data.strKeywords.toUtf8().data();
     //
+    std::vector<WIZZIPENTRYDATA> allLocalResources;
     WizUnzipFile zip;
     if (bWithDocumentData)
     {
@@ -1496,8 +1632,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
         }
         //
         QString html;
-        std::vector<WIZZIPENTRYDATA> resources;
-        if (!zip.readMainHtmlAndResources(html, resources))
+        if (!zip.readMainHtmlAndResources(html, allLocalResources))
         {
             qDebug() << "Can't load html and resources";
             return false;
@@ -1506,7 +1641,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
         doc["html"] = html.toUtf8().data();
         //
         Json::Value res;
-        for (auto data : resources)
+        for (auto data : allLocalResources)
         {
             Json::Value elemObj;
             elemObj["name"] = data.name.toUtf8().data();
@@ -1536,23 +1671,126 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
         //
         if (resCount > 0)
         {
+            //
+            std::map<QString, WIZZIPENTRYDATA> localResources;
+            for (auto entry : allLocalResources)
+            {
+                localResources[entry.name] = entry;
+            }
+            //
+            std::vector<WIZZIPENTRYDATA> resLess300K;
+            std::vector<WIZZIPENTRYDATA> resLess1M;
+            std::vector<WIZZIPENTRYDATA> resLarge;
+            //
+            //
             for (int i = 0; i < resCount; i++)
             {
                 QString resName = QString::fromUtf8(resourcesWaitForUpload[i].asString().c_str());
+                WIZZIPENTRYDATA entry = localResources[resName];
+                if (entry.size < 300 * 1024)
+                {
+                    resLess300K.push_back(entry);
+                }
+                else if (entry.size < 1024 * 1024)
+                {
+                    resLess1M.push_back(entry);
+                }
+                else
+                {
+                    resLarge.push_back(entry);
+                }
+            }
+            //
+            bool has1M = !resLess1M.empty();
+            bool hasLarge = !resLarge.empty();
+            //
+            while (!resLess300K.empty())
+            {
+                int size = 0;
+                std::vector<WIZRESOURCEDATA> uploads;
+                while (!resLess300K.empty())
+                {
+                    int count = resLess300K.size();
+                    WIZZIPENTRYDATA last = resLess300K[count - 1];
+                    if (size + last.size > 1024 * 1024)
+                        break;
+                    //
+                    resLess300K.pop_back();
+                    size += last.size;
+                    //
+                    QByteArray resData;
+                    if (!zip.extractFile("index_files/" + last.name, resData))
+                    {
+                        qDebug() << "Can't extract resource from zip file";
+                        return false;
+                    }
+                    WIZRESOURCEDATA data;
+                    data.name = last.name;
+                    data.data = resData;
+                    //
+                    uploads.push_back(data);
+                }
+                //
+                bool isLast = resLess300K.empty() && !has1M && !hasLarge;
+                //
+                Json::Value res;
+                if (!uploadResources(url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
+                {
+                    qDebug() << "Failed to upload note res";
+                    return false;
+                }
+                //
+                if (isLast)
+                {
+                    newVersion = res["version"].asInt64();
+                }
+            }
+            //
+            while (!resLess1M.empty())
+            {
+                int count = resLess1M.size();
+                WIZZIPENTRYDATA last = resLess1M[count - 1];
+                resLess1M.pop_back();
                 //
                 QByteArray resData;
-                if (!zip.extractFile("index_files/" + resName, resData))
+                if (!zip.extractFile("index_files/" + last.name, resData))
                 {
                     qDebug() << "Can't extract resource from zip file";
                     return false;
                 }
                 //
-                bool isLast = i == resCount - 1;
-                //
-                QString name = Utils::WizMisc::extractFileName(resName);
+                bool isLast = resLess1M.empty() && !hasLarge;
                 //
                 Json::Value res;
-                if (!uploadFile(url_res, key, m_userInfo.strKbGUID, data.strGUID, name, resData, isLast, res))
+                if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
+                {
+                    qDebug() << "Failed to upload note res";
+                    return false;
+                }
+                //
+                if (isLast)
+                {
+                    newVersion = res["version"].asInt64();
+                }
+            }
+            //
+            while (!resLarge.empty())
+            {
+                int count = resLarge.size();
+                WIZZIPENTRYDATA last = resLarge[count - 1];
+                resLarge.pop_back();
+                //
+                QByteArray resData;
+                if (!zip.extractFile("index_files/" + last.name, resData))
+                {
+                    qDebug() << "Can't extract resource from zip file";
+                    return false;
+                }
+                //
+                bool isLast = resLarge.empty();
+                //
+                Json::Value res;
+                if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
                 {
                     qDebug() << "Failed to upload note res";
                     return false;

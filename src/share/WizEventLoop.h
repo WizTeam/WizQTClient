@@ -19,10 +19,11 @@ public:
     void setTimeoutWaitSeconds(int seconds);
 
 public:
-    QNetworkReply::NetworkError error() const { return m_error; }
-    QString errorString() const { return m_errorString; }
+    QNetworkReply::NetworkError error() const;
+    QString errorString() const;
     const QByteArray& result() const { return m_result; }
     bool timeOut() const { return m_timeOut; }
+    bool isFinished() const { return m_finished; }
     QNetworkReply* networkReply() const;
 
     int exec(ProcessEventsFlags flags = AllEvents);
@@ -50,6 +51,7 @@ protected:
     qint64 m_uploadBytes;
     qint64 m_lastUploadBytes;
     QTimer m_timer;
+    bool m_finished;
 };
 
 

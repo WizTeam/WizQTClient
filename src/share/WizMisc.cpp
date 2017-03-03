@@ -29,6 +29,7 @@
 #include "sync/WizApiEntry.h"
 #include "share/WizAnalyzer.h"
 #include "share/WizObjectOperator.h"
+#include "share/WizEventLoop.h"
 #include "WizDatabaseManager.h"
 #include "WizObjectDataDownloader.h"
 #include "WizProgressDialog.h"
@@ -2935,20 +2936,43 @@ bool WizURLDownloadToData(const QString& url, QByteArray& data)
     QString newUrl = url;
     QNetworkAccessManager netCtrl;
     QNetworkReply* reply;
+    //
+    bool redirect = false;
     do
     {
-        QNetworkRequest request(newUrl);
-        QEventLoop loop;
-        loop.connect(&netCtrl, SIGNAL(finished(QNetworkReply*)), SLOT(quit()));
+        QNetworkRequest request(newUrl);       
+        //
         reply = netCtrl.get(request);
+        WizAutoTimeOutEventLoop loop(reply);
+        loop.setTimeoutWaitSeconds(60 * 60 * 1000);
         loop.exec();
 
-        QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
-        newUrl = redirectUrl.toString();
-    }
-    while (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301);
+        if (loop.error() != QNetworkReply::NoError)
+        {
+            return false;
+        }
 
-    data = reply->readAll();
+        //
+        if (reply->attribute(QNetworkRequest::HttpStatusCodeAttribute) == 301) {
+            redirect = true;
+            QUrl redirectUrl = reply->attribute(QNetworkRequest::RedirectionTargetAttribute).toUrl();
+            newUrl = redirectUrl.toString();
+        } else {
+            redirect = false;
+            data = loop.result();
+        }
+        //
+    }
+    while (redirect);
+    //
+    QVariant contentLength = reply->header(QNetworkRequest::ContentLengthHeader);
+    int length = contentLength.toInt();
+    if (length > 0)
+    if (length != data.length())
+    {
+        return false;
+    }
+    //
     return true;
 }
 
