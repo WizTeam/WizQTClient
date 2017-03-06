@@ -1532,7 +1532,7 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
         int extra = 0;
         int partEnd = i * partSize + partSize;
         if (partEnd > data.length()) {
-            extra = partEnd = data.length();
+            extra = partEnd - data.length();
         }
         QByteArray partData = data.mid(i * partSize, partSize - extra);
         filePart.setBody(partData);
@@ -1655,11 +1655,32 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
 }
 
 
-bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
+bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp, bool withData, __int64& nServerVersion)
 {
+    WIZDOCUMENTDATAEX data = dataTemp;
     //
     QString url_main = "http://localhost:4001/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
     QString url_res = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
+    //
+    if (withData && data.arrayData.length() > 2)
+    {
+        if (data.arrayData[0] == 'P' && data.arrayData[1] == 'K')
+        {
+            if (data.nProtected != 0)
+            {
+                TOLOG("note is not encrypted, but protected is 1");
+                data.nProtected = 0;
+            }
+        }
+        else
+        {
+            if (data.nProtected != 1)
+            {
+                TOLOG("note is encrypted, but protected is 0");
+                data.nProtected = 1;
+            }
+        }
+    }
     //
     Json::Value doc;
     doc["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
@@ -1681,10 +1702,11 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
     doc["seo"] = data.strSEO.toUtf8().data();
     doc["author"] = data.strAuthor.toUtf8().data();
     doc["keywords"] = data.strKeywords.toUtf8().data();
+    doc["withData"] = withData;
     //
     std::vector<WIZZIPENTRYDATA> allLocalResources;
     WizUnzipFile zip;
-    if (bWithDocumentData)
+    if (withData && !data.nProtected)
     {
         if (!zip.open(data.arrayData))
         {
@@ -1724,60 +1746,99 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
     //
     long long newVersion = -1;
     //
-    if (bWithDocumentData)
+    if (withData)
     {
         QString key = QString::fromUtf8(ret["key"].asString().c_str());
-        Json::Value resourcesWaitForUpload = ret["resources"];
-        size_t resCount = resourcesWaitForUpload.size();
-        //
-        if (resCount > 0)
+        if (data.nProtected)
         {
-            //
-            std::map<QString, WIZZIPENTRYDATA> localResources;
-            for (auto entry : allLocalResources)
+            Json::Value res;
+            if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "document", data.strGUID, data.arrayData, true, res))
             {
-                localResources[entry.name] = entry;
+                qDebug() << "Failed to upload note res";
+                return false;
             }
+            newVersion = res["version"].asInt64();
+        }
+        else
+        {
+            Json::Value resourcesWaitForUpload = ret["resources"];
+            size_t resCount = resourcesWaitForUpload.size();
             //
-            std::vector<WIZZIPENTRYDATA> resLess300K;
-            std::vector<WIZZIPENTRYDATA> resLess1M;
-            std::vector<WIZZIPENTRYDATA> resLarge;
-            //
-            //
-            for (int i = 0; i < resCount; i++)
+            if (resCount > 0)
             {
-                QString resName = QString::fromUtf8(resourcesWaitForUpload[i].asString().c_str());
-                WIZZIPENTRYDATA entry = localResources[resName];
-                if (entry.size < 300 * 1024)
+                //
+                std::map<QString, WIZZIPENTRYDATA> localResources;
+                for (auto entry : allLocalResources)
                 {
-                    resLess300K.push_back(entry);
+                    localResources[entry.name] = entry;
                 }
-                else if (entry.size < 1024 * 1024)
+                //
+                std::vector<WIZZIPENTRYDATA> resLess300K;
+                std::vector<WIZZIPENTRYDATA> resLarge;
+                //
+                for (int i = 0; i < resCount; i++)
                 {
-                    resLess1M.push_back(entry);
+                    QString resName = QString::fromUtf8(resourcesWaitForUpload[i].asString().c_str());
+                    WIZZIPENTRYDATA entry = localResources[resName];
+                    if (entry.size < 300 * 1024)
+                    {
+                        resLess300K.push_back(entry);
+                    }
+                    else
+                    {
+                        resLarge.push_back(entry);
+                    }
                 }
-                else
-                {
-                    resLarge.push_back(entry);
-                }
-            }
-            //
-            bool has1M = !resLess1M.empty();
-            bool hasLarge = !resLarge.empty();
-            //
-            while (!resLess300K.empty())
-            {
-                int size = 0;
-                std::vector<WIZRESOURCEDATA> uploads;
+                //
+                bool hasLarge = !resLarge.empty();
+                //
                 while (!resLess300K.empty())
                 {
-                    int count = resLess300K.size();
-                    WIZZIPENTRYDATA last = resLess300K[count - 1];
-                    if (size + last.size > 1024 * 1024)
-                        break;
+                    int size = 0;
+                    std::vector<WIZRESOURCEDATA> uploads;
+                    while (!resLess300K.empty())
+                    {
+                        int count = resLess300K.size();
+                        WIZZIPENTRYDATA last = resLess300K[count - 1];
+                        if (size + last.size > 1024 * 1024)
+                            break;
+                        //
+                        resLess300K.pop_back();
+                        size += last.size;
+                        //
+                        QByteArray resData;
+                        if (!zip.extractFile("index_files/" + last.name, resData))
+                        {
+                            qDebug() << "Can't extract resource from zip file";
+                            return false;
+                        }
+                        WIZRESOURCEDATA data;
+                        data.name = last.name;
+                        data.data = resData;
+                        //
+                        uploads.push_back(data);
+                    }
                     //
-                    resLess300K.pop_back();
-                    size += last.size;
+                    bool isLast = resLess300K.empty() && !hasLarge;
+                    //
+                    Json::Value res;
+                    if (!uploadResources(url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
+                    {
+                        qDebug() << "Failed to upload note res";
+                        return false;
+                    }
+                    //
+                    if (isLast)
+                    {
+                        newVersion = res["version"].asInt64();
+                    }
+                }
+                //
+                while (!resLarge.empty())
+                {
+                    int count = resLarge.size();
+                    WIZZIPENTRYDATA last = resLarge[count - 1];
+                    resLarge.pop_back();
                     //
                     QByteArray resData;
                     if (!zip.extractFile("index_files/" + last.name, resData))
@@ -1785,81 +1846,20 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& data, bo
                         qDebug() << "Can't extract resource from zip file";
                         return false;
                     }
-                    WIZRESOURCEDATA data;
-                    data.name = last.name;
-                    data.data = resData;
                     //
-                    uploads.push_back(data);
-                }
-                //
-                bool isLast = resLess300K.empty() && !has1M && !hasLarge;
-                //
-                Json::Value res;
-                if (!uploadResources(url_res, key, m_userInfo.strKbGUID, data.strGUID, uploads, isLast, res))
-                {
-                    qDebug() << "Failed to upload note res";
-                    return false;
-                }
-                //
-                if (isLast)
-                {
-                    newVersion = res["version"].asInt64();
-                }
-            }
-            //
-            while (!resLess1M.empty())
-            {
-                int count = resLess1M.size();
-                WIZZIPENTRYDATA last = resLess1M[count - 1];
-                resLess1M.pop_back();
-                //
-                QByteArray resData;
-                if (!zip.extractFile("index_files/" + last.name, resData))
-                {
-                    qDebug() << "Can't extract resource from zip file";
-                    return false;
-                }
-                //
-                bool isLast = resLess1M.empty() && !hasLarge;
-                //
-                Json::Value res;
-                if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
-                {
-                    qDebug() << "Failed to upload note res";
-                    return false;
-                }
-                //
-                if (isLast)
-                {
-                    newVersion = res["version"].asInt64();
-                }
-            }
-            //
-            while (!resLarge.empty())
-            {
-                int count = resLarge.size();
-                WIZZIPENTRYDATA last = resLarge[count - 1];
-                resLarge.pop_back();
-                //
-                QByteArray resData;
-                if (!zip.extractFile("index_files/" + last.name, resData))
-                {
-                    qDebug() << "Can't extract resource from zip file";
-                    return false;
-                }
-                //
-                bool isLast = resLarge.empty();
-                //
-                Json::Value res;
-                if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
-                {
-                    qDebug() << "Failed to upload note res";
-                    return false;
-                }
-                //
-                if (isLast)
-                {
-                    newVersion = res["version"].asInt64();
+                    bool isLast = resLarge.empty();
+                    //
+                    Json::Value res;
+                    if (!uploadObject(url_res, key, m_userInfo.strKbGUID, data.strGUID, "resource", last.name, resData, isLast, res))
+                    {
+                        qDebug() << "Failed to upload note res";
+                        return false;
+                    }
+                    //
+                    if (isLast)
+                    {
+                        newVersion = res["version"].asInt64();
+                    }
                 }
             }
         }
