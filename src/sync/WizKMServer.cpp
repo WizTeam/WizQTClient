@@ -1125,7 +1125,8 @@ bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    //
+    QString url = "http://localhost:4001/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
+    return WizURLDownloadToData(url, ret.arrayData);
 }
 
 bool WizKMDatabaseServer::attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
@@ -1620,7 +1621,7 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
 bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
     QString url_main = "http://localhost:4001/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID;
-    QString url_data = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
+    QString url_data = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID;
     //
     Json::Value att;
     att["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
