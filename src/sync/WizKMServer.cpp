@@ -933,6 +933,19 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
         return false;
     }
     //
+    Json::Value urlValue = doc["url"];
+    if (!urlValue.isNull())
+    {
+        //encrypted note
+        if (!::WizURLDownloadToData(urlValue.asString().c_str(), ret.arrayData))
+        {
+            TOLOG1("Failed to download document data: %1", ret.strTitle);
+            return false;
+        }
+        //
+        return true;
+    }
+    //
     QString html = QString::fromUtf8(doc["html"].asString().c_str());
     if (html.isEmpty())
         return false;
