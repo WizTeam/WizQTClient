@@ -58,6 +58,7 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
+    QString strNewKsServer;
 
     //NOTE: DEPRECATED
     int nMaxFileSize;
@@ -154,7 +155,6 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
 
     // field: sign up date
     WizOleDateTime tCreated;
-
 
 
     QString strBackupDatabaseServer;

@@ -815,6 +815,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
 {
+    m_userInfo.strNewKsServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -924,7 +925,7 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
-    QString url = "http://localhost:4001/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?download_data=1";
+    QString url = m_userInfo.strNewKsServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?download_data=1&token=" + m_userInfo.strToken;
     //
     Json::Value doc;
     if (!execStandardJsonRequest(url, doc))
@@ -1125,7 +1126,7 @@ bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    QString url = "http://localhost:4001/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
+    QString url = m_userInfo.strNewKsServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
     return WizURLDownloadToData(url, ret.arrayData);
 }
 
@@ -1620,8 +1621,8 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
 
 bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    QString url_main = "http://localhost:4001/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID;
-    QString url_data = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID;
+    QString url_main = m_userInfo.strNewKsServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_data = m_userInfo.strNewKsServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken;
     //
     Json::Value att;
     att["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
@@ -1673,8 +1674,8 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 {
     WIZDOCUMENTDATAEX data = dataTemp;
     //
-    QString url_main = "http://localhost:4001/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
-    QString url_res = "http://localhost:4001/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID;
+    QString url_main = m_userInfo.strNewKsServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_res = m_userInfo.strNewKsServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
     //
     if (withData && data.arrayData.length() > 2)
     {

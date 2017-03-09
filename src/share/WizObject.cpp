@@ -78,6 +78,8 @@ bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
     data.getInt("user_points", nUserPoints);
     data.getString("user_type", strUserType);
     data.getTime("vip_date", tVipExpried);
+    //
+    data.getStr("new_kapi_url", strNewKsServer);
 
     return !strToken.isEmpty()
             && !strKbGUID.isEmpty()
