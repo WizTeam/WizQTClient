@@ -9,6 +9,7 @@ WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
     , nUserPoints(0)
     , bEnableGroup(false)
+    , syncType(0)
 {
 }
 
@@ -17,6 +18,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strToken = info.strToken;
     strKbGUID = info.strKbGUID;
     strDatabaseServer = info.strDatabaseServer;
+    strNewKsServer = info.strNewKsServer;
     nMaxFileSize = info.nMaxFileSize;
     strChatUrl = info.strChatUrl;
     strDownloadUrl = info.strDownloadUrl;
@@ -39,6 +41,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strUserType = info.strUserType;
     tVipExpried = info.tVipExpried;
     tCreated = info.tCreated;
+    syncType = info.syncType;
 }
 
 
@@ -80,6 +83,8 @@ bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
     data.getTime("vip_date", tVipExpried);
     //
     data.getStr("new_kapi_url", strNewKsServer);
+    //
+    data.getInt("sync_type", syncType);
 
     return !strToken.isEmpty()
             && !strKbGUID.isEmpty()

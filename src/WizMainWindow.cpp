@@ -2161,7 +2161,7 @@ void WizMainWindow::on_actionAutoSync_triggered()
 void WizMainWindow::on_actionSync_triggered()
 {
     WizGetAnalyzer().logAction("ToolBarSyncAll");
-
+    //
     if (m_animateSync->isPlaying())
     {
         on_actionConsole_triggered();

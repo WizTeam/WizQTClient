@@ -170,6 +170,9 @@ public:
 
     const WIZKBINFO& kbInfo();
     void setKBInfo(const WIZKBINFO& info);
+    //
+    bool isGroup() const;
+    bool isUseNewSync() const;
 
 protected:
     WIZUSERINFOBASE m_userInfo;

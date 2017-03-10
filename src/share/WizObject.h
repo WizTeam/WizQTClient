@@ -156,6 +156,8 @@ struct WIZUSERINFO : public WIZUSERINFOBASE
     // field: sign up date
     WizOleDateTime tCreated;
 
+    //
+    int syncType;
 
     QString strBackupDatabaseServer;
 };

@@ -56,9 +56,7 @@ QString WizTokenPrivate::token()
     }
     else
     {
-        WIZUSERINFO info;
-        info.strToken = m_info.strToken;
-        info.strKbGUID = m_info.strKbGUID;
+        WIZUSERINFO info = m_info;
         WizKMAccountsServer asServer(WizCommonApiEntry::syncUrl());
         asServer.setUserInfo(info);
 

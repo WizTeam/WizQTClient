@@ -218,11 +218,6 @@ WizLoginDialog::~WizLoginDialog()
     {
         m_udpClient->deleteLater();
     }
-    if (m_oemDownloader)
-    {
-        QObject::disconnect(m_oemDownloader, 0, 0, 0);
-        m_oemDownloader->deleteLater();
-    }
 }
 
 

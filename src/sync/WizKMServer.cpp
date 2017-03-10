@@ -815,7 +815,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
 {
-    m_userInfo.strNewKsServer = "http://localhost:4001";
+    //m_userInfo.strNewKsServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -827,6 +827,22 @@ void WizKMDatabaseServer::onXmlRpcError()
 const WIZKBINFO& WizKMDatabaseServer::kbInfo()
 {
     return m_kbInfo;
+}
+
+bool WizKMDatabaseServer::isGroup() const
+{
+    Q_ASSERT(!WizToken::info().strKbGUID.isEmpty());
+    //
+    return WizToken::info().strKbGUID != m_userInfo.strKbGUID;
+}
+
+bool WizKMDatabaseServer::isUseNewSync() const
+{
+    if (isGroup())
+        return false;
+    //
+    return true;
+    return WizToken::info().syncType == 1;
 }
 
 void WizKMDatabaseServer::setKBInfo(const WIZKBINFO& info)
@@ -1132,7 +1148,11 @@ bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadData(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
+    if (isUseNewSync()) {
+        return attachment_downloadDataNew(strDocumentGUID, strAttachmentGUID, ret);
+    } else {
+        return attachment_downloadDataOld(strDocumentGUID, strAttachmentGUID, ret);
+    }
 }
 
 struct CWizKMAttachmentPostDataParam
@@ -1891,7 +1911,11 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 
 bool WizKMDatabaseServer::document_postData(const WIZDOCUMENTDATAEX& data, bool bWithDocumentData, __int64& nServerVersion)
 {
-    return document_postDataNew(data, bWithDocumentData, nServerVersion);
+    if (isUseNewSync()) {
+        return document_postDataNew(data, bWithDocumentData, nServerVersion);
+    } else {
+        return document_postDataOld(data, bWithDocumentData, nServerVersion);
+    }
 }
 
 
