@@ -176,6 +176,9 @@ public:
     WizDocumentViewMode noteViewMode() const;
     void setNoteViewMode(WizDocumentViewMode strMode) { set("NoteViewMode", QString::number(strMode)); }
 
+    double noteZoomFactor() const;
+    void setNoteZoomFactor(double dFactor);
+
     QString defaultFontFamily();
     void setDefaultFontFamily(const QString& strFont);
 

@@ -748,3 +748,23 @@ QStringList WizUserSettings::getRecentSearches(bool reverseOrder)
 
     return recentSearches;
 }
+
+double WizUserSettings::noteZoomFactor() const
+{
+    QString strNoteZoomFactor = get("NoteZoomFactor");
+    if (strNoteZoomFactor.isEmpty()) {
+        return 1.0;
+    }
+
+    return strNoteZoomFactor.toDouble();
+}
+
+void WizUserSettings::setNoteZoomFactor(double dFactor)
+{
+    if (dFactor <= 0.1) {
+        dFactor = 1.0;
+    } else if (dFactor > 5.0) {
+        dFactor = 5.0;
+    }
+    set("NoteZoomFactor", QString::number(dFactor));
+}

@@ -36,7 +36,7 @@ public Q_SLOTS:
     void on_radioAuto_clicked(bool checked);
     void on_radioAlwaysReading_clicked(bool checked);
     void on_radioAlwaysEditing_clicked(bool checked);
-
+    void on_doubleSpinBoxNoteZoomFactor_valueChanged(double factor);
     void on_comboSyncInterval_activated(int index);
     void on_comboSyncMethod_activated(int index);
     void on_comboSyncGroupMethod_activated(int index);
