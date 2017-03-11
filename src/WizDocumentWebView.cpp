@@ -1285,7 +1285,7 @@ void WizDocumentWebView::loadDocumentInWeb(WizEditorMode editorMode)
     replaceDefaultCss(strHtml);
     //
     ::WizSaveUnicodeTextToUtf8File(strFileName, strHtml, true);
-    //
+    setZoomFactor(m_app.userSettings().noteZoomFactor());
     m_strNoteHtmlFileName = strFileName;
     load(QUrl::fromLocalFile(strFileName));
 

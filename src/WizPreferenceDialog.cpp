@@ -76,7 +76,7 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
             ui->radioAuto->setChecked(true);
             break;
     }
-
+    ui->doubleSpinBoxNoteZoomFactor->setValue(m_app.userSettings().noteZoomFactor()*100);
     // syncing tab
     int nInterval = userSettings().syncInterval();
     switch (nInterval) {
@@ -498,4 +498,9 @@ void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 //        setFixedHeight(290);
 //        resize(width(), 290);
 //    }
+}
+
+void WizPreferenceWindow::on_doubleSpinBoxNoteZoomFactor_valueChanged(double factor)
+{
+    m_app.userSettings().setNoteZoomFactor(factor/100);
 }

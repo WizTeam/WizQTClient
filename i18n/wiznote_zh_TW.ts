@@ -4873,6 +4873,16 @@ Asian characters: %5</source>
         <translation type="unfinished">總是在閱讀檢視方式開啟筆記</translation>
     </message>
     <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="398"/>
+        <source>Zoom</source>
+        <translation>縮放</translation>
+    </message>
+    <message>
+        <location filename="../src/ui/WizPreferenceDialog.ui" line="404"/>
+        <source>Zoom Factor:</source>
+        <translation>縮放比例：</translation>
+    </message>
+    <message>
         <location filename="../src/ui/WizPreferenceDialog.ui" line="429"/>
         <source>Search</source>
         <translation type="unfinished">搜尋</translation>
