@@ -550,7 +550,8 @@ if(UNIX)
 		endif(APPSTORE_BUILD)
 	else(APPLE) #linux
 		target_link_libraries(${PROJECT_NAME}
-			X11
+                        -lpthread
+                        X11
 			quazip
 			cryptlib
 			Qt5::WebEngine
