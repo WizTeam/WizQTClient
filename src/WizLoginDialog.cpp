@@ -1821,7 +1821,7 @@ void WizOEMDownloader::checkServerLicence(const QString& licence)
     //
     Json::Value d;
     Json::Reader reader;
-    if (reader.parse(settings.toUtf8().constData(), d))
+    if (!reader.parse(settings.toUtf8().constData(), d))
         return;
 
     if (d.isMember("licence"))
