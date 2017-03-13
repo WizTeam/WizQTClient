@@ -17,7 +17,7 @@
 #include "share/WizGlobal.h"
 
 #include "html/WizHtmlCollector.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 #include "utils/WizPathResolve.h"
 #include "utils/WizMisc.h"
@@ -1873,50 +1873,47 @@ bool WizDatabase::loadBizUsersFromJson(const QString& strBizGUID,
                                         const QString& strJsonRaw,
                                         CWizBizUserDataArray& arrayUser)
 {
-    rapidjson::Document d;
-    d.Parse<0>(strJsonRaw.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strJsonRaw.toUtf8().constData(), d))
+        return false;
 
-    if (d.HasMember("error_code")) {
-        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
+    if (d.isMember("error_code")) {
+        qDebug() << QString::fromStdString(d["error"].asString());
         return false;
     }
 
-    if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.GetInt();
+    if (d.isMember("return_code")) {
+        int nCode = d["return_code"].asInt();
         if (nCode != 200) {
-            qDebug() << QString::fromUtf8(d.FindMember("return_message")->value.GetString()) << ", code = " << nCode;
+            qDebug() << QString::fromStdString(d["return_message"].asString()) << ", code = " << nCode;
             return false;
         }
     }
 
-    if (!d.HasMember("result")) {
+    if (!d.isMember("result")) {
         qDebug() << "Error occured when try to parse json of biz users";
         qDebug() << strJsonRaw;
         return false;
     }
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QTextDecoder* encoder = codec->makeDecoder();
-
-    const rapidjson::Value& users = d["result"];
-    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
-        const rapidjson::Value& u = users[i];
-        if (!u.IsObject()) {
+    const Json::Value& users = d["result"];
+    for (Json::ArrayIndex i = 0; i < users.size(); i++) {
+        const Json::Value& u = users[i];
+        if (!u.isObject()) {
             qDebug() << "Error occured when parse json of biz users";
             return false;
         }
 
         WIZBIZUSER user;
-        user.alias = encoder->toUnicode(u["alias"].GetString(), u["alias"].GetStringLength());
-        user.pinyin = encoder->toUnicode(u["pinyin"].GetString(), u["pinyin"].GetStringLength());
-        user.userGUID = encoder->toUnicode(u["user_guid"].GetString(), u["user_guid"].GetStringLength());
-        user.userId = encoder->toUnicode(u["user_id"].GetString(), u["user_id"].GetStringLength());
+        user.alias = QString::fromStdString(u["alias"].asString());
+        user.pinyin = QString::fromStdString(u["pinyin"].asString());
+        user.userGUID = QString::fromStdString(u["user_guid"].asString());
+        user.userId = QString::fromStdString(u["user_id"].asString());
         user.bizGUID = strBizGUID;
 
         arrayUser.push_back(user);
     }
-
-    delete encoder;
 
     return true;
 }

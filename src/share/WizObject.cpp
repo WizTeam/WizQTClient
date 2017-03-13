@@ -3,7 +3,7 @@
 #include "WizXmlRpc.h"
 #include "WizMisc.h"
 #include "utils/WizLogger.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 WIZUSERINFO::WIZUSERINFO()
     : nUserLevel(0)
@@ -797,20 +797,15 @@ bool WIZMESSAGEDATA::isAd()
     if (nMessageType != WIZ_USER_MSG_TYPE_SYSTEM || note.isEmpty())
         return false;
 
-    rapidjson::Document d;
-    d.Parse<0>(note.toUtf8().constData());
-
-    if (d.HasParseError())
-    {
-        qWarning() << "parse message note data error : " << d.GetParseError();
-    }
-
-    if (!d.HasMember("type"))
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(note.toUtf8().constData(), d))
         return false;
 
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QTextDecoder* encoder = codec->makeDecoder();
-    QString type = encoder->toUnicode(d["type"].GetString(), d["type"].GetStringLength());
+    if (!d.isMember("type"))
+        return false;
+
+    QString type = QString::fromStdString(d["type"].asString());
 
     return type == "ad";
 }

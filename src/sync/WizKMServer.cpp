@@ -1,9 +1,7 @@
 ﻿#include "WizKMServer.h"
 #include "WizApiEntry.h"
 #include "WizToken.h"
-#include "rapidjson/document.h"
-#include "rapidjson/writer.h"
-#include "rapidjson/stringbuffer.h"
+#include "share/jsoncpp/json/json.h"
 #include "share/WizZip.h"
 
 #include "share/jsoncpp/json/json.h"
@@ -278,33 +276,19 @@ bool WizKMAccountsServer::getAdminBizCert(const QString& strToken, const QString
     return true;
 }
 
-inline void AddJsonMemeber(rapidjson::Document& doc, rapidjson::Document::AllocatorType& allocator, const QString& name, const QString& str)
-{
-    rapidjson::Value n(name.toUtf8().constData(), allocator);
-    rapidjson::Value v(str.toUtf8().constData(), allocator);
-
-    doc.AddMember(n, v, allocator);
-}
 
 bool WizKMAccountsServer::setUserBizCert(const QString& strBizGuid, const QString& strN, const QString& stre, const QString& strd, const QString& strHint)
 {
-    rapidjson::Document doc;
-    doc.SetObject();
-    rapidjson::Document::AllocatorType& allocator = doc.GetAllocator();
+    Json::Value doc;
     //
-    AddJsonMemeber(doc, allocator, "n", strN);
-    AddJsonMemeber(doc, allocator, "e", stre);
-    AddJsonMemeber(doc, allocator, "d", strd);
-    AddJsonMemeber(doc, allocator, "hint", strHint);
+    doc["n"] = strN.toStdString();
+    doc["e"] = stre.toStdString();
+    doc["d"] = strd.toStdString();
+    doc["hint"] = strHint.toStdString();
     //
-    rapidjson::GenericStringBuffer< rapidjson::UTF8<> > buffer;
-    rapidjson::Writer<rapidjson::GenericStringBuffer< rapidjson::UTF8<> > > writer(buffer);
-    //
-    doc.Accept(writer);
-    //
-    QByteArray ba = buffer.GetString();
-    //
-    QString json = QString::fromUtf8(ba);
+    Json::FastWriter writer;
+    std::string ret = writer.write(doc);
+    QString json = QString::fromStdString(ret);
     //
     QString key = WizFormatString1("BizCert/%1", strBizGuid);
     //
@@ -322,14 +306,16 @@ bool WizKMAccountsServer::getUserBizCert(const QString& strBizGuid, QString& str
     if (version == -1)
         return false;
     //
-    rapidjson::Document d;
-    d.Parse<0>(json.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(json.toUtf8().constData(), d))
+        return false;
     //
     try {
-        strN = QString::fromUtf8(d.FindMember("n")->value.GetString());
-        stre = QString::fromUtf8(d.FindMember("e")->value.GetString());
-        strd = QString::fromUtf8(d.FindMember("d")->value.GetString());
-        strHint = QString::fromUtf8(d.FindMember("hint")->value.GetString());
+        strN = QString::fromStdString(d["n"].asString());
+        stre = QString::fromStdString(d["e"].asString());
+        strd = QString::fromStdString(d["d"].asString());
+        strHint = QString::fromStdString(d["hint"].asString());
     }
     catch (...) {
         return false;
@@ -735,16 +721,6 @@ bool WizKMAccountsServer::accounts_getMessagesByXmlrpc(int nCountPerPage, __int6
     return TRUE;
 }
 
-QString getStringFromRapidValue(const rapidjson::Value& u, const QString& memberName)
-{
-    if (!u.HasMember(memberName.toUtf8().constData()))
-        return QString();
-
-    QTextCodec* codec = QTextCodec::codecForName("UTF-8");
-    QTextDecoder* encoder = codec->makeDecoder();
-    return encoder->toUnicode(u[memberName.toUtf8().constData()].GetString(), u[memberName.toUtf8().constData()].GetStringLength());
-}
-
 bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 nVersion, CWizUserMessageDataArray& arrayMessage)
 {
     QString strUrl = WizCommonApiEntry::messageServerUrl();
@@ -754,10 +730,12 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
     if (!get(strUrl, strResult))
         return false;
 
-    rapidjson::Document d;
-    d.Parse<0>(strResult.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strResult.toUtf8().constData(), d))
+        return false;
 
-    if (d.HasParseError() || !d.HasMember("result")) {
+    if (!d.isMember("result")) {
         qDebug() << "Error occured when try to parse json of messages";
         qDebug() << strResult;
         return false;
@@ -765,36 +743,36 @@ bool WizKMAccountsServer::accounts_getMessagesByJson(int nCountPerPage, __int64 
 
 //    qDebug() << "url : " << strUrl << " result : " << strResult;
 
-    const rapidjson::Value& users = d["result"];
-    for (rapidjson::SizeType i = 0; i < users.Size(); i++) {
-        const rapidjson::Value& u = users[i];
-        if (!u.IsObject()) {
+    const Json::Value& users = d["result"];
+    for (Json::ArrayIndex i = 0; i < users.size(); i++) {
+        const Json::Value& u = users[i];
+        if (!u.isObject()) {
             qDebug() << "Error occured when parse json of messages";
             return false;
         }
 
         WIZUSERMESSAGEDATA data;
-        data.nMessageID = (__int64)u["id"].GetInt64();
-        data.strBizGUID = getStringFromRapidValue(u, "biz_guid");
-        data.strKbGUID = getStringFromRapidValue(u, "kb_guid");
-        data.strDocumentGUID = getStringFromRapidValue(u, "document_guid");
-        data.strSenderGUID = getStringFromRapidValue(u, "sender_guid");
-        data.strSenderID = getStringFromRapidValue(u, "sender_id");
-        data.strReceiverGUID = getStringFromRapidValue(u, "receiver_guid");
-        data.strReceiverID = getStringFromRapidValue(u, "receiver_id");
-        data.strMessageText = getStringFromRapidValue(u, "message_body");
-        data.strSender = getStringFromRapidValue(u, "sender_alias");
-        data.strReceiver = getStringFromRapidValue(u, "receiver_alias");
-        data.strSender = getStringFromRapidValue(u, "sender_alias");
-        data.strTitle = getStringFromRapidValue(u, "title");
-        data.strNote = getStringFromRapidValue(u, "note");
+        data.nMessageID = (__int64)u["id"].asInt64();
+        data.strBizGUID = QString::fromStdString(u["biz_guid"].asString());
+        data.strKbGUID = QString::fromStdString(u["kb_guid"].asString());
+        data.strDocumentGUID = QString::fromStdString(u["document_guid"].asString());
+        data.strSenderGUID = QString::fromStdString(u["sender_guid"].asString());
+        data.strSenderID = QString::fromStdString(u["sender_id"].asString());
+        data.strReceiverGUID = QString::fromStdString(u["receiver_guid"].asString());
+        data.strReceiverID = QString::fromStdString(u["receiver_id"].asString());
+        data.strMessageText = QString::fromStdString(u["message_body"].asString());
+        data.strSender = QString::fromStdString(u["sender_alias"].asString());
+        data.strReceiver = QString::fromStdString(u["receiver_alias"].asString());
+        data.strSender = QString::fromStdString(u["sender_alias"].asString());
+        data.strTitle = QString::fromStdString(u["title"].asString());
+        data.strNote = QString::fromStdString(u["note"].asString());
         //
-        data.nMessageType = u["message_type"].GetInt();
-        data.nReadStatus = u["read_status"].GetInt();
-        data.nDeletedStatus = u["delete_status"].GetInt();
-        data.nVersion = (__int64)u["version"].GetInt64();
+        data.nMessageType = u["message_type"].asInt();
+        data.nReadStatus = u["read_status"].asInt();
+        data.nDeletedStatus = u["delete_status"].asInt();
+        data.nVersion = (__int64)u["version"].asInt64();
         //
-        time_t dateCreated = __int64(u["dt_created"].GetInt64()) / 1000;
+        time_t dateCreated = __int64(u["dt_created"].asInt64()) / 1000;
         data.tCreated = WizOleDateTime(dateCreated);
 
         arrayMessage.push_back(data);

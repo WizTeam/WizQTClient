@@ -10,7 +10,7 @@
 #include <QDebug>
 
 #if defined Q_OS_MAC
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "utils/WizStyleHelper.h"
 #include "sync/WizToken.h"
 #include "share/WizMisc.h"
@@ -226,19 +226,21 @@ void WizIAPDialog::parseCheckResult(const QString& strResult, const QString& str
     if (strResult.isEmpty())
         return;
 
-    rapidjson::Document d;
-    d.Parse<0>(strResult.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(strResult.toUtf8().constData(), d))
+        return;
 
-    if (d.HasMember("error_code"))
+    if (d.isMember("error_code"))
     {
-        QString strError = QString::fromUtf8(d.FindMember("error")->value.GetString());
+        QString strError = QString::fromStdString(d["error"].asString());
         qDebug() << strError;
         on_purchase_failed(strError);
         return;
     }
 
-    if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.GetInt();
+    if (d.isMember("return_code")) {
+        int nCode = d["return_code"].asInt();
         if (nCode == 200)
         {
             qDebug() <<"IAP purchase successed!";
@@ -250,7 +252,7 @@ void WizIAPDialog::parseCheckResult(const QString& strResult, const QString& str
         }
         else
         {
-            QString message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
+            QString message = QString::fromStdString(d["return_message"].asString());
             qDebug() << "check on server failed , code :  " << nCode << "  message : " << message;
             on_purchase_failed(message);
             return;

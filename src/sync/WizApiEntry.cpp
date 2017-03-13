@@ -15,7 +15,7 @@
 #include "WizKMServer.h"
 #include "WizDef.h"
 #include "share/WizEventLoop.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 /*
  * %1: product, use wiz
@@ -421,24 +421,17 @@ void WizCommonApiEntry::getEndPoints()
     if (urls.isEmpty() || !urls.contains("http"))
         return;
 
-    rapidjson::Document d;
-    d.Parse<0>(urls.toUtf8().constData());
-
-    if (d.HasParseError())
-    {
-        qWarning() << "parse endpoints data error : " << d.GetParseError();
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(urls.toUtf8().constData(), d))
         return;
-    }
+    //
+    Json::Value::Members keys = d.getMemberNames();
 
-    for(rapidjson::Document::ConstMemberIterator iter = d.MemberBegin(); iter != d.MemberEnd(); ++iter)
+    for(auto keyStr : keys)
     {
-        if (!(iter->name).IsString() || !(iter->value).IsString())
-        {
-            continue;
-        }
-
-        QString key = (iter->name).GetString();
-        QString url = (iter->value).GetString();
+        QString key = QString::fromStdString(keyStr);
+        QString url = QString::fromStdString(d[keyStr].asString());
 #ifdef QT_DEBUG
         qDebug() << "key: " << key << " url : " << url;
 #endif

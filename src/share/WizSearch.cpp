@@ -21,7 +21,7 @@
 #include "sync/WizApiEntry.h"
 #include "sync/WizSync.h"
 #include "share/WizEventLoop.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "sync/WizToken.h"
 
 
@@ -482,24 +482,24 @@ void WizSearcher::run()
     }
 }
 
-QString JsonValueToText(const rapidjson::Value& value)
+QString JsonValueToText(const Json::Value& value)
 {
-    if (value.IsArray())
+    if (value.isArray())
     {
         CWizStdStringArray arr;
-        for (int i = 0; i < value.Size(); i++)
+        for (Json::ArrayIndex i = 0; i < value.size(); i++)
         {
-            const rapidjson::Value& elem = value[i];
-            arr.push_back(elem.GetString());
+            const Json::Value& elem = value[i];
+            arr.push_back(QString::fromStdString(elem.asString()));
         }
         //
         CString text;
         ::WizStringArrayToText(arr, text, " ");
         return text;
     }
-    else if (value.IsString())
+    else if (value.isString())
     {
-        return value.GetString();
+        return QString::fromStdString(value.asString());
     }
     else
     {
@@ -553,30 +553,32 @@ bool WizSearcher::onlineSearch(const QString& kbGuid, const QString& keywords, C
         return false;
     }
     //
-    rapidjson::Document d;
-    d.Parse<0>(loop.result().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(loop.result().constData(), d))
+        return false;
 
-    if (!d.HasMember("return_code"))
+    if (!d.isMember("return_code"))
     {
         qDebug() << "[Search] Can not get return code";
         return false;
     }
 
-    int returnCode = d.FindMember("return_code")->value.GetInt();
+    int returnCode = d["return_code"].asInt();
     if (returnCode != 200)
     {
         qDebug() << "[Search] Return code was not 200, error:  " << returnCode << loop.result();
         return false;
     }
     //
-    if (!d.HasMember("result"))
+    if (!d.isMember("result"))
     {
         qDebug() << "[Search] Can not get result";
         return false;
     }
     //
-    const rapidjson::Value& result = d.FindMember("result")->value;
-    if (!result.IsArray())
+    const Json::Value& result = d["result"];
+    if (!result.isArray())
     {
         qDebug() << "[Search] Result is not an array";
         return false;
@@ -588,22 +590,22 @@ bool WizSearcher::onlineSearch(const QString& kbGuid, const QString& keywords, C
     std::map<QString, QString> highlightTitle;
     std::map<QString, QString> highlightText;
     //
-    for (int i = 0; i < result.Size(); i++)
+    for (Json::ArrayIndex i = 0; i < result.size(); i++)
     {
-        const rapidjson::Value& elem = result[i];
+        const Json::Value& elem = result[i];
         //
-        QString docGuid = elem["doc_guid"].GetString();
+        QString docGuid = QString::fromStdString(elem["doc_guid"].asString());
         //
         QString title;
         QString text;
-        if (elem.HasMember("title"))
+        if (elem.isMember("title"))
         {
-            const rapidjson::Value& titleVal = elem["title"];
+            const Json::Value& titleVal = elem["title"];
             title = JsonValueToText(titleVal);
         }
-        if (elem.HasMember("text"))
+        if (elem.isMember("text"))
         {
-            const rapidjson::Value& textVal = elem["text"];
+            const Json::Value& textVal = elem["text"];
             text = JsonValueToText(textVal);
         }
         //

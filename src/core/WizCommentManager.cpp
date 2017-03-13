@@ -5,7 +5,7 @@
 #include <QNetworkReply>
 #include <QDebug>
 
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "sync/WizApiEntry.h"
 #include "sync/WizToken.h"
 #include "share/WizEventLoop.h"
@@ -48,30 +48,32 @@ void WizCommentQuerier::parseReplyData(const QString& reply)
     if (reply.isEmpty())
         return;
 
-    rapidjson::Document d;
-    d.Parse<0>(reply.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(reply.toUtf8().constData(), d))
+        return;
 
-    if (d.HasMember("error_code")) {
+    if (d.isMember("error_code")) {
         qDebug() << "Failed to get comment count: "
-                 << QString::fromUtf8(d.FindMember("error")->value.GetString())
-                 << " code: " << d.FindMember("error_code")->value.GetInt();
+                 << QString::fromStdString(d["error"].asString())
+                 << " code: " << d["error_code"].asInt();
         setCommentsCount(0);
         return;
     }
 
-    if (d.HasMember("return_code")) {
-        int nCode = d.FindMember("return_code")->value.GetInt();
+    if (d.isMember("return_code")) {
+        int nCode = d["return_code"].asInt();
         if (nCode != 200) {
             qDebug() << "Failed to get comment count, need 200, but return "
-                     << d.FindMember("return_code")->value.GetInt();
+                     << d["return_code"].asInt();
             setCommentsCount(0);
             return;
         }
     }
 
-    if (d.HasMember("comment_count"))
+    if (d.isMember("comment_count"))
     {
-        int count = d.FindMember("comment_count")->value.GetInt();
+        int count = d["comment_count"].asInt();
         setCommentsCount(count);
     }
 }

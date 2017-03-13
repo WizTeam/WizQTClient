@@ -14,7 +14,7 @@
 #include "sync/WizToken.h"
 #include "share/WizSettings.h"
 #include "share/WizDatabaseManager.h"
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "utils/WizStyleHelper.h"
 
 #define EMAIL_CONTACTS "EMAILCONTACTS"
@@ -157,22 +157,24 @@ void WizEmailShareDialog::on_mailShare_finished(int nCode, const QString& return
 
 void WizEmailShareDialog::processReturnMessage(const QString& returnMessage, int& nCode, QString& message)
 {
-    rapidjson::Document d;
-    d.Parse<0>(returnMessage.toUtf8().constData());
+    Json::Value d;
+    Json::Reader reader;
+    if (!reader.parse(returnMessage.toUtf8().constData(), d))
+        return;
 
-    if (d.HasMember("error_code")) {
-        qDebug() << QString::fromUtf8(d.FindMember("error")->value.GetString());
+    if (d.isMember("error_code")) {
+        qDebug() << QString::fromStdString(d["error"].asString());
         return;
     }
 
-    if (d.HasMember("return_code")) {
-        nCode = d.FindMember("return_code")->value.GetInt();
+    if (d.isMember("return_code")) {
+        nCode = d["return_code"].asInt();
         if (nCode == 200) {
             qDebug() <<"[EmailShar]:send email successed!";
             saveContacts();
             return;
         } else {
-            message = QString::fromUtf8(d.FindMember("return_message")->value.GetString());
+            message = QString::fromStdString(d["return_message"].asString());
             qDebug() << message << ", code = " << nCode;
             return;
         }

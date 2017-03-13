@@ -7,7 +7,6 @@
 #include "utils/WizPathResolve.h"
 #include "WizApiEntry.h"
 #include "WizAvatarHost.h"
-#include "rapidjson/document.h"
 
 #include "share/WizSyncableDatabase.h"
 #include "share/WizAnalyzer.h"

@@ -8,7 +8,7 @@
 #include <QSplitter>
 #include <QList>
 #include <QLabel>
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 
 #include "widgets/WizTagBar.h"
 #include "WizTitleEdit.h"
@@ -625,15 +625,17 @@ void WizTitleBar::onInfoButtonClicked()
     //
     noteView()->wordCount([=](const QString& json){
         //
-        rapidjson::Document d;
-        d.Parse(json.toUtf8().constData());
+        Json::Value d;
+        Json::Reader reader;
+        if (!reader.parse(json.toUtf8().constData(), d))
+            return;
 
         try {
-            int nWords = d.FindMember("nWords")->value.GetInt();
-            int nChars = d.FindMember("nChars")->value.GetInt();
-            int nCharsWithSpace = d.FindMember("nCharsWithSpace")->value.GetInt();
-            int nNonAsianWords = d.FindMember("nNonAsianWords")->value.GetInt();
-            int nAsianChars = d.FindMember("nAsianChars")->value.GetInt();
+            int nWords = d["nWords"].asInt();
+            int nChars = d["nChars"].asInt();
+            int nCharsWithSpace = d["nCharsWithSpace"].asInt();
+            int nNonAsianWords = d["nNonAsianWords"].asInt();
+            int nAsianChars = d["nAsianChars"].asInt();
             //
             m_info->setWordCount(nWords, nChars, nCharsWithSpace, nNonAsianWords, nAsianChars);
 

@@ -9,7 +9,7 @@
 #include <QHttpPart>
 #include <QHttpMultiPart>
 #include <QPlainTextEdit>
-#include "rapidjson/document.h"
+#include "share/jsoncpp/json/json.h"
 #include "WizDef.h"
 #include "share/WizEventLoop.h"
 #include "share/WizMisc.h"
@@ -73,16 +73,18 @@ void WizCrashReportDialog::on_btn_yes_clicked()
             return;
         }
 
-        rapidjson::Document d;
-        d.Parse<0>(loop.result().constData());
+        Json::Value d;
+        Json::Reader reader;
+        if (!reader.parse(loop.result().constData(), d))
+            return;
 
-        if (!d.HasMember("return_code"))
+        if (!d.isMember("return_code"))
         {
             qDebug() << "[Crash report]Can not get return code ";
             return;
         }
 
-        int returnCode = d.FindMember("return_code")->value.GetInt();
+        int returnCode = d["return_code"].asInt();
         if (returnCode != 200)
         {
             qDebug() << "[Crash report]Return code was not 200, error :  " << returnCode << loop.result();

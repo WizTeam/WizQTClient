@@ -4,7 +4,6 @@
 #include <QNetworkAccessManager>
 #include <QEventLoop>
 
-#include <rapidjson/document.h>
 #include "share/WizEventLoop.h"
 #include "share/WizThreads.h"
 #include "WizApiEntry.h"
