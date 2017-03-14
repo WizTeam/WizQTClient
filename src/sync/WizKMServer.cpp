@@ -718,8 +718,10 @@ bool WizKMDatabaseServer::isGroup() const
 
 bool WizKMDatabaseServer::isUseNewSync() const
 {
+#ifndef QT_DEBUG
     if (WizMainWindow::instance()->userSettings().serverType() != WizServer)
         return false;
+#endif
     //
     if (isGroup())
         return false;
@@ -1614,7 +1616,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         //
         doc["html"] = html.toUtf8().data();
         //
-        Json::Value res;
+        Json::Value res(Json::arrayValue);
         for (auto data : allLocalResources)
         {
             Json::Value elemObj;

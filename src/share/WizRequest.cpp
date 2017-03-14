@@ -34,11 +34,11 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     QNetworkReply* reply = NULL;
     if (method == "POST")
     {
-        if (reqBody.isEmpty())
+        if (!reqBody.isEmpty())
         {
             request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-            reply = net.post(request, reqBody);
         }
+        reply = net.post(request, reqBody);
     }
     else if (method == "GET")
     {
@@ -46,12 +46,15 @@ bool WizRequest::execJsonRequest(const QString& url, QString method, const QByte
     }
     else if (method == "PUT")
     {
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        if (!reqBody.isEmpty())
+        {
+            request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
+        }
+        //
         reply = net.put(request, reqBody);
     }
     else if (method == "DELETE")
     {
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
         reply = net.deleteResource(request);
     }
     else
