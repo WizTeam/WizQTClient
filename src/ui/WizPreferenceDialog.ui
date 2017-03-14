@@ -29,7 +29,7 @@
    <item>
     <widget class="QTabWidget" name="tabWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <property name="usesScrollButtons">
       <bool>false</bool>
@@ -133,6 +133,19 @@
           <string>Sync Method</string>
          </property>
          <layout class="QGridLayout" name="gridLayout_2">
+          <item row="2" column="0">
+           <widget class="QLabel" name="labelSyncGroupMethod">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Group sync method:</string>
+            </property>
+           </widget>
+          </item>
           <item row="0" column="0">
            <widget class="QLabel" name="labelSyncInterval">
             <property name="sizePolicy">
@@ -190,6 +203,74 @@
             </item>
            </widget>
           </item>
+          <item row="3" column="1">
+           <widget class="QComboBox" name="comboDownloadAttachments">
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Only download attachments title</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download all attachments</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="comboSyncGroupMethod">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>170</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>Only download note title</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download recent 1 day's data</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download recent 1 week's data</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download recent 1 month's data</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Download all data when syncing</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="3" column="0">
+           <widget class="QLabel" name="label_7">
+            <property name="text">
+             <string>Download attachment:</string>
+            </property>
+           </widget>
+          </item>
           <item row="1" column="0">
            <widget class="QLabel" name="labelSyncMethod">
             <property name="sizePolicy">
@@ -244,85 +325,11 @@
             </item>
            </widget>
           </item>
-          <item row="2" column="0">
-           <widget class="QLabel" name="labelSyncGroupMethod">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
+          <item row="4" column="0">
+           <widget class="QCheckBox" name="useNewSync">
             <property name="text">
-             <string>Group sync method:</string>
+             <string>Use new sync API</string>
             </property>
-           </widget>
-          </item>
-          <item row="2" column="1">
-           <widget class="QComboBox" name="comboSyncGroupMethod">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>170</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <item>
-             <property name="text">
-              <string>Only download note title</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download recent 1 day's data</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download recent 1 week's data</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download recent 1 month's data</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download all data when syncing</string>
-             </property>
-            </item>
-           </widget>
-          </item>
-          <item row="3" column="0">
-           <widget class="QLabel" name="label_7">
-            <property name="text">
-             <string>Download attachment:</string>
-            </property>
-           </widget>
-          </item>
-          <item row="3" column="1">
-           <widget class="QComboBox" name="comboDownloadAttachments">
-            <property name="maximumSize">
-             <size>
-              <width>170</width>
-              <height>16777215</height>
-             </size>
-            </property>
-            <item>
-             <property name="text">
-              <string>Only download attachments title</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Download all attachments</string>
-             </property>
-            </item>
            </widget>
           </item>
          </layout>

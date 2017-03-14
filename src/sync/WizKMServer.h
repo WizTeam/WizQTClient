@@ -104,7 +104,7 @@ private:
 
 
 
-#define WIZKM_WEBAPI_VERSION		9
+#define WIZKM_WEBAPI_VERSION		10
 
 struct CWizKMBaseParam: public WizXmlRpcStructValue
 {

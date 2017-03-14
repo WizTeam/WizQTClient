@@ -46,6 +46,8 @@ public:
 
     static QString appstoreParam(bool useAndSymbol = true);
 
+    static QString newAsServerUrl();
+
 private:
     static QString requestUrl(const QString& strCommand);
     static void getEndPoints();

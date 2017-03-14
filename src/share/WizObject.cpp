@@ -18,7 +18,7 @@ WIZUSERINFO::WIZUSERINFO(const WIZUSERINFO& info)
     strToken = info.strToken;
     strKbGUID = info.strKbGUID;
     strDatabaseServer = info.strDatabaseServer;
-    strNewKsServer = info.strNewKsServer;
+    strKbServer = info.strKbServer;
     nMaxFileSize = info.nMaxFileSize;
     strChatUrl = info.strChatUrl;
     strDownloadUrl = info.strDownloadUrl;
@@ -82,7 +82,7 @@ bool WIZUSERINFO::loadFromXmlRpc(WizXmlRpcStructValue& val)
     data.getString("user_type", strUserType);
     data.getTime("vip_date", tVipExpried);
     //
-    data.getStr("new_kapi_url", strNewKsServer);
+    data.getStr("kb_server_url", strKbServer);
     //
     data.getInt("sync_type", syncType);
 

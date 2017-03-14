@@ -3,14 +3,18 @@
 #include "WizToken.h"
 #include "share/jsoncpp/json/json.h"
 #include "share/WizZip.h"
+#include "share/WizRequest.h"
 
 #include "share/jsoncpp/json/json.h"
 #include "share/WizEventLoop.h"
+#include "share/WizRequest.h"
 
 #include "utils/WizMisc.h"
 
 #include "share/WizDatabase.h"
 #include "share/WizDatabaseManager.h"
+
+#include "WizMainWindow.h"
 
 #include "utils/WizPathResolve.h"
 
@@ -18,108 +22,6 @@
 
 #define WIZUSERMESSAGE_AT		0
 #define WIZUSERMESSAGE_EDIT		1
-
-bool execJsonRequest(const QString& url, QString method, const QByteArray& reqBody, QByteArray& resBody)
-{
-    method = method.toUpper();
-
-    QNetworkAccessManager net;
-    QNetworkRequest request;
-    request.setUrl(url);
-    //
-    QNetworkReply* reply = NULL;
-    if (method == "POST")
-    {
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-        reply = net.post(request, reqBody);
-    }
-    else if (method == "GET")
-    {
-        reply = net.get(request);
-    }
-    else if (method == "PUT")
-    {
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-        reply = net.put(request, reqBody);
-    }
-    else if (method == "DELETE")
-    {
-        request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("application/json"));
-        reply = net.deleteResource(request);
-    }
-    else
-    {
-        return false;
-    }
-
-    WizAutoTimeOutEventLoop loop(reply);
-    loop.setTimeoutWaitSeconds(60 * 60 * 1000);
-    loop.exec();
-    //
-    if (loop.error() != QNetworkReply::NoError)
-    {
-        qDebug() << "Failed to exec json request, error=" << loop.error() << ", message=" << loop.errorString();
-        return false;
-    }
-    //
-    resBody = loop.result();
-    //
-    return true;
-}
-
-bool execJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, QByteArray &resBody)
-{
-    Json::FastWriter writer;
-    std::string body = writer.write(reqBody);
-    QByteArray buffer(body.c_str());
-    //
-    return execJsonRequest(url, method, buffer, resBody);
-}
-
-bool execJsonRequest(const QString &url, QByteArray &resBody)
-{
-    return execJsonRequest(url, "GET", QByteArray(), resBody);
-}
-
-bool execStandardJsonRequest(const QString &url, const QString& method, const Json::Value &reqBody, Json::Value& res)
-{
-    QByteArray resData;
-    if (!execJsonRequest(url, method, reqBody, resData))
-        return false;
-    //
-    try {
-        std::string resultString = resData.toStdString();
-        //
-        Json::Reader reader;
-        if (!reader.parse(resultString, res))
-        {
-            qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
-            return false;
-        }
-        //
-        Json::Value returnCode = res["return_code"];
-        if (returnCode.asInt() != 200)
-        {
-            Json::Value returnMessage = res["return_message"];
-            qDebug() << "Can't upload note data, ret code=" << returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
-            return false;
-        }
-        //
-        return true;
-    }
-    catch (std::exception& err)
-    {
-        qDebug() << "josn error: " << err.what();
-        return false;
-    }
-}
-
-bool execStandardJsonRequest(const QString &url, Json::Value& res)
-{
-    Json::Value nullValue;
-    return execStandardJsonRequest(url, "GET", nullValue, res);
-}
-
 
 WizKMXmlRpcServerBase::WizKMXmlRpcServerBase(const QString& strUrl, QObject* parent)
     : WizXmlRpcServerBase(strUrl, parent)
@@ -793,7 +695,7 @@ WizKMDatabaseServer::WizKMDatabaseServer(const WIZUSERINFOBASE& kbInfo, QObject*
     : WizKMXmlRpcServerBase(kbInfo.strDatabaseServer, parent)
     , m_userInfo(kbInfo)
 {
-    //m_userInfo.strNewKsServer = "http://localhost:4001";
+    //m_userInfo.strKbServer = "http://localhost:4001";
 }
 WizKMDatabaseServer::~WizKMDatabaseServer()
 {
@@ -816,10 +718,12 @@ bool WizKMDatabaseServer::isGroup() const
 
 bool WizKMDatabaseServer::isUseNewSync() const
 {
+    if (WizMainWindow::instance()->userSettings().serverType() != WizServer)
+        return false;
+    //
     if (isGroup())
         return false;
     //
-    return true;
     return WizToken::info().syncType == 1;
 }
 
@@ -919,10 +823,10 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
-    QString url = m_userInfo.strNewKsServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?download_data=1&token=" + m_userInfo.strToken;
+    QString url = m_userInfo.strKbServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1&token=" + m_userInfo.strToken;
     //
     Json::Value doc;
-    if (!execStandardJsonRequest(url, doc))
+    if (!WizRequest::execStandardJsonRequest(url, doc))
     {
         TOLOG1("Failed to download document data: %1", ret.strTitle);
         return false;
@@ -1120,7 +1024,7 @@ bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    QString url = m_userInfo.strNewKsServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
+    QString url = m_userInfo.strKbServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
     return WizURLDownloadToData(url, ret.arrayData);
 }
 
@@ -1470,31 +1374,15 @@ bool uploadResources(const QString& url, const QString& key, const QString& kbGu
     //
     QByteArray resData = loop.result();
     //
-    try {
-        std::string resultString = resData.toStdString();
-        //
-        Json::Reader reader;
-        if (!reader.parse(resultString, res))
-        {
-            qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
-            return false;
-        }
-        //
-        Json::Value returnCode = res["return_code"];
-        if (returnCode.asInt() != 200)
-        {
-            Json::Value returnMessage = res["return_message"];
-            qDebug() << "Can't upload note data, ret code=" <<returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
-            return false;
-        }
-        //
-        return true;
-    }
-    catch (std::exception& err)
+    WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData);
+    if (!ret)
     {
-        qDebug() << "josn error: " << err.what();
+        //
+        qDebug() << ret.returnMessage;
         return false;
     }
+    //
+    return true;
 }
 
 
@@ -1579,21 +1467,11 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
         QByteArray resData = loop.result();
         //
         try {
-            std::string resultString = resData.toStdString();
-            //
-            Json::Reader reader;
             Json::Value partRes;
-            if (!reader.parse(resultString, partRes))
+            WIZSTANDARDRESULT ret = WizRequest::isSucceededStandardJsonRequest(resData, partRes);
+            if (!ret)
             {
-                qDebug() << "Can't parse result, ret: \n" << QString::fromUtf8(resultString.c_str());
-                return false;
-            }
-            //
-            Json::Value returnCode = partRes["return_code"];
-            if (returnCode.asInt() != 200)
-            {
-                Json::Value returnMessage = partRes["return_message"];
-                qDebug() << "Can't upload note data, ret code=" <<returnCode.asInt() << ", message=" << QString::fromUtf8(returnMessage.asString().c_str());
+                qDebug() << "Can't upload note data, ret code=" << ret.returnCode << ", message=" << ret.returnMessage;
                 return false;
             }
             //
@@ -1619,8 +1497,8 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
 
 bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    QString url_main = m_userInfo.strNewKsServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
-    QString url_data = m_userInfo.strNewKsServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken;
+    QString url_main = m_userInfo.strKbServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_data = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken;
     //
     Json::Value att;
     att["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
@@ -1638,7 +1516,7 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
     }
     //
     Json::Value ret;
-    if (!execStandardJsonRequest(url_main, "POST", att, ret))
+    if (!WizRequest::execStandardJsonRequest(url_main, "POST", att, ret))
     {
         qDebug() << "Failed to upload note";
         return false;
@@ -1672,8 +1550,8 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 {
     WIZDOCUMENTDATAEX data = dataTemp;
     //
-    QString url_main = m_userInfo.strNewKsServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
-    QString url_res = m_userInfo.strNewKsServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_res = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
     //
     if (withData && data.arrayData.length() > 2)
     {
@@ -1751,7 +1629,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 
     //
     Json::Value ret;
-    if (!execStandardJsonRequest(url_main, "POST", doc, ret))
+    if (!WizRequest::execStandardJsonRequest(url_main, "POST", doc, ret))
     {
         qDebug() << "Failed to upload note";
         return false;

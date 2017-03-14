@@ -132,6 +132,7 @@ set(wiznote_SOURCES
     widgets/WizUserServiceExprDialog.cpp
 
     share/jsoncpp/jsoncpp.cpp
+    share/WizRequest.cpp
 
     WizCategoryView.cpp
     WizCategoryViewItem.cpp
@@ -257,6 +258,7 @@ set(wiznote_HEADERS
 
     share/jsoncpp/json/json.h
     share/jsoncpp/json/json-forwards.h
+    share/WizRequest.h
 
     WizDef.h
     WizActions.h

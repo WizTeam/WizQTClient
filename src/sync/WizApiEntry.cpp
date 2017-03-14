@@ -160,6 +160,28 @@ QString WizCommonApiEntry::asServerUrl()
     return strAsUrl;
 }
 
+QString WizCommonApiEntry::newAsServerUrl()
+{
+    //使用endpoints获取as使用的API地址和之前的不同
+    QString strAsUrl = getUrlFromCache("new_as");
+
+    if (strAsUrl.isEmpty())
+    {
+        strAsUrl = requestUrl("new_as");
+        updateUrlCache("new_as", strAsUrl);
+    }
+
+    if (!strAsUrl.startsWith("http"))
+    {
+        qCritical() << "request url by command error. command : sync_https,  return : " << strAsUrl;
+        strAsUrl.clear();
+    }
+
+    return "http://localhost:5001";
+    return strAsUrl;
+}
+
+
 QString WizCommonApiEntry::messageServerUrl()
 {    
     return getUrlByCommand(WIZNOTE_API_COMMAND_MESSAGE_SERVER);

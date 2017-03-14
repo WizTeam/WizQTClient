@@ -46,6 +46,8 @@ public Q_SLOTS:
 
     void onButtonFontSelect_clicked();
     void onButtonFontSelect_confirmed();
+    //
+    void useNewSyncClicked(bool checked);
 
 private slots:
     void on_checkBox_stateChanged(int arg1);

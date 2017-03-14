@@ -4,13 +4,21 @@
 #include <QMessageBox>
 #include <QFontDialog>
 #include <QColorDialog>
+#include <QTimer>
 
 #include "share/WizGlobal.h"
 #include "utils/WizPathResolve.h"
 #include "share/WizMessageBox.h"
 #include "share/WizDatabaseManager.h"
+#include "share/WizThreads.h"
+#include "share/WizRequest.h"
+
 #include "WizMainWindow.h"
 #include "WizProxyDialog.h"
+#include "sync/WizToken.h"
+#include "sync/WizApiEntry.h"
+
+#include "widgets/WizExecutingActionDialog.h"
 
 
 WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
@@ -177,6 +185,13 @@ WizPreferenceWindow::WizPreferenceWindow(WizExplorerApp& app, QWidget* parent)
 
     bool manuallySortFolders = m_app.userSettings().isManualSortingEnabled();
     ui->checkBoxManuallySort->setChecked(manuallySortFolders);
+    //
+    connect(ui->useNewSync, SIGNAL(clicked(bool)), SLOT(useNewSyncClicked(bool)));
+    ui->useNewSync->setChecked(WizToken::info().syncType == 1);
+    if (ui->useNewSync->isChecked())
+    {
+        ui->useNewSync->setEnabled(false);
+    }
 }
 
 void WizPreferenceWindow::showPrintMarginPage()
@@ -458,3 +473,47 @@ void WizPreferenceWindow::on_tabWidget_currentChanged(int index)
 //        resize(width(), 290);
 //    }
 }
+
+void WizPreferenceWindow::useNewSyncClicked(bool checked)
+{
+    if (checked)
+    {
+        WizExecutingActionDialog::executeAction(tr("Change user settings..."), WIZ_THREAD_NETWORK, [=] {
+            //
+            bool ret = false;
+            QString errorMessage = tr("Network error");
+            //
+            QString asUrl = WizCommonApiEntry::newAsServerUrl();
+            if (!asUrl.isEmpty())
+            {
+                QString url = asUrl + "/as/user/settings/sync_type/1?token=" + WizToken::token();
+                //
+                WIZSTANDARDRESULT result = WizRequest::execStandardJsonRequest(url, "PUT");
+                if (result)  {
+                    ret = true;
+                } else {
+                    errorMessage = result.returnMessage;
+                }
+            }
+            //
+            ::WizExecuteOnThread(WIZ_THREAD_MAIN, [=] {
+                //
+                QTimer::singleShot(300, [=]{
+                    if (ret) {
+                        ui->useNewSync->setEnabled(false);
+                        WizMessageBox::information(this, tr("Succeeded to change user settings, please restart WizNote."));
+                    } else {
+                        WizMessageBox::warning(this, tr("Failed to change user settings:\n\n %1").arg(errorMessage));
+                        ui->useNewSync->setChecked(false);
+                    }
+                });
+                //
+
+            });
+            //
+
+        });
+    }
+
+}
+

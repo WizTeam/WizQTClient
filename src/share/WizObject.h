@@ -58,7 +58,7 @@ struct WIZUSERINFOBASE
     QString strToken;
     QString strKbGUID;
     QString strDatabaseServer;
-    QString strNewKsServer;
+    QString strKbServer;
 
     //NOTE: DEPRECATED
     int nMaxFileSize;

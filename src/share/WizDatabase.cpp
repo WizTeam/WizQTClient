@@ -1115,6 +1115,9 @@ void WizDatabase::setUserInfo(const WIZUSERINFO& userInfo)
     setMeta(g_strAccountSection, "UserPoints", QString::number(userInfo.nUserPoints));
     setMeta(g_strAccountSection, "MywizMail", userInfo.strMywizEmail);
     setMeta(g_strAccountSection, "DateSignUp", userInfo.tCreated.toString());
+    setMeta(g_strAccountSection, "kbServer", userInfo.strKbServer);
+    setMeta(g_strAccountSection, "SyncType", QString::number(userInfo.syncType));
+
 
     Q_EMIT userInfoChanged();
 }
@@ -2778,6 +2781,8 @@ bool WizDatabase::getUserInfo(WIZUSERINFO& userInfo)
     userInfo.nUserPoints = getMetaDef(g_strAccountSection, "UserPoints").toInt();
     userInfo.strMywizEmail = getMetaDef(g_strAccountSection, "MywizMail");
     userInfo.tCreated = QDateTime::fromString(getMetaDef(g_strAccountSection, "DateSignUp"));
+    userInfo.strKbServer = getMetaDef(g_strAccountSection, "KbServer");
+    userInfo.syncType = getMetaDef(g_strAccountSection, "SyncType").toInt();
 
     return true;
 }
