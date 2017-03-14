@@ -162,7 +162,7 @@ QString WizCommonApiEntry::asServerUrl()
 
 QString WizCommonApiEntry::newAsServerUrl()
 {
-    QString key = "account_seerver_url";
+    QString key = "account_server_url";
     QString strAsUrl = getUrlByCommand(key);
     //
     if (!strAsUrl.startsWith("http"))
