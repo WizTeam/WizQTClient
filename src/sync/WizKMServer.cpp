@@ -826,6 +826,9 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
     QString url = m_userInfo.strKbServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1&token=" + m_userInfo.strToken;
+#ifdef QT_DEBUG
+    qDebug() << url;
+#endif
     //
     Json::Value doc;
     if (!WizRequest::execStandardJsonRequest(url, doc))
@@ -960,7 +963,11 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
 
 bool WizKMDatabaseServer::document_downloadData(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& fileName)
 {
-    return document_downloadDataNew(strDocumentGUID, ret, fileName);
+    if (isUseNewSync()) {
+        return document_downloadDataNew(strDocumentGUID, ret, fileName);
+    } else {
+        return document_downloadDataOld(strDocumentGUID, ret, fileName);
+    }
 }
 //
 
@@ -1503,13 +1510,13 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
     QString url_data = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken;
     //
     Json::Value att;
-    att["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
-    att["docGuid"] = data.strDocumentGUID.toUtf8().data();
-    att["attGuid"] = data.strGUID.toUtf8().data();
-    att["dataMd5"] = data.strDataMD5.toUtf8().data();
+    att["kbGuid"] = m_userInfo.strKbGUID.toStdString();
+    att["docGuid"] = data.strDocumentGUID.toStdString();
+    att["attGuid"] = data.strGUID.toStdString();
+    att["dataMd5"] = data.strDataMD5.toStdString();
     att["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
-    att["name"] = data.strName.toUtf8().data();
-    att["url"] = data.strURL.toUtf8().data();
+    att["name"] = data.strName.toStdString();
+    att["url"] = data.strURL.toStdString();
     att["withData"] = withData;
     //
     if (withData)
@@ -1575,26 +1582,30 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         }
     }
     //
+    CString tags;
+    ::WizStringArrayToText(data.arrayTagGUID, tags, "*");
+    //
     Json::Value doc;
-    doc["kbGuid"] = m_userInfo.strKbGUID.toUtf8().data();
-    doc["docGuid"] = data.strGUID.toUtf8().data();
-    doc["title"] = data.strTitle.toUtf8().data();
-    doc["dataMd5"] = data.strDataMD5.toUtf8().data();
+    doc["kbGuid"] = m_userInfo.strKbGUID.toStdString();
+    doc["docGuid"] = data.strGUID.toStdString();
+    doc["title"] = data.strTitle.toStdString();
+    doc["dataMd5"] = data.strDataMD5.toStdString();
     doc["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
-    doc["category"] = data.strLocation.toUtf8().data();
-    doc["owner"] = data.strOwner.toUtf8().data();
+    doc["category"] = data.strLocation.toStdString();
+    doc["owner"] = data.strOwner.toStdString();
     doc["protected"] = (int)data.nProtected;
     doc["readCount"] = (int)data.nReadCount;
     doc["attachmentCount"] = (int)data.nAttachmentCount;
-    doc["type"] = data.strType.toUtf8().data();
-    doc["fileType"] = data.strFileType.toUtf8().data();
+    doc["type"] = data.strType.toStdString();
+    doc["fileType"] = data.strFileType.toStdString();
     doc["created"] = data.tCreated.toTime_t() * (long long)1000;
     doc["accessed"] = data.tAccessed.toTime_t() * (long long)1000;
-    doc["url"] = data.strURL.toUtf8().data();
-    doc["styleGuid"] = data.strStyleGUID.toUtf8().data();
-    doc["seo"] = data.strSEO.toUtf8().data();
-    doc["author"] = data.strAuthor.toUtf8().data();
-    doc["keywords"] = data.strKeywords.toUtf8().data();
+    doc["url"] = data.strURL.toStdString();
+    doc["styleGuid"] = data.strStyleGUID.toStdString();
+    doc["seo"] = data.strSEO.toStdString();
+    doc["author"] = data.strAuthor.toStdString();
+    doc["keywords"] = data.strKeywords.toStdString();
+    doc["tags"] = tags.toStdString();
     doc["withData"] = withData;
     //
     std::vector<WIZZIPENTRYDATA> allLocalResources;
@@ -1614,13 +1625,13 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
             return false;
         }
         //
-        doc["html"] = html.toUtf8().data();
+        doc["html"] = html.toStdString();
         //
         Json::Value res(Json::arrayValue);
         for (auto data : allLocalResources)
         {
             Json::Value elemObj;
-            elemObj["name"] = data.name.toUtf8().data();
+            elemObj["name"] = data.name.toStdString();
             elemObj["time"] = (long long)data.time.toTime_t() * 1000;
             elemObj["size"] = (long long)data.size;
             res.append(elemObj);
