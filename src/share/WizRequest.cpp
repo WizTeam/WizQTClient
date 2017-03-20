@@ -161,7 +161,7 @@ WIZSTANDARDRESULT WizRequest::execStandardJsonRequest(const QString &url, const 
     if (!execJsonRequest(url, method, reqBody, resData))
         return WIZSTANDARDRESULT(WIZSTANDARDRESULT::network);
     //
-    return isSucceededStandardJsonRequest(resData);
+    return isSucceededStandardJsonRequest(resData, res);
 }
 
 WIZSTANDARDRESULT WizRequest::execStandardJsonRequest(const QString &url, const QString& method)
