@@ -8,6 +8,7 @@
 #include "share/jsoncpp/json/json.h"
 #include "share/WizEventLoop.h"
 #include "share/WizRequest.h"
+#include "share/WizThreads.h"
 
 #include "utils/WizMisc.h"
 
@@ -908,6 +909,17 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
         }
     }
     //
+    struct RESDATAEX : public RESDATA
+    {
+        QByteArray data;
+    };
+    //
+    QMutex mutex;
+    //
+    int totalWaitForDownload = 0;
+    int totalDownloaded = 0;
+    int totalFailed = 0;
+    //
     for (auto res : serverResources)
     {
         QString resName = "index_files/" + res.name;
@@ -930,21 +942,51 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
 #ifdef QT_DEBUG
         qDebug() << res.url;
 #endif
-        QByteArray data;
-        if (!WizURLDownloadToData(res.url, data))
-        {
-            TOLOG1("Failed to download res: %1", res.url);
-            return false;
-        }
+        totalWaitForDownload++;
         //
-        if (!newZip.compressFile(data, resName))
-        {
-            TOLOG("Failed to add data to zip file");
-            return false;
+        ::WizExecuteOnThread(WIZ_THREAD_DOWNLOAD_RESOURCES, [=, &mutex, &totalFailed, &totalDownloaded, &newZip] {
             //
-        }
+            QByteArray data;
+            qDebug() << "downloading " << resName;
+            bool ret = WizURLDownloadToData(res.url, data);
+            qDebug() << "downloaded " << resName;
+            //
+            QMutexLocker locker(&mutex);
+            if (!ret)
+            {
+                TOLOG1("Failed to download res: %1", res.url);
+                totalFailed++;
+                return;
+            }
+            //
+            if (!newZip.compressFile(data, resName))
+            {
+                TOLOG("Failed to add data to zip file");
+                totalFailed++;
+                return;
+                //
+            }
+            //
+            totalDownloaded++;
+
+        });
     }
     //
+    if (totalWaitForDownload > 0)
+    {
+        while (true)
+        {
+            if (totalWaitForDownload == totalDownloaded + totalFailed)
+            {
+                if (totalFailed == 0)
+                    break;
+                //
+                return false;
+            }
+            //
+            QThread::msleep(300);
+        }
+    }
     //
     if (!newZip.close())
     {
@@ -1823,7 +1865,11 @@ bool WizKMDatabaseServer::attachment_postDataOld(WIZDOCUMENTATTACHMENTDATAEX& da
 
 bool WizKMDatabaseServer::attachment_postData(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    return attachment_postDataNew(data, withData, nServerVersion);
+    if (isUseNewSync()) {
+        return attachment_postDataNew(data, withData, nServerVersion);
+    } else {
+        return attachment_postDataOld(data, withData, nServerVersion);
+    }
 }
 
 
