@@ -34,6 +34,7 @@
 #include "sync/WizKMServer.h"
 #include "sync/WizApiEntry.h"
 #include "share/WizThreads.h"
+#include "share/WizMisc.h"
 #include "WizMessageBox.h"
 
 #define WIZNOTE_THUMB_VERSION "3"
@@ -3108,6 +3109,33 @@ bool WizDatabase::updateAttachments(const CWizDocumentAttachmentDataArray& array
     return !bHasError;
 }
 
+void removeUnusedImages(const QString& mainHtml, const QString& strResourcePath)
+{
+    CWizStdStringArray files;
+    ::WizEnumFiles(strResourcePath, "*.htm;*.html;*.js;*.css", files, 0);
+    QString allText = mainHtml;
+    for (auto file : files)
+    {
+        QString text;
+        if (::WizLoadUnicodeTextFromFile(file, text))
+        {
+            allText += text;
+        }
+    }
+    //
+    CWizStdStringArray images;
+    ::WizEnumFiles(strResourcePath, "*.png;*.jpg;*.bmp;*.gif;*.jpeg", images, 0);
+    //
+    for (auto imageFileName : images)
+    {
+        QString imageName = Utils::WizMisc::extractFileName(imageFileName);
+        if (!allText.contains(imageName, Qt::CaseInsensitive))
+        {
+            WizDeleteFile(imageFileName);
+        }
+    }
+}
+
 
 bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
                                       const QString& strHtml,
@@ -3123,6 +3151,8 @@ bool WizDatabase::updateDocumentData(WIZDOCUMENTDATA& data,
         strProcessedHtml.replace(urlResource.toString(), "index_files/");
     }
     m_mtxTempFile.unlock();
+    //
+    removeUnusedImages(strProcessedHtml, strResourcePath);
 
     if (isEncryptAllData())
         data.nProtected = 1;
