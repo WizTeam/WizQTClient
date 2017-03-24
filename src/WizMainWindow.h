@@ -136,7 +136,8 @@ private:
     WizDatabaseManager& m_dbMgr;
     WizProgressDialog* m_progress;
     WizUserSettings* m_settings;
-    WizKMSyncThread* m_sync;
+    WizKMSyncThread* m_syncFull;
+    WizKMSyncThread* m_syncQuick;
     WizUserVerifyDialog* m_userVerifyDialog;
     WizConsoleDialog* m_console;
     WizUpgradeChecker* m_upgrade;
@@ -235,7 +236,10 @@ public:
     QSize clientSize() const { return m_splitter->widget(2)->size(); }
     QWidget* client() const;
     WizDocumentView* documentView() const;
-    WizKMSyncThread* sync() const { return m_sync; }
+    WizKMSyncThread* fullSync() const { return m_syncFull; }
+    WizKMSyncThread* quickSync() const { return m_syncQuick; }
+    void quickSyncKb(const QString& kbGuid);
+    void setNeedResetGroups();
 
     WizActions* actions() const { return m_actions; }
 
@@ -247,8 +251,6 @@ public:
     void resetPermission(const QString& strKbGUID, const QString& strDocumentOwner);
     void viewDocument(const WIZDOCUMENTDATAEX& data, bool addToHistory);
     //
-    static void quickSyncKb(const QString& kbGuid);
-
     void checkWizUpdate();
     void setSystemTrayIconVisible(bool bVisible);
     void setMobileFileReceiverEnable(bool bEnable);

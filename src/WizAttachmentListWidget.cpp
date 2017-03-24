@@ -234,7 +234,7 @@ void WizAttachmentListView::addAttachments()
     //
     if (ok)
     {
-        WizMainWindow::quickSyncKb(db.isGroup() ? db.kbGUID() : "");
+        WizMainWindow::instance()->quickSyncKb(db.isGroup() ? db.kbGUID() : "");
     }
 }
 
@@ -595,7 +595,7 @@ void WizAttachmentListView::on_action_deleteAttachment()
     if (!strKbGUID.isEmpty())
     {
         WizDatabase& db = m_dbMgr.db(strKbGUID);
-        WizMainWindow::quickSyncKb(db.isGroup() ? db.kbGUID() : "");
+        WizMainWindow::instance()->quickSyncKb(db.isGroup() ? db.kbGUID() : "");
     }
 }
 

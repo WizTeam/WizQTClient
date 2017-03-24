@@ -160,7 +160,7 @@ WizDocumentWebView::WizDocumentWebView(WizExplorerApp& app, QWidget* parent)
             SLOT(onDocumentSaved(const QString, const QString,bool)), Qt::QueuedConnection);
 
     // loading and saving thread
-    m_timerAutoSave.setInterval(5*60*1000); // 5 minutes
+    m_timerAutoSave.setInterval(1*60*1000); // 1 minutes
     connect(&m_timerAutoSave, SIGNAL(timeout()), SLOT(onTimerAutoSaveTimout()));
     //
     //

@@ -115,7 +115,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_dbMgr(dbMgr)
     , m_progress(new WizProgressDialog(this))
     , m_settings(new WizUserSettings(dbMgr.db()))
-    , m_sync(new WizKMSyncThread(dbMgr.db(), this))
+    , m_syncQuick(new WizKMSyncThread(dbMgr.db(), true, this))
+    , m_syncFull(new WizKMSyncThread(dbMgr.db(), false, this))
     , m_searcher(new WizSearcher(m_dbMgr, this))
     , m_console(nullptr)
     , m_userVerifyDialog(nullptr)
@@ -167,6 +168,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     , m_bQuickDownloadMessageEnable(false)
 {
     WizGlobal::setMainWindow(this);
+    WizKMSyncThread::setQuickThread(m_syncQuick);
     //
 #ifndef Q_OS_MAC
     clientLayout()->addWidget(m_toolBar);
@@ -194,22 +196,25 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     m_searcher->start(QThread::HighPriority);
 
     // syncing thread
-    m_sync->setFullSyncInterval(userSettings().syncInterval());
-    connect(m_sync, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
-    connect(m_sync, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
+    m_syncFull->setFullSyncInterval(userSettings().syncInterval());
+    connect(m_syncFull, SIGNAL(processLog(const QString&)), SLOT(on_syncProcessLog(const QString&)));
+    connect(m_syncFull, SIGNAL(promptMessageRequest(int, const QString&, const QString&)),
             SLOT(on_promptMessage_request(int, QString, QString)));
-    connect(m_sync, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
-    connect(m_sync, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_syncFull, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
 
-    connect(m_sync, SIGNAL(bubbleNotificationRequest(const QVariant&)),
+    connect(m_syncFull, SIGNAL(bubbleNotificationRequest(const QVariant&)),
             SLOT(on_bubbleNotification_request(const QVariant&)));
-    connect(m_sync, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
-    connect(m_sync, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
+    connect(m_syncFull, SIGNAL(syncStarted(bool)), SLOT(on_syncStarted(bool)));
+    connect(m_syncFull, SIGNAL(syncFinished(int, QString, bool)), SLOT(on_syncDone(int, QString, bool)));
 
+    connect(m_syncQuick, SIGNAL(promptFreeServiceExpr()), SLOT(on_promptFreeServiceExpr()));
+    connect(m_syncQuick, SIGNAL(promptVipServiceExpr()), SLOT(on_promptVipServiceExpr()));
+    //
     // 如果没有禁止自动同步，则在打开软件后立即同步一次
     if (m_settings->syncInterval() > 0)
     {
-        QTimer::singleShot(15 * 1000, m_sync, SLOT(syncAfterStart()));
+        QTimer::singleShot(15 * 1000, m_syncFull, SLOT(syncAfterStart()));
     }
 
     connect(m_searcher, SIGNAL(searchProcess(const QString&, const CWizDocumentDataArray&, bool, bool)),
@@ -269,7 +274,8 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
 
     WizNoteComments::init();
     //
-    m_sync->start(QThread::IdlePriority);
+    m_syncFull->start(QThread::IdlePriority);
+    m_syncQuick->start(QThread::IdlePriority);
     //
     setSystemTrayIconVisible(userSettings().showSystemTrayIcon());
 
@@ -284,7 +290,7 @@ WizMainWindow::WizMainWindow(WizDatabaseManager& dbMgr, QWidget *parent)
     if (dbMgr.db().hasBiz())
     {
         QTimer* syncMessageTimer = new QTimer(this);
-        connect(syncMessageTimer, SIGNAL(timeout()), m_sync, SLOT(quickDownloadMesages()));
+        connect(syncMessageTimer, SIGNAL(timeout()), m_syncFull, SLOT(quickDownloadMesages()));
         syncMessageTimer->setInterval(3 * 1000 * 60);
         syncMessageTimer->start(3 * 1000 * 60);
     }
@@ -371,11 +377,18 @@ void WizMainWindow::on_application_aboutToQuit()
 void WizMainWindow::cleanOnQuit()
 {
     WizObjectDownloaderHost::instance()->waitForDone();
+    WizKMSyncThread::setQuickThread(NULL);
     //
     m_category->saveExpandState();
     saveStatus();
     //
-    m_sync->waitForDone();
+    auto full = m_syncFull;
+    m_syncFull = NULL;
+    full->waitForDone();
+    //
+    auto quick = m_syncQuick;
+    m_syncQuick = NULL;
+    quick->waitForDone();
     //
     m_searcher->waitForDone();
     //
@@ -648,7 +661,7 @@ void WizMainWindow::on_TokenAcquired(const QString& strToken)
 
 void WizMainWindow::on_quickSync_request(const QString& strKbGUID)
 {
-    WizKMSyncThread::quickSyncKb(strKbGUID);
+    m_syncQuick->addQuickSyncKb(strKbGUID);
 }
 
 void WizMainWindow::setSystemTrayIconVisible(bool bVisible)
@@ -1516,7 +1529,7 @@ void WizMainWindow::windowActived()
     if (!isBizUser || !m_bQuickDownloadMessageEnable)
         return;
 
-    m_sync->quickDownloadMesages();
+    m_syncFull->quickDownloadMesages();
     WizGetAnalyzer().logAction("bizUserQuickDownloadMessage");
 }
 
@@ -2154,7 +2167,7 @@ void WizMainWindow::init()
 
 void WizMainWindow::on_actionAutoSync_triggered()
 {
-    m_sync->startSyncAll();
+    m_syncFull->startSyncAll();
 }
 
 void WizMainWindow::on_actionSync_triggered()
@@ -2230,7 +2243,8 @@ void WizMainWindow::on_syncDone_userVerified()
 {
 
     if (m_dbMgr.db().setPassword(m_userVerifyDialog->password())) {
-        m_sync->clearCurrentToken();
+        m_syncFull->clearCurrentToken();
+        m_syncQuick->clearCurrentToken();
         syncAllData();
     }
 }
@@ -3183,7 +3197,7 @@ void WizMainWindow::on_category_itemSelectionChanged()
         {
             showMessageList(pItem);
             //
-            m_sync->quickDownloadMesages();
+            m_syncFull->quickDownloadMesages();
             WizGetAnalyzer().logAction("categoryMessageRootSelected");
         }
     }
@@ -3267,7 +3281,7 @@ void WizMainWindow::on_options_settingsChanged(WizOptionsType type)
         m_doc->settingsChanged();
         break;
     case wizoptionsSync:
-        m_sync->setFullSyncInterval(userSettings().syncInterval());
+        m_syncFull->setFullSyncInterval(userSettings().syncInterval());
         break;
     case wizoptionsFont:
     {
@@ -3574,7 +3588,7 @@ QString WizMainWindow::TranslateString(const QString& string)
 
 void WizMainWindow::syncAllData()
 {
-    m_sync->startSyncAll(false);
+    m_syncFull->startSyncAll(false);
     m_animateSync->startPlay();
 }
 
@@ -3587,7 +3601,8 @@ void WizMainWindow::reconnectServer()
         WizToken::setPasswd(m_settings->password());
     }
 
-    m_sync->clearCurrentToken();
+    m_syncFull->clearCurrentToken();
+    m_syncQuick->clearCurrentToken();
     connect(WizToken::instance(), SIGNAL(tokenAcquired(QString)),
             SLOT(on_TokenAcquired(QString)), Qt::QueuedConnection);
     WizToken::requestToken();
@@ -4148,7 +4163,21 @@ void WizMainWindow::viewCurrentNoteInSeparateWindow()
 
 void WizMainWindow::quickSyncKb(const QString& kbGuid)
 {
-    WizKMSyncThread::quickSyncKb(kbGuid);
+    if (!m_syncQuick)
+        return;
+    //
+    m_syncQuick->addQuickSyncKb(kbGuid);
 }
+
+void WizMainWindow::setNeedResetGroups()
+{
+    if (!m_syncQuick || !m_syncFull)
+        return;
+    //
+    m_syncQuick->setNeedResetGroups();
+    m_syncFull->setNeedResetGroups();
+}
+
+
 
 

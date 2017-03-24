@@ -1396,7 +1396,7 @@ void WizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentOl
         }
     }
     //
-    WizKMSyncThread::quickSyncKb(documentNew.strKbGUID);
+    WizMainWindow::instance()->quickSyncKb(documentNew.strKbGUID);
 }
 
 void WizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
