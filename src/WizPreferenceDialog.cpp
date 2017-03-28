@@ -478,6 +478,14 @@ void WizPreferenceWindow::useNewSyncClicked(bool checked)
 {
     if (checked)
     {
+        QString message = tr("Before checking, you need to know:\n\nDon't support returning old sync mode;\nWhen used, other client must be updated to the latest version, or can't log in.\n\nDo you want to use?");
+        if (QMessageBox::Yes != WizMessageBox::question(this, message))
+        {
+            ui->useNewSync->setChecked(false);
+            return;
+        }
+
+        //
         WizExecutingActionDialog::executeAction(tr("Change user settings..."), WIZ_THREAD_NETWORK, [=] {
             //
             bool ret = false;
