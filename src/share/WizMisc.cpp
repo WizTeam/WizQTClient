@@ -2474,8 +2474,8 @@ bool WizCopyFolder(const QString& strSrcDir, const QString& strDestDir, bool bCo
 
 void WizShowDocumentHistory(const WIZDOCUMENTDATA& doc, QWidget* parent)
 {
-    CString strExt = WizFormatString2("obj_guid=%1&kb_guid=%2&obj_type=document",
-                                      doc.strGUID, doc.strKbGUID);
+    CString strExt = WizFormatString3("obj_guid=%1&kb_guid=%2&doc_guid=%3&obj_type=document",
+                                      doc.strGUID, doc.strKbGUID, doc.strGUID);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Note History"), strUrl, parent, QSize(1000, 500), true);
 }
@@ -2719,8 +2719,8 @@ void WizIniFileEx::getSection(const QString& section, QMap<QString, QString>& da
 
 void WizShowAttachmentHistory(const WIZDOCUMENTATTACHMENTDATA& attach, QWidget* parent)
 {
-    CString strExt = WizFormatString2("obj_guid=%1&kb_guid=%2&obj_type=attachment",
-                                      attach.strGUID, attach.strKbGUID);
+    CString strExt = WizFormatString3("obj_guid=%1&kb_guid=%2&doc_guid=%3&obj_type=attachment",
+                                      attach.strGUID, attach.strKbGUID, attach.strDocumentGUID);
     QString strUrl = WizCommonApiEntry::makeUpUrlFromCommand("document_history", WIZ_TOKEN_IN_URL_REPLACE_PART, strExt);
     WizShowWebDialogWithToken(QObject::tr("Attachment History"), strUrl, parent, QSize(1000, 500), true);
 }
