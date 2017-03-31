@@ -720,8 +720,12 @@ bool WizKMDatabaseServer::isGroup() const
 bool WizKMDatabaseServer::isUseNewSync() const
 {
 #ifndef QT_DEBUG
-    if (WizMainWindow::instance()->userSettings().serverType() != WizServer)
-        return false;
+    if (WizMainWindow::instance()->userSettings().serverType() != WizServer) {
+        //
+        if (WizMainWindow::instance()->userSettings().enterpriseServerIP().indexOf("sandbox.wiz.cn") == -1) {
+            return false;
+        }
+    }
 #endif
     //
     if (isGroup())
