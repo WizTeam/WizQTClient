@@ -460,7 +460,7 @@ void getTemplatesFromJsonData(const QByteArray& ba, QMap<int, TemplateData>& tmp
     Json::Reader reader;
     if (!reader.parse(ba.constData(), d))
         return;
-    if (d.isMember("templates"))
+    if (!d.isMember("templates"))
         return;
 
     QString demoUrl;
