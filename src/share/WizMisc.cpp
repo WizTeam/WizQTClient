@@ -2070,6 +2070,15 @@ bool WizImage2Html(const QString& strImageFile, QString& strHtml, QString strDes
             qDebug() << "[Editor] failed to copy image to: " << strDestFile;
             return false;
         }
+        //
+        QFile::setPermissions(strImageFile,
+                              QFile::ReadOwner
+                            | QFile::WriteOwner
+                            | QFile::ReadUser
+                            | QFile::WriteUser
+                            | QFile::ReadGroup
+                            | QFile::ReadOther
+                            );
     }
     //
     strHtml = getImageHtmlLabelByFile(strDestFile);
