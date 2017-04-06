@@ -232,7 +232,19 @@ bool JlCompress::extractFile(QuaZip* zip, QString fileName, QString fileDest) {
     // Apro il file risultato
     QFile outFile;
     outFile.setFileName(fileDest);
-    if(!outFile.open(QIODevice::WriteOnly)) return false;
+    if(!outFile.open(QIODevice::WriteOnly)) {
+
+        outFile.setPermissions(QFile::ReadOwner
+                               | QFile::WriteOwner
+                               | QFile::ReadUser
+                               | QFile::WriteUser
+                               | QFile::ReadGroup
+                               | QFile::ReadOther
+                               );
+        //
+        if (!outFile.open(QIODevice::WriteOnly))
+            return false;
+    }
 
     // Copio i dati
     if (!copyData(inFile, outFile) || inFile.getZipError()!=UNZ_OK) {
