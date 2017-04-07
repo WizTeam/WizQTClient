@@ -136,6 +136,10 @@ WizDocumentListView::WizDocumentListView(WizExplorerApp& app, QWidget *parent /*
             SLOT(on_documentReadCount_changed(const WIZDOCUMENTDATA&)));
     connect(&m_dbMgr, SIGNAL(documentAccessDateModified(WIZDOCUMENTDATA)),
             SLOT(on_documentAccessDate_changed(WIZDOCUMENTDATA)));
+    //
+    connect(&m_dbMgr, SIGNAL(documentUploaded(const QString&, const QString&)),
+            SLOT(on_documentUploaded(const QString&, const QString&)));
+
 
     // message
     //connect(&m_dbMgr.db(), SIGNAL(messageModified(const WIZMESSAGEDATA&, const WIZMESSAGEDATA&)),
@@ -1397,6 +1401,19 @@ void WizDocumentListView::on_document_modified(const WIZDOCUMENTDATA& documentOl
     }
     //
     WizMainWindow::instance()->quickSyncKb(documentNew.strKbGUID);
+}
+
+
+void WizDocumentListView::on_documentUploaded(const QString& kbGuid, const QString& docGuid)
+{
+    int index = documentIndexFromGUID(docGuid);
+    if (-1 == index)
+        return;
+    //
+    if (WizDocumentListViewDocumentItem* pItem = documentItemAt(index)) {
+        pItem->reload(m_dbMgr.db(kbGuid));
+        update(indexFromItem(pItem));
+    }
 }
 
 void WizDocumentListView::on_document_deleted(const WIZDOCUMENTDATA& document)
