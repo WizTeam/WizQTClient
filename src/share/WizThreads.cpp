@@ -662,6 +662,7 @@ void WizQueuedThreadsInit()
 {
     CWizQueuedThreads::getThreadPool(WIZ_THREAD_MAIN);
     CWizQueuedThreads::getThreadPool(WIZ_THREAD_DOWNLOAD_RESOURCES, 5);
+    CWizQueuedThreads::getThreadPool(WIZ_THREAD_NETWORK, 2);
 }
 
 void WizQueuedThreadAddAction(int threadID, IWizRunable* action)

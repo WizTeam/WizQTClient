@@ -53,57 +53,46 @@ bool WizXmlRpcServerBase::xmlRpcCall(const QString& strMethodName, WizXmlRpcResu
     request.setHeader(QNetworkRequest::ContentTypeHeader, QVariant("text/xml"));
     request.setHeader(QNetworkRequest::UserAgentHeader, QVariant(QString("WizQT_") + WIZ_CLIENT_VERSION));
 
-    int nCounter = 0;
-    while (true)
-    {
-        QNetworkReply* reply = m_network->post(request, data.toData());
-        WizXmlRpcEventLoop loop(reply);
+    QNetworkReply* reply = m_network->post(request, data.toData());
+    WizXmlRpcEventLoop loop(reply);
 //        qDebug() << "[Sync]Start a xml rpc event loop";
-        loop.exec();
+    loop.exec();
 //        qDebug() << "[Sync]Xml rpc event loop finished";
-        //
-        if (loop.error() && nCounter == 0)
-        {
-            nCounter ++;
-            continue;
-        }
-        //
-        if (loop.error())
-        {
-            m_nLastErrorCode = loop.error();
-            m_strLastErrorMessage = loop.errorString();
-            return false;
-        }
-        //
-        QString strXml = QString::fromUtf8(loop.result().constData());
-        //
-        WizXMLDocument doc;
-        if (!doc.loadXML(strXml)) {
-            m_nLastErrorCode = -1;
-            m_strLastErrorMessage = "Invalid xml";
-            return false;
-        }
-
-        WizXmlRpcValue* pRet = NULL;
-
-        if (!WizXmlRpcResultFromXml(doc, &pRet)) {
-            m_nLastErrorCode = -1;
-            m_strLastErrorMessage = "Can not parse xmlrpc";
-            return false;
-        }
-
-        Q_ASSERT(pRet);
-
-        if (WizXmlRpcFaultValue* pFault = dynamic_cast<WizXmlRpcFaultValue *>(pRet)) {
-            m_nLastErrorCode = pFault->getFaultCode();
-            m_strLastErrorMessage = pFault->getFaultString();
-            TOLOG2("XmlRpcCall failed : %1, %2", QString::number(m_nLastErrorCode), m_strLastErrorMessage);
-            return false;
-        }
-        //
-        result.setResult(strMethodName, pRet);
-        break;
+    //
+    if (loop.error())
+    {
+        m_nLastErrorCode = loop.error();
+        m_strLastErrorMessage = loop.errorString();
+        return false;
     }
+    //
+    QString strXml = QString::fromUtf8(loop.result().constData());
+    //
+    WizXMLDocument doc;
+    if (!doc.loadXML(strXml)) {
+        m_nLastErrorCode = -1;
+        m_strLastErrorMessage = "Invalid xml";
+        return false;
+    }
+
+    WizXmlRpcValue* pRet = NULL;
+
+    if (!WizXmlRpcResultFromXml(doc, &pRet)) {
+        m_nLastErrorCode = -1;
+        m_strLastErrorMessage = "Can not parse xmlrpc";
+        return false;
+    }
+
+    Q_ASSERT(pRet);
+
+    if (WizXmlRpcFaultValue* pFault = dynamic_cast<WizXmlRpcFaultValue *>(pRet)) {
+        m_nLastErrorCode = pFault->getFaultCode();
+        m_strLastErrorMessage = pFault->getFaultString();
+        TOLOG2("XmlRpcCall failed : %1, %2", QString::number(m_nLastErrorCode), m_strLastErrorMessage);
+        return false;
+    }
+    //
+    result.setResult(strMethodName, pRet);
     //
     return true;
 }
