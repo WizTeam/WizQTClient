@@ -1612,6 +1612,16 @@ bool WizIndex::getDocumentsByLocation(const CString& strLocation,
     return sqlToDocumentDataArray(strSQL, arrayDocument);
 }
 
+bool WizIndex::getDocumentsByTitle(const QString& title, CWizDocumentDataArray& arrayDocument)
+{
+    CString strWhere;
+    strWhere.format("DOCUMENT_TITLE like %s",
+                    STR2SQL("%" + title + "%").utf16());
+
+    CString strSQL = formatQuerySQL(TABLE_NAME_WIZ_DOCUMENT, FIELD_LIST_WIZ_DOCUMENT, strWhere);
+    return sqlToDocumentDataArray(strSQL, arrayDocument);
+}
+
 //bool CWizIndex::GetDocumentsByLocationIncludeSubFolders(const CString& strLocation, CWizDocumentDataArray& arrayDocument)
 //{
 //	CString strWhere;

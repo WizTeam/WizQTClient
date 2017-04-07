@@ -559,6 +559,10 @@ void WizDocumentListViewDocumentItem::drawPrivateSummaryView_impl(QPainter* p, c
         title = m_data.doc.strHighlightTitle;
         text = m_data.doc.strHighlightText;
         //
+        if (title.isEmpty()) {
+            title = m_data.doc.strTitle;
+        }
+        //
         QString info = m_strAuthor + " " + m_data.doc.tCreated.toHumanFriendlyString() + " (" + documentLocation() + ")";
         //
         Utils::WizStyleHelper::drawListViewItemSearchResult(p, rcd, title, info,

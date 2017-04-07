@@ -507,11 +507,49 @@ QString JsonValueToText(const Json::Value& value)
     }
 }
 
+//
+static void highlightKeywordsInString(QString& str, const QString& keywords)
+{
+    int start = 0;
+    int keywordsLength = keywords.length();
+    //
+    while (1) {
+        start = str.indexOf(keywords, start, Qt::CaseInsensitive);
+        if (start == -1)
+            return;
+        //
+        str.insert(start, "<em>");
+        str.insert(start + 4 + keywordsLength, "</em>");
+        start += 4 + keywordsLength + 5;
+    }
+}
+
+//
 bool WizSearcher::onlineSearch(const QString& kbGuid, const QString& keywords, CWizDocumentDataArray& arrayResult)
 {
-    QString token = WizToken::token();
-    if (token.isEmpty())
+    if (onlineSearchOnly(kbGuid, keywords, arrayResult))
+        return true;
+    //
+    WizDatabase& db = m_dbMgr.db(kbGuid);
+    //
+    if (!db.getDocumentsByTitle(keywords, arrayResult))
         return false;
+    //
+    for (auto& doc : arrayResult) {
+        doc.strHighlightTitle = doc.strTitle;
+        highlightKeywordsInString(doc.strHighlightTitle, keywords);
+    }
+    return true;
+}
+
+
+bool WizSearcher::onlineSearchOnly(const QString& kbGuid, const QString& keywords, CWizDocumentDataArray& arrayResult)
+{
+    QString token = WizToken::token();
+    if (token.isEmpty()) {
+        //
+        return false;
+    }
     //
     QUrlQuery postData;
     postData.addQueryItem("token", token);

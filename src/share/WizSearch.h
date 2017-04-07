@@ -71,6 +71,7 @@ private:
     int m_nResults; // results returned
 
     void doSearch();
+    bool onlineSearchOnly(const QString& kbGuid, const QString& keywords, CWizDocumentDataArray& arrayResult);
 
     void searchDatabaseByKeyword(const QString& strKeywords);
     WizOleDateTime getDateByInterval(SearchDateInterval dateInterval);
