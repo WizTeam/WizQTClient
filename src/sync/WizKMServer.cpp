@@ -935,6 +935,7 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
                 QByteArray data;
                 if (oldZip.extractFile(index, data))
                 {
+                    //qDebug() << "data length: " << data.length() << " of name: " << resName;
                     if (newZip.compressFile(data, resName))
                     {
                         continue;

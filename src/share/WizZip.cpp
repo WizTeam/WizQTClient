@@ -48,14 +48,20 @@ public:
 
 static bool copyData(QIODevice &inFile, QIODevice &outFile)
 {
+    char* buf = new char[4096];
     while (!inFile.atEnd()) {
-        char buf[4096];
+        memset(buf, 0, 4096);
         qint64 readLen = inFile.read(buf, 4096);
-        if (readLen <= 0)
+        if (readLen <= 0) {
+            delete [] buf;
             return false;
-        if (outFile.write(buf, readLen) != readLen)
+        }
+        if (outFile.write(buf, readLen) != readLen) {
+            delete [] buf;
             return false;
+        }
     }
+    delete [] buf;
     return true;
 }
 
