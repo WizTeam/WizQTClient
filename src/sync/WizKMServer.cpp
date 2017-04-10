@@ -1564,7 +1564,7 @@ bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& da
     att["docGuid"] = data.strDocumentGUID.toStdString();
     att["attGuid"] = data.strGUID.toStdString();
     att["dataMd5"] = data.strDataMD5.toStdString();
-    att["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
+    att["dataModified"] = (Json::UInt64)data.tDataModified.toTime_t() * (Json::UInt64)1000;
     att["name"] = data.strName.toStdString();
     att["url"] = data.strURL.toStdString();
     att["withData"] = withData;
@@ -1640,7 +1640,7 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     doc["docGuid"] = data.strGUID.toStdString();
     doc["title"] = data.strTitle.toStdString();
     doc["dataMd5"] = data.strDataMD5.toStdString();
-    doc["dataModified"] = data.tDataModified.toTime_t() * (long long)1000;
+    doc["dataModified"] = (Json::UInt64)data.tDataModified.toTime_t() * (Json::UInt64)1000;
     doc["category"] = data.strLocation.toStdString();
     doc["owner"] = data.strOwner.toStdString();
     doc["protected"] = (int)data.nProtected;
@@ -1648,8 +1648,8 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
     doc["attachmentCount"] = (int)data.nAttachmentCount;
     doc["type"] = data.strType.toStdString();
     doc["fileType"] = data.strFileType.toStdString();
-    doc["created"] = data.tCreated.toTime_t() * (long long)1000;
-    doc["accessed"] = data.tAccessed.toTime_t() * (long long)1000;
+    doc["created"] = (Json::UInt64)data.tCreated.toTime_t() * (Json::UInt64)1000;
+    doc["accessed"] = (Json::UInt64)data.tAccessed.toTime_t() * (Json::UInt64)1000;
     doc["url"] = data.strURL.toStdString();
     doc["styleGuid"] = data.strStyleGUID.toStdString();
     doc["seo"] = data.strSEO.toStdString();
@@ -1682,8 +1682,8 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
         {
             Json::Value elemObj;
             elemObj["name"] = data.name.toStdString();
-            elemObj["time"] = (long long)data.time.toTime_t() * 1000;
-            elemObj["size"] = (long long)data.size;
+            elemObj["time"] = (Json::UInt64)data.time.toTime_t() * (Json::UInt64)1000;
+            elemObj["size"] = (Json::UInt64)data.size;
             res.append(elemObj);
         }
         //
