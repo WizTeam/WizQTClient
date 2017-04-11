@@ -830,7 +830,7 @@ bool WizKMDatabaseServer::document_downloadDataOld(const QString& strDocumentGUI
 
 bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUID, WIZDOCUMENTDATAEX& ret, const QString& oldFileName)
 {
-    QString url = m_userInfo.strKbServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1&token=" + m_userInfo.strToken;
+    QString url = m_userInfo.strKbServer + "/ks/note/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?downloadData=1&token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
 #ifdef QT_DEBUG
     qDebug() << url;
 #endif
@@ -1080,7 +1080,7 @@ bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentG
 
 bool WizKMDatabaseServer::attachment_downloadDataNew(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    QString url = m_userInfo.strKbServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken;
+    QString url = m_userInfo.strKbServer + "/ks/object/download/" + m_userInfo.strKbGUID + "/" + strDocumentGUID + "?objType=attachment&objId=" + strAttachmentGUID + "&token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     return WizURLDownloadToData(url, ret.arrayData);
 }
 
@@ -1553,8 +1553,8 @@ bool uploadObject(const QString& url, const QString& key, const QString& kbGuid,
 
 bool WizKMDatabaseServer::attachment_postDataNew(WIZDOCUMENTATTACHMENTDATAEX& data, bool withData, __int64& nServerVersion)
 {
-    QString url_main = m_userInfo.strKbServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
-    QString url_data = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken;
+    QString url_main = m_userInfo.strKbServer + "/ks/attachment/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url_data = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strDocumentGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     //
     Json::Value att;
     att["kbGuid"] = m_userInfo.strKbGUID.toStdString();
@@ -1606,8 +1606,8 @@ bool WizKMDatabaseServer::document_postDataNew(const WIZDOCUMENTDATAEX& dataTemp
 {
     WIZDOCUMENTDATAEX data = dataTemp;
     //
-    QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
-    QString url_res = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken;
+    QString url_main = m_userInfo.strKbServer + "/ks/note/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
+    QString url_res = m_userInfo.strKbServer + "/ks/object/upload/" + m_userInfo.strKbGUID + "/" + data.strGUID + "?token=" + m_userInfo.strToken + "&clientType=macos&clientVersion=" + WIZ_CLIENT_VERSION;
     //
     if (withData && data.arrayData.length() > 2)
     {
