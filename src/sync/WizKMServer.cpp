@@ -913,19 +913,9 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
         }
     }
     //
-    struct RESDATAEX : public RESDATA
+    for (intptr_t i = serverResources.size() - 1; i >= 0; i--)
     {
-        QByteArray data;
-    };
-    //
-    QMutex mutex;
-    //
-    int totalWaitForDownload = 0;
-    int totalDownloaded = 0;
-    int totalFailed = 0;
-    //
-    for (auto res : serverResources)
-    {
+        auto res = serverResources[i];
         QString resName = "index_files/" + res.name;
         if (hasOldZip)
         {
@@ -935,20 +925,29 @@ bool WizKMDatabaseServer::document_downloadDataNew(const QString& strDocumentGUI
                 QByteArray data;
                 if (oldZip.extractFile(index, data))
                 {
-                    //qDebug() << "data length: " << data.length() << " of name: " << resName;
                     if (newZip.compressFile(data, resName))
                     {
+                        serverResources.erase(serverResources.begin() + i);
                         continue;
                     }
                 }
             }
         }
+    }
+    //
+    QMutex mutex;
+    //
+    int totalWaitForDownload = (int)serverResources.size();
+    int totalDownloaded = 0;
+    int totalFailed = 0;
+    //
+    for (auto res : serverResources)
+    {
+        QString resName = "index_files/" + res.name;
         //
 #ifdef QT_DEBUG
         qDebug() << res.url;
 #endif
-        totalWaitForDownload++;
-        //
         ::WizExecuteOnThread(WIZ_THREAD_DOWNLOAD_RESOURCES, [=, &mutex, &totalFailed, &totalDownloaded, &newZip] {
             //
             QByteArray data;
