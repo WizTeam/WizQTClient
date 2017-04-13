@@ -1,5 +1,9 @@
 project(WizNote)
 
+set(WIZNOTE_VERSION 2.5.0)
+
+configure_file(WizDef.h.in WizDef.h)
+
 add_subdirectory(test)
 
 set(wiznote_SOURCES_MAC
@@ -77,7 +81,7 @@ set(wiznote_SOURCES
     share/WizEnc.cpp
     share/WizZiwReader.cpp
     html/WizHtmlReader.cpp
-    html/WizHtmlCollector.cpp    
+    html/WizHtmlCollector.cpp
     share/WizSearch.cpp
     widgets/WizScrollBar.cpp
     sync/WizToken.cpp
@@ -186,7 +190,7 @@ set(wiznote_SOURCES
     WizMobileFileReceiver.cpp
     WizWebEngineInjectObject.cpp
 
-    WizOEMSettings.cpp    
+    WizOEMSettings.cpp
     mac/WizSearchWidget_mm.cpp
     core/WizAccountManager.cpp
     core/WizCommentManager.cpp
