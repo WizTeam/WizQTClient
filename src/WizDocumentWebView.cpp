@@ -192,7 +192,7 @@ bool WizDocumentWebView::onPasteCommand()
     QClipboard* clip = QApplication::clipboard();
     Q_ASSERT(clip);
 
-    if (!clip->image().isNull()) {
+    if (isEditing() && !clip->image().isNull()) {
         // save clipboard image to
         QString strImagePath = noteResourcesPath();
         CString strFileName = strImagePath + WizIntToStr(WizGetTickCount()) + ".png";
