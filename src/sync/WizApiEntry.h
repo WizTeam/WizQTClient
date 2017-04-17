@@ -5,6 +5,7 @@
 
 #include <QString>
 #include <QMap>
+#include <QMutex>
 
 class WizCommonApiEntry
 {
@@ -55,6 +56,7 @@ private:
     static QString getUrlFromCache(const QString& strCommand);
 
 private:
+    static QMutex m_mutex;
     static QString m_server;
     static QMap<QString, QString> m_cacheMap;
     static QMap<QString, QString> m_mapkUrl;

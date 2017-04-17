@@ -10,6 +10,7 @@
 #include <QString>
 #include <QDebug>
 #include <QUrl>
+#include <QMutexLocker>
 
 #include "WizToken.h"
 #include "WizKMServer.h"
@@ -69,6 +70,7 @@ static QString LocalLanguage = QLocale::system().name();
 QString WizCommonApiEntry::m_server = QString();
 QMap<QString, QString> WizCommonApiEntry::m_cacheMap = QMap<QString, QString>();
 QMap<QString, QString> WizCommonApiEntry::m_mapkUrl = QMap<QString, QString>();
+QMutex WizCommonApiEntry::m_mutex(QMutex::Recursive);
 
 
 QString _requestUrl(const QString& strUrl)
@@ -357,6 +359,8 @@ QString WizCommonApiEntry::groupUsersUrl(const QString& strToken, const QString&
 
 QString WizCommonApiEntry::kUrlFromGuid(const QString& strToken, const QString& strKbGUID)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     if (strToken.isEmpty())
     {
         qCritical() << "request kb url by empty token";
@@ -429,6 +433,8 @@ QString WizCommonApiEntry::makeUpUrlFromCommand(const QString& strCommand)
 
 void WizCommonApiEntry::getEndPoints()
 {
+    QMutexLocker locker(&m_mutex);
+    //
     QString urls = requestUrl("endpoints");
 #ifdef QT_DEBUG
     qDebug() << "get end points : " << urls;
@@ -456,11 +462,15 @@ void WizCommonApiEntry::getEndPoints()
 
 void WizCommonApiEntry::updateUrlCache(const QString& strCommand, const QString& url)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     m_cacheMap.insert(strCommand, url);
 }
 
 QString WizCommonApiEntry::getUrlFromCache(const QString& strCommand)
 {
+    QMutexLocker locker(&m_mutex);
+    //
     if (m_cacheMap.isEmpty())
     {
         getEndPoints();
