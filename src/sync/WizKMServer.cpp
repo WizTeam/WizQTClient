@@ -728,10 +728,14 @@ bool WizKMDatabaseServer::isUseNewSync() const
     }
 #endif
     //
+    int syncType = WizToken::info().syncType;
+    if (syncType == 100)
+        return true;
+    //
     if (isGroup())
         return false;
     //
-    return WizToken::info().syncType == 1;
+    return syncType == 1;
 }
 
 void WizKMDatabaseServer::setKBInfo(const WIZKBINFO& info)
