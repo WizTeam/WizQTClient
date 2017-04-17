@@ -1065,7 +1065,7 @@ struct CWizKMDocumentPostDataParam
 
 bool WizKMDatabaseServer::attachment_downloadDataOld(const QString& strDocumentGUID, const QString& strAttachmentGUID, WIZDOCUMENTATTACHMENTDATAEX& ret)
 {
-    ATLASSERT(!ret.arrayData.isEmpty());
+    ATLASSERT(ret.arrayData.isEmpty());
     if (!ret.arrayData.isEmpty())
     {
         TOLOG("fault error: ret.arrayData is not null!");

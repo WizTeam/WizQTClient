@@ -748,17 +748,17 @@
         <translation>取消加密</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="196"/>
+        <location filename="../src/WizDocumentListView.cpp" line="200"/>
         <source>Add to Shortcuts</source>
         <translation>添加到快捷方式</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="488"/>
+        <location filename="../src/WizDocumentListView.cpp" line="492"/>
         <source>Unknown size</source>
         <translation>未知大小</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="514"/>
+        <location filename="../src/WizDocumentListView.cpp" line="518"/>
         <source>More than 100MB</source>
         <translation>大于100MB</translation>
     </message>
@@ -1335,28 +1335,28 @@
         <translation>%1 字节</translation>
     </message>
     <message>
-        <location filename="../src/share/WizMisc.cpp" line="2480"/>
+        <location filename="../src/share/WizMisc.cpp" line="2489"/>
         <source>Note History</source>
         <translation>笔记版本历史</translation>
     </message>
     <message>
-        <location filename="../src/share/WizMisc.cpp" line="2725"/>
+        <location filename="../src/share/WizMisc.cpp" line="2734"/>
         <source>Attachment History</source>
         <translation>附件版本历史</translation>
     </message>
     <message>
-        <location filename="../src/share/WizMisc.cpp" line="2767"/>
+        <location filename="../src/share/WizMisc.cpp" line="2776"/>
         <source>Download Note %1 ...</source>
         <translation>下载笔记 %1 ...</translation>
     </message>
     <message>
-        <location filename="../src/share/WizMisc.cpp" line="2768"/>
-        <location filename="../src/share/WizMisc.cpp" line="2842"/>
+        <location filename="../src/share/WizMisc.cpp" line="2777"/>
+        <location filename="../src/share/WizMisc.cpp" line="2851"/>
         <source>Downloading</source>
         <translation>正在下载</translation>
     </message>
     <message>
-        <location filename="../src/share/WizMisc.cpp" line="2841"/>
+        <location filename="../src/share/WizMisc.cpp" line="2850"/>
         <source>Download Attachment %1 ...</source>
         <translation>下载附件 %1 ...</translation>
     </message>
@@ -2789,19 +2789,33 @@ Password hint: %1</source>
 <context>
     <name>WizDocumentListView</name>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="182"/>
+        <location filename="../src/WizDocumentListView.cpp" line="186"/>
         <source>Open in new Window</source>
         <translation>在新窗口中打开</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="1673"/>
+        <location filename="../src/WizDocumentListView.cpp" line="1690"/>
         <source>Move notes</source>
         <translation>移动笔记</translation>
     </message>
     <message>
-        <location filename="../src/WizDocumentListView.cpp" line="1735"/>
+        <location filename="../src/WizDocumentListView.cpp" line="1752"/>
         <source>Copy documents</source>
         <translation>复制笔记</translation>
+    </message>
+    <message>
+        <location filename="../src/WizDocumentListView.cpp" line="2195"/>
+        <source>No search results...
+Try to change another keyword or advanced searching</source>
+        <translation>寻而未果
+尝试更换关键词或高级搜索看看</translation>
+    </message>
+    <message>
+        <location filename="../src/WizDocumentListView.cpp" line="2196"/>
+        <source>Nothing in here
+Go to create a note</source>
+        <translation>文件夹空空如也
+新建一篇笔记吧</translation>
     </message>
 </context>
 <context>

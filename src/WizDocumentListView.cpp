@@ -2164,3 +2164,54 @@ void WizDocumentListView::setItemsNeedUpdate(const QString& strKbGUID, const QSt
         }
     }
 }
+
+
+void WizDocumentListView::paintEvent(QPaintEvent *e)
+{
+    QListView::paintEvent(e);
+    if (model() && model()->rowCount(rootIndex()) > 0)
+       return;
+    // The view is empty.
+
+    QPainter p(viewport());
+    //
+    if (m_emptyFolder.isNull()) {
+        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_folder", true);
+        m_emptyFolder = QPixmap(fileName);
+    }
+    if (m_emptySearch.isNull()) {
+        QString fileName = Utils::WizStyleHelper::skinResourceFileName("empty_search", true);
+        m_emptySearch = QPixmap(fileName);
+    }
+    //
+    QPixmap pixmap = isSearchResult() ? m_emptySearch : m_emptyFolder;
+    QSize imageSize = pixmap.size();
+    QRect rc = rect();
+    //
+    imageSize.setWidth(imageSize.width() / pixmap.devicePixelRatio());
+    imageSize.setHeight(imageSize.height() / pixmap.devicePixelRatio());
+    //
+    QString text = isSearchResult()
+            ? tr("No search results...\nTry to change another keyword or advanced searching")
+            : tr("Nothing in here\nGo to create a note");
+    //
+    int spacing = 10;
+    //
+    QRect textRect = rc;
+    textRect.adjust(16, 0, -16, 0);
+    QFontMetrics fm(p.font());
+    int textHeight = fm.boundingRect(textRect, Qt::TextWordWrap, text).height();
+    int totalHeight = imageSize.height() + textHeight + spacing;
+    //
+    int x = (rc.size().width() - imageSize.width()) / 2;
+    int y = (rc.size().height() - totalHeight) / 2;
+    //
+    p.drawPixmap(x, y, pixmap);
+    //
+    int textY = y + imageSize.height() + spacing;
+    textRect.setTop(textY);
+    textRect.setHeight(textHeight);
+    //
+    p.setPen(QColor(0xcc, 0xcc, 0xcc));
+    p.drawText(textRect, Qt::AlignCenter | Qt::TextWordWrap, text);
+}

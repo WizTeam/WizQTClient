@@ -80,11 +80,13 @@ protected:
     virtual void mouseReleaseEvent(QMouseEvent* event);
     virtual void keyReleaseEvent(QKeyEvent* event);
     virtual void wheelEvent(QWheelEvent* event);
+    virtual void paintEvent(QPaintEvent* event);
 
     virtual void startDrag(Qt::DropActions supportedActions);
     virtual void dragEnterEvent(QDragEnterEvent *event);
     virtual void dragMoveEvent(QDragMoveEvent *event);
     virtual void dropEvent(QDropEvent * event);
+
 
 private:
     WizExplorerApp& m_app;
@@ -122,6 +124,9 @@ private:
     bool m_bSortDocumentsAfterAdded;
 
     QPointer<QPropertyAnimation> m_scrollAnimation;
+    //
+    QPixmap m_emptyFolder;
+    QPixmap m_emptySearch;
 
     QAction* findAction(const QString& strName);
 
