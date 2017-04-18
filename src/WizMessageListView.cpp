@@ -872,7 +872,7 @@ void WizMessageListView::on_itemSelectionChanged()
             Json::Reader reader;
             if (!reader.parse(msgData.note.toUtf8().constData(), d))
                 return;
-            if (d.isMember("link")) {
+            if (!d.isMember("link")) {
                 qDebug() << "Error occured when try to parse json of messages : " << msgData.note;
                 return;
             }

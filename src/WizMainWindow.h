@@ -112,6 +112,8 @@ public:
 
     QNetworkDiskCache* webViewNetworkCache();
     WizDocumentView* docView();
+    //
+    void trySaveCurrentNote(std::function<void(const QVariant &)> callback);
 
 protected:
     bool eventFilter(QObject* watched, QEvent* event);

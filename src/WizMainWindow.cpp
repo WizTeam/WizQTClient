@@ -422,6 +422,16 @@ WizDocumentView* WizMainWindow::docView()
     return m_doc;
 }
 
+void WizMainWindow::trySaveCurrentNote(std::function<void(const QVariant &)> callback)
+{
+    if (m_doc->noteLoaded()) {
+        m_doc->web()->trySaveDocument(m_doc->note(), false, callback);
+        return;
+    }
+    //
+    callback(QVariant(true));
+}
+
 void WizMainWindow::closeEvent(QCloseEvent* event)
 {
 #ifdef Q_OS_MAC

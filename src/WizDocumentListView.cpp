@@ -1860,29 +1860,35 @@ void WizDocumentListView::on_menu_aboutToHide()
 
 void WizDocumentListView::on_action_encryptDocument()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuEncryptDocument");
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        WIZDOCUMENTDATA doc = item->document();
-        WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-        db.encryptDocument(doc);
-    }
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuEncryptDocument");
+        foreach (WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
+        {
+            WIZDOCUMENTDATA doc = item->document();
+            WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+            db.encryptDocument(doc);
+        }
+    });
 }
 
 void WizDocumentListView::on_action_cancelEncryption()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuCancelEncryptionn");
-    //
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        WIZDOCUMENTDATA doc = item->document();
-        if (doc.nProtected)
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuCancelEncryptionn");
+        //
+        foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
         {
-            WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
-            if (!db.cancelDocumentEncryption(doc))
-                return;
+            WIZDOCUMENTDATA doc = item->document();
+            if (doc.nProtected)
+            {
+                WizDatabase& db = m_dbMgr.db(doc.strKbGUID);
+                if (!db.cancelDocumentEncryption(doc))
+                    return;
+            }
         }
-    }
+    });
 }
 
 
