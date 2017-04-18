@@ -1840,13 +1840,16 @@ void WizDocumentListView::on_action_copyWebClientLink()
 
 void WizDocumentListView::on_action_showDocumentInFloatWindow()
 {
-    ::WizGetAnalyzer().logAction("documentListMenuOpenInFloatWindow");
-    WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
-    foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
-    {
-        const WIZDOCUMENTDATA& document = item->document();
-        mainWindow->viewNoteInSeparateWindow(document);
-    }
+    WizMainWindow::instance()->trySaveCurrentNote([=](const QVariant& vRet) {
+        //
+        ::WizGetAnalyzer().logAction("documentListMenuOpenInFloatWindow");
+        WizMainWindow* mainWindow = qobject_cast<WizMainWindow*>(m_app.mainWindow());
+        foreach(WizDocumentListViewDocumentItem* item, m_rightButtonFocusedItems)
+        {
+            const WIZDOCUMENTDATA& document = item->document();
+            mainWindow->viewNoteInSeparateWindow(document);
+        }
+    });
 }
 
 void WizDocumentListView::on_menu_aboutToHide()
