@@ -1491,7 +1491,7 @@ void WizDocumentWebView::editorCommandExecuteLinkInsert()
         connect(m_editorInsertLinkForm, SIGNAL(accepted()), SLOT(on_editorCommandExecuteLinkInsert_accepted()));
     }
     //
-    page()->runJavaScript("WizEditor.link.queryCurrentLink();", [=](const QVariant& vLink){
+    page()->runJavaScript("WizEditor.link.getCurrentLink();", [=](const QVariant& vLink){
         //
         QString strUrl = vLink.toString();
         if (strUrl.isEmpty()) {
@@ -1512,7 +1512,7 @@ void WizDocumentWebView::on_editorCommandExecuteLinkInsert_accepted()
 {
     // append http if not exist
     QString strUrl = m_editorInsertLinkForm->getUrl();
-    if (strUrl.isEmpty()) {
+    if (strUrl.isEmpty() || strUrl == "http://") {
         //
         QString code = "WizEditor.link.removeSelectedLink();";
         page()->runJavaScript(code);
